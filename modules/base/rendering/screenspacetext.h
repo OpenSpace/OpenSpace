@@ -22,60 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SCREENSPACEFRAMEBUFFER___H__
-#define __OPENSPACE_CORE___SCREENSPACEFRAMEBUFFER___H__
+#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACETEXT___H__
+#define __OPENSPACE_MODULE_BASE___SCREENSPACETEXT___H__
 
-#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/rendering/screenspacerenderabletext.h>
 
-#include <openspace/properties/vector/vec2property.h>
-
-namespace ghoul::opengl {
-    class FramebufferObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <openspace/properties/misc/stringproperty.h>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
-/**
- * Creates a texture by rendering to a framebuffer, this is then used on a screen space
- * plane. This class lets you add renderfunctions that should render to a framebuffer with
- * an attached texture. The texture is then used on a screen space plane that works both
- * in fisheye and flat screens.
- */
-class ScreenSpaceFramebuffer : public ScreenSpaceRenderable {
+class ScreenSpaceText : public ScreenSpaceRenderableText {
 public:
-    using RenderFunction = std::function<void()>;
+    explicit ScreenSpaceText(const ghoul::Dictionary& dictionary);
 
-    explicit ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceFramebuffer() override;
-
-    void initializeGL() override;
-    void deinitializeGL() override;
-    void render(const RenderData& renderData) override;
-    bool isReady() const override;
-
-    void addRenderFunction(RenderFunction renderFunction);
-    void removeAllRenderFunctions();
+    void update() override;
 
     static documentation::Documentation Documentation();
 
-protected:
-    void createFramebuffer();
-    properties::Vec2Property _size;
-
 private:
-    void bindTexture() override;
-
-    static int id();
-
-    std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
-    std::vector<std::function<void()>> _renderFunctions;
-
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
+    properties::StringProperty _text;
 };
 
-} //namespace openspace
+} // namespace openspace
 
-#endif // __OPENSPACE_CORE___SCREENSPACEFRAMEBUFFER___H__
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACETEXT___H__

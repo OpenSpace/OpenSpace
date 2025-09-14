@@ -71,7 +71,8 @@
 #include <modules/base/rendering/screenspaceimageonline.h>
 #include <modules/base/rendering/screenspaceinsetblackout.h>
 #include <modules/base/rendering/screenspacerenderablerenderable.h>
-#include <modules/base/rendering/screenspacetextdate.h>
+#include <modules/base/rendering/screenspacedate.h>
+#include <modules/base/rendering/screenspacetext.h>
 #include <modules/base/rendering/screenspacetimevaryingimageonline.h>
 #include <modules/base/rotation/constantrotation.h>
 #include <modules/base/rotation/fixedrotation.h>
@@ -124,7 +125,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fSsRenderable->registerClass<ScreenSpaceTimeVaryingImageOnline>(
         "ScreenSpaceTimeVaryingImageOnline"
     );
-    fSsRenderable->registerClass<ScreenSpaceTextDate>("ScreenSpaceTextDate");
+    fSsRenderable->registerClass<ScreenSpaceDate>("ScreenSpaceDate");
+    fSsRenderable->registerClass<ScreenSpaceText>("ScreenSpaceText");
 
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
@@ -308,11 +310,12 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         SizeMappingComponent::Documentation(),
 
         ScreenSpaceDashboard::Documentation(),
+        ScreenSpaceDate::Documentation(),
         ScreenSpaceImageLocal::Documentation(),
         ScreenSpaceImageOnline::Documentation(),
         ScreenSpaceInsetBlackout::Documentation(),
         ScreenSpaceRenderableRenderable::Documentation(),
-        ScreenSpaceTextDate::Documentation(),
+        ScreenSpaceText::Documentation(),
         ScreenSpaceTimeVaryingImageOnline::Documentation(),
 
         ConstantRotation::Documentation(),

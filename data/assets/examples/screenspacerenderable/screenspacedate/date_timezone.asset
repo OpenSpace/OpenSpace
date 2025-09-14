@@ -1,0 +1,17 @@
+-- Timezone
+-- This example creates a screen space renderable that shows the current simulation time
+-- with a timezone of UTC-7 (=PDT)
+
+local Item = {
+  Type = "ScreenSpaceDate",
+  Identifier = "ScreenSpaceDate_Example_Timezone",
+  TimeFormat = "YYYY MON DD HR:MN:SC.### PDT ::UTC-7"
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Item)
+end)

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/screenspaceframebuffer.h>
+#include <openspace/rendering/screenspacerenderableframebuffer.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
@@ -43,17 +43,16 @@ namespace {
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceFramebuffer::Documentation() {
+documentation::Documentation ScreenSpaceRenderableFramebuffer::Documentation() {
     using namespace documentation;
     return {
-        "ScreenSpaceFramebuffer",
-        "base_screenspace_framebuffer",
-        "",
-        {}
+        "ScreenSpaceRenderableFramebuffer",
+        "screenspace_framebuffer"
     };
 }
 
-ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary)
+ScreenSpaceRenderableFramebuffer::ScreenSpaceRenderableFramebuffer(
+                                                     const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _size(SizeInfo, glm::vec2(16), glm::vec2(16), glm::vec2(16384))
 {
@@ -68,10 +67,12 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
         iIdentifier = id();
 
         if (iIdentifier == 0) {
-            setIdentifier("ScreenSpaceFramebuffer");
+            setIdentifier("ScreenSpaceRenderableFramebuffer");
         }
         else {
-            setIdentifier("ScreenSpaceFramebuffer" + std::to_string(iIdentifier));
+            setIdentifier(
+                "ScreenSpaceRenderableFramebuffer" + std::to_string(iIdentifier)
+            );
         }
     }
 
@@ -79,24 +80,24 @@ ScreenSpaceFramebuffer::ScreenSpaceFramebuffer(const ghoul::Dictionary& dictiona
     addProperty(_size);
 }
 
-ScreenSpaceFramebuffer::~ScreenSpaceFramebuffer() {}
+ScreenSpaceRenderableFramebuffer::~ScreenSpaceRenderableFramebuffer() {}
 
-void ScreenSpaceFramebuffer::initializeGL() {
+void ScreenSpaceRenderableFramebuffer::initializeGL() {
     ScreenSpaceRenderable::initializeGL();
 
     createFramebuffer();
 }
 
-void ScreenSpaceFramebuffer::deinitializeGL() {
+void ScreenSpaceRenderableFramebuffer::deinitializeGL() {
     _framebuffer->activate();
     _framebuffer->detachAll();
     ghoul::opengl::FramebufferObject::deactivate();
     removeAllRenderFunctions();
 
-    ScreenSpaceRenderable::deinitializeGL();
+    ScreenSpaceRenderableFramebuffer::deinitializeGL();
 }
 
-void ScreenSpaceFramebuffer::render(const RenderData& renderData) {
+void ScreenSpaceRenderableFramebuffer::render(const RenderData& renderData) {
     const glm::vec2& resolution = global::windowDelegate->currentDrawBufferResolution();
     const glm::vec2& size = _size.value();
     const glm::vec2 ratio = resolution / size;
@@ -131,19 +132,19 @@ void ScreenSpaceFramebuffer::render(const RenderData& renderData) {
     }
 }
 
-bool ScreenSpaceFramebuffer::isReady() const {
+bool ScreenSpaceRenderableFramebuffer::isReady() const {
     return _shader && _texture;
 }
 
-void ScreenSpaceFramebuffer::addRenderFunction(RenderFunction renderFunction) {
+void ScreenSpaceRenderableFramebuffer::addRenderFunction(RenderFunction renderFunction) {
     _renderFunctions.push_back(std::move(renderFunction));
 }
 
-void ScreenSpaceFramebuffer::removeAllRenderFunctions() {
+void ScreenSpaceRenderableFramebuffer::removeAllRenderFunctions() {
     _renderFunctions.clear();
 }
 
-void ScreenSpaceFramebuffer::createFramebuffer() {
+void ScreenSpaceRenderableFramebuffer::createFramebuffer() {
     const glm::vec2 resolution = global::windowDelegate->currentDrawBufferResolution();
 
     _framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
@@ -161,12 +162,12 @@ void ScreenSpaceFramebuffer::createFramebuffer() {
     ghoul::opengl::FramebufferObject::deactivate();
 }
 
-int ScreenSpaceFramebuffer::id() {
+int ScreenSpaceRenderableFramebuffer::id() {
     static int id = 0;
     return id++;
 }
 
-void ScreenSpaceFramebuffer::bindTexture() {
+void ScreenSpaceRenderableFramebuffer::bindTexture() {
     _texture->bind();
 }
 

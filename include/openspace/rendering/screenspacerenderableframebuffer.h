@@ -22,28 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACETEXTDATE___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACETEXTDATE___H__
+#ifndef __OPENSPACE_CORE___SCREENSPACEFRAMEBUFFER___H__
+#define __OPENSPACE_CORE___SCREENSPACEFRAMEBUFFER___H__
 
-#include <openspace/rendering/screenspacetext.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
-#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/vector/vec2property.h>
+
+namespace ghoul::opengl {
+    class FramebufferObject;
+    class Texture;
+} // namespace ghoul::opengl
 
 namespace openspace {
 
-class ScreenSpaceTextDate : public ScreenSpaceText{
-public:
-    explicit ScreenSpaceTextDate(const ghoul::Dictionary& dictionary);
+namespace documentation { struct Documentation; }
 
-    void update() override;
+/**
+ * Creates a texture by rendering to a framebuffer, this is then used on a screen space
+ * plane. This class lets you add renderfunctions that should render to a framebuffer with
+ * an attached texture. The texture is then used on a screen space plane that works both
+ * in fisheye and flat screens.
+ */
+class ScreenSpaceRenderableFramebuffer : public ScreenSpaceRenderable {
+public:
+    using RenderFunction = std::function<void()>;
+
+    explicit ScreenSpaceRenderableFramebuffer(const ghoul::Dictionary& dictionary);
+    virtual ~ScreenSpaceRenderableFramebuffer() override;
+
+    void initializeGL() override;
+    void deinitializeGL() override;
+    void render(const RenderData& renderData) override;
+    bool isReady() const override;
+
+    void addRenderFunction(RenderFunction renderFunction);
+    void removeAllRenderFunctions();
 
     static documentation::Documentation Documentation();
 
+protected:
+    void createFramebuffer();
+    properties::Vec2Property _size;
+
 private:
-    properties::StringProperty _formatString;
-    properties::StringProperty _timeFormat;
+    void bindTexture() override;
+
+    static int id();
+
+    std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
+    std::vector<std::function<void()>> _renderFunctions;
+
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 };
 
-} // namespace openspace
+} //namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACETEXTDATE___H__
+#endif // __OPENSPACE_CORE___SCREENSPACEFRAMEBUFFER___H__

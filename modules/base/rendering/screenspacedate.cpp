@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/rendering/screenspacetextdate.h>
+#include <modules/base/rendering/screenspacedate.h>
 
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
@@ -58,20 +58,20 @@ namespace {
         // [[codegen::verbatim(TimeFormatInfo.description)]]
         std::optional<std::string> timeFormat;
     };
-#include "screenspacetextdate_codegen.cpp"
+#include "screenspacedate_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceTextDate::Documentation() {
+documentation::Documentation ScreenSpaceDate::Documentation() {
     return codegen::doc<Parameters>(
-        "base_screenspace_textdate",
-        ScreenSpaceText::Documentation()
+        "base_screenspace_date",
+        ScreenSpaceRenderableText::Documentation()
     );
 }
 
-ScreenSpaceTextDate::ScreenSpaceTextDate(const ghoul::Dictionary& dictionary)
-    : ScreenSpaceText(dictionary)
+ScreenSpaceDate::ScreenSpaceDate(const ghoul::Dictionary& dictionary)
+    : ScreenSpaceRenderableText(dictionary)
     , _formatString(FormatStringInfo, "Date: {}")
     , _timeFormat(TimeFormatInfo, "YYYY MON DD HR:MN:SC.### UTC ::RND")
 {
@@ -84,9 +84,7 @@ ScreenSpaceTextDate::ScreenSpaceTextDate(const ghoul::Dictionary& dictionary)
     addProperty(_timeFormat);
 }
 
-void ScreenSpaceTextDate::update() {
-    ScreenSpaceText::update();
-
+void ScreenSpaceDate::update() {
     std::string time = SpiceManager::ref().dateFromEphemerisTime(
         global::timeManager->time().j2000Seconds(),
         _timeFormat.value().c_str()
@@ -99,6 +97,8 @@ void ScreenSpaceTextDate::update() {
     catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
+
+    ScreenSpaceRenderableText::update();
 }
 
 } // namespace openspace

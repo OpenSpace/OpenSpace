@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/rendering/screenspacetext.h>
+#include <openspace/rendering/screenspacerenderabletext.h>
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -57,16 +57,16 @@ namespace {
         // [[codegen::verbatim(FontSizeInfo.description)]]
         std::optional<float> fontSize;
     };
-#include "screenspacetext_codegen.cpp"
+#include "screenspacerenderabletext_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceText::Documentation() {
-    return codegen::doc<Parameters>("screenspaceframebuffer");
+documentation::Documentation ScreenSpaceRenderableText::Documentation() {
+    return codegen::doc<Parameters>("screenspace_text");
 }
 
-ScreenSpaceText::ScreenSpaceText(const ghoul::Dictionary& dictionary)
+ScreenSpaceRenderableText::ScreenSpaceRenderableText(const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _fontName(FontNameInfo, "Mono")
     , _fontSize(FontSizeInfo, 15.f, 6.f, 144.f, 1.f)
@@ -89,13 +89,13 @@ ScreenSpaceText::ScreenSpaceText(const ghoul::Dictionary& dictionary)
     _font = global::fontManager->font(_fontName, _fontSize);
 }
 
-void ScreenSpaceText::initializeGL() {
+void ScreenSpaceRenderableText::initializeGL() {
     ScreenSpaceRenderable::initializeGL();
 
     _framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
 }
 
-void ScreenSpaceText::deinitializeGL() {
+void ScreenSpaceRenderableText::deinitializeGL() {
     _framebuffer->activate();
     _framebuffer->detachAll();
     ghoul::opengl::FramebufferObject::deactivate();
@@ -105,15 +105,15 @@ void ScreenSpaceText::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
 }
 
-bool ScreenSpaceText::isReady() const {
+bool ScreenSpaceRenderableText::isReady() const {
     return _shader && _font && _texture;
 }
 
-void ScreenSpaceText::update() {
+void ScreenSpaceRenderableText::update() {
     updateFramebuffer();
 }
 
-void ScreenSpaceText::render(const RenderData& renderData) {
+void ScreenSpaceRenderableText::render(const RenderData& renderData) {
     const glm::vec2& resolution = global::windowDelegate->currentDrawBufferResolution();
     glm::vec2 size = _texture->dimensions();
     const glm::vec2 ratio = resolution / size;
@@ -142,16 +142,12 @@ void ScreenSpaceText::render(const RenderData& renderData) {
     const glm::mat4 globalRotation = globalRotationMatrix();
     const glm::mat4 translation = translationMatrix();
     const glm::mat4 localRotation = localRotationMatrix();
-    //const glm::mat4 scale = glm::scale(
-    //    scaleMatrix(),
-    //    glm::vec3((1.f / ratio.x), (1.f / ratio.y), 1.f)
-    //);
     const glm::mat4 scale = scaleMatrix();
     const glm::mat4 modelTransform = globalRotation * translation * localRotation * scale;
     draw(modelTransform, renderData);
 }
 
-void ScreenSpaceText::updateFramebuffer() {
+void ScreenSpaceRenderableText::updateFramebuffer() {
     const glm::vec2 bbox = _font->boundingBox(_buffer);
     const glm::uvec3 box = glm::uvec3(bbox.x, bbox.y, 1);
     const glm::uvec3 dim =  _texture ? _texture->dimensions() : glm::uvec3(0);
@@ -177,7 +173,7 @@ void ScreenSpaceText::updateFramebuffer() {
     ghoul::opengl::FramebufferObject::deactivate();
 }
 
-void ScreenSpaceText::bindTexture() {
+void ScreenSpaceRenderableText::bindTexture() {
     _texture->bind();
 }
 

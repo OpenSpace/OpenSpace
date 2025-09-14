@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
 #define __OPENSPACE_MODULE_BASE___SCREENSPACERENDERABLERENDERABLE___H__
 
-#include <openspace/rendering/screenspaceframebuffer.h>
+#include <openspace/rendering/screenspacerenderableframebuffer.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
@@ -43,7 +43,7 @@ class Translation;
 
 namespace documentation { struct Documentation; }
 
-class ScreenSpaceRenderableRenderable : public ScreenSpaceFramebuffer {
+class ScreenSpaceRenderableRenderable : public ScreenSpaceRenderableFramebuffer {
 public:
     using RenderFunction = std::function<void()>;
 
