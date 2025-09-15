@@ -34,6 +34,7 @@
 #include <openspace/util/keys.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -63,6 +64,17 @@ public:
 private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
     void addToCommand(const std::string& c);
+    void registerKeyHandlers();
+    void registerKeyHandler(Key key, KeyModifier modifier, std::function<void()> callback);
+
+    // Helper functions for tab autocomplete
+    void autoCompleteCommand();
+    size_t detectContext(std::string_view command);
+    bool gatherPathSuggestions(size_t contextStart);
+    void gatherFunctionSuggestions(size_t contextStart);
+    void filterSuggestions();
+    void cycleSuggestion();
+    void applySuggestion();
 
     properties::BoolProperty _isVisible;
     properties::BoolProperty _shouldBeSynchronized;
@@ -79,12 +91,29 @@ private:
     std::vector<std::string> _commandsHistory;
     size_t _activeCommand = 0;
     std::vector<std::string> _commands;
+    // Map of registered keybinds and their corresponding callbacks
+    std::map<KeyWithModifier, std::function<void()>> _keyHandlers;
 
-    struct {
-        int lastIndex;
-        bool hasInitialValue;
-        std::string initialValue;
-    } _autoCompleteInfo;
+    enum class Context {
+        None = 0,
+        Function,
+        Path
+    };
+
+    struct AutoCompleteState {
+        AutoCompleteState();
+
+        Context context; // Assumed context we are currently in based on
+        bool isDataDirty; // Flag indicating if we need to update the suggestion data
+        std::string input; // Part of the command that we're intrested in
+        std::vector<std::string> suggestions; // All suggestions found so far
+        int currentIndex; // Current suggestion index
+        std::string suggestion; // Current suggestion to show
+        bool cycleReverse; // Whether we should cycle suggestions forward or backwards
+        size_t insertPosition; // Where to insert the suggestion in the command
+    };
+
+    AutoCompleteState  _autoCompleteState;
 
     float _currentHeight = 0.f;
     float _targetHeight = 0.f;
