@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_SERVER___DOWNLOADEVENT_TOPIC___H__
 
 #include <modules/server/include/topics/topic.h>
+#include <chrono>
 
 namespace openspace {
 class DownloadEventTopic : public Topic {
@@ -37,8 +38,9 @@ public:
     bool isDone() const override;
 
 private:
-    bool _isSubscribedTo;
+    bool _isSubscribedTo = false;
     int _subscriptionID = -1;
+    std::unordered_map<std::string, std::chrono::steady_clock::time_point> _lastCallBack;
 };
 
 } // namespace openspace

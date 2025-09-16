@@ -30,9 +30,9 @@
 #include <ghoul/logging/logmanager.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "DownloadEventTopic";
     constexpr std::string_view StartSubscription = "start_subscription";
     constexpr std::string_view StopSubscription = "stop_subscription";
+    constexpr std::chrono::milliseconds CallbackUpdateInterval(250);
 } // namespace
 
 namespace openspace {
@@ -51,11 +51,26 @@ bool DownloadEventTopic::isDone() const {
 void DownloadEventTopic::handleJson(const nlohmann::json& json) {
     const std::string& event = json.at("event").get<std::string>();
 
-
     if (event == StartSubscription) {
         _isSubscribedTo = true;
 
         auto callback = [this](const DownloadEventEngine::DownloadEvent& event) {
+            // Rate limit how often we send data to frontend to reduce traffic
+            if (event.type == DownloadEventEngine::DownloadEvent::Type::Progress) {
+                const auto now = std::chrono::steady_clock::now();
+                auto& last = _lastCallBack[event.id];
+
+                bool shouldSend = false;
+                if (now - last >= CallbackUpdateInterval) {
+                    last = now;
+                    shouldSend = true;
+                }
+
+                if (!shouldSend) {
+                    return;
+                }
+            }
+
             nlohmann::json payload = {};
 
             payload["type"] = event.type;
@@ -65,11 +80,7 @@ void DownloadEventTopic::handleJson(const nlohmann::json& json) {
                 payload["totalBytes"] = event.totalBytes.value();
             }
 
-            LINFO(std::format("Sending package: id: {}, downloadedBytes: {}, totalBytes: {}",
-                event.id, event.downloadedBytes, event.totalBytes.value_or(0))
-            );
-
-            _connection->sendJson(wrappedPayload(payload));
+			_connection->sendJson(wrappedPayload(payload));
         };
         _subscriptionID = global::downloadEventEngine->subscribe(callback);
     }
