@@ -385,12 +385,10 @@ bool UrlSynchronization::trySyncUrls() {
         if (!d->hasSucceeded()) {
             failed = true;
             LERROR(std::format("Error downloading file from URL: {}", d->url()));
-            DownloadEventEngine::DownloadEvent event{
-                .type = DownloadEventEngine::DownloadEvent::Type::Failed,
-                .id = d->url(),
-                .downloadedBytes = -1
-            };
-            global::downloadEventEngine->publish(event);
+            global::downloadEventEngine->publish(
+                d->url(),
+                DownloadEventEngine::DownloadEvent::Type::Failed
+            );
             continue;
         }
 
@@ -417,20 +415,16 @@ bool UrlSynchronization::trySyncUrls() {
             );
 
             failed = true;
-            DownloadEventEngine::DownloadEvent event{
-                .type = DownloadEventEngine::DownloadEvent::Type::Failed,
-                .id = d->url(),
-                .downloadedBytes = -1
-            };
-            global::downloadEventEngine->publish(event);
+            global::downloadEventEngine->publish(
+                d->url(),
+                DownloadEventEngine::DownloadEvent::Type::Failed
+            );
         }
 
-        DownloadEventEngine::DownloadEvent event{
-            .type = DownloadEventEngine::DownloadEvent::Type::Finished,
-            .id = d->url(),
-            .downloadedBytes = -1
-        };
-        global::downloadEventEngine->publish(event);
+        global::downloadEventEngine->publish(
+            d->url(),
+            DownloadEventEngine::DownloadEvent::Type::Finished
+        );
     }
 
     return !failed;

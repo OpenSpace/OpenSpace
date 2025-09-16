@@ -333,6 +333,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
                 _nTotalBytes += sd.second.totalBytes.value_or(0);
                 _nSynchronizedBytes += sd.second.downloadedBytes;
             }
+
             DownloadEventEngine::DownloadEvent event {
                 .type = DownloadEventEngine::DownloadEvent::Type::Progress,
                 .id = line,
@@ -391,12 +392,11 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
             LERROR(std::format("Error downloading file from URL '{}'", d->url()));
             failed = true;
 
-            DownloadEventEngine::DownloadEvent event{
-                .type = DownloadEventEngine::DownloadEvent::Type::Failed,
-                .id = d->url(),
-                .downloadedBytes = 0
-            };
-            global::downloadEventEngine->publish(event);
+
+            global::downloadEventEngine->publish(
+                d->url(),
+                DownloadEventEngine::DownloadEvent::Type::Failed
+            );
             continue;
         }
 
@@ -445,39 +445,35 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
             std::filesystem::remove(source);
         }
     }
-    if (failed) {
-        for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
-            // Store all files that were synced to the ossync
+
+    for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
+        if (failed) {
+            // Atleast one download failed, there may still be downloads that succeeded
             if (d->hasSucceeded()) {
                 _newSyncedFiles.push_back(d->url());
-                DownloadEventEngine::DownloadEvent event{
-                    .type = DownloadEventEngine::DownloadEvent::Type::Finished,
-                    .id = d->url(),
-                    .downloadedBytes = 0
-                };
-                global::downloadEventEngine->publish(event);
+                global::downloadEventEngine->publish(
+                    d->url(),
+                    DownloadEventEngine::DownloadEvent::Type::Finished
+                );
             }
             else {
-                DownloadEventEngine::DownloadEvent event{
-                    .type = DownloadEventEngine::DownloadEvent::Type::Failed,
-                    .id = d->url(),
-                    .downloadedBytes = 0
-                };
-                global::downloadEventEngine->publish(event);
+                global::downloadEventEngine->publish(
+                    d->url(),
+                    DownloadEventEngine::DownloadEvent::Type::Failed
+                );
             }
         }
-        return SynchronizationState::FileDownloadFail;
+        else {
+            // All downloads are successfull
+            global::downloadEventEngine->publish(
+                d->url(),
+                DownloadEventEngine::DownloadEvent::Type::Finished
+            );
+        }
+
     }
 
-    for (const std::unique_ptr < HttpFileDownload>& d : downloads) {
-        DownloadEventEngine::DownloadEvent event{
-            .type = DownloadEventEngine::DownloadEvent::Type::Finished,
-            .id = d->url(),
-            .downloadedBytes = 0
-            };
-        global::downloadEventEngine->publish(event);
-    }
-    return SynchronizationState::Success;
+    return failed ? SynchronizationState::FileDownloadFail : SynchronizationState::Success;
 }
 
 } // namespace openspace

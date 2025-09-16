@@ -43,7 +43,7 @@ public:
         };
 
         Type type;
-        std::string id; // file id?
+        std::string id;
         int64_t downloadedBytes;
         std::optional<int64_t> totalBytes;
     };
@@ -54,6 +54,9 @@ public:
     void unsubscribe(int id);
 
     void publish(const DownloadEvent& event);
+    void publish(const std::string& id, DownloadEvent::Type type,
+        int64_t downloadedBytes = 0, std::optional<int64_t> totalBytes
+    );
 
 private:
     std::mutex _mutex;

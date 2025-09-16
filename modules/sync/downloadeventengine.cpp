@@ -45,4 +45,18 @@ void DownloadEventEngine::publish(const DownloadEvent& event) {
     }
 }
 
+void DownloadEventEngine::publish(const std::string& id, DownloadEvent::Type type,
+                                  int64_t downloadedBytes,
+                                  std::optional<int64_t> totalBytes)
+{
+    const DownloadEvent event {
+        .type = type,
+        .id = id,
+        .downloadedBytes = downloadedBytes,
+        .totalBytes = totalBytes
+    };
+
+    publish(event);
+}
+
 } // namespace openspace
