@@ -55,8 +55,7 @@ public:
 
     void publish(const DownloadEvent& event);
     void publish(const std::string& id, DownloadEvent::Type type,
-        int64_t downloadedBytes = 0, std::optional<int64_t> totalBytes
-    );
+        int64_t downloadedBytes = 0, std::optional<int64_t> totalBytes = std::nullopt);
 
 private:
     std::mutex _mutex;
