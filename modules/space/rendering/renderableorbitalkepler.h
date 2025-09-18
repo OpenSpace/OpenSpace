@@ -68,6 +68,8 @@ private:
         properties::FloatProperty maxSize;
         /// Max angular size between vector cameraToPoint and edge of the point
         properties::OptionProperty renderingModes;
+        /// Specifies rendering orientation when rendering points
+        properties::OptionProperty pointRenderOption;
         /// Specifies a multiplicative factor that fades out the trail line
         properties::FloatProperty trailFade;
         /// Specifies if the point outline should be enabled
@@ -76,47 +78,63 @@ private:
         properties::Vec3Property outlineColor;
         /// Specifies how much if the point should be covered by the outline
         properties::FloatProperty outlineWidth;
+
+        bool changedRenderType = false;
     };
 
     void updateBuffers();
-    void calculateSegmentsForPoints(const RenderData& data);
-    void calculateSegmentsForTrails(const RenderData& data);
+    void threadedSegmentCalculations(const int threadId, const UpdateData& data);
 
+    const int _nThreads = 0;
+    std::vector<int> _threadIds;
+    std::vector<int> _orbitsPerThread;
+    std::vector<int> _vertexBufferOffset;
+
+    bool _renderTrails = false;
+    bool _renderPoints = false;
+    bool _forceUpdate = false;
     bool _updateDataBuffersAtNextRender = false;
-    long long _numObjects = 0;
+
+    unsigned int _nOrbits = 0;
     GLsizei _lineDrawCount = 0;
-    properties::UIntProperty _segmentQuality;
-    properties::UIntProperty _startRenderIdx;
-    properties::UIntProperty _sizeRender;
-    std::vector<GLint> _segmentSizeRaw;
+    std::vector<GLint> _segmentsPerOrbit;
     std::vector<GLint> _startIndexPoints;
     std::vector<GLint> _segmentSizePoints;
     std::vector<GLint> _startIndexTrails;
     std::vector<GLint> _segmentSizeTrails;
     std::vector<kepler::Parameters> _parameters;
 
+    /// Extra data for more efficient updating of vectors
+    struct updateInfo {
+        double timestamp = std::numeric_limits<double>::min();
+        double timePerStep = 0.0;
+    };
+    std::vector<updateInfo> _updateHelper;
+
     /// The layout of the VBOs
     struct TrailVBOLayout {
         float x = 0.f;
         float y = 0.f;
         float z = 0.f;
-        float time = 0.f;
+        double time = 0.0;
         double epoch = 0.0;
         double period = 0.0;
     };
-
     /// The backend storage for the vertex buffer object containing all points
     std::vector<TrailVBOLayout> _vertexBufferData;
 
-    GLuint _vertexArray = 0;
-    GLuint _vertexBuffer = 0;
-
     ghoul::opengl::ProgramObject* _trailProgram = nullptr;
     ghoul::opengl::ProgramObject* _pointProgram = nullptr;
+    properties::UIntProperty _segmentQuality;
+    properties::UIntProperty _startRenderIdx;
+    properties::UIntProperty _sizeRender;
     properties::StringProperty _path;
     properties::BoolProperty _contiguousMode;
     kepler::Format _format;
     RenderableOrbitalKepler::Appearance _appearance;
+
+    GLuint _vertexArray = 0;
+    GLuint _vertexBuffer = 0;
 
     // Line cache
     UniformCache(modelViewTransform, projectionTransform, trailFadeExponent,
@@ -125,9 +143,9 @@ private:
 
     // Point cache
     UniformCache(modelTransform, viewTransform, projectionTransform,
-        cameraPositionWorld, cameraUpWorld,  inGameTime, color,
-        pointSizeExponent, enableMaxSize, maxSize, enableOutline,
-        outlineColor, outlineWeight, opacity)
+        renderOption, cameraViewDirectionUp, cameraViewDirectionRight,
+        cameraPositionWorld, cameraUpWorld, inGameTime, color, pointSizeExponent,
+        enableMaxSize, maxSize, enableOutline, outlineColor, outlineWeight, opacity)
         _uniformPointCache;
 };
 
