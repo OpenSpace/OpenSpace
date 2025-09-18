@@ -1,0 +1,30 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/screenspacerenderable/screenspacedate/date_day-of-year.asset"
+    },
+    {
+      "type": "time",
+      "value": "2025-09-13T02:03:04.567"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "ScreenSpace.ScreenSpaceDate_Example_DayOfYear.Scale",
+        "value": 0.75
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "ScreenSpace.ScreenSpaceDate_Example_DayOfYear.FontSize",
+        "value": 25.0
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

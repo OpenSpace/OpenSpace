@@ -1,0 +1,17 @@
+-- No Decorations
+-- This example creates a screen space renderable that shows the current simulation time
+-- without any additional text surrounding the current date.
+
+local Item = {
+  Type = "ScreenSpaceDate",
+  Identifier = "ScreenSpaceDate_Example_NoDecoration",
+  FormatString = "{}"
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Item)
+end)

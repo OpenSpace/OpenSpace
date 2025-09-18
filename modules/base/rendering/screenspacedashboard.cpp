@@ -69,7 +69,7 @@ documentation::Documentation ScreenSpaceDashboard::Documentation() {
 }
 
 ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
-    : ScreenSpaceFramebuffer(dictionary)
+    : ScreenSpaceRenderableFramebuffer(dictionary)
     , _useMainDashboard(UseMainInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -98,7 +98,7 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
 }
 
 void ScreenSpaceDashboard::initializeGL() {
-    ScreenSpaceFramebuffer::initializeGL();
+    ScreenSpaceRenderableFramebuffer::initializeGL();
 
     addRenderFunction([this]() {
         glm::vec2 penPosition = glm::vec2(0.f, _size.value().x);

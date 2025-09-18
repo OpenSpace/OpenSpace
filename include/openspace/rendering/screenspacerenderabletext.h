@@ -22,45 +22,56 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#ifndef __OPENSPACE_CORE___SCREENSPACERENDERABLETEXT___H__
+#define __OPENSPACE_CORE___SCREENSPACERENDERABLETEXT___H__
 
-#include <openspace/rendering/screenspacerenderableframebuffer.h>
+#include <openspace/rendering/screenspacerenderable.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/rendering/dashboard.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <ghoul/font/fontrenderer.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-} // namespace ghoul::fontrendering
+namespace ghoul { class Dictionary; }
+namespace ghoul::opengl {
+    class FramebufferObject;
+    class Texture;
+} // namespace ghoul::opengl
+namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
-namespace scripting { struct LuaLibrary; }
 
-class ScreenSpaceDashboard : public ScreenSpaceRenderableFramebuffer {
+class ScreenSpaceRenderableText : public ScreenSpaceRenderable {
 public:
-    explicit ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceDashboard() override = default;
+    explicit ScreenSpaceRenderableText(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
+    void deinitializeGL() override;
+    bool isReady() const override;
 
     void update() override;
-
-    Dashboard& dashboard();
-    const Dashboard& dashboard() const;
-
-    static scripting::LuaLibrary luaLibrary();
+    void render(const RenderData& renderData) override;
 
     static documentation::Documentation Documentation();
 
+protected:
+    std::string _buffer;
+
 private:
-    Dashboard _dashboard;
-    properties::BoolProperty _useMainDashboard;
+    void updateFramebuffer();
+    void bindTexture() override;
+
+    properties::StringProperty _fontName;
+    properties::FloatProperty _fontSize;
+
+    std::shared_ptr<ghoul::fontrendering::Font> _font;
+    std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
+
+    std::unique_ptr<ghoul::opengl::FramebufferObject> _framebuffer;
+    std::unique_ptr<ghoul::opengl::Texture> _texture;
 };
 
-} // namespace openspace
+} //namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#endif // __OPENSPACE_CORE___SCREENSPACERENDERABLETEXT___H__

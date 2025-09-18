@@ -22,45 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#include <modules/base/rendering/screenspacetext.h>
 
-#include <openspace/rendering/screenspacerenderableframebuffer.h>
+#include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/texture.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/rendering/dashboard.h>
+namespace {
+    constexpr openspace::properties::Property::PropertyInfo TextInfo = {
+        "Text",
+        "Text",
+        "The text to be displayed.",
+        openspace::properties::Property::Visibility::User
+    };
 
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-} // namespace ghoul::fontrendering
+    // This `ScreenSpaceRenderable` shows a static text that can be changed via a
+    // property.
+    struct [[codegen::Dictionary(DashboardItemText)]] Parameters {
+        // [[codegen::verbatim(TextInfo.description)]]
+        std::optional<std::string> text;
+    };
+#include "screenspacetext_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-namespace scripting { struct LuaLibrary; }
+documentation::Documentation ScreenSpaceText::Documentation() {
+    return codegen::doc<Parameters>(
+        "base_screenspace_text",
+        ScreenSpaceRenderableText::Documentation()
+    );
+}
 
-class ScreenSpaceDashboard : public ScreenSpaceRenderableFramebuffer {
-public:
-    explicit ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceDashboard() override = default;
+ScreenSpaceText::ScreenSpaceText(const ghoul::Dictionary& dictionary)
+    : ScreenSpaceRenderableText(dictionary)
+    , _text(TextInfo, "")
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _text = p.text.value_or(_text);
+    addProperty(_text);
+}
 
-    void initializeGL() override;
+void ScreenSpaceText::update() {
+    _buffer = _text.value();
 
-    void update() override;
-
-    Dashboard& dashboard();
-    const Dashboard& dashboard() const;
-
-    static scripting::LuaLibrary luaLibrary();
-
-    static documentation::Documentation Documentation();
-
-private:
-    Dashboard _dashboard;
-    properties::BoolProperty _useMainDashboard;
-};
+    ScreenSpaceRenderableText::update();
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__

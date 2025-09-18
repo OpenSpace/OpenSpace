@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEFRAMEBUFFER___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEFRAMEBUFFER___H__
+#ifndef __OPENSPACE_CORE___SCREENSPACEFRAMEBUFFER___H__
+#define __OPENSPACE_CORE___SCREENSPACEFRAMEBUFFER___H__
 
 #include <openspace/rendering/screenspacerenderable.h>
 
@@ -44,19 +44,18 @@ namespace documentation { struct Documentation; }
  * an attached texture. The texture is then used on a screen space plane that works both
  * in fisheye and flat screens.
  */
-class ScreenSpaceFramebuffer : public ScreenSpaceRenderable {
+class ScreenSpaceRenderableFramebuffer : public ScreenSpaceRenderable {
 public:
     using RenderFunction = std::function<void()>;
 
-    explicit ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceFramebuffer() override;
+    explicit ScreenSpaceRenderableFramebuffer(const ghoul::Dictionary& dictionary);
+    virtual ~ScreenSpaceRenderableFramebuffer() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
     void render(const RenderData& renderData) override;
     bool isReady() const override;
 
-    void setSize(glm::vec2 size);
     void addRenderFunction(RenderFunction renderFunction);
     void removeAllRenderFunctions();
 
@@ -79,4 +78,4 @@ private:
 
 } //namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEFRAMEBUFFER___H__
+#endif // __OPENSPACE_CORE___SCREENSPACEFRAMEBUFFER___H__
