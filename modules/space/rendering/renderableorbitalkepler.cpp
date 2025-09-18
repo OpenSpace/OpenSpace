@@ -40,22 +40,40 @@
 #include <ghoul/logging/logmanager.h>
 #include <chrono>
 #include <cmath>
+#include <execution>
 #include <fstream>
 #include <random>
 #include <vector>
 
 namespace {
     // The possible values for the _renderingModes property
-    enum RenderingMode {
+    enum RenderMode {
         RenderingModeTrail = 0,
         RenderingModePoint,
         RenderingModePointTrail
+    };
+
+    enum PointRenderingMode {
+        ViewDirection = 0,
+        PositionNormal
     };
 
     constexpr openspace::properties::Property::PropertyInfo PathInfo = {
         "Path",
         "Path",
         "The file path to the data file to read.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PointRenderingModeInfo =
+    {
+        "PointRenderingMode",
+        "Point Rendering Mode",
+        "Controls how the points will be oriented. \"Camera View "
+        "Direction\" rotates the points so that they are orthogonal to the viewing "
+        "direction of the camera (useful for planar displays), and \"Camera Position "
+        "Normal\" rotates the points towards the position of the camera (useful for "
+        "spherical displays, like dome theaters).",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -193,6 +211,13 @@ namespace {
         // The file format that is contained in the file.
         Format format;
 
+        enum class [[codegen::map(PointRenderingMode)]] PointRenderingMode {
+            ViewDirection [[codegen::key("Camera View Direction")]],
+            PositionNormal [[codegen::key("Camera Position Normal")]]
+        };
+        // [[codegen::verbatim(PointRenderingModeInfo.description)]]
+        std::optional<PointRenderingMode> pointRenderingMode;
+
         // [[codegen::verbatim(SegmentQualityInfo.description)]]
         int segmentQuality;
 
@@ -261,22 +286,24 @@ RenderableOrbitalKepler::Appearance::Appearance()
     , enableMaxSize(EnableMaxSizeInfo, true)
     , maxSize(MaxSizeInfo, 5.f, 0.f, 45.f)
     , renderingModes(RenderingModeInfo)
+    , pointRenderOption(PointRenderingModeInfo)
     , trailFade(TrailFadeInfo, 20.f, 0.f, 30.f)
     , enableOutline(EnableOutlineInfo, true)
     , outlineColor(OutlineColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
     , outlineWidth(OutlineWidthInfo, 0.2f, 0.f, 1.f)
 {
     renderingModes.addOptions({
-        { RenderingModeTrail, "Trails" },
-        { RenderingModePoint, "Points" },
-        { RenderingModePointTrail , "Points and Trails" }
+        { RenderMode::RenderingModeTrail, "Trails" },
+        { RenderMode::RenderingModePoint, "Points" },
+        { RenderMode::RenderingModePointTrail , "Points and Trails" }
     });
+    renderingModes.onChange([this]() { changedRenderType = true; });
     addProperty(renderingModes);
-
     color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(color);
     addProperty(trailWidth);
     addProperty(trailFade);
+    addProperty(pointRenderOption);
     addProperty(pointSizeExponent);
     addProperty(enableMaxSize);
     addProperty(maxSize);
@@ -288,6 +315,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
 
 RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     : Renderable(dict)
+    , _nThreads(static_cast<int>(std::ceil(std::thread::hardware_concurrency() / 2.0)))
     , _segmentQuality(SegmentQualityInfo, 2, 1, 10)
     , _startRenderIdx(StartRenderIdxInfo, 0, 0, 1)
     , _sizeRender(RenderSizeInfo, 1, 1, 2)
@@ -299,11 +327,12 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     addProperty(Fadeable::_opacity);
 
     _segmentQuality = static_cast<unsigned int>(p.segmentQuality);
-    _segmentQuality.onChange([this]() { updateBuffers(); });
+    _segmentQuality.onChange([this]() { _updateDataBuffersAtNextRender = true; });
     addProperty(_segmentQuality);
 
     _appearance.color = p.color;
     _appearance.trailFade = p.trailFade.value_or(_appearance.trailFade);
+    _appearance.trailFade.onChange([this]() { _forceUpdate = true; });
     _appearance.trailWidth = p.trailWidth.value_or(_appearance.trailWidth);
     _appearance.enableMaxSize = p.enableMaxSize.value_or(_appearance.enableMaxSize);
     _appearance.maxSize = p.maxSize.value_or(_appearance.maxSize);
@@ -313,21 +342,43 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _appearance.pointSizeExponent =
         p.pointSizeExponent.value_or(_appearance.pointSizeExponent);
 
+    _appearance.pointRenderOption.addOption(
+        PointRenderingMode::ViewDirection,
+        "Camera View Direction"
+    );
+    _appearance.pointRenderOption.addOption(
+        PointRenderingMode::PositionNormal,
+        "Camera Position Normal"
+    );
+    if (p.pointRenderingMode.has_value()) {
+        switch (*p.pointRenderingMode) {
+        case Parameters::PointRenderingMode::ViewDirection:
+            _appearance.pointRenderOption = PointRenderingMode::ViewDirection;
+            break;
+        case Parameters::PointRenderingMode::PositionNormal:
+            _appearance.pointRenderOption = PointRenderingMode::PositionNormal;
+            break;
+        }
+    }
+    else {
+        _appearance.pointRenderOption = PointRenderingMode::ViewDirection;
+    }
+
     if (p.renderingMode.has_value()) {
         switch (*p.renderingMode) {
             case Parameters::RenderingMode::Trail:
-                _appearance.renderingModes = RenderingModeTrail;
+                _appearance.renderingModes = RenderMode::RenderingModeTrail;
                 break;
             case Parameters::RenderingMode::Point:
-                _appearance.renderingModes = RenderingModePoint;
+                _appearance.renderingModes = RenderMode::RenderingModePoint;
                 break;
             case Parameters::RenderingMode::PointsTrails:
-                _appearance.renderingModes = RenderingModePointTrail;
+                _appearance.renderingModes = RenderMode::RenderingModePointTrail;
                 break;
         }
     }
     else {
-        _appearance.renderingModes = RenderingModeTrail;
+        _appearance.renderingModes = RenderMode::RenderingModeTrail;
     }
     addPropertySubOwner(_appearance);
 
@@ -336,8 +387,8 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _startRenderIdx = p.startRenderIdx.value_or(0);
     _startRenderIdx.onChange([this]() {
         if (_contiguousMode) {
-            if ((_numObjects - _startRenderIdx) < _sizeRender) {
-                _sizeRender = static_cast<unsigned int>(_numObjects - _startRenderIdx);
+            if ((_nOrbits - _startRenderIdx) < _sizeRender) {
+                _sizeRender = static_cast<unsigned int>(_nOrbits - _startRenderIdx);
             }
             _updateDataBuffersAtNextRender = true;
         }
@@ -347,8 +398,8 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _sizeRender = p.renderSize.value_or(0u);
     _sizeRender.onChange([this]() {
         if (_contiguousMode) {
-            if (_sizeRender > (_numObjects - _startRenderIdx)) {
-                _startRenderIdx = static_cast<unsigned int>(_numObjects - _sizeRender);
+            if (_sizeRender > (_nOrbits - _startRenderIdx)) {
+                _startRenderIdx = static_cast<unsigned int>(_nOrbits - _sizeRender);
             }
         }
         _updateDataBuffersAtNextRender = true;
@@ -360,7 +411,7 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     addProperty(_contiguousMode);
 
     _path = p.path.string();
-    _path.onChange([this]() { updateBuffers(); });
+    _path.onChange([this]() { _updateDataBuffersAtNextRender = true; });
     addProperty(_path);
 }
 
@@ -398,7 +449,7 @@ void RenderableOrbitalKepler::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_trailProgram, _uniformTrailCache);
     ghoul::opengl::updateUniformLocations(*_pointProgram, _uniformPointCache);
 
-    updateBuffers();
+    _updateDataBuffersAtNextRender = true;
 }
 
 void RenderableOrbitalKepler::deinitializeGL() {
@@ -427,11 +478,27 @@ bool RenderableOrbitalKepler::isReady() const {
     return _pointProgram != nullptr && _trailProgram != nullptr;
 }
 
-void RenderableOrbitalKepler::update(const UpdateData&) {
+void RenderableOrbitalKepler::update(const UpdateData& data) {
     if (_updateDataBuffersAtNextRender) {
-        _updateDataBuffersAtNextRender = false;
         updateBuffers();
     }
+
+    if(_appearance.changedRenderType) {
+        _forceUpdate = true;
+        _appearance.changedRenderType = false;
+    }
+
+    std::for_each(
+        std::execution::par_unseq,
+        _threadIds.cbegin(),
+        _threadIds.cend(),
+        [&](int threadId) {
+            threadedSegmentCalculations(threadId, data);
+        }
+    );
+
+    _lineDrawCount = static_cast<GLsizei>(_segmentsPerOrbit.size() * 2);
+    _forceUpdate = false;
 }
 
 void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
@@ -439,18 +506,21 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         return;
     }
 
-    const int selection = _appearance.renderingModes;
-    const bool renderPoints = (
-        selection == RenderingModePoint ||
-        selection == RenderingModePointTrail
-    );
-    const bool renderTrails = (
-        selection == RenderingModeTrail ||
-        selection == RenderingModePointTrail
-    );
-
-    if (renderPoints) {
-        calculateSegmentsForPoints(data);
+    if (_renderPoints) {
+        glm::vec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
+        glm::vec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
+        glm::vec3 orthoRight = glm::normalize(
+            glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
+        );
+        if (orthoRight == glm::vec3(0.f)) {
+            glm::vec3 otherVector = glm::vec3(
+                cameraUpDirectionWorld.y,
+                cameraUpDirectionWorld.x,
+                cameraUpDirectionWorld.z
+            );
+            orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
+        }
+        glm::vec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
 
         _pointProgram->activate();
         _pointProgram->setUniform(
@@ -464,6 +534,18 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         _pointProgram->setUniform(
             _uniformPointCache.projectionTransform,
             data.camera.projectionMatrix()
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.renderOption,
+            _appearance.pointRenderOption
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.cameraViewDirectionUp,
+            orthoUp
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.cameraViewDirectionRight,
+            orthoRight
         );
         _pointProgram->setUniform(
             _uniformPointCache.cameraPositionWorld,
@@ -513,9 +595,7 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         _pointProgram->deactivate();
     }
 
-    if (renderTrails) {
-        calculateSegmentsForTrails(data);
-       
+    if (_renderTrails) {
         _trailProgram->activate();
         _trailProgram->setUniform(_uniformTrailCache.opacity, opacity());
         _trailProgram->setUniform(_uniformTrailCache.color, _appearance.color);
@@ -562,32 +642,31 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
 
 void RenderableOrbitalKepler::updateBuffers() {
     _parameters = kepler::readFile(_path.value(), _format);
+    _nOrbits = static_cast<unsigned int>(_parameters.size());
 
-    _numObjects = _parameters.size();
-
-    if (_startRenderIdx >= _numObjects) {
+    if (_startRenderIdx >= _nOrbits) {
         throw ghoul::RuntimeError(std::format(
-            "Start index {} out of range [0, {}]", _startRenderIdx.value(), _numObjects
+            "Start index {} out of range [0, {}]", _startRenderIdx.value(), _nOrbits
         ));
     }
 
     long long endElement = _startRenderIdx + _sizeRender - 1;
-    endElement = (endElement >= _numObjects) ? _numObjects - 1 : endElement;
-    if (endElement < 0 || endElement >= _numObjects) {
+    endElement = (endElement >= _nOrbits) ? _nOrbits - 1 : endElement;
+    if (endElement < 0 || endElement >= _nOrbits) {
         throw ghoul::RuntimeError(std::format(
-            "End index {} out of range [0, {}]", endElement, _numObjects
+            "End index {} out of range [0, {}]", endElement, _nOrbits
         ));
     }
 
-    _startRenderIdx.setMaxValue(static_cast<unsigned int>(_numObjects - 1));
-    _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
+    _startRenderIdx.setMaxValue(static_cast<unsigned int>(_nOrbits - 1));
+    _sizeRender.setMaxValue(static_cast<unsigned int>(_nOrbits));
     if (_sizeRender == 0u) {
-        _sizeRender = static_cast<unsigned int>(_numObjects);
+        _sizeRender = static_cast<unsigned int>(_nOrbits);
     }
 
     if (_contiguousMode) {
         if (_startRenderIdx >= _parameters.size() ||
-            (_startRenderIdx + _sizeRender) >= _parameters.size())
+            (_startRenderIdx + _sizeRender) > _parameters.size())
         {
             throw ghoul::RuntimeError(std::format(
                 "Tried to load {} objects but only {} are available",
@@ -613,64 +692,115 @@ void RenderableOrbitalKepler::updateBuffers() {
         );
     }
 
+    _threadIds.clear();
+    _orbitsPerThread.clear();
+    _updateHelper.clear();
     _startIndexPoints.clear();
     _segmentSizePoints.clear();
+    _vertexBufferOffset.clear();
     _startIndexTrails.clear();
     _segmentSizeTrails.clear();
-    _segmentSizeRaw.clear();
-    size_t nVerticesTotal = 0;
-    const int numOrbits = static_cast<int>(_parameters.size());
-    for (int i = 0; i < numOrbits; i++) {
+    _segmentsPerOrbit.clear();
+
+    _updateHelper.resize(_sizeRender);
+    _startIndexPoints.resize(_sizeRender);
+    _segmentSizePoints.resize(_sizeRender);
+    _vertexBufferOffset.resize(_sizeRender);
+    _segmentsPerOrbit.resize(_sizeRender);
+
+    // Trail vectors needs double length as it may use two trails per orbit
+    _startIndexTrails.resize(_sizeRender * 2);
+    _segmentSizeTrails.resize(_sizeRender * 2);
+    
+    double maxSemiMajorAxis = 0.0;
+    size_t nVerticesTotal = 0; 
+    for (unsigned int i = 0; i < _sizeRender; i++) {
         // For points rendering as they are always two vertices long
-        _segmentSizePoints.push_back(2);
+        _segmentSizePoints[i] = 2;
 
         const double scale = static_cast<double>(_segmentQuality) * 10.0;
         const kepler::Parameters& p = _parameters[i];
-        _segmentSizeRaw.push_back(
-            static_cast<int>(scale + (scale / std::pow(1.0 - p.eccentricity, 1.2)))
+        _segmentsPerOrbit[i] = static_cast<int>(
+            scale + (scale / std::pow(1.0 - p.eccentricity, 1.2))
         );
-        nVerticesTotal += _segmentSizeRaw[i];
+        _vertexBufferOffset[i] = static_cast<int>(nVerticesTotal);
+        nVerticesTotal += _segmentsPerOrbit[i];
+
+        // Find largest value for bounding sphere
+        if (p.semiMajorAxis > maxSemiMajorAxis) {
+            maxSemiMajorAxis = p.semiMajorAxis;
+        }
     }
-    _startIndexPoints.resize(numOrbits);
-    _startIndexTrails.resize(numOrbits*2);
-    _segmentSizeTrails.resize(numOrbits*2);
+    setBoundingSphere(maxSemiMajorAxis * 1000);
     _vertexBufferData.resize(nVerticesTotal);
 
-    size_t vertexBufIdx = 0;
-    for (int orbitIdx = 0; orbitIdx < numOrbits; orbitIdx++) {
-        const kepler::Parameters& orbit = _parameters[orbitIdx];
+    std::vector<int> orbitIdHolder;
+    orbitIdHolder.resize(_sizeRender);
+    std::iota(orbitIdHolder.begin(), orbitIdHolder.end(), 0);
 
-        ghoul::Dictionary d;
-        d.setValue("Type", std::string("KeplerTranslation"));
-        d.setValue("Eccentricity", orbit.eccentricity);
-        d.setValue("SemiMajorAxis", orbit.semiMajorAxis);
-        d.setValue("Inclination", orbit.inclination);
-        d.setValue("AscendingNode", orbit.ascendingNode);
-        d.setValue("ArgumentOfPeriapsis", orbit.argumentOfPeriapsis);
-        d.setValue("MeanAnomaly", orbit.meanAnomaly);
-        d.setValue("Period", orbit.period);
-        d.setValue("Epoch", orbit.epoch);
-        KeplerTranslation keplerTranslator = KeplerTranslation(d);
+    std::for_each(
+        std::execution::par_unseq,
+        orbitIdHolder.begin(),
+        orbitIdHolder.end(),
+        [&](int& index) {
+            const kepler::Parameters& orbit = _parameters[index];
 
-        const int nSegments = _segmentSizeRaw[orbitIdx];
-        for (GLint j = 0 ; j < nSegments; j++) {
-            const double timeOffset = orbit.period *
-                static_cast<double>(j) / static_cast<double>(nSegments - 1);
+            ghoul::Dictionary d;
+            d.setValue("Type", std::string("KeplerTranslation"));
+            d.setValue("Eccentricity", orbit.eccentricity);
+            d.setValue("SemiMajorAxis", orbit.semiMajorAxis);
+            d.setValue("Inclination", orbit.inclination);
+            d.setValue("AscendingNode", orbit.ascendingNode);
+            d.setValue("ArgumentOfPeriapsis", orbit.argumentOfPeriapsis);
+            d.setValue("MeanAnomaly", orbit.meanAnomaly);
+            d.setValue("Period", orbit.period);
+            d.setValue("Epoch", orbit.epoch);
+            KeplerTranslation keplerTranslator = KeplerTranslation(d);
 
-            const glm::dvec3 position = keplerTranslator.position({
-                {},
-                Time(timeOffset + orbit.epoch),
-                Time(0.0)
-            });
+            const int nVerts = _segmentsPerOrbit[index];
+            const int offset = _vertexBufferOffset[index];
+            const int nSegments = nVerts - 1;
+            for (GLint j = 0; j < nVerts; j++) {
+                const double timeOffset = orbit.period *
+                    static_cast<double>(j) / static_cast<double>(nSegments);
 
-            _vertexBufferData[vertexBufIdx + j].x = static_cast<float>(position.x);
-            _vertexBufferData[vertexBufIdx + j].y = static_cast<float>(position.y);
-            _vertexBufferData[vertexBufIdx + j].z = static_cast<float>(position.z);
-            _vertexBufferData[vertexBufIdx + j].time = static_cast<float>(timeOffset);
-            _vertexBufferData[vertexBufIdx + j].epoch = orbit.epoch;
-            _vertexBufferData[vertexBufIdx + j].period = orbit.period;
+                const glm::dvec3 position = keplerTranslator.position({
+                    {},
+                    Time(timeOffset + orbit.epoch),
+                    Time(0.0)
+                });
+
+                _vertexBufferData[offset + j].x = static_cast<float>(position.x);
+                _vertexBufferData[offset + j].y = static_cast<float>(position.y);
+                _vertexBufferData[offset + j].z = static_cast<float>(position.z);
+                _vertexBufferData[offset + j].time = timeOffset;
+                _vertexBufferData[offset + j].epoch = orbit.epoch;
+                _vertexBufferData[offset + j].period = orbit.period;
+            }
+
+            _updateHelper[index].timePerStep = orbit.period / nSegments;
         }
-        vertexBufIdx += nSegments;
+    );
+
+    // Calculate how many orbits we calculate per thread
+    // 1000 per thread (arbitrary) to not create threads that do little to no work
+    unsigned int orbitsPerThread = std::max(
+        1000,
+        static_cast<int>(std::ceil(static_cast<double>(_sizeRender) / _nThreads))
+    );
+
+    // Vector that maps thread index to number of orbits to render
+    int threadId = 0;
+    unsigned int remainingOrbits = _sizeRender;
+    while (remainingOrbits >= orbitsPerThread) {
+        _threadIds.push_back(threadId);
+        _orbitsPerThread.push_back(orbitsPerThread);
+        remainingOrbits -= orbitsPerThread;
+        threadId++;
+    }
+    if (remainingOrbits > 0) {
+        _threadIds.push_back(threadId);
+        _orbitsPerThread.push_back(remainingOrbits);
     }
 
     glBindVertexArray(_vertexArray);
@@ -684,120 +814,141 @@ void RenderableOrbitalKepler::updateBuffers() {
     );
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), nullptr);
 
     glEnableVertexAttribArray(1);
     glVertexAttribLPointer(
         1,
-        2,
+        3,
         GL_DOUBLE,
         sizeof(TrailVBOLayout),
-        reinterpret_cast<GLvoid*>(4 * sizeof(GL_FLOAT))
+        reinterpret_cast<GLvoid*>(offsetof(TrailVBOLayout, TrailVBOLayout::time))
     );
 
     glBindVertexArray(0);
 
-    double maxSemiMajorAxis = 0.0;
-    for (const kepler::Parameters& kp : _parameters) {
-        if (kp.semiMajorAxis > maxSemiMajorAxis) {
-            maxSemiMajorAxis = kp.semiMajorAxis;
-        }
-    }
-    setBoundingSphere(maxSemiMajorAxis * 1000);
+    _updateDataBuffersAtNextRender = false;
 }
 
-void RenderableOrbitalKepler::calculateSegmentsForPoints(const RenderData& data) {
-    int startVertexIndex = 0;
-    for (size_t i = 0; i < _segmentSizeRaw.size(); i++) {
-        // Check how far along the trail we are
-        const kepler::Parameters& orbit = _parameters[i];
-        const double nRevs = (data.time.j2000Seconds() - orbit.epoch) / orbit.period;
-        float frac = static_cast<float>(nRevs - std::trunc(nRevs));
-        frac += (frac < 0.f) ? 1.f: 0.f;
+void RenderableOrbitalKepler::threadedSegmentCalculations(const int threadId,
+                                                                const UpdateData& data)
+{
+    const int selection = _appearance.renderingModes;
+    _renderPoints = (
+        selection == RenderMode::RenderingModePoint ||
+        selection == RenderMode::RenderingModePointTrail
+    );
+    _renderTrails = (
+        selection == RenderMode::RenderingModeTrail ||
+        selection == RenderMode::RenderingModePointTrail
+    );
 
-        // Get the closest vertex before that point
-        const int nSegments = _segmentSizeRaw[i] - 1;
-        const int offset = static_cast<int>(std::floor(frac * nSegments));
-
-        // Set start vertex ID in buffer
-        _startIndexPoints[i] = startVertexIndex + offset;
-        startVertexIndex += _segmentSizeRaw[i];
-    }
-}
-
-void RenderableOrbitalKepler::calculateSegmentsForTrails(const RenderData& data) {
     const float fade = std::pow(
         _appearance.trailFade.maxValue() - _appearance.trailFade,
         2.f
     );
     const float threshold = 1.f - std::pow(0.05f, 1.f / fade);
 
-    int nTotalTrailParts = 0;
-    int startVertexIndex = 0;
-    for (size_t i = 0; i < _segmentSizeRaw.size(); i++) {
-        // Check how far along the trail we are
-        const kepler::Parameters& orbit = _parameters[i];
-        const double nRevs = (data.time.j2000Seconds() - orbit.epoch) / orbit.period;
-        float frac = static_cast<float>(nRevs - std::trunc(nRevs));
-        frac += (frac < 0.f) ? 1.f : 0.f;
+    int offset = std::accumulate(_orbitsPerThread.begin(),
+        _orbitsPerThread.begin() + threadId,
+        0
+    );
+    const int cutoff = offset + _orbitsPerThread[threadId];
 
-        int p0Start = 0;
-        int p0Length = 0;
-        int p1Start = 0;
-        int p1Length = 0;
+    const double now = data.time.j2000Seconds();
+    int startVertexIndex = _vertexBufferOffset[offset];
+    for (int i = offset; i < cutoff; i++) {
+        updateInfo* helper = &_updateHelper[i];
+        double upper = helper->timestamp + (helper->timePerStep);
+        double lower = helper->timestamp - (helper->timePerStep);
+        const bool shouldUpdate = (now >= upper || now <= lower);
 
-        const int nVerts = _segmentSizeRaw[i];
-        const int nSegments = nVerts - 1;
-        const int trailLength = static_cast<int>(std::ceil(threshold * nSegments));
-        if (trailLength == nSegments) {
-            // Whole trail should be visible
-            p0Start = startVertexIndex;
-            p0Length = nVerts;
-        }
-        else {
-            const int headOffset = static_cast<int>(std::ceil(frac * nSegments));
-            const int headVertexIndex = startVertexIndex + headOffset;
-            const int correctTrailLength = trailLength + 2;
+        const int nVerts = _segmentsPerOrbit[i];
+        if (shouldUpdate || _forceUpdate) {
+            // Check how far along the trail we are
+            const kepler::Parameters& orbit = _parameters[i];
+            const double nRevs = (data.time.j2000Seconds() - orbit.epoch) / orbit.period;
+            double frac = static_cast<double>(nRevs - std::trunc(nRevs));
+            frac += (frac < 0.0) ? 1.0 : 0.0;
 
-            int correctVertexIndex = headVertexIndex - correctTrailLength + 1;
+            const int nSegments = nVerts - 1;
+            const int pointHead = static_cast<int>(std::floor(frac * nSegments));
 
-            // If the start of the trail should be at the end of the orbit
-            if (correctVertexIndex < startVertexIndex) {
-                correctVertexIndex += nVerts;
+            // We can always do this since it has no cost
+            _startIndexPoints[i] = startVertexIndex + pointHead;
+
+            // There is a lot of what seems to be "magic numbers" in this section.
+            // They will most likely disappear when we change our method of determining
+            // the trail fade amount is changed.
+            if (_renderTrails) {
+
+                // When rendering a trail we don't know if the trail will pass over
+                // the starting point of the orbit or not. If the trail passes over the
+                // starting point of the orbit, then we can't draw the entire trail as
+                // line strip. Instead we need to divide the line strip into two parts,
+                // where p0 and p1 denotes the respctive line strips (parts).
+                int p0Start;
+                int p0Length;
+                int p1Start;
+                int p1Length;
+
+                const int trailLength =
+                    static_cast<int>(std::ceil(threshold * nSegments));
+                if (trailLength == nSegments) {
+                    // Whole trail should be visible
+                    p0Start = startVertexIndex;
+                    p0Length = nVerts;
+                    p1Start = 0;
+                    p1Length = 0;
+                }
+                else {
+                    const int trailHead = static_cast<int>(std::ceil(frac * nSegments));
+                    const int headVertexIndex = startVertexIndex + trailHead + 1;
+                    const int correctTrailLength = trailLength + 3; 
+
+                    // Need to do this due to order of vertex data in the vertex buffer
+                    int correctVertexIndex = headVertexIndex - correctTrailLength;
+
+                    // If the start of the trail should be at the end of the orbit
+                    if (correctVertexIndex < startVertexIndex) {
+                        correctVertexIndex += nVerts;
+                    }
+
+                    // If the trail is length passes over the last point of the orbit
+                    const int lastVertexIndex = startVertexIndex + nVerts;
+                    if (correctVertexIndex + correctTrailLength > lastVertexIndex) {
+                        p0Start = startVertexIndex;
+                        p1Start = correctVertexIndex;
+                        if (lastVertexIndex - correctVertexIndex == 1) {
+                            p1Length = 0;
+                            p0Length = correctTrailLength - 1;
+                        }
+                        else {
+                            p1Length = lastVertexIndex - correctVertexIndex;
+                            p0Length = correctTrailLength - p1Length;
+                        }
+                    }
+                    else {
+                        // If the entire trail is within the bounds of the orbit
+                        p0Start = correctVertexIndex;
+                        p0Length = correctTrailLength;
+                        p1Start = 0;
+                        p1Length = 0;
+                    }
+                }
+                _startIndexTrails[i * 2] = p0Start;
+                _segmentSizeTrails[i * 2] = p0Length;
+                _startIndexTrails[i * 2 + 1] = p1Start;
+                _segmentSizeTrails[i * 2 + 1] = p1Length;
             }
 
-            // If the trail is length passes over the last point of the orbit
-            const int lastVertexIndex = startVertexIndex + nVerts;
-            if (correctVertexIndex + correctTrailLength > lastVertexIndex) {
-                p1Start = correctVertexIndex - 1;
-                p1Length = lastVertexIndex - correctVertexIndex + 1;
-                p0Start = startVertexIndex;
-                p0Length = correctTrailLength - p1Length + 1;
-            }
-            else {
-                // If the entire trail is within the bounds of the orbit
-                p0Start = correctVertexIndex;
-                p0Length = correctTrailLength;
-            }
-        }
-
-        int newTrailParts = 0;
-        if (p0Length > 1) {
-            _startIndexTrails[nTotalTrailParts] = p0Start;
-            _segmentSizeTrails[nTotalTrailParts] = p0Length;
-            newTrailParts += 1;
-        }
-
-        if (p1Length > 1) {
-            _startIndexTrails[nTotalTrailParts + newTrailParts] = p1Start;
-            _segmentSizeTrails[nTotalTrailParts + newTrailParts] = p1Length;
-            newTrailParts += 1;
+            _updateHelper[i].timestamp = orbit.epoch +
+                (std::floor(frac * nSegments) * _updateHelper[i].timePerStep) +
+                (std::floor(nRevs) * orbit.period);
         }
 
         startVertexIndex += nVerts;
-        nTotalTrailParts += newTrailParts;
     }
-    _lineDrawCount = static_cast<GLsizei>(nTotalTrailParts);
 }
 
 } // namespace openspace
