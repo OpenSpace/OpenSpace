@@ -206,8 +206,7 @@ private:
      * higher chunk levels.
      */
     void renderChunkLocally(const Chunk& chunk, const RenderData& data,
-        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false,
-        std::vector<DirectionalLightSource::DepthMapData> depthMapData = {}
+        std::vector<DirectionalLightSource::DepthMapData>& depthMapData, bool renderGeomOnly = false
     );
 
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
