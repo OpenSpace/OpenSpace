@@ -41,14 +41,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CameraPositionInfo = {
         "CameraPosition",
-        "Camera Position",
+        "Camera position",
         "Specifies the location of the virtual camera that is showing the renderable "
         "class. This position is provided in meters."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CameraCenterInfo = {
         "CameraCenter",
-        "Camera Center",
+        "Camera center",
         "The location of the camera's focal point. The camera's view direction will "
         "always be pointing at the provided center location. This position is provided "
         "in meters."
@@ -56,14 +56,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CameraUpInfo = {
         "CameraUp",
-        "Camera Up",
+        "Camera up",
         "The direction that is 'up' for the provided camera. This value does not have "
         "any units."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CameraFovInfo = {
         "CameraFov",
-        "Camera Field of view",
+        "Camera field of view",
         "The camera's field of view in degrees."
     };
 

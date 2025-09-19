@@ -3,25 +3,32 @@
   "commands": [
     {
       "type": "asset",
-      "value": "examples/renderable/renderablepointcloud/pointcloud_units.asset"
+      "value": "examples/renderable/renderablepointcloud/advanced/pointcloud_datamapping.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.RenderablePointCloud_Example_DataMapping.Renderable.Sizing.ScaleFactor",
+        "value": 5.0
+      }
     },
     {
       "type": "navigationstate",
       "value": {
-        "anchor": "RenderablePointCloud_Example_DataMapping",
+        "anchor": "Root",
         "position": [
-          5.321619599755165e+18,
-          7.857607809400956e+18,
-          -2.1166380939790738e+18
+          1.1597384597471084e+18,
+          -7.844861498540243e+17,
+          8.240322603461533e+18
         ],
-        "pitch": -0.005462881077891804,
+        "pitch": 0.007151529211622581,
         "up": [
-          -0.3239088733464889,
-          -0.035304881664504295,
-          -0.9454293242215747
+          -0.988253688126433,
+          0.05126593565499182,
+          0.14396684252257935
         ],
-        "yaw": -0.0041302538067119945,
-        "timestamp": "2025 JUL 13 12:13:52"
+        "yaw": -0.00398236742276883,
+        "timestamp": "2025 AUG 30 12:47:23"
       }
     },
     {

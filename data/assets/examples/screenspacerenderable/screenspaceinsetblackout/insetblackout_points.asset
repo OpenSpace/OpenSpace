@@ -7,7 +7,7 @@ local inset = {
   Type = "ScreenSpaceInsetBlackout",
   Name = "ScreenSpaceInsetBlackout Example - Points",
   Blackoutshape = {
-    -- Must always contain four corners in the following order: 
+    -- Must always contain four corners in the following order:
     -- top-left, top-right, bottom-right, bottom-left
     Corners = { {0.0, 0.9}, {1.0, 0.9}, {0.9, 0.1}, {0.1, 0.1} },
 

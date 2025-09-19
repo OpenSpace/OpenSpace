@@ -613,6 +613,9 @@ public:
 
     std::string dateFromEphemerisTime(double ephemerisTime, const char* format);
 
+    void dateFromEphemerisTime(double ephemerisTime, char* outBuf, int bufferSize,
+        const std::string& format = "YYYY MON DDTHR:MN:SC.### ::RND") const;
+
     /**
      * Returns the \p position of a \p target body relative to an \p observer in a
      * specific \p referenceFrame, optionally corrected for \p lightTime (planetary

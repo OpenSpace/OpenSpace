@@ -60,7 +60,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
-        "Step Size",
+        "Step size",
         "Specifies how often to sample during raycasting. Lower step size leads to "
         "higher resolution.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -68,7 +68,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "GridType",
-        "Grid Type",
+        "Grid type",
         "The grid type to use for the volume.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -89,14 +89,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
         "SourceDirectory",
-        "Source Directory",
+        "Source directory",
         "A directory from where to load the data files for the different time steps.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
-        "Transfer Function Path",
+        "Transfer function path",
         "The path to the transfer function file.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

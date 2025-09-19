@@ -206,7 +206,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # find CEF to initialize it properly.
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
   include(webbrowser_helpers)
-elseif ()
+else ()
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again")
 endif ()
 

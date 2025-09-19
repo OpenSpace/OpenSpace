@@ -342,7 +342,7 @@ std::vector<float> FitsFileReader::readFitsFile(std::filesystem::path filePath,
         values[idx++] = tycho_v_err[i % nStars];
 
         // Read extra columns, if any. This will slow down the sorting tremendously!
-        for (int col = defaultCols; col < nColumnsRead; ++col) {
+        for (int col = defaultCols; col < nColumnsRead; col++) {
             std::vector<float> vecData = std::move(tableContent[allColumnNames[col]]);
             values[idx++] = vecData[i];
         }

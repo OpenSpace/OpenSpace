@@ -70,28 +70,28 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
-        "Font Size",
+        "Font size",
         "Font size for the rendering labels. This is different fromt text size.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
-        "Min/Max Text Size",
+        "Min/max text size",
         "Minimum and maximum label size, in pixels.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "LabelsSize",
-        "Labels Size",
+        "Labels size",
         "This value affects the size scale of the labels.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HeightOffsetInfo = {
         "HeightOffset",
-        "Height Offset",
+        "Height offset",
         "This value moves the label away from the globe surface by the specified "
         "distance (in meters).",
         openspace::properties::Property::Visibility::User
@@ -106,7 +106,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeDistancesInfo = {
         "FadeDistances",
-        "Fade-In Distances",
+        "Fade-in distances",
         "The distances above the globe's surface at which the labels start fading in or "
         "out, given in meters. The final distances are also adjusted by the specified "
         "height offset.",
@@ -115,7 +115,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeInEnabledInfo = {
         "FadeInEnabled",
-        "Fade In Enabled",
+        "Fade-in enabled",
         "Sets whether the labels fade in when approaching the globe from a distance. If "
         "false, no fading happens and the labels immediately has full opacity.",
         openspace::properties::Property::Visibility::User
@@ -123,7 +123,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeOutEnabledInfo = {
         "FadeOutEnabled",
-        "Fade Out Enabled",
+        "Fade-out enabled",
         "Sets whether the labels fade out when approaching the surface of the globe. If "
         "false, no fading happens and the labels stays in full opacity.",
         openspace::properties::Property::Visibility::User
@@ -131,21 +131,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DisableCullingInfo = {
         "DisableCulling",
-        "Culling Disabled",
+        "Culling disabled",
         "Labels culling disabled.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceEPSInfo = {
         "DistanceEPS",
-        "Culling Distance",
+        "Culling distance",
         "Labels culling distance from globe's center.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo AlignmentOptionInfo = {
         "AlignmentOption",
-        "Alignment Option",
+        "Alignment option",
         "Labels are aligned horizontally or circularly related to the planet.",
         openspace::properties::Property::Visibility::User
     };

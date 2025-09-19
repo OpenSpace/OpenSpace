@@ -6,21 +6,35 @@
       "value": "examples/renderable/renderabletravelspeed/travelspeed.asset"
     },
     {
+      "type": "time",
+      "value": "2025-07-13T12:45:09.798"
+    },
+    {
+      "type": "pause",
+      "value": false
+    },
+    {
+      "type": "pause",
+      "value": true
+    },
+    {
       "type": "navigationstate",
       "value": {
         "anchor": "RenderableTravelSpeed_Example",
         "position": [
-          -126158731.7913208,
-          -111363957.81072998,
-          507317981.489769
+          -203890857.01141357,
+          29295077.413841248,
+          -149960533.2878952
         ],
+        "pitch": 3.2172739644619947e-07,
         "referenceFrame": "Root",
         "up": [
-          0.9619224667383646,
-          -0.18862448138129917,
-          0.19780286400255834
+          -0.4671332817886237,
+          0.4959317526862759,
+          0.732009695101717
         ],
-        "timestamp": "2025 JUL 13 12:45:06"
+        "yaw": -2.533027080309093e-07,
+        "timestamp": "2025 JUL 13 12:45:09"
       }
     },
     {

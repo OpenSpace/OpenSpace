@@ -90,7 +90,7 @@ DeltaTimesDialog::DeltaTimesDialog(QWidget* parent, std::vector<double>* deltaTi
     setWindowTitle("Simulation Time Increments");
     createWidgets();
 
-    for (size_t d = 0; d < _deltaTimesData.size(); ++d) {
+    for (size_t d = 0; d < _deltaTimesData.size(); d++) {
         const std::string summary = createSummaryForDeltaTime(d, true);
         _listWidget->addItem(new QListWidgetItem(QString::fromStdString(summary)));
     }

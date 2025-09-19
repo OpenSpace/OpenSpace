@@ -22,37 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___MAT4PROPERTY___H__
-#define __OPENSPACE_CORE___MAT4PROPERTY___H__
+bool rayIntersectsEllipsoid(vec3 rayOrigin, vec3 rayDir, vec3 ellipsoidCenter,
+                            vec3 ellipsoidRadii)
+{
+  // Translate ray to ellipsoid's local coordinate system
+  vec3 oc = rayOrigin - ellipsoidCenter;
 
-#include <openspace/properties/numericalproperty.h>
+  // Normalize by ellipsoid radii to convert to unit sphere problem
+  vec3 ocNorm = oc / ellipsoidRadii;
+  vec3 dirNorm = rayDir / ellipsoidRadii;
 
-#include <ghoul/glm.h>
-#include <limits>
+  // Quadratic equation coefficients: A*t^2 + B*t + C = 0
+  float a = dot(dirNorm, dirNorm);
+  float b = dot(ocNorm, dirNorm); // Note: factor of 2 moved to discriminant calc
+  float c = dot(ocNorm, ocNorm) - 1.0;
 
-namespace openspace::properties {
+  // Calculate discriminant (optimized: b^2 - ac since we factored out the 2)
+  float discriminant = b * b - a * c;
 
-class Mat4Property : public NumericalProperty<glm::mat4> {
-public:
-    Mat4Property(Property::PropertyInfo info, glm::mat4 value = glm::mat4(),
-        glm::mat4 minValue =
-            ghoul::createFillMat4x4<float>(std::numeric_limits<float>::lowest()),
-        glm::mat4 maxValue =
-            ghoul::createFillMat4x4<float>(std::numeric_limits<float>::max()),
-        glm::mat4 stepValue = ghoul::createFillMat4x4<float>(0.01f));
+  // Early exit if no intersection
+  if (discriminant < 0.0) {
+    return false;
+  }
 
-    std::string_view className() const override final;
-    ghoul::lua::LuaTypes typeLua() const override final;
+  // Check if at least one intersection is in front of ray origin
+  // For quadratic A*t^2 + 2*B*t + C = 0, if we want to check if any t >= 0:
+  // If C <= 0, ray origin is inside ellipsoid, so definitely intersects
+  if (c <= 0.0) {
+    return true;
+  }
 
-    void getLuaValue(lua_State* state) const override final;
-
-    std::string stringValue() const override final;
-    using TemplateProperty<glm::mat4>::operator=;
-
-private:
-    glm::mat4 toValue(lua_State* state) const override final;
-};
-
-} // namespace openspace::properties
-
-#endif // __OPENSPACE_CORE___MAT4PROPERTY___H__
+  // If both intersections exist and C > 0, check if the smaller root t1 >= 0
+  // t1 = (-b - sqrt(discriminant)) / a
+  // Since we need t1 >= 0: -b - sqrt(discriminant) >= 0
+  // This means: -b >= sqrt(discriminant), so b <= -sqrt(discriminant)
+  // Since sqrt(discriminant) >= 0, this means b <= 0
+  return b <= 0.0;
+}

@@ -86,7 +86,7 @@ LabelParser::LabelParser(std::filesystem::path fileName,
             const Dictionary specsOfInterestDict = typeDict.value<Dictionary>(KeySpecs);
 
             _specsOfInterest.resize(specsOfInterestDict.size());
-            for (size_t n = 0; n < _specsOfInterest.size(); ++n) {
+            for (size_t n = 0; n < _specsOfInterest.size(); n++) {
                 const std::string key = std::to_string(n + 1);
                 if (specsOfInterestDict.hasValue<std::string>(key)) {
                     std::string readMe = specsOfInterestDict.value<std::string>(key);

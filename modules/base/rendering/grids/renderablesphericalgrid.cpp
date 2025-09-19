@@ -45,7 +45,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LongSegmentsInfo = {
         "LongSegments",
-        "Number of Longitudinal Segments",
+        "Number of longitudinal segments",
         "The number of longitudinal segments the sphere is split into. Determines the "
         "resolution of the rendered sphere in a left/right direction when looking "
         "straight at the equator. Should be an even value (if an odd value is provided, "
@@ -56,7 +56,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LatSegmentsInfo = {
         "LatSegments",
-        "Number of Latitudinal Segments",
+        "Number of latitudinal segments",
         "The number of latitudinal segments the sphere is split into. Determines the "
         "resolution of the rendered sphere in a up/down direction when looking "
         "straight at the equator. Should be an even value (if an odd value is provided, "
@@ -67,7 +67,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
@@ -293,7 +293,7 @@ void RenderableSphericalGrid::update(const UpdateData&) {
 
     int nr = 0;
 
-    for (int lat = 0; lat <= _latSegments; ++lat) {
+    for (int lat = 0; lat <= _latSegments; lat++) {
         // define an extra vertex around the y-axis due to texture mapping
         for (int lng = 0; lng <= _longSegments; lng++) {
             // inclination angle (north to south)

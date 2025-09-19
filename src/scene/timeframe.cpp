@@ -37,7 +37,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo IsInTimeFrameInfo = {
         "IsInTimeFrame",
-        "Is in Time Frame",
+        "Is in time frame",
         "This property indicates the current state of the TimeFrame time testing. If the "
         "current simulation time is determined to be a valid time, this property is set "
         "to true. Otherwise it will be false, meaning that the scene graph node this "

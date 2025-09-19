@@ -71,14 +71,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SaveDepthTextureInfo = {
         "SaveDepthTextureInfo",
-        "Save Depth Texture",
+        "Save depth texture",
         "Debug.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceFractionInfo = {
         "DistanceFraction",
-        "Distance Fraction",
+        "Distance fraction",
         "Distance fraction of original distance from light source to the globe to be "
         "considered as the new light source distance.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -86,7 +86,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DepthMapSizeInfo = {
         "DepthMapSize",
-        "Depth Map Size",
+        "Depth map size",
         "The depth map size in pixels. You must entry the width and height values.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -311,12 +311,6 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     //============= Light Matrix by Camera Matrices Composition =============
     //=======================================================================
     const glm::dmat4 lightProjectionMatrix = glm::dmat4(_lightCamera->projectionMatrix());
-
-    // The model transformation missing in the final shadow matrix is add when rendering
-    // each object (using its transformations provided by the RenderData structure)
-    _shadowData.shadowMatrix =
-        ToTextureCoordsMatrix * lightProjectionMatrix *
-        _lightCamera->combinedViewMatrix();
 
 
     // Saves current state

@@ -44,14 +44,14 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo DisplayFormatInfo = {
         "DisplayFormat",
-        "Display Format",
+        "Display format",
         "Choosing the format in which the camera location is displayed.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SignificantDigitsInfo = {
         "SignificantDigits",
-        "Significant Digits",
+        "Significant digits",
         "Determines the number of significant digits that are shown in the location "
         "text.",
         openspace::properties::Property::Visibility::AdvancedUser
