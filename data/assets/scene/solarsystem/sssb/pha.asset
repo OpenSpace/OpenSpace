@@ -17,7 +17,6 @@ local Object = {
     Type = "RenderableOrbitalKepler",
     Path = sssb .. "sssb_data_pha.csv",
     Format = "SBDB",
-    Segments = 200,
     SegmentQuality = 3,
     Color = { 0.98, 0.09, 0.06 },
     TrailFade = 17,

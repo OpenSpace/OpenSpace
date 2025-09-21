@@ -17,7 +17,6 @@ local Object = {
     Type = "RenderableOrbitalKepler",
     Path = sssb .. "sssb_data_mars-crossing_asteroid.csv",
     Format = "SBDB",
-    Segments = 200,
     SegmentQuality = 1,
     Color = { 0.814, 0.305, 0.22 },
     TrailFade = 13,
