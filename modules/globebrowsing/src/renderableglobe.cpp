@@ -1421,7 +1421,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
     // Render all chunks that want to be rendered globally
     _globalRenderer.program->activate();
     for (int i = 0; i < globalCount; i++) {
-        renderChunkGlobally(*_globalChunkBuffer[i], data, renderGeomOnly);
+        renderChunkGlobally(*_globalChunkBuffer[i], data, depthMapData, renderGeomOnly);
     }
     _globalRenderer.program->deactivate();
 
@@ -1462,7 +1462,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
 }
 
 void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data,
-                                                                      bool renderGeomOnly)
+                                          std::vector<DirectionalLightSource::DepthMapData>& depthMapData, bool renderGeomOnly)
 {
     ZoneScoped;
     TracyGpuZone("renderChunkGlobally");
@@ -1474,6 +1474,28 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         _layerManager.layerGroups();
     for (size_t i = 0; i < layerGroups.size(); i++) {
         _globalRenderer.gpuLayerGroups[i].setValue(program, *layerGroups[i], tileIndex);
+    }
+
+    // Setup shadow mapping uniforms
+    std::vector<glm::dmat4> light_vps;
+    std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTextureUnits;
+    for (const DirectionalLightSource::DepthMapData& depthData : depthMapData) {
+        light_vps.push_back(depthData.viewProjecion);
+        depthmapTextureUnits.emplace_back(ghoul::opengl::TextureUnit(), depthData.depthMap);
+    }
+
+    std::vector<GLint> bound_units;
+    for (auto& [unit, depthMap] : depthmapTextureUnits) {
+        unit.activate();
+        glBindTexture(GL_TEXTURE_2D, depthMap);
+        bound_units.push_back(unit);
+    }
+
+    if (_shadowers.size() > 0 && _shadowersOk) {
+        program.setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
+        program.setUniform("light_depth_maps", bound_units);
+        GLint loc = glGetUniformLocation(program, "light_vps");
+        glUniformMatrix4dv(loc, light_vps.size(), GL_FALSE, glm::value_ptr(light_vps.front()));
     }
 
     // The length of the skirts is proportional to its size
@@ -1982,7 +2004,7 @@ void RenderableGlobe::recompileShaders() {
     );
     shaderDictionary.setValue("nEclipseShadows", nEclipseShadows - 1);
 
-    // Local shader uses depthmap shadows
+    // Both shader programs use depthmap shadows
     shaderDictionary.setValue("useDepthmapShadows", 1);
     int nmaps = 0;
     for (const auto& [src, grps] : _shadowSpec) {
@@ -2009,9 +2031,6 @@ void RenderableGlobe::recompileShaders() {
         *_localRenderer.program,
         _localRenderer.uniformCache
     );
-
-    // Global shader does not use depthmap shadows
-    shaderDictionary.setValue("useDepthmapShadows", 0);
 
     //
     // Create global shader

@@ -191,7 +191,7 @@ private:
      * lead to jagging. We only render global chunks for lower chunk levels.
      */
     void renderChunkGlobally(const Chunk& chunk, const RenderData& data,
-        bool renderGeomOnly = false
+        std::vector<DirectionalLightSource::DepthMapData>& depthMapData, bool renderGeomOnly = false
     );
 
     /**
