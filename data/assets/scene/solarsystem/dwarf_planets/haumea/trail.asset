@@ -19,6 +19,7 @@ local Trail = {
   GUI = {
     Name = "Haumea Trail",
     Path = "/Solar System/Dwarf Planets/Haumea",
+    Focusable = false,
     Description = "Trail of Haumea"
   }
 }
@@ -38,7 +39,6 @@ asset.export("Trail", Trail)
 
 asset.meta = {
   Name = "Haumea Trail",
-  Version = "1.0",
   Description = [[Trail of Haumea]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Mola_Europe",
   Name = "Mola Elevation [Sweden]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("mola_sweden.wms"),
   TilePixelSize = 360,
   Description = [[This digital elevation model (DEM) is based on data from the Mars
@@ -39,7 +40,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Mola Elevation [Sweden]",
-  Version = "1.1",
   Author = "USGS",
   Description = [[Global elevation layer for Mars. This layer is hosted on the OpenSpace
     server in Sweden]],

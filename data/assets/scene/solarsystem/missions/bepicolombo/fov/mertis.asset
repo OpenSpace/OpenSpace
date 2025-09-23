@@ -17,12 +17,12 @@ local MertisTis = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO MERTIS TIS",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -40,12 +40,12 @@ local MertisTisPlanet = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO MERTIS TIS Planet",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -63,12 +63,12 @@ local MertisTisSpace = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO MERTIS TIS Space",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -89,7 +89,6 @@ end)
 
 asset.meta = {
   Name = "MERTIS",
-  Version = "1.0",
   Description = [[
     The Mercury Radiometer and Thermal Infrared Spectrometer (MERTIS) is an innovative
     instrument for studying the surface composition and mineralogy of planet Mercury.

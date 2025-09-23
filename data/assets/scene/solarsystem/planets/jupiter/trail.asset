@@ -20,7 +20,8 @@ local JupiterTrail = {
   Tag = { "planetTrail_solarSystem", "planetTrail_giants" },
   GUI = {
     Name = "Jupiter Trail",
-    Path = "/Solar System/Planets/Jupiter"
+    Path = "/Solar System/Planets/Jupiter",
+    Focusable = false
   }
 }
 
@@ -39,7 +40,6 @@ asset.export(JupiterTrail)
 
 asset.meta = {
   Name = "Jupiter Trail",
-  Version = "1.1",
   Description = "Trail of Jupiter as observed by the Sun",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

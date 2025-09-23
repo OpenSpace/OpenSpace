@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -62,6 +62,17 @@ function (create_new_module module_name output_library_name library_mode)
     )
   endif ()
 
+
+  # For all modules, we want to add the defines for all other enabled modules in order to
+  # provide them with the ability to do soft-dependencies by checking the existence of the
+  # `_ENABLED` macro define
+  foreach (inner_val RANGE ${enabled_module_count})
+    list(GET enabled_module_names ${inner_val} inner_name)
+    create_define_name(${inner_name} inner_define_name)
+    target_compile_definitions(${library_name} PRIVATE "${inner_define_name}")
+  endforeach ()
+
+
   # This is an ugly hack as we can't inject a variable into a scope two parents above
   # would love to: set(${module_class_name} "${module_name}Module" PARENT_PARENT_SCOPE)
   # instead
@@ -94,8 +105,9 @@ function (handle_module_dependencies target_name module_name)
   # We always want to link against Ghoul and the core library
   target_link_libraries(${library_name} PRIVATE Ghoul openspace-core)
   target_precompile_headers(${library_name} PRIVATE
-    [["ghoul/fmt.h"]]
+    [["ghoul/format.h"]]
     [["ghoul/glm.h"]]
+    [["ghoul/lua/lua_helper.h"]]
     [["ghoul/misc/assert.h"]]
     [["ghoul/misc/boolean.h"]]
     [["ghoul/misc/exception.h"]]
@@ -134,3 +146,13 @@ function (handle_module_dependencies target_name module_name)
     endforeach ()
   endif ()
 endfunction ()
+
+
+# Disables compiler warnings for the provided library
+function (disable_compiler_warnings target)
+  if (MSVC)
+    target_compile_options(${target} PRIVATE "/W0")
+  else ()
+    target_compile_options(${target} PRIVATE "-w")
+  endif ()
+endfunction()

@@ -31,8 +31,6 @@ local Moon = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 1738140,
-    SegmentsPerPatch = 64,
-    Layers = {},
     ShadowGroup = {
       Sources = {
         { Name = sunAsset.Sun.Identifier, Radius = 696300000 },
@@ -54,6 +52,7 @@ local Moon = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
+  Tag = { "moon_solarSystem", "moon_terrestrial", "moon_earth" },
   GUI = {
     Path = "/Solar System/Planets/Earth/Moon"
   }
@@ -80,6 +79,7 @@ local MoonLabel = {
   GUI = {
     Name = "Moon Label",
     Path = "/Solar System/Planets/Earth/Moon",
+    Focusable = false,
     Description = "Label for Earth's Moon"
   }
 }
@@ -137,7 +137,6 @@ asset.export("ToggleMoonShading", ToggleMoonShading.Identifier)
 
 asset.meta = {
   Name = "Moon",
-  Version = "1.2",
   Description = "Moon globe with labels and actions",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

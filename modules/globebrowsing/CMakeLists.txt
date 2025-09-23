@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -29,12 +29,9 @@ set(HEADER_FILES
   src/asynctiledataprovider.h
   src/basictypes.h
   src/dashboarditemglobelocation.h
-  src/ellipsoid.h
   src/gdalwrapper.h
   src/geodeticpatch.h
   src/globelabelscomponent.h
-  src/globetranslation.h
-  src/globerotation.h
   src/gpulayergroup.h
   src/layer.h
   src/layeradjustment.h
@@ -74,6 +71,7 @@ set(HEADER_FILES
   src/tileprovider/texttileprovider.h
   src/tileprovider/tileindextileprovider.h
   src/tileprovider/tileprovider.h
+  src/tileprovider/tileproviderbydate.h
   src/tileprovider/tileproviderbyindex.h
   src/tileprovider/tileproviderbylevel.h
 )
@@ -83,12 +81,9 @@ set(SOURCE_FILES
   globebrowsingmodule_lua.inl
   src/asynctiledataprovider.cpp
   src/dashboarditemglobelocation.cpp
-  src/ellipsoid.cpp
   src/gdalwrapper.cpp
   src/geodeticpatch.cpp
   src/globelabelscomponent.cpp
-  src/globetranslation.cpp
-  src/globerotation.cpp
   src/gpulayergroup.cpp
   src/layer.cpp
   src/layeradjustment.cpp
@@ -120,6 +115,7 @@ set(SOURCE_FILES
   src/tileprovider/texttileprovider.cpp
   src/tileprovider/tileindextileprovider.cpp
   src/tileprovider/tileprovider.cpp
+  src/tileprovider/tileproviderbydate.cpp
   src/tileprovider/tileproviderbyindex.cpp
   src/tileprovider/tileproviderbylevel.cpp
 )
@@ -182,6 +178,12 @@ endif () # WIN32
 begin_dependency("GEOS")
 add_subdirectory(ext/geos SYSTEM)
 target_link_libraries(openspace-module-globebrowsing PRIVATE geos)
+
+if (MSVC)
+  target_compile_options(geos PRIVATE "/W0")
+else ()
+  target_compile_options(geos PRIVATE "-w")
+endif ()
 
 set_property(TARGET geos PROPERTY FOLDER "External")
 set_property(TARGET geos_c PROPERTY FOLDER "External")

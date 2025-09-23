@@ -1,0 +1,31 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablepointcloud/advanced/pointcloud_fading.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Root",
+        "position": [
+          274944489.906168,
+          -17269656.577937167,
+          205431204.36254713
+        ],
+        "pitch": 0.007151529211646736,
+        "up": [
+          -0.5993472932419356,
+          -0.024112491310222195,
+          0.8001258712517552
+        ],
+        "yaw": -0.003982367422764669,
+        "timestamp": "2025 AUG 30 12:48:20"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

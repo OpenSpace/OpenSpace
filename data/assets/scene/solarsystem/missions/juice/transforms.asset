@@ -43,8 +43,9 @@ local GanymedePosition = {
     }
   },
   GUI = {
-    Path = "/Solar System/Planets/Jupiter/Moons",
-    Description = "Ganymede's position relative to Jupiter as an inertial reference frame"
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Ganymede",
+    Description = "Ganymede's position relative to Jupiter as an inertial reference frame",
+    Hidden = true
   }
 }
 
@@ -90,7 +91,6 @@ asset.export(GPHIO)
 
 asset.meta = {
   Name = "Transformations for the JUICE mission profile",
-  Version = "1.0",
   Description = [[
     Contains all of the base transformations necessary for the JUICE mission in the Jovian
     system

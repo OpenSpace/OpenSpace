@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
+#include <modules/fieldlinessequence/tasks/kameleonvolumetofieldlinestask.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -48,29 +49,35 @@ mappingkey 1.0   255  255  255  255
 
 namespace openspace {
 
-std::string FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
+std::filesystem::path FieldlinesSequenceModule::DefaultTransferFunctionFile = "";
 
 FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
-    DefaultTransferFunctionFile = absPath(
-        "${TEMPORARY}/default_transfer_function.txt"
-    ).string();
+    DefaultTransferFunctionFile = absPath("${TEMPORARY}/default_transfer_function.txt");
 
-    std::ofstream file(DefaultTransferFunctionFile);
+    std::ofstream file = std::ofstream(DefaultTransferFunctionFile);
     file << DefaultTransferfunctionSource;
 }
 
 void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* factory =
+    ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "No renderable factory existed");
+    ghoul_assert(fRenderable, "No renderable factory existed");
+    fRenderable->registerClass<RenderableFieldlinesSequence>(
+        "RenderableFieldlinesSequence"
+    );
 
-    factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
+    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    ghoul_assert(fTask, "No task factory existed");
+    fTask->registerClass<KameleonVolumeToFieldlinesTask>(
+        "KameleonVolumeToFieldlinesTask"
+    );
 }
 
 std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const
 {
     return {
-        RenderableFieldlinesSequence::Documentation()
+        RenderableFieldlinesSequence::Documentation(),
+        KameleonVolumeToFieldlinesTask::Documentation()
     };
 }
 

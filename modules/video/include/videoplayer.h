@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 #include <openspace/util/syncable.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
@@ -48,10 +48,10 @@ enum class PlaybackMode {
 };
 
 class VideoPlayer : public properties::PropertyOwner, public Syncable {
-BooleanType(PauseAfterSeek);
-
 public:
-    VideoPlayer(const ghoul::Dictionary& dictionary);
+    BooleanType(PauseAfterSeek);
+
+    explicit VideoPlayer(const ghoul::Dictionary& dictionary);
     ~VideoPlayer() override;
 
     void initialize();
@@ -128,7 +128,7 @@ private:
     properties::BoolProperty _loopVideo;
 
     // Video properties. Try to read all these values from the video
-    std::string _videoFile;
+    std::filesystem::path _videoFile;
     double _currentVideoTime = 0.0;
     double _fps = 24.0; // If when we read it it is 0, use 24 fps
     double _videoDuration = 0.0;

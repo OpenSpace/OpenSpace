@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,28 +35,22 @@
 
 #include <glm/gtx/quaternion.hpp>
 
-#ifdef INTERPOLATION_DEBUG_PRINT
-namespace {
-    constexpr std::string_view _loggerCat = "KeyframeNavigator";
-} // namespace
-#endif
-
 namespace openspace::interaction {
 
 KeyframeNavigator::CameraPose::CameraPose(datamessagestructures::CameraKeyframe&& kf)
     : position(std::move(kf._position))
     , rotation(std::move(kf._rotation))
     , focusNode(std::move(kf._focusNode))
-    , scale(std::move(kf._scale))
-    , followFocusNodeRotation(std::move(kf._followNodeRotation))
+    , scale(kf._scale)
+    , followFocusNodeRotation(kf._followNodeRotation)
 {}
 
-bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes) {
-    double now = currentTime();
+void KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes) {
+    const double now = currentTime();
     bool foundPrevKeyframe = false;
 
     if (_cameraPoseTimeline.nKeyframes() == 0) {
-        return false;
+        return;
     }
 
     const Keyframe<CameraPose>* nextKeyframe =
@@ -72,7 +66,7 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
         if (ignoreFutureKeyframes) {
             _cameraPoseTimeline.removeKeyframesBefore(now);
         }
-        return false;
+        return;
     }
 
     double prevTime = 0.0;
@@ -93,15 +87,13 @@ bool KeyframeNavigator::updateCamera(Camera& camera, bool ignoreFutureKeyframes)
     const CameraPose nextPose = nextKeyframe->data;
     _cameraPoseTimeline.removeKeyframesBefore(prevTime);
 
-    if (!foundPrevKeyframe && ignoreFutureKeyframes) {
-        return false;
+    if (foundPrevKeyframe || !ignoreFutureKeyframes) {
+        updateCamera(&camera, prevPose, nextPose, t, ignoreFutureKeyframes);
     }
-
-    return updateCamera(&camera, prevPose, nextPose, t, ignoreFutureKeyframes);
 }
 
-bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose,
-                                     const CameraPose nextPose, double t,
+void KeyframeNavigator::updateCamera(Camera* camera, const CameraPose& prevPose,
+                                     const CameraPose& nextPose, double t,
                                      bool ignoreFutureKeyframes)
 {
     Scene* scene = camera->parent()->scene();
@@ -109,7 +101,7 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose,
     SceneGraphNode* nextFocusNode = scene->sceneGraphNode(nextPose.focusNode);
 
     if (!prevFocusNode || !nextFocusNode) {
-        return false;
+        return;
     }
 
     glm::dvec3 prevKeyframeCameraPosition = prevPose.position;
@@ -142,16 +134,16 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose,
 
     // Linear interpolation
     t = std::max(0.0, std::min(1.0, t));
-    glm::dvec3 nowCameraPosition = prevKeyframeCameraPosition * (1.0 - t) +
-                                   nextKeyframeCameraPosition * t;
+    glm::dvec3 nowCameraPosition =
+        prevKeyframeCameraPosition * (1.0 - t) + nextKeyframeCameraPosition * t;
     glm::dquat nowCameraRotation = glm::slerp(
         prevKeyframeCameraRotation,
         nextKeyframeCameraRotation,
         t
     );
 
-    camera->setPositionVec3(nowCameraPosition);
-    camera->setRotation(nowCameraRotation);
+    camera->setPositionVec3(std::move(nowCameraPosition));
+    camera->setRotation(std::move(nowCameraRotation));
 
     // We want to affect view scaling, such that we achieve
     // logarithmic interpolation of distance to an imagined focus node.
@@ -161,24 +153,9 @@ bool KeyframeNavigator::updateCamera(Camera* camera, const CameraPose prevPose,
         const float nextInvScaleExp = glm::log(1.f / nextPose.scale);
         const float interpolatedInvScaleExp = static_cast<float>(
             prevInvScaleExp * (1.0 - t) + nextInvScaleExp * t
-            );
+        );
         camera->setScaling(1.f / glm::exp(interpolatedInvScaleExp));
     }
-
-#ifdef INTERPOLATION_DEBUG_PRINT
-    LINFO(fmt::format(
-        "Cam pos = {} {} {}  rot = {} {} {} {}",
-        nowCameraPosition.x,
-        nowCameraPosition.y,
-        nowCameraPosition.z,
-        nowCameraRotation.x,
-        nowCameraRotation.y,
-        nowCameraRotation.z,
-        nowCameraRotation.w
-    ));
-#endif
-
-    return true;
 }
 
 double KeyframeNavigator::currentTime() const {

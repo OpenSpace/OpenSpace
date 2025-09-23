@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,6 @@
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/glm.h>
-#include <functional>
-#include <type_traits>
 #include <variant>
 
 namespace openspace::documentation {
@@ -162,7 +160,7 @@ public:
  */
 class StringVerifier : public TemplateVerifier<std::string> {
 public:
-    StringVerifier(bool mustBeNotEmpty = false);
+    explicit StringVerifier(bool mustBeNotEmpty = false);
 
     TestResult operator()(const ghoul::Dictionary& dictionary,
         const std::string& key) const override;
@@ -193,30 +191,40 @@ public:
 
 /**
  * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
- * refers to an existing file on disk.
+ * optionally refers to an existing file on disk.
  */
 class FileVerifier : public StringVerifier {
 public:
-    FileVerifier();
+    explicit FileVerifier(bool fileMustExist = true);
 
     TestResult operator()(const ghoul::Dictionary& dict,
         const std::string& key) const override;
 
     std::string type() const override;
+
+    bool mustExist() const;
+
+private:
+    bool _fileMustExist = true;
 };
 
 /**
  * A Verifier that checks whether a given key inside a ghoul::Dictionary is a string and
- * refers to an existing directory on disk.
+ * optionally refers to an existing directory on disk.
  */
 class DirectoryVerifier : public StringVerifier {
 public:
-    DirectoryVerifier();
+    explicit DirectoryVerifier(bool directoryMustExist = true);
 
     TestResult operator()(const ghoul::Dictionary& dict,
         const std::string& key) const override;
 
     std::string type() const override;
+
+    bool mustExist() const;
+
+private:
+    bool _directoryMustExist = true;
 };
 
 /**
@@ -253,8 +261,11 @@ public:
      * \param documentationEntries The DocumentationEntry%s that are used to recursively
      *        test the ghoul::Dictionary that is contained inside. If this list is empty,
      *        only a type check is performed
+     * \param nEntries The exact number of entries that should be in the table. If the
+     *        value is not provided, any number (including 0) is allowed
      */
-    TableVerifier(std::vector<DocumentationEntry> documentationEntries = {});
+    explicit TableVerifier(std::vector<DocumentationEntry> documentationEntries = {},
+        std::optional<size_t> nEntries = std::nullopt);
 
     /**
      * Checks whether the \p key%'s value is a table (= ghoul::Dictionary) and (if
@@ -277,6 +288,7 @@ public:
 
     /// The documentations passed in the constructor
     std::vector<DocumentationEntry> documentations;
+    std::optional<size_t> count;
 };
 
 /**
@@ -289,7 +301,7 @@ public:
      *
      * \param elementDocumentation The documentation for each string in the list
      */
-    StringListVerifier(std::string elementDocumentation = "");
+    explicit StringListVerifier(std::string elementDocumentation = "");
 
     std::string type() const override;
 };
@@ -304,7 +316,7 @@ public:
      *
      * \param elementDocumentation The documentation for each string in the list
      */
-    IntListVerifier(std::string elementDocumentation = "");
+    explicit IntListVerifier(std::string elementDocumentation = "");
 
     std::string type() const override;
 };
@@ -363,9 +375,15 @@ public:
 template <typename T>
 class Vector2ListVerifier : public TableVerifier {
 public:
-    Vector2ListVerifier(std::string elementDocumentation = "")
+    explicit Vector2ListVerifier(std::string elementDocumentation = "")
         : TableVerifier({
-            { "*", new Vector2Verifier<T>, Optional::No, std::move(elementDocumentation) }
+            {
+                "*",
+                new Vector2Verifier<T>,
+                Optional::No,
+                Private::No,
+                std::move(elementDocumentation)
+            }
         })
     {}
 
@@ -381,9 +399,15 @@ public:
 template <typename T>
 class Vector3ListVerifier : public TableVerifier {
 public:
-    Vector3ListVerifier(std::string elementDocumentation = "")
+    explicit Vector3ListVerifier(std::string elementDocumentation = "")
         : TableVerifier({
-            { "*", new Vector3Verifier<T>, Optional::No, std::move(elementDocumentation) }
+            {
+                "*",
+                new Vector3Verifier<T>,
+                Optional::No,
+                Private::No,
+                std::move(elementDocumentation)
+            }
         })
     {}
 
@@ -399,9 +423,15 @@ public:
 template <typename T>
 class Vector4ListVerifier : public TableVerifier {
 public:
-    Vector4ListVerifier(std::string elementDocumentation = "")
+    explicit Vector4ListVerifier(std::string elementDocumentation = "")
         : TableVerifier({
-            { "*", new Vector4Verifier<T>, Optional::No, std::move(elementDocumentation) }
+            {
+                "*",
+                new Vector4Verifier<T>,
+                Optional::No,
+                Private::No,
+                std::move(elementDocumentation)
+            }
         })
     {}
 
@@ -524,7 +554,7 @@ public:
      * \param value The value against which the tested value is compared using the
      *        `Operator`
      */
-    OperatorVerifier(typename T::Type value);
+    explicit OperatorVerifier(typename T::Type value);
 
     /**
      * First checks whether the \p dictionary contains the passed \p key and whether the
@@ -678,7 +708,7 @@ public:
      *
      * \param values The list of values against which the incoming value is tested
      */
-    InListVerifier(std::vector<typename T::Type> values);
+    explicit InListVerifier(std::vector<typename T::Type> values);
 
     /**
      * Tests whether the \p key exists in the \p dictionary, whether it has the correct
@@ -720,7 +750,7 @@ public:
      *
      * \param values The list of values against which the incoming value is tested
      */
-    NotInListVerifier(std::vector<typename T::Type> values);
+    explicit NotInListVerifier(std::vector<typename T::Type> values);
 
     /**
      * Tests whether the \p key exists in the \p dictionary, whether it has the correct
@@ -875,7 +905,7 @@ public:
      *
      * \pre annotation must not be empty
      */
-    AnnotationVerifier(std::string annotation);
+    explicit AnnotationVerifier(std::string annotation);
 
     std::string documentation() const override;
 
@@ -901,7 +931,7 @@ public:
      *
      * \param identifier The identifier of the Documentation that this Verifier references
      */
-    ReferencingVerifier(std::string identifier);
+    explicit ReferencingVerifier(std::string identifier);
 
     /**
      * Checks whether the \p key in the \p dictionary exists and is of type Table (similar
@@ -953,8 +983,8 @@ public:
      *       the entire ownership model of the documentation/verifiers. For now it was
      *       necessary to make the codegen work in all cases without complications there
      */
-    OrVerifier(const std::vector<std::variant<Verifier*,
-        std::shared_ptr<Verifier>>> values);
+    explicit OrVerifier(const std::vector<std::variant<Verifier*,
+        std::shared_ptr<Verifier>>>& values);
 
     /**
      * Checks whether the \p dictionary contains the \p key and whether this key passes

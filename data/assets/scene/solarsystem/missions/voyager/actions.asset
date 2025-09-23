@@ -49,12 +49,7 @@ local SaturnFocus = {
 local ToggleMinorMoonTrails = {
   Identifier = "os.voyager.ToggleMinorMoonTrails",
   Name = "Toggle minor trails",
-  Command = [[
-    local list = openspace.property("{moonTrail_minor}.Renderable.Enabled")
-    for _,v in pairs(list) do
-      openspace.setPropertyValueSingle(v, not openspace.propertyValue(v))
-    end
-  ]],
+  Command = [[openspace.toggleFade("{moonTrail_minor}.Renderable")]],
   Documentation = "Toggles the trails of the minor moons",
   GuiPath = "/Trails",
   IsLocal = false
@@ -87,7 +82,6 @@ asset.export("ToggleMinorMoonTrails", ToggleMinorMoonTrails.Identifier)
 
 asset.meta = {
   Name = "Voyager Actions",
-  Version = "1.0",
   Description = "Actions related to the Voyager 1 and 2 missions",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

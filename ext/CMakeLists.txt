@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -45,6 +45,10 @@ if (APPLE)
 endif ()
 
 # Ghoul
+if (NOT OPENSPACE_HAVE_TESTS)
+  # Unless overriden, disable ghoul tests if OpenSpace tests are disabled
+  set(GHOUL_HAVE_TESTS FALSE CACHE BOOL "Enable ghoul unit tests")
+endif()
 add_subdirectory(ghoul)
 if (TARGET GhoulTest)
   set_target_properties(GhoulTest PROPERTIES FOLDER "Unit Tests")
@@ -56,6 +60,11 @@ set(SPICE_BUILD_SHARED_LIBRARY OFF CACHE BOOL "" FORCE)
 add_subdirectory(spice SYSTEM)
 target_compile_features(spice PUBLIC cxx_std_20)
 set_target_properties(spice PROPERTIES FOLDER "External")
+end_dependency()
+
+# nlohmann
+begin_dependency("nlohmann")
+add_subdirectory(json)
 end_dependency()
 
 # Curl

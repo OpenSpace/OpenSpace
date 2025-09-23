@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
-#include <openspace/properties/vector/vec4property.h>
+#include <openspace/properties/vector/vec2property.h>
 
 namespace ghoul::opengl {
     class FramebufferObject;
@@ -40,7 +40,7 @@ namespace documentation { struct Documentation; }
 
 /**
  * Creates a texture by rendering to a framebuffer, this is then used on a screen space
- * plane. This class lets you ass renderfunctions that should render to a framebuffer with
+ * plane. This class lets you add renderfunctions that should render to a framebuffer with
  * an attached texture. The texture is then used on a screen space plane that works both
  * in fisheye and flat screens.
  */
@@ -48,15 +48,15 @@ class ScreenSpaceFramebuffer : public ScreenSpaceRenderable {
 public:
     using RenderFunction = std::function<void()>;
 
-    ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary = ghoul::Dictionary());
+    explicit ScreenSpaceFramebuffer(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceFramebuffer() override;
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
-    void render(float blackoutFactor) override;
+    void initializeGL() override;
+    void deinitializeGL() override;
+    void render(const RenderData& renderData) override;
     bool isReady() const override;
 
-    void setSize(glm::vec4 size);
+    void setSize(glm::vec2 size);
     void addRenderFunction(RenderFunction renderFunction);
     void removeAllRenderFunctions();
 
@@ -64,7 +64,7 @@ public:
 
 protected:
     void createFramebuffer();
-    properties::Vec4Property _size;
+    properties::Vec2Property _size;
 
 private:
     void bindTexture() override;

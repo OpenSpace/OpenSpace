@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,7 +41,7 @@ public:
      *
      * \param parent The parent object of this object
      */
-    SearchProxyModel(QObject* parent = nullptr);
+    explicit SearchProxyModel(QObject* parent = nullptr);
 
 public slots:
     /**
@@ -74,7 +74,8 @@ public:
      *        living
      */
     AssetsDialog(QWidget* parent, openspace::Profile* profile,
-        const std::string& assetBasePath, const std::string& userAssetBasePath);
+        const std::filesystem::path& assetBasePath,
+        const std::filesystem::path& userAssetBasePath);
 
 private slots:
     void searchTextChanged(const QString& text);

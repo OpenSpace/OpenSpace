@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,24 +58,32 @@
 #include <fstream>
 #include "cpl_minixml.h"
 
-namespace openspace::globebrowsing {
-
 namespace {
-
-std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
-Tile DefaultTile = Tile { nullptr, std::nullopt, Tile::Status::Unavailable };
-
+    std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
+    openspace::globebrowsing::Tile DefaultTile = openspace::globebrowsing::Tile {
+        nullptr,
+        std::nullopt,
+        openspace::globebrowsing::Tile::Status::Unavailable
+    };
 } // namespace
+
+namespace openspace::globebrowsing {
 
 unsigned int TileProvider::NumTileProviders = 0;
 
 std::unique_ptr<TileProvider> TileProvider::createFromDictionary(
-                                                            layers::Layer::ID layerTypeID,
                                                       const ghoul::Dictionary& dictionary)
 {
     ZoneScoped;
 
-    std::string_view type = layers::Layers[static_cast<int>(layerTypeID)].identifier;
+    layers::Layer::ID layerTypeID = layers::Layer::ID::DefaultTileProvider;
+    if (dictionary.hasValue<std::string>("Type")) {
+        const std::string type = dictionary.value<std::string>("Type");
+        layerTypeID = ghoul::from_string<layers::Layer::ID>(type);
+    }
+
+    const std::string_view type =
+        layers::Layers[static_cast<int>(layerTypeID)].identifier;
 
     ghoul::TemplateFactory<TileProvider>* factory =
         FactoryManager::ref().factory<TileProvider>();
@@ -92,7 +100,7 @@ void TileProvider::initializeDefaultTile() {
     using namespace ghoul::opengl;
 
     // Create pixel data
-    TileTextureInitData initData(
+    const TileTextureInitData initData(
         8,
         8,
         GL_UNSIGNED_BYTE,
@@ -152,7 +160,7 @@ void TileProvider::deinitialize() {
 }
 
 ChunkTile TileProvider::traverseTree(TileIndex tileIndex, int parents, int maxParents,
-                        std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent,
+                  const std::function<void(TileIndex&, TileUvTransform&)>& ascendToParent,
                                                              TileUvTransform& uvTransform)
 {
     // Step 1. Traverse 0 or more parents up the chunkTree as requested by the caller
@@ -163,7 +171,7 @@ ChunkTile TileProvider::traverseTree(TileIndex tileIndex, int parents, int maxPa
 
     // Step 2. Traverse 0 or more parents up the chunkTree to make sure we're inside
     //         the range of defined data.
-    int maximumLevel = maxLevel();
+    const int maximumLevel = maxLevel();
     while (tileIndex.level > maximumLevel) {
         ascendToParent(tileIndex, uvTransform);
         maxParents--;
@@ -174,7 +182,7 @@ ChunkTile TileProvider::traverseTree(TileIndex tileIndex, int parents, int maxPa
 
     // Step 3. Traverse 0 or more parents up the chunkTree until we find a chunk that
     //         has a loaded tile ready to use.
-    int minimumLevel = minLevel();
+    const int minimumLevel = minLevel();
     while (tileIndex.level > minimumLevel) {
         Tile t = tile(tileIndex);
         if (t.status != Tile::Status::OK) {
@@ -199,17 +207,16 @@ ChunkTile TileProvider::chunkTile(TileIndex tileIndex, int parents, int maxParen
 
     ghoul_assert(isInitialized, "TileProvider was not initialized");
 
-    std::function<void(TileIndex&, TileUvTransform&)> ascendToParent = []
-        (TileIndex& ti, TileUvTransform& uv) {
-            uv.uvOffset *= 0.5;
-            uv.uvScale *= 0.5;
+    constexpr auto ascendToParent = [](TileIndex& ti, TileUvTransform& uv) {
+        uv.uvOffset *= 0.5;
+        uv.uvScale *= 0.5;
 
-            uv.uvOffset += ti.positionRelativeParent();
+        uv.uvOffset += ti.positionRelativeParent();
 
-            ti.x /= 2;
-            ti.y /= 2;
-            ti.level--;
-        };
+        ti.x /= 2;
+        ti.y /= 2;
+        ti.level--;
+    };
 
     TileUvTransform uvTransform = {
        .uvOffset = glm::vec2(0.f, 0.f),
@@ -227,7 +234,7 @@ ChunkTilePile TileProvider::chunkTilePile(TileIndex tileIndex, int pileSize) {
 
     ChunkTilePile chunkTilePile;
     std::fill(chunkTilePile.begin(), chunkTilePile.end(), std::nullopt);
-    for (int i = 0; i < pileSize; ++i) {
+    for (int i = 0; i < pileSize; i++) {
         chunkTilePile[i] = chunkTile(tileIndex, i);
         if (chunkTilePile[i]->tile.status == Tile::Status::Unavailable) {
             if (i == 0) {

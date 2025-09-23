@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,56 +39,50 @@
 #include <optional>
 
 namespace {
-    constexpr std::array<const char*, 6> UniformNames = {
-        "modelViewProjectionTransform", "textureOffset", "colorFilterValue",
-        "_nightFactor", "sunPosition", "texture1"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "This value is the path to a texture on disk that contains a one-dimensional "
-        "texture which is used for these rings",
+        "The path to a texture on disk that contains a one-dimensional texture to use "
+        "for these rings.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "This value specifies the radius of the rings in meter",
+        "The radius of the rings in meters.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
-        "This value is used to limit the width of the rings. Each of the two values is "
+        "A value that is used to limit the width of the rings. Each of the two values is "
         "a value between 0 and 1, where 0 is the center of the ring and 1 is the "
         "maximum extent at the radius. For example, if the value is {0.5, 1.0}, the "
-        "ring is only shown between radius/2 and radius. It defaults to {0.0, 1.0}",
+        "ring is only shown between radius/2 and radius. It defaults to {0.0, 1.0}.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo NightFactorInfo = {
         "NightFactor",
-        "Night Factor",
-        "This value is a multiplicative factor that is applied to the side of the rings "
-        "that is facing away from the Sun. If this value is equal to '1', no darkening "
-        "of the night side occurs",
+        "Night factor",
+        "A multiplicative factor that is applied to the side of the rings that is facing "
+        "away from the Sun. If it is 1, no darkening of the night side occurs.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorFilterInfo = {
         "ColorFilter",
-        "Color Filter",
-        "This value affects the filtering out of part of the rings depending on the "
-        "color values of the texture. The higher value, the more rings are filtered out",
+        "Color filter",
+        "A value that affects the filtering out of part of the rings depending on the "
+        "color values of the texture. The higher value, the more rings are filtered out.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableRings)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
-        std::string texture;
+        std::filesystem::path texture;
 
         // [[codegen::verbatim(SizeInfo.description)]]
         float size;
@@ -128,7 +122,7 @@ RenderableRings::RenderableRings(const ghoul::Dictionary& dictionary)
     _size.onChange([this]() { _planeIsDirty = true; });
     addProperty(_size);
 
-    _texturePath = absPath(p.texture).string();
+    _texturePath = p.texture.string();
     _textureFile = std::make_unique<File>(_texturePath.value());
 
     _offset = p.offset.value_or(_offset);
@@ -158,7 +152,7 @@ void RenderableRings::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/rings_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
     glGenVertexArrays(1, &_quad);
     glGenBuffers(1, &_vertexPositionBuffer);
@@ -209,17 +203,17 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableRings::update(const UpdateData& data) {
-    if (_shader->isDirty()) {
+    if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
 
-    if (_planeIsDirty) {
+    if (_planeIsDirty) [[unlikely]] {
         createPlane();
         _planeIsDirty = false;
     }
 
-    if (_textureIsDirty) {
+    if (_textureIsDirty) [[unlikely]] {
         loadTexture();
         _textureIsDirty = false;
     }
@@ -235,29 +229,25 @@ void RenderableRings::update(const UpdateData& data) {
 }
 
 void RenderableRings::loadTexture() {
-    if (!_texturePath.value().empty()) {
-        using namespace ghoul::io;
-        using namespace ghoul::opengl;
-        std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absPath(_texturePath).string(),
-            1
+    using namespace ghoul::io;
+    using namespace ghoul::opengl;
+    std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
+        _texturePath.value(),
+        1
+    );
+
+    if (texture) {
+        LDEBUGC(
+            "RenderableRings",
+            std::format("Loaded texture from '{}'", _texturePath.value())
         );
+        _texture = std::move(texture);
 
-        if (texture) {
-            LDEBUGC(
-                "RenderableRings",
-                fmt::format("Loaded texture from {}", absPath(_texturePath))
-            );
-            _texture = std::move(texture);
+        _texture->uploadTexture();
+        _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
-            _texture->uploadTexture();
-            _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFile = std::make_unique<ghoul::filesystem::File>(
-                _texturePath.value()
-            );
-            _textureFile->setCallback([this]() { _textureIsDirty = true; });
-        }
+        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
+        _textureFile->setCallback([this]() { _textureIsDirty = true; });
     }
 }
 
@@ -271,18 +261,18 @@ void RenderableRings::createPlane() {
         GLfloat t;
     };
 
-    VertexData data[] = {
-        { -size, -size, 0.f, 0.f },
-        {  size,  size, 1.f, 1.f },
-        { -size,  size, 0.f, 1.f },
-        { -size, -size, 0.f, 0.f },
-        {  size, -size, 1.f, 0.f },
-        {  size,  size, 1.f, 1.f },
+    const std::array<VertexData, 6> Data = {
+        VertexData{ -size, -size, 0.f, 0.f },
+        VertexData{  size,  size, 1.f, 1.f },
+        VertexData{ -size,  size, 0.f, 1.f },
+        VertexData{ -size, -size, 0.f, 0.f },
+        VertexData{  size, -size, 1.f, 0.f },
+        VertexData{  size,  size, 1.f, 1.f },
     };
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, Data.size(), Data.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(
         0,

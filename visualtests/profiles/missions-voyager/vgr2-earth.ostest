@@ -1,0 +1,52 @@
+{
+  "profile": "missions/voyager",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Voyager_2",
+        "position": [
+          24.773270471310138,
+          -10.813526534685039,
+          -7.612173433870477
+        ],
+        "pitch": -0.006990822004539131,
+        "up": [
+          -0.00496611398086344,
+          0.5679883041223384,
+          -0.8230216425417741
+        ],
+        "yaw": 0.0076975498414759425,
+        "timestamp": "1977 AUG 20 16:09:16"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.StereoscopicDepthOfFocusSurface",
+        "value": 5.0
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Earth.Renderable.Layers.ColorLayers.ESRI_VIIRS_Combo.Enabled",
+        "value": false
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.Earth.Renderable.Layers.ColorLayers.Blue_Marble.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "wait",
+      "value": 15
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

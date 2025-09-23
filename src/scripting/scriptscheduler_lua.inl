@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -21,6 +21,8 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+
+#include <ghoul/lua/lua_helper.h>
 
 namespace {
 
@@ -41,7 +43,7 @@ namespace {
     );
 
     std::vector<scripting::ScriptScheduler::ScheduledScript> scripts;
-    for (size_t i = 1; i <= scriptsDict.size(); ++i) {
+    for (size_t i = 1; i <= scriptsDict.size(); i++) {
         ghoul::Dictionary d = scriptsDict.value<ghoul::Dictionary>(std::to_string(i));
 
         scripting::ScriptScheduler::ScheduledScript script =
@@ -76,30 +78,6 @@ namespace {
     std::vector<scripting::ScriptScheduler::ScheduledScript> scripts;
     scripts.push_back(std::move(script));
     global::scriptScheduler->loadScripts(scripts);
-}
-
-/**
- * Sets the time reference for scheduled scripts to application time (seconds since
- * OpenSpace application started).
- */
-[[codegen::luawrap]] void setModeApplicationTime() {
-    openspace::global::scriptScheduler->setModeApplicationTime();
-}
-
-/**
- * Sets the time reference for scheduled scripts to the time since the recording was
- * started (the same relative time applies to playback).
- */
-[[codegen::luawrap]] void setModeRecordedTime() {
-    openspace::global::scriptScheduler->setModeRecordedTime();
-}
-
-/**
- * Sets the time reference for scheduled scripts to the simulated date & time (J2000 epoch
- * seconds).
- */
-[[codegen::luawrap]] void setModeSimulationTime() {
-    openspace::global::scriptScheduler->setModeSimulationTime();
 }
 
 // Clears all scheduled scripts.

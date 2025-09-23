@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,20 +30,45 @@
 #include <openspace/util/sphere.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
-        "Sets the URL of the texture that is displayed on this sphere. If "
-        "this value is changed, the image at the new path will automatically be loaded "
-        "and displayed. This image is expected to be an equirectangular projection",
-        // @VISIBILITY(2.25)
+        "A URL to an image to use as a texture for this sphere. The image is expected "
+        "to be an equirectangular projection.",
         openspace::properties::Property::Visibility::User
     };
 
-    struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
+    std::future<openspace::DownloadManager::MemoryFile> downloadImageToMemory(
+                                                                   const std::string& url)
+    {
+        using namespace openspace;
+
+        return global::downloadManager->fetchFile(
+            url,
+            [url](const DownloadManager::MemoryFile&) {
+                LDEBUGC(
+                    "RenderableSphereImageOnline",
+                    std::format("Download to memory finished for image '{}'", url)
+                );
+            },
+            [url](const std::string& err) {
+                LDEBUGC(
+                    "RenderableSphereImageOnline",
+                    std::format("Download to memory failed for image '{}': {}", url, err)
+                );
+            }
+        );
+    }
+
+    // This `Renderable` shows a sphere with an image provided by an online URL. The image
+    // will be downloaded when the `Renderable` is added to a scene graph node. To show a
+    // sphere with an image from a local file, see
+    // [RenderableSphereImageLocal](#base_screenspace_image_local).
+    struct [[codegen::Dictionary(RenderableSphereImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
     };
@@ -53,7 +78,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphereImageOnline::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_sphere_image_online");
+    return codegen::doc<Parameters>(
+        "base_renderable_sphere_image_online",
+        RenderableSphere::Documentation()
+    );
 }
 
 RenderableSphereImageOnline::RenderableSphereImageOnline(
@@ -79,7 +107,7 @@ void RenderableSphereImageOnline::deinitializeGL() {
 void RenderableSphereImageOnline::update(const UpdateData& data) {
     RenderableSphere::update(data);
 
-    if (!_textureIsDirty) {
+    if (!_textureIsDirty) [[likely]] {
         return;
     }
 
@@ -93,12 +121,12 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
     }
 
     if (_imageFuture.valid() && DownloadManager::futureReady(_imageFuture)) {
-        DownloadManager::MemoryFile imageFile = _imageFuture.get();
+        const DownloadManager::MemoryFile imageFile = _imageFuture.get();
 
         if (imageFile.corrupted) {
             LERRORC(
                 "RenderableSphereImageOnline",
-                fmt::format("Error loading image from URL '{}'", _textureUrl.value())
+                std::format("Error loading image from URL '{}'", _textureUrl.value())
             );
             return;
         }
@@ -139,26 +167,6 @@ void RenderableSphereImageOnline::bindTexture() {
     else {
         unbindTexture();
     }
-}
-
-std::future<DownloadManager::MemoryFile>
-RenderableSphereImageOnline::downloadImageToMemory(const std::string& url)
-{
-    return global::downloadManager->fetchFile(
-        url,
-        [url](const DownloadManager::MemoryFile&) {
-            LDEBUGC(
-                "RenderableSphereImageOnline",
-                fmt::format("Download to memory finished for image '{}'", url)
-            );
-        },
-        [url](const std::string& err) {
-            LDEBUGC(
-                "RenderableSphereImageOnline",
-                fmt::format("Download to memory failed for image '{}': {}", url, err)
-            );
-        }
-    );
 }
 
 } // namespace openspace

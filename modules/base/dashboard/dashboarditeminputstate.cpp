@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,44 +37,44 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ShowWhenEnabledInfo = {
         "ShowWhenEnabled",
         "Show when enabled",
-        "Show text when the input is enabled",
-        // @VISIBILITY(?)
+        "Show text when the input is enabled.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowWhenDisabledInfo = {
         "ShowWhenDisabled",
         "Show when disabled",
-        "Show text when the input is disabled",
-        // @VISIBILITY(?)
+        "Show text when the input is disabled.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowKeyboardInfo = {
         "ShowKeyboard",
-        "Show Keyboard information",
-        "Display the state of the keyboard input",
-        // @VISIBILITY(?)
+        "Show keyboard information",
+        "Display the state of the keyboard input.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowMouseInfo = {
         "ShowMouse",
-        "Show Mouse information",
-        "Display the state of the mouse input",
-        // @VISIBILITY(?)
+        "Show mouse information",
+        "Display the state of the mouse input.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowJoystickInfo = {
         "ShowJoystick",
-        "Show Joystick information",
-        "Display the state of the joystick input",
-        // @VISIBILITY(?)
+        "Show joystick information",
+        "Display the state of the joystick input.",
         openspace::properties::Property::Visibility::User
     };
 
-    struct [[codegen::Dictionary(DashboardItemPropertyValue)]] Parameters {
+    // This `DashboardItem` shows the current state of the different methods to provide
+    // user input: keyboard, mouse, and/or joystick.
+    //
+    // Each input method has the ability to be selectively disabled, meaning that all
+    // inputs from that input method are ignored by the system entirely.
+    struct [[codegen::Dictionary(DashboardItemInputState)]] Parameters {
         // [[codegen::verbatim(ShowWhenEnabledInfo.description)]]
         std::optional<bool> showWhenEnabled;
 
@@ -128,19 +128,19 @@ DashboardItemInputState::DashboardItemInputState(const ghoul::Dictionary& dictio
     addProperty(_showJoystick);
 }
 
-void DashboardItemInputState::render(glm::vec2& penPosition) {
+void DashboardItemInputState::update() {
     ZoneScoped;
 
     std::vector<std::string> text;
     if (_showKeyboard) {
         if (global::navigationHandler->disabledKeybindings()) {
             if (_showWhenDisabled) {
-                text.push_back("Keyboard shortcuts disabled");
+                text.emplace_back("Keyboard shortcuts disabled");
             }
         }
         else {
             if (_showWhenEnabled) {
-                text.push_back("Keyboard shortcuts enabled");
+                text.emplace_back("Keyboard shortcuts enabled");
             }
         }
     }
@@ -148,12 +148,12 @@ void DashboardItemInputState::render(glm::vec2& penPosition) {
     if (_showMouse) {
         if (global::navigationHandler->disabledMouse()) {
             if (_showWhenDisabled) {
-                text.push_back("Mouse input disabled");
+                text.emplace_back("Mouse input disabled");
             }
         }
         else {
             if (_showWhenEnabled) {
-                text.push_back("Mouse input enabled");
+                text.emplace_back("Mouse input enabled");
             }
         }
     }
@@ -161,73 +161,17 @@ void DashboardItemInputState::render(glm::vec2& penPosition) {
     if (_showJoystick) {
         if (global::navigationHandler->disabledJoystick()) {
             if (_showWhenDisabled) {
-                text.push_back("Joystick input disabled");
+                text.emplace_back("Joystick input disabled");
             }
         }
         else {
             if (_showWhenEnabled) {
-                text.push_back("Joystick input enabled");
+                text.emplace_back("Joystick input enabled");
             }
         }
     }
 
-    if (!text.empty()) {
-        std::string t = ghoul::join(std::move(text), "\n");
-        RenderFont(*_font, penPosition, t);
-        penPosition.y -= _font->height();
-    }
-}
-
-glm::vec2 DashboardItemInputState::size() const {
-    ZoneScoped;
-
-    std::vector<std::string> text;
-    if (_showKeyboard) {
-        if (global::navigationHandler->disabledKeybindings()) {
-            if (_showWhenDisabled) {
-                text.push_back("Keyboard shortcuts disabled");
-            }
-        }
-        else {
-            if (_showWhenEnabled) {
-                text.push_back("Keyboard shortcuts enabled");
-            }
-        }
-    }
-
-    if (_showMouse) {
-        if (global::navigationHandler->disabledMouse()) {
-            if (_showWhenDisabled) {
-                text.push_back("Mouse input disabled");
-            }
-        }
-        else {
-            if (_showWhenEnabled) {
-                text.push_back("Mouse input disabled");
-            }
-        }
-    }
-
-    if (_showJoystick) {
-        if (global::navigationHandler->disabledJoystick()) {
-            if (_showWhenDisabled) {
-                text.push_back("Joystick input disabled");
-            }
-        }
-        else {
-            if (_showWhenEnabled) {
-                text.push_back("Joystick input disabled");
-            }
-        }
-    }
-
-    if (!text.empty()) {
-        std::string t = ghoul::join(std::move(text), "\n");
-        return _font->boundingBox(t);
-    }
-    else {
-        return glm::vec2(0.f, 0.f);
-    }
+    _buffer = ghoul::join(std::move(text), "\n");
 }
 
 } // namespace openspace

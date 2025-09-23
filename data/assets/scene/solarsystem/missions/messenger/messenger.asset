@@ -1,8 +1,9 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local mercuryTransforms = asset.require("scene/solarsystem/planets/mercury/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
+
 
 
 local models = asset.resource({
@@ -58,7 +59,9 @@ local MessengerProbeBlack = {
   },
   GUI = {
     Name = "MessengerProbe Black",
-    Path = "/Solar System/Missions/Messenger"
+    Path = "/Solar System/Missions/Messenger",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -75,7 +78,9 @@ local MessengerProbeFoil = {
   },
   GUI = {
     Name = "MessengerProbe foil",
-    Path = "/Solar System/Missions/Messenger"
+    Path = "/Solar System/Missions/Messenger",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -92,7 +97,9 @@ local MessengerProbeHeatShield = {
   },
   GUI = {
     Name = "MessengerProbe Heat Shield",
-    Path = "/Solar System/Missions/Messenger"
+    Path = "/Solar System/Missions/Messenger",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -109,7 +116,9 @@ local MessengerProbeMetal = {
   },
   GUI = {
     Name = "MessengerProbe Metal",
-    Path = "/Solar System/Missions/Messenger"
+    Path = "/Solar System/Missions/Messenger",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -126,7 +135,9 @@ local MessengerProbePanels = {
   },
   GUI = {
     Name = "MessengerProbe Panels",
-    Path = "/Solar System/Missions/Messenger"
+    Path = "/Solar System/Missions/Messenger",
+    Focusable = false,
+    Hidden = true
   }
 }
 
@@ -148,7 +159,8 @@ local MessengerTrail = {
   },
   GUI = {
     Name = "Messenger Trail",
-    Path = "/Solar System/Missions/Messenger"
+    Path = "/Solar System/Missions/Messenger",
+    Focusable = false
   }
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@
 namespace openspace {
 
 bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
-                                           [[ maybe_unused ]] const CefString& targetUrl,
+                                           [[maybe_unused]] const CefString& targetUrl,
                                            const CefString&,
                                            CefLifeSpanHandler::WindowOpenDisposition,
                                            bool, const CefPopupFeatures&, CefWindowInfo&,
@@ -46,7 +46,7 @@ bool DefaultBrowserLauncher::OnBeforePopup(CefRefPtr<CefBrowser>, CefRefPtr<CefF
     std::string url = targetUrl.ToString();
     LDEBUGC("DefaultBrowserLauncher", "Launching default browser: " + url);
     ShellExecuteA(nullptr, nullptr, url.c_str(), nullptr, nullptr, SW_SHOW);
-#endif
+#endif // WIN32
     return true;
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <ghoul/logging/log.h>
 
+#include <ghoul/misc/profiling.h>
 #include <chrono>
 #include <mutex>
 #include <string_view>
@@ -76,7 +77,8 @@ public:
      * \param logLevel The minimum ghoul::logging::LogLevel that messages must
      *        have in order to be stored in the ScreenLog
      */
-    ScreenLog(std::chrono::seconds timeToLive, LogLevel logLevel = LogLevel::Info);
+    explicit ScreenLog(std::chrono::seconds timeToLive,
+        LogLevel logLevel = LogLevel::Info);
 
     /**
      * Destructor
@@ -124,7 +126,7 @@ private:
 
     /// A mutex to ensure thread-safety since the logging and the removal of expired
     /// entires can occur on different threads
-    mutable std::mutex _mutex;
+    mutable TracyLockable(std::mutex, _mutex);
 };
 
 } // namespace openspace

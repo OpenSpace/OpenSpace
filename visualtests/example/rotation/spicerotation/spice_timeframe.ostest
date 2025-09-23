@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/rotation/spicerotation/spice_timeframe.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "SpiceRotation_Example_TimeFrame",
+        "position": [
+          -1.3421436605357386,
+          -1.4590079694043865,
+          -0.6431396151518061
+        ],
+        "pitch": 1.3567479720253276e-07,
+        "referenceFrame": "Root",
+        "up": [
+          -0.38742147559907203,
+          -0.0494067253149979,
+          0.9205778488201234
+        ],
+        "yaw": 1.4108155860228755e-07,
+        "timestamp": "2025 JUL 13 12:45:06"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

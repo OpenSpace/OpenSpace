@@ -17,12 +17,12 @@ local HGA = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "MERCURY", "EARTH", "VENUS" },
-    FrameConversions = {}
+    PotentialTargets = { "MERCURY", "EARTH", "VENUS" }
   },
   GUI = {
     Name = "MPO HGA",
     Path = "/Solar System/Missions/BepiColombo/Instruments",
+    Focusable = false
   }
 }
 
@@ -40,7 +40,6 @@ end)
 
 asset.meta = {
   Name = "HGA",
-  Version = "1.0",
   Description = "Shows the field-view for the High Gain Antenna of the MPO spacecraft.",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

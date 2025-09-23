@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Messenger_SHADE_Utah",
   Name = "Messenger SHADE [Utah]",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = asset.resource("messenger_shade_utah.wms"),
   Settings = {
     Gamma = 1.33,
@@ -29,7 +30,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Messenger SHADE [Utah]",
-  Version = "1.0",
   Description = [[Mercury Messenger SHADE layer for Mercury globe. This map is hosted on
     the OpenSpace server in Utah]],
   Author = "USGS",

@@ -15,6 +15,7 @@ local Layer = {
   Identifier = "JupiterVideo",
   Name = "Jupiter Video",
   Enabled = true,
+  ZIndex = 10,
   Video = data .. "/jupiter_movie_3600.mp4"
 }
 
@@ -33,7 +34,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Jupiter Video",
-  Version = "1.0",
   Description = "An video showing Jupiter.",
   Author = "NOAA",
   URL = "https://sos.noaa.gov/copyright/",

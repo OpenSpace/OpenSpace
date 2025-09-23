@@ -6,9 +6,12 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_LRO_NAC_CratAbnd_17S173E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_17S173E_150cmp",
   Name = [[LRO LROC Crater Abundance, Aitken Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Aitken_Crater.vrt"),
   Description = [[]]
 }
@@ -16,6 +19,7 @@ local treks_LRO_NAC_CratAbnd_17S173E_150cmp = {
 local treks_LRO_NAC_CratAbnd_13S358E_2mp = {
   Identifier = "LRO_NAC_CratAbnd_13S358E_2mp",
   Name = [[LRO LROC Crater Abundance, Alphonsus Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Alphonsus_Crater.vrt"),
   Description = [[]]
 }
@@ -23,6 +27,7 @@ local treks_LRO_NAC_CratAbnd_13S358E_2mp = {
 local treks_LRO_NAC_CratAbnd_73N350E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_73N350E_150cmp",
   Name = [[LRO LROC Crater Abundance, Anaxagoras Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Anaxagoras_Crater.vrt"),
   Description = [[]]
 }
@@ -30,6 +35,7 @@ local treks_LRO_NAC_CratAbnd_73N350E_150cmp = {
 local treks_LRO_NAC_CratAbnd_26N004E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_26N004E_150cmp",
   Name = [[LRO LROC Crater Abundance, Apollo 15]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Apollo_15.vrt"),
   Description = [[]]
 }
@@ -37,6 +43,7 @@ local treks_LRO_NAC_CratAbnd_26N004E_150cmp = {
 local treks_LRO_NAC_CratAbnd_09S015E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_09S015E_150cmp",
   Name = [[LRO LROC Crater Abundance, Apollo 16]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Apollo_16.vrt"),
   Description = [[]]
 }
@@ -44,6 +51,7 @@ local treks_LRO_NAC_CratAbnd_09S015E_150cmp = {
 local treks_LRO_NAC_CratAbnd_37S206E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_37S206E_150cmp",
   Name = [[LRO LROC Crater Abundance, Apollo Basin]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Apollo_Basin.vrt"),
   Description = [[]]
 }
@@ -51,6 +59,7 @@ local treks_LRO_NAC_CratAbnd_37S206E_150cmp = {
 local treks_LRO_NAC_CratAbnd_25N311E_2mp = {
   Identifier = "LRO_NAC_CratAbnd_25N311E_2mp",
   Name = [[LRO LROC Crater Abundance, Aristarchus 1]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Aristarchus_1.vrt"),
   Description = [[]]
 }
@@ -58,6 +67,7 @@ local treks_LRO_NAC_CratAbnd_25N311E_2mp = {
 local treks_LRO_NAC_CratAbnd_28N307E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_28N307E_150cmp",
   Name = [[LRO LROC Crater Abundance, Aristarchus 2]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Aristarchus_2.vrt"),
   Description = [[]]
 }
@@ -65,6 +75,7 @@ local treks_LRO_NAC_CratAbnd_28N307E_150cmp = {
 local treks_LRO_NAC_CratAbnd_19S070E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_19S070E_150cmp",
   Name = [[LRO LROC Crater Abundance, Balmer Basin]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Balmer_Basin.vrt"),
   Description = [[]]
 }
@@ -72,6 +83,7 @@ local treks_LRO_NAC_CratAbnd_19S070E_150cmp = {
 local treks_LRO_NAC_CratAbnd_20S337E_400cmp = {
   Identifier = "LRO_NAC_CratAbnd_20S337E_400cmp",
   Name = [[LRO LROC Crater Abundance, Bullialdus Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Bullialdus_Crater.vrt"),
   Description = [[]]
 }
@@ -79,6 +91,7 @@ local treks_LRO_NAC_CratAbnd_20S337E_400cmp = {
 local treks_LRO_NAC_CratAbnd_36N320E_2mp = {
   Identifier = "LRO_NAC_CratAbnd_36N320E_2mp",
   Name = [[LRO LROC Crater Abundance, Gruithuisen Domes]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Gruithuisen_Domes.vrt"),
   Description = [[]]
 }
@@ -86,6 +99,7 @@ local treks_LRO_NAC_CratAbnd_36N320E_2mp = {
 local treks_LRO_NAC_CratAbnd_00N234E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_00N234E_150cmp",
   Name = [[LRO LROC Crater Abundance, Hertzsprung]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Hertzsprung.vrt"),
   Description = [[]]
 }
@@ -93,6 +107,7 @@ local treks_LRO_NAC_CratAbnd_00N234E_150cmp = {
 local treks_LRO_NAC_CratAbnd_08N332E_2mp = {
   Identifier = "LRO_NAC_CratAbnd_08N332E_2mp",
   Name = [[LRO LROC Crater Abundance, Hortensius Domes]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Hortensius_Domes.vrt"),
   Description = [[]]
 }
@@ -100,6 +115,7 @@ local treks_LRO_NAC_CratAbnd_08N332E_2mp = {
 local treks_LRO_NAC_CratAbnd_06N120E_200cmp = {
   Identifier = "LRO_NAC_CratAbnd_06N120E_200cmp",
   Name = [[LRO LROC Crater Abundance, King Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/King_Crater.vrt"),
   Description = [[]]
 }
@@ -107,6 +123,7 @@ local treks_LRO_NAC_CratAbnd_06N120E_200cmp = {
 local treks_LRO_NAC_CratAbnd_32N292E_2mp = {
   Identifier = "LRO_NAC_CratAbnd_32N292E_2mp",
   Name = [[LRO LROC Crater Abundance, Lichtenberg Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Lichtenberg_Crater.vrt"),
   Description = [[]]
 }
@@ -114,6 +131,7 @@ local treks_LRO_NAC_CratAbnd_32N292E_2mp = {
 local treks_LRO_NAC_CratAbnd_10N058E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_10N058E_150cmp",
   Name = [[LRO LROC Crater Abundance, Mare Crisium]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Mare_Crisium.vrt"),
   Description = [[]]
 }
@@ -121,6 +139,7 @@ local treks_LRO_NAC_CratAbnd_10N058E_150cmp = {
 local treks_LRO_NAC_CratAbnd_16S041E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_16S041E_150cmp",
   Name = [[LRO LROC Crater Abundance, Montes Pyrenaeus]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Montes_Pyrenaeus.vrt"),
   Description = [[]]
 }
@@ -128,6 +147,7 @@ local treks_LRO_NAC_CratAbnd_16S041E_150cmp = {
 local treks_LRO_NAC_CratAbnd_26S265E_200cmp = {
   Identifier = "LRO_NAC_CratAbnd_26S265E_200cmp",
   Name = [[LRO LROC Crater Abundance, Orientale 1]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Orientale_1.vrt"),
   Description = [[]]
 }
@@ -135,6 +155,7 @@ local treks_LRO_NAC_CratAbnd_26S265E_200cmp = {
 local treks_LRO_NAC_CratAbnd_53N354E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_53N354E_150cmp",
   Name = [[LRO LROC Crater Abundance, Plato Ejecta]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Plato_Ejecta.vrt"),
   Description = [[]]
 }
@@ -142,6 +163,7 @@ local treks_LRO_NAC_CratAbnd_53N354E_150cmp = {
 local treks_LRO_NAC_CratAbnd_60S200E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_60S200E_150cmp",
   Name = [[LRO LROC Crater Abundance, South Pole-Aitken Basin Interior]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/South_Pole-Aitken_Basin_Interior.vrt"),
   Description = [[]]
 }
@@ -149,6 +171,7 @@ local treks_LRO_NAC_CratAbnd_60S200E_150cmp = {
 local treks_LRO_NAC_CratAbnd_02S167E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_02S167E_150cmp",
   Name = [[LRO LROC Crater Abundance, Stratton (Dewar) High Fe Anomaly]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Stratton_Dewar_High_Fe_Anomaly.vrt"),
   Description = [[]]
 }
@@ -156,6 +179,7 @@ local treks_LRO_NAC_CratAbnd_02S167E_150cmp = {
 local treks_LRO_NAC_CratAbnd_20N010E_2mp = {
   Identifier = "LRO_NAC_CratAbnd_20N010E_2mp",
   Name = [[LRO LROC Crater Abundance, Sulpicius Gallus]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Sulpicius_Gallus.vrt"),
   Description = [[]]
 }
@@ -163,9 +187,11 @@ local treks_LRO_NAC_CratAbnd_20N010E_2mp = {
 local treks_LRO_NAC_CratAbnd_43S349E_150cmp = {
   Identifier = "LRO_NAC_CratAbnd_43S349E_150cmp",
   Name = [[LRO LROC Crater Abundance, Tycho Crater]],
+  ZIndex = 50,
   FilePath = asset.resource("LRO_LROC_Crater_Abundance/Tycho_Crater.vrt"),
   Description = [[]]
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_17S173E_150cmp)
@@ -194,29 +220,29 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_17S173E_150cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_13S358E_2mp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_73N350E_150cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_26N004E_150cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_09S015E_150cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_37S206E_150cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_25N311E_2mp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_28N307E_150cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_19S070E_150cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_20S337E_400cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_36N320E_2mp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_00N234E_150cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_08N332E_2mp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_06N120E_200cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_32N292E_2mp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_10N058E_150cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_16S041E_150cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_26S265E_200cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_53N354E_150cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_60S200E_150cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_02S167E_150cmp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_20N010E_2mp")
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_LRO_NAC_CratAbnd_43S349E_150cmp")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_17S173E_150cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_13S358E_2mp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_73N350E_150cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_26N004E_150cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_09S015E_150cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_37S206E_150cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_25N311E_2mp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_28N307E_150cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_19S070E_150cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_20S337E_400cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_36N320E_2mp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_00N234E_150cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_08N332E_2mp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_06N120E_200cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_32N292E_2mp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_10N058E_150cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_16S041E_150cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_26S265E_200cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_53N354E_150cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_60S200E_150cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_02S167E_150cmp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_20N010E_2mp)
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_LRO_NAC_CratAbnd_43S349E_150cmp)
 end)
 
 asset.export("LRO_NAC_CratAbnd_17S173E_150cmp", treks_LRO_NAC_CratAbnd_17S173E_150cmp)
@@ -244,9 +270,9 @@ asset.export("LRO_NAC_CratAbnd_20N010E_2mp", treks_LRO_NAC_CratAbnd_20N010E_2mp)
 asset.export("LRO_NAC_CratAbnd_43S349E_150cmp", treks_LRO_NAC_CratAbnd_43S349E_150cmp)
 
 
+
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon LRO_LROC_Crater_Abundance],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon LRO_LROC_Crater_Abundance]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

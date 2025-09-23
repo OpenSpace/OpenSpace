@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -73,6 +73,7 @@ enum class HorizonsResultCode {
     ErrorObserverTargetSame,
     ErrorNoData,
     MultipleObserverStations,
+    News,
 
     // Errors/problems NOT caught by the error field in the json output
     MultipleObserver,
@@ -102,7 +103,7 @@ struct HorizonsResult {
 class HorizonsFile {
 public:
     HorizonsFile() = default;
-    HorizonsFile(std::filesystem::path file);
+    explicit HorizonsFile(std::filesystem::path file);
     HorizonsFile(std::filesystem::path filePath, std::string result);
 
     void setFile(std::filesystem::path file);
@@ -128,10 +129,10 @@ std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
     const std::string& stopTime, const std::string& stepSize,
     const std::string& unit);
 nlohmann::json sendHorizonsRequest(const std::string& url,
-    std::filesystem::path filePath);
-nlohmann::json convertHorizonsDownloadToJson(std::filesystem::path filePath);
+    const std::filesystem::path& filePath);
+nlohmann::json convertHorizonsDownloadToJson(const std::filesystem::path& filePath);
 HorizonsResultCode isValidHorizonsAnswer(const nlohmann::json& answer);
-HorizonsResultCode isValidHorizonsFile(std::filesystem::path file);
+HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file);
 HorizonsResult readHorizonsFile(std::filesystem::path file);
 
 HorizonsResult readHorizonsVectorFile(std::filesystem::path file);

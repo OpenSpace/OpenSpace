@@ -16,9 +16,7 @@ local Francisco = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 22000, 22000, 22000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 22000, 22000, 22000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -58,7 +56,8 @@ local FranciscoTrail = {
   },
   GUI = {
     Name = "Francisco Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Francisco"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Francisco",
+    Focusable = false
   }
 }
 
@@ -83,7 +82,7 @@ local FranciscoLabel = {
   GUI = {
     Name = "Francisco Label",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Francisco",
-    Description = "Label for Uranus' moon Francisco (Irregular Retrograde Moons)"
+    Focusable = false
   }
 }
 
@@ -99,9 +98,7 @@ local Caliban = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 72000, 72000, 72000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 72000, 72000, 72000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -141,7 +138,8 @@ local CalibanTrail = {
   },
   GUI = {
     Name = "Caliban Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Caliban"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Caliban",
+    Focusable = false
   }
 }
 
@@ -166,7 +164,7 @@ local CalibanLabel = {
   GUI = {
     Name = "Caliban Label",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Caliban",
-    Description = "Label for Uranus' moon Caliban (Irregular Retrograde Moons)"
+    Focusable = false
   }
 }
 
@@ -182,9 +180,7 @@ local Stephano = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 32000, 32000, 32000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 32000, 32000, 32000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -224,7 +220,8 @@ local StephanoTrail = {
   },
   GUI = {
     Name = "Stephano Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Stephano"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Stephano",
+    Focusable = false
   }
 }
 
@@ -249,7 +246,7 @@ local StephanoLabel = {
   GUI = {
     Name = "Stephano Label",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Stephano",
-    Description = "Label for Uranus' moon Stephano (Irregular Retrograde Moons)"
+    Focusable = false
   }
 }
 
@@ -265,9 +262,7 @@ local Trinculo = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 18000, 18000, 18000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 18000, 18000, 18000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -307,7 +302,8 @@ local TrinculoTrail = {
   },
   GUI = {
     Name = "Trinculo Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Trinculo"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Trinculo",
+    Focusable = false
   }
 }
 
@@ -332,7 +328,7 @@ local TrinculoLabel = {
   GUI = {
     Name = "Trinculo Label",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Trinculo",
-    Description = "Label for Uranus' moon Trinculo (Irregular Retrograde Moons)"
+    Focusable = false
   }
 }
 
@@ -348,9 +344,7 @@ local Sycorax = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 165000, 165000, 165000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 165000, 165000, 165000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -390,7 +384,8 @@ local SycoraxTrail = {
   },
   GUI = {
     Name = "Sycorax Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Sycorax"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Sycorax",
+    Focusable = false
   }
 }
 
@@ -415,7 +410,7 @@ local SycoraxLabel = {
   GUI = {
     Name = "Sycorax Label",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Sycorax",
-    Description = "Label for Uranus' moon Sycorax (Irregular Retrograde Moons)"
+    Focusable = false
   }
 }
 
@@ -431,9 +426,7 @@ local Prospero = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 50000, 50000, 50000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 50000, 50000, 50000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -473,7 +466,8 @@ local ProsperoTrail = {
   },
   GUI = {
     Name = "Prospero Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Prospero"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Prospero",
+    Focusable = false
   }
 }
 
@@ -498,7 +492,7 @@ local ProsperoLabel = {
   GUI = {
     Name = "Prospero Label",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Prospero",
-    Description = "Label for Uranus' moon Prospero (Irregular Retrograde Moons)"
+    Focusable = false
   }
 }
 
@@ -514,9 +508,7 @@ local Setebos = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 48000, 48000, 48000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 48000, 48000, 48000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -556,7 +548,8 @@ local SetebosTrail = {
   },
   GUI = {
     Name = "Setebos Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Setebos"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Setebos",
+    Focusable = false
   }
 }
 
@@ -581,7 +574,7 @@ local SetebosLabel = {
   GUI = {
     Name = "Setebos Label",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Setebos",
-    Description = "Label for Uranus' moon Setebos (Irregular Retrograde Moons)"
+    Focusable = false
   }
 }
 
@@ -597,9 +590,7 @@ local Ferdinand = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 20000, 20000, 20000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 20000, 20000, 20000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -639,7 +630,8 @@ local FerdinandTrail = {
   },
   GUI = {
     Name = "Ferdinand Trail",
-    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Ferdinand"
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Ferdinand",
+    Focusable = false
   }
 }
 
@@ -664,7 +656,7 @@ local FerdinandLabel = {
   GUI = {
     Name = "Ferdinand Label",
     Path = "/Solar System/Planets/Uranus/Minor Moons/Irregular Retrograde Moons/Ferdinand",
-    Description = "Label for Uranus' moon Ferdinand (Irregular Retrograde Moons)"
+    Focusable = false
   }
 }
 
@@ -770,9 +762,9 @@ asset.export(FerdinandTrail)
 asset.export(FerdinandLabel)
 
 
+
 asset.meta = {
   Name = "Uranus Irregular Retrograde Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Uranus' irregular retrograde moons:
     Francisco, Caliban, Stephano, Trinculo, Sycorax, Prospero, Setebos and Ferdinand.
     Blank globes and SPICE trails are generated for each moon]],

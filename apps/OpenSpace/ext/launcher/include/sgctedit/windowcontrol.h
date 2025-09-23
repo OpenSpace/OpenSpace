@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,14 +41,6 @@ class QSpinBox;
 class WindowControl final : public QWidget {
 Q_OBJECT
 public:
-    enum class ProjectionIndices {
-        Planar = 0,
-        Fisheye,
-        SphericalMirror,
-        Cylindrical,
-        Equirectangular
-    };
-
     /**
      * Constructor for WindowControl class, which contains settings and configuration for
      * individual windows.
@@ -57,14 +49,10 @@ public:
      *        resides in
      * \param windowIndex The zero-based window index
      * \param monitorDims Vector of monitor dimensions in QRect form
-     * \param winColor A QColor object for this window's unique color
-     * \param resetToDefault If this is `true`, the widgets will be initialized to their
-     *        default values
      * \param parent The parent widget
      */
     WindowControl(int monitorIndex, int windowIndex,
-        const std::vector<QRect>& monitorDims, const QColor& winColor,
-        bool resetToDefault, QWidget* parent);
+        const std::vector<QRect>& monitorDims, QWidget* parent);
 
     /**
      * Makes the window label at top of a window control column visible.
@@ -81,9 +69,12 @@ public:
     /**
      * Sets the window dimensions.
      *
-     * \param newDims The x, y dimensions to set the window to
+     * \param x The x coordinate to set the window to
+     * \param y The y coordinate to set the window to
+     * \param width The width to set the window to
+     * \param height The height to set the window to
      */
-    void setDimensions(QRectF newDims);
+    void setDimensions(int x, int y, int width, int height);
 
     /**
      * Sets the monitor selection combobox.
@@ -108,6 +99,14 @@ public:
     void setDecorationState(bool hasWindowDecoration);
 
     /**
+     * Sets whether the window is shared using spout.
+     */
+    void setSpoutOutputState(bool shouldSpoutOutput);
+
+    void setRender2D(bool state);
+    void setRender3D(bool state);
+
+    /**
      * Generates window configuration (sgct::config::Window struct) based on the
      * GUI settings.
      *
@@ -127,14 +126,15 @@ public:
 
     /**
      * Sets the window's projection type to fisheye, with the accompanying quality
-     * setting and spout option.
+     * setting.
      *
      * \param quality The value for number of vertical lines of resolution. This will be
      *        compared against the QualityValues array in order to set the correct
-     *       combobox index
-     * \param spoutOutput Enabling the spout output option
+     *        combobox index
+     * \param tilt The tilt of the fisheye in degrees
+     * \param fov Set the field-of-view of the fisheye
      */
-    void setProjectionFisheye(int quality, bool spoutOutput);
+    void setProjectionFisheye(int quality, float tilt, float fov);
 
     /**
      * Sets the window's projection type to spherical mirror, with the accompanying
@@ -159,53 +159,50 @@ public:
 
     /**
      * Sets the window's projection type to equirectangular, with the accompanying
-     * quality setting and spout option.
+     * quality setting.
      *
      * \param quality The value for number of vertical lines of resolution. This will be
      *        compared against the QualityValues array in order to set the correct
      *        combobox index
-     * \param spoutOutput Enabling the spout output option
      */
-    void setProjectionEquirectangular(int quality, bool spoutOutput);
+    void setProjectionEquirectangular(int quality);
 
     /**
-     * Controls the visibility of all projection controls, including those that are only
-     * shown when the projection type is set to certain values.
+     * Sets the window's projection type to blitting the contents of another window.
      *
-     * \param enable `true` if the projections controls should be visible
+     * \param windowBlitId The id of the window from which to blit
      */
-    void setVisibilityOfProjectionGui(bool enable);
+    void setProjectionBlit(int windowBlitId);
 
     /**
-     * Returns an #sgct::config::Projections struct containing the projection information
-     * for this window.
+     * This function must be called by users of this class whenever the total number of
+     * windows has changed.
      *
-     * \return The object containing the projection information
+     * \param newWindowCount the number of windows after the change
      */
-    sgct::config::Projections generateProjectionInformation() const;
+    void updateWindowCount(int newWindowCount);
 
 signals:
     void windowChanged(int monitorIndex, int windowIndex, const QRectF& newDimensions);
 
 private:
-    void createWidgets(const QColor& windowColor);
     QWidget* createPlanarWidget();
     QWidget* createFisheyeWidget();
     QWidget* createSphericalMirrorWidget();
     QWidget* createCylindricalWidget();
     QWidget* createEquirectangularWidget();
+    QWidget* createBlitWidget();
 
     void onSizeXChanged(int newValue);
     void onSizeYChanged(int newValue);
     void onOffsetXChanged(int newValue);
     void onOffsetYChanged(int newValue);
-    void onProjectionChanged(int newSelection);
+    void onProjectionChanged(int newSelection) const;
     void onFullscreenClicked();
     void onAspectRatioLockClicked();
     void onFovLockClicked();
 
     void updatePlanarLockedFov();
-    void setQualityComboBoxFromLinesResolution(int lines, QComboBox* combo);
 
     static constexpr float IdealAspectRatio = 16.f / 9.f;
     float _aspectRatioSize = IdealAspectRatio;
@@ -215,7 +212,7 @@ private:
     bool _aspectRatioLocked = false;
     bool _fovLocked = true;
     std::vector<QRect> _monitorResolutions;
-    QRectF _windowDimensions;
+    QRect _windowDimensions;
 
     QLabel* _windowNumber = nullptr;
     QLineEdit* _windowName = nullptr;
@@ -225,50 +222,47 @@ private:
     QSpinBox* _offsetX = nullptr;
     QSpinBox* _offsetY = nullptr;
     QCheckBox* _windowDecoration = nullptr;
+    QCheckBox* _spoutOutput = nullptr;
+    QCheckBox* _render2D = nullptr;
+    QCheckBox* _render3D = nullptr;
+    QFrame* _projectionGroup = nullptr;
     QComboBox* _projectionType = nullptr;
-    QLabel* _projectionLabel = nullptr;
 
     struct {
         QWidget* widget = nullptr;
-        QLabel* labelInfo = nullptr;
         QDoubleSpinBox* fovH = nullptr;
         QDoubleSpinBox* fovV = nullptr;
-        QLabel* labelFovH = nullptr;
-        QLabel* labelFovV = nullptr;
         QPushButton* buttonLockFov = nullptr;
     } _planar;
 
     struct {
         QWidget* widget = nullptr;
-        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
-        QLabel* labelQuality = nullptr;
-        QCheckBox* spoutOutput = nullptr;
+        QDoubleSpinBox* tilt = nullptr;
+        QDoubleSpinBox* fov = nullptr;
     } _fisheye;
 
     struct {
         QWidget* widget = nullptr;
-        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
-        QLabel* labelQuality = nullptr;
     } _sphericalMirror;
 
     struct {
         QWidget* widget = nullptr;
-        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
-        QLabel* labelQuality = nullptr;
         QDoubleSpinBox* heightOffset = nullptr;
-        QLabel* labelHeightOffset = nullptr;
     } _cylindrical;
 
     struct {
         QWidget* widget = nullptr;
-        QLabel* labelInfo = nullptr;
         QComboBox* quality = nullptr;
-        QLabel* labelQuality = nullptr;
-        QCheckBox* spoutOutput = nullptr;
     } _equirectangular;
+
+    struct {
+        QWidget* widget = nullptr;
+        QComboBox* windowId = nullptr;
+        QLabel* unavailable = nullptr;
+    } _blit;
 
     const QIcon _lockIcon;
     const QIcon _unlockIcon;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -40,7 +40,7 @@ namespace openspace::globebrowsing {
  */
 class RangedTime {
 public:
-    RangedTime() {}
+    RangedTime() = default;
 
     /**
      * Constructor that accepts an ISO8601 date/time string (`YYYY-MM-DDTHH:mm:ss`) for an
@@ -94,9 +94,9 @@ public:
     /**
      * Set the end date/time of the time range.
      *
-     * \param start The ISO8601 date/time string that defines the end of the range
+     * \param end The ISO8601 date/time string that defines the end of the range
      */
-    void setEnd(const std::string start);
+    void setEnd(const std::string end);
 
 private:
     std::string _start;
@@ -118,12 +118,13 @@ private:
 class DateTime {
 public:
     DateTime() = default;
+
     /**
      * Constructor that initializes with date/time string.
      *
      * \param initDateTime The ISO8601 date/time string (`YYYY-MM-DDTHH:mm:ss`)
      */
-    DateTime(std::string_view initDateTime);
+    explicit DateTime(std::string_view initDateTime);
 
     /**
      * Set the date/time value.
@@ -362,7 +363,7 @@ public:
 private:
     void verifyStartTimeRestrictions();
     void verifyResolutionRestrictions(const int value, const char unit);
-    void doFirstApproximation(DateTime& q, DateTime& unQ, double value, char unit);
+    void doFirstApproximation(DateTime& q, const DateTime& unQ, double value, char unit);
     double computeSecondsFromResolution(const int valueIn, const char unit);
     double _resolution = 0.0;
     double _resolutionValue = 0.0;

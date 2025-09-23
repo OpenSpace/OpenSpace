@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -76,4 +76,5 @@ create_new_module(
 
 add_subdirectory(ext/imgui SYSTEM)
 target_link_libraries(${imgui_module} PUBLIC Imgui)
+disable_compiler_warnings(Imgui)
 set_target_properties(Imgui PROPERTIES FOLDER "External")

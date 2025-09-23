@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,7 +33,7 @@ public:
      * Constructor for filesystemAccess class.
      *
      * \param fileExtension The file extensiopn filter used to find files. Only files with
-     *        this extension will be recognized (e.g. '.xml')
+     *        this extension will be recognized (e.g. '.json')
      * \param hideFileExtensions If `true` then file extensions will be removed from the
      *        listed files in the output
      * \param useCheckboxes If `true` then the text output format will contain a '0' as
@@ -44,18 +44,18 @@ public:
         bool useCheckboxes);
 
     /**
-     * Function that uses the #QtFileSystemModel class to search the given directory.
+     * Function that uses the QtFileSystemModel class to search the given directory.
      *
      * \param dir The directory from which to start the search from
      */
-    std::string useQtFileSystemModelToTraverseDir(std::string dir,
-        bool usersAssets = false);
+    std::string useQtFileSystemModelToTraverseDir(const std::string& dir,
+        bool userAssets = false);
 
 private:
-    void parseChildDirElements(QFileInfo item, std::string space, int level,
-        std::vector<std::string>& dirNames, std::vector<std::string>& output,
+    void parseChildDirElements(const QFileInfo& fileInfo, const std::string& space,
+        int level, std::vector<std::string>& dirNames, std::vector<std::string>& output,
         bool userAssets);
-    void parseChildFile(std::string res, bool& hasDirHeaderBeenAdded,
+    void parseChildFile(std::string filename, bool& hasDirHeaderBeenAdded,
         std::vector<std::string>& dirNames, std::vector<std::string>& output);
 
     QFileSystemModel _filesystemModel;

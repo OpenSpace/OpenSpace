@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,6 +31,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/logging/logmanager.h>
 #include <optional>
 
 namespace {
@@ -43,50 +44,48 @@ namespace {
         "Enabled",
         "Enabled",
         "This setting determines whether the labels will be visible or not. They are "
-        "disabled per default",
-        // @VISIBILITY(?)
+        "disabled per default.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
         "File",
-        "The speck label file with the data for the labels",
+        "The speck label file with the data for the labels.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "The color of the labels",
+        "The color of the labels.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "The size of the labels in pixels",
-        // @VISIBILITY(2.5)
+        "The size of the labels in pixels.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
-        "Font Size",
-        "Font size for the labels. This is different from the text size",
+        "Font size",
+        "Font size for the labels. This is different from the text size.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxInfo = {
         "MinMaxSize",
-        "Min/Max Size",
-        "The minimum and maximum size (in pixels) of the labels",
+        "Min/max size",
+        "The minimum and maximum size (in pixels) of the labels.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
         "FaceCamera",
-        "Face Camera",
+        "Face camera",
         "If enabled, the labels will be rotated to face the camera. For non-linear "
         "display rendering (for example fisheye) this should be set to false.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -94,9 +93,8 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
-        "Transformation Matrix",
-        "Transformation matrix to be applied to the labels",
-        // @VISIBILITY(?)
+        "Transformation matrix",
+        "Transformation matrix to be applied to the labels.",
         openspace::properties::Property::Visibility::Developer
     };
 
@@ -170,7 +168,7 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _labelFile = absPath(p.file.value_or(""));
+    _labelFile = p.file.has_value() ? absPath(*p.file) : "";
     _useCache = p.useCaching.value_or(true);
 
     if (p.unit.has_value()) {
@@ -223,21 +221,6 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
 }
 
-LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary,
-                                 const dataloader::Dataset& dataset,
-                                 DistanceUnit unit)
-    : LabelsComponent(dictionary)
-{
-    // The unit should match the one in the dataset, not the one that was included in the
-    // asset (if any)
-    _unit = unit;
-
-    // Load the labelset directly based on the dataset, and keep track of that it has
-    // already been loaded this way
-    _labelset = dataloader::label::loadFromDataset(dataset);
-    _createdFromDataset = true;
-}
-
 dataloader::Labelset& LabelsComponent::labelSet() {
     return _labelset;
 }
@@ -247,6 +230,8 @@ const dataloader::Labelset& LabelsComponent::labelSet() const {
 }
 
 void LabelsComponent::initialize() {
+    ZoneScoped;
+
     _font = global::fontManager->font(
         "Mono",
         _fontSize,
@@ -257,13 +242,33 @@ void LabelsComponent::initialize() {
     loadLabels();
 }
 
+void LabelsComponent::loadLabelsFromDataset(const dataloader::Dataset& dataset,
+                                            DistanceUnit unit)
+{
+    ZoneScoped;
+
+    LINFO("Loading labels from dataset");
+
+    // The unit should match the one in the dataset, not the one that was included in the
+    // asset (if any)
+    _unit = unit;
+
+    // Load the labelset directly based on the dataset, and keep track of that it has
+    // already been loaded this way
+    _labelset = dataloader::label::loadFromDataset(dataset);
+
+    _createdFromDataset = true;
+}
+
 void LabelsComponent::loadLabels() {
-    LINFO(fmt::format("Loading label file {}", _labelFile));
+    ZoneScoped;
 
     if (_createdFromDataset) {
         // The labelset should already have been loaded
         return;
     }
+
+    LINFO(std::format("Loading label file '{}'", _labelFile));
 
     if (_useCache) {
         _labelset = dataloader::label::loadFileWithCache(_labelFile);
@@ -289,9 +294,10 @@ void LabelsComponent::render(const RenderData& data,
     if (!_enabled) {
         return;
     }
-    float scale = static_cast<float>(toMeter(_unit));
+    const float scale = static_cast<float>(toMeter(_unit));
 
-    int renderOption = _faceCamera ? RenderOptionFaceCamera : RenderOptionPositionNormal;
+    const int renderOption =
+        _faceCamera ? RenderOptionFaceCamera : RenderOptionPositionNormal;
 
     ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
     labelInfo.orthoRight = orthoRight;
@@ -302,11 +308,11 @@ void LabelsComponent::render(const RenderData& data,
     labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
     labelInfo.renderType = renderOption;
     labelInfo.mvpMatrix = modelViewProjectionMatrix;
-    labelInfo.scale = pow(10.f, _size);
+    labelInfo.scale = std::pow(10.f, _size);
     labelInfo.enableDepth = true;
     labelInfo.enableFalseDepth = false;
 
-    glm::vec4 textColor = glm::vec4(glm::vec3(_color), opacity() * fadeInVariable);
+    const glm::vec4 textColor = glm::vec4(glm::vec3(_color), opacity() * fadeInVariable);
 
     for (const dataloader::Labelset::Entry& e : _labelset.entries) {
         if (!e.isEnabled) {
@@ -314,9 +320,10 @@ void LabelsComponent::render(const RenderData& data,
         }
 
         // Transform and scale the labels
-        glm::vec3 transformedPos(_transformationMatrix * glm::dvec4(e.position, 1.0));
-        glm::vec3 scaledPos(transformedPos);
-        scaledPos *= scale;
+        const glm::vec3 transformedPos = glm::vec3(
+            _transformationMatrix * glm::dvec4(e.position, 1.0)
+        );
+        const glm::vec3 scaledPos = glm::vec3(transformedPos * scale);
 
         ghoul::fontrendering::FontRenderer::defaultProjectionRenderer().render(
             *_font,

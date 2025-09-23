@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -75,7 +75,7 @@ struct Dataset {
 
     int index(std::string_view variableName) const;
     bool normalizeVariable(std::string_view variableName);
-    glm::vec2 findValueRange(int variableIndex) const;
+    glm::vec2 findValueRange(size_t variableIndex) const;
     glm::vec2 findValueRange(std::string_view variableName) const;
 };
 
@@ -103,8 +103,8 @@ namespace data {
     Dataset loadFile(std::filesystem::path path,
         std::optional<DataMapping> specs = std::nullopt);
 
-    std::optional<Dataset> loadCachedFile(std::filesystem::path path);
-    void saveCachedFile(const Dataset& dataset, std::filesystem::path path);
+    std::optional<Dataset> loadCachedFile(const std::filesystem::path& path);
+    void saveCachedFile(const Dataset& dataset, const std::filesystem::path& path);
 
     Dataset loadFileWithCache(std::filesystem::path path,
         std::optional<DataMapping> specs = std::nullopt);
@@ -116,8 +116,8 @@ namespace label {
     Labelset loadFile(std::filesystem::path path,
         std::optional<DataMapping> specs = std::nullopt);
 
-    std::optional<Labelset> loadCachedFile(std::filesystem::path path);
-    void saveCachedFile(const Labelset& labelset, std::filesystem::path path);
+    std::optional<Labelset> loadCachedFile(const std::filesystem::path& path);
+    void saveCachedFile(const Labelset& labelset, const std::filesystem::path& path);
 
     Labelset loadFileWithCache(std::filesystem::path path);
 
@@ -129,8 +129,8 @@ namespace color {
     ColorMap loadFile(std::filesystem::path path,
         std::optional<DataMapping> specs = std::nullopt);
 
-    std::optional<ColorMap> loadCachedFile(std::filesystem::path path);
-    void saveCachedFile(const ColorMap& colorMap, std::filesystem::path path);
+    std::optional<ColorMap> loadCachedFile(const std::filesystem::path& path);
+    void saveCachedFile(const ColorMap& colorMap, const std::filesystem::path& path);
 
     ColorMap loadFileWithCache(std::filesystem::path path);
 

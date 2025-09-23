@@ -1,10 +1,10 @@
 local helper = asset.require("util/vrt_flipbook_helper")
-local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
 
 local assetPrefix = "A11flip"
-local assetGlobe = moonAsset.Moon.Identifier
+local assetGlobe = moon.Moon.Identifier
 local flipbookCount = 19
 
 local flipbook = nil
@@ -15,7 +15,6 @@ local vrts = asset.resource({
   Identifier = "apollo_11_flipbook",
   Version = 1
 })
-
 
 
 asset.onInitialize(function()
@@ -43,10 +42,20 @@ asset.onInitialize(function()
   })
 end)
 
-
 asset.onDeinitialize(function()
   flipbook = nil
 
   openspace.action.removeAction("os.lemFlipbook.NextFlip")
   openspace.action.removeAction("os.lemFlipbook.PrevFlip")
 end)
+
+
+
+asset.meta = {
+  Name = "Apollo 11 Landing Site Flipbook",
+  Description = [[This asset provides georeferenced images of the Apollo 11 landing site,
+    taken with different illumination angles.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

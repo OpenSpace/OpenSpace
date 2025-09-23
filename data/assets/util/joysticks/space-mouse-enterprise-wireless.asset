@@ -1,4 +1,3 @@
-local propertyHelper = asset.require("../property_helper")
 local joystickHelper = asset.require("./joystick_helper")
 
 
@@ -63,3 +62,13 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickAxis(name, controller.Push.UpDown, "Zoom")
   openspace.navigation.bindJoystickAxis(name, controller.Tilt.LeftRight, "LocalRoll")
 end)
+
+
+
+asset.meta = {
+  Name = "Joystick controller: SpaceMouse enterprise wireless",
+  Description = "Joystick controller configuration for SpaceMouse enterprise wireless",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

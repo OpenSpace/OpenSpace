@@ -16,9 +16,7 @@ local Albiorix = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 32000, 32000, 32000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 32000, 32000, 32000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -52,13 +50,15 @@ local AlbiorixTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_gallic",
     "moonTrail_minor",
     "moonTrail_minor_saturn",
     "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Albiorix Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix",
+    Focusable = false
   }
 }
 
@@ -79,11 +79,17 @@ local AlbiorixLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_gallic"
+  },
   GUI = {
     Name = "Albiorix Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Albiorix",
-    Description = "Label for Saturn's moon Albiorix (Gallic group)"
+    Focusable = false
   }
 }
 
@@ -99,9 +105,7 @@ local Bebhionn = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 6000, 6000, 6000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 6000, 6000, 6000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -135,13 +139,15 @@ local BebhionnTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_gallic",
     "moonTrail_minor",
     "moonTrail_minor_saturn",
     "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Bebhionn Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn",
+    Focusable = false
   }
 }
 
@@ -162,11 +168,17 @@ local BebhionnLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_gallic"
+  },
   GUI = {
     Name = "Bebhionn Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Bebhionn",
-    Description = "Label for Saturn's moon Bebhionn (Gallic group)"
+    Focusable = false
   }
 }
 
@@ -182,9 +194,7 @@ local Erriapus = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 10000, 10000, 10000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 10000, 10000, 10000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -218,13 +228,15 @@ local ErriapusTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_gallic",
     "moonTrail_minor",
     "moonTrail_minor_saturn",
     "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Erriapus Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus",
+    Focusable = false
   }
 }
 
@@ -245,11 +257,17 @@ local ErriapusLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_gallic"
+  },
   GUI = {
     Name = "Erriapus Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Erriapus",
-    Description = "Label for Saturn's moon Erriapus (Gallic group)"
+    Focusable = false
   }
 }
 
@@ -265,9 +283,7 @@ local Tarvos = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 15000, 15000, 15000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 15000, 15000, 15000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -301,13 +317,15 @@ local TarvosTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_gallic",
     "moonTrail_minor",
     "moonTrail_minor_saturn",
     "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Tarvos Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos",
+    Focusable = false
   }
 }
 
@@ -328,11 +346,17 @@ local TarvosLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_gallic"
+  },
   GUI = {
     Name = "Tarvos Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Gallic Group/Tarvos",
-    Description = "Label for Saturn's moon Tarvos (Gallic group)"
+    Focusable = false
   }
 }
 
@@ -393,7 +417,6 @@ asset.export(TarvosLabel)
 
 asset.meta = {
   Name = "Saturn Gallic Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Gallic Group moons: Albiorix,
     Bebhionn, Erriapus, and Tarvos. Blank globes and SPICE trails are generated for each
     moon]],

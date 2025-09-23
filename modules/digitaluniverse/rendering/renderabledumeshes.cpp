@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
@@ -51,91 +52,85 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableDUMeshes";
 
-    constexpr std::array<const char*, 4> UniformNames = {
-        "modelViewTransform", "projectionTransform", "alphaValue", "color"
-    };
-
     constexpr int RenderOptionViewDirection = 0;
     constexpr int RenderOptionPositionNormal = 1;
 
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
-        "Text Color",
-        "The text color for the astronomical object",
+        "Text color",
+        "The text color for the astronomical object.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
         "TextOpacity",
-        "Text Opacity",
+        "Text opacity",
         "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent",
+        "and 0 fully transparent.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
-        "Text Size",
-        "The text size for the astronomical object labels",
+        "Text size",
+        "The text size for the astronomical object labels.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelFileInfo = {
         "LabelFile",
-        "Label File",
+        "Label file",
         "The path to the label file that contains information about the astronomical "
-        "objects being rendered",
+        "objects being rendered.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
         "TextMinMaxSize",
-        "Text Min/Max Size",
+        "Text min/max size",
         "The minimum and maximum size (in pixels) of the text for the labels for the "
-        "astronomical objects being rendered",
+        "astronomical objects being rendered.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
-        "If the DU mesh is of wire type, this value determines the width of the lines",
-        // @VISIBILITY(1.75)
+        "Line width",
+        "If the DU mesh is of wire type, this value determines the width of the lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
-        "Draw Elements",
-        "Enables/Disables the drawing of the astronomical objects",
+        "Draw elements",
+        "Enables/Disables the drawing of the astronomical objects.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
         "DrawLabels",
-        "Draw Labels",
-        "Determines whether labels should be drawn or hidden",
+        "Draw labels",
+        "Determines whether labels should be drawn or hidden.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MeshColorInfo = {
         "MeshColor",
         "Meshes colors",
-        "The defined colors for the meshes to be rendered",
-        // @VISIBILITY(1.25)
+        "The defined colors for the meshes to be rendered.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
-        "Render Option",
-        "Debug option for rendering of billboards and texts",
+        "Render option",
+        "Debug option for rendering of billboards and texts.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableDUMeshes)]] Parameters {
         // The path to the SPECK file that contains information about the astronomical
-        // object being rendered
+        // object being rendered.
         std::string file;
 
         // [[codegen::verbatim(DrawLabelInfo.description)]]
@@ -150,6 +145,7 @@ namespace {
             Gigaparsec [[codegen::key("Gpc")]],
             Gigalightyear [[codegen::key("Gly")]]
         };
+        // The unit used when interpreting the positions in the dataset.
         std::optional<Unit> unit;
 
         // [[codegen::verbatim(TextColorInfo.description)]]
@@ -196,14 +192,13 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
         glm::ivec2(1000)
     )
     , _lineWidth(LineWidthInfo, 2.f, 1.f, 16.f)
-    , _renderOption(RenderOptionInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _renderOption(RenderOptionInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(Fadeable::_opacity);
 
-    _speckFile = absPath(p.file).string();
-    _hasSpeckFile = true;
+    _speckFile = absPath(p.file);
     _drawElements.onChange([this]() { _hasSpeckFile = !_hasSpeckFile; });
     addProperty(_drawElements);
 
@@ -230,7 +225,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
     addProperty(_lineWidth);
 
     if (p.labelFile.has_value()) {
-        _labelFile = absPath(*p.labelFile).string();
+        _labelFile = absPath(*p.labelFile);
         _hasLabel = true;
 
         _drawLabels = p.drawLabels.value_or(_drawLabels);
@@ -255,7 +250,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 
     if (p.meshColor.has_value()) {
         std::vector<glm::vec3> ops = *p.meshColor;
-        for (size_t i = 0; i < ops.size(); ++i) {
+        for (size_t i = 0; i < ops.size(); i++) {
             _meshColorMap.insert({ static_cast<int>(i) + 1, ops[i] });
         }
     }
@@ -267,7 +262,7 @@ bool RenderableDUMeshes::isReady() const {
 }
 
 void RenderableDUMeshes::initialize() {
-    bool success = loadData();
+    const bool success = loadData();
     if (!success) {
         throw ghoul::RuntimeError("Error loading data");
     }
@@ -285,26 +280,24 @@ void RenderableDUMeshes::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     createMeshes();
 
-    if (_hasLabel) {
-        if (!_font) {
-            constexpr int FontSize = 50;
-            _font = global::fontManager->font(
-                "Mono",
-                static_cast<float>(FontSize),
-                ghoul::fontrendering::FontManager::Outline::Yes,
-                ghoul::fontrendering::FontManager::LoadGlyphs::No
-            );
-        }
+    if (_hasLabel && !_font) {
+        constexpr int FontSize = 50;
+        _font = global::fontManager->font(
+            "Mono",
+            static_cast<float>(FontSize),
+            ghoul::fontrendering::FontManager::Outline::Yes,
+            ghoul::fontrendering::FontManager::LoadGlyphs::No
+        );
     }
 }
 
 void RenderableDUMeshes::deinitializeGL() {
     for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
-        for (int i = 0; i < pair.second.numU; ++i) {
+        for (int i = 0; i < pair.second.numU; i++) {
             glDeleteVertexArrays(1, &pair.second.vaoArray[i]);
             glDeleteBuffers(1, &pair.second.vboArray[i]);
         }
@@ -336,7 +329,7 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
 
     for (const std::pair<const int, RenderingMesh>& pair : _renderingMeshesMap) {
         _program->setUniform(_uniformCache.color, _meshColorMap[pair.second.colorIndex]);
-        for (size_t i = 0; i < pair.second.vaoArray.size(); ++i) {
+        for (size_t i = 0; i < pair.second.vaoArray.size(); i++) {
             glBindVertexArray(pair.second.vaoArray[i]);
             switch (pair.second.style) {
                 case Solid:
@@ -368,22 +361,23 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
                                       const glm::vec3& orthoRight,
                                       const glm::vec3& orthoUp)
 {
-    float scale = static_cast<float>(toMeter(_unit));
+    const float scale = static_cast<float>(toMeter(_unit));
 
-    ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo;
-    labelInfo.orthoRight = orthoRight;
-    labelInfo.orthoUp = orthoUp;
-    labelInfo.minSize = _textMinMaxSize.value().x;
-    labelInfo.maxSize = _textMinMaxSize.value().y;
-    labelInfo.cameraPos = data.camera.positionVec3();
-    labelInfo.cameraLookUp = data.camera.lookUpVectorWorldSpace();
-    labelInfo.renderType = _renderOption;
-    labelInfo.mvpMatrix = modelViewProjectionMatrix;
-    labelInfo.scale = pow(10.f, _textSize);
-    labelInfo.enableDepth = true;
-    labelInfo.enableFalseDepth = false;
+    const ghoul::fontrendering::FontRenderer::ProjectedLabelsInformation labelInfo = {
+        .enableDepth = true,
+        .enableFalseDepth = false,
+        .scale = std::pow(10.f, _textSize),
+        .renderType = _renderOption,
+        .minSize = _textMinMaxSize.value().x,
+        .maxSize = _textMinMaxSize.value().y,
+        .mvpMatrix = modelViewProjectionMatrix,
+        .orthoRight = orthoRight,
+        .orthoUp = orthoUp,
+        .cameraPos = data.camera.positionVec3(),
+        .cameraLookUp = data.camera.lookUpVectorWorldSpace()
+    };
 
-    glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity);
+    const glm::vec4 textColor = glm::vec4(glm::vec3(_textColor), _textOpacity.value());
 
     for (const dataloader::Labelset::Entry& e : _labelset.entries) {
         glm::vec3 scaledPos(e.position);
@@ -415,14 +409,14 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
 
     const glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
     glm::vec3 orthoRight = glm::normalize(
-        glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+        glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
     );
 
     if (orthoRight == glm::vec3(0.0)) {
-        glm::vec3 otherVector(lookup.y, lookup.x, lookup.z);
+        const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
         right = glm::cross(viewDirection, otherVector);
         orthoRight = glm::normalize(
-            glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+            glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
         );
     }
 
@@ -439,24 +433,23 @@ void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableDUMeshes::update(const UpdateData&) {
-    if (_program->isDirty()) {
+    if (_program->isDirty()) [[unlikely]] {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 }
 
 bool RenderableDUMeshes::loadData() {
     bool success = false;
     if (_hasSpeckFile) {
-        LINFO(fmt::format("Loading Speck file {}", std::filesystem::path(_speckFile)));
+        LINFO(std::format("Loading Speck file '{}'", _speckFile));
         success = readSpeckFile();
         if (!success) {
             return false;
         }
     }
 
-    std::string labelFile = _labelFile;
-    if (!labelFile.empty()) {
+    if (!_labelFile.empty()) {
         _labelset = dataloader::label::loadFileWithCache(_labelFile);
     }
 
@@ -466,9 +459,7 @@ bool RenderableDUMeshes::loadData() {
 bool RenderableDUMeshes::readSpeckFile() {
     std::ifstream file(_speckFile);
     if (!file.good()) {
-        LERROR(fmt::format(
-            "Failed to open Speck file {}", std::filesystem::path(_speckFile)
-        ));
+        LERROR(std::format("Failed to open Speck file '{}'", _speckFile));
         return false;
     }
 
@@ -482,7 +473,7 @@ bool RenderableDUMeshes::readSpeckFile() {
     // (signaled by the keywords 'datavar', 'texturevar', and 'texture')
     std::string line;
     while (true) {
-        std::getline(file, line);
+        ghoul::getline(file, line);
 
         if (file.eof()) {
             break;
@@ -498,7 +489,7 @@ bool RenderableDUMeshes::readSpeckFile() {
             continue;
         }
 
-        std::size_t found = line.find("mesh");
+        const size_t found = line.find("mesh");
         if (found == std::string::npos) {
             continue;
         }
@@ -547,13 +538,13 @@ bool RenderableDUMeshes::readSpeckFile() {
                 str >> dummy;
             } while (dummy != "{");
 
-            std::getline(file, line);
+            ghoul::getline(file, line);
             std::stringstream dim(line);
             dim >> mesh.numU >> mesh.numV;
 
             // We can now read the vertices data:
-            for (int l = 0; l < mesh.numU * mesh.numV; ++l) {
-                std::getline(file, line);
+            for (int l = 0; l < mesh.numU * mesh.numV; l++) {
+                ghoul::getline(file, line);
                 if (line.substr(0, 1) == "}") {
                     break;
                 }
@@ -563,23 +554,23 @@ bool RenderableDUMeshes::readSpeckFile() {
                 // Try to read three values for the position
                 glm::vec3 pos;
                 bool success = true;
-                for (int i = 0; i < 3; ++i) {
-                    GLfloat value;
+                for (int i = 0; i < 3; i++) {
+                    GLfloat value = 0.f;
                     lineData >> value;
-                    bool errorReading = lineData.rdstate() & std::ifstream::failbit;
+                    const bool errorReading = lineData.rdstate() & std::ifstream::failbit;
                     if (errorReading) {
                         success = false;
                         break;
                     }
 
-                    GLfloat scaledValue = value * scale;
+                    const GLfloat scaledValue = value * scale;
                     pos[i] = scaledValue;
                     mesh.vertices.push_back(scaledValue);
                 }
 
                 if (!success) {
-                    LERROR(fmt::format(
-                        "Failed reading position on line {} of mesh {} in file: '{}'. "
+                    LERROR(std::format(
+                        "Failed reading position on line {} of mesh {} in file '{}'. "
                         "Stopped reading mesh data", l, meshIndex, _speckFile
                     ));
                     break;
@@ -592,7 +583,7 @@ bool RenderableDUMeshes::readSpeckFile() {
                 // OLD CODE:
                 // (2022-03-23, emmbr)  None of our files included texture coordinates,
                 // and if they would they would still not be used by the shader
-                //for (int i = 0; i < 7; ++i) {
+                //for (int i = 0; i < 7; i++) {
                 //    GLfloat value;
                 //    lineData >> value;
                 //    bool errorReading = lineData.rdstate() & std::ifstream::failbit;
@@ -605,7 +596,7 @@ bool RenderableDUMeshes::readSpeckFile() {
                 //}
             }
 
-            std::getline(file, line);
+            ghoul::getline(file, line);
             if (line.substr(0, 1) == "}") {
                 _renderingMeshesMap.insert({ meshIndex++, mesh });
             }
@@ -626,12 +617,12 @@ void RenderableDUMeshes::createMeshes() {
     LDEBUG("Creating planes");
 
     for (std::pair<const int, RenderingMesh>& p : _renderingMeshesMap) {
-        for (int i = 0; i < p.second.numU; ++i) {
-            GLuint vao;
+        for (int i = 0; i < p.second.numU; i++) {
+            GLuint vao = 0;
             glGenVertexArrays(1, &vao);
             p.second.vaoArray.push_back(vao);
 
-            GLuint vbo;
+            GLuint vbo = 0;
             glGenBuffers(1, &vbo);
             p.second.vboArray.push_back(vbo);
 
@@ -641,7 +632,7 @@ void RenderableDUMeshes::createMeshes() {
             glBufferData(
                 GL_ARRAY_BUFFER,
                 p.second.vertices.size() * sizeof(GLfloat),
-                &p.second.vertices[0],
+                p.second.vertices.data(),
                 GL_STATIC_DRAW
             );
             // in_position
@@ -685,12 +676,12 @@ void RenderableDUMeshes::createMeshes() {
 
         // Grid: we need columns
         if (p.second.numU > 1) {
-            for (int i = 0; i < p.second.numV; ++i) {
-                GLuint cvao;
+            for (int i = 0; i < p.second.numV; i++) {
+                GLuint cvao = 0;
                 glGenVertexArrays(1, &cvao);
                 p.second.vaoArray.push_back(cvao);
 
-                GLuint cvbo;
+                GLuint cvbo = 0;
                 glGenBuffers(1, &cvbo);
                 p.second.vboArray.push_back(cvbo);
 
@@ -699,7 +690,7 @@ void RenderableDUMeshes::createMeshes() {
                 glBufferData(
                     GL_ARRAY_BUFFER,
                     p.second.vertices.size() * sizeof(GLfloat),
-                    &p.second.vertices[0],
+                    p.second.vertices.data(),
                     GL_STATIC_DRAW
                 );
                 // in_position

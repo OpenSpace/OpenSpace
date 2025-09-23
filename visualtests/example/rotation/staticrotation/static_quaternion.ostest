@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/rotation/staticrotation/static_quaternion.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "StaticRotation_Example_Quaternion",
+        "position": [
+          1.058968522588751,
+          0.915154257007239,
+          -1.0155511105846113
+        ],
+        "pitch": 1.2082043990278113e-07,
+        "referenceFrame": "Root",
+        "up": [
+          -0.517305950592379,
+          -0.2934931638723859,
+          -0.8039006880466595
+        ],
+        "yaw": 1.256352645251588e-07,
+        "timestamp": "2025 JUL 13 12:45:06"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

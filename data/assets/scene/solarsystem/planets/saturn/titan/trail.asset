@@ -18,10 +18,16 @@ local TitanTrail = {
     Period = 16.0,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn", "moonTrail_major_saturn" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_major_saturn"
+  },
   GUI = {
     Name = "Titan Trail",
     Path = "/Solar System/Planets/Saturn/Major Moons/Titan",
+    Focusable = false,
     Description = "Trail of Saturn's moon Titan as observed by Saturn"
   }
 }
@@ -41,7 +47,6 @@ asset.export(TitanTrail)
 
 asset.meta = {
   Name = "Titan Trail",
-  Version = "1.2",
   Description = "Main trail for Titan",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

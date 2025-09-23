@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringhelper.h>
 #include <fstream>
 
 namespace {
@@ -44,13 +45,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FieldlineSeedInfo = {
         "FieldlineSeedsIndexFile",
-        "Fieldline Seedpoints",
+        "Fieldline seedpoints",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 
-namespace openspace{
+namespace openspace {
+
 IswaKameleonGroup::IswaKameleonGroup(std::string name, std::string type)
     : IswaDataGroup(name, type)
     , _resolution(ResolutionInfo, 100.f, 10.f, 200.f)
@@ -72,8 +74,8 @@ std::set<std::string> IswaKameleonGroup::fieldlineValue() const {
     return _fieldlines;
 }
 
-void IswaKameleonGroup::setFieldlineInfo(std::string fieldlineIndexFile,
-                                         std::string kameleonPath)
+void IswaKameleonGroup::setFieldlineInfo(std::filesystem::path fieldlineIndexFile,
+                                         std::filesystem::path kameleonPath)
 {
     if (fieldlineIndexFile != _fieldlineIndexFile) {
         _fieldlineIndexFile = std::move(fieldlineIndexFile);
@@ -98,18 +100,18 @@ void IswaKameleonGroup::registerProperties() {
     _fieldlines.onChange([this]() { updateFieldlineSeeds(); });
 }
 
-void IswaKameleonGroup::readFieldlinePaths(const std::string& indexFile) {
-    LINFO(fmt::format("Reading seed points paths from file '{}'", indexFile));
+void IswaKameleonGroup::readFieldlinePaths(const std::filesystem::path& indexFile) {
+    LINFO(std::format("Reading seed points paths from file '{}'", indexFile));
 
     // Read the index file from disk
     std::ifstream seedFile(indexFile);
     if (!seedFile.good()) {
-        LERROR(fmt::format("Could not open seed points file '{}'", indexFile));
+        LERROR(std::format("Could not open seed points file '{}'", indexFile));
     }
     else {
         std::string line;
         std::string fileContent;
-        while (std::getline(seedFile, line)) {
+        while (ghoul::getline(seedFile, line)) {
             fileContent += line;
         }
 
@@ -118,11 +120,11 @@ void IswaKameleonGroup::readFieldlinePaths(const std::string& indexFile) {
             json fieldlines = json::parse(fileContent);
             int i = 0;
 
-            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); ++it) {
+            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); it++) {
                 _fieldlines.addOption(it.key());
                 _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
                     identifier() + "/" + it.key(),
-                    it.value(),
+                    it->get<std::string>(),
                     false
                 );
                 i++;
@@ -151,11 +153,10 @@ void IswaKameleonGroup::updateFieldlineSeeds() {
         if (it == options.end() && std::get<2>(seedPath.second)) {
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
 
-            global::scriptEngine->queueScript(
-                "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
+            const std::string script = std::format(
+                "openspace.removeSceneGraphNode('{}')", std::get<0>(seedPath.second)
             );
+            global::scriptEngine->queueScript(script);
             std::get<2>(seedPath.second) = false;
         // if this option was turned on
         }
@@ -179,11 +180,10 @@ void IswaKameleonGroup::clearFieldlines() {
         if (std::get<2>(seedPath.second)) {
             LDEBUG("Removed fieldlines: " + std::get<0>(seedPath.second));
 
-            global::scriptEngine->queueScript(
-                "openspace.removeSceneGraphNode('" + std::get<0>(seedPath.second) + "')",
-                scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-                scripting::ScriptEngine::ShouldSendToRemote::Yes
+            const std::string script = std::format(
+                "openspace.removeSceneGraphNode('{}')", std::get<0>(seedPath.second)
             );
+            global::scriptEngine->queueScript(script);
             std::get<2>(seedPath.second) = false;
         }
     }

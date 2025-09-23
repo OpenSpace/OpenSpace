@@ -15,12 +15,17 @@ local MoonTrail = {
     },
     Color = { 0.5, 0.3, 0.3 },
     Period = 27,
-    Resolution = 1000,
-    Tag = { "moonTrail_solarSystem", "moonTrail_terrestrial", "moonTrail_earth" }
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_terrestrial",
+    "moonTrail_earth"
   },
   GUI = {
     Name = "Moon Trail",
-    Path = "/Solar System/Planets/Earth/Moon"
+    Path = "/Solar System/Planets/Earth/Moon",
+    Focusable = false
   }
 }
 
@@ -39,7 +44,6 @@ asset.export(MoonTrail)
 
 asset.meta = {
   Name = "Moon Trail",
-  Version = "1.1",
   Description = "Moon Trail - This asset contains the trail of the Moon",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

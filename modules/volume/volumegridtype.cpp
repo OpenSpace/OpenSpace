@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,11 +26,6 @@
 
 namespace openspace::volume {
 
-InvalidGridTypeError::InvalidGridTypeError(std::string gt)
-    : RuntimeError("Invalid grid type: '" + gt + "'")
-    , gridType(std::move(gt))
-{}
-
 VolumeGridType parseGridType(const std::string& gridType) {
     if (gridType == "Cartesian") {
         return VolumeGridType::Cartesian;
@@ -38,7 +33,7 @@ VolumeGridType parseGridType(const std::string& gridType) {
     if (gridType == "Spherical") {
         return VolumeGridType::Spherical;
     }
-    throw InvalidGridTypeError(gridType);
+    throw ghoul::RuntimeError(std::format("Invalid grid type: '{}'", gridType));
 }
 
 std::string gridTypeToString(VolumeGridType gridType) {

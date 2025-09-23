@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,10 +31,10 @@ class QLineEdit;
 class QListWidget;
 class QPushButton;
 
-class ScriptlogDialog final : public QDialog {
+class ScriptLogDialog final : public QDialog {
 Q_OBJECT
 public:
-    ScriptlogDialog(QWidget* parent, std::string filter = "");
+    explicit ScriptLogDialog(QWidget* parent, std::string filter = "");
 
 signals:
     void scriptsSelected(std::vector<std::string> script);

@@ -14,18 +14,18 @@ local Clouds = {
   Identifier = "Clouds",
   FilePath = texturesPath .. "venus_clouds.jpg",
   Enabled = asset.enabled,
-  CacheSettings = { Enabled = false }
+  ZIndex = 20
 }
 
 local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "venus.jpg",
   Enabled = asset.enabled,
+  ZIndex = 5,
   Settings = {
     Opacity = 0.48,
     Gamma = 0.48
-  },
-  CacheSettings = { Enabled = false }
+  }
 }
 
 
@@ -46,7 +46,6 @@ asset.export(Clouds)
 
 asset.meta = {
   Name = "Venus Texture",
-  Version = "2.0",
   Description = "This asset supplies a default texture for Venus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

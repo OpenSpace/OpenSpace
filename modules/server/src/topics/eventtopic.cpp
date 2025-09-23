@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -74,7 +74,7 @@ void EventTopic::handleJson(const nlohmann::json& json) {
 
             for (uint8_t i = 0; i < lastEvent; i++) {
                 auto type = static_cast<events::Event::Type>(i);
-                events.push_back(std::string(events::toString(type)));
+                events.emplace_back(events::toString(type));
             }
         }
         else {
@@ -99,7 +99,7 @@ void EventTopic::handleJson(const nlohmann::json& json) {
             global::eventEngine->registerEventTopic(_topicId, type, onCallback);
         }
         else if (status == StopSubscription) {
-            events::Event::Type type = events::fromString(event);
+            const events::Event::Type type = events::fromString(event);
             _subscribedEvents.erase(type);
             global::eventEngine->unregisterEventTopic(_topicId, type);
         }
@@ -111,7 +111,7 @@ bool EventTopic::isSubscribed() const {
         return false;
     }
 
-    bool hasActiveSubscription = std::any_of(
+    const bool hasActiveSubscription = std::any_of(
         _subscribedEvents.begin(),
         _subscribedEvents.end(),
         [](const std::pair<const events::Event::Type, bool>& subscription) {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,19 +44,19 @@ void WebsocketCameraStates::updateStateFromInput(
 {
     std::pair<bool, glm::dvec2> globalRotation = std::pair(false, glm::dvec2(0.0));
     std::pair<bool, double> zoom = std::pair(false, 0.0);
-    std::pair<bool, glm::dvec2> localRoll = std::pair(false, glm::dvec2(0.0));
-    std::pair<bool, glm::dvec2> globalRoll = std::pair(false, glm::dvec2(0.0));
+    std::pair<bool, double> localRoll = std::pair(false, 0.0);
+    std::pair<bool, double> globalRoll = std::pair(false, 0.0);
     std::pair<bool, glm::dvec2> localRotation = std::pair(false, glm::dvec2(0.0));
 
     if (!websocketInputStates.empty()) {
-        for (int i = 0; i < WebsocketInputState::MaxAxes; ++i) {
-            AxisInformation t = _axisMapping[i];
+        for (int i = 0; i < WebsocketInputState::MaxAxes; i++) {
+            const AxisInformation t = _axisMapping[i];
             if (t.type == AxisType::None) {
                 continue;
             }
 
             float value = websocketInputStates.axis(i);
-            bool hasValue = std::fabs(value) > t.deadzone;
+            const bool hasValue = std::fabs(value) > t.deadzone;
 
             if (!hasValue) {
                 value = 0.f;
@@ -93,19 +93,19 @@ void WebsocketCameraStates::updateStateFromInput(
                     break;
                 case AxisType::LocalRollX:
                     localRoll.first = hasValue || localRoll.first;
-                    localRoll.second.x = value;
+                    localRoll.second = value;
                     break;
                 case AxisType::LocalRollY:
                     localRoll.first = hasValue || localRoll.first;
-                    localRoll.second.y = value;
+                    localRoll.second = value;
                     break;
                 case AxisType::GlobalRollX:
                     globalRoll.first = hasValue || globalRoll.first;
-                    globalRoll.second.x = value;
+                    globalRoll.second = value;
                     break;
                 case AxisType::GlobalRollY:
                     globalRoll.first = hasValue || globalRoll.first;
-                    globalRoll.second.y = value;
+                    globalRoll.second = value;
                     break;
                 case AxisType::PanX:
                     localRotation.first = hasValue || localRotation.first;
@@ -127,7 +127,7 @@ void WebsocketCameraStates::updateStateFromInput(
     }
 
     if (zoom.first) {
-        _truckMovementState.velocity.set(glm::dvec2(zoom.second), deltaTime);
+        _truckMovementState.velocity.set(zoom.second, deltaTime);
     }
     else {
         _truckMovementState.velocity.decelerate(deltaTime);
@@ -198,7 +198,7 @@ void WebsocketCameraStates::clearButtonCommand(int button) {
             it = _buttonMapping.erase(it);
         }
         else {
-            ++it;
+            it++;
         }
     }
 }
@@ -206,7 +206,7 @@ void WebsocketCameraStates::clearButtonCommand(int button) {
 std::vector<std::string> WebsocketCameraStates::buttonCommand(int button) const {
     std::vector<std::string> result;
     auto itRange = _buttonMapping.equal_range(button);
-    for (auto it = itRange.first; it != itRange.second; ++it) {
+    for (auto it = itRange.first; it != itRange.second; it++) {
         result.push_back(it->second.command);
     }
     return result;

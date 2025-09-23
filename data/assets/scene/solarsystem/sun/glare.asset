@@ -17,14 +17,16 @@ local SunGlare = {
     Type = "RenderablePlaneImageLocal",
     Size = 41109609582.189,
     Origin = "Center",
-    Billboard = true,
+    Billboard = "Camera Position Normal",
     Texture = textures .. "halo.png",
     BlendMode = "Additive",
-    Opacity = 0.65
+    Opacity = 0.65,
+    MultiplyColor = { 0.92, 0.93, 0.84 }
   },
   GUI = {
     Name = "Sun Glare",
     Path = "/Solar System/Sun",
+    Focusable = false,
     Description = "Sun glare effect. Enabled by default instead of sun globe"
   }
 }
@@ -44,7 +46,6 @@ asset.export(SunGlare)
 
 asset.meta = {
   Name = "Sun Glare",
-  Version = "1.1",
   Description = "Image plane with sun glare effect",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

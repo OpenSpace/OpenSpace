@@ -19,6 +19,7 @@ local Trail = {
   GUI = {
     Name = "Sedna Trail",
     Path = "/Solar System/Dwarf Planets/Sedna",
+    Focusable = false,
     Description = "Trail of Sedna"
   }
 }
@@ -38,7 +39,6 @@ asset.export("Trail", Trail)
 
 asset.meta = {
   Name = "Sedna Trail",
-  Version = "1.0",
   Description = [[Trail of Sedna]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

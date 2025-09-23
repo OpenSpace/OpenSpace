@@ -16,6 +16,7 @@ local VenusBarycenter = {
   GUI = {
     Name = "Venus Barycenter",
     Path = "/Solar System/Planets/Venus",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -35,7 +36,6 @@ asset.export(VenusBarycenter)
 
 asset.meta = {
   Name = "Venus Transforms",
-  Version = "1.1",
   Description = "Spice translation for Venus Barycenter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

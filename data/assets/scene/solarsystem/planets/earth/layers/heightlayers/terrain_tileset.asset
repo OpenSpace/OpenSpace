@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Terrain_tileset",
   Name = "Terrain tileset",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("terrain_tileset.wms"),
   TilePixelSize = 129,
   Description = [[This globe layer presents elevation data at approximately 90m or 1km
@@ -30,7 +31,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "World Elevation (3D)",
-  Version = "1.1",
   Description = "Main web loaded height layer for Earth. This layer is hosted by ESRI",
   Author = "ESRI",
   URL = "https://www.arcgis.com/home/item.html?id=1b48cd3b6276416784fe90a68c580a89",

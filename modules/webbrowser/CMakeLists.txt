@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -29,7 +29,18 @@ set(WEBBROWSER_MODULE_NAME WebBrowser)
 set(WEBBROWSER_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBBROWSER_MODULE_PATH")
 
 # wanted by CEF
-set(PROJECT_ARCH "x86_64")
+if (CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
+  set(PROJECT_ARCH "arm64") # For macOS on ARM64
+  if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "13.3" CACHE STRING "Minimum OS X deployment version" FORCE) # check if this solves no type named 'in_place_t'
+    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  endif ()
+elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
+  set(PROJECT_ARCH "armv8-a") # For Ubuntu/Linux on ARM64 - or should it be aarch64? Builds OK on Ubuntu with armv8-a
+else ()
+  set(PROJECT_ARCH "x86_64") # Default to x86_64
+endif ()
 
 ##########################################################################################
 # Download CEF
@@ -38,7 +49,7 @@ set(PROJECT_ARCH "x86_64")
 # reserved. Use of this source code is governed by a BSD-style license that
 # can be found in the LICENSE file.
 
-cmake_minimum_required(VERSION 2.8.12.1)
+cmake_minimum_required(VERSION 3.10)
 
 # Use folders in the resulting project files.
 set_property(GLOBAL PROPERTY OS_FOLDERS ON)
@@ -48,7 +59,7 @@ set_property(GLOBAL PROPERTY OS_FOLDERS ON)
 cmake_policy(SET CMP0074 NEW)
 
 # Specify the CEF distribution version.
-set(CEF_VERSION "102.0.10+gf249b2e+chromium-102.0.5005.115")
+set(CEF_VERSION "127.3.5+g114ea2a+chromium-127.0.6533.120")
 
 # CEF Sandbox is not working with the latest Visual Studio, so we disable it for now.
 if (WIN32 OR UNIX)
@@ -90,7 +101,9 @@ add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper SYSTEM)
 
 mark_as_advanced(CEF_DEBUG_INFO_FLAG USE_ATL USE_OFFICIAL_BUILD_SANDBOX USE_SANDBOX)
 
-if (UNIX)
+if (WIN32)
+  target_compile_options(libcef_dll_wrapper PRIVATE "/W0")
+elseif (UNIX)
   target_compile_options(libcef_dll_wrapper PRIVATE "-w")
 endif ()
 
@@ -164,13 +177,14 @@ set(WEBBROWSER_RESOURCES_SRCS
 
 # Place Helper in separate executable
 # The naming style "<ApplicationName> Helper" is required by Chromium.
-if (OS_MACOSX)
-  set(CEF_HELPER_TARGET "OpenSpace Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
-else ()
-  set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
-endif ()
-set(CEF_HELPER_TARGET_GPU "OpenSpace Helper (GPU)" CACHE INTERNAL "CEF_HELPER_TARGET_GPU")
-set(CEF_HELPER_TARGET_RENDERER "OpenSpace Helper (Renderer)" CACHE INTERNAL "CEF_HELPER_TARGET_RENDERER")
+set(CEF_HELPER_TARGET "OpenSpace_Helper" CACHE INTERNAL "CEF_HELPER_TARGET")
+set(CEF_HELPER_TARGET_OUTPUT_NAME "OpenSpace Helper" CACHE INTERNAL "")
+
+set(CEF_HELPER_TARGET_GPU "OpenSpace_Helper_GPU" CACHE INTERNAL "CEF_HELPER_TARGET_GPU")
+set(CEF_HELPER_TARGET_GPU_OUTPUT_NAME "OpenSpace Helper (GPU)" CACHE INTERNAL "")
+
+set(CEF_HELPER_TARGET_RENDERER "OpenSpace_Helper_Renderer" CACHE INTERNAL "CEF_HELPER_TARGET_RENDERER")
+set(CEF_HELPER_TARGET_RENDERER_OUTPUT_NAME "OpenSpace Helper (Renderer)" CACHE INTERNAL "")
 
 #
 # CEF platform-specific config
@@ -190,6 +204,7 @@ if (OS_MACOSX)
     target_link_libraries(${target} libcef_dll_wrapper ${CEF_STANDARD_LIBS})
     set_target_properties(${target} PROPERTIES
       MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
+      OUTPUT_NAME "${target}_OUTPUT_NAME"
     )
 
     target_compile_options(${target} PRIVATE -Wno-deprecated-declarations)
@@ -203,15 +218,22 @@ if (OS_MACOSX)
 
   set_target_properties(${CEF_HELPER_TARGET_GPU} PROPERTIES FOLDER "Helper")
   set_target_properties(${CEF_HELPER_TARGET_RENDERER} PROPERTIES FOLDER "Helper")
-else()
+else ()
   message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
   set_openspace_cef_target_out_dir()
   add_executable(${CEF_HELPER_TARGET} ${WEBBROWSER_HELPER_SOURCES})
+
+  if (WIN32)
+    target_compile_options(${CEF_HELPER_TARGET} PRIVATE "/W0")
+  elseif (UNIX)
+    target_compile_options(${CEF_HELPER_TARGET} PRIVATE "-w")
+  endif ()
+
   set_executable_target_properties(${CEF_HELPER_TARGET})
   add_dependencies(${CEF_HELPER_TARGET} libcef_dll_wrapper)
   # Logical target used to link the libcef library.
   add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
-  target_link_libraries(${CEF_HELPER_TARGET} libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+  target_link_libraries(${CEF_HELPER_TARGET} PRIVATE libcef_lib libcef_dll_wrapper ${CEF_STANDARD_LIBS})
   if (OS_WINDOWS)
     # Add the custom manifest files to the executable.
     add_windows_cef_manifest("${CEF_TARGET_OUT_DIR}" "${WEBBROWSER_MODULE_PATH}" "${CEF_HELPER_TARGET}" "exe")
@@ -219,6 +241,7 @@ else()
 endif ()
 
 set_target_properties(${CEF_HELPER_TARGET} PROPERTIES FOLDER "Helper")
+set_openspace_compile_settings(${CEF_HELPER_TARGET})
 
 ##########################################################################################
 # Create OpenSpace module.
@@ -266,6 +289,7 @@ target_precompile_headers(${webbrowser_module} PRIVATE
 )
 
 set_target_properties(libcef_dll_wrapper PROPERTIES FOLDER "Helper")
+set_openspace_compile_settings(libcef_dll_wrapper)
 
 # Display CEF configuration settings.
 # PRINT_CEF_CONFIG()

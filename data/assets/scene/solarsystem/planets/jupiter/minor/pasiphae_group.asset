@@ -17,9 +17,7 @@ local Euporie = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -53,12 +51,14 @@ local EuporieTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Euporie Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Euporie"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Euporie",
+    Focusable = false
   }
 }
 
@@ -79,10 +79,17 @@ local EuporieLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Euporie Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Euporie",
+    Focusable = false,
     Description = "Label for Jupiter's moon Euporie (Pasiphae group)"
   }
 }
@@ -99,9 +106,7 @@ local S2003J18 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -135,12 +140,14 @@ local S2003J18Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "S/2003 J 18 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J18"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J18",
+    Focusable = false
   }
 }
 
@@ -161,10 +168,17 @@ local S2003J18Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2003 J 18 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J18",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2003 J 18 (Pasiphae group)"
   }
 }
@@ -181,9 +195,7 @@ local Helike = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -217,12 +229,14 @@ local HelikeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Helike Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Helike"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Helike",
+    Focusable = false
   }
 }
 
@@ -243,10 +257,17 @@ local HelikeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Helike Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Helike",
+    Focusable = false,
     Description = "Label for Jupiter's moon Helike (Pasiphae group)"
   }
 }
@@ -263,9 +284,7 @@ local Orthosie = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -299,12 +318,14 @@ local OrthosieTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Orthosie Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Orthosie"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Orthosie",
+    Focusable = false
   }
 }
 
@@ -325,10 +346,17 @@ local OrthosieLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Orthosie Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Orthosie",
+    Focusable = false,
     Description = "Label for Jupiter's moon Orthosie (Pasiphae group)"
   }
 }
@@ -345,9 +373,7 @@ local S2016J1 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -381,12 +407,14 @@ local S2016J1Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "S/2016 J 1 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J1"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J1",
+    Focusable = false
   }
 }
 
@@ -407,10 +435,17 @@ local S2016J1Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2016 J 1 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J1",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2016 J 1 (Pasiphae group)"
   }
 }
@@ -427,9 +462,7 @@ local S2003J15 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -463,12 +496,14 @@ local S2003J15Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "S/2003 J 15 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J15"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J15",
+    Focusable = false
   }
 }
 
@@ -489,10 +524,17 @@ local S2003J15Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2003 J 15 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J15",
+    Focusable = false,
     Description = "Label for Jupiter's moon OrthosiS/2003 J 15e (Pasiphae group)"
   }
 }
@@ -509,9 +551,7 @@ local Aoede = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -545,12 +585,14 @@ local AoedeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Aoede Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Aoede"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Aoede",
+    Focusable = false
   }
 }
 
@@ -571,10 +613,17 @@ local AoedeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Aoede Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Aoede",
+    Focusable = false,
     Description = "Label for Jupiter's moon Aoede (Pasiphae group)"
   }
 }
@@ -591,9 +640,7 @@ local Callirrhoe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 9000, 9000, 9000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 9000, 9000, 9000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -627,12 +674,14 @@ local CallirrhoeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Callirrhoe Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Callirrhoe"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Callirrhoe",
+    Focusable = false
   }
 }
 
@@ -653,10 +702,17 @@ local CallirrhoeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Callirrhoe Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Callirrhoe",
+    Focusable = false,
     Description = "Label for Jupiter's moon Callirrhoe (Pasiphae group)"
   }
 }
@@ -673,9 +729,7 @@ local Eurydome = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -709,12 +763,14 @@ local EurydomeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Eurydome Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Eurydome"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Eurydome",
+    Focusable = false
   }
 }
 
@@ -735,10 +791,17 @@ local EurydomeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Eurydome Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Eurydome",
+    Focusable = false,
     Description = "Label for Jupiter's moon Eurydome (Pasiphae group)"
   }
 }
@@ -755,9 +818,7 @@ local Kore = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -791,12 +852,14 @@ local KoreTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Kore Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Kore"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Kore",
+    Focusable = false
   }
 }
 
@@ -817,10 +880,17 @@ local KoreLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Kore Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Kore",
+    Focusable = false,
     Description = "Label for Jupiter's moon Kore (Pasiphae group)"
   }
 }
@@ -837,9 +907,7 @@ local Cyllene = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -873,12 +941,14 @@ local CylleneTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Cyllene Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Cyllene"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Cyllene",
+    Focusable = false
   }
 }
 
@@ -899,10 +969,17 @@ local CylleneLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Cyllene Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Cyllene",
+    Focusable = false,
     Description = "Label for Jupiter's moon Cyllene (Pasiphae group)"
   }
 }
@@ -919,9 +996,7 @@ local S2011J2 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -955,12 +1030,14 @@ local S2011J2Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "S/2011 J 2 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2011J2"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2011J2",
+    Focusable = false
   }
 }
 
@@ -981,10 +1058,17 @@ local S2011J2Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2011 J 2 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2011J2",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2011 J 2 (Pasiphae group)"
   }
 }
@@ -1001,9 +1085,7 @@ local S2017J1 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1037,12 +1119,14 @@ local S2017J1Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "S/2017 J 1 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J1"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J1",
+    Focusable = false
   }
 }
 
@@ -1063,10 +1147,17 @@ local S2017J1Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2017 J 1 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J1",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2017 J 1 (Pasiphae group)"
   }
 }
@@ -1083,9 +1174,7 @@ local S2003J4 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1119,12 +1208,14 @@ local S2003J4Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "S/2003 J 4 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J4"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J4",
+    Focusable = false
   }
 }
 
@@ -1145,10 +1236,17 @@ local S2003J4Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2003 J 4 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J4",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2003 J 4 (Pasiphae group)"
   }
 }
@@ -1165,9 +1263,7 @@ local Pasiphae = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 60000, 60000, 60000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 60000, 60000, 60000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1201,12 +1297,14 @@ local PasiphaeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Pasiphae Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Pasiphae"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Pasiphae",
+    Focusable = false
   }
 }
 
@@ -1227,10 +1325,17 @@ local PasiphaeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Pasiphae Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Pasiphae",
+    Focusable = false,
     Description = "Label for Jupiter's moon Pasiphae (Pasiphae group)"
   }
 }
@@ -1247,9 +1352,7 @@ local Hegemone = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1283,12 +1386,14 @@ local HegemoneTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Hegemone Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Hegemone"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Hegemone",
+    Focusable = false
   }
 }
 
@@ -1309,10 +1414,17 @@ local HegemoneLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Hegemone Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Hegemone",
+    Focusable = false,
     Description = "Label for Jupiter's moon Hegemone (Pasiphae group)"
   }
 }
@@ -1329,9 +1441,7 @@ local Sinope = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 38000, 38000, 38000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 38000, 38000, 38000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1365,12 +1475,14 @@ local SinopeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Sinope Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sinope"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sinope",
+    Focusable = false
   }
 }
 
@@ -1391,10 +1503,17 @@ local SinopeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Sinope Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sinope",
+    Focusable = false,
     Description = "Label for Jupiter's moon Sinope (Pasiphae group)"
   }
 }
@@ -1411,9 +1530,7 @@ local Sponde = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1447,12 +1564,14 @@ local SpondeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Sponde Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sponde"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sponde",
+    Focusable = false
   }
 }
 
@@ -1473,10 +1592,17 @@ local SpondeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Sponde Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Sponde",
+    Focusable = false,
     Description = "Label for Jupiter's moon Sponde (Pasiphae group)"
   }
 }
@@ -1493,9 +1619,7 @@ local Autonoe = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1529,12 +1653,14 @@ local AutonoeTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Autonoe Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Autonoe"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Autonoe",
+    Focusable = false
   }
 }
 
@@ -1555,10 +1681,17 @@ local AutonoeLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Autonoe Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Autonoe",
+    Focusable = false,
     Description = "Label for Jupiter's moon Autonoe (Pasiphae group)"
   }
 }
@@ -1575,9 +1708,7 @@ local Megaclite = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1611,12 +1742,14 @@ local MegacliteTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Megaclite Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Megaclite"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Megaclite",
+    Focusable = false
   }
 }
 
@@ -1637,10 +1770,17 @@ local MegacliteLabel = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "Megaclite Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/Megaclite",
+    Focusable = false,
     Description = "Label for Jupiter's moon Megaclite (Pasiphae group)"
   }
 }
@@ -1657,9 +1797,7 @@ local S2016J4 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 1000, 1000, 1000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 1000, 1000, 1000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1693,12 +1831,14 @@ local S2016J4Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "S/2016 J 4 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J4"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J4",
+    Focusable = false
   }
 }
 
@@ -1719,10 +1859,17 @@ local S2016J4Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2016 J 4 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2016J4",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2016 J 4 (Pasiphae group)"
   }
 }
@@ -1739,9 +1886,7 @@ local S2017J6 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1775,12 +1920,14 @@ local S2017J6Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "S/2017 J 6 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J6"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J6",
+    Focusable = false
   }
 }
 
@@ -1801,10 +1948,17 @@ local S2017J6Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2017 J 6 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2017J6",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2017 J 6 (Pasiphae group)"
   }
 }
@@ -1821,9 +1975,7 @@ local S2003J23 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -1857,12 +2009,14 @@ local S2003J23Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_pasiphae",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "S/2003 J 23 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J23"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J23",
+    Focusable = false
   }
 }
 
@@ -1883,10 +2037,17 @@ local S2003J23Label = {
     FadeDistances = { 1.5, 140.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_pasiphae"
+  },
   GUI = {
     Name = "S/2003 J 23 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Pasiphae Group/S2003J23",
+    Focusable = false,
     Description = "Label for Jupiter's moon S/2003 J 23 (Pasiphae group)"
   }
 }
@@ -2173,14 +2334,14 @@ asset.export(S2003J23Trail)
 asset.export(S2003J23Label)
 
 
+
 asset.meta = {
-    Name = "Jupiter Pasiphae Group Moons",
-    Version = "1.0",
-    Description = [[Procedural Globe asset containing Jupiter's Pasiphae Group moons:
-      Euporie, S2003J18, Helike, Orthosie, S2016J1, S2003J15, Aoede, Callirrhoe, Eurydome,
-      Kore, Cyllene, S2011J2, S2017J1, S2003J4, Pasiphae, Hegemone, Sinope, Sponde,
-      Autonoe and Megaclite. Blank globes and SPICE trails are generated for each moon]],
-    Author = "OpenSpace Team",
-    URL = "http://openspaceproject.com",
-    License = "MIT license"
+  Name = "Jupiter Pasiphae Group Moons",
+  Description = [[Procedural Globe asset containing Jupiter's Pasiphae Group moons:
+    Euporie, S2003J18, Helike, Orthosie, S2016J1, S2003J15, Aoede, Callirrhoe, Eurydome,
+    Kore, Cyllene, S2011J2, S2017J1, S2003J4, Pasiphae, Hegemone, Sinope, Sponde,
+    Autonoe and Megaclite. Blank globes and SPICE trails are generated for each moon]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
 }

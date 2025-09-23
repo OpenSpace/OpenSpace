@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_WEBBROWSER___WEBBROWSERMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <chrono>
@@ -49,7 +50,7 @@ public:
     static constexpr const char* Name = "WebBrowser";
 
     WebBrowserModule();
-    ~WebBrowserModule() override = default;
+    ~WebBrowserModule() override;
 
     void addBrowser(BrowserInstance*);
     void removeBrowser(BrowserInstance*);
@@ -58,27 +59,24 @@ public:
     void detachEventHandler();
     bool isEnabled() const;
 
+    static bool canUseAcceleratedRendering();
+
+    std::vector<documentation::Documentation> documentations() const override;
+    static documentation::Documentation Documentation();
+
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
     void internalDeinitialize() override;
 
 private:
-    /**
-     * Try to find the CEF Helper executable. It looks in the bin/openspace folder.
-     * Therefore, if you change that this might cause a crash here.
-     *
-     * \return the absolute path to the file
-     */
-    std::filesystem::path findHelperExecutable();
-
     properties::BoolProperty _updateBrowserBetweenRenderables;
     properties::FloatProperty _browserUpdateInterval;
 
     std::vector<BrowserInstance*> _browsers;
     std::unique_ptr<EventHandler> _eventHandler;
     std::unique_ptr<CefHost> _cefHost;
-    std::filesystem::path _webHelperLocation;
     bool _enabled = true;
+    static inline bool _disableAcceleratedRendering = false;
 };
 
 } // namespace openspace

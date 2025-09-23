@@ -1,5 +1,5 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
-local moonAsset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
 
@@ -13,19 +13,19 @@ local model = asset.resource({
 
 local Apollo17Lem = {
   Identifier = "Apollo17Lem",
-  Parent = moonAsset.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moonAsset.Moon.Identifier,
-      Longitude = -329.22833,
+      Globe = moon.Moon.Identifier,
+      Longitude = 30.77167,
       Latitude = 20.19092,
       UseHeightmap = true
     },
     Rotation = {
       Type = "GlobeRotation",
-      Globe = moonAsset.Moon.Identifier,
-      Longitude = -329.22833,
+      Globe = moon.Moon.Identifier,
+      Longitude = 30.77167,
       Latitude = 20.19092
     }
   },
@@ -78,3 +78,14 @@ end)
 
 asset.export(Apollo17Lem)
 asset.export(Apollo17LemModel)
+
+
+
+asset.meta = {
+  Name = "Apollo 17 Lunar Excursion Module",
+  Description = [[This asset provides a 3D model of the Apollo Lunar Module/Lunar
+    Excursion Module of Apollo 17.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -6,7 +6,7 @@ local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Jupiter Trojan Asteroid)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_jupiter_trojan_asteroid",
-  Version = 3
+  Version = 4
 })
 
 
@@ -17,14 +17,15 @@ local Object = {
     Type = "RenderableOrbitalKepler",
     Path = sssb .. "sssb_data_jupiter_trojan_asteroid.csv",
     Format = "SBDB",
-    Segments = 200,
     SegmentQuality = 1,
     Color = { 0.5, 0.8, 0.5 },
-    TrailFade = 5
+    TrailFade = 5,
+    PointSizeExponent = 9.2
   },
   GUI = {
     Name = "Jupiter Trojan Asteroids",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = [[Asteroids trapped in Jupiter's L4/L5 Lagrange points (semimajor axis
       of between 4.6 and 5.5 AU), with an eccentricity of less than 0.3.]]
   }
@@ -45,7 +46,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Jupiter Trojan Asteroids",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     Jupiter Trojan group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

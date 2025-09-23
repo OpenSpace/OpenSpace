@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <QWidget>
 
+#include <sgct/config.h>
 #include <vector>
 
 class QFrame;
@@ -41,35 +42,19 @@ public:
      * Constructor for DisplayWindowUnion class, which manages the overall control layout
      * including monitorBox, multiple WindowControl columns, and additional controls.
      *
-     * \param monitorSizeList A vector containing QRect objects containing pixel dims of
-     *        each monitor
+     * \param monitorResolutions A vector containing QRect objects containing pixel dims
+     *        of each monitor
      * \param nMaxWindows The maximum number of windows allowed (depends on the number of
      *        monitors in the system)
-     * \param winColors An array of QColor objects for window colors. The indexing of this
-     *        array matches the window indexing used elsewhere in the class. This allows
-     *        for a unique color for each window
-     * \param resetToDefault If set to true, all display and window settings will be
-     *        initialized to their default values
      * \param parent The parent to which this widget belongs
      */
-    DisplayWindowUnion(const std::vector<QRect>& monitorSizeList,
-        int nMaxWindows, const std::array<QColor, 4>& windowColors, bool resetToDefault,
-        QWidget* parent = nullptr);
+    DisplayWindowUnion(const std::vector<QRect>& monitorResolutions,
+        int nMaxWindows, QWidget* parent = nullptr);
 
-    /**
-     * Returns a vector of pointers to the WindowControl objects for all visible windows.
-     *
-     * \return The vector of pointers of WindowControl objects
-     */
-    std::vector<WindowControl*> activeWindowControls() const;
+    void initialize(const std::vector<QRect>& monitorSizeList,
+        const sgct::config::Cluster& cluster);
 
-    /**
-     * Returns a vector of pointers to the WindowControl objects for all windows, whether
-     * they are visible or not.
-     *
-     * \return The vector of pointers of all WindowControl objects
-     */
-    std::vector<WindowControl*>& windowControls();
+    void applyWindowSettings(std::vector<sgct::config::Window>& windows);
 
     /**
      * When called will add a new window to the set of windows, which will, in turn, send
@@ -82,14 +67,6 @@ public:
      * turn, send out all of the corresponding signals described below.
      */
     void removeWindow();
-
-    /**
-     * Returns the number of windows that are displayed (there can be more window
-     * objects than are currently displayed).
-     *
-     * \return The number of displayed windows in the current configuration
-     */
-    unsigned int numWindowsDisplayed() const;
 
 signals:
     /**
@@ -109,13 +86,11 @@ signals:
     void nWindowsChanged(int newCount);
 
 private:
-    void createWidgets(int nMaxWindows, std::vector<QRect> monitorResolutions,
-        std::array<QColor, 4> windowColors, bool resetToDefault);
-    void showWindows();
+    void updateWindows();
 
     unsigned int _nWindowsDisplayed = 0;
 
-    std::vector<WindowControl*> _windowControl;
+    std::vector<WindowControl*> _windowControls;
     QPushButton* _addWindowButton = nullptr;
     QPushButton* _removeWindowButton = nullptr;
     std::vector<QFrame*> _frameBorderLines;

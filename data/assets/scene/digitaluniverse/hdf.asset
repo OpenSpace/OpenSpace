@@ -27,14 +27,12 @@ local Object = {
     Enabled = false,
     Opacity = 1.0,
     File = HUDFSpeck .. "hudf.speck",
-    Texture = circle .. "circle.png",
+    Texture = {
+      File = circle .. "circle.png",
+    },
     Coloring = {
       ColorMapping = {
-        File = ColorMap .. "hudf.cmap",
-        ParameterOptions = {
-          { Key = "proximity", Range = { 1.0, 25.0 } },
-          { Key = "redshift", Range = { 0.0, 0.075 } }
-        }
+        File = ColorMap .. "hudf.cmap"
       }
     },
     Unit = "Mpc",
@@ -45,6 +43,7 @@ local Object = {
   GUI = {
     Name = "Hubble Deep Field",
     Path = "/Universe/Galaxies",
+    Focusable = false,
     Description = [[
       Hubble Ultra Deep Field galaxy survey <br><br>
       Data Reference: Hubble Ultra Deep Field 2012 program (Ellis+, Koekemoer+, 2013)
@@ -67,7 +66,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Hubble Ultra Deep Field",
-  Version = "2.0",
   Description = "Hubble Ultra Deep Field galaxy survey",
   Author = "Frank Summers (STScI), Brian Abbott (AMNH)",
   URL = "http://www.haydenplanetarium.org/universe",

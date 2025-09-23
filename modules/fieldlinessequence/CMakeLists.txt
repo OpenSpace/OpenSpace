@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -26,6 +26,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   rendering/renderablefieldlinessequence.h
+  tasks/kameleonvolumetofieldlinestask.h
   util/fieldlinesstate.h
   util/commons.h
   util/kameleonfieldlinehelper.h
@@ -34,6 +35,7 @@ source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   rendering/renderablefieldlinessequence.cpp
+  tasks/kameleonvolumetofieldlinestask.cpp
   util/fieldlinesstate.cpp
   util/commons.cpp
   util/kameleonfieldlinehelper.cpp

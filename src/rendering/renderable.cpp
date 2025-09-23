@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/ellipsoid.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
@@ -45,47 +46,55 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "This setting determines whether this object will be visible or not",
-        // @VISIBILITY(0.33)
+        "Determines whether this object will be visible or not.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
         "Type",
-        "Renderable Type",
-        "This tells the type of the renderable",
-        // @VISIBILITY(3.4)
+        "Renderable type",
+        "The type of the renderable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderableRenderBinModeInfo =
     {
         "RenderBinMode",
-        "Render Bin Mode",
-        "This value specifies if the renderable should be rendered in the Background,"
-        "Opaque, Pre/PostDeferredTransparency, or Overlay rendering step",
-        // @VISIBILITY(3.2)
+        "Render bin mode",
+        "A value that specifies if the renderable should be rendered in the Background, "
+        "Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DimInAtmosphereInfo = {
         "DimInAtmosphere",
-        "Dim In Atmosphere",
-        "Enables/Disables if the object should be dimmed when the camera is in the "
-        "sunny part of an atmosphere",
+        "Dim in atmosphere",
+        "Decides if the object should be dimmed (i.e. faded out) when the camera is in "
+        "the sunny part of an atmosphere.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This is the base class for all `Renderable` types. These objects are responsible
+    // for rendering the visuals for scene graph nodes in the 3D rendering. Different
+    // `Renderable` types create various kinds of visuals, sometimes based on external
+    // data files or resources (such as images, 3D models, color maps, or datasets).
+    //
+    // A `Renderable` is created by adding it to a scene graph node in an asset. In
+    // general, this places the rendered object at the position of that scene graph node,
+    // unless otherwise specified by the specific `Renderable` type.
+    //
+    // Each `Renderable` type typically also includes a number of settings to alter its
+    // appearance. See the documentation for the individual types for more details.
     struct [[codegen::Dictionary(Renderable)]] Parameters {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
 
         // This value determines the opacity of this renderable. A value of 0 means
-        // completely transparent
+        // completely transparent.
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
 
         // A single tag or a list of tags that this renderable will respond to when
-        // setting properties
+        // setting properties.
         std::optional<std::variant<std::vector<std::string>, std::string>> tag;
 
         // [[codegen::verbatim(RenderableTypeInfo.description)]]
@@ -96,8 +105,9 @@ namespace {
             Background,
             Opaque,
             PreDeferredTransparent,
+            Overlay,
             PostDeferredTransparent,
-            Overlay
+            Sticker
         };
 
         // [[codegen::verbatim(RenderableRenderBinModeInfo.description)]]
@@ -116,8 +126,10 @@ documentation::Documentation Renderable::Documentation() {
 }
 
 ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
-                                                             ghoul::Dictionary dictionary)
+                                                      const ghoul::Dictionary& dictionary)
 {
+    ZoneScoped;
+
     if (!dictionary.hasKey(KeyType)) {
         throw ghoul::RuntimeError("Tried to create Renderable but no 'Type' was found");
     }
@@ -125,7 +137,7 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
     // This should be done in the constructor instead with noexhaustive
     documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
-    std::string renderableType = dictionary.value<std::string>(KeyType);
+    const std::string renderableType = dictionary.value<std::string>(KeyType);
     ghoul::TemplateFactory<Renderable>* factory =
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(factory, "Renderable factory did not exist");
@@ -142,7 +154,6 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings settings)
     : properties::PropertyOwner({ "Renderable" })
-    , Fadeable()
     , _enabled(EnabledInfo, true)
     , _renderableType(RenderableTypeInfo, "Renderable")
     , _dimInAtmosphere(DimInAtmosphereInfo, false)
@@ -249,6 +260,10 @@ SurfacePositionHandle Renderable::calculateSurfacePositionHandle(
     };
 }
 
+Ellipsoid Renderable::ellipsoid() const {
+    return Ellipsoid(glm::dvec3(_interactionSphere));
+}
+
 bool Renderable::renderedWithDesiredData() const {
     return true;
 }
@@ -340,29 +355,29 @@ bool Renderable::hasOverrideRenderBin() const noexcept {
 glm::dmat4 Renderable::calcModelTransform(const RenderData& data,
                                           const AlternativeTransform& altTransform) const
 {
-    glm::dvec3 translation =
+    const glm::dvec3 translation =
         altTransform.translation.value_or(data.modelTransform.translation);
-    glm::dmat3 rotation = altTransform.rotation.value_or(data.modelTransform.rotation);
-    glm::dvec3 scale = altTransform.scale.value_or(data.modelTransform.scale);
+    const glm::dmat3 rot = altTransform.rotation.value_or(data.modelTransform.rotation);
+    const glm::dvec3 scale = altTransform.scale.value_or(data.modelTransform.scale);
 
     return glm::translate(glm::dmat4(1.0), translation) *
-        glm::dmat4(rotation) *
+        glm::dmat4(rot) *
         glm::scale(glm::dmat4(1.0), scale);
 }
 
 glm::dmat4 Renderable::calcModelViewTransform(const RenderData& data,
-                                           std::optional<glm::dmat4> modelTransform) const
+                                    const std::optional<glm::dmat4>& modelTransform) const
 {
-    glm::dmat4 modelMatrix = modelTransform.value_or(calcModelTransform(data));
+    const glm::dmat4 modelMatrix = modelTransform.value_or(calcModelTransform(data));
     return data.camera.combinedViewMatrix() * modelMatrix;
 }
 
 glm::dmat4 Renderable::calcModelViewProjectionTransform(const RenderData& data,
-                                           std::optional<glm::dmat4> modelTransform) const
+                                    const std::optional<glm::dmat4>& modelTransform) const
 {
-    glm::dmat4 modelMatrix = modelTransform.value_or(calcModelTransform(data));
-    glm::dmat4 viewMatrix = data.camera.combinedViewMatrix();
-    glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
+    const glm::dmat4& modelMatrix = modelTransform.value_or(calcModelTransform(data));
+    const glm::dmat4 viewMatrix = data.camera.combinedViewMatrix();
+    const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
     return glm::dmat4(projectionMatrix * viewMatrix * modelMatrix);
 }
 
@@ -370,9 +385,9 @@ std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> Renderable::calcAllTransforms(
                                                                    const RenderData& data,
                                       const AlternativeTransform& altModelTransform) const
 {
-    glm::dmat4 modelTransform = calcModelTransform(data, altModelTransform);
-    glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
-    glm::dmat4 modelViewProjectionTransform = calcModelViewProjectionTransform(
+    const glm::dmat4 modelTransform = calcModelTransform(data, altModelTransform);
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
+    const glm::dmat4 modelViewProjectionTransform = calcModelViewProjectionTransform(
         data,
         modelTransform
     );

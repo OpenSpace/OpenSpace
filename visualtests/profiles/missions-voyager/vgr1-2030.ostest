@@ -1,0 +1,27 @@
+{
+  "profile": "missions/voyager",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Voyager_1",
+        "position": [
+          16.15234375,
+          8.796875,
+          11.640625
+        ],
+        "pitch": -0.00038644289794921403,
+        "up": [
+          -0.61717568933293,
+          0.7232657498335403,
+          0.30980772039145393
+        ],
+        "yaw": -0.00011545264177548087,
+        "timestamp": "2030 JUL 08 08:04:50"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

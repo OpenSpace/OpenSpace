@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,14 +35,13 @@
 #include <QMessageBox>
 #include <QPushButton>
 
-SettingsDialog::SettingsDialog(openspace::Settings settings,
-                               QWidget* parent)
+SettingsDialog::SettingsDialog(openspace::Settings settings, QWidget* parent)
     : QDialog(parent)
-    , _currentEdit(settings)
+    , _currentEdit(std::move(settings))
 {
     setWindowTitle("Settings");
     createWidgets();
-    loadFromSettings(settings);
+    loadFromSettings(_currentEdit);
 
     // Setting the startup values for the control will have caused the Save button to be
     // enabled, so we need to manually disable it again here
@@ -56,8 +55,8 @@ void SettingsDialog::createWidgets() {
     // | Profile                                             |
     // | Starting Profile:          | [oooooooooooooooooooo] |
     // | [] Keep Last Profile                                |
-    // | Configuration                                       |
-    // | Starting Configuration:    | [oooooooooooooooooooo] |
+    // | Window Options                                      |
+    // | Starting Window Option:    | [oooooooooooooooooooo] |
     // | [] Keep Last Configuration                          |
     // | User Interface                                      |
     // | Property Visibility        | DDDDDDDDDDDDDDDDDDDDD> |
@@ -91,7 +90,7 @@ void SettingsDialog::createWidgets() {
             _profile,
             &QLineEdit::textChanged,
             [this]() {
-                std::string v = _profile->text().toStdString();
+                const std::string v = _profile->text().toStdString();
                 if (v.empty()) {
                     _currentEdit.profile = std::nullopt;
                 }
@@ -109,9 +108,14 @@ void SettingsDialog::createWidgets() {
             "If this setting is checked, the application will remember the profile that "
             "was loaded into OpenSpace and will use it at the next startup as well"
         );
+        
         connect(
             _rememberLastProfile,
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
+            &QCheckBox::checkStateChanged,
+#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
             &QCheckBox::stateChanged,
+#endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
                 if (_rememberLastProfile->isChecked()) {
                     _currentEdit.rememberLastProfile = true;
@@ -130,11 +134,11 @@ void SettingsDialog::createWidgets() {
     layout->addWidget(new Line(), 3, 0, 1, 2);
 
     {
-        QLabel* label = new QLabel("Configuration");
+        QLabel* label = new QLabel("Window Configuration");
         label->setObjectName("heading");
         layout->addWidget(label, 4, 0, 1, 2);
 
-        QLabel* conf = new QLabel("Starting Configuration");
+        QLabel* conf = new QLabel("Starting Window Configuration");
         conf->setToolTip(
             "With this setting, you can choose a window configuration that will be "
             "loaded the next time you start the application"
@@ -147,7 +151,7 @@ void SettingsDialog::createWidgets() {
             _configuration,
             &QLineEdit::textChanged,
             [this]() {
-                std::string v = _configuration->text().toStdString();
+                const std::string v = _configuration->text().toStdString();
                 if (v.empty()) {
                     _currentEdit.configuration = std::nullopt;
                 }
@@ -167,7 +171,11 @@ void SettingsDialog::createWidgets() {
         );
         connect(
             _rememberLastConfiguration,
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
+            &QCheckBox::checkStateChanged,
+#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
             &QCheckBox::stateChanged,
+#endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
                 if (_rememberLastConfiguration->isChecked()) {
                     _currentEdit.rememberLastConfiguration = true;
@@ -231,6 +239,7 @@ void SettingsDialog::createWidgets() {
                 updateSaveButton();
             }
         );
+        _propertyVisibility->setObjectName("dropdown");
         layout->addWidget(_propertyVisibility, 9, 1);
 
         _bypassLauncher = new QCheckBox("Bypass Launcher");
@@ -241,7 +250,11 @@ void SettingsDialog::createWidgets() {
         );
         connect(
             _bypassLauncher,
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
+            &QCheckBox::checkStateChanged,
+#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
             &QCheckBox::stateChanged,
+#endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
                 if (_bypassLauncher->isChecked()) {
                     _currentEdit.bypassLauncher = _bypassLauncher->isChecked();
@@ -300,6 +313,7 @@ void SettingsDialog::createWidgets() {
                 updateSaveButton();
             }
         );
+        _layerServer->setObjectName("dropdown");
         layout->addWidget(_layerServer, 14, 1);
 
         _mrf.isEnabled = new QCheckBox("Enable MRF Caching");
@@ -312,7 +326,11 @@ void SettingsDialog::createWidgets() {
         );
         connect(
             _mrf.isEnabled,
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
+            &QCheckBox::checkStateChanged,
+#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
             &QCheckBox::stateChanged,
+#endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
                 if (_mrf.isEnabled->isChecked()) {
                     _currentEdit.mrf.isEnabled = _mrf.isEnabled->isChecked();
@@ -392,7 +410,7 @@ void SettingsDialog::loadFromSettings(const openspace::Settings& settings) {
 
     if (settings.visibility.has_value()) {
         using Visibility = openspace::properties::Property::Visibility;
-        Visibility vis = *settings.visibility;
+        const Visibility vis = *settings.visibility;
         switch (vis) {
             case Visibility::NoviceUser:
                 _propertyVisibility->setCurrentText("Novice User");
@@ -417,9 +435,9 @@ void SettingsDialog::loadFromSettings(const openspace::Settings& settings) {
     }
 
     if (settings.layerServer.has_value()) {
-        openspace::Configuration::LayerServer server = *settings.layerServer;
+        Configuration::LayerServer server = *settings.layerServer;
         _layerServer->setCurrentText(
-            QString::fromStdString(openspace::layerServerToString(server))
+            QString::fromStdString(openspace::layerServerToString(std::move(server)))
         );
     }
 

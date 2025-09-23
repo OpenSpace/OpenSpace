@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 
 namespace openspace {
 
@@ -40,9 +40,7 @@ public:
     DashboardItemPropertyValue(const ghoul::Dictionary& dictionary);
     ~DashboardItemPropertyValue() override = default;
 
-    void render(glm::vec2& penPosition) override;
-
-    glm::vec2 size() const override;
+    void update() override;
 
     static documentation::Documentation Documentation();
 

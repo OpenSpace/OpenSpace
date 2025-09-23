@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,18 +44,15 @@ public:
     explicit RenderablePolygonCloud(const ghoul::Dictionary& dictionary);
     ~RenderablePolygonCloud() override = default;
 
-    void initializeGL() override;
     void deinitializeGL() override;
 
     static documentation::Documentation Documentation();
 
 private:
-    void createPolygonTexture();
+    void initializeCustomTexture() override;
     void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
         GLuint textureHeight);
-    void renderPolygonGeometry(GLuint vao);
-
-    void bindTextureForRendering() const override;
+    void renderPolygonGeometry(GLuint vao) const;
 
     int _nPolygonSides = 3;
 
@@ -63,6 +60,8 @@ private:
 
     GLuint _polygonVao = 0;
     GLuint _polygonVbo = 0;
+
+    bool _textureIsInitialized = false;
 };
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <QDialog>
 
+class QComboBox;
 class QDialogButtonBox;
 class QLabel;
 class QListWidget;
@@ -40,8 +41,8 @@ public:
      * Constructor for deltaTimes class.
      *
      * \param parent Pointer to parent Qt widget
-     * \param profile The list of delta times containing all data of the new or imported
-     *        profile
+     * \param deltaTimes The list of delta times containing all data of the new or
+     *        imported profile
      */
     DeltaTimesDialog(QWidget* parent, std::vector<double>* deltaTimes);
 
@@ -65,7 +66,7 @@ private:
     void createWidgets();
 
     void listItemSelected();
-    void valueChanged(const QString& text);
+    void currentUnitChanged(int index);
     void saveDeltaTimeValue();
     void discardDeltaTimeValue();
     void addDeltaTimeValue();
@@ -80,7 +81,7 @@ private:
      */
     void transitionEditMode(int index, bool state);
 
-    void setLabelForKey(int index, bool editMode, std::string color);
+    void setLabelForKey(int index, bool editMode, std::string_view color);
     bool isLineEmpty(int index);
 
     std::vector<double>* _deltaTimes = nullptr;
@@ -89,16 +90,15 @@ private:
 
     QListWidget* _listWidget = nullptr;
     QLabel* _adjustLabel = nullptr;
-    QLineEdit* _seconds = nullptr;
-    QLabel* _value = nullptr;
+    QLineEdit* _value = nullptr;
+    QComboBox* _valueUnit = nullptr;
+    int _previousValueUnit = 0;
 
     QPushButton* _addButton = nullptr;
     QPushButton* _removeButton = nullptr;
     QPushButton* _saveButton = nullptr;
     QPushButton* _discardButton = nullptr;
     QDialogButtonBox* _buttonBox = nullptr;
-
-    QLabel* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___DELTATIMESDIALOG___H__

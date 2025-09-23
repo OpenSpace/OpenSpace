@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,12 +35,12 @@ class Waypoint;
 
 class PathCurve {
 public:
-    struct InsufficientPrecisionError : public ghoul::RuntimeError {
-        explicit InsufficientPrecisionError(std::string msg);
+    struct InsufficientPrecisionError final : public ghoul::RuntimeError {
+        explicit InsufficientPrecisionError(std::string error);
     };
 
-    struct TooShortPathError : public ghoul::RuntimeError {
-        explicit TooShortPathError(std::string msg);
+    struct TooShortPathError final : public ghoul::RuntimeError {
+        explicit TooShortPathError(std::string error);
     };
 
     virtual ~PathCurve() = 0;

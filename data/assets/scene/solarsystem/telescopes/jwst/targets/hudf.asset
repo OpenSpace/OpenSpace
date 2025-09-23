@@ -77,12 +77,10 @@ asset.onInitialize(function()
   openspace.addScreenSpaceRenderable(HUDFImage)
 
   openspace.addSceneGraphNode(HUDFPosition)
-  openspace.addSceneGraphNode(HUDFImage)
   openspace.addSceneGraphNode(HUDFJWSTLine)
 end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(HUDFPosition)
-  openspace.removeSceneGraphNode(HUDFImage)
   openspace.removeSceneGraphNode(HUDFJWSTLine)
 
   openspace.removeScreenSpaceRenderable(HUDFImage)
@@ -96,7 +94,6 @@ asset.export(HUDFPosition)
 
 asset.meta = {
   Name = "Hubble Ultra Deep Field Image and Line",
-  Version = "1.0",
   Description = [[
     Screenspace image of the Hubble Ultra Deep Field and a line from the
     James Webb Space Telescope to the Hubble Ultra Deep Field position.

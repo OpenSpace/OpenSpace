@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,8 @@
 #ifndef __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
 #define __OPENSPACE_CORE___NAVIGATIONHANDLER___H__
 
-#include <openspace/documentation/documentation.h>
+#include <openspace/properties/propertyowner.h>
+
 #include <openspace/interaction/joystickcamerastates.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/interaction/mouseinputstate.h>
@@ -34,13 +35,11 @@
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/navigation/pathnavigator.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/scene/profile.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
-#include <optional>
 
 namespace openspace {
     class Camera;
@@ -52,12 +51,12 @@ namespace openspace::scripting { struct LuaLibrary; }
 namespace openspace::interaction {
 
 struct JoystickInputStates;
-struct NavigationState;
-struct NodeCameraStateSpec;
-struct WebsocketInputStates;
 class KeyframeNavigator;
+struct NavigationState;
 class OrbitalNavigator;
 class PathNavigator;
+struct NodeCameraStateSpec;
+struct WebsocketInputStates;
 
 class NavigationHandler : public properties::PropertyOwner {
 public:
@@ -85,7 +84,9 @@ public:
     OrbitalNavigator& orbitalNavigator();
     KeyframeNavigator& keyframeNavigator();
     PathNavigator& pathNavigator();
+
     bool isKeyFrameInteractionEnabled() const;
+    float jumpToFadeDuration() const;
     float interpolationTime() const;
 
     // Callback functions
@@ -98,6 +99,8 @@ public:
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
+
+    void renderOverlay() const;
 
     std::vector<std::string> listAllJoysticks() const;
     void setJoystickAxisMapping(std::string joystickName,
@@ -143,9 +146,9 @@ public:
     NavigationState navigationState(const SceneGraphNode& referenceFrame) const;
 
     void saveNavigationState(const std::filesystem::path& filepath,
-        const std::string& referenceFrameIdentifier);
+        const std::string& referenceFrameIdentifier) const;
 
-    void loadNavigationState(const std::string& filepath);
+    void loadNavigationState(const std::string& filepath, bool useTimeStamp);
 
     /**
      * Set camera state from a provided navigation state next frame. The actual position
@@ -164,6 +167,18 @@ public:
      * \param spec The node specification from which to compute the resulting camera pose
      */
     void setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec);
+
+    /**
+     * Trigger a transition script after first fading out the rendering, and fading in
+     * the rendering when the script is finished. One example use case could be to fade
+     * out, move the camera to another focus node, and then fade in
+     *
+     * \param transitionScript The Lua script to handle the transition. Can be anything
+     * \param fadeDuration An optional duration for the fading. If unspecified, use the
+     *                     JumpToFadeDuration property
+     */
+    void triggerFadeToTransition(std::string transitionScript,
+        std::optional<float> fadeDuration = std::nullopt);
 
     /**
      * \return The Lua library that contains all Lua functions available to affect the
@@ -195,6 +210,18 @@ private:
     properties::BoolProperty _disableMouseInputs;
     properties::BoolProperty _disableJoystickInputs;
     properties::BoolProperty _useKeyFrameInteraction;
+    properties::FloatProperty _jumpToFadeDuration;
+
+    struct {
+        properties::PropertyOwner owner;
+        properties::BoolProperty enable;
+        properties::Vec4Property color;
+
+        bool isMouseFirstPress = false;
+        bool isMousePressed = false;
+        glm::vec2 clickPosition;
+        glm::vec2 currentPosition;
+    } _mouseVisualizer;
 };
 
 } // namespace openspace::interaction

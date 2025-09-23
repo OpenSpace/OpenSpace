@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,8 @@
 
 #include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <utility>
 
@@ -40,19 +40,17 @@ namespace documentation { struct Documentation; }
 
 class DashboardItemDistance : public DashboardTextItem {
 public:
-    DashboardItemDistance(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemDistance(const ghoul::Dictionary& dictionary);
     ~DashboardItemDistance() override = default;
 
-    void render(glm::vec2& penPosition) override;
-
-    glm::vec2 size() const override;
+    void update() override;
 
     static documentation::Documentation Documentation();
 
 private:
     struct Component {
         properties::OptionProperty type;
-        properties::StringProperty nodeName;
+        properties::StringProperty nodeIdentifier;
         SceneGraphNode* node;
     };
 
@@ -66,7 +64,7 @@ private:
     Component _source;
     Component _destination;
 
-    std::vector<char> _buffer;
+    std::vector<char> _localBuffer;
 };
 
 } // namespace openspace

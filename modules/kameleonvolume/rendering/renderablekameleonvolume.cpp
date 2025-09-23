@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,6 @@
 #include <modules/volume/rendering/basicvolumeraycaster.h>
 #include <modules/volume/rawvolume.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
-#include <openspace/rendering/transferfunction.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <modules/volume/rawvolumereader.h>
@@ -37,8 +36,10 @@
 #include <modules/volume/transferfunctionhandler.h>
 #include <modules/volume/volumegridtype.h>
 #include <openspace/engine/globals.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
+#include <openspace/rendering/transferfunction.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
@@ -49,21 +50,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableKameleonVolume";
-
-    constexpr std::string_view KeyDimensions = "Dimensions";
-    constexpr std::string_view KeyStepSize = "StepSize";
-    constexpr std::string_view KeyTransferFunction = "TransferFunction";
-    constexpr std::string_view KeySource = "Source";
-    constexpr std::string_view KeyVariable = "Variable";
-    constexpr std::string_view KeyLowerDomainBound = "LowerDomainBound";
-    constexpr std::string_view KeyUpperDomainBound = "UpperDomainBound";
-    constexpr std::string_view KeyDomainScale = "DomainScale";
-    constexpr std::string_view KeyLowerValueBound = "LowerValueBound";
-    constexpr std::string_view KeyUpperValueBound = "UpperValueBound";
-    constexpr std::string_view KeyClipPlanes = "ClipPlanes";
-    constexpr std::string_view KeyCache = "Cache";
-    constexpr std::string_view KeyGridType = "GridType";
-    constexpr std::string_view ValueSphericalGridType = "Spherical";
 
     constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
@@ -81,14 +67,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LowerDomainBoundInfo = {
         "LowerDomainBound",
-        "Lower Domain Bound",
+        "Lower domain bound",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UpperDomainBoundInfo = {
         "UpperDomainBound",
-        "Upper Domain Bound",
+        "Upper domain bound",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -102,23 +88,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LowerValueBoundInfo = {
         "LowerValueBound",
-        "Lower Value Bound",
+        "Lower value bound",
         "", // @TODO Missing documentation
-        // @VISIBILITY(?)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UpperValueBoundInfo = {
         "UpperValueBound",
-        "Upper Value Bound",
+        "Upper value bound",
         "", // @TODO Missing documentation
-        // @VISIBILITY(?)
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "GridType",
-        "Grid Type",
+        "Grid type",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
@@ -132,14 +116,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SourcePathInfo = {
         "SourcePath",
-        "Source Path",
+        "Source path",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
-        "Transfer Function Path",
+        "Transfer function path",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -150,6 +134,50 @@ namespace {
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
+
+    struct [[codegen::Dictionary(RenderableKameleonVolume)]] Parameters {
+        // [[codegen::verbatim(DimensionsInfo.description)]]
+        glm::ivec3 dimensions [[codegen::greater(glm::ivec3(0))]];
+
+        // [[codegen::verbatim(StepSizeInfo.description)]]
+        float stepSize;
+
+        // [[codegen::verbatim(TransferFunctionInfo.description)]]
+        std::optional<std::filesystem::path> transferFunction;
+
+        // [[codegen::verbatim(SourcePathInfo.description)]]
+        std::optional<std::filesystem::path> source;
+
+        // [[codegen::verbatim(VariableInfo.description)]]
+        std::optional<std::string> variable;
+
+        // [[codegen::verbatim(LowerDomainBoundInfo.description)]]
+        std::optional<glm::vec3> lowerDomainBound;
+
+        // [[codegen::verbatim(UpperDomainBoundInfo.description)]]
+        std::optional<glm::vec3> upperDomainBound;
+
+        // [[codegen::verbatim(DomainScaleInfo.description)]]
+        std::optional<glm::vec3> domainScale;
+
+        // [[codegen::verbatim(LowerValueBoundInfo.description)]]
+        std::optional<float> lowerValueBound;
+
+        // [[codegen::verbatim(UpperValueBoundInfo.description)]]
+        std::optional<float> upperValueBound;
+
+        std::optional<ghoul::Dictionary> clipPlanes;
+
+        // [[codegen::verbatim(CacheInfo.description)]]
+        std::optional<bool> cache;
+
+        enum class GridType {
+            Cartesian,
+            Spherical
+        };
+        std::optional<GridType> gridType;
+    };
+#include "renderablekameleonvolume_codegen.cpp"
 } // namespace
 
 namespace openspace::kameleonvolume {
@@ -163,84 +191,48 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     , _domainScale(DomainScaleInfo, glm::vec3(1.f))
     , _lowerValueBound(LowerValueBoundInfo, 0.f, 0.f, 1.f)
     , _upperValueBound(UpperValueBoundInfo, 1.f, 0.01f, 1.f)
-    , _gridType(GridTypeInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _gridType(GridTypeInfo)
     , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f)
     , _sourcePath(SourcePathInfo)
     , _transferFunctionPath(TransferFunctionInfo)
     , _cache(CacheInfo)
 {
-    if (dictionary.hasValue<glm::dvec3>(KeyDimensions)) {
-        _dimensions = dictionary.value<glm::dvec3>(KeyDimensions);
-    }
-    else {
-        LWARNING("No dimensions specified for volumetric data, falling back to 32^3");
-        _dimensions = glm::uvec3(32);
-    }
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _stepSize = static_cast<float>(dictionary.value<double>(KeyStepSize));
+    _dimensions = p.dimensions;
+    _stepSize = p.stepSize;
 
-    if (dictionary.hasValue<std::string>(KeyTransferFunction)) {
-        _transferFunctionPath = dictionary.value<std::string>(KeyTransferFunction);
+    if (p.transferFunction.has_value()) {
+        _transferFunctionPath = p.transferFunction->string();
         _transferFunction = std::make_shared<openspace::TransferFunction>(
-            _transferFunctionPath, [](const openspace::TransferFunction&) {}
+            _transferFunctionPath.value()
         );
     }
 
-    if (dictionary.hasValue<std::string>(KeySource)) {
-        _sourcePath = absPath(dictionary.value<std::string>(KeySource)).string();
+    if (p.source.has_value()) {
+        _sourcePath = p.source->string();
     }
 
-    if (dictionary.hasValue<std::string>(KeyVariable)) {
-        _variable = dictionary.value<std::string>(KeyVariable);
-    }
+    _variable = p.variable.value_or(_variable);
+    _lowerDomainBound = p.lowerDomainBound.value_or(_lowerDomainBound);
+    _upperDomainBound = p.upperDomainBound.value_or(_upperDomainBound);
+    _autoDomainBounds =
+        !p.lowerDomainBound.has_value() || !p.upperDomainBound.has_value();
 
-    if (dictionary.hasValue<glm::dvec3>(KeyLowerDomainBound)) {
-        _lowerDomainBound = dictionary.value<glm::dvec3>(KeyLowerDomainBound);
-    }
-    else {
-        _autoDomainBounds = true;
-    }
+    _domainScale = p.domainScale.value_or(_domainScale);
 
-    if (dictionary.hasValue<glm::dvec3>(KeyUpperDomainBound)) {
-        _upperDomainBound = dictionary.value<glm::dvec3>(KeyUpperDomainBound);
-    }
-    else {
-        _autoDomainBounds = true;
-    }
+    _lowerValueBound = p.lowerValueBound.value_or(_lowerValueBound);
+    _upperValueBound = p.upperValueBound.value_or(_upperValueBound);
+    _autoValueBounds = !p.lowerValueBound.has_value() || !p.upperValueBound.has_value();
 
-    if (dictionary.hasValue<glm::dvec3>(KeyDomainScale)) {
-        _domainScale = dictionary.value<glm::dvec3>(KeyDomainScale);
-    }
 
-    if (dictionary.hasValue<double>(KeyLowerValueBound)) {
-        _lowerValueBound = static_cast<float>(
-            dictionary.value<double>(KeyLowerValueBound)
-        );
-    }
-    else {
-        _autoValueBounds = true;
-    }
-
-    if (dictionary.hasValue<double>(KeyUpperValueBound)) {
-        _upperValueBound = static_cast<float>(
-            dictionary.value<double>(KeyUpperValueBound)
-        );
-    }
-    else {
-        _autoValueBounds = true;
-    }
-
-    ghoul::Dictionary clipPlanesDictionary;
-    if (dictionary.hasValue<ghoul::Dictionary>(KeyClipPlanes)) {
-        clipPlanesDictionary = dictionary.value<ghoul::Dictionary>(KeyClipPlanes);
-    }
-    _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDictionary);
+    _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(
+        p.clipPlanes.value_or(ghoul::Dictionary())
+    );
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
-    if (dictionary.hasValue<bool>(KeyCache)) {
-        _cache = dictionary.value<bool>(KeyCache);
-    }
+    _cache = p.cache.value_or(_cache);
 
     _gridType.addOption(
         static_cast<int>(volume::VolumeGridType::Cartesian),
@@ -250,17 +242,17 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
         static_cast<int>(volume::VolumeGridType::Spherical),
         "Spherical grid"
     );
-    _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
 
-    if (dictionary.hasValue<std::string>(KeyGridType)) {
-        const std::string& gridType = dictionary.value<std::string>(KeyGridType);
-        if (gridType == ValueSphericalGridType) {
+    Parameters::GridType type = p.gridType.value_or(Parameters::GridType::Cartesian);
+    switch (type) {
+        case Parameters::GridType::Cartesian:
+            _gridType.setValue(static_cast<int>(volume::VolumeGridType::Cartesian));
+            break;
+        case Parameters::GridType::Spherical:
             _gridType.setValue(static_cast<int>(volume::VolumeGridType::Spherical));
-        }
-        else {
-            _autoGridType = true;
-        }
+            break;
     }
+    _autoGridType = !p.gridType.has_value();
 }
 
 RenderableKameleonVolume::~RenderableKameleonVolume() {}
@@ -339,7 +331,7 @@ bool RenderableKameleonVolume::isCachingEnabled() const {
 
 void RenderableKameleonVolume::load() {
     if (!std::filesystem::is_regular_file(_sourcePath.value())) {
-        LERROR(fmt::format("File '{}' does not exist", _sourcePath.value()));
+        LERROR(std::format("File '{}' does not exist", _sourcePath.value()));
         return;
     }
     if (!isCachingEnabled()) {
@@ -361,7 +353,7 @@ void RenderableKameleonVolume::load() {
 
 std::string RenderableKameleonVolume::cacheSuffix() const {
     glm::uvec3 dims = _dimensions;
-    return fmt::format(".{}.{}x{}x{}", _variable.value(), dims[0], dims[1], dims[2]);
+    return std::format(".{}.{}x{}x{}", _variable.value(), dims[0], dims[1], dims[2]);
 }
 
 void RenderableKameleonVolume::loadFromPath(const std::string& path) {
@@ -430,7 +422,7 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
     float min = _lowerValueBound;
     float diff = _upperValueBound - _lowerValueBound;
 
-    for (size_t i = 0; i < _normalizedVolume->nCells(); ++i) {
+    for (size_t i = 0; i < _normalizedVolume->nCells(); i++) {
         out[i] = glm::clamp((in[i] - min) / diff, 0.f, 1.f);
     }
 

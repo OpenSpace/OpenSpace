@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,8 @@
 
 #include <openspace/network/messagestructures.h>
 #include <openspace/network/parallelconnection.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/designpattern/event.h>
 #include <atomic>
@@ -52,6 +52,7 @@ public:
     void connect();
     void setPort(std::string port);
     void setAddress(std::string address);
+    void setServerName(std::string name);
     void setName(std::string name);
     bool isHost();
     const std::string& hostName();
@@ -97,6 +98,7 @@ private:
 
     properties::StringProperty _password;
     properties::StringProperty _hostPassword;
+    properties::StringProperty _serverName;
 
     // While the port should in theory be an int,
     // we use a StringProperty to avoid a slider in the GUI.

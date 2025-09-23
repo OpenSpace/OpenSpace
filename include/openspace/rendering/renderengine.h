@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,14 +27,14 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/list/intlistproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <chrono>
 #include <filesystem>
@@ -103,11 +103,12 @@ public:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         const std::string& name, const std::filesystem::path& vsPath,
-        std::filesystem::path fsPath, ghoul::Dictionary data = ghoul::Dictionary());
+        const std::filesystem::path& fsPath,
+        ghoul::Dictionary data = ghoul::Dictionary());
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         const std::string& name, const std::filesystem::path& vsPath,
-        std::filesystem::path fsPath, const std::filesystem::path& csPath,
+        const std::filesystem::path& fsPath, const std::filesystem::path& csPath,
         ghoul::Dictionary data = ghoul::Dictionary());
 
     void removeRenderProgram(ghoul::opengl::ProgramObject* program);
@@ -164,7 +165,7 @@ private:
     void renderVersionInformation();
     void renderCameraInformation();
     void renderShutdownInformation(float timer, float fullTime);
-    void renderDashboard();
+    void renderDashboard() const;
     float combinedBlackoutFactor() const;
 
     Camera* _camera = nullptr;
@@ -185,9 +186,7 @@ private:
 
     properties::IntListProperty _screenshotWindowIds;
     properties::BoolProperty _applyWarping;
-    properties::BoolProperty _showStatistics;
     properties::BoolProperty _screenshotUseDate;
-    properties::BoolProperty _showFrameInformation;
     properties::BoolProperty _disableMasterRendering;
 
     properties::FloatProperty _globalBlackOutFactor;
@@ -205,7 +204,15 @@ private:
 
     properties::IntProperty _framerateLimit;
     std::chrono::high_resolution_clock::time_point _lastFrameTime;
-    properties::FloatProperty _horizFieldOfView;
+
+    struct Window : properties::PropertyOwner {
+        Window(PropertyOwnerInfo info, size_t id);
+
+        properties::FloatProperty horizFieldOfView;
+    };
+
+    properties::PropertyOwner _windowing;
+    std::vector<std::unique_ptr<Window>> _windows;
 
     properties::Vec3Property _globalRotation;
     properties::Vec3Property _screenSpaceRotation;
@@ -216,7 +223,6 @@ private:
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _fontFrameInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontCameraInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontVersionInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontShutdown;
@@ -227,8 +233,6 @@ private:
         glm::ivec4 zoom = glm::ivec4(0);
         glm::ivec4 roll = glm::ivec4(0);
     } _cameraButtonLocations;
-
-    std::string _versionString;
 
     properties::Vec4Property _enabledFontColor;
     properties::Vec4Property _disabledFontColor;

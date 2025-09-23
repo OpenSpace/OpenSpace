@@ -9,7 +9,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_aqua",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=27424&FORMAT=kvn",
   Filename = "Aqua.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -30,7 +30,7 @@ local Aqua = {
       DestinationFrame = coreKernels.Frame.J2000
     }
   },
-  Tag = { "earth_satellite", "Aqua" },
+  Tag = { "earth_satellites", "Aqua" },
   GUI = {
     Name = "Aqua",
     Path = "/Solar System/Planets/Earth/Satellites/Aqua"
@@ -53,10 +53,11 @@ local AquaTrail = {
     Fade = 1.5,
     Resolution = 320
   },
-  Tag = { "earth_satellite", "Aqua" },
+  Tag = { "earth_satellites", "Aqua" },
   GUI = {
     Name = "Aqua Trail",
-    Path = "/Solar System/Planets/Earth/Satellites/Aqua"
+    Path = "/Solar System/Planets/Earth/Satellites/Aqua",
+    Focusable = false
   }
 }
 
@@ -110,7 +111,6 @@ asset.export(AquaLabel)
 
 asset.meta = {
   Name = "Aqua",
-  Version = "1.0",
   Description = [[Trail for Aqua. trail from Celestrak. Can be used in conjuntion with
     Aqua Modis (Temporal) layer for Earth]],
   Author = "OpenSpace Team",

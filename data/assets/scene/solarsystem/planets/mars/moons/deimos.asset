@@ -1,6 +1,6 @@
 local transforms = asset.require("scene/solarsystem/planets/mars/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -68,6 +68,7 @@ local DeimosTrail = {
   GUI = {
     Name = "Deimos Trail",
     Path = "/Solar System/Planets/Mars/Moons/Deimos",
+    Focusable = false,
     Description = "Trail for Deimos"
   }
 }
@@ -93,6 +94,7 @@ local DeimosLabel = {
   GUI = {
     Name = "Deimos Label",
     Path = "/Solar System/Planets/Mars/Moons/Deimos",
+    Focusable = false,
     Description = "Label for Mars' moon Deimos"
   }
 }
@@ -117,7 +119,6 @@ asset.export(DeimosTrail)
 
 asset.meta = {
   Name = "Deimos",
-  Version = "1.0",
   Description = "RenderableModel and Trail for Deimos",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

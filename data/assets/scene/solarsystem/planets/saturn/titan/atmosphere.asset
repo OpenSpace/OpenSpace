@@ -43,7 +43,8 @@ local Atmosphere = {
   },
   GUI = {
     Name = "Titan Atmosphere",
-    Path = "/Solar System/Planets/Saturn/Major Moons/Titan"
+    Path = "/Solar System/Planets/Saturn/Major Moons/Titan",
+    Focusable = false
   }
 }
 
@@ -62,7 +63,6 @@ asset.export(Atmosphere)
 
 asset.meta = {
   Name = "Titan Atmosphere",
-  Version = "1.1",
   Description = "RenderableAtmosphere for Titan",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

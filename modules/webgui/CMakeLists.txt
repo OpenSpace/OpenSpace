@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -25,6 +25,9 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 include(../webbrowser/cmake/webbrowser_helpers.cmake)
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(nodejs_support)
+
 set(WEBGUI_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBGUI_MODULE_PATH")
 
 set(OPENSPACE_HEADER_FILES
@@ -37,13 +40,7 @@ set(OPENSPACE_SOURCE_FILES
 )
 source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-
-# Specify the NodeJs distribution version.
-set(NODEJS_VERSION "8.11.4")
-
-include(nodejs_support)
-DownloadNodeJs("${NODEJS_VERSION}" "${CMAKE_CURRENT_SOURCE_DIR}/ext/nodejs")
+DownloadNodeJs("22.15.0" "${CMAKE_CURRENT_SOURCE_DIR}/ext/nodejs")
 
 create_new_module(
   WebGui

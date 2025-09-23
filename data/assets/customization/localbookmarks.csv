@@ -1,2 +1,0 @@
-Group (optional),Name (required),Globe (optional),Lat (required if globe),Lon (required if globe),Altitude (optional if globe),x (required if not globe),y (required if not globe),z (required if not globe),Scale (optional),LineWidth (optional)
-NASA,Kennedy Space Center,Earth,28.6658276,-80.70282839,,,,,,

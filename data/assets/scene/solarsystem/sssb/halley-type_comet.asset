@@ -6,7 +6,7 @@ local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Halley-type Comet)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_halley-type_comet",
-  Version = 3
+  Version = 4
 })
 
 
@@ -17,14 +17,15 @@ local Object = {
     Type = "RenderableOrbitalKepler",
     Path = sssb .. "sssb_data_halley-type_comet.csv",
     Format = "SBDB",
-    Segments = 200,
     SegmentQuality = 9,
     Color = { 0.66, 0.66, 0.66 },
-    TrailFade = 18
+    TrailFade = 18,
+    PointSizeExponent = 10.6
   },
   GUI = {
     Name = "Halley-type Comets",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = "Periodic comets with an orbital period between 20 and 200 years."
   }
 }
@@ -44,7 +45,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Halley-Type Comets",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     the Halley-Type group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

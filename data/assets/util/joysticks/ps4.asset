@@ -1,4 +1,3 @@
-local propertyHelper = asset.require("../property_helper")
 local joystickHelper = asset.require("./joystick_helper")
 
 
@@ -121,19 +120,19 @@ asset.onInitialize(function()
   openspace.navigation.bindJoystickButton(
     name,
     controller.Cross,
-    propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RotationalFriction"),
+    [[openspace.invertBooleanProperty("NavigationHandler.OrbitalNavigator.Friction.RotationalFriction")]],
     "Toggle rotational friction"
   )
   openspace.navigation.bindJoystickButton(
     name,
     controller.Circle,
-    propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction"),
+    [[openspace.invertBooleanProperty("NavigationHandler.OrbitalNavigator.Friction.ZoomFriction")]],
     "Toggle zoom friction"
   )
   openspace.navigation.bindJoystickButton(
     name,
     controller.Triangle,
-    propertyHelper.invert("NavigationHandler.OrbitalNavigator.Friction.RollFriction"),
+    [[openspace.invertBooleanProperty("NavigationHandler.OrbitalNavigator.Friction.RollFriction")]],
     "Toggle roll friction"
   )
 
@@ -228,3 +227,13 @@ asset.onInitialize(function()
     ""  -- <-- Description of your custom script here (optional)
   )
 end)
+
+
+
+asset.meta = {
+  Name = "Joystick controller: PS4",
+  Description = "Joystick controller configuration for PS4",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

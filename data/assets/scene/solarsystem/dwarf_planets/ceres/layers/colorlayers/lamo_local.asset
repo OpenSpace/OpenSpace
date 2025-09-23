@@ -14,8 +14,8 @@ local Layer = {
   Identifier = "LAMO_Local",
   Name = "LAMO [Local]",
   Enabled = asset.enabled,
-  FilePath = textures .. "ceres_lamo_4096x2048.png",
-  CacheSettings = { Enabled = false }
+  ZIndex = 5,
+  FilePath = textures .. "ceres_lamo_4096x2048.png"
 }
 
 
@@ -33,7 +33,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "LAMO [Local]",
-  Version = "1.0",
   Description = [[]],
   Author = "",
   URL = "",

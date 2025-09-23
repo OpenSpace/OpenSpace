@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___PROPERTYOWNER___H__
 #define __OPENSPACE_CORE___PROPERTYOWNER___H__
 
-#include <openspace/json.h>
 #include <map>
 #include <string>
 #include <vector>
@@ -53,9 +52,9 @@ public:
     static constexpr char URISeparator = '.';
 
     struct PropertyOwnerInfo {
-        std::string identifier;
-        std::string guiName;
-        std::string description;
+        std::string identifier = "";
+        std::string guiName = "";
+        std::string description = "";
     };
 
     /**
@@ -68,13 +67,13 @@ public:
      * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any whitespaces
      * \pre The \p info 's #PropertyOwnerInfo::identifier must not contain any `.`
      */
-    PropertyOwner(PropertyOwnerInfo info);
+    explicit PropertyOwner(PropertyOwnerInfo info);
 
     /**
      * The destructor will remove all Propertys and PropertyOwners it owns along with
      * itself.
      */
-    virtual ~PropertyOwner();
+    virtual ~PropertyOwner() = default;
 
     /**
      * Sets the identifier for this PropertyOwner. If the PropertyOwner does not have an
@@ -140,18 +139,50 @@ public:
     std::vector<Property*> propertiesRecursive() const;
 
     /**
-     * Retrieves a Property identified by \p uri from this PropertyOwner. If \p uri does
-     * not contain a `.` the identifier must refer to a Property directly owned by this
-     * PropertyOwner. If the identifier contains one or more `.`, the first part of the
-     * name will be recursively extracted and used as a name for a sub-owner and only the
-     * last part of the identifier is referring to a Property owned by PropertyOwner named
-     * by the second-but-last name.
+     * Returns a list of all PropertyOwners directly or indirectly owned by this
+     * PropertyOwner.
      *
-     * \param uri The identifier of the Property that should be extracted
+     * \return A list of all PropertyOwners directly or indirectly owned by this
+     *         PropertyOwner
+     */
+    std::vector<PropertyOwner*> subownersRecursive() const;
+
+    /**
+     * Retrieves a Property identified by \p uri from this PropertyOwner. If \p uri does
+     * not contain a `.`  it is an identifier and must refer to a Property directly owned
+     * by this PropertyOwner. If the identifier contains one or more `.`, the first part
+     * of the name will be recursively extracted and used as a name for a sub-owner and
+     * only the last part of the identifier is referring to a Property owned by a
+     * PropertyOwner named by the second-but-last name.
+     *
+     * \param uri The uri or identifier of the Property that should be extracted
      * \return If the Property cannot be found, `nullptr` is returned, otherwise the
      *         pointer to the Property is returned
      */
     Property* property(const std::string& uri) const;
+
+    /**
+     * Retrieves a PropertyOwner identified by \p uri from this PropertyOwner. If \p uri
+     * does not contain a `.` it is an identifier and must refer to a PropertyOwner
+     * directly owned by this PropertyOwner. If the uri contains one or more `.`, the
+     * first part of the name will be recursively extracted and used as a name for a sub-
+     * owner and only the last part of the uri is referring to a PropertyOwner owned by a
+     * PropertyOwner named by the second-but-last name.
+     *
+     * \param uri The uri or identifier of the PropertyOwner that should be extracted
+     * \return If the PropertyOwner cannot be found, `nullptr` is returned, otherwise the
+     *         pointer to the PropertyOwner is returned
+     */
+    PropertyOwner* propertyOwner(const std::string& uri) const;
+
+    /**
+     * Returns a uri for this PropertyOwner. This is created by looking up all the owners
+     * of this PropertyOwner. The owner identifiers are separated by ".", which make up
+     * the uri of this PropertyOwner.
+     *
+     * \return The uri of this PropertyOwner
+     */
+    std::string uri() const;
 
     /**
      * This method checks if a Property with the provided \p uri exists in this
@@ -171,8 +202,8 @@ public:
      */
     bool hasProperty(const Property* prop) const;
 
-    void setPropertyOwner(PropertyOwner* owner) { _owner = owner; }
-    PropertyOwner* owner() const { return _owner; }
+    void setPropertyOwner(PropertyOwner* owner);
+    PropertyOwner* owner() const;
 
     /**
      * Returns a list of all sub-owners this PropertyOwner has. Each name of a sub-owner
@@ -228,7 +259,7 @@ public:
      * PropertyOwner. This method will also inform the Property about the change in
      * ownership by calling the Property::setPropertyOwner method.
      *
-     * \param prop The Property whose ownership is changed.
+     * \param prop The Property whose ownership is changed
      */
     void addProperty(Property* prop);
 
@@ -295,11 +326,6 @@ public:
      */
     void removeTag(const std::string& tag);
 
-    /**
-     * Generate JSON for documentation.
-     */
-    nlohmann::json generateJson() const;
-
 protected:
     /// The unique identifier of this PropertyOwner
     std::string _identifier;
@@ -320,6 +346,16 @@ protected:
     std::map<std::string, std::string> _groupNames;
     /// Collection of string tag(s) assigned to this property
     std::vector<std::string> _tags;
+
+    /// A cached version of the full URI of this property owner, which includes the
+    /// identifiers of all owners
+    std::string _uriCache;
+    bool _isUriCacheDirty = true;
+
+private:
+    /// Will regenerate the uri caches for this property owner and all directly or
+    /// indirectly owned properties
+    void updateUriCaches();
 };
 
 }  // namespace openspace::properties

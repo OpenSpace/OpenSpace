@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -84,6 +84,7 @@ struct Layer {
         SizeReferenceTileProvider,
         TemporalTileProvider,
         TileIndexTileProvider,
+        TileProviderByDate,
         TileProviderByIndex,
         TileProviderByLevel,
         SolidColor,
@@ -95,7 +96,7 @@ struct Layer {
     std::string_view identifier;
 };
 
-constexpr std::array<Layer, 11> Layers = {
+constexpr std::array<Layer, 12> Layers = {
     Layer {
         .id = Layer::ID::DefaultTileProvider,
         .identifier = "DefaultTileProvider"
@@ -119,6 +120,10 @@ constexpr std::array<Layer, 11> Layers = {
     Layer {
         .id = Layer::ID::TileIndexTileProvider,
         .identifier = "TileIndexTileProvider"
+    },
+    Layer {
+        .id = Layer::ID::TileProviderByDate,
+        .identifier = "TileProviderByDate"
     },
     Layer {
         .id = Layer::ID::TileProviderByIndex,
@@ -210,7 +215,7 @@ constexpr openspace::globebrowsing::layers::Layer::ID from_string(std::string_vi
         return it->id;
     }
     else {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Could not find Layer of type '{}'", string
         ));
     }
@@ -231,7 +236,7 @@ constexpr openspace::globebrowsing::layers::Group::ID from_string(std::string_vi
         return it->id;
     }
     else {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Could not find Group of type '{}'", string
         ));
     }

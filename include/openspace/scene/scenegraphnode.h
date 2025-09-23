@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,11 +27,12 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
+#include <openspace/util/ellipsoid.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
@@ -74,7 +75,6 @@ public:
 
     BooleanType(UpdateScene);
 
-    static constexpr const char* RootNodeIdentifier = "Root";
     static constexpr std::string_view KeyIdentifier = "Identifier";
     static constexpr std::string_view KeyParentName = "Parent";
     static constexpr std::string_view KeyDependencies = "Dependencies";
@@ -91,8 +91,6 @@ public:
     void deinitialize();
     void deinitializeGL();
 
-    void traversePreOrder(const std::function<void(SceneGraphNode*)>& fn);
-    void traversePostOrder(const std::function<void(SceneGraphNode*)>& fn);
     void update(const UpdateData& data);
     void render(const RenderData& data, RendererTasks& tasks);
 
@@ -123,7 +121,7 @@ public:
     const glm::dmat3& worldRotationMatrix() const;
     glm::dmat4 modelTransform() const;
     glm::dvec3 worldScale() const;
-    bool isTimeFrameActive(const Time& time) const;
+    bool isTimeFrameActive() const;
 
     SceneGraphNode* parent() const;
     std::vector<SceneGraphNode*> children() const;
@@ -133,6 +131,8 @@ public:
     const std::vector<std::string>& onRecedeAction() const;
     const std::vector<std::string>& onExitAction() const;
 
+    Ellipsoid ellipsoid() const;
+
     double boundingSphere() const;
     double interactionSphere() const;
 
@@ -141,22 +141,27 @@ public:
 
     bool supportsDirectInteraction() const;
 
-    SceneGraphNode* childNode(const std::string& identifier);
+    SceneGraphNode* childNode(const std::string& id);
 
     const Renderable* renderable() const;
     Renderable* renderable();
 
     std::string guiPath() const;
     bool hasGuiHintHidden() const;
+    void setGuiHintHidden(bool value);
 
     static documentation::Documentation Documentation();
 
 private:
+    void traversePreOrder(const std::function<void(SceneGraphNode*)>& fn);
+    void traversePostOrder(const std::function<void(SceneGraphNode*)>& fn);
+
     glm::dvec3 calculateWorldPosition() const;
     glm::dmat3 calculateWorldRotation() const;
     glm::dvec3 calculateWorldScale() const;
     void computeScreenSpaceData(RenderData& newData);
-    void renderDebugSphere(const Camera& camera, double size, glm::vec4 color);
+    void renderDebugSphere(const Camera& camera, double size,
+        const glm::vec4& color) const;
 
     std::atomic<State> _state = State::Loaded;
     std::vector<ghoul::mm_unique_ptr<SceneGraphNode>> _children;
@@ -170,15 +175,18 @@ private:
     std::vector<std::string> _onRecedeAction;
     std::vector<std::string> _onExitAction;
 
+    ghoul::mm_unique_ptr<Renderable> _renderable;
+
     // If this value is 'true' GUIs are asked to hide this node from collections, as it
     // might be a node that is not very interesting (for example barycenters)
     properties::BoolProperty _guiHidden;
 
-    ghoul::mm_unique_ptr<Renderable> _renderable;
-
     properties::StringProperty _guiPath;
     properties::StringProperty _guiDisplayName;
     properties::StringProperty _guiDescription;
+    properties::BoolProperty _useGuiOrdering;
+    properties::BoolProperty _guiFocusable;
+    properties::FloatProperty _guiOrderingNumber;
 
     // Transformation defined by translation, rotation and scale
     struct {

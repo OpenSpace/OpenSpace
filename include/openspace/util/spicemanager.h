@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,12 +25,15 @@
 #ifndef __OPENSPACE_CORE___SPICEMANAGER___H__
 #define __OPENSPACE_CORE___SPICEMANAGER___H__
 
-#include <ghoul/fmt.h>
+#include <openspace/engine/globals.h>
+#include <openspace/util/memorymanager.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/exception.h>
 #include <array>
+#include <filesystem>
 #include <map>
 #include <string>
 #include <vector>
@@ -66,7 +69,7 @@ public:
     using TransformMatrix = std::array<double, 36>;
     using KernelHandle = unsigned int;
 
-    struct SpiceException : public ghoul::RuntimeError {
+    struct SpiceException final : public ghoul::RuntimeError {
         explicit SpiceException(std::string msg);
     };
 
@@ -214,7 +217,7 @@ public:
      *
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/furnsh_c.html
      */
-    KernelHandle loadKernel(std::string filePath);
+    KernelHandle loadKernel(std::filesystem::path filePath);
 
     /**
      * Unloads a SPICE kernel identified by the \p kernelId which was returned by the
@@ -238,7 +241,7 @@ public:
      *
      * \return The list of all loaded kernels that have been loaded through this manager
      */
-    std::vector<std::string> loadedKernels() const;
+    std::vector<std::filesystem::path> loadedKernels() const;
 
     /**
      * Unloads a SPICE kernel identified by the \p filePath which was used in the
@@ -254,7 +257,7 @@ public:
      *
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/unload_c.html
      */
-    void unloadKernel(std::string filePath);
+    void unloadKernel(std::filesystem::path filePath);
 
     /**
      * Returns whether a given \p target has an SPK kernel covering it at the designated
@@ -524,7 +527,7 @@ public:
      *        specific spacecraft
      * \pre \p craft must not be empty
      */
-    double spacecraftClockToET(const std::string& craft, double craftTicks);
+    double spacecraftClockToET(const std::string& craft, double craftTicks) const;
 
     /**
      * Converts the \p timeString representing a date to a double precision value
@@ -578,7 +581,7 @@ public:
 
         timout_c(ephemerisTime, format, bufferSize, outBuf);
         if (failed_c()) {
-            throwSpiceError(fmt::format(
+            throwSpiceError(std::format(
                 "Error converting ephemeris time '{}' to date with format '{}'",
                     ephemerisTime, format
             ));
@@ -588,10 +591,30 @@ public:
             // The conversion failed and we need to use et2utc
             constexpr int SecondsPrecision = 3;
             et2utc_c(ephemerisTime, "C", SecondsPrecision, bufferSize, outBuf);
+            // We want to move the B.C. part to the beginning of the string so that we can
+            // identify B.C. years by inspecting the first character of `outBuf`
+            const char* bcPos = std::strstr(outBuf, "B.C.");
+            if (bcPos) {
+                const size_t bcLength = 4;
+                const size_t prefixYearLength = bcPos - outBuf;
+                // Create temporary storage
+                char* tmp = reinterpret_cast<char*>(
+                    global::memoryManager->TemporaryMemory.allocate(prefixYearLength)
+                );
+                // Copy year into tmp buffer
+                std::memcpy(tmp, outBuf, prefixYearLength);
+                // Copy B.C. to beginning of outBuf, + 1 to add a space ' ' after B.C.
+                std::memcpy(outBuf, "B.C. ", bcLength + 1);
+                // Copy year to after B.C
+                std::memcpy(outBuf + bcLength + 1 , tmp, prefixYearLength);
+            }
         }
     }
 
     std::string dateFromEphemerisTime(double ephemerisTime, const char* format);
+
+    void dateFromEphemerisTime(double ephemerisTime, char* outBuf, int bufferSize,
+        const std::string& format = "YYYY MON DDTHR:MN:SC.### ::RND") const;
 
     /**
      * Returns the \p position of a \p target body relative to an \p observer in a
@@ -1009,6 +1032,13 @@ public:
      */
     UseException exceptionHandling() const;
 
+    /**
+     * Returns the path to the most current leap second kernel.
+     *
+     * \return The path to the most current leap second kernel.
+     */
+    static std::filesystem::path leapSecondKernel();
+
     static scripting::LuaLibrary luaLibrary();
 
 private:
@@ -1017,7 +1047,7 @@ private:
      */
     struct KernelInformation {
         /// The path from which the kernel was loaded
-        std::string path;
+        std::filesystem::path path;
         /// A unique identifier for each kernel
         KernelHandle id;
         /// How many parts loaded this kernel and are interested in it
@@ -1049,7 +1079,7 @@ private:
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckobj_c.html
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/ckcov_c.html
      */
-    void findCkCoverage(const std::string& path);
+    void findCkCoverage(const std::filesystem::path& path);
 
     /**
      * Function to find and store the intervals covered by a spk file, this is done
@@ -1063,7 +1093,7 @@ private:
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkobj_c.html
      * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/spkcov_c.html
      */
-    void findSpkCoverage(const std::string& path);
+    void findSpkCoverage(const std::filesystem::path& path);
 
     /**
      * If a position is requested for an uncovered time in the SPK kernels, this function
@@ -1122,12 +1152,18 @@ private:
      */
     void loadLeapSecondsSpiceKernel();
 
+    /**
+     * Loads pre defined geophysical constants kernel (geophysical.ker)
+     */
+    void loadGeophysicalConstantsKernel();
+
+
     /// A list of all loaded kernels
     std::vector<KernelInformation> _loadedKernels;
 
     // Map: id, vector of pairs. Pair: Start time, end time;
-    std::map<int, std::vector< std::pair<double, double>>> _ckIntervals;
-    std::map<int, std::vector< std::pair<double, double>>> _spkIntervals;
+    std::map<int, std::vector<std::pair<double, double>>> _ckIntervals;
+    std::map<int, std::vector<std::pair<double, double>>> _spkIntervals;
     std::map<int, std::set<double>> _ckCoverageTimes;
     std::map<int, std::set<double>> _spkCoverageTimes;
 

@@ -7,11 +7,9 @@ local Ceres = {
   Parent = transforms.CeresPosition.Identifier,
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 487300, 487300, 454700 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 487300, 487300, 454700 }
   },
-  Tag = { "planet_solarSystem", "planet_terrestrial", "dwarf_planet", "ceres_system" },
+  Tag = { "planet_terrestrial", "dwarf_planet" },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Ceres"
   }
@@ -34,6 +32,7 @@ local CeresLabel = {
   GUI = {
     Name = "Ceres Label",
     Path = "/Solar System/Dwarf Planets/Ceres",
+    Focusable = false,
     Description = "Label for Ceres, visible at the solarsystem overview zoom level"
   }
 }
@@ -56,7 +55,6 @@ asset.export(CeresLabel)
 
 asset.meta = {
   Name = "Ceres",
-  Version = "1.0",
   Description = "Ceres globe, and main label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,7 @@
 
 #include <openspace/util/task.h>
 
-#include <modules/exoplanets/exoplanetshelper.h>
-
+#include <modules/exoplanets/datastructure.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <filesystem>
 #include <string>
@@ -44,7 +43,8 @@ public:
         ExoplanetDataEntry dataEntry;
     };
 
-    ExoplanetsDataPreparationTask(const ghoul::Dictionary& dictionary);
+    explicit ExoplanetsDataPreparationTask(const ghoul::Dictionary& dictionary);
+
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();
@@ -65,7 +65,7 @@ public:
      *
      * \param row The row to parse, given as a string
      * \param columnNames The list of column names in the file, from the CSV header
-     * \param positionSourceFile A SPECK file to use for getting the position of the star.
+     * \param positionSourceFile A SPECK file to use for getting the position of the star
      *        This is used to make sure the position of the star matches those of other
      *        star datasets. If no file is provided, the position from the CSV data file
      *        is read and used instead
@@ -77,10 +77,10 @@ public:
      *
      * /sa https://exoplanetarchive.ipac.caltech.edu/
      */
-    static PlanetData parseDataRow(std::string row,
+    static PlanetData parseDataRow(const std::string& row,
         const std::vector<std::string>& columnNames,
-        std::filesystem::path positionSourceFile,
-        std::filesystem::path bvFromTeffConversionFile);
+        const std::filesystem::path& positionSourceFile,
+        const std::filesystem::path& bvFromTeffConversionFile);
 
 private:
     std::filesystem::path _inputDataPath;

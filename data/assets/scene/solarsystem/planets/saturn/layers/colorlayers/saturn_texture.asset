@@ -14,7 +14,7 @@ local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "saturn.jpg",
   Enabled = asset.enabled,
-  CacheSettings = { Enabled = false }
+  ZIndex = 5
 }
 
 
@@ -32,7 +32,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Saturn Texutre",
-  Version = "1.0",
   Description = "Default jpg texture for Saturn",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

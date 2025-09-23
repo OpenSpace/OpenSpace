@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,16 +26,20 @@
 
 namespace openspace::interaction {
 
-CameraInteractionStates::InteractionState::InteractionState(double scaleFactor)
-    : previousPosition(0.0, 0.0)
+template <typename T>
+CameraInteractionStates::InteractionState<T>::InteractionState(double scaleFactor)
+    : previousValue(T(0.0))
     , velocity(scaleFactor, 1)
 {}
 
-void CameraInteractionStates::InteractionState::setFriction(double friction) {
+template <typename T>
+void CameraInteractionStates::InteractionState<T>::setFriction(double friction) {
     velocity.setFriction(friction);
 }
 
-void CameraInteractionStates::InteractionState::setVelocityScaleFactor(double scaleFactor)
+template <typename T>
+void CameraInteractionStates::InteractionState<T>::setVelocityScaleFactor(
+                                                                       double scaleFactor)
 {
     velocity.setScaleFactor(scaleFactor);
 }
@@ -79,12 +83,12 @@ void CameraInteractionStates::setVelocityScaleFactor(double scaleFactor) {
 void CameraInteractionStates::resetVelocities() {
     _globalRotationState.velocity.setHard({ 0.0, 0.0 });
     _localRotationState.velocity.setHard({ 0.0, 0.0 });
-    _truckMovementState.velocity.setHard({ 0.0, 0.0 });
-    _localRollState.velocity.setHard({ 0.0, 0.0 });
-    _globalRollState.velocity.setHard({ 0.0, 0.0 });
+    _truckMovementState.velocity.setHard(0.0);
+    _localRollState.velocity.setHard(0.0);
+    _globalRollState.velocity.setHard(0.0);
 }
 
-bool CameraInteractionStates::hasNonZeroVelocities(bool checkOnlyMovement) {
+bool CameraInteractionStates::hasNonZeroVelocities(bool checkOnlyMovement) const {
     glm::dvec2 sum = glm::dvec2(0.0);
     sum += globalRotationVelocity();
     sum += truckMovementVelocity();
@@ -107,15 +111,15 @@ glm::dvec2 CameraInteractionStates::localRotationVelocity() const{
     return _localRotationState.velocity.get();
 }
 
-glm::dvec2 CameraInteractionStates::truckMovementVelocity() const{
+double CameraInteractionStates::truckMovementVelocity() const{
     return _truckMovementState.velocity.get();
 }
 
-glm::dvec2 CameraInteractionStates::localRollVelocity() const{
+double CameraInteractionStates::localRollVelocity() const{
     return _localRollState.velocity.get();
 }
 
-glm::dvec2 CameraInteractionStates::globalRollVelocity() const{
+double CameraInteractionStates::globalRollVelocity() const{
     return _globalRollState.velocity.get();
 }
 

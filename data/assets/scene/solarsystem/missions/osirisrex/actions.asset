@@ -76,10 +76,7 @@ local ToggleSunMarker = {
   Identifier = "os.osirisrex.ToggleSunMarker",
   Name = "Toggle Sun marker",
   Command = [[
-    openspace.setPropertyValueSingle(
-      "Scene.SunMarker.Renderable.Enabled",
-      not openspace.propertyValue("Scene.SunMarker.Renderable.Enabled")
-    )
+    openspace.toggleFade("Scene.SunMarker.Renderable")
   ]],
   Documentation = "Toggles the visibility of the text marking the location of the Sun",
   GuiPath = "/Missions/Osiris Rex",
@@ -136,6 +133,7 @@ local LookImageCapture = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.action.registerAction(FocusOsirisRex)
   openspace.action.registerAction(FocusBennu)
@@ -177,7 +175,6 @@ asset.export("LookImageCapture", LookImageCapture.Identifier)
 
 asset.meta = {
   Name = "OsirisRex Actions",
-  Version = "1.0",
   Description = "Actions related to the OsirisRex mission",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

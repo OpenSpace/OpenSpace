@@ -22,7 +22,8 @@ local BepiColomboTrailSun = {
   },
   GUI = {
     Name = "BepiColombo Trail (Sun)",
-    Path = "/Solar System/Missions/BepiColombo"
+    Path = "/Solar System/Missions/BepiColombo",
+    Focusable = false
   }
 }
 
@@ -43,7 +44,8 @@ local BepiColomboTrailMercury = {
   },
   GUI = {
     Name = "BepiColombo Trail (Mercury)",
-    Path = "/Solar System/Missions/BepiColombo"
+    Path = "/Solar System/Missions/BepiColombo",
+    Focusable = false
   }
 }
 
@@ -65,7 +67,6 @@ asset.export(BepiColomboTrailMercury)
 
 asset.meta = {
   Name = "BepiColombo Trails",
-  Version = "1.0",
   Description = "This asset contains the trails for the BepiColombo spacecraft relative to the Sun and Mercury.",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

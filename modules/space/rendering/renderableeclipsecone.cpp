@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,10 +34,6 @@
 #include <ghoul/filesystem/filesystem.h>
 
 namespace {
-    constexpr std::array<const char*, 3> UniformNames = {
-        "modelViewProjectionTransform", "shadowColor", "opacity"
-    };
-
     struct VBOLayout {
         float x = 0.f;
         float y = 0.f;
@@ -45,94 +41,121 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
-        "AmountOfPoints",
+        "NumberOfPoints",
         "Points",
-        "This value determines the number of control points that is used to construct "
-        "the shadow geometry. The higher this number, the more detailed the shadow is, "
-        "but it will have a negative impact on the performance. Also note that rendering "
-        "errors will occur if this value is even",
+        "The number of control points used for constructing the shadow geometry. The "
+        "higher this number, the more detailed the shadow is. However, it will have a "
+        "negative impact on the performance. Also note that rendering errors will occur "
+        "if this value is an even number.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
         "ShadowLength",
-        "Shadow Length",
-        "This value determines the length of the shadow that is cast by the target "
-        "object. The total distance of the shadow is equal to the distance from the "
-        "target to the Sun multiplied with this value",
+        "Shadow length",
+        "A factor that controls the length of the rendered shadow cone. The total length "
+        "will be the distance from the shadower to the shadowee multiplied by this "
+        "value.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowUmbralShadowInfo = {
         "ShowUmbralShadow",
-        "Show Umbral Shadow",
-        "If this is enabled, the umbral portioon of the shadow is shown",
+        "Show umbral shadow",
+        "Decides whether the umbral portion of the shadow should be shown.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo UmbralShadowColorInfo = {
         "UmbralShadowColor",
-        "Umbral Shadow Color",
-        "This value determines the color that is used for the shadow cylinder of the "
-        "umbral shadow",
-        // @VISIBILITY(2.5)
+        "Umbral shadow color",
+        "The color for the shadow cylinder that represents the umbral shadow.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShowPenumbralShadowInfo = {
         "ShowPenumbralShadow",
-        "Show Penumbral Shadow",
-        "If this is enabled, the penumbral portioon of the shadow is shown",
+        "Show penumbral shadow",
+        "Decides whether the penumbral portion of the shadow should be shown.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo PenumbralShadowColorInfo = {
         "PenumbralShadowColor",
-        "Penumbral Shadow Color",
-        "This value determines the color that is used for the shadow cylinder of the "
-        "penumbral shadow",
-        // @VISIBILITY(2.5)
+        "Penumbral shadow color",
+        "The color for the shadow cylinder that represents the penumbral shadow.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourceInfo = {
         "LightSource",
-        "Light Source",
-        "This value determines the SPICE name of the object that is used as the "
-        "illuminator for computing the shadow cylinder",
+        "Light source",
+        "The SPICE name of the object that is used as the illuminator when computing the "
+        "shadow cylinder.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourceFrameInfo = {
         "LightSourceFrame",
-        "Light Source Frame",
-        "This value is the SPICE name of the body-fixed reference frame for the light "
-        "source",
+        "Light source frame",
+        "The SPICE name of the body-fixed reference frame for the light source.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowerInfo = {
         "Shadower",
         "Shadower",
-        "This value specifies the SPICE name of the object that is casting the shadow on "
-        "the shadowee",
+        "The SPICE name of the object that is casting the shadow on the shadowee.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadowerFrameInfo = {
         "ShadowerFrame",
-        "Shadower Frame",
-        "This value is the SPICE name of the body-fixed reference frame for the shadower",
+        "Shadower frame",
+        "The SPICE name of the body-fixed reference frame for the shadower.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadoweeInfo = {
         "Shadowee",
         "Shadowee",
-        "This value is the SPICE name of object that is receiving the shadow from the "
-        "shadower",
+        "The SPICE name of object that is receiving the shadow from the shadower.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
+    std::vector<VBOLayout> calculateShadowPoints(
+                                             const std::vector<glm::dvec3>& srcTerminator,
+                                             const std::vector<glm::dvec3>& dstTerminator,
+                                                  const glm::dvec3& shadowerToLightSource,
+                                                  const glm::dmat3& lightSourceToShadower,
+                                                                       double lengthScale)
+    {
+        ghoul_assert(
+            srcTerminator.size() == dstTerminator.size(),
+            "Unmatched termiator pts"
+        );
+
+        std::vector<VBOLayout> vertices;
+        vertices.reserve(dstTerminator.size() * 2);
+        for (size_t i = 0; i < dstTerminator.size(); i++) {
+            // Convert the terminator points from the reference frame of the Sun to the
+            // reference frame of the Moon
+            const glm::dvec3 src =
+                lightSourceToShadower * srcTerminator[i] + shadowerToLightSource;
+            const glm::dvec3& dst = dstTerminator[i];
+            const glm::dvec3 dir = glm::normalize(dst - src);
+
+            // The start point is the terminator point on the Moon
+            const glm::vec3 p1 = dst;
+            vertices.push_back({ p1.x, p1.y, p1.z });
+
+            // The end point is calculated by forward propagating the incoming direction
+            const glm::vec3 p2 = dst + dir * lengthScale;
+            vertices.push_back({ p2.x, p2.y, p2.z });
+        }
+        return vertices;
+    }
+
 
     struct [[codegen::Dictionary(RenderableEclipseCone)]] Parameters {
         // [[codegen::verbatim(NumberPointsInfo.description)]]
@@ -248,7 +271,7 @@ void RenderableEclipseCone::initializeGL() {
         }
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void RenderableEclipseCone::deinitializeGL() {
@@ -267,7 +290,7 @@ void RenderableEclipseCone::deinitializeGL() {
 }
 
 bool RenderableEclipseCone::isReady() const {
-    return _shader;
+    return _shader != nullptr;
 }
 
 void RenderableEclipseCone::render(const RenderData& data, RendererTasks&) {
@@ -307,40 +330,11 @@ void RenderableEclipseCone::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableEclipseCone::update(const UpdateData& data) {
-    if (_shader->isDirty()) {
+    if (_shader->isDirty()) [[unlikely]] {
         _shader->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
     createCone(data.time.j2000Seconds());
-}
-
-std::vector<VBOLayout> calculateShadowPoints(const std::vector<glm::dvec3>& srcTerminator,
-                                             const std::vector<glm::dvec3>& dstTerminator,
-                                             const glm::dvec3& shadowerToLightSource,
-                                             const glm::dmat3& lightSourceToShadower,
-                                             double lengthScale)
-{
-    ghoul_assert(srcTerminator.size() == dstTerminator.size(), "Unmatched termiator pts");
-
-    std::vector<VBOLayout> vertices;
-    vertices.reserve(dstTerminator.size() * 2);
-    for (size_t i = 0; i < dstTerminator.size(); i++) {
-        // Convert the terminator points from the reference frame of the Sun to the
-        // reference frame of the Moon
-        const glm::dvec3 src =
-            lightSourceToShadower * srcTerminator[i] + shadowerToLightSource;
-        const glm::dvec3 dst = dstTerminator[i];
-        const glm::dvec3 dir = glm::normalize(dst - src);
-
-        // The start point is the terminator point on the Moon
-        glm::vec3 p1 = dst;
-        vertices.push_back({ p1.x, p1.y, p1.z });
-
-        // The end point is calculated by forward propagating the incoming direction
-        glm::vec3 p2 = dst + dir * lengthScale;
-        vertices.push_back({ p2.x, p2.y, p2.z });
-    }
-    return vertices;
 }
 
 void RenderableEclipseCone::createCone(double et) {
@@ -428,7 +422,7 @@ void RenderableEclipseCone::createCone(double et) {
 
 
     // 3. Get the necessary conversion distances and matrices
-    glm::dvec3 diff = SpiceManager::ref().targetPosition(
+    const glm::dvec3 diff = SpiceManager::ref().targetPosition(
         _shadowee,
         _shadower,
         "GALACTIC",
@@ -451,7 +445,7 @@ void RenderableEclipseCone::createCone(double et) {
         },
         et
     ) * 1000.0; // to meter
-    glm::dmat3 lightSourceToShadower = SpiceManager::ref().frameTransformationMatrix(
+    const glm::dmat3 lightToShadower = SpiceManager::ref().frameTransformationMatrix(
         _lightSourceFrame, _shadowerFrame, et
     );
 
@@ -463,7 +457,7 @@ void RenderableEclipseCone::createCone(double et) {
             resSrc.terminatorPoints,
             resDst.terminatorPoints,
             shadowerToLightSource,
-            lightSourceToShadower,
+            lightToShadower,
             distance * static_cast<double>(_shadowLength)
         );
 
@@ -488,7 +482,7 @@ void RenderableEclipseCone::createCone(double et) {
             resSrc.terminatorPoints,
             resDst.terminatorPoints,
             shadowerToLightSource,
-            lightSourceToShadower,
+            lightToShadower,
             distance * static_cast<double>(_shadowLength)
         );
 

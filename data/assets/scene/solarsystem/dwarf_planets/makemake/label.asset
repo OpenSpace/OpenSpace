@@ -23,6 +23,7 @@ local Label = {
   GUI = {
     Name = "Makemake Label",
     Path = "/Solar System/Dwarf Planets/Makemake",
+    Focusable = false,
     Description = "Label for Makemake, visible at the solarsystem overview zoom level"
   }
 }
@@ -42,7 +43,6 @@ asset.export("Label", Label)
 
 asset.meta = {
   Name = "Makemake Label",
-  Version = "1.0",
   Description = [[Label of Makemake]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_iridium",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=iridium&FORMAT=kvn",
   Filename = "iridium.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -21,13 +21,15 @@ local IridiumSatellites = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
-    Fade = 1.5,
+    TrailFade = 15,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Iridium",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 
@@ -46,7 +48,6 @@ asset.export(IridiumSatellites)
 
 asset.meta = {
   Name = "Satellites Communications - Iridium",
-  Version = "1.0",
   Description = "Satellites asset for Communications - Iridium. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

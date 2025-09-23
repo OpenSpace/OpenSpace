@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,6 +38,9 @@ namespace {
         // The human readable name of this mission or mission phase that is displayed to
         // the user
         std::string name;
+
+        // The unique identifier for the mission
+        std::optional<std::string> identifier [[codegen::identifier()]];
 
         // A description of this mission or mission phase
         std::optional<std::string> description;
@@ -88,6 +91,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _name = p.name;
+    _identifier = p.identifier.value_or(_identifier);
     _description = p.description.value_or(_description);
     _image = p.image.value_or(_image);
     _link = p.link.value_or(_link);
@@ -114,16 +118,16 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
 
         // user may specify an overall time range. In that case expand this timerange
         if (p.timeRange.has_value()) {
-            std::string start = p.timeRange->start;
-            std::string end = p.timeRange->end.value_or(start);
+            const std::string start = p.timeRange->start;
+            const std::string end = p.timeRange->end.value_or(start);
 
-            TimeRange overallTimeRange = TimeRange(
+            const TimeRange overallTimeRange = TimeRange(
                 SpiceManager::ref().ephemerisTimeFromDate(start),
                 SpiceManager::ref().ephemerisTimeFromDate(end)
             );
 
             if (!overallTimeRange.includes(timeRangeSubPhases)) {
-                throw ghoul::RuntimeError(fmt::format(
+                throw ghoul::RuntimeError(std::format(
                     "User specified time range must at least include its subphases'",
                     "Mission ({})", _name
                 ));
@@ -139,8 +143,8 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
     }
     else {
         if (p.timeRange.has_value()) {
-            std::string start = p.timeRange->start;
-            std::string end = p.timeRange->end.value_or(start);
+            const std::string start = p.timeRange->start;
+            const std::string end = p.timeRange->end.value_or(start);
 
             _timeRange = TimeRange(
                 SpiceManager::ref().ephemerisTimeFromDate(start),
@@ -148,7 +152,7 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
             );
         }
         else {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "If there are no subphases specified, the time range has to be specified",
                 "Mission ({})", _name
             ));
@@ -163,10 +167,9 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
         _milestones.reserve(p.milestones->size());
         for (const Parameters::Milestone& milestone : *p.milestones) {
             std::string name = milestone.name;
-            Time newTime = Time(milestone.date);
             Milestone newDate = {
-                .name = name,
-                .date = newTime
+                .name = std::move(name),
+                .date = Time(milestone.date)
             };
             if (milestone.description.has_value()) {
                 newDate.description = milestone.description.value();
@@ -187,6 +190,10 @@ MissionPhase::MissionPhase(const ghoul::Dictionary& dictionary) {
 
 const std::string& MissionPhase::name() const {
     return _name;
+}
+
+const std::string& MissionPhase::identifier() const {
+    return _identifier;
 }
 
 const TimeRange& MissionPhase::timeRange() const {
@@ -235,7 +242,7 @@ void MissionPhase::phaseTrace(double time, Trace& trace, int maxDepth) const {
 
     for (const MissionPhase& phase : _subphases) {
         if (phase.timeRange().includes(time)) {
-            trace.push_back(phase);
+            trace.emplace_back(phase);
             phase.phaseTrace(time, trace, maxDepth - 1);
             return;
         }

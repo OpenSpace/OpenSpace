@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -78,12 +78,25 @@ public:
     void remove(const std::string& path);
 
     /**
+     * Reloads the asset at the provided \p path as a new root asset of the AssetManager.
+     * If the asset at that path was not previously loaded, acts the same as the add
+     * function.
+     *
+     * \param path The path from which the Asset is loaded. This path can be either
+     *        relative to the base directory (the path starting with . or ..), an absolute
+     *        path (that path starting with *:/ or /) or relative to the global asset root
+     *        (if the path starts any other way)
+     * \pre \p path must not be the empty string
+     */
+    void reload(const std::string& path);
+
+    /**
      * Update function that should be called at least once per frame that will load all
      * queued asset loads and asset removal.
      */
     void update();
 
-    scripting::LuaLibrary luaLibrary();
+    static scripting::LuaLibrary luaLibrary();
 
     /**
      * Returns all assets that have been loaded by the AssetManager. The order of the
@@ -179,6 +192,9 @@ private:
      */
     std::filesystem::path generateAssetPath(const std::filesystem::path& baseDirectory,
         const std::string& assetPath) const;
+
+    void runRemoveQueue();
+    void runAddQueue();
 
     //
     // Assets

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,8 +30,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/json_helper.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
@@ -43,39 +43,37 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ServerProcessEnabledInfo = {
         "ServerProcessEnabled",
-        "Enable Server Process",
-        "Enable the node js based process used to serve the Web GUI",
-        // @VISIBILITY(3.5)
+        "Enable server process",
+        "Enable the node js based process used to serve the Web GUI.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AddressInfo = {
         "Address",
         "Address",
-        "The network address to use when connecting to OpenSpace from the Web GUI",
+        "The network address to use when connecting to OpenSpace from the Web GUI.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
-        "The network port to use when serving the Web GUI over HTTP",
+        "The network port to use when serving the Web GUI over HTTP.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo WebSocketInterfaceInfo = {
         "WebSocketInterface",
-        "WebSocket Interface",
-        "The identifier of the websocket interface to use when communicating",
+        "WebSocket interface",
+        "The identifier of the websocket interface to use when communicating.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ServerProcessEntryPointInfo =
     {
         "ServerProcessEntryPoint",
-        "Server Process Entry Point",
-        "The node js command to invoke",
-        // @VISIBILITY(3.5)
+        "Server process entry point",
+        "The node js command to invoke.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -84,27 +82,25 @@ namespace {
         "Directories",
         "Directories from which to to serve static content, as a string list "
         "with entries expressed as pairs, where every odd is the endpoint name and every "
-        "even is the directory",
-        // @VISIBILITY(3.5)
+        "even is the directory.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DefaultEndpointInfo = {
         "DefaultEndpoint",
-        "Default Endpoint",
+        "Default endpoint",
         "The 'default' endpoint. The server will redirect http requests from / to "
-        "/<DefaultEndpoint>",
-        // @VISIBILITY(3.5)
+        "/<DefaultEndpoint>.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ServedDirectoriesInfo = {
         "ServedDirectories",
-        "ServedDirectories",
+        "Served directories",
         "Directories that are currently served. This value is set by the server process, "
         "as a verification of the actually served directories. For example, an onChange "
         "callback can be registered to this, to reload browsers when the server is "
-        "ready. Manual changes to this property have no effect",
+        "ready. Manual changes to this property have no effect.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -122,6 +118,10 @@ namespace {
 } // namespace
 
 namespace openspace {
+
+documentation::Documentation WebGuiModule::Documentation() {
+    return codegen::doc<Parameters>("module_webgui");
+}
 
 WebGuiModule::WebGuiModule()
     : OpenSpaceModule(WebGuiModule::Name)
@@ -153,8 +153,8 @@ std::string  WebGuiModule::address() const {
 
 WebGuiModule::CallbackHandle WebGuiModule::addEndpointChangeCallback(EndpointCallback cb)
 {
-    CallbackHandle handle = _nextCallbackHandle++;
-    _endpointChangeCallbacks.push_back({ handle, std::move(cb) });
+    const CallbackHandle handle = _nextCallbackHandle++;
+    _endpointChangeCallbacks.emplace_back(handle, std::move(cb));
     return handle;
 }
 
@@ -252,14 +252,14 @@ void WebGuiModule::startProcess() {
 
 #ifdef _MSC_VER
     const std::filesystem::path node = absPath("${MODULE_WEBGUI}/ext/nodejs/node.exe");
-#else
+#else  // ^^^^ _MSC_VER // !_MSC_VER vvvv
     const std::filesystem::path node = absPath("${MODULE_WEBGUI}/ext/nodejs/node");
-#endif
+#endif // _MSC_VER
 
     std::string formattedDirectories = "[";
 
     std::vector<std::string> directories = _directories;
-    for (size_t i = 0; i < directories.size(); ++i) {
+    for (size_t i = 0; i < directories.size(); i++) {
         std::string arg = directories[i];
         if (i % 2 == 1) {
             arg = absPath(arg).string();
@@ -273,26 +273,26 @@ void WebGuiModule::startProcess() {
 
     std::string defaultEndpoint;
     if (!_defaultEndpoint.value().empty()) {
-        defaultEndpoint = fmt::format("--redirect \"{}\"", _defaultEndpoint.value());
+        defaultEndpoint = std::format("--redirect \"{}\"", _defaultEndpoint.value());
     }
 
-    const std::string command = fmt::format(
+    const std::string command = std::format(
         "\"{}\" \"{}\" --directories \"{}\" {} --http-port \"{}\" --ws-address \"{}\" "
         "--ws-port {} --auto-close --local",
-        node.string(), absPath(_entryPoint.value()).string(), formattedDirectories,
+        node.string(), absPath(_entryPoint.value()), formattedDirectories,
         defaultEndpoint, _port.value(), _address.value(), webSocketPort
     );
 
     _process = std::make_unique<ghoul::Process>(
         command,
-        absPath("${BIN}").string(),
+        absPath("${BIN}"),
         [](const char* data, size_t n) {
-            const std::string str(data, n);
-            LDEBUG(fmt::format("Web GUI server output: {}", str));
+            const std::string_view str = std::string_view(data, n);
+            LDEBUG(std::format("Web GUI server output: {}", str));
         },
         [](const char* data, size_t n) {
-            const std::string str(data, n);
-            LERROR(fmt::format("Web GUI server error: {}", str));
+            const std::string_view str = std::string_view(data, n);
+            LERROR(std::format("Web GUI server error: {}", str));
         }
     );
 }

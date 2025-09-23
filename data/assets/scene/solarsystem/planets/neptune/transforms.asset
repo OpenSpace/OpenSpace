@@ -16,6 +16,7 @@ local NeptuneBarycenter = {
   GUI = {
     Name = "Neptune Barycenter",
     Path = "/Solar System/Planets/Neptune",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -35,7 +36,6 @@ asset.export(NeptuneBarycenter)
 
 asset.meta = {
   Name = "Neptune Transforms",
-  Version = "1.1",
   Description = "Neptune Barycenter transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

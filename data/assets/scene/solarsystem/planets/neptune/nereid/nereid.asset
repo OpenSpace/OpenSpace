@@ -23,9 +23,7 @@ local Nereid = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 357000, 340000, 340000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 357000, 340000, 340000 }
   },
   Tag = { "moon_solarSystem", "moon_giants", "moon_neptune", "moon_major_neptune" },
   GUI = {
@@ -48,10 +46,16 @@ local NereidTrail = {
     Period = 360.13,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_neptune", "moonTrail_major_neptune" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_neptune",
+    "moonTrail_major_neptune"
+  },
   GUI = {
     Name = "Nereid Trail",
-    Path = "/Solar System/Planets/Neptune/Major Moons/Nereid"
+    Path = "/Solar System/Planets/Neptune/Major Moons/Nereid",
+    Focusable = false
   }
 }
 
@@ -76,6 +80,7 @@ local NereidLabel = {
   GUI = {
     Name = "Nereid Label",
     Path = "/Solar System/Planets/Neptune/Major Moons/Nereid",
+    Focusable = false,
     Description = "Label for Neptune's moon Nereid"
   }
 }
@@ -105,7 +110,6 @@ asset.export(NereidLabel)
 
 asset.meta = {
   Name = "Nereid",
-  Version = "1.1",
   Description = [[Procedural Globe asset containing Neptune's moon: Nereid. A blank globe
     and SPICE trail are generated for the moon]],
   Author = "OpenSpace Team",

@@ -6,6 +6,7 @@ local Layer = {
   Identifier = "Viking_MDIM_NewYork",
   Name = "Viking MDIM [New York]",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("viking_mdim_newyork.wms"),
   Description = [[This global image map of Mars has a resolution of 256 pixels/degree
     (scale approximately 232 meters per pixel (m) at the equator). The colorized
@@ -43,7 +44,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Viking MDIM [New York]",
-  Version = "1.1",
   Description = [[Alternate image layer for Mars. This map is hosted on the OpenSpace
     server in New York]],
   Author = "USGS",

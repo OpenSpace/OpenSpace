@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -77,7 +77,7 @@ endif ()
 #####
 if (APPLE)
   set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.15" CACHE STRING "Minimum OS X deployment version" FORCE)
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "13.3" CACHE STRING "Minimum OS X deployment version" FORCE)
   set(CMAKE_XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--deep" CACHE STRING "Other Code Signing Flags" FORCE)
 endif ()
 
@@ -113,9 +113,14 @@ begin_header("Dependency: SGCT")
 set(SGCT_TEXT OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_FREETYPE OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_FMT OFF CACHE BOOL "" FORCE)
+set(SGCT_DEP_INCLUDE_JSON OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_SCN OFF CACHE BOOL "" FORCE)
 set(SGCT_DEP_INCLUDE_CATCH2 OFF CACHE BOOL "" FORCE)
 
+if (NOT OPENSPACE_HAVE_TESTS)
+  # Unless overriden, disable sgct tests if OpenSpace tests are disabled
+  set(SGCT_BUILD_TESTS FALSE CACHE BOOL "Enable ghoul unit tests")
+endif()
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
 target_link_libraries(OpenSpace PRIVATE sgct)
 
@@ -147,10 +152,9 @@ if (WIN32)
   # Find the windeployqt application
   get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
   get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
-  find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_qt_bin_dir}")
   add_custom_command(
     TARGET OpenSpace POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E env PATH="${_qt_bin_dir}" "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations \"$<TARGET_FILE:OpenSpace>\"
+    COMMAND "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations \"$<TARGET_FILE:OpenSpace>\"
     COMMENT "Deploying Qt libraries"
   )
 endif ()
@@ -174,7 +178,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
 
   set_cef_targets("${CEF_ROOT}" OpenSpace)
   run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
-elseif ()
+else ()
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again")
 endif ()
 

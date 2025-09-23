@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
+#include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
@@ -66,7 +67,7 @@ bool SkyBrowserTopic::isDone() const {
 }
 
 void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
-    std::string event = json.at("event").get<std::string>();
+    const std::string event = json.at("event").get<std::string>();
     if (event == UnsubscribeEvent) {
         _isDone = true;
         return;
@@ -80,7 +81,7 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
     ServerModule* module = global::moduleEngine->module<ServerModule>();
     _targetDataCallbackHandle = module->addPreSyncCallback(
         [this]() {
-            std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+            const auto now = std::chrono::system_clock::now();
             if (now - _lastUpdateTime > _skyBrowserUpdateTime) {
                 sendBrowserData();
                 _lastUpdateTime = std::chrono::system_clock::now();
@@ -100,22 +101,20 @@ void SkyBrowserTopic::sendBrowserData() {
     data.setValue("cameraInSolarSystem", module->isCameraInSolarSystem());
 
     // Pass data for all the browsers and the corresponding targets
-    if (module->isCameraInSolarSystem()) {
-        const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
-        ghoul::Dictionary targets;
-        for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
-            std::string id = pair->browserId();
-            ghoul::Dictionary target = pair->dataAsDictionary();
-            targets.setValue(id, target);
-        }
-        data.setValue("browsers", targets);
+    const std::vector<std::unique_ptr<TargetBrowserPair>>& pairs = module->pairs();
+    ghoul::Dictionary targets;
+    for (const std::unique_ptr<TargetBrowserPair>& pair : pairs) {
+        const std::string id = pair->browserId();
+        const ghoul::Dictionary target = pair->dataAsDictionary();
+        targets.setValue(id, target);
     }
+    data.setValue("browsers", targets);
 
     std::string jsonString = ghoul::formatJson(data);
 
     // Only send message if data actually changed
     if (jsonString != _lastUpdateJsonString) {
-        json jsonData = json::parse(jsonString.begin(), jsonString.end());
+        const json jsonData = json::parse(jsonString.begin(), jsonString.end());
         _connection->sendJson(wrappedPayload(jsonData));
     }
 

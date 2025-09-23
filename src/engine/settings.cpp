@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -49,6 +49,7 @@ namespace version1 {
 
         Settings settings;
         settings.hasStartedBefore = get_to<bool>(json, "started-before");
+        settings.lastStartedDate = get_to<std::string>(json, "last-started-date");
         settings.configuration = get_to<std::string>(json, "config");
         settings.rememberLastConfiguration = get_to<bool>(json, "config-remember");
         settings.profile = get_to<std::string>(json, "profile");
@@ -68,8 +69,8 @@ namespace version1 {
                 settings.visibility = properties::Property::Visibility::Developer;
             }
             else {
-                throw ghoul::RuntimeError(fmt::format(
-                    "Unknown visibility value {}", *visibility
+                throw ghoul::RuntimeError(std::format(
+                    "Unknown visibility value '{}'", *visibility
                 ));
             }
         }
@@ -100,8 +101,8 @@ namespace version1 {
 std::filesystem::path findSettings(const std::string& filename) {
     // Right now the settings file lives next to the openspace.cfg file
 
-    std::filesystem::path path = findConfiguration();
-    std::filesystem::path result = path.parent_path() / filename;
+    const std::filesystem::path path = findConfiguration();
+    const std::filesystem::path result = path.parent_path() / filename;
     return result;
 }
 
@@ -110,10 +111,12 @@ Settings loadSettings(const std::filesystem::path& filename) {
         return Settings();
     }
 
-    std::ifstream f(filename);
     std::stringstream buffer;
-    buffer << f.rdbuf();
-    std::string contents = buffer.str();
+    {
+        const std::ifstream f = std::ifstream(filename);
+        buffer << f.rdbuf();
+    }
+    const std::string contents = buffer.str();
 
     nlohmann::json setting = nlohmann::json::parse(contents);
     if (setting.empty()) {
@@ -125,7 +128,7 @@ Settings loadSettings(const std::filesystem::path& filename) {
         return version1::parseSettings(setting);
     }
 
-    throw ghoul::RuntimeError(fmt::format(
+    throw ghoul::RuntimeError(std::format(
         "Unrecognized version for setting: {}", version
     ));
 }
@@ -137,6 +140,9 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
 
     if (settings.hasStartedBefore.has_value()) {
         json["started-before"] = *settings.hasStartedBefore;
+    }
+    if (settings.lastStartedDate.has_value()) {
+        json["last-started-date"] = *settings.lastStartedDate;
     }
     if (settings.configuration.has_value()) {
         json["config"] = *settings.configuration;
@@ -186,8 +192,8 @@ void saveSettings(const Settings& settings, const std::filesystem::path& filenam
         json["mrf"] = mrf;
     }
 
-    std::string content = json.dump(2);
-    std::ofstream f(filename);
+    std::ofstream f = std::ofstream(filename);
+    const std::string content = json.dump(2);
     f << content;
 }
 

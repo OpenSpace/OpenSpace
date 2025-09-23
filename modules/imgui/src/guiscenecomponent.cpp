@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,12 +44,12 @@ namespace {
         using namespace openspace;
 
         if (ImGui::TreeNode(node.identifier().c_str())) {
-            std::vector<SceneGraphNode*> children = node.children();
+            const std::vector<SceneGraphNode*> children = node.children();
             for (SceneGraphNode* c : children) {
                 renderSceneGraphNode(*c, time);
             }
 
-            bool timeRangeActive = node.isTimeFrameActive(time);
+            bool timeRangeActive = node.isTimeFrameActive();
             ImGui::Checkbox("Time Range Active", &timeRangeActive);
 
             const Renderable* renderable = node.renderable();
@@ -67,8 +67,8 @@ namespace {
                 bool isReady = renderable->isReady();
                 ImGui::Checkbox("Is Ready", &isReady);
 
-                Renderable::RenderBin bin = renderable->renderBin();
-                std::string binStr = [](Renderable::RenderBin b) {
+                const Renderable::RenderBin bin = renderable->renderBin();
+                const std::string binStr = [](Renderable::RenderBin b) {
                     switch (b) {
                         case Renderable::RenderBin::Background:
                             return "Background";

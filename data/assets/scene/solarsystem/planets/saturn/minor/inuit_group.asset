@@ -16,9 +16,7 @@ local Kiviuq = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 16000, 16000, 16000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 16000, 16000, 16000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -52,13 +50,15 @@ local KiviuqTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn",
     "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Kiviuq Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq",
+    Focusable = false
   }
 }
 
@@ -79,11 +79,17 @@ local KiviuqLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "Kiviuq Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Kiviuq",
-    Description = "Label for Saturn's moon Kiviuq (Inuit group)"
+    Focusable = false
   }
 }
 
@@ -99,9 +105,7 @@ local Ijiraq = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 12000, 12000, 12000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 12000, 12000, 12000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -135,13 +139,15 @@ local IjiraqTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn",
     "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Ijiraq Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq",
+    Focusable = false
   }
 }
 
@@ -162,11 +168,17 @@ local IjiraqLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "Ijiraq Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Ijiraq",
-    Description = "Label for Saturn's moon Ijiraq (Inuit group)"
+    Focusable = false
   }
 }
 
@@ -182,9 +194,7 @@ local Paaliaq = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 22000, 22000, 22000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 22000, 22000, 22000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -218,13 +228,15 @@ local PaaliaqTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn",
     "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Paaliaq Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq",
+    Focusable = false
   }
 }
 
@@ -245,11 +257,17 @@ local PaaliaqLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "Paaliaq Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Paaliaq",
-    Description = "Label for Saturn's moon Paaliaq (Inuit group)"
+    Focusable = false
   }
 }
 
@@ -265,9 +283,7 @@ local Siarnaq = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 40000, 40000, 40000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 40000, 40000, 40000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -301,13 +317,15 @@ local SiarnaqTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn",
     "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Cyllene Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Cyllene"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Cyllene",
+    Focusable = false
   }
 }
 
@@ -328,11 +346,17 @@ local SiarnaqLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "Siarnaq Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Siarnaq",
-    Description = "Label for Saturn's moon Siarnaq (Inuit group)"
+    Focusable = false
   }
 }
 
@@ -348,9 +372,7 @@ local Tarqeq = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7000, 7000, 7000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 7000, 7000, 7000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -384,13 +406,15 @@ local TarqeqTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn",
     "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "Tarqeq Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq",
+    Focusable = false
   }
 }
 
@@ -411,11 +435,17 @@ local TarqeqLabel = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "Tarqeq Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/Tarqeq",
-    Description = "Label for Saturn's moon Tarqeq (Inuit group)"
+    Focusable = false
   }
 }
 
@@ -431,9 +461,7 @@ local S2004S29 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -467,13 +495,15 @@ local S2004S29Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn",
     "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2004 S 29 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29",
+    Focusable = false
   }
 }
 
@@ -494,11 +524,17 @@ local S2004S29Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "S/2004 S 29 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S29",
-    Description = "Label for Saturn's moon S/2004 S 29 (Inuit group)"
+    Focusable = false
   }
 }
 
@@ -514,9 +550,7 @@ local S2004S31 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 4000, 4000, 4000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 4000, 4000, 4000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -550,13 +584,15 @@ local S2004S31Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn",
     "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2004 S 31 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31",
+    Focusable = false
   }
 }
 
@@ -577,11 +613,17 @@ local S2004S31Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "S/2004 S 31 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2004S31",
-    Description = "Label for Saturn's moon S/2004 S 31 (Inuit group)"
+    Focusable = false
   }
 }
 
@@ -597,9 +639,7 @@ local S2019S01 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 5000, 5000, 5000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 5000, 5000, 5000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -633,13 +673,15 @@ local S2019S01Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_saturn",
+    "moonTrail_inuit",
     "moonTrail_minor",
     "moonTrail_minor_saturn",
     "moonTrail_minor_far_saturn"
   },
   GUI = {
     Name = "S/2019 S 01 Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01"
+    Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01",
+    Focusable = false
   }
 }
 
@@ -660,11 +702,17 @@ local S2019S01Label = {
     FadeDistances = { 1.25, 90.0 },
     FadeWidths = { 0.25, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_saturn",
+    "minor_moon_labels_inuit"
+  },
   GUI = {
     Name = "S/2019 S 01 Label",
     Path = "/Solar System/Planets/Saturn/Minor Moons/Inuit Group/S2019S01",
-    Description = "Label for Saturn's moon S/2019 S 01 (Inuit group)"
+    Focusable = false
   }
 }
 
@@ -773,7 +821,6 @@ asset.export(S2019S01Label)
 
 asset.meta = {
   Name = "Saturn Inuit Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Saturn's Inuit Group moons: Kiviuq,
     Ijiraq, Paaliaq, Siarnaq and Tarqeq. Blank globes and SPICE trails are generated for
     each moon]],

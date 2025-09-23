@@ -7,7 +7,6 @@ asset.require("./layers/newyork_layers", false)
 
 asset.meta = {
   Name = "Default Mars Layers",
-  Version = "1.2",
   Description = [[Default Mars layers are: Mars texture, CTX Blended, HiRISE,
     HiRISE Local Set, MOC WA Color, Viking MDIM, MOLA Pseudo Color, MOLA HRSC,
     Themis IR Day, Themis IR Night, CTX Mosaic, MDEM200M (3D), HiRISE Local Set DEM (3D),

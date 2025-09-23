@@ -1,0 +1,29 @@
+-- Basic
+-- This asset applies a rotation to a set of coordinate axes that makes them rotate at a 
+-- constant rate of one revolution around the z-axis every 2 seconds.
+
+local Node = {
+  Identifier = "ConstantRotation_Example",
+  Transform = {
+    Rotation = {
+      Type = "ConstantRotation",
+      RotationAxis = { 0.0, 0.0, 1.0 },
+      RotationRate = 0.5
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "ConstantRotation - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

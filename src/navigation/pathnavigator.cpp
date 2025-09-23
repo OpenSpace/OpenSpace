@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,6 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
-#include <openspace/navigation/pathnavigator.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -45,9 +44,11 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
 #include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/vector_angle.hpp>
 #include <vector>
+
 #include "pathnavigator_lua.inl"
 
 namespace {
@@ -55,72 +56,70 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DefaultCurveOptionInfo = {
         "DefaultPathType",
-        "Default Path Type",
+        "Default path type",
         "The default path type chosen when generating a path or flying to a target. "
         "See wiki for alternatives. The shape of the generated path will be different "
-        "depending on the path type",
+        "depending on the path type.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IncludeRollInfo = {
         "IncludeRoll",
-        "Include Roll",
-        "If disabled, roll is removed from the interpolation of camera orientation",
+        "Include roll",
+        "If disabled, roll is removed from the interpolation of camera orientation.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpeedScaleInfo = {
         "SpeedScale",
-        "Speed Scale",
+        "Speed scale",
         "Scale factor that the speed will be multiplied with during path traversal. "
         "Can be used to speed up or slow down the camera motion, depending on if the "
-        "value is larger than or smaller than one",
+        "value is larger than or smaller than one.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo IdleBehaviorOnFinishInfo = {
         "ApplyIdleBehaviorOnFinish",
-        "Apply Idle Behavior on Finish",
+        "Apply idle behavior on finish",
         "If set to true, the chosen IdleBehavior of the OrbitalNavigator will be "
-        "triggered once the path has reached its target",
+        "triggered once the path has reached its target.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ArrivalDistanceFactorInfo = {
         "ArrivalDistanceFactor",
-        "Arrival Distance Factor",
+        "Arrival distance factor",
         "A factor used to compute the default distance from a target scene graph node "
         "when creating a camera path. The factor will be multipled with the node's "
         "bounding sphere to compute the target height from the bounding sphere of the "
-        "object",
+        "object.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationSpeedFactorInfo = {
         "RotationSpeedFactor",
-        "Rotation Speed Factor (Linear Path)",
+        "Rotation speed factor (linear path)",
         "Affects how fast the camera rotates to the target rotation during a linear "
         "path. A value of 1 means that the camera will rotate 90 degrees in about 5 "
-        "seconds. A value of 2 means twice that time, i.e. 10 seconds, and so on",
-        // @VISIBILITY(2.5)
+        "seconds. A value of 2 means twice that time, i.e. 10 seconds, and so on.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
         "MinimalValidBoundingSphere",
-        "Minimal Valid Bounding Sphere",
+        "Minimal valid bounding sphere",
         "The minimal allowed value for a bounding sphere, in meters. Used for "
         "computation of target positions and path generation, to avoid issues when "
-        "there is no bounding sphere",
+        "there is no bounding sphere.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RelevantNodeTagsInfo = {
         "RelevantNodeTags",
-        "Relevant Node Tags",
+        "Relevant node tags",
         "List of tags for the nodes that are relevant for path creation, for example "
-        "when avoiding collisions",
-        // @VISIBILITY(3.5)
+        "when avoiding collisions.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
@@ -129,10 +128,7 @@ namespace openspace::interaction {
 
 PathNavigator::PathNavigator()
     : properties::PropertyOwner({ "PathNavigator", "Path Navigator" })
-    , _defaultPathType(
-        DefaultCurveOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _defaultPathType(DefaultCurveOptionInfo)
     , _includeRoll(IncludeRollInfo, false)
     , _speedScale(SpeedScaleInfo, 1.f, 0.01f, 2.f)
     , _applyIdleBehaviorOnFinish(IdleBehaviorOnFinishInfo, false)
@@ -267,7 +263,7 @@ void PathNavigator::updateCamera(double deltaTime) {
 
     // Set anchor node in orbitalNavigator, to render visible nodes and add activate
     // navigation when we reach the end.
-    std::string currentAnchor = anchor()->identifier();
+    const std::string currentAnchor = anchor()->identifier();
     if (currentAnchor != newAnchor) {
         global::navigationHandler->orbitalNavigator().setFocusNode(newAnchor, false);
     }
@@ -294,7 +290,7 @@ void PathNavigator::updateCamera(double deltaTime) {
 }
 
 void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
-    OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
+    const OpenSpaceEngine::Mode m = global::openSpaceEngine->currentMode();
     if (m == OpenSpaceEngine::Mode::SessionRecordingPlayback) {
         // Silently ignore any paths that are being created during a session recording
         // playback. The camera path should already have been recorded
@@ -314,7 +310,7 @@ void PathNavigator::createPath(const ghoul::Dictionary& dictionary) {
         // Do nothing
     }
     catch (const ghoul::RuntimeError& e) {
-        LERROR(fmt::format("Could not create path. Reason: {}", e.message));
+        LERROR(std::format("Could not create path. Reason: {}", e.message));
         return;
     }
 
@@ -334,7 +330,9 @@ void PathNavigator::startPath() {
         return;
     }
 
-    bool success = global::openSpaceEngine->setMode(OpenSpaceEngine::Mode::CameraPath);
+    const bool success = global::openSpaceEngine->setMode(
+        OpenSpaceEngine::Mode::CameraPath
+    );
     if (!success) {
         LERROR("Could not start camera path");
         return; // couldn't switch to camera path mode
@@ -344,11 +342,7 @@ void PathNavigator::startPath() {
     // moving. However, keep track of whether the time was running before the path
     // was started, so we can reset it on finish
     if (!global::timeManager->isPaused()) {
-        openspace::global::scriptEngine->queueScript(
-            "openspace.time.setPause(true)",
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        openspace::global::scriptEngine->queueScript("openspace.time.setPause(true)");
 
         _startSimulationTimeOnFinish = true;
         LINFO("Pausing time simulation during path traversal");
@@ -427,15 +421,15 @@ double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const 
         // Use the biggest of the bounding sphere and interaction sphere,
         // so we don't accidentally choose a bounding sphere that is much smaller
         // than the interaction sphere of the node
-        double bs = n->boundingSphere();
-        double is = n->interactionSphere();
+        const double bs = n->boundingSphere();
+        const double is = n->interactionSphere();
         return std::max(is, bs);
     };
 
     double result = sphere(node);
 
     if (result < _minValidBoundingSphere) {
-        LDEBUG(fmt::format(
+        LDEBUG(std::format(
             "The scene graph node '{}' has no, or a very small, bounding sphere. Using "
             "minimal value of {}. This might lead to unexpected results",
             node->identifier(), _minValidBoundingSphere.value()
@@ -444,6 +438,17 @@ double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const 
     }
 
     return result;
+}
+
+double PathNavigator::defaultArrivalHeight(const std::string& sgnIdentifier) const {
+    const SceneGraphNode* node = sceneGraphNode(sgnIdentifier);
+    if (!node) {
+        LERROR(std::format("Could not find scene graph node '{}'", sgnIdentifier));
+        return 0.0;
+    }
+
+    const double radius = findValidBoundingSphere(node);
+    return radius * arrivalDistanceFactor();
 }
 
 const std::vector<SceneGraphNode*>& PathNavigator::relevantNodes() {
@@ -460,11 +465,7 @@ void PathNavigator::handlePathEnd() {
     global::openSpaceEngine->resetMode();
 
     if (_startSimulationTimeOnFinish) {
-        openspace::global::scriptEngine->queueScript(
-            "openspace.time.setPause(false)",
-            scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            scripting::ScriptEngine::ShouldSendToRemote::Yes
-        );
+        global::scriptEngine->queueScript("openspace.time.setPause(false)");
         _startSimulationTimeOnFinish = false;
     }
 
@@ -473,9 +474,7 @@ void PathNavigator::handlePathEnd() {
             "openspace.setPropertyValueSingle("
                 "'NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior',"
                 "true"
-            ");",
-            openspace::scripting::ScriptEngine::ShouldBeSynchronized::Yes,
-            openspace::scripting::ScriptEngine::ShouldSendToRemote::Yes
+            ");"
         );
     }
 
@@ -497,7 +496,7 @@ void PathNavigator::findRelevantNodes() {
     }
 
     auto isRelevant = [&relevantTags](const SceneGraphNode* node) {
-        const std::vector<std::string> tags = node->tags();
+        const std::vector<std::string>& tags = node->tags();
         auto result = std::find_first_of(
             relevantTags.begin(),
             relevantTags.end(),
@@ -547,7 +546,7 @@ SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
         const glm::dvec3 posInModelCoords =
             glm::inverse(n->modelTransform()) * glm::dvec4(node->worldPosition(), 1.0);
 
-        bool isClose = collision::isPointInsideSphere(
+        const bool isClose = collision::isPointInsideSphere(
             posInModelCoords,
             glm::dvec3(0.0, 0.0, 0.0),
             proximityRadius
@@ -561,7 +560,7 @@ SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
     return nullptr;
 }
 
-void PathNavigator::removeRollRotation(CameraPose& pose) {
+void PathNavigator::removeRollRotation(CameraPose& pose) const {
     // The actual position for the camera does not really matter. Use the origin,
     // to avoid precision problems when we have large values for the position
     const glm::dvec3 cameraPos = glm::dvec3(0.0);
@@ -573,9 +572,9 @@ void PathNavigator::removeRollRotation(CameraPose& pose) {
     // enough away from the camera
     constexpr double NotTooCloseDistance = 10000.0;
 
-    glm::dvec3 lookAtPos = cameraPos + NotTooCloseDistance * cameraDir;
+    const glm::dvec3 lookAtPos = cameraPos + NotTooCloseDistance * cameraDir;
 
-    glm::dquat rollFreeRotation = ghoul::lookAtQuaternion(
+    const glm::dquat rollFreeRotation = ghoul::lookAtQuaternion(
         cameraPos,
         lookAtPos,
         camera()->lookUpVectorWorldSpace()
@@ -588,17 +587,10 @@ scripting::LuaLibrary PathNavigator::luaLibrary() {
     return {
         "pathnavigation",
         {
-            codegen::lua::IsFlying,
             codegen::lua::ContinuePath,
             codegen::lua::PausePath,
             codegen::lua::StopPath,
             codegen::lua::SkipToEnd,
-            codegen::lua::FlyTo,
-            codegen::lua::FlyToHeight,
-            codegen::lua::FlyToNavigationState,
-            codegen::lua::ZoomToFocus,
-            codegen::lua::ZoomToDistance,
-            codegen::lua::ZoomToDistanceRelative,
             codegen::lua::CreatePath
         }
     };

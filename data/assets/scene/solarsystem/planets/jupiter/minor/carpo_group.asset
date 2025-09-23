@@ -17,9 +17,7 @@ local Carpo = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 3000, 3000, 3000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 3000, 3000, 3000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -53,12 +51,14 @@ local CarpoTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carpo",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Carpo Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo",
+    Focusable = false
   }
 }
 
@@ -79,10 +79,17 @@ local CarpoLabel = {
     FadeDistances = { 1.0, 100.0 },
     FadeWidths = { 0.0, 100.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carpo"
+  },
   GUI = {
     Name = "Carpo Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo",
+    Focusable = false,
     Description = "Label for Jupiter's moon Carpo (Carpo group)"
   }
 }
@@ -104,10 +111,17 @@ local CarpoLabelNear = {
     FadeDistances = { 0.2, 1.0 },
     FadeWidths = { 0.1, 0.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carpo"
+  },
   GUI = {
     Name = "Carpo Label (Near)",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/Carpo",
+    Focusable = false,
     Description = "Transitional Label for close-range viewing of Carpo (Carpo group)"
   }
 }
@@ -124,9 +138,7 @@ local S2018J4 = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 2000, 2000, 2000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 2000, 2000, 2000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -160,12 +172,14 @@ local S2018J4Trail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_carpo",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "S/2018 J 4 Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4",
+    Focusable = false
   }
 }
 
@@ -186,10 +200,17 @@ local S2018J4Label = {
     FadeDistances = { 1.5, 90.0 },
     FadeWidths = { 0.5, 90.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carpo"
+  },
   GUI = {
     Name = "S/2018 J 4 Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4",
+    Focusable = false,
     Description = "Label for Jupiter's moon S2018J4 (Carpo group)"
   }
 }
@@ -211,10 +232,17 @@ local S2018J4LabelNear = {
     FadeDistances = { 0.2, 1.0 },
     FadeWidths = { 0.1, 0.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_carpo"
+  },
   GUI = {
     Name = "S2018J4 Label (Near)",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Carpo Group/S2018J4",
+    Focusable = false,
     Description = "Transitional Label for close-range viewing of S2018J4 (Carpo group)"
   }
 }
@@ -252,7 +280,6 @@ asset.export(S2018J4Label)
 
 asset.meta = {
   Name = "Jupiter Carpo Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Jupiter's Carpo Group moons: Carpo.
     Blank globes and SPICE trails are generated for each moon]],
   Author = "OpenSpace Team",

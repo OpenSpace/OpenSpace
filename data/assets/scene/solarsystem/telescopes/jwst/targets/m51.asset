@@ -34,7 +34,6 @@ asset.export(M51Image)
 
 asset.meta = {
   Name = "M51 Galaxy Image",
-  Version = "1.0",
   Description = "Screenspace image of the M51 Galaxy",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

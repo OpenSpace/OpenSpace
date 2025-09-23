@@ -23,12 +23,12 @@ local SwiCh2 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "SWI CH2 FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false
   }
 }
 
@@ -58,12 +58,12 @@ local SwiFull = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "SWI Full FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = "The field-of-view for the full SWI instrument onboard Juice"
   }
 }
@@ -96,12 +96,12 @@ local SwiFullGCO500 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "SWI Full GCO500 FOV",
-    Path = "/Solar System/Missions/Juice/Instruments"
+    Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false
   }
 }
 
@@ -131,7 +131,6 @@ asset.export(SwiFull)
 
 asset.meta = {
   Name = "SWI",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Submillimetre Wave Instrument (SWI), which is measuring
     the chemistry, meteorology, and structure of Jupiters middle atmosphere as well as the

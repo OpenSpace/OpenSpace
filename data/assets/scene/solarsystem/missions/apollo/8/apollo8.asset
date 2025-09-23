@@ -3,3 +3,14 @@ asset.require("./launch_model")
 asset.require("./trails")
 asset.require("./actions")
 asset.require("../actions")
+
+
+
+asset.meta = {
+  Name = "Apollo 8",
+  Description = [[A meta asset that will include all of the other assets to show the
+    Apollo 8 launch and orbit trajectory]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

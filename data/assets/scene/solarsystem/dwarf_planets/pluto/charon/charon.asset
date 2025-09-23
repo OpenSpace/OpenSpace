@@ -30,8 +30,6 @@ local Charon = {
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 6.035E5, 6.035E5, 6.035E5 },
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "charon.labels",
@@ -45,7 +43,13 @@ local Charon = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_major", "moon_major_pluto" },
+  Tag = {
+    "moon_solarSystem",
+    "moon_dwarf",
+    "moon_pluto",
+    "moon_major",
+    "moon_major_pluto"
+  },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto/Charon"
   }
@@ -72,6 +76,7 @@ local CharonLabel = {
   GUI = {
     Name = "Charon Label",
     Path = "/Solar System/Dwarf Planets/Pluto/Charon",
+    Focusable = false,
     Description = "Label for Pluto's moon Charon"
   }
 }
@@ -94,7 +99,6 @@ asset.export(CharonLabel)
 
 asset.meta = {
   Name = "Charon",
-  Version = "1.0",
   Description = "Charon globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

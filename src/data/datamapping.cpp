@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,12 +25,15 @@
 #include <openspace/data/datamapping.h>
 
 #include <openspace/documentation/documentation.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/crc32.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
 #include <string_view>
 
 namespace {
+    constexpr std::string_view _loggerCat = "RenderablePolygonCloud";
+
     constexpr std::string_view DefaultX = "x";
     constexpr std::string_view DefaultY = "y";
     constexpr std::string_view DefaultZ = "z";
@@ -48,24 +51,45 @@ namespace {
         if (mapping.has_value()) {
             switch (columnCase) {
                 case PositionColumn::X:
-                    column = (*mapping).xColumnName.value_or(column);
+                    column = mapping->xColumnName.value_or(column);
                     break;
                 case PositionColumn::Y:
-                    column = (*mapping).yColumnName.value_or(column);
+                    column = mapping->yColumnName.value_or(column);
                     break;
                 case PositionColumn::Z:
-                    column = (*mapping).zColumnName.value_or(column);
+                    column = mapping->zColumnName.value_or(column);
                     break;
             }
         }
 
         // Per default, allow both lower case and upper case versions of column names
-        if (!mapping.has_value() || !(*mapping).isCaseSensitive) {
+        if (!mapping.has_value() || !mapping->isCaseSensitive) {
             column = ghoul::toLowerCase(column);
             testColumn = ghoul::toLowerCase(testColumn);
         }
 
         return testColumn == column;
+    }
+
+    bool isSameStringColumn(const std::string& left, const std::string& right,
+                            bool isCaseSensitive)
+    {
+        std::string l = isCaseSensitive ? ghoul::toLowerCase(left) : left;
+        std::string r = isCaseSensitive ? ghoul::toLowerCase(right) : right;
+        return (l == r);
+    }
+
+    bool containsColumn(const std::string& c, const std::vector<std::string>& columns,
+                        bool isCaseSensitive)
+    {
+        auto it = std::find_if(
+            columns.begin(),
+            columns.end(),
+            [&c, &isCaseSensitive](const std::string& col) {
+                return isSameStringColumn(c, col, isCaseSensitive);
+            }
+        );
+        return it != columns.end();
     }
 
     // This is a data mapping structure that can be used when creating point cloud
@@ -92,6 +116,18 @@ namespace {
         // files, where the name is given by the comment at the end of each line
         std::optional<std::string> name;
 
+        // Specifies a column name for a column that has the data for which texture to
+        // use for each point (given as an integer index). If included, a texture map
+        // file need to be included as well
+        std::optional<std::string> textureColumn;
+
+        // A file where each line contains an integer index and an image file name.
+        // Not valid for SPECK files, which includes this information as part of its
+        // data format. This map will be used to map the data in the TextureColumn to
+        // an image file to use for rendering the points. Note that only the files with
+        // indices that are used in the dataset will actually be loaded
+        std::optional<std::filesystem::path> textureMapFile;
+
         // Specifies whether to do case sensitive checks when reading column names.
         // Default is not to, so that 'X' and 'x' are both valid column names for the
         // x position column, for example
@@ -107,7 +143,7 @@ namespace {
         std::optional<std::vector<std::string>> excludeColumns;
     };
 #include "datamapping_codegen.cpp"
-}
+} // namespace
 
 namespace openspace::dataloader {
 
@@ -116,6 +152,8 @@ documentation::Documentation DataMapping::Documentation() {
 }
 
 DataMapping DataMapping::createFromDictionary(const ghoul::Dictionary& dictionary) {
+    ZoneScoped;
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     DataMapping result;
@@ -124,6 +162,8 @@ DataMapping DataMapping::createFromDictionary(const ghoul::Dictionary& dictionar
     result.yColumnName = p.y;
     result.zColumnName = p.z;
     result.nameColumn = p.name;
+    result.textureColumn = p.textureColumn;
+    result.textureMap = p.textureMapFile;
 
     result.missingDataValue = p.missingDataValue;
 
@@ -142,21 +182,44 @@ bool DataMapping::isExcludeColumn(std::string_view column) const {
     return (found != excludeColumns.end());
 }
 
+bool DataMapping::checkIfAllProvidedColumnsExist(
+                                            const std::vector<std::string>& columns) const
+{
+    auto checkColumnIsOk = [this, &columns](std::optional<std::string> col,
+                                            std::string_view key)
+    {
+        if (col.has_value() && !containsColumn(*col, columns, isCaseSensitive)) {
+            LWARNING(std::format("Could not find provided {} column: '{}'", key, *col));
+            return false;
+        }
+        return true;
+    };
+
+    bool hasAll = true;
+    hasAll &= checkColumnIsOk(xColumnName, "X");
+    hasAll &= checkColumnIsOk(yColumnName, "Y");
+    hasAll &= checkColumnIsOk(zColumnName, "Z");
+    hasAll &= checkColumnIsOk(nameColumn, "Name");
+    hasAll &= checkColumnIsOk(textureColumn, "Texture");
+    return hasAll;
+}
+
 std::string generateHashString(const DataMapping& dm) {
     std::string a;
-    for (std::string_view c : dm.excludeColumns) {
+    for (const std::string_view c : dm.excludeColumns) {
         a += c;
     }
     unsigned int excludeColumnsHash = ghoul::hashCRC32(a);
 
-    return fmt::format(
-        "DM|x{}|y{}|z{}|name{}|m{}|{}|{}",
+    return std::format(
+        "DM|{}|{}|{}|{}|{}|{}|{}|{}",
         dm.xColumnName.value_or(""),
         dm.yColumnName.value_or(""),
         dm.zColumnName.value_or(""),
         dm.nameColumn.value_or(""),
+        dm.textureColumn.value_or(""),
         dm.missingDataValue.has_value() ? ghoul::to_string(*dm.missingDataValue) : "",
-        dm.isCaseSensitive ? "1" : "0",
+        dm.isCaseSensitive ? 1 : 0,
         excludeColumnsHash
     );
 }
@@ -181,14 +244,14 @@ bool isNameColumn(const std::string& c, const std::optional<DataMapping>& mappin
     if (!mapping.has_value() || !mapping->nameColumn.has_value()) {
         return false;
     }
+    return isSameStringColumn(c, *mapping->nameColumn, mapping->isCaseSensitive);
+}
 
-    std::string testColumn = c;
-    std::string mappedColumn = *mapping->nameColumn;
-    if (!mapping->isCaseSensitive) {
-        testColumn = ghoul::toLowerCase(testColumn);
-        mappedColumn = ghoul::toLowerCase(mappedColumn);
+bool isTextureColumn(const std::string& c, const std::optional<DataMapping>& mapping) {
+    if (!mapping.has_value() || !mapping->textureColumn.has_value()) {
+        return false;
     }
-    return testColumn == mappedColumn;
+    return isSameStringColumn(c, *mapping->textureColumn, mapping->isCaseSensitive);
 }
 
 } // namespace openspace::dataloader

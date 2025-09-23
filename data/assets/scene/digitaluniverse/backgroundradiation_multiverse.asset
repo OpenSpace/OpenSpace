@@ -27,7 +27,9 @@ local PlanckMultiverse1 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "Planck Multiverse 1",
@@ -56,7 +58,9 @@ local PlanckMultiverse2 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "Planck Multiverse 2",
@@ -85,7 +89,9 @@ local PlanckMultiverse3 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "Planck Multiverse 3",
@@ -114,7 +120,9 @@ local PlanckMultiverse4 = {
     Texture = textures .. "cmb4k.jpg",
     Orientation = "Both",
     MirrorTexture = true,
-    FadeInThreshold = 0.4
+    FadeInThreshold = 0.4,
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "Planck Multiverse 4",
@@ -146,7 +154,6 @@ asset.export(PlanckMultiverse4)
 
 asset.meta = {
   Name = "Multiverse Background Radiation",
-  Version = "2.1",
   Description = [[Non-physical representation of the location of hypothetical cosmic
     microwave background radiation images how they would be observed from other locations
     in the universe. <br> This is not a measured dataset]],

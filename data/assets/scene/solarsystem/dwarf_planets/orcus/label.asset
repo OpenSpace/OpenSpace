@@ -23,6 +23,7 @@ local Label = {
   GUI = {
     Name = "Orcus Label",
     Path = "/Solar System/Dwarf Planets/Orcus",
+    Focusable = false,
     Description = "Label for Orcus, visible at the solarsystem overview zoom level"
   }
 }
@@ -42,7 +43,6 @@ asset.export("Label", Label)
 
 asset.meta = {
   Name = "Orcus Label",
-  Version = "1.0",
   Description = [[Label of Orcus]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

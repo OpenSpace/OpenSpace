@@ -6,27 +6,31 @@
 
 local globeIdentifier = asset.require("scene/solarsystem//planets/earth/moon/moon").Moon.Identifier
 
+
+
 local treks_ApolloZone_MetricCam_ClrShade_Global_1024ppd = {
   Identifier = "ApolloZone_MetricCam_ClrShade_Global_1024ppd",
   Name = [[Apollo Zone Metric Cam DEM, ColorHillshade]],
+  ZIndex = 50,
   FilePath = asset.resource("Apollo_Zone_Metric_Cam_DEM/ColorHillshade.vrt"),
   Description = [[]]
 }
+
 
 asset.onInitialize(function()
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", treks_ApolloZone_MetricCam_ClrShade_Global_1024ppd)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", "treks_ApolloZone_MetricCam_ClrShade_Global_1024ppd")
+  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", treks_ApolloZone_MetricCam_ClrShade_Global_1024ppd)
 end)
 
 asset.export("ApolloZone_MetricCam_ClrShade_Global_1024ppd", treks_ApolloZone_MetricCam_ClrShade_Global_1024ppd)
 
 
+
 asset.meta = {
-  Name = [[NASA Treks Layers for Moon Apollo_Zone_Metric_Cam_DEM],
-  Version = "1.0",
+  Name = [[NASA Treks Layers for Moon Apollo_Zone_Metric_Cam_DEM]],
   Author = "NASA/Treks",
   URL = "https://trek.nasa.gov/moon",
   License = "NASA/Treks",

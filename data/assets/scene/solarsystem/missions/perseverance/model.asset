@@ -1,6 +1,6 @@
 local trail = asset.require("./trail")
 local marsTransforms = asset.require("scene/solarsystem/planets/mars/transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -74,6 +74,7 @@ local PerseveranceNode = {
   GUI = {
     Name = "Perseverance Node",
     Path = "/Solar System/Missions/Perseverance",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -101,6 +102,7 @@ local PerseveranceModel = {
   GUI = {
     Name = "Perseverance Model",
     Path = "/Solar System/Missions/Perseverance",
+    Focusable = false,
     Hidden = true
   }
 }

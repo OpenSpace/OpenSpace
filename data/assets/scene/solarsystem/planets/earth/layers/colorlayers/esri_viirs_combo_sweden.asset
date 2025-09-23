@@ -1,0 +1,63 @@
+local globe = asset.require("../../earth")
+local snpp = asset.require("./definitions/snpp")
+local noaa20 = asset.require("./definitions/noaa20")
+local noaa21 = asset.require("./definitions/noaa21")
+
+
+
+local Layer = {
+  Identifier = "ESRI_VIIRS_Combo_UsSweden",
+  Name = "ESRI VIIRS Combo [US/Sweden]",
+  Enabled = asset.enabled,
+  ZIndex = 20,
+  Type = "TileProviderByLevel",
+  LevelTileProviders = {
+    {
+      MaxLevel = 4,
+      TileProvider = {
+        Identifier = "VIIRS_Joint_Layer",
+        Name = "VIIRS Joint Layer",
+        Type = "TileProviderByDate",
+        Providers = {
+          ["2015-11-24"] = snpp.Layer,
+          ["2018-01-05"] = noaa20.Layer,
+          ["2024-04-19"] = noaa21.Layer
+        }
+      }
+    },
+    {
+      MaxLevel = 22,
+      TileProvider = {
+        Identifier = "ESRI_World_Imagery_Sweden",
+        Name = "ESRI World Imagery [Sweden]",
+        FilePath = asset.resource("esri_world_imagery_sweden.wms"),
+        PadTiles = false
+      }
+    }
+  },
+  PadTiles = false,
+  Description = [[Level based layer combining different VIIRS layers and ESRI World
+    Imagery. VIIRS is faded out at tile level 4]]
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "ESRI VIIRS Combo",
+  Description = [[Level based layer combining "VIIRS SNPP (Temporal)" and ESRI World
+  Imagery. "VIIRS SNPP (Temporal)" is faded out at tile level 4]],
+  Author = "OpenSpace Tem",
+  URL = "http://www.openspaceproject.com",
+  License = "MIT License"
+}

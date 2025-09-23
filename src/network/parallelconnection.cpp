@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/logging/logmanager.h>
 
@@ -91,34 +90,34 @@ void ParallelConnection::sendDataMessage(const DataMessage& dataMessage) {
 bool ParallelConnection::sendMessage(const Message& message) {
     const uint8_t messageTypeOut = static_cast<uint8_t>(message.type);
     const uint32_t messageSizeOut = static_cast<uint32_t>(message.content.size());
-    std::vector<char> header;
+    std::vector<char> payload;
 
-    //insert header into buffer
-    header.push_back('O');
-    header.push_back('S');
+    // insert header into buffer
+    payload.push_back('O');
+    payload.push_back('S');
 
-    header.insert(header.end(),
+    payload.insert(
+        payload.end(),
         reinterpret_cast<const char*>(&ProtocolVersion),
         reinterpret_cast<const char*>(&ProtocolVersion) + sizeof(uint8_t)
     );
 
-    header.insert(header.end(),
+    payload.insert(
+        payload.end(),
         reinterpret_cast<const char*>(&messageTypeOut),
         reinterpret_cast<const char*>(&messageTypeOut) + sizeof(uint8_t)
     );
 
-    header.insert(header.end(),
+    payload.insert(
+        payload.end(),
         reinterpret_cast<const char*>(&messageSizeOut),
         reinterpret_cast<const char*>(&messageSizeOut) + sizeof(uint32_t)
     );
 
-    if (!_socket->put<char>(header.data(), header.size())) {
-        return false;
-    }
-    if (!_socket->put<char>(message.content.data(), message.content.size())) {
-        return false;
-    }
-    return true;
+    payload.insert(payload.end(), message.content.begin(), message.content.end());
+
+    const bool res = _socket->put<char>(payload.data(), payload.size());
+    return res;
 }
 
 void ParallelConnection::disconnect() {
@@ -158,7 +157,7 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
     }
 
     // Make sure that header matches this version of OpenSpace
-    if (!(headerBuffer[0] == 'O' && headerBuffer[1] == 'S')) {
+    if (headerBuffer[0] != 'O' || headerBuffer[1] != 'S') {
         LERROR("Expected to read message header 'OS' from socket");
         throw ConnectionLostError();
     }
@@ -169,7 +168,7 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
     offset += sizeof(uint8_t);
 
     if (protocolVersionIn != ProtocolVersion) {
-        LERROR(fmt::format(
+        LERROR(std::format(
             "Protocol versions do not match. Remote version: {}, Local version: {}",
             protocolVersionIn,
             ProtocolVersion

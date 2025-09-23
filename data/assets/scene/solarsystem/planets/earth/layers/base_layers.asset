@@ -2,7 +2,7 @@ asset.require("./colorlayers/blue_marble", false)
 asset.require("./colorlayers/esri_viirs_combo", asset.enabled)
 asset.require("./colorlayers/esri_noaa20_combo", false)
 asset.require("./colorlayers/esri_world_imagery", false)
-asset.require("./colorlayers/viirs_snpp_temporal", false)
+asset.require("./colorlayers/viirs_noaa20_temporal", false)
 asset.require("./colorlayers/aqua_modis_temporal", false)
 asset.require("./colorlayers/terra_modis_temporal", false)
 asset.require("./colorlayers/amsr2_gcom_w1_sea_ice_concentration_temporal", false)
@@ -28,7 +28,6 @@ asset.require("./watermasks/modis_water_mask", asset.enabled)
 
 asset.meta = {
   Name = "Base Earth Layers",
-  Version = "1.0",
   Description = [[Base Earth layers are: Blue Marble, ESRI VIIRS Combo, ESRI NOAA20 Combo,
     ESRI World Imagery, VIIRS SNPP (Temporal), Aqua Modis (Temporal),
     Terra Modis (Temporal), AMSR2 GCOM W1 Sea Ice Concentration (Temporal),

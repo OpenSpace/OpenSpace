@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,6 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <ghoul/opengl/programobjectmanager.h>
-#include <ghoul/opengl/texturemanager.h>
 
 namespace openspace {
 
@@ -41,7 +40,6 @@ public:
     std::vector<documentation::Documentation> documentations() const override;
 
     static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
-    static ghoul::opengl::TextureManager TextureManager;
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,9 +36,9 @@
 namespace {
     // Extract J2000 time from file names
     // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
-    double extractTriggerTimeFromFileName(const std::string& filePath) {
+    double extractTriggerTimeFromFileName(const std::filesystem::path& filePath) {
         // Extract the filename from the path (without extension)
-        std::string timeString = std::filesystem::path(filePath).stem().string();
+        std::string timeString = filePath.stem().string();
 
         // Ensure the separators are correct
         timeString.replace(4, 1, "-");
@@ -52,16 +52,15 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
         "TextureSource",
-        "Texture Source",
-        "This value specifies a directory of images that are loaded from disk and is "
-        "used as a texture that is applied to this sphere. The images are expected to "
-        "be an equirectangular projection",
+        "Texture source",
+        "A directory containing images that are loaded from disk and used for texturing "
+        "the sphere. The images are expected to be equirectangular projections.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingSphere)]] Parameters {
         // [[codegen::verbatim(TextureSourceInfo.description)]]
-        std::string textureSource;
+        std::filesystem::path textureSource [[codegen::directory()]];
     };
 #include "renderabletimevaryingsphere_codegen.cpp"
 } // namespace
@@ -69,7 +68,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_time_varying_sphere");
+    return codegen::doc<Parameters>(
+        "base_renderable_time_varying_sphere",
+        RenderableSphere::Documentation()
+    );
 }
 
 RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
@@ -79,19 +81,14 @@ RenderableTimeVaryingSphere::RenderableTimeVaryingSphere(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _textureSourcePath = p.textureSource;
+    _textureSourcePath = p.textureSource.string();
+    extractMandatoryInfoFromSourceFolder();
+    computeSequenceEndTime();
+    loadTexture();
 }
 
 bool RenderableTimeVaryingSphere::isReady() const {
     return RenderableSphere::isReady() && _texture;
-}
-
-void RenderableTimeVaryingSphere::initializeGL() {
-    RenderableSphere::initializeGL();
-
-    extractMandatoryInfoFromSourceFolder();
-    computeSequenceEndTime();
-    loadTexture();
 }
 
 void RenderableTimeVaryingSphere::deinitializeGL() {
@@ -105,7 +102,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
     // Ensure that the source folder exists and then extract
     // the files with the same extension as <inputFileTypeString>
     namespace fs = std::filesystem;
-    fs::path sourceFolder = absPath(_textureSourcePath);
+    const fs::path sourceFolder = absPath(_textureSourcePath);
     if (!std::filesystem::is_directory(sourceFolder)) {
         throw ghoul::RuntimeError(
             "Source folder for RenderableTimeVaryingSphere is not a valid directory"
@@ -118,8 +115,8 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         if (!e.is_regular_file()) {
             continue;
         }
-        std::string filePath = e.path().string();
-        double time = extractTriggerTimeFromFileName(filePath);
+        std::filesystem::path filePath = e.path();
+        const double time = extractTriggerTimeFromFileName(filePath);
         std::unique_ptr<ghoul::opengl::Texture> t =
             ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
 
@@ -128,7 +125,7 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
         t->purgeFromRAM();
 
-        _files.push_back({ filePath, time, std::move(t) });
+        _files.push_back({ std::move(filePath), time, std::move(t) });
     }
 
     std::sort(
@@ -149,9 +146,14 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
 void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     RenderableSphere::update(data);
 
+    if (_files.empty()) {
+        return;
+    }
+
     const double currentTime = data.time.j2000Seconds();
     const bool isInInterval = (currentTime >= _files[0].time) &&
         (currentTime < _sequenceEndTime);
+
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
@@ -168,7 +170,8 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         // not in interval => set everything to false
         _activeTriggerTimeIndex = 0;
     }
-    if (_textureIsDirty) {
+
+    if (_textureIsDirty) [[unlikely]] {
         loadTexture();
         _textureIsDirty = false;
     }
@@ -185,16 +188,14 @@ void RenderableTimeVaryingSphere::bindTexture() {
 
 void RenderableTimeVaryingSphere::updateActiveTriggerTimeIndex(double currentTime) {
     auto iter = std::upper_bound(
-        _files.begin(),
-        _files.end(),
+        _files.cbegin(),
+        _files.cend(),
         currentTime,
-        [](double value, const FileData& f) {
-            return value < f.time;
-        }
+        [](double value, const FileData& f) { return value < f.time; }
     );
-    if (iter != _files.end()) {
-        if (iter != _files.begin()) {
-            ptrdiff_t idx = std::distance(_files.begin(), iter);
+    if (iter != _files.cend()) {
+        if (iter != _files.cbegin()) {
+            const ptrdiff_t idx = std::distance(_files.cbegin(), iter);
             _activeTriggerTimeIndex = static_cast<int>(idx - 1);
         }
         else {

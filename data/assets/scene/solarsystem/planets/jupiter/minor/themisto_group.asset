@@ -16,9 +16,7 @@ local Themisto = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 8000, 8000, 8000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 8000, 8000, 8000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -52,12 +50,14 @@ local ThemistoTrail = {
     "moonTrail_solarSystem",
     "moonTrail_giants",
     "moonTrail_jupiter",
+    "moonTrail_themisto",
     "moonTrail_minor",
     "moonTrail_minor_jupiter"
   },
   GUI = {
     Name = "Themisto Trail",
-    Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto"
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto",
+    Focusable = false
   }
 }
 
@@ -78,10 +78,17 @@ local ThemistoLabel = {
     FadeDistances = { 1.5, 120.0 },
     FadeWidths = { 0.5, 50.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_themisto"
+  },
   GUI = {
     Name = "Themisto Label",
     Path = "/Solar System/Planets/Jupiter/Minor Moons/Themisto Group/Themisto",
+    Focusable = false,
     Description = "Label for Jupiter's moon Themisto (Themisto group)"
   }
 }
@@ -107,7 +114,6 @@ asset.export(ThemistoLabel)
 
 asset.meta = {
   Name = "Jupiter Themisto Group Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Jupiter's Themisto Group moons:
     Themisto. Blank globes and SPICE trails are generated for each moon]],
   Author = "OpenSpace Team",

@@ -9,13 +9,16 @@ local Sun = {
     Type = "RenderableGlobe",
     Enabled = false,
     Radii = { 695700000, 695700000, 695700000 },
-    SegmentsPerPatch = 64,
-    Layers = {},
+    LightSource = {
+      Identifier = "Camera",
+      Type = "CameraLightSource",
+      Intensity = 1.0
+    },
     PerformShading = false
   },
   ApproachFactor = 15.0,
   GUI = {
-    Name = "Sun",
+    Name = "Sun Surface",
     Path = "/Solar System/Sun",
     Description = "Globe for the sun in our solar system"
   }
@@ -42,15 +45,9 @@ local SunLabel = {
   GUI = {
     Name = "Sun Label",
     Path = "/Solar System/Sun",
+    Focusable = false,
     Description = "Label for the sun in our solar system"
   }
-}
-
-local LightSource = {
-  Type = "SceneGraphLightSource",
-  Identifier = "Sun",
-  Node = Sun.Identifier,
-  Intensity = 1.0
 }
 
 
@@ -66,13 +63,11 @@ end)
 
 asset.export(Sun)
 asset.export(SunLabel)
-asset.export("LightSource", LightSource)
 
 
 
 asset.meta = {
   Name = "Sun",
-  Version = "1.1",
   Description = "The Sun and label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

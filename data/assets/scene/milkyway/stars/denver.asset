@@ -25,11 +25,12 @@ local Object = {
   Renderable = {
     Type = "RenderableStars",
     File = speck .. "denver_stars.speck",
-    Texture = textures .. "halo.png",
+    Glare = {
+      Texture = textures .. "halo.png"
+    },
     ColorMap = colorLUT .. "denver_colorbv.cmap",
     MagnitudeExponent = 6.2,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based", -- or PSF
     DataMapping = {
       Bv = "colorb_v",
       Luminance = "lum",
@@ -43,7 +44,8 @@ local Object = {
   },
   GUI = {
     Name = "Stars (Denver)",
-    Path = "/Milky Way/Stars"
+    Path = "/Milky Way/Stars",
+    Focusable = false
   }
 }
 
@@ -62,7 +64,6 @@ asset.export(Object)
 
 asset.meta = {
   Name = "Stars Denver",
-  Version = "1.0",
   Description = [[Alternative Milky Way Atlas: based on HIPPARCOS and Yale Bright
     Star catalogs]],
   Author = "Ka chun Yu",

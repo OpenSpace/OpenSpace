@@ -1,6 +1,6 @@
 asset.require("../actions")
-local moonTransforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
@@ -16,7 +16,12 @@ local models = asset.resource({
 
 local Apollo15 = {
   Identifier = "Apollo15",
-  Parent = moonTransforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "1971-07-30T02:22:00.00",
+    End = "1971-08-01T18:05:00.00"
+  },
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -39,11 +44,6 @@ local Apollo15 = {
     },
     PerformShading = true
   },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = "1971-07-30T02:22:00.00",
-    End = "1971-08-01T18:05:00.00"
-  },
   GUI = {
     Name = "Apollo 15",
     Path = "/Solar System/Missions/Apollo/15"
@@ -52,7 +52,7 @@ local Apollo15 = {
 
 local Apollo15Trail = {
   Identifier = "Apollo15Trail",
-  Parent = moonTransforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
@@ -68,9 +68,11 @@ local Apollo15Trail = {
   },
   GUI = {
     Name = "Apollo 15 Trail",
-    Path = "/Solar System/Missions/Apollo/15"
+    Path = "/Solar System/Missions/Apollo/15",
+    Focusable = false
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo15)
@@ -84,3 +86,14 @@ end)
 
 asset.export(Apollo15)
 asset.export(Apollo15Trail)
+
+
+
+asset.meta = {
+  Name = "Apollo 15",
+  Description = [[This asset provides a 3D model and a Moon-centered trail of the Apollo
+    15 command and service module.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

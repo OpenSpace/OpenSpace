@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,10 +31,6 @@
 #include <ghoul/opengl/programobject.h>
 
 namespace {
-    constexpr std::array<const char*, 4> UniformNames = {
-        "radius", "opacity", "thickness", "color"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
         "Visibility",
         "Toggle visibility of markers",
@@ -101,7 +97,7 @@ void TouchMarker::initialize() {
         absPath("${MODULE_TOUCH}/shaders/marker_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
 void TouchMarker::deinitialize() {
@@ -143,8 +139,8 @@ void TouchMarker::createVertexList(const std::vector<openspace::TouchInputHolder
 
     int i = 0;
     for (const openspace::TouchInputHolder& inputHolder : list) {
-        _vertexData[i] = 2 * (inputHolder.latestInput().x - 0.5f);
-        _vertexData[i + 1] = -2 * (inputHolder.latestInput().y - 0.5f);
+        _vertexData[i] = 2.f * (inputHolder.latestInput().x - 0.5f);
+        _vertexData[i + 1] = -2.f * (inputHolder.latestInput().y - 0.5f);
         i += 2;
     }
 
@@ -157,14 +153,7 @@ void TouchMarker::createVertexList(const std::vector<openspace::TouchInputHolder
         GL_STATIC_DRAW
     );
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        0,
-        nullptr
-    );
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
 } // openspace namespace

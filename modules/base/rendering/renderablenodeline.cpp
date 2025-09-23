@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,7 +43,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
-        "Start Node",
+        "Start node",
         "The identifier of the node the line starts from. Defaults to 'Root' if not "
         "specified.",
         openspace::properties::Property::Visibility::User
@@ -51,7 +51,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EndNodeInfo = {
         "EndNode",
-        "End Node",
+        "End node",
         "The identifier of the node the line ends at. Defaults to 'Root' if not "
         "specified.",
         openspace::properties::Property::Visibility::User
@@ -60,21 +60,20 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB color for the line",
+        "The RGB color for the line.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
-        "This value specifies the line width",
-        // @VISIBILITY(1.75)
+        "Line width",
+        "The width of the line. The larger number, the thicker the line.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartOffsetInfo = {
         "StartOffset",
-        "Offset to Start Node",
+        "Offset to start node",
         "A distance from the start node at which the rendered line should begin. "
         "By default it takes a value in meters, but if 'UseRelativeOffsets' is set "
         "to true it is read as a multiplier times the bounding sphere of the node.",
@@ -83,7 +82,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EndOffsetInfo = {
         "EndOffset",
-        "Offset to End Node",
+        "Offset to end node",
         "A distance to the end node at which the rendered line should end. "
         "By default it takes a value in meters, but if 'UseRelativeOffsets' is set "
         "to true it is read as a multiplier times the bounding sphere of the node.",
@@ -92,7 +91,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RelativeOffsetsInfo = {
         "UseRelativeOffsets",
-        "Use Relative Offsets",
+        "Use relative offsets",
         "If true, the offset values are interpreted as relative values to be multiplied "
         "with the bounding sphere of the start/end node. If false, the value is "
         "interpreted as a distance in meters.",
@@ -111,10 +110,17 @@ namespace {
         if (nav.anchorNode()) {
             anchorNodePos = nav.anchorNode()->worldPosition();
         }
-        glm::dvec3 diffPos = worldPos - anchorNodePos;
+        const glm::dvec3 diffPos = worldPos - anchorNodePos;
         return diffPos;
     }
 
+    // This `Renderable` connects two scene graph nodes by drawing a line between them.
+    // The line will update dynamically if the position of the nodes change.
+    //
+    // One use case for the `RenderableNodeLine` is to visualize the distance between two
+    // objects. For this, a [RenderableDistanceLabel](#base_renderable_distancelabel) can
+    // also be added to show the distance as a number. That renderable is designed to show
+    // the distance between the start and end node for a given `RenderableNodeLine`.
     struct [[codegen::Dictionary(RenderableNodeLine)]] Parameters {
         // [[codegen::verbatim(StartNodeInfo.description)]]
         std::optional<std::string> startNode [[codegen::identifier()]];
@@ -143,7 +149,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableNodeLine::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_renderablenodeline");
+    return codegen::doc<Parameters>("base_renderable_nodeline");
 }
 
 RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
@@ -181,11 +187,10 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
             if (!node || node->boundingSphere() > 0.0) {
                 return;
             }
-            LWARNING(fmt::format(
-                "Setting StartOffset for node line '{}': "
-                "Trying to use relative offsets for start node '{}' that has no "
-                "bounding sphere. This will result in no offset. Use direct "
-                "values by setting UseRelativeOffsets to false",
+            LWARNING(std::format(
+                "Setting StartOffset for node line '{}': Trying to use relative offsets "
+                "for start node '{}' that has no bounding sphere. This will result in no "
+                "offset. Use direct values by setting UseRelativeOffsets to false",
                 parent()->identifier(), _start.value()
             ));
         }
@@ -199,11 +204,10 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
             if (!node || node->boundingSphere() > 0.0) {
                 return;
             }
-            LWARNING(fmt::format(
-                "Setting EndOffset for node line '{}': "
-                "Trying to use relative offsets for end node '{}' that has no "
-                "bounding sphere. This will result in no offset. Use direct "
-                "values by setting UseRelativeOffsets to false",
+            LWARNING(std::format(
+                "Setting EndOffset for node line '{}': Trying to use relative offsets "
+                "for end node '{}' that has no bounding sphere. This will result in no "
+                "offset. Use direct values by setting UseRelativeOffsets to false",
                 parent()->identifier(), _end.value()
             ));
         }
@@ -215,7 +219,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
         SceneGraphNode* endNode = global::renderEngine->scene()->sceneGraphNode(_end);
 
         if (!startNode) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Error when recomputing node line offsets for scene graph node '{}'. "
                 "Could not find start node '{}'", parent()->identifier(), _start.value()
             ));
@@ -223,7 +227,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
         }
 
         if (!endNode) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Error when recomputing node line offsets for scene graph node '{}'. "
                 "Could not find end node '{}'", parent()->identifier(), _end.value()
             ));
@@ -232,8 +236,8 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
 
         if (_useRelativeOffsets) {
             // Recompute previous offsets to relative values
-            double startBs = startNode->boundingSphere();
-            double endBs = endNode->boundingSphere();
+            const double startBs = startNode->boundingSphere();
+            const double endBs = endNode->boundingSphere();
             _startOffset =
                 static_cast<float>(startBs > 0.0 ? _startOffset / startBs : 0.0);
             _endOffset =
@@ -275,12 +279,14 @@ void RenderableNodeLine::initializeGL() {
     glGenVertexArrays(1, &_vaoId);
     glGenBuffers(1, &_vBufferId);
 
-    bindGL();
+    glBindVertexArray(_vaoId);
+    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
 
     glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
     glEnableVertexAttribArray(_locVertex);
 
-    unbindGL();
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 void RenderableNodeLine::deinitializeGL() {
@@ -305,27 +311,17 @@ bool RenderableNodeLine::isReady() const {
     return ready;
 }
 
-void RenderableNodeLine::unbindGL() {
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-void RenderableNodeLine::bindGL() {
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-}
-
 void RenderableNodeLine::updateVertexData() {
     SceneGraphNode* startNode = global::renderEngine->scene()->sceneGraphNode(_start);
     SceneGraphNode* endNode = global::renderEngine->scene()->sceneGraphNode(_end);
 
     if (!startNode) {
-        LERROR(fmt::format("Could not find start node '{}'", _start.value()));
+        LERROR(std::format("Could not find start node '{}'", _start.value()));
         return;
     }
 
     if (!endNode) {
-        LERROR(fmt::format("Could not find end node '{}'", _end.value()));
+        LERROR(std::format("Could not find end node '{}'", _end.value()));
         return;
     }
 
@@ -344,9 +340,9 @@ void RenderableNodeLine::updateVertexData() {
     }
 
     // Compute line positions
-    glm::dvec3 dir = glm::normalize(_endPos - _startPos);
-    glm::dvec3 startPos = _startPos + startOffset * dir;
-    glm::dvec3 endPos = _endPos - endOffset * dir;
+    const glm::dvec3 dir = glm::normalize(_endPos - _startPos);
+    const glm::dvec3 startPos = _startPos + startOffset * dir;
+    const glm::dvec3 endPos = _endPos - endOffset * dir;
 
     _vertexArray.push_back(static_cast<float>(startPos.x));
     _vertexArray.push_back(static_cast<float>(startPos.y));
@@ -356,7 +352,8 @@ void RenderableNodeLine::updateVertexData() {
     _vertexArray.push_back(static_cast<float>(endPos.y));
     _vertexArray.push_back(static_cast<float>(endPos.z));
 
-    bindGL();
+    glBindVertexArray(_vaoId);
+    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
     glBufferData(
         GL_ARRAY_BUFFER,
         _vertexArray.size() * sizeof(float),
@@ -367,7 +364,8 @@ void RenderableNodeLine::updateVertexData() {
     // update vertex attributes
     glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
 
-    unbindGL();
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
 }
 
 void RenderableNodeLine::update(const UpdateData&) {
@@ -401,11 +399,13 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     glLineWidth(_lineWidth);
 
     // Bind and draw
-    bindGL();
+    glBindVertexArray(_vaoId);
+    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
     glDrawArrays(GL_LINES, 0, 2);
 
     // Restore GL State
-    unbindGL();
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindVertexArray(0);
     _program->deactivate();
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();

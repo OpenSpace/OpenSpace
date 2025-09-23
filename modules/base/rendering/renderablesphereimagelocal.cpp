@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,21 +36,17 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this sphere. This image is expected to be an equirectangular "
-        "projection",
-        // @VISIBILITY(2.33)
+        "The path to an image on disk to use as a texture for this sphere. The image is "
+        "expected to be an equirectangular projection.",
         openspace::properties::Property::Visibility::User
     };
 
-    struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
+    // This `Renderable` shows a sphere with an image provided by a local file on disk. To
+    // show a sphere with an image from an online source, see
+    // [RenderableSphereImageOnline](#base_screenspace_image_online).
+    struct [[codegen::Dictionary(RenderableSphereImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
-        std::string texture;
-
-        // If this value is set to 'true', the image for this sphere will not be loaded at
-        // startup but rather when the image is shown for the first time. Additionally, if
-        // the sphere is disabled, the image will automatically be unloaded
-        std::optional<bool> lazyLoading;
+        std::filesystem::path texture;
     };
 #include "renderablesphereimagelocal_codegen.cpp"
 } // namespace
@@ -58,7 +54,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableSphereImageLocal::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_sphere_image_local");
+    return codegen::doc<Parameters>(
+        "base_renderable_sphere_image_local",
+        RenderableSphere::Documentation()
+    );
 }
 
 RenderableSphereImageLocal::RenderableSphereImageLocal(
@@ -68,10 +67,8 @@ RenderableSphereImageLocal::RenderableSphereImageLocal(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _texturePath = p.texture;
-    _texturePath.onChange([this]() {
-        loadTexture();
-    });
+    _texturePath = p.texture.string();
+    _texturePath.onChange([this]() { _texture->loadFromFile(_texturePath.value()); });
     addProperty(_texturePath);
 }
 
@@ -79,12 +76,16 @@ bool RenderableSphereImageLocal::isReady() const {
     return RenderableSphere::isReady() && _texture;
 }
 
+void RenderableSphereImageLocal::initialize() {
+    _texture = std::make_unique<TextureComponent>(2);
+    _texture->setFilterMode(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+}
+
 void RenderableSphereImageLocal::initializeGL() {
     RenderableSphere::initializeGL();
-
-    if (!_isLoadingLazily) {
-        loadTexture();
-    }
+    _texture->loadFromFile(_texturePath.value());
+    _texture->uploadToGpu();
 }
 
 void RenderableSphereImageLocal::deinitializeGL() {
@@ -95,41 +96,11 @@ void RenderableSphereImageLocal::deinitializeGL() {
 
 void RenderableSphereImageLocal::update(const UpdateData& data) {
     RenderableSphere::update(data);
-
-    if (_textureIsDirty) {
-        loadTexture();
-        _textureIsDirty = false;
-    }
+    _texture->update();
 }
 
 void RenderableSphereImageLocal::bindTexture() {
     _texture->bind();
-}
-
-void RenderableSphereImageLocal::loadTexture() {
-    if (_texturePath.value().empty()) {
-        return;
-    }
-
-    std::unique_ptr<ghoul::opengl::Texture> texture =
-        ghoul::io::TextureReader::ref().loadTexture(_texturePath, 2);
-
-    if (!texture) {
-        LWARNINGC(
-            "RenderableSphereImageLocal",
-            fmt::format("Could not load texture from {}", absPath(_texturePath))
-        );
-        return;
-    }
-
-    LDEBUGC(
-        "RenderableSphereImageLocal",
-        fmt::format("Loaded texture from {}", absPath(_texturePath))
-    );
-    texture->uploadTexture();
-    texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-    texture->purgeFromRAM();
-    _texture = std::move(texture);
 }
 
 } // namespace openspace

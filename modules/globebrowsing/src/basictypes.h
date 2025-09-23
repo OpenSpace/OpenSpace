@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,20 +38,6 @@ namespace openspace::globebrowsing {
 struct AABB3 {
     glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
     glm::vec3 max = glm::vec3(-std::numeric_limits<float>::max());
-};
-
-
-
-struct Geodetic2 {
-    double lat = 0.0; // in radians
-    double lon = 0.0; // in radians
-};
-
-
-
-struct Geodetic3 {
-    Geodetic2 geodetic2;
-    double height = 0.0;
 };
 
 

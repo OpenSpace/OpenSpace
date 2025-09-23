@@ -1,0 +1,30 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderableswitch/switch.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableSwitch_Example",
+        "position": [
+          30212227447.374126,
+          -142920585499.81036,
+          1047831170017.8524
+        ],
+        "referenceFrame": "Root",
+        "up": [
+          0.04389077208512016,
+          0.9900396531787764,
+          0.13377251309376031
+        ],
+        "timestamp": "2025 JUL 13 12:43:19"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

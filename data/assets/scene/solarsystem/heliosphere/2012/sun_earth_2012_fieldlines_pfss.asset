@@ -1,4 +1,4 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
+local transforms = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
 
 
 
@@ -47,12 +47,13 @@ local InteractionSphere = 695700000
 
 local PFSS = {
   Identifier = "FL_PFSS",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
   InteractionSphere = InteractionSphere,
   Renderable = {
     Type = "RenderableFieldlinesSequence",
     SourceFolder = PFSSPaths.SolarSoft,
     InputFileType = "Osfls",
+    ShowAtAllTimes = true,
     Color = { 0.35, 0.51, 0.875, 0.22 },
     FlowEnabled = true,
     ReversedFlow = true,
@@ -78,14 +79,7 @@ local PFSS = {
 
 asset.onInitialize(function()
   openspace.action.registerAction(DarkSun)
-
   openspace.addSceneGraphNode(PFSS)
-
-  -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.FlowEnabled", true)
-  -- openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.Reversed", true)
-  --openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.particleSize", 5)
-  --openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.particleSpacing", 250)
-  --openspace.setPropertyValueSingle("Scene.FL_PFSS.Renderable.Flow.speed", 75.0)
 end)
 
 asset.onDeinitialize(function()
@@ -100,7 +94,6 @@ asset.export("DarkSun", DarkSun.Identifier)
 
 asset.meta = {
   Name = "Fieldlines from PFSS model of 2012 event",
-  Version = "1.0",
   Description = "Magnetic fieldlines from PFSS model for a 2012 CME event",
   Author = "CCMC",
   URL = "",

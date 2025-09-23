@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,9 @@
 #ifndef __OPENSPACE_CORE___ACTION___H__
 #define __OPENSPACE_CORE___ACTION___H__
 
+#include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
+#include <optional>
 #include <string>
 
 namespace openspace::interaction {
@@ -59,11 +61,21 @@ struct Action {
     /// for the root path
     std::string guiPath = "/";
 
+    /// This variable, if specified, will be used as a hint to any potential user
+    /// interface as a desired background color. This can be used, for example, by the
+    /// user to visually group similar Actions together
+    std::optional<glm::vec4> color;
+
+    /// This variable, if specified, will be used as a hint to any potential user
+    /// interface as a desired text color. This can be used, for example, by the user to
+    /// visually group similar Actions together
+    std::optional<glm::vec4> textColor;
+
     /// If this value is set to `Yes`, the execution of this action is restricted to the
     /// current OpenSpace instance. If it is `No`, it is synchronized to other OpenSpace
     /// instances, for example other nodes in a cluster environment, or to other OpenSpace
     /// instances using a parallel connection
-    IsLocal isLocal = IsLocal::Yes;
+    IsLocal isLocal = IsLocal::No;
 };
 
 } // namespace openspace::interaction

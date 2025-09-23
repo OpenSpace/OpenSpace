@@ -23,6 +23,7 @@ local Label = {
   GUI = {
     Name = "Vesta Label",
     Path = "/Solar System/Dwarf Planets/Vesta",
+    Focusable = false,
     Description = "Label for Vesta, visible at the solarsystem overview zoom level"
   }
 }
@@ -42,7 +43,6 @@ asset.export("Label", Label)
 
 asset.meta = {
   Name = "Vesta Label",
-  Version = "1.0",
   Description = [[Label of Vesta]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,56 +31,54 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunction",
-        "TransferFunction",
-        "All the envelopes used in the transfer function",
+        "Transfer function",
+        "All the envelopes used in the transfer function.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DataUnitInfo = {
         "DataUnit",
-        "DataUnit",
-        "Unit of the data",
+        "Data unit",
+        "Unit of the data.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinValueInfo = {
         "MinValue",
-        "MinValue",
-        "Minimum value in the data",
+        "Min value",
+        "Minimum value in the data.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxValueInfo = {
         "MaxValue",
-        "MaxValue",
-        "Maximum value in the data",
+        "Max value",
+        "Maximum value in the data.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SaveTransferFunctionInfo = {
         "SaveTransferFunction",
-        "Save Transfer Function",
-        "Save your transfer function",
-        // @VISIBILITY(3.5)
+        "Save transfer function",
+        "Save your transfer function.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 
 namespace openspace::volume {
 
-TransferFunctionHandler::TransferFunctionHandler(const properties::StringProperty& prop)
+TransferFunctionHandler::TransferFunctionHandler(properties::StringProperty prop)
     : properties::PropertyOwner({ "TransferFunctionHandler", "Tranfer Function Handler" })
-    , _transferFunctionPath(prop)
+    , _transferFunctionPath(std::move(prop))
     , _dataUnit(DataUnitInfo)
     , _minValue(MinValueInfo)
     , _maxValue(MaxValueInfo)
     , _saveTransferFunction(SaveTransferFunctionInfo)
     , _transferFunctionProperty(TransferFunctionInfo)
-{
-    _transferFunction = std::make_shared<openspace::TransferFunction>(
-        _transferFunctionPath
-    );
-}
+    , _transferFunction(std::make_shared<openspace::TransferFunction>(
+        _transferFunctionPath.value()
+    ))
+{}
 
 void TransferFunctionHandler::initialize() {
     addProperty(_transferFunctionPath);
@@ -106,7 +104,6 @@ void TransferFunctionHandler::initialize() {
     }
 
     _transferFunctionProperty.onChange([this]() { setTexture(); });
-
     _saveTransferFunction.onChange([this]() { saveEnvelopes(); });
 }
 
@@ -143,14 +140,14 @@ void TransferFunctionHandler::setFilepath(std::string path) {
 }
 
 ghoul::opengl::Texture& TransferFunctionHandler::texture() {
-    return *_texture.get();
+    return *_texture;
 }
 
 void TransferFunctionHandler::uploadTexture() {
     _texture->uploadTexture();
 }
 
-bool TransferFunctionHandler::hasTexture() {
+bool TransferFunctionHandler::hasTexture() const {
     return _texture != nullptr;
 }
 

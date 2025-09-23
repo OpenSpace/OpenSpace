@@ -1,4 +1,4 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./transforms")
 
 
@@ -21,7 +21,7 @@ local ArtemisModel = {
       Attached = "ArtemisModel",
       XAxis = { 1.0, 0.0, 0.0 },
       XAxisOrthogonal = true,
-      YAxis = "Sun",
+      YAxis = sun.SunCenter.Identifier,
       YAxisInvert = true
     }
   },
@@ -55,7 +55,6 @@ asset.export(ArtemisModel)
 
 asset.meta = {
   Name = "Artemis-1 Model",
-  Version = "1.0",
   Description = "Orion capsule model for the Artemis-1 mission",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

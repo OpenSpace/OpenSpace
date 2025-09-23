@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
@@ -51,7 +51,7 @@ struct LinePoint;
 
 class RenderablePlane : public Renderable {
 public:
-    RenderablePlane(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlane(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -64,16 +64,34 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
+    enum OrientationOption {
+        ViewDirection = 0,
+        PositionNormal,
+        FixedRotation
+    };
+
     virtual void bindTexture();
     virtual void unbindTexture();
     void createPlane();
+    glm::dmat4 rotationMatrix(const RenderData& data) const;
 
     properties::OptionProperty _blendMode;
-    properties::BoolProperty _billboard;
+    properties::OptionProperty _renderOption;
     properties::BoolProperty _mirrorBackside;
     properties::Vec2Property _size;
     properties::BoolProperty _autoScale;
     properties::Vec3Property _multiplyColor;
+
+    struct DistanceScalingSettings : properties::PropertyOwner {
+        explicit DistanceScalingSettings(const ghoul::Dictionary& dictionary);
+
+        properties::BoolProperty scaleByDistance;
+        properties::FloatProperty apparentSizeMultiplier;
+        properties::FloatProperty scaleByDistanceMaxHeight;
+        properties::FloatProperty scaleByDistanceMinHeight;
+    };
+
+    DistanceScalingSettings _distanceScalingSettings;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
 

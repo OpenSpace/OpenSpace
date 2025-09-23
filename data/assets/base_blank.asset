@@ -4,11 +4,10 @@
 asset.require("spice/core")
 
 asset.require("dashboard/default_dashboard")
--- Load default key bindings applicable to most scenes
-asset.require("./default_keybindings")
 
--- Load web gui
-local webGui = asset.require("util/webgui")
+-- Load default actions and key bindings applicable to most scenes
+asset.require("actions/default_actions")
+asset.require("./default_keybindings")
 
 -- Scale the different UI components based on the operating system's DPI scaling value
 asset.require("util/dpiscaling")
@@ -19,9 +18,12 @@ asset.require("util/launcher_images")
 -- Modules and component settings
 asset.require("modules/touch/default_settings")
 
+-- Load web gui
+local webGui = asset.require("util/webgui")
+
 
 asset.onInitialize(function()
-  webGui.setCefRoute("onscreen")
-  openspace.setDefaultGuiSorting()
-  openspace.setPropertyValueSingle("RenderEngine.VerticalLogOffset", 0.100000)
+  openspace.setPropertyValueSingle("RenderEngine.VerticalLogOffset", 0.1)
+  openspace.setPropertyValueSingle("Dashboard.StartPositionOffset", { 15.0, 49.0 })
+  openspace.setPropertyValueSingle("RenderEngine.ShowCamera", false)
 end)

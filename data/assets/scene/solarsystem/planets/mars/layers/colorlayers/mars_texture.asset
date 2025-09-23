@@ -14,9 +14,9 @@ local Layer = {
   Identifier = "Mars_Texture",
   Name = "Mars Texture",
   Enabled = asset.enabled,
+  ZIndex = 5,
   FilePath = texturesPath .. "mars.png",
-  Description = "Default jpg texture for Mars",
-  CacheSettings = { Enabled = false }
+  Description = "Default jpg texture for Mars"
 }
 
 
@@ -34,7 +34,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Mars Texutre",
-  Version = "1.0",
   Description = "Jpg texture for Mars, available for offline use",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -1,5 +1,5 @@
 local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
-local sunAsset = asset.require("scene/solarsystem/sun/sun")
+local sunAsset = asset.require("scene/solarsystem/sun/transforms")
 
 
 
@@ -88,7 +88,6 @@ asset.export("ResetPositionAction", ResetPositionAction.Identifier)
 
 asset.meta = {
   Name = "Scale Model - Kuala Lumpur Tower",
-  Version = "1.0",
   Description = [[A 1:1 scale model of the Kuala Lumpur Tower. Per default it is placed
     at its actual position in Kuala Lumpur, Malaysia. But the asset also includes actions
     to move it to a position under the camera, or back to its original position.]],

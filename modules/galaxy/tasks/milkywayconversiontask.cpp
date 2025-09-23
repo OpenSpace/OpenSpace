@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,46 +27,35 @@
 #include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
 #include <modules/volume/volumesampler.h>
-#include <modules/volume/textureslicevolumereader.h>
-
-#include <modules/volume/rawvolumewriter.h>
 #include <openspace/documentation/documentation.h>
-
 #include <ghoul/misc/dictionary.h>
 
 namespace {
-    constexpr std::string_view KeyInFilenamePrefix = "InFilenamePrefix";
-    constexpr std::string_view KeyInFilenameSuffix = "InFilenameSuffix";
-    constexpr std::string_view KeyInFirstIndex = "InFirstIndex";
-    constexpr std::string_view KeyInNSlices = "InNSlices";
-    constexpr std::string_view KeyOutFilename = "OutFilename";
-    constexpr std::string_view KeyOutDimensions = "OutDimensions";
+    struct [[codegen::Dictionary(MilkywayConversionTask)]] Parameters {
+        std::string inFilenamePrefix;
+        std::string inFilenameSuffix;
+        int inFirstIndex;
+        int inNSlices;
+        std::string outFilename;
+        glm::ivec3 outDimensions;
+    };
+#include "milkywayconversiontask_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary)
-    : _inFirstIndex(0)
-    , _inNSlices(0)
-{
-    if (dictionary.hasKey(KeyInFilenamePrefix)) {
-        _inFilenamePrefix = dictionary.value<std::string>(KeyInFilenamePrefix);
-    }
-    if (dictionary.hasKey(KeyInFilenameSuffix)) {
-        _inFilenameSuffix = dictionary.value<std::string>(KeyInFilenameSuffix);
-    }
-    if (dictionary.hasKey(KeyInFirstIndex)) {
-        _inFirstIndex = static_cast<size_t>(dictionary.value<int>(KeyInFirstIndex));
-    }
-    if (dictionary.hasKey(KeyInNSlices)) {
-        _inNSlices = static_cast<size_t>(dictionary.value<int>(KeyInNSlices));
-    }
-    if (dictionary.hasKey(KeyOutFilename)) {
-        _outFilename = dictionary.value<std::string>(KeyOutFilename);
-    }
-    if (dictionary.hasKey(KeyOutDimensions)) {
-        _outDimensions = dictionary.value<glm::ivec3>(KeyOutDimensions);
-    }
+documentation::Documentation MilkywayConversionTask::Documentation() {
+    return codegen::doc<Parameters>("galaxy_milkywayconversiontask");
+}
+
+MilkywayConversionTask::MilkywayConversionTask(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _inFilenamePrefix = p.inFilenamePrefix;
+    _inFilenameSuffix = p.inFilenameSuffix;
+    _inFirstIndex = p.inFirstIndex;
+    _inNSlices = p.inNSlices;
+    _outFilename = p.outFilename;
+    _outDimensions = p.outDimensions;
 }
 
 std::string MilkywayConversionTask::description() {
@@ -92,26 +81,18 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& onProgress) {
     const glm::vec3 resolutionRatio = static_cast<glm::vec3>(sliceReader.dimensions()) /
                                       static_cast<glm::vec3>(rawWriter.dimensions());
 
-    VolumeSampler<TextureSliceVolumeReader<glm::tvec4<GLfloat>>> sampler(
+    const VolumeSampler<TextureSliceVolumeReader<glm::tvec4<GLfloat>>> sampler(
         &sliceReader,
         resolutionRatio
     );
-    std::function<glm::tvec4<GLfloat>(glm::ivec3)> sampleFunction =
-        [resolutionRatio, sampler](glm::ivec3 outCoord) {
-            const glm::vec3 inCoord = ((glm::vec3(outCoord) + glm::vec3(0.5f)) *
-                                      resolutionRatio) - glm::vec3(0.5f);
-            const glm::tvec4<GLfloat> value = sampler.sample(inCoord);
-            return value;
-        };
+    auto sampleFunction = [resolutionRatio, sampler](const glm::ivec3& outCoord) {
+        const glm::vec3 inCoord =
+            ((glm::vec3(outCoord) + glm::vec3(0.5f)) * resolutionRatio) - glm::vec3(0.5f);
+        const glm::tvec4<GLfloat> value = sampler.sample(inCoord);
+        return value;
+    };
 
     rawWriter.write(sampleFunction, onProgress);
-}
-
-documentation::Documentation MilkywayConversionTask::Documentation() {
-    return {
-        "MilkywayConversionTask",
-        "galaxy_milkywayconversiontask"
-    };
 }
 
 } // namespace openspace

@@ -1,0 +1,38 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderabledisc/disc_with_hole.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderableDisc_Example_WithHole",
+        "position": [
+          -8.599759281586872,
+          232.26297144876608,
+          -138.9340344658343
+        ],
+        "pitch": 0.005038942674602147,
+        "up": [
+          0.22365140219621574,
+          -0.4942286230944608,
+          -0.8400703056350822
+        ],
+        "yaw": 0.004635536562578271,
+        "timestamp": "2000 JAN 01 12:00:00"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

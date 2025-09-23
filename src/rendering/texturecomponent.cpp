@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -87,29 +87,25 @@ void TextureComponent::uploadToGpu() {
 }
 
 void TextureComponent::loadFromFile(const std::filesystem::path& path) {
-    if (!path.empty()) {
-        using namespace ghoul::io;
-        using namespace ghoul::opengl;
+    if (path.empty()) {
+        return;
+    }
 
-        std::filesystem::path absolutePath = absPath(path);
+    using namespace ghoul::io;
+    using namespace ghoul::opengl;
 
-        std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
-            absolutePath.string(),
-            _nDimensions
-        );
+    std::unique_ptr<Texture> tex = TextureReader::ref().loadTexture(path, _nDimensions);
+    if (tex) {
+        LDEBUG(std::format("Loaded texture from '{}'", path));
+        _texture = std::move(tex);
 
-        if (texture) {
-            LDEBUG(fmt::format("Loaded texture from {}", absolutePath));
-            _texture = std::move(texture);
-
-            _textureFile = std::make_unique<ghoul::filesystem::File>(absolutePath);
-            if (_shouldWatchFile) {
-                _textureFile->setCallback([this]() { _fileIsDirty = true; });
-            }
-
-            _fileIsDirty = false;
-            _textureIsDirty = true;
+        _textureFile = std::make_unique<ghoul::filesystem::File>(path);
+        if (_shouldWatchFile) {
+            _textureFile->setCallback([this]() { _fileIsDirty = true; });
         }
+
+        _fileIsDirty = false;
+        _textureIsDirty = true;
     }
 }
 

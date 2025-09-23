@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,15 +57,15 @@ void MarkNodesDialog::createWidgets() {
     _list->setDragDropMode(QListView::InternalMove);
     _list->setResizeMode(QListView::Adjust);
 
-    for (size_t i = 0; i < _markedNodes->size(); ++i) {
-        QListWidgetItem* item =
-            new QListWidgetItem(QString::fromStdString(_markedNodes->at(i)));
+    for (const std::string& nodes : *_markedNodes) {
+        QListWidgetItem* item = new QListWidgetItem(QString::fromStdString(nodes));
         _list->addItem(item);
     }
     layout->addWidget(_list);
 
     _removeButton = new QPushButton("Remove");
     connect(_removeButton, &QPushButton::clicked, this, &MarkNodesDialog::listItemRemove);
+    _removeButton->setAccessibleName("Remove node");
     layout->addWidget(_removeButton);
 
     {
@@ -79,6 +79,7 @@ void MarkNodesDialog::createWidgets() {
 
         QPushButton* addButton = new QPushButton("Add new");
         connect(addButton, &QPushButton::clicked, this, &MarkNodesDialog::listItemAdded);
+        addButton->setAccessibleName("Add new node");
         box->addWidget(addButton);
         layout->addLayout(box);
     }
@@ -100,7 +101,6 @@ void MarkNodesDialog::listItemAdded() {
         return;
     }
 
-    std::string itemToAdd = _newNode->text().toStdString();
     QListWidgetItem* item = new QListWidgetItem(_newNode->text());
     _list->addItem(item);
 
@@ -113,14 +113,14 @@ void MarkNodesDialog::listItemAdded() {
 
 void MarkNodesDialog::listItemRemove() {
     QListWidgetItem* item = _list->currentItem();
-    int index = _list->row(item);
+    const int index = _list->row(item);
     _list->takeItem(index);
 }
 
 void MarkNodesDialog::parseSelections() {
     std::vector<std::string> nodes;
     for (int i = 0; i < _list->count(); i++) {
-        QString node = _list->item(i)->text();
+        const QString node = _list->item(i)->text();
         nodes.push_back(node.toStdString());
     }
     *_markedNodes = std::move(nodes);

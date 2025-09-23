@@ -6,6 +6,7 @@ local Layer = {
   Name = "Gebco [New York]",
   Identifier = "Gebco_NewYork",
   Enabled = asset.enabled,
+  ZIndex = 10,
   FilePath = asset.resource("gebco_newyork.wms")
 }
 
@@ -24,7 +25,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Gebco WaterMask Layer (New York)",
-  Version = "1.0",
   Description = "WaterMask layer for Earth globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

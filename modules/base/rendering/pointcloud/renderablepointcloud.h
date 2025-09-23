@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,9 +27,10 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
+#include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
@@ -41,6 +42,7 @@
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <filesystem>
 #include <functional>
 
 namespace ghoul::opengl {
@@ -51,6 +53,16 @@ namespace ghoul::opengl {
 namespace openspace {
 
 namespace documentation { struct Documentation; }
+
+struct TextureFormat {
+    glm::uvec2 resolution;
+    bool useAlpha = false;
+
+    friend bool operator==(const TextureFormat& l, const TextureFormat& r);
+};
+struct TextureFormatHash {
+    size_t operator()(const TextureFormat& k) const;
+};
 
 /**
  * This class describes a point cloud renderable that can be used to draw billboraded
@@ -74,14 +86,30 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
+    enum class TextureInputMode {
+        Single = 0,
+        Multi,
+        Other // For subclasses that need to handle their own texture
+    };
+
     virtual void initializeShadersAndGlExtras();
     virtual void deinitializeShaders();
-    virtual void bindDataForPointRendering();
+    virtual void setExtraUniforms();
     virtual void preUpdate();
 
     glm::dvec3 transformedPosition(const dataloader::Dataset::Entry& e) const;
+    glm::quat orientationQuaternion(const dataloader::Dataset::Entry& e) const;
 
     virtual int nAttributesPerPoint() const;
+
+    /**
+     * Helper function to buffer the vertex attribute with the given name and number
+     * of values. Assumes that the value is a float value.
+     *
+     * Returns the updated offset after this attribute is added
+     */
+    int bufferVertexAttribute(const std::string& name, GLint nValues,
+        int nAttributesPerPoint, int offset) const;
 
     virtual void updateBufferData();
     void updateSpriteTexture();
@@ -91,17 +119,49 @@ protected:
     /// Find the index of the currently chosen size parameter in the dataset
     int currentSizeParameterIndex() const;
 
-    virtual std::vector<float> createDataSlice();
+    bool hasColorData() const;
+    bool hasSizeData() const;
+    bool hasMultiTextureData() const;
+    bool useOrientationData() const;
 
-    virtual void bindTextureForRendering() const;
+    virtual void addPositionDataForPoint(unsigned int index, std::vector<float>& result,
+        double& maxRadius) const;
+    virtual void addColorAndSizeDataForPoint(unsigned int index,
+        std::vector<float>& result) const;
+    virtual void addOrientationDataForPoint(unsigned int index,
+        std::vector<float>& result) const;
+
+    std::vector<float> createDataSlice();
+
+    /**
+     * A function that subclasses could override to initialize their own textures to
+     * use for rendering, when the `_textureMode` is set to Other
+     */
+    virtual void initializeCustomTexture();
+    void initializeSingleTexture();
+    void initializeMultiTextures();
+    void clearTextureDataStructures();
+
+    void loadTexture(const std::filesystem::path& path, int index);
+
+    void initAndAllocateTextureArray(unsigned int textureId,
+        glm::uvec2 resolution, size_t nLayers, bool useAlpha);
+
+    void fillAndUploadTextureLayer(unsigned int arrayindex, unsigned int layer,
+        size_t textureIndex, glm::uvec2 resolution, bool useAlpha, const void* pixelData);
+
+    void generateArrayTextures();
 
     float computeDistanceFadeValue(const RenderData& data) const;
 
-    void renderBillboards(const RenderData& data, const glm::dmat4& modelMatrix,
+    void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
+    gl::GLenum internalGlFormat(bool useAlpha) const;
+    ghoul::opengl::Texture::Format glFormat(bool useAlpha) const;
+
     bool _dataIsDirty = true;
-    bool _spriteTextureIsDirty = true;
+    bool _spriteTextureIsDirty = false;
     bool _cmapIsDirty = true;
 
     bool _hasSpriteTexture = false;
@@ -113,12 +173,7 @@ protected:
     struct SizeSettings : properties::PropertyOwner {
         explicit SizeSettings(const ghoul::Dictionary& dictionary);
 
-        struct SizeMapping : properties::PropertyOwner {
-            SizeMapping();
-            properties::BoolProperty enabled;
-            properties::OptionProperty parameterOption;
-        };
-        SizeMapping sizeMapping;
+        std::unique_ptr<SizeMappingComponent> sizeMapping;
 
         properties::FloatProperty scaleExponent;
         properties::FloatProperty scaleFactor;
@@ -132,6 +187,11 @@ protected:
         explicit ColorSettings(const ghoul::Dictionary& dictionary);
         properties::Vec3Property pointColor;
         std::unique_ptr<ColorMappingComponent> colorMapping;
+        properties::BoolProperty enableOutline;
+        properties::Vec3Property outlineColor;
+        properties::FloatProperty outlineWidth;
+        properties::OptionProperty outlineStyle;
+        properties::BoolProperty applyCmapToOutline;
     };
     ColorSettings _colorSettings;
 
@@ -143,31 +203,48 @@ protected:
     };
     Fading _fading;
 
-    properties::BoolProperty _useSpriteTexture;
-    properties::StringProperty _spriteTexturePath;
-
     properties::BoolProperty _useAdditiveBlending;
+    properties::BoolProperty _useRotation;
 
     properties::BoolProperty _drawElements;
     properties::OptionProperty _renderOption;
 
     properties::UIntProperty _nDataPoints;
+    properties::BoolProperty _hasOrientationData;
 
-    ghoul::opengl::Texture* _spriteTexture = nullptr;
+    struct Texture : properties::PropertyOwner {
+        Texture();
+
+        properties::BoolProperty enabled;
+        properties::BoolProperty allowCompression;
+        properties::BoolProperty useAlphaChannel;
+        properties::StringProperty spriteTexturePath;
+        properties::StringProperty inputMode;
+    };
+    Texture _texture;
+    TextureInputMode _textureMode = TextureInputMode::Single;
+    std::filesystem::path _texturesDirectory;
+
     ghoul::opengl::ProgramObject* _program = nullptr;
 
     UniformCache(
-        cameraViewMatrix, projectionMatrix, modelMatrix, cameraPos, cameraLookup,
+        cameraViewMatrix, projectionMatrix, modelMatrix, cameraPosition, cameraLookUp,
         renderOption, maxAngularSize, color, opacity, scaleExponent, scaleFactor, up,
-        right, fadeInValue, hasSpriteTexture, spriteTexture, useColormap, colorMapTexture,
+        right, fadeInValue, hasSpriteTexture, spriteTexture, useColorMap, colorMapTexture,
         cmapRangeMin, cmapRangeMax, nanColor, useNanColor, hideOutsideRange,
         enableMaxSizeControl, aboveRangeColor, useAboveRangeColor, belowRangeColor,
-        useBelowRangeColor, hasDvarScaling
+        useBelowRangeColor, hasDvarScaling, dvarScaleFactor, enableOutline, outlineColor,
+        outlineWeight, outlineStyle, useCmapOutline, aspectRatioScale, useOrientationData
     ) _uniformCache;
 
-    std::string _dataFile;
+    std::filesystem::path _dataFile;
 
     DistanceUnit _unit = DistanceUnit::Parsec;
+
+    bool _useCaching = true;
+    bool _shouldComputeScaleExponent = false;
+    bool _createLabelsFromDataset = false;
+    bool _skipFirstDataPoint = false;
 
     dataloader::Dataset _dataset;
     dataloader::DataMapping _dataMapping;
@@ -178,6 +255,33 @@ protected:
 
     GLuint _vao = 0;
     GLuint _vbo = 0;
+
+    // List of (unique) loaded textures. The other maps refer to the index in this vector
+    std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
+    std::unordered_map<std::string, size_t> _textureNameToIndex;
+
+    // Texture index in dataset to index in vector of textures
+    std::unordered_map<int, size_t> _indexInDataToTextureIndex;
+
+    // Resolution/format to index in textures vector (used to generate one texture
+    // array per unique format)
+    std::unordered_map<TextureFormat, std::vector<size_t>, TextureFormatHash>
+        _textureMapByFormat;
+
+    // One per resolution above
+    struct TextureArrayInfo {
+        GLuint renderId;
+        GLint startOffset = -1;
+        int nPoints = -1;
+        glm::vec2 aspectRatioScale = glm::vec2(1.f);
+    };
+    std::vector<TextureArrayInfo> _textureArrays;
+
+    struct TextureId {
+        unsigned int arrayId;
+        unsigned int layer;
+    };
+    std::unordered_map<size_t, TextureId> _textureIndexToArrayMap;
 };
 
 } // namespace openspace

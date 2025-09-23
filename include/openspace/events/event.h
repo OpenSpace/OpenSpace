@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,21 +58,22 @@ struct Event {
     //     if they are triggered by events
     //  6. Add the new enum entry into the `toString` and `fromString` methods
     enum class Type : uint8_t {
-        SceneGraphNodeAdded,
-        SceneGraphNodeRemoved,
         ParallelConnection,
         ProfileLoadingFinished,
+        AssetLoadingFinished,
         ApplicationShutdown,
-        ScreenSpaceRenderableAdded,
-        ScreenSpaceRenderableRemoved,
         CameraFocusTransition,
         TimeOfInterestReached,
+        MissionAdded,
+        MissionRemoved,
         MissionEventReached,
         PlanetEclipsed,
         InterpolationFinished,
         FocusNodeChanged,
-        LayerAdded,
-        LayerRemoved,
+        PropertyTreeUpdated,
+        PropertyTreePruned,
+        ActionAdded,
+        ActionRemoved,
         SessionRecordingPlayback,
         PointSpacecraft,
         RenderableEnabled,
@@ -80,6 +81,8 @@ struct Event {
         CameraPathStarted,
         CameraPathFinished,
         CameraMovedPosition,
+        ScheduledScriptExecuted,
+        GuiTreeUpdated,
         Custom,
         Last // sentinel value
     };
@@ -110,43 +113,6 @@ void logAllEvents(const Event* e);
 //
 //  Events
 //
-
-/**
- * This event is created whenever a new scene graph node is added to the system. By the
- * time this event is signalled, the scene graph node has already been created and added
- * to the scene.
- */
-struct EventSceneGraphNodeAdded : public Event {
-    static constexpr Type Type = Event::Type::SceneGraphNodeAdded;
-
-    /**
-     * Creates an instance of an EventSceneGraphNodeAdded event.
-     *
-     * \param node_ The identifier of the node that was added
-     *
-     * \pre node_ must not be nullptr
-     */
-    explicit EventSceneGraphNodeAdded(const SceneGraphNode* node_);
-    const tstring node;
-};
-
-/**
- * This event is created whenever a scene graph node was removed. By the time this event
- * is signalled, the scene graph node has already been removed.
- */
-struct EventSceneGraphNodeRemoved : public Event {
-    static constexpr Type Type = Event::Type::SceneGraphNodeRemoved;
-
-    /**
-     * Creates an instance of an EventSceneGraphNodeRemoved event.
-     *
-     * \param node_ The identifier of the node that was removed
-     *
-     * \pre node_ must not be nullptr
-     */
-    explicit EventSceneGraphNodeRemoved(const SceneGraphNode* node_);
-    const tstring node;
-};
 
 /**
  * This event is created whenever something in the parallel connection subsystem changes.
@@ -186,6 +152,20 @@ struct EventProfileLoadingFinished : public Event {
 };
 
 /**
+* This event is created when the loading of all assets are finished. This is emitted
+* regardless of whether it is the initial startup of a profile, or any subsequent asset
+* being loaded e.g., through add or drag-and-drop.
+*/
+struct EventAssetLoadingFinished : public Event {
+    static constexpr Type Type = Event::Type::AssetLoadingFinished;
+
+    /**
+     * Creates an instance of an AssetLoadingFinished event.
+     */
+    EventAssetLoadingFinished();
+};
+
+/**
  * This event is created whenever some information about the application shutdown sequence
  * changes. This can either be that the seqeuence started, was aborted, or is finished,
  * which means that OpenSpace is just about the shutdown.
@@ -207,41 +187,6 @@ struct EventApplicationShutdown : public Event {
      */
     explicit EventApplicationShutdown(State state_);
     const State state;
-};
-
-/**
- * This event is created when a new screenspace renderable has been created.  By the time
- * this event is created, the screenspace renderable is already registered and available.
- */
-struct EventScreenSpaceRenderableAdded : public Event {
-    static constexpr Type Type = Event::Type::ScreenSpaceRenderableAdded;
-
-    /**
-     * Creates an instance of an EventScreenSpaceRenderableAdded event.
-     *
-     * \param renderable_ The the new screenspace renderable that was added to the system
-     *
-     * \pre renderable_ must not be nullptr
-     */
-    explicit EventScreenSpaceRenderableAdded(const ScreenSpaceRenderable* renderable_);
-    const tstring renderable;
-};
-
-/**
- * This event is created when a screenspace renderable has been removed from the system.
- * When this event is created, the screenspace renderable has already been removed and is
- * no longer available.
- */
-struct EventScreenSpaceRenderableRemoved : public Event {
-    static constexpr Type Type = Event::Type::ScreenSpaceRenderableRemoved;
-
-    /**
-     * Creates an instance of an EventScreenSpaceRenderableRemoved event.
-     *
-     * \param renderable_ The the new screenspace renderable that was removed
-     */
-    explicit EventScreenSpaceRenderableRemoved(const ScreenSpaceRenderable* renderable_);
-    const tstring renderable;
 };
 
 /**
@@ -314,13 +259,45 @@ struct EventTimeOfInterestReached : public Event {
 
 
 /**
+ * This event is created when a mission is added.
+ */
+struct EventMissionAdded : public Event {
+    static constexpr Type Type = Event::Type::MissionAdded;
+
+    /**
+     * Creates an instance of an EventMissionAdded event.
+     *
+     * \param identifier The identifier of the mission added
+     */
+    EventMissionAdded(std::string_view identifier);
+
+    const tstring identifier;
+};
+
+/**
+ * This event is created when a mission is removed.
+ */
+struct EventMissionRemoved : public Event {
+    static constexpr Type Type = Event::Type::MissionRemoved;
+
+    /**
+     * Creates an instance of an EventMissionRemoved event.
+     *
+     * \param identifier The identifier of the mission removed
+     */
+    EventMissionRemoved(std::string_view identifier);
+
+    const tstring identifier;
+};
+
+/**
  * This event is created when the end of a mission phase is reached. This event is
  * currently unused.
  */
 struct EventMissionEventReached : public Event {
     static constexpr Type Type = Event::Type::MissionEventReached;
 
-    // Not sure which kind of parameters we want to pass here
+    // Not sure which kind of parameters we want to pass here.
     EventMissionEventReached();
 };
 
@@ -333,7 +310,7 @@ struct EventPlanetEclipsed : public Event {
 
     /**
      * Creates an instance of an EventPlanetEclipsed event.
-     *
+
      * \param eclipsee_ The scene graph node that is eclipsed by another object
      * \param eclipser_ The scene graph node that is eclipsing the other object
      *
@@ -388,53 +365,76 @@ struct EventFocusNodeChanged : public Event {
 };
 
 /**
- * This event is created when a layer is added to to a globe.
+ * This event is created a property owner or property has been added or has changed.
  */
-struct EventLayerAdded : public Event {
-    static constexpr Type Type = Event::Type::LayerAdded;
+struct EventPropertyTreeUpdated : public Event {
+    static constexpr Type Type = Event::Type::PropertyTreeUpdated;
 
     /**
-     * Creates an instance of an EventLayerAdded event.
+     * Creates an instance of an EventPropertyTreeUpdated event.
      *
-     * \param node_ The identifier of the globe to which the layer is added
-     * \param layerGroup_ The identifier of the layer group to which the layer is added
-     * \param layer_ The identifier of the layer that was added
+     * \param uri_ A string with the uri of the property or property owner that was added
      *
-     * \pre node_ must not be empty
-     * \pre layerGroup_ must not be empty
-     * \pre layer_ must not be empty
+     * \pre uri_ must be a valid uri
      */
-    explicit EventLayerAdded(std::string_view node_, std::string_view layerGroup_,
-        std::string_view layer_);
+    explicit EventPropertyTreeUpdated(std::string_view uri_);
 
-    const tstring node;
-    const tstring layerGroup;
-    const tstring layer;
+    const tstring uri;
 };
 
 /**
- * This event is created when a layer is removed from a globe.
+ * This event is created when a property owner or property is removed from a the property
+ * tree.
  */
-struct EventLayerRemoved : public Event {
-    static constexpr Type Type = Event::Type::LayerRemoved;
+struct EventPropertyTreePruned : public Event {
+    static constexpr Type Type = Event::Type::PropertyTreePruned;
 
     /**
-     * Creates an instance of an EventLayerRemoved event.
+     * Creates an instance of an EventPropertyTreePruned event.
      *
-     * \param node_ The identifier of the globe to which the layer is removed
-     * \param layerGroup_ The identifier of the layer group to which the layer is removed
-     * \param layer_ The identifier of the layer that was removed
+     * \param uri_ The uri of the property or property owner that was removed
      *
-     * \pre node_ must not be empty
-     * \pre layerGroup_ must not be empty
-     * \pre layer_ must not be empty
+     * \pre uri_ must be a valid uri
      */
-    explicit EventLayerRemoved(std::string_view node_, std::string_view layerGroup_,
-        std::string_view layer_);
+    explicit EventPropertyTreePruned(std::string_view uri_);
 
-    const tstring node;
-    const tstring layerGroup;
-    const tstring layer;
+    const tstring uri;
+};
+
+/**
+ * This event is created when an action is added.
+ */
+struct EventActionAdded : public Event {
+    static constexpr Type Type = Event::Type::ActionAdded;
+
+    /**
+     * Creates an instance of an EventActionAdded event.
+     *
+     * \param uri_ A string with the uri of the action that was added
+     *
+     * \pre uri_ must be a valid uri
+     */
+    explicit EventActionAdded(std::string_view uri_);
+
+    const tstring uri;
+};
+
+/**
+ * This event is created when an action is removed.
+ */
+struct EventActionRemoved : public Event {
+    static constexpr Type Type = Event::Type::ActionRemoved;
+
+    /**
+     * Creates an instance of an EventActionRemoved event.
+     *
+     * \param uri_ The uri of the action that was removed
+     *
+     * \pre uri_ must be a valid uri
+     */
+    explicit EventActionRemoved(std::string_view uri_);
+
+    const tstring uri;
 };
 
 /**
@@ -572,6 +572,33 @@ struct EventCameraMovedPosition : public Event {
      * Creates an instance of an EventCameraMovedPosition event.
      */
     EventCameraMovedPosition();
+};
+
+/**
+ * This event is created when a scheduled script is executed.
+ */
+struct EventScheduledScriptExecuted : public Event {
+    static constexpr Type Type = Event::Type::ScheduledScriptExecuted;
+
+    /**
+     * Creates an instance of an ScheduledScriptExecuted event.
+     */
+    EventScheduledScriptExecuted(std::string_view script_);
+
+    const tstring script;
+};
+
+/**
+ * This event is created when the custom ordering for a specific branch in the Scene
+ * GUI tree is changed. It signals to the UI that the tree should be updated.
+ */
+struct EventGuiTreeUpdated : public Event {
+    static constexpr Type Type = Event::Type::GuiTreeUpdated;
+
+    /**
+     * Creates an instance of an EventGuiTreeUpdated event.
+     */
+    EventGuiTreeUpdated();
 };
 
 /**

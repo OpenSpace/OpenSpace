@@ -36,7 +36,6 @@ asset.export(ExampleRoverPath)
 
 asset.meta = {
   Name = "GeoJson Example - Rover path",
-  Version = "1.0",
   Description = [[GeoJson example asset that renderes a snapshot of the path of the
     Perseverance Rover on Mars. Data from: https://mars.nasa.gov/mars2020/mission/where-is-the-rover/]],
   Author = "OpenSpace Team",

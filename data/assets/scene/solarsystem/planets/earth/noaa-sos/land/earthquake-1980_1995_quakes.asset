@@ -34,6 +34,7 @@ local Layer = {
   Identifier = Identifier,
   Name = Name,
   Enabled = asset.enabled,
+  ZIndex = 100,
   Type = "ImageSequenceTileProvider",
   FolderPath = syncedDirectory .. "1024",
   Description = Description
@@ -95,7 +96,6 @@ asset.export(QuakebarCombined)
 
 asset.meta = {
   Name = Name,
-  Version = "1.0",
   Description = Description .. "Data provided by the National Oceanic and Atmospheric Administration",
   Author = "National Oceanic and Atmospheric Administration",
   URL = URL,

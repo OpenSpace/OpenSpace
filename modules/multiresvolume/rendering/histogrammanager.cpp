@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -61,7 +61,7 @@ bool HistogramManager::buildHistogram(TSP* tsp, unsigned int brickIndex) {
         std::vector<float> voxelValues = readValues(tsp, brickIndex);
         size_t numVoxels = voxelValues.size();
 
-        for (size_t v = 0; v < numVoxels; ++v) {
+        for (size_t v = 0; v < numVoxels; v++) {
             histogram.add(voxelValues[v], 1.0);
         }
     }
@@ -139,7 +139,7 @@ bool HistogramManager::loadFromFile(const std::filesystem::path& filename) {
 
     _histograms = std::vector<Histogram>(numHistograms);
 
-    for (int i = 0; i < numHistograms; ++i) {
+    for (int i = 0; i < numHistograms; i++) {
         int offset = i * _numBins;
         // No need to deallocate histogram data, since histograms take ownership.
         float* data = new float[_numBins];
@@ -166,7 +166,7 @@ bool HistogramManager::saveToFile(const std::filesystem::path& filename) {
     size_t nFloats = numHistograms * _numBins;
     std::vector<float> histogramData(nFloats);
 
-    for (size_t i = 0; i < numHistograms; ++i) {
+    for (size_t i = 0; i < numHistograms; i++) {
         size_t offset = i*_numBins;
         memcpy(&histogramData[offset], _histograms[i].data(), sizeof(float) * _numBins);
     }

@@ -1,0 +1,16 @@
+# A dummy dataset with an xyz position, some random values and an integer value to
+# use for texturing the points
+
+datavar 0 a
+datavar 1 b
+datavar 2 texture
+texturevar 2  # The index of the data column that has the texture data
+texture 0 test3.jpg
+texture 1 test.jpg
+texture 2 test.jpg
+texture 3 openspace-horiz-logo.png
+
+13428000 26239000 45870000 -3.226548224 33.95773276 0
+14727000 45282000 10832000 45.05941924 -106.0395917 2
+24999000 28370000 19911000 -70.58906931 154.1851656 3
+26539000 36165000 39582000 -13.3663358  71.79484733 1

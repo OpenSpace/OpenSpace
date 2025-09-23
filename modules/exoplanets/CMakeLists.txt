@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -25,6 +25,7 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
+    datastructure.h    
     exoplanetshelper.h
     exoplanetsmodule.h
     rendering/renderableorbitdisc.h
@@ -33,6 +34,7 @@ set(HEADER_FILES
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+    datastructure.cpp    
     exoplanetshelper.cpp
     exoplanetsmodule.cpp
     exoplanetsmodule_lua.inl

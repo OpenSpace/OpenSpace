@@ -48,7 +48,8 @@ local Atmosphere = {
   GUI = {
     Name = "Venus Atmosphere",
     Path = "/Solar System/Planets/Venus",
-    Description = "Simulation of Venus' Atmosphere"
+    Description = "Simulation of Venus' Atmosphere",
+    Focusable = false
   }
 }
 
@@ -67,7 +68,6 @@ asset.export(Atmosphere)
 
 asset.meta = {
   Name = "Venus Atmosphere",
-  Version = "1.1",
   Description = "Atmosphere of Venus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

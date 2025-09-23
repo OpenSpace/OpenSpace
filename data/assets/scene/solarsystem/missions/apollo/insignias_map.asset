@@ -1,6 +1,4 @@
 -- Apollo mission insignias on their locations on the Lunar surface.
--- The insignias are invisible by default, but can be enabled using shown or hidden using
--- the exported functions `showInsignias(interpolationDuration)` and `hideInsignias(interpolationDuration)`.
 
 local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
@@ -194,6 +192,7 @@ local HideInsignias = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo11)
   openspace.addSceneGraphNode(Apollo12)
@@ -224,18 +223,13 @@ asset.export(Apollo14)
 asset.export(Apollo15)
 asset.export(Apollo16)
 
-asset.export("showInsignia", function (missionNumber, interpolationDuration)
-  openspace.setPropertyValue("Scene.Apollo" .. missionNumber .. "Insignia.Renderable.Opacity", 1, interpolationDuration)
-end)
 
-asset.export("hideInsignia", function (missionNumber, interpolationDuration)
-  openspace.setPropertyValue("Scene.Apollo" .. missionNumber .. "Insignia.Renderable.Opacity", 0, interpolationDuration)
-end)
 
-asset.export("showInsignias", function (interpolationDuration)
-  openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 1, interpolationDuration)
-end)
-
-asset.export("hideInsignias", function (interpolationDuration)
-  openspace.setPropertyValue("Scene.Apollo*Insignia.Renderable.Opacity", 0, interpolationDuration)
-end)
+asset.meta = {
+  Name = "Apollo - Insignias",
+  Description = [[This asset shows the location of the different landing sites of the
+    Apollo missions on the Moon by placing the missions' insignias.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

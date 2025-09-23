@@ -1,4 +1,4 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("./67p")
 local kernels = asset.require("./kernels")
@@ -23,6 +23,11 @@ local RotationMatrix = {
 local RosettaPosition = {
   Identifier = "RosettaPosition",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2014 JAN 01 00:00:00.000",
+    End = "2016 OCT 01 00:00:00.000"
+  },
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
@@ -89,6 +94,7 @@ local PhilaePosition = {
   GUI = {
     Name = "Philae Position",
     Path = "/Solar System/Missions/Rosetta",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -97,6 +103,10 @@ local Philae = {
   Identifier = "Philae",
   Parent = PhilaePosition.Identifier,
   Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 1.0, 0.0, -1.25 }
+    },
     Rotation = {
       Type = "StaticRotation",
       Rotation = { 0.0, math.pi / 2.0, 0.0 }
@@ -117,7 +127,8 @@ local Philae = {
   },
   GUI = {
     Name = "Philae",
-    Path = "/Solar System/Missions/Rosetta"
+    Path = "/Solar System/Missions/Rosetta",
+    Focusable = false
   }
 }
 
@@ -125,7 +136,8 @@ local NavCam = {
   Identifier = "NAVCAM",
   Parent = RosettaPosition.Identifier,
   GUI = {
-    Path = "/Solar System/Missions/Rosetta/Instruments"
+    Path = "/Solar System/Missions/Rosetta/Instruments",
+    Focusable = false
   }
 }
 
@@ -149,7 +161,8 @@ local NavCamFov = {
   },
   GUI = {
     Name = "NAVCAM FOV",
-    Path = "/Solar System/Missions/Rosetta/Instruments"
+    Path = "/Solar System/Missions/Rosetta/Instruments",
+    Focusable = false
   }
 }
 
@@ -188,7 +201,8 @@ local RosettaCometTrail = {
   },
   GUI = {
     Name = "Rosetta Comet Trail",
-    Path = "/Solar System/Missions/Rosetta"
+    Path = "/Solar System/Missions/Rosetta",
+    Focusable = false
   }
 }
 
@@ -209,7 +223,8 @@ local PhilaeTrail = {
   },
   GUI = {
     Name = "Philae Trail",
-    Path = "/Solar System/Missions/Rosetta"
+    Path = "/Solar System/Missions/Rosetta",
+    Focusable = false
   }
 }
 
@@ -241,10 +256,7 @@ local ToggleImagePlane = {
   Identifier = "os.rosetta.ToggleImagePlane",
   Name = "Toggle image plane",
   Command = [[
-    openspace.setPropertyValueSingle(
-      "Scene.ImagePlaneRosetta.Renderable.Enabled",
-      not openspace.propertyValue("Scene.ImagePlaneRosetta.Renderable.Enabled")
-    )
+    openspace.toggleFade("Scene.ImagePlaneRosetta.Renderable")
   ]],
   Documentation = "Toggles the visibility of the free floating image plane",
   GuiPath = "/Missions/Rosetta",
@@ -255,10 +267,7 @@ local TogglePhilaeTrail = {
   Identifier = "os.rosetta.TogglePhilaeTrail",
   Name = "Toggle Philae trail",
   Command = [[
-    openspace.setPropertyValueSingle(
-      "Scene.PhilaeTrail.Renderable.Enabled",
-      not openspace.propertyValue("Scene.PhilaeTrail.Renderable.Enabled")
-    )
+    openspace.toggleFade("Scene.PhilaeTrail.Renderable")
   ]],
   Documentation = "Toggles the visibility of Philae's trail",
   GuiPath = "/Missions/Rosetta",

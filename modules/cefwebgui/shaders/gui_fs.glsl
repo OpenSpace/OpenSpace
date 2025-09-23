@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,14 @@ in vec2 vs_st;
 out vec4 outputColor;
 
 uniform sampler2D tex;
-
+#define USE_ACCELERATED_RENDERING #{useAcceleratedRendering}
 
 void main() {
-  outputColor = texture(tex, vs_st);
+  #if USE_ACCELERATED_RENDERING
+    vec2 flippedTexCoords = vec2(vs_st.x, 1.0 - vs_st.y);
+    vec4 texColor = texture(tex, flippedTexCoords);
+    outputColor = texColor.bgra;  // Correcting both orientation and color channels
+  #else
+    outputColor = texture(tex, vs_st);
+  #endif
 }

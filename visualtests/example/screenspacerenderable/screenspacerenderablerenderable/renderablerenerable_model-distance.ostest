@@ -1,0 +1,12 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/screenspacerenderable/screenspacerenderablerenderable/renderablerenderable_model-distance.asset"
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

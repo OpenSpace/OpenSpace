@@ -1,0 +1,112 @@
+local textures = asset.resource({
+  Name = "Cardinal Directions Textures",
+  Type = "HttpSynchronization",
+  Identifier = "cardinal_directions_textures",
+  Version = 1
+})
+
+
+local FadeInConstellationLabels = {
+  Identifier = "os.nightsky.FadeInConstellationLabels",
+  Name = "Fade In Constellation Labels",
+  Command = [[openspace.fadeIn("Scene.Constellations.Renderable.Labels",nil)]],
+  Documentation = "Fades in the constllation labels",
+  GuiPath = "/Constellations/Lines",
+  IsLocal = false
+}
+
+local FadeOutConstellationLabels = {
+  Identifier = "os.nightsky.FadeOutConstellationLabels",
+  Name = "Fade Out Constellation Labels",
+  Command = [[openspace.fadeOut("Scene.Constellations.Renderable.Labels")]],
+  Documentation = "Fades out the constellation labels",
+  GuiPath = "/Constellations/Lines",
+  IsLocal = false
+}
+
+local ShowConstellationElements = {
+  Identifier = "os.nightsky.ShowConstellationElements",
+  Name = "Show Constellation Elements",
+  Command = [[
+    openspace.setPropertyValueSingle('Scene.Constellations.Renderable.DrawElements', true)
+    openspace.setPropertyValueSingle('Scene.Constellations.Renderable.Fade', 0)
+    local fadeSpeed = openspace.propertyValue("OpenSpaceEngine.FadeDuration")
+	  openspace.fadeIn("Scene.Constellations.Renderable", fadeSpeed, "")
+  ]],
+  Documentation = "Shows the constellation lines with consideration of label state",
+  GuiPath = "/Constellations/Lines",
+  IsLocal = false
+}
+
+local HideAllMarkings = {
+  Identifier = "os.nightsky.HideAllMarkings",
+  Name = "Hide All Markings",
+  Command = [[
+    openspace.fadeOut("Scene.Constellations.Renderable")
+    openspace.fadeOut("{nightsky_marking}")
+    openspace.fadeOut("{du_grid}")
+    openspace.fadeOut("{du_grid_labels}")
+    openspace.fadeOut("{image_constellation}")
+  ]],
+  Documentation = "Hides all markings in the night sky",
+  GuiPath = "/Night Sky/Markings",
+  IsLocal = false
+}
+
+local AddTickMarksBand = {
+  Identifier = "os.nightsky.AddNeswBandMarks",
+    Name = "Add a band to cardinal directions",
+    Command = [[
+      local tex = openspace.propertyValue("Scene.CardinalDirectionSphere.Renderable.Texture")
+      if (string.find(tex, "small")) then
+        openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Texture", "]].. textures:gsub("\\","/") .. [[nesw_lines_red_small.png")
+      else
+        openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Texture", "]].. textures:gsub("\\","/") .. [[nesw_lines_red.png")
+      end
+    ]],
+    Documentation = "Adds tick marks to the cardinal directions",
+    GuiPath = "/Night Sky/Directions",
+    IsLocal = false
+}
+
+local RemoveTickMarksBand = {
+  Identifier = "os.nightsky.RemoveNeswBandMarks",
+    Name = "Add a band to cardinal directions",
+    Command = [[
+      local tex = openspace.propertyValue("Scene.CardinalDirectionSphere.Renderable.Texture")
+      if (string.find(tex, "small")) then
+        openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Texture", "]].. textures:gsub("\\","/") .. [[nesw_red_small.png")
+      else
+        openspace.setPropertyValueSingle("Scene.CardinalDirectionSphere.Renderable.Texture", "]].. textures:gsub("\\","/") .. [[nesw_red.png")
+      end
+    ]],
+    Documentation = "Removes tick marks to the cardinal directions",
+    GuiPath = "/Night Sky/Directions",
+    IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(FadeInConstellationLabels)
+  openspace.action.registerAction(FadeOutConstellationLabels)
+  openspace.action.registerAction(ShowConstellationElements)
+  openspace.action.registerAction(HideAllMarkings)
+  openspace.action.registerAction(AddTickMarksBand)
+  openspace.action.registerAction(RemoveTickMarksBand)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(RemoveTickMarksBand)
+  openspace.action.removeAction(AddTickMarksBand)
+  openspace.action.removeAction(HideAllMarkings)
+  openspace.action.removeAction(ShowConstellationElements)
+  openspace.action.removeAction(FadeOutConstellationLabels)
+  openspace.action.removeAction(FadeInConstellationLabels)
+end)
+
+asset.export("FadeInConstellationLabels", FadeInConstellationLabels.Identifier)
+asset.export("FadeOutConstellationLabels", FadeOutConstellationLabels.Identifier)
+asset.export("ShowConstellationElements", ShowConstellationElements.Identifier)
+asset.export("HideAllMarkings", HideAllMarkings.Identifier)
+asset.export("AddTickMarksBand", AddTickMarksBand.Identifier)
+asset.export("RemoveTickMarksBand", RemoveTickMarksBand.Identifier)

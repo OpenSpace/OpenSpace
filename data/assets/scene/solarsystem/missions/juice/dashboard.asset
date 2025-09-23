@@ -3,14 +3,15 @@ local jupiter = asset.require("scene/solarsystem/planets/jupiter/jupiter")
 local ganymede = asset.require("scene/solarsystem/planets/jupiter/ganymede/ganymede")
 
 
+
 local DistanceJuiceJupiter = {
   Type = "DashboardItemDistance",
   Identifier = "JuiceJupiterDistance",
   Enabled = asset.enabled,
   SourceType = "Node",
-  SourceNodeName = juice.Juice.Identifier,
+  SourceNodeIdentifier = juice.Juice.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = jupiter.Jupiter.Identifier,
+  DestinationNodeIdentifier = jupiter.Jupiter.Identifier,
   GuiName = "Juice - Jupiter Distance"
 }
 
@@ -19,9 +20,9 @@ local DistanceJuiceGanymede = {
   Identifier = "JuiceGanymedeDistance",
   Enabled = asset.enabled,
   SourceType = "Node",
-  SourceNodeName = juice.Juice.Identifier,
+  SourceNodeIdentifier = juice.Juice.Identifier,
   DestinationType = "Node",
-  DestinationNodeName = ganymede.Ganymede.Identifier,
+  DestinationNodeIdentifier = ganymede.Ganymede.Identifier,
   GuiName = "Juice - Ganymede Distance"
 }
 

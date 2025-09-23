@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,35 +32,10 @@
 #include <optional>
 
 namespace {
-    constexpr std::string_view LoggerCat = "ScreenSpaceSpout";
-
-    constexpr openspace::properties::Property::PropertyInfo NameInfo = {
-        "SpoutName",
-        "Spout Sender Name",
-        "This value explicitly sets the Spout receiver to use a specific name. If this "
-        "is not a valid name, an empty image is used",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
-        "SpoutSelection",
-        "Spout Selection",
-        "This property displays all available Spout sender on the system. If one them is "
-        "selected, its value is stored in the 'SpoutName' property, overwriting its "
-        "previous value",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo UpdateInfo = {
-        "UpdateSelection",
-        "Update Selection",
-        "If this property is trigged, the 'SpoutSelection' options will be refreshed",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
+    // This `Renderable` type can be used to render a plane with a texture that is
+    // provided by another application on the same computer using the SPOUT library.
+    // Note: The Spout library is only available on Windows.
     struct [[codegen::Dictionary(RenderablePlaneSpout)]] Parameters {
-        // [[codegen::verbatim(NameInfo.description)]]
-        std::optional<std::string> spoutName;
     };
 #include "renderableplanespout_codegen.cpp"
 
@@ -69,7 +44,10 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderablePlaneSpout::Documentation() {
-    return codegen::doc<Parameters>("spout_screenspace_spout");
+    return codegen::doc<Parameters>(
+        "spout_renderableplanespout",
+        spout::SpoutReceiverPropertyProxy::Documentation()
+    );
 }
 
 RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
@@ -87,14 +65,14 @@ RenderablePlaneSpout::RenderablePlaneSpout(const ghoul::Dictionary& dictionary)
             setIdentifier("RenderablePlaneSpout");
         }
         else {
-            setIdentifier("RenderablePlaneSpout" + std::to_string(iIdentifier));
+            setIdentifier(std::format("RenderablePlaneSpout{}", iIdentifier));
         }
-        ++id;
+        id++;
     }
 
     if (_guiName.empty()) {
         // Adding an extra space to the user-facing name as it looks nicer
-        setGuiName("RenderablePlaneSpout " + std::to_string(iIdentifier));
+        setGuiName(std::format("RenderablePlaneSpout {}", iIdentifier));
     }
 }
 

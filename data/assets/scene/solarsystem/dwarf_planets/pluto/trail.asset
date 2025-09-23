@@ -14,13 +14,15 @@ local PlutoBarycenterTrail = {
       Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.3, 0.7, 0.3 },
-    Period = 365.25,
-    Resolution = 1000
+    Period = 90560,
+    Resolution = 368,
+    LineLength = 0.03
   },
-  Tag = { "planetTrail_solarSystem", "planetTrail_dwarf", "pluto_system" },
+  Tag = { "planetTrail_dwarf" },
   GUI = {
     Name = "Pluto Barycenter Trail",
     Path = "/Solar System/Dwarf Planets/Pluto",
+    Focusable = false,
     Description = [[Precise trail of Pluto from NASA SPICE data. Not containing full
       orbit]]
   }
@@ -41,7 +43,6 @@ asset.export(PlutoBarycenterTrail)
 
 asset.meta = {
   Name = "Pluto Barycenter Trail",
-  Version = "1.0",
   Description = "Trail of Pluto Barycenter as observed by the Sun",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

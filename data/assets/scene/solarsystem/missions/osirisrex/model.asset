@@ -1,5 +1,5 @@
 local transforms = asset.require("./transforms")
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local kernels = asset.require("./kernels")
@@ -131,7 +131,8 @@ local PolyCamFov = {
   },
   GUI = {
     Name = "POLYCAM FOV",
-    Path = "/Solar System/Missions/OSIRIS REx/Instruments"
+    Path = "/Solar System/Missions/OSIRIS REx/Instruments",
+    Focusable = false
   }
 }
 
@@ -160,6 +161,7 @@ local PolyCamFov = {
 --     Path = "/Solar System/Missions/OSIRIS REx/Instruments"
 --   }
 -- }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(OsirisRex)

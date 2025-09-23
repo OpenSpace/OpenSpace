@@ -17,7 +17,6 @@ asset.require("./communications/starlink")
 
 asset.meta = {
   Name = "Satellites Communications",
-  Version = "1.0",
   Description = [[Meta asset for communications satellites of Earth. Containing groups:
     geostationary, intelsat, ses, iridium, iridium_next, orbcomm, globalstar, amateur,
     experimental, other_comm, gorizont, raduga and molniya]],

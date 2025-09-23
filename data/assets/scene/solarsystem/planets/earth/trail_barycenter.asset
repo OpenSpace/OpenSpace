@@ -21,7 +21,8 @@ local EarthBarycenterTrail = {
   Tag = { "planetTrail_solarSystem", "planetTrail_terrestrial" },
   GUI = {
     Name = "Earth Barycenter Trail",
-    Path = "/Solar System/Planets/Earth"
+    Path = "/Solar System/Planets/Earth",
+    Focusable = false
   }
 }
 
@@ -40,7 +41,6 @@ asset.export(EarthBarycenterTrail)
 
 asset.meta = {
   Name = "Earth Trail",
-  Version = "1.1",
   Description = "Trail of Earth's Barycenter as observed by the Sun",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

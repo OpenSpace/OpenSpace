@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -52,7 +52,7 @@ public:
 
     bool isReady() const override;
 
-    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
 
     static documentation::Documentation Documentation();
@@ -73,21 +73,19 @@ private:
     void renderConstellations(const RenderData& data, const glm::dmat4& modelViewMatrix,
         const glm::dmat4& projectionMatrix);
 
-    bool loadData();
-    bool readSpeckFile();
+    void loadData();
 
     /**
      * Callback method that gets triggered when `_constellationSelection` changes.
      */
     void selectionPropertyHasChanged() override;
 
+    properties::StringProperty _speckFile;
     properties::BoolProperty _drawElements;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, opacity,
         color) _uniformCache;
-
-    properties::StringProperty _speckFile;
 
     DistanceUnit _constellationUnit = DistanceUnit::Parsec;
 

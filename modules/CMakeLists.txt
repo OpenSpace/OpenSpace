@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2025                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -320,6 +320,7 @@ list(REMOVE_DUPLICATES topologically_sorted)
 
 set(MODULE_HEADERS "")
 set(MODULE_CLASSES "")
+set(MODULE_DOCUMENTATION "")
 
 foreach (key RANGE ${enabled_module_count})
   list(GET topologically_sorted ${key} name)
@@ -335,6 +336,7 @@ foreach (key RANGE ${enabled_module_count})
 
   list(APPEND MODULE_HEADERS "#include <${header_filepath}>\n")
   list(APPEND MODULE_CLASSES "        new ${class_name},\n")
+  list(APPEND MODULE_DOCUMENTATION "        ${class_name}::Documentation(),\n")
 endforeach ()
 
 get_unique_include_paths(
@@ -357,6 +359,10 @@ endif ()
 
 if (NOT "${MODULE_CLASSES}" STREQUAL "")
   string(REPLACE ";" "" MODULE_CLASSES ${MODULE_CLASSES})
+endif ()
+
+if (NOT "${MODULE_DOCUMENTATION}" STREQUAL "")
+  string(REPLACE ";" "" MODULE_DOCUMENTATION ${MODULE_DOCUMENTATION})
 endif ()
 
 configure_file(

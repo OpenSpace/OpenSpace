@@ -18,10 +18,16 @@ local RheaTrail = {
     Period = 108.0 / 24.0,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_saturn", "moonTrail_major_saturn" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_saturn",
+    "moonTrail_major_saturn"
+  },
   GUI = {
     Name = "Rhea Trail",
     Path = "/Solar System/Planets/Saturn/Major Moons/Rhea",
+    Focusable = false,
     Description = "Trail of Saturn's moon Rhea as observed by Saturn"
   }
 }
@@ -41,7 +47,6 @@ asset.export(RheaTrail)
 
 asset.meta = {
   Name = "Rhea Trail",
-  Version = "1.0",
   Description = "Main trail for Rhea",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

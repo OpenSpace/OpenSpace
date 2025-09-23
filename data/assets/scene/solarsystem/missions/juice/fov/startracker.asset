@@ -22,12 +22,12 @@ local StarOh1 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Star Tracker OH1 FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = "The first head of the Hydra star tracking system"
   }
 }
@@ -51,12 +51,12 @@ local StarOh2 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Star Tracker OH2 FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = "The second head of the Hydra star tracking system"
   }
 }
@@ -80,12 +80,12 @@ local StarOh3 = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Star Tracker OH3 FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = "The third head of the Hydra star tracking system"
   }
 }
@@ -111,7 +111,6 @@ asset.export(StarOh3)
 
 asset.meta = {
   Name = "Star Tracker",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the three headed "Hydra" star trackers onboard Juice, which
     is measuring the location of stars and comparing them to their known locations in

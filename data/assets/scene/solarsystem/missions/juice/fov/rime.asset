@@ -23,12 +23,12 @@ local RimeBase = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Rime Base FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = "The location of the base for the RIME instrument onboard Juice"
   }
 }
@@ -53,25 +53,27 @@ local Rime = {
       Aberration = "NONE"
     },
     AlwaysDrawFov = true,
-    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" },
-    FrameConversions = {}
+    PotentialTargets = { "JUPITER", "CALLISTO", "EUROPA", "GANYMEDE", "IO" }
   },
   GUI = {
     Name = "Rime FOV",
     Path = "/Solar System/Missions/Juice/Instruments",
+    Focusable = false,
     Description = "The location of the RIME instrument onboard Juice"
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(Rime)
-  openspace.addSceneGraphNode(RimeBase)
+  openspace.printWarning([[The Rime instruments use a circular field-of-view that is
+    currently not supported in OpenSpace]])
+  -- openspace.addSceneGraphNode(Rime)
+  -- openspace.addSceneGraphNode(RimeBase)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(RimeBase)
-  openspace.removeSceneGraphNode(Rime)
+  -- openspace.removeSceneGraphNode(RimeBase)
+  -- openspace.removeSceneGraphNode(Rime)
 end)
 
 asset.export(Rime)
@@ -81,7 +83,6 @@ asset.export(RimeBase)
 
 asset.meta = {
   Name = "RIME",
-  Version = "1.0",
   Description = [[
     Shows the field-view for the Radar for Icy Moons Exploration (RIME) onboard Juice,
     which is a ground-penetrating radar meant to measure the subsurface structure of the

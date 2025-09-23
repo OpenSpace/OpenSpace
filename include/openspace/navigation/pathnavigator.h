@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,7 @@
 
 #include <openspace/navigation/path.h>
 #include <openspace/properties/list/stringlistproperty.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -81,6 +81,8 @@ public:
     double minValidBoundingSphere() const;
     double findValidBoundingSphere(const SceneGraphNode* node) const;
 
+    double defaultArrivalHeight(const std::string& sgnIdentifier) const;
+
     const std::vector<SceneGraphNode*>& relevantNodes();
 
     /**
@@ -105,7 +107,7 @@ private:
      */
     void findRelevantNodes();
 
-    void removeRollRotation(CameraPose& pose);
+    void removeRollRotation(CameraPose& pose) const;
 
     std::unique_ptr<Path> _currentPath = nullptr;
     bool _isPlaying = false;

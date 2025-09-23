@@ -15,11 +15,15 @@ local Styx = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 45000, 45000, 45000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 45000, 45000, 45000 }
   },
-  Tag = { "moon_solarSystem", "moon_dwarf", "moon_pluto", "moon_minor", "moon_minor_pluto" },
+  Tag = {
+    "moon_solarSystem",
+    "moon_dwarf",
+    "moon_pluto",
+    "moon_minor",
+    "moon_minor_pluto"
+  },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto/Moons/Styx"
   }
@@ -48,7 +52,8 @@ local StyxTrail = {
   },
   GUI = {
     Name = "Styx Trail",
-    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Styx"
+    Path = "/Solar System/Dwarf Planets/Pluto/Moons/Styx",
+    Focusable = false
   }
 }
 
@@ -73,6 +78,7 @@ local StyxLabel = {
   GUI = {
     Name = "Styx Label",
     Path = "/Solar System/Dwarf Planets/Pluto/Moons/Styx",
+    Focusable = false,
     Description = "Label for Pluto's moon Styx"
   }
 }
@@ -98,7 +104,6 @@ asset.export(StyxLabel)
 
 asset.meta = {
   Name = "Styx",
-  Version = "1.0",
   Description = "Globe and trail for Pluto's moon Styx",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

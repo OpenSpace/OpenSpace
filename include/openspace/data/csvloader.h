@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,6 +33,9 @@ namespace openspace::dataloader::csv {
 
 Dataset loadCsvFile(std::filesystem::path path,
     std::optional<DataMapping> specs = std::nullopt);
+
+std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
+    const std::set<int>& texturesInData);
 
 } // namespace openspace::dataloader
 

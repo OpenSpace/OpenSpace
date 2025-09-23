@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,10 +26,12 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
@@ -41,16 +43,22 @@ namespace {
         "Script",
         "This value is the path to the Lua script that will be executed to compute the "
         "translation for this transformation. The script needs to define a function "
-        "'translate' that takes the current simulation time in seconds past the J2000 "
-        "epoch as the first argument, the current wall time as milliseconds past the "
-        "J2000 epoch as the second argument and computes the translation",
-        // @VISIBILITY(3.75)
+        "'translation' that takes the current simulation time in seconds past the J2000 "
+        "epoch as the first argument, the simulation time in seconds past the J2000 "
+        "epoch of the last frame as the second argument, and the current wall time as "
+        "milliseconds past the J2000 epoch the third argument and computes the three "
+        "translation values returned as a table.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `Translation` type generates the translation values used to offset the
+    // attached scene graph node's position by calling the provided Lua script. The script
+    // must return three translation factors, one for each principal axis, each providing
+    // in meters. The script parameter describes in greater detail how the Lua script file
+    // should be constructed.
     struct [[codegen::Dictionary(LuaTranslation)]] Parameters {
         // [[codegen::verbatim(ScriptInfo.description)]]
-        std::string script;
+        std::filesystem::path script;
     };
 #include "luatranslation_codegen.cpp"
 } // namespace
@@ -61,25 +69,24 @@ documentation::Documentation LuaTranslation::Documentation() {
     return codegen::doc<Parameters>("base_transform_translation_lua");
 }
 
-LuaTranslation::LuaTranslation()
-    : _luaScriptFile(ScriptInfo)
-    , _state(ghoul::lua::LuaState::IncludeStandardLibrary::No)
+LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary)
+    : Translation(dictionary)
+    , _luaScriptFile(ScriptInfo)
 {
-    addProperty(_luaScriptFile);
+    const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _luaScriptFile.onChange([this]() {
         requireUpdate();
         _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
         _fileHandle->setCallback([this]() {
-             requireUpdate();
-             notifyObservers();
-         });
+            requireUpdate();
+            notifyObservers();
+        });
     });
-}
+    addProperty(_luaScriptFile);
+    global::scriptEngine->initializeLuaState(_state);
 
-LuaTranslation::LuaTranslation(const ghoul::Dictionary& dictionary) : LuaTranslation() {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-    _luaScriptFile = absPath(p.script).string();
+    _luaScriptFile = p.script.string();
 }
 
 glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
@@ -90,8 +97,8 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
     const bool isFunction = lua_isfunction(_state, -1);
     if (!isFunction) {
         LERRORC(
-            "LuaScale",
-            fmt::format(
+            "LuaTranslation",
+            std::format(
                 "Script '{}' does not have a function 'translation'",
                 _luaScriptFile.value()
             )
@@ -111,20 +118,16 @@ glm::dvec3 LuaTranslation::position(const UpdateData& data) const {
     ghoul::lua::push(_state, duration_cast<milliseconds>(now.time_since_epoch()).count());
 
     // Execute the scaling function
-    const int success = lua_pcall(_state, 2, 3, 0);
+    const int success = lua_pcall(_state, 3, 1, 0);
     if (success != 0) {
         LERRORC(
-            "LuaScale",
-            fmt::format("Error executing 'translation': {}", lua_tostring(_state, -1))
+            "LuaTranslation",
+            std::format("Error executing 'translation': {}", lua_tostring(_state, -1))
         );
     }
 
-    double values[3];
-    for (int i = 1; i <= 3; ++i) {
-        values[i - 1] = ghoul::lua::value<double>(_state, i);
-    }
-
-    return glm::make_vec3(values);
+    const glm::dvec3 translation = ghoul::lua::value<glm::dvec3>(_state);
+    return translation;
 }
 
 } // namespace openspace

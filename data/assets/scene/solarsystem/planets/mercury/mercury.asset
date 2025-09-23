@@ -31,8 +31,6 @@ local Mercury = {
     Type = "RenderableGlobe",
     Radii = 2439700,
     CameraMinHeight = 300,
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "Mercury.labels",
@@ -66,13 +64,14 @@ local MercuryLabel = {
     BlendMode = "Additive",
     EnableFading = true,
     FadeUnit = "au",
-    FadeDistances = { 1.5, 20.0 },
+    FadeDistances = { 0.75, 20.0 },
     FadeWidths = { 1.0, 30.0 }
   },
   Tag = { "solarsystem_labels" },
   GUI = {
     Name = "Mercury Label",
-    Path = "/Solar System/Planets/Mercury"
+    Path = "/Solar System/Planets/Mercury",
+    Focusable = false
   }
 }
 
@@ -94,7 +93,6 @@ asset.export(MercuryLabel)
 
 asset.meta = {
   Name = "Mercury",
-  Version = "1.1",
   Description = "Mercury globe with labels, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

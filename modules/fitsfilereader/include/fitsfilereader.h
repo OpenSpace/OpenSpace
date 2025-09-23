@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -60,7 +60,7 @@ struct TableData {
 
 class FitsFileReader {
 public:
-    FitsFileReader(bool verboseMode);
+    explicit FitsFileReader(bool verboseMode);
     ~FitsFileReader();
 
     template<typename T>
@@ -106,12 +106,16 @@ private:
 
     bool isPrimaryHDU();
     template<typename T>
-    const std::shared_ptr<ImageData<T>> readImageInternal(CCfits::PHDU& image);
+    std::shared_ptr<ImageData<T>> readImageInternal(CCfits::PHDU& image);
+
     template<typename T>
-    const std::shared_ptr<ImageData<T>> readImageInternal(CCfits::ExtHDU& image);
+    std::shared_ptr<ImageData<T>> readImageInternal(CCfits::ExtHDU& image);
 
     mutable std::mutex _mutex;
 };
+
+extern template std::shared_ptr<TableData<float>> FitsFileReader::readTable(
+    const std::filesystem::path&, const std::vector<std::string>&, int, int, int, bool);
 
 } // namespace openspace
 

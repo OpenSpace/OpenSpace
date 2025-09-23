@@ -1,6 +1,8 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local coreKernels = asset.require("spice/core")
 
+
+
 local EarthMoonShadow = {
   Identifier = "EarthMoonShadow",
   Parent = transforms.Moon.Identifier,
@@ -18,9 +20,11 @@ local EarthMoonShadow = {
   },
   GUI = {
     Name = "Earth/Moon Shadow",
-    Path = "/Solar System/Planets/Earth"
+    Path = "/Solar System/Planets/Earth",
+    Focusable = false
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(EarthMoonShadow)
@@ -36,7 +40,6 @@ asset.export(EarthMoonShadow)
 
 asset.meta = {
   Name = "Eclipse Shadow",
-  Version = "1.0",
   Description = "The penumbral and umbral shadow eclipses for the Earth-Moon system",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

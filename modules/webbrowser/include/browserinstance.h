@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -57,11 +57,12 @@ class WebKeyboardHandler;
 class BrowserInstance {
 public:
     static constexpr int SingleClick = 1;
-
-    BrowserInstance(WebRenderHandler* renderer, WebKeyboardHandler* keyboardHandler);
+    BrowserInstance(WebRenderHandler* renderer,
+        WebKeyboardHandler* keyboardHandler
+    );
     ~BrowserInstance();
 
-    void loadUrl(std::string url);
+    void loadUrl(const std::string& url);
 
     /**
      * Load a local file.

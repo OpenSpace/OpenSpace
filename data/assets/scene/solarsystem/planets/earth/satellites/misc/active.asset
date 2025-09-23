@@ -8,7 +8,7 @@ local omm = asset.resource({
   Identifier = "satellite_omm_data_active",
   Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=active&FORMAT=kvn",
   Filename = "active.txt",
-  SecondsUntilResync = 24 * 60 * 60
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
 
@@ -21,13 +21,15 @@ local ActiveSatellites = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.45, 0.25, 0.45 },
-    Fade = 1.5,
+    TrailFade = 5,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Active",
     Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false,
     Description = [[Satellites that employ active communication.]]
   }
 }
@@ -47,7 +49,6 @@ asset.export(ActiveSatellites)
 
 asset.meta = {
   Name = "Satellites Active",
-  Version = "1.0",
   Description = "Satellites that employ active communication. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

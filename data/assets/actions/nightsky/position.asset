@@ -1,0 +1,59 @@
+local NorthPole = {
+  Identifier = "os.nightsky.position.NorthPole",
+  Name = "Jump to the North Pole",
+  Command = [[
+    openspace.navigation.jumpToGeo("Earth", 90.0001, 0.0001, 500)
+    local script = 'local wait = openspace.propertyValue("NavigationHandler.JumpToFadeDuration")openspace.action.triggerAction("os.nightsky.LookUp");openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1, wait)'
+    local wait = openspace.propertyValue("NavigationHandler.JumpToFadeDuration")
+    openspace.scheduleScript(script, wait + 0.1)
+  ]],
+  Documentation = "",
+  GuiPath = "/Night Sky/Position",
+  IsLocal = false
+}
+
+local SouthPole = {
+  Identifier = "os.nightsky.position.SouthPole",
+  Name = "Jump to the South Pole",
+  Command = [[
+    openspace.navigation.jumpToGeo("Earth", -89.9, 0.001, 2800);
+    local script = 'local wait = openspace.propertyValue("NavigationHandler.JumpToFadeDuration")openspace.action.triggerAction("os.nightsky.LookUp");openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1, wait)'
+    local wait = openspace.propertyValue("NavigationHandler.JumpToFadeDuration")
+    openspace.scheduleScript(script, wait + 0.1)
+  ]],
+  Documentation = "",
+  GuiPath = "/Night Sky/Position",
+  IsLocal = false
+}
+
+local Equator = {
+  Identifier = "os.nightsky.position.Equator",
+  Name = "Jump to the Equator",
+  Command = [[
+    local _, long, _ = openspace.globebrowsing.geoPositionForCamera(false);
+    openspace.navigation.jumpToGeo("Earth", 0.0001, long, 500);
+    local script = 'local wait = openspace.propertyValue("NavigationHandler.JumpToFadeDuration")openspace.action.triggerAction("os.nightsky.LookUp");openspace.setPropertyValueSingle("RenderEngine.BlackoutFactor", 1, wait)'
+    local wait = openspace.propertyValue("NavigationHandler.JumpToFadeDuration")
+    openspace.scheduleScript(script, wait + 0.1)
+  ]],
+  Documentation = "",
+  GuiPath = "/Night Sky/Position",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(NorthPole)
+  openspace.action.registerAction(SouthPole)
+  openspace.action.registerAction(Equator)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(Equator)
+  openspace.action.removeAction(SouthPole)
+  openspace.action.removeAction(NorthPole)
+end)
+
+asset.export("NorthPole", NorthPole.Identifier)
+asset.export("SouthPole", SouthPole.Identifier)
+asset.export("Equator", Equator.Identifier)

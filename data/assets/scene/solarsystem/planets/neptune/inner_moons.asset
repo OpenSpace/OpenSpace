@@ -16,9 +16,7 @@ local Naiad = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 96000, 60000, 52000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 96000, 60000, 52000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -57,7 +55,8 @@ local NaiadTrail = {
   },
   GUI = {
     Name = "Naiad Trail",
-    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Naiad"
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Naiad",
+    Focusable = false
   }
 }
 
@@ -82,6 +81,7 @@ local NaiadLabel = {
   GUI = {
     Name = "Naiad Label",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Naiad",
+    Focusable = false,
     Description = "Label for Neptune's moon Naiad (Inner Moons)"
   }
 }
@@ -98,9 +98,7 @@ local Thalassa = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 108000, 100000, 52000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 108000, 100000, 52000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -139,7 +137,8 @@ local ThalassaTrail = {
   },
   GUI = {
     Name = "Thalassa Trail",
-    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Thalassa"
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Thalassa",
+    Focusable = false
   }
 }
 
@@ -164,6 +163,7 @@ local ThalassaLabel = {
   GUI = {
     Name = "Thalassa Label",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Thalassa",
+    Focusable = false,
     Description = "Label for Neptune's moon Thalassa (Inner Moons)"
   }
 }
@@ -180,9 +180,7 @@ local Despina = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 180000, 148000, 128000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 180000, 148000, 128000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -221,7 +219,8 @@ local DespinaTrail = {
   },
   GUI = {
     Name = "Despina Trail",
-    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Despina"
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Despina",
+    Focusable = false
   }
 }
 
@@ -246,6 +245,7 @@ local DespinaLabel = {
   GUI = {
     Name = "Despina Label",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Despina",
+    Focusable = false,
     Description = "Label for Neptune's moon Despina (Inner Moons)"
   }
 }
@@ -262,9 +262,7 @@ local Galatea = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 204000, 184000, 144000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 204000, 184000, 144000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -303,7 +301,8 @@ local GalateaTrail = {
   },
   GUI = {
     Name = "Galatea Trail",
-    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Galatea"
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Galatea",
+    Focusable = false
   }
 }
 
@@ -328,6 +327,7 @@ local GalateaLabel = {
   GUI = {
     Name = "Galatea Label",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Galatea",
+    Focusable = false,
     Description = "Label for Neptune's moon Galatea (Inner Moons)"
   }
 }
@@ -344,9 +344,7 @@ local Larissa = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 216000, 204000, 168000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 216000, 204000, 168000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -385,7 +383,8 @@ local LarissaTrail = {
   },
   GUI = {
     Name = "Larissa Trail",
-    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Larissa"
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Larissa",
+    Focusable = false
   }
 }
 
@@ -410,6 +409,7 @@ local LarissaLabel = {
   GUI = {
     Name = "Larissa Label",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Larissa",
+    Focusable = false,
     Description = "Label for Neptune's moon Larissa (Inner Moons)"
   }
 }
@@ -426,9 +426,7 @@ local Hippocamp = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 16000, 16000, 16000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 16000, 16000, 16000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -467,7 +465,8 @@ local HippocampTrail = {
   },
   GUI = {
     Name = "Hippocamp Trail",
-    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Hippocamp"
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Hippocamp",
+    Focusable = false
   }
 }
 
@@ -492,6 +491,7 @@ local HippocampLabel = {
   GUI = {
     Name = "Hippocamp Label",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Hippocamp",
+    Focusable = false,
     Description = "Label for Neptune's moon Hippocamp (Inner Moons)"
   }
 }
@@ -508,9 +508,7 @@ local Proteus = {
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 436000, 416000, 402000 },
-    SegmentsPerPatch = 64,
-    Layers = {}
+    Radii = { 436000, 416000, 402000 }
   },
   Tag = {
     "moon_solarSystem",
@@ -549,7 +547,8 @@ local ProteusTrail = {
   },
   GUI = {
     Name = "Proteus Trail",
-    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Proteus"
+    Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Proteus",
+    Focusable = false
   }
 }
 
@@ -574,6 +573,7 @@ local ProteusLabel = {
   GUI = {
     Name = "Proteus Label",
     Path = "/Solar System/Planets/Neptune/Minor Moons/Inner Moons/Proteus",
+    Focusable = false,
     Description = "Label for Neptune's moon Proteus (Inner Moons)"
   }
 }
@@ -671,7 +671,6 @@ asset.export(ProteusLabel)
 
 asset.meta = {
   Name = "Neptune Inner Moons",
-  Version = "1.0",
   Description = [[Procedural Globe asset containing Neptune' inner prograde moons:
     Naiad, Thalassa, Despina, Galatea, Larissa, S2004N1, and Proteus. Blank globes and
     SPICE trails are generated for each moon]],

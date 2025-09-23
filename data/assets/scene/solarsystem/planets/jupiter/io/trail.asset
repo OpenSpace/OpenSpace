@@ -18,10 +18,16 @@ local IoTrail = {
     Period = 42.0 / 24.0,
     Resolution = 1000
   },
-  Tag = { "moonTrail_solarSystem", "moonTrail_giants", "moonTrail_jupiter", "moonTrail_major_jupiter" },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_major_jupiter"
+  },
   GUI = {
     Name = "Io Trail",
-    Path = "/Solar System/Planets/Jupiter/Major Moons/Io"
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Io",
+    Focusable = false
   }
 }
 
@@ -40,7 +46,6 @@ asset.export(IoTrail)
 
 asset.meta = {
   Name = "Io Trail",
-  Version = "1.1",
   Description = "Trail of Io as observed by the Jupiter",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

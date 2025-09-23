@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,8 @@
 #define __OPENSPACE_CORE___LIGHTSOURCE___H__
 
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalar/boolproperty.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/glm.h>
 #include <memory>
 
@@ -45,8 +45,7 @@ public:
     static std::unique_ptr<LightSource> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-    LightSource();
-    LightSource(const ghoul::Dictionary& dictionary);
+    explicit LightSource(const ghoul::Dictionary& dictionary);
     ~LightSource() override = default;
 
     virtual glm::vec3 directionViewSpace(const RenderData& renderData) const = 0;

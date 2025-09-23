@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,28 +31,26 @@ CefRefPtr<CefRenderProcessHandler> WebBrowserApp::GetRenderProcessHandler() {
 }
 
 void WebBrowserApp::OnContextCreated(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
-                                     CefRefPtr<CefV8Context>)
+                                     CefRefPtr<CefV8Context> context)
 {
-//    CEF_REQUIRE_UI_THREAD();
-//    CefRefPtr<CefV8Value> val = CefV8Value::CreateBool(true);
-//    CefRefPtr<CefV8Value> global = context->GetGlobal();
-//    global->SetValue("IsWithinCEF", val, V8_PROPERTY_ATTRIBUTE_NONE);
+    CefRefPtr<CefV8Value> val = CefV8Value::CreateBool(true);
+    CefRefPtr<CefV8Value> global = context->GetGlobal();
+    global->SetValue("isWithinCEF", val, V8_PROPERTY_ATTRIBUTE_NONE);
 }
 
 void WebBrowserApp::OnBeforeCommandLineProcessing(const CefString&,
-                                                  CefRefPtr<CefCommandLine> commandLine)
+                                                  CefRefPtr<CefCommandLine> commandline)
 {
-    commandLine->AppendSwitch("--enable-gpu-rasterization");
-    commandLine->AppendSwitch("--use-gl=desktop");
-    commandLine->AppendSwitch("--enable-webgl2-compute-context");
-    commandLine->AppendSwitch("log-gpu-control-list-decisions");
-    commandLine->AppendSwitch("use-mock-keychain");
-    commandLine->AppendSwitch("enable-begin-frame-scheduling");
-    commandLine->AppendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
+    // This is to allow dev tools to connect
+    commandline->AppendSwitchWithValue("remote-allow-origins", "http://localhost:8088");
+    commandline->AppendSwitch("log-gpu-control-list-decisions");
+    commandline->AppendSwitch("use-mock-keychain");
+    commandline->AppendSwitch("enable-begin-frame-scheduling");
+    commandline->AppendSwitchWithValue("autoplay-policy", "no-user-gesture-required");
 #ifdef __APPLE__
-    commandLine->AppendSwitch("--disable-gpu-sandbox");
-    commandLine->AppendSwitch("--no-sandbox");
-#endif
+    commandline->AppendSwitch("--disable-gpu-sandbox");
+    commandline->AppendSwitch("--no-sandbox");
+#endif // __APPLE__
 }
 
 } // namespace openspace

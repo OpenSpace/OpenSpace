@@ -24,7 +24,8 @@ local OsirisRexTrailEarth = {
   },
   GUI = {
     Name = "OSIRIS REx Trail Earth",
-    Path = "/Solar System/Missions/OSIRIS REx"
+    Path = "/Solar System/Missions/OSIRIS REx",
+    Focusable = false
   }
 }
 
@@ -45,7 +46,8 @@ local OsirisRexTrailSolarSystem = {
   },
   GUI = {
     Name = "OSIRIS REx Trail Solar System",
-    Path = "/Solar System/Missions/OSIRIS REx"
+    Path = "/Solar System/Missions/OSIRIS REx",
+    Focusable = false
   }
 }
 
@@ -66,7 +68,8 @@ local OsirisRexTrailBennu = {
   },
   GUI = {
     Name = "OSIRIS REx Trail Bennu",
-    Path = "/Solar System/Missions/OSIRIS REx"
+    Path = "/Solar System/Missions/OSIRIS REx",
+    Focusable = false
   }
 }
 

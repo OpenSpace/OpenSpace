@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -84,6 +84,7 @@ std::vector<documentation::Documentation>
 SpacecraftInstrumentsModule::documentations() const
 {
     return {
+        DashboardItemInstruments::Documentation(),
         RenderableCrawlingLine::Documentation(),
         RenderableFov::Documentation(),
         RenderableModelProjection::Documentation(),
@@ -113,7 +114,7 @@ std::string SpacecraftInstrumentsModule::frameFromBody(const std::string& body) 
 
     constexpr std::string_view unionPrefix = "IAU_";
     if (body.find(unionPrefix) == std::string::npos) {
-        return fmt::format("{}{}", unionPrefix, body);
+        return std::format("{}{}", unionPrefix, body);
     }
     else {
         return body;

@@ -4,6 +4,10 @@
 
 asset.require("./base_blank")
 
+-- We load the SDSS dataset first as that is the one that takes the longest, so the
+-- earlier we start, the sooner the loading is done
+asset.require("scene/digitaluniverse/sdss")
+
 -- Specifying which other assets should be loaded in this scene
 asset.require("scene/solarsystem/sun/sun")
 asset.require("scene/solarsystem/sun/glare")
@@ -34,45 +38,11 @@ else
   asset.require("scene/solarsystem/planets/default_layers")
 end
 
-asset.require("scene/digitaluniverse/2dF")
-asset.require("scene/digitaluniverse/2mass")
-asset.require("scene/digitaluniverse/6dF")
-asset.require("scene/digitaluniverse/abell")
-asset.require("scene/digitaluniverse/alternatestarlabels")
-asset.require("scene/digitaluniverse/backgroundradiation")
-asset.require("scene/digitaluniverse/clusters")
-asset.require("scene/digitaluniverse/constellationbounds")
-asset.require("scene/digitaluniverse/constellations")
-asset.require("scene/digitaluniverse/deepsky")
-asset.require("scene/digitaluniverse/dwarfs")
-asset.require("scene/digitaluniverse/exoplanets")
-asset.require("scene/digitaluniverse/exoplanets_candidates")
-asset.require("scene/digitaluniverse/globularclusters")
-asset.require("scene/digitaluniverse/grids")
-asset.require("scene/digitaluniverse/groups")
-asset.require("scene/digitaluniverse/h2regions")
-asset.require("scene/digitaluniverse/localdwarfs")
-asset.require("scene/digitaluniverse/milkyway")
-asset.require("scene/digitaluniverse/milkyway_arm_labels")
-asset.require("scene/digitaluniverse/milkyway_label")
-asset.require("scene/digitaluniverse/milkyway_sphere")
-asset.require("scene/digitaluniverse/obassociations")
-asset.require("scene/digitaluniverse/openclusters")
-asset.require("scene/digitaluniverse/planetarynebulae")
-asset.require("scene/digitaluniverse/pulsars")
-asset.require("scene/digitaluniverse/quasars")
-asset.require("scene/digitaluniverse/sdss")
-asset.require("scene/digitaluniverse/starlabels")
-asset.require("scene/digitaluniverse/starorbits")
-asset.require("scene/digitaluniverse/stars")
-asset.require("scene/digitaluniverse/superclusters")
-asset.require("scene/digitaluniverse/supernovaremnants")
-asset.require("scene/digitaluniverse/tully")
-asset.require("scene/digitaluniverse/voids")
+asset.require("scene/digitaluniverse/digitaluniverse")
 asset.require("nightsky/nightsky")
 
 asset.require("customization/globebrowsing")
-asset.require("actions/default_actions")
+asset.require("actions/solarsystem_actions")
 
 asset.require("modules/exoplanets/exoplanets")
 asset.require("modules/skybrowser/skybrowser")
@@ -80,5 +50,14 @@ asset.require("modules/skybrowser/skybrowser")
 asset.onInitialize(function()
   openspace.globebrowsing.loadWMSServersFromFile(
     openspace.absPath("${DATA}/globebrowsing_servers.lua")
+  )
+
+  openspace.setGuiOrder(
+    "/",
+    { "Solar System", "Milky Way", "Universe", "Night Sky", "Examples" }
+  )
+  openspace.setGuiOrder(
+    "/Solar System",
+    { "Planets", "Dwarf Planets", "Sun", "Solar System Barycenter" }
   )
 end)

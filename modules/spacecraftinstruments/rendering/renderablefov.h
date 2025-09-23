@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -47,7 +47,7 @@ namespace documentation { struct Documentation; }
 
 class RenderableFov : public Renderable {
 public:
-    RenderableFov(const ghoul::Dictionary& dictionary);
+    explicit RenderableFov(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -81,9 +81,9 @@ private:
     properties::DoubleProperty _standOffDistance;
     properties::BoolProperty _alwaysDrawFov;
     ghoul::opengl::ProgramObject* _program = nullptr;
-    UniformCache(modelViewProjection, defaultColorStart, defaultColorEnd, activeColor,
-        targetInFieldOfViewColor, intersectionStartColor, intersectionEndColor,
-        squareColor, interpolation) _uniformCache;
+    UniformCache(modelViewProjectionTransform, colorStart, colorEnd,
+        activeColor, targetInFieldOfViewColor, intersectionStartColor,
+        intersectionEndColor, squareColor, interpolation) _uniformCache;
 
     bool _simplifyBounds = false;
 
@@ -131,6 +131,8 @@ private:
     RenderInformation _fieldOfViewBounds;
 
     struct {
+        properties::PropertyOwner container;
+
         /// Start color for uninteresting times
         properties::Vec3Property defaultStart;
         /// End color for uninteresting times

@@ -14,9 +14,9 @@ local Layer = {
   Name = "Silicon Abundance",
   Identifier = "ssimap_02122015",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = texturesPath .. "ssimap_02122015.png",
-  BlendMode = "Multiply",
-  CacheSettings = { Enabled = false }
+  BlendMode = "Multiply"
 }
 
 
@@ -34,7 +34,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Mercury Silicon Abundance",
-  Version = "1.0",
   Description = "Silicon Abundance layer for Mercury globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

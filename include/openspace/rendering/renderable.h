@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,10 +28,10 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/fadeable.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/stringproperty.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <string_view>
@@ -45,6 +45,7 @@ namespace ghoul::opengl {
 namespace openspace {
 
 class Camera;
+class Ellipsoid;
 struct RenderData;
 struct RendererTasks;
 struct SurfacePositionHandle;
@@ -71,9 +72,9 @@ public:
     };
 
     static ghoul::mm_unique_ptr<Renderable> createFromDictionary(
-        ghoul::Dictionary dictionary);
+        const ghoul::Dictionary& dictionary);
 
-    Renderable(const ghoul::Dictionary& dictionary,
+    explicit Renderable(const ghoul::Dictionary& dictionary,
         RenderableSettings settings = RenderableSettings());
     virtual ~Renderable() override = default;
 
@@ -102,6 +103,8 @@ public:
     // handled
     virtual SurfacePositionHandle calculateSurfacePositionHandle(
         const glm::dvec3& targetModelSpace) const;
+
+    virtual Ellipsoid ellipsoid() const;
 
     virtual bool renderedWithDesiredData() const;
 
@@ -175,7 +178,7 @@ protected:
      * \return The resulting model view transformation matrix in double precision
      */
     glm::dmat4 calcModelViewTransform(const RenderData& data,
-        std::optional<glm::dmat4> modelTransform = std::nullopt) const;
+        const std::optional<glm::dmat4>& modelTransform = std::nullopt) const;
 
     /**
      * Calculates the model view projection transformation matrix with the given data and
@@ -189,7 +192,7 @@ protected:
      *         precision
      */
     glm::dmat4 calcModelViewProjectionTransform(const RenderData& data,
-        std::optional<glm::dmat4> modelTransform = std::nullopt) const;
+        const std::optional<glm::dmat4>& modelTransform = std::nullopt) const;
 
     /**
      * Calculates the model, model view, and the model view projection transformation

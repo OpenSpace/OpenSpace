@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,9 @@
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/texture.h>
@@ -44,7 +45,7 @@ namespace {
 namespace openspace {
 
 GalaxyRaycaster::GalaxyRaycaster(ghoul::opengl::Texture& texture,
-                                 std::optional<std::filesystem::path> raycastingShader)
+                             const std::optional<std::filesystem::path>& raycastingShader)
     : _boundingBox(glm::vec3(1.f))
     , _texture(texture)
     , _textureUnit(nullptr)
@@ -90,7 +91,7 @@ void GalaxyRaycaster::renderExitPoints(const RenderData& data,
 }
 
 glm::dmat4 GalaxyRaycaster::modelViewTransform(const RenderData& data) {
-    glm::dmat4 modelTransform =
+    const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
@@ -102,29 +103,16 @@ glm::dmat4 GalaxyRaycaster::modelViewTransform(const RenderData& data) {
 void GalaxyRaycaster::preRaycast(const RaycastData& data,
                                  ghoul::opengl::ProgramObject& program)
 {
-    const std::string stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
-    const std::string galaxyTextureUniformName = "galaxyTexture" +
-                                                 std::to_string(data.id);
-    const std::string volumeAspectUniformName = "aspect" + std::to_string(data.id);
-    const std::string opacityCoefficientUniformName = "opacityCoefficient" +
-                                                      std::to_string(data.id);
-
-    const std::string absorptionMultiplyUniformName = "absorptionMultiply" +
-                                                  std::to_string(data.id);
-
-    const std::string emissionMultiplyUniformName = "emissionMultiply" +
-                                                    std::to_string(data.id);
-
-    program.setUniform(volumeAspectUniformName, _aspect);
-    program.setUniform(stepSizeUniformName, _stepSize);
-    program.setUniform(opacityCoefficientUniformName, _opacityCoefficient);
-    program.setUniform(absorptionMultiplyUniformName, _absorptionMultiply);
-    program.setUniform(emissionMultiplyUniformName, _emissionMultiply);
+    program.setUniform(std::format("aspect{}", data.id), _aspect);
+    program.setUniform(std::format("maxStepSize{}", data.id), _stepSize);
+    program.setUniform(std::format("opacityCoefficient{}", data.id), _opacityCoefficient);
+    program.setUniform(std::format("absorptionMultiply{}", data.id), _absorptionMultiply);
+    program.setUniform(std::format("emissionMultiply{}", data.id), _emissionMultiply);
 
     _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
     _textureUnit->activate();
     _texture.bind();
-    program.setUniform(galaxyTextureUniformName, *_textureUnit);
+    program.setUniform(std::format("galaxyTexture{}", data.id), *_textureUnit);
 }
 
 void GalaxyRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {
@@ -132,7 +120,7 @@ void GalaxyRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObje
 }
 
 bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPosition) {
-    glm::vec4 modelPos = glm::inverse(modelViewTransform(data)) *
+    const glm::vec4 modelPos = glm::inverse(modelViewTransform(data)) *
         glm::vec4(0.f, 0.f, 0.f, 1.f);
 
     localPosition = (glm::vec3(modelPos) + glm::vec3(0.5f));
@@ -142,19 +130,19 @@ bool GalaxyRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPos
         localPosition.z > 0 && localPosition.z < 1);
 }
 
-std::string GalaxyRaycaster::boundsVertexShaderPath() const {
-    return std::string(GlslBoundsVsPath);
+std::filesystem::path GalaxyRaycaster::boundsVertexShaderPath() const {
+    return absPath(GlslBoundsVsPath);
 }
 
-std::string GalaxyRaycaster::boundsFragmentShaderPath() const {
-    return std::string(GlslBoundsFsPath);
+std::filesystem::path GalaxyRaycaster::boundsFragmentShaderPath() const {
+    return absPath(GlslBoundsFsPath);
 }
 
-std::string GalaxyRaycaster::raycasterPath() const {
-    return _raycastingShader.string();
+std::filesystem::path GalaxyRaycaster::raycasterPath() const {
+    return _raycastingShader;
 }
 
-std::string GalaxyRaycaster::helperPath() const {
+std::filesystem::path GalaxyRaycaster::helperPath() const {
     return ""; // no helper file
 }
 
@@ -163,7 +151,7 @@ void GalaxyRaycaster::setAspect(const glm::vec3& aspect) {
 }
 
 void GalaxyRaycaster::setModelTransform(glm::mat4 transform) {
-    _modelTransform = transform;
+    _modelTransform = std::move(transform);
 }
 
 void GalaxyRaycaster::setOpacityCoefficient(float opacityCoefficient) {

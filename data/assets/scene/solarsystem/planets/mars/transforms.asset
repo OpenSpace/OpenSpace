@@ -16,6 +16,7 @@ local MarsBarycenter = {
   GUI = {
     Name = "Mars Barycenter",
     Path = "/Solar System/Planets/Mars",
+    Focusable = false,
     Hidden = true
   }
 }
@@ -35,7 +36,6 @@ asset.export(MarsBarycenter)
 
 asset.meta = {
   Name = "Mars Transforms",
-  Version = "1.1",
   Description = "Transform with position for Mars",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

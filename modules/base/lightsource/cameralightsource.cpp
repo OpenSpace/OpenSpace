@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,11 +33,13 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
         "Intensity",
         "Intensity",
-        "The intensity of this light source",
-        // @VISIBILITY(1.75)
+        "The intensity of this light source.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
+    // This `LightSource` type represents a light source placed at the position of the
+    // camera. An object with this light source will always be illuminated from the
+    // current view direction.
     struct [[codegen::Dictionary(CameraLightSource)]] Parameters {
         // [[codegen::verbatim(IntensityInfo.description)]]
         std::optional<float> intensity;
@@ -49,12 +51,6 @@ namespace openspace {
 
 documentation::Documentation CameraLightSource::Documentation() {
     return codegen::doc<Parameters>("base_camera_light_source");
-}
-
-CameraLightSource::CameraLightSource()
-    : _intensity(IntensityInfo, 1.f, 0.f, 1.f)
-{
-    addProperty(_intensity);
 }
 
 CameraLightSource::CameraLightSource(const ghoul::Dictionary& dictionary)

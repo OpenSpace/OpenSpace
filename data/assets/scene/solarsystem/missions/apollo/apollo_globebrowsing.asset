@@ -5,6 +5,7 @@ local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 --asset.require("scene/solarsystem/planets/earth/moon/default_layers") -- Commented out this line for the installaiton as it leads to warnings (emmbr, 2024-02-20)
 
 
+
 local heightmaps = asset.resource({
   Name = "Apollo Globebrowsing Heightmaps",
   Type = "HttpSynchronization",
@@ -38,10 +39,7 @@ local ToggleKaguyaLayer = {
   Identifier = "os.apollo.moon.ToggleKaguyaLayer",
   Name = "Toggle Kaguya layer",
   Command = [[
-    openspace.setPropertyValueSingle(
-      "Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled",
-      not openspace.propertyValue("Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah.Enabled")
-    )
+    openspace.toggleFade("Scene.Moon.Renderable.Layers.ColorLayers.Kaguya_Utah")
   ]],
   Documentation = "Toggles Moon Kaguya color layer",
   GuiPath = "/Missions/Apollo",
@@ -64,6 +62,7 @@ local DisableApolloSites = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.globebrowsing.addBlendingLayersFromDirectory(heightmaps, moon.Moon.Identifier)
   openspace.globebrowsing.addBlendingLayersFromDirectory(basemaps, moon.Moon.Identifier)
@@ -78,3 +77,14 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(DisableApolloSites)
   openspace.action.removeAction(ToggleKaguyaLayer)
 end)
+
+
+
+asset.meta = {
+  Name = "Apollo - Globe Actions",
+  Description = [[This asset defines actions that are used to control the visibility of
+    features on the Moon's surface as they related to the different landing sites.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -113,7 +113,7 @@ public:
      */
     void unregisterEventAction(events::Event::Type type,
         const std::string& identifier,
-        std::optional<ghoul::Dictionary> filter = std::nullopt);
+        const std::optional<ghoul::Dictionary>& filter = std::nullopt);
 
     /**
      * Removing registration for a specific event identified by the \p identifier.
@@ -137,6 +137,14 @@ public:
      * \return The list of all registered actions
      */
     std::vector<ActionInfo> registeredActions() const;
+
+    /**
+     * Returns the list of all registered actions, grouped by their event type.
+     *
+     * \return The unordered map of all registered actions
+     */
+    const std::unordered_map<events::Event::Type, std::vector<ActionInfo>>&
+        eventActions() const;
 
     /**
      * Enables the event identified by the \p identifier. If the event is already enabled,

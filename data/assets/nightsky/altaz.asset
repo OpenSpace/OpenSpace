@@ -2,6 +2,14 @@ local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
 
 
 
+local labels = asset.resource({
+  Name = "AltAz Label Files",
+  Type = "HttpSynchronization",
+  Identifier = "alt_az_labels",
+  Version = 1
+})
+
+
 local AltAzGridPosition = {
   Identifier = "AltAzGridPosition",
   Parent = earthAsset.Earth.Identifier,
@@ -25,8 +33,8 @@ local AltAzGridPosition = {
     }
   },
   GUI = {
-    Name = "Altitude/Azimuth Grid Position",
-    Path = "/Other/Night Sky",
+    Name = "Altitude-Azimuth Grid Position",
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth",
     Hidden = true
   }
 }
@@ -48,17 +56,50 @@ local AltAzGrid = {
     Type = "RenderableSphericalGrid",
     Enabled = asset.enabled,
     Opacity = 0.8,
-    Color = { 0.4, 0.8, 0.4 },
+    Color = { 0.2, 0.4, 0.2 },
     LineWidth = 2.0,
     RenderBinMode = "PostDeferredTransparent"
   },
+  Tag = { "nightsky_marking" },
   GUI = {
-    Name = "Altitude/Azimuth Grid",
+    Name = "Altitude-Azimuth Grid",
     Description = [[A local Altitude/Azimuth grid centered around your position on a
     planetary surface. The grid can be toggled, hidden or shown using the accompanying
     actions in the actions panel, under "Night Sky". Use these actions to move it to
     another planet. The default is Earth.]],
-    Path = "/Other/Night Sky"
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth"
+  }
+}
+
+local AltAzGridLabels = {
+  Identifier = "AltAzGridLabels",
+  Parent = AltAzGridPosition.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "StaticRotation",
+      Rotation = { -math.pi / 2.0, math.pi, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderablePointCloud",
+    Enabled = false,
+    Labels = {
+      Enabled = true,
+      File = labels .. "eclip.label",
+      Color = { 0.5, 0.5, 0.5 },
+      FaceCamera = false,
+      Size = 14.8,
+      MinMaxSize = { 2, 70 },
+      Unit = "pc",
+    },
+    Opacity = 0.65,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "nightsky_marking" },
+  GUI = {
+    Name = "Altitude-Azimuth Grid Labels",
+    Description = [[Labels for the Altitude-Azimuth Grid]],
+    Path = "/Night Sky/Coordinate Systems/Altitude-Azimuth"
   }
 }
 
@@ -102,9 +143,11 @@ local ToggleAltaz = {
   IsLocal = false
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(AltAzGridPosition)
   openspace.addSceneGraphNode(AltAzGrid)
+  openspace.addSceneGraphNode(AltAzGridLabels)
   openspace.action.registerAction(ShowAltaz)
   openspace.action.registerAction(HideAltaz)
   openspace.action.registerAction(ToggleAltaz)
@@ -115,20 +158,22 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(ToggleAltaz)
   openspace.action.removeAction(HideAltaz)
   openspace.action.removeAction(ShowAltaz)
+  openspace.removeSceneGraphNode(AltAzGridLabels)
   openspace.removeSceneGraphNode(AltAzGrid)
   openspace.removeSceneGraphNode(AltAzGridPosition)
 end)
 
 asset.export(AltAzGridPosition)
 asset.export(AltAzGrid)
+asset.export(AltAzGridLabels)
 asset.export("ShowAltaz", ShowAltaz.Identifier)
 asset.export("HideAltaz", HideAltaz.Identifier)
 asset.export("ToggleAltaz", ToggleAltaz.Identifier)
 
 
+
 asset.meta = {
   Name = "Altitude/Azimuth Grid",
-  Version = "1.0",
   Description = [[A local Altitude/Azimuth grid centered around your position on a
     planetary surface. The asset also includes some actions to toggle, hide or
     show the grid.]],

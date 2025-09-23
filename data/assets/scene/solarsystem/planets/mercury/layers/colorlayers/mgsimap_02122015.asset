@@ -14,13 +14,13 @@ local Layer = {
   Name = "Magnesium Abundance",
   Identifier = "mgsimap_02122015",
   Enabled = asset.enabled,
+  ZIndex = 100,
   FilePath = texturesPath .. "mgsimap_02122015.png",
   Settings = {
     Gamma = 1.33,
     Multiplier = 1.15
   },
-  BlendMode = "Multiply",
-  CacheSettings = { Enabled = false }
+  BlendMode = "Multiply"
 }
 
 
@@ -38,7 +38,6 @@ asset.export("layer", Layer)
 
 asset.meta = {
   Name = "Mercury Magnesium Abundance",
-  Version = "1.0",
   Description = "Magnesium Abundance layer for Mercury globe",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

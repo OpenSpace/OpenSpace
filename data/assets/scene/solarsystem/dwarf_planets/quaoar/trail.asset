@@ -19,6 +19,7 @@ local Trail = {
   GUI = {
     Name = "Quaoar Trail",
     Path = "/Solar System/Dwarf Planets/Quaoar",
+    Focusable = false,
     Description = "Trail of Quaoar"
   }
 }
@@ -38,7 +39,6 @@ asset.export("Trail", Trail)
 
 asset.meta = {
   Name = "Quaoar Trail",
-  Version = "1.0",
   Description = [[Trail of Quaoar]],
   Author = "OpenSpace Team",
   URL = "https://www.openspaceproject.com",
