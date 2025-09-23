@@ -121,6 +121,16 @@ std::string_view Time::UTC() const {
     return std::string_view(b);
 }
 
+std::string_view Time::string(const std::string& format) const {
+    char* b = reinterpret_cast<char*>(
+        global::memoryManager->TemporaryMemory.allocate(128)
+    );
+    std::memset(b, 0, 128);
+
+    SpiceManager::ref().dateFromEphemerisTime(_time, b, 128, format.c_str());
+    return std::string_view(b);
+}
+
 std::string_view Time::ISO8601() const {
     ZoneScoped;
 

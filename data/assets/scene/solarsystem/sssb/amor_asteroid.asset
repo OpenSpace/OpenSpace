@@ -17,7 +17,6 @@ local Object = {
     Type = "RenderableOrbitalKepler",
     Path = sssb .. "sssb_data_amor_asteroid.csv",
     Format = "SBDB",
-    Segments = 200,
     SegmentQuality = 4,
     Color = { 1.0, 1.0, 1.0 },
     TrailFade = 11,
