@@ -6,6 +6,7 @@ local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
 
 
+
 local heightmaps = asset.resource({
   Name = "Apollo Globebrowsing Heightmaps",
   Type = "HttpSynchronization",
