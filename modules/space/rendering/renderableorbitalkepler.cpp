@@ -743,19 +743,20 @@ void RenderableOrbitalKepler::updateBuffers() {
         orbitIdHolder.begin(),
         orbitIdHolder.end(),
         [&](int& index) {
+            ZoneScoped;
+
             const kepler::Parameters& orbit = _parameters[index];
 
-            ghoul::Dictionary d;
-            d.setValue("Type", std::string("KeplerTranslation"));
-            d.setValue("Eccentricity", orbit.eccentricity);
-            d.setValue("SemiMajorAxis", orbit.semiMajorAxis);
-            d.setValue("Inclination", orbit.inclination);
-            d.setValue("AscendingNode", orbit.ascendingNode);
-            d.setValue("ArgumentOfPeriapsis", orbit.argumentOfPeriapsis);
-            d.setValue("MeanAnomaly", orbit.meanAnomaly);
-            d.setValue("Period", orbit.period);
-            d.setValue("Epoch", orbit.epoch);
-            KeplerTranslation keplerTranslator = KeplerTranslation(d);
+            const KeplerCalculator calc = KeplerCalculator(
+                orbit.eccentricity,
+                orbit.semiMajorAxis,
+                orbit.inclination,
+                orbit.ascendingNode,
+                orbit.argumentOfPeriapsis,
+                orbit.meanAnomaly,
+                orbit.period,
+                orbit.epoch
+            );
 
             const int nVerts = _segmentsPerOrbit[index];
             const int offset = _vertexBufferOffset[index];
@@ -764,11 +765,7 @@ void RenderableOrbitalKepler::updateBuffers() {
                 const double timeOffset = orbit.period *
                     static_cast<double>(j) / static_cast<double>(nSegments);
 
-                const glm::dvec3 position = keplerTranslator.position({
-                    {},
-                    Time(timeOffset + orbit.epoch),
-                    Time(0.0)
-                });
+                const glm::dvec3 position = calc.position(timeOffset + orbit.epoch);
 
                 _vertexBufferData[offset + j].x = static_cast<float>(position.x);
                 _vertexBufferData[offset + j].y = static_cast<float>(position.y);
@@ -833,6 +830,8 @@ void RenderableOrbitalKepler::updateBuffers() {
 void RenderableOrbitalKepler::threadedSegmentCalculations(const int threadId,
                                                                 const UpdateData& data)
 {
+    ZoneScoped;
+
     const int selection = _appearance.renderingModes;
     _renderPoints = (
         selection == RenderMode::RenderingModePoint ||
