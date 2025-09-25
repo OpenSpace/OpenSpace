@@ -44,6 +44,12 @@ CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
     LDEBUG("Initializing CEF...");
 
     CefSettings settings;
+
+#ifndef CEF_USE_SANDBOX
+    LDEBUG("Disabling sandbox for CEF");
+    settings.no_sandbox = 1;
+#endif
+
     const std::filesystem::path root =
         std::filesystem::path(helperLocation).parent_path();
     const std::filesystem::path cefcache = std::format("{}/cefcache", root);
