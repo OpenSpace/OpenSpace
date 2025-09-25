@@ -42,7 +42,7 @@ local apollo8State = {
     ]] .. util.fadeOutNodes({ "ISS_trail", "ISS" }) .. [[
     ]] .. scripts.apolloScripts .. [[
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnableMaximumAllowedDistance", false);
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnabledMinimumAllowedDistance", false);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance", false);
     openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true);
   ]],
@@ -87,7 +87,7 @@ local leaveState = [[
 local flyToMoon = [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
   openspace.time.setPause(true)
-  openspace.pathnavigation.flyTo('Moon', true)
+  openspace.navigation.flyTo('Moon', true)
 ]]
 
 local flyToApollo8 = [[

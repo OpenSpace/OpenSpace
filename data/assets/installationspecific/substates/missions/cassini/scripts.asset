@@ -165,7 +165,7 @@ local huygensScripts = [[
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Titan')" ..
-    "openspace.pathnavigation.zoomToDistance(]] .. tostring(approachDistance) .. [[)" ..
+    "openspace.navigation.zoomToDistance(]] .. tostring(approachDistance) .. [[)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Titan')" ..
@@ -178,7 +178,7 @@ local huygensScripts = [[
     "openspace.time.interpolateDeltaTime(600)" .. -- 10 min per second
     "openspace.setPropertyValueSingle('UserProperties.DeltaTimeValue', 10)" ..
     "openspace.setPropertyValueSingle('UserProperties.DeltaTimeUnit', 'm')" ..
-    "openspace.pathnavigation.zoomToDistance(]] .. tostring(landingDistance) .. [[)" ..
+    "openspace.navigation.zoomToDistance(]] .. tostring(landingDistance) .. [[)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchorInterpolationTime', 2.0)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.RetargetAnchor', nil)" ..
     "openspace.setPropertyValueSingle('NavigationHandler.OrbitalNavigator.Anchor', 'Titan')" ..

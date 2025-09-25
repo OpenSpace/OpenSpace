@@ -65,7 +65,7 @@ local huygensState = {
     openspace.setPropertyValue('{moonTrail_major_saturn}.Renderable.Fade', 0.0, 3.0)
     openspace.setPropertyValueSingle('Scene.Titan.Renderable.Fade', 1.0, 3.0)
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnableMaximumAllowedDistance", false);
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnabledMinimumAllowedDistance", false);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance", false);
     openspace.setPropertyValueSingle('Modules.Touch.TouchInteraction.DisableZoom', true);
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true);
     ]] .. util.fadeInNodes({ "TitanTrail", "Titan" }) .. [[

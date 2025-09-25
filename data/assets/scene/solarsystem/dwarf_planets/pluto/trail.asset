@@ -18,7 +18,7 @@ local PlutoBarycenterTrail = {
     Resolution = 368,
     LineLength = 0.03
   },
-  Tag = { "planetTrail_dwarf" },
+  Tag = { "planetTrail_dwarf", "pluto_system" },
   GUI = {
     Name = "Pluto Barycenter Trail",
     Path = "/Solar System/Dwarf Planets/Pluto",

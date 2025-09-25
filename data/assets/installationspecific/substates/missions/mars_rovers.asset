@@ -43,9 +43,9 @@ local marsRoversState = {
   Enter = [[
     openspace.setPropertyValue("{ingenuity_only}.Renderable.Fade", 0.0, 2.0);
     openspace.setPropertyValue("{perseverance_only}.Renderable.Fade", 0.0, 2.0);
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path.Fade", 0.0);
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path-2024.Fade", 0.0);
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Ingenuity-Path-2024.Fade", 0.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Perseverance-Rover-Path.Fade", 0.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Perseverance-Rover-Path-2024.Fade", 0.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Ingenuity-Path-2024.Fade", 0.0);
     ]] .. util.setOrbitSpeedFactor(0.4) .. [[
     ]] .. util.orbitOnArrival() .. [[
   ]],
@@ -57,7 +57,7 @@ local marsRoversState = {
 local goToMarsOverview = [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
   openspace.time.setPause(true)
-  openspace.pathnavigation.flyTo('Mars', true)
+  openspace.navigation.flyTo('Mars', true)
 ]]
 
 -----
@@ -78,14 +78,14 @@ local curiosityState = {
   Enter = [[
     ]] .. reduceAmbientIntensity .. [[
     openspace.setPropertyValueSingle("Scene.Mars.Renderable.Layers.ColorLayers.CTX_Mosaic_Sweden.Fade", 1.0, 5.0);
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Curiosity-Rover-Path.Enabled", true);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Curiosity-Rover-Path.Enabled", true);
     ]] .. util.setOrbitSpeedFactor(0.8) .. [[
     ]] .. util.orbitAroundUpOnArrival() .. [[
   ]],
   Exit = [[
     ]] .. resetAmbientIntensity .. [[
     ]] .. util.stopOrbiting() .. [[
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Curiosity-Rover-Path.Enabled", false);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Curiosity-Rover-Path.Enabled", false);
     ]] .. util.disableRoll() .. [[
   ]]
 }
@@ -111,12 +111,12 @@ local perseveranceState = {
     ]] .. util.stopOrbiting() .. [[
     openspace.setPropertyValue("{perseverance_only}.Enabled", true);
     openspace.setPropertyValue("{perseverance_only}.Renderable.Fade", 1.0, 2.0);
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path.Enabled", true);
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path.Fade", 1.0, 2.0);
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path.ForceUpdateHeightData", nil);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Perseverance-Rover-Path.Enabled", true);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Perseverance-Rover-Path.Fade", 1.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Perseverance-Rover-Path.ForceUpdateHeightData", nil);
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.MinimumAllowedDistance", 10);
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnableMaximumAllowedDistance", false);
-    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnabledMinimumAllowedDistance", false);
+    openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance", false);
     openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.DisableZoom", true);
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", true);
     ]] .. util.setOrbitSpeedFactor(0.6) .. [[
@@ -124,7 +124,7 @@ local perseveranceState = {
   ]],
   Exit = [[
     openspace.setPropertyValue("{perseverance_only}.Renderable.Fade", 0.0, 2.0);
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path.Fade", 0.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Perseverance-Rover-Path.Fade", 0.0, 2.0);
     openspace.setPropertyValueSingle("Modules.Touch.TouchInteraction.DisableZoom", false);
     openspace.setPropertyValueSingle("NavigationHandler.OrbitalNavigator.DisableZoom", false);
     ]] .. util.stopOrbiting() .. [[
@@ -154,19 +154,19 @@ local ingenuityState = {
     openspace.setPropertyValue("{ingenuity_only}.Renderable.Fade", 1.0, 2.0);
     openspace.setPropertyValueSingle("Scene.Mars-Ingenuity-Position-2024.Renderable.Fade", 1.0, 2.0);
 
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path-2024.Enabled", true);
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path-2024.Fade", 1.0, 2.0);
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path-2024.ForceUpdateHeightData", nil);
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Ingenuity-Path-2024.Enabled", true);
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Ingenuity-Path-2024.Fade", 1.0, 2.0);
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Ingenuity-Path-2024.ForceUpdateHeightData", nil);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Perseverance-Rover-Path-2024.Enabled", true);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Perseverance-Rover-Path-2024.Fade", 1.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Perseverance-Rover-Path-2024.ForceUpdateHeightData", nil);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Ingenuity-Path-2024.Enabled", true);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Ingenuity-Path-2024.Fade", 1.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Ingenuity-Path-2024.ForceUpdateHeightData", nil);
     ]] .. util.orbitAroundUpOnArrival() .. [[
   ]],
   Exit = [[
     openspace.setPropertyValue("{ingenuity_only}.Renderable.Fade", 0.0, 2.0);
     openspace.setPropertyValueSingle("Scene.Mars-Ingenuity-Position-2024.Renderable.Fade", 0.0, 2.0);
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Perseverance-Rover-Path-2024.Fade", 0.0, 2.0);
-    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeoJson.Ingenuity-Path-2024.Fade", 0.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Perseverance-Rover-Path-2024.Fade", 0.0, 2.0);
+    openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Ingenuity-Path-2024.Fade", 0.0, 2.0);
     ]] .. util.stopOrbiting() .. [[
     ]] .. util.disableRoll() .. [[
   ]]
@@ -198,19 +198,19 @@ local leaveTransition = [[
 local toPerseveranceTransition = [[
   ]] .. util.enableRoll() .. [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
-  openspace.pathnavigation.flyToNavigationState( ]] .. perseverance_TiltedNavState_Path .. [[)
+  openspace.navigation.flyToNavigationState( ]] .. perseverance_TiltedNavState_Path .. [[)
 ]]
 
 local toIngenuityTransition = [[
   ]] .. util.enableRoll() .. [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
-  openspace.pathnavigation.flyToNavigationState( ]] .. ingenuity_TiltedNavState_Path .. [[)
+  openspace.navigation.flyToNavigationState( ]] .. ingenuity_TiltedNavState_Path .. [[)
 ]]
 
 local toCuriosityTransition = [[
   ]] .. util.enableRoll() .. [[
   ]] .. util.setCurveType("ZoomOutOverview") .. [[
-  openspace.pathnavigation.flyToNavigationState( ]] .. galeCrater_TiltedNavState .. [[)
+  openspace.navigation.flyToNavigationState( ]] .. galeCrater_TiltedNavState .. [[)
 ]]
 
 local transitions = {

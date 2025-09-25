@@ -102,7 +102,7 @@ local SetLaunchTime = {
   Command = [[
     openspace.printInfo('Set time: Launch')
     openspace.time.setTime('2016-SEP-08 23:05:05.000'
-    openspace.pathnavigation.flyToNavigationState({
+    openspace.navigation.flyToNavigationState({
       Yaw = -0.0001539482222527231,
       Anchor = "Earth",
       Position = { 10453686.309525654, -10108287.946681349, 5873485.232088189 },
@@ -125,7 +125,7 @@ local LookImageCapture = {
   Command = [[
     openspace.printInfo("Set time: Image Capture")
     openspace.time.setTime("2018-11-02T04:14:44")
-    openspace.pathnavigation.flyTo("BennuBarycenter")
+    openspace.navigation.flyTo("BennuBarycenter")
     openspace.time.setDeltaTime(60)
   ]],
   Documentation = "Look at the image capture of OSIRIS-REx",

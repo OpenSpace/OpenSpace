@@ -1,7 +1,8 @@
 local mars = asset.require('scene/solarsystem/planets/mars/mars')
 
 local lat = 18.65
-local long = 226.2
+-- local long = 226.2
+local long = -133.3
 
 local OlympusMonsPosition = {
   Identifier = "OlympusMonsPosition",

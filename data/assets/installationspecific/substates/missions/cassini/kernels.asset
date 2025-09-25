@@ -93,6 +93,17 @@ local pckKernels = {
   kernels .. "/telesto_mst2013.bpc",
 }
 
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(ephemerisKernels)
+  openspace.spice.loadKernel(pckKernels)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(pckKernels)
+  openspace.spice.unloadKernel(ephemerisKernels)
+end)
+
 asset.export("kernels", kernels)
 asset.export("ephemerisKernels", ephemerisKernels)
 asset.export("pckKernels", pckKernels)

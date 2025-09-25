@@ -5,7 +5,7 @@ local today = asset.require('./../../default_time').time
 ----------------------------------------------------------------
 -- STATES
 ----------------------------------------------------------------
-local trails = { "Voyager1", "Voyager2", "Pioneer10", "Pioneer11" }
+local trails = { "Voyager1_Horizons", "Voyager2_Horizons", "Pioneer10_Horizons", "Pioneer11_Horizons" }
 
 local voyagerPioneerNavigationState = [[{
   Anchor = "Sun",

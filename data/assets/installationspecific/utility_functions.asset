@@ -113,13 +113,13 @@ end
 
 local flyToNavState = function(state)
   return [[
-    openspace.pathnavigation.flyToNavigationState(]] .. state .. [[)
+    openspace.navigation.flyToNavigationState(]] .. state .. [[)
   ]]
 end
 
 local flyLinearlyToHeight = function(height)
   return [[
-    openspace.pathnavigation.zoomToDistance(]] .. tostring(height) .. [[)
+    openspace.navigation.zoomToDistance(]] .. tostring(height) .. [[)
   ]]
 end
 
