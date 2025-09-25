@@ -352,12 +352,12 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     );
     if (p.pointRenderingMode.has_value()) {
         switch (*p.pointRenderingMode) {
-        case Parameters::PointRenderingMode::ViewDirection:
-            _appearance.pointRenderOption = PointRenderingMode::ViewDirection;
-            break;
-        case Parameters::PointRenderingMode::PositionNormal:
-            _appearance.pointRenderOption = PointRenderingMode::PositionNormal;
-            break;
+            case Parameters::PointRenderingMode::ViewDirection:
+                _appearance.pointRenderOption = PointRenderingMode::ViewDirection;
+                break;
+            case Parameters::PointRenderingMode::PositionNormal:
+                _appearance.pointRenderOption = PointRenderingMode::PositionNormal;
+                break;
         }
     }
     else {
@@ -919,6 +919,10 @@ void RenderableOrbitalKepler::threadedSegmentCalculations(const int threadId,
                     if (correctVertexIndex + correctTrailLength > lastVertexIndex) {
                         p0Start = startVertexIndex;
                         p1Start = correctVertexIndex;
+
+                        // Special check to make sure we don't end up with segment 
+                        // sections 1 vertex length. A segment must contain at least 2
+                        // vertices or more.
                         if (lastVertexIndex - correctVertexIndex == 1) {
                             p1Length = 0;
                             p0Length = correctTrailLength - 1;
