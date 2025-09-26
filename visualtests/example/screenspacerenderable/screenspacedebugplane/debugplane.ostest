@@ -3,6 +3,10 @@
   "commands": [
     {
       "type": "asset",
+      "value": "examples/screenspacerenderable/screenspaceimagelocal/imagelocal.asset"
+    },
+    {
+      "type": "asset",
       "value": "examples/screenspacerenderable/screenspacedebugplane/debugplane.asset"
     },
     {
@@ -33,31 +37,8 @@
     {
       "type": "property",
       "value": {
-        "property": "RenderEngine.ShowLog",
-        "value": true
-      }
-    },
-    {
-      "type": "script",
-      "value": "openspace.printInfo('abcdefghijklmnopqrstuvwxyz')"
-    },
-    {
-      "type": "script",
-      "value": "openspace.printInfo('ABCDEFGHIJKLMNOPQRSTUVWXYZ')"
-    },
-    {
-      "type": "script",
-      "value": "openspace.printInfo('0123456789:-;!@#$%^&*()_+')"
-    },
-    {
-      "type": "wait",
-      "value": 5
-    },
-    {
-      "type": "property",
-      "value": {
-        "property": "RenderEngine.ShowLog",
-        "value": false
+        "property": "ScreenSpace.ScreenSpaceDebugPlane_Example.Texture",
+        "value": 2
       }
     },
     {
