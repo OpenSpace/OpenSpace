@@ -486,23 +486,28 @@ bool RenderableOrbitalKepler::isReady() const {
 void RenderableOrbitalKepler::update(const UpdateData& data) {
     if (_updateDataBuffersAtNextRender) {
         updateBuffers();
+        _forceUpdate = true;
     }
 
     if (_appearance.isRenderTypeDirty) {
         _forceUpdate = true;
-        _appearance.isRenderTypeDirty = false;
     }
 
-    std::for_each(
-        std::execution::par_unseq,
-        _threadIds.begin(),
-        _threadIds.end(),
-        [&](int threadId) {
-            threadedSegmentCalculations(threadId, data);
-        }
-    );
+    bool isPaused = data.time.j2000Seconds() == data.previousFrameTime.j2000Seconds();
+    if (!isPaused || _forceUpdate) {
+        std::for_each(
+            std::execution::par_unseq,
+            _threadIds.begin(),
+            _threadIds.end(),
+            [&](int threadId) {
+                threadedSegmentCalculations(threadId, data);
+            }
+        );
+    }
 
     _lineDrawCount = static_cast<GLsizei>(_segmentsPerOrbit.size() * 2);
+    _updateDataBuffersAtNextRender = false;
+    _appearance.isRenderTypeDirty = false;
     _forceUpdate = false;
 }
 
@@ -828,8 +833,6 @@ void RenderableOrbitalKepler::updateBuffers() {
     );
 
     glBindVertexArray(0);
-
-    _updateDataBuffersAtNextRender = false;
 }
 
 void RenderableOrbitalKepler::threadedSegmentCalculations(int threadId,
