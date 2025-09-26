@@ -22,45 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
-#define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDATE___H__
+#define __OPENSPACE_MODULE_BASE___SCREENSPACEDATE___H__
 
-#include <openspace/rendering/screenspacerenderableframebuffer.h>
+#include <openspace/rendering/screenspacerenderabletext.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/rendering/dashboard.h>
-
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-} // namespace ghoul::fontrendering
+#include <openspace/properties/misc/stringproperty.h>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-namespace scripting { struct LuaLibrary; }
-
-class ScreenSpaceDashboard : public ScreenSpaceRenderableFramebuffer {
+class ScreenSpaceDate : public ScreenSpaceRenderableText {
 public:
-    explicit ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceDashboard() override = default;
-
-    void initializeGL() override;
+    explicit ScreenSpaceDate(const ghoul::Dictionary& dictionary);
 
     void update() override;
-
-    Dashboard& dashboard();
-    const Dashboard& dashboard() const;
-
-    static scripting::LuaLibrary luaLibrary();
 
     static documentation::Documentation Documentation();
 
 private:
-    Dashboard _dashboard;
-    properties::BoolProperty _useMainDashboard;
+    properties::StringProperty _formatString;
+    properties::StringProperty _timeFormat;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
+#endif // __OPENSPACE_MODULE_BASE___SCREENSPACEDATE___H__

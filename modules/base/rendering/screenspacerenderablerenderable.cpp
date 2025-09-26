@@ -143,13 +143,13 @@ namespace openspace {
 documentation::Documentation ScreenSpaceRenderableRenderable::Documentation() {
     return codegen::doc<Parameters>(
         "base_screenspace_renderable",
-        ScreenSpaceFramebuffer::Documentation()
+        ScreenSpaceRenderableFramebuffer::Documentation()
     );
 }
 
 ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
                                                       const ghoul::Dictionary& dictionary)
-    : ScreenSpaceFramebuffer(dictionary)
+    : ScreenSpaceRenderableFramebuffer(dictionary)
     , _time(
         TimeInfo,
         0.0,
@@ -232,7 +232,7 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
 ScreenSpaceRenderableRenderable::~ScreenSpaceRenderableRenderable() {}
 
 void ScreenSpaceRenderableRenderable::initialize() {
-    ScreenSpaceFramebuffer::initialize();
+    ScreenSpaceRenderableFramebuffer::initialize();
     _transform.translation->initialize();
     _transform.rotation->initialize();
     _transform.scale->initialize();
@@ -240,7 +240,7 @@ void ScreenSpaceRenderableRenderable::initialize() {
 }
 
 void ScreenSpaceRenderableRenderable::initializeGL() {
-    ScreenSpaceFramebuffer::initializeGL();
+    ScreenSpaceRenderableFramebuffer::initializeGL();
 
     _renderable->initializeGL();
 
@@ -288,7 +288,7 @@ void ScreenSpaceRenderableRenderable::deinitializeGL() {
     _renderable->deinitializeGL();
     _renderable->deinitialize();
 
-    ScreenSpaceFramebuffer::deinitializeGL();
+    ScreenSpaceRenderableFramebuffer::deinitializeGL();
 }
 
 void ScreenSpaceRenderableRenderable::update() {

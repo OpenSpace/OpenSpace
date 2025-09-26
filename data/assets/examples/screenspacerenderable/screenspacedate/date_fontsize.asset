@@ -1,0 +1,21 @@
+-- Font Size
+-- This example creates a screen space renderable that shows the current simulation time
+-- with a larger font. The FontSize parameter is increased to improve the fidelity of the
+-- text being rendered. The Scale parameter will make the text show up larger on the
+-- screen.
+
+local Object = {
+  Type = "ScreenSpaceDate",
+  Identifier = "ScreenSpaceDate_Example_FontSize",
+  Name = "ScreenSpace Date Example - Font Size",
+  Scale = 0.5,
+  FontSize = 72
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Object)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Object)
+end)
