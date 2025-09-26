@@ -52,7 +52,7 @@ documentation::Documentation ScreenSpaceRenderableFramebuffer::Documentation() {
 }
 
 ScreenSpaceRenderableFramebuffer::ScreenSpaceRenderableFramebuffer(
-                                                     const ghoul::Dictionary& dictionary)
+                                                      const ghoul::Dictionary& dictionary)
     : ScreenSpaceRenderable(dictionary)
     , _size(SizeInfo, glm::vec2(16), glm::vec2(16), glm::vec2(16384))
 {
@@ -62,17 +62,14 @@ ScreenSpaceRenderableFramebuffer::ScreenSpaceRenderableFramebuffer(
         "ScreenSpaceFramebuffer"
     );
 
-    int iIdentifier = 0;
     if (_identifier.empty()) {
-        iIdentifier = id();
+        int idCounter = id();
 
-        if (iIdentifier == 0) {
+        if (idCounter == 0) {
             setIdentifier("ScreenSpaceRenderableFramebuffer");
         }
         else {
-            setIdentifier(
-                "ScreenSpaceRenderableFramebuffer" + std::to_string(iIdentifier)
-            );
+            setIdentifier(std::format("ScreenSpaceRenderableFramebuffer{}", idCounter));
         }
     }
 

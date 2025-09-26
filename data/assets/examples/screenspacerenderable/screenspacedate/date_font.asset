@@ -1,12 +1,13 @@
--- No Decorations
+-- Font
 -- This example creates a screen space renderable that shows the current simulation time
--- without any additional text surrounding the current date.
+-- with a non-standard font. This is using one of the fonts that is loaded by default in the
+-- openspace.cfg file.
 
 local Object = {
   Type = "ScreenSpaceDate",
-  Identifier = "ScreenSpaceDate_Example_NoDecoration",
-  Name = "ScreenSpace Date Example - No Decoration",
-  FormatString = "{}"
+  Identifier = "ScreenSpaceDate_Example_Font",
+  Name = "ScreenSpace Date Example - Font",
+  FontName = "Light"
 }
 
 asset.onInitialize(function()

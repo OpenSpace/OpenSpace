@@ -1,15 +1,16 @@
 -- Basic
 -- This example creates a screen space renderable that shows the current simulation time.
 
-local Item = {
+local Object = {
   Type = "ScreenSpaceDate",
-  Identifier = "ScreenSpaceDate_Example"
+  Identifier = "ScreenSpaceDate_Example",
+  Name = "ScreenSpace Date Example - Basic"
 }
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(Item)
+  openspace.addScreenSpaceRenderable(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(Item)
+  openspace.removeScreenSpaceRenderable(Object)
 end)

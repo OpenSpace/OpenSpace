@@ -99,7 +99,7 @@ void ScreenSpaceDate::update() {
         _buffer = std::vformat(_formatString.value(), std::make_format_args(time));
     }
     catch (const std::format_error&) {
-        LERRORC("DashboardItemDate", "Illegal format string");
+        LERRORC("ScreenSpaceDate", "Illegal format string");
     }
 
     ScreenSpaceRenderableText::update();
