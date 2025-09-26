@@ -79,11 +79,11 @@ private:
         /// Specifies how much if the point should be covered by the outline
         properties::FloatProperty outlineWidth;
 
-        bool changedRenderType = false;
+        bool isRenderTypeDirty = false;
     };
 
     void updateBuffers();
-    void threadedSegmentCalculations(const int threadId, const UpdateData& data);
+    void threadedSegmentCalculations(int threadId, const UpdateData& data);
 
     const int _nThreads = 0;
     std::vector<int> _threadIds;
@@ -105,11 +105,11 @@ private:
     std::vector<kepler::Parameters> _parameters;
 
     /// Extra data for more efficient updating of vectors
-    struct updateInfo {
+    struct UpdateInfo {
         double timestamp = std::numeric_limits<double>::min();
         double timePerStep = 0.0;
     };
-    std::vector<updateInfo> _updateHelper;
+    std::vector<UpdateInfo> _updateHelper;
 
     /// The layout of the VBOs
     struct TrailVBOLayout {
@@ -138,15 +138,13 @@ private:
 
     // Line cache
     UniformCache(modelViewTransform, projectionTransform, trailFadeExponent,
-        colorFadeCutoffValue, inGameTime, color, opacity)
-        _uniformTrailCache;
+        colorFadeCutoffValue, inGameTime, color, opacity) _uniformTrailCache;
 
     // Point cache
-    UniformCache(modelTransform, viewTransform, projectionTransform,
-        renderOption, cameraViewDirectionUp, cameraViewDirectionRight,
-        cameraPositionWorld, cameraUpWorld, inGameTime, color, pointSizeExponent,
-        enableMaxSize, maxSize, enableOutline, outlineColor, outlineWeight, opacity)
-        _uniformPointCache;
+    UniformCache(modelTransform, viewTransform, projectionTransform, renderOption,
+        cameraViewDirectionUp, cameraViewDirectionRight, cameraPositionWorld,
+        cameraUpWorld, inGameTime, color, pointSizeExponent, enableMaxSize, maxSize,
+        enableOutline, outlineColor, outlineWeight, opacity) _uniformPointCache;
 };
 
 } // namespace openspace

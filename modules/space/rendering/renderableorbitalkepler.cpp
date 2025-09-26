@@ -47,13 +47,13 @@
 
 namespace {
     // The possible values for the _renderingModes property
-    enum RenderMode {
+    enum class RenderMode {
         RenderingModeTrail = 0,
         RenderingModePoint,
         RenderingModePointTrail
     };
 
-    enum PointRenderingMode {
+    enum class PointRenderingMode {
         ViewDirection = 0,
         PositionNormal
     };
@@ -65,15 +65,14 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointRenderingModeInfo =
-    {
+    constexpr openspace::properties::Property::PropertyInfo PointRenderingModeInfo = {
         "PointRenderingMode",
         "Point Rendering Mode",
-        "Controls how the points will be oriented. \"Camera View "
-        "Direction\" rotates the points so that they are orthogonal to the viewing "
-        "direction of the camera (useful for planar displays), and \"Camera Position "
-        "Normal\" rotates the points towards the position of the camera (useful for "
-        "spherical displays, like dome theaters).",
+        "Controls how the points will be oriented. \"Camera View Direction\" rotates the "
+        "points so that they are orthogonal to the viewing direction of the camera "
+        "(useful for planar displays), and \"Camera Position Normal\" rotates the points "
+        "towards the position of the camera (useful for spherical displays, like dome "
+        "theaters).",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -293,11 +292,11 @@ RenderableOrbitalKepler::Appearance::Appearance()
     , outlineWidth(OutlineWidthInfo, 0.2f, 0.f, 1.f)
 {
     renderingModes.addOptions({
-        { RenderMode::RenderingModeTrail, "Trails" },
-        { RenderMode::RenderingModePoint, "Points" },
-        { RenderMode::RenderingModePointTrail , "Points and Trails" }
+        { static_cast<int>(RenderMode::RenderingModeTrail), "Trails" },
+        { static_cast<int>(RenderMode::RenderingModePoint), "Points"},
+        { static_cast<int>(RenderMode::RenderingModePointTrail) , "Points and Trails" }
     });
-    renderingModes.onChange([this]() { changedRenderType = true; });
+    renderingModes.onChange([this]() { isRenderTypeDirty = true; });
     addProperty(renderingModes);
     color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(color);
@@ -315,7 +314,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
 
 RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     : Renderable(dict)
-    , _nThreads(static_cast<int>(std::ceil(std::thread::hardware_concurrency() / 2.0)))
+    , _nThreads(std::max(1u, std::thread::hardware_concurrency() / 2u))
     , _segmentQuality(SegmentQualityInfo, 2, 1, 10)
     , _startRenderIdx(StartRenderIdxInfo, 0, 0, 1)
     , _sizeRender(RenderSizeInfo, 1, 1, 2)
@@ -343,42 +342,48 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
         p.pointSizeExponent.value_or(_appearance.pointSizeExponent);
 
     _appearance.pointRenderOption.addOption(
-        PointRenderingMode::ViewDirection,
+        static_cast<int>(PointRenderingMode::ViewDirection),
         "Camera View Direction"
     );
     _appearance.pointRenderOption.addOption(
-        PointRenderingMode::PositionNormal,
+        static_cast<int>(PointRenderingMode::PositionNormal),
         "Camera Position Normal"
     );
     if (p.pointRenderingMode.has_value()) {
         switch (*p.pointRenderingMode) {
             case Parameters::PointRenderingMode::ViewDirection:
-                _appearance.pointRenderOption = PointRenderingMode::ViewDirection;
+                _appearance.pointRenderOption =
+                    static_cast<int>(PointRenderingMode::ViewDirection);
                 break;
             case Parameters::PointRenderingMode::PositionNormal:
-                _appearance.pointRenderOption = PointRenderingMode::PositionNormal;
+                _appearance.pointRenderOption =
+                    static_cast<int>(PointRenderingMode::PositionNormal);
                 break;
         }
     }
     else {
-        _appearance.pointRenderOption = PointRenderingMode::ViewDirection;
+        _appearance.pointRenderOption =
+            static_cast<int>(PointRenderingMode::ViewDirection);
     }
 
     if (p.renderingMode.has_value()) {
         switch (*p.renderingMode) {
             case Parameters::RenderingMode::Trail:
-                _appearance.renderingModes = RenderMode::RenderingModeTrail;
+                _appearance.renderingModes =
+                    static_cast<int>(RenderMode::RenderingModeTrail);
                 break;
             case Parameters::RenderingMode::Point:
-                _appearance.renderingModes = RenderMode::RenderingModePoint;
+                _appearance.renderingModes =
+                    static_cast<int>(RenderMode::RenderingModePoint);
                 break;
             case Parameters::RenderingMode::PointsTrails:
-                _appearance.renderingModes = RenderMode::RenderingModePointTrail;
+                _appearance.renderingModes =
+                    static_cast<int>(RenderMode::RenderingModePointTrail);
                 break;
         }
     }
     else {
-        _appearance.renderingModes = RenderMode::RenderingModeTrail;
+        _appearance.renderingModes = static_cast<int>(RenderMode::RenderingModeTrail);
     }
     addPropertySubOwner(_appearance);
 
@@ -483,15 +488,15 @@ void RenderableOrbitalKepler::update(const UpdateData& data) {
         updateBuffers();
     }
 
-    if(_appearance.changedRenderType) {
+    if (_appearance.isRenderTypeDirty) {
         _forceUpdate = true;
-        _appearance.changedRenderType = false;
+        _appearance.isRenderTypeDirty = false;
     }
 
     std::for_each(
         std::execution::par_unseq,
-        _threadIds.cbegin(),
-        _threadIds.cend(),
+        _threadIds.begin(),
+        _threadIds.end(),
         [&](int threadId) {
             threadedSegmentCalculations(threadId, data);
         }
@@ -742,7 +747,7 @@ void RenderableOrbitalKepler::updateBuffers() {
         std::execution::par_unseq,
         orbitIdHolder.begin(),
         orbitIdHolder.end(),
-        [&](int& index) {
+        [&](int index) {
             ZoneScoped;
 
             const kepler::Parameters& orbit = _parameters[index];
@@ -827,19 +832,19 @@ void RenderableOrbitalKepler::updateBuffers() {
     _updateDataBuffersAtNextRender = false;
 }
 
-void RenderableOrbitalKepler::threadedSegmentCalculations(const int threadId,
-                                                                const UpdateData& data)
+void RenderableOrbitalKepler::threadedSegmentCalculations(int threadId,
+                                                          const UpdateData& data)
 {
     ZoneScoped;
 
     const int selection = _appearance.renderingModes;
     _renderPoints = (
-        selection == RenderMode::RenderingModePoint ||
-        selection == RenderMode::RenderingModePointTrail
+        selection == static_cast<int>(RenderMode::RenderingModePoint) ||
+        selection == static_cast<int>(RenderMode::RenderingModePointTrail)
     );
     _renderTrails = (
-        selection == RenderMode::RenderingModeTrail ||
-        selection == RenderMode::RenderingModePointTrail
+        selection == static_cast<int>(RenderMode::RenderingModeTrail) ||
+        selection == static_cast<int>(RenderMode::RenderingModePointTrail)
     );
 
     const float fade = std::pow(
@@ -848,7 +853,8 @@ void RenderableOrbitalKepler::threadedSegmentCalculations(const int threadId,
     );
     const float threshold = 1.f - std::pow(0.05f, 1.f / fade);
 
-    int offset = std::accumulate(_orbitsPerThread.begin(),
+    int offset = std::accumulate(
+        _orbitsPerThread.begin(),
         _orbitsPerThread.begin() + threadId,
         0
     );
@@ -857,7 +863,7 @@ void RenderableOrbitalKepler::threadedSegmentCalculations(const int threadId,
     const double now = data.time.j2000Seconds();
     int startVertexIndex = _vertexBufferOffset[offset];
     for (int i = offset; i < cutoff; i++) {
-        updateInfo* helper = &_updateHelper[i];
+        UpdateInfo* helper = &_updateHelper[i];
         double upper = helper->timestamp + (helper->timePerStep);
         double lower = helper->timestamp - (helper->timePerStep);
         const bool shouldUpdate = (now >= upper || now <= lower);
@@ -880,16 +886,15 @@ void RenderableOrbitalKepler::threadedSegmentCalculations(const int threadId,
             // They will most likely disappear when we change our method of determining
             // the trail fade amount is changed.
             if (_renderTrails) {
-
                 // When rendering a trail we don't know if the trail will pass over
                 // the starting point of the orbit or not. If the trail passes over the
                 // starting point of the orbit, then we can't draw the entire trail as
                 // line strip. Instead we need to divide the line strip into two parts,
                 // where p0 and p1 denotes the respctive line strips (parts).
-                int p0Start;
-                int p0Length;
-                int p1Start;
-                int p1Length;
+                int p0Start = -1;
+                int p0Length = -1;
+                int p1Start = -1;
+                int p1Length = -1;
 
                 const int trailLength =
                     static_cast<int>(std::ceil(threshold * nSegments));
