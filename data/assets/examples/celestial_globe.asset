@@ -1,0 +1,64 @@
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local mars = asset.require("scene/solarsystem/planets/mars/mars")
+local lightsource = asset.require("scene/solarsystem/sun/light_source")
+
+local longitude = 3.63325
+local latitude = 26.13238
+local altitude = 0.5
+
+local assetFolder = asset.resource({
+  Name = "Celestial Globe",
+  Type = "HttpSynchronization",
+  Identifier = "celestial_globe",
+  Version = 1
+})
+
+local Model = {
+  Identifier = "celestial-globe",
+  Parent = mars.Mars.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = mars.Mars.Identifier,
+      Longitude = longitude,
+      Latitude = latitude,
+      UseHeightmap = true,
+      Altitude = altitude
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = mars.Mars.Identifier,
+      Longitude = longitude,
+      Latitude = latitude,
+      Angle= 180,
+    },
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Enabled = true,
+    GeometryFile = assetFolder .. "celestial_globe.glb",
+    ModelScale = "Kilometer",
+    AmbientIntensity = 0.3,
+    DiffuseIntensity = 0.13,
+    SpecularIntensity = 9.0,
+    SpecularPower = 12.5,
+    LightSources = {
+      sun.LightSource
+    },
+    CastShadow = true,
+    LightSource = lightsource.LightSource.Identifier,
+    ShadowGroup = 'default'
+  },
+  GUI = {
+    Name = "Model",
+    Path = "/Shadow Casting Models/Celestial Globe"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Model)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Model)
+end)
