@@ -3,7 +3,7 @@
 -- larger font. The FontSize parameter is increased to improve the fidelity of the text
 -- being rendered. The Scale parameter will make the text show up larger on the screen.
 
-local Object = {
+local Item = {
   Type = "ScreenSpaceText",
   Identifier = "ScreenSpaceText_Example_FontSize",
   Text = "Example Text - Font Size",
@@ -12,9 +12,9 @@ local Object = {
 }
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(Object)
+  openspace.addScreenSpaceRenderable(Item)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(Object)
+  openspace.removeScreenSpaceRenderable(Item)
 end)

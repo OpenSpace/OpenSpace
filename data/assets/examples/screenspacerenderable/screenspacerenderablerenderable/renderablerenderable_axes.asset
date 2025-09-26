@@ -4,7 +4,7 @@
 -- onto the axes and increases the field of view of the camera to a wider degree. We also
 -- set the background color to be fully opaque to make it easier to see the axes.
 
-local Object = {
+local Item = {
   Type = "ScreenSpaceRenderableRenderable",
   Identifier = "ScreenSpaceRenderableRenderable_Example_Axes",
   Renderable = {
@@ -16,9 +16,9 @@ local Object = {
 }
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(Object)
+  openspace.addScreenSpaceRenderable(Item)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(Object)
+  openspace.removeScreenSpaceRenderable(Item)
 end)

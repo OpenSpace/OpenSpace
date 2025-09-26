@@ -3,7 +3,7 @@
 -- with a non-standard font. This is using one of the fonts that is loaded by default in the
 -- openspace.cfg file.
 
-local Object = {
+local Item = {
   Type = "ScreenSpaceDate",
   Identifier = "ScreenSpaceDate_Example_Font",
   Name = "ScreenSpace Date Example - Font",
@@ -11,9 +11,9 @@ local Object = {
 }
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(Object)
+  openspace.addScreenSpaceRenderable(Item)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(Object)
+  openspace.removeScreenSpaceRenderable(Item)
 end)

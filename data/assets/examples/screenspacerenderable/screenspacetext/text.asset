@@ -1,16 +1,16 @@
 -- Basic
 -- This example creates a screen space renderable that displays a static text.
 
-local Object = {
+local Item = {
   Type = "ScreenSpaceText",
   Identifier = "ScreenSpaceText_Example",
   Text = "Example Text"
 }
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(Object)
+  openspace.addScreenSpaceRenderable(Item)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(Object)
+  openspace.removeScreenSpaceRenderable(Item)
 end)

@@ -2,7 +2,7 @@
 -- This example creates a screen space renderable that shows the current simulation time
 -- with the current year and the number of days that have passed in the year.
 
-local Object = {
+local Item = {
   Type = "ScreenSpaceDate",
   Identifier = "ScreenSpaceDate_Example_DayOfYear",
   Name = "ScreenSpace Date Example - Day of Year",
@@ -10,9 +10,9 @@ local Object = {
 }
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(Object)
+  openspace.addScreenSpaceRenderable(Item)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(Object)
+  openspace.removeScreenSpaceRenderable(Item)
 end)
