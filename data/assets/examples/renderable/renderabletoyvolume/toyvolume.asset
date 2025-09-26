@@ -1,0 +1,25 @@
+-- Basic
+-- A simple example of a toy volume rendered using direct volume rendering.
+
+local Node = {
+  Identifier = "RenderableToyVolume_Example",
+  Renderable = {
+    Type = "RenderableToyVolume",
+    Size = { 5, 5, 5 },
+    ScalingExponent = 11,
+    StepSize = 0.01,
+    Color = { 1.0, 0.0, 0.0 }
+  },
+  GUI = {
+    Name = "RenderableToyVolume - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

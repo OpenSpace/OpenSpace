@@ -4,8 +4,6 @@
 -- the plane does not become larger or smaller than a given max height and min height, in
 -- meters.
 
-local earth = asset.require("scene/solarsystem/planets/earth/earth")
-
 local Node = {
   Identifier = "RenderablePlaneImageLocal_Example_ScaleByDistance",
   Renderable = {

@@ -9,7 +9,7 @@ local texturePath = asset.resource({
   Version = 1
 })
 
-local inset = {
+local Item = {
   Identifier = "ScreenSpaceInsetBlackout_Example_Calibration_Pattern",
   Type = "ScreenSpaceInsetBlackout",
   Name = "ScreenSpaceInsetBlackout Example - Calibration Pattern",
@@ -24,9 +24,9 @@ local inset = {
 }
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(inset)
+  openspace.addScreenSpaceRenderable(Item)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(inset)
+  openspace.removeScreenSpaceRenderable(Item)
 end)

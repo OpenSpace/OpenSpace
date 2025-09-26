@@ -1,0 +1,32 @@
+-- Ellipse
+-- The `RenderableRadialGrid` can also be used to create a simple ellipse. This is done by
+-- setting the number of segments in each direction to 1 and make sure the inner radius
+-- is zero (which is the default). By then applying a
+-- [NonUniformStaticScale](#base_transform_scale_nonuniformstatic) to the scene graph node
+-- this circle can be deformed into an ellipse.
+
+local Node = {
+  Identifier = "RenderableRadialGrid_Example_Ellipse",
+  Transform = {
+    Scale = {
+      Type = "NonUniformStaticScale",
+      Scale = { 1.5, 1.0, 1.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableRadialGrid",
+    GridSegments = { 1, 1 }
+  },
+  GUI = {
+    Name = "RenderableRadialGrid - Ellipse",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

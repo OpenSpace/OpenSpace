@@ -67,11 +67,12 @@
 #include <modules/base/rendering/renderableprism.h>
 #include <modules/base/rendering/renderabletimevaryingsphere.h>
 #include <modules/base/rendering/screenspacedashboard.h>
-#include <modules/base/rendering/screenspaceframebuffer.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
 #include <modules/base/rendering/screenspaceinsetblackout.h>
 #include <modules/base/rendering/screenspacerenderablerenderable.h>
+#include <modules/base/rendering/screenspacedate.h>
+#include <modules/base/rendering/screenspacetext.h>
 #include <modules/base/rendering/screenspacetimevaryingimageonline.h>
 #include <modules/base/rendering/screenspaceframebuffer.h>
 #include <modules/base/rendering/directionallightsource.h>
@@ -117,7 +118,6 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul_assert(fSsRenderable, "ScreenSpaceRenderable factory was not created");
 
     fSsRenderable->registerClass<ScreenSpaceDashboard>("ScreenSpaceDashboard");
-    fSsRenderable->registerClass<ScreenSpaceFramebuffer>("ScreenSpaceFramebuffer");
     fSsRenderable->registerClass<ScreenSpaceImageLocal>("ScreenSpaceImageLocal");
     fSsRenderable->registerClass<ScreenSpaceImageOnline>("ScreenSpaceImageOnline");
     fSsRenderable->registerClass<ScreenSpaceInsetBlackout>("ScreenSpaceInsetBlackout");
@@ -127,6 +127,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fSsRenderable->registerClass<ScreenSpaceTimeVaryingImageOnline>(
         "ScreenSpaceTimeVaryingImageOnline"
     );
+    fSsRenderable->registerClass<ScreenSpaceDate>("ScreenSpaceDate");
+    fSsRenderable->registerClass<ScreenSpaceText>("ScreenSpaceText");
 
 
     ghoul::TemplateFactory<DashboardItem>* fDashboard =
@@ -312,11 +314,12 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
         SizeMappingComponent::Documentation(),
 
         ScreenSpaceDashboard::Documentation(),
-        ScreenSpaceFramebuffer::Documentation(),
+        ScreenSpaceDate::Documentation(),
         ScreenSpaceImageLocal::Documentation(),
         ScreenSpaceImageOnline::Documentation(),
         ScreenSpaceInsetBlackout::Documentation(),
         ScreenSpaceRenderableRenderable::Documentation(),
+        ScreenSpaceText::Documentation(),
         ScreenSpaceTimeVaryingImageOnline::Documentation(),
 
         ConstantRotation::Documentation(),
