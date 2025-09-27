@@ -1,0 +1,5 @@
+openspace (@CPACK_PACKAGE_VERSION@) unstable; urgency=medium
+
+  * Release of OpenSpace version @CPACK_PACKAGE_VERSION@.
+
+ -- OpenSpace Project Team <openspace@openspaceproject.com>  @CPACK_DEBIAN_CHANGELOG_DATE@
