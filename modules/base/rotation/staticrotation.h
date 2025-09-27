@@ -28,6 +28,7 @@
 #include <openspace/scene/rotation.h>
 
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/misc/optionproperty.h>
 
 namespace openspace {
 
@@ -43,6 +44,7 @@ public:
 
 private:
     properties::Vec3Property _eulerRotation;
+    properties::OptionProperty _eulerSequence;
     mutable glm::dmat3 _cachedMatrix = glm::dmat3(1.0);
     mutable bool _matrixIsDirty = true;
 };

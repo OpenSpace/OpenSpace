@@ -74,6 +74,7 @@
 #include <modules/base/rendering/screenspacedate.h>
 #include <modules/base/rendering/screenspacetext.h>
 #include <modules/base/rendering/screenspacetimevaryingimageonline.h>
+#include <modules/base/rendering/directionallightsource.h>
 #include <modules/base/rotation/constantrotation.h>
 #include <modules/base/rotation/fixedrotation.h>
 #include <modules/base/rotation/globerotation.h>
@@ -171,6 +172,8 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
+
+    fRenderable->registerClass<DirectionalLightSource>("DirectionalLightSource");
 
     fRenderable->registerClass<RenderableBoxGrid>("RenderableBoxGrid");
     fRenderable->registerClass<RenderableCartesianAxes>("RenderableCartesianAxes");

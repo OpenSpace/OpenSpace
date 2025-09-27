@@ -27,6 +27,9 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/base/rendering/renderablemodel.h>
+#include <modules/base/rendering/directionallightsource.h>
+#include <openspace/util/ellipsoid.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/geojson/geojsonmanager.h>
 #include <modules/globebrowsing/src/globelabelscomponent.h>
@@ -128,6 +131,22 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    static constexpr int MinSplitDepth = 2;
+    static constexpr int MaxSplitDepth = 22;
+
+    properties::BoolProperty _showChunkEdges;
+    properties::BoolProperty _levelByProjectedAreaElseDistance;
+    properties::BoolProperty _resetTileProviders;
+    properties::BoolProperty _performFrustumCulling;
+    properties::BoolProperty _performHorizonCulling;
+    properties::IntProperty  _modelSpaceRenderingCutoffLevel;
+    properties::IntProperty  _dynamicLodIterationCount;
+
+
+    properties::PropertyOwner _debugPropertyOwner;
+
+    properties::PropertyOwner _shadowMappingPropertyOwner;
+
     /**
      * Test if a specific chunk can safely be culled without affecting the rendered image.
      *
@@ -172,7 +191,7 @@ private:
      * lead to jagging. We only render global chunks for lower chunk levels.
      */
     void renderChunkGlobally(const Chunk& chunk, const RenderData& data,
-        bool renderGeomOnly = false
+        std::vector<DirectionalLightSource::DepthMapData>& depthMapData, bool renderGeomOnly = false
     );
 
     /**
@@ -187,7 +206,7 @@ private:
      * higher chunk levels.
      */
     void renderChunkLocally(const Chunk& chunk, const RenderData& data,
-        bool renderGeomOnly = false
+        std::vector<DirectionalLightSource::DepthMapData>& depthMapData, bool renderGeomOnly = false
     );
 
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
@@ -219,8 +238,7 @@ private:
     void updateChunk(Chunk& chunk, const RenderData& data, const glm::dmat4& mvp) const;
     void freeChunkNode(Chunk* n);
 
-    static constexpr int MinSplitDepth = 2;
-    static constexpr int MaxSplitDepth = 22;
+    std::vector<const RenderableModel*> getShadowers(const SceneGraphNode* node);
 
     properties::BoolProperty _performShading;
     properties::BoolProperty _useAccurateNormals;
@@ -235,24 +253,9 @@ private:
     properties::FloatProperty _orenNayarRoughness;
     properties::IntProperty _nActiveLayers;
 
-    struct {
-        properties::BoolProperty showChunkEdges;
-        properties::BoolProperty levelByProjectedAreaElseDistance;
-        properties::TriggerProperty resetTileProviders;
-        properties::BoolProperty performFrustumCulling;
-        properties::IntProperty  modelSpaceRenderingCutoffLevel;
-        properties::IntProperty  dynamicLodIterationCount;
-    } _debugProperties;
-
-    properties::PropertyOwner _debugPropertyOwner;
-
-    struct {
-        properties::BoolProperty shadowMapping;
-        properties::FloatProperty zFightingPercentage;
-        properties::IntProperty nShadowSamples;
-    } _shadowMappingProperties;
-
-    properties::PropertyOwner _shadowMappingPropertyOwner;
+    properties::BoolProperty _shadowMapping;
+    properties::FloatProperty _zFightingPercentage;
+    properties::IntProperty _nShadowSamples;
 
     Ellipsoid _ellipsoid;
     SkirtedGrid _grid;
@@ -298,10 +301,15 @@ private:
     bool _nLayersIsDirty = true;
     bool _allChunksAvailable = true;
     bool _layerManagerDirty = true;
-    bool _resetTileProviders = false;
     size_t _iterationsOfAvailableData = 0;
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;
+
+    std::vector<const RenderableModel*> _shadowers;
+    bool _shadowersUpdated = false;
+    bool _shadowersOk = false;
+
+    std::map<std::string, std::vector<std::string>> _shadowSpec;
 
     // Components
     std::unique_ptr<RingsComponent> _ringsComponent;

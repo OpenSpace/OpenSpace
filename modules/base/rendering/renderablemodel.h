@@ -33,10 +33,12 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
+#include <optional>
 
 namespace ghoul::opengl {
     class ProgramObject;
@@ -61,11 +63,23 @@ public:
     void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
+    void createDepthMapResources();
+    void releaseDepthMapResources();
 
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
+
+    const bool isCastingShadow() const;
+
+    void renderForDepthMap(const glm::dmat4& vp) const;
+
+    glm::dvec3 center() const;
+
+    const std::string lightsource() const;
+    const std::string shadowGroup() const;
+    const double shadowFrustumSize() const;
 
     static documentation::Documentation Documentation();
 
@@ -92,6 +106,7 @@ private:
     properties::FloatProperty _ambientIntensity;
     properties::FloatProperty _diffuseIntensity;
     properties::FloatProperty _specularIntensity;
+    properties::FloatProperty _specularPower;
 
     properties::BoolProperty _performShading;
     properties::BoolProperty _enableFaceCulling;
@@ -102,13 +117,24 @@ private:
 
     properties::BoolProperty _enableDepthTest;
     properties::OptionProperty _blendingFuncOption;
+    properties::BoolProperty _renderWireframe;
+    properties::FloatProperty _frustumSize;
+
+    properties::BoolProperty _useCache;
+    properties::BoolProperty _castShadow;
+    std::string _lightSource;
+    std::string _shadowGroup;
+    properties::BoolProperty _useOverrideColor;
+    properties::Vec4Property _overrideColor;
+
+    bool _autoSizeFrustum = false;
 
     std::filesystem::path _vertexShaderPath;
     std::filesystem::path _fragmentShaderPath;
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, normalTransform, meshTransform,
         meshNormalTransform, ambientIntensity, diffuseIntensity,
-        specularIntensity, performShading, use_forced_color, has_texture_diffuse,
+        specularIntensity, specularPower, performShading, use_forced_color, has_texture_diffuse,
         has_texture_normal, has_texture_specular, has_color_specular,
         texture_diffuse, texture_normal, texture_specular, color_diffuse,
         color_specular, opacity, nLightSources, lightDirectionsViewSpace,
@@ -136,6 +162,8 @@ private:
 
     // Store the original RenderBin
     Renderable::RenderBin _originalRenderBin;
+
+    ghoul::opengl::ProgramObject* _depthMapProgram = nullptr;
 };
 
 }  // namespace openspace

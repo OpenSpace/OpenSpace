@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,36 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
-#define __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
+#include <modules/globebrowsing/src/tileprovider/forcehighresolutiontileprovider.h>
 
-#include <openspace/scene/lightsource.h>
+namespace {
+}
 
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+namespace openspace::globebrowsing {
 
-namespace openspace {
+ForceHighResolutionTileProvider::ForceHighResolutionTileProvider(const ghoul::Dictionary& dictionary) {}
 
-namespace documentation { struct Documentation; }
+ForceHighResolutionTileProvider::~ForceHighResolutionTileProvider() {}
 
-class SceneGraphLightSource : public LightSource {
-public:
-    explicit SceneGraphLightSource(const ghoul::Dictionary& dictionary);
+Tile ForceHighResolutionTileProvider::tile(const globebrowsing::TileIndex& tileIndex) {
+    return Tile{ 0, std::nullopt, Tile::Status::OK };
+}
 
-    static documentation::Documentation Documentation();
+Tile::Status ForceHighResolutionTileProvider::tileStatus(const globebrowsing::TileIndex& tileIndex) {
+    return globebrowsing::Tile::Status::OK;
+}
 
-    bool initialize() override;
-    glm::vec3 directionViewSpace(const RenderData& renderData) const override;
-    float intensity() const override;
-	glm::dvec3 positionWorldSpace() const;
+TileDepthTransform ForceHighResolutionTileProvider::depthTransform() {
+    return { 0.f, 1.f };
+}
 
-private:
-    properties::FloatProperty _intensity;
-    properties::StringProperty _sceneGraphNodeReference;
+void ForceHighResolutionTileProvider::update() {
+    ZoneScoped;
+}
 
-    SceneGraphNode* _sceneGraphNode = nullptr;
-};
+int ForceHighResolutionTileProvider::minLevel() {
+    return 1;
+}
 
-} // namespace openspace
+int ForceHighResolutionTileProvider::maxLevel() {
+    return 1337;
+}
 
-#endif // __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
+float ForceHighResolutionTileProvider::noDataValueAsFloat() {
+    return std::numeric_limits<float>::min();
+}
+
+void ForceHighResolutionTileProvider::reset() {
+}
+
+} // namespace openspace::globebrowsing

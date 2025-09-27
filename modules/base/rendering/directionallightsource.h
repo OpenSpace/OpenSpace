@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2024                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,36 +22,63 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
-#define __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
-
+#ifndef __OPENSPACE_MODULE_BASE___DIRECTIONALLIGHTSOURCE___H__
+#define __OPENSPACE_MODULE_BASE___DIRECTIONALLIGHTSOURCE___H__
+#include <openspace/rendering/renderable.h>
 #include <openspace/scene/lightsource.h>
 
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+#include <ghoul/opengl/programobject.h>
+
+#include <vector>
+#include <string>
+#include <map>
+
+#include <glm/glm.hpp>
+
+namespace ghoul::opengl { class ProgramObject; }
+
+namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
-class SceneGraphLightSource : public LightSource {
+class DirectionalLightSource : public Renderable {
 public:
-    explicit SceneGraphLightSource(const ghoul::Dictionary& dictionary);
+    struct DepthMapData {
+        glm::dmat4 viewProjecion;
+        GLuint depthMap;
+    };
+
+    DirectionalLightSource(const ghoul::Dictionary& dictionary);
+    ~DirectionalLightSource() override = default;
+
+    bool isReady() const override;
+
+    virtual void initialize() override;
+
+    virtual void initializeGL() override;
+
+    virtual void deinitializeGL() override;
+
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+
+    void registerShadowCaster(const std::string& shadowgroup, const std::string& identifier);
+
+    const GLuint& depthMap(const std::string& shadowgroup) const;
+
+    glm::dmat4 viewProjectionMatrix(const std::string& shadowgroup) const;
 
     static documentation::Documentation Documentation();
 
-    bool initialize() override;
-    glm::vec3 directionViewSpace(const RenderData& renderData) const override;
-    float intensity() const override;
-	glm::dvec3 positionWorldSpace() const;
-
 private:
-    properties::FloatProperty _intensity;
-    properties::StringProperty _sceneGraphNodeReference;
-
-    SceneGraphNode* _sceneGraphNode = nullptr;
+    glm::ivec2 _depthMapResolution;
+    std::map<std::string, std::vector<std::string>> _shadowGroups;
+    std::map<std::string, GLuint> _depthMaps;
+    std::map<std::string, GLuint> _FBOs;
+    std::map<std::string, glm::dmat4> _vps;
+    std::unique_ptr<LightSource> _lightSource;
+    ghoul::opengl::ProgramObject* _depthMapProgram = nullptr;
 };
 
-} // namespace openspace
+}// namespace openspace
 
-#endif // __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
+#endif // __OPENSPACE_MODULE_BASE___DIRECTIONALLIGHTSOURCE___H__

@@ -36,6 +36,13 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo SequenceInfo = {
+        "RotationSequence",
+        "Rotation Sequence",
+        "The rotation sequence to use for Euler angle rotations.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     // Conversion from rotation matrix to euler angles, given that the rotation is a pure
     // rotation matrix.
     // Inspired by: https://www.learnopencv.com/rotation-matrix-to-euler-angles/
@@ -92,6 +99,7 @@ StaticRotation::StaticRotation(const ghoul::Dictionary& dictionary)
         glm::vec3(-glm::pi<float>()),
         glm::vec3(glm::pi<float>())
     )
+    , _eulerSequence(SequenceInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
