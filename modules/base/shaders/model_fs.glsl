@@ -159,6 +159,7 @@ Fragment getFragment() {
     vec3 totalLightColor = ambientIntensity * lightColor * diffuseAlbedo.rgb;
 
     vec3 viewDirection = normalize(vs_positionCameraSpace.xyz);
+    vec3 totalSpecularColor = vec3(0.0);
 
     for (int i = 0; i < nLightSources; i++) {
       // Diffuse light
@@ -174,9 +175,10 @@ Fragment getFragment() {
       vec3 specularColor =
         specularIntensity * lightColor * specularFactor * specularAlbedo;
 
-      totalLightColor += lightIntensities[i] * (diffuseColor + specularColor);
+      totalLightColor += lightIntensities[i] * diffuseColor;
+      totalSpecularColor += lightIntensities[i] * specularColor;
     }
-    frag.color.rgb = totalLightColor;
+    frag.color.rgb = totalLightColor + totalSpecularColor;
 
     if (has_shadow_depth_map) {
       const float bias = 0.0005;
@@ -193,7 +195,13 @@ Fragment getFragment() {
         }
       }
 
-      frag.color.rgb *= ambientIntensity + (1.f - ambientIntensity) * accum / norm;
+      float shadowFactor = accum / norm;
+      // Apply shadow to diffuse lighting (with ambient contribution)
+      totalLightColor *= ambientIntensity + (1.f - ambientIntensity) * shadowFactor;
+      // Apply shadow to specular lighting (more aggressive - specular highlights should be sharply attenuated in shadows)
+      totalSpecularColor *= shadowFactor;
+      
+      frag.color.rgb = totalLightColor + totalSpecularColor;
     }
   }
   else {
