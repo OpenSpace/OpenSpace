@@ -74,7 +74,6 @@
 #include <modules/base/rendering/screenspacedate.h>
 #include <modules/base/rendering/screenspacetext.h>
 #include <modules/base/rendering/screenspacetimevaryingimageonline.h>
-#include <modules/base/rendering/screenspaceframebuffer.h>
 #include <modules/base/rendering/directionallightsource.h>
 #include <modules/base/rotation/constantrotation.h>
 #include <modules/base/rotation/fixedrotation.h>

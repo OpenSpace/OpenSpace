@@ -13,6 +13,8 @@ local assetFolder = asset.resource({
   Version = 1
 })
 
+-- Model CC0 from https://sketchfab.com/3d-models/celestial-globe-341fa8a777e94883841409438756f747
+
 local Model = {
   Identifier = "celestial-globe",
   Parent = mars.Mars.Identifier,
