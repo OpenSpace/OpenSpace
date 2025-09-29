@@ -39,6 +39,7 @@
 #include <modules/globebrowsing/src/shadowcomponent.h>
 #include <modules/globebrowsing/src/skirtedgrid.h>
 #include <modules/globebrowsing/src/tileindex.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -141,6 +142,7 @@ private:
     properties::BoolProperty _performHorizonCulling;
     properties::IntProperty  _modelSpaceRenderingCutoffLevel;
     properties::IntProperty  _dynamicLodIterationCount;
+    properties::OptionProperty _overrideRenderMode;
 
 
     properties::PropertyOwner _debugPropertyOwner;

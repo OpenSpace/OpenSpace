@@ -277,6 +277,14 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
+    constexpr openspace::properties::Property::PropertyInfo OverrideRenderModeInfo = {
+        "OverrideRenderMode",
+        "Override render mode",
+        "Override the automatic render mode selection to force either global or local "
+        "rendering mode. 'Default' uses the automatic selection based on distance.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableGlobe)]] Parameters {
         // The radii for this planet. If only one value is given, all three radii are
         // set to that value.
@@ -616,6 +624,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     , _performHorizonCulling(PerformHorizonCullingInfo, true)
     , _modelSpaceRenderingCutoffLevel(ModelSpaceRenderingInfo, 14, 1, 22)
     , _dynamicLodIterationCount(DynamicLodIterationCountInfo, 16, 4, 128)
+    , _overrideRenderMode(OverrideRenderModeInfo)
     , _shadowMapping(ShadowMappingInfo, true)
     , _zFightingPercentage(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f)
     , _nShadowSamples(NumberShadowSamplesInfo, 4, 1, 256)
@@ -732,6 +741,13 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _nActiveLayers.setReadOnly(true);
     addProperty(_nActiveLayers);
 
+    _overrideRenderMode.addOptions({
+        { 0, "Default" },
+        { 1, "Force Global Rendering" },
+        { 2, "Force Local Rendering" }
+    });
+    _overrideRenderMode = 0;
+
     _debugPropertyOwner.addProperty(_showChunkEdges);
     _debugPropertyOwner.addProperty(_levelByProjectedAreaElseDistance);
     _resetTileProviders.onChange([&]() { _resetTileProviders = true; });
@@ -740,6 +756,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_performHorizonCulling);
     _debugPropertyOwner.addProperty(_modelSpaceRenderingCutoffLevel);
     _debugPropertyOwner.addProperty(_dynamicLodIterationCount);
+    _debugPropertyOwner.addProperty(_overrideRenderMode);
     addPropertySubOwner(_debugPropertyOwner);
 
     auto notifyShaderRecompilation = [this]() {
@@ -1365,7 +1382,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
     int globalCount = 0;
     int localCount = 0;
 
-    auto traversal = [](const Chunk& node, std::vector<const Chunk*>& global,
+    auto traversal = [this](const Chunk& node, std::vector<const Chunk*>& global,
         int& iGlobal, std::vector<const Chunk*>& local, int& iLocal, int cutoff,
         std::vector<const Chunk*>& traversalMemory)
     {
@@ -1380,7 +1397,22 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
             traversalMemory.erase(traversalMemory.begin());
 
             if (isLeaf(*n) && n->isVisible) {
-                if (n->tileIndex.level < cutoff) {
+                bool useGlobalRendering;
+
+                switch (_overrideRenderMode.value()) {
+                    case 1: // Force Global Rendering
+                        useGlobalRendering = true;
+                        break;
+                    case 2: // Force Local Rendering
+                        useGlobalRendering = false;
+                        break;
+                    case 0: // Default
+                    default:
+                        useGlobalRendering = n->tileIndex.level < cutoff;
+                        break;
+                }
+
+                if (useGlobalRendering) {
                     global[iGlobal] = n;
                     iGlobal++;
                 }
