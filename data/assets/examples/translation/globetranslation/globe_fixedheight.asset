@@ -1,0 +1,48 @@
+-- Fixed Height
+-- This asset creates a translation that places coordinate axes on the surface of a
+-- planetary body with a fixed height to the reference surface of the globe. Note that
+-- this examples only the position of the coordinate axes, but leaves the orientation
+-- unchanged, causing their rotation to be inherited from the parent node.
+
+-- The example needs a `RenderableGlobe` with a height map as a parent to function
+local Globe = {
+  Identifier = "GlobeTranslation_Example_FixedHeight_Globe",
+  Renderable = {
+    Type = "RenderableGlobe"
+  },
+  GUI = {
+    Name = "GlobeTranslation - Fixed Height (Globe)",
+    Path = "/Examples"
+  }
+}
+
+local Node = {
+  Identifier = "GlobeTranslation_Example_FixedHeight",
+  Parent = "GlobeTranslation_Example_FixedHeight_Globe",
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = "GlobeTranslation_Example_FixedHeight_Globe",
+      Latitude = 20.0,
+      Longitude = -45.0,
+      Altitude = 2.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "GlobeTranslation - Fixed Height",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Globe)
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+  openspace.removeSceneGraphNode(Globe)
+end)

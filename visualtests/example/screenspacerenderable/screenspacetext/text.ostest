@@ -1,0 +1,26 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/screenspacerenderable/screenspacetext/text.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "ScreenSpace.ScreenSpaceText_Example.Scale",
+        "value": 0.75
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "ScreenSpace.ScreenSpaceText_Example.FontSize",
+        "value": 55.0
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

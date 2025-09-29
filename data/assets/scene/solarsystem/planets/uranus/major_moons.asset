@@ -53,7 +53,8 @@ local MirandaTrail = {
   },
   GUI = {
     Name = "Miranda Trail",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Miranda",
+    Focusable = false
   }
 }
 
@@ -77,7 +78,8 @@ local MirandaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Miranda Label",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Miranda"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Miranda",
+    Focusable = false
   }
 }
 
@@ -130,7 +132,8 @@ local ArielTrail = {
   },
   GUI = {
     Name = "Ariel Trail",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Ariel",
+    Focusable = false
   }
 }
 
@@ -154,7 +157,8 @@ local ArielLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Ariel Label",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Ariel"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Ariel",
+    Focusable = false
   }
 }
 
@@ -207,7 +211,8 @@ local UmbrielTrail = {
   },
   GUI = {
     Name = "Umbriel Trail",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel",
+    Focusable = false
   }
 }
 
@@ -231,7 +236,8 @@ local UmbrielLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Umbriel Label",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Umbriel",
+    Focusable = false
   }
 }
 
@@ -284,7 +290,8 @@ local TitaniaTrail = {
   },
   GUI = {
     Name = "Titania Trail",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Titania",
+    Focusable = false
   }
 }
 
@@ -308,7 +315,8 @@ local TitaniaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Titania Label",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Titania"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Titania",
+    Focusable = false
   }
 }
 
@@ -361,7 +369,8 @@ local OberonTrail = {
   },
   GUI = {
     Name = "Oberon Trail",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Oberon",
+    Focusable = false
   }
 }
 
@@ -385,7 +394,8 @@ local OberonLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Oberon Label",
-    Path = "/Solar System/Planets/Uranus/Major Moons/Oberon"
+    Path = "/Solar System/Planets/Uranus/Major Moons/Oberon",
+    Focusable = false
   }
 }
 

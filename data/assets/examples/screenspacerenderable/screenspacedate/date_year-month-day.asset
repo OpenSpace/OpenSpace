@@ -1,0 +1,18 @@
+-- Year Month Day
+-- This example creates a screen space renderable that shows the current simulation time
+-- with a resolution of days.
+
+local Item = {
+  Type = "ScreenSpaceDate",
+  Identifier = "ScreenSpaceDate_Example_YearMonthDay",
+  Name = "ScreenSpace Date Example - Year/Month/Day",
+  TimeFormat = "YYYY MON DD"
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Item)
+end)

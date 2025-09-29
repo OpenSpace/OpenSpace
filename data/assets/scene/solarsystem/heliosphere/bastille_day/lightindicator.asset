@@ -26,8 +26,9 @@ local TravelSpeedIndicator = {
     FadeLength = 10
   },
    GUI = {
+    Name = "Speed Indicator",
     Path = "/Solar System/Heliosphere",
-    Name = "Speed indicator",
+    Focusable = false,
     Description = "Speed of light indicator from sun to earth"
   }
 }

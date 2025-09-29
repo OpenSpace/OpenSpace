@@ -1,0 +1,58 @@
+-- Adaptive Height
+-- This asset creates a translation that places coordinate axes on the surface of a
+-- planetary body while adjusting to the existing height map on the globe. Note that this
+-- examples only the position of the coordinate axes, but leaves the orientation
+-- unchanged, causing their rotation to be inherited from the parent node.
+
+-- The example needs a `RenderableGlobe` with a height map as a parent to function
+local layer = asset.require("scene/solarsystem/planets/earth/layers/heightlayers/blue_marble_height")
+local Globe = {
+  Identifier = "GlobeTranslation_Example_AdaptiveHeight_Globe",
+  Renderable = {
+    Type = "RenderableGlobe",
+    Layers = {
+      HeightLayers = { layer.layer }
+    }
+  },
+  GUI = {
+    Name = "GlobeTranslation - Adaptive Height (Globe)",
+    Path = "/Examples"
+  }
+}
+
+local Node = {
+  Identifier = "GlobeTranslation_Example_AdaptiveHeight",
+  Parent = "GlobeTranslation_Example_AdaptiveHeight_Globe",
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = "GlobeTranslation_Example_AdaptiveHeight_Globe",
+      Latitude = 20.0,
+      Longitude = -45.0,
+      UseHeightmap = true
+    }
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "GlobeTranslation - Adaptive Height",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Globe)
+  -- The layer is designed for a globe with Earth scale. So we need to scale it down for
+  -- it to make sense for this example
+  openspace.setPropertyValueSingle("Scene.GlobeTranslation_Example_AdaptiveHeight_Globe.Renderable.Layers.HeightLayers.Earth_Bluemarble_Height.Enabled", true)
+  enspace.setPropertyValueSingle("Scene.GlobeTranslation_Example_AdaptiveHeight_Globe.Renderable.Layers.HeightLayers.Earth_Bluemarble_Height.Settings.Multiplier", 1.9)
+  openspace.setPropertyValueSingle("Scene.GlobeTranslation_Example_AdaptiveHeight_Globe.Renderable.Layers.HeightLayers.Earth_Bluemarble_Height.Settings.Gamma", 0.16)
+
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+  openspace.removeSceneGraphNode(Globe)
+end)

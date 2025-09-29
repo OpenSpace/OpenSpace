@@ -4,7 +4,7 @@
 --
 -- The texture that is displayed can be changed during runtime. Here it is just set to 1.
 
-local Object = {
+local Item = {
   Identifier = "ScreenSpaceDebugPlane_Example",
   Type = "ScreenSpaceDebugPlane",
   Texture = 1,
@@ -12,9 +12,9 @@ local Object = {
 }
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(Object)
+  openspace.addScreenSpaceRenderable(Item)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(Object)
+  openspace.removeScreenSpaceRenderable(Item)
 end)

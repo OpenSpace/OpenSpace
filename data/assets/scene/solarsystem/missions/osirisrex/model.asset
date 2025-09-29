@@ -78,7 +78,8 @@ local PolyCam = {
   },
   GUI = {
     Name = "OCAMS POLYCAM",
-    Path = "/Solar System/Missions/OSIRIS REx/Instruments"
+    Path = "/Solar System/Missions/OSIRIS REx/Instruments",
+    Focusable = false
   }
 }
 
@@ -110,7 +111,8 @@ local Rexis = {
   },
   GUI = {
     Name = "REXIS",
-    Path = "/Solar System/Missions/OSIRIS REx/Instruments"
+    Path = "/Solar System/Missions/OSIRIS REx/Instruments",
+    Focusable = false
   }
 }
 

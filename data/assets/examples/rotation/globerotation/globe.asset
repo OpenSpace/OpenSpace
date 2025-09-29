@@ -1,7 +1,7 @@
 -- Basic
--- This asset creates a rotation that places a coordinate axes on the surface of a
--- planetary body. The rotation causes the coordinate axes to remain fixed to the surface
--- of the globe.
+-- This asset creates a rotation that places coordinate axes on the surface of a planetary
+-- body. The rotation causes the coordinate axes to remain fixed to the surface of the
+-- globe.
 --
 -- In order for this feature to work properly, the coordinate axes need to be located at
 -- the same place as well, so this example also needs a `GlobeTranslation` applied.

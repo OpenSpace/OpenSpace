@@ -26,7 +26,8 @@ local Station6Frag1Holder = {
   },
   GUI = {
     Name = "Station 6 Fragment 1",
-    Path = "/Solar System/Missions/Apollo/17/Station 6"
+    Path = "/Solar System/Missions/Apollo/17/Station 6",
+    Focusable = false
   }
 }
 
@@ -73,7 +74,8 @@ local Station6Frag23Holder = {
   Parent = moon.Moon.Identifier,
   GUI = {
     Name = "Station 6 Fragments 2 & 3 Holder",
-    Path = "/Solar System/Missions/Apollo/17/Station 6"
+    Path = "/Solar System/Missions/Apollo/17/Station 6",
+    Focusable = false
   }
 }
 

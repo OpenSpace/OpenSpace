@@ -848,7 +848,7 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
             argPeriapsis,
             meanAnomaly,
             epochFromYMDdSubstring(epochDate),
-            std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion
+            (360.0 / meanMotion) * std::chrono::seconds(std::chrono::hours(24)).count()
         );
 
     }

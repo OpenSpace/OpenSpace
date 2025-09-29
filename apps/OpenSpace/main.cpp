@@ -1336,7 +1336,7 @@ int main(int argc, char* argv[]) {
         LINFO(std::format("Configuration Path '{}'", configurationFilePath));
 
         // Register the base path as the directory where the configuration file lives
-        std::filesystem::path base = configurationFilePath.parent_path();
+        std::filesystem::path base = findConfiguration().parent_path();
         FileSys.registerPathToken("${BASE}", std::move(base));
 
         // The previous incarnation of this was initializing GLFW to get the primary

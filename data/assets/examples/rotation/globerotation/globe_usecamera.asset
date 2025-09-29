@@ -1,9 +1,9 @@
 -- UseCamera
--- This asset creates a rotation that places a coordinate axes on the surface of a
--- planetary body. The rotation causes the coordinate axes to remain fixed to the surface
--- of the globe. In this example, the rotation of the object will be updated based on the
--- location of the camera. When loading this example, make sure to focus the camera on
--- the Globe object for the follow-function to work.
+-- This asset creates a rotation that places coordinate axes on the surface of a planetary
+-- body. The rotation causes the coordinate axes to remain fixed to the surface of the
+-- globe. In this example, the rotation of the object will be updated based on the
+-- location of the camera. When loading this example, make sure to focus the camera on the
+-- Globe object for the follow-function to work.
 --
 -- In order for this feature to work properly, the coordinate axes need to be located at
 -- the same place as well, so this example also needs a `GlobeTranslation` applied, which

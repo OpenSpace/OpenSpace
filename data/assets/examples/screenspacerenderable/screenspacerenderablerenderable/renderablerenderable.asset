@@ -2,7 +2,7 @@
 -- Creates a screenspace image that shows a spherical grid as an example for any
 -- [Renderable](#renderable) that can be displayed.
 
-local Object = {
+local Item = {
   Type = "ScreenSpaceRenderableRenderable",
   Identifier = "ScreenSpaceRenderableRenderable_Example",
   Renderable = {
@@ -14,9 +14,9 @@ local Object = {
 }
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(Object)
+  openspace.addScreenSpaceRenderable(Item)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(Object)
+  openspace.removeScreenSpaceRenderable(Item)
 end)

@@ -24,7 +24,8 @@ local EarthMarker = {
   },
   GUI = {
     Name = "Earth Marker",
-    Path = "/Solar System/Planets/Earth"
+    Path = "/Solar System/Planets/Earth",
+    Focusable = false
   }
 }
 

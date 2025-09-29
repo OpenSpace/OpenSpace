@@ -1,6 +1,6 @@
-local transforms = asset.require("scene/solarsystem/sun/transforms")
-
-
+-- With Custom Shader
+-- This example creates a rendering of the volumetric milky way galaxy, but using a custom
+-- shader to highlight the arms of the galaxy.
 
 local data = asset.resource({
   Name = "Milkyway Volume Data",
@@ -12,15 +12,13 @@ local data = asset.resource({
 
 local KiloParsec = 3.086E19
 
-local MilkyWayVolume = {
-  Identifier = "MilkyWayVolume_CustomShader",
-  Parent = transforms.SolarSystemBarycenter.Identifier,
+local Node = {
+  Identifier = "RenderableGalaxy_Example_CustomShader",
   Transform = {
     Translation = {
       Type = "StaticTranslation",
       -- The center of the Milky Way is approximately 8 kiloparsec from the Sun.
-      -- The x-axis of galactic coordinates points from the sun towards the center
-      -- of the galaxy.
+      -- The x-axis of galactic coordinates points from the Sun towards the galaxy center
       Position = { 8 * KiloParsec, 0, 0 }
     }
   },
@@ -46,30 +44,15 @@ local MilkyWayVolume = {
     }
   },
   GUI = {
-    Path = "/Milky Way",
-    Name = "Milky Way Volume (Custom Shader)",
-    Description = "Volumetric rendering of Milky Way galaxy based on simulation from NAOJ"
+    Name = "RenderableGalaxy - Custom Shader",
+    Path = "/Examples"
   }
 }
 
-
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(MilkyWayVolume)
+  openspace.addSceneGraphNode(Node)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MilkyWayVolume)
+  openspace.removeSceneGraphNode(Node)
 end)
-
-asset.export(MilkyWayVolume)
-
-
-
-asset.meta = {
-  Name = "Milky Way Volume",
-  Description = [[Volumetric rendering of Milky Way galaxy based on simulations from "
-  "NAOJ with a custom shader]],
-  Author = "OpenSpace Team",
-  URL = "http://openspaceproject.com",
-  License = "MIT License"
-}

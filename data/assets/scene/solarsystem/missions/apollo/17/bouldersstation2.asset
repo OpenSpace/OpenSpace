@@ -26,7 +26,8 @@ local Station2Boulder1Holder = {
   },
   GUI = {
     Name = "Station 2 Boulder 1",
-    Path = "/Solar System/Missions/Apollo/17/Station 2"
+    Path = "/Solar System/Missions/Apollo/17/Station 2",
+    Focusable = false
   }
 }
 
@@ -75,7 +76,8 @@ local Station2Boulder2Holder = {
   },
   GUI = {
     Name = "Station 2 Boulder 2",
-    Path = "/Solar System/Missions/Apollo/17/Station 2"
+    Path = "/Solar System/Missions/Apollo/17/Station 2",
+    Focusable = false
   }
 }
 
@@ -124,7 +126,8 @@ local Station2Boulder3Holder = {
   },
   GUI = {
     Name = "Station 2 Boulder 3",
-    Path = "/Solar System/Missions/Apollo/17/Station 2"
+    Path = "/Solar System/Missions/Apollo/17/Station 2",
+    Focusable = false
   }
 }
 

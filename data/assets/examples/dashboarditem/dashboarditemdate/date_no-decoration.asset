@@ -1,6 +1,6 @@
 -- No Decorations
 -- This example adds a new DashboardItem that shows the current in-game simulation date
--- without any additional text surrounding the current date
+-- without any additional text surrounding the current date.
 
 local Item = {
   Identifier = "DashboardItemDate_Example_NoDecoration",

@@ -2,7 +2,7 @@
 -- This example shows how to display dashboard items in a screen space. In this specific
 -- example it is show the date in the simulation, but any #DashboardItem is supported.
 
-local Object = {
+local Item = {
   Type = "ScreenSpaceDashboard",
   Identifier = "ScreenSpaceDashboard_Example",
   Name = "ScreenSpaceDashboard Example - Basic",
@@ -15,9 +15,9 @@ local Object = {
 }
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(Object)
+  openspace.addScreenSpaceRenderable(Item)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(Object)
+  openspace.removeScreenSpaceRenderable(Item)
 end)

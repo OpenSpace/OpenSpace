@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
 #define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/rendering/screenspacerenderableframebuffer.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/rendering/dashboard.h>
@@ -40,7 +40,7 @@ namespace openspace {
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
-class ScreenSpaceDashboard : public ScreenSpaceFramebuffer {
+class ScreenSpaceDashboard : public ScreenSpaceRenderableFramebuffer {
 public:
     explicit ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceDashboard() override = default;
