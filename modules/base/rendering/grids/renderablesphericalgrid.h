@@ -69,7 +69,14 @@ protected:
 
     GLuint _vaoID = 0;
     GLuint _vBufferID = 0;
-    GLuint _iBufferID = 0;
+    struct {
+        std::vector<GLint> first;
+        std::vector<GLsizei> count;
+    } _latitudeRenderInfo;
+    struct {
+        std::vector<GLint> first;
+        std::vector<GLsizei> count;
+    } _longitudeRenderInfo;
 
     bool _gridIsDirty = true;
 

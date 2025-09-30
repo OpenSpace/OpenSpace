@@ -136,9 +136,8 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     addProperty(_color);
 
     auto gridDirty = [this]() {
-        if (_longSegments.value() % 2 == 1) {
-            _longSegments = _longSegments - 1;
-        }
+        _longSegments = std::max<int>(_longSegments, 3);
+        _latSegments = std::max<int>(_latSegments, 3);
         _gridIsDirty = true;
     };
     _longSegments = p.segments.value_or(p.longSegments.value_or(_longSegments));
@@ -188,11 +187,9 @@ void RenderableSphericalGrid::initializeGL() {
 
     glGenVertexArrays(1, &_vaoID);
     glGenBuffers(1, &_vBufferID);
-    glGenBuffers(1, &_iBufferID);
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 }
@@ -203,9 +200,6 @@ void RenderableSphericalGrid::deinitializeGL() {
 
     glDeleteBuffers(1, &_vBufferID);
     _vBufferID = 0;
-
-    glDeleteBuffers(1, &_iBufferID);
-    _iBufferID = 0;
 
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
@@ -239,8 +233,23 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_LINE_SMOOTH);
 
     glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-    glDrawElements(GL_LINES, 6 * _longSegments * _latSegments, GL_UNSIGNED_INT, nullptr);
+
+    // Render latitude rings
+    glMultiDrawArrays(
+        GL_LINE_LOOP,
+        _latitudeRenderInfo.first.data(),
+        _latitudeRenderInfo.count.data(),
+        _latSegments
+    );
+
+    // Render longitude segments
+    glMultiDrawArrays(
+        GL_LINE_STRIP,
+        _longitudeRenderInfo.first.data(),
+        _longitudeRenderInfo.count.data(),
+        _longSegments
+    );
+
     glBindVertexArray(0);
 
     _gridProgram->deactivate();
@@ -286,70 +295,71 @@ void RenderableSphericalGrid::update(const UpdateData&) {
         return;
     }
 
-    unsigned int vertSize = (_longSegments + 1) * (_latSegments + 1);
-    std::vector<Vertex> vert = std::vector<Vertex>(vertSize, { 0.f, 0.f, 0.f });
-    unsigned int idxSize = 6 * _longSegments * _latSegments;
-    std::vector<int> idx = std::vector<int>(idxSize, 0);
+    // Instead of using an element buffer which didn't save that much memory and just
+    // caused some indirections, we are creating two sets of vertices in the same vertex
+    // buffer in this function. First all of the vertices for the longitudinal rings, one
+    // ring after another. After that it is all the vertices for the latitudinal arcs, one
+    // arc after another
 
-    int nr = 0;
-
-    for (int lat = 0; lat <= _latSegments; ++lat) {
-        // define an extra vertex around the y-axis due to texture mapping
-        for (int lng = 0; lng <= _longSegments; lng++) {
+    // * 2 since we store all vertices twice
+    const unsigned int vertSize = _longSegments * _latSegments * 2;
+    std::vector<Vertex> vert;
+    vert.reserve(vertSize);
+    for (int lat = 0; lat < _latSegments; lat++) {
+        for (int lng = 0; lng < _longSegments; lng++) {
             // inclination angle (north to south)
-            const float theta = lat * glm::pi<float>() / _latSegments * 2.f;  // 0 -> PI
+            const float theta =
+                static_cast<float>(lat) / static_cast<float>(_latSegments - 1) *
+                glm::pi<float>(); // 0 -> PI
 
             // azimuth angle (east to west)
-            const float phi = lng * 2.f * glm::pi<float>() / _longSegments;  // 0 -> 2*PI
+            // Dividing by one segment more as the points for 0 and 2*pi are identical
+            const float phi =
+                static_cast<float>(lng) / static_cast<float>(_longSegments) *
+                2.f * glm::pi<float>();  // 0 -> 2*PI
 
             const float x = std::sin(phi) * std::sin(theta);  //
-            const float y = std::cos(theta);                  // up
-            const float z = std::cos(phi) * std::sin(theta);  //
-
-            glm::vec3 normal = glm::vec3(x, y, z);
-            if (x != 0.f || y != 0.f || z != 0.f) {
-                normal = glm::normalize(normal);
-            }
-
-            glm::vec4 tmp = glm::vec4(x, y, z, 1.f);
-            const glm::mat4 rot = glm::rotate(
-                glm::mat4(1.f),
-                glm::half_pi<float>(),
-                glm::vec3(1.f, 0.f, 0.f)
-            );
-            tmp = glm::vec4(glm::dmat4(rot) * glm::dvec4(tmp));
-
-            for (int i = 0; i < 3; i++) {
-                vert[nr].location[i] = tmp[i];
-            }
-            ++nr;
+            const float y = std::cos(phi) * std::sin(theta);  //
+            const float z = std::cos(theta);                  // up
+            vert.push_back({ x, y, z });
         }
     }
 
-    nr = 0;
-    // define indices for all triangles
-    for (int i = 1; i <= _latSegments; i++) {
-        for (int j = 0; j < _longSegments; j++) {
-            const int t = _longSegments + 1;
-            idx[nr] = t * (i - 1) + j + 0;  ++nr;
-            idx[nr] = t * (i + 0) + j + 0;  ++nr;
-            idx[nr] = t * (i + 0) + j + 1;  ++nr;
-            idx[nr] = t * (i - 1) + j + 1;  ++nr;
-            idx[nr] = t * (i - 1) + j + 0;  ++nr;
+    // Create the render info struct to be able to render the longitude rings using
+    // glMultiDrawArrays in the render function
+    _latitudeRenderInfo.first.clear();
+    _latitudeRenderInfo.count.clear();
+    for (int i = 0; i < _latSegments; i++) {
+        _latitudeRenderInfo.first.push_back(i * _longSegments);
+        _latitudeRenderInfo.count.push_back(_longSegments);
+    }
+
+    // Create the duplicate vertex entries to efficiently render the latitude arcs. We
+    // take every vertex in a longitude segment and connect it to the same index along all
+    // latitude arcs
+    for (int lng = 0; lng < _longSegments; lng++) {
+        for (int lat = 0; lat < _latSegments; lat++) {
+            Vertex v = vert[lat * _longSegments + lng];
+            vert.push_back(v);
         }
     }
+
+    // Create the render info struct to be able to render the latitude arcs using
+    // glMultiDrawArrays in the render function. The `base` is the offset to make this
+    // render call use the vertices that are in the second "block" of the VBO
+    _longitudeRenderInfo.first.clear();
+    _longitudeRenderInfo.count.clear();
+    const int base = _longSegments * _latSegments;
+    for (int i = 0; i < _longSegments; i++) {
+        _longitudeRenderInfo.first.push_back(i * _latSegments + base);
+        _longitudeRenderInfo.count.push_back(_latSegments);
+    }
+
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
     glBufferData(GL_ARRAY_BUFFER, vertSize * sizeof(Vertex), vert.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        idxSize * sizeof(int),
-        idx.data(), GL_STATIC_DRAW
-    );
 
     _gridIsDirty = false;
 }
