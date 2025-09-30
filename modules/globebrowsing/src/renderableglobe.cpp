@@ -153,7 +153,7 @@ namespace {
         "globe model rendering vs the flat in-game rendering method. The value is a "
         "trade-off between not having precision errors in the rendering and representing "
         "a tile as flat or curved.",
-        openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DynamicLodIterationCountInfo =
@@ -307,6 +307,9 @@ namespace {
 
         // [[codegen::verbatim(TargetLodScaleFactorInfo.description)]]
         std::optional<float> targetLodScaleFactor;
+
+        // [[codegen::verbatim(ModelSpaceRenderingInfo.description)]]
+        std::optional<int> modelSpaceRenderingCutoffLevel;
 
         // [[codegen::verbatim(OrenNayarRoughnessInfo.description)]]
         std::optional<float> orenNayarRoughness;
@@ -748,13 +751,16 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     });
     _overrideRenderMode = 0;
 
+    _modelSpaceRenderingCutoffLevel =
+        p.modelSpaceRenderingCutoffLevel.value_or(_modelSpaceRenderingCutoffLevel);
+    addProperty(_modelSpaceRenderingCutoffLevel);
+
     _debugPropertyOwner.addProperty(_showChunkEdges);
     _debugPropertyOwner.addProperty(_levelByProjectedAreaElseDistance);
     _resetTileProviders.onChange([&]() { _resetTileProviders = true; });
     _debugPropertyOwner.addProperty(_resetTileProviders);
     _debugPropertyOwner.addProperty(_performFrustumCulling);
     _debugPropertyOwner.addProperty(_performHorizonCulling);
-    _debugPropertyOwner.addProperty(_modelSpaceRenderingCutoffLevel);
     _debugPropertyOwner.addProperty(_dynamicLodIterationCount);
     _debugPropertyOwner.addProperty(_overrideRenderMode);
     addPropertySubOwner(_debugPropertyOwner);
