@@ -6,7 +6,7 @@
   ],
   "camera": {
     "aim": "",
-    "anchor": "celestial-globe",
+    "anchor": "celestial-globe-mars1",
     "frame": "Root",
     "pitch": 0.1228616,
     "position": {
@@ -23,7 +23,10 @@
     "yaw": -0.0063002
   },
   "mark_nodes": [
-    "celestial-globe",
+    "celestial-globe-earth",
+    "celestial-globe-mars1",
+    "celestial-globe-mars2",
+    "celestial-globe-moon",
     "Earth",
     "Moon",
     "Sun",
