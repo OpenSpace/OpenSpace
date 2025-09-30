@@ -197,7 +197,8 @@ Fragment getFragment() {
 
       float shadowFactor = accum / norm;
       // Apply shadow to diffuse lighting (with ambient contribution)
-      totalLightColor *= ambientIntensity + (1.f - ambientIntensity) * shadowFactor;
+      vec3 ambientLightColor = ambientIntensity * lightColor * diffuseAlbedo.rgb;
+      totalLightColor *= ambientLightColor + (1.f - ambientLightColor) * shadowFactor;
       // Apply shadow to specular lighting (more aggressive - specular highlights should be sharply attenuated in shadows)
       totalSpecularColor *= shadowFactor;
       
