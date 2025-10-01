@@ -1,0 +1,43 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "scene/digitaluniverse/grids.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Root",
+        "position": [
+          5.772931777994144e+17,
+          1.4835370783876826e+18,
+          1.3873651729766423e+18
+        ],
+        "up": [
+          -0.928522915381148,
+          0.3711269304441822,
+          -0.01048795076135034
+        ],
+        "timestamp": "2025 SEP 29 18:58:29"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.RadioSphere.Renderable.Enabled",
+        "value": true
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.RadioSphere.Renderable.Opacity",
+        "value": 0.25
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}
