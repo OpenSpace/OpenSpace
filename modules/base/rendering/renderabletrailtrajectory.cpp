@@ -76,8 +76,8 @@ namespace {
         "The factor that is used to create subsamples along the trajectory. This value "
         "(together with 'SampleInterval') determines how far apart (in seconds) the "
         "samples are spaced along the trajectory. Subsamples are rendered as smaller "
-		"points compared to normal samples (from 'SampleInterval') when rendering the "
-		"trail as points.",
+        "points compared to normal samples (from 'SampleInterval') when rendering the "
+        "trail as points.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -192,7 +192,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
 
     _timeStampSubsamplingFactor =
         p.timeStampSubsampleFactor.value_or(_timeStampSubsamplingFactor);
-	_timeStampSubsamplingFactor.onChange([this]() { reset(); });
+    _timeStampSubsamplingFactor.onChange([this]() { reset(); });
     addProperty(_timeStampSubsamplingFactor);
 
     // We store the vertices with ascending temporal order

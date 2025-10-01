@@ -71,15 +71,15 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    const bool isCastingShadow() const;
+    bool isCastingShadow() const;
 
     void renderForDepthMap(const glm::dmat4& vp) const;
 
     glm::dvec3 center() const;
 
-    const std::string lightsource() const;
-    const std::string shadowGroup() const;
-    const double shadowFrustumSize() const;
+    const std::string& lightSource() const;
+    const std::string& shadowGroup() const;
+    double shadowFrustumSize() const;
 
     static documentation::Documentation Documentation();
 

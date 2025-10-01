@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,10 +41,19 @@ namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
 
+/**
+ * DirectionalLightSource is a Renderable that manages shadow mapping for directional
+ * light sources. It creates depth maps from the light's perspective and manages shadow
+ * groups to optimize rendering when multiple objects cast shadows.
+ *
+ * Shadow groups allow models near each other to share a shadow map, reducing memory
+ * usage and improving performance by grouping shadow casters that should render into
+ * the same depth buffer.
+ */
 class DirectionalLightSource : public Renderable {
 public:
     struct DepthMapData {
-        glm::dmat4 viewProjecion;
+        glm::dmat4 viewProjection;
         GLuint depthMap;
     };
 
@@ -75,7 +84,6 @@ private:
     std::map<std::string, GLuint> _depthMaps;
     std::map<std::string, GLuint> _FBOs;
     std::map<std::string, glm::dmat4> _vps;
-    std::unique_ptr<LightSource> _lightSource;
     ghoul::opengl::ProgramObject* _depthMapProgram = nullptr;
 };
 

@@ -1330,7 +1330,7 @@ void RenderableModel::update(const UpdateData& data) {
     }
 }
 
-const bool RenderableModel::isCastingShadow() const {
+bool RenderableModel::isCastingShadow() const {
     return _castShadow;
 }
 
@@ -1362,14 +1362,15 @@ glm::dvec3 RenderableModel::center() const {
     return model * glm::dvec4(0, 0, 0, 1);
 }
 
-const std::string RenderableModel::lightsource() const {
+const std::string& RenderableModel::lightSource() const {
     return _lightSource;
 }
 
-const std::string RenderableModel::shadowGroup() const {
+const std::string& RenderableModel::shadowGroup() const {
     return _shadowGroup;
 }
-const double RenderableModel::shadowFrustumSize() const {
+
+double RenderableModel::shadowFrustumSize() const {
     return _frustumSize;
 }
 

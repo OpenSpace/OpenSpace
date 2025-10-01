@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,26 +22,27 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/base/basemodule.h>
 #include <modules/base/rendering/directionallightsource.h>
-#include <modules/base/rendering/renderablemodel.h>
 
+#include <modules/base/basemodule.h>
+#include <modules/base/rendering/renderablemodel.h>
 #include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/rendering/renderengine.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/programobjectmanager.h>
-
 #include <limits>
 
 namespace {
 
     constexpr std::string_view _loggerCat = "DirectionalLightsource";
-   
+
+    constexpr int DepthMapResolutionMultiplier = 4;
+    constexpr double ShadowFrustumDistanceMultiplier = 500.0;
+
     struct [[codegen::Dictionary(DirectionalLightsource)]] Parameters {
-      
+
     };
 #include "DirectionalLightsource_codegen.cpp"
 } // namespace
@@ -49,7 +50,7 @@ namespace {
 namespace openspace {
 
 documentation::Documentation DirectionalLightSource::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_cartesianaxes");
+    return codegen::doc<Parameters>("base_renderable_directionallightsource");
 }
 
 DirectionalLightSource::DirectionalLightSource(const ghoul::Dictionary& dictionary)
@@ -63,7 +64,8 @@ bool DirectionalLightSource::isReady() const {
 }
 
 void DirectionalLightSource::initialize() {
-    _depthMapResolution = global::renderEngine->renderingResolution() * 4;
+    _depthMapResolution =
+        global::renderEngine->renderingResolution() * DepthMapResolutionMultiplier;
 }
 
 void DirectionalLightSource::initializeGL() {
@@ -126,7 +128,12 @@ void DirectionalLightSource::render(const RenderData& data, RendererTasks&){
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
             glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-            glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, glm::value_ptr(glm::vec4(1.f, 1.f, 1.f, 1.f)));
+            const glm::vec4 borderColor(1.f, 1.f, 1.f, 1.f);
+            glTexParameterfv(
+                GL_TEXTURE_2D,
+                GL_TEXTURE_BORDER_COLOR,
+                glm::value_ptr(borderColor)
+            );
             glBindTexture(GL_TEXTURE_2D, 0);
             _depthMaps[key] = tex;
 
@@ -161,9 +168,16 @@ void DirectionalLightSource::render(const RenderData& data, RendererTasks&){
         }
 
         double sz = glm::length(vmax - vmin);
-        double d = sz * 500.;
+        double d = sz * ShadowFrustumDistanceMultiplier;
         glm::dvec3 center = vmin + (vmax - vmin) * 0.5;
-        glm::dvec3 light = parent()->modelTransform() * glm::dvec4(0.0, 0.0, 0.0, 1.0);
+
+        SceneGraphNode* parentNode = parent();
+        if (!parentNode) {
+            LERROR("DirectionalLightSource must have a parent node");
+            continue;
+        }
+
+        glm::dvec3 light = parentNode->modelTransform() * glm::dvec4(0.0, 0.0, 0.0, 1.0);
         glm::dvec3 light_dir = glm::normalize(center - light);
         glm::dvec3 right = glm::normalize(glm::cross(glm::dvec3(0, 1, 0), light_dir));
         glm::dvec3 eye = center - light_dir * d;

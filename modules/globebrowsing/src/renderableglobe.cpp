@@ -1077,8 +1077,12 @@ void RenderableGlobe::update(const UpdateData& data) {
                     _shadowersOk = false;
 
                     _shadowSpec.clear();
-                    for (const auto model : _shadowers) {
-                        _shadowSpec[model->lightsource()].push_back(model->shadowGroup());
+                    for (const RenderableModel* model : _shadowers) {
+                        const std::string& modelLightSource = model->lightSource();
+                        if (!_shadowSpec.contains(modelLightSource)) {
+                            _shadowSpec.emplace(modelLightSource, std::vector<std::string>{});
+                        }
+                        _shadowSpec.at(modelLightSource).push_back(model->shadowGroup());
                     }
                 }
                 break;
@@ -1376,7 +1380,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
                 for (const auto& grp : groups) {
                     depthMapData.push_back(
                         {
-                        .viewProjecion = src->viewProjectionMatrix(grp),
+                        .viewProjection = src->viewProjectionMatrix(grp),
                         .depthMap = src->depthMap(grp)
                         }
                     );
@@ -1518,7 +1522,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     std::vector<glm::dmat4> light_vps;
     std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTextureUnits;
     for (const DirectionalLightSource::DepthMapData& depthData : depthMapData) {
-        light_vps.push_back(depthData.viewProjecion);
+        light_vps.push_back(depthData.viewProjection);
         depthmapTextureUnits.emplace_back(ghoul::opengl::TextureUnit(), depthData.depthMap);
     }
 
@@ -1742,7 +1746,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     std::vector<glm::dmat4> light_vps;
     std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTextureUnits;
     for (const DirectionalLightSource::DepthMapData& depthData : depthMapData) {
-        light_vps.push_back(depthData.viewProjecion);
+        light_vps.push_back(depthData.viewProjection);
         depthmapTextureUnits.emplace_back(ghoul::opengl::TextureUnit(), depthData.depthMap);
     }
 
@@ -2751,21 +2755,21 @@ void RenderableGlobe::freeChunkNode(Chunk* n) {
 }
 
 std::vector<const RenderableModel*> RenderableGlobe::getShadowers(const SceneGraphNode* node) {
-	std::vector<const RenderableModel*> shadowers;
+    std::vector<const RenderableModel*> shadowers;
 
-	if (node) {
-		const RenderableModel* model = dynamic_cast<const RenderableModel*>(node->renderable());
-		if (model && model->isCastingShadow()) {
-			shadowers.push_back(model);
-		}
+    if (node) {
+        const RenderableModel* model = dynamic_cast<const RenderableModel*>(node->renderable());
+        if (model && model->isCastingShadow()) {
+            shadowers.push_back(model);
+        }
 
-		for (const SceneGraphNode* child : node->children()) {
-			std::vector<const RenderableModel*> res = getShadowers(child);
-			shadowers.insert(shadowers.end(), res.begin(), res.end());
-		}
-	}
+        for (const SceneGraphNode* child : node->children()) {
+            std::vector<const RenderableModel*> res = getShadowers(child);
+            shadowers.insert(shadowers.end(), res.begin(), res.end());
+        }
+    }
 
-	return shadowers;
+    return shadowers;
 }
 
 void RenderableGlobe::mergeChunkNode(Chunk& cn) {
