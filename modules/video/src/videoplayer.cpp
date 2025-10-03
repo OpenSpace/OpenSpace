@@ -274,7 +274,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         _goToStart.onChange([this]() { goToStart(); });
         addProperty(_goToStart);
         _loopVideo.onChange([this]() {
-            setPropertyAsyncMpv(_loopVideo ? "inf" : "no", MpvKey::Loop);
+            //setPropertyAsyncMpv(_loopVideo ? "inf" : "no", MpvKey::Loop);
         });
         addProperty(_loopVideo);
         // Audio only makes sense when the video is playing in real time
@@ -307,7 +307,8 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         { MpvKey::IsSeeking, "seeking" },
         { MpvKey::Mute, "mute" },
         { MpvKey::Seek, "seek" },
-        { MpvKey::Loop, "loop-file" }
+        { MpvKey::Loop, "loop-file" },
+        { MpvKey::EndOfFile, "eof-reached" }
     };
 
     formats = {
@@ -320,7 +321,8 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         { MpvKey::Fps, MPV_FORMAT_DOUBLE },
         { MpvKey::IsSeeking, MPV_FORMAT_FLAG },
         { MpvKey::Mute, MPV_FORMAT_STRING },
-        { MpvKey::Loop, MPV_FORMAT_STRING }
+        { MpvKey::Loop, MPV_FORMAT_STRING },
+        { MpvKey::EndOfFile, MPV_FORMAT_FLAG }
     };
 }
 
@@ -358,10 +360,12 @@ void VideoPlayer::initializeMpv() {
     // Avoiding async calls in uninitialized state
 
     // Loop video
+    /*
     if (_loopVideo && _playbackMode == PlaybackMode::RealTimeLoop) {
         // https://mpv.io/manual/master/#options-loop
         setPropertyStringMpv("loop-file", "inf");
     }
+    */
 
     // Allow only OpenGL (requires OpenGL 2.1+ or GLES 2.0+)
     // https://mpv.io/manual/master/#options-gpu-api
@@ -457,6 +461,7 @@ void VideoPlayer::initializeMpv() {
     observePropertyMpv(MpvKey::Fps);
     observePropertyMpv(MpvKey::Time);
     observePropertyMpv(MpvKey::IsSeeking);
+    observePropertyMpv(MpvKey::EndOfFile);
 
     // Render the first frame so we can see the video
     renderFrame();
@@ -487,7 +492,7 @@ void VideoPlayer::update() {
 }
 
 void VideoPlayer::renderMpv() {
-    handleMpvEvents();
+    //handleMpvEvents();
 
     // Renders a frame libmpv has been updated
     if (true) { // _wakeup
@@ -737,6 +742,18 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             }
             break;
         }
+        case MpvKey::EndOfFile: {
+            if (!prop) {
+                break;
+            }
+            int* eof = reinterpret_cast<int*>(prop->data);
+            if (*eof) {
+                seekToTime(0.0, PauseAfterSeek(true));
+                _playAtNextFrame =
+                    _loopVideo && _playbackMode == PlaybackMode::RealTimeLoop;
+            }
+            break;
+        }
         default:
             throw ghoul::MissingCaseException();
     }
@@ -754,15 +771,18 @@ void VideoPlayer::destroy() {
 }
 
 void VideoPlayer::preSync(bool isMaster) {
+    handleMpvEvents();
     _correctPlaybackTime = isMaster ? _currentVideoTime : -1.0;
 }
 
 void VideoPlayer::encode(SyncBuffer* syncBuffer) {
     syncBuffer->encode(_correctPlaybackTime);
+    syncBuffer->encode(_playAtNextFrame);
 }
 
 void VideoPlayer::decode(SyncBuffer* syncBuffer) {
     syncBuffer->decode(_correctPlaybackTime);
+    syncBuffer->decode(_playAtNextFrame);
 }
 
 void VideoPlayer::postSync(bool isMaster) {
@@ -796,6 +816,11 @@ void VideoPlayer::postSync(bool isMaster) {
         seekToTime(correctVideoPlaybackTime());
     }
     if (_mpvRenderContext && _mpvHandle) {
+        if (_isPaused && _playAtNextFrame) {
+            play();
+            _playAtNextFrame = false;
+            _isPaused = false;
+        }
         renderMpv();
     }
 

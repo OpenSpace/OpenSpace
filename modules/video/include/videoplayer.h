@@ -92,7 +92,8 @@ private:
         Mute,
         Command,
         Seek,
-        Loop
+        Loop,
+        EndOfFile
     };
     // Framebuffer
     void createTexture(glm::ivec2 size);
@@ -135,6 +136,7 @@ private:
     glm::ivec2 _videoResolution = glm::ivec2(2048, 1024); // Used for the fbos
     bool _isPaused = false;
     PlaybackMode _playbackMode = PlaybackMode::RealTimeLoop; // Default is to loop
+    bool _playAtNextFrame = false;
 
     // Maps for keeping track of libmpv commands and formats
     std::map<MpvKey, const char*> keys;
