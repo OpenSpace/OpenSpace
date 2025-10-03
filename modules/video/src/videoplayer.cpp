@@ -824,16 +824,16 @@ void VideoPlayer::postSync(bool isMaster) {
     }
 
     if (_mpvRenderContext && _mpvHandle) {
-        if (_isPaused && _adjustAtNextFrame) {
-            if (!isMaster) {
-                seekToTime(_correctPlaybackTime);
+        if (_isPaused) {
+            if (_adjustAtNextFrame) {
+                if (!isMaster) {
+                    seekToTime(_correctPlaybackTime);
+                }
             }
-            _adjustAtNextFrame = false;
-        }
-        else if (_isPaused && _playAtNextFrame) {
-            play();
-            _playAtNextFrame = false;
-            _isPaused = false;
+            if (_playAtNextFrame) {
+                play();
+                _playAtNextFrame = false;
+            }
         }
         renderMpv();
     }
