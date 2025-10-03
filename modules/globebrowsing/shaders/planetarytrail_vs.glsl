@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,36 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
-#define __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
+#version __CONTEXT__
 
-#include <openspace/scene/lightsource.h>
+layout (location = 0) in vec3 in_position_opacity;
 
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+uniform dmat4 projectionMatrix;
 
-namespace openspace {
+out VertexData {
+  float opacity;
+} vs_out;
 
-namespace documentation { struct Documentation; }
-
-class SceneGraphLightSource : public LightSource {
-public:
-    explicit SceneGraphLightSource(const ghoul::Dictionary& dictionary);
-
-    static documentation::Documentation Documentation();
-
-    bool initialize() override;
-    glm::vec3 directionViewSpace(const RenderData& renderData) const override;
-    float intensity() const override;
-	glm::dvec3 positionWorldSpace() const;
-
-private:
-    properties::FloatProperty _intensity;
-    properties::StringProperty _sceneGraphNodeReference;
-
-    SceneGraphNode* _sceneGraphNode = nullptr;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
+void main() {
+  vs_out.opacity = in_position_opacity.z;
+  vec4 pos = vec4(projectionMatrix * vec4(in_position_opacity.xy, 0, 1));
+  gl_Position = pos;
+}

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2023                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,36 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
-#define __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
+#include "fragment.glsl"
 
-#include <openspace/scene/lightsource.h>
+uniform vec3 color;
 
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+in VertexData {
+  float opacity;
+} fs_in;
 
-namespace openspace {
-
-namespace documentation { struct Documentation; }
-
-class SceneGraphLightSource : public LightSource {
-public:
-    explicit SceneGraphLightSource(const ghoul::Dictionary& dictionary);
-
-    static documentation::Documentation Documentation();
-
-    bool initialize() override;
-    glm::vec3 directionViewSpace(const RenderData& renderData) const override;
-    float intensity() const override;
-	glm::dvec3 positionWorldSpace() const;
-
-private:
-    properties::FloatProperty _intensity;
-    properties::StringProperty _sceneGraphNodeReference;
-
-    SceneGraphNode* _sceneGraphNode = nullptr;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
+Fragment getFragment() {
+  Fragment frag;
+  frag.color = vec4(color, fs_in.opacity);
+  frag.disableLDR2HDR = true;
+  return frag;
+}

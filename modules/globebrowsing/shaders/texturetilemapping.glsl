@@ -69,6 +69,7 @@
 #define SHADOW_MAPPING_ENABLED #{enableShadowMapping}
 // Show shadow from rings onto globe
 #define USE_RING_SHADOWS #{useRingShadows}
+#define USE_DEPTHMAP_SHADOWS #{useDepthmapShadows}
 
 const vec3 DefaultLevelWeights = vec3(1.0, 0.0, 0.0);
 
@@ -167,6 +168,12 @@ vec4 getSample#{layerGroup}#{i}(vec2 uv, vec3 levelWeights,
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
 #elif (#{#{layerGroup}#{i}LayerType} == 11) // VideoTileProvider
   c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
+#elif (#{#{layerGroup}#{i}LayerType} == 12) // PlanetaryTrailTileProvider
+  c = getTexVal(#{layerGroup}[#{i}].pile, levelWeights, uv);
+#elif (#{#{layerGroup}#{i}LayerType} == 13) // ForceHighResolutionTileProvider
+  // does nothing but uses variables to avoid compilation warnings....
+  LayerSettings settings = #{layerGroup}[#{i}].settings;
+  c *= settings.gamma * settings.multiplier * min(settings.opacity, 0);
 #endif
 
   return c;

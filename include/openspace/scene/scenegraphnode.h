@@ -139,6 +139,8 @@ public:
     double reachFactor() const;
     double approachFactor() const;
 
+    double followRotationDistance() const;
+
     bool supportsDirectInteraction() const;
 
     SceneGraphNode* childNode(const std::string& id);
@@ -217,6 +219,7 @@ private:
     properties::DoubleProperty _screenSizeRadius;
     properties::FloatProperty _visibilityDistance;
     properties::BoolProperty _supportsDirectInteraction;
+    properties::DoubleProperty _followRotationDistance;
 
     // This variable is used for the rate-limiting of the screenspace positions (if they
     // are calculated when _computeScreenSpaceValues is true)
