@@ -33,6 +33,7 @@
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -83,7 +84,8 @@ private:
     Timestep* timestepFromIndex(int target);
     void jumpToTimestep(int target);
 
-    void loadTimestepMetadata(const std::filesystem::path& path);
+    void loadTimestepMetadata(const std::filesystem::path& path, float& globalMin,
+        float& globalMax);
 
     glm::mat4 calculateModelTransform();
     void createPlane() const;
@@ -104,6 +106,8 @@ private:
 
     properties::TriggerProperty _triggerTimeJump;
     properties::IntProperty _jumpToTimestep;
+    properties::Vec2Property _valueRange;
+    properties::BoolProperty _hideOutsideRange;
 
     std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
@@ -112,7 +116,7 @@ private:
 
     struct VolumeSliceSettings : properties::PropertyOwner {
         VolumeSliceSettings();
-        
+
         properties::Vec3Property normal;
         properties::FloatProperty offset;
         properties::BoolProperty shouldRenderSlice;

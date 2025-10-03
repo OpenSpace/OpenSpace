@@ -89,6 +89,8 @@ public:
     VolumeGridType gridType() const;
     void setGridType(VolumeGridType gridType);
     void setModelTransform(glm::mat4 transform);
+    void setValueRange(glm::vec2 range);
+    void setHideOutsideRange(bool value);
 
 private:
     glm::dmat4 modelViewTransform(const RenderData& data);
@@ -102,6 +104,8 @@ private:
     float _brightness = 1.f;
     float _rNormalization = 0.f;
     float _rUpperBound = 1.f;
+    glm::vec2 _valueRange = glm::vec2(0.f);
+    bool _hideOutsideRange = false;
 
     std::unique_ptr<ghoul::opengl::TextureUnit> _tfUnit;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;

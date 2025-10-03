@@ -157,6 +157,23 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo RangeInfo = {
+        "ValueRange",
+        "Value Range",
+        "The range of values to use in the color mapping. The lowest value will be "
+        "mapped to the first color in the color map.",
+        openspace::properties::Property::Visibility::AdvancedUser
+
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo HideOutsideInfo = {
+        "HideValuesOutsideRange",
+        "Hide values outside range",
+        "If ture, density values outside the provided range will be hidden, i.e., not "
+        "rendered at all.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {
         // [[codegen::verbatim(SourceDirectoryInfo.description)]]
         std::filesystem::path sourceDirectory [[codegen::directory()]];
@@ -193,6 +210,12 @@ namespace {
 
         // [[codegen::verbatim(ShowVolumeSliceInfo.description)]]
         std::optional<bool> showVolumeSlice;
+
+        // [[codegen::verbatim(RangeInfo.description)]]
+        std::optional<glm::vec2> valueRange;
+
+        // [[codegen::verbatim(HideOutsideInfo.description)]]
+        std::optional<bool> hideValuesOutsideRange;
     };
 #include "renderabletimevaryingvolume_codegen.cpp"
 } // namespace
@@ -224,7 +247,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridType(GridTypeInfo)
-    , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
+    , _stepSize(StepSizeInfo, 0.01f, 0.001f, 0.1f, 0.001f)
     , _brightness(BrightnessInfo, 0.33f, 0.f, 1.f)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
     , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
@@ -235,6 +258,8 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
     , _invertDataAtZ(false)
+    , _valueRange(RangeInfo, glm::vec2(0.f))
+    , _hideOutsideRange(HideOutsideInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -286,6 +311,12 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     });
 
     addPropertySubOwner(_volumeSlice);
+
+    _valueRange = p.valueRange.value_or(_valueRange);
+    _hideOutsideRange = p.hideValuesOutsideRange.value_or(false);
+
+    addProperty(_valueRange);
+    addProperty(_hideOutsideRange);
 }
 
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
@@ -299,13 +330,23 @@ void RenderableTimeVaryingVolume::initializeGL() {
     }
 
     namespace fs = std::filesystem;
-    double timestep = 0.0;
+
+    // VTI specific until we decide on a meta data format that can be read
+    const int nVtiSamples = 191;
+    const int VtiSimulationTime = 48; // seconds
+    double deltaTimeStep = static_cast<double>(VtiSimulationTime) / static_cast<double>(nVtiSamples);
+    int step = 0;
+
+    float globalMin = std::numeric_limits<float>::max();
+    float globalMax = std::numeric_limits<float>::lowest();
+
     for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
         if (e.is_regular_file() && e.path().extension() == ".dictionary") {
-            loadTimestepMetadata(e.path());
+            loadTimestepMetadata(e.path(), globalMin, globalMax);
         }
         if (e.is_regular_file() && e.path().extension() == ".vti") {
-            const auto [metadata, scalars] = readVTIFile(e.path(), timestep++);
+            double timestep = Time::convertTime(std::format("2023-03-23T20:29:{:02}", deltaTimeStep * step++));
+            const auto [metadata, scalars] = readVTIFile(e.path(), timestep);
 
             Timestep t;
             t.metadata = metadata;
@@ -313,6 +354,10 @@ void RenderableTimeVaryingVolume::initializeGL() {
             t.inRam = false;
             t.onGpu = false;
             t.rawData = scalars;
+
+
+            globalMin = std::min(globalMin, t.metadata.minValue);
+            globalMax = std::max(globalMax, t.metadata.maxValue);
 
             _volumeTimesteps[t.metadata.time] = std::move(t);
         }
@@ -329,30 +374,44 @@ void RenderableTimeVaryingVolume::initializeGL() {
             );
             RawVolumeReader<float> reader(path, t.metadata.dimensions);
             t.rawVolume = reader.read(_invertDataAtZ);
+            for (size_t i = 0; i < t.metadata.dimensions.x * t.metadata.dimensions.y * t.metadata.dimensions.z; i++) {
+                float d = t.rawVolume->data()[i];
+                globalMin = std::min(globalMin, d);
+                globalMax = std::max(globalMax, d);
+            }
         }
-
-        const float min = t.metadata.minValue;
-        const float diff = t.metadata.maxValue - t.metadata.minValue;
 
         float* data;
         // We've read data from binary file
         if (t.rawVolume) {
-            data = t.rawVolume->data();
-            for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-                data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
-            }
+            //const float min = t.metadata.minValue;
+            //const float diff = t.metadata.maxValue - t.metadata.minValue;
+            const float min = globalMin;
+            const float diff = globalMax - globalMin;
+            //_valueRange = glm::vec2(t.metadata.minValue, t.metadata.maxValue);
+            _valueRange = glm::vec2(globalMin, globalMax);
 
-            t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
-            for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-                t.histogram->add(data[i]);
-            }
+            data = t.rawVolume->data();
+            //for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
+            //    data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
+            //}
+
+            //t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
+            //for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
+            //    t.histogram->add(data[i]);
+            //}
         }
         // Data came from xml file
         else {
+            const float min = globalMin;
+            const float diff = globalMax - globalMin;
+
+            _valueRange = glm::vec2(globalMin, globalMax);
+
             data = t.rawData.data();
-            for (size_t i = 0; i < t.rawData.size(); i++) {
-                data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
-            }
+            //for (size_t i = 0; i < t.rawData.size(); i++) {
+            //    data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
+            //}
         }
         // TODO: handle normalization properly for different timesteps + transfer function
 
@@ -360,7 +419,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
             t.metadata.dimensions,
             GL_TEXTURE_3D,
             ghoul::opengl::Texture::Format::Red,
-            GL_RED,
+            GL_R32F,
             GL_FLOAT,
             ghoul::opengl::Texture::FilterMode::Linear,
             ghoul::opengl::Texture::WrappingMode::Clamp
@@ -441,7 +500,8 @@ void RenderableTimeVaryingVolume::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
-void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::filesystem::path& path)
+void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::filesystem::path& path,
+                                                       float& globalMin, float& globalMax)
 {
     RawVolumeMetadata metadata;
 
@@ -462,6 +522,9 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::filesystem::pa
     t.baseName = path.stem();
     t.inRam = false;
     t.onGpu = false;
+
+    globalMin = std::min(t.metadata.minValue, globalMin);
+    globalMax = std::max(t.metadata.maxValue, globalMax);
 
     _volumeTimesteps[t.metadata.time] = std::move(t);
 }
@@ -566,6 +629,8 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
         _raycaster->setBrightness(_brightness * opacity());
         _raycaster->setRNormalization(_rNormalization);
         _raycaster->setRUpperBound(_rUpperBound);
+        _raycaster->setValueRange(_valueRange);
+        _raycaster->setHideOutsideRange(_hideOutsideRange);
     }
 }
 
@@ -625,13 +690,13 @@ glm::mat4 RenderableTimeVaryingVolume::calculateModelTransform() {
 
 void RenderableTimeVaryingVolume::createPlane() const {
     const std::array<GLfloat, 36> vertexData = {
-    //   x     y  
+    //   x     y
         -1.f, -1.f,
          1.f,  1.f,
         -1.f,  1.f,
         -1.f, -1.f,
          1.f, -1.f,
-         1.f,  1.f, 
+         1.f,  1.f,
     };
 
     glBindVertexArray(_quad);
@@ -682,7 +747,7 @@ void RenderableTimeVaryingVolume::renderVolumeSlice(const RenderData& data) {
     _shader->setUniform(_uniformCache.transferFunction, transferFunctionUnit);
 
     if (_slicePlaneIsDirty) {
-        // Create basis to convert points on the 2D plane into volume 3D coordinates 
+        // Create basis to convert points on the 2D plane into volume 3D coordinates
         glm::vec3 n = glm::normalize(_volumeSlice.normal.value());
 
         glm::vec3 up = glm::abs(n.z) < 0.999f ? glm::vec3(0.f, 0.f, 1.f)
@@ -691,7 +756,7 @@ void RenderableTimeVaryingVolume::renderVolumeSlice(const RenderData& data) {
         glm::vec3 tangent = glm::normalize(glm::cross(up, n));
         glm::vec3 bitangent = glm::normalize(glm::cross(n, tangent));
 
-        _basisTransform = glm::mat3(tangent, bitangent, n); 
+        _basisTransform = glm::mat3(tangent, bitangent, n);
     }
 
     _shader->setUniform(_uniformCache.basis, _basisTransform);
