@@ -143,6 +143,7 @@ namespace {
 namespace openspace {
 
 void VideoPlayer::onMpvRenderUpdate(void* ctx) {
+    ZoneScopedN("WAKE UP");
     // The wakeup flag is set here to enable the mpv_render_context_render
     // path in the main loop.
     // The pattern here with a static function and a void pointer to the the class
@@ -483,42 +484,13 @@ void VideoPlayer::update() {
     if (_isDestroying) {
         return;
     }
-
-    if (global::sessionRecordingHandler->isSavingFramesDuringPlayback()) {
-        const double dt =
-            global::sessionRecordingHandler->fixedDeltaTimeDuringFrameOutput();
-        if (_playbackMode == PlaybackMode::MapToSimulationTime) {
-            _currentVideoTime = correctVideoPlaybackTime();
-        }
-        else {
-            _currentVideoTime = _currentVideoTime + dt;
-        }
-
-        const MpvKey key = MpvKey::Time;
-        mpv_set_property(_mpvHandle, keys[key], formats[key], &_currentVideoTime);
-
-        uint64_t result = mpv_render_context_update(_mpvRenderContext);
-        while ((result & MPV_RENDER_UPDATE_FRAME) == 0) {
-            renderFrame();
-
-            result = mpv_render_context_update(_mpvRenderContext);
-        }
-        return;
-    }
-
-    if (_playbackMode == PlaybackMode::MapToSimulationTime) {
-        seekToTime(correctVideoPlaybackTime());
-    }
-    if (_mpvRenderContext && _mpvHandle) {
-        renderMpv();
-    }
 }
 
 void VideoPlayer::renderMpv() {
     handleMpvEvents();
 
     // Renders a frame libmpv has been updated
-    if (_wakeup) {
+    if (true) { // _wakeup
         const uint64_t result = mpv_render_context_update(_mpvRenderContext);
         if ((result & MPV_RENDER_UPDATE_FRAME)) {
             renderFrame();
@@ -528,6 +500,7 @@ void VideoPlayer::renderMpv() {
 }
 
 void VideoPlayer::renderFrame() {
+    ZoneScopedN("RENDER MPV FRAME");
     // Save the currently bound fbo
     const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
 
@@ -796,11 +769,41 @@ void VideoPlayer::postSync(bool isMaster) {
     if (_correctPlaybackTime < 0.0) {
         return;
     }
+
+    if (global::sessionRecordingHandler->isSavingFramesDuringPlayback()) {
+        const double dt =
+            global::sessionRecordingHandler->fixedDeltaTimeDuringFrameOutput();
+        if (_playbackMode == PlaybackMode::MapToSimulationTime) {
+            _currentVideoTime = correctVideoPlaybackTime();
+        }
+        else {
+            _currentVideoTime = _currentVideoTime + dt;
+        }
+
+        const MpvKey key = MpvKey::Time;
+        mpv_set_property(_mpvHandle, keys[key], formats[key], &_currentVideoTime);
+
+        uint64_t result = mpv_render_context_update(_mpvRenderContext);
+        while ((result & MPV_RENDER_UPDATE_FRAME) == 0) {
+            renderFrame();
+
+            result = mpv_render_context_update(_mpvRenderContext);
+        }
+        return;
+    }
+
+    if (_playbackMode == PlaybackMode::MapToSimulationTime) {
+        seekToTime(correctVideoPlaybackTime());
+    }
+    if (_mpvRenderContext && _mpvHandle) {
+        renderMpv();
+    }
+
     // Ensure the nodes have the same time as the master node
     const bool isMappingTime = _playbackMode == PlaybackMode::MapToSimulationTime;
     if (!isMaster) {
         if ((_correctPlaybackTime - _currentVideoTime) > glm::epsilon<double>()) {
-            seekToTime(_correctPlaybackTime, PauseAfterSeek(isMappingTime));
+            //seekToTime(_correctPlaybackTime, PauseAfterSeek(isMappingTime));
         }
     }
 }
