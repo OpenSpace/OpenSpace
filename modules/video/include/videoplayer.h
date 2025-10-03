@@ -136,7 +136,6 @@ private:
     glm::ivec2 _videoResolution = glm::ivec2(2048, 1024); // Used for the fbos
     bool _isPaused = false;
     PlaybackMode _playbackMode = PlaybackMode::RealTimeLoop; // Default is to loop
-    bool _playAtNextFrame = false;
 
     // Maps for keeping track of libmpv commands and formats
     std::map<MpvKey, const char*> keys;
@@ -144,6 +143,8 @@ private:
 
     // Syncing with multiple nodes
     double _correctPlaybackTime = 0.0;
+    bool _playAtNextFrame = false;
+    bool _adjustAtNextFrame = false;
 
     // Video stretching: map to simulation time animation mode
     double _startJ200Time = 0.0;

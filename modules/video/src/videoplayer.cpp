@@ -393,6 +393,10 @@ void VideoPlayer::initializeMpv() {
     // https://mpv.io/manual/master/#options-video-timing-offset
     setPropertyStringMpv("video-timing-offset", "0");
 
+    // Use precise seek whenever possible (slower than default behaviour)
+    // https://mpv.io/manual/master/#options-hr-seek
+    setPropertyStringMpv("hr-seek", "yes");
+
     // Turn off audio as default
     setPropertyStringMpv("mute", "yes");
 
@@ -726,6 +730,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             }
             int* videoIsPaused = reinterpret_cast<int*>(prop->data);
             _isPaused = (* videoIsPaused == 1);
+            _adjustAtNextFrame = _isPaused;
             break;
         }
         case MpvKey::Meta: {
@@ -778,11 +783,13 @@ void VideoPlayer::preSync(bool isMaster) {
 void VideoPlayer::encode(SyncBuffer* syncBuffer) {
     syncBuffer->encode(_correctPlaybackTime);
     syncBuffer->encode(_playAtNextFrame);
+    syncBuffer->encode(_adjustAtNextFrame);
 }
 
 void VideoPlayer::decode(SyncBuffer* syncBuffer) {
     syncBuffer->decode(_correctPlaybackTime);
     syncBuffer->decode(_playAtNextFrame);
+    syncBuffer->decode(_adjustAtNextFrame);
 }
 
 void VideoPlayer::postSync(bool isMaster) {
@@ -815,8 +822,15 @@ void VideoPlayer::postSync(bool isMaster) {
     if (_playbackMode == PlaybackMode::MapToSimulationTime) {
         seekToTime(correctVideoPlaybackTime());
     }
+
     if (_mpvRenderContext && _mpvHandle) {
-        if (_isPaused && _playAtNextFrame) {
+        if (_isPaused && _adjustAtNextFrame) {
+            if (!isMaster) {
+                seekToTime(_correctPlaybackTime);
+            }
+            _adjustAtNextFrame = false;
+        }
+        else if (_isPaused && _playAtNextFrame) {
             play();
             _playAtNextFrame = false;
             _isPaused = false;
