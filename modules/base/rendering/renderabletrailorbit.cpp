@@ -408,7 +408,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             else {
                 // Move the current pointer fowards one step  to be used as the new
                 // floating
-                ++_primaryRenderInformation.first;
+                _primaryRenderInformation.first++;
             }
         }
 

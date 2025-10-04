@@ -769,7 +769,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _lightDirectionsViewSpaceBuffer[nLightSources] =
             lightSource->directionViewSpace(data);
 
-        ++nLightSources;
+        nLightSources++;
     }
 
     if (_uniformCache.performShading != -1) {

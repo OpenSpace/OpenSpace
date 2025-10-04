@@ -624,7 +624,7 @@ void RenderableFluxNodes::populateStartTimes() {
     std::string columnName;
     // loops through the names/columns in first line/header
     while (s >> columnName) {
-        ++nColumns;
+        nColumns++;
     }
     while (ghoul::getline(tfs, line)) {   // for each line of data
         std::istringstream iss(line);
