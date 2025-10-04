@@ -62,7 +62,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DisplayStringInfo = {
         "DisplayString",
-        "Display String",
+        "Display string",
         "The String that is being displayed. It must either be empty (in which case only "
         "the value itself will be displayed), or it must contain extact one or more "
         "instances of {}, which will be replaced with the value(s) of the property "

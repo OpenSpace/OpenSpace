@@ -80,6 +80,7 @@ local OrionNebulaModel = {
   GUI = {
     Name = "Orion Nebula Model",
     Path = "/Milky Way/Orion",
+    Focusable = false,
     Description = "Orion Nebula 3D model. See Orion Nebula for description"
   }
 }
@@ -114,6 +115,7 @@ local OrionNebulaShocksModel = {
   GUI = {
     Name = "Orion Nebula Shocks",
     Path = "/Milky Way/Orion",
+    Focusable = false,
     Description = "Orion Nebula Shocks 3D model. See Orion Nebula for description"
   }
 }
@@ -148,6 +150,7 @@ local OrionNebulaProplydsModel = {
   GUI = {
     Name = "Orion Nebula Proplyds",
     Path = "/Milky Way/Orion",
+    Focusable = false,
     Description = "Orion Nebula Proplyds 3D model. See Orion Nebula for description"
   }
 }

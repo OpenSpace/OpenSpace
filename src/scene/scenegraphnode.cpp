@@ -47,7 +47,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ComputeScreenSpaceInfo = {
         "ComputeScreenSpaceData",
-        "Compute Screen Space Data",
+        "Compute screen space data",
         "If this value is set to 'true', the screenspace-based properties are calculated "
         "at regular intervals. If these values are set to 'false', they are not updated.",
         openspace::properties::Property::Visibility::Developer
@@ -55,35 +55,35 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSpacePositionInfo = {
         "ScreenSpacePosition",
-        "ScreenSpacePosition",
+        "ScreenSpace position",
         "The x,y position in screen space. Can be used for placing GUI elements.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenVisibilityInfo = {
         "ScreenVisibility",
-        "ScreenVisibility",
+        "Screen visibility",
         "Determines if the node is currently visible on screen.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceFromCamToNodeInfo = {
         "DistanceFromCamToNode",
-        "DistanceFromCamToNode",
+        "Distance from camera to node",
         "The distance from the camera to the node surface.",
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScreenSizeRadiusInfo = {
         "ScreenSizeRadius",
-        "ScreenSizeRadius",
+        "Screen size radius",
         "The screen size of the radius of the node.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo VisibilityDistanceInfo = {
         "VisibilityDistance",
-        "VisibilityDistance",
+        "Visibility distance",
         "The distace in world coordinates between node and camera at which the "
         "screenspace object will become visible.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -91,7 +91,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BoundingSphereInfo = {
         "BoundingSphere",
-        "Bounding Sphere",
+        "Bounding sphere",
         "The bounding sphere of the scene graph node meaning that everything that this "
         "scene graph node renders must be contained within this sphere. This value is "
         "only used as an override to the bounding sphere calculated by the Renderable, "
@@ -102,7 +102,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo InteractionSphereInfo = {
         "InteractionSphere",
-        "Interaction Sphere",
+        "Interaction sphere",
         "The minimum radius that the camera is allowed to get close to this scene graph "
         "node. This value is only used as an override to the bounding sphere calculated "
         "by the Renderable, if present. If this value is -1, the Renderable's computed "
@@ -112,7 +112,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EvalBoundingSphereInfo = {
         "EvaluatedBoundingSphere",
-        "Evaluated Bounding Sphere",
+        "Evaluated bounding sphere",
         "This read-only property contains the evaluated value for the bounding sphere. "
         "This is the actual value that is used internally within the software. If the "
         "BoundingSphere property is set to -1, it is the computed value, otherwise it "
@@ -122,7 +122,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EvalInteractionSphereInfo = {
         "EvaluatedInteractionSphere",
-        "Evaluated Interaction Sphere",
+        "Evaluated interaction sphere",
         "This read-only property contains the evaluated value for the interaction "
         "sphere. This is the actual value that is used internally within the software. "
         "If the InteractionSphere property is set to -1, it is the computed value, "
@@ -132,7 +132,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ApproachFactorInfo = {
         "ApproachFactor",
-        "Approach Factor",
+        "Approach factor",
         "This value is a multiplication factor for the interaction sphere that "
         "determines when the camera is 'approaching' the scene graph node.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -140,7 +140,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ReachFactorInfo = {
         "ReachFactor",
-        "Reach Factor",
+        "Reach factor",
         "This value is a multiplication factor for the interaction sphere that "
         "determines when the camera has 'reached' the scene graph node.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -148,7 +148,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GuiPathInfo = {
         "GuiPath",
-        "Gui Path",
+        "GUI path",
         "This is the path for the scene graph node in the gui example: "
         "/Solar System/Planets/Earth.",
         openspace::properties::Property::Visibility::Hidden
@@ -156,14 +156,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GuiNameInfo = {
         "GuiName",
-        "Gui Name",
+        "GUI name",
         "This is the name for the scene graph node in the gui. Example: Earth.",
         openspace::properties::Property::Visibility::Hidden
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
         "GuiDescription",
-        "Gui Description",
+        "GUI description",
         "This is the description for the scene graph node to be shown in the gui. "
         "Example: Earth is a special place.",
         openspace::properties::Property::Visibility::Hidden
@@ -171,7 +171,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GuiHiddenInfo = {
         "GuiHidden",
-        "Gui Hidden",
+        "GUI hidden",
         "This represents if the scene graph node should be shown in the gui. "
         "Example: false.",
         openspace::properties::Property::Visibility::Hidden
@@ -179,7 +179,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GuiOrderInfo = {
         "GuiOrderingNumber",
-        "Gui Ordering Number",
+        "GUI ordering number",
         "This is an optional numerical value that will affect the sorting of this scene "
         "graph node in relation to its neighbors in the GUI. Nodes with the same value "
         "will be sorted alphabetically.",
@@ -188,7 +188,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseGuiOrderInfo = {
         "UseGuiOrdering",
-        "Use Gui Ordering",
+        "Use GUI ordering",
         "If true, use the 'GuiOrderingNumber' to place this scene graph node in a "
         "sorted way in relation to its neighbors in the GUI",
         openspace::properties::Property::Visibility::Hidden
@@ -205,7 +205,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShowDebugSphereInfo = {
         "ShowDebugSphere",
-        "Show Debug Sphere",
+        "Show debug sphere",
         "If enabled the bounding sphere of this scene graph node is rendered as a debug "
         "method. The interaction sphere is rendered in cyan and the bounding sphere in "
         "purple. If only one is visible, this may be because the spheres have equal "
@@ -217,7 +217,7 @@ namespace {
         SupportsDirectInteractionInfo =
     {
         "SupportsDirectInteraction",
-        "Supports Direct Interaction",
+        "Supports direct interaction",
         "Only relevant when using touch interaction. If true, the \'direct "
         "manipulation\' scheme will be used when interacting with this scene graph "
         "node, meaning that the positions on the interaction sphere that intersects "

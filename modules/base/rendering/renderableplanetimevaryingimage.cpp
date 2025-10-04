@@ -42,7 +42,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SourceFolderInfo = {
         "SourceFolder",
-        "Source Folder",
+        "Source folder",
         "An image directory that is loaded from disk and contains the textures to use "
         "for this plane.",
        openspace::properties::Property::Visibility::AdvancedUser

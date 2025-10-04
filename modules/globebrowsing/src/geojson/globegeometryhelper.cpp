@@ -103,7 +103,7 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
     vertices.reserve(nVerts * 3);
 
     // Extrude polygon
-    for (size_t nBound = 0; nBound < edgeVertices.size(); ++nBound) {
+    for (size_t nBound = 0; nBound < edgeVertices.size(); nBound++) {
         const std::vector<glm::vec3>& boundary = edgeVertices[nBound];
         for (size_t i = 1; i < boundary.size(); i++) {
             const glm::vec3& v0 = boundary[i - 1];
@@ -190,7 +190,7 @@ std::vector<PosHeightPair> subdivideLine(const glm::dvec3& v0, const glm::dvec3&
         positions.push_back({ glm::vec3(v0), h0 });
     }
 
-    for (int seg = 0; seg < nSegments; ++seg) {
+    for (int seg = 0; seg < nSegments; seg++) {
         const double t = static_cast<double>(seg) / static_cast<double>(nSegments);
 
         // Interpolate both position and height value

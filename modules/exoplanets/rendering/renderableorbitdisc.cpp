@@ -75,7 +75,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
-        "Multiply Color",
+        "Multiply color",
         "If set, the disc's texture is multiplied with this color. Useful for applying a "
         "color grayscale images.",
         openspace::properties::Property::Visibility::NoviceUser

@@ -184,7 +184,7 @@ std::string TransferFunction::serializedToString() const {
         return "";
     }
     json j;
-    for (auto envIter = _envelopes.begin(); envIter != _envelopes.end(); ++envIter) {
+    for (auto envIter = _envelopes.begin(); envIter != _envelopes.end(); envIter++) {
         j[std::distance(_envelopes.begin(), envIter)] = { envIter->jsonEnvelope() };
     }
     return j.dump();
@@ -216,7 +216,7 @@ bool TransferFunction::createTexture(ghoul::opengl::Texture& ptr) {
         rgbFromEnvelopes /= (count == 0) ? 1.f : static_cast<float>(count);
         rgbFromEnvelopes.w = alpha;
 
-        for (int channel = 0; channel < 4; ++channel) {
+        for (int channel = 0; channel < 4; channel++) {
             const int p = 4 * i + channel;
             const float value = rgbFromEnvelopes[channel];
             transferFunction[p] = value;

@@ -25,6 +25,8 @@ local Node = {
     ArrowHeadSize = 0.25,
     -- Set the arrow head width. A value of 1 makes it as wide as the body of the arrow
     ArrowHeadWidthFactor = 1.0,
+    -- How long should the arrow be (meters)
+    Length = 5 * 6371000.0,
     -- How wide should the arrow be (meters)
     Width = 1000000.0
   },

@@ -88,7 +88,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineLengthInfo = {
         "LineLength",
-        "Line Length",
+        "Line length",
         "The extent of the rendered trail. A value of 0 will result in no trail and a "
         "value of 1 will result in a trail that covers the entire extent. The setting "
         "only applies if 'EnableFade' is true. If it is false, this setting has "
@@ -98,10 +98,10 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineFadeAmountInfo = {
         "LineFadeAmount",
-        "Line Fade Amount",
+        "Line fade amount",
         "The amount of the trail that should be faded. If the value is 0 then the "
         "trail will have no fading applied. A value of 0.6 will result in a trail "
-        "where 60% of the extent of the trail will have fading applied to it. In other"
+        "where 60% of the extent of the trail will have fading applied to it. In other "
         "words, the 40% closest to the head of the trail will be solid and the rest "
         "will fade until completely transparent at the end of the trail. A value of 1 "
         "will result in a trail that starts fading immediately, becoming fully "
@@ -112,7 +112,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "Specifies the line width of the trail lines, if the selected rendering method "
         "includes lines. If the rendering mode is Points, this value is ignored.",
         openspace::properties::Property::Visibility::User
@@ -120,7 +120,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
         "PointSize",
-        "Point Size",
+        "Point size",
         "Specifies the base size of the points along the line, if the selected rendering "
         "method includes points. If the rendering mode is Lines, this value is ignored. "
         "If a subsampling of the values is performed, the subsampled values are half "
@@ -130,7 +130,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
-        "Rendering Mode",
+        "Rendering mode",
         "Determines how the trail should be rendered. If 'Lines' is selected, only the "
         "line part is visible, if 'Points' is selected, only the corresponding points "
         "(and subpoints) are shown. 'Lines+Points' shows both parts.",

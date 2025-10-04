@@ -60,7 +60,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GoToStartInfo = {
         "GoToStart",
-        "Go To Start",
+        "Go To start",
         "Sets the time to the beginning of the video and pauses it."
     };
 
@@ -73,27 +73,27 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AudioInfo = {
         "PlayAudio",
-        "Play Audio",
+        "Play audio",
         "Play audio."
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {
         "StartTime",
-        "Start Time",
+        "Start time",
         "The date and time that the video should start in the format "
         "'YYYY MM DD hh:mm:ss'."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndTimeInfo = {
         "EndTime",
-        "End Time",
+        "End time",
         "The date and time that the video should end in the format "
         "'YYYY MM DD hh:mm:ss'."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LoopVideoInfo = {
         "LoopVideo",
-        "Loop Video",
+        "Loop video",
         "If checked, the video is continues playing from the start when it reaches the "
         "end of the video."
     };

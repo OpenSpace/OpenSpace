@@ -220,9 +220,9 @@ void AtlasManager::fillVolume(float* in, float* out, unsigned int linearAtlasCoo
     unsigned int zMax = zMin + _paddedBrickDim;
 
     unsigned int from = 0;
-    for (unsigned int zValCoord = zMin; zValCoord<zMax; ++zValCoord) {
-        for (unsigned int yValCoord = yMin; yValCoord<yMax; ++yValCoord) {
-            for (unsigned int xValCoord = xMin; xValCoord<xMax; ++xValCoord) {
+    for (unsigned int zValCoord = zMin; zValCoord<zMax; zValCoord++) {
+        for (unsigned int yValCoord = yMin; yValCoord<yMax; yValCoord++) {
+            for (unsigned int xValCoord = xMin; xValCoord<xMax; xValCoord++) {
                 unsigned int idx = xValCoord + yValCoord * _atlasDim +
                                    zValCoord * _atlasDim * _atlasDim;
 

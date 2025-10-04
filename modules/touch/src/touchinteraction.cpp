@@ -94,7 +94,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TouchScreenSizeInfo = {
         "TouchScreenSize",
-        "Touch Screen size in inches",
+        "Touch screen size in inches",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -207,7 +207,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ZoomOutLimitInfo = {
         "ZoomOutLimit",
-        "Zoom Out Limit",
+        "Zoom out Limit",
         "The maximum distance you are allowed to navigate away from the anchor. "
         "This should always be larger than the zoom in value if you want to be able "
         "to zoom. Defaults to maximum allowed double.",
@@ -216,7 +216,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ZoomInLimitInfo = {
         "ZoomInLimit",
-        "Zoom In Limit",
+        "Zoom in Limit",
         "The minimum distance from the anchor that you are allowed to navigate to. "
         "Its purpose is to limit zooming in on a node. If this value is not set it "
         "defaults to the surface of the current anchor.",
@@ -1081,8 +1081,9 @@ void TouchInteraction::step(double dt, bool directTouch) {
         global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
 
 #ifdef TOUCH_DEBUG_PROPERTIES
-        //Show velocity status every N frames
-        if (++stepVelUpdate >= 60) {
+        // Show velocity status every N frames
+        stepVelUpdate++;
+        if (stepVelUpdate >= 60) {
             stepVelUpdate = 0;
             LINFO(std::format(
                 "DistToFocusNode {} stepZoomVelUpdate {}",

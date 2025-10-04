@@ -50,14 +50,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
-        "Source Type",
+        "Source type",
         "The type of position that is used as the source to calculate the distance.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SourceNodeIdentifierInfo = {
         "SourceNodeIdentifier",
-        "Source Node Identifier",
+        "Source node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the source for computing the distance.",
         openspace::properties::Property::Visibility::User
@@ -65,7 +65,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
         "DestinationType",
-        "Destination Type",
+        "Destination type",
         "The type of position that is used as the destination to calculate the distance.",
         openspace::properties::Property::Visibility::User
     };
@@ -74,7 +74,7 @@ namespace {
         DestinationNodeIdentifierInfo =
     {
         "DestinationNodeIdentifier",
-        "Destination Node Identifier",
+        "Destination node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the destination for computing the distance.",
         openspace::properties::Property::Visibility::User
@@ -91,7 +91,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
-        "Requested Unit",
+        "Requested unit",
         "If the simplification is disabled, this distance unit is used as a destination "
         "to convert the meters into.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -99,7 +99,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
         "FormatString",
-        "Format String",
+        "Format string",
         "The format string that is used for formatting the distance string.  This format "
         "receives four parameters:  The name of the source, the name of the destination "
         "the value of the distance and the unit of the distance.",

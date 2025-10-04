@@ -40,7 +40,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "FilePath",
-        "File Path",
+        "File path",
         "The file path to the data containing information about when to display which "
         "image.",
         openspace::properties::Property::Visibility::User

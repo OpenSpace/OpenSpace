@@ -39,7 +39,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
         "TravelSpeed",
-        "Speed of Travel",
+        "Speed of travel",
         "A value for how fast the speed indicator should travel, in meters per second. "
         "The default value is the speed of light.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -47,7 +47,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
         "TargetNode",
-        "Target Object",
+        "Target object",
         "The identifier of the scene graph node to target with the speed indicator. The "
         "speed indicator will travel from the parent node to this scene graph node.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -62,14 +62,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "This value specifies the line width.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IndicatorLengthInfo = {
         "IndicatorLength",
-        "Indicator Length",
+        "Indicator length",
         "The length of the speed indicator line, given in seconds. The length will be "
         "computed as the speed times this value. For example, a value of 1 will make it "
         "as long as the distance it would travel over one second with the specified "
@@ -79,7 +79,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeLengthInfo = {
         "FadeLength",
-        "Fade Length",
+        "Fade length",
         "The length of the faded tail of the speed indicator, given in seconds. The "
         "length of the tail will be computed as the speed times this value. For example, "
         "a value of 1 will make it as long as the distance it would travel over one "

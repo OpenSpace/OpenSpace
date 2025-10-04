@@ -33,8 +33,6 @@
 namespace openspace {
 
 struct Settings {
-    auto operator<=>(const Settings&) const = default;
-
     // Settings that are not configurable by the user and that represent a persistent
     // state for the system
     std::optional<bool> hasStartedBefore;
@@ -50,12 +48,14 @@ struct Settings {
     std::optional<Configuration::LayerServer> layerServer;
 
     struct MRF {
-        auto operator<=>(const MRF&) const = default;
-
         std::optional<bool> isEnabled;
         std::optional<std::string> location;
+
+        bool operator==(const MRF&) const noexcept = default;
     };
     MRF mrf;
+
+    bool operator==(const Settings&) const noexcept = default;
 };
 
 std::filesystem::path findSettings(const std::string& filename = "settings.json");

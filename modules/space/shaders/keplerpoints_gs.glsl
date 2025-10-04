@@ -54,8 +54,8 @@ void main() {
   float v1Frac = vertexRevolutionFraction[1];
 
   // Interpolate position of current position of the trail head
-  float dFrac = abs(cFrac - v0Frac);
-  float vFrac = abs(v1Frac - v0Frac);
+  float dFrac = cFrac - v0Frac;
+  float vFrac = v1Frac - v0Frac;
   float percentage = dFrac / vFrac;
 
   vec4 v0Weighted = (1.0 - percentage) * gl_in[0].gl_Position;

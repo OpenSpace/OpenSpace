@@ -61,7 +61,7 @@ bool HistogramManager::buildHistogram(TSP* tsp, unsigned int brickIndex) {
         std::vector<float> voxelValues = readValues(tsp, brickIndex);
         size_t numVoxels = voxelValues.size();
 
-        for (size_t v = 0; v < numVoxels; ++v) {
+        for (size_t v = 0; v < numVoxels; v++) {
             histogram.add(voxelValues[v], 1.0);
         }
     }

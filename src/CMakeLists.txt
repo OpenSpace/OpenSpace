@@ -143,7 +143,9 @@ set(OPENSPACE_SOURCE
   rendering/renderable.cpp
   rendering/renderengine.cpp
   rendering/renderengine_lua.inl
+  rendering/screenspacerenderableframebuffer.cpp
   rendering/screenspacerenderable.cpp
+  rendering/screenspacerenderabletext.cpp
   rendering/texturecomponent.cpp
   rendering/transferfunction.cpp
   rendering/volumeraycaster.cpp
@@ -341,7 +343,9 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/raycastermanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/renderable.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/renderengine.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/rendering/screenspacerenderableframebuffer.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/screenspacerenderable.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/rendering/screenspacerenderabletext.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/texturecomponent.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/transferfunction.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/volumeraycaster.h

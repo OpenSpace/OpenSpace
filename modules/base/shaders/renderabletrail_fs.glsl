@@ -55,23 +55,24 @@ Fragment getFragment() {
     //float circleClipping = 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));
     float circleClipping = smoothstep(1.0, 1.0 - Delta, dot(circCoord, circCoord));
     frag.color.a *= circleClipping;
-  }
-
-  // We can't expect a viewport of the form (0, 0, res.x, res.y) used to convert the
-  // window coordinates from gl_FragCoord into [0, 1] coordinates, so we need to use
-  // this more complicated method that is also used in the FXAA and HDR rendering steps
-  vec2 xy = vec2(gl_FragCoord.xy);
-  xy -= viewport.xy;
-
-  double distanceCenter = length(mathLine - xy);
-  double dLW = double(lineWidth);
-  const float blendFactor = 20.0;
-
-  if (distanceCenter > dLW) {
-    frag.color.a = 0.0;
-  }
+  } 
   else {
-    frag.color.a *= pow(float((dLW - distanceCenter) / dLW), blendFactor);
+    // We can't expect a viewport of the form (0, 0, res.x, res.y) used to convert the
+    // window coordinates from gl_FragCoord into [0, 1] coordinates, so we need to use
+    // this more complicated method that is also used in the FXAA and HDR rendering steps
+    vec2 xy = vec2(gl_FragCoord.xy);
+    xy -= viewport.xy;
+
+    double distanceCenter = length(mathLine - xy);
+    double dLW = double(lineWidth);
+    const float blendFactor = 20.0;
+
+    if (distanceCenter > dLW) {
+      frag.color.a = 0.0;
+    }
+    else {
+      frag.color.a *= pow(float((dLW - distanceCenter) / dLW), blendFactor);
+    }
   }
 
   frag.gPosition = vs_gPosition;

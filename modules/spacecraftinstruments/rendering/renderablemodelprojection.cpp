@@ -41,7 +41,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
-        "Perform Shading",
+        "Perform shading",
         "If true, the model will be shaded based on the location of the Sun. If false, "
         "shading is disabled and the model is fully illuminated.",
         openspace::properties::Property::Visibility::NoviceUser

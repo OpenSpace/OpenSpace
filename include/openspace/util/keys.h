@@ -390,7 +390,7 @@ struct KeyWithModifier {
     Key key = Key::Unknown;
     KeyModifier modifier = KeyModifier::None;
 
-    auto operator<=>(const KeyWithModifier&) const = default;
+    auto operator<=>(const KeyWithModifier&) const noexcept = default;
 };
 
 constexpr inline bool isKeypadKey(Key key) noexcept {

@@ -103,7 +103,8 @@ namespace {
 
 // Downloads a file from Lua interpreter
 [[codegen::luawrap]] void downloadFile(std::string url, std::string savePath,
-                                       bool waitForCompletion = false)
+                                       bool waitForCompletion = false,
+                                       bool overrideExistingFile = true)
 {
     using namespace openspace;
 
@@ -112,7 +113,7 @@ namespace {
         global::downloadManager->downloadFile(
             url,
             savePath,
-            DownloadManager::OverrideFile::Yes,
+            DownloadManager::OverrideFile(overrideExistingFile),
             DownloadManager::FailOnError::Yes,
             5
         );

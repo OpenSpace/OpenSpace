@@ -1178,6 +1178,18 @@ int main(int argc, char* argv[]) {
     _controlfp(_controlfp(0, 0) & ~(_EM_ZERODIVIDE | _EM_OVERFLOW), _MCW_EM);
 #endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
 
+#ifdef WIN32
+    // In order to be able to use PDB files to resolve stack traces on _user_ machines,
+    // we need to explicitly tell the operating system where to find the PDB files. We
+    // place them right next to the .exe file and this seems to be the only reliable way
+    // to do it.
+    // Using SymInitialize and SymSetSearchPath from dbghelp.h didn't work 
+    // https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/symbol-path
+
+    std::string exeFolder = std::filesystem::path(argv[0]).parent_path().string();
+    _putenv_s("_NT_SYMBOL_PATH", exeFolder.c_str());
+#endif //WIN32
+
     std::setlocale(LC_ALL, "C");
 
 #ifdef WIN32
@@ -1324,7 +1336,7 @@ int main(int argc, char* argv[]) {
         LINFO(std::format("Configuration Path '{}'", configurationFilePath));
 
         // Register the base path as the directory where the configuration file lives
-        std::filesystem::path base = configurationFilePath.parent_path();
+        std::filesystem::path base = findConfiguration().parent_path();
         FileSys.registerPathToken("${BASE}", std::move(base));
 
         // The previous incarnation of this was initializing GLFW to get the primary

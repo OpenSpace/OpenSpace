@@ -38,7 +38,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
         "FormatString",
-        "Format String",
+        "Format string",
         "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will contain the value "
         "of the elapsed time.",
@@ -47,7 +47,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ReferenceTimeInfo = {
         "ReferenceTime",
-        "Reference Time",
+        "Reference time",
         "The reference time relative to which the elapsed time is specified. The format "
         "must be an ISO 8601-compliant date string.",
         openspace::properties::Property::Visibility::User
@@ -55,7 +55,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SimplifyTimeInfo = {
         "SimplifyTime",
-        "Simplify Time",
+        "Simplify time",
         "If this value is enabled, the elapsed time will be simplified into seconds, "
         "minutes, hours, etc. If the value is disabled, the elapsed time is always "
         "presented in seconds. The default value for this is 'true'.",
@@ -64,7 +64,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LowestTimeUnitInfo = {
         "LowestTimeUnit",
-        "Lowest Time Unit when Simplifying",
+        "Lowest time unit when simplifying",
         "If 'SimplifyTime' is enabled, this is the lowest time unit that will be shown. "
         "All finer grained timesteps will be ignored.",
         openspace::properties::Property::Visibility::User
@@ -111,7 +111,7 @@ documentation::Documentation DashboardItemElapsedTime::Documentation() {
 }
 
 DashboardItemElapsedTime::DashboardItemElapsedTime(const ghoul::Dictionary& dictionary)
-    : DashboardTextItem(dictionary, 15.f)
+    : DashboardTextItem(dictionary)
     , _formatString(FormatStringInfo, "Elapsed time: {}")
     , _referenceTime(ReferenceTimeInfo)
     , _simplifyTime(SimplifyTimeInfo, true)

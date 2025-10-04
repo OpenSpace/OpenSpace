@@ -3,6 +3,10 @@
   "commands": [
     {
       "type": "asset",
+      "value": "examples/screenspacerenderable/screenspaceimagelocal/imagelocal.asset"
+    },
+    {
+      "type": "asset",
       "value": "examples/screenspacerenderable/screenspacedebugplane/debugplane.asset"
     },
     {
@@ -29,6 +33,17 @@
         "property": "ScreenSpace.ScreenSpaceDebugPlane_Example.Scale",
         "value": 1.4500000476837158
       }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "ScreenSpace.ScreenSpaceDebugPlane_Example.Texture",
+        "value": 2
+      }
+    },
+    {
+      "type": "wait",
+      "value": 5
     },
     {
       "type": "screenshot"

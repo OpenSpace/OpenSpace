@@ -86,7 +86,7 @@ void ActionDialog::createWidgets() {
     //  |                      | Is Local      | []  [choosescr] |    Row 5
     //  |                      | Script        | [ooooooooooooo] |    Row 6
     //  *----------------------*---------------*-----------------*
-    //  | [+] [-]              |               | <Save> <Cancel> |    Row 7
+    //  | [+] [-] [D]          |               | <Save> <Cancel> |    Row 7
     //  *----------------------*---------------*-----------------*
     //  |========================================================|    Row 8
     //  | Keybindings                                            |    Row 9
@@ -264,6 +264,15 @@ void ActionDialog::createActionWidgets(QGridLayout* layout) {
     containerLayout->addWidget(_actionWidgets.removeButton);
     layout->addWidget(container, 7, 0, Qt::AlignLeft);
 
+    _actionWidgets.duplicateButton = new QPushButton("Duplicate");
+    _actionWidgets.duplicateButton->setObjectName("duplicate-button");
+    _actionWidgets.duplicateButton->setToolTip("Duplicate the currently selected action");
+    _actionWidgets.duplicateButton->setEnabled(false);
+    QObject::connect(
+        _actionWidgets.duplicateButton, &QPushButton::clicked,
+        this, &ActionDialog::actionDuplicate
+    );
+    containerLayout->addWidget(_actionWidgets.duplicateButton);
 
     // Save / Cancel buttons
     _actionWidgets.saveButtons = new QDialogButtonBox;
@@ -481,7 +490,7 @@ void ActionDialog::actionRemove() {
             _keybindingsData.erase(_keybindingsData.begin() + i);
             delete _keybindingWidgets.list->takeItem(static_cast<int>(i));
             i--;
-            //Save the updated keybindings to the profile
+            // Save the updated keybindings to the profile
             if (_keybindings) {
                 *_keybindings = _keybindingsData;
             }
@@ -514,6 +523,22 @@ void ActionDialog::actionRemove() {
     ghoul_assert(false, "We shouldn't be able to get here");
 }
 
+void ActionDialog::actionDuplicate() {
+    const openspace::Profile::Action* action = selectedAction();
+    ghoul_assert(action, "An action must exist at this point");
+
+    ghoul_assert(
+        _actionWidgets.list->count() == static_cast<int>(_actionData.size()),
+        "Action list and data has desynced"
+    );
+    const openspace::Profile::Action act = *action;
+
+    _actionData.push_back(act);
+    _actionWidgets.list->addItem("");
+    _actionWidgets.list->setCurrentRow(_actionWidgets.list->count() - 1);
+    updateListItem(_actionWidgets.list->currentItem(), act);
+}
+
 void ActionDialog::actionSelected() {
     const Profile::Action* action = selectedAction();
     if (action) {
@@ -535,6 +560,7 @@ void ActionDialog::actionSelected() {
         _actionWidgets.script->setEnabled(true);
         _actionWidgets.addButton->setEnabled(false);
         _actionWidgets.removeButton->setEnabled(true);
+        _actionWidgets.duplicateButton->setEnabled(true);
         _actionWidgets.saveButtons->setEnabled(true);
         if (_mainButton) {
             _mainButton->setEnabled(false);
@@ -545,6 +571,7 @@ void ActionDialog::actionSelected() {
         // No action selected
         _actionWidgets.addButton->setEnabled(true);
         _actionWidgets.removeButton->setEnabled(false);
+        _actionWidgets.duplicateButton->setEnabled(false);
         _actionWidgets.saveButtons->setEnabled(false);
         //Keybinding panel must also be in valid state to re-enable main start button
         if (_mainButton && !_keybindingWidgets.saveButtons->isEnabled()) {

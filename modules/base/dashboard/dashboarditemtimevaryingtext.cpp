@@ -36,7 +36,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
         "FormatString",
-        "Format String",
+        "Format string",
         "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will be replaced "
         "with the values read from the file provided in `DataFile`",
@@ -45,7 +45,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DataFileInfo = {
         "DataFile",
-        "Data File Path",
+        "Data file path",
         "The file path to the JSON data.",
         openspace::properties::Property::Visibility::User
     };

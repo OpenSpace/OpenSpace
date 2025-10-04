@@ -48,7 +48,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ProjectionInfo = {
         "PerformProjection",
-        "Perform Projections",
+        "Perform projections",
         "If this value is enabled, this ProjectionComponent will perform projections. If "
         "it is disabled, projections will be ignored.",
         openspace::properties::Property::Visibility::User
@@ -56,7 +56,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ClearProjectionInfo = {
         "ClearAllProjections",
-        "Clear Projections",
+        "Clear projections",
         "If this property is triggered, it will remove all the projections that have "
         "already been applied.",
         openspace::properties::Property::Visibility::User
@@ -64,7 +64,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadingInfo = {
         "ProjectionFading",
-        "Projection Fading",
+        "Projection fading",
         "This value fades the previously performed projections in or out. If this value "
         "is equal to '1', the projections are fully visible, if the value is equal to "
         "'0', the performed projections are completely invisible.",
@@ -73,7 +73,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureSizeInfo = {
         "TextureSize",
-        "Texture Size",
+        "Texture size",
         "This value determines the size of the texture into which the images are "
         "projected and thus provides the limit to the resolution of projections that can "
         "be applied. Changing this value will not cause the texture to be automatically "
@@ -83,7 +83,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ApplyTextureSizeInfo = {
         "ApplyTextureSize",
-        "Apply Texture Size",
+        "Apply texture size",
         "Triggering this property applies a new size to the underlying projection "
         "texture. The old texture is resized and interpolated to fit the new size.",
         openspace::properties::Property::Visibility::AdvancedUser

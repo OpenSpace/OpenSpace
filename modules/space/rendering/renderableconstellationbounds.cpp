@@ -46,7 +46,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo VertexInfo = {
         "File",
-        "Vertex File Path",
+        "Vertex file path",
         "A file that contains the vertex locations of the constellations bounds, as RA "
         "Dec coordinates on the celestial sphere.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -340,7 +340,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
             static_cast<float>(rectangularValues[1]),
             static_cast<float>(rectangularValues[2])
         });
-        ++currentLineNumber;
+        currentLineNumber++;
     }
 
     // Due to the way we read the file, the first (empty) constellation bounds will not

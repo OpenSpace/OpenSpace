@@ -31,7 +31,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo IdleTimeInfo = {
         "IdleTime",
-        "Idle Time",
+        "Idle time",
         "Time in seconds that has passed from latest registered interaction until the "
         "application goes idle.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -39,7 +39,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo IsInActiveStateInfo = {
         "IsInActiveState",
-        "Is State Active",
+        "Is state active",
         "Keeps track whether the interaction session is in active state or not. False if "
         "application is in idle state, true if it is in active state.",
         openspace::properties::Property::Visibility::AdvancedUser
