@@ -914,7 +914,7 @@ float RenderEngine::combinedBlackoutFactor() const {
 void RenderEngine::postDraw() {
     ZoneScoped;
 
-    ++_frameNumber;
+    _frameNumber++;
 }
 
 Scene* RenderEngine::scene() {
@@ -1417,7 +1417,7 @@ void RenderEngine::renderScreenLog() {
             message,
             white
         );
-        ++nRows;
+        nRows++;
     }
 }
 

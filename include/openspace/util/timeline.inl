@@ -32,7 +32,8 @@ Keyframe<T>::Keyframe(size_t i, double t, T d)
 
 template <typename T>
 void Timeline<T>::addKeyframe(double timestamp, T&& data) {
-    Keyframe<T> keyframe(++_nextKeyframeId, timestamp, std::move(data));
+    _nextKeyframeId++;
+    Keyframe<T> keyframe(_nextKeyframeId, timestamp, std::move(data));
     const auto iter = std::upper_bound(
         _keyframes.cbegin(),
         _keyframes.cend(),
@@ -44,7 +45,8 @@ void Timeline<T>::addKeyframe(double timestamp, T&& data) {
 
 template <typename T>
 void Timeline<T>::addKeyframe(double timestamp, const T& data) {
-    Keyframe<T> keyframe(++_nextKeyframeId, timestamp, data);
+    _nextKeyframeId++;
+    Keyframe<T> keyframe(_nextKeyframeId, timestamp, data);
     const auto iter = std::upper_bound(
         _keyframes.cbegin(),
         _keyframes.cend(),

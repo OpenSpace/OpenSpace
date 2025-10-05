@@ -85,7 +85,7 @@ Sphere::Sphere(glm::vec3 radius, int segments)
 
             _varray[nr].tex[0] = t1;
             _varray[nr].tex[1] = t2;
-            ++nr;
+            nr++;
         }
     }
 
@@ -95,18 +95,18 @@ Sphere::Sphere(glm::vec3 radius, int segments)
         for (int j = 0; j < segments; j++) {
             const int t = segments + 1;
             _iarray[nr] = t * (i - 1) + j + 0; //1
-            ++nr;
+            nr++;
             _iarray[nr] = t * (i + 0) + j + 0; //2
-            ++nr;
+            nr++;
             _iarray[nr] = t * (i + 0) + j + 1; //3
-            ++nr;
+            nr++;
 
             _iarray[nr] = t * (i - 1) + j + 0; //4
-            ++nr;
+            nr++;
             _iarray[nr] = t * (i + 0) + j + 1; //5
-            ++nr;
+            nr++;
             _iarray[nr] = t * (i - 1) + j + 1; //6
-            ++nr;
+            nr++;
         }
     }
 }

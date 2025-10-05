@@ -365,7 +365,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action,
     }
     else {
         if (isDoubleClick(state)) {
-            ++clickCount;
+            clickCount++;
         }
         else {
             state.lastClickTime = std::chrono::high_resolution_clock::now();

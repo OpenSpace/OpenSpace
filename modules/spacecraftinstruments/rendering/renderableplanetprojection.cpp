@@ -478,7 +478,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
                 const std::shared_ptr<ghoul::opengl::Texture> t =
                     _projectionComponent.loadProjectionTexture(img.path);
                 imageProjectGPU(*t, projMatrix);
-                ++nProjections;
+                nProjections++;
             }
             catch (const SpiceManager::SpiceException& e) {
                 LERRORC(e.component, e.what());

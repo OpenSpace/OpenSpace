@@ -85,7 +85,7 @@ bool Envelope::isValueInEnvelope(float pos) const {
 bool Envelope::isEnvelopeValid() const {
     for (auto currentIter = _points.begin(), nextIter = currentIter + 1;
          nextIter != _points.end();
-         ++currentIter, ++nextIter)
+         currentIter++, nextIter++)
     {
         if (currentIter->position.first > nextIter->position.first) {
             return false;
@@ -104,7 +104,7 @@ glm::vec4 Envelope::valueAtPosition(float pos) const {
         if (afterIter == _points.end()) {
             return glm::vec4(0.f, 0.f, 0.f ,0.f);
         }
-        ++afterIter;
+        afterIter++;
     }
     if (afterIter->position.first == pos) {
         return glm::vec4(afterIter->color, afterIter->position.second);

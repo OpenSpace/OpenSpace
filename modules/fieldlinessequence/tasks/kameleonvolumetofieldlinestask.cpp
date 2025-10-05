@@ -193,7 +193,7 @@ void KameleonVolumeToFieldlinesTask::perform(
                 throw ghoul::MissingCaseException();
             }
         }
-        ++fileNumber;
+        fileNumber++;
     }
 
     // Ideally, we would want to signal about progress earlier as well, but

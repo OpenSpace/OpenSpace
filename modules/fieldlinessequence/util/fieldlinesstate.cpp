@@ -371,7 +371,7 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
     size_t pointIndex = 0;
     for (size_t lineIndex = 0; lineIndex < nLines; lineIndex++) {
         json jData = json::array();
-        for (GLsizei i = 0; i < _lineCount[lineIndex]; i++, ++pointIndex) {
+        for (GLsizei i = 0; i < _lineCount[lineIndex]; i++, pointIndex++) {
             const glm::vec3 pos = _vertexPositions[pointIndex];
             json jDataElement = { pos.x, pos.y, pos.z };
 

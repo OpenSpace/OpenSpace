@@ -130,7 +130,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
     // Read number of lines
     int nExoplanets = 0;
     while (ghoul::getline(lookupTableFile, line)) {
-        ++nExoplanets;
+        nExoplanets++;
     }
     lookupTableFile.clear();
     lookupTableFile.seekg(0);

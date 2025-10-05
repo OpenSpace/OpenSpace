@@ -338,7 +338,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
             fileElement.state = File::State::Available;
         }
         _availableData.push_back(std::move(fileElement));
-        ++index;
+        index++;
     }
 
     const double cadence = calculateCadence();
@@ -446,7 +446,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
         }
         // The file is not finished downloading, move on to next
         else {
-            ++currentIt;
+            currentIt++;
         }
 
         // Since in the if statement one is removed and else statement it got incremented,

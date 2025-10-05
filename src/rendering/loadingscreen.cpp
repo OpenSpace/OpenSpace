@@ -609,10 +609,10 @@ void LoadingScreen::renderLogMessages() const {
                 if (charactersSinceNewLine > MessageLength) {
                     result << '\n';
                     charactersSinceNewLine = static_cast<int>(word.size());
-                    ++nRows;
+                    nRows++;
                 }
                 result << word << ' ';
-                ++charactersSinceNewLine;
+                charactersSinceNewLine++;
             }
         }
 
@@ -625,7 +625,7 @@ void LoadingScreen::renderLogMessages() const {
             it.message.size() < MessageLength ? it.message : result.str(),
             ghoul::toColor(it.level)
         );
-        ++nRows;
+        nRows++;
     }
 
     const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
@@ -650,7 +650,7 @@ void LoadingScreen::renderLogMessages() const {
             text,
             ghoul::toColor(level)
         );
-        ++row;
+        row++;
     }
 }
 

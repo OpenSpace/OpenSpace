@@ -316,7 +316,7 @@ float Histogram::highestBinValue(bool equalized, int overBins) {
         }
 
         value += _data[i];
-        value /= static_cast<float>(++num);
+        value /= static_cast<float>(num + 1);
 
         if (value > highestValue) {
             highestBin = i;
@@ -329,7 +329,7 @@ float Histogram::highestBinValue(bool equalized, int overBins) {
         const float low = _minValue + static_cast<float>(highestBin) /
                           _numBins * (_maxValue - _minValue);
         const float high = low + (_maxValue - _minValue) / static_cast<float>(_numBins);
-        return (high+low) / 2.f;
+        return (high + low) / 2.f;
     }
     else {
         return highestBin / static_cast<float>(_numBins);

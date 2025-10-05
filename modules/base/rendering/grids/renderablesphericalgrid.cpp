@@ -124,7 +124,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     , _gridProgram(nullptr)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _longSegments(LongSegmentsInfo, 36, 4, 200)
-    , _latSegments(LatSegmentsInfo, 36, 4, 200)
+    , _latSegments(LatSegmentsInfo, 18, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
