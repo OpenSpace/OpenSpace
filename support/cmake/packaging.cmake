@@ -297,9 +297,9 @@ if (UNIX AND NOT APPLE)
 
 
   if (DEFINED OPENSPACE_DISTRO AND OPENSPACE_DISTRO STREQUAL "ubuntu24.04")
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglew2.2, libpng16-16t64, libglut3.12, libjack0, libxrandr2, libgeos-dev, libxinerama1, libx11-6, libxcursor1, libcurl4t64, libxi6, libasound2t64, libgdal34t64, libmpv2, libvulkan1, xclip")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglew2.2, libpng16-16t64, libglut3.12, libjack0, libxrandr2, libgeos-dev, libxinerama1, libx11-6, libxcursor1, libcurl4t64, libxi6, libasound2t64, libgdal34t64, libmpv2, libvulkan1, xclip, coreutils")
   else ()
-    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6 (>= 13), libglew2.2, libpng16-16, freeglut3, libjack0, libxrandr2, libxinerama1, libx11-6, libxcursor1, libcurl4, libxi6, libasound2, libgdal30, libboost1.74-dev, qt6-base-dev, libmpv1, libvulkan1, xclip")
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6 (>= 13), libglew2.2, libpng16-16, freeglut3, libjack0, libxrandr2, libxinerama1, libx11-6, libxcursor1, libcurl4, libxi6, libasound2, libgdal30, libboost1.74-dev, qt6-base-dev, libmpv1, libvulkan1, xclip, coreutils")
   endif ()
   
   # Map CMAKE_SYSTEM_PROCESSOR to Debian arch names
