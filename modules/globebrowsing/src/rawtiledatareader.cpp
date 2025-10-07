@@ -118,6 +118,23 @@ GDALDataType toGDALDataType(GLenum glType) {
     }
 }
 
+// Temporary fix for: https://github.com/OpenSpace/OpenSpace/issues/3810
+int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
+    GDALRasterBand* firstBand = dataset->GetRasterBand(1);
+    GDALRasterBand* maxOverview = nullptr;
+    const int numOverviews = firstBand->GetOverviewCount();
+    if (numOverviews <= 0) { // No overviews. Use first band.
+        maxOverview = firstBand;
+    }
+    else { // Pick the highest overview.
+        maxOverview = firstBand->GetOverview(numOverviews - 1);
+    }
+    const int sizeLevel0 = maxOverview->GetXSize();
+    const double diff = log2(minimumPixelSize) - log2(sizeLevel0);
+    const double intdiff = diff >= 0 ? ceil(diff) : floor(diff);
+    return static_cast<int>(intdiff);
+}
+
 bool isInside(const PixelRegion& lhs, const PixelRegion& rhs) {
     const glm::ivec2 e = lhs.start + lhs.numPixels;
     const glm::ivec2 re = rhs.start + rhs.numPixels;
@@ -413,7 +430,19 @@ void RawTileDataReader::initialize() {
         _padfTransform = geoTransform(_rasterXSize, _rasterYSize);
     }
 
-    _maxChunkLevel = _dataset->GetRasterBand(1)->GetOverviewCount();
+
+    // Temporary fix for: https://github.com/OpenSpace/OpenSpace/issues/3810
+    const double tileLevelDifference = calculateTileLevelDifference(
+        _dataset,
+        _initData.dimensions.x
+    );
+
+    const int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
+    _maxChunkLevel = static_cast<int>(-tileLevelDifference);
+    if (numOverviews > 0) {
+        _maxChunkLevel += numOverviews;
+    }
+    _maxChunkLevel = std::max(_maxChunkLevel, 2);
 }
 
 void RawTileDataReader::reset() {
