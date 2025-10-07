@@ -19,10 +19,10 @@ local States = {
   {
     Identifier = "Constellations",
     Enter = [[
-      openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Opacity", 1.0, 1.0)
+      openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 1.0, 1.0)
     ]],
     Exit = [[
-      openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Opacity", 0.0, 1.0)
+      openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 0.0, 1.0)
     ]]
   },
   {
@@ -70,7 +70,7 @@ local Transitions = {
 asset.onInitialize(function()
   -- Setup (could be done in the profile)
   openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Enabled", true)
-  openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Opacity", 0.0)
+  openspace.setPropertyValueSingle("Scene.Constellations.Renderable.Fade", 0.0)
 
   openspace.statemachine.createStateMachine(States, Transitions, "Earth")
 end)
