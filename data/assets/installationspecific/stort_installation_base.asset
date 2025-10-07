@@ -96,6 +96,7 @@ asset.onInitialize(function ()
 
   openspace.setPropertyValueSingle("Scene.PerseveranceModel.Renderable.LightSources.Camera.Intensity", 0.7)
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Curiosity-Rover-Path.Enabled", false)
+  openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Curiosity-Rover-Path.DefaultProperties.PointSize", 0.4)
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Perseverance-Rover-Path.Enabled", false)
 
   -- Exoplanets
