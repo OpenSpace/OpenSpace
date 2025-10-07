@@ -44,7 +44,7 @@ namespace {
     struct [[codegen::Dictionary(DirectionalLightsource)]] Parameters {
 
     };
-#include "DirectionalLightsource_codegen.cpp"
+#include "directionallightsource_codegen.cpp"
 } // namespace
 
 namespace openspace {
