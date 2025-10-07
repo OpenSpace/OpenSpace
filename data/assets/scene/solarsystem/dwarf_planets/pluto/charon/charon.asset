@@ -48,7 +48,8 @@ local Charon = {
     "moon_dwarf",
     "moon_pluto",
     "moon_major",
-    "moon_major_pluto"
+    "moon_major_pluto",
+    "pluto_system"
   },
   GUI = {
     Path = "/Solar System/Dwarf Planets/Pluto/Charon"
