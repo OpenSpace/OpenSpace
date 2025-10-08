@@ -76,7 +76,7 @@ namespace {
 
     struct [[codegen::Dictionary(TouchModule)]] Parameters {
         // [[codegen::verbatim(TuioPortInfo.description)]]
-        std::optional<int> tuioPort;
+        std::optional<int> tuioPort [[codegen::inrange(1, 65535)]];
     };
 
     #include "touchmodule_codegen.cpp"
@@ -86,7 +86,7 @@ namespace openspace {
 
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
-    , _tuioPort(TuioPortInfo, 3333, 0, 65535)
+    , _tuioPort(TuioPortInfo, 3333, 1, 65535)
     , _touchIsEnabled(EnableTouchInfo, true)
     , _hasActiveTouchEvent(EventsInfo, false)
     , _defaultDirectTouchRenderableTypes(DefaultDirectTouchRenderableTypesInfo)
