@@ -33,7 +33,8 @@ local PlanckMultiverse1 = {
   },
   GUI = {
     Name = "Planck Multiverse 1",
-    Path = "/Universe/Cosmic Microwave Background"
+    Path = "/Universe/Cosmic Microwave Background",
+    Focusable = false
   }
 }
 
@@ -64,7 +65,8 @@ local PlanckMultiverse2 = {
   },
   GUI = {
     Name = "Planck Multiverse 2",
-    Path = "/Universe/Cosmic Microwave Background"
+    Path = "/Universe/Cosmic Microwave Background",
+    Focusable = false
   }
 }
 
@@ -95,7 +97,8 @@ local PlanckMultiverse3 = {
   },
   GUI = {
     Name = "Planck Multiverse 3",
-    Path = "/Universe/Cosmic Microwave Background"
+    Path = "/Universe/Cosmic Microwave Background",
+    Focusable = false
   }
 }
 
@@ -126,7 +129,8 @@ local PlanckMultiverse4 = {
   },
   GUI = {
     Name = "Planck Multiverse 4",
-    Path = "/Universe/Cosmic Microwave Background"
+    Path = "/Universe/Cosmic Microwave Background",
+    Focusable = false
   }
 }
 

@@ -34,6 +34,18 @@
 #include <tlhelp32.h>
 #endif // WIN32
 
+#ifdef WIN32
+extern "C" {
+    // These variables are checked by the different drivers to see if the discrete GPU
+    // should be preferred
+
+    // Nvidia Optimus: force switch to discrete GPU
+    __declspec(dllexport) DWORD NvOptimusEnablement = 1;
+    // AMD
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
+} // extern
+#endif // WIN32
+
 // The solution for GetParentProcess and the thread comes from Mikael who posted it here:
 // https://www.magpcss.org/ceforum/viewtopic.php?f=6&t=15817&start=10#p37813
 

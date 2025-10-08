@@ -1081,8 +1081,9 @@ void TouchInteraction::step(double dt, bool directTouch) {
         global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
 
 #ifdef TOUCH_DEBUG_PROPERTIES
-        //Show velocity status every N frames
-        if (++stepVelUpdate >= 60) {
+        // Show velocity status every N frames
+        stepVelUpdate++;
+        if (stepVelUpdate >= 60) {
             stepVelUpdate = 0;
             LINFO(std::format(
                 "DistToFocusNode {} stepZoomVelUpdate {}",

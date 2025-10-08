@@ -889,6 +889,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks&) {
                 if (_ringsComponent && _ringsComponent->isEnabled() &&
                     _ringsComponent->isVisible())
                 {
+                    _ringsComponent->setEllipsoidRadii(glm::vec3(_ellipsoid.radii()));
                     _ringsComponent->draw(data, _shadowComponent->shadowMapData());
                 }
             }
@@ -897,6 +898,7 @@ void RenderableGlobe::render(const RenderData& data, RendererTasks&) {
                 if (_ringsComponent && _ringsComponent->isEnabled() &&
                     _ringsComponent->isVisible())
                 {
+                    _ringsComponent->setEllipsoidRadii(glm::vec3(_ellipsoid.radii()));
                     _ringsComponent->draw(data);
                 }
             }
@@ -1453,7 +1455,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     }
 
     // Shadow Mapping
-    if (_shadowMappingProperties.shadowMapping) {
+    if (_shadowMappingProperties.shadowMapping && _performShading) {
         // Bind ring textures for direct projection when rings component is available
         if (_ringsComponent && _ringsComponent->isEnabled()) {
             ghoul::opengl::TextureUnit ringTextureColorUnit;

@@ -880,7 +880,7 @@ void LightSourceRenderData::updateBasedOnLightSources(const RenderData& renderDa
         directionsViewSpaceBuffer[nEnabledLightSources] =
             lightSource->directionViewSpace(renderData);
 
-        ++nEnabledLightSources;
+        nEnabledLightSources++;
     }
     nLightSources = nEnabledLightSources;
 }

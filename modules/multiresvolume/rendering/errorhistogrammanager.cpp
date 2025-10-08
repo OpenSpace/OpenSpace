@@ -73,7 +73,8 @@ bool ErrorHistogramManager::buildHistograms(int numBins) {
             if (!success) {
                 return false;
             }
-            pb.print(++processedLeaves);
+            processedLeaves++;
+            pb.print(processedLeaves);
         }
     }
 

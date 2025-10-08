@@ -837,7 +837,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
 
         pos = pos + (step / 6.f) * (k1 + 2.f * k2 + 2.f * k3 + k4);
 
-        ++numSteps;
+        numSteps++;
         if (numSteps > MaxSteps) {
             LDEBUG(std::format("Max number of steps taken ({})", MaxSteps));
             break;
@@ -951,7 +951,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
 
         v0 = v0 + step / 6.f * (k1 + 2.f * k2 + 2.f * k3 + k4);
 
-        ++numSteps;
+        numSteps++;
         if (numSteps > MaxSteps) {
             LDEBUG(std::format("Max number of steps taken ({})", MaxSteps));
             break;

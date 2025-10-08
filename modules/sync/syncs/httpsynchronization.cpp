@@ -380,7 +380,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
             break;
         }
         else {
-            ++downloadTry;
+            downloadTry++;
             std::this_thread::sleep_for(std::chrono::seconds(1));
         }
     }
