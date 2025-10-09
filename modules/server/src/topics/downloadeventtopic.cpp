@@ -60,13 +60,10 @@ void DownloadEventTopic::handleJson(const nlohmann::json& json) {
                 const auto now = std::chrono::steady_clock::now();
                 auto& last = _lastCallBack[event.id];
 
-                bool shouldSend = false;
                 if (now - last >= CallbackUpdateInterval) {
                     last = now;
-                    shouldSend = true;
                 }
-
-                if (!shouldSend) {
+                else {
                     return;
                 }
             }

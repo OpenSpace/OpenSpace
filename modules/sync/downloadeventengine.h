@@ -64,4 +64,5 @@ private:
 };
 
 } // namespace openspace
+
 #endif // __OPENSPACE_MODULE_SYNC___DOWNLOAD_EVENT_ENGINE___H__

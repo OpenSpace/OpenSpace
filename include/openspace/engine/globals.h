@@ -35,8 +35,8 @@ namespace openspace {
 struct Configuration;
 class Dashboard;
 class DeferredcasterManager;
-class DownloadManager;
 class DownloadEventEngine;
+class DownloadManager;
 class EventEngine;
 class LuaConsole;
 class MemoryManager;
@@ -73,8 +73,8 @@ namespace global {
 inline ghoul::fontrendering::FontManager* fontManager;
 inline Dashboard* dashboard;
 inline DeferredcasterManager* deferredcasterManager;
-inline DownloadManager* downloadManager;
 inline DownloadEventEngine* downloadEventEngine;
+inline DownloadManager* downloadManager;
 inline EventEngine* eventEngine;
 inline LuaConsole* luaConsole;
 inline MemoryManager* memoryManager;

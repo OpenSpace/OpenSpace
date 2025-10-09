@@ -356,7 +356,7 @@ bool UrlSynchronization::trySyncUrls() {
                     _nSynchronizedBytes += sd.second.downloadedBytes;
                 }
 
-                DownloadEventEngine::DownloadEvent event{
+                DownloadEventEngine::DownloadEvent event = {
                     .type = DownloadEventEngine::DownloadEvent::Type::Progress,
                     .id = url,
                     .downloadedBytes = downloadedBytes,
@@ -367,7 +367,7 @@ bool UrlSynchronization::trySyncUrls() {
                 return !_shouldCancel;
             });
 
-        DownloadEventEngine::DownloadEvent event{
+        DownloadEventEngine::DownloadEvent event = {
             .type = DownloadEventEngine::DownloadEvent::Type::Started,
             .id = url,
             .downloadedBytes = 0

@@ -26,12 +26,13 @@
 #define __OPENSPACE_MODULE_SERVER___DOWNLOADEVENT_TOPIC___H__
 
 #include <modules/server/include/topics/topic.h>
+
 #include <chrono>
 
 namespace openspace {
+
 class DownloadEventTopic : public Topic {
 public:
-    DownloadEventTopic() = default;
     ~DownloadEventTopic() override;
 
     void handleJson(const nlohmann::json& json) override;

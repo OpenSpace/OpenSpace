@@ -27,8 +27,8 @@
 #include <modules/sync/downloadeventengine.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/util/httprequest.h>
 #include <openspace/engine/globals.h>
+#include <openspace/util/httprequest.h>
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/stringhelper.h>
@@ -334,7 +334,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
                 _nSynchronizedBytes += sd.second.downloadedBytes;
             }
 
-            DownloadEventEngine::DownloadEvent event {
+            DownloadEventEngine::DownloadEvent event = {
                 .type = DownloadEventEngine::DownloadEvent::Type::Progress,
                 .id = line,
                 .downloadedBytes = downloadedBytes,
@@ -342,11 +342,10 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
             };
             global::downloadEventEngine->publish(event);
 
-
             return !_shouldCancel;
         });
 
-        DownloadEventEngine::DownloadEvent event{
+        DownloadEventEngine::DownloadEvent event = {
             .type = DownloadEventEngine::DownloadEvent::Type::Started,
             .id = line,
             .downloadedBytes = 0
@@ -391,7 +390,6 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
         if (!d->hasSucceeded()) {
             LERROR(std::format("Error downloading file from URL '{}'", d->url()));
             failed = true;
-
 
             global::downloadEventEngine->publish(
                 d->url(),
@@ -448,7 +446,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
 
     for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
         if (failed) {
-            // Atleast one download failed, there may still be downloads that succeeded
+            // At least one download failed, there may still be downloads that succeeded
             if (d->hasSucceeded()) {
                 _newSyncedFiles.push_back(d->url());
                 global::downloadEventEngine->publish(
@@ -464,7 +462,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
             }
         }
         else {
-            // All downloads are successfull
+            // All downloads are successful
             global::downloadEventEngine->publish(
                 d->url(),
                 DownloadEventEngine::DownloadEvent::Type::Finished

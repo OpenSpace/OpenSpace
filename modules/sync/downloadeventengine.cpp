@@ -49,7 +49,7 @@ void DownloadEventEngine::publish(const std::string& id, DownloadEvent::Type typ
                                   int64_t downloadedBytes,
                                   std::optional<int64_t> totalBytes)
 {
-    const DownloadEvent event {
+    const DownloadEvent event = {
         .type = type,
         .id = id,
         .downloadedBytes = downloadedBytes,
