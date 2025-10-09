@@ -99,6 +99,9 @@ asset.onInitialize(function ()
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Curiosity-Rover-Path.DefaultProperties.PointSize", 0.4)
   openspace.setPropertyValueSingle("Scene.Mars.Renderable.GeographicOverlays.Perseverance-Rover-Path.Enabled", false)
 
+  -- Reload Jupiter video layer (Note: Added after 2025 update, needed for some reason)
+  openspace.setPropertyValueSingle("Scene.Jupiter.Renderable.Layers.ColorLayers.JupiterVideo.TileProvider.VideoPlayer.Reload", nil);
+
   -- Exoplanets
   openspace.setPropertyValueSingle("Scene.Exoplanets.Renderable.Enabled", true)
   openspace.setPropertyValueSingle("Scene.Exoplanets.Renderable.Fade", 0.0)
