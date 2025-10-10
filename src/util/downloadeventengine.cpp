@@ -22,47 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SYNC___DOWNLOAD_EVENT_ENGINE___H__
-#define __OPENSPACE_MODULE_SYNC___DOWNLOAD_EVENT_ENGINE___H__
-
-#include <functional>
-#include <map>
-#include <mutex>
-#include <string>
+#include <openspace/util/downloadeventengine.h>
 
 namespace openspace {
 
-class DownloadEventEngine {
-public:
-    struct DownloadEvent {
-        enum class Type {
-            Started,
-            Progress,
-            Finished,
-            Failed
-        };
+int DownloadEventEngine::subscribe(Callback cb) {
+    std::lock_guard lock(_mutex);
+    int id = _id++;
+    _subscribers[id] = std::move(cb);
+    return id;
+}
 
-        Type type;
-        std::string id;
-        int64_t downloadedBytes;
-        std::optional<int64_t> totalBytes;
+void DownloadEventEngine::unsubscribe(int id) {
+    std::lock_guard lock(_mutex);
+    _subscribers.erase(id);
+}
+
+void DownloadEventEngine::publish(const DownloadEvent& event) {
+    std::lock_guard lock(_mutex);
+    for (auto& [_, callback] : _subscribers) {
+        callback(event);
+    }
+}
+
+void DownloadEventEngine::publish(const std::string& id, DownloadEvent::Type type,
+                                  int64_t downloadedBytes,
+                                  std::optional<int64_t> totalBytes)
+{
+    const DownloadEvent event = {
+        .type = type,
+        .id = id,
+        .downloadedBytes = downloadedBytes,
+        .totalBytes = totalBytes
     };
 
-    using Callback = std::function<void(const DownloadEvent&)>;
-
-    int subscribe(Callback cb);
-    void unsubscribe(int id);
-
-    void publish(const DownloadEvent& event);
-    void publish(const std::string& id, DownloadEvent::Type type,
-        int64_t downloadedBytes = 0, std::optional<int64_t> totalBytes = std::nullopt);
-
-private:
-    std::mutex _mutex;
-    int _id = 0;
-    std::unordered_map<int, Callback> _subscribers;
-};
+    publish(event);
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SYNC___DOWNLOAD_EVENT_ENGINE___H__

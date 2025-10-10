@@ -24,7 +24,6 @@
 
 #include <openspace/engine/globals.h>
 
-#include <modules/sync/downloadeventengine.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -53,6 +52,7 @@
 #include <openspace/scene/profile.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
+#include <openspace/util/downloadeventengine.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/versionchecker.h>

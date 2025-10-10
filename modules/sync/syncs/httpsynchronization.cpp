@@ -24,10 +24,10 @@
 
 #include <modules/sync/syncs/httpsynchronization.h>
 
-#include <modules/sync/downloadeventengine.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/util/downloadeventengine.h>
 #include <openspace/util/httprequest.h>
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
 #include <ghoul/logging/logmanager.h>

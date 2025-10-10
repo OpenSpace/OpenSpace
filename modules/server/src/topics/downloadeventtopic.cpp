@@ -24,8 +24,8 @@
 
 #include <modules/server/include/topics/downloadeventtopic.h>
 
-#include <modules/sync/downloadeventengine.h>
 #include <openspace/engine/globals.h>
+#include <openspace/util/downloadeventengine.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 

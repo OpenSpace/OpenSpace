@@ -22,41 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/sync/downloadeventengine.h>
+#ifndef __OPENSPACE_MODULE_SYNC___DOWNLOAD_EVENT_ENGINE___H__
+#define __OPENSPACE_MODULE_SYNC___DOWNLOAD_EVENT_ENGINE___H__
+
+#include <functional>
+#include <map>
+#include <mutex>
+#include <optional>
+#include <string>
 
 namespace openspace {
 
-int DownloadEventEngine::subscribe(Callback cb) {
-    std::lock_guard lock(_mutex);
-    int id = _id++;
-    _subscribers[id] = std::move(cb);
-    return id;
-}
 
-void DownloadEventEngine::unsubscribe(int id) {
-    std::lock_guard lock(_mutex);
-    _subscribers.erase(id);
-}
+// @TODO (anden88 2025-10-10): This class was specifically written for the multi-threaded
+// url- and httpSynchronization events. In the future we should make this more general
+// purposed.
+class DownloadEventEngine {
+public:
+    struct DownloadEvent {
+        enum class Type {
+            Started,
+            Progress,
+            Finished,
+            Failed
+        };
 
-void DownloadEventEngine::publish(const DownloadEvent& event) {
-    std::lock_guard lock(_mutex);
-    for (auto& [_, callback] : _subscribers) {
-        callback(event);
-    }
-}
-
-void DownloadEventEngine::publish(const std::string& id, DownloadEvent::Type type,
-                                  int64_t downloadedBytes,
-                                  std::optional<int64_t> totalBytes)
-{
-    const DownloadEvent event = {
-        .type = type,
-        .id = id,
-        .downloadedBytes = downloadedBytes,
-        .totalBytes = totalBytes
+        Type type;
+        std::string id;
+        int64_t downloadedBytes;
+        std::optional<int64_t> totalBytes;
     };
 
-    publish(event);
-}
+    using Callback = std::function<void(const DownloadEvent&)>;
+
+    int subscribe(Callback cb);
+    void unsubscribe(int id);
+
+    void publish(const DownloadEvent& event);
+    void publish(const std::string& id, DownloadEvent::Type type,
+        int64_t downloadedBytes = 0, std::optional<int64_t> totalBytes = std::nullopt);
+
+private:
+    std::mutex _mutex;
+    int _id = 0;
+    std::unordered_map<int, Callback> _subscribers;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_SYNC___DOWNLOAD_EVENT_ENGINE___H__
