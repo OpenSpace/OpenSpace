@@ -829,7 +829,7 @@ void RenderableOrbitalKepler::updateBuffers() {
         3,
         GL_DOUBLE,
         sizeof(TrailVBOLayout),
-        reinterpret_cast<GLvoid*>(offsetof(TrailVBOLayout, TrailVBOLayout::time))
+        reinterpret_cast<GLvoid*>(offsetof(TrailVBOLayout, time))
     );
 
     glBindVertexArray(0);
