@@ -1,4 +1,4 @@
--- Basic
+-- Changing Font
 -- This example creates a screen space renderable that displays a static text with a
 -- non-standard font. This is using one of the fonts that is loaded by default in the
 -- openspace.cfg file.

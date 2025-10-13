@@ -164,6 +164,8 @@ local Saturn = {
       File = textures .. "glare.png"
     },
     SizeSettings = {
+      ScaleFactor = 10,
+      ScaleExponent = 15,
       MaxSize = 0.332,
       EnableMaxSizeControl = true
     },

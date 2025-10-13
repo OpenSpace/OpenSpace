@@ -91,7 +91,7 @@ void ScreenSpaceRenderableFramebuffer::deinitializeGL() {
     ghoul::opengl::FramebufferObject::deactivate();
     removeAllRenderFunctions();
 
-    ScreenSpaceRenderableFramebuffer::deinitializeGL();
+    ScreenSpaceRenderable::deinitializeGL();
 }
 
 void ScreenSpaceRenderableFramebuffer::render(const RenderData& renderData) {
