@@ -135,6 +135,7 @@ private:
     double _videoDuration = 0.0;
     glm::ivec2 _videoResolution = glm::ivec2(2048, 1024); // Used for the fbos
     bool _isPaused = false;
+    bool _justPaused = false;
     PlaybackMode _playbackMode = PlaybackMode::RealTimeLoop; // Default is to loop
 
     // Maps for keeping track of libmpv commands and formats
@@ -143,8 +144,8 @@ private:
 
     // Syncing with multiple nodes
     double _correctPlaybackTime = 0.0;
-    bool _playAtNextFrame = false;
-    bool _adjustAtNextFrame = false;
+    bool _syncPlay = true;
+    bool _shouldLoop = false;
 
     // Video stretching: map to simulation time animation mode
     double _startJ200Time = 0.0;
@@ -156,7 +157,6 @@ private:
     mpv_render_context* _mpvRenderContext = nullptr;
     std::unique_ptr<ghoul::opengl::Texture> _frameTexture;
     GLuint _fbo = 0; // Our opengl framebuffer where mpv renders to
-    int _wakeup = 0; // Signals when libmpv has a new frame ready
     bool _isInitialized = false; // If libmpv has been inititalized
     bool _isSeeking = false; // Prevent seeking while already seeking
     bool _isDestroying = false;

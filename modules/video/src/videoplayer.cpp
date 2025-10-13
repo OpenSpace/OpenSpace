@@ -142,15 +142,6 @@ namespace {
 
 namespace openspace {
 
-void VideoPlayer::onMpvRenderUpdate(void* ctx) {
-    ZoneScopedN("WAKE UP");
-    // The wakeup flag is set here to enable the mpv_render_context_render
-    // path in the main loop.
-    // The pattern here with a static function and a void pointer to the the class
-    // instance is a common pattern where C++ integrates a C library
-    static_cast<VideoPlayer*>(ctx)->_wakeup = 1;
-}
-
 void VideoPlayer::observePropertyMpv(MpvKey key) {
     mpv_observe_property(_mpvHandle, static_cast<uint64_t>(key), keys[key], formats[key]);
 }
@@ -273,9 +264,6 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         addProperty(_pause);
         _goToStart.onChange([this]() { goToStart(); });
         addProperty(_goToStart);
-        _loopVideo.onChange([this]() {
-            //setPropertyAsyncMpv(_loopVideo ? "inf" : "no", MpvKey::Loop);
-        });
         addProperty(_loopVideo);
         // Audio only makes sense when the video is playing in real time
         _playAudio.onChange([this]() { toggleMute(); });
@@ -359,14 +347,6 @@ void VideoPlayer::initializeMpv() {
     // See order at https://github.com/mpv-player/mpv/blob/master/libmpv/client.h#L420
     // Avoiding async calls in uninitialized state
 
-    // Loop video
-    /*
-    if (_loopVideo && _playbackMode == PlaybackMode::RealTimeLoop) {
-        // https://mpv.io/manual/master/#options-loop
-        setPropertyStringMpv("loop-file", "inf");
-    }
-    */
-
     // Allow only OpenGL (requires OpenGL 2.1+ or GLES 2.0+)
     // https://mpv.io/manual/master/#options-gpu-api
     setPropertyStringMpv("gpu-api", "opengl");
@@ -396,6 +376,10 @@ void VideoPlayer::initializeMpv() {
     // Use precise seek whenever possible (slower than default behaviour)
     // https://mpv.io/manual/master/#options-hr-seek
     setPropertyStringMpv("hr-seek", "yes");
+
+    // Set sync mode
+    // https://mpv.io/manual/master/#options-video-sync
+    setPropertyStringMpv("video-sync", "display-resample");
 
     // Turn off audio as default
     setPropertyStringMpv("mute", "yes");
@@ -436,12 +420,6 @@ void VideoPlayer::initializeMpv() {
     if (result < 0) {
         LINFO("Failed to initialize libmpv OpenGL context");
     }
-
-    // When there is a need to call mpv_render_context_update(), which can
-    // request a new frame to be rendered.
-    // (Separate from the normal event handling mechanism for the sake of
-    //  users which run OpenGL on a different thread.)
-    mpv_render_context_set_update_callback(_mpvRenderContext, onMpvRenderUpdate, this);
 
     // Load file
     const std::string file = _videoFile.string();
@@ -498,18 +476,14 @@ void VideoPlayer::update() {
 void VideoPlayer::renderMpv() {
     //handleMpvEvents();
 
-    // Renders a frame libmpv has been updated
-    if (true) { // _wakeup
-        const uint64_t result = mpv_render_context_update(_mpvRenderContext);
-        if ((result & MPV_RENDER_UPDATE_FRAME)) {
-            renderFrame();
-            _wakeup = 0;
-        }
+    // Renders a frame
+    const uint64_t result = mpv_render_context_update(_mpvRenderContext);
+    if ((result & MPV_RENDER_UPDATE_FRAME)) {
+        renderFrame();
     }
 }
 
 void VideoPlayer::renderFrame() {
-    ZoneScopedN("RENDER MPV FRAME");
     // Save the currently bound fbo
     const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
 
@@ -730,7 +704,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             }
             int* videoIsPaused = reinterpret_cast<int*>(prop->data);
             _isPaused = (* videoIsPaused == 1);
-            _adjustAtNextFrame = _isPaused;
+            _justPaused = _isPaused;
             break;
         }
         case MpvKey::Meta: {
@@ -753,9 +727,9 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             }
             int* eof = reinterpret_cast<int*>(prop->data);
             if (*eof) {
-                seekToTime(0.0, PauseAfterSeek(true));
-                _playAtNextFrame =
-                    _loopVideo && _playbackMode == PlaybackMode::RealTimeLoop;
+                if (_loopVideo && _playbackMode == PlaybackMode::RealTimeLoop) {
+                    _shouldLoop = true;
+                }
             }
             break;
         }
@@ -782,14 +756,12 @@ void VideoPlayer::preSync(bool isMaster) {
 
 void VideoPlayer::encode(SyncBuffer* syncBuffer) {
     syncBuffer->encode(_correctPlaybackTime);
-    syncBuffer->encode(_playAtNextFrame);
-    syncBuffer->encode(_adjustAtNextFrame);
+    syncBuffer->encode(_syncPlay);
 }
 
 void VideoPlayer::decode(SyncBuffer* syncBuffer) {
     syncBuffer->decode(_correctPlaybackTime);
-    syncBuffer->decode(_playAtNextFrame);
-    syncBuffer->decode(_adjustAtNextFrame);
+    syncBuffer->decode(_syncPlay);
 }
 
 void VideoPlayer::postSync(bool isMaster) {
@@ -824,16 +796,14 @@ void VideoPlayer::postSync(bool isMaster) {
     }
 
     if (_mpvRenderContext && _mpvHandle) {
-        if (_isPaused) {
-            if (_adjustAtNextFrame) {
-                if (!isMaster) {
-                    seekToTime(_correctPlaybackTime);
-                }
-            }
-            if (_playAtNextFrame) {
-                play();
-                _playAtNextFrame = false;
-            }
+        if (_justPaused) {
+            const double time = _shouldLoop ? 0.0 : _correctPlaybackTime;
+            setPropertyAsyncMpv(time, MpvKey::Time);
+            _justPaused = false;
+        }
+        else if (_isPaused && _shouldLoop) {
+            play();
+            _shouldLoop = false;
         }
         renderMpv();
     }
