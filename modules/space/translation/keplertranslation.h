@@ -118,9 +118,9 @@ public:
     /**
      * Recombutes the rotation matrix used in the update method.
      */
-    void computeOrbitPlane() const;
+    static glm::dmat3 computeOrbitPlane(double ascendingNode, double inclination,
+        double argumentOfPeriapsis);
 
-private:
     /**
      * This method computes the eccentric anomaly (location of the space craft taking the
      * eccentricity into acount) based on the mean anomaly (location of the space craft
@@ -128,10 +128,13 @@ private:
      *
      * \param meanAnomaly The mean anomaly for which the eccentric anomaly shall be
      *        computed
+     * \param eccentricity The eccentricity for which the eccentric anomaly shall be
+     *        computed
      * \return The eccentric anomaly for the provided \p meanAnomaly
      */
-    double eccentricAnomaly(double meanAnomaly) const;
+    static double eccentricAnomaly(double meanAnomaly, double eccentricity);
 
+private:
     /// The eccentricity of the orbit in [0, 1)
     properties::DoubleProperty _eccentricity;
     /// The semi-major axis in km
@@ -157,6 +160,27 @@ private:
 
     /// The cached position for the last time with which the update method was called
     glm::dvec3 _position = glm::dvec3(0.0);
+};
+
+class KeplerCalculator {
+public:
+    KeplerCalculator(double eccentricity, double semiMajorAxis,
+        double inclination, double ascendingNode, double argumentOfPeriapsis,
+        double meanAnomalyAtEpoch, double orbitalPeriod, double epoch);
+
+    glm::dvec3 position(double time) const;
+
+private:
+    const double _eccentricity;
+    const double _semiMajorAxis;
+    const double _inclination;
+    const double _ascendingNode;
+    const double _argumentOfPeriapsis;
+    const double _meanAnomalyAtEpoch;
+    const double _orbitalPeriod;
+    const double _epoch;
+
+    const glm::dmat3 _orbitPlaneRotation;
 };
 
 } // namespace openspace

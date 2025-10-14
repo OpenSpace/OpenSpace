@@ -26,8 +26,8 @@
 
 #include "PowerScaling/powerScalingMath.hglsl"
 
-layout (location = 0) in vec4 vertexData; // 1: x, 2: y, 3: z, 4: timeOffset,
-layout (location = 1) in dvec2 orbitData; // 1: epoch, 2: period
+layout (location = 0) in vec3 vertexData; // 1: x, 2: y, 3: z
+layout (location = 1) in dvec3 orbitData; // 1: timeOffset, 2: epoch, 3: period
 
 out vec4 viewSpacePosition;
 out float viewSpaceDepth;
@@ -48,8 +48,9 @@ void main() {
   // offsetPeriods is calculated to know how much to fade that specific fragment.
 
   // If orbit_data is doubles, cast to float first
-  double epoch = orbitData.x;
-  double period = orbitData.y;
+  double timeOffset = orbitData.x;
+  double epoch = orbitData.y;
+  double period = orbitData.z;
 
   // Calculate nr of periods, get fractional part to know where the vertex closest to the
   // debris part is right now
@@ -61,7 +62,7 @@ void main() {
   }
 
   // Same procedure for the current vertex
-  offsetPeriods = vertexData.w / float(period);
+  offsetPeriods = float(timeOffset / period);
 
   viewSpacePosition = vec4(modelViewTransform * dvec4(vertexData.xyz, 1));
   vec4 vs_position = z_normalization(projectionTransform * viewSpacePosition);
