@@ -1045,10 +1045,10 @@ void RenderEngine::applyBloomEffect() {
     }
 }
 
-void RenderEngine::applyTMOEffect(float blackoutFactor) {
+void RenderEngine::applyTMOEffect(float blackoutFactor, const glm::ivec4& viewport) {
     ZoneScoped;
     
-    _renderer.applyTMOComposite(blackoutFactor);
+    _renderer.applyTMOComposite(blackoutFactor, viewport);
 }
 
 void RenderEngine::postDraw() {

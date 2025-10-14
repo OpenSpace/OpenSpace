@@ -168,7 +168,8 @@ public:
      * Apply Tone Mapping Operator on the current framebuffer content for composite frame processing.
      * This should be called after bloom but before GUI overlays.
      */
-    void applyTMOComposite(float blackoutFactor);
+    void applyTMOComposite(float blackoutFactor, const glm::ivec4& viewport);
+    void applyTMO(float blackoutFactor, const glm::ivec4& viewport);
 
     void update();
     void performRaycasterTasks(const std::vector<RaycasterTask>& tasks,
@@ -198,7 +199,6 @@ private:
     >;
 
     void resolveMSAA(float blackoutFactor);
-    void applyTMO(float blackoutFactor, const glm::ivec4& viewport);
     void applyFXAA(const glm::ivec4& viewport);
     void updateDownscaleTextures() const;
     void updateExitVolumeTextures();

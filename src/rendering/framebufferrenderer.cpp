@@ -466,40 +466,29 @@ void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewp
     _hdrFilteringProgram->deactivate();
 }
 
-void FramebufferRenderer::applyTMOComposite(float blackoutFactor) {
+void FramebufferRenderer::applyTMOComposite(float blackoutFactor, const glm::ivec4& viewport) {
     ZoneScoped;
     TracyGpuZone("applyTMOComposite");
 
-    GLint currentFbo;
+    // Get currently bound FBO and its color texture
+    GLint currentFbo, currentFboTex;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
-    
-    // Create temporary texture to capture current framebuffer content
-    static GLuint captureTexture = 0;
-    static glm::ivec2 lastRes = glm::ivec2(0);
-    
-    if (captureTexture == 0 || lastRes != _resolution) {
-        if (captureTexture != 0) {
-            glDeleteTextures(1, &captureTexture);
-        }
-        glGenTextures(1, &captureTexture);
-        glBindTexture(GL_TEXTURE_2D, captureTexture);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, _resolution.x, _resolution.y, 0, GL_RGBA, GL_FLOAT, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        lastRes = _resolution;
-    }
-    
-    // Copy current framebuffer to texture
-    glBindTexture(GL_TEXTURE_2D, captureTexture);
-    glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, _resolution.x, _resolution.y, 0);
+    glGetFramebufferAttachmentParameteriv(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_FRAMEBUFFER_ATTACHMENT_OBJECT_NAME,
+        &currentFboTex
+    );
+    glBindFramebuffer(GL_FRAMEBUFFER, 0u);
 
+    assert(currentFboTex != 0);
+    assert(currentFbo != 0);
+    
     _hdrFilteringProgram->activate();
 
     ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
     hdrFeedingTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, captureTexture);
+    glBindTexture(GL_TEXTURE_2D, currentFboTex);
 
     _hdrFilteringProgram->setUniform(
         _hdrUniformCache.hdrFeedingTexture,
@@ -513,7 +502,7 @@ void FramebufferRenderer::applyTMOComposite(float blackoutFactor) {
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
     // Use full viewport for composite frame
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Viewport, glm::vec4(0, 0, _resolution.x, _resolution.y));
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Viewport, glm::vec4(viewport));
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Resolution, glm::vec2(_resolution));
 
     glDepthMask(false);
@@ -527,6 +516,7 @@ void FramebufferRenderer::applyTMOComposite(float blackoutFactor) {
     glEnable(GL_DEPTH_TEST);
 
     _hdrFilteringProgram->deactivate();
+    glBindFramebuffer(GL_FRAMEBUFFER, currentFbo);
 }
 
 void FramebufferRenderer::applyFXAA(const glm::ivec4& viewport) {
@@ -1222,14 +1212,6 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
     glEnablei(GL_BLEND, 0);
 
-    // Apply bloom effect before TMO (in HDR color space)
-    if (_bloomEffect && _bloomEffect->isEnabled()) {
-        TracyGpuZone("Apply Bloom");
-        const ghoul::GLDebugGroup group("Apply Bloom");
-        
-        _bloomEffect->render(_pingPongBuffers.colorTexture[_pingPongIndex]);
-    }
-
     {
         TracyGpuZone("Overlay")
         const ghoul::GLDebugGroup group("Overlay");
@@ -1259,33 +1241,18 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     // Disabling depth test for filtering and hdr
     glDisable(GL_DEPTH_TEST);
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
 
-    if (_enableFXAA) {
-        glBindFramebuffer(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer);
-        glDrawBuffers(1, ColorAttachmentArray.data());
-        glDisable(GL_BLEND);
-
-    }
-    else {
-        // When applying the TMO, the result is saved to the default FBO to be displayed
-        // by the Operating System. Also, the resolve procedure is executed in this step.
-        glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
-    }
-
-    {
-        // Apply the selected TMO on the results and resolve the result to the default FBO
-        TracyGpuZone("Apply TMO");
-        const ghoul::GLDebugGroup group("Apply TMO");
-
-        applyTMO(blackoutFactor, viewport);
-    }
-
-    if (_enableFXAA) {
-        TracyGpuZone("Apply FXAA")
-        const ghoul::GLDebugGroup group("Apply FXAA");
-        glBindFramebuffer(GL_FRAMEBUFFER, _defaultFBO);
-        applyFXAA(viewport);
-    }
+    // Copy final color to SGCT output buffer
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, _pingPongBuffers.framebuffer);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _defaultFBO);
+    glBlitFramebuffer(
+        0, 0, _resolution.x, _resolution.y,
+        viewport.x, viewport.y, viewport.x + viewport.z, viewport.y + viewport.w,
+        GL_COLOR_BUFFER_BIT,
+        GL_NEAREST
+    );
 }
 
 void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks,

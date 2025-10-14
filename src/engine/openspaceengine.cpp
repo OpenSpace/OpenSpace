@@ -1292,12 +1292,6 @@ void OpenSpaceEngine::drawOverlays() {
 
     viewportChanged();
 
-    // Apply bloom effect on the stitched / composited image
-    // global::renderEngine->applyBloomEffect();
-
-    // Apply TMO on the composite frame after bloom
-    // global::renderEngine->applyTMOEffect(global::renderEngine->combinedBlackoutFactor());
-
     // Render the overlays on top of the rendered scene
     const bool isGuiWindow =
         global::windowDelegate->hasGuiWindow() ?

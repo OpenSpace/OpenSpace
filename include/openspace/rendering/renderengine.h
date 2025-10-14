@@ -92,7 +92,7 @@ public:
     void renderOverlays(const ShutdownInformation& shutdownInfo);
     void renderEndscreen();
     void applyBloomEffect();
-    void applyTMOEffect(float blackoutFactor);
+    void applyTMOEffect(float blackoutFactor, const glm::ivec4& viewport);
     void postDraw();
 
     float hdrExposure() const;
