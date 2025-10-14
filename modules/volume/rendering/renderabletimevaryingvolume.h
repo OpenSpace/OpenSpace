@@ -112,7 +112,7 @@ private:
     std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
     bool _invertDataAtZ;
-
+    bool _useCaching = true;
 
     struct VolumeSliceSettings : properties::PropertyOwner {
         VolumeSliceSettings();

@@ -216,6 +216,14 @@ namespace {
 
         // [[codegen::verbatim(HideOutsideInfo.description)]]
         std::optional<bool> hideValuesOutsideRange;
+
+        // If true (default), the loaded dataset and color map will be cached so that they
+        // can be loaded faster at a later time. This does however mean that any updates
+        // to the values in the dataset will not lead to changes in the rendering without
+        // first removing the cached file. Set it to false to disable caching. This can be
+        // useful for example when working on importing a new dataset or when making
+        // changes to the color map.
+        std::optional<bool> useCaching;
     };
 #include "renderabletimevaryingvolume_codegen.cpp"
 } // namespace
@@ -257,9 +265,12 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _transferFunctionPath(TransferFunctionInfo)
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
+    , _valueRange(RangeInfo, glm::vec2(
+        std::numeric_limits<float>::lowest(),
+        std::numeric_limits<float>::max())
+    )
+    , _hideOutsideRange(HideOutsideInfo, false)
     , _invertDataAtZ(false)
-    , _valueRange(RangeInfo, glm::vec2(0.f))
-    , _hideOutsideRange(HideOutsideInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -313,7 +324,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     addPropertySubOwner(_volumeSlice);
 
     _valueRange = p.valueRange.value_or(_valueRange);
-    _hideOutsideRange = p.hideValuesOutsideRange.value_or(false);
+    _hideOutsideRange = p.hideValuesOutsideRange.value_or(_hideOutsideRange);
 
     addProperty(_valueRange);
     addProperty(_hideOutsideRange);
@@ -331,21 +342,34 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
     namespace fs = std::filesystem;
 
-    // VTI specific until we decide on a meta data format that can be read
-    const int nVtiSamples = 191;
-    const int VtiSimulationTime = 48; // seconds
-    double deltaTimeStep = static_cast<double>(VtiSimulationTime) / static_cast<double>(nVtiSamples);
+    // TODO refactor into datareader
     int step = 0;
+    double deltaTimeStep = 0.0;
+    double startTime = 0.0;
+
+    // VTI specific metadata
+    std::filesystem::path metaDataPath = sequenceDir / ".metadata";
+    if (std::filesystem::is_regular_file(metaDataPath)) {
+        const ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(metaDataPath);
+        const int nVtiSamples = dictionary.value<double>("TimeSamples");
+        const std::string start = dictionary.value<std::string>("Start");
+        const std::string end = dictionary.value<std::string>("End");
+
+        startTime = Time::convertTime(start);
+        const double endTime = Time::convertTime(end);
+        const double simulationTime = endTime - startTime;
+
+        deltaTimeStep = simulationTime / static_cast<double>(nVtiSamples);
+    }
 
     float globalMin = std::numeric_limits<float>::max();
     float globalMax = std::numeric_limits<float>::lowest();
-
     for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
         if (e.is_regular_file() && e.path().extension() == ".dictionary") {
             loadTimestepMetadata(e.path(), globalMin, globalMax);
         }
         if (e.is_regular_file() && e.path().extension() == ".vti") {
-            double timestep = Time::convertTime(std::format("2023-03-23T20:29:{:02}", deltaTimeStep * step++));
+            double timestep = startTime + deltaTimeStep * step++;
             const auto [metadata, scalars] = readVTIFile(e.path(), timestep);
 
             Timestep t;
@@ -354,7 +378,6 @@ void RenderableTimeVaryingVolume::initializeGL() {
             t.inRam = false;
             t.onGpu = false;
             t.rawData = scalars;
-
 
             globalMin = std::min(globalMin, t.metadata.minValue);
             globalMax = std::max(globalMax, t.metadata.maxValue);
@@ -384,36 +407,12 @@ void RenderableTimeVaryingVolume::initializeGL() {
         float* data;
         // We've read data from binary file
         if (t.rawVolume) {
-            //const float min = t.metadata.minValue;
-            //const float diff = t.metadata.maxValue - t.metadata.minValue;
-            const float min = globalMin;
-            const float diff = globalMax - globalMin;
-            //_valueRange = glm::vec2(t.metadata.minValue, t.metadata.maxValue);
-            _valueRange = glm::vec2(globalMin, globalMax);
-
             data = t.rawVolume->data();
-            //for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-            //    data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
-            //}
-
-            //t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
-            //for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-            //    t.histogram->add(data[i]);
-            //}
         }
         // Data came from xml file
         else {
-            const float min = globalMin;
-            const float diff = globalMax - globalMin;
-
-            _valueRange = glm::vec2(globalMin, globalMax);
-
             data = t.rawData.data();
-            //for (size_t i = 0; i < t.rawData.size(); i++) {
-            //    data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
-            //}
         }
-        // TODO: handle normalization properly for different timesteps + transfer function
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
             t.metadata.dimensions,
@@ -430,6 +429,14 @@ void RenderableTimeVaryingVolume::initializeGL() {
             ghoul::opengl::Texture::TakeOwnership::No
         );
         t.texture->uploadTexture();
+    }
+
+    // Data range was not set by user,  set it based on min and max values of the data
+    if (_valueRange.value().x == std::numeric_limits<float>::lowest()) {
+        _valueRange = glm::vec2(globalMin, _valueRange.value().y);
+    }
+    if (_valueRange.value().y == std::numeric_limits<float>::max()) {
+        _valueRange = glm::vec2(_valueRange.value().x, globalMax);
     }
 
     _clipPlanes->initialize();
