@@ -351,6 +351,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
             .downloadedBytes = 0
         };
         global::downloadEventEngine->publish(event);
+        LDEBUG(std::format("Started downloading '{}'", dl->url()));
 
         dl->start();
     }
@@ -395,6 +396,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
                 d->url(),
                 DownloadEventEngine::DownloadEvent::Type::Failed
             );
+            LERROR(std::format("Failed to download '{}'", d->url()));
             continue;
         }
 
@@ -453,12 +455,14 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
                     d->url(),
                     DownloadEventEngine::DownloadEvent::Type::Finished
                 );
+                LDEBUG(std::format("Finished downloading '{}'", d->url()));
             }
             else {
                 global::downloadEventEngine->publish(
                     d->url(),
                     DownloadEventEngine::DownloadEvent::Type::Failed
                 );
+                LERROR(std::format("Failed to download '{}'", d->url()));
             }
         }
         else {
@@ -467,6 +471,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
                 d->url(),
                 DownloadEventEngine::DownloadEvent::Type::Finished
             );
+            LDEBUG(std::format("Finished downloading '{}'", d->url()));
         }
 
     }
