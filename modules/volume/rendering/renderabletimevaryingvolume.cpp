@@ -30,6 +30,7 @@
 #include <modules/volume/transferfunctionhandler.h>
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumereader.h>
+#include <modules/volume/rawvolumewriter.h>
 #include <modules/volume/volumegridtype.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
@@ -41,6 +42,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
@@ -325,6 +327,7 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 
     _valueRange = p.valueRange.value_or(_valueRange);
     _hideOutsideRange = p.hideValuesOutsideRange.value_or(_hideOutsideRange);
+    _useCaching = p.useCaching.value_or(_useCaching);
 
     addProperty(_valueRange);
     addProperty(_hideOutsideRange);
@@ -346,6 +349,8 @@ void RenderableTimeVaryingVolume::initializeGL() {
     int step = 0;
     double deltaTimeStep = 0.0;
     double startTime = 0.0;
+    volume::RawVolumeMetadata metadata;
+
 
     // VTI specific metadata
     std::filesystem::path metaDataPath = sequenceDir / ".metadata";
@@ -360,6 +365,19 @@ void RenderableTimeVaryingVolume::initializeGL() {
         const double simulationTime = endTime - startTime;
 
         deltaTimeStep = simulationTime / static_cast<double>(nVtiSamples);
+
+        metadata.lowerDomainBound =
+            static_cast<glm::vec3>(dictionary.value<glm::dvec3>("MinExtent"));
+        metadata.upperDomainBound=
+            static_cast<glm::vec3>(dictionary.value<glm::dvec3>("MaxExtent"));
+        metadata.dimensions = 1 +
+            static_cast<glm::ivec3>(metadata.upperDomainBound - metadata.lowerDomainBound);
+
+        metadata.hasDomainBounds = true;
+        metadata.hasValueRange = true;
+        metadata.minValue = dictionary.value<double>("MinValue");
+        metadata.maxValue = dictionary.value<double>("MaxValue");
+        metadata.hasTime = true;
     }
 
     float globalMin = std::numeric_limits<float>::max();
@@ -369,19 +387,32 @@ void RenderableTimeVaryingVolume::initializeGL() {
             loadTimestepMetadata(e.path(), globalMin, globalMax);
         }
         if (e.is_regular_file() && e.path().extension() == ".vti") {
-            double timestep = startTime + deltaTimeStep * step++;
-            const auto [metadata, scalars] = readVTIFile(e.path(), timestep);
-
             Timestep t;
-            t.metadata = metadata;
+            double timestep = startTime + deltaTimeStep * step++;
+
+            std::filesystem::path cached =
+                FileSys.cacheManager()->cachedFilename(e.path());
+            if (_useCaching) {
+
+                // Load caching data if it exists, otherwise we'll load normally and store a
+                // cache for next time
+                if (std::filesystem::exists(cached)) {
+                    LINFO(std::format("Cached file {} used for file {}", cached, e.path()));
+                    loadVtiFromCache(cached, timestep, metadata, t, globalMin, globalMax);
+                }
+                else {
+                    loadVti(e.path(), timestep, t, globalMin, globalMax);
+                    saveVtiCache(cached, t.rawData);
+                }
+            }
+            else {
+                loadVti(e.path(), timestep, t, globalMin, globalMax);
+                saveVtiCache(cached, t.rawData);
+            }
+
             t.baseName = "";
             t.inRam = false;
             t.onGpu = false;
-            t.rawData = scalars;
-
-            globalMin = std::min(globalMin, t.metadata.minValue);
-            globalMax = std::max(globalMax, t.metadata.maxValue);
-
             _volumeTimesteps[t.metadata.time] = std::move(t);
         }
     }
@@ -397,7 +428,9 @@ void RenderableTimeVaryingVolume::initializeGL() {
             );
             RawVolumeReader<float> reader(path, t.metadata.dimensions);
             t.rawVolume = reader.read(_invertDataAtZ);
-            for (size_t i = 0; i < t.metadata.dimensions.x * t.metadata.dimensions.y * t.metadata.dimensions.z; i++) {
+            const unsigned length = t.metadata.dimensions.x * t.metadata.dimensions.y *
+                t.metadata.dimensions.z;
+            for (size_t i = 0; i < length; i++) {
                 float d = t.rawVolume->data()[i];
                 globalMin = std::min(globalMin, d);
                 globalMax = std::max(globalMax, d);
@@ -774,6 +807,46 @@ void RenderableTimeVaryingVolume::renderVolumeSlice(const RenderData& data) {
     glBindVertexArray(0);
     glEnable(GL_CULL_FACE);
     _shader->deactivate();
+}
+
+void RenderableTimeVaryingVolume::loadVtiFromCache(const std::filesystem::path& cached,
+                                                   double timestep,
+                                                   RawVolumeMetadata& metadata,
+                                                   Timestep& t, float& globalMin,
+                                                   float& globalMax)
+{
+    metadata.time = timestep;
+    t.metadata = metadata;
+
+    RawVolumeReader<float> reader(cached, metadata.dimensions);
+    t.rawVolume = reader.read(_invertDataAtZ);
+    const unsigned length = metadata.dimensions.x * metadata.dimensions.y *
+        metadata.dimensions.z;
+    // If the metadata contain the min max this is unnecessary
+    for (size_t i = 0; i < length; i++) {
+        float d = t.rawVolume->data()[i];
+        globalMin = std::min(globalMin, d);
+        globalMax = std::max(globalMax, d);
+    }
+}
+
+void RenderableTimeVaryingVolume::loadVti(const std::filesystem::path& path,
+                                          double timestep, Timestep& t, float& globalMin,
+                                          float& globalMax)
+{
+    const auto [metadata, scalars] = readVTIFile(path, timestep);
+    t.metadata = metadata;
+    t.rawData = scalars;
+
+    globalMin = std::min(globalMin, t.metadata.minValue);
+    globalMax = std::max(globalMax, t.metadata.maxValue);
+}
+
+void RenderableTimeVaryingVolume::saveVtiCache(const std::filesystem::path& cached,
+                                               const std::vector<float>& scalars)
+{
+    RawVolumeWriter<float> writer(cached);
+    writer.write(scalars);
 }
 
 } // namespace openspace::volume

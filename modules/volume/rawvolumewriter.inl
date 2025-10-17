@@ -106,4 +106,19 @@ void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     file.write(buffer, length);
 }
 
+template <typename VoxelType>
+void RawVolumeWriter<VoxelType>::write(const std::vector<VoxelType>& data) const {
+
+    const char* const buffer = reinterpret_cast<const char*>(data.data());
+    size_t length = data.size() * sizeof(VoxelType);
+
+    std::ofstream file = std::ofstream(_path, std::ios::binary);
+
+    if (!file.good()) {
+        throw ghoul::RuntimeError(std::format("Could not create file '{}'", _path));
+    }
+
+    file.write(buffer, length);
+}
+
 } // namespace openspace::volume

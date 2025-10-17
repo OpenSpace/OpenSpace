@@ -91,6 +91,13 @@ private:
     void createPlane() const;
     void renderVolumeSlice(const RenderData& data);
 
+    void loadVtiFromCache(const std::filesystem::path& cached, double timestep,
+        RawVolumeMetadata& metadata, Timestep& t, float& globalMin, float& globalMax);
+    void loadVti(const std::filesystem::path& path, double timestep, Timestep& t,
+        float& globalMin, float& globalMax);
+    void saveVtiCache(const std::filesystem::path& cached,
+        const std::vector<float>& scalars);
+
     properties::OptionProperty _gridType;
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
 

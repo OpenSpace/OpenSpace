@@ -49,7 +49,9 @@ std::string getAttribute(const std::string& line, const std::string& attribute) 
 
 }
 
-std::pair<volume::RawVolumeMetadata, std::vector<float>> readVTIFile(const std::filesystem::path& path, double timestep) {
+std::pair<volume::RawVolumeMetadata, std::vector<float>> readVTIFile(
+    const std::filesystem::path& path, double timestep)
+{
     tinyxml2::XMLDocument doc;
 
     if (doc.LoadFile(path.string().c_str()) != tinyxml2::XML_SUCCESS) {
