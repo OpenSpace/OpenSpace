@@ -232,6 +232,7 @@ private:
     GLuint _exitColorTexture = 0;
     GLuint _exitDepthTexture = 0;
     GLuint _exitFramebuffer = 0;
+    GLuint _tmoCompositeInputTexture = 0;
 
     struct {
         GLuint colorTexture;

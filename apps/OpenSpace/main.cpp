@@ -587,9 +587,6 @@ void mainDraw2DFunc(const sgct::RenderData& data) {
     currentFrustumMode = data.frustumMode;
     currentDrawResolution = glm::ivec2(data.bufferSize.x, data.bufferSize.y);
 
-    GLint prevFbo = 0;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
-
     glm::ivec4 viewport = glm::ivec4(
         data.viewport.position().x,
         data.viewport.position().y,
@@ -597,8 +594,6 @@ void mainDraw2DFunc(const sgct::RenderData& data) {
         data.viewport.size().y * data.window.framebufferResolution().y
     );
     global::renderEngine->applyTMOEffect(global::renderEngine->combinedBlackoutFactor(), viewport);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     try {
         global::openSpaceEngine->drawOverlays();
@@ -611,7 +606,6 @@ void mainDraw2DFunc(const sgct::RenderData& data) {
     glEnable(GL_BLEND);
     glDisable(GL_CULL_FACE);
     glDisable(GL_DEPTH_TEST);
-    glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
 
     LTRACE("main::mainDraw2DFunc(end)");
 }
