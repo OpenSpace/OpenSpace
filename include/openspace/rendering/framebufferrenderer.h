@@ -164,11 +164,6 @@ public:
 
     PostprocessingBloom* bloomEffect() const { return _bloomEffect.get(); }
 
-    /**
-     * Apply Tone Mapping Operator on the current framebuffer content for composite frame processing.
-     * This should be called after bloom but before GUI overlays.
-     */
-    void applyTMOComposite(float blackoutFactor, const glm::ivec4& viewport);
     void applyTMO(float blackoutFactor, const glm::ivec4& viewport);
 
     void update();
@@ -232,7 +227,6 @@ private:
     GLuint _exitColorTexture = 0;
     GLuint _exitDepthTexture = 0;
     GLuint _exitFramebuffer = 0;
-    GLuint _tmoCompositeInputTexture = 0;
 
     struct {
         GLuint colorTexture;

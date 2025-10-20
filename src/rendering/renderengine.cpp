@@ -68,6 +68,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/openglstatecache.h>
+#include <ghoul/opengl/textureunit.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 #include "renderengine_lua.inl"
@@ -606,6 +607,63 @@ void RenderEngine::initializeGL() {
     const glm::ivec2 res = renderingResolution();
     _bloom.setResolution(res.x, res.y);
 
+    // Initialize TMO composite resources
+    {
+        constexpr std::array<GLfloat, 12> VertexData = {
+            // x     y
+            -1.f, -1.f,
+             1.f,  1.f,
+            -1.f,  1.f,
+            -1.f, -1.f,
+             1.f, -1.f,
+             1.f,  1.f,
+        };
+
+        glGenVertexArrays(1, &_screenQuad);
+        glBindVertexArray(_screenQuad);
+
+        glGenBuffers(1, &_vertexPositionBuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+
+        glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
+        glEnableVertexAttribArray(0);
+
+        glBindVertexArray(0);
+
+        // Generate TMO Composite Input Texture
+        glGenTextures(1, &_tmoCompositeInputTexture);
+        glBindTexture(GL_TEXTURE_2D, _tmoCompositeInputTexture);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGBA32F,
+            res.x,
+            res.y,
+            0,
+            GL_RGBA,
+            GL_FLOAT,
+            nullptr
+        );
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        if (glbinding::Binding::ObjectLabel.isResolved()) {
+            glObjectLabel(GL_TEXTURE, _tmoCompositeInputTexture, -1, "TMO Composite Input");
+        }
+        glBindTexture(GL_TEXTURE_2D, 0);
+
+        // Compile HDR filtering shader
+        _hdrFilteringProgram = ghoul::opengl::ProgramObject::Build(
+            "HDR and Filtering Program",
+            absPath("${SHADERS}/framebuffer/hdrAndFiltering.vert"),
+            absPath("${SHADERS}/framebuffer/hdrAndFiltering.frag")
+        );
+
+        ghoul::opengl::updateUniformLocations(*_hdrFilteringProgram, _hdrUniformCache);
+    }
+
     // set the close clip plane and the far clip plane to extreme values while in
     // development
     global::windowDelegate->setNearFarClippingPlane(0.001f, 1000.f);
@@ -647,6 +705,20 @@ void RenderEngine::deinitializeGL() {
 
     _bloom.deinitialize();
     _renderer.deinitialize();
+
+    // Clean up TMO composite resources
+    if (_tmoCompositeInputTexture != 0) {
+        glDeleteTextures(1, &_tmoCompositeInputTexture);
+        _tmoCompositeInputTexture = 0;
+    }
+    if (_screenQuad != 0) {
+        glDeleteVertexArrays(1, &_screenQuad);
+        _screenQuad = 0;
+    }
+    if (_vertexPositionBuffer != 0) {
+        glDeleteBuffers(1, &_vertexPositionBuffer);
+        _vertexPositionBuffer = 0;
+    }
 }
 
 void RenderEngine::updateScene() {
@@ -696,6 +768,27 @@ void RenderEngine::updateRenderer() {
         const glm::ivec2 res = renderingResolution();
         _bloom.setResolution(res.x, res.y);
 
+        // Resize TMO composite input texture to match draw buffer resolution
+        glBindTexture(GL_TEXTURE_2D, _tmoCompositeInputTexture);
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGBA32F,
+            res.x,
+            res.y,
+            0,
+            GL_RGBA,
+            GL_FLOAT,
+            nullptr
+        );
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        if (glbinding::Binding::ObjectLabel.isResolved()) {
+            glObjectLabel(GL_TEXTURE, _tmoCompositeInputTexture, -1, "TMO Composite Input");
+        }
+
         using FR = ghoul::fontrendering::FontRenderer;
         FR::defaultRenderer().setFramebufferSize(fontResolution());
         FR::defaultProjectionRenderer().setFramebufferSize(renderingResolution());
@@ -711,6 +804,12 @@ void RenderEngine::updateRenderer() {
 
     _renderer.update();
     _bloom.update();
+
+    // Update HDR filtering program if dirty
+    if (_hdrFilteringProgram && _hdrFilteringProgram->isDirty()) {
+        _hdrFilteringProgram->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(*_hdrFilteringProgram, _hdrUniformCache);
+    }
 }
 
 void RenderEngine::updateScreenSpaceRenderables() {
@@ -1047,8 +1146,52 @@ void RenderEngine::applyBloomEffect() {
 
 void RenderEngine::applyTMOEffect(float blackoutFactor, const glm::ivec4& viewport) {
     ZoneScoped;
-    
-    _renderer.applyTMOComposite(blackoutFactor, viewport);
+    TracyGpuZone("applyTMOComposite");
+
+    // Copy current FBO color texture to _tmoCompositeInputTexture using texture copy
+    glReadBuffer(GL_COLOR_ATTACHMENT0);
+    glBindTexture(GL_TEXTURE_2D, _tmoCompositeInputTexture);
+    glCopyTexSubImage2D(
+        GL_TEXTURE_2D,
+        0,
+        0, 0,
+        viewport.x, viewport.y,
+        viewport.z, viewport.w
+    );
+
+    _hdrFilteringProgram->activate();
+
+    ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
+    hdrFeedingTextureUnit.activate();
+    glBindTexture(GL_TEXTURE_2D, _tmoCompositeInputTexture);
+
+    _hdrFilteringProgram->setUniform(
+        _hdrUniformCache.hdrFeedingTexture,
+        hdrFeedingTextureUnit
+    );
+
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrExposure, _hdrExposure.value());
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.gamma, _gamma.value());
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Hue, _hue.value() / 360.f);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation.value());
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value.value());
+    // Use full viewport for composite frame
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Viewport, glm::vec4(viewport));
+    const glm::ivec2 res = renderingResolution();
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.Resolution, glm::vec2(res));
+
+    glDepthMask(false);
+    glDisable(GL_DEPTH_TEST);
+
+    glBindVertexArray(_screenQuad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+
+    glDepthMask(true);
+    glEnable(GL_DEPTH_TEST);
+
+    _hdrFilteringProgram->deactivate();
 }
 
 void RenderEngine::postDraw() {

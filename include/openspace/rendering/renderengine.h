@@ -37,6 +37,7 @@
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/postprocess.h>
+#include <ghoul/opengl/uniformcache.h>
 #include <chrono>
 #include <filesystem>
 
@@ -247,6 +248,14 @@ private:
 
     properties::Vec4Property _enabledFontColor;
     properties::Vec4Property _disabledFontColor;
+
+    // TMO Composite resources
+    GLuint _tmoCompositeInputTexture = 0;
+    GLuint _screenQuad = 0;
+    GLuint _vertexPositionBuffer = 0;
+    std::unique_ptr<ghoul::opengl::ProgramObject> _hdrFilteringProgram;
+    UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
+        Hue, Saturation, Value, Viewport, Resolution) _hdrUniformCache;
 };
 
 } // namespace openspace

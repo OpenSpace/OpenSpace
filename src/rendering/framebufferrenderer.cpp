@@ -168,9 +168,6 @@ void FramebufferRenderer::initialize() {
     glGenTextures(1, &_exitDepthTexture);
     glGenFramebuffers(1, &_exitFramebuffer);
 
-    // TMO Composite Input Texture
-    glGenTextures(1, &_tmoCompositeInputTexture);
-
     // FXAA Buffers
     glGenFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
     glGenTextures(1, &_fxaaBuffers.fxaaTexture);
@@ -406,7 +403,6 @@ void FramebufferRenderer::deinitialize() {
 
     glDeleteTextures(1, &_exitColorTexture);
     glDeleteTextures(1, &_exitDepthTexture);
-    glDeleteTextures(1, &_tmoCompositeInputTexture);
 
     glDeleteBuffers(1, &_vertexPositionBuffer);
     glDeleteVertexArrays(1, &_screenQuad);
@@ -454,92 +450,6 @@ void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewp
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Hue, _hue);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Viewport, glm::vec4(viewport));
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Resolution, glm::vec2(_resolution));
-
-    glDepthMask(false);
-    glDisable(GL_DEPTH_TEST);
-
-    glBindVertexArray(_screenQuad);
-    glDrawArrays(GL_TRIANGLES, 0, 6);
-    glBindVertexArray(0);
-
-    glDepthMask(true);
-    glEnable(GL_DEPTH_TEST);
-
-    _hdrFilteringProgram->deactivate();
-}
-
-void FramebufferRenderer::applyTMOComposite(float blackoutFactor, const glm::ivec4& viewport) {
-    ZoneScoped;
-    TracyGpuZone("applyTMOComposite");
-
-    // Copy current FBO color texture to _tmoCompositeInputTexture using texture copy
-    glReadBuffer(GL_COLOR_ATTACHMENT0);
-    glBindTexture(GL_TEXTURE_2D, _tmoCompositeInputTexture);
-
-    // Check if the viewport size matches the texture size
-    GLint texSizeW, texSizeH;
-    glGetTexLevelParameteriv(
-        GL_TEXTURE_2D,
-        0,
-        GL_TEXTURE_WIDTH,
-        &texSizeW
-    );
-    glGetTexLevelParameteriv(
-        GL_TEXTURE_2D,
-        0,
-        GL_TEXTURE_HEIGHT,
-        &texSizeH
-    );
-    if (texSizeW != viewport.z || texSizeH != viewport.w) {
-
-        // TMO Composite Input Texture
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RGBA32F,
-            viewport.z,
-            viewport.w,
-            0,
-            GL_RGBA,
-            GL_FLOAT,
-            nullptr
-        );
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        if (glbinding::Binding::ObjectLabel.isResolved()) {
-            glObjectLabel(GL_TEXTURE, _tmoCompositeInputTexture, -1, "TMO Composite Input");
-        }
-    }
-    glCopyTexSubImage2D(
-        GL_TEXTURE_2D,
-        0,
-        0, 0,
-        viewport.x, viewport.y,
-        viewport.z, viewport.w
-    );
-
-    _hdrFilteringProgram->activate();
-
-    ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
-    hdrFeedingTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, _tmoCompositeInputTexture);
-
-    _hdrFilteringProgram->setUniform(
-        _hdrUniformCache.hdrFeedingTexture,
-        hdrFeedingTextureUnit
-    );
-
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrExposure, _hdrExposure);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.gamma, _gamma);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Hue, _hue);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
-    // Use full viewport for composite frame
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Viewport, glm::vec4(viewport));
     _hdrFilteringProgram->setUniform(_hdrUniformCache.Resolution, glm::vec2(_resolution));
 
