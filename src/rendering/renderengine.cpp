@@ -1112,35 +1112,29 @@ void RenderEngine::applyBloomEffect() {
 
     // Apply bloom postprocessing effect
     if (_bloom.isEnabled()) {
+        glm::ivec2 res = renderingResolution();
+        glm::ivec4 viewport = glm::ivec4(0, 0, res.x, res.y);
+
         // Copy current framebuffer to texture for bloom processing
         GLint currentFbo;
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFbo);
         
-        // Create temporary texture to capture current framebuffer content
-        static GLuint captureTexture = 0;
-        static glm::ivec2 lastRes = glm::ivec2(0);
-        const glm::ivec2 res = renderingResolution();
-        
-        if (captureTexture == 0 || lastRes != res) {
-            if (captureTexture != 0) {
-                glDeleteTextures(1, &captureTexture);
-            }
-            glGenTextures(1, &captureTexture);
-            glBindTexture(GL_TEXTURE_2D, captureTexture);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, res.x, res.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            lastRes = res;
-        }
+        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        glBindTexture(GL_TEXTURE_2D, _tmoCompositeInputTexture);
+        glCopyTexSubImage2D(
+            GL_TEXTURE_2D,
+            0,
+            0, 0,
+            viewport.x, viewport.y,
+            viewport.z, viewport.w
+        );    
         
         // Copy current framebuffer to texture
-        glBindTexture(GL_TEXTURE_2D, captureTexture);
+        glBindTexture(GL_TEXTURE_2D, _tmoCompositeInputTexture);
         glCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 0, 0, res.x, res.y, 0);
         
         // Apply bloom effect
-        _bloom.render(captureTexture);
+        _bloom.render(_tmoCompositeInputTexture);
     }
 }
 

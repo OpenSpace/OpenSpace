@@ -593,6 +593,7 @@ void mainDraw2DFunc(const sgct::RenderData& data) {
         data.viewport.size().x * data.window.framebufferResolution().x,
         data.viewport.size().y * data.window.framebufferResolution().y
     );
+    global::renderEngine->applyBloomEffect();
     global::renderEngine->applyTMOEffect(global::renderEngine->combinedBlackoutFactor(), viewport);
 
     try {
