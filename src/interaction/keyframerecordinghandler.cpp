@@ -48,7 +48,7 @@ void KeyframeRecordingHandler::addCameraKeyframe(double sequenceTime) {
         sequenceTime,
         global::timeManager->time().j2000Seconds(),
         KeyframeNavigator::CameraPose(std::move(kf)),
-        id++
+        _id++
     };
 
     auto it = std::upper_bound(
@@ -68,7 +68,7 @@ void KeyframeRecordingHandler::addScriptKeyframe(double sequenceTime, std::strin
         sequenceTime,
         global::timeManager->time().j2000Seconds(),
         std::move(script),
-        id++
+        _id++
     };
 
     auto it = std::upper_bound(
@@ -89,6 +89,23 @@ void KeyframeRecordingHandler::removeKeyframe(int index) {
     _timeline.entries.erase(_timeline.entries.begin() + index);
 }
 
+void KeyframeRecordingHandler::removeKeyframeById(int id) {
+    auto entry = std::find_if(
+        _timeline.entries.begin(),
+        _timeline.entries.end(),
+        [id](const SessionRecording::Entry& e) {
+            return e.id == id;
+        }
+    );
+
+    if (entry != _timeline.entries.end()) {
+        _timeline.entries.erase(entry);
+    }
+    else {
+        throw ghoul::RuntimeError(std::format("Could not find keyframe with id '{}'", id));
+    }
+}
+
 void KeyframeRecordingHandler::updateKeyframe(int index) {
     using namespace datamessagestructures;
     if (index < 0 || static_cast<size_t>(index) > (_timeline.entries.size() - 1)) {
@@ -101,6 +118,24 @@ void KeyframeRecordingHandler::updateKeyframe(int index) {
     }
     auto& camera = std::get<SessionRecording::Entry::Camera>(entry.value);
     camera = KeyframeNavigator::CameraPose(generateCameraKeyframe());
+}
+
+void KeyframeRecordingHandler::updateKeyframeById(int id) {
+    auto entry = std::find_if(
+        _timeline.entries.begin(),
+        _timeline.entries.end(),
+        [id](const SessionRecording::Entry& e) {
+        return e.id == id;
+    }
+    );
+
+    if (entry != _timeline.entries.end()) {
+        int index = static_cast<int>(entry - _timeline.entries.begin());
+        updateKeyframeById(index);
+    }
+    else {
+        throw ghoul::RuntimeError(std::format("Could not find keyframe with id '{}'", id));
+    }
 }
 
 void KeyframeRecordingHandler::moveKeyframe(int index, double sequenceTime) {
@@ -118,6 +153,21 @@ void KeyframeRecordingHandler::moveKeyframe(int index, double sequenceTime) {
     );
 }
 
+void KeyframeRecordingHandler::moveKeyframeById(int id, double sequenceTime) {
+    auto entry = std::find_if(
+        _timeline.entries.begin(),
+        _timeline.entries.end(),
+        [id](const SessionRecording::Entry& e) {
+            return e.id == id;
+        }
+    );
+
+    if (entry != _timeline.entries.end()) {
+        int index = static_cast<int>(entry - _timeline.entries.begin());
+        moveKeyframe(index, sequenceTime);
+    }
+}
+
 void KeyframeRecordingHandler::saveSequence(std::filesystem::path filename) {
     if (filename.empty()) {
         throw ghoul::RuntimeError("Failed to save file, reason: Invalid empty file name");
@@ -128,9 +178,9 @@ void KeyframeRecordingHandler::saveSequence(std::filesystem::path filename) {
 
 void KeyframeRecordingHandler::loadSequence(std::filesystem::path filename) {
     _timeline = loadSessionRecording(filename);
-    id = 1;
+    _id = 1;
     for (auto& entry : _timeline.entries) {
-        entry.id = id++;
+        entry.id = _id++;
     }
 }
 
@@ -154,8 +204,11 @@ scripting::LuaLibrary KeyframeRecordingHandler::luaLibrary() {
             codegen::lua::AddCameraKeyframe,
             codegen::lua::AddScriptKeyframe,
             codegen::lua::RemoveKeyframe,
+            codegen::lua::RemoveKeyframeById,
             codegen::lua::UpdateKeyframe,
+            codegen::lua::UpdateKeyframeById,
             codegen::lua::MoveKeyframe,
+            codegen::lua::MoveKeyframeById,
             codegen::lua::SaveSequence,
             codegen::lua::LoadSequence,
             codegen::lua::Play,

@@ -43,8 +43,11 @@ public:
     void addCameraKeyframe(double sequenceTime);
     void addScriptKeyframe(double sequenceTime, std::string script);
     void removeKeyframe(int index);
+    void removeKeyframeById(int id);
     void updateKeyframe(int index);
+    void updateKeyframeById(int id);
     void moveKeyframe(int index, double sequenceTime);
+    void moveKeyframeById(int id, double sequenceTime);
     void saveSequence(std::filesystem::path filename);
     void loadSequence(std::filesystem::path filename);
     void play();
@@ -55,7 +58,7 @@ public:
 
 private:
     SessionRecording _timeline;
-    size_t id = 1;
+    int _id = 1;
 };
 
 } // namespace openspace

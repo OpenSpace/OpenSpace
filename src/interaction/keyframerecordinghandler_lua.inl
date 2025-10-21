@@ -52,16 +52,34 @@ namespace {
     global::keyframeRecording->removeKeyframe(index);
 }
 
+// Removes a keyframe with the specified id
+[[codegen::luawrap]] void removeKeyframeById(int id) {
+    using namespace openspace;
+    global::keyframeRecording->removeKeyframeById(id);
+}
+
 // Update the camera position at keyframe specified by the 0-based index
 [[codegen::luawrap]] void updateKeyframe(int index) {
     using namespace openspace;
     global::keyframeRecording->updateKeyframe(index);
 }
 
+// Update the camera position at keyframe with the specified id
+[[codegen::luawrap]] void updateKeyframeById(int index) {
+    using namespace openspace;
+    global::keyframeRecording->updateKeyframeById(index);
+}
+
 // Move keyframe of `index` to the new specified `sequenceTime`
 [[codegen::luawrap]] void moveKeyframe(int index, double sequenceTime) {
     using namespace openspace;
     global::keyframeRecording->moveKeyframe(index, sequenceTime);
+}
+
+// Move keyframe of `id` to the new specified `sequenceTime`
+[[codegen::luawrap]] void moveKeyframeById(int id, double sequenceTime) {
+    using namespace openspace;
+    global::keyframeRecording->moveKeyframeById(id, sequenceTime);
 }
 
 // Saves the current sequence of keyframes to disk by the optionally specified `filename`.
