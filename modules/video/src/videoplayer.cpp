@@ -296,7 +296,7 @@ VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
         { MpvKey::Mute, "mute" },
         { MpvKey::Seek, "seek" },
         { MpvKey::Loop, "loop-file" },
-        { MpvKey::EndOfFile, "eof-reached" }
+        { MpvKey::EndOfFile, "eof-reached" }  
     };
 
     formats = {
@@ -373,13 +373,14 @@ void VideoPlayer::initializeMpv() {
     // https://mpv.io/manual/master/#options-video-timing-offset
     setPropertyStringMpv("video-timing-offset", "0");
 
-    // Use precise seek whenever possible (slower than default behaviour)
-    // https://mpv.io/manual/master/#options-hr-seek
-    setPropertyStringMpv("hr-seek", "yes");
+    // Enables more in-flight frames (Default: 2)
+    // May decrease stutter but increase frame latency
+    // https://mpv.io/manual/master/#options-swapchain-depth
+    setPropertyStringMpv("swapchain-depth", "3");
 
-    // Set sync mode
-    // https://mpv.io/manual/master/#options-video-sync
-    setPropertyStringMpv("video-sync", "display-resample");
+    // Number of GPU frames hardware decoding should preallocate (Default: 6)
+    // https://mpv.io/manual/master/#options-hwdec-extra-frames
+    setPropertyStringMpv("hwdec-extra-frames", "10");
 
     // Turn off audio as default
     setPropertyStringMpv("mute", "yes");
@@ -471,11 +472,48 @@ void VideoPlayer::update() {
     if (_isDestroying) {
         return;
     }
+
+    if (global::sessionRecordingHandler->isSavingFramesDuringPlayback()) {
+        const double dt =
+            global::sessionRecordingHandler->fixedDeltaTimeDuringFrameOutput();
+        if (_playbackMode == PlaybackMode::MapToSimulationTime) {
+            _currentVideoTime = correctVideoPlaybackTime();
+        }
+        else {
+            _currentVideoTime = _currentVideoTime + dt;
+        }
+
+        const MpvKey key = MpvKey::Time;
+        mpv_set_property(_mpvHandle, keys[key], formats[key], &_currentVideoTime);
+
+        uint64_t result = mpv_render_context_update(_mpvRenderContext);
+        while ((result & MPV_RENDER_UPDATE_FRAME) == 0) {
+            renderFrame();
+
+            result = mpv_render_context_update(_mpvRenderContext);
+        }
+        return;
+    }
+
+    if (_playbackMode == PlaybackMode::MapToSimulationTime) {
+        seekToTime(correctVideoPlaybackTime());
+    }
+
+    if (_mpvRenderContext && _mpvHandle) {
+        if (_justPaused) {
+            const double time = _shouldLoop ? 0.0 : _correctPlaybackTime;
+            setPropertyAsyncMpv(time, MpvKey::Time);
+            _justPaused = false;
+        }
+        else if (_isPaused && _shouldLoop) {
+            play();
+            _shouldLoop = false;
+        }
+        renderMpv();
+    }
 }
 
 void VideoPlayer::renderMpv() {
-    //handleMpvEvents();
-
     // Renders a frame
     const uint64_t result = mpv_render_context_update(_mpvRenderContext);
     if ((result & MPV_RENDER_UPDATE_FRAME)) {
@@ -769,50 +807,11 @@ void VideoPlayer::postSync(bool isMaster) {
         return;
     }
 
-    if (global::sessionRecordingHandler->isSavingFramesDuringPlayback()) {
-        const double dt =
-            global::sessionRecordingHandler->fixedDeltaTimeDuringFrameOutput();
-        if (_playbackMode == PlaybackMode::MapToSimulationTime) {
-            _currentVideoTime = correctVideoPlaybackTime();
-        }
-        else {
-            _currentVideoTime = _currentVideoTime + dt;
-        }
-
-        const MpvKey key = MpvKey::Time;
-        mpv_set_property(_mpvHandle, keys[key], formats[key], &_currentVideoTime);
-
-        uint64_t result = mpv_render_context_update(_mpvRenderContext);
-        while ((result & MPV_RENDER_UPDATE_FRAME) == 0) {
-            renderFrame();
-
-            result = mpv_render_context_update(_mpvRenderContext);
-        }
-        return;
-    }
-
-    if (_playbackMode == PlaybackMode::MapToSimulationTime) {
-        seekToTime(correctVideoPlaybackTime());
-    }
-
-    if (_mpvRenderContext && _mpvHandle) {
-        if (_justPaused) {
-            const double time = _shouldLoop ? 0.0 : _correctPlaybackTime;
-            setPropertyAsyncMpv(time, MpvKey::Time);
-            _justPaused = false;
-        }
-        else if (_isPaused && _shouldLoop) {
-            play();
-            _shouldLoop = false;
-        }
-        renderMpv();
-    }
-
     // Ensure the nodes have the same time as the master node
     const bool isMappingTime = _playbackMode == PlaybackMode::MapToSimulationTime;
     if (!isMaster) {
         if ((_correctPlaybackTime - _currentVideoTime) > glm::epsilon<double>()) {
-            //seekToTime(_correctPlaybackTime, PauseAfterSeek(isMappingTime));
+            seekToTime(_correctPlaybackTime, PauseAfterSeek(isMappingTime));
         }
     }
 }

@@ -100,7 +100,6 @@ private:
     void resizeTexture(glm::ivec2 size);
 
     // Libmpv
-    static void onMpvRenderUpdate(void*); // Has to be static because of C api
     void initializeMpv(); // Called first time in update
     void renderMpv(); // Called in update
     void renderFrame(); // Renders a frame; called in renderMpv
