@@ -61,7 +61,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FrameInfo = {
         "Frame",
-        "Reference Frame",
+        "Reference frame",
         "This is the SPICE name of the reference frame in which the position should be "
         "calculated. The default value is GALACTIC.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -69,7 +69,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
-        "Fixed Date",
+        "Fixed date",
         "If this value is specified, the position will be locked to a specific time "
         "rather than following the in-game in the system. Setting this to an empty "
         "string will unlock the time and return to position based on current simulation "
@@ -79,7 +79,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TimeOffsetInfo = {
         "TimeOffset",
-        "Time Offset",
+        "Time offset",
         "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
         "at which to compute the rotation.",
         openspace::properties::Property::Visibility::User

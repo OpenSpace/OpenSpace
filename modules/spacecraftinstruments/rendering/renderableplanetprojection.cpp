@@ -43,7 +43,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorTexturePathsInfo = {
         "ColorTexturePaths",
-        "Color Texture",
+        "Color texture",
         "The texture path selected in this property is used as the base texture that is "
         "applied to the planet prior to any image projections. This menu always contains "
         "an empty option for not using a color map. If this value is specified in an "
@@ -53,7 +53,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AddColorTextureInfo = {
         "AddColorTexture",
-        "Add Color Base Texture",
+        "Add color base texture",
         "Adds a new base color texture to the list of selectable base maps used prior to "
         "any image projection.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -61,7 +61,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HeightTexturePathsInfo = {
         "HeightTexturePaths",
-        "Heightmap Texture",
+        "Heightmap texture",
         "The texture path selected in this property is used as the height map on the "
         "planet. This menu always contains an empty option for not using a heightmap. If "
         "this value is specified in an asset, the last texture is used.",
@@ -70,14 +70,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AddHeightTextureInfo = {
         "AddHeightTexture",
-        "Add Heightmap Texture",
+        "Add heightmap texture",
         "Adds a new height map texture to the list of selectable height maps used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HeightExaggerationInfo = {
         "HeightExaggeration",
-        "Height Exaggeration",
+        "Height exaggeration",
         "This value determines the level of height exaggeration that is applied to a "
         "potential height field. A value of '0' inhibits the height field, whereas a "
         "value of '1' uses the measured height field.",
@@ -86,7 +86,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MeridianShiftInfo = {
         "MeridianShift",
-        "Meridian Shift",
+        "Meridian shift",
         "If this value is enabled, a shift of the meridian by 180 degrees is performed. "
         "This is a fix especially for Pluto height maps, where the definition of the "
         "meridian has changed through the New Horizons mission and this requires this "
@@ -96,14 +96,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AmbientBrightnessInfo = {
         "AmbientBrightness",
-        "Ambient Brightness",
+        "Ambient brightness",
         "This value determines the ambient brightness of the dark side of the planet.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxProjectionsPerFrameInfo = {
         "MaxProjectionsPerFrame",
-        "Max Projections Per Frame",
+        "Max projections per frame",
         "The maximum number of image projections to perform per frame. Useful to avoid "
         "freezing the system for large delta times.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -111,14 +111,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ProjectionsInBufferInfo = {
         "ProjectionsInBuffer",
-        "Projections In Buffer",
+        "Projections in buffer",
         "(Read only) The number of images that are currently waiting to be projected.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ClearProjectionBufferInfo = {
         "ClearProjectionBuffer",
-        "Clear Projection Buffer",
+        "Clear projection buffer",
         "Remove all pending projections from the buffer.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -478,7 +478,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
                 const std::shared_ptr<ghoul::opengl::Texture> t =
                     _projectionComponent.loadProjectionTexture(img.path);
                 imageProjectGPU(*t, projMatrix);
-                ++nProjections;
+                nProjections++;
             }
             catch (const SpiceManager::SpiceException& e) {
                 LERRORC(e.component, e.what());

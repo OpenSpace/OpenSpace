@@ -42,7 +42,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnableTouchInfo = {
         "EnableTouchInteraction",
-        "Enable Touch Interaction",
+        "Enable touch interaction",
         "Use this property to turn on/off touch input navigation in the 3D scene. "
         "Disabling will reset all current touch inputs to the navigation.",
         openspace::properties::Property::Visibility::User
@@ -50,7 +50,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
         "DetectedTouchEvent",
-        "Detected Touch Event",
+        "Detected touch event",
         "True when there is an active touch event.",
         openspace::properties::Property::Visibility::Hidden
     };
@@ -59,7 +59,7 @@ namespace {
         DefaultDirectTouchRenderableTypesInfo =
     {
         "DefaultDirectTouchRenderableTypes",
-        "Default Direct Touch Renderable Types",
+        "Default direct touch renderable types",
         "A list of renderable types that will automatically use the \'direct "
         "manipulation\' scheme when interacted with, keeping the finger on a static "
         "position on the interaction sphere of the object when touching. Good for "

@@ -26,7 +26,8 @@ local Station7BoulderHolder = {
   },
   GUI = {
     Name = "Station 7 Boulder",
-    Path = "/Solar System/Missions/Apollo/17/Station 7"
+    Path = "/Solar System/Missions/Apollo/17/Station 7",
+    Focusable = false
   }
 }
 

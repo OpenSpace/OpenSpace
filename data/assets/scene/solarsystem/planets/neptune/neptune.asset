@@ -52,6 +52,7 @@ local NeptuneLabel = {
   GUI = {
     Name = "Neptune Label",
     Path = "/Solar System/Planets/Neptune",
+    Focusable = false,
     Description = "Main planet label for Neptune"
   }
 }

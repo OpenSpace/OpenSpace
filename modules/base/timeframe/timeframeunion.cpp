@@ -33,7 +33,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TimeFramesInfo = {
         "TimeFrames",
-        "Time Frames",
+        "Time frames",
         "A vector of time frames to combine into one. The time frame is active when any "
         "of the contained time frames are, but not in gaps between contained time "
         "frames.",

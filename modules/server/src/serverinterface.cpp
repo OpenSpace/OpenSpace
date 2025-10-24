@@ -54,14 +54,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DefaultAccessInfo = {
         "DefaultAccess",
-        "Default Access",
+        "Default access",
         "Sets the default access policy: Allow, RequirePassword or Deny.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AllowAddressesInfo = {
         "AllowAddresses",
-        "Allow Addresses",
+        "Allow addresses",
         "IP addresses or domains that should always be allowed access to this interface.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -69,7 +69,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo
         RequirePasswordAddressesInfo = {
         "RequirePasswordAddresses",
-        "Require Password Addresses",
+        "Require password addresses",
         "IP addresses or domains that should be allowed access if they provide a "
         "password.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -77,7 +77,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DenyAddressesInfo = {
         "DenyAddresses",
-        "Deny Addresses",
+        "Deny addresses",
         "IP addresses or domains that should never be allowed access to this interface.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

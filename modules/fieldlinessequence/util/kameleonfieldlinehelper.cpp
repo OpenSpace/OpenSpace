@@ -176,7 +176,7 @@ extractSeedPointsFromFiles(std::filesystem::path path, size_t nth)
                     outVec.push_back(std::move(point));
                 }
             }
-            ++linenumber;
+            linenumber++;
         }
 
         if (outVec.empty()) {
@@ -318,7 +318,7 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
 {
     int nVariableAttributes = kameleon->getNumberOfVariableAttributes();
     std::vector<std::string> variablesAttributeNames;
-    for (int i = 0; i < nVariableAttributes; ++i) {
+    for (int i = 0; i < nVariableAttributes; i++) {
         std::string varname = kameleon->getVariableAttributeName(i);
         std::string varunit = kameleon->getNativeUnit(varname);
         std::string varVisualizationUnit = kameleon->getVisUnit(varname);

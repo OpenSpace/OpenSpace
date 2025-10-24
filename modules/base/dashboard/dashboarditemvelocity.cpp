@@ -49,7 +49,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
-        "Requested Unit",
+        "Requested unit",
         "If the simplification is disabled, this distance unit is used for the velocity "
         "display.",
         openspace::properties::Property::Visibility::User

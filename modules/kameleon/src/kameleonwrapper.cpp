@@ -201,9 +201,9 @@ float* KameleonWrapper::uniformSampledValues(const std::string& var,
     };
 
     // ProgressBar pb(static_cast<int>(outDimensions.x));
-    for (size_t x = 0; x < outDimensions.x; ++x) {
-        for (size_t y = 0; y < outDimensions.y; ++y) {
-            for (size_t z = 0; z < outDimensions.z; ++z) {
+    for (size_t x = 0; x < outDimensions.x; x++) {
+        for (size_t y = 0; y < outDimensions.y; y++) {
+            for (size_t z = 0; z < outDimensions.z; z++) {
                 const size_t index = x + y * outDimensions.x +
                                      z * outDimensions.x * outDimensions.y;
 
@@ -359,9 +359,9 @@ float* KameleonWrapper::uniformSliceValues(const std::string& var,
 
     float missingValue = _model->getMissingValue();
 
-    for (size_t x = 0; x < outDimensions.x; ++x) {
-        for (size_t y = 0; y < outDimensions.y; ++y) {
-            for (size_t z = 0; z < outDimensions.z; ++z) {
+    for (size_t x = 0; x < outDimensions.x; x++) {
+        for (size_t y = 0; y < outDimensions.y; y++) {
+            for (size_t z = 0; z < outDimensions.z; z++) {
 
                 const float xi = (hasXSlice) ? slice : x;
                 const float yi = (hasYSlice) ? slice : y;
@@ -484,10 +484,10 @@ float* KameleonWrapper::uniformSampledVectorValues(const std::string& xVar,
     //LDEBUG(zVar << "Max: " << varZMax);
 
     //ProgressBar pb(static_cast<int>(outDimensions.x));
-    for (size_t x = 0; x < outDimensions.x; ++x) {
+    for (size_t x = 0; x < outDimensions.x; x++) {
         //pb.print(x);
-        for (size_t y = 0; y < outDimensions.y; ++y) {
-            for (size_t z = 0; z < outDimensions.z; ++z) {
+        for (size_t y = 0; y < outDimensions.y; y++) {
+            for (size_t z = 0; z < outDimensions.z; z++) {
                 const size_t index = x * NumChannels + y * NumChannels * outDimensions.x +
                                      z * NumChannels * outDimensions.x * outDimensions.y;
 
@@ -837,7 +837,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
 
         pos = pos + (step / 6.f) * (k1 + 2.f * k2 + 2.f * k3 + k4);
 
-        ++numSteps;
+        numSteps++;
         if (numSteps > MaxSteps) {
             LDEBUG(std::format("Max number of steps taken ({})", MaxSteps));
             break;
@@ -951,7 +951,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
 
         v0 = v0 + step / 6.f * (k1 + 2.f * k2 + 2.f * k3 + k4);
 
-        ++numSteps;
+        numSteps++;
         if (numSteps > MaxSteps) {
             LDEBUG(std::format("Max number of steps taken ({})", MaxSteps));
             break;

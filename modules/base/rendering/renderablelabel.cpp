@@ -91,7 +91,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
-        "Blending Mode",
+        "Blending mode",
         "This determines the blending mode that is applied to the renderable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -105,7 +105,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
-        "Font Size",
+        "Font size",
         "The font size (in points) for the label.",
         openspace::properties::Property::Visibility::User
     };
@@ -127,35 +127,35 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
-        "Min and Max Size",
+        "Min and max size",
         "The minimum and maximum size (in pixels) of the label.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
-        "Transformation Matrix",
+        "Transformation matrix",
         "Transformation matrix to be applied to the label.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrientationOptionInfo = {
         "OrientationOption",
-        "Orientation Option",
+        "Orientation option",
         "Label orientation rendering mode.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableFadingEffectInfo = {
         "EnableFading",
-        "Enable/Disable Fade-in Effect",
+        "Enable/disable fade-in effect",
         "Enable/Disable the Fade-in effect.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeWidthsInfo = {
         "FadeWidths",
-        "Fade Widths",
+        "Fade widths",
         "The distances over which the fading takes place, given in the specified unit. "
         "The first value is the distance before the closest distance and the second "
         "the one after the furthest distance. For example, with the unit Parsec (pc), "
@@ -166,7 +166,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeDistancesInfo = {
         "FadeDistances",
-        "Fade Distances",
+        "Fade distances",
         "The distance range in which the labels should be fully opaque, specified in "
         "the chosen unit. The distance from the position of the label to the camera.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -174,7 +174,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeUnitOptionInfo = {
         "FadeUnit",
-        "Fade Distance Unit",
+        "Fade distance Unit",
         "Distance unit for fade-in/-out distance calculations. Defaults to \"au\".",
         openspace::properties::Property::Visibility::AdvancedUser
     };

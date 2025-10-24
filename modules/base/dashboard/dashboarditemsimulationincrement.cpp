@@ -38,7 +38,7 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
         "Simplification",
-        "Do Time Simplification",
+        "Do time simplification",
         "If this value is enabled, the time is displayed in nuanced units, such as "
         "minutes, hours, days, years, etc. If this value is disabled, it is always "
         "displayed in seconds.",
@@ -47,7 +47,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
-        "Requested Unit",
+        "Requested unit",
         "If the simplification is disabled, this time unit is used as a destination to "
         "convert the seconds into.",
         openspace::properties::Property::Visibility::User
@@ -55,7 +55,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TransitionFormatInfo = {
         "TransitionFormat",
-        "Transition Format",
+        "Transition format",
         "Format string used to format the text used while in a delta time transition, "
         "that is if the current delta time is being interpolated to reach a target "
         "delta time. This format gets five parameters in this order:  The target delta "
@@ -69,7 +69,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RegularFormatInfo = {
         "RegularFormat",
-        "Regular Format",
+        "Regular format",
         "The format string used to format the text if the target delta time is the same "
         "as the current delta time. This format gets three parameters in this order:  "
         "The target delta value, the target delta unit, and the string 'Paused' if the "

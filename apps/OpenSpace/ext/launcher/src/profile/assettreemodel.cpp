@@ -85,7 +85,8 @@ namespace {
             const int levelChange = elem.level - level;
 
             if (levelChange == 0) {
-                parent->insertChildren(++nChildInsert, 1, 3);
+                nChildInsert++;
+                parent->insertChildren(nChildInsert, 1, 3);
                 parent->child(nChildInsert)->setData(
                     0,
                     QString::fromStdString(elem.line)

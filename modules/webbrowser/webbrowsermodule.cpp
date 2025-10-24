@@ -48,7 +48,7 @@ namespace {
         UpdateBrowserBetweenRenderablesInfo =
     {
         "UpdateBrowserBetweenRenderables",
-        "Update Browser Between Renderables",
+        "Update browser between renderables",
         "Run the message loop of the browser between calls to render individual "
         "renderables. When disabled, the browser message loop only runs once per frame.",
         openspace::properties::Property::Visibility::Developer
@@ -56,7 +56,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BrowserUpdateIntervalInfo = {
         "BrowserUpdateInterval",
-        "Browser Update Interval",
+        "Browser update interval",
         "The time in microseconds between running the message loop of the browser. Only "
         "used if UpdateBrowserBetweenRenderables is true.",
         openspace::properties::Property::Visibility::Developer

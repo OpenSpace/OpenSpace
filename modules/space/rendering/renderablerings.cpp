@@ -66,7 +66,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo NightFactorInfo = {
         "NightFactor",
-        "Night Factor",
+        "Night factor",
         "A multiplicative factor that is applied to the side of the rings that is facing "
         "away from the Sun. If it is 1, no darkening of the night side occurs.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -74,7 +74,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorFilterInfo = {
         "ColorFilter",
-        "Color Filter",
+        "Color filter",
         "A value that affects the filtering out of part of the rings depending on the "
         "color values of the texture. The higher value, the more rings are filtered out.",
         openspace::properties::Property::Visibility::AdvancedUser

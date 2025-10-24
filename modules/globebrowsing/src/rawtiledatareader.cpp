@@ -118,27 +118,6 @@ GDALDataType toGDALDataType(GLenum glType) {
     }
 }
 
-/**
- * Use as a helper function when determining the maximum tile level. This function
- * returns the negated number of overviews requred to downscale the highest overview
- * dataset so that it fits within minimumPixelSize pixels in the x-dimension.
- */
-int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
-    GDALRasterBand* firstBand = dataset->GetRasterBand(1);
-    GDALRasterBand* maxOverview = nullptr;
-    const int numOverviews = firstBand->GetOverviewCount();
-    if (numOverviews <= 0) { // No overviews. Use first band.
-        maxOverview = firstBand;
-    }
-    else { // Pick the highest overview.
-        maxOverview = firstBand->GetOverview(numOverviews - 1);
-    }
-    const int sizeLevel0 = maxOverview->GetXSize();
-    const double diff = log2(minimumPixelSize) - log2(sizeLevel0);
-    const double intdiff = diff >= 0 ? ceil(diff) : floor(diff);
-    return static_cast<int>(intdiff);
-}
-
 bool isInside(const PixelRegion& lhs, const PixelRegion& rhs) {
     const glm::ivec2 e = lhs.start + lhs.numPixels;
     const glm::ivec2 re = rhs.start + rhs.numPixels;
@@ -434,17 +413,7 @@ void RawTileDataReader::initialize() {
         _padfTransform = geoTransform(_rasterXSize, _rasterYSize);
     }
 
-    const double tileLevelDifference = calculateTileLevelDifference(
-        _dataset,
-        _initData.dimensions.x
-    );
-
-    const int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-    _maxChunkLevel = static_cast<int>(-tileLevelDifference);
-    if (numOverviews > 0) {
-        _maxChunkLevel += numOverviews;
-    }
-    _maxChunkLevel = std::max(_maxChunkLevel, 2);
+    _maxChunkLevel = _dataset->GetRasterBand(1)->GetOverviewCount();
 }
 
 void RawTileDataReader::reset() {
@@ -683,12 +652,12 @@ TileMetaData RawTileDataReader::tileMetaData(RawTile& rawTile,
     std::fill(ppData.hasMissingData.begin(), ppData.hasMissingData.end(), false);
 
     bool allIsMissing = true;
-    for (int y = 0; y < region.numPixels.y; ++y) {
+    for (int y = 0; y < region.numPixels.y; y++) {
         const size_t yi =
             (static_cast<unsigned long long>(region.numPixels.y) - 1 - y) * bytesPerLine;
         size_t i = 0;
-        for (int x = 0; x < region.numPixels.x; ++x) {
-            for (size_t raster = 0; raster < _initData.nRasters; ++raster) {
+        for (int x = 0; x < region.numPixels.x; x++) {
+            for (size_t raster = 0; raster < _initData.nRasters; raster++) {
                 const float noDataValue = noDataValueAsFloat();
                 const float val = interpretFloat(
                     _initData.glType,

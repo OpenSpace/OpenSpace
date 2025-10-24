@@ -71,35 +71,35 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "Stepsize",
-        "Fieldline Step Size.",
+        "Fieldline step size.",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo Classification = {
         "Classification",
-        "Fieldline Classification",
+        "Fieldline classification",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FieldlineColorInfo = {
         "FieldlineColor",
-        "Fieldline Color",
+        "Fieldline color",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SeedPointSourceInfo = {
         "Source",
-        "SeedPoint Source",
+        "SeedPoint source",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SeedPointFileInfo = {
         "SourceFile",
-        "SeedPoint File",
+        "SeedPoint file",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };

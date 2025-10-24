@@ -62,7 +62,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GoesEnergyBinsInfo = {
         "GoesEnergy",
-        "GOES Energy",
+        "GOES energy",
         "Select which energy bin you want to show. GOES = Geostationary Operational "
         "Environmental Satellites. Emin01 is values > 10 MeV, Default is Emin03 where "
         "values > 100 MeV.",
@@ -71,7 +71,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorModeInfo = {
         "ColorMode",
-        "Color Mode",
+        "Color mode",
         "Color lines uniformly or using color tables based on specific values on nodes, "
         "for examples flux values.",
         openspace::properties::Property::Visibility::User
@@ -79,7 +79,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
-        "Path to Color Table",
+        "Path to color table",
         "Color Table/Transfer Function to use for 'By Flux Value' coloring.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -107,14 +107,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FilteringInfo = {
         "FilterLower",
-        "Filtering Lower Value in AU",
+        "Filtering lower value in AU",
         "Use filtering to show nodes within a given range.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilteringUpperInfo = {
         "FilterUpper",
-        "Filtering Upper Value in AU",
+        "Filtering upper value in AU",
         "Use filtering to show nodes within a given range.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -134,9 +134,9 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo EarthNodeSkipInfo = {
-       "NodeSkipEarth",
-       "Every nth node to render close to Earth",
-       "Show only every nth node outside of skippingmethod.",
+        "NodeSkipEarth",
+        "Every nth node to render close to Earth",
+        "Show only every nth node outside of skippingmethod.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -156,7 +156,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo colorTableRangeInfo = {
         "ColorTableRange",
-        "Color Table Range",
+        "Color table range",
         "Valid range for the color table as the exponent, with base 10, of flux values. "
         "[Min, Max].",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -171,14 +171,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FluxColorAlphaInfo = {
         "FluxColorAlpha",
-        "Flux Color Alpha",
+        "Flux color alpha",
         "The value of alpha for the flux color mode.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FluxNodeskipThresholdInfo = {
         "SkippingNodesByFlux",
-        "Skipping Nodes By Flux",
+        "Skipping nodes by flux",
         "Select nodes to skip depending on flux value.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -186,7 +186,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo
                                                            RadiusNodeSkipThresholdInfo = {
         "SkippingNodesByRadius",
-        "Skipping Nodes By Radius",
+        "Skipping nodes by radius",
         "Select nodes to skip depending on Radius.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -200,14 +200,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ProximityNodesSizeInfo = {
         "ProximityNodesSize",
-        "Earths Proximity Nodes Size",
+        "Earths proximity nodes size",
         "Changes size of nodes only close to earth.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxNodeDistanceSizeInfo = {
         "MaxNodeDistanceSize",
-        "Max Node Distance Size",
+        "Max node distance size",
         "The maximum size of the nodes at a certin distance.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -215,7 +215,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo
                                                           CameraPerspectiveEnabledInfo = {
         "CameraPerspectiveEnabled",
-        "Use Camera perspective",
+        "Use camera perspective",
         "Camera perspective changes the size of the nodes dependent on the distance from "
         "camera.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -237,7 +237,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GaussiandAlphaFilterInfo = {
         "RenderingGaussianAlphaFilter",
-        "Alpha by Gaussian",
+        "Alpha by gaussian",
         "Using fragment shader to draw nodes with Gaussian filter for alpha value.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -245,7 +245,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo
                                                          PerspectiveDistanceFactorInfo = {
         "PerspectiveDistanceFactor",
-        "Perspective Distance factor",
+        "Perspective distance factor",
         "This value decides how far away the camera must be to start impacting the node "
         "size.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -253,7 +253,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxNodeSizeInfo = {
         "MinMaxNodeSize",
-        "Min & Max node size",
+        "Min & max node size",
         "The minimum and maximum node size.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -624,7 +624,7 @@ void RenderableFluxNodes::populateStartTimes() {
     std::string columnName;
     // loops through the names/columns in first line/header
     while (s >> columnName) {
-        ++nColumns;
+        nColumns++;
     }
     while (ghoul::getline(tfs, line)) {   // for each line of data
         std::istringstream iss(line);

@@ -54,7 +54,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ClearCacheInfo = {
         "ClearCache",
-        "Clear Cache",
+        "Clear cache",
         "Clears the cache of this DashboardItemFramerate item. If the selected option "
         "does not use any caching, this trigger does not do anything.",
         openspace::properties::Property::Visibility::AdvancedUser

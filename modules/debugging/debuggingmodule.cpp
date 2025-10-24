@@ -54,14 +54,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShowStatisticsInfo = {
         "ShowStatistics",
-        "Show Statistics",
+        "Show statistics",
         "Show updating, rendering, and network statistics on all rendering nodes.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StatisticsScaleInfo = {
         "StatisticsScale",
-        "Statistics Scale",
+        "Statistics scale",
         "This value is scaling the statistics window by the provided amount. For flat "
         "projections this is rarely necessary, but it is important when using a setup "
         "where the corners of the image are masked out.",
@@ -70,7 +70,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StatisticsOffsetInfo = {
         "StatisticsOffset",
-        "Statistics Offset",
+        "Statistics offset",
         "This value is offsetting the center of the statistics window by the provided "
         "amount. For flat projections this is rarely necessary, but it is important when "
         "using a setup the center of the image is distorted in some form.",
@@ -79,7 +79,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
         "ShowFrameInformation",
-        "Show Frame Information",
+        "Show frame information",
         "If this value is enabled, the current frame number and frame times are rendered "
         "into the window.",
         openspace::properties::Property::Visibility::AdvancedUser
