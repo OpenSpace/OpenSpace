@@ -767,55 +767,6 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         glDisable(GL_BLEND);
     }
 
-    if (_debugTextureRender > 0) {
-        static constexpr GLfloat vertices[] = {
-            0.5f, 0.5f,
-            1.f, 0.5f,
-            0.5f,  1.f,
-            0.5f,  1.f,
-            1.f, 0.5f,
-            1.f,  1.f,
-        };
-
-        static GLuint vao = 0, vbo;
-        static std::unique_ptr<ghoul::opengl::ProgramObject> prog;
-        if (vao == 0) {
-            glGenVertexArrays(1, &vao);
-            glBindVertexArray(vao);
-
-            glGenBuffers(1, &vbo);
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-            glEnableVertexAttribArray(0);
-            glVertexAttribPointer(
-                0,
-                2,
-                GL_FLOAT,
-                GL_FALSE,
-                2 * sizeof(GL_FLOAT),
-                reinterpret_cast<void*>(0)
-            );
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
-            glBindVertexArray(0);
-
-            prog = buildRenderProgram(
-                "dbg_tex_program",
-                absPath("${MODULE_BASE}/shaders/dbg_tex_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/dbg_tex_fs.glsl")
-            );
-        }
-
-        prog->activate();
-        prog->setUniform("tex", 0);
-
-        glBindTexture(GL_TEXTURE_2D, _debugTextureRender);
-
-        glBindVertexArray(vao);
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
-
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
     LTRACE("RenderEngine::render(end)");
 }
 
@@ -1126,10 +1077,6 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
             codegen::lua::ResetScreenshotNumber
         }
     };
-}
-
-void RenderEngine::setDebugTextureRendering(GLuint texture) {
-    _debugTextureRender = texture;
 }
 
 void RenderEngine::addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s) {

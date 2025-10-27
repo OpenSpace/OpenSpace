@@ -151,7 +151,6 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
-    void setDebugTextureRendering(GLuint texture);
 
     glm::ivec2 renderingResolution() const;
     glm::ivec2 fontResolution() const;
@@ -178,7 +177,6 @@ private:
     ghoul::Dictionary _resolveData;
     ScreenLog* _log = nullptr;
 
-    GLuint _debugTextureRender = 0;
 
     ghoul::opengl::OpenGLStateCache* _openglStateCache = nullptr;
 
