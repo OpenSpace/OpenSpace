@@ -22,7 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <modules/debugging/rendering/debugrenderer.h>
 #include <modules/globebrowsing/src/basictypes.h>

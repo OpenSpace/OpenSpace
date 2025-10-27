@@ -42,7 +42,6 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/lightsource.h>
 #include <ghoul/io/model/modelgeometry.h>
-
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/invariants.h>
@@ -226,7 +225,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UseOverrideColorInfo = {
         "UseOverrideColor",
         "Use Override Color",
-        "Wether or not to render model with a single color.",
+        "Whether or not to render model with a single color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
