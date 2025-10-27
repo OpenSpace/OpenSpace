@@ -500,20 +500,24 @@ void VideoPlayer::update() {
     }
 
     if (_mpvRenderContext && _mpvHandle) {
-        if (_justPaused) {
-            const double time = _shouldLoop ? 0.0 : _correctPlaybackTime;
-            setPropertyAsyncMpv(time, MpvKey::Time);
-            _justPaused = false;
+        if (_loopReset) {
+            goToStart();
         }
-        else if (_isPaused && _shouldLoop) {
+        else if (_playAfterLoopReset) {
             play();
-            _shouldLoop = false;
+        }
+        else if (_isPaused) {
+            if (std::abs(_correctPlaybackTime - _currentVideoTime) > glm::epsilon<double>()) {
+                setPropertyAsyncMpv(_correctPlaybackTime, MpvKey::Time);
+            }
         }
         renderMpv();
     }
 }
 
 void VideoPlayer::renderMpv() {
+    //handleMpvEvents();
+
     // Renders a frame
     const uint64_t result = mpv_render_context_update(_mpvRenderContext);
     if ((result & MPV_RENDER_UPDATE_FRAME)) {
@@ -742,7 +746,6 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             }
             int* videoIsPaused = reinterpret_cast<int*>(prop->data);
             _isPaused = (* videoIsPaused == 1);
-            _justPaused = _isPaused;
             break;
         }
         case MpvKey::Meta: {
@@ -766,7 +769,7 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
             int* eof = reinterpret_cast<int*>(prop->data);
             if (*eof) {
                 if (_loopVideo && _playbackMode == PlaybackMode::RealTimeLoop) {
-                    _shouldLoop = true;
+                    _loopReset = true;
                 }
             }
             break;
@@ -789,30 +792,32 @@ void VideoPlayer::destroy() {
 
 void VideoPlayer::preSync(bool isMaster) {
     handleMpvEvents();
-    _correctPlaybackTime = isMaster ? _currentVideoTime : -1.0;
 }
 
 void VideoPlayer::encode(SyncBuffer* syncBuffer) {
+    _correctPlaybackTime = _currentVideoTime;
+    if (_loopReset && _currentVideoTime == 0.0) {
+        _playAfterLoopReset = true;
+        _loopReset = false;
+    }
+    else {
+        _playAfterLoopReset = false;
+    }
+
     syncBuffer->encode(_correctPlaybackTime);
-    syncBuffer->encode(_syncPlay);
+    syncBuffer->encode(_loopReset);
+    syncBuffer->encode(_playAfterLoopReset);
 }
 
 void VideoPlayer::decode(SyncBuffer* syncBuffer) {
     syncBuffer->decode(_correctPlaybackTime);
-    syncBuffer->decode(_syncPlay);
+    syncBuffer->decode(_loopReset);
+    syncBuffer->decode(_playAfterLoopReset);
 }
 
 void VideoPlayer::postSync(bool isMaster) {
     if (_correctPlaybackTime < 0.0) {
         return;
-    }
-
-    // Ensure the nodes have the same time as the master node
-    const bool isMappingTime = _playbackMode == PlaybackMode::MapToSimulationTime;
-    if (!isMaster) {
-        if ((_correctPlaybackTime - _currentVideoTime) > glm::epsilon<double>()) {
-            seekToTime(_correctPlaybackTime, PauseAfterSeek(isMappingTime));
-        }
     }
 }
 
