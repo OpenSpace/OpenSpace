@@ -766,7 +766,6 @@ void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMat
         }
         glDisable(GL_BLEND);
     }
-
     LTRACE("RenderEngine::render(end)");
 }
 

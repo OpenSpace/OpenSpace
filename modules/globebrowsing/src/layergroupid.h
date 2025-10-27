@@ -89,8 +89,7 @@ struct Layer {
         TileProviderByLevel,
         SolidColor,
         SpoutImageProvider,
-        VideoTileProvider,
-        Unknown
+        VideoTileProvider
     };
 
     ID id;
