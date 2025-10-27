@@ -4,7 +4,7 @@ local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
 local mars = asset.require("scene/solarsystem/planets/mars/mars")
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
-local lightsource = asset.require("scene/solarsystem/sun/light_source")
+local sun = asset.require("scene/solarsystem/sun/sun")
 
 local celestial_globe_folder = asset.resource({
   Name = "Celestial Globe",
@@ -49,7 +49,7 @@ function createModel(longitude, latitude, scale, name, parent, group)
         sun_transforms.LightSource
       },
       CastShadow = true,
-      LightSource = lightsource.LightSource.Identifier,
+      LightSource = sun.LightSource.Identifier,
       ShadowGroup = group
     },
     GUI = {
@@ -71,7 +71,8 @@ asset.onInitialize(function()
 end)
 
 asset.onDeinitialize(function()
-  for i = 1, #globeModels do
+  -- Reverse order to deinitialize to avoid dependency issues between nodes
+  for i = #globeModels, 1, -1 do
     openspace.removeSceneGraphNode(globeModels[i].Identifier)
   end
 end)
