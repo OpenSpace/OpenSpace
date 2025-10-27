@@ -65,6 +65,7 @@ protected:
 
     properties::OptionProperty _orientation;
     properties::BoolProperty _mirrorTexture;
+    properties::OptionProperty _textureProjection;
 
     properties::BoolProperty _disableFadeInDistance;
     properties::FloatProperty _fadeInThreshold;

@@ -88,6 +88,20 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    enum class TextureProjection : int {
+        Equirectangular = 0,
+        AngularFisheye
+    };
+
+    // TODO: Consider adding coordinates mapper instead - so we can configurate e.g. equirectangular left/right/top/bottom
+    // and fisheye conver angle
+    constexpr openspace::properties::Property::PropertyInfo TextureProjectionInfo = {
+        "TextureProjection",
+        "Texture Projection",
+        "TODO.", // @TODO
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
         "DisableFadeInOut",
         "Disable fade-in/fade-out effects",
@@ -168,6 +182,14 @@ namespace {
         // [[codegen::verbatim(MirrorTextureInfo.description)]]
         std::optional<bool> mirrorTexture;
 
+        enum class [[codegen::map(TextureProjection)]] TextureProjection {
+            Equirectangular,
+            AngularFisheye
+        };
+
+        // [[codegen::verbatim(TextureProjectionInfo.description)]]
+        std::optional<TextureProjection> textureProjection;
+
         // [[codegen::verbatim(DisableFadeInOutInfo.description)]]
         std::optional<bool> disableFadeInOut;
 
@@ -204,6 +226,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _segments(SegmentsInfo, 16, 4, 1000)
     , _orientation(OrientationInfo)
     , _mirrorTexture(MirrorTextureInfo, false)
+    , _textureProjection(TextureProjectionInfo)
     , _disableFadeInDistance(DisableFadeInOutInfo, false)
     , _fadeInThreshold(FadeInThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
     , _fadeOutThreshold(FadeOutThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
@@ -242,6 +265,15 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
 
     _mirrorTexture = p.mirrorTexture.value_or(_mirrorTexture);
     addProperty(_mirrorTexture);
+
+    _textureProjection.addOptions({
+        { static_cast<int>(TextureProjection::Equirectangular), "Equirectangular" },
+        { static_cast<int>(TextureProjection::AngularFisheye), "Angular Fisheye" },
+    });
+    _textureProjection = p.textureProjection.has_value() ?
+        static_cast<int>(codegen::map<TextureProjection>(*p.textureProjection)) :
+        static_cast<int>(TextureProjection::Equirectangular);
+    addProperty(_textureProjection);
 
     _disableFadeInDistance = p.disableFadeInOut.value_or(_disableFadeInDistance);
     addProperty(_disableFadeInDistance);
@@ -438,6 +470,8 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     bindTexture();
     defer{ unbindTexture(); };
     _shader->setUniform(_uniformCache.colorTexture, unit);
+
+    _shader->setUniform("textureProjection", _textureProjection.value()); // @TODO: uniform cache
 
     // Setting these states should not be necessary,
     // since they are the default state in OpenSpace.

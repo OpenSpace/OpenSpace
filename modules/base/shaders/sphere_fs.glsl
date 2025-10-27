@@ -42,6 +42,11 @@ uniform bool mirrorTexture;
 Fragment getFragment() {
   vec2 texCoord = vs_textureCoords;
 
+  if (texCoord.x < 0.0 || texCoord.y < 0.0) {
+    // Invalid texture coordinates
+    discard;
+  }
+
   Fragment frag;
   if (mirrorTexture) {
     texCoord.x = 1.0 - texCoord.x;
