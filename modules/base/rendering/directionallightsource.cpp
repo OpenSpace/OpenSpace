@@ -95,12 +95,12 @@ void DirectionalLightSource::initializeGL() {
 }
 
 void DirectionalLightSource::deinitializeGL() {
-    for (const auto& [key, tex] : _depthMaps) {
-        glDeleteTextures(1, &tex);
+    for (const std::pair<std::string, GLuint>& p : _depthMaps) {
+        glDeleteTextures(1, &p.second);
     }
 
-    for (const auto& [key, fbo] : _FBOs) {
-        glDeleteFramebuffers(1, &fbo);
+    for (const std::pair<std::string, GLuint>& p : _fbos) {
+        glDeleteFramebuffers(1, &p.second);
     }
 }
 
@@ -144,7 +144,7 @@ void DirectionalLightSource::render(const RenderData& data, RendererTasks&){
             glDrawBuffer(GL_NONE);
             glReadBuffer(GL_NONE);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            _FBOs[key] = fbo;
+            _fbos[key] = fbo;
 
             glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
         }
@@ -154,9 +154,9 @@ void DirectionalLightSource::render(const RenderData& data, RendererTasks&){
         std::vector<RenderableModel*> torender;
         for (const std::string& identifier : casters) {
             SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(identifier);
-            if (node != nullptr) {
+            if (node) {
                 RenderableModel* model = dynamic_cast<RenderableModel*>(node->renderable());
-                if (model != nullptr && model->isEnabled() && model->isCastingShadow() && model->isReady()) {
+                if (model && model->isEnabled() && model->isCastingShadow() && model->isReady()) {
                     const double fsz = model->shadowFrustumSize();
                     glm::dvec3 center = model->center();
                     vmin = glm::min(vmin, center - fsz / 2);
@@ -178,10 +178,10 @@ void DirectionalLightSource::render(const RenderData& data, RendererTasks&){
         }
 
         glm::dvec3 light = parentNode->modelTransform() * glm::dvec4(0.0, 0.0, 0.0, 1.0);
-        glm::dvec3 light_dir = glm::normalize(center - light);
-        glm::dvec3 right = glm::normalize(glm::cross(glm::dvec3(0, 1, 0), light_dir));
-        glm::dvec3 eye = center - light_dir * d;
-        glm::dvec3 up = glm::cross(right, light_dir);
+        glm::dvec3 lightDir = glm::normalize(center - light);
+        glm::dvec3 right = glm::normalize(glm::cross(glm::dvec3(0.0, 1.0, 0.0), lightDir));
+        glm::dvec3 eye = center - lightDir * d;
+        glm::dvec3 up = glm::cross(right, lightDir);
 
         glm::dmat4 view = glm::lookAt(eye, center, up);
         glm::dmat4 projection = glm::ortho(
@@ -203,7 +203,7 @@ void DirectionalLightSource::render(const RenderData& data, RendererTasks&){
         GLint prevVp[4];
         glGetIntegerv(GL_VIEWPORT, prevVp);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, _FBOs[key]);
+        glBindFramebuffer(GL_FRAMEBUFFER, _fbos[key]);
         glViewport(0, 0, _depthMapResolution.x, _depthMapResolution.y);
         glClear(GL_DEPTH_BUFFER_BIT);
 
@@ -213,7 +213,7 @@ void DirectionalLightSource::render(const RenderData& data, RendererTasks&){
 
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        _vps[key] = vp;
+        _viewports[key] = vp;
 
         glUseProgram(prevProg);
         glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
@@ -230,7 +230,7 @@ const GLuint& DirectionalLightSource::depthMap(const std::string& shadowgroup) c
 }
 
 glm::dmat4 DirectionalLightSource::viewProjectionMatrix(const std::string& shadowgroup) const {
-    return _vps.at(shadowgroup);
+    return _viewports.at(shadowgroup);
 }
 
 } // namespace openspace

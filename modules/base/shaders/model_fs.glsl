@@ -201,7 +201,7 @@ Fragment getFragment() {
       totalLightColor *= ambientLightColor + (1.f - ambientLightColor) * shadowFactor;
       // Apply shadow to specular lighting (more aggressive - specular highlights should be sharply attenuated in shadows)
       totalSpecularColor *= shadowFactor;
-      
+
       frag.color.rgb = totalLightColor + totalSpecularColor;
     }
   }
@@ -215,6 +215,5 @@ Fragment getFragment() {
     frag.color = override_color;
   }
 
-  // frag.color = frag.color * 0.00000000000000000000001 + override_color ;
   return frag;
 }

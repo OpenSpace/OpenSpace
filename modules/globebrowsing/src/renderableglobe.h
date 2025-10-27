@@ -135,17 +135,23 @@ private:
     static constexpr int MinSplitDepth = 2;
     static constexpr int MaxSplitDepth = 22;
 
-    properties::BoolProperty _showChunkEdges;
-    properties::BoolProperty _levelByProjectedAreaElseDistance;
-    properties::BoolProperty _resetTileProviders;
-    properties::BoolProperty _performFrustumCulling;
-    properties::BoolProperty _performHorizonCulling;
-    properties::IntProperty  _modelSpaceRenderingCutoffLevel;
-    properties::IntProperty  _dynamicLodIterationCount;
-    properties::OptionProperty _overrideRenderMode;
-
+    struct {
+        properties::BoolProperty showChunkEdges;
+        properties::BoolProperty levelByProjectedAreaElseDistance;
+        properties::TriggerProperty resetTileProviders;
+        properties::BoolProperty performFrustumCulling;
+        properties::BoolProperty performHorizonCulling;
+        properties::IntProperty modelSpaceRenderingCutoffLevel;
+        properties::IntProperty dynamicLodIterationCount;
+    } _debugProperties;
 
     properties::PropertyOwner _debugPropertyOwner;
+
+    struct {
+        properties::BoolProperty shadowMapping;
+        properties::FloatProperty zFightingPercentage;
+        properties::IntProperty nShadowSamples;
+    } _shadowMappingProperties;
 
     properties::PropertyOwner _shadowMappingPropertyOwner;
 
@@ -255,10 +261,6 @@ private:
     properties::FloatProperty _orenNayarRoughness;
     properties::IntProperty _nActiveLayers;
 
-    properties::BoolProperty _shadowMapping;
-    properties::FloatProperty _zFightingPercentage;
-    properties::IntProperty _nShadowSamples;
-
     Ellipsoid _ellipsoid;
     SkirtedGrid _grid;
     LayerManager _layerManager;
@@ -303,6 +305,7 @@ private:
     bool _nLayersIsDirty = true;
     bool _allChunksAvailable = true;
     bool _layerManagerDirty = true;
+    bool _resetTileProviders = false;
     size_t _iterationsOfAvailableData = 0;
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;

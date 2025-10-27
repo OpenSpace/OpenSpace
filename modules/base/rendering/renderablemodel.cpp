@@ -73,20 +73,6 @@ namespace {
 
     constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
-    constexpr std::array<const char*, 27> UniformNames = {
-        "modelViewTransform", "projectionTransform", "normalTransform", "meshTransform",
-        "meshNormalTransform", "ambientIntensity", "diffuseIntensity",
-        "specularIntensity", "specularPower", "performShading", "use_forced_color", "has_texture_diffuse",
-        "has_texture_normal", "has_texture_specular", "has_color_specular",
-        "texture_diffuse", "texture_normal", "texture_specular", "color_diffuse",
-        "color_specular", "opacity", "nLightSources", "lightDirectionsViewSpace",
-        "lightIntensities", "performManualDepthTest", "gBufferDepthTexture", "resolution"
-    };
-
-    constexpr std::array<const char*, 5> UniformOpacityNames = {
-        "opacity", "colorTexture", "depthTexture", "viewport", "resolution"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
         "EnableAnimation",
         "Enable animation",
@@ -119,7 +105,6 @@ namespace {
         "SpecularPower",
         "Specular Power",
         "Power factor for specular component, higher value gives narrower specularity",
-        // @VISIBILITY(2.4)
         openspace::properties::Property::Visibility::User
     };
 
@@ -193,24 +178,17 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseCacheInfo = {
-        "UseCache",
-        "Enable model caching",
-        "Enable cache for the Model",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo CastShadowInfo = {
         "CastShadow",
         "Cast shadow",
-        "Enable model to cast shadow on its parent renderable",
+        "Enable model to cast shadow on its parent renderable.",
     };
 
     constexpr openspace::properties::Property::PropertyInfo FrustumSizeInfo = {
         "FrustumSize",
         "Size of the depth-pass view frustum",
-        "Sets the width & height (effectively left/right & top/bottom)"
-        " of the depth-pass view frustum, z-near & z-far are calculated.",
+        "Sets the width & height (effectively left/right & top/bottom) of the depth-pass "
+        "view frustum, z-near & z-far are calculated.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -340,9 +318,6 @@ namespace {
         // The path to a fragment shader program to use instead of the default shader.
         std::optional<std::filesystem::path> fragmentShader;
 
-        // [[codegen::verbatim(UseCacheInfo.description)]]
-        std::optional<bool> useCache;
-
         // [[codegen::verbatim(CastShadowInfo.description)]]
         std::optional<bool> castShadow;
 
@@ -402,7 +377,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _blendingFuncOption(BlendingOptionInfo)
     , _renderWireframe(RenderWireframeInfo, false)
     , _frustumSize(FrustumSizeInfo, 1.f)
-    , _useCache(UseCacheInfo, true)
     , _castShadow(CastShadowInfo, false)
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _useOverrideColor(UseOverrideColorInfo, false)
@@ -528,10 +502,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    _useCache = p.useCache.value_or(_useCache);
     _castShadow = p.castShadow.value_or(_castShadow);
-    _lightSource = p.lightSource.value_or("");
-    _shadowGroup = p.shadowGroup.value_or("");
+    _lightSource = p.lightSource.value_or(_lightSource);
+    _shadowGroup = p.shadowGroup.value_or(_shadowGroup);
     _useOverrideColor = p.useOverrideColor.value_or(_useOverrideColor);
     _overrideColor = p.overrideColor.value_or(_overrideColor);
 
@@ -550,7 +523,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_modelTransform);
     addProperty(_pivot);
     addProperty(_rotationVec);
-    addProperty(_useCache);
     addProperty(_useOverrideColor);
     addProperty(_overrideColor);
 
@@ -575,7 +547,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         if (_autoSizeFrustum) {
             const float radius = _geometry->boundingRadius() * _modelScale;
             _frustumSize = radius;
-            _frustumSize.setMinValue(radius * .1f);
+            _frustumSize.setMinValue(radius * 0.1f);
             _frustumSize.setMaxValue(radius * 3.f);
         }
     });
@@ -617,7 +589,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
 
         // To update list of shadowers for our parent
-        global::eventEngine->publishEvent<events::CustomEvent>("Cast Shadow Changed", "nada");
+        global::eventEngine->publishEvent<events::CustomEvent>("Cast Shadow Changed");
     });
 
     if (p.rotationVector.has_value()) {
@@ -840,7 +812,7 @@ void RenderableModel::initializeGL() {
     if (_autoSizeFrustum) {
         const float radius = _geometry->boundingRadius() * _modelScale;
         _frustumSize = radius;
-        _frustumSize.setMinValue(radius * .1f);
+        _frustumSize.setMinValue(radius * 0.1f);
         _frustumSize.setMaxValue(radius * 3.f);
     }
 
@@ -1042,22 +1014,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     _program->setUniform("has_shadow_depth_map", _castShadow);
 
     if (_castShadow) {
-        /*_program->setUniform("model", modelTransform);
-        _program->setUniform("light_vp", _lightVP);
-        _program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
-
-        _program->setUniform("shadow_depth_map", 13);
-        glActiveTexture(GL_TEXTURE13);
-        glBindTexture(
-            GL_TEXTURE_2D,
-            _depthMap
-        );*/
-
-        if (_lightSource.size() > 0) {
+        if (!_lightSource.empty()) {
             SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(_lightSource);
-            if (node != nullptr) {
+            if (node) {
                 DirectionalLightSource* src = dynamic_cast<DirectionalLightSource*>(node->renderable());
-                if (src != nullptr) {
+                if (src) {
                     GLuint depthMap = src->depthMap(_shadowGroup);
                     glm::dmat4 vp = src->viewProjectionMatrix(_shadowGroup);
 
@@ -1336,7 +1297,7 @@ bool RenderableModel::isCastingShadow() const {
 void RenderableModel::renderForDepthMap(const glm::dmat4& vp) const {
     _depthMapProgram->activate();
 
-    glm::dmat4 transform = glm::translate(glm::dmat4(1), glm::dvec3(_pivot.value()));
+    glm::dmat4 transform = glm::translate(glm::dmat4(1.0), glm::dvec3(_pivot.value()));
     transform *= glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
     glm::dmat4 model = this->parent()->modelTransform() * transform;
 
@@ -1351,14 +1312,15 @@ void RenderableModel::renderForDepthMap(const glm::dmat4& vp) const {
 }
 
 glm::dvec3 RenderableModel::center() const {
-    glm::dmat4 transform = glm::translate(glm::dmat4(1), glm::dvec3(_pivot.value()));
+    glm::dmat4 transform = glm::translate(glm::dmat4(1.0), glm::dvec3(_pivot.value()));
     transform *= glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
     glm::dmat4 model = this->parent()->modelTransform() * transform;
+
     if (_modelHasAnimation) {
-        return model * glm::dvec4(0, 0, 0, 1.);
+        return model * glm::dvec4(0.0, 0.0, 0.0, 1.0);
     }
 
-    return model * glm::dvec4(0, 0, 0, 1);
+    return model * glm::dvec4(0.0, 0.0, 0.0, 1.0);
 }
 
 const std::string& RenderableModel::lightSource() const {
@@ -1372,6 +1334,5 @@ const std::string& RenderableModel::shadowGroup() const {
 double RenderableModel::shadowFrustumSize() const {
     return _frustumSize;
 }
-
 
 }  // namespace openspace

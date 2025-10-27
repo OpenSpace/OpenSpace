@@ -1,11 +1,12 @@
--- Model CC0 from https://sketchfab.com/3d-models/celestial-globe-341fa8a777e94883841409438756f747
-
-local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
 local mars = asset.require("scene/solarsystem/planets/mars/mars")
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 local sun = asset.require("scene/solarsystem/sun/sun")
+local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
 
+
+
+-- Model CC0 from https://sketchfab.com/3d-models/celestial-globe-341fa8a777e94883841409438756f747
 local celestial_globe_folder = asset.resource({
   Name = "Celestial Globe",
   Type = "HttpSynchronization",
@@ -13,66 +14,173 @@ local celestial_globe_folder = asset.resource({
   Version = 1
 })
 
-local globeModels = {}
-
-function createModel(longitude, latitude, scale, name, parent, group)
-  local model = {
-    Identifier = "celestial-globe-" .. name,
-    Parent = parent,
-    Transform = {
-      Translation = {
-        Type = "GlobeTranslation",
-        Globe = parent,
-        Longitude = longitude,
-        Latitude = latitude,
-        UseHeightmap = true,
-        Altitude = 0.0
-      },
-      Rotation = {
-        Type = "GlobeRotation",
-        Globe = parent,
-        Longitude = longitude,
-        Latitude = latitude,
-        Angle= 180
-      },
-      Scale = {
-        Type = "StaticScale",
-        Scale = scale
-      }
+local ModelMars1 = {
+  Identifier = "celestial-globe-mars1",
+  Parent = mars.Mars.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.63325,
+      Latitude = 26.13238,
+      UseHeightmap = true,
+      Altitude = 0.0
     },
-    Renderable = {
-      Type = "RenderableModel",
-      Enabled = true,
-      GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
-      ModelScale = "Kilometer",
-      LightSources = {
-        sun_transforms.LightSource
-      },
-      CastShadow = true,
-      LightSource = sun.LightSource.Identifier,
-      ShadowGroup = group
-    },
-    GUI = {
-      Name = "Celestial Globe - " .. name,
-      Path = "/Shadow Casting Models/Celestial Globe - " .. name
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.63325,
+      Latitude = 26.13238,
+      Angle= 180
     }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Enabled = true,
+    GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
+    ModelScale = "Kilometer",
+    LightSources = {
+      sun_transforms.LightSource
+    },
+    CastShadow = true,
+    LightSource = sun.LightSource.Identifier,
+    ShadowGroup = "mars"
+  },
+  GUI = {
+    Name = "Celestial Globe - Mars1",
+    Path = "/Shadow Casting Models/Celestial Globe"
   }
-  globeModels[#globeModels + 1] = model
-  return model
-end
+}
+
+local ModelMars2 = {
+  Identifier = "celestial-globe-mars2",
+  Parent = mars.Mars.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.6,
+      Latitude = 26.15239,
+      UseHeightmap = true,
+      Altitude = 0.0
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.6,
+      Latitude = 26.15239,
+      Angle= 180
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 5.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Enabled = true,
+    GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
+    ModelScale = "Kilometer",
+    LightSources = {
+      sun_transforms.LightSource
+    },
+    CastShadow = true,
+    LightSource = sun.LightSource.Identifier,
+    ShadowGroup = "mars"
+  },
+  GUI = {
+    Name = "Celestial Globe - Mars2",
+    Path = "/Shadow Casting Models/Celestial Globe"
+  }
+}
+
+local ModelEarth = {
+  Identifier = "celestial-globe-earth",
+  Parent = earth.Earth.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Longitude = -74.0060,
+      Latitude = 40.7128,
+      UseHeightmap = true,
+      Altitude = 0.0
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = earth.Earth.Identifier,
+      Longitude = -74.0060,
+      Latitude = 40.7128,
+      Angle= 180
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Enabled = true,
+    GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
+    ModelScale = "Kilometer",
+    LightSources = {
+      sun_transforms.LightSource
+    },
+    CastShadow = true,
+    LightSource = sun.LightSource.Identifier,
+    ShadowGroup = "earth"
+  },
+  GUI = {
+    Name = "Celestial Globe - Earth",
+    Path = "/Shadow Casting Models/Celestial Globe"
+  }
+}
+
+local ModelMoon = {
+  Identifier = "celestial-globe-moon",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Longitude = -0.1276,
+      Latitude = 51.5074,
+      UseHeightmap = true,
+      Altitude = 0.0
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = moon.Moon.Identifier,
+      Longitude = -0.1276,
+      Latitude = 51.5074,
+      Angle= 180
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Enabled = true,
+    GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
+    ModelScale = "Kilometer",
+    LightSources = {
+      sun_transforms.LightSource
+    },
+    CastShadow = true,
+    LightSource = sun.LightSource.Identifier,
+    ShadowGroup = "moon"
+  },
+  GUI = {
+    Name = "Celestial Globe - Moon",
+    Path = "/Shadow Casting Models/Celestial Globe"
+  }
+}
+
 
 asset.onInitialize(function()
-  -- Two models in the same group will share a shadow map,
-  --  so only put them in the same group if they are near each other
-  openspace.addSceneGraphNode(createModel(3.63325, 26.13238, 1.0, "mars1", mars.Mars.Identifier, "mars"))
-  openspace.addSceneGraphNode(createModel(3.6, 26.15239, 5.0, "mars2", mars.Mars.Identifier, "mars"))
-  openspace.addSceneGraphNode(createModel(-74.0060, 40.7128, 1.0, "earth", earth.Earth.Identifier, "earth"))
-  openspace.addSceneGraphNode(createModel(-0.1276, 51.5074, 1.0, "moon", moon.Moon.Identifier, "moon"))
+  openspace.addSceneGraphNode(ModelMars1)
+  openspace.addSceneGraphNode(ModelMars2)
+  openspace.addSceneGraphNode(ModelEarth)
+  openspace.addSceneGraphNode(ModelMoon)
 end)
 
 asset.onDeinitialize(function()
-  -- Reverse order to deinitialize to avoid dependency issues between nodes
-  for i = #globeModels, 1, -1 do
-    openspace.removeSceneGraphNode(globeModels[i].Identifier)
-  end
+  openspace.removeSceneGraphNode(ModelMoon)
+  openspace.removeSceneGraphNode(ModelEarth)
+  openspace.removeSceneGraphNode(ModelMars2)
+  openspace.removeSceneGraphNode(ModelMars1)
 end)

@@ -120,7 +120,6 @@ private:
     properties::BoolProperty _renderWireframe;
     properties::FloatProperty _frustumSize;
 
-    properties::BoolProperty _useCache;
     properties::BoolProperty _castShadow;
     std::string _lightSource;
     std::string _shadowGroup;

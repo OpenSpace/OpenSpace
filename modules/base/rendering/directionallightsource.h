@@ -24,19 +24,16 @@
 
 #ifndef __OPENSPACE_MODULE_BASE___DIRECTIONALLIGHTSOURCE___H__
 #define __OPENSPACE_MODULE_BASE___DIRECTIONALLIGHTSOURCE___H__
+
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/lightsource.h>
-
 #include <ghoul/opengl/programobject.h>
-
-#include <vector>
-#include <string>
+#include <ghoul/glm.h>
 #include <map>
-
-#include <glm/glm.hpp>
+#include <string>
+#include <vector>
 
 namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
@@ -57,7 +54,7 @@ public:
         GLuint depthMap;
     };
 
-    DirectionalLightSource(const ghoul::Dictionary& dictionary);
+    explicit DirectionalLightSource(const ghoul::Dictionary& dictionary);
     ~DirectionalLightSource() override = default;
 
     bool isReady() const override;
@@ -82,8 +79,8 @@ private:
     glm::ivec2 _depthMapResolution;
     std::map<std::string, std::vector<std::string>> _shadowGroups;
     std::map<std::string, GLuint> _depthMaps;
-    std::map<std::string, GLuint> _FBOs;
-    std::map<std::string, glm::dmat4> _vps;
+    std::map<std::string, GLuint> _fbos;
+    std::map<std::string, glm::dmat4> _viewports;
     ghoul::opengl::ProgramObject* _depthMapProgram = nullptr;
 };
 
