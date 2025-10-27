@@ -85,7 +85,7 @@ private:
     std::unique_ptr<TransferFunction> _transferFunction;
 
     UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,
-        colorTexture, mirrorTexture) _uniformCache;
+        colorTexture, mirrorTexture, textureProjection) _uniformCache;
 };
 
 } // namespace openspace

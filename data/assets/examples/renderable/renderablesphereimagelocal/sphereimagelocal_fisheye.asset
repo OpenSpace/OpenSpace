@@ -1,0 +1,27 @@
+-- Fisheye Mapping
+-- This example shows a sphere that is covered with an image which is retrieved from
+-- a local file path and mapped to the sphere using Angular Fisheye projection. The image
+-- will cover half of the sphere.
+
+local Node = {
+  Identifier = "RenderableSphereImageLocal_Example_FisheyeMapping",
+  Renderable = {
+    Type = "RenderableSphereImageLocal",
+    Texture = openspace.absPath("${DATA}/test3.jpg"),
+    TextureProjection = "Angular Fisheye",
+    -- Set orientation to also render the inside of the sphere
+    Orientation = "Both"
+  },
+  GUI = {
+    Name = "RenderableSphereImageLocal - Fisheye Mapping",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

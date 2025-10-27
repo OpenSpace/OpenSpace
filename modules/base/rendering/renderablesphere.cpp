@@ -67,8 +67,8 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    enum class Orientation : int {
-        Outside = 0,
+    enum class Orientation {
+        Outside ,
         Inside,
         Both
     };
@@ -88,17 +88,17 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    enum class TextureProjection : int {
-        Equirectangular = 0,
+    enum class TextureProjection {
+        Equirectangular,
         AngularFisheye
     };
 
-    // TODO: Consider adding coordinates mapper instead - so we can configurate e.g. equirectangular left/right/top/bottom
-    // and fisheye conver angle
     constexpr openspace::properties::Property::PropertyInfo TextureProjectionInfo = {
         "TextureProjection",
         "Texture Projection",
-        "TODO.", // @TODO
+        "Specifies the projection mapping to use any texture loaded onto the sphere "
+        "(assumes Equirectangular per default). Note that for \"Angular Fisheye\" only "
+        "half the sphere will be textured - the hemisphere centered around the z-axis.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -159,10 +159,11 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    // This `Renderable` represents a simple sphere with an image. The image that is shown
-    // should be in an equirectangular projection/spherical panoramic image or else
-    // distortions will be introduced. The `Orientation` parameter determines whether the
-    // provided image is shown on the inside, outside, or both sides of the sphere.
+    // This `Renderable` represents a simple sphere with an image. Per default, the
+    // sphere uses an equirectangular projection for the image mapping.
+    //
+    // The `Orientation` parameter determines whether the provided image is shown on
+    // the inside, outside, or both sides of the sphere.
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<float> size [[codegen::greater(0.f)]];
@@ -184,7 +185,7 @@ namespace {
 
         enum class [[codegen::map(TextureProjection)]] TextureProjection {
             Equirectangular,
-            AngularFisheye
+            AngularFisheye [[codegen::key("Angular Fisheye")]]
         };
 
         // [[codegen::verbatim(TextureProjectionInfo.description)]]
@@ -471,7 +472,7 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     defer{ unbindTexture(); };
     _shader->setUniform(_uniformCache.colorTexture, unit);
 
-    _shader->setUniform("textureProjection", _textureProjection.value()); // @TODO: uniform cache
+    _shader->setUniform(_uniformCache.textureProjection, _textureProjection.value());
 
     // Setting these states should not be necessary,
     // since they are the default state in OpenSpace.

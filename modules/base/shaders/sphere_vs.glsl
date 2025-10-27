@@ -36,12 +36,14 @@ uniform mat4 modelViewProjection;
 uniform mat4 modelViewTransform;
 uniform mat3 modelViewRotation;
 
-uniform int textureProjection = 0; // 0: Equirectangular, 1: Angular Fisheye
+const int Equirectangular = 0;
+const int AngularFisheye = 1;
+uniform int textureProjection;
 
 const float M_PI = 3.14159265358979323846;
 
-// Remap equrectangular texture coordinates into angular fisheye
-vec2 equiToangularFisheye(vec2 textureCoords) {
+// Remap equirectangular texture coordinates into angular fisheye
+vec2 equiToAngularFisheye(vec2 textureCoords) {
   vec2 pos2 = textureCoords * 2.0 - 1.0; // Map [0,1] tex coords to [-1,1]
 
   // 2D equi to 3D vector
@@ -71,10 +73,10 @@ vec2 equiToangularFisheye(vec2 textureCoords) {
 }
 
 void main() {
-  if (textureProjection == 1) { // Angular Fisheye
-    vs_textureCoords = equiToangularFisheye(in_textureCoords);
+  if (textureProjection == AngularFisheye) {
+    vs_textureCoords = equiToAngularFisheye(in_textureCoords);
   }
-  else { // 0: Equirectangular, which is the default mapping for the sphere
+  else { // Equirectangular
     vs_textureCoords = in_textureCoords;
   }
 
