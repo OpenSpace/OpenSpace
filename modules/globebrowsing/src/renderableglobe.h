@@ -27,9 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/base/rendering/renderablemodel.h>
 #include <modules/base/rendering/directionallightsource.h>
-#include <openspace/util/ellipsoid.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/geojson/geojsonmanager.h>
 #include <modules/globebrowsing/src/globelabelscomponent.h>
@@ -39,7 +37,6 @@
 #include <modules/globebrowsing/src/shadowcomponent.h>
 #include <modules/globebrowsing/src/skirtedgrid.h>
 #include <modules/globebrowsing/src/tileindex.h>
-#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -50,6 +47,7 @@
 #include <cstddef>
 #include <memory>
 
+namespace openspace { class RenderableModel; }
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::globebrowsing {
@@ -134,20 +132,6 @@ public:
 private:
     static constexpr int MinSplitDepth = 2;
     static constexpr int MaxSplitDepth = 22;
-
-    properties::BoolProperty _showChunkEdges;
-    properties::BoolProperty _levelByProjectedAreaElseDistance;
-    properties::BoolProperty _resetTileProviders;
-    properties::BoolProperty _performFrustumCulling;
-    properties::BoolProperty _performHorizonCulling;
-    properties::IntProperty  _modelSpaceRenderingCutoffLevel;
-    properties::IntProperty  _dynamicLodIterationCount;
-    properties::OptionProperty _overrideRenderMode;
-
-
-    properties::PropertyOwner _debugPropertyOwner;
-
-    properties::PropertyOwner _shadowMappingPropertyOwner;
 
     /**
      * Test if a specific chunk can safely be culled without affecting the rendered image.
@@ -255,9 +239,25 @@ private:
     properties::FloatProperty _orenNayarRoughness;
     properties::IntProperty _nActiveLayers;
 
-    properties::BoolProperty _shadowMapping;
-    properties::FloatProperty _zFightingPercentage;
-    properties::IntProperty _nShadowSamples;
+    struct {
+        properties::BoolProperty showChunkEdges;
+        properties::BoolProperty levelByProjectedAreaElseDistance;
+        properties::TriggerProperty resetTileProviders;
+        properties::BoolProperty performFrustumCulling;
+        properties::BoolProperty performHorizonCulling;
+        properties::IntProperty modelSpaceRenderingCutoffLevel;
+        properties::IntProperty dynamicLodIterationCount;
+    } _debugProperties;
+
+    properties::PropertyOwner _debugPropertyOwner;
+
+    struct {
+        properties::BoolProperty shadowMapping;
+        properties::FloatProperty zFightingPercentage;
+        properties::IntProperty nShadowSamples;
+    } _shadowMappingProperties;
+
+    properties::PropertyOwner _shadowMappingPropertyOwner;
 
     Ellipsoid _ellipsoid;
     SkirtedGrid _grid;
@@ -303,6 +303,7 @@ private:
     bool _nLayersIsDirty = true;
     bool _allChunksAvailable = true;
     bool _layerManagerDirty = true;
+    bool _resetTileProviders = false;
     size_t _iterationsOfAvailableData = 0;
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;
