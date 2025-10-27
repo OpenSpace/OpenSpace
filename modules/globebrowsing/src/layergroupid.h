@@ -90,8 +90,6 @@ struct Layer {
         SolidColor,
         SpoutImageProvider,
         VideoTileProvider,
-        PlanetaryTrailTileProvider,
-        ForceHighResolutionTileProvider,
         Unknown
     };
 
@@ -99,7 +97,7 @@ struct Layer {
     std::string_view identifier;
 };
 
-constexpr std::array<Layer, 14> Layers = {
+constexpr std::array<Layer, 12> Layers = {
     Layer {
         .id = Layer::ID::DefaultTileProvider,
         .identifier = "DefaultTileProvider"
@@ -147,14 +145,6 @@ constexpr std::array<Layer, 14> Layers = {
     Layer {
         .id = Layer::ID::VideoTileProvider,
         .identifier = "VideoTileProvider"
-    },
-    Layer {
-        .id = Layer::ID::PlanetaryTrailTileProvider,
-        .identifier = "PlanetaryTrailTileProvider"
-    },
-    Layer {
-        .id = Layer::ID::ForceHighResolutionTileProvider,
-        .identifier = "ForceHighResolutionTileProvider"
     }
 };
 

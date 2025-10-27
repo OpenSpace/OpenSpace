@@ -102,8 +102,7 @@ float SceneGraphLightSource::intensity() const {
     return _intensity;
 }
 
-glm::dvec3 SceneGraphLightSource::positionWorldSpace() const
-{
+glm::dvec3 SceneGraphLightSource::positionWorldSpace() const {
     return _sceneGraphNode->modelTransform() * glm::dvec4(0.0, 0.0, 0.0, 1.0);
 }
 

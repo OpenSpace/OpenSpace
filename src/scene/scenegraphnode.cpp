@@ -228,16 +228,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FollowRotationDistanceInfo =
-    {
-        "FollowRotationDistance",
-        "Follow Rotation Distance",
-        "Distance within which the orbital navigator will follow along this nodes"
-        "rotation. A value less than zero means that the navigator will never follow"
-        "along with the nodes rotation.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     struct [[codegen::Dictionary(SceneGraphNode)]] Parameters {
         // The identifier of this scene graph node. This name must be unique among all
         // scene graph nodes that are loaded in a specific scene. If a duplicate is
@@ -266,9 +256,6 @@ namespace {
 
         // [[codegen::verbatim(SupportsDirectInteractionInfo.description)]]
         std::optional<bool> supportsDirectInteraction;
-
-        // [[codegen::verbatim(FollowRotationDistanceInfo.description)]]
-        std::optional<double> followRotationDistance;
 
         struct Transform {
             // This node describes a translation that is applied to the scene graph node
@@ -431,8 +418,6 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
     result->_approachFactor = p.approachFactor.value_or(result->_approachFactor);
     result->_reachFactor = p.reachFactor.value_or(result->_reachFactor);
 
-    result->_followRotationDistance = p.followRotationDistance.value_or(result->_followRotationDistance);
-
     if (p.transform.has_value()) {
         ZoneScopedN("Transform");
 
@@ -586,7 +571,6 @@ SceneGraphNode::SceneGraphNode()
     , _visibilityDistance(VisibilityDistanceInfo, 6e10f)
     , _supportsDirectInteraction(SupportsDirectInteractionInfo, false)
     , _showDebugSphere(ShowDebugSphereInfo, false)
-    , _followRotationDistance(FollowRotationDistanceInfo, -1.0, -1.0)
 {
     {
         ghoul::Dictionary translation;
@@ -1373,11 +1357,6 @@ double SceneGraphNode::reachFactor() const {
 
 double SceneGraphNode::approachFactor() const {
     return _approachFactor;
-}
-
-double SceneGraphNode::followRotationDistance() const
-{
-    return _followRotationDistance;
 }
 
 bool SceneGraphNode::supportsDirectInteraction() const {

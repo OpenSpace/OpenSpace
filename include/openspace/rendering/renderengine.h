@@ -151,7 +151,6 @@ public:
      */
     static scripting::LuaLibrary luaLibrary();
 
-
     glm::ivec2 renderingResolution() const;
     glm::ivec2 fontResolution() const;
 
@@ -176,7 +175,6 @@ private:
     ghoul::Dictionary _rendererData;
     ghoul::Dictionary _resolveData;
     ScreenLog* _log = nullptr;
-
 
     ghoul::opengl::OpenGLStateCache* _openglStateCache = nullptr;
 

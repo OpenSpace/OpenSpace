@@ -45,8 +45,6 @@
 #include <modules/globebrowsing/src/tileprovider/spoutimageprovider.h>
 #include <modules/globebrowsing/src/tileprovider/temporaltileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/tileindextileprovider.h>
-#include <modules/globebrowsing/src/tileprovider/planetarytrailtileprovider.h>
-#include <modules/globebrowsing/src/tileprovider/forcehighresolutiontileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/tileproviderbydate.h>
 #include <modules/globebrowsing/src/tileprovider/tileproviderbyindex.h>
@@ -306,8 +304,6 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     fTileProvider->registerClass<TemporalTileProvider>("TemporalTileProvider");
     fTileProvider->registerClass<TileIndexTileProvider>("TileIndexTileProvider");
     fTileProvider->registerClass<SizeReferenceTileProvider>("SizeReferenceTileProvider");
-    fTileProvider->registerClass<PlanetaryTrailTileProvider>("PlanetaryTrailTileProvider");
-    fTileProvider->registerClass<ForceHighResolutionTileProvider>("ForceHighResolutionTileProvider");
     fTileProvider->registerClass<TileProviderByDate>("TileProviderByDate");
     fTileProvider->registerClass<TileProviderByLevel>("TileProviderByLevel");
     fTileProvider->registerClass<TileProviderByIndex>("TileProviderByIndex");

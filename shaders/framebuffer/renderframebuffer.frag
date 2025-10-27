@@ -54,7 +54,8 @@ void main() {
 
   if (f.disableDepthNormalization) {
     gl_FragDepth = f.depth;
-  } else {
+  }
+  else {
     gl_FragDepth = normalizeFloat(f.depth);
   }
 }

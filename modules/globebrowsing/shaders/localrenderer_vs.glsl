@@ -138,7 +138,7 @@ void main() {
 #endif // SHADOW_MAPPING_ENABLED
 
 #if nDepthMaps > 0
-  for (int idx = 0; idx < nDepthMaps; ++idx) {
+  for (int idx = 0; idx < nDepthMaps; idx++) {
     positions_lightspace[idx] = vec4(light_vps[idx] * (inv_vp * dvec4(p, 1.0)));
   }
 #endif // nDepthMaps > 0

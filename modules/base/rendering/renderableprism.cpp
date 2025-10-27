@@ -59,22 +59,6 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo WidthInfo = {
-        "Width",
-        "Width",
-        "The width of the prism's shape in meters",
-        // @VISIBILITY(2.8)
-        openspace::properties::Property::Visibility::User
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo HeightInfo = {
-        "Height",
-        "Height",
-        "The height of the prism's shape in meters",
-        // @VISIBILITY(2.8)
-        openspace::properties::Property::Visibility::User
-    };
-
     constexpr openspace::properties::Property::PropertyInfo BaseRadiusInfo = {
         "BaseRadius",
         "Base radius",
@@ -125,12 +109,6 @@ namespace {
 
         // [[codegen::verbatim(LengthInfo.description)]]
         std::optional<float> length;
-
-        // [[codegen::verbatim(WidthInfo.description)]]
-        std::optional<float> width;
-
-        // [[codegen::verbatim(HeightInfo.description)]]
-        std::optional<float> height;
     };
 #include "renderableprism_codegen.cpp"
 } // namespace
@@ -146,8 +124,6 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
     , _nShapeSegments(SegmentsInfo, 6, 3, 32)
     , _nLines(LinesInfo, 6, 0, 32)
     , _radius(RadiusInfo, 10.f, 0.f, 3e20f)
-    , _width(WidthInfo, 0.f, 0.f, 3e20f)
-    , _height(HeightInfo, 0.f, 0.f, 3e20f)
     , _baseRadius(BaseRadiusInfo, 10.f, 0.f, 3e20f)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 20.f)
     , _lineColor(LineColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
@@ -167,14 +143,6 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
     _radius.onChange([this]() { _prismIsDirty = true; });
     _radius = p.radius.value_or(_radius);
     addProperty(_radius);
-
-    _width.onChange([this]() { _prismIsDirty = true; });
-    _width = p.width.value_or(_width);
-    addProperty(_width);
-
-    _height.onChange([this]() { _prismIsDirty = true; });
-    _height = p.height.value_or(_height);
-    addProperty(_height);
 
     _baseRadius.setExponent(12.f);
     _baseRadius.onChange([this]() { _prismIsDirty = true; });
@@ -250,14 +218,6 @@ void RenderablePrism::updateVertexData() {
     std::vector<VertexXYZ> unitVertices = createRingXYZ(_nShapeSegments, 1.f);
     std::vector<VertexXYZ> unitVerticesLines = createRingXYZ(_nLines, 1.f);
 
-    // hacked-up FOV adaptation
-    const auto doFOV = (_width > 0.f && _height > 0.f && _nShapeSegments == 4 && _nLines == 4);
-    const auto rot = glm::rotate(glm::mat4(1), glm::radians(-45.f), glm::vec3(0, 0, 1));
-    const auto NW = rot * glm::vec4(-_width / 2, _height / 2, 0.f, 1.f);
-    const auto SW = rot * glm::vec4(-_width / 2, -_height / 2, 0.f, 1.f);
-    const auto SE = rot * glm::vec4(_width / 2, -_height / 2, 0.f, 1.f);
-    const auto NE = rot * glm::vec4(_width / 2, _height / 2, 0.f, 1.f);
-
     // Put base vertices into array
     for (int j = 0; j < _nShapeSegments; j++) {
         const float ux = unitVertices[j].xyz[0];
@@ -268,34 +228,14 @@ void RenderablePrism::updateVertexData() {
         _vertexArray.push_back(0.f);              // z
     }
 
-    if (doFOV) {
-        // Put top shape vertices into array
-        _vertexArray.push_back(NW.x);
-        _vertexArray.push_back(NW.y);
-        _vertexArray.push_back(_length);
+    // Put top shape vertices into array
+    for (int j = 0; j < _nShapeSegments; j++) {
+        const float ux = unitVertices[j].xyz[0];
+        const float uy = unitVertices[j].xyz[1];
 
-        _vertexArray.push_back(SW.x);
-        _vertexArray.push_back(SW.y);
-        _vertexArray.push_back(_length);
-
-        _vertexArray.push_back(SE.x);
-        _vertexArray.push_back(SE.y);
-        _vertexArray.push_back(_length);
-
-        _vertexArray.push_back(NE.x);
-        _vertexArray.push_back(NE.y);
-        _vertexArray.push_back(_length);
-    }
-    else {
-        // Put top shape vertices into array
-        for (int j = 0; j < _nShapeSegments; j++) {
-            const float ux = unitVertices[j].xyz[0];
-            const float uy = unitVertices[j].xyz[1];
-
-            _vertexArray.push_back(ux * _radius); // x
-            _vertexArray.push_back(uy * _radius); // y
-            _vertexArray.push_back(_length);      // z
-        }
+        _vertexArray.push_back(ux * _radius); // x
+        _vertexArray.push_back(uy * _radius); // y
+        _vertexArray.push_back(_length);      // z
     }
 
     // Put the vertices for the connecting lines into array
@@ -322,35 +262,9 @@ void RenderablePrism::updateVertexData() {
             _vertexArray.push_back(0.f);              // z
 
             // Top
-            if (!doFOV) {
-                _vertexArray.push_back(ux * _radius); // x
-                _vertexArray.push_back(uy * _radius); // y
-                _vertexArray.push_back(_length);      // z
-            }
-            else {
-                switch (j) {
-                case 0:
-                    _vertexArray.push_back(NW.x);
-                    _vertexArray.push_back(NW.y);
-                    _vertexArray.push_back(_length);
-                    break;
-                case 1:
-                    _vertexArray.push_back(SW.x);
-                    _vertexArray.push_back(SW.y);
-                    _vertexArray.push_back(_length);
-                    break;
-                case 2:
-                    _vertexArray.push_back(SE.x);
-                    _vertexArray.push_back(SE.y);
-                    _vertexArray.push_back(_length);
-                    break;
-                case 3:
-                    _vertexArray.push_back(NE.x);
-                    _vertexArray.push_back(NE.y);
-                    _vertexArray.push_back(_length);
-                    break;
-                }
-            }
+            _vertexArray.push_back(ux * _radius); // x
+            _vertexArray.push_back(uy * _radius); // y
+            _vertexArray.push_back(_length);      // z
         }
     }
 

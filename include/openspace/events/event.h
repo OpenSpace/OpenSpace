@@ -617,7 +617,7 @@ struct CustomEvent : public Event {
      *
      * \pre subtype_ must not be empty
      */
-    CustomEvent(std::string_view subtype_, std::string_view payload_);
+    CustomEvent(std::string_view subtype_, std::string_view payload_ = "");
 
     const tstring subtype;
     const tstring payload;
