@@ -20,8 +20,12 @@ local Node = {
     Type = "RenderableVideoSphere",
     Video = video,
     TextureProjection = "Angular Fisheye",
-    -- Set orientation to also render the inside of the sphere
-    Orientation = "Both"
+    -- Set orientation to also render the inside of the sphere (which is the correct view
+    -- for a fisheye/fulldome video)
+    Orientation = "Both",
+    -- Increasing the segments makes the sphere smoother and reduces distortion at the
+    -- edge of the video
+    Segments = 64
   },
   GUI = {
     Name = "RenderableVideoSphere - Fisheye Video",
