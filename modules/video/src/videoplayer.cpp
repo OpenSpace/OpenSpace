@@ -74,7 +74,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AudioInfo = {
         "PlayAudio",
         "Play audio",
-        "Play audio."
+        "Decides whether to play audio when playing back the video."
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {
@@ -133,8 +133,9 @@ namespace {
             RealTimeLoop
         };
 
-        // The mode of how the video should be played back.
-        // Default is video is played back according to the set start and end times.
+        // The mode of how the video is played back. The Default is `RealTimeLoop`,
+        // which means that the video is played in realtime using the `Play` command
+        // in the user interface under `Video Player`.
         std::optional<PlaybackMode> playbackMode;
     };
 #include "videoplayer_codegen.cpp"
@@ -235,7 +236,7 @@ documentation::Documentation VideoPlayer::Documentation() {
 }
 
 VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
-    : PropertyOwner({ "VideoPlayer" })
+    : PropertyOwner({ "VideoPlayer", "Video Player"})
     , _play(PlayInfo)
     , _pause(PauseInfo)
     , _goToStart(GoToStartInfo)

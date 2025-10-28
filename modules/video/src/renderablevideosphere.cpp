@@ -28,12 +28,24 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/sphere.h>
 
+namespace {
+    // This `Renderable` creates a textured 3D sphere where the texture is a video.
+    //
+    // The video can either be played back based on a given simulation time
+    // (`PlaybackMode` MapToSimulationTime) or through the user interface at `Video
+    // Player` &rarr; `Play` (for `PlaybackMode` RealTimeLoop). It is also possible to
+    // control whether the video should loop or just be played once.
+    struct [[codegen::Dictionary(RenderableVideoSphere)]] Parameters {};
+#include "renderablevideosphere_codegen.cpp"
+} // namespace
+
 namespace openspace {
 
 documentation::Documentation RenderableVideoSphere::Documentation() {
-    documentation::Documentation doc = RenderableSphere::Documentation();
-    doc.name = "RenderableVideoSphere";
-    doc.id = "video_renderablevideosphere";
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "video_renderablevideosphere",
+        RenderableSphere::Documentation()
+    );
 
     documentation::Documentation vp = VideoPlayer::Documentation();
     doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());

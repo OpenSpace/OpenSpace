@@ -35,12 +35,25 @@
 #include <filesystem>
 #include <optional>
 
+namespace {
+    // This `ScreenSpaceRenderable` can be used to render a video in front of the camera.
+    //
+    // The video can either be played back based on a given simulation time
+    // (`PlaybackMode` MapToSimulationTime) or through the user interface at `Video
+    // Player` &rarr; `Play` (for `PlaybackMode` RealTimeLoop). It is also possible to
+    // control whether the video should loop or just be played once.
+    struct [[codegen::Dictionary(ScreenSpaceVideo)]] Parameters {};
+#include "screenspacevideo_codegen.cpp"
+} // namespace
+
 namespace openspace {
 
 documentation::Documentation ScreenSpaceVideo::Documentation() {
-    documentation::Documentation doc = VideoPlayer::Documentation();
-    doc.name = "ScreenSpaceVideo";
-    doc.id = "video_screenspacevideo";
+    documentation::Documentation doc = codegen::doc<Parameters>("video_screenspacevideo");
+
+    documentation::Documentation vp = VideoPlayer::Documentation();
+    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
+
     return doc;
 }
 
