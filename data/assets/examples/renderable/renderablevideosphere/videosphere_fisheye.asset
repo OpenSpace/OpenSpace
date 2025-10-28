@@ -1,0 +1,38 @@
+-- Fulldome Fisheye Video
+-- Creates a 3D sphere with an angular fisheye video (fulldome) mapped onto its surface.
+-- The video will be shown on half of the sphere.
+
+-- The video file is here downloaded from a URL to a location on our servers. This
+-- returns the path to a folder where the file is stored after download
+local data = asset.resource({
+  Name = "Example Video Angular Fisheye",
+  Type = "UrlSynchronization",
+  Identifier = "example_video_angularfisheye",
+  Url = "https://liu-se.cdn.openspaceproject.com/files/examples/video/examplevideo_fisheye.mp4"
+})
+
+-- For a local file, use "asset.resource("path/to/local/video.mp4")" here instead
+local video = data .. "examplevideo_fisheye.mp4"
+
+local Node = {
+  Identifier = "RenderableVideoSphere_Example",
+  Renderable = {
+    Type = "RenderableVideoSphere",
+    Video = video,
+    TextureProjection = "Angular Fisheye",
+    -- Set orientation to also render the inside of the sphere
+    Orientation = "Both"
+  },
+  GUI = {
+    Name = "RenderableVideoSphere - Fisheye Video",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

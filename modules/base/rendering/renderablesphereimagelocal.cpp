@@ -44,6 +44,10 @@ namespace {
     // This `Renderable` shows a sphere with an image provided by a local file on disk. To
     // show a sphere with an image from an online source, see
     // [RenderableSphereImageOnline](#base_screenspace_image_online).
+    //
+    // Per default, the sphere uses an equirectangular projection for the image mapping
+    // and hence expects an equirectangular image. However, it can also be used show
+    // fisheye images by changing the `TextureProjection`.
     struct [[codegen::Dictionary(RenderableSphereImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;
