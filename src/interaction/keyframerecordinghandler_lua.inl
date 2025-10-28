@@ -94,6 +94,13 @@ namespace {
     global::keyframeRecording->loadSequence(std::move(filename));
 }
 
+// Simplifies a timeline recording by removing redudant keyframes. Keyframes are removed
+// if they are a linear combination of its neighboring keyframes.
+[[codegen::luawrap]] std::vector<ghoul::Dictionary> reduceKeyframes() {
+    using namespace openspace;
+    return global::keyframeRecording->reduceKeyframes();
+}
+
 // Playback sequence optionally from the specified `sequenceTime` or if not specified
 // starts playing from the current time set within the sequence
 [[codegen::luawrap]] void play(std::optional<double> sequenceTime) {

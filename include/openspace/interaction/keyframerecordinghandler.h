@@ -53,6 +53,7 @@ public:
     void play();
     bool hasKeyframeRecording() const;
     std::vector<ghoul::Dictionary> keyframes() const;
+    std::vector<ghoul::Dictionary> reduceKeyframes() const;
 
     static openspace::scripting::LuaLibrary luaLibrary();
 
