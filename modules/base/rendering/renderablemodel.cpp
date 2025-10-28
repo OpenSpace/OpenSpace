@@ -1003,22 +1003,21 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     // does only really need to be set when _castShadow changes
     _program->setUniform("has_shadow_depth_map", _castShadow);
 
-    if (_castShadow) {
-        if (!_lightSource.empty()) {
-            const SceneGraphNode* ls = global::renderEngine->scene()->sceneGraphNode(_lightSource);
-            auto [depthMap, vp] = global::renderEngine->shadowInformation(ls, _shadowGroup);
+    ghoul::opengl::TextureUnit shadowUnit;
+    if (_castShadow && !_lightSource.empty()) {
+        const SceneGraphNode* ls = global::renderEngine->scene()->sceneGraphNode(_lightSource);
+        auto [depthMap, vp] = global::renderEngine->shadowInformation(ls, _shadowGroup);
 
-            _program->setUniform("model", modelTransform);
-            _program->setUniform("light_vp", vp);
-            _program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
+        _program->setUniform("model", modelTransform);
+        _program->setUniform("light_vp", vp);
+        _program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
 
-            _program->setUniform("shadow_depth_map", 13);
-            glActiveTexture(GL_TEXTURE13);
-            glBindTexture(
-                GL_TEXTURE_2D,
-                depthMap
-            );
-        }
+        shadowUnit.activate();
+        glBindTexture(
+            GL_TEXTURE_2D,
+            depthMap
+        );
+        _program->setUniform("shadow_depth_map", shadowUnit);
     }
 
     _program->setUniform("has_override_color", _useOverrideColor);
