@@ -31,7 +31,7 @@ local ModelMars1 = {
       Globe = mars.Mars.Identifier,
       Longitude = 3.63325,
       Latitude = 26.13238,
-      Angle= 180
+      Angle = 180.0
     }
   },
   Renderable = {
@@ -69,7 +69,7 @@ local ModelMars2 = {
       Globe = mars.Mars.Identifier,
       Longitude = 3.6,
       Latitude = 26.15239,
-      Angle= 180
+      Angle = 180.0
     },
     Scale = {
       Type = "StaticScale",
@@ -94,6 +94,48 @@ local ModelMars2 = {
   }
 }
 
+local ModelMars3 = {
+  Identifier = "celestial-globe-mars3",
+  Parent = mars.Mars.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.62,
+      Latitude = 26.13,
+      UseHeightmap = true,
+      Altitude = 0.0
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.62,
+      Latitude = 26.13,
+      Angle = 180.0
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 1.25
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Enabled = true,
+    GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
+    ModelScale = "Kilometer",
+    LightSources = {
+      sun_transforms.LightSource
+    },
+    CastShadow = true,
+    LightSource = sun.LightSource.Identifier,
+    ShadowGroup = "second-mars"
+  },
+  GUI = {
+    Name = "Celestial Globe - Mars3",
+    Path = "/Shadow Casting Models/Celestial Globe"
+  }
+}
+
 local ModelEarth = {
   Identifier = "celestial-globe-earth",
   Parent = earth.Earth.Identifier,
@@ -111,7 +153,7 @@ local ModelEarth = {
       Globe = earth.Earth.Identifier,
       Longitude = -74.0060,
       Latitude = 40.7128,
-      Angle= 180
+      Angle = 180.0
     }
   },
   Renderable = {
@@ -149,7 +191,7 @@ local ModelMoon = {
       Globe = moon.Moon.Identifier,
       Longitude = -0.1276,
       Latitude = 51.5074,
-      Angle= 180
+      Angle = 180.0
     }
   },
   Renderable = {
@@ -174,6 +216,7 @@ local ModelMoon = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ModelMars1)
   openspace.addSceneGraphNode(ModelMars2)
+  openspace.addSceneGraphNode(ModelMars3)
   openspace.addSceneGraphNode(ModelEarth)
   openspace.addSceneGraphNode(ModelMoon)
 end)
@@ -181,6 +224,7 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ModelMoon)
   openspace.removeSceneGraphNode(ModelEarth)
+  openspace.removeSceneGraphNode(ModelMars3)
   openspace.removeSceneGraphNode(ModelMars2)
   openspace.removeSceneGraphNode(ModelMars1)
 end)

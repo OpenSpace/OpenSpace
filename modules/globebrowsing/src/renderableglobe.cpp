@@ -1486,25 +1486,25 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     }
 
     // Setup shadow mapping uniforms
-    std::vector<glm::dmat4> light_vps;
+    std::vector<glm::dmat4> lightViewProjections;
     std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTextureUnits;
     for (const DepthMapData& depthData : depthMapData) {
-        light_vps.push_back(depthData.viewProjection);
+        lightViewProjections.push_back(depthData.viewProjection);
         depthmapTextureUnits.emplace_back(ghoul::opengl::TextureUnit(), depthData.depthMap);
     }
 
-    std::vector<GLint> bound_units;
+    std::vector<GLint> boundUnits;
     for (auto& [unit, depthMap] : depthmapTextureUnits) {
         unit.activate();
         glBindTexture(GL_TEXTURE_2D, depthMap);
-        bound_units.push_back(unit);
+        boundUnits.push_back(unit);
     }
 
-    if (_shadowers.size() > 0 && _shadowersOk) {
+    if (!_shadowers.empty() && _shadowersOk) {
         program.setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
-        program.setUniform("light_depth_maps", bound_units);
+        program.setUniform("light_depth_maps", boundUnits);
         GLint loc = glGetUniformLocation(program, "light_vps");
-        glUniformMatrix4dv(loc, light_vps.size(), GL_FALSE, glm::value_ptr(light_vps.front()));
+        glUniformMatrix4dv(loc, lightViewProjections.size(), GL_FALSE, glm::value_ptr(lightViewProjections.front()));
     }
 
     // The length of the skirts is proportional to its size
@@ -1710,25 +1710,25 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     }
 
 
-    std::vector<glm::dmat4> light_vps;
+    std::vector<glm::dmat4> lightViewProjections;
     std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTextureUnits;
     for (const DepthMapData& depthData : depthMapData) {
-        light_vps.push_back(depthData.viewProjection);
+        lightViewProjections.push_back(depthData.viewProjection);
         depthmapTextureUnits.emplace_back(ghoul::opengl::TextureUnit(), depthData.depthMap);
     }
 
-    std::vector<GLint> bound_units;
+    std::vector<GLint> boundUnits;
     for (auto& [unit, depthMap] : depthmapTextureUnits) {
         unit.activate();
         glBindTexture(GL_TEXTURE_2D, depthMap);
-        bound_units.push_back(unit);
+        boundUnits.push_back(unit);
     }
 
-    if (_shadowers.size() > 0 && _shadowersOk) {
+    if (!_shadowers.empty() && _shadowersOk) {
         _localRenderer.program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
-        _localRenderer.program->setUniform("light_depth_maps", bound_units);
+        _localRenderer.program->setUniform("light_depth_maps", boundUnits);
         GLint loc = glGetUniformLocation(*_localRenderer.program, "light_vps");
-        glUniformMatrix4dv(loc, light_vps.size(), GL_FALSE, glm::value_ptr(light_vps.front()));
+        glUniformMatrix4dv(loc, lightViewProjections.size(), GL_FALSE, glm::value_ptr(lightViewProjections.front()));
     }
 
     glEnable(GL_DEPTH_TEST);

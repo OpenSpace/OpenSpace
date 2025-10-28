@@ -252,12 +252,14 @@ private:
     } _downscaleVolumeRendering;
 
     struct ShadowMap {
-        std::map<std::string, std::vector<std::string>> shadowGroups;
-        std::map<std::string, GLuint> depthMaps;
-        std::map<std::string, GLuint> fbos;
-        std::map<std::string, glm::dmat4> viewports;
+        const SceneGraphNode* lightsource = nullptr;
+        std::vector<std::string> shadowGroups;
+        GLuint depthMap = 0;
+        glm::ivec2 depthMapResolution = glm::ivec2(0);
+        GLuint fbo = 0;
+        glm::dmat4 viewProjectionMatrix = glm::dmat4(1.0);
     };
-    std::map<const SceneGraphNode*, ShadowMap> _shadowMaps;
+    std::map<std::string, ShadowMap> _shadowMaps;
 
     unsigned int _pingPongIndex = 0u;
 
