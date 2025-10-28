@@ -51,7 +51,7 @@ using json = nlohmann::json;
 namespace {
     constexpr std::string_view _loggerCat = "RenderableTube";
     constexpr int8_t CurrentMajorVersion = 0;
-    constexpr int8_t CurrentMinorVersion = 1;
+    constexpr int8_t CurrentMinorVersion = 2;
     constexpr int SpiceIdOffset = 1000000;
 
     constexpr int NearestInterpolation = 0;
