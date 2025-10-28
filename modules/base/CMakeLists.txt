@@ -78,7 +78,6 @@ set(HEADER_FILES
   rendering/screenspacerenderablerenderable.h
   rendering/screenspacetext.h
   rendering/screenspacetimevaryingimageonline.h
-  rendering/directionallightsource.h
   rotation/timelinerotation.h
   rotation/constantrotation.h
   rotation/fixedrotation.h
@@ -158,7 +157,6 @@ set(SOURCE_FILES
   rendering/screenspacerenderablerenderable.cpp
   rendering/screenspacetext.cpp
   rendering/screenspacetimevaryingimageonline.cpp
-  rendering/directionallightsource.cpp
   rotation/timelinerotation.cpp
   rotation/constantrotation.cpp
   rotation/fixedrotation.cpp

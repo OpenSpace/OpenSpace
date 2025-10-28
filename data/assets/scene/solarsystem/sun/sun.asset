@@ -53,9 +53,6 @@ local SunLabel = {
 local LightSource = {
   Identifier = "sun-directional-lightsource",
   Parent = transforms.SunIAU.Identifier,
-  Renderable = {
-    Type = "DirectionalLightSource",
-  },
   GUI = {
     Name = "Directional Light Source",
     Path = "/Solar System/Sun",

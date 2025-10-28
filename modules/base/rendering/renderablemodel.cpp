@@ -26,7 +26,6 @@
 
 #include <modules/base/basemodule.h>
 #include <modules/base/lightsource/scenegraphlightsource.h>
-#include <modules/base/rendering/directionallightsource.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -621,16 +620,6 @@ void RenderableModel::initialize() {
     for (const std::unique_ptr<LightSource>& ls : _lightSources) {
         ls->initialize();
     }
-
-    if (_lightSource.size() > 0) {
-        SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(_lightSource);
-        if (node != nullptr) {
-            DirectionalLightSource* src = dynamic_cast<DirectionalLightSource*>(node->renderable());
-            if (src != nullptr) {
-                src->registerShadowCaster(_shadowGroup, parent()->identifier());
-            }
-        }
-    }
 }
 
 void RenderableModel::initializeGL() {
@@ -820,6 +809,7 @@ void RenderableModel::initializeGL() {
     setInteractionSphere(boundingSphere() * 0.1);
 
     if (_castShadow) {
+        global::renderEngine->registerShadowCaster(_shadowGroup, _lightSource, parent()->identifier());
         createDepthMapResources();
     }
 }
@@ -1015,25 +1005,19 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
     if (_castShadow) {
         if (!_lightSource.empty()) {
-            SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(_lightSource);
-            if (node) {
-                DirectionalLightSource* src = dynamic_cast<DirectionalLightSource*>(node->renderable());
-                if (src) {
-                    GLuint depthMap = src->depthMap(_shadowGroup);
-                    glm::dmat4 vp = src->viewProjectionMatrix(_shadowGroup);
+            const SceneGraphNode* ls = global::renderEngine->scene()->sceneGraphNode(_lightSource);
+            auto [depthMap, vp] = global::renderEngine->shadowInformation(ls, _shadowGroup);
 
-                    _program->setUniform("model", modelTransform);
-                    _program->setUniform("light_vp", vp);
-                    _program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
+            _program->setUniform("model", modelTransform);
+            _program->setUniform("light_vp", vp);
+            _program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
 
-                    _program->setUniform("shadow_depth_map", 13);
-                    glActiveTexture(GL_TEXTURE13);
-                    glBindTexture(
-                        GL_TEXTURE_2D,
-                        depthMap
-                    );
-                }
-            }
+            _program->setUniform("shadow_depth_map", 13);
+            glActiveTexture(GL_TEXTURE13);
+            glBindTexture(
+                GL_TEXTURE_2D,
+                depthMap
+            );
         }
     }
 

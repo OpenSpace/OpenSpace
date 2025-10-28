@@ -27,7 +27,6 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/base/rendering/directionallightsource.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/geojson/geojsonmanager.h>
 #include <modules/globebrowsing/src/globelabelscomponent.h>
@@ -133,6 +132,11 @@ private:
     static constexpr int MinSplitDepth = 2;
     static constexpr int MaxSplitDepth = 22;
 
+    struct DepthMapData {
+        GLuint depthMap;
+        glm::dmat4 viewProjection;
+    };
+
     /**
      * Test if a specific chunk can safely be culled without affecting the rendered image.
      *
@@ -177,7 +181,7 @@ private:
      * lead to jagging. We only render global chunks for lower chunk levels.
      */
     void renderChunkGlobally(const Chunk& chunk, const RenderData& data,
-        std::vector<DirectionalLightSource::DepthMapData>& depthMapData, bool renderGeomOnly = false
+        std::vector<DepthMapData>& depthMapData, bool renderGeomOnly = false
     );
 
     /**
@@ -192,7 +196,7 @@ private:
      * higher chunk levels.
      */
     void renderChunkLocally(const Chunk& chunk, const RenderData& data,
-        std::vector<DirectionalLightSource::DepthMapData>& depthMapData, bool renderGeomOnly = false
+        std::vector<DepthMapData>& depthMapData, bool renderGeomOnly = false
     );
 
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,

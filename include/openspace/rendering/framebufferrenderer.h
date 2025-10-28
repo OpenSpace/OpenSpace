@@ -52,6 +52,7 @@ struct DeferredcasterTask;
 struct RaycastData;
 struct RaycasterTask;
 class Scene;
+class SceneGraphNode;
 struct UpdateStructures;
 
 class FramebufferRenderer final : public RaycasterListener, public DeferredcasterListener
@@ -178,6 +179,9 @@ public:
     virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
         DeferredcasterListener::IsAttached isAttached) override;
 
+    void registerShadowCaster(const std::string& shadowgroup, const SceneGraphNode* lightsource, const SceneGraphNode* target);
+    std::pair<GLuint, glm::dmat4> shadowInformation(const SceneGraphNode* node, const std::string& shadowgroup) const;
+
 private:
     using RaycasterProgObjMap = std::map<
         VolumeRaycaster*,
@@ -246,6 +250,14 @@ private:
         GLuint depthbuffer;
         float currentDownscaleFactor  = 1.f;
     } _downscaleVolumeRendering;
+
+    struct ShadowMap {
+        std::map<std::string, std::vector<std::string>> shadowGroups;
+        std::map<std::string, GLuint> depthMaps;
+        std::map<std::string, GLuint> fbos;
+        std::map<std::string, glm::dmat4> viewports;
+    };
+    std::map<const SceneGraphNode*, ShadowMap> _shadowMaps;
 
     unsigned int _pingPongIndex = 0u;
 

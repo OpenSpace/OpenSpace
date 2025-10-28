@@ -1359,21 +1359,13 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
     }
 
-    std::vector<DirectionalLightSource::DepthMapData> depthMapData;
+    std::vector<DepthMapData> depthMapData;
     for (const auto& [key, groups] : _shadowSpec) {
         const auto node = global::renderEngine->scene()->sceneGraphNode(key);
-        if (node != nullptr) {
-            const auto src = dynamic_cast<DirectionalLightSource*>(node->renderable());
-            if (src != nullptr) {
-                for (const auto& grp : groups) {
-                    depthMapData.push_back(
-                        {
-                        .viewProjection = src->viewProjectionMatrix(grp),
-                        .depthMap = src->depthMap(grp)
-                        }
-                    );
-                }
-            }
+
+        for (const std::string& grp : groups) {
+            auto [depthmap, vp] = global::renderEngine->shadowInformation(node, grp);
+            depthMapData.emplace_back(depthmap, vp);
         }
     }
 
@@ -1479,7 +1471,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
 }
 
 void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data,
-                                          std::vector<DirectionalLightSource::DepthMapData>& depthMapData, bool renderGeomOnly)
+                                          std::vector<DepthMapData>& depthMapData, bool renderGeomOnly)
 {
     ZoneScoped;
     TracyGpuZone("renderChunkGlobally");
@@ -1496,7 +1488,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     // Setup shadow mapping uniforms
     std::vector<glm::dmat4> light_vps;
     std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTextureUnits;
-    for (const DirectionalLightSource::DepthMapData& depthData : depthMapData) {
+    for (const DepthMapData& depthData : depthMapData) {
         light_vps.push_back(depthData.viewProjection);
         depthmapTextureUnits.emplace_back(ghoul::opengl::TextureUnit(), depthData.depthMap);
     }
@@ -1596,7 +1588,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 }
 
 void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data,
-                                         std::vector<DirectionalLightSource::DepthMapData>& depthMapData,
+                                         std::vector<DepthMapData>& depthMapData,
                                          bool renderGeomOnly)
 {
     ZoneScoped;
@@ -1720,7 +1712,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     std::vector<glm::dmat4> light_vps;
     std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTextureUnits;
-    for (const DirectionalLightSource::DepthMapData& depthData : depthMapData) {
+    for (const DepthMapData& depthData : depthMapData) {
         light_vps.push_back(depthData.viewProjection);
         depthmapTextureUnits.emplace_back(ghoul::opengl::TextureUnit(), depthData.depthMap);
     }
