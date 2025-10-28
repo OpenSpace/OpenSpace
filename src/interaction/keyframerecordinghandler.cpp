@@ -216,55 +216,58 @@ SessionRecording::Entry::Camera interpolate(const SessionRecording::Entry::Camer
     return c;
 }
 
-double isInterpolatedKeyframe(const SessionRecording::Entry::Camera& a,
-    const SessionRecording::Entry::Camera& b)
+double isInterpolatedKeyframe(const SessionRecording::Entry::Camera& truth,
+    const SessionRecording::Entry::Camera& interpolated)
 {
     // a - b if all of the components are ideally = 0
     // abs(a - b) / b < some %
-    double aLen = glm::length(a.position);
-    double bLen = glm::length(b.position);
-    double min = std::min(aLen, bLen);
-    double max = std::max(aLen, bLen);
-    double frac = min / max;
+    const glm::dvec3 diff = glm::abs(truth.position - interpolated.position) / truth.position;
     // If we're within 1% error margin the position is regarded as interpolated
-    bool isPositionInterpolated = (1.0 - frac) < 1;
+    const double threshold = 0.01;
+    bool isPositionInterpolated = diff.x < threshold && diff.y < threshold && diff.z < threshold;
 
-    bool isScaleInterpolated = std::abs(a.scale - b.scale) < 1e4;
+    //double aLen = glm::length(truth.position);
+    //double bLen = glm::length(interpolated.position);
+    //double min = std::min(aLen, bLen);
+    //double max = std::max(aLen, bLen);
+    //double frac = min / max;
+    //bool isPositionInterpolated = (1.0 - frac) < 1;
+
+    bool isScaleInterpolated = std::abs(truth.scale - interpolated.scale) < 1e4;
 
     //glm::angle()
 
     return isPositionInterpolated && isScaleInterpolated;
 
-    double posDiff = glm::distance(a.position, b.position);
+    double posDiff = glm::distance(truth.position, interpolated.position);
     //auto rotDiff = glm::
     return posDiff < 1e-5;
 }
 
 std::vector<ghoul::Dictionary> KeyframeRecordingHandler::reduceKeyframes() const {
-    SessionRecording timeline;
-    timeline.entries.reserve(_timeline.entries.size());
-    const auto& entries = _timeline.entries;
+    SessionRecording timeline = _timeline;
+    //timeline.entries.reserve(_timeline.entries.size());
+    //const auto& entries = _timeline.entries;
 
-    auto& r = timeline.entries;
+    //auto& r = timeline.entries;
 
-    r.push_back(entries[0]);
+    //r.push_back(entries[0]);
 
-    for (size_t i = 1; i < entries.size() - 1; i++) {
-        const SessionRecording::Entry& A = entries[i - 1];
-        const SessionRecording::Entry& B = entries[i];
-        const SessionRecording::Entry& C = entries[i + 1];
+    for (size_t i = 1; i < timeline.entries.size() - 1; i++) {
+        auto A = timeline.entries.begin() + i - 1;
+        auto B = timeline.entries.begin() + i;
+        auto C = timeline.entries.begin() + i + 1;
 
-        // Always add the scripts
-        if (std::holds_alternative<SessionRecording::Entry::Script>(B.value)) {
-            r.push_back(B);
+
+        // Always keep scripts
+        if (std::holds_alternative<SessionRecording::Entry::Script>(B->value)) {
             continue;
         }
 
-        // A, B, and C are not all camera keyframes we cant interpolate so we need to add B
-        if (std::holds_alternative<SessionRecording::Entry::Script>(A.value) ||
-            std::holds_alternative<SessionRecording::Entry::Script>(C.value))
+        // A, B, and C are not all camera keyframes we cant interpolate so we need to keep B
+        if (std::holds_alternative<SessionRecording::Entry::Script>(A->value) ||
+            std::holds_alternative<SessionRecording::Entry::Script>(C->value))
         {
-            r.push_back(B);
             continue;
         }
 
@@ -274,40 +277,38 @@ std::vector<ghoul::Dictionary> KeyframeRecordingHandler::reduceKeyframes() const
         // interpolated keyframe. TODO: potentially look at the acceleration between
         // keyframes? Also should the threshold be 1 second, less, more?
         // TODO: remove timestamps where the t value is between 0.4 and 0.6
-        if (B.timestamp - A.timestamp > 1.0) {
-            r.push_back(B);
+        if (B->timestamp - A->timestamp > 1.0) {
             continue;
         }
 
-        const auto& a = std::get<SessionRecording::Entry::Camera>(A.value);
-        const auto& b = std::get<SessionRecording::Entry::Camera>(B.value);
-        const auto& c = std::get<SessionRecording::Entry::Camera>(C.value);
+        const auto& a = std::get<SessionRecording::Entry::Camera>(A->value);
+        const auto& b = std::get<SessionRecording::Entry::Camera>(B->value);
+        const auto& c = std::get<SessionRecording::Entry::Camera>(C->value);
 
         // If the keyframes are not on the same focus node keep B
         if (a.focusNode != b.focusNode || b.focusNode != c.focusNode) {
-            r.push_back(B);
             continue;
         }
 
-        // If the following changes we want to keep B
+        // If the following focus note rotation changes we want to keep B
         if (a.followFocusNodeRotation != b.followFocusNodeRotation ||
             b.followFocusNodeRotation != c.followFocusNodeRotation)
         {
-            r.push_back(B);
             continue;
         }
+
         // Compute where B lies in time between A and C
-        const double t = (B.timestamp - A.timestamp) / (C.timestamp - A.timestamp);
+        const double t = (B->timestamp - A->timestamp) / (C->timestamp - A->timestamp);
         // Compute an interpolated keyframe
         SessionRecording::Entry::Camera interpolated = interpolate(a, c, t);
         // Compare the interpolated keyframe with the existing keyframe, we only keep
         // keyframes that are sufficiently different
-        if (!isInterpolatedKeyframe(b, interpolated)) {
-            r.push_back(B);
+        if (isInterpolatedKeyframe(b, interpolated)) {
+            timeline.entries.erase(B);
+            i--;
         }
     }
 
-    r.push_back(entries[entries.size() - 1]);
 
 
     return sessionRecordingToDictionary(timeline);
