@@ -83,7 +83,8 @@ void RenderableVideoSphere::render(const RenderData& data, RendererTasks& render
     }
 }
 
-void RenderableVideoSphere::update(const UpdateData&) {
+void RenderableVideoSphere::update(const UpdateData& data) {
+    RenderableSphere::update(data);
     if (!_videoPlayer.isInitialized()) {
         return;
     }
