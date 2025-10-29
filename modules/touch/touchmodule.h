@@ -31,6 +31,7 @@
 #include <modules/touch/include/touchinteraction.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/util/touch.h>
 #include <memory>
 
@@ -77,6 +78,7 @@ private:
     std::vector<TouchInput> _deferredRemovals;
     std::vector<TouchInput> _lastTouchInputs;
 
+    properties::IntProperty _tuioPort;
     properties::BoolProperty _touchIsEnabled;
     properties::BoolProperty _hasActiveTouchEvent;
     properties::StringListProperty _defaultDirectTouchRenderableTypes;
