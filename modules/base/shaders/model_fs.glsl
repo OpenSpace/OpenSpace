@@ -183,18 +183,20 @@ Fragment getFragment() {
     if (has_shadow_depth_map) {
       const float bias = 0.0005;
       vec3 coords = 0.5 + 0.5 * lightspace_position.xyz / lightspace_position.w;
-      vec2 ssz = 1.f / textureSize(shadow_depth_map, 0);
-      const int sz = 3;
-      const float norm = pow(2.f * sz + 1, 2.f);
-      float accum = 0.f;
 
-      for (int x = -sz; x <= sz; ++x) {
-        for (int y = -sz; y <= sz; ++y) {
-          float depth = texture(shadow_depth_map, coords.xy + vec2(x * ssz.x, y * ssz.y)).r;
+      // Any fragment that is behind the stored depth is in shadow, multisampling for smoother shadows
+      const int shadowFilterSize = 3;
+      float accum = 0.f;
+      vec2 stepSize = 1.f / textureSize(shadow_depth_map, 0);
+      for (int x = -shadowFilterSize; x <= shadowFilterSize; ++x) {
+        for (int y = -shadowFilterSize; y <= shadowFilterSize; ++y) {
+          float depth = texture(shadow_depth_map, coords.xy + vec2(x * stepSize.x, y * stepSize.y)).r;
           accum += float(coords.z < 1.f && depth > coords.z - bias);
         }
       }
 
+      // Scale the accumulated shadow factor to [0, 1]
+      const float norm = pow(2.f * shadowFilterSize + 1, 2.f);
       float shadowFactor = accum / norm;
       // Apply shadow to diffuse lighting (with ambient contribution)
       vec3 ambientLightColor = ambientIntensity * lightColor * diffuseAlbedo.rgb;

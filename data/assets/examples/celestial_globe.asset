@@ -14,7 +14,9 @@ local celestial_globe_folder = asset.resource({
   Version = 1
 })
 
-local ModelMars1 = {
+-- These models are in the same shadow group, so will cast onto and receive
+--  shadows from each other, as well as the Mars surface
+local ModelMarsSmall = {
   Identifier = "celestial-globe-mars1",
   Parent = mars.Mars.Identifier,
   Transform = {
@@ -52,7 +54,7 @@ local ModelMars1 = {
   }
 }
 
-local ModelMars2 = {
+local ModelMarsLarge = {
   Identifier = "celestial-globe-mars2",
   Parent = mars.Mars.Identifier,
   Transform = {
@@ -94,7 +96,8 @@ local ModelMars2 = {
   }
 }
 
-local ModelMars3 = {
+-- This model is in a different shadow group, so will not receive or cast shadows onto the other Mars models
+local ModelMarsOtherGroup = {
   Identifier = "celestial-globe-mars3",
   Parent = mars.Mars.Identifier,
   Transform = {
@@ -136,6 +139,7 @@ local ModelMars3 = {
   }
 }
 
+-- Models that are far away MUST have their own shadow groups, otherwise no shadows will be visible
 local ModelEarth = {
   Identifier = "celestial-globe-earth",
   Parent = earth.Earth.Identifier,
@@ -214,9 +218,9 @@ local ModelMoon = {
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(ModelMars1)
-  openspace.addSceneGraphNode(ModelMars2)
-  openspace.addSceneGraphNode(ModelMars3)
+  openspace.addSceneGraphNode(ModelMarsSmall)
+  openspace.addSceneGraphNode(ModelMarsLarge)
+  openspace.addSceneGraphNode(ModelMarsOtherGroup)
   openspace.addSceneGraphNode(ModelEarth)
   openspace.addSceneGraphNode(ModelMoon)
 end)
@@ -224,7 +228,7 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ModelMoon)
   openspace.removeSceneGraphNode(ModelEarth)
-  openspace.removeSceneGraphNode(ModelMars3)
-  openspace.removeSceneGraphNode(ModelMars2)
-  openspace.removeSceneGraphNode(ModelMars1)
+  openspace.removeSceneGraphNode(ModelMarsOtherGroup)
+  openspace.removeSceneGraphNode(ModelMarsLarge)
+  openspace.removeSceneGraphNode(ModelMarsSmall)
 end)

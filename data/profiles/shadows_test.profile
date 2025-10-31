@@ -26,6 +26,7 @@
     "celestial-globe-earth",
     "celestial-globe-mars1",
     "celestial-globe-mars2",
+    "celestial-globe-mars3",
     "celestial-globe-moon",
     "Earth",
     "Moon",

@@ -487,7 +487,7 @@ void FramebufferRenderer::registerShadowCaster(const std::string& shadowgroup,
 std::pair<GLuint, glm::dmat4> FramebufferRenderer::shadowInformation(
     const SceneGraphNode* node, const std::string& shadowgroup) const
 {
-    ghoul_assert(_shadowMaps.contains(shadowgroup), "");
+    ghoul_assert(_shadowMaps.contains(shadowgroup), "Shadow group not registered");
     return {
         _shadowMaps.at(shadowgroup).depthMap,
         _shadowMaps.at(shadowgroup).viewProjectionMatrix

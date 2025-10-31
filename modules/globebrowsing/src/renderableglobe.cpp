@@ -136,7 +136,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo PerformHorizonCullingInfo = {
         "PerformHorizonCulling",
         "Perform horizon culling",
-        "If this value is set to 'true', horizon culling will be performed.",
+        "If this value is set to 'true', renderables below the horizon will be culled.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
