@@ -1417,8 +1417,8 @@ void RenderableTube::initializeTextures() {
             gl::GLsizei(_textureResolution.x), // width
             gl::GLsizei(_textureResolution.y), // height
             1, // depth
-            gl::GLenum(ghoul::opengl::Texture::Format::RGBA),
-            GL_UNSIGNED_BYTE, // type
+            gl::GLenum(ghoul::opengl::Texture::Format::Red),
+            GL_FLOAT, // type
             texture->pixelData()
         );
     }
