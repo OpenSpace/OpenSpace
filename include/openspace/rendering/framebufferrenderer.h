@@ -169,6 +169,8 @@ public:
         const glm::ivec4& viewport);
     void render(Scene* scene, Camera* camera, float blackoutFactor);
 
+    void renderDepthMaps();
+
     /**
      * Update render data. Responsible for calling renderEngine::setRenderData
      */
@@ -277,6 +279,8 @@ private:
     float _hue = 1.f;
     float _saturation = 1.f;
     float _value = 1.f;
+
+    bool _renderedDepthMapsThisFrame = false;
 
     ghoul::Dictionary _rendererData;
 };
