@@ -181,7 +181,8 @@ public:
     virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
         DeferredcasterListener::IsAttached isAttached) override;
 
-    void registerShadowCaster(const std::string& shadowgroup, const SceneGraphNode* lightsource, const SceneGraphNode* target);
+    void registerShadowCaster(const std::string& shadowgroup, const SceneGraphNode* lightsource,
+            const SceneGraphNode* target);
     std::pair<GLuint, glm::dmat4> shadowInformation(const SceneGraphNode* node, const std::string& shadowgroup) const;
 
 private:

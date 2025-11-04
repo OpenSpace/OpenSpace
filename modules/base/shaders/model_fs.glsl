@@ -61,7 +61,6 @@ uniform sampler2D gBufferDepthTexture;
 
 uniform vec2 resolution;
 
-// Should & can be extended to be an array covering all lightsources
 // See renderableglobe and renderer_fs.glsl
 uniform bool has_shadow_depth_map;
 uniform sampler2D shadow_depth_map;
