@@ -380,6 +380,16 @@ if (UNIX AND NOT APPLE)
   install(FILES ${CMAKE_BINARY_DIR}/support/deb/copyright
         DESTINATION ${CMAKE_INSTALL_DOCDIR})
 
+    # Desktop integration
+    install(FILES ${CMAKE_SOURCE_DIR}/support/deb/openspace.desktop
+    DESTINATION share/applications
+    )
+    install(FILES
+        ${CMAKE_SOURCE_DIR}/support/deb/openspace.png
+        DESTINATION share/icons/hicolor/256x256/apps
+    )
+
+
     # --------------------------------------------------------------------------
     # Remove unwanted developer/source files from staged install
     # --------------------------------------------------------------------------
