@@ -138,7 +138,17 @@ if (UNIX AND NOT APPLE)
   # for Debian convention, package name should be in lowercase, and docdir path should be as below.
   set(CPACK_PACKAGE_NAME "openspace")
   set(CPACK_PACKAGE_VERSION "0.21.2")           # upstream version only
-  set(CPACK_DEBIAN_PACKAGE_RELEASE "1~ubuntu24.04.1")  # or "1~noble1"
+  # Generate a timestamp in the desired format: YYYY.MM.DD.HH.MM
+  string(TIMESTAMP BUILD_TIMESTAMP "%Y.%m.%d.%H.%M")
+  # --- Determine distro suffix ---
+  # Default to ubuntu22.04 if OPENSPACE_DISTRO is not set or not ubuntu24.04
+  if(NOT DEFINED OPENSPACE_DISTRO)
+      set(OPENSPACE_DISTRO "ubuntu22.04")
+  elseif(NOT OPENSPACE_DISTRO STREQUAL "ubuntu24.04")
+      set(OPENSPACE_DISTRO "ubuntu22.04")
+  endif()
+  # --- Compose Debian package release string ---
+  set(CPACK_DEBIAN_PACKAGE_RELEASE "${BUILD_TIMESTAMP}~${OPENSPACE_DISTRO}")
   set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")     # get Package_Version-Release_Arch.deb
   set(CMAKE_INSTALL_DATADIR share)
   set(CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DATADIR}/doc/${CPACK_PACKAGE_NAME}" CACHE PATH "" FORCE)
