@@ -387,6 +387,7 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(std::format("Could not load asset '{}': {}", asset->path(), e.message));
+        global::eventEngine->publishEvent<events::EventAssetLoadingError>(asset->path());
         return false;
     }
     catch (const ghoul::RuntimeError& e) {
@@ -964,6 +965,9 @@ void AssetManager::callOnInitialize(Asset* asset) const {
     for (const int init : it->second) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
+            global::eventEngine->publishEvent<events::EventAssetLoadingError>(
+                asset->path()
+            );
             throw ghoul::lua::LuaRuntimeException(std::format(
                 "When initializing '{}': {}",
                 asset->path(),

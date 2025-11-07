@@ -61,6 +61,7 @@ struct Event {
         ParallelConnection,
         ProfileLoadingFinished,
         AssetLoadingFinished,
+        AssetLoadingError,
         ApplicationShutdown,
         CameraFocusTransition,
         TimeOfInterestReached,
@@ -163,6 +164,22 @@ struct EventAssetLoadingFinished : public Event {
      * Creates an instance of an AssetLoadingFinished event.
      */
     EventAssetLoadingFinished();
+};
+
+/**
+* This event is created when the loading of an asset failed. This is emitted
+* regardless of whether it is the initial startup of a profile, or any subsequent asset
+* being loaded e.g., through add or drag-and-drop.
+*/
+struct EventAssetLoadingError : public Event {
+    static constexpr Type Type = Event::Type::AssetLoadingError;
+
+    /**
+     * Creates an instance of an AssetLoadingFinished event.
+     */
+    EventAssetLoadingError(const std::filesystem::path& assetPath_);
+
+    std::filesystem::path assetPath;
 };
 
 /**
