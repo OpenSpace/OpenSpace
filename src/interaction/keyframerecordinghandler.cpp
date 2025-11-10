@@ -216,7 +216,7 @@ SessionRecording::Entry::Camera interpolate(const SessionRecording::Entry::Camer
     return c;
 }
 
-double isInterpolatedKeyframe(const SessionRecording::Entry::Camera& truth,
+bool isInterpolatedKeyframe(const SessionRecording::Entry::Camera& truth,
     const SessionRecording::Entry::Camera& interpolated)
 {
     // a - b if all of the components are ideally = 0
@@ -244,7 +244,7 @@ double isInterpolatedKeyframe(const SessionRecording::Entry::Camera& truth,
     return posDiff < 1e-5;
 }
 
-std::vector<ghoul::Dictionary> KeyframeRecordingHandler::reduceKeyframes() const {
+std::vector<ghoul::Dictionary> KeyframeRecordingHandler::reduceKeyframes() {
     SessionRecording timeline = _timeline;
     //timeline.entries.reserve(_timeline.entries.size());
     //const auto& entries = _timeline.entries;
@@ -252,8 +252,8 @@ std::vector<ghoul::Dictionary> KeyframeRecordingHandler::reduceKeyframes() const
     //auto& r = timeline.entries;
 
     //r.push_back(entries[0]);
-
-    for (size_t i = 1; i < timeline.entries.size() - 1; i++) {
+    size_t i = 1;
+    while (i < timeline.entries.size() - 1) {
         auto A = timeline.entries.begin() + i - 1;
         auto B = timeline.entries.begin() + i;
         auto C = timeline.entries.begin() + i + 1;
@@ -303,14 +303,17 @@ std::vector<ghoul::Dictionary> KeyframeRecordingHandler::reduceKeyframes() const
         SessionRecording::Entry::Camera interpolated = interpolate(a, c, t);
         // Compare the interpolated keyframe with the existing keyframe, we only keep
         // keyframes that are sufficiently different
-        if (isInterpolatedKeyframe(b, interpolated)) {
+        bool shouldErase = isInterpolatedKeyframe(b, interpolated);
+        if (shouldErase) {
             timeline.entries.erase(B);
-            i--;
+        }
+        else {
+            i++;
         }
     }
 
 
-
+    _timeline = timeline;
     return sessionRecordingToDictionary(timeline);
 }
 
