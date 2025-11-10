@@ -24,6 +24,7 @@
 
 #include <modules/volume/xmlreader.h>
 
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/stringhelper.h>
 #include <fstream>
@@ -87,16 +88,22 @@ std::pair<volume::RawVolumeMetadata, std::vector<float>> readVTIFile(
     ss.str(dataText);
     ss.clear();
 
-    float value;
     float minValue = std::numeric_limits<float>::max();
     float maxValue = std::numeric_limits<float>::lowest();
-
-    while (ss >> value) {
-        scalars.push_back(value);
-        minValue = std::min(minValue, value);
-        maxValue = std::max(maxValue, value);
+    std::string v;
+    while (ss >> v) {
+        try {
+            float value = std::stof(v);
+            scalars.push_back(value);
+            if (!std::isinf(value) && !std::isnan(value)) {
+                minValue = std::min(minValue, value);
+                maxValue = std::max(maxValue, value);
+            }
+        }
+        catch (std::invalid_argument e) {
+            LWARNINGC("XmlReader", std::format("Cannot read value of '{}'", v));
+        }
     }
-
 
     volume::RawVolumeMetadata metadata;
 

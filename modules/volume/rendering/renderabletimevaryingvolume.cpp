@@ -356,7 +356,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     std::filesystem::path metaDataPath = sequenceDir / ".metadata";
     if (std::filesystem::is_regular_file(metaDataPath)) {
         const ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(metaDataPath);
-        const int nVtiSamples = dictionary.value<double>("TimeSamples");
+        const double nVtiSamples = dictionary.value<double>("TimeSamples");
         const std::string start = dictionary.value<std::string>("Start");
         const std::string end = dictionary.value<std::string>("End");
 
@@ -364,49 +364,59 @@ void RenderableTimeVaryingVolume::initializeGL() {
         const double endTime = Time::convertTime(end);
         const double simulationTime = endTime - startTime;
 
-        deltaTimeStep = simulationTime / static_cast<double>(nVtiSamples);
+        deltaTimeStep = simulationTime / nVtiSamples;
 
-        metadata.lowerDomainBound =
-            static_cast<glm::vec3>(dictionary.value<glm::dvec3>("MinExtent"));
-        metadata.upperDomainBound=
-            static_cast<glm::vec3>(dictionary.value<glm::dvec3>("MaxExtent"));
-        metadata.dimensions = 1 +
-            static_cast<glm::ivec3>(metadata.upperDomainBound - metadata.lowerDomainBound);
+        glm::ivec3 minExtent = dictionary.value<glm::dvec3>("MinExtent");
+        glm::ivec3 maxExtent = dictionary.value<glm::dvec3>("MaxExtent");
+        metadata.dimensions = 1 + static_cast<glm::ivec3>(maxExtent - minExtent);
 
         metadata.hasDomainBounds = true;
+        metadata.lowerDomainBound =
+            static_cast<glm::vec3>(dictionary.value<glm::dvec3>("MinDomain"));
+        metadata.upperDomainBound =
+            static_cast<glm::vec3>(dictionary.value<glm::dvec3>("MaxDomain"));
+
         metadata.hasValueRange = true;
-        metadata.minValue = dictionary.value<double>("MinValue");
-        metadata.maxValue = dictionary.value<double>("MaxValue");
+        metadata.minValue = static_cast<float>(dictionary.value<double>("MinValue"));
+        metadata.maxValue = static_cast<float>(dictionary.value<double>("MaxValue"));
         metadata.hasTime = true;
     }
 
     float globalMin = std::numeric_limits<float>::max();
     float globalMax = std::numeric_limits<float>::lowest();
-    for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
-        if (e.is_regular_file() && e.path().extension() == ".dictionary") {
-            loadTimestepMetadata(e.path(), globalMin, globalMax);
+
+    const std::vector<std::filesystem::path> paths = ghoul::filesystem::walkDirectory(
+        sequenceDir,
+        ghoul::filesystem::Recursive::Yes,
+        ghoul::filesystem::Sorted::Yes,
+        [](const fs::path& p) { return fs::is_regular_file(p); }
+    );
+
+    for (const std::filesystem::path& path : paths) {
+        if (path.extension() == ".dictionary") {
+            loadTimestepMetadata(path, globalMin, globalMax);
         }
-        if (e.is_regular_file() && e.path().extension() == ".vti") {
+        if (path.extension() == ".vti") {
             Timestep t;
             double timestep = startTime + deltaTimeStep * step++;
 
             std::filesystem::path cached =
-                FileSys.cacheManager()->cachedFilename(e.path());
+                FileSys.cacheManager()->cachedFilename(path);
             if (_useCaching) {
 
                 // Load caching data if it exists, otherwise we'll load normally and store a
                 // cache for next time
                 if (std::filesystem::exists(cached)) {
-                    LINFO(std::format("Cached file {} used for file {}", cached, e.path()));
+                    LINFO(std::format("Cached file {} used for file {}", cached, path));
                     loadVtiFromCache(cached, timestep, metadata, t, globalMin, globalMax);
                 }
                 else {
-                    loadVti(e.path(), timestep, t, globalMin, globalMax);
+                    loadVti(path, timestep, t, globalMin, globalMax, metadata);
                     saveVtiCache(cached, t.rawData);
                 }
             }
             else {
-                loadVti(e.path(), timestep, t, globalMin, globalMax);
+                loadVti(path, timestep, t, globalMin, globalMax, metadata);
                 saveVtiCache(cached, t.rawData);
             }
 
@@ -432,8 +442,10 @@ void RenderableTimeVaryingVolume::initializeGL() {
                 t.metadata.dimensions.z;
             for (size_t i = 0; i < length; i++) {
                 float d = t.rawVolume->data()[i];
-                globalMin = std::min(globalMin, d);
-                globalMax = std::max(globalMax, d);
+                if (!std::isinf(d) && !std::isnan(d)) {
+                    globalMin = std::min(globalMin, d);
+                    globalMax = std::max(globalMax, d);
+                }
             }
         }
 
@@ -719,12 +731,12 @@ glm::mat4 RenderableTimeVaryingVolume::calculateModelTransform() {
 
     const glm::dvec3 scale =
         t->metadata.upperDomainBound - t->metadata.lowerDomainBound;
-    //const glm::dvec3 translation =
-    //    (t->metadata.lowerDomainBound + t->metadata.upperDomainBound) * 0.5f;
+    const glm::dvec3 translation =
+        (t->metadata.lowerDomainBound + t->metadata.upperDomainBound) * 0.5f;
 
-    //glm::dmat4 translationMatrix = glm::translate(glm::dmat4(1.0), translation);
+    glm::dmat4 translationMatrix = glm::translate(glm::dmat4(1.0), translation);
     const glm::dmat4 scaleMatrix = glm::scale(glm::dmat4(1.0), scale);
-    glm::dmat4 modelTransform = /*translationMatrix **/ scaleMatrix;
+    glm::dmat4 modelTransform = translationMatrix * scaleMatrix;
     return glm::mat4(modelTransform);
 }
 
@@ -825,21 +837,28 @@ void RenderableTimeVaryingVolume::loadVtiFromCache(const std::filesystem::path& 
     // If the metadata contain the min max this is unnecessary
     for (size_t i = 0; i < length; i++) {
         float d = t.rawVolume->data()[i];
-        globalMin = std::min(globalMin, d);
-        globalMax = std::max(globalMax, d);
+        if (!std::isinf(d) && !std::isnan(d)) {
+            globalMin = std::min(globalMin, d);
+            globalMax = std::max(globalMax, d);
+        }
     }
 }
 
 void RenderableTimeVaryingVolume::loadVti(const std::filesystem::path& path,
                                           double timestep, Timestep& t, float& globalMin,
-                                          float& globalMax)
+                                          float& globalMax,
+                                          const RawVolumeMetadata& metadata)
 {
-    const auto [metadata, scalars] = readVTIFile(path, timestep);
+    const auto [m, scalars] = readVTIFile(path, timestep);
+    // TODO: this will now ignore any metadata in the VTI file and only use the 1 .metadata
+    // file supplied. The time is set specifically since the metadata file determines the
+    // shown time for each timestep.
     t.metadata = metadata;
+    t.metadata.time = timestep;
     t.rawData = scalars;
 
-    globalMin = std::min(globalMin, t.metadata.minValue);
-    globalMax = std::max(globalMax, t.metadata.maxValue);
+    globalMin = std::min(globalMin, m.minValue);
+    globalMax = std::max(globalMax, m.maxValue);
 }
 
 void RenderableTimeVaryingVolume::saveVtiCache(const std::filesystem::path& cached,

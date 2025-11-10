@@ -94,7 +94,7 @@ private:
     void loadVtiFromCache(const std::filesystem::path& cached, double timestep,
         RawVolumeMetadata& metadata, Timestep& t, float& globalMin, float& globalMax);
     void loadVti(const std::filesystem::path& path, double timestep, Timestep& t,
-        float& globalMin, float& globalMax);
+        float& globalMin, float& globalMax, const RawVolumeMetadata& metadata);
     void saveVtiCache(const std::filesystem::path& cached,
         const std::vector<float>& scalars);
 
