@@ -166,7 +166,7 @@ namespace {
         // [[codegen::verbatim(UpperValueBoundInfo.description)]]
         std::optional<float> upperValueBound;
 
-        std::optional<ghoul::Dictionary> clipPlanes;
+        std::optional<std::vector<ghoul::Dictionary>> clipPlanes [[codegen::reference("volume_volumeclipplane")]];
 
         // [[codegen::verbatim(CacheInfo.description)]]
         std::optional<bool> cache;
@@ -225,12 +225,10 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
     _upperValueBound = p.upperValueBound.value_or(_upperValueBound);
     _autoValueBounds = !p.lowerValueBound.has_value() || !p.upperValueBound.has_value();
 
-
-    _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(
-        p.clipPlanes.value_or(ghoul::Dictionary())
+    const std::vector<ghoul::Dictionary> clipPlanes = p.clipPlanes.value_or(
+        std::vector<ghoul::Dictionary>()
     );
-    _clipPlanes->setIdentifier("clipPlanes");
-    _clipPlanes->setGuiName("Clip Planes");
+    _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanes);
 
     _cache = p.cache.value_or(_cache);
 
