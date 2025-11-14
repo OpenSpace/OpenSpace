@@ -533,6 +533,87 @@ namespace {
     globe->geoJsonManager().addGeoJsonLayer(d);
 }
 
+[[codegen::luawrap]] ghoul::Dictionary globeNodes() {
+    using namespace openspace;
+    using namespace globebrowsing;
+    GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
+
+    // Render the list of planets
+    std::vector<SceneGraphNode*> nodes =
+        global::renderEngine->scene()->allSceneGraphNodes();
+
+    nodes.erase(
+        std::remove_if(
+            nodes.begin(),
+            nodes.end(),
+            [](SceneGraphNode* n) {
+        using namespace globebrowsing;
+        const Renderable* r = n->renderable();
+        const RenderableGlobe* rg = dynamic_cast<const RenderableGlobe*>(r);
+        return rg == nullptr;
+    }
+        ),
+        nodes.end()
+    );
+    std::sort(
+        nodes.begin(),
+        nodes.end(),
+        [module](SceneGraphNode* lhs, SceneGraphNode* rhs) {
+        const bool lhsHasUrl = module->hasUrlInfo(lhs->identifier());
+        const bool rhsHasUrl = module->hasUrlInfo(rhs->identifier());
+
+        if (lhsHasUrl && !rhsHasUrl) {
+            return true;
+        }
+        if (!lhsHasUrl && rhsHasUrl) {
+            return false;
+        }
+
+        return lhs->guiName() < rhs->guiName();
+    }
+    );
+    std::vector<std::string> globeURIs = {};
+    globeURIs.reserve(nodes.size());
+    for (SceneGraphNode* node : nodes) {
+        globeURIs.push_back(node->identifier());
+    }
+
+    auto firstWithoutUrl = std::find_if(
+        nodes.begin(),
+        nodes.end(),
+        [module](SceneGraphNode* n) {
+            return !module->hasUrlInfo(n->identifier());
+        }
+    );
+
+    int index = static_cast<int>(firstWithoutUrl - nodes.begin());
+
+    ghoul::Dictionary e;
+    e.setValue("identifiers", globeURIs);
+    e.setValue("firstIndexWithoutUrl", index);
+
+
+    return e;
+}
+
+[[codegen::luawrap]] std::vector<ghoul::Dictionary> urlInfo(std::string globe) {
+    using namespace openspace;
+    using namespace globebrowsing;
+    GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
+    std::vector<GlobeBrowsingModule::UrlInfo> info = module->urlInfo(globe);
+
+    std::vector<ghoul::Dictionary> res;
+    for (const auto& i : info) {
+        ghoul::Dictionary e;
+        e.setValue("name", i.name);
+        e.setValue("url", i.url);
+        res.push_back(std::move(e));
+    }
+
+    return res;
+}
+
 #include "globebrowsingmodule_lua_codegen.cpp"
 
 } // namespace
+
