@@ -258,80 +258,39 @@ void RenderableTimeVaryingVolume::initializeGL() {
     float globalMin = std::numeric_limits<float>::max();
     float globalMax = std::numeric_limits<float>::lowest();
 
-    // === Pass 1: Find global min/max ===
-    for (auto& [time, t] : _volumeTimesteps) {
-        const std::string path = std::format(
-            "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
-        );
-        RawVolumeReader<float> reader(path, t.metadata.dimensions);
-        std::shared_ptr<RawVolume<float>> volume = reader.read(_invertDataAtZ);
-
-        float* data = volume->data();
-        for (size_t i = 0; i < volume->nCells(); i++) {
-            globalMin = std::min(globalMin, data[i]);
-            globalMax = std::max(globalMax, data[i]);
-        }
-
-        // Temporarily store the volume to avoid double I/O
-        t.rawVolume = volume;
-    }
-
-    // Avoid divide-by-zero
-    const float diff = std::max(globalMax - globalMin, 1e-8f);
-
-    // === Pass 2: Normalize and finalize ===
-    for (auto& [time, t] : _volumeTimesteps) {
-        float* data = t.rawVolume->data();
-
-        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-            data[i] = glm::clamp((data[i] - globalMin) / diff, 0.f, 1.f);
-        }
-
-        t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
-        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-            t.histogram->add(data[i]);
-        }
-
-        t.texture = std::make_shared<ghoul::opengl::Texture>(
-            t.metadata.dimensions,
-            GL_TEXTURE_3D,
-            ghoul::opengl::Texture::Format::Red,
-            GL_RED,
-            GL_FLOAT,
-            ghoul::opengl::Texture::FilterMode::Linear,
-            ghoul::opengl::Texture::WrappingMode::Clamp
-        );
-
-        t.texture->setPixelData(
-            reinterpret_cast<void*>(data),
-            ghoul::opengl::Texture::TakeOwnership::No
-        );
-        t.texture->uploadTexture();
-    }
-
-
-
-    //// TODO: defer loading of data to later (separate thread or at least not when loading)
-    //for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
-    //    Timestep& t = p.second;
+    //// === Pass 1: Find global min/max ===
+    //for (auto& [time, t] : _volumeTimesteps) {
     //    const std::string path = std::format(
     //        "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
     //    );
     //    RawVolumeReader<float> reader(path, t.metadata.dimensions);
-    //    t.rawVolume = reader.read(_invertDataAtZ);
+    //    std::shared_ptr<RawVolume<float>> volume = reader.read(_invertDataAtZ);
 
-    //    const float min = t.metadata.minValue;
-    //    const float diff = t.metadata.maxValue - t.metadata.minValue;
+    //    float* data = volume->data();
+    //    for (size_t i = 0; i < volume->nCells(); i++) {
+    //        globalMin = std::min(globalMin, data[i]);
+    //        globalMax = std::max(globalMax, data[i]);
+    //    }
+
+    //    // Temporarily store the volume to avoid double I/O
+    //    t.rawVolume = volume;
+    //}
+
+    //// Avoid divide-by-zero
+    //const float diff = std::max(globalMax - globalMin, 1e-8f);
+
+    //// === Pass 2: Normalize and finalize ===
+    //for (auto& [time, t] : _volumeTimesteps) {
     //    float* data = t.rawVolume->data();
+
     //    for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-    //        data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
+    //        data[i] = glm::clamp((data[i] - globalMin) / diff, 0.f, 1.f);
     //    }
 
     //    t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
     //    for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
     //        t.histogram->add(data[i]);
     //    }
-    //    // TODO: handle normalization properly for different timesteps + transfer function
 
     //    t.texture = std::make_shared<ghoul::opengl::Texture>(
     //        t.metadata.dimensions,
@@ -349,6 +308,47 @@ void RenderableTimeVaryingVolume::initializeGL() {
     //    );
     //    t.texture->uploadTexture();
     //}
+
+
+
+    // TODO: defer loading of data to later (separate thread or at least not when loading)
+    for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
+        Timestep& t = p.second;
+        const std::string path = std::format(
+            "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
+        );
+        RawVolumeReader<float> reader(path, t.metadata.dimensions);
+        t.rawVolume = reader.read(_invertDataAtZ);
+
+        const float min = t.metadata.minValue;
+        const float diff = t.metadata.maxValue - t.metadata.minValue;
+        float* data = t.rawVolume->data();
+        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
+            data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
+        }
+
+        t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
+        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
+            t.histogram->add(data[i]);
+        }
+        // TODO: handle normalization properly for different timesteps + transfer function
+
+        t.texture = std::make_shared<ghoul::opengl::Texture>(
+            t.metadata.dimensions,
+            GL_TEXTURE_3D,
+            ghoul::opengl::Texture::Format::Red,
+            GL_RED,
+            GL_FLOAT,
+            ghoul::opengl::Texture::FilterMode::Linear,
+            ghoul::opengl::Texture::WrappingMode::Clamp
+        );
+
+        t.texture->setPixelData(
+            reinterpret_cast<void*>(data),
+            ghoul::opengl::Texture::TakeOwnership::No
+        );
+        t.texture->uploadTexture();
+    }
 
     _clipPlanes->initialize();
 
