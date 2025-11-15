@@ -51,7 +51,7 @@ elseif (UNIX AND NOT APPLE)
 elseif (APPLE)
   set(SOLOUD_BACKEND_COREAUDIO ON CACHE BOOL "")
 endif ()
-add_subdirectory(ext/soloud/contrib SYSTEM)
+add_subdirectory(ext/soloud/contrib SYSTEM EXCLUDE_FROM_ALL)
 
 # Unfortunately, the soloud cmake tarket doesn't set the include directories correctly
 target_include_directories(openspace-module-audio SYSTEM PRIVATE ext/soloud/include)
