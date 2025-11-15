@@ -121,7 +121,7 @@ if (NOT OPENSPACE_HAVE_TESTS)
   # Unless overriden, disable sgct tests if OpenSpace tests are disabled
   set(SGCT_BUILD_TESTS FALSE CACHE BOOL "Enable ghoul unit tests")
 endif()
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct)
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/sgct EXCLUDE_FROM_ALL)
 target_link_libraries(OpenSpace PRIVATE sgct)
 
 set_target_properties(sgct PROPERTIES FOLDER "External")
