@@ -22,36 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
-#define __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
+#version __CONTEXT__
 
-#include <openspace/scene/lightsource.h>
+layout(location = 0) in vec4 in_position;
 
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+uniform dmat4 model;
+uniform dmat4 light_vp;
+uniform mat4 meshTransform;
 
-namespace openspace {
-
-namespace documentation { struct Documentation; }
-
-class SceneGraphLightSource : public LightSource {
-public:
-    explicit SceneGraphLightSource(const ghoul::Dictionary& dictionary);
-
-    static documentation::Documentation Documentation();
-
-    bool initialize() override;
-    glm::vec3 directionViewSpace(const RenderData& renderData) const override;
-    float intensity() const override;
-	glm::dvec3 positionWorldSpace() const;
-
-private:
-    properties::FloatProperty _intensity;
-    properties::StringProperty _sceneGraphNodeReference;
-
-    SceneGraphNode* _sceneGraphNode = nullptr;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
+void main() {
+  gl_Position = vec4(light_vp * model * meshTransform * in_position);
+}

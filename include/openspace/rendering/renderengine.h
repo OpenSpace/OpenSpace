@@ -160,6 +160,9 @@ public:
 
     uint64_t frameNumber() const;
 
+    void registerShadowCaster(const std::string& shadowgroup, const std::string& lightsource, const std::string& target);
+    std::pair<GLuint, glm::dmat4> shadowInformation(const SceneGraphNode* node, const std::string& shadowgroup) const;
+
 private:
     void renderScreenLog();
     void renderVersionInformation();

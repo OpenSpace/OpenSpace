@@ -22,36 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
-#define __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
+#include "fragment.glsl"
 
-#include <openspace/scene/lightsource.h>
-
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-
-namespace openspace {
-
-namespace documentation { struct Documentation; }
-
-class SceneGraphLightSource : public LightSource {
-public:
-    explicit SceneGraphLightSource(const ghoul::Dictionary& dictionary);
-
-    static documentation::Documentation Documentation();
-
-    bool initialize() override;
-    glm::vec3 directionViewSpace(const RenderData& renderData) const override;
-    float intensity() const override;
-	glm::dvec3 positionWorldSpace() const;
-
-private:
-    properties::FloatProperty _intensity;
-    properties::StringProperty _sceneGraphNodeReference;
-
-    SceneGraphNode* _sceneGraphNode = nullptr;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_MODULE_BASE___SCENEGRAPHLIGHTSOURCE___H__
+Fragment getFragment() {
+  Fragment frag;
+  frag.depth = gl_FragCoord.z;
+  frag.disableLDR2HDR = true;
+  frag.disableDepthNormalization = true;
+  return frag;
+}

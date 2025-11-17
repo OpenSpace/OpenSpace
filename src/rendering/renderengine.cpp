@@ -679,6 +679,20 @@ uint64_t RenderEngine::frameNumber() const {
     return _frameNumber;
 }
 
+void RenderEngine::registerShadowCaster(const std::string& shadowgroup,
+    const std::string& lightsource, const std::string& target)
+{
+    const SceneGraphNode* ls = _scene->sceneGraphNode(lightsource);
+    const SceneGraphNode* tgt = _scene->sceneGraphNode(target);
+    _renderer.registerShadowCaster(shadowgroup, ls, tgt);
+}
+
+std::pair<GLuint, glm::dmat4> RenderEngine::shadowInformation(const SceneGraphNode* node,
+    const std::string& shadowgroup) const
+{
+    return _renderer.shadowInformation(node, shadowgroup);
+}
+
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                           const glm::mat4& projectionMatrix)
 {

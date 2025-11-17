@@ -52,6 +52,7 @@ struct DeferredcasterTask;
 struct RaycastData;
 struct RaycasterTask;
 class Scene;
+class SceneGraphNode;
 struct UpdateStructures;
 
 class FramebufferRenderer final : public RaycasterListener, public DeferredcasterListener
@@ -168,6 +169,8 @@ public:
         const glm::ivec4& viewport);
     void render(Scene* scene, Camera* camera, float blackoutFactor);
 
+    void renderDepthMaps();
+
     /**
      * Update render data. Responsible for calling renderEngine::setRenderData
      */
@@ -177,6 +180,10 @@ public:
         RaycasterListener::IsAttached attached) override;
     virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
         DeferredcasterListener::IsAttached isAttached) override;
+
+    void registerShadowCaster(const std::string& shadowgroup, const SceneGraphNode* lightsource,
+            const SceneGraphNode* target);
+    std::pair<GLuint, glm::dmat4> shadowInformation(const SceneGraphNode* node, const std::string& shadowgroup) const;
 
 private:
     using RaycasterProgObjMap = std::map<
@@ -247,6 +254,16 @@ private:
         float currentDownscaleFactor  = 1.f;
     } _downscaleVolumeRendering;
 
+    struct ShadowMap {
+        const SceneGraphNode* lightsource = nullptr;
+        std::vector<std::string> shadowGroups;
+        GLuint depthMap = 0;
+        glm::ivec2 depthMapResolution = glm::ivec2(0);
+        GLuint fbo = 0;
+        glm::dmat4 viewProjectionMatrix = glm::dmat4(1.0);
+    };
+    std::map<std::string, ShadowMap> _shadowMaps;
+
     unsigned int _pingPongIndex = 0u;
 
     bool _dirtyDeferredcastData;
@@ -263,6 +280,8 @@ private:
     float _hue = 1.f;
     float _saturation = 1.f;
     float _value = 1.f;
+
+    bool _renderedDepthMapsThisFrame = false;
 
     ghoul::Dictionary _rendererData;
 };

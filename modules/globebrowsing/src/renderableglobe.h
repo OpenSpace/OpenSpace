@@ -46,6 +46,7 @@
 #include <cstddef>
 #include <memory>
 
+namespace openspace { class RenderableModel; }
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::globebrowsing {
@@ -128,6 +129,14 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    static constexpr int MinSplitDepth = 2;
+    static constexpr int MaxSplitDepth = 22;
+
+    struct DepthMapData {
+        GLuint depthMap;
+        glm::dmat4 viewProjection;
+    };
+
     /**
      * Test if a specific chunk can safely be culled without affecting the rendered image.
      *
@@ -172,7 +181,7 @@ private:
      * lead to jagging. We only render global chunks for lower chunk levels.
      */
     void renderChunkGlobally(const Chunk& chunk, const RenderData& data,
-        bool renderGeomOnly = false
+        std::vector<DepthMapData>& depthMapData, bool renderGeomOnly = false
     );
 
     /**
@@ -187,7 +196,7 @@ private:
      * higher chunk levels.
      */
     void renderChunkLocally(const Chunk& chunk, const RenderData& data,
-        bool renderGeomOnly = false
+        std::vector<DepthMapData>& depthMapData, bool renderGeomOnly = false
     );
 
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
@@ -219,8 +228,7 @@ private:
     void updateChunk(Chunk& chunk, const RenderData& data, const glm::dmat4& mvp) const;
     void freeChunkNode(Chunk* n);
 
-    static constexpr int MinSplitDepth = 2;
-    static constexpr int MaxSplitDepth = 22;
+    std::vector<const RenderableModel*> getShadowers(const SceneGraphNode* node);
 
     properties::BoolProperty _performShading;
     properties::BoolProperty _useAccurateNormals;
@@ -240,8 +248,9 @@ private:
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::TriggerProperty resetTileProviders;
         properties::BoolProperty performFrustumCulling;
-        properties::IntProperty  modelSpaceRenderingCutoffLevel;
-        properties::IntProperty  dynamicLodIterationCount;
+        properties::BoolProperty performHorizonCulling;
+        properties::IntProperty modelSpaceRenderingCutoffLevel;
+        properties::IntProperty dynamicLodIterationCount;
     } _debugProperties;
 
     properties::PropertyOwner _debugPropertyOwner;
@@ -302,6 +311,12 @@ private:
     size_t _iterationsOfAvailableData = 0;
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;
+
+    std::vector<const RenderableModel*> _shadowers;
+    bool _shadowersUpdated = false;
+    bool _shadowersOk = false;
+
+    std::map<std::string, std::vector<std::string>> _shadowSpec;
 
     // Components
     std::unique_ptr<RingsComponent> _ringsComponent;
