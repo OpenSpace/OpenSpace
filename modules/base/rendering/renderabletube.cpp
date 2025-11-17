@@ -1112,8 +1112,9 @@ void RenderableTube::readDataFile() {
             );
 
             _colorDatasetCutplane.variables.push_back({
-                .index = colorDataIndex++, .name = channelName
+                .index = colorDataIndex, .name = channelName
             });
+            colorDataIndex++;
         }
 
         // Fill with some data even if it is not usefull
@@ -1417,7 +1418,7 @@ void RenderableTube::initializeTextures() {
             gl::GLsizei(_textureResolution.x), // width
             gl::GLsizei(_textureResolution.y), // height
             1, // depth
-            gl::GLenum(ghoul::opengl::Texture::Format::Red),
+            texture->internalFormat(),
             GL_FLOAT, // type
             texture->pixelData()
         );
