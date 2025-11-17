@@ -413,7 +413,18 @@ void RawTileDataReader::initialize() {
         _padfTransform = geoTransform(_rasterXSize, _rasterYSize);
     }
 
-    _maxChunkLevel = _dataset->GetRasterBand(1)->GetOverviewCount();
+
+
+    const int nOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
+    if (nOverviews > 0) {
+        _maxChunkLevel = nOverviews;
+    }
+    else {
+        const int sizeLevel0 = _dataset->GetRasterBand(1)->GetXSize();
+        const double diff = log2(sizeLevel0) - log2(_initData.dimensions.x);
+        const double intdiff = diff >= 0 ? ceil(diff) : floor(diff);
+        _maxChunkLevel = intdiff;
+    }
 }
 
 void RawTileDataReader::reset() {
