@@ -9,7 +9,8 @@ local Node = {
     Type = "RenderableSphereImageOnline",
     URL = "http://data.openspaceproject.com/examples/renderableplaneimageonline.jpg",
     TextureProjection = "Angular Fisheye",
-    -- Set orientation to also render the inside of the sphere
+    -- Set orientation to also render the inside of the sphere (which is the correct view
+    -- for a fisheye/fulldome image)
     Orientation = "Both"
   },
   GUI = {
