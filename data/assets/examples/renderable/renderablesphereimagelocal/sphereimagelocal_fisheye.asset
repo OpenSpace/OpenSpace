@@ -10,7 +10,7 @@ local Node = {
     Texture = openspace.absPath("${DATA}/test3.jpg"),
     TextureProjection = "Angular Fisheye",
     -- Set orientation to also render the inside of the sphere (which is the correct view
-    -- for a fisheye/fulldome video)
+    -- for a fisheye/fulldome image)
     Orientation = "Both"
   },
   GUI = {

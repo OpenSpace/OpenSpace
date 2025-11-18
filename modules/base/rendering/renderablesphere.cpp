@@ -96,7 +96,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureProjectionInfo = {
         "TextureProjection",
         "Texture Projection",
-        "Specifies the projection mapping to use any texture loaded onto the sphere "
+        "Specifies the projection mapping to use for any texture loaded onto the sphere "
         "(assumes Equirectangular per default). Note that for \"Angular Fisheye\" only "
         "half the sphere will be textured - the hemisphere centered around the z-axis.",
         openspace::properties::Property::Visibility::AdvancedUser

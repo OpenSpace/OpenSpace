@@ -70,7 +70,7 @@ namespace {
     // [RenderableSphereImageLocal](#base_screenspace_image_local).
     //
     // Per default, the sphere uses an equirectangular projection for the image mapping
-    // and hence expects an equirectangular image. However, it can also be used show
+    // and hence expects an equirectangular image. However, it can also be used to show
     // fisheye images by changing the `TextureProjection`.
     struct [[codegen::Dictionary(RenderableSphereImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]

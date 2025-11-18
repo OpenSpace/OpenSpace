@@ -50,7 +50,7 @@ vec2 equiToAngularFisheye(vec2 textureCoords) {
   float lat = pos2.y * 0.5 * M_PI;
   float lon = pos2.x * M_PI;
 
-  // Map to 3D position, with Z begin the north pole
+  // Map to 3D position, with Z being the north pole
   vec3 pos3 = vec3(
     cos(lat)*cos(lon),
     sin(lat),

@@ -23,7 +23,7 @@ local Node = {
     -- Set orientation to also render the inside of the sphere (which is the correct view
     -- for a fisheye/fulldome video)
     Orientation = "Both",
-    -- Increasing the segments makes the sphere smoother and reduces distortion at the
+    -- Increasing the number of segments makes the sphere smoother and reduces distortion at the
     -- edge of the video
     Segments = 64
   },
