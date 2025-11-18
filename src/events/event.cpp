@@ -64,12 +64,17 @@ void log(int i, [[maybe_unused]] const EventProfileLoadingFinished& e) {
 
 void log(int i, const EventAssetLoadingFinished& e) {
     ghoul_assert(e.type == EventAssetLoadingFinished::Type, "Wrong type");
-    LINFO(std::format("[{}] AssetLoadingFinished", i));
+    LINFO(std::format("[{}] AssetLoadingFinished: {}", i, e.assetPath));
 }
 
 void log(int i, const EventAssetLoadingError& e) {
     ghoul_assert(e.type == EventAssetLoadingError::Type, "Wrong type");
     LINFO(std::format("[{}] AssetLoadingError: {}", i, e.assetPath));
+}
+
+void log(int i, const EventAssetUnloadingFinished& e) {
+    ghoul_assert(e.type == EventAssetUnloadingFinished::Type, "Wrong type");
+    LINFO(std::format("[{}] AssetUnloadingFinished: {}", i, e.assetPath));
 }
 
 void log(int i, const EventApplicationShutdown& e) {
@@ -242,6 +247,7 @@ std::string_view toString(Event::Type type) {
         case Event::Type::ProfileLoadingFinished: return "ProfileLoadingFinished";
         case Event::Type::AssetLoadingFinished: return "AssetLoadingFinished";
         case Event::Type::AssetLoadingError: return "AssetLoadingError";
+        case Event::Type::AssetUnloadingFinished: return "AssetUnloadingFinished";
         case Event::Type::ApplicationShutdown: return "ApplicationShutdown";
         case Event::Type::CameraFocusTransition: return "CameraFocusTransition";
         case Event::Type::TimeOfInterestReached: return "TimeOfInterestReached";
@@ -282,6 +288,9 @@ Event::Type fromString(std::string_view str) {
     }
     else if (str == "AssetLoadingError") {
         return Event::Type::AssetLoadingError;
+    }
+    else if (str == "AssetUnloadingFinished") {
+        return Event::Type::AssetUnloadingFinished;
     }
     else if (str == "ApplicationShutdown") {
         return Event::Type::ApplicationShutdown;
@@ -375,10 +384,22 @@ ghoul::Dictionary toParameter(const Event& e) {
                     break;
             }
             break;
+        case Event::Type::AssetLoadingFinished:
+            d.setValue(
+                "AssetPath",
+                static_cast<const EventAssetLoadingFinished&>(e).assetPath
+            );
+            break;
         case Event::Type::AssetLoadingError:
             d.setValue(
                 "AssetPath",
                 static_cast<const EventAssetLoadingError&>(e).assetPath
+            );
+            break;
+        case Event::Type::AssetUnloadingFinished:
+            d.setValue(
+                "AssetPath",
+                static_cast<const EventAssetUnloadingFinished&>(e).assetPath
             );
             break;
         case Event::Type::ApplicationShutdown:
@@ -565,6 +586,9 @@ void logAllEvents(const Event* e) {
             case Event::Type::AssetLoadingError:
                 log(i, *static_cast<const EventAssetLoadingError*>(e));
                 break;
+            case Event::Type::AssetUnloadingFinished:
+                log(i, *static_cast<const EventAssetUnloadingFinished*>(e));
+                break;
             case Event::Type::ApplicationShutdown:
                 log(i, *static_cast<const EventApplicationShutdown*>(e));
                 break;
@@ -652,11 +676,19 @@ EventProfileLoadingFinished::EventProfileLoadingFinished()
     : Event(Type)
 {}
 
-EventAssetLoadingFinished::EventAssetLoadingFinished()
+EventAssetLoadingFinished::EventAssetLoadingFinished(
+                                                  const std::filesystem::path& assetPath_)
     : Event(Type)
+    , assetPath(assetPath_)
 {}
 
 EventAssetLoadingError::EventAssetLoadingError(const std::filesystem::path& assetPath_)
+    : Event(Type)
+    , assetPath(assetPath_)
+{}
+
+EventAssetUnloadingFinished::EventAssetUnloadingFinished(
+                                                  const std::filesystem::path& assetPath_)
     : Event(Type)
     , assetPath(assetPath_)
 {}

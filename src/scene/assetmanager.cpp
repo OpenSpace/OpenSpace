@@ -230,10 +230,6 @@ void AssetManager::runAddQueue() {
 
 void AssetManager::update() {
     ZoneScoped;
-
-    // Flag to keep track of when to emit synchronization event
-    const bool isLoadingAssets = !_toBeInitialized.empty();
-
     // Delete all the assets that have been marked for deletion in the previous frame
     {
         ZoneScopedN("Deleting assets");
@@ -302,11 +298,6 @@ void AssetManager::update() {
         else {
             it++;
         }
-    }
-
-    // If the _toBeInitialized state has changed in this update call we emit the event
-    if (isLoadingAssets && _toBeInitialized.empty()) {
-        global::eventEngine->publishEvent<events::EventAssetLoadingFinished>();
     }
 }
 
@@ -467,6 +458,9 @@ void AssetManager::unloadAsset(Asset* asset) {
         // might be painful
         _toBeDeleted.push_back(std::move(*it));
         _assets.erase(it);
+        global::eventEngine->publishEvent<events::EventAssetUnloadingFinished>(
+            asset->path()
+        );
     }
 }
 
@@ -1062,7 +1056,8 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
             codegen::lua::RemoveAll,
             codegen::lua::IsLoaded,
             codegen::lua::AllAssets,
-            codegen::lua::RootAssets
+            codegen::lua::RootAssets,
+            codegen::lua::InterestedParents
         }
     };
 }

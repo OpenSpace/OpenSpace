@@ -62,6 +62,7 @@ struct Event {
         ProfileLoadingFinished,
         AssetLoadingFinished,
         AssetLoadingError,
+        AssetUnloadingFinished,
         ApplicationShutdown,
         CameraFocusTransition,
         TimeOfInterestReached,
@@ -163,7 +164,9 @@ struct EventAssetLoadingFinished : public Event {
     /**
      * Creates an instance of an AssetLoadingFinished event.
      */
-    EventAssetLoadingFinished();
+    EventAssetLoadingFinished(const std::filesystem::path& assetPath_);
+
+	std::filesystem::path assetPath;
 };
 
 /**
@@ -175,9 +178,25 @@ struct EventAssetLoadingError : public Event {
     static constexpr Type Type = Event::Type::AssetLoadingError;
 
     /**
-     * Creates an instance of an AssetLoadingFinished event.
+     * Creates an instance of an AssetLoadingError event.
      */
     EventAssetLoadingError(const std::filesystem::path& assetPath_);
+
+    std::filesystem::path assetPath;
+};
+
+/**
+* This event is created when an asset has finished unloading. This is emitted
+* regardless of whether it is the initial startup of a profile, or any subsequent asset
+* being unloaded.
+*/
+struct EventAssetUnloadingFinished : public Event {
+    static constexpr Type Type = Event::Type::AssetUnloadingFinished;
+
+    /**
+     * Creates an instance of an AssetUnloadingFinished event.
+     */
+    EventAssetUnloadingFinished(const std::filesystem::path& assetPath_);
 
     std::filesystem::path assetPath;
 };
