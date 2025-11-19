@@ -135,7 +135,7 @@ namespace {
 
         // The mode of how the video is played back. The Default is `RealTimeLoop`,
         // which means that the video is played in realtime using the `Play` command
-        // in the user interface under `Video Player`.
+        // in the user interface.
         std::optional<PlaybackMode> playbackMode;
     };
 #include "videoplayer_codegen.cpp"
