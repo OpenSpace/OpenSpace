@@ -33,7 +33,7 @@ local CarringtonPrimeMeridian = {
     Color = { 1.0, 0.0, 0.0 },
     LineWidth = 2.0,
     LongSegments = 2,
-    LatSegments = 64
+    LatSegments = 31
   },
   GUI = {
     Name = "Carrington Prime Meridian",
@@ -63,7 +63,7 @@ local WSA_GridSlice = {
     Color = { 0.8, 0.8, 0.8 },
     LineWidth = 2.0,
     LongSegments = 2,
-    LatSegments = 64
+    LatSegments = 31
   },
   GUI = {
     Name = "Solar Longitude Facing the Earth",
