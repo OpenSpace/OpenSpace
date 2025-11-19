@@ -112,9 +112,7 @@ namespace {
  * Returns the path to all parents that are still interested in this Asset e.g., through
  * 'asset.require()'
  */
-[[codegen::luawrap]] std::vector<std::filesystem::path> interestedParents(
-                                                                    std::string assetName)
-{
+[[codegen::luawrap]] std::vector<std::filesystem::path> parents(std::string assetName) {
     using namespace openspace;
     std::vector<const Asset*> as = global::openSpaceEngine->assetManager().allAssets();
     for (const Asset* a : as) {

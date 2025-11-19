@@ -297,6 +297,10 @@ void Asset::initialize() {
     }
     LDEBUG(std::format("Initializing asset '{}'", _assetPath));
 
+    global::eventEngine->publishEvent<events::EventAssetLoading>(
+        _assetPath.string(),
+        events::EventAssetLoading::State::Loading
+    );
     // 1. Initialize requirements
     for (Asset* child : _requiredAssets) {
         child->initialize();
@@ -321,8 +325,9 @@ void Asset::initialize() {
 
     // 3. Update state
     setState(State::Initialized);
-    global::eventEngine->publishEvent<events::EventAssetLoadingFinished>(
-        _assetPath.string()
+    global::eventEngine->publishEvent<events::EventAssetLoading>(
+        _assetPath.string(),
+        events::EventAssetLoading::State::Loaded
     );
 }
 

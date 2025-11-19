@@ -60,9 +60,7 @@ struct Event {
     enum class Type : uint8_t {
         ParallelConnection,
         ProfileLoadingFinished,
-        AssetLoadingFinished,
-        AssetLoadingError,
-        AssetUnloadingFinished,
+		AssetLoading,
         ApplicationShutdown,
         CameraFocusTransition,
         TimeOfInterestReached,
@@ -154,51 +152,32 @@ struct EventProfileLoadingFinished : public Event {
 };
 
 /**
-* This event is created when the loading of all assets are finished. This is emitted
-* regardless of whether it is the initial startup of a profile, or any subsequent asset
-* being loaded e.g., through add or drag-and-drop.
+* This event is created whenever the loading state of an assets changes. An asset can
+* enter one of four states: `Loading`, `Loaded`, `Unloaded`, or `Error`. This event is
+* emitted regardless of whether it is the initial startup of a profile, or any subsequent
+* asset being added or revmoed e.g., through add or drag-and-drop.
 */
-struct EventAssetLoadingFinished : public Event {
-    static constexpr Type Type = Event::Type::AssetLoadingFinished;
+struct EventAssetLoading : public Event {
+    static constexpr Type Type = Event::Type::AssetLoading;
+
+	enum class State {
+		Loaded,
+		Loading,
+		Unloaded,
+		Error
+	};
 
     /**
-     * Creates an instance of an AssetLoadingFinished event.
+     * Creates an instance of an AssetLoading event.
+	 *
+	 * \param assetPath_ The path to the asset
+	 * \param state_ The new state of the asset given by 'asstPath_'; is one of `Loading`,
+	 * `Loaded`, `Unloaded`, or `Error`
      */
-    EventAssetLoadingFinished(const std::filesystem::path& assetPath_);
+    EventAssetLoading(const std::filesystem::path& assetPath_, const State newState);
 
 	std::filesystem::path assetPath;
-};
-
-/**
-* This event is created when the loading of an asset failed. This is emitted
-* regardless of whether it is the initial startup of a profile, or any subsequent asset
-* being loaded e.g., through add or drag-and-drop.
-*/
-struct EventAssetLoadingError : public Event {
-    static constexpr Type Type = Event::Type::AssetLoadingError;
-
-    /**
-     * Creates an instance of an AssetLoadingError event.
-     */
-    EventAssetLoadingError(const std::filesystem::path& assetPath_);
-
-    std::filesystem::path assetPath;
-};
-
-/**
-* This event is created when an asset has finished unloading. This is emitted
-* regardless of whether it is the initial startup of a profile, or any subsequent asset
-* being unloaded.
-*/
-struct EventAssetUnloadingFinished : public Event {
-    static constexpr Type Type = Event::Type::AssetUnloadingFinished;
-
-    /**
-     * Creates an instance of an AssetUnloadingFinished event.
-     */
-    EventAssetUnloadingFinished(const std::filesystem::path& assetPath_);
-
-    std::filesystem::path assetPath;
+	State state;
 };
 
 /**

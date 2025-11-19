@@ -378,7 +378,10 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(std::format("Could not load asset '{}': {}", asset->path(), e.message));
-        global::eventEngine->publishEvent<events::EventAssetLoadingError>(asset->path());
+        global::eventEngine->publishEvent<events::EventAssetLoading>(
+            asset->path().string(),
+            events::EventAssetLoading::State::Error
+        );
         return false;
     }
     catch (const ghoul::RuntimeError& e) {
@@ -458,8 +461,9 @@ void AssetManager::unloadAsset(Asset* asset) {
         // might be painful
         _toBeDeleted.push_back(std::move(*it));
         _assets.erase(it);
-        global::eventEngine->publishEvent<events::EventAssetUnloadingFinished>(
-            asset->path()
+        global::eventEngine->publishEvent<events::EventAssetLoading>(
+            asset->path().string(),
+            events::EventAssetLoading::State::Unloaded
         );
     }
 }
@@ -959,8 +963,9 @@ void AssetManager::callOnInitialize(Asset* asset) const {
     for (const int init : it->second) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
-            global::eventEngine->publishEvent<events::EventAssetLoadingError>(
-                asset->path()
+            global::eventEngine->publishEvent<events::EventAssetLoading>(
+                asset->path().string(),
+                events::EventAssetLoading::State::Error
             );
             throw ghoul::lua::LuaRuntimeException(std::format(
                 "When initializing '{}': {}",
@@ -1057,7 +1062,7 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
             codegen::lua::IsLoaded,
             codegen::lua::AllAssets,
             codegen::lua::RootAssets,
-            codegen::lua::InterestedParents
+            codegen::lua::Parents
         }
     };
 }
