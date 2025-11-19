@@ -1356,6 +1356,7 @@ void RenderableTube::loadSelectedSample() {
 }
 
 void RenderableTube::initializeTextures() {
+    ghoul_assert(!_data.empty(), "Cannot load empty list of textures");
     _textures.reserve(_data.size());
 
     for (size_t i = 0; i < _data.size(); ++i) {
@@ -1388,7 +1389,7 @@ void RenderableTube::initializeTextures() {
     glTexStorage3D(
         GL_TEXTURE_2D_ARRAY,
         1, // No mipmaps
-        GL_RGBA32F,
+        _textures.begin()->get()->internalFormat(),
         _textureResolution.x,
         _textureResolution.y,
         static_cast<gl::GLsizei>(_textures.size())
@@ -1418,7 +1419,7 @@ void RenderableTube::initializeTextures() {
             gl::GLsizei(_textureResolution.x), // width
             gl::GLsizei(_textureResolution.y), // height
             1, // depth
-            texture->internalFormat(),
+            GLenum(texture->format()),
             GL_FLOAT, // type
             texture->pixelData()
         );
