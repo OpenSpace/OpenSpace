@@ -2,8 +2,8 @@
 -- Creates a video plane located in 3D space that plays a video file. The dimensions of
 -- the plane are automatically set to match the aspect ratio of the video.
 
--- The video file is here downloaded from a URL to a location on our servers. This
--- returns the path to a folder where the file is stored after download
+-- The video file is here downloaded from a URL. This code returns the path to a folder
+-- where the file is stored after download
 local data = asset.resource({
   Name = "Example Video",
   Type = "UrlSynchronization",
