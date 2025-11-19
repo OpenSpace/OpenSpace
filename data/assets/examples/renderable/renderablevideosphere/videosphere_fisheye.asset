@@ -2,8 +2,8 @@
 -- Creates a 3D sphere with an angular fisheye video (fulldome) mapped onto its surface.
 -- The video will be shown on half of the sphere.
 
--- The video file is here downloaded from a URL to a location on our servers. This
--- returns the path to a folder where the file is stored after download
+-- The video file is here downloaded from a URL. This code returns the path to a folder
+-- where the file is stored after download
 local data = asset.resource({
   Name = "Example Video Angular Fisheye",
   Type = "UrlSynchronization",
