@@ -42,9 +42,12 @@ namespace {
     // This `TileProvider` can be used to render a video on the globe.
     //
     // The video can either be played back based on a given simulation time
-    // (`PlaybackMode` MapToSimulationTime) or through the user interface at `Video
-    // Player` &rarr; `Play` (for `PlaybackMode` RealTimeLoop). It is also possible to
-    // control whether the video should loop or just be played once.
+    // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
+    // `PlaybackMode` RealTimeLoop). It is also possible to control whether the video
+    // should loop or just be played once.
+    //
+    // Note that, unless playback is mapped to simulation time, the video must be started
+    // manually via the user interface.
     struct [[codegen::Dictionary(VideoTileProvider)]] Parameters {};
 #include "videotileprovider_codegen.cpp"
 } // namespace

@@ -32,9 +32,12 @@ namespace {
     // This `Renderable` creates a textured 3D sphere where the texture is a video.
     //
     // The video can either be played back based on a given simulation time
-    // (`PlaybackMode` MapToSimulationTime) or through the user interface at `Video
-    // Player` &rarr; `Play` (for `PlaybackMode` RealTimeLoop). It is also possible to
-    // control whether the video should loop or just be played once.
+    // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
+    // `PlaybackMode` RealTimeLoop). It is also possible to control whether the video
+    // should loop or just be played once.
+    //
+    // Note that, unless playback is mapped to simulation time, the video must be started
+    // manually via the user interface.
     struct [[codegen::Dictionary(RenderableVideoSphere)]] Parameters {};
 #include "renderablevideosphere_codegen.cpp"
 } // namespace
