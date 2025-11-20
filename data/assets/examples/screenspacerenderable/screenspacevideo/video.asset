@@ -1,0 +1,30 @@
+-- Basic
+-- Creates a screenspace video plane that plays a video file. The dimensions of the plane
+-- are automatically set to match the aspect ratio of the video.
+
+-- The video file is here downloaded from a URL. This code returns the path to a folder
+-- where the file is stored after download
+local data = asset.resource({
+  Name = "Example Video",
+  Type = "UrlSynchronization",
+  Identifier = "example_video",
+  Url = "https://liu-se.cdn.openspaceproject.com/files/examples/video/chlorophyll_model_2048.mp4"
+})
+
+-- For a local file, use "asset.resource("path/to/local/video.mp4")" here instead
+local video = data .. "chlorophyll_model_2048.mp4"
+
+local Item = {
+  Name = "ScreenSpaceVideo Example",
+  Type = "ScreenSpaceVideo",
+  Identifier = "ScreenSpaceVideo_Example",
+  Video = video
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Item)
+end)

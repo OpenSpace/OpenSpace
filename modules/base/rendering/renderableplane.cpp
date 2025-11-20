@@ -169,7 +169,7 @@ namespace {
         std::optional<bool> mirrorBackside;
 
         // [[codegen::verbatim(SizeInfo.description)]]
-        std::variant<float, glm::vec2> size;
+        std::optional<std::variant<float, glm::vec2>> size;
 
         // [[codegen::verbatim(AutoScaleInfo.description)]]
         std::optional<bool> autoScale;
@@ -257,11 +257,13 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     });
     addProperty(Fadeable::_opacity);
 
-    if (std::holds_alternative<float>(p.size)) {
-        _size = glm::vec2(std::get<float>(p.size));
-    }
-    else {
-        _size = std::get<glm::vec2>(p.size);
+    if (p.size.has_value()) {
+        if (std::holds_alternative<float>(*p.size)) {
+            _size = glm::vec2(std::get<float>(*p.size));
+        }
+        else {
+            _size = std::get<glm::vec2>(*p.size);
+        }
     }
     _size.setExponent(15.f);
     _size.onChange([this]() { _planeIsDirty = true; });
