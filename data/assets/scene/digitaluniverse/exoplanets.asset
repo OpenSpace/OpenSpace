@@ -1,8 +1,10 @@
+local colormaps = asset.require("util/default_colormaps")
+
 local textures = asset.resource({
   Name = "Exoplanets Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_exoplanets_textures",
-  Version = 1
+  Version = 2
 })
 
 local speck = asset.resource({
@@ -28,7 +30,20 @@ local Object = {
     },
     Opacity = 1.0,
     Texture = {
-      File = textures .. "target-blue.png",
+      File = textures .. "target-white.png",
+    },
+    Coloring = {
+      ColorMapping = {
+        File = colormaps.Sequential2.Cool,
+        Enabled = false,
+        Parameter = "sy_pnum",
+        ParameterOptions = {
+          { Key = "sy_pnum" },
+          { Key = "discovery_method" },
+          { Key = "discovery_year" }
+        },
+      },
+      FixedColor = { 0.451, 0.553, 1.0 }
     },
     Unit = "pc",
     SizeSettings = {
@@ -47,8 +62,12 @@ local Object = {
       required to infer or observe them. Here, exoplanet systems are represented by a blue
       ring centered on each host star. The ring is not intended to signify an orbit, but
       serve only as a marker. The labels list the host star name, and if there is more
-      than one planet, will list the number of planets in parentheses. Census: 5,589
-      planets in 4,139 systems.]]
+      than one planet, will list the number of planets in parentheses.
+      Colors: When enabling color mapping, matplotlib 'sequential-cool' is used, by
+      default mapping the number of planets found, with options available for discovery
+      year and method. For number of planets, the colors are start at teal for one planet,
+      and progress to magenta for the maximum number of planets found in a system (which is
+      currently 8). Census: 5,589 planets in 4,139 systems.]]
   }
 }
 
