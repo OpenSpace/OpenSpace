@@ -20,7 +20,7 @@ local AddSunTrail = {
     local datePlus = dateSub .. "T23:59:59Z"
 
     local SunTrailEarth = {
-      Identifier = "SunTrailEarth" ..  dateSub,
+      Identifier = "SunTrailEarth" .. dateSub,
       Parent = "Earth",
       Renderable = {
         Type = "RenderableTrailTrajectory",
