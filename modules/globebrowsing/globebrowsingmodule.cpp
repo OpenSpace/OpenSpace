@@ -515,7 +515,9 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             codegen::lua::CapabilitiesWMS,
             codegen::lua::AddGeoJson,
             codegen::lua::DeleteGeoJson,
-            codegen::lua::AddGeoJsonFromFile
+            codegen::lua::AddGeoJsonFromFile,
+            codegen::lua::Globes,
+            codegen::lua::UrlInfo
         },
         .scripts = {
             absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua"),
