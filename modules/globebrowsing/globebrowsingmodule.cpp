@@ -516,7 +516,7 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             codegen::lua::AddGeoJson,
             codegen::lua::DeleteGeoJson,
             codegen::lua::AddGeoJsonFromFile,
-            codegen::lua::GlobeNodes,
+            codegen::lua::Globes,
             codegen::lua::UrlInfo
         },
         .scripts = {
