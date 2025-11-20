@@ -33,7 +33,7 @@ local CarringtonPrimeMeridian = {
     Color = { 1.0, 0.0, 0.0 },
     LineWidth = 2.0,
     LongSegments = 2,
-    LatSegments = 31
+    LatSegments = 19
   },
   GUI = {
     Name = "Carrington Prime Meridian",
@@ -63,7 +63,7 @@ local WSA_GridSlice = {
     Color = { 0.8, 0.8, 0.8 },
     LineWidth = 2.0,
     LongSegments = 2,
-    LatSegments = 31
+    LatSegments = 19
   },
   GUI = {
     Name = "Solar Longitude Facing the Earth",
@@ -86,8 +86,7 @@ local WSA_Grid10Degrees = {
     Type = "RenderableSphericalGrid",
     Size = gridSizeRadius,
     Color = { 0.035, 0.675, 0.255 },
-    LineWidth = 1.0,
-    Segments = 36
+    LineWidth = 1.0
   },
   GUI = {
     Name = "Grid on Sun",
