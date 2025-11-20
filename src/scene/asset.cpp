@@ -25,6 +25,9 @@
 #include <openspace/scene/asset.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/scene/assetmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/file.h>
@@ -184,6 +187,16 @@ bool Asset::hasInitializedParent() const {
     );
 }
 
+std::vector<std::filesystem::path> Asset::initializedParents() const {
+    std::vector<std::filesystem::path> parents;
+    for (const Asset* parent : _parentAssets) {
+        if (parent->isInitialized()) {
+            parents.push_back(parent->path());
+        }
+    }
+    return parents;
+}
+
 bool Asset::isInitialized() const {
     return _state == State::Initialized;
 }
@@ -284,6 +297,10 @@ void Asset::initialize() {
     }
     LDEBUG(std::format("Initializing asset '{}'", _assetPath));
 
+    global::eventEngine->publishEvent<events::EventAssetLoading>(
+        _assetPath.string(),
+        events::EventAssetLoading::State::Loading
+    );
     // 1. Initialize requirements
     for (Asset* child : _requiredAssets) {
         child->initialize();
@@ -308,6 +325,10 @@ void Asset::initialize() {
 
     // 3. Update state
     setState(State::Initialized);
+    global::eventEngine->publishEvent<events::EventAssetLoading>(
+        _assetPath.string(),
+        events::EventAssetLoading::State::Loaded
+    );
 }
 
 void Asset::deinitialize() {

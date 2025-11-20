@@ -26,6 +26,8 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/util/downloadeventengine.h>
 #include <openspace/util/httprequest.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
@@ -354,8 +356,24 @@ bool UrlSynchronization::trySyncUrls() {
                     _nSynchronizedBytes += sd.second.downloadedBytes;
                 }
 
+                DownloadEventEngine::DownloadEvent event = {
+                    .type = DownloadEventEngine::DownloadEvent::Type::Progress,
+                    .id = url,
+                    .downloadedBytes = downloadedBytes,
+                    .totalBytes = totalBytes
+                };
+                global::downloadEventEngine->publish(event);
+
                 return !_shouldCancel;
             });
+
+        DownloadEventEngine::DownloadEvent event = {
+            .type = DownloadEventEngine::DownloadEvent::Type::Started,
+            .id = url,
+            .downloadedBytes = 0
+        };
+        global::downloadEventEngine->publish(event);
+        LDEBUG(std::format("Started downloading '{}'", dl->url()));
 
         dl->start();
     }
@@ -368,6 +386,11 @@ bool UrlSynchronization::trySyncUrls() {
         if (!d->hasSucceeded()) {
             failed = true;
             LERROR(std::format("Error downloading file from URL: {}", d->url()));
+            global::downloadEventEngine->publish(
+                d->url(),
+                DownloadEventEngine::DownloadEvent::Type::Failed
+            );
+            LERROR(std::format("Failed to download '{}'", d->url()));
             continue;
         }
 
@@ -394,7 +417,18 @@ bool UrlSynchronization::trySyncUrls() {
             );
 
             failed = true;
+            global::downloadEventEngine->publish(
+                d->url(),
+                DownloadEventEngine::DownloadEvent::Type::Failed
+            );
+            LERROR(std::format("Failed to download '{}'", d->url()));
         }
+
+        global::downloadEventEngine->publish(
+            d->url(),
+            DownloadEventEngine::DownloadEvent::Type::Finished
+        );
+        LDEBUG(std::format("Finished downloading '{}'", d->url()));
     }
 
     return !failed;

@@ -22,62 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___CONNECTION___H__
-#define __OPENSPACE_MODULE_SERVER___CONNECTION___H__
-
-#include <ghoul/misc/templatefactory.h>
-#include <openspace/json.h>
-#include <memory>
-#include <mutex>
-#include <string>
-#include <thread>
-
-namespace ghoul::io { class Socket; }
+#include <openspace/util/downloadeventengine.h>
 
 namespace openspace {
 
-using TopicId = size_t;
+int DownloadEventEngine::subscribe(Callback cb) {
+    std::lock_guard lock(_mutex);
+    int id = _id++;
+    _subscribers[id] = std::move(cb);
+    return id;
+}
 
-class Topic;
+void DownloadEventEngine::unsubscribe(int id) {
+    std::lock_guard lock(_mutex);
+    _subscribers.erase(id);
+}
 
-// @TODO (abock, 2022-05-06) This is not really elegant as there is no need for a
-// Connection to be held by a shared_ptr, but there was a problem with the LuaScriptTopic
-// otherwise (issue #1940).
-// The problem there is that the LuaScriptTopic is keeping a copy of the _connection in
-// its lambda to return a script back to the caller. The script is only queued, so is
-// executed a bit longer. If the UI gets reloaded in between the creation of the lambda
-// and the execution, the _connection will be an invalid pointer and the program will
-// crash. Making this a shared_ptr circumvents that problem my having the lamdba retain
-// ownership of the _connection and keeping it alive until the message is sent. The
-// message doesn't go anywhere since noone is listening, but it's better than a crash.
-class Connection : public std::enable_shared_from_this<Connection> {
-public:
-    Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address,
-        bool authorized = false, const std::string& password = "");
+void DownloadEventEngine::publish(const DownloadEvent& event) {
+    std::lock_guard lock(_mutex);
+    for (auto& [_, callback] : _subscribers) {
+        callback(event);
+    }
+}
 
-    void handleMessage(const std::string& message);
-    void sendMessage(const std::string& message);
-    void handleJson(const nlohmann::json& json);
-    void sendJson(const nlohmann::json& json);
-    void setAuthorized(bool status);
+void DownloadEventEngine::publish(const std::string& id, DownloadEvent::Type type,
+                                  int64_t downloadedBytes,
+                                  std::optional<int64_t> totalBytes)
+{
+    const DownloadEvent event = {
+        .type = type,
+        .id = id,
+        .downloadedBytes = downloadedBytes,
+        .totalBytes = totalBytes
+    };
 
-    bool isAuthorized() const;
-
-    ghoul::io::Socket* socket();
-    std::thread& thread();
-    void setThread(std::thread&& thread);
-
-private:
-    ghoul::TemplateFactory<Topic> _topicFactory;
-    std::map<TopicId, std::unique_ptr<Topic>> _topics;
-    std::unique_ptr<ghoul::io::Socket> _socket;
-    std::thread _thread;
-    std::mutex _mutex;
-
-    std::string _address;
-    bool _isAuthorized = false;
-};
+    publish(event);
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SERVER___CONNECTION___H__

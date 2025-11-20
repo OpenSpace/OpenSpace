@@ -52,6 +52,7 @@
 #include <openspace/scene/profile.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
+#include <openspace/util/downloadeventengine.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/versionchecker.h>
@@ -75,6 +76,7 @@ namespace {
 #ifdef WIN32
     constexpr int TotalSize =
         sizeof(MemoryManager) +
+        sizeof(DownloadEventEngine) +
         sizeof(EventEngine) +
         sizeof(ghoul::fontrendering::FontManager) +
         sizeof(Dashboard) +
@@ -139,6 +141,14 @@ void create() {
     currentPos += sizeof(OpenSpaceEngine);
 #else // ^^^ WIN32 / !WIN32 vvv
     openSpaceEngine = new OpenSpaceEngine;
+#endif // WIN32
+
+#ifdef WIN32
+    downloadEventEngine = new (currentPos) DownloadEventEngine;
+    ghoul_assert(downloadEventEngine, "No downloadEventEngine");
+    currentPos += sizeof(DownloadEventEngine);
+#else // ^^^^ WIN32 / !WIN32 vvv
+    downloadEventEngine = new DownloadEventEngine;
 #endif // WIN32
 
 #ifdef WIN32
@@ -624,6 +634,13 @@ void destroy() {
     fontManager->~FontManager();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete fontManager;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'DownloadEventEngine'");
+#ifdef WIN32
+    downloadEventEngine->~DownloadEventEngine();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete downloadEventEngine;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'EventEngine'");

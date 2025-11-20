@@ -38,6 +38,7 @@ set(HEADER_FILES
   include/topics/camerapathtopic.h
   include/topics/cameratopic.h
   include/topics/documentationtopic.h
+  include/topics/downloadeventtopic.h
   include/topics/enginemodetopic.h
   include/topics/errorlogtopic.h
   include/topics/eventtopic.h
@@ -70,6 +71,7 @@ set(SOURCE_FILES
   src/topics/camerapathtopic.cpp
   src/topics/cameratopic.cpp
   src/topics/documentationtopic.cpp
+  src/topics/downloadeventtopic.cpp
   src/topics/enginemodetopic.cpp
   src/topics/errorlogtopic.cpp
   src/topics/eventtopic.cpp
