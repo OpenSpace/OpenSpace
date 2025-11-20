@@ -135,7 +135,7 @@ if (UNIX AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   endif ()
 endif ()
 
-add_subdirectory(ext)
+add_subdirectory(ext EXCLUDE_FROM_ALL)
 add_subdirectory(src)
 
 add_subdirectory(support/coding/codegen)
