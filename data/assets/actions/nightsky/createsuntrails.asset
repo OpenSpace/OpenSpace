@@ -43,8 +43,12 @@ local AddSunTrail = {
         Path = "/Night Sky/Sun Trails",
       }
     }
- 
-    openspace.addSceneGraphNode(SunTrailEarth)
+
+    if not openspace.hasSceneGraphNode(SunTrailEarth.Identifier) then
+      openspace.addSceneGraphNode(SunTrailEarth)
+    else
+      openspace.printWarning("Sun trail for date " .. dateSub .. " already exists.")
+    end
   ]],
   Documentation = [[
     Adds a trail for the sun, if an argument is provided, that date will be used instead of now
