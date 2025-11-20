@@ -65,6 +65,7 @@ protected:
 
     properties::OptionProperty _orientation;
     properties::BoolProperty _mirrorTexture;
+    properties::OptionProperty _textureProjection;
 
     properties::BoolProperty _disableFadeInDistance;
     properties::FloatProperty _fadeInThreshold;
@@ -84,7 +85,7 @@ private:
     std::unique_ptr<TransferFunction> _transferFunction;
 
     UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,
-        colorTexture, mirrorTexture) _uniformCache;
+        colorTexture, mirrorTexture, textureProjection) _uniformCache;
 };
 
 } // namespace openspace
