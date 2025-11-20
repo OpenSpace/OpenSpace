@@ -36,7 +36,7 @@ set(CMAKE_POLICY_VERSION_MINIMUM 3.10)
 set(OPENSPACE_RELEASE_BUILD ON)
 set(OPENSPACE_VERSION_MAJOR 0)
 set(OPENSPACE_VERSION_MINOR 21)
-set(OPENSPACE_VERSION_PATCH 2)
+set(OPENSPACE_VERSION_PATCH 3)
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
 include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
