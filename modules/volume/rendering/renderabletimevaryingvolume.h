@@ -138,7 +138,8 @@ private:
     GLuint _vertexPositionBuffer = 0;
     ghoul::opengl::ProgramObject* _shader = nullptr;
     UniformCache(normal, offset, basis, volumeTexture, transferFunction, modelTransform,
-        modelViewTransform, modelViewProjection, volumeResolution) _uniformCache;
+        modelViewTransform, modelViewProjection, volumeResolution, valueRange)
+        _uniformCache;
 
     std::shared_ptr<openspace::TransferFunction> _transferFunction;
 };

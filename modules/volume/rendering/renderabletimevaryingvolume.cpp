@@ -425,6 +425,15 @@ void RenderableTimeVaryingVolume::initializeGL() {
             t.onGpu = false;
             _volumeTimesteps[t.metadata.time] = std::move(t);
         }
+        if (path.extension() == ".bin") {
+            Timestep t;
+            double timestep = startTime + deltaTimeStep * step++;
+            loadVtiFromCache(path, timestep, metadata, t, globalMin, globalMax);
+            t.baseName = "";
+            t.inRam = false;
+            t.onGpu = false;
+            _volumeTimesteps[t.metadata.time] = std::move(t);
+        }
     }
 
     // TODO: defer loading of data to later (separate thread or at least not when loading)
@@ -770,6 +779,7 @@ void RenderableTimeVaryingVolume::renderVolumeSlice(const RenderData& data) {
     _shader->activate();
     _shader->setUniform(_uniformCache.offset, _volumeSlice.offset);
     _shader->setUniform(_uniformCache.normal, _volumeSlice.normal);
+    _shader->setUniform(_uniformCache.valueRange, _valueRange);
 
     _shader->setUniform(_uniformCache.modelTransform,
         glm::mat4(calculateModelTransform())
