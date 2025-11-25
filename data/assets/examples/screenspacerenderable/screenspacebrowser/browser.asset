@@ -1,7 +1,7 @@
 -- Basic
 -- This example shows how to load and show a webpage in the rendering, in screen space.
 
-local Object = {
+local Item = {
   Type = "ScreenSpaceBrowser",
   Identifier = "ScreenSpaceBrowser_Example",
   Url = "https://www.openspaceproject.com/",
@@ -9,9 +9,9 @@ local Object = {
 }
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(Object)
+  openspace.addScreenSpaceRenderable(Item)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(Object)
+  openspace.removeScreenSpaceRenderable(Item)
 end)

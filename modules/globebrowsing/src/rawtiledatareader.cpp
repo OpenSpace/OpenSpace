@@ -118,27 +118,6 @@ GDALDataType toGDALDataType(GLenum glType) {
     }
 }
 
-/**
- * Use as a helper function when determining the maximum tile level. This function
- * returns the negated number of overviews requred to downscale the highest overview
- * dataset so that it fits within minimumPixelSize pixels in the x-dimension.
- */
-int calculateTileLevelDifference(GDALDataset* dataset, int minimumPixelSize) {
-    GDALRasterBand* firstBand = dataset->GetRasterBand(1);
-    GDALRasterBand* maxOverview = nullptr;
-    const int numOverviews = firstBand->GetOverviewCount();
-    if (numOverviews <= 0) { // No overviews. Use first band.
-        maxOverview = firstBand;
-    }
-    else { // Pick the highest overview.
-        maxOverview = firstBand->GetOverview(numOverviews - 1);
-    }
-    const int sizeLevel0 = maxOverview->GetXSize();
-    const double diff = log2(minimumPixelSize) - log2(sizeLevel0);
-    const double intdiff = diff >= 0 ? ceil(diff) : floor(diff);
-    return static_cast<int>(intdiff);
-}
-
 bool isInside(const PixelRegion& lhs, const PixelRegion& rhs) {
     const glm::ivec2 e = lhs.start + lhs.numPixels;
     const glm::ivec2 re = rhs.start + rhs.numPixels;
@@ -434,17 +413,18 @@ void RawTileDataReader::initialize() {
         _padfTransform = geoTransform(_rasterXSize, _rasterYSize);
     }
 
-    const double tileLevelDifference = calculateTileLevelDifference(
-        _dataset,
-        _initData.dimensions.x
-    );
 
-    const int numOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
-    _maxChunkLevel = static_cast<int>(-tileLevelDifference);
-    if (numOverviews > 0) {
-        _maxChunkLevel += numOverviews;
+
+    const int nOverviews = _dataset->GetRasterBand(1)->GetOverviewCount();
+    if (nOverviews > 0) {
+        _maxChunkLevel = nOverviews;
     }
-    _maxChunkLevel = std::max(_maxChunkLevel, 2);
+    else {
+        const int sizeLevel0 = _dataset->GetRasterBand(1)->GetXSize();
+        const double diff = log2(sizeLevel0) - log2(_initData.dimensions.x);
+        const double intdiff = diff >= 0 ? ceil(diff) : floor(diff);
+        _maxChunkLevel = intdiff;
+    }
 }
 
 void RawTileDataReader::reset() {

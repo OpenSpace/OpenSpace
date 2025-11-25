@@ -340,7 +340,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
             static_cast<float>(rectangularValues[1]),
             static_cast<float>(rectangularValues[2])
         });
-        ++currentLineNumber;
+        currentLineNumber++;
     }
 
     // Due to the way we read the file, the first (empty) constellation bounds will not

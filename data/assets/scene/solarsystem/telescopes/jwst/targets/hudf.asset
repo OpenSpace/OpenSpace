@@ -66,6 +66,7 @@ local HUDFJWSTLine = {
   GUI = {
     Name = "JWST to HUDF Line",
     Path = "/Solar System/Telescopes/JWST/HUDF",
+    Focusable = false,
     Description = [[
       Line from the James Webb Space Telescope to the Hubble Ultra Deep Field
     ]]

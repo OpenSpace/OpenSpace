@@ -148,7 +148,7 @@ void ExoplanetsDataPreparationTask::perform(
     int total = 0;
     std::string row;
     while (ghoul::getline(inputDataFile, row)) {
-        ++total;
+        total++;
     }
     inputDataFile.clear();
     inputDataFile.seekg(0);
@@ -161,7 +161,7 @@ void ExoplanetsDataPreparationTask::perform(
 
     int exoplanetCount = 0;
     while (ghoul::getline(inputDataFile, row)) {
-        ++exoplanetCount;
+        exoplanetCount++;
         progressCallback(static_cast<float>(exoplanetCount) / static_cast<float>(total));
 
         PlanetData planetData = parseDataRow(

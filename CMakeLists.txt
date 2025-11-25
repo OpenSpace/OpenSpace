@@ -38,6 +38,18 @@ set(OPENSPACE_VERSION_MAJOR)
 set(OPENSPACE_VERSION_MINOR)
 set(OPENSPACE_VERSION_PATCH)
 
+# Optionally disable vcpkg to prevent dependency conflicts
+set(DISABLE_VCPKG OFF CACHE BOOL "Disable the use of vcpkg libs for Windows builds")
+if (WIN32 AND DISABLE_VCPKG)
+  # This works for all subprojects due to MSBuild's hierarchical search
+  configure_file(
+    "${CMAKE_SOURCE_DIR}/support/cmake/Directory.Build.Props.template"
+    "${CMAKE_BINARY_DIR}/Directory.Build.props"
+    COPYONLY
+  )
+  message(STATUS "Vcpkg disabled through CMake option DISABLE_VCPKG")
+endif ()
+
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
 include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
 

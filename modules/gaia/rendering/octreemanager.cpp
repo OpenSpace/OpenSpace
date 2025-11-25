@@ -1022,7 +1022,7 @@ bool OctreeManager::insertInNode(OctreeNode& node, const std::vector<float>& sta
         storeStarData(node, starValues);
     }
 
-    return insertInNode(*node.children[index], starValues, ++depth);
+    return insertInNode(*node.children[index], starValues, depth + 1);
 }
 
 void OctreeManager::sliceNodeLodCache(OctreeNode& node) {

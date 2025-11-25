@@ -176,7 +176,7 @@ extractSeedPointsFromFiles(std::filesystem::path path, size_t nth)
                     outVec.push_back(std::move(point));
                 }
             }
-            ++linenumber;
+            linenumber++;
         }
 
         if (outVec.empty()) {
