@@ -539,7 +539,7 @@ namespace {
  * indicates the first item in the list that does not have WMS server info.
  *
  * \return Table containing a list of `renderableGlobe` identifiers, and an index
- * indicating the first item in the list that does not have a WMS server
+ *         indicating the first item in the list that does not have a WMS server
  */
 [[codegen::luawrap]] ghoul::Dictionary globes() {
     using namespace openspace;
@@ -554,7 +554,6 @@ namespace {
             nodes.begin(),
             nodes.end(),
             [](const SceneGraphNode* n) {
-                using namespace globebrowsing;
                 const Renderable* r = n->renderable();
                 const RenderableGlobe* rg = dynamic_cast<const RenderableGlobe*>(r);
                 return rg == nullptr;
@@ -562,6 +561,7 @@ namespace {
         ),
         nodes.end()
     );
+
     // Sort the globes with respect to WMS server info followed by alphabetical order
     std::sort(
         nodes.begin(),
@@ -580,7 +580,7 @@ namespace {
             return lhs->guiName() < rhs->guiName();
         }
     );
-    std::vector<std::string> globeIdentifiers = {};
+    std::vector<std::string> globeIdentifiers;
     globeIdentifiers.reserve(nodes.size());
     for (const SceneGraphNode* node : nodes) {
         globeIdentifiers.push_back(node->identifier());
@@ -616,7 +616,7 @@ namespace {
     std::vector<GlobeBrowsingModule::UrlInfo> info = module->urlInfo(globe);
 
     std::vector<ghoul::Dictionary> res;
-    for (const auto& i : info) {
+    for (const GlobeBrowsingModule::UrlInfo& i : info) {
         ghoul::Dictionary e;
         e.setValue("name", i.name);
         e.setValue("url", i.url);
