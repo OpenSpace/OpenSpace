@@ -27,12 +27,27 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 
+namespace {
+    // This `Renderable` creates a textured 3D plane where the texture is a video.
+    //
+    // The video can either be played back based on a given simulation time
+    // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
+    // `PlaybackMode` RealTimeLoop). It is also possible to control whether the video
+    // should loop or just be played once.
+    //
+    // Note that, unless playback is mapped to simulation time, the video must be started
+    // manually via the user interface.
+    struct [[codegen::Dictionary(RenderableVideoPlane)]] Parameters {};
+#include "renderablevideoplane_codegen.cpp"
+} // namespace
+
 namespace openspace {
 
 documentation::Documentation RenderableVideoPlane::Documentation() {
-    documentation::Documentation doc = RenderablePlane::Documentation();
-    doc.name = "RenderableVideoPlane";
-    doc.id = "video_renderablevideoplane";
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "video_renderablevideoplane",
+        RenderablePlane::Documentation()
+    );
 
     documentation::Documentation vp = VideoPlayer::Documentation();
     doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
