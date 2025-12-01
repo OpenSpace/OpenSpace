@@ -1129,20 +1129,10 @@ bool LuaConsole::gatherPathSuggestions(size_t contextStart) {
             ghoul::filesystem::Sorted::Yes
         );
 
-    auto containsNonAscii = [](const std::filesystem::path& p) {
-        const std::u8string s = p.generic_u8string();
-        for (auto it = s.rbegin(); it != s.rend(); it++) {
-            if (static_cast<unsigned char>(*it) > 0x7F) {
-                return true;
-            }
-        }
-        return false;
-    };
-
     std::vector<std::string> entries;
     for (const std::filesystem::path& entry : suggestions) {
         // Filter paths that contain non-ASCII characters
-        if (containsNonAscii(entry)) {
+        if (ghoul::containsNonAscii(entry)) {
             continue;
         }
 

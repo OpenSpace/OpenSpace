@@ -102,6 +102,12 @@
     "isOpen": false
   },
   "17": {
+    "id": "assetsFolderPanel",
+    "visible": false,
+    "name": "Assets",
+    "isOpen": false
+  },
+  "18": {
     "id": "devPanel",
     "visible": false,
     "name": "Dev Panel",

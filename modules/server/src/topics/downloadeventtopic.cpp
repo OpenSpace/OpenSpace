@@ -22,62 +22,69 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___CONNECTION___H__
-#define __OPENSPACE_MODULE_SERVER___CONNECTION___H__
+#include <modules/server/include/topics/downloadeventtopic.h>
 
-#include <ghoul/misc/templatefactory.h>
-#include <openspace/json.h>
-#include <memory>
-#include <mutex>
-#include <string>
-#include <thread>
+#include <openspace/engine/globals.h>
+#include <openspace/util/downloadeventengine.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 
-namespace ghoul::io { class Socket; }
+namespace {
+    constexpr std::string_view StartSubscription = "start_subscription";
+    constexpr std::string_view StopSubscription = "stop_subscription";
+    constexpr std::chrono::milliseconds CallbackUpdateInterval(250);
+} // namespace
 
 namespace openspace {
 
-using TopicId = size_t;
+DownloadEventTopic::~DownloadEventTopic() {
+    if (_isSubscribedTo) {
+        global::downloadEventEngine->unsubscribe(_subscriptionID);
+        _isSubscribedTo = false;
+    }
+}
 
-class Topic;
+bool DownloadEventTopic::isDone() const {
+    return !_isSubscribedTo;
+}
 
-// @TODO (abock, 2022-05-06) This is not really elegant as there is no need for a
-// Connection to be held by a shared_ptr, but there was a problem with the LuaScriptTopic
-// otherwise (issue #1940).
-// The problem there is that the LuaScriptTopic is keeping a copy of the _connection in
-// its lambda to return a script back to the caller. The script is only queued, so is
-// executed a bit longer. If the UI gets reloaded in between the creation of the lambda
-// and the execution, the _connection will be an invalid pointer and the program will
-// crash. Making this a shared_ptr circumvents that problem my having the lamdba retain
-// ownership of the _connection and keeping it alive until the message is sent. The
-// message doesn't go anywhere since noone is listening, but it's better than a crash.
-class Connection : public std::enable_shared_from_this<Connection> {
-public:
-    Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address,
-        bool authorized = false, const std::string& password = "");
+void DownloadEventTopic::handleJson(const nlohmann::json& json) {
+    const std::string& event = json.at("event").get<std::string>();
 
-    void handleMessage(const std::string& message);
-    void sendMessage(const std::string& message);
-    void handleJson(const nlohmann::json& json);
-    void sendJson(const nlohmann::json& json);
-    void setAuthorized(bool status);
+    if (event == StartSubscription) {
+        _isSubscribedTo = true;
 
-    bool isAuthorized() const;
+        auto callback = [this](const DownloadEventEngine::DownloadEvent& event) {
+            // Limit how often we send data to frontend to reduce traffic
+            if (event.type == DownloadEventEngine::DownloadEvent::Type::Progress) {
+                const auto now = std::chrono::steady_clock::now();
+                auto& last = _lastCallBack[event.id];
 
-    ghoul::io::Socket* socket();
-    std::thread& thread();
-    void setThread(std::thread&& thread);
+                if (now - last >= CallbackUpdateInterval) {
+                    last = now;
+                }
+                else {
+                    return;
+                }
+            }
 
-private:
-    ghoul::TemplateFactory<Topic> _topicFactory;
-    std::map<TopicId, std::unique_ptr<Topic>> _topics;
-    std::unique_ptr<ghoul::io::Socket> _socket;
-    std::thread _thread;
-    std::mutex _mutex;
+            nlohmann::json payload;
+            payload["type"] = event.type;
+            payload["id"] = event.id;
+            payload["downloadedBytes"] = event.downloadedBytes;
+            if (event.totalBytes.has_value()) {
+                payload["totalBytes"] = event.totalBytes.value();
+            }
 
-    std::string _address;
-    bool _isAuthorized = false;
-};
+			_connection->sendJson(wrappedPayload(payload));
+        };
+        _subscriptionID = global::downloadEventEngine->subscribe(callback);
+    }
+
+    else if (event == StopSubscription) {
+        global::downloadEventEngine->unsubscribe(_subscriptionID);
+        _isSubscribedTo = false;
+    }
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_SERVER___CONNECTION___H__

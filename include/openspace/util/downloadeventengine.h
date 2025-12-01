@@ -22,62 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___CONNECTION___H__
-#define __OPENSPACE_MODULE_SERVER___CONNECTION___H__
+#ifndef __OPENSPACE_MODULE_SYNC___DOWNLOAD_EVENT_ENGINE___H__
+#define __OPENSPACE_MODULE_SYNC___DOWNLOAD_EVENT_ENGINE___H__
 
-#include <ghoul/misc/templatefactory.h>
-#include <openspace/json.h>
-#include <memory>
+#include <functional>
+#include <map>
 #include <mutex>
+#include <optional>
 #include <string>
-#include <thread>
-
-namespace ghoul::io { class Socket; }
 
 namespace openspace {
 
-using TopicId = size_t;
-
-class Topic;
-
-// @TODO (abock, 2022-05-06) This is not really elegant as there is no need for a
-// Connection to be held by a shared_ptr, but there was a problem with the LuaScriptTopic
-// otherwise (issue #1940).
-// The problem there is that the LuaScriptTopic is keeping a copy of the _connection in
-// its lambda to return a script back to the caller. The script is only queued, so is
-// executed a bit longer. If the UI gets reloaded in between the creation of the lambda
-// and the execution, the _connection will be an invalid pointer and the program will
-// crash. Making this a shared_ptr circumvents that problem my having the lamdba retain
-// ownership of the _connection and keeping it alive until the message is sent. The
-// message doesn't go anywhere since noone is listening, but it's better than a crash.
-class Connection : public std::enable_shared_from_this<Connection> {
+// @TODO (anden88 2025-10-10): This class was specifically written for the multi-threaded
+// url- and httpSynchronization events. In the future we should make this more general
+// purposed.
+class DownloadEventEngine {
 public:
-    Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address,
-        bool authorized = false, const std::string& password = "");
+    struct DownloadEvent {
+        enum class Type {
+            Started,
+            Progress,
+            Finished,
+            Failed
+        };
 
-    void handleMessage(const std::string& message);
-    void sendMessage(const std::string& message);
-    void handleJson(const nlohmann::json& json);
-    void sendJson(const nlohmann::json& json);
-    void setAuthorized(bool status);
+        Type type;
+        std::string id;
+        int64_t downloadedBytes;
+        std::optional<int64_t> totalBytes;
+    };
 
-    bool isAuthorized() const;
+    using Callback = std::function<void(const DownloadEvent&)>;
 
-    ghoul::io::Socket* socket();
-    std::thread& thread();
-    void setThread(std::thread&& thread);
+    int subscribe(Callback cb);
+    void unsubscribe(int id);
+
+    void publish(const DownloadEvent& event);
+    void publish(const std::string& id, DownloadEvent::Type type,
+        int64_t downloadedBytes = 0, std::optional<int64_t> totalBytes = std::nullopt);
 
 private:
-    ghoul::TemplateFactory<Topic> _topicFactory;
-    std::map<TopicId, std::unique_ptr<Topic>> _topics;
-    std::unique_ptr<ghoul::io::Socket> _socket;
-    std::thread _thread;
     std::mutex _mutex;
-
-    std::string _address;
-    bool _isAuthorized = false;
+    int _id = 0;
+    std::unordered_map<int, Callback> _subscribers;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___CONNECTION___H__
+#endif // __OPENSPACE_MODULE_SYNC___DOWNLOAD_EVENT_ENGINE___H__
