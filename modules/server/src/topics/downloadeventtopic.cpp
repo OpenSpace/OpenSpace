@@ -55,7 +55,7 @@ void DownloadEventTopic::handleJson(const nlohmann::json& json) {
         _isSubscribedTo = true;
 
         auto callback = [this](const DownloadEventEngine::DownloadEvent& event) {
-            // Rate limit how often we send data to frontend to reduce traffic
+            // Limit how often we send data to frontend to reduce traffic
             if (event.type == DownloadEventEngine::DownloadEvent::Type::Progress) {
                 const auto now = std::chrono::steady_clock::now();
                 auto& last = _lastCallBack[event.id];
@@ -68,8 +68,7 @@ void DownloadEventTopic::handleJson(const nlohmann::json& json) {
                 }
             }
 
-            nlohmann::json payload = {};
-
+            nlohmann::json payload;
             payload["type"] = event.type;
             payload["id"] = event.id;
             payload["downloadedBytes"] = event.downloadedBytes;

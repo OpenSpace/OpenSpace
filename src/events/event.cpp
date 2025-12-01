@@ -664,7 +664,7 @@ EventProfileLoadingFinished::EventProfileLoadingFinished()
 {}
 
 EventAssetLoading::EventAssetLoading(const std::filesystem::path& assetPath_,
-                                     const State newState)
+                                     State newState)
     : Event(Type)
     , assetPath(assetPath_)
     , state(newState)

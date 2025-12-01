@@ -172,9 +172,9 @@ struct EventAssetLoading : public Event {
 	 *
 	 * \param assetPath_ The path to the asset
 	 * \param state_ The new state of the asset given by 'asstPath_'; is one of `Loading`,
-	 * `Loaded`, `Unloaded`, or `Error`
+	 *               `Loaded`, `Unloaded`, or `Error`
      */
-    EventAssetLoading(const std::filesystem::path& assetPath_, const State newState);
+    EventAssetLoading(const std::filesystem::path& assetPath_, State newState);
 
 	std::filesystem::path assetPath;
 	State state;

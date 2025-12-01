@@ -120,7 +120,7 @@ namespace {
             return a->initializedParents();
         }
     }
-    return std::vector<std::filesystem::path>{};
+    return std::vector<std::filesystem::path>();
 }
 
 #include "assetmanager_lua_codegen.cpp"

@@ -211,7 +211,7 @@ public:
      * Returns a list of the parents of this Asset that is currently in an initialized
      * state, meaning any parent that is still interested in this Asset at all.
      *
-     * \return list of parent filepaths that are interested in this asset, empty otherwise
+     * \return A list of parent filepaths that are interested in this asset
      */
     std::vector<std::filesystem::path> initializedParents() const;
 

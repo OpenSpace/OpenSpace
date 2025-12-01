@@ -33,7 +33,6 @@
 
 namespace openspace {
 
-
 // @TODO (anden88 2025-10-10): This class was specifically written for the multi-threaded
 // url- and httpSynchronization events. In the future we should make this more general
 // purposed.

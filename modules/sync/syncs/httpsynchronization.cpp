@@ -448,7 +448,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
 
     for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
         if (failed) {
-            // At least one download failed, there may still be downloads that succeeded
+            // At least one download failed, (some downloads may have succeeded)
             if (d->hasSucceeded()) {
                 _newSyncedFiles.push_back(d->url());
                 global::downloadEventEngine->publish(
