@@ -230,10 +230,6 @@ void AssetManager::runAddQueue() {
 
 void AssetManager::update() {
     ZoneScoped;
-
-    // Flag to keep track of when to emit synchronization event
-    const bool isLoadingAssets = !_toBeInitialized.empty();
-
     // Delete all the assets that have been marked for deletion in the previous frame
     {
         ZoneScopedN("Deleting assets");
@@ -302,11 +298,6 @@ void AssetManager::update() {
         else {
             it++;
         }
-    }
-
-    // If the _toBeInitialized state has changed in this update call we emit the event
-    if (isLoadingAssets && _toBeInitialized.empty()) {
-        global::eventEngine->publishEvent<events::EventAssetLoadingFinished>();
     }
 }
 
@@ -387,6 +378,10 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(std::format("Could not load asset '{}': {}", asset->path(), e.message));
+        global::eventEngine->publishEvent<events::EventAssetLoading>(
+            asset->path().string(),
+            events::EventAssetLoading::State::Error
+        );
         return false;
     }
     catch (const ghoul::RuntimeError& e) {
@@ -466,6 +461,10 @@ void AssetManager::unloadAsset(Asset* asset) {
         // might be painful
         _toBeDeleted.push_back(std::move(*it));
         _assets.erase(it);
+        global::eventEngine->publishEvent<events::EventAssetLoading>(
+            asset->path().string(),
+            events::EventAssetLoading::State::Unloaded
+        );
     }
 }
 
@@ -964,6 +963,10 @@ void AssetManager::callOnInitialize(Asset* asset) const {
     for (const int init : it->second) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
+            global::eventEngine->publishEvent<events::EventAssetLoading>(
+                asset->path().string(),
+                events::EventAssetLoading::State::Error
+            );
             throw ghoul::lua::LuaRuntimeException(std::format(
                 "When initializing '{}': {}",
                 asset->path(),
@@ -1058,7 +1061,8 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
             codegen::lua::RemoveAll,
             codegen::lua::IsLoaded,
             codegen::lua::AllAssets,
-            codegen::lua::RootAssets
+            codegen::lua::RootAssets,
+            codegen::lua::Parents
         }
     };
 }

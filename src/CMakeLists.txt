@@ -174,6 +174,7 @@ set(OPENSPACE_SOURCE
   util/collisionhelper.cpp
   util/coordinateconversion.cpp
   util/distanceconversion.cpp
+  util/downloadeventengine.cpp
   util/dynamicfilesequencedownloader.cpp
   util/ellipsoid.cpp
   util/factorymanager.cpp
@@ -372,6 +373,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/util/coordinateconversion.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/distanceconstants.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/distanceconversion.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/downloadeventengine.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/dynamicfilesequencedownloader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/ellipsoid.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/factorymanager.h

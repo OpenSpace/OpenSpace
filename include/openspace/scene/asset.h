@@ -208,6 +208,14 @@ public:
     bool hasInitializedParent() const;
 
     /**
+     * Returns a list of the parents of this Asset that is currently in an initialized
+     * state, meaning any parent that is still interested in this Asset at all.
+     *
+     * \return A list of parent filepaths that are interested in this asset
+     */
+    std::vector<std::filesystem::path> initializedParents() const;
+
+    /**
      * Deinitializes this Asset and recursively deinitializes the required assets if this
      * Asset was their ownly initialized parent. If the Asset was already deinitialized,
      * calling this function does nothing.

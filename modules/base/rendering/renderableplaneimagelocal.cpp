@@ -45,7 +45,7 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    // A RenderablePlaneImageLocal creates a textured 3D plane, where the texture is
+    // A `RenderablePlaneImageLocal` creates a textured 3D plane, where the texture is
     // provided by a local file on disk.
     struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]

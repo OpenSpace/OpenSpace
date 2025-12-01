@@ -28,6 +28,7 @@
 #include <ghoul/misc/templatefactory.h>
 #include <openspace/json.h>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <thread>
 
@@ -71,11 +72,10 @@ private:
     std::map<TopicId, std::unique_ptr<Topic>> _topics;
     std::unique_ptr<ghoul::io::Socket> _socket;
     std::thread _thread;
+    std::mutex _mutex;
 
     std::string _address;
     bool _isAuthorized = false;
-    std::map<TopicId, std::string> _messageQueue;
-    std::map<TopicId, std::chrono::system_clock::time_point> _sentMessages;
 };
 
 } // namespace openspace

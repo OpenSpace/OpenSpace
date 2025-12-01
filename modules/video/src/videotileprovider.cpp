@@ -38,14 +38,30 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "VideoTileProvider";
+
+    // This `TileProvider` can be used to render a video on the globe.
+    //
+    // The video can either be played back based on a given simulation time
+    // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
+    // `PlaybackMode` RealTimeLoop). It is also possible to control whether the video
+    // should loop or just be played once.
+    //
+    // Note that, unless playback is mapped to simulation time, the video must be started
+    // manually via the user interface.
+    struct [[codegen::Dictionary(VideoTileProvider)]] Parameters {};
+#include "videotileprovider_codegen.cpp"
 } // namespace
 
 namespace openspace::globebrowsing {
 
 documentation::Documentation VideoTileProvider::Documentation() {
-    documentation::Documentation doc = VideoPlayer::Documentation();
-    doc.name = "VideoTileProvider";
-    doc.id = "video_videotileprovider";
+     documentation::Documentation doc = codegen::doc<Parameters>(
+         "video_videotileprovider"
+     );
+
+    documentation::Documentation vp = VideoPlayer::Documentation();
+    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
+
     return doc;
 }
 

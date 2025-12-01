@@ -96,8 +96,8 @@ std::vector<TouchInput> TuioEar::takeRemovals() {
 }
 
 // Standard UDP IP connection to port 3333
-TuioEar::TuioEar()
-    : _tuioClient(3333)
+TuioEar::TuioEar(int port)
+    : _tuioClient(port)
 {
     _tuioClient.addTuioListener(this);
     _tuioClient.connect();
