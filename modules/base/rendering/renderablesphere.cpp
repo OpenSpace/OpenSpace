@@ -68,7 +68,7 @@ namespace {
     };
 
     enum class Orientation {
-        Outside ,
+        Outside,
         Inside,
         Both
     };
@@ -269,7 +269,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
 
     _textureProjection.addOptions({
         { static_cast<int>(TextureProjection::Equirectangular), "Equirectangular" },
-        { static_cast<int>(TextureProjection::AngularFisheye), "Angular Fisheye" },
+        { static_cast<int>(TextureProjection::AngularFisheye), "Angular Fisheye" }
     });
     _textureProjection = p.textureProjection.has_value() ?
         static_cast<int>(codegen::map<TextureProjection>(*p.textureProjection)) :

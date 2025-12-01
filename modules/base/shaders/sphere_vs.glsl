@@ -52,9 +52,9 @@ vec2 equiToAngularFisheye(vec2 textureCoords) {
 
   // Map to 3D position, with Z being the north pole
   vec3 pos3 = vec3(
-    cos(lat)*cos(lon),
+    cos(lat) * cos(lon),
     sin(lat),
-    cos(lat)*sin(lon)
+    cos(lat) * sin(lon)
   );
 
   float coverAngle = M_PI; // 180 degrees
@@ -65,7 +65,7 @@ vec2 equiToAngularFisheye(vec2 textureCoords) {
   vec2 fisheye2D = vec2(r * cos(theta), r * sin(theta));
 
   if (r > 1.0) {
-    return vec2(-1, -1); // Indicate invalid coordinates
+    return vec2(-1.0, -1.0); // Indicate invalid coordinates
   }
 
   // Remap to [0,1]
