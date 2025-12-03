@@ -143,14 +143,13 @@ add_custom_command(TARGET OpenSpace POST_BUILD
 
 end_header("Dependency: SGCT")
 
-# Profile Editor / Launcher GUI 
-option(OPENSPACE_PROFILE_EDITOR "Build profile editor (launcher GUI)" ON)
-if (OPENSPACE_PROFILE_EDITOR)
-
+# Profile Editor / Launcher GUI
+option(OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER "Build Launcher GUI" ON)
+if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER)
   begin_header("Dependency: Profile Editor")
   add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher)
   target_link_libraries(OpenSpace PRIVATE openspace-ui-launcher)
-  add_compile_definitions(OPENSPACE_PROFILE_EDITOR)
+  target_compile_definitions(OpenSpace PRIVATE OPENSPACE_HAS_LAUNCHER)
   end_header("Dependency: Profile Editor")
 
   if (WIN32)
