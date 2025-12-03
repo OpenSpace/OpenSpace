@@ -143,22 +143,27 @@ add_custom_command(TARGET OpenSpace POST_BUILD
 
 end_header("Dependency: SGCT")
 
-begin_header("Dependency: Profile Editor")
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher)
-target_link_libraries(OpenSpace PRIVATE openspace-ui-launcher)
-end_header("Dependency: Profile Editor")
+# Profile Editor / Launcher GUI 
+option(OPENSPACE_PROFILE_EDITOR "Build profile editor (launcher GUI)" ON)
+if (OPENSPACE_PROFILE_EDITOR)
 
-if (WIN32)
-  # Find the windeployqt application
-  get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
-  get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
-  add_custom_command(
-    TARGET OpenSpace POST_BUILD
-    COMMAND "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations \"$<TARGET_FILE:OpenSpace>\"
-    COMMENT "Deploying Qt libraries"
-  )
+  begin_header("Dependency: Profile Editor")
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher)
+  target_link_libraries(OpenSpace PRIVATE openspace-ui-launcher)
+  add_compile_definitions(OPENSPACE_PROFILE_EDITOR)
+  end_header("Dependency: Profile Editor")
+
+  if (WIN32)
+    # Find the windeployqt application
+    get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
+    get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+    add_custom_command(
+      TARGET OpenSpace POST_BUILD
+      COMMAND "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations \"$<TARGET_FILE:OpenSpace>\"
+      COMMENT "Deploying Qt libraries"
+    )
+  endif ()
 endif ()
-
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the

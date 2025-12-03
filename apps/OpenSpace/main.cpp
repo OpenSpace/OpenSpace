@@ -79,9 +79,11 @@
 #include <float.h>
 #endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
 
+#ifdef OPENSPACE_PROFILE_EDITOR
 #include <launcherwindow.h>
 #include <QApplication>
 #include <QMessageBox>
+#endif // OPENSPACE_PROFILE_EDITOR
 
 #ifdef WIN32
 extern "C" {
@@ -1450,6 +1452,8 @@ int main(int argc, char* argv[]) {
 #endif // __APPLE__
 
     if (!global::configuration->bypassLauncher) {
+#ifdef OPENSPACE_PROFILE_EDITOR
+
 #ifndef __APPLE__
         int qac = 0;
         QApplication app(qac, nullptr);
@@ -1542,6 +1546,11 @@ int main(int argc, char* argv[]) {
             }
             global::configuration->windowConfiguration = config;
         }
+#else
+        LDEBUG("Forcing the use of the bypassLauncher path, as the profile editor is not available.");
+        glfwInit();
+
+#endif // OPENSPACE_PROFILE_EDITOR
     }
     else {
         glfwInit();
