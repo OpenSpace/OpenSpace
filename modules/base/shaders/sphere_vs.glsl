@@ -36,11 +36,10 @@ uniform mat4 modelViewProjection;
 uniform mat4 modelViewTransform;
 uniform mat3 modelViewRotation;
 
-
 void main() {
-  vs_normal = modelViewRotation * normalize(in_position.xyz);
   vs_textureCoords = in_textureCoords;
 
+  vs_normal = modelViewRotation * normalize(in_position.xyz);
   vec4 position = modelViewProjection * vec4(in_position.xyz, 1.0);
   vs_position = modelViewTransform * vec4(in_position.xyz, 1.0);
 
