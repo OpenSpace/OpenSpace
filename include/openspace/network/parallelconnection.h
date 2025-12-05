@@ -32,7 +32,7 @@
 
 namespace openspace {
 
-class ParallelConnection  {
+class ParallelConnection {
 public:
     enum class Status : uint32_t {
         Disconnected = 0,

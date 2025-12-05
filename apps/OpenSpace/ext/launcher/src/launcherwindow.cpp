@@ -31,17 +31,14 @@
 #include "splitcombobox.h"
 #include <openspace/openspace.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <sgct/config.h>
 #include <QFile>
 #include <QKeyEvent>
-#include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QStandardItemModel>
 #include <filesystem>
-#include <fstream>
 #include <iostream>
 
 using namespace openspace;

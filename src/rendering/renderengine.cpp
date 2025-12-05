@@ -30,21 +30,15 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/events/event.h>
-#include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
-#include <openspace/mission/missionmanager.h>
 #include <openspace/rendering/dashboard.h>
-#include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/luaconsole.h>
-#include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/memorymanager.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
 #include <openspace/util/updatestructures.h>
@@ -62,13 +56,10 @@
 #include <ghoul/io/texture/texturewriter.h>
 #include <ghoul/io/texture/texturewriterstb.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/easing.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 
 #include "renderengine_lua.inl"
 

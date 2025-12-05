@@ -26,9 +26,8 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/dashboarditem.h>
-#include <openspace/scripting/scriptengine.h>
+#include <openspace/scripting/lualibrary.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 

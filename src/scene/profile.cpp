@@ -32,16 +32,11 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/scene/scene.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ctime>
 #include <filesystem>
 #include <set>
 

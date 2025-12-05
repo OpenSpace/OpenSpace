@@ -27,7 +27,7 @@
 
 #include <openspace/util/concurrentqueue.h>
 #include <openspace/util/threadpool.h>
-
+#include <memory>
 #include <mutex>
 
 namespace openspace {

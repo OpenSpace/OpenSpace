@@ -37,20 +37,19 @@
 #include "profile/timedialog.h"
 #include "profile/uipanelsdialog.h"
 #include <openspace/scene/profile.h>
-#include <ghoul/format.h>
 #include <QDialogButtonBox>
 #include <QFileDialog>
 #include <QKeyEvent>
 #include <QLabel>
-#include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <iostream>
+#include <ios>
 
 #ifdef WIN32
 #include <Windows.h>

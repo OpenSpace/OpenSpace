@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "profile/assettreeitem.h"
 #include "profile/assettreemodel.h"
+
+#include "profile/assettreeitem.h"
 #include "filesystemaccess.h"
 #include <ghoul/misc/stringhelper.h>
 #include <sstream>
-#include <QColor>
 
 namespace {
     constexpr std::string_view Header1 = "Asset";

@@ -22,9 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/navigation/navigationstate.h>
+
 #include <openspace/camera/camerapose.h>
 #include <ghoul/logging/logmanager.h>
-#include <openspace/navigation/navigationstate.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/spicemanager.h>

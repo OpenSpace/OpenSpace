@@ -25,10 +25,8 @@
 #include <openspace/engine/moduleengine.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/openspacemodule.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>

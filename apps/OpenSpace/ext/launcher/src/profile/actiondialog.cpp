@@ -27,21 +27,19 @@
 #include "profile/line.h"
 #include "profile/scriptlogdialog.h"
 #include <openspace/util/keys.h>
-#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
-#include <QCheckBox>
+#include <QCheckbox>
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QErrorMessage>
 #include <QGridLayout>
-#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
-#include <QListWidget>
+#include <QListWidgetItem>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QTextEdit>
-#include <QVBoxLayout>
+#include <algorithm>
 
 using namespace openspace;
 

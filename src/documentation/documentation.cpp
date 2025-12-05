@@ -27,8 +27,10 @@
 #include <openspace/documentation/verifier.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
-#include <algorithm>
+#include <compare>
 #include <set>
+#include <type_traits>
+#include <utility>
 
 namespace {
 

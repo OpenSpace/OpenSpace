@@ -30,7 +30,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/texture.h>
-#include <iterator>
 #include <filesystem>
 #include <fstream>
 #include <sstream>

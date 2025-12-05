@@ -36,7 +36,6 @@
 #include <openspace/scene/translation.h>
 #include <openspace/util/resourcesynchronization.h>
 #include <openspace/util/task.h>
-#include <sstream>
 
 namespace openspace {
 

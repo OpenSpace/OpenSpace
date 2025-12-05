@@ -51,10 +51,7 @@ namespace openspace::scripting { struct LuaLibrary; }
 namespace openspace::interaction {
 
 struct JoystickInputStates;
-class KeyframeNavigator;
 struct NavigationState;
-class OrbitalNavigator;
-class PathNavigator;
 struct NodeCameraStateSpec;
 struct WebsocketInputStates;
 

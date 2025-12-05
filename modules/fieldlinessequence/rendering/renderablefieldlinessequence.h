@@ -36,6 +36,7 @@
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
+#include <deque>
 #include <vector>
 
 namespace openspace {

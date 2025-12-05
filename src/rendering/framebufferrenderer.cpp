@@ -26,7 +26,6 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/deferredcaster.h>
 #include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/raycastermanager.h>
@@ -44,7 +43,6 @@
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <fstream>
 #include <string>
 #include <vector>
 

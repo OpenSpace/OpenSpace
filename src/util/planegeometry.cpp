@@ -24,9 +24,7 @@
 
 #include <openspace/util/planegeometry.h>
 
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <string>
 
 namespace openspace {
 
@@ -59,11 +57,11 @@ void PlaneGeometry::updateSize(const glm::vec2& size) {
     updateGeometry();
 }
 
-void PlaneGeometry::updateSize(const float size) {
+void PlaneGeometry::updateSize(float size) {
     updateSize(glm::vec2(size));
 }
 
-void PlaneGeometry::updateGeometry() {
+void PlaneGeometry::updateGeometry() const {
     const glm::vec2 size = _size;
     struct VertexData {
         GLfloat x;

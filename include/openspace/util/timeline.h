@@ -25,9 +25,7 @@
 #ifndef __OPENSPACE_CORE___TIMELINE___H__
 #define __OPENSPACE_CORE___TIMELINE___H__
 
-#include <algorithm>
 #include <deque>
-#include <cstddef>
 
 namespace openspace {
 

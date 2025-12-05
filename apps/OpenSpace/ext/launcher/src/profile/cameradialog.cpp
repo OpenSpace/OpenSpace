@@ -27,17 +27,11 @@
 #include "profile/line.h"
 #include <openspace/navigation/navigationstate.h>
 #include <QDialogButtonBox>
-#include <QDoubleValidator>
 #include <QFileDialog>
-#include <QFrame>
 #include <QGridLayout>
-#include <QKeyEvent>
 #include <QLabel>
-#include <QLineEdit>
 #include <QMessageBox>
-#include <QPlainTextEdit>
 #include <QPushButton>
-#include <QTabWidget>
 #include <fstream>
 
 namespace {

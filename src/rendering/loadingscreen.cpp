@@ -39,11 +39,8 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <random>
 #include <sstream>
 #include <thread>

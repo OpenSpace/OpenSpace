@@ -29,11 +29,9 @@
 #include <openspace/rendering/deferredcasterlistener.h>
 
 #include <ghoul/glm.h>
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <map>
-#include <string>
 #include <vector>
 
 namespace ghoul { class Dictionary; }

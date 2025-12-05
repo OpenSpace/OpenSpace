@@ -29,9 +29,7 @@
 #include <openspace/json.h>
 #include <optional>
 
-namespace openspace {
-    struct CameraPose;
-} // namespace openspace
+namespace openspace { struct CameraPose; }
 
 namespace openspace::interaction {
 

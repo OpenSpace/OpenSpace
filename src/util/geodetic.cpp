@@ -30,7 +30,6 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/logging/logmanager.h>
 
 namespace openspace {
 

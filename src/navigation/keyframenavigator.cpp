@@ -31,9 +31,6 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/logging/logmanager.h>
-
-#include <glm/gtx/quaternion.hpp>
 
 namespace openspace::interaction {
 

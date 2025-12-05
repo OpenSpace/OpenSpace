@@ -27,8 +27,6 @@
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/timeconstants.h>
 
-#include <ghoul/glm.h>
-
 namespace openspace {
 
 std::pair<double, std::string_view> simplifyDistance(double meters,

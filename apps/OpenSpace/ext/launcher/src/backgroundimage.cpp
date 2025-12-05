@@ -26,7 +26,6 @@
 
 #include <ghoul/filesystem/filesystem.h>
 #include <QPainter>
-#include <QPixmap>
 #include <random>
 
 BackgroundImage::BackgroundImage(QRect size, const std::filesystem::path& syncFolder,

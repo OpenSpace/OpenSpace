@@ -26,7 +26,6 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo IdleTimeInfo = {

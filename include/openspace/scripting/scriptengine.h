@@ -31,7 +31,6 @@
 #include <ghoul/misc/boolean.h>
 #include <filesystem>
 #include <mutex>
-#include <optional>
 #include <queue>
 #include <functional>
 

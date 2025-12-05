@@ -24,10 +24,8 @@
 
 #include <openspace/navigation/path.h>
 
-#include <openspace/camera/camera.h>
 #include <openspace/camera/camerapose.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/pathcurve.h>
 #include <openspace/navigation/pathcurves/avoidcollisioncurve.h>
@@ -39,7 +37,6 @@
 #include <openspace/util/universalhelpers.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/interpolator.h>
-#include <glm/ext/quaternion_relational.hpp>
 
 namespace {
     constexpr std::string_view _loggerCat = "Path";

@@ -26,15 +26,18 @@
 
 #include "profile/line.h"
 #include "profile/scriptlogdialog.h"
-#include <openspace/scene/profile.h>
 #include <ghoul/misc/stringhelper.h>
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QTextEdit>
-#include <QVBoxLayout>
+#include <ios>
+#include <new>
 #include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
 
 AdditionalScriptsDialog::AdditionalScriptsDialog(QWidget* parent,
                                                  std::vector<std::string>* scripts)

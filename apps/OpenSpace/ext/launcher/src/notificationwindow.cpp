@@ -31,11 +31,9 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/stringhelper.h>
 #include <QGuiApplication>
-#include <QStyleHints>
 #include <QTimer>
 #include <scn/scan.h>
 #include <date/date.h>
-#include <string_view>
 #include <vector>
 
 using namespace openspace;

@@ -28,9 +28,6 @@
 #include <openspace/util/screenlog.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
-#include <atomic>
 #include <memory>
 #include <mutex>
 #include <random>

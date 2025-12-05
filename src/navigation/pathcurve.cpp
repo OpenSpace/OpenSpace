@@ -25,12 +25,8 @@
 #include <openspace/navigation/pathcurve.h>
 
 #include <openspace/navigation/waypoint.h>
-#include <openspace/query/query.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/integration.h>
 #include <ghoul/misc/interpolator.h>
-#include <glm/gtx/projection.hpp>
 #include <algorithm>
 #include <vector>
 

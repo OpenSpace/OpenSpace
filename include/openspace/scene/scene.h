@@ -29,7 +29,6 @@
 
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/easing.h>
-#include <ghoul/misc/memorypool.h>
 #include <mutex>
 #include <set>
 #include <unordered_map>

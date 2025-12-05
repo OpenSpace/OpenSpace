@@ -25,14 +25,11 @@
 #include "settingsdialog.h"
 
 #include "profile/line.h"
-
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QLabel>
-#include <QLineEdit>
-#include <QMessageBox>
 #include <QPushButton>
 
 SettingsDialog::SettingsDialog(openspace::Settings settings, QWidget* parent)

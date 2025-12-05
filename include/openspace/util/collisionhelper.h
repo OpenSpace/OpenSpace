@@ -50,7 +50,7 @@ bool lineSphereIntersection(const glm::dvec3& p1, const glm::dvec3& p2,
 
 /**
  * Check if the point \p p is inside of the sphere defined by radius \p r and center
- * point \p c
+ * point \p c.
  */
 bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r);
 

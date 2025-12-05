@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___LISTPROPERTY___H__
 
 #include <openspace/properties/templateproperty.h>
+
 #include <vector>
 
 namespace openspace::properties {

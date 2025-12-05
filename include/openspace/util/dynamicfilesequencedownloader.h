@@ -26,13 +26,9 @@
 #define __OPENSPACE_CORE___DYNAMICFILESEQUENCEDOWNLOADER___H__
 
 #include <openspace/util/httprequest.h>
-#include <ghoul/logging/logmanager.h>
 #include <filesystem>
-#include <map>
 #include <memory>
-#include <queue>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 namespace openspace {
