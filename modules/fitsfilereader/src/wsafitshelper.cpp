@@ -89,7 +89,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         // Create texture from imagedata
         auto texture = std::make_unique<ghoul::opengl::Texture>(
             imageData,
-            glm::size3_t(fitsValues->width, fitsValues->height, 1),
+            glm::uvec3(fitsValues->width, fitsValues->height, 1),
             GL_TEXTURE_2D,
             ghoul::opengl::Texture::Format::Red,
             GL_RED,
@@ -140,7 +140,7 @@ int nLayers(const std::filesystem::path& path) {
     }
 }
 
-template<typename T, typename U>
+template <typename T, typename U>
 std::shared_ptr<ImageData<T>> readImageInternal(U& image) {
     try {
         std::valarray<T> contents;

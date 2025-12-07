@@ -27,24 +27,24 @@
 
 namespace openspace::globebrowsing::cache {
 
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 LRUCache<KeyType, ValueType, HasherType>::LRUCache(size_t size)
     : _maximumCacheSize(size)
 {}
 
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 void LRUCache<KeyType, ValueType, HasherType>::clear() {
     _itemList.clear();
     _itemMap.clear();
 }
 
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 void LRUCache<KeyType, ValueType, HasherType>::put(KeyType key, ValueType value) {
     putWithoutCleaning(std::move(key), std::move(value));
     clean();
 }
 
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 std::vector<std::pair<KeyType, ValueType>>
 LRUCache<KeyType, ValueType, HasherType>::putAndFetchPopped(KeyType key, ValueType value)
 {
@@ -52,12 +52,12 @@ LRUCache<KeyType, ValueType, HasherType>::putAndFetchPopped(KeyType key, ValueTy
     return cleanAndFetchPopped();
 }
 
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 bool LRUCache<KeyType, ValueType, HasherType>::exist(const KeyType& key) const {
     return (_itemMap.count(key) > 0);
 }
 
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 bool LRUCache<KeyType, ValueType, HasherType>::touch(const KeyType& key) {
     ZoneScoped;
 
@@ -84,12 +84,12 @@ bool LRUCache<KeyType, ValueType, HasherType>::touch(const KeyType& key) {
     }
 }
 
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 bool LRUCache<KeyType, ValueType, HasherType>::isEmpty() const {
     return (_itemMap.size() == 0);
 }
 
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 ValueType LRUCache<KeyType, ValueType, HasherType>::get(const KeyType& key) {
     const auto it = _itemMap.find(key);
     // Move list iterator pointing to value
@@ -98,7 +98,7 @@ ValueType LRUCache<KeyType, ValueType, HasherType>::get(const KeyType& key) {
     return res;
 }
 
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popMRU() {
     ghoul_assert(!_itemList.empty(), "Cannot pop LRU cache. Ensure cache is not empty");
 
@@ -109,7 +109,7 @@ std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popMRU()
     return toReturn;
 }
 
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popLRU() {
     ghoul_assert(!_itemList.empty(), "Cannot pop LRU cache. Ensure cache is not empty");
 
@@ -121,17 +121,17 @@ std::pair<KeyType, ValueType> LRUCache<KeyType, ValueType, HasherType>::popLRU()
     return toReturn;
 }
 
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 size_t LRUCache<KeyType, ValueType, HasherType>::size() const {
     return _itemMap.size();
 }
 
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 size_t LRUCache<KeyType, ValueType, HasherType>::maximumCacheSize() const {
     return _maximumCacheSize;
 }
 
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 void LRUCache<KeyType, ValueType, HasherType>::putWithoutCleaning(KeyType key,
                                                                   ValueType value)
 {
@@ -144,7 +144,7 @@ void LRUCache<KeyType, ValueType, HasherType>::putWithoutCleaning(KeyType key,
     _itemMap.emplace(std::move(key), _itemList.begin());
 }
 
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 void LRUCache<KeyType, ValueType, HasherType>::clean() {
     while (_itemMap.size() > _maximumCacheSize) {
         auto lastIt = _itemList.end();
@@ -154,7 +154,7 @@ void LRUCache<KeyType, ValueType, HasherType>::clean() {
     }
 }
 
-template<typename KeyType, typename ValueType, typename HasherType>
+template <typename KeyType, typename ValueType, typename HasherType>
 std::vector<std::pair<KeyType, ValueType>>
 LRUCache<KeyType, ValueType, HasherType>::cleanAndFetchPopped()
 {

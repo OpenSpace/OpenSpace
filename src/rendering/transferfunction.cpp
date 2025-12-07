@@ -196,7 +196,7 @@ void TransferFunction::setTextureFromTxt() {
 
     _texture = std::make_unique<ghoul::opengl::Texture>(
         transferFunction,
-        glm::size3_t(width, 1, 1),
+        glm::uvec3(width, 1, 1),
         GL_TEXTURE_1D,
         ghoul::opengl::Texture::Format::RGBA,
         GL_RGBA,

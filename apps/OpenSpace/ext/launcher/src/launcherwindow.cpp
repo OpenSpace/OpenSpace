@@ -145,9 +145,18 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
 
     {
         QFile file(":/qss/launcher.qss");
-        file.open(QFile::ReadOnly);
-        const QString styleSheet = QLatin1String(file.readAll());
-        setStyleSheet(styleSheet);
+        const bool success = file.open(QFile::ReadOnly);
+        if (!success) {
+            QMessageBox::critical(
+                this,
+                "Missing QSS",
+                "Could not find launcher.qss"
+            );
+        }
+        else {
+            const QString styleSheet = QLatin1String(file.readAll());
+            setStyleSheet(styleSheet);
+        }
     }
 
     QWidget* centralWidget = new QWidget;
