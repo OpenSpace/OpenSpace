@@ -34,6 +34,22 @@
 
 namespace openspace::documentation {
 
+// Workaround for macOS libc++ std::format with std::vector<bool>
+namespace detail {
+    template <typename T>
+    decltype(auto) format_value(T&& value) {
+        using Type = std::remove_cvref_t<T>;
+        if constexpr (std::is_same_v<Type, std::vector<bool>::reference> ||
+                        std::is_same_v<Type, std::vector<bool>::const_reference>)
+        {
+            return static_cast<bool>(std::forward<T>(value));
+        }
+        else {
+            return std::forward<T>(value);
+        }
+    }
+} // detail
+
 template <>
 TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dict,
     const std::string& key) const;
@@ -380,7 +396,7 @@ TestResult InListVerifier<T>::operator()(const ghoul::Dictionary& dict,
             std::string list = std::accumulate(
                 values.begin() + 1,
                 values.end(),
-                std::format("{}", values.front()),
+                std::format("{}", detail::format_value(values.front())),
                 [](std::string lhs, typename T::Type rhs) {
                     return std::format("{}, {}", lhs, rhs);
                 }

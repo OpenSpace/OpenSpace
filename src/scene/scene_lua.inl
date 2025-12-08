@@ -307,6 +307,31 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
     std::vector<Property*> matches;
 
     std::mutex mutex;
+#ifdef __APPLE__
+    // Apple Clang does not support C++17 parallel algorithms yet.
+    // Fallback to sequential execution.
+    std::for_each(
+        properties.cbegin(),
+        properties.cend(),
+        [&](Property* prop) {
+            const std::string_view uri = prop->uri();
+
+            bool isMatch = checkUriMatchFromRegexResults(
+                uri,
+                { parentUri, propertyIdentifier, isLiteral },
+                groupTag,
+                prop->owner()
+            );
+
+            if (isMatch) {
+                // No need for std::lock_guard(mutex) here because 
+                // this runs sequentially on the calling thread.
+                matches.push_back(prop);
+            }
+        }
+    );
+#else
+    // Windows/Linux (GCC/MSVC) parallel implementation
     std::for_each(
         std::execution::par_unseq,
         properties.cbegin(),
@@ -327,7 +352,7 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
             }
         }
     );
-
+#endif
     return matches;
 }
 
@@ -355,14 +380,46 @@ std::vector<openspace::properties::PropertyOwner*> findMatchesInAllPropertyOwner
     std::vector<PropertyOwner*> matches;
 
     std::mutex mutex;
+#ifdef __APPLE__
+    // Apple Clang: Sequential execution
+    std::for_each(
+        propertyOwners.cbegin(),
+        propertyOwners.cend(),
+        [&](PropertyOwner* propOwner) {
+            if (inputIsOnlyTag) {
+                // If we only got a tag as input, the result is all owners that directly
+                // match the group tag (without looking recursively in parent owners)
+                if (!ownerMatchesGroupTag(propOwner, groupTag, false)) {
+                    return;
+                }
+            }
+            else {
+                const std::string uri = propOwner->uri();
+
+                bool isMatch = checkUriMatchFromRegexResults(
+                    uri,
+                    { parentUri, ownerIdentifier, isLiteral },
+                    groupTag,
+                    propOwner->owner()
+                );
+
+                if (!isMatch) {
+                    return;
+                }
+            }
+
+            // No lock needed for sequential execution
+            matches.push_back(propOwner);
+        }
+    );
+#else
+    // Windows/Linux: Parallel execution
     std::for_each(
         std::execution::par_unseq,
         propertyOwners.cbegin(),
         propertyOwners.cend(),
         [&](PropertyOwner* propOwner) {
             if (inputIsOnlyTag) {
-                // If we only got a tag as input, the result is all owners that directly
-                // match the group tag (without looking recusively in parent owners)
                 if (!ownerMatchesGroupTag(propOwner, groupTag, false)) {
                     return;
                 }
@@ -386,7 +443,7 @@ std::vector<openspace::properties::PropertyOwner*> findMatchesInAllPropertyOwner
             matches.push_back(propOwner);
         }
     );
-
+#endif
     return matches;
 }
 
