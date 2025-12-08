@@ -59,6 +59,7 @@
 
 #include <ghoul/misc/stringconversion.h>
 #include <array>
+#include <cstdint>
 #include <string>
 
 namespace openspace {
