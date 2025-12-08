@@ -28,7 +28,7 @@
 #include "profile/scriptlogdialog.h"
 #include <openspace/util/keys.h>
 #include <ghoul/misc/assert.h>
-#include <QCheckbox>
+#include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QErrorMessage>
