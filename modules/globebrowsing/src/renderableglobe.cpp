@@ -55,14 +55,7 @@
 #include <queue>
 #include <vector>
 
-#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
-#include <experimental/memory_resource>
-namespace std {
-    using namespace experimental;
-} // namespace std
-#else
 #include <memory_resource>
-#endif
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableGlobe";
