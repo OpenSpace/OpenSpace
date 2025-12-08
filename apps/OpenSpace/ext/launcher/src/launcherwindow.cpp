@@ -166,7 +166,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
             centralWidget
         );
     }
-    
+
     {
         QLabel* logoImage = new QLabel(centralWidget);
         logoImage->setObjectName("clear");
@@ -323,7 +323,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
     connect(
         _windowConfigBox, &SplitComboBox::selectionChanged,
         this, &LauncherWindow::selectConfiguration
-    ); 
+    );
     connect(
         _windowConfigBox, &SplitComboBox::selectionChanged,
         this, &LauncherWindow::updateStartButton
