@@ -34,6 +34,7 @@
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturewriter.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
@@ -207,6 +208,16 @@ namespace {
     }
 
     return fileName;
+}
+
+/**
+ * This function returns the size in pixels of an image file.
+ *
+ * \param path The location of the image file for which the pixel size will be returned
+ * \return The size of the image in pixels
+ */
+[[codegen::luawrap]] glm::ivec2 imageSize(std::filesystem::path path) {
+    return ghoul::io::TextureReader::ref().imageSize(path);
 }
 
 /**

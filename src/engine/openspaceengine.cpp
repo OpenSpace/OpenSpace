@@ -1738,6 +1738,7 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::RemoveTag,
             codegen::lua::DownloadFile,
             codegen::lua::CreateSingleColorImage,
+            codegen::lua::ImageSize,
             codegen::lua::SaveBase64File,
             codegen::lua::IsMaster,
             codegen::lua::Version,
