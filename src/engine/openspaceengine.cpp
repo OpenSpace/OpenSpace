@@ -29,7 +29,6 @@
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configuration.h>
-#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
@@ -47,12 +46,10 @@
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelpeer.h>
-#include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
@@ -62,13 +59,11 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
-#include <openspace/util/screenlog.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/task.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <ghoul/ghoul.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
@@ -82,7 +77,6 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <date/date.h>

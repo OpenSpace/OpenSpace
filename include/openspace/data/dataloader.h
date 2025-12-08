@@ -27,8 +27,6 @@
 
 #include <openspace/data/datamapping.h>
 #include <ghoul/glm.h>
-#include <ghoul/misc/boolean.h>
-#include <ghoul/misc/csvreader.h>
 #include <filesystem>
 #include <optional>
 #include <string>

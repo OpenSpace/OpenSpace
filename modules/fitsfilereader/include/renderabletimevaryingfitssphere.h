@@ -29,6 +29,7 @@
 
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
+#include <deque>
 
 namespace openspace {
 

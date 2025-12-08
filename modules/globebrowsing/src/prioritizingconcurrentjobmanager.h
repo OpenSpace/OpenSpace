@@ -39,7 +39,7 @@ namespace openspace::globebrowsing {
  * which is used to identify jobs. In case a job need to be explicitly ended. It can be
  * identified using its key.
  */
-template<typename P, typename KeyType>
+template <typename P, typename KeyType>
 class PrioritizingConcurrentJobManager {
 public:
     explicit PrioritizingConcurrentJobManager(LRUThreadPool<KeyType> pool);

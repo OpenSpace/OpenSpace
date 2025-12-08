@@ -25,8 +25,6 @@
 #include <openspace/rendering/colormappingcomponent.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {

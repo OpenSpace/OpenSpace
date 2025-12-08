@@ -29,15 +29,12 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/scene/assetmanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <filesystem>
-#include <unordered_set>
 
 namespace openspace {
 

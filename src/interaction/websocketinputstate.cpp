@@ -24,11 +24,8 @@
 
 #include <openspace/interaction/websocketinputstate.h>
 
-#include <ghoul/misc/exception.h>
 #include <ghoul/misc/invariants.h>
-#include <ghoul/misc/stringconversion.h>
 #include <algorithm>
-#include <map>
 #include <numeric>
 
 namespace openspace::interaction {

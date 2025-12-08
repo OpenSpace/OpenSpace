@@ -25,11 +25,11 @@
 #include <openspace/scene/assetmanager.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/scene/asset.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>

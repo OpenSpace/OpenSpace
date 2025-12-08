@@ -27,11 +27,9 @@
 #include <openspace/camera/camera.h>
 #include <openspace/camera/camerapose.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/navigationstate.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -40,13 +38,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/collisionhelper.h>
 #include <openspace/util/timemanager.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/vector_angle.hpp>
 #include <vector>
 
 #include "pathnavigator_lua.inl"

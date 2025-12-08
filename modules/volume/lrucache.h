@@ -31,10 +31,10 @@
 
 namespace openspace::volume {
 
-template<
+template <
     typename KeyType,
     typename ValueType,
-    template<typename...> class ContainerType
+    template <typename...> class ContainerType
 >
 class LruCache {
 public:

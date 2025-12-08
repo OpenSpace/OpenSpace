@@ -111,7 +111,6 @@ void SyncBuffer::setData(std::vector<std::byte> data) {
 
 std::vector<std::byte> SyncBuffer::data() {
     _dataStream.resize(_encodeOffset);
-
     return _dataStream;
 }
 

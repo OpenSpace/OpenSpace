@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/stringhelper.h>
+#include <ghoul/format.h>
 #include <ios>
 
 namespace {

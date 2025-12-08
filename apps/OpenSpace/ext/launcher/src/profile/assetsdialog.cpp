@@ -27,7 +27,6 @@
 #include "profile/assetedit.h"
 #include "profile/line.h"
 #include <openspace/scene/profile.h>
-#include <ghoul/format.h>
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QLabel>
@@ -35,6 +34,7 @@
 #include <QVBoxLayout>
 #include <QTextEdit>
 #include <QTreeView>
+#include <filesystem>
 
 namespace {
     bool traverseToExpandSelectedItems(QTreeView& tree, AssetTreeModel& model, int rows,

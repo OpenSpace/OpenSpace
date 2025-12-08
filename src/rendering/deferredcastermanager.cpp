@@ -26,7 +26,6 @@
 
 #include <openspace/rendering/deferredcasterlistener.h>
 #include <algorithm>
-#include <string>
 
 namespace openspace {
 

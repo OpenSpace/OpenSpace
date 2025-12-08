@@ -24,8 +24,6 @@
 
 #include <openspace/engine/downloadmanager.h>
 
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -142,18 +140,14 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     const std::string f = file.string();
     errno_t error = fopen_s(&fp, f.c_str(), "wb");
     if (error != 0) {
-        LERROR(std::format(
-            "Could not open/create file: {}. Errno: {}", file, errno
-        ));
+        LERROR(std::format("Could not open/create file: {}. Errno: {}", file, errno));
     }
 #else
     const std::string f = file.string();
     FILE* fp = fopen(f.c_str(), "wb"); // write binary
 #endif // WIN32
     if (!fp) {
-        LERROR(std::format(
-            "Could not open/create file: {}. Errno: {}", file, errno
-        ));
+        LERROR(std::format("Could not open/create file: {}. Errno: {}", file, errno));
     }
 
     auto downloadFunction = [url, failOnError, timeout_secs,

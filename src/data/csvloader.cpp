@@ -32,6 +32,7 @@
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <algorithm>

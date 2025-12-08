@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <ghoul/lua/lua_helper.h>
-
 #include <openspace/util/geodetic.h>
 
 namespace {

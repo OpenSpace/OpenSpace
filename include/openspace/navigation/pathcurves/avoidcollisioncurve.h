@@ -27,6 +27,8 @@
 
 #include <openspace/navigation/pathcurve.h>
 
+#include <vector>
+
 namespace openspace { class SceneGraphNode; }
 
 namespace openspace::interaction {

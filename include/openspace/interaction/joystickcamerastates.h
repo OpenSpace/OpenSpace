@@ -29,7 +29,6 @@
 
 #include <openspace/interaction/joystickinputstate.h>
 #include <ghoul/misc/boolean.h>
-#include <ghoul/misc/stringconversion.h>
 #include <map>
 #include <vector>
 

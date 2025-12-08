@@ -28,15 +28,24 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/settings.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/json.h>
-#include <openspace/util/json_helper.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/glm.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/dictionaryjsonformatter.h>
+#include <ghoul/misc/exception.h>
+#include <filesystem>
+#include <format>
+#include <map>
+#include <memory>
+#include <new>
 #include <optional>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace {
     // We can't use ${SCRIPTS} here as that hasn't been defined by this point

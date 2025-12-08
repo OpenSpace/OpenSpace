@@ -29,7 +29,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
-#include <ghoul/logging/logmanager.h>
 
 #include "scriptscheduler_lua.inl"
 

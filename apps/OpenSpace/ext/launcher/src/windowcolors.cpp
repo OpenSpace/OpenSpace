@@ -25,6 +25,7 @@
 #include "windowcolors.h"
 
 #include <ghoul/misc/assert.h>
+#include <array>
 
 QColor colorForWindow(int idx) {
     constexpr std::array<QColor, 4> Hardcoded = {

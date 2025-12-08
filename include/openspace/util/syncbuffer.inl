@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/assert.h>
-#include <ghoul/glm.h>
 #include <cstring>
 
 namespace openspace {

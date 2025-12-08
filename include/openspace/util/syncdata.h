@@ -42,7 +42,7 @@ namespace openspace {
  *
  * `((T&) t).method();`
  */
-template<class T>
+template <class T>
 class SyncData : public Syncable {
 public:
     SyncData() = default;

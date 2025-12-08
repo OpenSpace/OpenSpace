@@ -33,7 +33,6 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/glm.h>
 #include <memory>
 
 namespace openspace {

@@ -26,9 +26,7 @@
 
 #include "profile/line.h"
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/boolean.h>
 #include <QComboBox>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
@@ -36,7 +34,6 @@
 #include <QFileDialog>
 #include <QGridLayout>
 #include <QLabel>
-#include <QLineEdit>
 #include <QMessageBox>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -44,11 +41,9 @@
 #include <QProgressBar>
 #include <QPushButton>
 #include <QScrollBar>
-#include <QStyle>
+#include <filesystem>
+#include <istream>
 #include <sstream>
-
-//using json = nlohmann::json;
-//using namespace openspace;
 
 namespace {
     constexpr std::string_view _loggerCat = "HorizonsDialog";

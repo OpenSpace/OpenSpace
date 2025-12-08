@@ -28,7 +28,6 @@
 #include <ghoul/io/socket/socketserver.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
-#include <functional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {

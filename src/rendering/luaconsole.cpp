@@ -39,7 +39,6 @@
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
 #include <filesystem>
 #include <fstream>
 

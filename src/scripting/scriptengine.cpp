@@ -28,12 +28,9 @@
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
-#include <openspace/documentation/documentation.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>

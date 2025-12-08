@@ -56,7 +56,7 @@ public:
      * Used to explicitly show which variables within the Camera class that are used
      * for caching.
      */
-    template<typename T>
+    template <typename T>
     struct Cached {
         T datum = T(0);
         bool isDirty = true;

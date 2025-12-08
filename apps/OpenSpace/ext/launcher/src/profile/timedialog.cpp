@@ -26,16 +26,12 @@
 
 #include "profile/line.h"
 #include <QCheckBox>
-#include <QComboBox>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
-#include <QKeyEvent>
 #include <QLabel>
-#include <QLineEdit>
-#include <QTabWidget>
 #include <QVBoxLayout>
 #include <format>
-#include <algorithm>
+#include <optional>
 
 using namespace openspace;
 

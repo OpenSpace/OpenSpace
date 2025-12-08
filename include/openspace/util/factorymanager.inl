@@ -33,7 +33,6 @@ void FactoryManager::addFactory(std::string name) {
     _factories.push_back({ std::move(f), std::move(name) });
 }
 
-
 template <class T>
 ghoul::TemplateFactory<T>* FactoryManager::factory() const {
     for (const FactoryInfo& f : _factories) {

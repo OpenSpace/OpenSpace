@@ -28,7 +28,6 @@
 #include <openspace/util/syncbuffer.h>
 
 #include <ghoul/misc/boolean.h>
-#include <memory>
 #include <vector>
 
 namespace openspace {

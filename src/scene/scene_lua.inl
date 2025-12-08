@@ -59,7 +59,6 @@
 #include <openspace/rendering/screenspacerenderable.h>
 #include <algorithm>
 #include <execution>
-#include <cctype>
 
 namespace {
 

@@ -28,7 +28,6 @@
 #include <openspace/util/timeconstants.h>
 
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/constexpr.h>
 #include <algorithm>
 #include <array>
 #include <string>

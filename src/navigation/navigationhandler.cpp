@@ -25,14 +25,12 @@
 #include <openspace/navigation/navigationhandler.h>
 
 #include <openspace/camera/camera.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
-#include <openspace/interaction/scriptcamerastates.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelpeer.h>
@@ -43,12 +41,10 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/profiling.h>
-#include <glm/gtx/vector_angle.hpp>
 #include <filesystem>
 #include <fstream>
 #include <numeric>

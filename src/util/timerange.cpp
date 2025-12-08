@@ -27,7 +27,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
-
 #include <ghoul/misc/dictionary.h>
 
 namespace {

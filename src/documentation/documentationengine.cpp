@@ -24,7 +24,6 @@
 
 #include <openspace/documentation/documentationengine.h>
 
-#include <openspace/openspace.h>
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
@@ -39,7 +38,6 @@
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/json_helper.h>
@@ -55,81 +53,80 @@ namespace {
     constexpr std::string_view _loggerCat = "DocumentationEngine";
 
     // General keys
-    constexpr const char* NameKey = "name";
-    constexpr const char* IdentifierKey = "identifier";
-    constexpr const char* DescriptionKey = "description";
-    constexpr const char* DataKey = "data";
-    constexpr const char* TypeKey = "type";
-    constexpr const char* DocumentationKey = "documentation";
-    constexpr const char* ActionKey = "action";
-    constexpr const char* IdKey = "id";
+    constexpr std::string_view NameKey = "name";
+    constexpr std::string_view IdentifierKey = "identifier";
+    constexpr std::string_view DescriptionKey = "description";
+    constexpr std::string_view DataKey = "data";
+    constexpr std::string_view TypeKey = "type";
+    constexpr std::string_view DocumentationKey = "documentation";
+    constexpr std::string_view ActionKey = "action";
+    constexpr std::string_view IdKey = "id";
 
     // Actions
-    constexpr const char* ActionTitle = "Actions";
-    constexpr const char* GuiNameKey = "guiName";
-    constexpr const char* CommandKey = "command";
-    constexpr const char* ColorKey = "color";
-    constexpr const char* TextColorKey = "textColor";
+    constexpr std::string_view ActionTitle = "Actions";
+    constexpr std::string_view GuiNameKey = "guiName";
+    constexpr std::string_view CommandKey = "command";
+    constexpr std::string_view ColorKey = "color";
+    constexpr std::string_view TextColorKey = "textColor";
 
     // Factory
-    constexpr const char* MembersKey = "members";
-    constexpr const char* OptionalKey = "optional";
-    constexpr const char* ReferenceKey = "reference";
-    constexpr const char* FoundKey = "found";
-    constexpr const char* ClassesKey = "classes";
+    constexpr std::string_view MembersKey = "members";
+    constexpr std::string_view OptionalKey = "optional";
+    constexpr std::string_view ReferenceKey = "reference";
+    constexpr std::string_view FoundKey = "found";
+    constexpr std::string_view ClassesKey = "classes";
 
-    constexpr const char* OtherName = "Other";
-    constexpr const char* OtherIdentifierName = "other";
-    constexpr const char* propertyOwnerName = "propertyOwner";
-    constexpr const char* categoryName = "category";
+    constexpr std::string_view OtherName = "Other";
+    constexpr std::string_view OtherIdentifierName = "other";
+    constexpr std::string_view PropertyOwnerName = "propertyOwner";
+    constexpr std::string_view CategoryName = "category";
 
     // Properties
-    constexpr const char* SettingsTitle = "Settings";
-    constexpr const char* SceneTitle = "Scene";
-    constexpr const char* PropertiesKeys = "properties";
-    constexpr const char* PropertyOwnersKey = "propertyOwners";
-    constexpr const char* TagsKey = "tags";
-    constexpr const char* UriKey = "uri";
+    constexpr std::string_view SettingsTitle = "Settings";
+    constexpr std::string_view SceneTitle = "Scene";
+    constexpr std::string_view PropertiesKeys = "properties";
+    constexpr std::string_view PropertyOwnersKey = "propertyOwners";
+    constexpr std::string_view TagsKey = "tags";
+    constexpr std::string_view UriKey = "uri";
 
     // Scripting
-    constexpr const char* DefaultValueKey = "defaultValue";
-    constexpr const char* ArgumentsKey = "arguments";
-    constexpr const char* ReturnTypeKey = "returnType";
-    constexpr const char* HelpKey = "help";
-    constexpr const char* FileKey = "file";
-    constexpr const char* LineKey = "line";
-    constexpr const char* LibraryKey = "library";
-    constexpr const char* FullNameKey = "fullName";
-    constexpr const char* FunctionsKey = "functions";
-    constexpr const char* SourceLocationKey = "sourceLocation";
-    constexpr const char* OpenSpaceScriptingKey = "openspace";
+    constexpr std::string_view DefaultValueKey = "defaultValue";
+    constexpr std::string_view ArgumentsKey = "arguments";
+    constexpr std::string_view ReturnTypeKey = "returnType";
+    constexpr std::string_view HelpKey = "help";
+    constexpr std::string_view FileKey = "file";
+    constexpr std::string_view LineKey = "line";
+    constexpr std::string_view LibraryKey = "library";
+    constexpr std::string_view FullNameKey = "fullName";
+    constexpr std::string_view FunctionsKey = "functions";
+    constexpr std::string_view SourceLocationKey = "sourceLocation";
+    constexpr std::string_view OpenSpaceScriptingKey = "openspace";
 
     // Licenses
-    constexpr const char* LicensesTitle = "Licenses";
-    constexpr const char* ProfileName = "Profile";
-    constexpr const char* AssetsName = "Assets";
-    constexpr const char* LicensesName = "Licenses";
-    constexpr const char* NoLicenseName = "No License";
-    constexpr const char* NoDataName = "";
+    constexpr std::string_view LicensesTitle = "Licenses";
+    constexpr std::string_view ProfileName = "Profile";
+    constexpr std::string_view AssetsName = "Assets";
+    constexpr std::string_view LicensesName = "Licenses";
+    constexpr std::string_view NoLicenseName = "No License";
 
-    constexpr const char* ProfileNameKey = "profileName";
-    constexpr const char* VersionKey = "version";
-    constexpr const char* AuthorKey = "author";
-    constexpr const char* UrlKey = "url";
-    constexpr const char* LicenseKey = "license";
-    constexpr const char* IdentifiersKey = "identifiers";
-    constexpr const char* PathKey = "path";
-    constexpr const char* AssetKey = "assets";
-    constexpr const char* LicensesKey = "licenses";
+    constexpr std::string_view ProfileNameKey = "profileName";
+    constexpr std::string_view VersionKey = "version";
+    constexpr std::string_view AuthorKey = "author";
+    constexpr std::string_view UrlKey = "url";
+    constexpr std::string_view LicenseKey = "license";
+    constexpr std::string_view IdentifiersKey = "identifiers";
+    constexpr std::string_view PathKey = "path";
+    constexpr std::string_view AssetKey = "assets";
+    constexpr std::string_view LicensesKey = "licenses";
 
     // Keybindings
-    constexpr const char* KeybindingsTitle = "Keybindings";
-    constexpr const char* KeybindingsKey = "keybindings";
+    constexpr std::string_view KeybindingsTitle = "Keybindings";
+    constexpr std::string_view KeybindingsKey = "keybindings";
 
     // Events
-    constexpr const char* EventsTitle = "Events";
-    constexpr const char* FiltersKey = "filters";
-    constexpr const char* ActionsKey = "actions";
+    constexpr std::string_view EventsTitle = "Events";
+    constexpr std::string_view FiltersKey = "filters";
+    constexpr std::string_view ActionsKey = "actions";
 
     nlohmann::json documentationToJson(
                              const openspace::documentation::Documentation& documentation)
@@ -242,7 +239,7 @@ namespace {
             nlohmann::json argument;
             argument[NameKey] = arg.name;
             argument[TypeKey] = arg.type;
-            argument[DefaultValueKey] = arg.defaultValue.value_or(NoDataName);
+            argument[DefaultValueKey] = arg.defaultValue.value_or("");
             arguments.push_back(argument);
         }
 
@@ -314,8 +311,9 @@ nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
         // Keep the library key for backwards compatability
         library[LibraryKey] = libraryName;
         library[NameKey] = libraryName;
-        std::string os = OpenSpaceScriptingKey;
-        library[FullNameKey] = libraryName.empty() ? os : os + "." + libraryName;
+        std::string_view os = OpenSpaceScriptingKey;
+        library[FullNameKey] =
+            libraryName.empty() ? os : std::format("{}.{}", os, libraryName);
 
         for (const LuaLibrary::Function& f : l.functions) {
             constexpr bool HasSourceLocation = true;
@@ -342,12 +340,12 @@ nlohmann::json DocumentationEngine::generateLicenseGroupsJson() const {
 
         nlohmann::json metaJson;
         metaJson[NameKey] = ProfileName;
-        metaJson[ProfileNameKey] = meta.name.value_or(NoDataName);
-        metaJson[VersionKey] = meta.version.value_or(NoDataName);
-        metaJson[DescriptionKey] = meta.description.value_or(NoDataName);
-        metaJson[AuthorKey] = meta.author.value_or(NoDataName);
-        metaJson[UrlKey] = meta.url.value_or(NoDataName);
-        metaJson[LicenseKey] = meta.license.value_or(NoDataName);
+        metaJson[ProfileNameKey] = meta.name.value_or("");
+        metaJson[VersionKey] = meta.version.value_or("");
+        metaJson[DescriptionKey] = meta.description.value_or("");
+        metaJson[AuthorKey] = meta.author.value_or("");
+        metaJson[UrlKey] = meta.url.value_or("");
+        metaJson[LicenseKey] = meta.license.value_or("");
         json.push_back(std::move(metaJson));
     }
 
@@ -360,17 +358,17 @@ nlohmann::json DocumentationEngine::generateLicenseGroupsJson() const {
         std::optional<Asset::MetaInformation> meta = asset->metaInformation();
 
         // Ensure the license is not going to be an empty string
-        std::string licenseName = NoLicenseName;
-        if (meta.has_value() && meta->license != NoDataName) {
+        std::string licenseName = std::string(NoLicenseName);
+        if (meta.has_value() && !meta->license.empty()) {
             licenseName = meta->license;
         }
 
         nlohmann::json assetJson;
-        assetJson[NameKey] = meta.has_value() ? meta->name : NoDataName;
-        assetJson[VersionKey] = meta.has_value() ? meta->version : NoDataName;
-        assetJson[DescriptionKey] = meta.has_value() ? meta->description : NoDataName;
-        assetJson[AuthorKey] = meta.has_value() ? meta->author : NoDataName;
-        assetJson[UrlKey] = meta.has_value() ? meta->url : NoDataName;
+        assetJson[NameKey] = meta.has_value() ? meta->name : "";
+        assetJson[VersionKey] = meta.has_value() ? meta->version : "";
+        assetJson[DescriptionKey] = meta.has_value() ? meta->description : "";
+        assetJson[AuthorKey] = meta.has_value() ? meta->author : "";
+        assetJson[UrlKey] = meta.has_value() ? meta->url : "";
         assetJson[LicenseKey] = licenseName;
         assetJson[PathKey] = asset->path().string();
         assetJson[IdKey] = asset->path().string();
@@ -406,12 +404,12 @@ nlohmann::json DocumentationEngine::generateLicenseListJson() const {
 
     if (global::profile->meta.has_value()) {
         nlohmann::json profile;
-        profile[NameKey] = global::profile->meta->name.value_or(NoDataName);
-        profile[VersionKey] = global::profile->meta->version.value_or(NoDataName);
-        profile[DescriptionKey] = global::profile->meta->description.value_or(NoDataName);
-        profile[AuthorKey] = global::profile->meta->author.value_or(NoDataName);
-        profile[UrlKey] = global::profile->meta->url.value_or(NoDataName);
-        profile[LicenseKey] = global::profile->meta->license.value_or(NoDataName);
+        profile[NameKey] = global::profile->meta->name.value_or("");
+        profile[VersionKey] = global::profile->meta->version.value_or("");
+        profile[DescriptionKey] = global::profile->meta->description.value_or("");
+        profile[AuthorKey] = global::profile->meta->author.value_or("");
+        profile[UrlKey] = global::profile->meta->url.value_or("");
+        profile[LicenseKey] = global::profile->meta->license.value_or("");
         json.push_back(profile);
     }
 
@@ -505,7 +503,7 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
         }
         nlohmann::json factory;
         factory[NameKey] = factoryInfo.name;
-        factory[IdentifierKey] = categoryName + factoryInfo.name;
+        factory[IdentifierKey] = std::format("{}{}", CategoryName, factoryInfo.name);
 
         ghoul::TemplateFactoryBase* f = factoryInfo.factory.get();
         // Add documentation about base class
@@ -615,7 +613,7 @@ nlohmann::json DocumentationEngine::generatePropertyOwnerJson(
     sortJson(json, NameKey);
 
     nlohmann::json result;
-    result[NameKey] = propertyOwnerName;
+    result[NameKey] = PropertyOwnerName;
     result[DataKey] = json;
 
     return result;
@@ -710,7 +708,6 @@ nlohmann::json DocumentationEngine::generateActionJson() const {
     return res;
 }
 
-
 void DocumentationEngine::addDocumentation(Documentation documentation) {
     if (documentation.id.empty()) {
         _documentations.push_back(std::move(documentation));
@@ -737,4 +734,5 @@ void DocumentationEngine::addDocumentation(Documentation documentation) {
 std::vector<Documentation> DocumentationEngine::documentations() const {
     return _documentations;
 }
+
 } // namespace openspace::documentation

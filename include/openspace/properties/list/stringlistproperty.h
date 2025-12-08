@@ -26,7 +26,9 @@
 #define __OPENSPACE_CORE___STRINGLISTPROPERTY___H__
 
 #include <openspace/properties/misc/listproperty.h>
+
 #include <string>
+#include <vector>
 
 namespace openspace::properties {
 

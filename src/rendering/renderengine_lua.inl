@@ -26,7 +26,9 @@
 
 namespace {
 
-/// Will create a ScreenSpaceRenderable from a lua Table and add it in the RenderEngine
+/**
+ * Will create a ScreenSpaceRenderable from a lua Table and add it in the RenderEngine.
+ */
 [[codegen::luawrap]] void addScreenSpaceRenderable(ghoul::Dictionary screenSpace) {
     using namespace openspace;
     std::unique_ptr<ScreenSpaceRenderable> s =
@@ -70,15 +72,17 @@ namespace {
 }
 
 /**
-* Reset screenshot index to 0.
-*/
+ * Reset screenshot index to 0.
+ */
 [[codegen::luawrap]] void resetScreenshotNumber() {
     using namespace openspace;
     global::renderEngine->resetScreenshotNumber();
 }
 
-// Extracts the DPI scaling for either the GUI window or if there is no dedicated GUI
-// window, the first window.
+/**
+ * Extracts the DPI scaling for either the GUI window or if there is no dedicated GUI
+ * window, the first window.
+ */
 [[codegen::luawrap]] float dpiScaling() {
     return openspace::global::windowDelegate->osDpiScaling();
 }

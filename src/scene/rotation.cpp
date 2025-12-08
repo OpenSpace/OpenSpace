@@ -31,9 +31,7 @@
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 
 namespace {
     // A `Rotation` object describes a specific rotation for a scene graph node, which may

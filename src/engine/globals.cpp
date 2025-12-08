@@ -57,13 +57,10 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/versionchecker.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/glm.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/misc/sharedmemory.h>
 #include <ghoul/opengl/texture.h>
 #include <array>
-#include <functional>
 #include <memory>
 
 namespace openspace {

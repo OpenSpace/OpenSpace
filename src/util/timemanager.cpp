@@ -30,7 +30,6 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
-#include <openspace/network/parallelpeer.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/timeline.h>
