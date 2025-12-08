@@ -85,33 +85,33 @@ private:
     properties::IntProperty _downsamplingLevel;
     properties::BoolProperty _verboseMode;
 
-    TransferFunction* _lut;
+    TransferFunction* _lut = nullptr;
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 
     float _imagePlaneOffset = 0.0;
-    double _realTimeDiff;
+    //double _realTimeDiff; // @TODO: figure out if this is needed
 
     bool _isWithinFrustum = false;
     bool _isWithinFrustumLast = true;
     unsigned int _bufferCountOffset = 1;
-    unsigned int _imageSize;
+    unsigned int _imageSize = 32;
 
-    float _currentScale;
-    glm::vec2 _currentCenterPixel;
-    bool _isCoronaGraph;
+    float _currentScale = 0;
+    glm::vec2 _currentCenterPixel = glm::vec2(2.f);
+    bool _isCoronaGraph = false;
 
     // For debugging
     unsigned int _frameSkipCount = 0;
 
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>> _tfMap;
     std::string _currentActiveInstrument;
-    ImageMetadata* _currentImage;
+    ImageMetadata* _currentImage = nullptr;
     std::unordered_map<std::string, Timeline<ImageMetadata>> _imageMetadataMap;
     std::unique_ptr<SpacecraftCameraPlane> _spacecraftCameraPlane;
     std::vector<unsigned char> _decodeBuffer;
 
     void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
-    void listen();
+    //void listen();
     bool checkBoundaries(const RenderData& data);
 
     void decode(unsigned char* buffer, const std::string& fileame);

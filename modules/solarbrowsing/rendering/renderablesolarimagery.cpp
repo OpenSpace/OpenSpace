@@ -44,53 +44,51 @@
 #include <chrono>
 
 namespace {
-    constexpr const char* _loggerCat = "RenderableSolarImagery";
-    constexpr const char* KeyStartInstrument = "StartInstrument";
+    constexpr char* _loggerCat = "RenderableSolarImagery";
 
-    constexpr const unsigned int DefaultTextureSize = 32;
-    constexpr const unsigned int MaxImageResolution = 4096;
+    constexpr unsigned int DefaultTextureSize = 32;
 
-    static const openspace::properties::Property::PropertyInfo ActiveInstrumentsInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ActiveInstrumentsInfo = {
         "ActiveInstrument",
         "Active instrument",
         "The active instrument of the current spacecraft imagery"
     };
-    static const openspace::properties::Property::PropertyInfo ContrastValueInfo = {
+    constexpr openspace::properties::Property::PropertyInfo ContrastValueInfo = {
         "ContrastValue",
         "Contrast",
         "Contrast of the current spacecraft imagery"
     };
-    static const openspace::properties::Property::PropertyInfo EnableBorderInfo = {
-        "EnableBorder",
-        "Enable Border",
-        "Enables border around the current spacecraft imagery"
-    };
-    static const openspace::properties::Property::PropertyInfo EnableFrustumInfo = {
-        "EnableFrustum",
-        "Enable frustum",
-        "Enables frustum around the current spacecraft imagery"
-    };
-    static const openspace::properties::Property::PropertyInfo GammaValueInfo = {
-        "GammaValue",
-        "Gamma",
-        "Gamma of the current spacecraft imagery"
-    };
-    static const openspace::properties::Property::PropertyInfo MoveFactorInfo = {
-        "MoveFactor",
-        "Move Factor",
-        "How close to the sun to render the imagery"
-    };
-    static const openspace::properties::Property::PropertyInfo PlaneOpacityInfo = {
-        "PlaneOpacity",
-        "Plane Opacity",
-        "Opacity of the image plane"
-    };
-    static const openspace::properties::Property::PropertyInfo DownsamplingLevelInfo = {
+    constexpr openspace::properties::Property::PropertyInfo DownsamplingLevelInfo = {
         "DownsamplingLevel",
         "Downsampling Level",
         "How much to downsample the original data. 0 is original resolution."
     };
-    static const openspace::properties::Property::PropertyInfo VerboseModeInfo = {
+    constexpr openspace::properties::Property::PropertyInfo EnableBorderInfo = {
+        "EnableBorder",
+        "Enable Border",
+        "Enables border around the current spacecraft imagery"
+    };
+    constexpr openspace::properties::Property::PropertyInfo EnableFrustumInfo = {
+        "EnableFrustum",
+        "Enable frustum",
+        "Enables frustum around the current spacecraft imagery"
+    };
+    constexpr openspace::properties::Property::PropertyInfo GammaValueInfo = {
+        "GammaValue",
+        "Gamma",
+        "Gamma of the current spacecraft imagery"
+    };
+    constexpr openspace::properties::Property::PropertyInfo MoveFactorInfo = {
+        "MoveFactor",
+        "Move Factor",
+        "How close to the sun to render the imagery"
+    };
+    constexpr openspace::properties::Property::PropertyInfo PlaneOpacityInfo = {
+        "PlaneOpacity",
+        "Plane Opacity",
+        "Opacity of the image plane"
+    };
+    constexpr openspace::properties::Property::PropertyInfo VerboseModeInfo = {
         "VerboseMode",
         "Verbose Mode",
         "Output information about image decoding etc"
@@ -100,9 +98,16 @@ namespace {
         std::string rootPath;
 
         std::string transferfunctionPath;
-    };
 
-#include "renderablesolarimagery_codegen.cpp";
+        std::optional<std::string> startInstrument;
+
+        // [[codegen::verbatim(EnableBorderInfo.description)]]
+        std::optional<bool> enableBorder;
+
+        // [[codegen::verbatim(EnableFrustumInfo.description)]]
+        std::optional<bool> enableFrustum;
+    };
+#include "renderablesolarimagery_codegen.cpp"
 }
 
 namespace openspace {
@@ -135,9 +140,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 
     std::string transferfunctionPath = p.transferfunctionPath;
 
-
     spacecraftImageryManager.loadTransferFunctions(transferfunctionPath, _tfMap);
-
 
     spacecraftImageryManager.loadImageMetadata(rootPath, _imageMetadataMap);
 
@@ -149,8 +152,8 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         _activeInstruments.addOption(guiNameCount++, el.first);
     }
 
-    if (dictionary.hasKey(KeyStartInstrument)) {
-        _currentActiveInstrument = dictionary.value<std::string>(KeyStartInstrument);
+    if (p.startInstrument.has_value()) {
+        _currentActiveInstrument = p.startInstrument.value();
     }
     else {
         _currentActiveInstrument = _activeInstruments.getDescriptionByValue(
@@ -161,6 +164,9 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     if (_imageMetadataMap.empty()) {
         LERROR("Images map is empty! Check your path");
     }
+
+    _enableBorder = p.enableBorder.value_or(_enableBorder);
+    _enableFrustum = p.enableFrustum.value_or(_enableFrustum);
 
     addProperty(_planeOpacity);
     addProperty(_enableBorder);
@@ -289,7 +295,7 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
             return;
         }
         _isCoronaGraph = false;
-        _imageSize = 32;
+        _imageSize = DefaultTextureSize;
         _currentScale = 0;
         _currentCenterPixel = glm::vec2(2.f);
         _currentImage = nullptr;
