@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SYNC___DOWNLOAD_EVENT_ENGINE___H__
-#define __OPENSPACE_MODULE_SYNC___DOWNLOAD_EVENT_ENGINE___H__
+#ifndef __OPENSPACE_CORE___DOWNLOAD_EVENT_ENGINE___H__
+#define __OPENSPACE_CORE___DOWNLOAD_EVENT_ENGINE___H__
 
 #include <functional>
 #include <map>
@@ -69,4 +69,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SYNC___DOWNLOAD_EVENT_ENGINE___H__
+#endif // __OPENSPACE_CORE___DOWNLOAD_EVENT_ENGINE___H__

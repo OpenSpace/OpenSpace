@@ -476,7 +476,8 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
 
     }
 
-    return failed ? SynchronizationState::FileDownloadFail : SynchronizationState::Success;
+    return
+        failed ? SynchronizationState::FileDownloadFail : SynchronizationState::Success;
 }
 
 } // namespace openspace

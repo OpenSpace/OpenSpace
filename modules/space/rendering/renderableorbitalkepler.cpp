@@ -528,9 +528,13 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
                 cameraUpDirectionWorld.x,
                 cameraUpDirectionWorld.z
             );
-            orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
+            orthoRight = glm::normalize(
+                glm::cross(otherVector, cameraViewDirectionWorld)
+            );
         }
-        glm::vec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
+        glm::vec3 orthoUp = glm::normalize(
+            glm::cross(cameraViewDirectionWorld, orthoRight)
+        );
 
         _pointProgram->activate();
         _pointProgram->setUniform(
@@ -721,9 +725,9 @@ void RenderableOrbitalKepler::updateBuffers() {
     // Trail vectors needs double length as it may use two trails per orbit
     _startIndexTrails.resize(_sizeRender * 2);
     _segmentSizeTrails.resize(_sizeRender * 2);
-    
+
     double maxSemiMajorAxis = 0.0;
-    size_t nVerticesTotal = 0; 
+    size_t nVerticesTotal = 0;
     for (unsigned int i = 0; i < _sizeRender; i++) {
         // For points rendering as they are always two vertices long
         _segmentSizePoints[i] = 2;
@@ -911,7 +915,7 @@ void RenderableOrbitalKepler::threadedSegmentCalculations(int threadId,
                 else {
                     const int trailHead = static_cast<int>(std::ceil(frac * nSegments));
                     const int headVertexIndex = startVertexIndex + trailHead + 1;
-                    const int correctTrailLength = trailLength + 3; 
+                    const int correctTrailLength = trailLength + 3;
 
                     // Need to do this due to order of vertex data in the vertex buffer
                     int correctVertexIndex = headVertexIndex - correctTrailLength;
@@ -927,7 +931,7 @@ void RenderableOrbitalKepler::threadedSegmentCalculations(int threadId,
                         p0Start = startVertexIndex;
                         p1Start = correctVertexIndex;
 
-                        // Special check to make sure we don't end up with segment 
+                        // Special check to make sure we don't end up with segment
                         // sections 1 vertex length. A segment must contain at least 2
                         // vertices or more.
                         if (lastVertexIndex - correctVertexIndex == 1) {

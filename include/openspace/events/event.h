@@ -60,7 +60,7 @@ struct Event {
     enum class Type : uint8_t {
         ParallelConnection,
         ProfileLoadingFinished,
-		AssetLoading,
+        AssetLoading,
         ApplicationShutdown,
         CameraFocusTransition,
         TimeOfInterestReached,
@@ -160,24 +160,24 @@ struct EventProfileLoadingFinished : public Event {
 struct EventAssetLoading : public Event {
     static constexpr Type Type = Event::Type::AssetLoading;
 
-	enum class State {
-		Loaded,
-		Loading,
-		Unloaded,
-		Error
-	};
+    enum class State {
+        Loaded,
+        Loading,
+        Unloaded,
+        Error
+    };
 
     /**
      * Creates an instance of an AssetLoading event.
-	 *
-	 * \param assetPath_ The path to the asset
-	 * \param newState The new state of the asset given by 'asstPath_'; is one of
+     *
+     * \param assetPath_ The path to the asset
+     * \param newState The new state of the asset given by 'asstPath_'; is one of
                        `Loading`, `Loaded`, `Unloaded`, or `Error`
      */
     EventAssetLoading(const std::filesystem::path& assetPath_, State newState);
 
-	std::filesystem::path assetPath;
-	State state;
+    std::filesystem::path assetPath;
+    State state;
 };
 
 /**

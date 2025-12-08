@@ -63,7 +63,8 @@ private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
     void addToCommand(const std::string& c);
     void registerKeyHandlers();
-    void registerKeyHandler(Key key, KeyModifier modifier, std::function<void()> callback);
+    void registerKeyHandler(Key key, KeyModifier modifier,
+        std::function<void()> callback);
 
     // Helper functions for tab autocomplete
     void autoCompleteCommand();

@@ -938,7 +938,8 @@ void LuaConsole::registerKeyHandlers() {
                 return;
             }
 
-            // If the next character after _inputPosition is a JumpCharacter, delete just that
+            // If the next character after _inputPosition is a JumpCharacter, delete just
+            // that
             if (JumpCharacters.find(command[_inputPosition]) != std::string::npos) {
                 command.erase(_inputPosition, 1);
                 return;

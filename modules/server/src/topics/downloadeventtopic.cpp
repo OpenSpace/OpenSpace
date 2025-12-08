@@ -76,7 +76,7 @@ void DownloadEventTopic::handleJson(const nlohmann::json& json) {
                 payload["totalBytes"] = event.totalBytes.value();
             }
 
-			_connection->sendJson(wrappedPayload(payload));
+            _connection->sendJson(wrappedPayload(payload));
         };
         _subscriptionID = global::downloadEventEngine->subscribe(callback);
     }

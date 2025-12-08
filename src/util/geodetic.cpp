@@ -132,7 +132,7 @@ glm::dvec3 geoViewFromCamera() {
         glm::normalize(cameraPositionModelSpace),
         glm::normalize(glm::transpose(rotationOnly) * cameraViewDirection)
     );
-   
+
     const SurfacePositionHandle posHandle = n->calculateSurfacePositionHandle(
         cameraViewDirectionModelSpace
     );

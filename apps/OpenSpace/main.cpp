@@ -1185,7 +1185,7 @@ int main(int argc, char* argv[]) {
     // we need to explicitly tell the operating system where to find the PDB files. We
     // place them right next to the .exe file and this seems to be the only reliable way
     // to do it.
-    // Using SymInitialize and SymSetSearchPath from dbghelp.h didn't work 
+    // Using SymInitialize and SymSetSearchPath from dbghelp.h didn't work
     // https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/symbol-path
 
     std::string exeFolder = std::filesystem::path(argv[0]).parent_path().string();

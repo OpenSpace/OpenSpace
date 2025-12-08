@@ -89,7 +89,6 @@ namespace {
         // up OpenSpace. If it is not provided, it defaults to 'true', i.e., each
         // individual property determines whether it requires a confirmation or not.
         std::optional<bool> showPropertyConfirmation;
-        
 
         // A list of paths that are automatically registered with the file system. If a
         // key X is used in the table, it is then useable by referencing ${X} in all other

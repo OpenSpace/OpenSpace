@@ -351,7 +351,7 @@ void RingsComponent::initializeGL() {
     glGenBuffers(1, &_vertexPositionBuffer);
 
     createPlane();
-    
+
     // Check if readiness state has changed after shader compilation
     checkAndNotifyReadinessChange();
 }
@@ -487,9 +487,9 @@ void RingsComponent::draw(const RenderData& data,
         _shader->setUniform(_uniformCache.colorFilterValue, _colorFilter);
         _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
         _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
-        
+
         _shader->setUniform(_uniformCache.sunPositionObj, sunPositionObjectSpace);
-        
+
         _shader->setUniform(
             _uniformCache.modelViewProjectionMatrix,
             modelViewProjectionTransform
@@ -679,7 +679,7 @@ void RingsComponent::loadTexture() {
                 "Loaded transparency texture from '{}'", absPath(_textureTransparencyPath)
             ));
             _textureTransparency = std::move(textureTransparency);
-            
+
             _textureTransparency->uploadTexture();
             _textureTransparency->setFilter(Texture::FilterMode::AnisotropicMipMap);
 
@@ -691,7 +691,7 @@ void RingsComponent::loadTexture() {
     }
 
     _isAdvancedTextureEnabled = _textureForwards && _textureBackwards && _textureUnlit;
-    
+
     // Check if readiness state has changed after loading textures
     checkAndNotifyReadinessChange();
 }
@@ -784,7 +784,7 @@ void RingsComponent::compileShadowShader() {
     catch (const ghoul::RuntimeError& e) {
         LERROR(e.message);
     }
-    
+
     // Check if readiness state has changed after shader compilation
     checkAndNotifyReadinessChange();
 }
