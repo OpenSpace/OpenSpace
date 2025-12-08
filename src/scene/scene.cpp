@@ -524,10 +524,6 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
     }
 }
 
-const std::unordered_map<std::string, SceneGraphNode*>& Scene::nodesByIdentifier() const {
-    return _nodesByIdentifier;
-}
-
 SceneGraphNode* Scene::root() {
     return &_rootNode;
 }
@@ -536,7 +532,7 @@ const SceneGraphNode* Scene::root() const {
     return &_rootNode;
 }
 
-SceneGraphNode* Scene::sceneGraphNode(const std::string& name) const {
+SceneGraphNode* Scene::sceneGraphNode(std::string_view name) const {
     const auto it = _nodesByIdentifier.find(name);
     if (it != _nodesByIdentifier.end()) {
         return it->second;

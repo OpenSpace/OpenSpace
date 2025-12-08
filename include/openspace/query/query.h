@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___QUERY___H__
 #define __OPENSPACE_CORE___QUERY___H__
 
-#include <string>
+#include <string_view>
 #include <vector>
 
 namespace openspace {
@@ -39,10 +39,10 @@ class IswaGroup;
 class ScreenSpaceRenderable;
 
 Scene* sceneGraph();
-SceneGraphNode* sceneGraphNode(const std::string& name);
-const Renderable* renderable(const std::string& name);
-properties::Property* property(const std::string& uri);
-properties::PropertyOwner* propertyOwner(const std::string& uri);
+SceneGraphNode* sceneGraphNode(std::string_view name);
+const Renderable* renderable(std::string_view name);
+properties::Property* property(std::string_view uri);
+properties::PropertyOwner* propertyOwner(std::string_view uri);
 const std::vector<properties::Property*>& allProperties();
 const std::vector<properties::PropertyOwner*>& allPropertyOwners();
 
