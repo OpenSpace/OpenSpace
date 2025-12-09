@@ -169,6 +169,35 @@ set(OPENSPACE_SOURCE
   scripting/scriptscheduler_lua.inl
   scripting/systemcapabilitiesbinding.cpp
   scripting/systemcapabilitiesbinding_lua.inl
+  topic/connection.cpp
+  topic/connectionpool.cpp
+  topic/jsonconverters.cpp
+  topic/notificationlog.cpp
+  topic/serverinterface.cpp
+  topic/topicmanager.cpp
+  topic/topics/actionkeybindtopic.cpp
+  topic/topics/authorizationtopic.cpp
+  topic/topics/bouncetopic.cpp
+  topic/topics/camerapathtopic.cpp
+  topic/topics/cameratopic.cpp
+  topic/topics/documentationtopic.cpp
+  topic/topics/downloadeventtopic.cpp
+  topic/topics/enginemodetopic.cpp
+  topic/topics/errorlogtopic.cpp
+  topic/topics/eventtopic.cpp
+  topic/topics/flightcontrollertopic.cpp
+  topic/topics/getpropertytopic.cpp
+  topic/topics/luascripttopic.cpp
+  topic/topics/missiontopic.cpp
+  topic/topics/profiletopic.cpp
+  topic/topics/sessionrecordingtopic.cpp
+  topic/topics/setpropertytopic.cpp
+  topic/topics/subscriptiontopic.cpp
+  topic/topics/timetopic.cpp
+  topic/topics/skybrowsertopic.cpp
+  topic/topics/topic.cpp
+  topic/topics/triggerpropertytopic.cpp
+  topic/topics/versiontopic.cpp
   util/blockplaneintersectiongeometry.cpp
   util/boxgeometry.cpp
   util/collisionhelper.cpp
@@ -363,6 +392,35 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/scripting/scriptengine.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scripting/scriptscheduler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/scripting/systemcapabilitiesbinding.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/connection.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/connectionpool.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/jsonconverters.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/notificationlog.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/serverinterface.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topicmanager.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/actionkeybindtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/authorizationtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/bouncetopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/camerapathtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/cameratopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/documentationtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/downloadeventtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/enginemodetopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/errorlogtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/eventtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/flightcontrollertopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/getpropertytopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/luascripttopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/missiontopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/profiletopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/sessionrecordingtopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/setpropertytopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/subscriptiontopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/timetopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/skybrowsertopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/topic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/triggerpropertytopic.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/topic/topics/versiontopic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/blockplaneintersectiongeometry.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/boxgeometry.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/collisionhelper.h
