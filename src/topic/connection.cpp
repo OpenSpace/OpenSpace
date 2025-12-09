@@ -22,30 +22,31 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/connection.h>
+#include <openspace/topic/connection.h>
 
-#include <modules/server/include/topics/authorizationtopic.h>
-#include <modules/server/include/topics/bouncetopic.h>
-#include <modules/server/include/topics/camerapathtopic.h>
-#include <modules/server/include/topics/cameratopic.h>
-#include <modules/server/include/topics/documentationtopic.h>
-#include <modules/server/include/topics/downloadeventtopic.h>
-#include <modules/server/include/topics/enginemodetopic.h>
-#include <modules/server/include/topics/errorlogtopic.h>
-#include <modules/server/include/topics/eventtopic.h>
-#include <modules/server/include/topics/flightcontrollertopic.h>
-#include <modules/server/include/topics/getpropertytopic.h>
-#include <modules/server/include/topics/luascripttopic.h>
-#include <modules/server/include/topics/missiontopic.h>
-#include <modules/server/include/topics/sessionrecordingtopic.h>
-#include <modules/server/include/topics/setpropertytopic.h>
-#include <modules/server/include/topics/actionkeybindtopic.h>
-#include <modules/server/include/topics/skybrowsertopic.h>
-#include <modules/server/include/topics/subscriptiontopic.h>
-#include <modules/server/include/topics/timetopic.h>
-#include <modules/server/include/topics/topic.h>
-#include <modules/server/include/topics/triggerpropertytopic.h>
-#include <modules/server/include/topics/versiontopic.h>
+#include <openspace/topic/topics/authorizationtopic.h>
+#include <openspace/topic/topics/bouncetopic.h>
+#include <openspace/topic/topics/camerapathtopic.h>
+#include <openspace/topic/topics/cameratopic.h>
+#include <openspace/topic/topics/documentationtopic.h>
+#include <openspace/topic/topics/downloadeventtopic.h>
+#include <openspace/topic/topics/enginemodetopic.h>
+#include <openspace/topic/topics/errorlogtopic.h>
+#include <openspace/topic/topics/eventtopic.h>
+#include <openspace/topic/topics/flightcontrollertopic.h>
+#include <openspace/topic/topics/getpropertytopic.h>
+#include <openspace/topic/topics/luascripttopic.h>
+#include <openspace/topic/topics/missiontopic.h>
+#include <openspace/topic/topics/profiletopic.h>
+#include <openspace/topic/topics/sessionrecordingtopic.h>
+#include <openspace/topic/topics/setpropertytopic.h>
+#include <openspace/topic/topics/actionkeybindtopic.h>
+#include <openspace/topic/topics/skybrowsertopic.h>
+#include <openspace/topic/topics/subscriptiontopic.h>
+#include <openspace/topic/topics/timetopic.h>
+#include <openspace/topic/topics/topic.h>
+#include <openspace/topic/topics/triggerpropertytopic.h>
+#include <openspace/topic/topics/versiontopic.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/format.h>
@@ -54,7 +55,6 @@
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
 #include <ghoul/misc/profiling.h>
-#include <include/topics/profiletopic.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "ServerModule: Connection";

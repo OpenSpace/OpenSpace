@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___CAMERAPATHTOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___CAMERAPATHTOPIC___H__
+#ifndef __OPENSPACE_CORE___CAMERAPATHTOPIC___H__
+#define __OPENSPACE_CORE___CAMERAPATHTOPIC___H__
 
-#include <modules/server/include/topics/topic.h>
+#include <openspace/topic/topics/topic.h>
 #include <chrono>
 
 namespace openspace {
@@ -52,4 +52,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___CAMERAPATHTOPIC___H__
+#endif // __OPENSPACE_CORE___CAMERAPATHTOPIC___H__

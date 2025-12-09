@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___TRIGGERPROPERTYTOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___TRIGGERPROPERTYTOPIC___H__
+#ifndef __OPENSPACE_CORE___TRIGGERPROPERTYTOPIC___H__
+#define __OPENSPACE_CORE___TRIGGERPROPERTYTOPIC___H__
 
-#include <modules/server/include/topics/topic.h>
+#include <openspace/topic/topics/topic.h>
 
 namespace openspace {
 
@@ -40,4 +40,4 @@ public:
 
 } // namespace
 
-#endif // __OPENSPACE_MODULE_SERVER___TRIGGERPROPERTYTOPIC___H__
+#endif // __OPENSPACE_CORE___TRIGGERPROPERTYTOPIC___H__

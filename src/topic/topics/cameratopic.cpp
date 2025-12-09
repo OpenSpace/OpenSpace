@@ -22,13 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/cameratopic.h>
+#include <openspace/topic/topics/cameratopic.h>
 
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
-#include <modules/server/include/connection.h>
-#include <modules/server/servermodule.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/topicmanager.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
@@ -50,10 +51,7 @@ CameraTopic::CameraTopic()
 
 CameraTopic::~CameraTopic() {
     if (_dataCallbackHandle != UnsetOnChangeHandle) {
-        ServerModule* module = global::moduleEngine->module<ServerModule>();
-        if (module) {
-            module->removePreSyncCallback(_dataCallbackHandle);
-        }
+        global::topicManager->removePreSyncCallback(_dataCallbackHandle);
     }
 }
 
@@ -69,8 +67,7 @@ void CameraTopic::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    ServerModule* module = global::moduleEngine->module<ServerModule>();
-    _dataCallbackHandle = module->addPreSyncCallback(
+    _dataCallbackHandle = global::topicManager->addPreSyncCallback(
         [this]() {
             const auto now = std::chrono::system_clock::now();
             if (now - _lastUpdateTime > _cameraPositionUpdateTime) {

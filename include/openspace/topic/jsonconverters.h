@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___JSON_CONVERTERS___H__
-#define __OPENSPACE_MODULE_SERVER___JSON_CONVERTERS___H__
+#ifndef __OPENSPACE_CORE___JSON_CONVERTERS___H__
+#define __OPENSPACE_CORE___JSON_CONVERTERS___H__
 
 #include <openspace/json.h>
 #include <ghoul/glm.h>
@@ -74,4 +74,4 @@ void to_json(nlohmann::json& j, const dvec3& v);
 
 } // namespace glm
 
-#endif // __OPENSPACE_MODULE_SERVER___JSON_CONVERTERS___H__
+#endif // __OPENSPACE_CORE___JSON_CONVERTERS___H__

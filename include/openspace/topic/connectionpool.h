@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___CONNECTIONPOOL___H__
-#define __OPENSPACE_MODULE_SERVER___CONNECTIONPOOL___H__
+#ifndef __OPENSPACE_CORE___CONNECTIONPOOL___H__
+#define __OPENSPACE_CORE___CONNECTIONPOOL___H__
 
 #include <functional>
 #include <memory>
@@ -62,4 +62,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___CONNECTIONPOOL___H__
+#endif // __OPENSPACE_CORE___CONNECTIONPOOL___H__

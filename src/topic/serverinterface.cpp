@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/serverinterface.h>
+#include <openspace/topic/serverinterface.h>
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/io/socket/socketserver.h>

@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/documentationtopic.h>
+#include <openspace/topic/topics/documentationtopic.h>
 
-#include <modules/server/include/connection.h>
-#include <modules/server/include/jsonconverters.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/jsonconverters.h>
 #include <openspace/engine/globals.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/documentation/documentationengine.h>

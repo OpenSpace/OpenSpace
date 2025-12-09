@@ -49,6 +49,7 @@ class RenderEngine;
 class ScreenSpaceRenderable;
 class SyncEngine;
 class TimeManager;
+class TopicManager;
 class VersionChecker;
 struct WindowDelegate;
 namespace interaction {
@@ -87,6 +88,7 @@ inline RenderEngine* renderEngine;
 inline std::vector<std::unique_ptr<ScreenSpaceRenderable>>* screenSpaceRenderables;
 inline SyncEngine* syncEngine;
 inline TimeManager* timeManager;
+inline TopicManager* topicManager;
 inline VersionChecker* versionChecker;
 inline WindowDelegate* windowDelegate;
 inline Configuration* configuration;

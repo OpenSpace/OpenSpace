@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/bouncetopic.h>
+#include <openspace/topic/topics/bouncetopic.h>
 
-#include <modules/server/include/connection.h>
+#include <openspace/topic/connection.h>
 
 namespace openspace {
 

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
-#define __OPENSPACE_MODULE_SERVER___NOTIFICATIONLOG___H__
+#ifndef __OPENSPACE_CORE___NOTIFICATIONLOG___H__
+#define __OPENSPACE_CORE___NOTIFICATIONLOG___H__
 
 #include <ghoul/logging/log.h>
 

@@ -24,7 +24,7 @@
 
 #include <modules/webgui/webguimodule.h>
 
-#include <modules/server/servermodule.h>
+#include <openspace/topic/topicmanager.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
@@ -240,10 +240,8 @@ void WebGuiModule::startProcess() {
 
     _endpoints.clear();
 
-    ServerModule* serverModule = global::moduleEngine->module<ServerModule>();
-    const ServerInterface* serverInterface = serverModule->serverInterfaceByIdentifier(
-        _webSocketInterface
-    );
+    const ServerInterface* serverInterface =
+        global::topicManager->serverInterfaceByIdentifier(_webSocketInterface);
     if (!serverInterface) {
         LERROR("Missing server interface. Server process could not start");
         return;

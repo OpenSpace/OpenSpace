@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
-#define __OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
+#ifndef __OPENSPACE_CORE___ERRORLOGTOPIC____H__
+#define __OPENSPACE_CORE___ERRORLOGTOPIC____H__
 
-#include <modules/server/include/topics/topic.h>
+#include <openspace/topic/topics/topic.h>
 #include <ghoul/logging/log.h>
 
 namespace openspace {
@@ -52,4 +52,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
+#endif // __OPENSPACE_CORE___ERRORLOGTOPIC____H__

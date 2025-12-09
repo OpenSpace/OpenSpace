@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/jsonconverters.h>
+#include <openspace/topic/jsonconverters.h>
 
 #include <openspace/interaction/action.h>
 #include <openspace/properties/property.h>

@@ -52,6 +52,7 @@
 #include <openspace/scene/profile.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
+#include <openspace/topic/topicmanager.h>
 #include <openspace/util/downloadeventengine.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/timemanager.h>
@@ -89,6 +90,7 @@ namespace {
         sizeof(std::vector<std::unique_ptr<ScreenSpaceRenderable>>) +
         sizeof(SyncEngine) +
         sizeof(TimeManager) +
+        sizeof(TopicManager) +
         sizeof(VersionChecker) +
         sizeof(WindowDelegate) +
         sizeof(Configuration) +
@@ -262,6 +264,14 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
+    topicManager = new (currentPos) TopicManager;
+    ghoul_assert(topicManager, "No topicManager");
+    currentPos += sizeof(TopicManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    topicManager = new TopicManager;
+#endif // WIN32
+
+#ifdef WIN32
     versionChecker = new (currentPos) VersionChecker;
     ghoul_assert(versionChecker, "No versionChecker");
     currentPos += sizeof(VersionChecker);
@@ -415,6 +425,8 @@ void initialize() {
     rootPropertyOwner->addPropertySubOwner(global::renderEngine);
     rootPropertyOwner->addPropertySubOwner(global::screenSpaceRootPropertyOwner);
 
+    rootPropertyOwner->addPropertySubOwner(global::topicManager);
+
     rootPropertyOwner->addPropertySubOwner(global::parallelPeer);
     rootPropertyOwner->addPropertySubOwner(global::luaConsole);
     rootPropertyOwner->addPropertySubOwner(global::dashboard);
@@ -540,6 +552,13 @@ void destroy() {
     versionChecker->~VersionChecker();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete versionChecker;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'TopicManager'");
+#ifdef WIN32
+    topicManager->~TopicManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete topicManager;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'TimeManager'");

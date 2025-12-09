@@ -22,9 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/errorlogtopic.h>
+#include <openspace/topic/topics/errorlogtopic.h>
 
-#include <modules/server/include/logging/notificationlog.h>
+#include <openspace/topic/notificationlog.h>
+#include <openspace/topic/connection.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {

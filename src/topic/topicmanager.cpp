@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/servermodule.h>
+#include <openspace/topic/topicmanager.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/server/include/serverinterface.h>
-#include <modules/server/include/connection.h>
-#include <modules/server/include/topics/topic.h>
+#include <openspace/topic/serverinterface.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/topics/topic.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
@@ -47,17 +47,17 @@ namespace {
         std::optional<std::vector<std::string>> allowAddresses;
         std::optional<int> skyBrowserUpdateTime;
     };
-#include "servermodule_codegen.cpp"
+#include "topicmanager_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation ServerModule::Documentation() {
-    return codegen::doc<Parameters>("module_server");
+documentation::Documentation TopicManager::Documentation() {
+    return codegen::doc<Parameters>("core_topicmanager");
 }
 
-ServerModule::ServerModule()
-    : OpenSpaceModule(ServerModule::Name)
+TopicManager::TopicManager()
+    : properties::PropertyOwner( { "TopicManager", "Topic Manager" })
     , _interfaceOwner({"Interfaces", "Interfaces", "Server Interfaces"})
 {
     addPropertySubOwner(_interfaceOwner);
@@ -72,12 +72,12 @@ ServerModule::ServerModule()
     });
 }
 
-ServerModule::~ServerModule() {
+TopicManager::~TopicManager() {
     disconnectAll();
     cleanUpFinishedThreads();
 }
 
-ServerInterface* ServerModule::serverInterfaceByIdentifier(const std::string& identifier)
+ServerInterface* TopicManager::serverInterfaceByIdentifier(const std::string& identifier)
 {
     const auto si = std::find_if(
         _interfaces.begin(),
@@ -92,11 +92,11 @@ ServerInterface* ServerModule::serverInterfaceByIdentifier(const std::string& id
     return si->get();
 }
 
-int ServerModule::skyBrowserUpdateTime() const {
+int TopicManager::skyBrowserUpdateTime() const {
     return _skyBrowserUpdateTime;
 }
 
-void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
+void TopicManager::initialize(const ghoul::Dictionary& configuration) {
     global::callback::preSync->emplace_back([this]() {
         ZoneScopedN("ServerModule");
 
@@ -127,7 +127,7 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
     _skyBrowserUpdateTime = p.skyBrowserUpdateTime.value_or(_skyBrowserUpdateTime);
 }
 
-void ServerModule::preSync() {
+void TopicManager::preSync() {
     // Set up new connections.
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
         if (!serverInterface->isEnabled()) {
@@ -171,7 +171,7 @@ void ServerModule::preSync() {
     cleanUpFinishedThreads();
 }
 
-void ServerModule::cleanUpFinishedThreads() {
+void TopicManager::cleanUpFinishedThreads() {
     ZoneScoped;
 
     for (ConnectionData& connectionData : _connections) {
@@ -192,7 +192,7 @@ void ServerModule::cleanUpFinishedThreads() {
     ), _connections.end());
 }
 
-void ServerModule::disconnectAll() {
+void TopicManager::disconnectAll() {
     ZoneScoped;
 
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
@@ -209,7 +209,7 @@ void ServerModule::disconnectAll() {
     }
 }
 
-void ServerModule::handleConnection(const std::shared_ptr<Connection>& connection) {
+void TopicManager::handleConnection(const std::shared_ptr<Connection>& connection) {
     ZoneScoped;
 
     std::string messageString;
@@ -220,7 +220,7 @@ void ServerModule::handleConnection(const std::shared_ptr<Connection>& connectio
     }
 }
 
-void ServerModule::consumeMessages() {
+void TopicManager::consumeMessages() {
     ZoneScoped;
 
     const std::lock_guard lock(_messageQueueMutex);
@@ -233,13 +233,13 @@ void ServerModule::consumeMessages() {
     }
 }
 
-ServerModule::CallbackHandle ServerModule::addPreSyncCallback(CallbackFunction cb) {
+TopicManager::CallbackHandle TopicManager::addPreSyncCallback(CallbackFunction cb) {
     const CallbackHandle handle = _nextCallbackHandle++;
     _preSyncCallbacks.emplace_back(handle, std::move(cb));
     return handle;
 }
 
-void ServerModule::removePreSyncCallback(CallbackHandle handle) {
+void TopicManager::removePreSyncCallback(CallbackHandle handle) {
     const auto it = std::find_if(
         _preSyncCallbacks.begin(),
         _preSyncCallbacks.end(),

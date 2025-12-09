@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___CONNECTION___H__
-#define __OPENSPACE_MODULE_SERVER___CONNECTION___H__
+#ifndef __OPENSPACE_CORE___CONNECTION___H__
+#define __OPENSPACE_CORE___CONNECTION___H__
 
 #include <ghoul/misc/templatefactory.h>
 #include <openspace/json.h>
@@ -80,4 +80,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___CONNECTION___H__
+#endif // __OPENSPACE_CORE___CONNECTION___H__

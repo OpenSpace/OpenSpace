@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/subscriptiontopic.h>
+#include <openspace/topic/topics/subscriptiontopic.h>
 
-#include <modules/server/include/connection.h>
-#include <modules/server/include/jsonconverters.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/jsonconverters.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>

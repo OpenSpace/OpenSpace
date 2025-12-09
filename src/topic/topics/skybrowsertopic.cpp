@@ -22,10 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/server/include/topics/skybrowsertopic.h"
+#include "openspace/topic/topics/skybrowsertopic.h"
 
-#include <modules/server/include/connection.h>
-#include <modules/server/servermodule.h>
+#include <openspace/engine/globals.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/topicmanager.h>
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <modules/skybrowser/include/targetbrowserpair.h>
 #include <openspace/engine/moduleengine.h>
@@ -47,18 +48,13 @@ namespace openspace {
 SkyBrowserTopic::SkyBrowserTopic()
     : _lastUpdateTime(std::chrono::system_clock::now())
 {
-    ServerModule* module = global::moduleEngine->module<ServerModule>();
-    if (module) {
-        _skyBrowserUpdateTime = std::chrono::milliseconds(module->skyBrowserUpdateTime());
-    }
+    _skyBrowserUpdateTime =
+        std::chrono::milliseconds(global::topicManager->skyBrowserUpdateTime());
 }
 
 SkyBrowserTopic::~SkyBrowserTopic() {
     if (_targetDataCallbackHandle != UnsetOnChangeHandle) {
-        ServerModule* module = global::moduleEngine->module<ServerModule>();
-        if (module) {
-            module->removePreSyncCallback(_targetDataCallbackHandle);
-        }
+        global::topicManager->removePreSyncCallback(_targetDataCallbackHandle);
     }
 }
 
@@ -78,8 +74,7 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
         return;
     }
 
-    ServerModule* module = global::moduleEngine->module<ServerModule>();
-    _targetDataCallbackHandle = module->addPreSyncCallback(
+    _targetDataCallbackHandle = global::topicManager->addPreSyncCallback(
         [this]() {
             const auto now = std::chrono::system_clock::now();
             if (now - _lastUpdateTime > _skyBrowserUpdateTime) {

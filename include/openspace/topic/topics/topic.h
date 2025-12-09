@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___TOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___TOPIC___H__
+#ifndef __OPENSPACE_CORE___TOPIC___H__
+#define __OPENSPACE_CORE___TOPIC___H__
 
 #include <openspace/json.h>
 
@@ -49,4 +49,4 @@ protected:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___TOPIC___H__
+#endif // __OPENSPACE_CORE___TOPIC___H__

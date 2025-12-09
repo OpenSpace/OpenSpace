@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/server/include/topics/versiontopic.h"
+#include "openspace/topic/topics/versiontopic.h"
 
-#include <modules/server/include/connection.h>
-#include <modules/server/servermodule.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/topicmanager.h>
 #include <openspace/openspace.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/versionchecker.h>

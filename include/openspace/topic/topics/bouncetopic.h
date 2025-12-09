@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___BOUNCETOPIC___H__
-#define __OPENSPACE_MODULE_SERVER___BOUNCETOPIC___H__
+#ifndef __OPENSPACE_CORE___BOUNCETOPIC___H__
+#define __OPENSPACE_CORE___BOUNCETOPIC___H__
 
-#include <modules/server/include/topics/topic.h>
+#include <openspace/topic/topics/topic.h>
 
 namespace openspace {
 
@@ -42,4 +42,4 @@ public:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___BOUNCETOPIC___H__
+#endif // __OPENSPACE_CORE___BOUNCETOPIC___H__

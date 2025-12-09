@@ -246,6 +246,9 @@ namespace {
         // used if this is left out
         std::optional<HttpProxy> httpProxy;
 
+        //ghoul::Dictionary server [[codegen::reference("core_topicmanager")]];
+        ghoul::Dictionary server;
+
         struct OpenGLDebugContext {
             // Determines whether the OpenGL context should be a debug context
             bool activate;
@@ -452,6 +455,8 @@ ghoul::Dictionary Configuration::createDictionary() {
     }
     res.setValue("ModuleConfigurations", moduleConfigurationsDict);
 
+    res.setValue("Server", server);
+
     {
         ghoul::Dictionary openGLDebugContextDict;
         openGLDebugContextDict.setValue("IsActive", openGLDebugContext.isActive);
@@ -634,6 +639,8 @@ void parseLuaState(Configuration& configuration) {
             c.moduleConfigurations[std::string(key)] = dict.value<ghoul::Dictionary>(key);
         }
     }
+
+    c.server = p.server;
 
     if (p.openGLDebugContext.has_value()) {
         const Parameters::OpenGLDebugContext& l = *p.openGLDebugContext;

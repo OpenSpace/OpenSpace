@@ -22,12 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
-#define __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
+#ifndef __OPENSPACE_CORE___TOPICMANAGER___H__
+#define __OPENSPACE_CORE___TOPICMANAGER___H__
 
+#include <openspace/properties/propertyowner.h>
 #include <openspace/util/openspacemodule.h>
 
-#include <modules/server/include/serverinterface.h>
+#include <openspace/topic/serverinterface.h>
 
 #include <deque>
 #include <memory>
@@ -46,14 +47,17 @@ struct Message {
     std::string messageString;
 };
 
-class ServerModule : public OpenSpaceModule {
+class TopicManager : public properties::PropertyOwner {
 public:
-    static constexpr const char* Name = "Server";
     using CallbackHandle = int;
     using CallbackFunction = std::function<void()>;
 
-    ServerModule();
-    virtual ~ServerModule() override;
+    TopicManager();
+    virtual ~TopicManager() override;
+
+    void initialize(const ghoul::Dictionary& configuration);
+
+    void preSync();
 
     ServerInterface* serverInterfaceByIdentifier(const std::string& identifier);
 
@@ -63,9 +67,6 @@ public:
     void removePreSyncCallback(CallbackHandle handle);
 
     static documentation::Documentation Documentation();
-
-protected:
-    void internalInitialize(const ghoul::Dictionary& configuration) override;
 
 private:
     struct ConnectionData {
@@ -77,7 +78,6 @@ private:
     void cleanUpFinishedThreads();
     void consumeMessages();
     void disconnectAll();
-    void preSync();
 
     std::mutex _messageQueueMutex;
     std::deque<Message> _messageQueue;
@@ -94,4 +94,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___SERVERMODULE___H__
+#endif // __OPENSPACE_CORE___TOPICMANAGER___H__

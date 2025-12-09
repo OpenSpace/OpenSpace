@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/triggerpropertytopic.h>
+#include <openspace/topic/topics/triggerpropertytopic.h>
 
 #include <openspace/json.h>
 #include <openspace/properties/property.h>

@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/logging/notificationlog.h>
+#include <openspace/topic/notificationlog.h>
 
 namespace openspace {
 

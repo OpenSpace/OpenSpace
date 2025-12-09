@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/connectionpool.h>
+#include <openspace/topic/connectionpool.h>
 
 #include <ghoul/io/socket/socket.h>
 #include <ghoul/io/socket/socketserver.h>

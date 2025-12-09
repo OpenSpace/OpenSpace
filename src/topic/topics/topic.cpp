@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/topic.h>
+#include <openspace/topic/topics/topic.h>
 
-#include <modules/server/servermodule.h>
+#include <openspace/topic/topicmanager.h>
 #include <openspace/json.h>
 #include <ghoul/misc/profiling.h>
 

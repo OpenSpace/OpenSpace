@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/authorizationtopic.h>
+#include <openspace/topic/topics/authorizationtopic.h>
 
-#include <modules/server/include/connection.h>
+#include <openspace/topic/connection.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/logging/logmanager.h>

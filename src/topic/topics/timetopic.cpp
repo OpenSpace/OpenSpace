@@ -22,9 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/server/include/topics/timetopic.h"
+#include "openspace/topic/topics/timetopic.h"
 
-#include <modules/server/include/connection.h>
+#include <openspace/topic/connection.h>
 #include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
 #include <openspace/query/query.h>

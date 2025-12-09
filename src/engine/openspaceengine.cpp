@@ -57,6 +57,7 @@
 #include <openspace/scene/sceneinitializer.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/topic/topicmanager.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
@@ -417,6 +418,8 @@ void OpenSpaceEngine::initialize() {
     LINFOC("OpenSpace Version", std::string(OPENSPACE_VERSION));
     LINFOC("Commit", std::string(OPENSPACE_GIT_FULL));
 
+    global::topicManager->initialize(global::configuration->server);
+
     // Register modules
     global::moduleEngine->initialize(global::configuration->moduleConfigurations);
 
@@ -430,6 +433,7 @@ void OpenSpaceEngine::initialize() {
             DocEng.addDocumentation(doc);
         }
     }
+    DocEng.addDocumentation(TopicManager::Documentation());
     DocEng.addDocumentation(Configuration::Documentation());
 
     // Register the provided shader directories
@@ -1148,6 +1152,8 @@ void OpenSpaceEngine::preSynchronization() {
         global::parallelPeer->preSynchronization();
         global::interactionMonitor->updateActivityState();
     }
+
+    global::topicManager->preSync();
 
     for (const std::function<void()>& func : *global::callback::preSync) {
         ZoneScopedN("[Module] preSync");

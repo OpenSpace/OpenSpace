@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/setpropertytopic.h>
+#include <openspace/topic/topics/setpropertytopic.h>
 
 #include <openspace/json.h>
 #include <openspace/engine/globals.h>

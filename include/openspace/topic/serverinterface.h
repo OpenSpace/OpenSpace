@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__
-#define __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__
+#ifndef __OPENSPACE_CORE___SERVERINTERFACE___H__
+#define __OPENSPACE_CORE___SERVERINTERFACE___H__
 
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/list/stringlistproperty.h>
@@ -80,4 +80,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__
+#endif // __OPENSPACE_CORE___SERVERINTERFACE___H__

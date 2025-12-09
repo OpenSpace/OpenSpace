@@ -22,12 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/server/include/topics/downloadeventtopic.h>
+#include <openspace/topic/topics/downloadeventtopic.h>
 
 #include <openspace/engine/globals.h>
 #include <openspace/util/downloadeventengine.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <openspace/topic/connection.h>
 
 namespace {
     constexpr std::string_view StartSubscription = "start_subscription";
