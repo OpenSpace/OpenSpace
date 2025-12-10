@@ -34,6 +34,7 @@
 #include <QLabel>
 #include <QListWidget>
 #include <QPushButton>
+#include <QTextStream>
 #include <QTimer>
 #include <algorithm>
 #include <filesystem>
