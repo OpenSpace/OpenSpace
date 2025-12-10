@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
+#include <openspace/util/timeconstants.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
@@ -90,11 +91,11 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ForceFullOrbitTrailInfo = {
         "ForceFullOrbitTrail",
         "Force Full Orbit Trail",
-        "Forces the trail to always have a visible length of one orbit. If time between "
+        "Forces the trail to always have a visible length of one orbit.If the time from"
         "the start date of the trail and the current time in OpenSpace is less than one "
-        "period, then the trail will show part of the trail that extends into the "
-        "future compared to the current OpenSpace time. The extent of the trail will "
-        "then be from the start date of the trail and one period of time forward.",
+        "period (full rotation), then the trail will extends into the future compared "
+        "to the current OpenSpace time (if possible). If the current time in OpenSpace "
+        "has passed the end date, the last full period of the trail will be shown.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -178,7 +179,6 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
     _forceFullOrbitTrail.onChange([&]() {
         _needsFullSweep = true;
         _indexBufferDirty = true;
-        _forceFlag = true;
     });
     addProperty(_forceFullOrbitTrail);
 
@@ -217,8 +217,6 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
 
     // We store the vertices with (excluding the wrapping) decending temporal order
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::NewestFirst;
-
-    _forceFlag = _forceFullOrbitTrail;
 }
 
 void RenderableTrailOrbit::initializeGL() {
@@ -255,9 +253,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     }
 
     // 2
-    using namespace std::chrono;
-    const int phase = trailPhase(data.time.j2000Seconds());
-    if (phase == Phase::Normal) {
+    const PhaseType phase = trailPhase(data.time.j2000Seconds());
+    if (phase == PhaseType::Normal) {
         // Write the current location into the floating position
         const glm::vec3 p = translationPosition(data.time);
         _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
@@ -382,23 +379,23 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     glBindVertexArray(0);
 }
 
-RenderableTrailOrbit::Phase RenderableTrailOrbit::trailPhase(double time) {
-    if (!_forceFullOrbitTrail) {
-        return Phase::Normal;
+RenderableTrailOrbit::PhaseType RenderableTrailOrbit::trailPhase(double time) {
+    const bool missingDates = _startTime.value().empty() || _endTime.value().empty();
+    if (!_forceFullOrbitTrail || missingDates) {
+        return PhaseType::Normal;
     }
 
-    using namespace std::chrono;
     const double startTime = Time::convertTime(_startTime);
     const double endTime = Time::convertTime(_endTime);
-    const double periodInSeconds = _period * duration_cast<seconds>(hours(24)).count();
-    if (time < startTime + periodInSeconds) {
-        return Phase::Beginning;
+    const double periodSeconds = _period * timeconstants::SecondsPerDay;
+    if (time < startTime + periodSeconds) {
+        return PhaseType::Pre;
     }
     else if (time > endTime) {
-        return Phase::End;
+        return PhaseType::Post;
     }
     else {
-        return Phase::Normal;
+        return PhaseType::Normal;
     }
 }
 
@@ -408,6 +405,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     const double time = data.time.j2000Seconds();
     if (_needsFullSweep) {
         fullSweep(time);
+        _previousPhase = trailPhase(time);
         return { false, true, UpdateReport::All } ;
     }
 
@@ -417,12 +415,12 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         return { false, false, 0 };
     }
 
-    using namespace std::chrono;
-    const double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
+    const double periodSeconds = _period * timeconstants::SecondsPerDay;
     const double secondsPerPoint = periodSeconds / (_resolution - 1);
 
-    const int phase = trailPhase(time);
-    if (phase == Phase::Normal) {
+    const PhaseType currentPhase = trailPhase(time);
+    if (currentPhase == PhaseType::Normal) {
+        _previousPhase = currentPhase;
         // How much time has passed since the last permanent point
         const double delta = time - _lastPointTime;
 
@@ -519,16 +517,18 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         }
     }
     else {
-        const double prevTime = data.previousFrameTime.j2000Seconds();
-        const double lowerCutOff = Time::convertTime(_startTime) + periodSeconds;
-        const double upperCutOff = Time::convertTime(_endTime);
-        if (prevTime > lowerCutOff && prevTime < upperCutOff || _forceFlag) {
+        // If _forceFullOrbitTrail is true and if before startTime + preiod or after
+        // endTime.
+        bool permanentPointsNeedUpdate = false;
+        bool nUpdated = 0;
+        if (_previousPhase != currentPhase) {
             fullSweep(time);
-            return { false, true, UpdateReport::All };
+            permanentPointsNeedUpdate = true;
+            nUpdated = UpdateReport::All;
         }
 
-        _forceFlag = false;
-        return { false, false, 0 };
+        _previousPhase = currentPhase;
+        return { false, permanentPointsNeedUpdate, nUpdated };
     }
 }
 
@@ -546,15 +546,14 @@ void RenderableTrailOrbit::fullSweep(double time) {
         std::iota(_indexArray.begin() + _resolution, _indexArray.end(), 0);
     }
 
-    using namespace std::chrono;
-    const double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
+    const double periodSeconds = _period * timeconstants::SecondsPerDay;
     const double secondsPerPoint = periodSeconds / (_resolution - 1);
 
-    const int phase = trailPhase(time);
-    if (phase == Phase::Beginning) {
+    const PhaseType phase = trailPhase(time);
+    if (phase == PhaseType::Pre) {
         time = Time::convertTime(_startTime) + periodSeconds;
     }
-    else if (phase == Phase::End) {
+    else if (phase == PhaseType::Post) {
         time = Time::convertTime(_endTime);
     }
     _lastPointTime = time;

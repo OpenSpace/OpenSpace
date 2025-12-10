@@ -56,11 +56,11 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    enum Phase {
-        Beginning = 0,
-        Normal,
-        End
-    };
+	enum PhaseType {
+		Pre = 0,
+	    Normal,
+	    Post
+	};
 
     /**
      * Performs a full sweep of the orbit and fills the entire vertex buffer object.
@@ -105,7 +105,7 @@ private:
     * \param time The current ingame time in j2000 epoch.
     * \return Integer 0 to 2 representing phase (Enum: Beginning, Normal, End)
     */
-    Phase trailPhase(double time);
+    PhaseType trailPhase(double time);
 
     /// Determines if trail length should be forced to be one orbital period in length
     properties::BoolProperty _forceFullOrbitTrail;
@@ -124,9 +124,8 @@ private:
     /// A dirty flag to determine whether the index buffer needs to be regenerated and
     /// then reuploaded
     bool _indexBufferDirty = true;
-    /// Flag to help determine if we should apply full sweep or not when
-    /// _forceFullOrbitTrail is enabled
-    bool _forceFlag = false;
+	/// Previous phase such that we can track transitions to other phases
+	PhaseType _previousPhase = PhaseType::Normal;
 
     /// The time stamp of the oldest point in the array
     double _firstPointTime = 0.0;
