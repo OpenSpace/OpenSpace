@@ -108,7 +108,7 @@ void SplitComboBox::populateList(const std::string& preset) {
         // Display the relative path, but store the full path in the user data segment
         addItem(
             icon,
-            QString::fromStdString(relPath.string()),
+            QString::fromStdString(relPath.generic_string()),
             QString::fromStdString(p.string())
         );
 
@@ -137,7 +137,7 @@ void SplitComboBox::populateList(const std::string& preset) {
 
         // Display the relative path, but store the full path in the user data segment
         addItem(
-            QString::fromStdString(relPath.string()),
+            QString::fromStdString(relPath.generic_string()),
             QString::fromStdString(p.string())
         );
 
