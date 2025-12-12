@@ -67,7 +67,6 @@ public:
 private:
     void loadTexture();
 
-    std::vector<std::string> _dependentNodes;
     std::vector<SceneGraphNode*> _solarImageryDependencies;
 };
 

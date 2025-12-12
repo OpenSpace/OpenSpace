@@ -44,15 +44,17 @@
 #include <memory>
 
 namespace {
-    constexpr const char* _loggerCat = "RendearbleSpacecraftCameraSphere";
+    constexpr char* _loggerCat = "RendearbleSpacecraftCameraSphere";
 
     // This number MUST match the constant specified in the shader, otherwise UB / MN
-    constexpr const int MaxSpacecraftObservatories = 7;
+    constexpr int MaxSpacecraftObservatories = 7;
+
 
     struct [[codegen::Dictionary(RenderableSolarImageryProjection)]] Parameters {
+        // List of spacecraft identifiers that will be projected on the sphere
         std::vector<std::string> dependentNodes;
 
-        std::optional<float> radius;
+        //std::optional<float> radius;
     };
 
 #include "renderablesolarimageryprojection_codegen.cpp"
@@ -71,12 +73,7 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _dependentNodes = p.dependentNodes;
-    //_sphere(p.radius.value_or(6.96701E8f), 100) @TODO
-}
-
-void RenderableSolarImageryProjection::initialize() {
-    for (const std::string& n : _dependentNodes) {
+    for (const std::string& n : p.dependentNodes) {
         SceneGraphNode* depNode = global::renderEngine->scene()->sceneGraphNode(n);
         if (!depNode) {
             LWARNING(std::format(
@@ -93,6 +90,12 @@ void RenderableSolarImageryProjection::initialize() {
             continue;
         }
         _solarImageryDependencies.push_back(depNode);
+    }
+}
+
+void RenderableSolarImageryProjection::initialize() {
+    for (SceneGraphNode* node : _solarImageryDependencies) {
+        parent()->addDependency(*node);
     }
 }
 
@@ -125,10 +128,7 @@ void RenderableSolarImageryProjection::update(const UpdateData& data) {
 }
 
 void RenderableSolarImageryProjection::render(const RenderData& data, RendererTasks& rendererTask) {
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)));
+    glm::dmat4 modelTransform = calcModelTransform(data);
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 
     _shader->activate();
@@ -138,7 +138,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
 
-    const int numPlanes = _solarImageryDependencies.size();
+    const int numPlanes = static_cast<int>(_solarImageryDependencies.size());
     int solarImageryCount = 0;
 
     ghoul::opengl::TextureUnit txUnits[MaxSpacecraftObservatories];
@@ -154,14 +154,14 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
 
         const SpacecraftCameraPlane& plane = solarImagery->getCameraPlane();
         const glm::dvec3 planePos = plane.worldPosition();
-        const glm::dmat4 planeRot = plane.worldRotation();
+        const glm::dmat4 planeRot = glm::inverse(plane.worldRotation());
 
         _shader->setUniform("isCoronaGraph[" + std::to_string(i) + "]", isCoronaGraph);
         _shader->setUniform("isEnabled[" + std::to_string(i) + "]", enabled);
         _shader->setUniform("sunToSpacecraftReferenceFrame[" + std::to_string(i) + "]",
                         planeRot * glm::dmat4(data.modelTransform.rotation));
         _shader->setUniform("planePositionSpacecraft[" + std::to_string(i) + "]",
-                            glm::dvec3(planeRot * glm::dvec4(planePos, 1.0)));
+                            glm::dvec3(planeRot * glm::dvec4(planePos - data.modelTransform.translation, 1.0)));
         _shader->setUniform("gammaValue[" + std::to_string(i) + "]", solarImagery->getGammaValue());
         _shader->setUniform("contrastValue[" + std::to_string(i) + "]", solarImagery->getContrastValue());
         _shader->setUniform("scale[" + std::to_string(i) + "]", solarImagery->getScale());
