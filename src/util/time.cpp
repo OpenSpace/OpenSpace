@@ -25,18 +25,18 @@
 #include <openspace/util/time.h>
 
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timeconversion.h>
-#include <openspace/util/timemanager.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
+#include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <ctime>
 #include <string_view>
 

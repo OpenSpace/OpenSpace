@@ -27,8 +27,6 @@
 
 #include <openspace/properties/templateproperty.h>
 
-#include <vector>
-
 namespace openspace::properties {
 
 template <typename T>

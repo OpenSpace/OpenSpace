@@ -36,10 +36,6 @@
 #include <openspace/rendering/labelscomponent.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul::opengl { class ProgramObject; }
-
-namespace openspace::documentation { struct Documentation; }
-
 namespace openspace {
 
 class RenderableRadialGrid : public Renderable {

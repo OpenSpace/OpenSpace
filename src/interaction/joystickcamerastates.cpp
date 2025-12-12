@@ -29,7 +29,8 @@
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <algorithm>
-#include <cmath>
+#include <cstdlib>
+#include <limits>
 #include <utility>
 
 namespace {

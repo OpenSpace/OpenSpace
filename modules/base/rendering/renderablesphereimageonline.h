@@ -28,15 +28,10 @@
 #include <modules/base/rendering/renderablesphere.h>
 
 #include <openspace/engine/downloadmanager.h>
-
-namespace ghoul::opengl { class Texture; }
+#include <openspace/properties/misc/stringproperty.h>
+#include <future>
 
 namespace openspace {
-
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 /**
  * This class describes a sphere renderable that displays an image from an online source

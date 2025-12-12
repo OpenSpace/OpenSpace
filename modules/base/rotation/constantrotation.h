@@ -32,8 +32,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class ConstantRotation : public Rotation {
 public:
     explicit ConstantRotation(const ghoul::Dictionary& dictionary);

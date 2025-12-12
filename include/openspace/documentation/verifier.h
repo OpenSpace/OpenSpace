@@ -27,7 +27,16 @@
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/glm.h>
+#include <functional>
+#include <memory>
+#include <optional>
+#include <string>
+#include <type_traits>
 #include <variant>
+#include <vector>
+#include <utility>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace::documentation {
 

@@ -27,7 +27,9 @@
 #include <openspace/util/geodetic.h>
 #include <algorithm>
 #include <array>
-#include <vector>
+#include <cmath>
+#include <cstdlib>
+#include <utility>
 
 namespace {
     constexpr size_t MaxIterations = 8;

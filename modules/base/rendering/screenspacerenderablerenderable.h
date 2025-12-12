@@ -27,14 +27,11 @@
 
 #include <openspace/rendering/screenspacerenderableframebuffer.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 
 namespace openspace {
-
-namespace properties { class PropertyOwner; }
 
 class Renderable;
 class Rotation;

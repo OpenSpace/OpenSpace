@@ -30,11 +30,7 @@
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class DashboardItemFramerate : public DashboardTextItem {
 public:

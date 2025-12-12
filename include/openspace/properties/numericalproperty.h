@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___NUMERICALPROPERTY___H__
 
 #include <openspace/properties/templateproperty.h>
-#include <openspace/util/json_helper.h>
 
 namespace openspace::properties {
 

@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___DOWNLOADMANAGER___H__
 
 #include <ghoul/misc/boolean.h>
+#include <chrono>
 #include <filesystem>
 #include <functional>
 #include <future>

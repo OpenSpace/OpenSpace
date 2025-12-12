@@ -25,11 +25,15 @@
 #ifndef __OPENSPACE_CORE___ASSETMANAGER___H__
 #define __OPENSPACE_CORE___ASSETMANAGER___H__
 
-#include <ghoul/lua/luastate.h>
 #include <filesystem>
-#include <optional>
-#include <unordered_map>
 #include <list>
+#include <memory>
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+namespace ghoul::lua { class LuaState; }
 
 namespace openspace {
 

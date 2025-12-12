@@ -33,8 +33,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class TimeDependentScale : public Scale {
 public:
     explicit TimeDependentScale(const ghoul::Dictionary& dictionary);

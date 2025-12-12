@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___CONFIGURATION___H__
 #define __OPENSPACE_CORE___CONFIGURATION___H__
 
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/properties/property.h>
 #include <openspace/util/keys.h>
+#include <ghoul/glm.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/dictionary.h>
 #include <filesystem>

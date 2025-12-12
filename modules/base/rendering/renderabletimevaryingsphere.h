@@ -27,16 +27,13 @@
 
 #include <modules/base/rendering/renderablesphere.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <filesystem>
+#include <limits>
 
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
-
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 class RenderableTimeVaryingSphere : public RenderableSphere {
 public:

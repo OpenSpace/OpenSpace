@@ -56,7 +56,7 @@ public:
     DynamicFileSequenceDownloader(int dataID, const std::string& identifier,
         std::string infoUrl, std::string dataUrl, size_t nFilesToQueue);
 
-    void deinitialize(bool cacheFiles);
+    void deinitialize(bool cacheFiles) const;
     void requestDataInfo(std::string httpInfoRequest);
     void requestAvailableFiles(std::string httpDataRequest,
         std::filesystem::path syncDir);

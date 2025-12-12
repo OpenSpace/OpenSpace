@@ -25,7 +25,11 @@
 #ifndef __OPENSPACE_CORE___HELPER___H__
 #define __OPENSPACE_CORE___HELPER___H__
 
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <memory>
+#include <vector>
 
 namespace ghoul::opengl {
     class ProgramObject;

@@ -28,7 +28,6 @@
 #include <openspace/properties/numericalproperty.h>
 
 #include <ghoul/glm.h>
-#include <limits>
 
 namespace openspace::properties {
 

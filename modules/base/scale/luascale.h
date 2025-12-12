@@ -34,8 +34,6 @@ namespace ghoul::filesystem { class File; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class LuaScale : public Scale {
 public:
     explicit LuaScale(const ghoul::Dictionary& dictionary);

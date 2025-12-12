@@ -25,9 +25,7 @@
 #ifndef __OPENSPACE_CORE___OPTIONPROPERTY___H__
 #define __OPENSPACE_CORE___OPTIONPROPERTY___H__
 
-#include <openspace/properties/scalar/intproperty.h>
-
-#include <vector>
+#include <openspace/properties/numericalproperty.h>
 
 namespace openspace::properties {
 

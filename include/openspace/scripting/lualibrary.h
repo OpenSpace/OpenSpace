@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___LUALIBRARY___H__
 
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <vector>
 

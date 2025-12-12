@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___MESSAGESTRUCTURESHELPER___H__
 
 #include <openspace/network/messagestructures.h>
+#include <string>
 
 namespace openspace::datamessagestructures {
 

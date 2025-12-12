@@ -24,7 +24,6 @@
 
 #include <openspace/properties/scalar/longproperty.h>
 
-#include <ghoul/glm.h>
 #include <ghoul/lua/lua_types.h>
 
 namespace openspace::properties {

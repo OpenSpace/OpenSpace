@@ -32,6 +32,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
+#include <utility>
 
 namespace openspace::datamessagestructures {
 

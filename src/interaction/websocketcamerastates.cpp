@@ -24,6 +24,7 @@
 
 #include <openspace/interaction/websocketcamerastates.h>
 
+#include <ghoul/misc/assert.h>
 #include <cmath>
 #include <utility>
 

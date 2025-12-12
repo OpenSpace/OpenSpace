@@ -25,17 +25,35 @@
 #include <openspace/scene/scene.h>
 
 #include <openspace/camera/camera.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
-#include <openspace/query/query.h>
+#include <openspace/properties/property.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/sceneinitializer.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/lua/luastate.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/easing.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/invariants.h>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
+#include <algorithm>
+#include <cctype>
+#include <cstring>
+#include <iterator>
+#include <limits>
 #include <source_location>
 #include <stack>
+#include <utility>
+#include <variant>
 
 #include "scene_lua.inl"
 
@@ -495,7 +513,7 @@ void Scene::render(const RenderData& data, RendererTasks& tasks) {
     ZoneScoped;
     ZoneText(
         renderBinToString(data.renderBinMask),
-        strlen(renderBinToString(data.renderBinMask))
+        std::strlen(renderBinToString(data.renderBinMask))
     );
 
     for (SceneGraphNode* node : _topologicallySortedNodes) {

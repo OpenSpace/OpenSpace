@@ -40,6 +40,8 @@
 #include <chrono>
 #include <functional>
 #include <optional>
+#include <string>
+#include <string_view>
 #include <vector>
 
 // #define Debugging_Core_SceneGraphNode_Indices

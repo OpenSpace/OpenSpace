@@ -27,7 +27,14 @@
 #include <openspace/navigation/waypoint.h>
 #include <ghoul/misc/integration.h>
 #include <ghoul/misc/interpolator.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <algorithm>
+#include <cstdlib>
+#include <iterator>
+#include <limits>
+#include <string>
+#include <utility>
 #include <vector>
 
 namespace {

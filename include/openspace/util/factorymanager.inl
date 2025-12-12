@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/templatefactory.h>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 

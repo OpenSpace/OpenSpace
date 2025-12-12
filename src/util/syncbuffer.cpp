@@ -24,7 +24,11 @@
 
 #include <openspace/util/syncbuffer.h>
 
+#include <ghoul/glm.h>
 #include <ghoul/misc/profiling.h>
+#include <cstdint>
+#include <cstring>
+#include <utility>
 
 namespace openspace {
 
@@ -45,13 +49,13 @@ void SyncBuffer::encode(const std::string& s) {
     }
 
     int32_t length = static_cast<int32_t>(s.size() * sizeof(char));
-    memcpy(
+    std::memcpy(
         _dataStream.data() + _encodeOffset,
         reinterpret_cast<const char*>(&length),
         sizeof(int32_t)
     );
     _encodeOffset += sizeof(int32_t);
-    memcpy(_dataStream.data() + _encodeOffset, s.c_str(), length);
+    std::memcpy(_dataStream.data() + _encodeOffset, s.c_str(), length);
     _encodeOffset += length;
 }
 

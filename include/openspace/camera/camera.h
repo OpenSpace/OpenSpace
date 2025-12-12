@@ -27,12 +27,16 @@
 
 #include <openspace/util/syncdata.h>
 #include <ghoul/glm.h>
+#include <istream>
 #include <mutex>
+#include <ostream>
+#include <vector>
 
 namespace openspace {
 
 struct CameraPose;
 class SceneGraphNode;
+class Syncable;
 
 /**
  * This class still needs some more love. Suggested improvements:

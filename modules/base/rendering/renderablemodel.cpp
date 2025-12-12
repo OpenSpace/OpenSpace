@@ -38,6 +38,7 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/lightsource.h>
 #include <ghoul/io/model/modelgeometry.h>
+#include <ghoul/io/model/modelreader.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/invariants.h>

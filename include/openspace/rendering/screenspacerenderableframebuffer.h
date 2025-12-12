@@ -28,6 +28,7 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <openspace/properties/vector/vec2property.h>
+#include <functional>
 
 namespace ghoul::opengl {
     class FramebufferObject;
@@ -35,8 +36,6 @@ namespace ghoul::opengl {
 } // namespace ghoul::opengl
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 /**
  * Creates a texture by rendering to a framebuffer, this is then used on a screen space

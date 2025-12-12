@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___KEYBOARDINPUTSTATE___H__
 
 #include <openspace/util/keys.h>
+#include <utility>
 #include <vector>
 
 namespace openspace::interaction {

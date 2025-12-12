@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/interaction/joystickcamerastates.h>
+#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/websocketcamerastates.h>
@@ -38,8 +39,15 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <openspace/util/mouse.h>
 #include <openspace/util/keys.h>
+#include <openspace/util/mouse.h>
+#include <ghoul/glm.h>
+#include <filesystem>
+#include <functional>
+#include <optional>
+#include <string>
+#include <variant>
+#include <vector>
 
 namespace openspace {
     class Camera;

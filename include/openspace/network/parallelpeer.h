@@ -34,6 +34,7 @@
 #include <ghoul/designpattern/event.h>
 #include <atomic>
 #include <deque>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <thread>

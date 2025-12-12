@@ -26,7 +26,9 @@
 #define __OPENSPACE_CORE___ACTIONMANAGER___H__
 
 #include <openspace/interaction/action.h>
+#include <ghoul/misc/boolean.h>
 #include <unordered_map>
+#include <vector>
 
 namespace ghoul { class Dictionary; }
 namespace openspace::scripting { struct LuaLibrary; }

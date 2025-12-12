@@ -29,9 +29,16 @@
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/lua/lua_types.h>
+#include <cstdint>
 #include <functional>
+#include <limits>
+#include <optional>
 #include <string>
 #include <string_view>
+#include <typeinfo>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 struct lua_State;
 

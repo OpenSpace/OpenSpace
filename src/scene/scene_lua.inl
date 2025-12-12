@@ -27,12 +27,14 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scene.h>
 #include <openspace/properties/propertyowner.h>
+#include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/matrix/dmat2property.h>
 #include <openspace/properties/matrix/dmat3property.h>
 #include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/matrix/mat2property.h>
 #include <openspace/properties/matrix/mat3property.h>
 #include <openspace/properties/matrix/mat4property.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -54,11 +56,18 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <openspace/query/query.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <algorithm>
 #include <execution>
+#include <stdexcept>
+#include <tuple>
+#include <optional>
 
 namespace {
 
@@ -231,7 +240,7 @@ bool checkUriMatchFromRegexResults(std::string_view uri,
     )
 {
     const bool isGroupMode = !groupTag.empty();
-    auto [parentUri, identifier, isLiteral] = regexResults;
+    auto& [parentUri, identifier, isLiteral] = regexResults;
 
     // Literal check
     if (isLiteral && uri != identifier) {

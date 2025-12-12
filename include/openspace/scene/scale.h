@@ -30,6 +30,7 @@
 #include <openspace/scene/timeframe.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
+#include <limits>
 
 namespace ghoul { class Dictionary; }
 

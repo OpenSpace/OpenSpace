@@ -25,13 +25,16 @@
 #ifndef __OPENSPACE_CORE___ASSET___H__
 #define __OPENSPACE_CORE___ASSET___H__
 
-#include <openspace/util/resourcesynchronization.h>
+#include <atomic>
 #include <filesystem>
 #include <optional>
+#include <string>
+#include <vector>
 
 namespace openspace {
 
 class AssetManager;
+class ResourceSynchronization;
 
 /**
  * This class represents a successfully loaded Asset. Each Lua asset file results in

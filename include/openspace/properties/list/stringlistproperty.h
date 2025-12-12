@@ -27,9 +27,6 @@
 
 #include <openspace/properties/misc/listproperty.h>
 
-#include <string>
-#include <vector>
-
 namespace openspace::properties {
 
 class StringListProperty : public ListProperty<std::string> {

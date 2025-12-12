@@ -27,8 +27,13 @@
 
 #include <openspace/events/event.h>
 #include <openspace/scripting/lualibrary.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/memorypool.h>
+#include <functional>
+#include <optional>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace openspace {
 

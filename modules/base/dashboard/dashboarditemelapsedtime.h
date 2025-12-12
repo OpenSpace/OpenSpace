@@ -33,8 +33,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class DashboardItemElapsedTime : public DashboardTextItem {
 public:
     explicit DashboardItemElapsedTime(const ghoul::Dictionary& dictionary);

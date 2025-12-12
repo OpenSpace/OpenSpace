@@ -31,8 +31,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class NonUniformStaticScale : public Scale {
 public:
     explicit NonUniformStaticScale(const ghoul::Dictionary& dictionary);

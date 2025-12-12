@@ -33,6 +33,8 @@
 #include <string>
 #include <vector>
 
+namespace ghoul { class Dictionary; }
+
 namespace openspace::interaction {
 
 class KeyframeRecordingHandler : public properties::PropertyOwner {

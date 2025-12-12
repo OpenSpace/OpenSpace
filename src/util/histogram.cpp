@@ -26,7 +26,10 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <algorithm>
 #include <cmath>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "Histogram";
@@ -203,7 +206,7 @@ const float* Histogram::data() const {
 
 std::vector<std::pair<float,float>> Histogram::getDecimated(int) const {
     // Return a copy of _data decimated as in Ljung 2004
-    return std::vector<std::pair<float,float>>();
+    return std::vector<std::pair<float, float>>();
 }
 
 void Histogram::normalize() {

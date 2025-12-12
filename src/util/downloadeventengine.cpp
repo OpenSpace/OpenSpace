@@ -24,6 +24,8 @@
 
 #include <openspace/util/downloadeventengine.h>
 
+#include <utility>
+
 namespace openspace {
 
 int DownloadEventEngine::subscribe(Callback cb) {

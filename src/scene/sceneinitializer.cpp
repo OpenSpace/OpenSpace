@@ -29,6 +29,11 @@
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
+#include <chrono>
+#include <thread>
+#include <utility>
 
 namespace openspace {
 

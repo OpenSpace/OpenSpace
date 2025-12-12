@@ -27,6 +27,7 @@
 
 #include <openspace/util/timerange.h>
 #include <openspace/util/time.h>
+#include <functional>
 #include <optional>
 #include <string>
 #include <vector>
@@ -121,14 +122,12 @@ public:
      */
     const std::vector<MissionPhase>& phases() const;
 
-
     /**
      * Returns all important dates.
      *
      * \return All important dates
      */
     const std::vector<Milestone>& milestones() const;
-
 
     /**
      * Returns all actions.

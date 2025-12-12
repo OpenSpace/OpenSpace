@@ -33,7 +33,7 @@ namespace openspace { class SceneGraphNode; }
 
 namespace openspace::interaction {
 
-class WayPoint;
+class Waypoint;
 
 class AvoidCollisionCurve : public PathCurve {
 public:

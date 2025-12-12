@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___LONGPROPERTY___H__
 
 #include <openspace/properties/numericalproperty.h>
-#include <limits>
 
 namespace openspace::properties {
 

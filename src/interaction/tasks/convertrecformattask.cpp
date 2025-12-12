@@ -23,16 +23,13 @@
  ****************************************************************************************/
 
 #include <openspace/interaction/tasks/convertrecformattask.h>
-#include <openspace/interaction/sessionrecording.h>
-#include <openspace/documentation/verifier.h>
 
-#include <openspace/engine/globals.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/stringhelper.h>
-#include <filesystem>
-#include <iomanip>
+#include <openspace/documentation/documentation.h>
+#include <openspace/interaction/sessionrecording.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "ConvertRecFormatTask";

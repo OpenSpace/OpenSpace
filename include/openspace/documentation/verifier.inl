@@ -24,9 +24,10 @@
 
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
-#include <functional>
+#include <ghoul/misc/stringconversion.h>
 #include <iterator>
 #include <numeric>
+#include <type_traits>
 
 namespace openspace::documentation {
 
@@ -254,7 +255,7 @@ TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& di
         else if constexpr (std::is_same_v<typename T::Type, int>) {
             const double d = dict.value<double>(key);
             double intPart;
-            bool isInt = modf(d, &intPart) == 0.0;
+            bool isInt = std::modf(d, &intPart) == 0.0;
             if (isInt) {
                 val = static_cast<int>(d);
             }

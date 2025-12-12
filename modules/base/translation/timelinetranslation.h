@@ -29,13 +29,8 @@
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/util/timeline.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
 
 namespace openspace {
-
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 class TimelineTranslation : public Translation {
 public:

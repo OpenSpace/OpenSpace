@@ -32,14 +32,10 @@
 #include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <ghoul/opengl/ghoul_gl.h>
 
 namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class RenderableDisc : public Renderable {
 public:

@@ -27,6 +27,7 @@
 
 #include <openspace/util/threadpool.h>
 #include <unordered_set>
+#include <mutex>
 #include <vector>
 
 namespace openspace {

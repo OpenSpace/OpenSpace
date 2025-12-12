@@ -27,14 +27,12 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
-
-namespace ghoul::opengl { class ProgramObject; }
-namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
 

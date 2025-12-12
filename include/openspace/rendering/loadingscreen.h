@@ -28,9 +28,13 @@
 #include <openspace/util/screenlog.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
+#include <chrono>
+#include <cstdint>
 #include <memory>
 #include <mutex>
 #include <random>
+#include <string>
+#include <vector>
 
 // #define LOADINGSCREEN_DEBUGGING
 

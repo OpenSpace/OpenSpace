@@ -28,6 +28,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/json.h>
 #include <openspace/properties/propertyowner.h>
+#include <vector>
 
 namespace openspace::documentation {
 

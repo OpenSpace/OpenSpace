@@ -32,10 +32,23 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <cstring>
+#include <filesystem>
+#include <format>
 #include <fstream>
 #include <functional>
+#include <limits>
+#include <optional>
+#include <string>
 #include <string_view>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 namespace {
     constexpr int8_t DataCacheFileVersion = 13;

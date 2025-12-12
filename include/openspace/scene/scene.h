@@ -28,10 +28,17 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/scene/scenegraphnode.h>
+#include <ghoul/misc/boolean.h>
 #include <ghoul/misc/easing.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/misc/map.h>
+#include <chrono>
+#include <functional>
+#include <memory>
 #include <mutex>
 #include <set>
+#include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -45,7 +52,13 @@ namespace opengl { class ProgramObject; }
 
 namespace openspace {
 
+class Camera;
+struct RenderData;
+struct RendererTasks;
+struct UpdateData;
+
 namespace documentation { struct Documentation; }
+namespace properties { class Property; }
 namespace scripting { struct LuaLibrary; }
 
 enum class PropertyValueType {

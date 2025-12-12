@@ -37,8 +37,6 @@ namespace openspace {
 
 class SceneGraphNode;
 
-namespace documentation { struct Documentation; }
-
 class FixedRotation : public Rotation {
 public:
     explicit FixedRotation(const ghoul::Dictionary& dictionary);

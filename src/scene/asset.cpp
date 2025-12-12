@@ -29,12 +29,19 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/scene/assetmanager.h>
+#include <openspace/util/resourcesynchronization.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/invariants.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <filesystem>
+#include <string_view>
+#include <utility>
+#include <functional>
 
 namespace openspace {
 

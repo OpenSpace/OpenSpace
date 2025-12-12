@@ -27,31 +27,19 @@
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/matrix/dmat4property.h>
-#include <openspace/properties/matrix/mat3property.h>
 #include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
-#include <ghoul/io/model/modelreader.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
 
 namespace ghoul::modelgeometry { class ModelGeometry; }
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
 class LightSource;
-
-namespace documentation { struct Documentation; }
 
 class RenderableModel : public Renderable {
 public:

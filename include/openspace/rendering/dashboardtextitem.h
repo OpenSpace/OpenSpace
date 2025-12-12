@@ -29,13 +29,11 @@
 
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <string>
 
-namespace ghoul { class Dictionary; }
 namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class DashboardTextItem : public DashboardItem {
 public:

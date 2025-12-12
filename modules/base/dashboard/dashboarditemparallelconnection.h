@@ -29,8 +29,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class DashboardItemParallelConnection : public DashboardTextItem {
 public:
     explicit DashboardItemParallelConnection(const ghoul::Dictionary& dictionary);

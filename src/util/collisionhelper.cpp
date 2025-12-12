@@ -24,6 +24,9 @@
 
 #include <openspace/util/collisionhelper.h>
 
+#include <cmath>
+#include <cstdlib>
+
 namespace openspace::collision {
 
 // Source: http://paulbourke.net/geometry/circlesphere/raysphere.c

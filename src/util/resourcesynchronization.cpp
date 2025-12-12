@@ -24,11 +24,13 @@
 
 #include <openspace/util/resourcesynchronization.h>
 
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 #include <fstream>
+#include <utility>
 
 namespace {
     struct [[codegen::Dictionary(ResourceSynchronization)]] Parameters {

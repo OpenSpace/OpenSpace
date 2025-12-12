@@ -22,8 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/engine/globals.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionary.h>
+#include <variant>
+#include <utility>
 
 // Load mission phases from file.
 [[codegen::luawrap]] void loadMission(ghoul::Dictionary mission) {

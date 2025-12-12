@@ -29,11 +29,7 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 /**
  * A billboarded point cloud, but with dynamically created uniform polygon shapes instead

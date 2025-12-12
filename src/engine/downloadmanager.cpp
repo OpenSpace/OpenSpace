@@ -27,13 +27,20 @@
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/misc/thread.h>
 #include <curl/curl.h>
+#include <cerrno>
 #include <chrono>
+#include <cstdio>
+#include <cstring>
 #include <filesystem>
+#include <malloc.h>
 #include <sstream>
+#include <string_view>
 #include <thread>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "DownloadManager";

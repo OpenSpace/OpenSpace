@@ -34,8 +34,13 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/framebufferrenderer.h>
+#include <cstdint>
 #include <chrono>
 #include <filesystem>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace ghoul {
 namespace fontrendering { class Font; }

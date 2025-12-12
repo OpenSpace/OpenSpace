@@ -25,6 +25,7 @@
 #include <openspace/rendering/renderengine.h>
 
 #include <openspace/openspace.h>
+#include <openspace/camera/camera.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -38,9 +39,11 @@
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
+#include <openspace/util/timemanager.h>
+#include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/versionchecker.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -55,13 +58,24 @@
 #include <ghoul/io/texture/texturereaderstb.h>
 #include <ghoul/io/texture/texturewriter.h>
 #include <ghoul/io/texture/texturewriterstb.h>
+#include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/easing.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/openglstatecache.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/shaderobject.h>
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <ctime>
+#include <utility>
 
 #include "renderengine_lua.inl"
+#include <thread>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderEngine";

@@ -32,7 +32,10 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
+#include <functional>
+#include <optional>
 #include <string_view>
+#include <tuple>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl {

@@ -41,6 +41,8 @@
 #include <ghoul/opengl/programobject.h>
 #include <glm/gtx/projection.hpp>
 #include <glm/gtx/transform.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <ghoul/glm.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableNodeArrow";

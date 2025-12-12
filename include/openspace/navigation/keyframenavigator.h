@@ -29,7 +29,7 @@
 #include <openspace/util/timeline.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
-#include <glm/gtx/quaternion.hpp>
+#include <string>
 
 namespace openspace {
     class Camera;

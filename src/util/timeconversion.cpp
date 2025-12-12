@@ -24,11 +24,14 @@
 
 #include <openspace/util/timeconversion.h>
 
+#include <cmath>
+#include <cstdlib>
+
 namespace {
     std::pair<double, openspace::TimeUnit> extractUnit(double seconds) {
         using namespace openspace;
 
-        const double secondsVal = glm::abs(seconds);
+        const double secondsVal = std::abs(seconds);
 
         if (secondsVal == 0.0) {
             return { 0.0, TimeUnit::Second };

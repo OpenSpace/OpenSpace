@@ -32,8 +32,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class SceneGraphLightSource : public LightSource {
 public:
     explicit SceneGraphLightSource(const ghoul::Dictionary& dictionary);

@@ -25,13 +25,14 @@
 #include <openspace/rendering/screenspacerenderabletext.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/texture.h>
+#include <array>
 #include <optional>
 
 namespace {

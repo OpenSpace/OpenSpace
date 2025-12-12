@@ -25,8 +25,10 @@
 #include <openspace/util/blockplaneintersectiongeometry.h>
 
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <algorithm>
+#include <array>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "BlockPlaneIntersectionGeometry";

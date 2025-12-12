@@ -28,6 +28,8 @@
 #include <openspace/network/messagestructures.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/misc/exception.h>
+#include <cstdint>
+#include <memory>
 #include <vector>
 
 namespace openspace {

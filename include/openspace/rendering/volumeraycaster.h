@@ -35,8 +35,8 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-struct RenderData;
 struct RaycastData;
+struct RenderData;
 
 class VolumeRaycaster {
 public:

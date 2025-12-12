@@ -32,13 +32,9 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <ghoul/glm.h>
-
-namespace ghoul::opengl { class ProgramObject; }
+#include <cstdint>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class RenderablePrism : public Renderable {
 public:

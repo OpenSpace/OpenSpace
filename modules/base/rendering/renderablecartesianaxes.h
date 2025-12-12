@@ -27,16 +27,8 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/matrix/dmat4property.h>
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
-
-namespace ghoul::opengl { class ProgramObject; }
-
-namespace openspace::documentation { struct Documentation; }
 
 namespace openspace {
 

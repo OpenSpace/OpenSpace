@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___SPECKLOADER___H__
 
 #include <openspace/data/dataloader.h>
+#include <openspace/data/datamapping.h>
 #include <filesystem>
 #include <optional>
 

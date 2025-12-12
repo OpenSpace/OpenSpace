@@ -33,11 +33,7 @@
 #include <openspace/rendering/labelscomponent.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class RenderableSphericalGrid : public Renderable {
 public:

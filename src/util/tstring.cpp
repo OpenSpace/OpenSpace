@@ -26,6 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/util/memorymanager.h>
+#include <cstring>
 
 namespace openspace {
 

@@ -32,7 +32,6 @@
 namespace openspace {
 
 namespace properties { class Property; }
-namespace documentation { struct Documentation; }
 
 class DashboardItemInputState : public DashboardTextItem {
 public:

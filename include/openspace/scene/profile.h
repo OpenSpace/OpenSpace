@@ -29,8 +29,10 @@
 #include <openspace/util/keys.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
+#include <map>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
 

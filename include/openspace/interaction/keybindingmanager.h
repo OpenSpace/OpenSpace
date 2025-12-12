@@ -26,6 +26,9 @@
 #define __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
 
 #include <openspace/util/keys.h>
+#include <map>
+#include <utility>
+#include <vector>
 
 namespace openspace {
     class Camera;

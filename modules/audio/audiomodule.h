@@ -29,7 +29,14 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/scripting/lualibrary.h>
+#include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
+#include <filesystem>
+#include <map>
+#include <memory>
+#include <optional>
+
+namespace ghoul { class Dictionary; }
 
 namespace SoLoud {
     class Soloud;

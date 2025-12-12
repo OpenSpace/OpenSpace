@@ -28,9 +28,12 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/navigation/pathcurve.h>
 #include <openspace/navigation/waypoint.h>
-#include <ghoul/misc/dictionary.h>
+#include <memory>
 #include <optional>
+#include <string>
 #include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace { struct CameraPose; }
 

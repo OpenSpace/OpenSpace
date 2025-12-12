@@ -28,12 +28,10 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/font/fontrenderer.h>
+#include <string>
 
 namespace ghoul {
-
-class Dictionary;
 
 namespace fontrendering { class Font; }
 namespace opengl {
@@ -44,8 +42,6 @@ namespace opengl {
 } // namespace ghoul
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class ScreenSpaceRenderableText : public ScreenSpaceRenderable {
 public:

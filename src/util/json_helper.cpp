@@ -24,7 +24,11 @@
 
 #include <openspace/util/json_helper.h>
 
+#include <ghoul/format.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
+#include <functional>
+#include <utility>
 
 namespace openspace {
 
