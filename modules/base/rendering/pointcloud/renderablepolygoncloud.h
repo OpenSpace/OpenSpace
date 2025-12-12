@@ -27,8 +27,6 @@
 
 #include <modules/base/rendering/pointcloud/renderablepointcloud.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
-
 namespace openspace {
 
 /**

@@ -34,6 +34,7 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <chrono>
 #include <filesystem>
+#include <memory>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::filesystem { class File; }

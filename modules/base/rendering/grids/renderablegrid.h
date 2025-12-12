@@ -33,6 +33,7 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/rendering/labelscomponent.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <memory>
 
 namespace openspace {
 

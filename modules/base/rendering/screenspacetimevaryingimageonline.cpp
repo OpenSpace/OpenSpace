@@ -25,15 +25,20 @@
 #include <modules/base/rendering/screenspacetimevaryingimageonline.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/json.h>
+#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/opengl/texture.h>
+#include <algorithm>
 #include <fstream>
+#include <iterator>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "ScreenSpaceTimeVaryingImageOnline";

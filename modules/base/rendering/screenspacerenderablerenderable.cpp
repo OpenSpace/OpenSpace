@@ -25,11 +25,17 @@
 #include <modules/base/rendering/screenspacerenderablerenderable.h>
 
 #include <openspace/camera/camera.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/translation.h>
+#include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/misc/dictionary.h>
+#include <limits>
+#include <optional>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TimeInfo = {

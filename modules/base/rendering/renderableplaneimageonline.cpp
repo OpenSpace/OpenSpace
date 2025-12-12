@@ -25,13 +25,16 @@
 #include <modules/base/rendering/renderableplaneimageonline.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <cstdlib>
+#include <limits>
+#include <memory>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {

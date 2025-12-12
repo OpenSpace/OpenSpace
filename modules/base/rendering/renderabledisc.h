@@ -32,6 +32,7 @@
 #include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <memory>
 
 namespace ghoul::filesystem { class File; }
 

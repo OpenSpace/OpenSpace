@@ -26,16 +26,21 @@
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/translation.h>
+#include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <algorithm>
+#include <array>
 #include <cmath>
+#include <memory>
 #include <optional>
 
 namespace {

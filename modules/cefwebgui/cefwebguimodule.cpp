@@ -31,12 +31,11 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {

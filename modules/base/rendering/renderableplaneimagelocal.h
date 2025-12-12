@@ -28,6 +28,7 @@
 #include <modules/base/rendering/renderableplane.h>
 
 #include <openspace/properties/misc/stringproperty.h>
+#include <memory>
 
 namespace openspace {
 

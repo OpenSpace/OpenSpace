@@ -26,28 +26,26 @@
 
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/format.h>
+#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <array>
-#include <cstdint>
-#include <filesystem>
+#include <algorithm>
+#include <cmath>
 #include <fstream>
-#include <optional>
+#include <sstream>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableDUMeshes";

@@ -28,18 +28,11 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <ghoul/font/font.h>
 #include <ghoul/font/fontrenderer.h>
-#include <string>
-
-namespace ghoul {
-
-namespace fontrendering { class Font; }
-namespace opengl {
-    class FramebufferObject;
-    class Texture;
-} // namespace opengl
-
-} // namespace ghoul
+#include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace {
 

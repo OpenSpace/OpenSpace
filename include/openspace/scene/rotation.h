@@ -61,7 +61,6 @@ public:
     static ghoul::mm_unique_ptr<Rotation> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-
     explicit Rotation(const ghoul::Dictionary& dictionary);
     virtual ~Rotation() override = default;
 

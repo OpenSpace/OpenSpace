@@ -30,9 +30,9 @@
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-
 #include <ghoul/opengl/uniformcache.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <memory>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {

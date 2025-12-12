@@ -36,6 +36,8 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
+class Class;
+
 /**
  * A helper class for quick rendering of vertices IN clipping space. The class is
  * practically stateless. It only stores a ghoul::opengl::ProgramObject which can be

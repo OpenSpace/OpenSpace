@@ -24,12 +24,15 @@
 
 #include <modules/base/rendering/screenspacedate.h>
 
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/texture.h>
+#include <ghoul/misc/dictionary.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {

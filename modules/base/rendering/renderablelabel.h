@@ -34,6 +34,7 @@
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <memory>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::fontrendering { class Font; }

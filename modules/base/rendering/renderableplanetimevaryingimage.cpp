@@ -26,16 +26,16 @@
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
+#include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
-#include <optional>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/texture.h>
+#include <algorithm>
+#include <iterator>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePlaneTimeVaryingImage";

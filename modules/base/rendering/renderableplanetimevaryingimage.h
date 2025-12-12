@@ -30,6 +30,7 @@
 #include <openspace/properties/misc/stringproperty.h>
 #include <filesystem>
 #include <limits>
+#include <memory>
 
 namespace openspace {
 

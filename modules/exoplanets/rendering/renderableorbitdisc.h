@@ -33,15 +33,12 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
-#include <openspace/util/updatestructures.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <memory>
 
 namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; } // namespace ghoul::opengl
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class RenderableOrbitDisc : public Renderable {
 public:

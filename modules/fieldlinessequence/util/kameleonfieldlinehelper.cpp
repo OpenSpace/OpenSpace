@@ -29,9 +29,15 @@
 #include <openspace/util/spicemanager.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
+#include <cctype>
+#include <cmath>
 #include <memory>
 #include <fstream>
+#include <sstream>
+#include <string_view>
+#include <utility>
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 
@@ -42,7 +48,9 @@
 #endif // _MSC_VER
 
 #include <ccmc/Kameleon.h>
+#include <ccmc/Fieldline.h>
 #include <ccmc/KameleonInterpolator.h>
+#include <ccmc/Point3f.h>
 #include <ccmc/Tracer.h>
 #include <modules/kameleon/include/kameleonhelper.h>
 

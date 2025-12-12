@@ -33,6 +33,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <filesystem>
+#include <memory>
 
 namespace ghoul::opengl { class ProgramObject; }
 

@@ -34,6 +34,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <memory>
 
 namespace openspace {
 

@@ -30,6 +30,7 @@
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <future>
+#include <memory>
 
 namespace openspace {
 

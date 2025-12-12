@@ -25,10 +25,10 @@
 #include <modules/base/rotation/multirotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/util/time.h>
-#include <optional>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <utility>
 
 namespace {
     // This Rotation type combines multiple individual rotations that are applied one

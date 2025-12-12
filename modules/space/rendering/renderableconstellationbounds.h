@@ -28,6 +28,7 @@
 #include <modules/space/rendering/renderableconstellationsbase.h>
 
 #include <ghoul/opengl/uniformcache.h>
+#include <memory>
 
 namespace ghoul::opengl { class ProgramObject; }
 

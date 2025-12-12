@@ -30,6 +30,7 @@
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 
 namespace openspace {
 
@@ -38,12 +39,8 @@ class Rotation;
 class Scale;
 class Translation;
 
-namespace documentation { struct Documentation; }
-
 class ScreenSpaceRenderableRenderable : public ScreenSpaceRenderableFramebuffer {
 public:
-    using RenderFunction = std::function<void()>;
-
     explicit ScreenSpaceRenderableRenderable(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceRenderableRenderable() override;
 

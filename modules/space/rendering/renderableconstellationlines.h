@@ -28,6 +28,7 @@
 #include <modules/space/rendering/renderableconstellationsbase.h>
 
 #include <ghoul/opengl/uniformcache.h>
+#include <memory>
 #include <unordered_map>
 
 namespace ghoul::filesystem { class File; }

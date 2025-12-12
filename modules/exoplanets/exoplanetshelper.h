@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSHELPER___H__
 
 #include <ghoul/glm.h>
-#include <ghoul/misc/dictionary.h>
 #include <string>
 
 namespace openspace::exoplanets {

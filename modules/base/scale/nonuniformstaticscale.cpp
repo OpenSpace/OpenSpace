@@ -25,7 +25,7 @@
 #include <modules/base/scale/nonuniformstaticscale.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {

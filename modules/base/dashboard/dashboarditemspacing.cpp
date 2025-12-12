@@ -25,7 +25,7 @@
 #include <modules/base/dashboard/dashboarditemspacing.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
 
 namespace {

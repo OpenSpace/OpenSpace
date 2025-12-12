@@ -34,6 +34,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/rendering/transferfunction.h>
+#include <memory>
 
 namespace openspace {
     class Histogram;

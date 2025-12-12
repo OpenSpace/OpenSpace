@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
 #define __OPENSPACE_MODULE_WEBBROWSER__WEB_RENDER_HANDLER_H
 
-#include <vector>
 #include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <vector>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -45,7 +46,6 @@
 //#pragma clang diagnostic pop
 #endif // _MSC_VER
 
-#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
@@ -55,12 +55,12 @@ public:
 
     WebRenderHandler();
 
-    virtual void draw(void) = 0;
+    virtual void draw() = 0;
     virtual void render() = 0;
 
     void reshape(int, int);
 
-    void GetViewRect(CefRefPtr<CefBrowser> browser, CefRect &rect) override;
+    void GetViewRect(CefRefPtr<CefBrowser> browser, CefRect& rect) override;
 
     // Regular OnPaint method. Uses CPU allocation
     void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
@@ -90,9 +90,7 @@ private:
     glm::ivec2 _windowSize = glm::ivec2(0);
     glm::ivec2 _browserBufferSize = glm::ivec2(0);
 
-    /**
-     * RGBA buffer from browser
-     */
+    /// RGBA buffer from browser
     std::vector<Pixel> _browserBuffer;
     bool _needsRepaint = true;
     bool _textureSizeIsDirty = true;

@@ -30,6 +30,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <memory>
 
 namespace openspace {
 

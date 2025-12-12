@@ -29,6 +29,7 @@
 
 #include <openspace/properties/misc/stringproperty.h>
 #include <ghoul/lua/luastate.h>
+#include <memory>
 
 namespace ghoul::filesystem { class File; }
 

@@ -28,8 +28,6 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <ghoul/systemcapabilities/version.h>
-#include <string>
-#include <vector>
 
 namespace ghoul { class Dictionary; }
 

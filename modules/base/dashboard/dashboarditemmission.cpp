@@ -25,16 +25,18 @@
 #include <modules/base/dashboard/dashboarditemmission.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
 #include <stack>
+#include <utility>
 
 namespace {
     std::string progressToStr(int size, double t) {

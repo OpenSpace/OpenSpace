@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__
 #define __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__
 
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
+#include <memory>
+#include <utility>
 #include <valarray>
 
 namespace CCfits {

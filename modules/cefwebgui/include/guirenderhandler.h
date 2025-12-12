@@ -27,7 +27,6 @@
 
 #include <modules/webbrowser/include/webrenderhandler.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
 #include <memory>
 
 namespace ghoul::opengl { class ProgramObject; }

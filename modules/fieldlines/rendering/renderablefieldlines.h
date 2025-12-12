@@ -34,8 +34,7 @@
 #include <openspace/properties/vector/vec4property.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/ghoul_gl.h>
-
-namespace ghoul::opengl { class ProgramObject; }
+#include <memory>
 
 namespace openspace {
 

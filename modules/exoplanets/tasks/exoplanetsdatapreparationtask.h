@@ -28,8 +28,8 @@
 #include <openspace/util/task.h>
 
 #include <modules/exoplanets/datastructure.h>
-#include <openspace/properties/vector/vec3property.h>
 #include <filesystem>
+#include <fstream>
 #include <string>
 
 namespace openspace::exoplanets {

@@ -33,7 +33,9 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/util/sphere.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <memory>
 
 namespace openspace {
 

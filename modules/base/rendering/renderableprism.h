@@ -33,6 +33,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <cstdint>
+#include <memory>
 
 namespace openspace {
 

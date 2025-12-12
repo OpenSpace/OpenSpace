@@ -37,6 +37,7 @@
 #include <ghoul/opengl/uniformcache.h>
 #include <atomic>
 #include <filesystem>
+#include <memory>
 
 namespace openspace {
 

@@ -35,11 +35,7 @@
 #include <ghoul/glm.h>
 #include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class ScreenSpaceInsetBlackout : public ScreenSpaceRenderable {
 public:

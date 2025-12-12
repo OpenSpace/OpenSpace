@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/base/rendering/pointcloud/sizemappingcomponent.h>
+#include <openspace/data/dataloader.h>
 #include <openspace/data/datamapping.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
@@ -41,9 +42,10 @@
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <filesystem>
-#include <functional>
+#include <memory>
 #include <unordered_map>
 
 namespace openspace {
@@ -151,7 +153,7 @@ protected:
     void renderPoints(const RenderData& data, const glm::dmat4& modelMatrix,
         const glm::dvec3& orthoRight, const glm::dvec3& orthoUp, float fadeInVariable);
 
-    gl::GLenum internalGlFormat(bool useAlpha) const;
+    GLenum internalGlFormat(bool useAlpha) const;
     ghoul::opengl::Texture::Format glFormat(bool useAlpha) const;
 
     bool _dataIsDirty = true;

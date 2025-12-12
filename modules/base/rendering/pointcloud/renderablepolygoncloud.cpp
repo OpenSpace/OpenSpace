@@ -26,11 +26,12 @@
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <optional>
+#include <array>
+#include <memory>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePolygonCloud";

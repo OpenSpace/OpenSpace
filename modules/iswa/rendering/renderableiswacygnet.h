@@ -33,6 +33,7 @@
 #include <ghoul/glm.h>
 #include <chrono>
 #include <future>
+#include <memory>
 #include <string>
 
 namespace openspace {

@@ -27,9 +27,15 @@
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
+#include <cstdlib>
 #include <fstream>
+#include <iterator>
+#include <sstream>
+#include <string>
+#include <string_view>
+#include <utility>
 
 #ifdef WIN32
 #pragma warning (push)

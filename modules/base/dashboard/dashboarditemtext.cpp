@@ -25,10 +25,7 @@
 #include <modules/base/dashboard/dashboarditemtext.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/engine/globals.h>
-#include <ghoul/font/font.h>
-#include <ghoul/misc/profiling.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
 
 namespace {

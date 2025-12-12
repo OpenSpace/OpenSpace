@@ -26,7 +26,6 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
@@ -34,11 +33,13 @@
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <optional>
+#include <utility>
 
 namespace {
     enum Type {

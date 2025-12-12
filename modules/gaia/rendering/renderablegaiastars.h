@@ -39,6 +39,7 @@
 #include <ghoul/opengl/bufferbinding.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <memory>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl {

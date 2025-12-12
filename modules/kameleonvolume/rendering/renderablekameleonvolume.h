@@ -32,6 +32,7 @@
 #include <openspace/properties/vector/uvec3property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <memory>
 
 namespace openspace {
     struct RenderData;

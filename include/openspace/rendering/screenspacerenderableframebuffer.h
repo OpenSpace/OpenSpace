@@ -28,12 +28,9 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <openspace/properties/vector/vec2property.h>
+#include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/texture.h>
 #include <functional>
-
-namespace ghoul::opengl {
-    class FramebufferObject;
-    class Texture;
-} // namespace ghoul::opengl
 
 namespace openspace {
 

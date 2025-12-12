@@ -25,10 +25,10 @@
 #include <modules/base/translation/multitranslation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/util/time.h>
-#include <optional>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <utility>
 
 namespace {
     // This Translation type combines multiple translations that are applied one after the

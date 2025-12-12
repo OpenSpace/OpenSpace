@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
 
 #include <openspace/rendering/renderable.h>
+
 #include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>

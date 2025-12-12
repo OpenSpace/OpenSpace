@@ -33,6 +33,7 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <memory>
 
 namespace ghoul::opengl {
     class ProgramObject;

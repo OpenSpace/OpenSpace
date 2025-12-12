@@ -27,18 +27,12 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <memory>
-#include <string>
 #include <utility>
-#include <vector>
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -55,9 +49,6 @@ struct ShadowConfiguration {
     bool printedCasterError = false;
 };
 
-namespace documentation { struct Documentation; }
-namespace planetgeometry { class PlanetGeometry; }
-
 class RenderableAtmosphere : public Renderable {
 public:
     explicit RenderableAtmosphere(const ghoul::Dictionary& dictionary);
@@ -72,7 +63,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    glm::dmat4 computeModelTransformMatrix(const openspace::TransformData& data);
+    glm::dmat4 computeModelTransformMatrix(const TransformData& data);
     void updateAtmosphereParameters();
     void setDimmingCoefficient(const glm::dmat4& modelTransform);
 
