@@ -25,15 +25,26 @@
 #include <modules/sync/syncs/httpsynchronization.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/downloadeventengine.h>
 #include <openspace/util/httprequest.h>
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
+#include <algorithm>
+#include <chrono>
+#include <cstdint>
 #include <fstream>
+#include <istream>
+#include <mutex>
+#include <sstream>
+#include <string_view>
+#include <system_error>
+#include <thread>
 #include <unordered_map>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "HttpSynchronization";

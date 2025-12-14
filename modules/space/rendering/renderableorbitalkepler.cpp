@@ -26,24 +26,35 @@
 
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/spacemodule.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/misc/csvreader.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/logging/logmanager.h>
-#include <chrono>
+#include <ghoul/format.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/uniformcache.h>
+#include <openspace/properties/property.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
+#include <openspace/rendering/renderable.h>
+#include <modules/space/kepler.h>
+#include <algorithm>
 #include <cmath>
+#include <cstddef>
+#include <ctime>
 #include <execution>
-#include <fstream>
+#include <filesystem>
+#include <memory>
+#include <numeric>
+#include <optional>
 #include <random>
-#include <vector>
+#include <thread>
 
 namespace {
     // The possible values for the _renderingModes property

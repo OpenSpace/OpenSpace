@@ -24,10 +24,15 @@
 
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 
-#include <openspace/util/time.h>
-#include <openspace/util/timemanager.h>
+#include <modules/spacecraftinstruments/util/sequenceparser.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <algorithm>
+#include <cstdlib>
+#include <iterator>
+#include <limits>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "ImageSequencer";

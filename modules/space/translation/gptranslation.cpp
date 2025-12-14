@@ -25,7 +25,10 @@
 #include <modules/space/translation/gptranslation.h>
 
 #include <modules/space/kepler.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <filesystem>
 #include <optional>
 

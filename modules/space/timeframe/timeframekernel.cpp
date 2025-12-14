@@ -24,10 +24,20 @@
 
 #include <modules/space/timeframe/timeframekernel.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include "SpiceUsr.h"
+#include <algorithm>
+#include <array>
+#include <cstring>
+#include <filesystem>
+#include <optional>
+#include <variant>
 
 namespace {
     constexpr std::string_view _loggerCat = "TimeFrameKernel";

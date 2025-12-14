@@ -35,15 +35,10 @@
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <cstdint>
+#include <utility>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class RenderableFov : public Renderable {
 public:

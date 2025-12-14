@@ -25,18 +25,22 @@
 #ifndef __OPENSPACE_MODULE_SPOUT___SPOUTWRAPPER___H__
 #define __OPENSPACE_MODULE_SPOUT___SPOUTWRAPPER___H__
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
+#include <functional>
+#include <memory>
 #include <string>
 #include <vector>
 
 struct SPOUTLIBRARY;
 typedef SPOUTLIBRARY* SPOUTHANDLE;
 
+namespace ghoul { class Dictionary; }
 namespace ghoul::opengl { class Texture; }
+namespace openspace::documentation { class Documentation; }
 
 namespace openspace::spout {
 

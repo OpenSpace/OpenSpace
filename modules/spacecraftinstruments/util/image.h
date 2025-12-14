@@ -27,6 +27,7 @@
 
 #include <openspace/util/timerange.h>
 
+#include <filesystem>
 #include <string>
 #include <vector>
 

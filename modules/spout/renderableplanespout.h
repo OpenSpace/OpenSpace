@@ -33,8 +33,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class RenderablePlaneSpout : public RenderablePlane {
 public:
     explicit RenderablePlaneSpout(const ghoul::Dictionary& dictionary);

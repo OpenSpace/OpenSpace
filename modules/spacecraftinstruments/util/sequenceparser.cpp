@@ -24,10 +24,6 @@
 
 #include <modules/spacecraftinstruments/util/sequenceparser.h>
 
-#include <openspace/engine/globals.h>
-#include <openspace/util/spicemanager.h>
-#include <ghoul/logging/logmanager.h>
-
 namespace openspace {
 
 std::map<std::string, ImageSubset>& SequenceParser::subsetMap() {

@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/space/kepler.h>
+#include <openspace/util/coordinateconversion.h>
 #include <ghoul/lua/lua_helper.h>
 
 namespace {

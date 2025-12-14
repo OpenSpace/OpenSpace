@@ -29,15 +29,13 @@
 
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/util/timeline.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/lua/luastate.h>
-#include <modules/space/horizonsfile.h>
-#include <memory>
+#include <filesystem>
+#include <array>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
+class HorizonsFile;
 
 /**
  * The HorizonsTranslation is based on text files generated from NASA JPL HORIZONS Website

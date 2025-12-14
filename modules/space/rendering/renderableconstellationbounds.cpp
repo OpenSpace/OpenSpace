@@ -29,12 +29,21 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
+#include "SpiceUsr.h"
+#include <algorithm>
+#include <array>
+#include <filesystem>
 #include <fstream>
 #include <optional>
-#include "SpiceUsr.h"
+#include <set>
+#include <sstream>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableConstellationBounds";

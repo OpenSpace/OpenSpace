@@ -41,14 +41,19 @@
 #include <modules/space/rotation/spicerotation.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/scene/timeframe.h>
+#include <openspace/scene/translation.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/util/coordinateconversion.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/objectmanager.h>
 #include <ghoul/misc/templatefactory.h>
+#include <ghoul/opengl/programobjectmanager.h>
+#include <optional>
 
 #include "spacemodule_lua.inl"
 

@@ -24,11 +24,18 @@
 
 #include <modules/space/translation/keplertranslation.h>
 
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <glm/gtx/transform.hpp>
+#include <cmath>
+#include <cstdlib>
+#include <variant>
 
 namespace {
     struct RangeError final : public ghoul::RuntimeError {

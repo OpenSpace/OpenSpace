@@ -25,17 +25,22 @@
 #ifndef __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___IMAGESEQUENCER___H__
 #define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___IMAGESEQUENCER___H__
 
-#include <modules/spacecraftinstruments/util/sequenceparser.h>
+//#include <modules/spacecraftinstruments/util/sequenceparser.h>
 
+#include <modules/spacecraftinstruments/util/decoder.h>
+#include <modules/spacecraftinstruments/util/image.h>
+#include <openspace/util/timerange.h>
+#include <filesystem>
 #include <map>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
 namespace openspace {
 
-class Time;
 class SequenceParser;
+class Time;
 
 /**
  * The ImageSequencer singleton function is to manage the timekeeping and distribution of

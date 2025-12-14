@@ -35,14 +35,7 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace {
-
-namespace documentation { struct Documentation; }
-
-struct RenderData;
-struct UpdateData;
 
 class RenderableShadowCylinder : public Renderable {
 public:

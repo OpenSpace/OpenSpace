@@ -27,18 +27,17 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/base/rendering/renderabletrail.h>
 #include <modules/space/kepler.h>
-#include <modules/space/translation/keplertranslation.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
-#include <ghoul/glm.h>
-#include <ghoul/misc/objectmanager.h>
+#include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/programobject.h>
+#include <limits>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class RenderableOrbitalKepler : public Renderable {
 public:

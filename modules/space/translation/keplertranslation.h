@@ -28,10 +28,7 @@
 #include <openspace/scene/translation.h>
 
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/util/time.h>
 #include <ghoul/glm.h>
-#include <ghoul/misc/exception.h>
-#include <openspace/util/time.h>
 
 namespace openspace {
 

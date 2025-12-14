@@ -32,17 +32,11 @@
 #include <memory>
 
 namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
 
 namespace openspace {
 
 struct Image;
 struct LinePoint;
-struct RenderData;
-struct UpdateData;
 
 class RenderablePlaneProjection : public Renderable {
 public:

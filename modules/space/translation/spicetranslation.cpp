@@ -25,14 +25,10 @@
 #include <modules/space/translation/spicetranslation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
+#include <ghoul/misc/dictionary.h>
 #include <filesystem>
 #include <optional>
 #include <variant>

@@ -27,6 +27,7 @@
 
 #include <openspace/util/resourcesynchronization.h>
 
+#include <atomic>
 #include <thread>
 #include <optional>
 #include <vector>

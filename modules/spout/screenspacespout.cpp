@@ -27,9 +27,9 @@
 #include <modules/spout/screenspacespout.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo NameInfo = {

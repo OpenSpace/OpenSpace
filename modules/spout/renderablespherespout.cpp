@@ -26,10 +26,11 @@
 
 #include <modules/spout/renderablespherespout.h>
 
+#include <modules/base/rendering/renderablesphere.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/sphere.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     // This `Renderable` type can be used to render a sphere with a texture that is

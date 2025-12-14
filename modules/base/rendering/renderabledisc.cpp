@@ -35,7 +35,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <filesystem>
-#include <memory>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {

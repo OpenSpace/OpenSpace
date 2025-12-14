@@ -33,8 +33,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class ScreenSpaceSpout : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceSpout(const ghoul::Dictionary& dictionary);
