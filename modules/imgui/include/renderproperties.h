@@ -29,13 +29,11 @@
 
 #include <string>
 
-namespace openspace::properties { class Property; }
-
 namespace openspace {
 
-BooleanType(ShowToolTip);
+namespace properties { class Property; }
 
-void executeSetPropertyScript(const std::string& id, const std::string& value);
+BooleanType(ShowToolTip);
 
 void renderBoolProperty(properties::Property* prop, const std::string& ownerName,
     ShowToolTip showTooltip = ShowToolTip::Yes, double tooltipDelay = 1.0);

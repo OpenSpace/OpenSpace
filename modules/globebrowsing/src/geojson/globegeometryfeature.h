@@ -25,18 +25,24 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEGEOMETRYFEATURE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEGEOMETRYFEATURE___H__
 
-#include <openspace/properties/propertyowner.h>
-
-#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/geojson/geojsonproperties.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/texturecomponent.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <chrono>
+#include <memory>
+#include <string>
 #include <vector>
 
-namespace openspace::documentation { struct Documentation; }
+namespace ghoul::opengl { class ghoul::opengl::ProgramObject; }
+namespace openspace {
+    struct Geodetic2;
+    struct Geodetic3;
+    struct RenderData;
+    namespace documentation { struct Documentation; }
+} // namespace openspace
+
 namespace rendering::helper {
     struct LightSourceRenderData;
     struct VertexXYZNormal;

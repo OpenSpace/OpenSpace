@@ -34,18 +34,20 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <functional>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
-    struct RenderData;
-    struct UpdateData;
+
+struct RenderData;
+struct UpdateData;
 
 namespace documentation { struct Documentation; }
 

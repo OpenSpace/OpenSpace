@@ -27,6 +27,7 @@
 
 #include <list>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace openspace::globebrowsing::cache {

@@ -27,10 +27,8 @@
 
 #include <openspace/util/task.h>
 
-#include <openspace/util/threadpool.h>
-#include <openspace/util/concurrentjobmanager.h>
-#include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <filesystem>
+#include <vector>
 
 namespace openspace {
 

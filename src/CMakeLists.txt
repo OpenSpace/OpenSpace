@@ -132,6 +132,7 @@ set(OPENSPACE_SOURCE
   rendering/dashboarditem.cpp
   rendering/dashboardtextitem.cpp
   rendering/framebufferrenderer.cpp
+  rendering/deferredcaster.cpp
   rendering/deferredcastermanager.cpp
   rendering/fadeable.cpp
   rendering/helper.cpp

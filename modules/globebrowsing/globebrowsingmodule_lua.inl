@@ -22,7 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/collisionhelper.h>
+#include <modules/globebrowsing/src/layergroup.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/query/query.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/stringhelper.h>
 

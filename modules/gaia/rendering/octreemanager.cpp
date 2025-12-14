@@ -25,11 +25,13 @@
 #include <modules/gaia/rendering/octreemanager.h>
 
 #include <modules/gaia/rendering/octreeculler.h>
+#include <modules/globebrowsing/src/basictypes.h>
 #include <openspace/util/distanceconstants.h>
 #include <ghoul/format.h>
-#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
-#include <fstream>
+#include <algorithm>
+#include <cstdint>
+#include <string_view>
 #include <thread>
 
 namespace {

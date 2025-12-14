@@ -28,6 +28,7 @@
 #include <modules/server/include/topics/topic.h>
 
 #include <chrono>
+#include <unordered_map>
 
 namespace openspace {
 

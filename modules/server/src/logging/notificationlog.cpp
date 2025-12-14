@@ -24,6 +24,8 @@
 
 #include <modules/server/include/logging/notificationlog.h>
 
+#include <utility>
+
 namespace openspace {
 
 NotificationLog::NotificationLog(CallbackFunction callbackFunction,

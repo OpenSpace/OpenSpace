@@ -30,25 +30,18 @@
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
-#include <openspace/util/ellipsoid.h>
-#include <ghoul/glm.h>
+#include <filesystem>
 #include <future>
 #include <memory>
-#include <optional>
-
-namespace openspace::globebrowsing {
-    class RenderableGlobe;
-    struct TileIndex;
-
-    namespace cache { class MemoryAwareTileCache; }
-} // namespace openspace::globebrowsing
 
 namespace openspace {
 
-class Camera;
-struct Geodetic2;
-struct Geodetic3;
 class SceneGraphNode;
+
+namespace globebrowsing {
+    class RenderableGlobe;
+    namespace cache { class MemoryAwareTileCache; }
+} // namespace globebrowsing
 
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:

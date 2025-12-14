@@ -25,7 +25,7 @@
 #include <modules/gaia/rendering/octreeculler.h>
 
 #include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
+#include <utility>
 
 namespace openspace {
 

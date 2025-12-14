@@ -29,7 +29,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <CCfits>
 #include <algorithm>
-#include <filesystem>
 #include <string>
 #include <string_view>
 #include <vector>

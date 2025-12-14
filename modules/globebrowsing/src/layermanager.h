@@ -28,7 +28,6 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/src/layergroupid.h>
-#include <ghoul/misc/boolean.h>
 #include <array>
 #include <functional>
 #include <memory>
@@ -41,7 +40,6 @@ namespace openspace::globebrowsing {
 
 class Layer;
 struct LayerGroup;
-class TileTextureInitData;
 
 /**
  * Manages multiple LayerGroups.

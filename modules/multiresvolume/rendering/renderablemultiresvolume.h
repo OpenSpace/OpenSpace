@@ -36,12 +36,7 @@
 #include <filesystem>
 #include <memory>
 
-namespace ghoul { class Dictionary; }
 namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
 
 namespace openspace {
 
@@ -104,7 +99,6 @@ private:
     double _time;
     double _startTime;
     double _endTime;
-
 
     // Stats timers
     std::string _statsFileName;

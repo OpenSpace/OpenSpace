@@ -27,29 +27,26 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/gaia/rendering/octreeculler.h>
 #include <modules/gaia/rendering/octreemanager.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/ivec2property.h>
+#include <ghoul/glm.h>
 #include <ghoul/opengl/bufferbinding.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <filesystem>
 #include <memory>
+#include <vector>
 
 namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class RenderableGaiaStars : public Renderable {
 public:

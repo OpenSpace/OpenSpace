@@ -24,6 +24,9 @@
 
 #include <modules/globebrowsing/src/layerrendersettings.h>
 
+#include <cmath>
+#include <cstdlib>
+
 namespace {
     constexpr openspace::properties::Property::PropertyInfo SetDefaultInfo = {
         "SetDefault",

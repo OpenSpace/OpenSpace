@@ -29,9 +29,9 @@
 
 #include <openspace/engine/downloadmanager.h>
 #include <ghoul/designpattern/event.h>
+#include <filesystem>
 #include <future>
 #include <set>
-#include <string>
 
 namespace ccmc { class Kameleon; }
 

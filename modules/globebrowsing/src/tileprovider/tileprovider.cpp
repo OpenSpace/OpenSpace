@@ -24,39 +24,12 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/asynctiledataprovider.h>
-#include <modules/globebrowsing/src/geodeticpatch.h>
-#include <modules/globebrowsing/src/layermanager.h>
-#include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/rawtiledatareader.h>
-#include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
-#include <modules/globebrowsing/src/tileprovider/imagesequencetileprovider.h>
-#include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
-#include <modules/globebrowsing/src/tileprovider/sizereferencetileprovider.h>
-#include <modules/globebrowsing/src/tileprovider/temporaltileprovider.h>
-#include <modules/globebrowsing/src/tileprovider/tileindextileprovider.h>
-#include <modules/globebrowsing/src/tileprovider/tileproviderbyindex.h>
-#include <modules/globebrowsing/src/tileprovider/tileproviderbylevel.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/memorymanager.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/textureunit.h>
 #include <filesystem>
-#include <fstream>
-#include "cpl_minixml.h"
 
 namespace {
     std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;

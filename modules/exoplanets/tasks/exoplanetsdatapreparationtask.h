@@ -30,7 +30,6 @@
 #include <modules/exoplanets/datastructure.h>
 #include <filesystem>
 #include <fstream>
-#include <string>
 
 namespace openspace::exoplanets {
 

@@ -28,10 +28,10 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <modules/server/include/serverinterface.h>
-
 #include <deque>
 #include <memory>
 #include <mutex>
+#include <utility>
 
 namespace openspace {
 

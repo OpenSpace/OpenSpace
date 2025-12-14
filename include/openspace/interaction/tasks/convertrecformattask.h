@@ -29,7 +29,6 @@
 
 #include <openspace/interaction/sessionrecording.h>
 #include <filesystem>
-#include <string>
 
 namespace ghoul { class Dictionary; }
 namespace openspace::documentation { struct Documentation; }

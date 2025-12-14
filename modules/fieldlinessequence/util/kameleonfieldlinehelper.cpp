@@ -41,6 +41,8 @@
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
 
+#include <modules/kameleon/include/kameleonhelper.h>
+
 #ifdef _MSC_VER
 #pragma warning (push)
 // Boost throws #pragma warning: there is no warning number '4675'
@@ -52,7 +54,6 @@
 #include <ccmc/KameleonInterpolator.h>
 #include <ccmc/Point3f.h>
 #include <ccmc/Tracer.h>
-#include <modules/kameleon/include/kameleonhelper.h>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -97,12 +98,12 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     return false;
 #else // OPENSPACE_MODULE_KAMELEON_ENABLED
     // Create Kameleon object and open CDF file!
-    std::unique_ptr<ccmc::Kameleon> kameleon = kameleonHelper::createKameleonObject(
+    std::unique_ptr<ccmc::Kameleon> kameleon = kameleonhelper::createKameleonObject(
         cdfPath
     );
 
     state.setModel(fls::stringToModel(kameleon->getModelName()));
-    double cdfDoubleTime = kameleonHelper::getTime(kameleon.get(), manualTimeOffset);
+    double cdfDoubleTime = kameleonhelper::getTime(kameleon.get(), manualTimeOffset);
     state.setTriggerTime(cdfDoubleTime);
 
     // get time as string.

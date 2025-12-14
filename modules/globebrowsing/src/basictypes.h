@@ -27,9 +27,9 @@
 
 #include <ghoul/glm.h>
 #include <array>
-#include <memory>
+#include <cstdint>
+#include <limits>
 #include <optional>
-#include <vector>
 
 namespace ghoul::opengl { class Texture; }
 

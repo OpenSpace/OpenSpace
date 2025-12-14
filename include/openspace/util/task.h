@@ -27,6 +27,7 @@
 
 #include <functional>
 #include <memory>
+#include <string>
 
 namespace ghoul { class Dictionary; }
 

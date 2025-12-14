@@ -30,19 +30,17 @@
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <filesystem>
 #include <memory>
-
-namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
 namespace volume { template <typename T> class RawVolume; }
 
 class GalaxyRaycaster;
-struct RenderData;
 
 class RenderableGalaxy : public Renderable {
 public:

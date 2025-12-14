@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/globebrowsing/src/lruthreadpool.h>
+#include <utility>
+
 namespace openspace::globebrowsing {
 
 template <typename KeyType>

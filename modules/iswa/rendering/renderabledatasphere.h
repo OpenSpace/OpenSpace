@@ -30,7 +30,6 @@
 namespace openspace {
 
 class Sphere;
-namespace documentation { struct Documentation; }
 
 /**
  * DataSphere is a concrete IswaCygnet with data files as its input source. The class

@@ -25,7 +25,11 @@
 #include <modules/server/include/topics/errorlogtopic.h>
 
 #include <modules/server/include/logging/notificationlog.h>
+#include <ghoul/logging/log.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/stringconversion.h>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view StartSubscription = "start_subscription";

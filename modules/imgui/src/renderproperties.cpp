@@ -35,6 +35,7 @@
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/property.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
@@ -49,9 +50,18 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/scripting/scriptengine.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/stringconversion.h>
 #include <ghoul/misc/stringhelper.h>
+#include <algorithm>
+#include <array>
+#include <cstring>
+#include <iterator>
+#include <limits>
+#include <set>
+#include <string_view>
+#include <vector>
 
 namespace openspace {
 

@@ -25,18 +25,22 @@
 #include <modules/galaxy/tasks/milkywaypointsconversiontask.h>
 
 #include <openspace/documentation/documentation.h>
-
+#include <ghoul/misc/dictionary.h>
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <vector>
 
 namespace openspace {
-
-/*MilkywayPointsConversionTask::MilkywayPointsConversionTask(
-    const std::string& inFilename,
-    const std::string& outFilename)
-    : _inFilename(inFilename)
-    , _outFilename(outFilename) {}*/
+    
+documentation::Documentation MilkywayPointsConversionTask::Documentation() {
+    return {
+        "MilkywayPointsConversionTask",
+        "galaxy_milkywaypointsconversiontask",
+        "",
+        {}
+    };
+}
 
 MilkywayPointsConversionTask::MilkywayPointsConversionTask(const ghoul::Dictionary&) {}
 
@@ -46,8 +50,8 @@ std::string MilkywayPointsConversionTask::description() {
 
 void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progressCallback)
 {
-    std::ifstream in(_inFilename, std::ios::in);
-    std::ofstream out(_outFilename, std::ios::out | std::ios::binary);
+    std::ifstream in = std::ifstream(_inFilename, std::ios::in);
+    std::ofstream out = std::ofstream(_outFilename, std::ios::out | std::ios::binary);
 
     std::string format;
     int64_t nPoints = 0;
@@ -85,18 +89,6 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
 
     out.write(reinterpret_cast<char*>(&nPoints), sizeof(int64_t));
     out.write(reinterpret_cast<char*>(pointData.data()), nFloats * sizeof(float));
-
-    in.close();
-    out.close();
-}
-
-documentation::Documentation MilkywayPointsConversionTask::Documentation() {
-    return {
-        "MilkywayPointsConversionTask",
-        "galaxy_milkywaypointsconversiontask",
-        "",
-        {}
-    };
 }
 
 } // namespace openspace

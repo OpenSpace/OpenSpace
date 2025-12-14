@@ -28,7 +28,10 @@
 #include <modules/iswa/rendering/renderabledatacygnet.h>
 
 #include <openspace/properties/misc/selectionproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <filesystem>
+#include <tuple>
 
 namespace openspace {
 
@@ -78,7 +81,6 @@ private:
     void subscribeToGroup();
 
     void changeKwPath(std::string path);
-    static int id();
 
     properties::SelectionProperty _fieldlines;
     properties::FloatProperty _resolution;

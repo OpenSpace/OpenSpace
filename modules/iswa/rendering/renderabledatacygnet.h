@@ -29,13 +29,13 @@
 
 #include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <glm/gtx/std_based_type.hpp>
 
 namespace openspace {
 
 class DataProcessor;
-namespace documentation { struct Documentation; }
 
 /**
  * This class abstracts away the the loading of data and creation of textures for all data

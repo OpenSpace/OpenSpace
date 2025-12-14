@@ -24,12 +24,13 @@
 
 #include <modules/server/include/topics/triggerpropertytopic.h>
 
-#include <openspace/json.h>
-#include <openspace/properties/property.h>
-#include <openspace/query/query.h>
-#include <ghoul/logging/logmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
+#include <stdexcept>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "TriggerPropertyTopic";

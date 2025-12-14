@@ -29,6 +29,10 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <glm/gtx/std_based_type.hpp>
+#include <algorithm>
+#include <cmath>
+#include <format>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "BrickManager";

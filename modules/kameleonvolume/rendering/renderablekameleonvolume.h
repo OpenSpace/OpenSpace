@@ -29,20 +29,19 @@
 
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/uvec3property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <filesystem>
 #include <memory>
 
-namespace openspace {
-    struct RenderData;
-    class TransferFunction;
-} // namespace openspace
+namespace openspace { class TransferFunction; }
 
 namespace openspace::volume {
     class BasicVolumeRaycaster;
     template <typename T> class RawVolume;
-    class TransferFunctionHandler;
     class VolumeClipPlanes;
 } // openspace::volume
 
@@ -98,7 +97,7 @@ private:
     std::unique_ptr<volume::BasicVolumeRaycaster> _raycaster;
 
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
-    std::shared_ptr<openspace::TransferFunction> _transferFunction;
+    std::shared_ptr<TransferFunction> _transferFunction;
 };
 
 } // namespace openspace::kameleonvolume

@@ -29,19 +29,17 @@
 
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/properties/misc/triggerproperty.h>
-#include <openspace/rendering/transferfunction.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/glm.h>
+#include <ghoul/opengl/texture.h>
 #include <chrono>
 #include <future>
 #include <memory>
-#include <string>
 
 namespace openspace {
 
 class IswaBaseGroup;
 class TransferFunction;
-
-namespace documentation { struct Documentation; }
 
 class RenderableIswaCygnet : public Renderable {
 public:

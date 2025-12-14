@@ -31,18 +31,11 @@
 #include <ghoul/glm.h>
 #include <ghoul/opengl/bufferbinding.h>
 #include <ghoul/opengl/textureunit.h>
-#include <string>
-
-namespace ghoul::opengl {
-    class Texture;
-    class ProgramObject;
-} // namespace ghoul::opengl
+#include <memory>
 
 namespace openspace {
 
 class AtlasManager;
-struct RenderData;
-struct RaycastData;
 class TSP;
 class TransferFunction;
 

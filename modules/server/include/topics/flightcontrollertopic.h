@@ -29,11 +29,6 @@
 
 #include <openspace/interaction/websocketinputstate.h>
 
-namespace openspace::interaction {
-    struct WebsocketInputStates;
-    struct WebsocketInputState;
-} // namespace openspace::interaction
-
 namespace openspace {
 
 class FlightControllerTopic : public Topic {

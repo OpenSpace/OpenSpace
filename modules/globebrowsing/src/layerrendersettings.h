@@ -29,6 +29,8 @@
 
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <functional>
 
 namespace openspace::globebrowsing {
 

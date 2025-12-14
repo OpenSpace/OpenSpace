@@ -28,11 +28,9 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/fadeable.h>
 
-#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/geojson/geojsonproperties.h>
 #include <modules/globebrowsing/src/geojson/globegeometryfeature.h>
 #include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -40,19 +38,15 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/helper.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/glm.h>
+#include <memory>
 #include <optional>
-#include <vector>
 
-namespace openspace {
-    struct RenderData;
-    class LightSource;
-    namespace documentation { struct Documentation; }
-    namespace rendering::helper { struct VertexXYZNormal; }
-} // namespace::openspace
-
+namespace openspace { class LightSource; }
+namespace openspace { struct RenderData; }
+namespace openspace::documentation { struct Documentation; }
+namespace ghoul { class Dictionary; }
 namespace ghoul::opengl { class ProgramObject; }
+namespace geos::geom { class Geometry; }
 namespace geos::io { class GeoJSONFeature; }
 
 namespace openspace::globebrowsing {

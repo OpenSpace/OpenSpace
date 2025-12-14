@@ -25,9 +25,10 @@
 #include <modules/server/include/topics/authorizationtopic.h>
 
 #include <modules/server/include/connection.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
 #include <ghoul/logging/logmanager.h>
+#include <stdexcept>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "AuthorizationTopic";

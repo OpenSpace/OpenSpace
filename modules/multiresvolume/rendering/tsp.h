@@ -28,8 +28,8 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <filesystem>
 #include <fstream>
+#include <ios>
 #include <list>
-#include <string>
 #include <vector>
 
 namespace openspace {
@@ -108,11 +108,6 @@ private:
      * spatial subdivision level).
      */
     std::list<unsigned int> coveredBSTLeafBricks(unsigned int brickIndex) const;
-
-    /**
-     * Return a list of eight children brick incices given a brick index.
-     */
-    std::list<unsigned int> childBricks(unsigned int brickIndex);
 
     std::filesystem::path _filename;
     std::ifstream _file;

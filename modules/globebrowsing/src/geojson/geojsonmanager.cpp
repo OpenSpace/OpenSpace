@@ -24,11 +24,17 @@
 
 #include <modules/globebrowsing/src/geojson/geojsonmanager.h>
 
+#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/rendering/helper.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
-
+#include <algorithm>
+#include <functional>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "GeoJsonManager";

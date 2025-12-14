@@ -27,13 +27,17 @@
 
 #include <modules/gaia/rendering/gaiaoptions.h>
 #include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <array>
 #include <filesystem>
+#include <fstream>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <queue>
+#include <set>
 #include <stack>
+#include <string>
+#include <utility>
 #include <vector>
 
 namespace openspace {

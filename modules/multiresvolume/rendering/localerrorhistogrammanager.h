@@ -28,8 +28,9 @@
 #include <openspace/util/histogram.h>
 #include <ghoul/glm.h>
 #include <filesystem>
-#include <iosfwd>
+#include <fstream>
 #include <map>
+#include <vector>
 
 namespace openspace {
 

@@ -31,12 +31,14 @@
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <filesystem>
+#include <memory>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl { class ProgramObject; }

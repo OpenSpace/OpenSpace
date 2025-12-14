@@ -32,27 +32,29 @@
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/boxgeometry.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
-#include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/component_wise.hpp>
-#include <filesystem>
+#include <algorithm>
+#include <cstdint>
+#include <cstdlib>
 #include <fstream>
-#include <optional>
+#include <sstream>
+#include <utility>
 
 namespace {
     constexpr int8_t CurrentCacheVersion = 1;

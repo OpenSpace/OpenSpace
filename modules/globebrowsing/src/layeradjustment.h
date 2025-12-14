@@ -31,6 +31,9 @@
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <functional>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace::documentation { struct Documentation; }
 

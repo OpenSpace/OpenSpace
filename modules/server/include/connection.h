@@ -27,6 +27,7 @@
 
 #include <ghoul/misc/templatefactory.h>
 #include <openspace/json.h>
+#include <map>
 #include <memory>
 #include <mutex>
 #include <string>

@@ -40,6 +40,8 @@
 #include <cctype>
 #include <iterator>
 #include <sstream>
+#include <optional>
+#include <vector>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableTimeVaryingFitsSphere";

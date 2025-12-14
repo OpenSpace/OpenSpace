@@ -25,7 +25,14 @@
 #include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
 
 #include <openspace/documentation/documentation.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/texture.h>
+#include <limits>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {

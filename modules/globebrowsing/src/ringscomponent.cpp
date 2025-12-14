@@ -25,30 +25,29 @@
 #include <modules/globebrowsing/src/ringscomponent.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <array>
+#include <cstddef>
 #include <filesystem>
-#include <fstream>
-#include <cstdlib>
-#include <locale>
+#include <memory>
+#include <optional>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "RingsComponent";

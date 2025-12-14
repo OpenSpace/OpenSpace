@@ -27,6 +27,7 @@
 
 #include <modules/opensoundcontrol/ext/oscpack/ip/UdpSocket.h>
 #include <modules/opensoundcontrol/ext/oscpack/osc/OscOutboundPacketStream.h>
+#include <modules/opensoundcontrol/ext/oscpack/osc/OscTypes.h>
 #include <string>
 #include <variant>
 #include <vector>

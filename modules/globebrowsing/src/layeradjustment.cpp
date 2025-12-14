@@ -25,8 +25,9 @@
 #include <modules/globebrowsing/src/layeradjustment.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ChromaKeyColorInfo = {

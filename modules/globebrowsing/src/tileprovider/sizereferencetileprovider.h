@@ -27,6 +27,8 @@
 
 #include <modules/globebrowsing/src/tileprovider/texttileprovider.h>
 
+#include <openspace/util/ellipsoid.h>
+
 namespace openspace::globebrowsing {
 
 class SizeReferenceTileProvider : public TextTileProvider {

@@ -22,34 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___HISTOGRAMMANAGER___H__
-#define __OPENSPACE_MODULE_MULTIRESVOLUME___HISTOGRAMMANAGER___H__
-
-#include <openspace/util/histogram.h>
-#include <filesystem>
-#include <vector>
+#include <openspace/rendering/deferredcaster.h>
 
 namespace openspace {
 
-class TSP;
+void Deferredcaster::preRaycast(const RenderData&, const DeferredcastData&,
+                                ghoul::opengl::ProgramObject&)
+{}
 
-class HistogramManager {
-public:
-    bool buildHistograms(TSP* tsp, int numBins);
-    Histogram* histogram(unsigned int brickIndex);
-    bool loadFromFile(const std::filesystem::path& filename);
-    bool saveToFile(const std::filesystem::path& filename);
-
-private:
-    bool buildHistogram(TSP* tsp, unsigned int brickIndex);
-    std::vector<float> readValues(TSP* tsp, unsigned int brickIndex);
-
-    std::vector<Histogram> _histograms;
-    float _minBin = 0.f;
-    float _maxBin = 0.f;
-    int _numBins = 0;
-};
+void Deferredcaster::postRaycast(const RenderData&, const DeferredcastData&,
+                                 ghoul::opengl::ProgramObject&)
+{}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_MULTIRESVOLUME___HISTOGRAMMANAGER___H__

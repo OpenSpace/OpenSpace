@@ -28,6 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>

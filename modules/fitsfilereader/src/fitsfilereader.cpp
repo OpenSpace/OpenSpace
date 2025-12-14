@@ -50,7 +50,6 @@
 #pragma warning (pop)
 #endif // WIN32
 
-
 using namespace CCfits;
 
 namespace {

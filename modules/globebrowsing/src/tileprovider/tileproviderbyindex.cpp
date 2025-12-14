@@ -25,6 +25,13 @@
 #include <modules/globebrowsing/src/tileprovider/tileproviderbyindex.h>
 
 #include <openspace/documentation/documentation.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <cstdint>
+#include <limits>
+#include <utility>
+#include <vector>
 
 namespace {
     // This TileProvider provides the ability to override the contents for tiles at

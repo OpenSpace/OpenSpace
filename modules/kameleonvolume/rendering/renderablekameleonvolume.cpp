@@ -26,27 +26,25 @@
 
 #include <modules/volume/rendering/basicvolumeraycaster.h>
 #include <modules/volume/rawvolume.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <modules/volume/rawvolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
-#include <modules/volume/rendering/basicvolumeraycaster.h>
 #include <modules/volume/rendering/volumeclipplanes.h>
-#include <modules/volume/transferfunctionhandler.h>
 #include <modules/volume/volumegridtype.h>
-#include <openspace/engine/globals.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
+#include <array>
 #include <filesystem>
+#include <optional>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableKameleonVolume";

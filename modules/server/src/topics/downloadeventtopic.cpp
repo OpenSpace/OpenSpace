@@ -27,7 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/util/downloadeventengine.h>
 #include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
+#include <string_view>
 
 namespace {
     constexpr std::string_view StartSubscription = "start_subscription";
@@ -42,10 +42,6 @@ DownloadEventTopic::~DownloadEventTopic() {
         global::downloadEventEngine->unsubscribe(_subscriptionID);
         _isSubscribedTo = false;
     }
-}
-
-bool DownloadEventTopic::isDone() const {
-    return !_isSubscribedTo;
 }
 
 void DownloadEventTopic::handleJson(const nlohmann::json& json) {
@@ -85,6 +81,10 @@ void DownloadEventTopic::handleJson(const nlohmann::json& json) {
         global::downloadEventEngine->unsubscribe(_subscriptionID);
         _isSubscribedTo = false;
     }
+}
+
+bool DownloadEventTopic::isDone() const {
+    return !_isSubscribedTo;
 }
 
 } // namespace openspace

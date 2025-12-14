@@ -26,7 +26,9 @@
 #define __OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
 
 #include <modules/server/include/topics/topic.h>
-#include <ghoul/logging/log.h>
+#include <ghoul/logging/loglevel.h>
+
+namespace ghoul::logging { class Log; }
 
 namespace openspace {
 

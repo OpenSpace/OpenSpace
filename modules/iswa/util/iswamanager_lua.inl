@@ -22,7 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <modules/iswa/rendering/iswabasegroup.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/screenspacerenderable.h>
+#include <ghoul/format.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionary.h>
+#include <memory>
+#include <utility>
 
 namespace {
 

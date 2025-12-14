@@ -28,34 +28,20 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/src/basictypes.h>
-#include <modules/globebrowsing/src/layergroupid.h>
-#include <modules/globebrowsing/src/tileindex.h>
-#include <modules/globebrowsing/src/tiletextureinitdata.h>
-#include <modules/globebrowsing/src/timequantizer.h>
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
-#include <openspace/util/ellipsoid.h>
-#include <unordered_map>
-#include <ghoul/opengl/programobject.h>
+#include <cstdint>
+#include <functional>
+#include <memory>
+#include <string>
 
 struct CPLXMLNode;
 
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-} // namespace ghoul::fontrendering
+namespace ghoul { class Dictionary; }
 
-namespace openspace { class PixelBuffer; }
+namespace openspace { struct Documentation; }
 
 namespace openspace::globebrowsing {
-    class AsyncTileDataProvider;
-    struct RawTile;
-    struct TileIndex;
-    namespace cache { class MemoryAwareTileCache; }
-} // namespace openspace::globebrowsing
 
-namespace openspace::globebrowsing {
+struct TileIndex;
 
 // If you add a new type, also add it to shaders/texturetilemapping.glsl
 enum class Type {

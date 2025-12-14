@@ -28,10 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/src/geojson/geojsoncomponent.h>
-
-#include <functional>
 #include <memory>
-#include <vector>
 
 namespace ghoul { class Dictionary; }
 namespace openspace { struct RenderData; }

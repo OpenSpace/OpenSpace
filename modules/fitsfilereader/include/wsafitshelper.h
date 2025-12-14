@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__
 
 #include <ghoul/opengl/texture.h>
+#include <filesystem>
 #include <memory>
 #include <utility>
 #include <valarray>

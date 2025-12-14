@@ -38,7 +38,6 @@
 #include <memory>
 
 namespace ghoul { class Dictionary; }
-
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {

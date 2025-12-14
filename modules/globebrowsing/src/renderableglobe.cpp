@@ -29,21 +29,26 @@
 #include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
+#include <modules/globebrowsing/src/layergroupid.h>
+#include <modules/globebrowsing/src/layerrendersettings.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
@@ -51,18 +56,13 @@
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <algorithm>
+#include <cmath>
+#include <limits>
 #include <numeric>
-#include <queue>
-#include <vector>
-
-#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
-#include <experimental/memory_resource>
-namespace std {
-    using namespace experimental;
-} // namespace std
-#else
-#include <memory_resource>
-#endif
+#include <optional>
+#include <utility>
+#include <variant>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableGlobe";
