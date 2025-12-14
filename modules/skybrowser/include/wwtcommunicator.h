@@ -25,12 +25,18 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___WWTCOMMUNICATOR___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___WWTCOMMUNICATOR___H__
 
-#include <modules/webbrowser/include/browserinstance.h>
-#include <openspace/properties/scalar/doubleproperty.h>
-
+#include <ghoul/glm.h>
 #include <deque>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
+
+class BrowserInstance;
+
 using SelectedImageDeque = std::deque<std::pair<std::string, double>>;
 
 class WwtCommunicator {
@@ -66,7 +72,6 @@ private:
 
     bool _isImageCollectionLoaded = false;
     SelectedImageDeque _selectedImages;
-
 
     BrowserInstance* _browserInstance = nullptr;
 };

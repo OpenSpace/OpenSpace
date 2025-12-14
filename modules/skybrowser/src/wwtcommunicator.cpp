@@ -24,13 +24,12 @@
 
 #include <modules/skybrowser/include/wwtcommunicator.h>
 
-#include <modules/cefwebgui/include/guirenderhandler.h>
-#include <modules/cefwebgui/include/guikeyboardhandler.h>
-#include <modules/skybrowser/include/utility.h>
-#include <modules/webbrowser/include/webkeyboardhandler.h>
-#include <modules/webbrowser/webbrowsermodule.h>
+#include <modules/webbrowser/include/browserinstance.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
-#include <deque>
+#include <ghoul/misc/dictionary.h>
+#include <algorithm>
+#include <iterator>
 
 namespace {
     // WWT messages

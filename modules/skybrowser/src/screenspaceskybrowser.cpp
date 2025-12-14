@@ -25,17 +25,19 @@
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 
 #include <modules/skybrowser/skybrowsermodule.h>
-#include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/skybrowser/include/utility.h>
+#include <modules/webbrowser/include/browserinstance.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionaryjsonformatter.h>
-#include <ghoul/opengl/texture.h>
-#include <optional>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 #include <glm/gtx/color_space.hpp>
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <optional>
 #include <random>
 
 namespace {

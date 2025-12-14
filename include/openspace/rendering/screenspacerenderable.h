@@ -42,6 +42,8 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
+struct RenderData;
+
 namespace documentation { struct Documentation; }
 
 /**

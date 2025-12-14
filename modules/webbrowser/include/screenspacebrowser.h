@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
+#include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
@@ -101,6 +102,7 @@ private:
     bool _useAcceleratedRendering = false;
     bool _isUrlDirty = false;
 };
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_WEBBROWSER___SCREEN_SPACE_BROWSER___H__

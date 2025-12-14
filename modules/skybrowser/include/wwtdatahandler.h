@@ -25,9 +25,11 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___WWTDATAHANDLER___H__
 
+#include <ghoul/glm.h>
 #include <filesystem>
-#include <memory>
+#include <map>
 #include <optional>
+#include <string>
 
 namespace tinyxml2 { class XMLElement; }
 
