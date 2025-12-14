@@ -26,15 +26,17 @@
 #define __OPENSPACE_UI_LAUNCHER___PROFILEEDIT___H__
 
 #include <QDialog>
+
+#include <filesystem>
 #include <string>
-#include <vector>
 
 namespace openspace { class Profile; }
 
-class QWidget;
+class QKeyEvent;
 class QLabel;
 class QLineEdit;
 class QTextEdit;
+class QWidget;
 
 class ProfileEdit final : public QDialog {
 Q_OBJECT

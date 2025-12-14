@@ -27,9 +27,9 @@
 
 #include <modules/telemetry/include/telemetrybase.h>
 
-#include <openspace/properties/misc/optionproperty.h>
-
 namespace openspace {
+
+class Camera;
 
 class FocusTelemetry : public TelemetryBase {
 public:

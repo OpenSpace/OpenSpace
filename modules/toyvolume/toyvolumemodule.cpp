@@ -25,8 +25,11 @@
 #include <modules/toyvolume/toyvolumemodule.h>
 
 #include <modules/toyvolume/rendering/renderabletoyvolume.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 
 namespace openspace {
@@ -38,6 +41,12 @@ void ToyVolumeModule::internalInitialize(const ghoul::Dictionary&) {
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableToyVolume>("RenderableToyVolume");
+}
+
+std::vector<documentation::Documentation> ToyVolumeModule::documentations() const {
+    return {
+        RenderableToyVolume::Documentation()
+    };
 }
 
 } // namespace openspace

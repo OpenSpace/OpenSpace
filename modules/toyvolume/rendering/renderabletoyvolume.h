@@ -27,6 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
@@ -34,19 +35,17 @@
 
 namespace openspace {
 
-class ToyVolumeRaycaster;
-struct RenderData;
-
 class RenderableToyVolume : public Renderable {
 public:
     explicit RenderableToyVolume(const ghoul::Dictionary& dictionary);
-    ~RenderableToyVolume() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
+
+    static documentation::Documentation Documentation();
 
 private:
     properties::Vec3Property _size;

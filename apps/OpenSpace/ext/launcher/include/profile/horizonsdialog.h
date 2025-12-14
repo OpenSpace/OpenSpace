@@ -30,6 +30,7 @@
 #include <openspace/json.h>
 #include <filesystem>
 #include <string>
+#include <utility>
 
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
 #include <modules/space/horizonsfile.h>
@@ -43,6 +44,9 @@ class QNetworkAccessManager;
 class QNetworkReply;
 class QPlainTextEdit;
 class QProgressBar;
+class QPushButton;
+class QVariant;
+class QWidget;
 
 class HorizonsDialog final : public QDialog {
 Q_OBJECT

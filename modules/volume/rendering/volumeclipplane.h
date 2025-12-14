@@ -29,6 +29,7 @@
 
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <ghoul/glm.h>
 
 namespace ghoul { class Dictionary; }
 

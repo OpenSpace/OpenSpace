@@ -32,6 +32,8 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <optional>
+#include <utility>
 
 using namespace openspace;
 

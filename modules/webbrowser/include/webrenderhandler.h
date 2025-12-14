@@ -38,7 +38,6 @@
 #endif // _MSC_VER
 
 #include <include/cef_render_handler.h>
-#include <include/cef_display_handler.h>
 
 #ifdef _MSC_VER
 #pragma warning (pop)

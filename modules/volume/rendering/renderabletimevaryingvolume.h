@@ -34,11 +34,11 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/rendering/transferfunction.h>
+#include <filesystem>
 #include <memory>
 
 namespace openspace {
     class Histogram;
-    struct RenderData;
 } // namespace openspace
 
 namespace openspace::volume {

@@ -25,7 +25,13 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___FILESYSTEMACCESS___H__
 #define __OPENSPACE_UI_LAUNCHER___FILESYSTEMACCESS___H__
 
+#include <QDir>
 #include <QFileSystemModel>
+
+#include <string>
+#include <vector>
+
+class QFileInfo;
 
 class FileSystemAccess {
 public:

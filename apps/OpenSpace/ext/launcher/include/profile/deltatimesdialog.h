@@ -27,12 +27,18 @@
 
 #include <QDialog>
 
+#include <string>
+#include <string_view>
+#include <vector>
+
 class QComboBox;
 class QDialogButtonBox;
+class QKeyEvent;
 class QLabel;
 class QListWidget;
 class QLineEdit;
 class QPushButton;
+class QWidget;
 
 class DeltaTimesDialog final : public QDialog {
 Q_OBJECT

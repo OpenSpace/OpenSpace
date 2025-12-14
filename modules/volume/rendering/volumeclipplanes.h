@@ -29,13 +29,11 @@
 
 #include <modules/volume/rendering/volumeclipplane.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <vector>
+#include <ghoul/glm.h>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace::volume {
-
-class VolumeClipPlane;
 
 class VolumeClipPlanes : public properties::PropertyOwner {
 public:

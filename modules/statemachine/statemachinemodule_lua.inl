@@ -22,6 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/stringhelper.h>
+
 namespace {
 
 /**

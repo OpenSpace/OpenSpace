@@ -37,6 +37,9 @@
 #include "profile/timedialog.h"
 #include "profile/uipanelsdialog.h"
 #include <openspace/scene/profile.h>
+#include <openspace/util/keys.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/stringconversion.h>
 #include <QDialogButtonBox>
 #include <QFileDialog>
 #include <QKeyEvent>
@@ -47,9 +50,10 @@
 #include <QVBoxLayout>
 #include <QWidget>
 #include <algorithm>
-#include <filesystem>
 #include <fstream>
 #include <ios>
+#include <utility>
+#include <vector>
 
 #ifdef WIN32
 #include <Windows.h>

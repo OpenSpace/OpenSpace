@@ -31,6 +31,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <chrono>
 #include <filesystem>
+#include <memory>
 
 namespace openspace {
 

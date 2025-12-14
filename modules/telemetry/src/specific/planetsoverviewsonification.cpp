@@ -24,8 +24,10 @@
 
 #include <modules/telemetry/include/specific/planetsoverviewsonification.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/memorymanager.h>
+#include <cstdint>
 
 namespace {
     // Indices for data items

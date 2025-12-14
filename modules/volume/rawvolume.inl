@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/volume/volumeutils.h>
+#include <functional>
 
 namespace openspace::volume {
 

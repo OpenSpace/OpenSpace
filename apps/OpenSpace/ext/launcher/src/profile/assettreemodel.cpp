@@ -28,6 +28,8 @@
 #include "filesystemaccess.h"
 #include <ghoul/misc/stringhelper.h>
 #include <sstream>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view Header1 = "Asset";

@@ -26,7 +26,9 @@
 
 #include <sgctedit/displaywindowunion.h>
 #include <sgctedit/monitorbox.h>
+#include <sgct/math.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include <QApplication>
 #include <QCheckBox>
@@ -36,7 +38,13 @@
 #include <QPushButton>
 #include <QScreen>
 #include <QVBoxLayout>
+#include <algorithm>
+#include <cstdint>
 #include <fstream>
+#include <limits>
+#include <optional>
+#include <utility>
+#include <vector>
 
 namespace {
     constexpr int MaxNumberWindows = 4;

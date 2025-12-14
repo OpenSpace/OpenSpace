@@ -27,14 +27,13 @@
 
 #include <QMainWindow>
 
-#include "sgctedit/sgctedit.h"
 #include <openspace/scene/profile.h>
-#include <sgct/config.h>
-#include <sgct/error.h>
-#include <QApplication>
 #include <filesystem>
 #include <optional>
+#include <string>
 
+class QKeyEvent;
+class QPushButton;
 class SplitComboBox;
 
 namespace openspace { struct Configuration; }

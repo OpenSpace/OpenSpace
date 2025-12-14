@@ -29,17 +29,9 @@
 
 #include <openspace/util/boxgeometry.h>
 #include <ghoul/glm.h>
-#include <string>
-
-namespace ghoul::opengl {
-    class Texture;
-    class ProgramObject;
-} // namespace ghoul::opengl
+#include <filesystem>
 
 namespace openspace {
-
-struct RenderData;
-struct RaycastData;
 
 class ToyVolumeRaycaster : public VolumeRaycaster {
 public:

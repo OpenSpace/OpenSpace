@@ -25,12 +25,18 @@
 #include "settingsdialog.h"
 
 #include "profile/line.h"
+#include <openspace/engine/configuration.h>
+#include <openspace/properties/property.h>
+#include <ghoul/misc/assert.h>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <optional>
+#include <string>
+#include <utility>
 
 SettingsDialog::SettingsDialog(openspace::Settings settings, QWidget* parent)
     : QDialog(parent)

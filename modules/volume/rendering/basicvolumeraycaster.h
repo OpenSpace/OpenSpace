@@ -27,20 +27,13 @@
 
 #include <openspace/rendering/volumeraycaster.h>
 
-#include <openspace/util/boxgeometry.h>
 #include <modules/volume/volumegridtype.h>
+#include <openspace/util/boxgeometry.h>
+#include <memory>
 
-namespace ghoul::opengl {
-    class Texture;
-    class ProgramObject;
-    class TextureUnit;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class TextureUnit; }
 
-namespace openspace {
-    struct RenderData;
-    struct RaycastData;
-    class TransferFunction;
-} // namespace openspace
+namespace openspace { class TransferFunction; }
 
 namespace openspace::volume {
 

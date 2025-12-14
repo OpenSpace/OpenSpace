@@ -33,7 +33,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation {  struct Documentation; }
+namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
 class ModuleEngine;

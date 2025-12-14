@@ -37,7 +37,6 @@
 #include <cstdint>
 #include <cstdlib>
 #include <format>
-#include <iostream>
 #include <new>
 #include <string>
 #include <string_view>

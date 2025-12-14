@@ -29,13 +29,18 @@
 
 #include <sgct/config.h>
 #include <QIcon>
+#include <string>
 #include <vector>
 
 class QCheckBox;
 class QComboBox;
 class QDoubleSpinBox;
+class QFrame;
 class QLabel;
 class QLineEdit;
+class QPushButton;
+class QRect;
+class QRectF;
 class QSpinBox;
 
 class WindowControl final : public QWidget {

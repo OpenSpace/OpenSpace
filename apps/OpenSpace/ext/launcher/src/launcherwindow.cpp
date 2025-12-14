@@ -25,21 +25,29 @@
 #include "launcherwindow.h"
 
 #include "profile/profileedit.h"
+#include "sgctedit/sgctedit.h"
 #include "backgroundimage.h"
 #include "notificationwindow.h"
 #include "settingsdialog.h"
 #include "splitcombobox.h"
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/settings.h>
 #include <openspace/openspace.h>
+#include <openspace/scene/profile.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <sgct/config.h>
 #include <QFile>
 #include <QKeyEvent>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
-#include <filesystem>
 #include <iostream>
+#include <cassert>
+#include <stdexcept>
+#include <utility>
 
 using namespace openspace;
 

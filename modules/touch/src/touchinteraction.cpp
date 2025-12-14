@@ -31,8 +31,18 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <numeric>
+#include <utility>
 
 #ifdef WIN32
 #pragma warning (push)

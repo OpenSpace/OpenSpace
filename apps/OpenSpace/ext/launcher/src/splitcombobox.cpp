@@ -26,7 +26,9 @@
 
 #include "usericon.h"
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <QStandardItemModel>
+#include <vector>
 
 SplitComboBox::SplitComboBox(QWidget* parent, std::filesystem::path userPath,
                              std::string userHeader, std::filesystem::path hardcodedPath,

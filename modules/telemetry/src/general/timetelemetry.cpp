@@ -24,9 +24,12 @@
 
 #include <modules/telemetry/include/general/timetelemetry.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/camera/camera.h>
+#include <cstdlib>
 
 namespace {
     // Indices for data items

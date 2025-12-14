@@ -27,11 +27,12 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
-#include <modules/webbrowser/include/webkeyboardhandler.h>
+#include <modules/webbrowser\include/webkeyboardhandler.h>
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/vector/uvec2property.h>
+#include <ghoul/opengl/ghoul_gl.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -59,7 +60,6 @@ namespace openspace {
 
 class BrowserInstance;
 class ScreenSpaceRenderHandler;
-class WebKeyboardHandler;
 
 class ScreenSpaceBrowser : public ScreenSpaceRenderable {
 public:

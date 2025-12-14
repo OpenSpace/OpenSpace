@@ -27,7 +27,7 @@
 
 #include <ghoul/glm.h>
 #include <list>
-#include <iterator>
+#include <utility>
 
 namespace openspace::volume {
 

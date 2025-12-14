@@ -27,23 +27,17 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
-#include <modules/video/include/videoplayer.h>
+#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/tileindex.h>
-#include <openspace/properties/misc/triggerproperty.h>
-#include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/properties/vector/ivec2property.h>
-#include <ghoul/glm.h>
-
-// libmpv
-#include <client.h>
-#include <render_gl.h>
+#include <modules/video/include/videoplayer.h>
 
 namespace openspace::globebrowsing {
+
+struct ChunkTile;
 
 class VideoTileProvider : public TileProvider {
 public:
     explicit VideoTileProvider(const ghoul::Dictionary& dictionary);
-    ~VideoTileProvider() override;
 
     void update() override final;
     void reset() override final;

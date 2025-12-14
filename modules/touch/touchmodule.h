@@ -34,6 +34,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/util/touch.h>
 #include <memory>
+#include <set>
 
 namespace openspace {
 
@@ -90,7 +91,7 @@ private:
     glm::ivec2 _webPositionCallback = glm::ivec2(0);
 #ifdef WIN32
     std::unique_ptr<Win32TouchHook> _win32TouchHook;
-#endif //WIN32
+#endif // WIN32
     bool _tap = false;
 };
 

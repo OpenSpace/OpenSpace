@@ -24,8 +24,14 @@
 
 #include <modules/touch/include/touchinteraction.h>
 
+#include <modules/touch/include/directinputsolver.h>
 #include <openspace/camera/camera.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
 
 namespace {
     // Used in the LM algorithm

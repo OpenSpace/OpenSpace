@@ -26,6 +26,7 @@
 #include <modules/volume/rendering/volumeclipplanes.h>
 
 #include <ghoul/misc/dictionary.h>
+#include <utility>
 
 namespace openspace::volume {
 

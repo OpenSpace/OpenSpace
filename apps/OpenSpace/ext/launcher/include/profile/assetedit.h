@@ -27,11 +27,7 @@
 
 #include <QDialog>
 
-namespace openspace { class Asset; }
-
 class QBoxLayout;
-class QComboBox;
-class QLabel;
 class QLineEdit;
 class QWidget;
 

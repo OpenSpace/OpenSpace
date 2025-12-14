@@ -24,6 +24,10 @@
 
 #include "profile/assettreeitem.h"
 
+#include <algorithm>
+#include <iterator>
+#include <utility>
+
 AssetTreeItem::AssetTreeItem(std::vector<QVariant> data, AssetTreeItem* parentItem)
     : _itemData(std::move(data))
     , _parentItem(parentItem)

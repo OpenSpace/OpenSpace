@@ -27,6 +27,7 @@
 #include <modules/spout/renderableplanespout.h>
 #include <modules/spout/renderablespherespout.h>
 #include <modules/spout/screenspacespout.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>

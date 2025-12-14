@@ -28,17 +28,16 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/touch/include/directinputsolver.h>
-#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <openspace/util/touch.h>
+#include <ghoul/glm.h>
 #include <array>
 #include <chrono>
-#include <memory>
 
 // #define TOUCH_DEBUG_PROPERTIES
 

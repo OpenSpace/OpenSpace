@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___LINEARLRUCACHE___H__
 #define __OPENSPACE_MODULE_VOLUME___LINEARLRUCACHE___H__
 
-#include <ghoul/glm.h>
 #include <list>
-#include <iterator>
+#include <utility>
+#include <vector>
 
 namespace openspace::volume {
 

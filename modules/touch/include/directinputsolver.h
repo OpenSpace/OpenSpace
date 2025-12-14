@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
 #define __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
 
-#include <openspace/util/touch.h>
 #include <modules/touch/ext/levmarq.h>
+#include <openspace/util/touch.h>
+#include <ghoul/glm.h>
 #include <vector>
 
 namespace openspace {

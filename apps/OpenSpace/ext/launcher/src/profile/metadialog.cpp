@@ -31,6 +31,7 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <optional>
+#include <utility>
 
 MetaDialog::MetaDialog(QWidget* parent, std::optional<openspace::Profile::Meta>* meta)
     : QDialog(parent)

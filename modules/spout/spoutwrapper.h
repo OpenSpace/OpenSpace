@@ -40,7 +40,7 @@ typedef SPOUTLIBRARY* SPOUTHANDLE;
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl { class Texture; }
-namespace openspace::documentation { class Documentation; }
+namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::spout {
 
