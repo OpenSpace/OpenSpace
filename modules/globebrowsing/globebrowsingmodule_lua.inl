@@ -534,8 +534,8 @@ namespace {
 }
 
 /**
- * Returns an object containing a list of all loaded `RenderableGlobe` sorted with respect
- * to WMS server info followed by alphabetical order. The index `firstIndexWithoutUrl`
+ * Returns an object containing a list of all loaded `RenderableGlobe`s sorted first by
+ * the presence of WMS server info, then alphabetically. The index `firstIndexWithoutUrl`
  * indicates the first item in the list that does not have WMS server info.
  *
  * \return Table containing a list of `renderableGlobe` identifiers, and an index
@@ -606,8 +606,7 @@ namespace {
  * Return a list of all WMS servers associated with the `renderableGlobe` globe.
  *
  * \param globe The identifier of the `renderableGlobe` to fetch WMS servers for
- *
- * \return A list of WMS server info containing its name and url
+ * \return A list of WMS server info containing its name and URL
  */
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> urlInfo(std::string globe) {
     using namespace openspace;
