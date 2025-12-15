@@ -78,6 +78,7 @@ set(OPENSPACE_SOURCE
   navigation/navigationhandler.cpp
   navigation/navigationhandler_lua.inl
   navigation/navigationstate.cpp
+  navigation/orbitalinputhandler.cpp
   navigation/orbitalnavigator.cpp
   navigation/orbitalnavigator_lua.inl
   navigation/path.cpp
@@ -276,6 +277,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/keyframenavigator.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/navigationhandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/navigationstate.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalinputhandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/path.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/pathcurve.h

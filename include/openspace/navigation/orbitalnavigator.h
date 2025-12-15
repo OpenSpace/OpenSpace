@@ -28,10 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/interaction/interpolator.h>
-#include <openspace/interaction/joystickcamerastates.h>
-#include <openspace/interaction/mousecamerastates.h>
-#include <openspace/interaction/scriptcamerastates.h>
-#include <openspace/interaction/websocketcamerastates.h>
+#include <openspace/navigation/orbitalinputhandler.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
@@ -118,13 +115,8 @@ public:
     void setMaximumAllowedDistance(float distance);
 
     JoystickCameraStates& joystickStates();
-    const JoystickCameraStates& joystickStates() const;
-
     WebsocketCameraStates& websocketStates();
-    const WebsocketCameraStates& websocketStates() const;
-
     ScriptCameraStates& scriptStates();
-    const ScriptCameraStates& scriptStates() const;
 
     bool shouldFollowAnchorRotation(const glm::dvec3& cameraPosition) const;
     bool followingAnchorRotation() const;
@@ -215,10 +207,6 @@ private:
     properties::BoolProperty _disableZoom;
     properties::BoolProperty _disableRoll;
 
-    properties::FloatProperty _mouseSensitivity;
-    properties::FloatProperty _joystickSensitivity;
-    properties::FloatProperty _websocketSensitivity;
-
     properties::BoolProperty _useAdaptiveStereoscopicDepth;
     properties::FloatProperty _stereoscopicDepthOfFocusSurface;
     properties::FloatProperty _staticViewScaleExponent;
@@ -229,8 +217,6 @@ private:
     properties::FloatProperty _stereoInterpolationTime;
     properties::FloatProperty _followRotationInterpolationTime;
 
-    properties::BoolProperty _invertMouseButtons;
-
     properties::BoolProperty _shouldRotateAroundUp;
 
     enum class UpDirectionChoice {
@@ -240,10 +226,7 @@ private:
     };
     properties::OptionProperty _upToUseForRotation;
 
-    MouseCameraStates _mouseStates;
-    JoystickCameraStates _joystickStates;
-    WebsocketCameraStates _websocketStates;
-    ScriptCameraStates _scriptStates;
+    OrbitalInputHandler _inputHandler;
 
     SyncData<std::string> _syncedAnchorNode;
     const SceneGraphNode* _anchorNode = nullptr;
