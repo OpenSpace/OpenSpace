@@ -44,6 +44,9 @@ namespace openspace {
 
 class TransferFunction;
 
+// @TODO anden88 2025-12-05: Move these functions to a utility file instead. Unlees there
+// is a need for a manager (currently not since it has no member variables or keep tracks of
+// anything particular)
 class SpacecraftImageryManager {
 public:
     void loadTransferFunctions(const std::string& path,
