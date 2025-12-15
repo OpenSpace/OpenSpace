@@ -284,7 +284,7 @@ namespace {
 {
     using namespace openspace;
     using JoystickCameraStates = interaction::JoystickCameraStates;
-    global::navigationHandler->setJoystickAxisMapping(
+    global::navigationHandler->orbitalNavigator().joystickStates().setAxisMapping(
         std::move(joystickName),
         axis,
         ghoul::from_string<JoystickCameraStates::AxisType>(axisType),
@@ -322,7 +322,7 @@ namespace {
 {
     using namespace openspace;
     using JoystickCameraStates = interaction::JoystickCameraStates;
-    global::navigationHandler->setJoystickAxisMappingProperty(
+    global::navigationHandler->orbitalNavigator().joystickStates().setAxisMappingProperty(
         std::move(joystickName),
         axis,
         std::move(propertyUri),
@@ -389,7 +389,10 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
     using namespace openspace;
 
     interaction::JoystickCameraStates::AxisInformation info =
-        global::navigationHandler->joystickAxisMapping(joystickName, axis);
+        global::navigationHandler->orbitalNavigator().joystickStates().axisMapping(
+            joystickName,
+            axis
+        );
 
     ghoul::Dictionary dict;
     dict.setValue("Type", ghoul::to_string(info.type));
@@ -424,7 +427,11 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
                                                                            float deadzone)
 {
     using namespace openspace;
-    global::navigationHandler->setJoystickAxisDeadzone(joystickName, axis, deadzone);
+    global::navigationHandler->orbitalNavigator().joystickStates().setDeadzone(
+        joystickName,
+        axis,
+        deadzone
+    );
 }
 
 /**
@@ -439,11 +446,11 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 [[codegen::luawrap("axisDeadzone")]] float joystickAxisDeadzone(std::string joystickName,
                                                                 int axis)
 {
-    float deadzone = openspace::global::navigationHandler->joystickAxisDeadzone(
+    using namespace openspace;
+    return global::navigationHandler->orbitalNavigator().joystickStates().deadzone(
         joystickName,
         axis
     );
-    return deadzone;
 }
 
 /**
@@ -472,7 +479,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
     interaction::JoystickAction act =
         ghoul::from_string<interaction::JoystickAction>(action);
 
-    global::navigationHandler->bindJoystickButtonCommand(
+    global::navigationHandler->orbitalNavigator().joystickStates().bindButtonCommand(
         joystickName,
         button,
         command,
@@ -490,7 +497,8 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * \param button the button for which to clear the commands
  */
 [[codegen::luawrap]] void clearJoystickButton(std::string joystickName, int button) {
-    openspace::global::navigationHandler->clearJoystickButtonCommand(
+    using namespace openspace;
+    global::navigationHandler->orbitalNavigator().joystickStates().clearButtonCommand(
         joystickName,
         button
     );
@@ -508,7 +516,10 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 [[codegen::luawrap]] std::string joystickButton(std::string joystickName, int button) {
     using namespace openspace;
     const std::vector<std::string>& cmds =
-        global::navigationHandler->joystickButtonCommand(joystickName, button);
+        global::navigationHandler->orbitalNavigator().joystickStates().buttonCommand(
+            joystickName,
+            button
+        );
 
     std::string cmd = std::accumulate(
         cmds.cbegin(),
@@ -632,7 +643,15 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  */
 [[codegen::luawrap]] std::vector<std::string> listAllJoysticks() {
     using namespace openspace;
-    return global::navigationHandler->listAllJoysticks();
+    std::vector<std::string> result;
+    result.reserve(global::joystickInputStates->size());
+
+    for (const interaction::JoystickInputState& state : *global::joystickInputStates) {
+        if (!state.name.empty()) {
+            result.push_back(state.name);
+        }
+    }
+    return result;
 }
 
 /**

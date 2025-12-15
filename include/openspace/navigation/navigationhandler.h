@@ -57,10 +57,8 @@ namespace openspace {
 
 namespace openspace::interaction {
 
-struct JoystickInputStates;
 struct NavigationState;
 struct NodeCameraStateSpec;
-struct WebsocketInputStates;
 
 class NavigationHandler : public properties::PropertyOwner {
 public:
@@ -105,46 +103,6 @@ public:
     void mouseScrollWheelCallback(double pos);
 
     void renderOverlay() const;
-
-    std::vector<std::string> listAllJoysticks() const;
-    void setJoystickAxisMapping(std::string joystickName,
-        int axis, JoystickCameraStates::AxisType mapping,
-        JoystickCameraStates::AxisInvert shouldInvert =
-            JoystickCameraStates::AxisInvert::No,
-        JoystickCameraStates::JoystickType joystickType =
-            JoystickCameraStates::JoystickType::JoystickLike,
-        bool isSticky = false,
-        JoystickCameraStates::AxisFlip shouldFlip = JoystickCameraStates::AxisFlip::No,
-        double sensitivity = 0.0);
-
-    void setJoystickAxisMappingProperty(std::string joystickName,
-        int axis, std::string propertyUri,
-        float min = 0.f, float max = 1.f,
-        JoystickCameraStates::AxisInvert shouldInvert =
-            JoystickCameraStates::AxisInvert::No,
-        bool isRemote = true);
-
-    JoystickCameraStates::AxisInformation joystickAxisMapping(
-        const std::string& joystickName, int axis) const;
-
-    void setJoystickAxisDeadzone(const std::string& joystickName, int axis,
-        float deadzone);
-    float joystickAxisDeadzone(const std::string& joystickName, int axis) const;
-
-    void bindJoystickButtonCommand(const std::string& joystickName, int button,
-        std::string command, JoystickAction action,
-        JoystickCameraStates::ButtonCommandRemote remote, std::string documentation);
-
-    void clearJoystickButtonCommand(const std::string& joystickName, int button);
-    std::vector<std::string> joystickButtonCommand(const std::string& joystickName,
-        int button) const;
-
-    // Websockets
-    void setWebsocketAxisMapping(int axis, WebsocketCameraStates::AxisType mapping,
-        WebsocketCameraStates::AxisInvert shouldInvert =
-        WebsocketCameraStates::AxisInvert::No,
-        WebsocketCameraStates::AxisNormalize shouldNormalize =
-        WebsocketCameraStates::AxisNormalize::No);
 
     NavigationState navigationState() const;
     NavigationState navigationState(const SceneGraphNode& referenceFrame) const;

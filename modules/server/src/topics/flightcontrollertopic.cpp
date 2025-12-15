@@ -148,7 +148,7 @@ namespace openspace {
 
 FlightControllerTopic::FlightControllerTopic() {
     for (auto it = AxisIndexMap.begin(); it != AxisIndexMap.end(); it++) {
-        global::navigationHandler->setWebsocketAxisMapping(
+        global::navigationHandler->orbitalNavigator().websocketStates().setAxisMapping(
             int(std::distance(AxisIndexMap.begin(), it)),
             it->second
         );
