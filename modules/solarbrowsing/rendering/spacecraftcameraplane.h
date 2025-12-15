@@ -70,16 +70,12 @@ private:
     GLuint _quad;
     GLuint _vertexPositionBuffer;
 
-//    glm::dvec3 _spacecraftPosition;
- //   glm::dmat4 _spacecraftRotation.
     glm::dvec3 _position;
     glm::dmat4 _rotation;
     glm::vec3 _normal;
 
-    //glm::dvec2 _centerPixel;
     double _gaussianMoveFactor;
     float _size;
-    //float _scaleFactor;
 
     void createFrustum();
     void createPlane();

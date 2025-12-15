@@ -124,6 +124,10 @@ void SpacecraftCameraPlane::createPlaneAndFrustum(double moveDistance) {
     //const double c = 0.31622776601; // sqrt(0.1)
     //_move = a * exp(-(pow((_moveFactor.value() - 1) - b, 2.0)) / (2.0 * pow(c, 2.0)));
     //_move = /*a **/ exp(-(pow((_moveFactor.value() - 1) /*- b*/, 2.0)) / (2.0 /** pow(c, 2.0)*/));
+
+    // Computing the image plane position using linear scale is not sufficient for fine
+    // tuning movement near the Sun. A Gaussian function* (3.1) is used to address this
+    // issue: *https://www.diva-portal.org/smash/get/diva2:1147161/FULLTEXT01.pdf
     _gaussianMoveFactor = /*a **/ exp(-(pow((moveDistance - 1) /*- b*/, 2.0)) / (2.0 /** pow(c, 2.0)*/));
     _size = static_cast<float>(_gaussianMoveFactor * SUN_RADIUS); /// _scaleFactor;
     createPlane();
@@ -222,25 +226,50 @@ void SpacecraftCameraPlane::render(const RenderData& data,
     const glm::dvec3 sunDir = sunPositionWorld - spacecraftPosWorld;
     const glm::dvec3 offset = sunDir * (_gaussianMoveFactor + static_cast<double>(multipleImageryOffset));
 
-    const glm::dvec3 up = spacecraftRotWorld * glm::dvec3(0.0, 0.0, 1.0);
     _position = spacecraftPosWorld + offset;
-    _normal = glm::normalize(spacecraftPosWorld - _position);
-    _rotation = glm::lookAt(glm::normalize(spacecraftPosWorld), glm::dvec3(sunPositionWorld), up);
-    const glm::dmat4 rotationInv = glm::inverse(_rotation);
+    // normal should point from plane toward spacecraft (i.e. plane faces spacecraft)
+    _normal = glm::normalize(spacecraftPosWorld - sunPositionWorld);
+
+    // anden88 2025-12-10: An attempt was made to use the glm::lookAt to "simplify" the
+    // rotation matrix without having to build the basis vectors ourselves. However, the
+    // plane rotation would be rotating in all different kinds of orientations
+    // _rotation = glm::lookAt(spacecraftPosWorld, glm::dvec3(sunPositionWorld), glm::normalize(up));
+    // _rotation[3] = glm::dvec4(0.0, 0.0, 0.0, 1.0);
+
+    // Pick a world up. Prefer the spacecraft local +Z transformed to world,
+    // but fall back to a global up if nearly collinear with the normal.
+    glm::vec3 worldUp = spacecraftRotWorld * glm::dvec3(0.0, 0.0, 1.0);
+    if (std::abs(glm::dot(worldUp, _normal)) > 0.9999) {
+        // nearly parallel: pick another stable up (e.g. world Y)
+        worldUp = glm::dvec3(0.0, 1.0, 0.0);
+    }
+
+    // build tangent basis for the plane: right, upOnPlane, normal
+    glm::vec3 right = glm::normalize(glm::cross(worldUp, _normal));
+    glm::vec3 upOnPlane = glm::cross(_normal, right); // already normalized if right and N are normalized
+
+    // Build a rotation matrix that transforms local axes -> world axes.
+    // Local axes: +X = right, +Y = upOnPlane, +Z = _normal
+    glm::dmat4 rot = glm::dmat4(1.0);
+    rot[0] = glm::dvec4(right, 0.0);      // first column = world X for local +X
+    rot[1] = glm::dvec4(upOnPlane, 0.0);  // second column = world Y for local +Y
+    rot[2] = glm::dvec4(_normal, 0.0);    // third column = world Z for local +Z
+
+    _rotation = std::move(rot);
 
     const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), _position) *
-        rotationInv *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
-        glm::dmat4(1.0);
+        _rotation *
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))
+    );
     const glm::dmat4 modelViewTransform = viewMatrix * modelTransform;
 
     // For frustum
     const glm::dmat4 spacecraftModelTransform =
         glm::translate(glm::dmat4(1.0), spacecraftPosWorld) *
-        rotationInv *
-        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))) *
-        glm::dmat4(1.0);
+        _rotation *
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))
+    );
 
     _planeShader->activate();
     ghoul::opengl::TextureUnit imageUnit;
