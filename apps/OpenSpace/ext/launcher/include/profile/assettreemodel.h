@@ -29,7 +29,13 @@
 
 #include "assettreeitem.h"
 #include "openspace/scene/profile.h"
+#include <QString>
+#include <QVariant>
 #include <memory>
+#include <string>
+#include <vector>
+
+class QObject;
 
 class AssetTreeModel final : public QAbstractItemModel {
 Q_OBJECT

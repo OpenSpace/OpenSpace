@@ -27,19 +27,32 @@
 #include <modules/skybrowser/include/renderableskytarget.h>
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/targetbrowserpair.h>
-#include <modules/skybrowser/include/wwtdatahandler.h>
 #include <openspace/camera/camera.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/properties/property.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/keys.h>
+#include <openspace/util/mouse.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringconversion.h>
+#include <ghoul/misc/templatefactory.h>
+#include <algorithm>
+#include <memory>
+#include <optional>
 
 #include "skybrowsermodule_lua.inl"
 
 namespace {
-
     constexpr openspace::properties::Property::PropertyInfo AllowRotationInfo = {
         "AllowCameraRotation",
         "Allow camera rotation",
@@ -107,7 +120,6 @@ namespace {
        "The url of the image collection which is loaded into AAS WorldWide Telescope.",
        openspace::properties::Property::Visibility::AdvancedUser
     };
-
 
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
         // [[codegen::verbatim(AllowRotationInfo.description)]]

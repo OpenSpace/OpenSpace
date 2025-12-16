@@ -23,9 +23,12 @@
  ****************************************************************************************/
 
 #include <modules/webbrowser/include/webrenderhandler.h>
+
 #include <modules/webbrowser/webbrowsermodule.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <algorithm>
 
 namespace openspace {
 

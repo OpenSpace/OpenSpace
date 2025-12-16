@@ -33,8 +33,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class DashboardItemSimulationIncrement : public DashboardTextItem {
 public:
     explicit DashboardItemSimulationIncrement(const ghoul::Dictionary& dictionary);

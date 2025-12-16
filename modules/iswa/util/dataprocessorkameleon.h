@@ -29,6 +29,7 @@
 
 namespace openspace {
 
+namespace properties { class SelectionProperty; }
 class KameleonWrapper;
 
 class DataProcessorKameleon : public DataProcessor {

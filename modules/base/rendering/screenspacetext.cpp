@@ -24,8 +24,9 @@
 
 #include <modules/base/rendering/screenspacetext.h>
 
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/texture.h>
+#include <openspace/documentation/documentation.h>
+#include <ghoul/misc/dictionary.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextInfo = {

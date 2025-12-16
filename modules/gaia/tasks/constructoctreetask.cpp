@@ -25,14 +25,18 @@
 #include <modules/gaia/tasks/constructoctreetask.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
-#include <filesystem>
+#include <cstdint>
+#include <cstdlib>
 #include <fstream>
+#include <limits>
+#include <optional>
+#include <string_view>
 #include <thread>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "ConstructOctreeTask";

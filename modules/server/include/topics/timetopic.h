@@ -26,7 +26,9 @@
 #define __OPENSPACE_MODULE_SERVER___TIME_TOPIC___H__
 
 #include <modules/server/include/topics/topic.h>
+
 #include <chrono>
+#include <vector>
 
 namespace openspace {
 

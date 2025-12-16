@@ -24,12 +24,9 @@
 
 #include <modules/touch/include/tuioear.h>
 
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <ghoul/logging/logmanager.h>
-#include <mutex>
+#include <TuioBlob.h>
+#include <TuioCursor.h>
+#include <TuioObject.h>
 
 using namespace TUIO;
 

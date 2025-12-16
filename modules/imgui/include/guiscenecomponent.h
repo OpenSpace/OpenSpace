@@ -27,8 +27,6 @@
 
 #include <modules/imgui/include/guicomponent.h>
 
-namespace openspace { class SceneGraphNode; }
-
 namespace openspace::gui {
 
 class GuiSceneComponent : public GuiComponent {

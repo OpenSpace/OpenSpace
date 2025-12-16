@@ -30,10 +30,11 @@
 #include <modules/skybrowser/include/targetbrowserpair.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/properties/property.h>
-#include <openspace/query/query.h>
-#include <openspace/util/json_helper.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/dictionaryjsonformatter.h>
+#include <memory>
+#include <string_view>
+#include <vector>
 
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
@@ -62,10 +63,6 @@ SkyBrowserTopic::~SkyBrowserTopic() {
     }
 }
 
-bool SkyBrowserTopic::isDone() const {
-    return _isDone;
-}
-
 void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
     const std::string event = json.at("event").get<std::string>();
     if (event == UnsubscribeEvent) {
@@ -88,6 +85,10 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
             }
         }
     );
+}
+
+bool SkyBrowserTopic::isDone() const {
+    return _isDone;
 }
 
 void SkyBrowserTopic::sendBrowserData() {

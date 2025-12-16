@@ -27,6 +27,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <array>
+#include <cstddef>
 
 namespace openspace::global::callback {
 

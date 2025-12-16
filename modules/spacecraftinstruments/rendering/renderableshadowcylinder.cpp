@@ -26,12 +26,16 @@
 
 #include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/programobject.h>
+#include <algorithm>
+#include <iterator>
+#include <memory>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {

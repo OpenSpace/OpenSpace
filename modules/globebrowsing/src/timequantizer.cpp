@@ -34,8 +34,10 @@
 #include <date/date.h>
 #include <algorithm>
 #include <charconv>
-#include <iomanip>
-#include <sstream>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <utility>
 
 // @TODO (abock, 2020-08-07) All of the time handling in this class should be cleaned up
 //       a bit. There are lots of conversions between ISO strings for time and Time

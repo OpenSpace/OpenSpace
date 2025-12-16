@@ -32,8 +32,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 /**
  * This concrete implementation of a RenderableTrail renders an updated trail behind an
  * object that is likely to have an orbit-like path. However, this is not required and

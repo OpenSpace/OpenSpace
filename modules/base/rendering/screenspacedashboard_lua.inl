@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/lua/lua_helper.h>
+#include <openspace/rendering/renderengine.h>
 
 namespace {
 

@@ -25,8 +25,8 @@
 #include <modules/video/include/renderablevideosphere.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/sphere.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     // This `Renderable` creates a textured 3D sphere where the texture is a video. Per

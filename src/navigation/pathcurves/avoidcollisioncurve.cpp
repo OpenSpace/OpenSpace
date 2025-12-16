@@ -26,13 +26,18 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/pathcurve.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/collisionhelper.h>
+#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
+#include <format>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -73,7 +78,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     // Note that the factor 2.0 is arbitrarily chosen to look ok.
     // @TODO: (2022-02-27, emmbr) Should be unified to a "getting close to object sphere"
     // that can be used in multiple cases when creating paths more cleverly later on
-    const double closeToNodeThresholdFactor = glm::max(
+    const double closeToNodeThresholdFactor = std::max(
         CloseToNodeThresholdRadiusMultiplier,
         2.0 * global::navigationHandler->pathNavigator().arrivalDistanceFactor()
     );

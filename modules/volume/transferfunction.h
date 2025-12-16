@@ -26,10 +26,14 @@
 #define __OPENSPACE_MODULE_VOLUME___TRANSFERFUNCTION___H__
 
 #include <modules/volume/envelope.h>
-#include <ghoul/glm.h>
+#include <string>
+#include <vector>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class Texture; }
+namespace ghoul {
+    namespace opengl { class Texture; }
+    class Dictionary;
+} // namespace ghoul
+struct lua_State;
 
 namespace openspace::volume {
 
@@ -53,7 +57,6 @@ public:
     std::string serializedToString() const;
 
 private:
-    int _width = 1024;
     std::string _loadableFilePath;
     std::vector<Envelope> _envelopes;
 };

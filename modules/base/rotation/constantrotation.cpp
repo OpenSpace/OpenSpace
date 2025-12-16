@@ -25,8 +25,8 @@
 #include <modules/base/rotation/constantrotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/misc/dictionary.h>
 #include <glm/gtx/quaternion.hpp>
 #include <optional>
 

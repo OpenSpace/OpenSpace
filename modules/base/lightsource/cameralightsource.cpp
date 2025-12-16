@@ -25,8 +25,8 @@
 #include <modules/base/lightsource/cameralightsource.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
 
 namespace {

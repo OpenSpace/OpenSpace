@@ -27,19 +27,21 @@
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumemetadata.h>
 #include <modules/volume/rawvolumewriter.h>
-#include <openspace/documentation/verifier.h>
+#include <modules/volume/volumegridtype.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/defer.h>
-#include <filesystem>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
+#include <algorithm>
+#include <ios>
 #include <fstream>
+#include <limits>
 
 namespace {
     struct [[codegen::Dictionary(GenerateRawVolumeTask)]] Parameters {

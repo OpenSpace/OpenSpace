@@ -24,8 +24,26 @@
 
 #include <openspace/documentation/verifier.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/documentationengine.h>
+#include <ghoul/format.h>
+#include <ghoul/glm.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
+#include <algorithm>
+#include <cmath>
+#include <ctime>
+#include <iomanip>
+#include <filesystem>
+#include <functional>
+#include <memory>
+#include <optional>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
+#include <variant>
 
 namespace openspace::documentation {
 
@@ -136,7 +154,7 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
                 // If we have a double value, we need to check if it is integer
                 const double value = dict.value<double>(key);
                 double intPart = 0.0;
-                const bool isInt = modf(value, &intPart) == 0.0;
+                const bool isInt = std::modf(value, &intPart) == 0.0;
                 if (isInt) {
                     TestResult res;
                     res.success = true;

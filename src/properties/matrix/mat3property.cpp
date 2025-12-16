@@ -24,7 +24,6 @@
 
 #include <openspace/properties/matrix/mat3property.h>
 
-#include <ghoul/glm.h>
 #include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {

@@ -25,6 +25,8 @@
 #include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <ip/IpEndpointName.h>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "OpenSoundControlConnection";

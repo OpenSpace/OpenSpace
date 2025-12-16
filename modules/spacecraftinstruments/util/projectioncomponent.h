@@ -33,6 +33,8 @@
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <filesystem>
+#include <memory>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl {

@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE___H__
 #define __OPENSPACE_MODULE_VOLUME___VOLUMEGRIDTYPE___H__
 
-#include <ghoul/misc/exception.h>
 #include <string>
 
 namespace openspace::volume {
@@ -36,7 +35,7 @@ enum class VolumeGridType : int {
 };
 
 VolumeGridType parseGridType(const std::string& gridType);
-std::string gridTypeToString(VolumeGridType);
+std::string gridTypeToString(VolumeGridType gridType);
 
 } // namespace openspace::volume
 

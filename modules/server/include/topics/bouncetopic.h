@@ -29,8 +29,6 @@
 
 namespace openspace {
 
-class Connection;
-
 class BounceTopic : public Topic {
 public:
     BounceTopic() = default;

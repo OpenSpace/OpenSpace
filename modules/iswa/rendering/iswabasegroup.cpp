@@ -24,12 +24,12 @@
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 
-#include <openspace/json.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "IswaBaseGroup";
-    using json = nlohmann::json;
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",

@@ -25,7 +25,7 @@
 #include <modules/base/rotation/staticrotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
+#include <variant>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo RotationInfo = {

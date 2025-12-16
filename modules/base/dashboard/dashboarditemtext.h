@@ -31,8 +31,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class DashboardItemText : public DashboardTextItem {
 public:
     explicit DashboardItemText(const ghoul::Dictionary& dictionary);

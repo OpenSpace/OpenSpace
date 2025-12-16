@@ -25,14 +25,18 @@
 #ifndef __OPENSPACE_CORE___PATH___H__
 #define __OPENSPACE_CORE___PATH___H__
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/navigation/pathcurve.h>
 #include <openspace/navigation/waypoint.h>
-#include <ghoul/misc/dictionary.h>
+#include <memory>
 #include <optional>
+#include <string>
 #include <vector>
 
-namespace openspace { struct CameraPose; }
+namespace ghoul { class Dictionary; }
+namespace openspace {
+    namespace documentation { struct Documentation; }
+    struct CameraPose;
+} // namespace openspace
 
 namespace openspace::interaction {
 

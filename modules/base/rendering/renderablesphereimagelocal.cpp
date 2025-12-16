@@ -25,12 +25,9 @@
 #include <modules/base/rendering/renderablesphereimagelocal.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/sphere.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
-#include <optional>
+#include <filesystem>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {

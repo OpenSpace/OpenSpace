@@ -31,8 +31,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 /**
  * TexturePlane is a "concrete" IswaCygnet with texture as its input source. It handles
  * the creation, destruction and rendering of a plane geometry. It also specifies which

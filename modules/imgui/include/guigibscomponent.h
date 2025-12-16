@@ -27,8 +27,6 @@
 
 #include <modules/imgui/include/guicomponent.h>
 
-#include <string>
-
 namespace openspace::gui {
 
 class GuiGIBSComponent : public GuiComponent {

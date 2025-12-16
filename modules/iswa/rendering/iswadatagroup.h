@@ -29,7 +29,9 @@
 
 #include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <set>
 
 namespace openspace {
 

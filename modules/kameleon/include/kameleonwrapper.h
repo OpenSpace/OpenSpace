@@ -62,7 +62,7 @@ public:
 
     enum class TraceDirection {
         FORWARD = 1,
-        BACK    = -1
+        BACK = -1
     };
 
     enum class FieldlineEnd {

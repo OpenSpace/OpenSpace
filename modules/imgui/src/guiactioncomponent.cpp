@@ -27,10 +27,14 @@
 #include <modules/imgui/imguimodule.h>
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
+#include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/util/keys.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringconversion.h>
 #include <set>
+#include <utility>
 
 namespace openspace::gui {
 

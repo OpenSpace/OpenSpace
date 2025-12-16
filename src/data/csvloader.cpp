@@ -26,9 +26,6 @@
 
 #include <openspace/data/datamapping.h>
 #include <openspace/util/progressbar.h>
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
@@ -36,12 +33,15 @@
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <algorithm>
+#include <charconv>
 #include <cmath>
-#include <cctype>
+#include <limits>
 #include <fstream>
 #include <functional>
 #include <sstream>
+#include <string>
 #include <string_view>
+#include <system_error>
 
 namespace {
     constexpr std::string_view _loggerCat = "DataLoader: CSV";

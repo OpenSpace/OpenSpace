@@ -27,7 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/util/downloadeventengine.h>
 #include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
+#include <string_view>
 
 namespace {
     constexpr std::string_view StartSubscription = "start_subscription";
@@ -44,10 +44,6 @@ DownloadEventTopic::~DownloadEventTopic() {
     }
 }
 
-bool DownloadEventTopic::isDone() const {
-    return !_isSubscribedTo;
-}
-
 void DownloadEventTopic::handleJson(const nlohmann::json& json) {
     const std::string& event = json.at("event").get<std::string>();
 
@@ -58,7 +54,7 @@ void DownloadEventTopic::handleJson(const nlohmann::json& json) {
             // Limit how often we send data to frontend to reduce traffic
             if (event.type == DownloadEventEngine::DownloadEvent::Type::Progress) {
                 const auto now = std::chrono::steady_clock::now();
-                auto& last = _lastCallBack[event.id];
+                auto& last = _lastCallback[event.id];
 
                 if (now - last >= CallbackUpdateInterval) {
                     last = now;
@@ -85,6 +81,10 @@ void DownloadEventTopic::handleJson(const nlohmann::json& json) {
         global::downloadEventEngine->unsubscribe(_subscriptionID);
         _isSubscribedTo = false;
     }
+}
+
+bool DownloadEventTopic::isDone() const {
+    return !_isSubscribedTo;
 }
 
 } // namespace openspace

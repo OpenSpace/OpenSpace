@@ -37,22 +37,22 @@
 #include <modules/globebrowsing/src/skirtedgrid.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/util/ellipsoid.h>
+#include <ghoul/glm.h>
 #include <ghoul/misc/memorypool.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <cstddef>
+#include <array>
+#include <cstdint>
 #include <memory>
-
-namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::globebrowsing {
 
-class GPULayerGroup;
-class RenderableGlobe;
-struct TileIndex;
+class Layer;
 
 struct BoundingHeights {
     float min;
@@ -60,9 +60,6 @@ struct BoundingHeights {
     bool available;
     bool tileOK;
 };
-
-namespace chunklevelevaluator { class Evaluator; }
-namespace culling { class ChunkCuller; }
 
 struct Chunk {
     enum class Status : uint8_t {
@@ -105,9 +102,9 @@ public:
     void deinitializeGL() override;
     bool isReady() const override;
 
+    void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void renderSecondary(const RenderData& data, RendererTasks&) override;
-    void update(const UpdateData& data) override;
 
     SurfacePositionHandle calculateSurfacePositionHandle(
         const glm::dvec3& targetModelSpace) const override;

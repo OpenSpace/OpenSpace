@@ -29,12 +29,11 @@
 
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <future>
 
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
 public:

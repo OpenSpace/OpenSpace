@@ -22,6 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/ext/assimp/contrib/zip/src/zip.h>
+#include <ghoul/misc/stringhelper.h>
+#include <vector>
+
 namespace openspace::luascriptfunctions {
 
 int printInternal(ghoul::logging::LogLevel level, lua_State* L) {

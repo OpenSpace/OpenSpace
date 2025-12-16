@@ -35,7 +35,6 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/glm.h>
 #include <optional>
-#include <string_view>
 
 namespace geos::io { class GeoJSONFeature; }
 

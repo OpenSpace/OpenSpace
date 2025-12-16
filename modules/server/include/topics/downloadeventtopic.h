@@ -28,6 +28,7 @@
 #include <modules/server/include/topics/topic.h>
 
 #include <chrono>
+#include <unordered_map>
 
 namespace openspace {
 
@@ -41,7 +42,7 @@ public:
 private:
     bool _isSubscribedTo = false;
     int _subscriptionID = -1;
-    std::unordered_map<std::string, std::chrono::steady_clock::time_point> _lastCallBack;
+    std::unordered_map<std::string, std::chrono::steady_clock::time_point> _lastCallback;
 };
 
 } // namespace openspace

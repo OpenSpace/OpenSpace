@@ -24,77 +24,79 @@
 
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 
+#include <ghoul/misc/assert.h>
+#include <type_traits>
+
 namespace {
 
-size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
-    switch (format) {
-        case ghoul::opengl::Texture::Format::Red:
-            return 1;
-        case ghoul::opengl::Texture::Format::RG:
-            return 2;
-        case ghoul::opengl::Texture::Format::RGB:
-        case ghoul::opengl::Texture::Format::BGR:
-            return 3;
-        case ghoul::opengl::Texture::Format::RGBA:
-        case ghoul::opengl::Texture::Format::BGRA:
-            return 4;
-        default:
-            throw ghoul::MissingCaseException();
+    size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
+        switch (format) {
+            case ghoul::opengl::Texture::Format::Red:
+                return 1;
+            case ghoul::opengl::Texture::Format::RG:
+                return 2;
+            case ghoul::opengl::Texture::Format::RGB:
+            case ghoul::opengl::Texture::Format::BGR:
+                return 3;
+            case ghoul::opengl::Texture::Format::RGBA:
+            case ghoul::opengl::Texture::Format::BGRA:
+                return 4;
+            default:
+                throw ghoul::MissingCaseException();
+        }
     }
-}
 
-size_t numberOfBytes(GLenum glType) {
-    switch (glType) {
-        case GL_UNSIGNED_BYTE:  return sizeof(GLubyte);
-        case GL_BYTE:           return sizeof(GLbyte);
-        case GL_UNSIGNED_SHORT: return sizeof(GLushort);
-        case GL_SHORT:          return sizeof(GLshort);
-        case GL_UNSIGNED_INT:   return sizeof(GLuint);
-        case GL_INT:            return sizeof(GLint);
-        case GL_HALF_FLOAT:     return sizeof(GLhalf);
-        case GL_FLOAT:          return sizeof(GLfloat);
-        case GL_DOUBLE:         return sizeof(GLdouble);
-        default:
-            throw ghoul::MissingCaseException();
+    size_t numberOfBytes(GLenum glType) {
+        switch (glType) {
+            case GL_UNSIGNED_BYTE:  return sizeof(GLubyte);
+            case GL_BYTE:           return sizeof(GLbyte);
+            case GL_UNSIGNED_SHORT: return sizeof(GLushort);
+            case GL_SHORT:          return sizeof(GLshort);
+            case GL_UNSIGNED_INT:   return sizeof(GLuint);
+            case GL_INT:            return sizeof(GLint);
+            case GL_HALF_FLOAT:     return sizeof(GLhalf);
+            case GL_FLOAT:          return sizeof(GLfloat);
+            case GL_DOUBLE:         return sizeof(GLdouble);
+            default:
+                throw ghoul::MissingCaseException();
+        }
     }
-}
 
-unsigned int uniqueIdForTextureFormat(ghoul::opengl::Texture::Format textureFormat) {
-    switch (textureFormat) {
-        case ghoul::opengl::Texture::Format::Red:            return 0;
-        case ghoul::opengl::Texture::Format::RG:             return 1;
-        case ghoul::opengl::Texture::Format::RGB:            return 2;
-        case ghoul::opengl::Texture::Format::BGR:            return 3;
-        case ghoul::opengl::Texture::Format::RGBA:           return 4;
-        case ghoul::opengl::Texture::Format::BGRA:           return 5;
-        case ghoul::opengl::Texture::Format::DepthComponent: return 6;
-        default:                                      throw ghoul::MissingCaseException();
+    unsigned int uniqueIdForTextureFormat(ghoul::opengl::Texture::Format textureFormat) {
+        switch (textureFormat) {
+            case ghoul::opengl::Texture::Format::Red:            return 0;
+            case ghoul::opengl::Texture::Format::RG:             return 1;
+            case ghoul::opengl::Texture::Format::RGB:            return 2;
+            case ghoul::opengl::Texture::Format::BGR:            return 3;
+            case ghoul::opengl::Texture::Format::RGBA:           return 4;
+            case ghoul::opengl::Texture::Format::BGRA:           return 5;
+            case ghoul::opengl::Texture::Format::DepthComponent: return 6;
+            default:                                  throw ghoul::MissingCaseException();
+        }
     }
-}
 
-openspace::globebrowsing::TileTextureInitData::HashKey calculateHashKey(
+    openspace::globebrowsing::TileTextureInitData::HashKey calculateHashKey(
                                                              const glm::ivec3& dimensions,
                                              const ghoul::opengl::Texture::Format& format,
                                                                      const GLenum& glType)
-{
-    ghoul_assert(dimensions.x > 0, "Incorrect dimension");
-    ghoul_assert(dimensions.y > 0, "Incorrect dimension");
-    ghoul_assert(dimensions.x <= 1024, "Incorrect dimension");
-    ghoul_assert(dimensions.y <= 1024, "Incorrect dimension");
-    ghoul_assert(dimensions.z == 1, "Incorrect dimension");
-    const unsigned int formatId = uniqueIdForTextureFormat(format);
-    ghoul_assert(formatId < 256, "Incorrect format");
+    {
+        ghoul_assert(dimensions.x > 0, "Incorrect dimension");
+        ghoul_assert(dimensions.y > 0, "Incorrect dimension");
+        ghoul_assert(dimensions.x <= 1024, "Incorrect dimension");
+        ghoul_assert(dimensions.y <= 1024, "Incorrect dimension");
+        ghoul_assert(dimensions.z == 1, "Incorrect dimension");
+        const unsigned int formatId = uniqueIdForTextureFormat(format);
+        ghoul_assert(formatId < 256, "Incorrect format");
 
-    openspace::globebrowsing::TileTextureInitData::HashKey res = 0ULL;
+        openspace::globebrowsing::TileTextureInitData::HashKey res = 0ULL;
 
-    res |= dimensions.x;
-    res |= dimensions.y << 10;
-    res |= static_cast<std::underlying_type_t<GLenum>>(glType) << (10 + 16);
-    res |= formatId << (10 + 16 + 4);
+        res |= dimensions.x;
+        res |= dimensions.y << 10;
+        res |= static_cast<std::underlying_type_t<GLenum>>(glType) << (10 + 16);
+        res |= formatId << (10 + 16 + 4);
 
-    return res;
-}
-
+        return res;
+    }
 } // namespace
 
 namespace openspace::globebrowsing {

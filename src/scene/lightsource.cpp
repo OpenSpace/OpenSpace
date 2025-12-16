@@ -25,14 +25,11 @@
 #include <openspace/scene/lightsource.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 #include <optional>
+#include <string>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {

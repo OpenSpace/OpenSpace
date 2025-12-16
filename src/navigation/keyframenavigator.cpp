@@ -27,10 +27,14 @@
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/network/messagestructures.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
+#include <algorithm>
+#include <cmath>
+#include <utility>
 
 namespace openspace::interaction {
 

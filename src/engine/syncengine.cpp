@@ -28,6 +28,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
+#include <memory>
 
 namespace openspace {
 

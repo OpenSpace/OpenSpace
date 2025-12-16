@@ -29,6 +29,7 @@
 #include <openspace/properties/property.h>
 #include <filesystem>
 #include <optional>
+#include <string>
 
 namespace openspace {
 

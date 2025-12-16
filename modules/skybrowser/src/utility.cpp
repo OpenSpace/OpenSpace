@@ -29,7 +29,9 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <glm/gtx/vector_angle.hpp>
+#include <algorithm>
 #include <cmath>
+#include <cstdlib>
 
 namespace {
     // Galactic coordinates are projected onto the celestial sphere

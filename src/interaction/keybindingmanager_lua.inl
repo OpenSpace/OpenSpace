@@ -22,7 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/format.h>
 #include <ghoul/lua/lua_helper.h>
+#include <algorithm>
+#include <map>
+#include <string>
+#include <utility>
+#include <variant>
+#include <vector>
 
 namespace {
 

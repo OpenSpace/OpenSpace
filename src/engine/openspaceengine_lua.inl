@@ -24,25 +24,18 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/downloadmanager.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/openspace.h>
-#include <openspace/properties/propertyowner.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturewriter.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/base64.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
-#include <filesystem>
+#include <array>
+#include <iterator>
 
 namespace {
 

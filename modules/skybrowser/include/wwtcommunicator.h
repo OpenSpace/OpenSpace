@@ -25,13 +25,17 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___WWTCOMMUNICATOR___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___WWTCOMMUNICATOR___H__
 
-#include <modules/webbrowser/include/browserinstance.h>
-#include <openspace/properties/scalar/doubleproperty.h>
-
+#include <ghoul/glm.h>
 #include <deque>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
-using SelectedImageDeque = std::deque<std::pair<std::string, double>>;
+
+class BrowserInstance;
 
 class WwtCommunicator {
 public:
@@ -58,15 +62,15 @@ public:
     void setBorderRadius(double radius);
 
     void setIdInBrowser(const std::string& id) const;
-    SelectedImageDeque::iterator findSelectedImage(const std::string& imageUrl);
+    std::deque<std::pair<std::string, double>>::iterator findSelectedImage(
+        const std::string& imageUrl);
 
 private:
     void executeJavascript(const std::string& script) const;
     void sendMessageToWwt(const ghoul::Dictionary& msg) const;
 
     bool _isImageCollectionLoaded = false;
-    SelectedImageDeque _selectedImages;
-
+    std::deque<std::pair<std::string, double>> _selectedImages;
 
     BrowserInstance* _browserInstance = nullptr;
 };

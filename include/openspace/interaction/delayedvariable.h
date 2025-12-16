@@ -36,6 +36,7 @@ template <typename T, typename ScaleType>
 class DelayedVariable {
 public:
     DelayedVariable(ScaleType scaleFactor, ScaleType friction);
+
     void set(T value, double dt);
     void decelerate(double dt);
     void setHard(T value);

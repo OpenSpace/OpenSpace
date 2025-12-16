@@ -34,8 +34,7 @@
 #include <openspace/properties/vector/vec4property.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/ghoul_gl.h>
-
-namespace ghoul::opengl { class ProgramObject; }
+#include <memory>
 
 namespace openspace {
 
@@ -54,7 +53,7 @@ public:
     void update(const UpdateData& data) override;
 
 private:
-    typedef std::vector<LinePoint> Line;
+    using Line = std::vector<LinePoint>;
 
     void initializeDefaultPropertyValues();
     void loadSeedPoints();

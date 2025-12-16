@@ -32,10 +32,6 @@
 
 namespace openspace {
 
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
 class TimelineRotation : public Rotation {
 public:
     explicit TimelineRotation(const ghoul::Dictionary& dictionary);

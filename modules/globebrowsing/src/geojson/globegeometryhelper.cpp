@@ -26,11 +26,23 @@
 
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/rendering/helper.h>
+#include <openspace/util/ellipsoid.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <geos/geom/Coordinate.h>
+#include <geos/geom/Geometry.h>
+#include <geos/geom/GeometryCollection.h>
 #include <geos/geom/GeometryFactory.h>
+#include <geos/geom/MultiPoint.h>
+#include <geos/geom/Point.h>
 #include <geos/triangulate/DelaunayTriangulationBuilder.h>
 #include <geos/triangulate/quadedge/QuadEdgeSubdivision.h>
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <memory>
+#include <utility>
 
 namespace openspace::globebrowsing::geometryhelper {
 

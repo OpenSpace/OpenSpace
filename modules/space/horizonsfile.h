@@ -30,13 +30,14 @@
 #include <filesystem>
 #include <string>
 #include <vector>
+#include <utility>
 
 namespace openspace {
 
 /**
  * A Horizons file is a text file generated from NASA JPL HORIZONS Website
- * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation supports both Vector
- * and Observer as Horizons data table.
+ * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation supports both Vector and
+ * Observer as Horizons data table.
  *
  * In case of Vector table data the implementation expects a file with format:
  * TIME(JulianDayNumber = A.D. YYYY-MM-DD HH:MM:SS TDB)
@@ -126,8 +127,7 @@ private:
 // Free functions
 std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
     const std::string& observer, const std::string& startTime,
-    const std::string& stopTime, const std::string& stepSize,
-    const std::string& unit);
+    const std::string& stopTime, const std::string& stepSize, const std::string& unit);
 nlohmann::json sendHorizonsRequest(const std::string& url,
     const std::filesystem::path& filePath);
 nlohmann::json convertHorizonsDownloadToJson(const std::filesystem::path& filePath);

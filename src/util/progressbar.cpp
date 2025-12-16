@@ -25,6 +25,7 @@
 #include <openspace/util/progressbar.h>
 
 #include <iomanip>
+#include <ostream>
 
 namespace openspace {
 

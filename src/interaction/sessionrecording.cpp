@@ -26,9 +26,24 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/stringhelper.h>
+#include <algorithm>
 #include <array>
-#include <format>
+#include <cstddef>
+#include <cstdint>
+#include <filesystem>
+#include <fstream>
+#include <istream>
 #include <optional>
+#include <ostream>
+#include <stdexcept>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <variant>
+#include <vector>
 
 namespace {
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };

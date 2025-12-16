@@ -28,16 +28,18 @@
 #include <modules/exoplanets/exoplanetsmodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/util/distanceconstants.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/stringhelper.h>
-#include <glm/gtx/quaternion.hpp>
 #include <glm/gtx/transform.hpp>
-#include <string_view>
+#include <cmath>
 #include <fstream>
 #include <sstream>
+#include <filesystem>
+#include <format>
+#include <memory>
+#include <string>
 
 namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsModule";

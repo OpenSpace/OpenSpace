@@ -36,8 +36,6 @@ namespace openspace {
 
 class SceneGraphNode;
 
-namespace documentation { struct Documentation; }
-
 class DashboardItemDistance : public DashboardTextItem {
 public:
     explicit DashboardItemDistance(const ghoul::Dictionary& dictionary);

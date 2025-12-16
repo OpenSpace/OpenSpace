@@ -24,18 +24,24 @@
 
 #include "sgctedit/windowcontrol.h"
 
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
+#include <sgct/config.h>
+#include <sgct/math.h>
 #include "windowcolors.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QGridLayout>
 #include <QLabel>
-#include <QLayout>
 #include <QPushButton>
 #include <QSpinBox>
 #include <algorithm>
 #include <numbers>
 #include <optional>
+#include <array>
+#include <cmath>
+#include <iterator>
+#include <utility>
 
 namespace {
     std::array<std::pair<int, std::string>, 10> Quality = {

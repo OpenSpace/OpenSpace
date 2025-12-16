@@ -26,9 +26,10 @@
 #define __OPENSPACE_CORE___JSON_HELPER___H__
 
 #include <openspace/json.h>
-#include <ghoul/misc/dictionary.h>
 #include <string>
 #include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 

@@ -28,6 +28,8 @@
 #include <QDialog>
 
 #include <openspace/scene/profile.h>
+#include <string>
+#include <vector>
 
 class QCheckBox;
 class QComboBox;
@@ -39,6 +41,7 @@ class QLineEdit;
 class QListWidget;
 class QPushButton;
 class QTextEdit;
+class QWidget;
 
 class ActionDialog final : public QDialog {
 Q_OBJECT
@@ -50,7 +53,6 @@ private:
     void createWidgets();
     void createActionWidgets(QGridLayout* layout);
     void createKeyboardWidgets(QGridLayout* layout);
-    void applyChanges();
 
     openspace::Profile::Action* selectedAction();
     void actionAdd();

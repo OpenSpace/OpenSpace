@@ -24,15 +24,18 @@
 
 #include <modules/multiresvolume/rendering/tsp.h>
 
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <algorithm>
+#include <cmath>
 #include <filesystem>
+#include <list>
 #include <numeric>
 #include <queue>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "TSP";

@@ -28,20 +28,17 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/src/layergroupid.h>
-#include <ghoul/misc/boolean.h>
 #include <array>
 #include <functional>
 #include <memory>
 
 namespace ghoul { class Dictionary; }
-
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::globebrowsing {
 
 class Layer;
 struct LayerGroup;
-class TileTextureInitData;
 
 /**
  * Manages multiple LayerGroups.

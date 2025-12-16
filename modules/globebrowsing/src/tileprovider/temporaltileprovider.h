@@ -28,7 +28,20 @@
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
 #include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
-#include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
+#include <modules/globebrowsing/src/timequantizer.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <filesystem>
+#include <unordered_map>
+#include <utility>
+
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
+
+namespace openspace { class Time; }
 
 namespace openspace::globebrowsing {
 

@@ -27,8 +27,17 @@
 #include <modules/skybrowser/include/utility.h>
 #include <openspace/util/httprequest.h>
 #include <ghoul/logging/logmanager.h>
-#include <string_view>
+#include <ghoul/misc/profiling.h>
 #include <tinyxml2.h>
+#include <algorithm>
+#include <cctype>
+#include <chrono>
+#include <format>
+#include <fstream>
+#include <memory>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace {
     constexpr std::string_view _loggerCat = "WwtDataHandler";

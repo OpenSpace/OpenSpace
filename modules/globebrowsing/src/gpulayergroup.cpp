@@ -24,11 +24,18 @@
 
 #include <modules/globebrowsing/src/gpulayergroup.h>
 
+#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
-#include <modules/globebrowsing/src/layermanager.h>
+#include <modules/globebrowsing/src/layergroupid.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <string>
+#include <vector>
 
 namespace openspace::globebrowsing {
 

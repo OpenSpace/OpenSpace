@@ -31,8 +31,11 @@
 #include <QDialogButtonBox>
 #include <QLabel>
 #include <QVBoxLayout>
+#include <algorithm>
 #include <fstream>
+#include <iterator>
 #include <string_view>
+#include <vector>
 
 namespace {
     constexpr std::string_view DefaultPanelPath = "${DATA}/web/default_ui_panels.json";

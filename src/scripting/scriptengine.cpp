@@ -32,12 +32,18 @@
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/ext/assimp/contrib/zip/src/zip.h>
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
+#include <optional>
+#include <utility>
 
 #include "scriptengine_lua.inl"
 

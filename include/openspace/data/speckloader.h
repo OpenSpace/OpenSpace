@@ -25,9 +25,15 @@
 #ifndef __OPENSPACE_CORE___SPECKLOADER___H__
 #define __OPENSPACE_CORE___SPECKLOADER___H__
 
-#include <openspace/data/dataloader.h>
+#include <openspace/data/datamapping.h>
 #include <filesystem>
 #include <optional>
+
+namespace openspace::dataloader {
+    struct ColorMap;
+    struct Dataset;
+    struct Labelset;
+} // namespace openspace::dataloader
 
 namespace openspace::dataloader::speck {
 

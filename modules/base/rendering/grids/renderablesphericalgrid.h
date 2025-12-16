@@ -32,12 +32,9 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/rendering/labelscomponent.h>
 #include <ghoul/opengl/ghoul_gl.h>
-
-namespace ghoul::opengl { class ProgramObject; }
+#include <memory>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class RenderableSphericalGrid : public Renderable {
 public:

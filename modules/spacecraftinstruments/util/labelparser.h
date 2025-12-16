@@ -29,6 +29,8 @@
 
 #include <filesystem>
 
+namespace ghoul { class Dictionary; }
+
 namespace openspace {
 
 class LabelParser : public SequenceParser {

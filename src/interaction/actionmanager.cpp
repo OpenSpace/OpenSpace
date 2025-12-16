@@ -24,15 +24,22 @@
 
 #include <openspace/interaction/actionmanager.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/engine/globals.h>
+#include <openspace/interaction/action.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/crc32.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
-#include <algorithm>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "actionmanager_lua.inl"
 

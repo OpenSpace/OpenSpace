@@ -24,6 +24,8 @@
 
 #include <modules/imgui/include/guicomponent.h>
 
+#include <utility>
+
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",

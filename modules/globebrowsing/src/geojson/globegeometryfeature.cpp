@@ -27,27 +27,39 @@
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/geojson/globegeometryhelper.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
-#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <geos/util/GEOSException.h>
 #include <geos/triangulate/polygon/ConstrainedDelaunayTriangulator.h>
 #include <geos/util/IllegalStateException.h>
+#include <openspace/util/geodetic.h>
+#include <geos/geom/Coordinate.h>
+#include <geos/geom/Geometry.h>
+#include <geos/geom/LinearRing.h>
+#include <geos/geom/Polygon.h>
+#include <geos/triangulate/tri/Tri.h>
+#include <geos/triangulate/tri/TriList.h>
 #include <algorithm>
+#include <array>
+#include <cstdlib>
 #include <filesystem>
-#include <fstream>
+#include <limits>
+#include <stdexcept>
+#include <string_view>
+#include <utility>
 
 namespace {
-    constexpr const char* _loggerCat = "GlobeGeometryFeature";
+    constexpr std::string_view _loggerCat = "GlobeGeometryFeature";
 
     constexpr std::chrono::milliseconds HeightUpdateInterval(10000);
 } // namespace

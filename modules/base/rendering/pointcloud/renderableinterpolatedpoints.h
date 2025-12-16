@@ -31,15 +31,12 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
-
-namespace ghoul::opengl { class Texture; }
+#include <utility>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 /**
- * A specialization of the RenderablePointCloud that supports interpolation beetween
+ * A specialization of the RenderablePointCloud that supports interpolation between
  * different positions for the points.
  */
 class RenderableInterpolatedPoints : public RenderablePointCloud {

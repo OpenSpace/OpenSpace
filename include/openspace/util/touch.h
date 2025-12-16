@@ -25,8 +25,7 @@
 #ifndef __OPENSPACE_CORE___TOUCH___H__
 #define __OPENSPACE_CORE___TOUCH___H__
 
-#include <glm/vec2.hpp>
-
+#include <ghoul/glm.h>
 #include <deque>
 
 namespace openspace {
@@ -38,6 +37,7 @@ namespace openspace {
  */
 struct TouchInput {
     TouchInput(size_t touchDeviceId, size_t fingerId, float x, float y, double timestamp);
+
     glm::vec2 screenCoordinates(const glm::vec2& resolution) const;
     glm::vec2 currentWindowCoordinates() const;
     bool isMoving() const;
@@ -59,7 +59,7 @@ struct TouchInput {
  */
 class TouchInputHolder {
 public:
-    TouchInputHolder(TouchInput input);
+    explicit TouchInputHolder(TouchInput input);
 
     /**
      * Succeeds upon a different input than last. Fails upon a too similar input as last.

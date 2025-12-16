@@ -24,6 +24,8 @@
 
 #include <modules/globebrowsing/src/tileindex.h>
 
+#include <ghoul/misc/assert.h>
+
 namespace openspace::globebrowsing {
 
 bool operator==(const TileIndex& lhs, const TileIndex& rhs) {

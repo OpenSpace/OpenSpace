@@ -25,6 +25,8 @@
 #include <modules/debugging/rendering/screenspacedebugplane.h>
 
 #include <openspace/documentation/documentation.h>
+#include <ghoul/misc/dictionary.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {

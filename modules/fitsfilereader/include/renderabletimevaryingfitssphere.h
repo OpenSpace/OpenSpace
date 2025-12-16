@@ -27,15 +27,17 @@
 
 #include <modules/base/rendering/renderablesphere.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
+#include <ghoul/glm.h>
 #include <deque>
+#include <filesystem>
+#include <limits>
+#include <utility>
 
 namespace openspace {
-
-struct RenderData;
-struct UpdateData;
-namespace documentation { struct Documentation; }
 
 class RenderableTimeVaryingFitsSphere : public RenderableSphere {
 public:

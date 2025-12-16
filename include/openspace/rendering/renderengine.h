@@ -34,27 +34,30 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/framebufferrenderer.h>
+#include <cstdint>
 #include <chrono>
 #include <filesystem>
+#include <memory>
+#include <string>
+#include <string_view>
+#include <vector>
 
 namespace ghoul {
-namespace fontrendering { class Font; }
-namespace opengl {
-    class ProgramObject;
-    class OpenGLStateCache;
-} // namespace opengl
-
-class Dictionary;
-class SharedMemory;
+    namespace fontrendering { class Font; }
+    namespace opengl {
+        class ProgramObject;
+        class OpenGLStateCache;
+    } // namespace opengl
+    class Dictionary;
+    class SharedMemory;
 } // ghoul
 
 namespace openspace {
 
 namespace scripting { struct LuaLibrary; }
-
 class Camera;
-class RaycasterManager;
 class DeferredcasterManager;
+class RaycasterManager;
 class Scene;
 class SceneManager;
 class ScreenLog;

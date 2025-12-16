@@ -27,7 +27,9 @@
 #include <modules/imgui/include/imgui_include.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/format.h>
 #include <array>
+#include <utility>
 
 namespace {
     const ImVec2 WindowSize = ImVec2(350, 500);

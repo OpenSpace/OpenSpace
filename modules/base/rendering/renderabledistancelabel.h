@@ -33,8 +33,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class RenderableDistanceLabel : public RenderableLabel {
 public:
     explicit RenderableDistanceLabel(const ghoul::Dictionary& dictionary);

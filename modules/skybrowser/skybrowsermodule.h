@@ -32,13 +32,12 @@
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
+#include <ghoul/glm.h>
 #include <filesystem>
 
 namespace openspace {
 
-struct ImageData;
 class SceneGraphNode;
-class ScreenSpaceImageLocal;
 class TargetBrowserPair;
 
 class SkyBrowserModule : public OpenSpaceModule {

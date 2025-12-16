@@ -29,13 +29,8 @@
 
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <utility>
 
 namespace openspace {
-
-class SceneGraphNode;
-
-namespace documentation { struct Documentation; }
 
 class DashboardItemVelocity : public DashboardTextItem {
 public:

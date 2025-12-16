@@ -25,13 +25,14 @@
 #include <openspace/scene/rotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/misc/dictionary.h>
+#include <optional>
+#include <string>
 
 namespace {
     // A `Rotation` object describes a specific rotation for a scene graph node, which may

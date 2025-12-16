@@ -24,7 +24,9 @@
 
 #include <openspace/util/planegeometry.h>
 
-#include <ghoul/opengl/ghoul_gl.h>
+#include <array>
+#include <cstddef>
+#include <utility>
 
 namespace openspace {
 

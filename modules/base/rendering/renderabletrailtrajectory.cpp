@@ -25,11 +25,15 @@
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
 #include <openspace/util/timeconstants.h>
 #include <openspace/util/updatestructures.h>
+#include <algorithm>
+#include <cmath>
+#include <iterator>
+#include <limits>
 #include <optional>
 
 // This class creates the entire trajectory at once and keeps it in memory the entire

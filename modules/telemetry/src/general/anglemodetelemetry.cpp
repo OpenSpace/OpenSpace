@@ -24,6 +24,7 @@
 
 #include <modules/telemetry/include/general/anglemodetelemetry.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <ghoul/logging/logmanager.h>

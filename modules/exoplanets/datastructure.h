@@ -28,7 +28,7 @@
 #include <openspace/documentation/documentation.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/dictionary.h>
-#include <optional>
+#include <limits>
 #include <string>
 #include <vector>
 

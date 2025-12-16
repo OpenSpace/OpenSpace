@@ -28,6 +28,8 @@
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/templatefactory.h>
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace openspace {
 

@@ -26,8 +26,6 @@
 #define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___SCANNERDECODER___H__
 
 #include <modules/spacecraftinstruments/util/decoder.h>
-#include <string>
-#include <vector>
 
 namespace openspace {
 

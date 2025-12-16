@@ -24,22 +24,21 @@
 
 #include <modules/server/servermodule.h>
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/server/include/serverinterface.h>
 #include <modules/server/include/connection.h>
-#include <modules/server/include/topics/topic.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <ghoul/format.h>
 #include <ghoul/io/socket/socket.h>
-#include <ghoul/io/socket/tcpsocketserver.h>
+#include <ghoul/io/socket/socketserver.h>
 #include <ghoul/io/socket/websocket.h>
-#include <ghoul/io/socket/websocketserver.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
+#include <algorithm>
+#include <optional>
+#include <thread>
+#include <utility>
 
 namespace {
     struct [[codegen::Dictionary(ServerModule)]] Parameters {
@@ -58,7 +57,7 @@ documentation::Documentation ServerModule::Documentation() {
 
 ServerModule::ServerModule()
     : OpenSpaceModule(ServerModule::Name)
-    , _interfaceOwner({"Interfaces", "Interfaces", "Server Interfaces"})
+    , _interfaceOwner({ "Interfaces", "Interfaces", "Server Interfaces" })
 {
     addPropertySubOwner(_interfaceOwner);
 

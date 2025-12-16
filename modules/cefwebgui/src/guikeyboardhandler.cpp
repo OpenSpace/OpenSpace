@@ -25,6 +25,7 @@
 #include <modules/cefwebgui/include/guikeyboardhandler.h>
 
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/util/keys.h>
 
 namespace openspace {
 

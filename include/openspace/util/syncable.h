@@ -41,10 +41,10 @@ protected:
     // from the used of implementations of the interface
     friend class SyncEngine;
 
-    virtual void preSync(bool /*isMaster*/) {}
-    virtual void encode(SyncBuffer* /*syncBuffer*/) = 0;
-    virtual void decode(SyncBuffer* /*syncBuffer*/) = 0;
-    virtual void postSync(bool /*isMaster*/) {}
+    virtual void preSync(bool isMaster);
+    virtual void encode(SyncBuffer* syncBuffer) = 0;
+    virtual void decode(SyncBuffer* syncBuffer) = 0;
+    virtual void postSync(bool isMaster);
 };
 
 } // namespace openspace

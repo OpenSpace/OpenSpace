@@ -28,10 +28,12 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/interaction/sessionrecording.h>
-#include <openspace/scripting/lualibrary.h>
 #include <filesystem>
 #include <string>
 #include <vector>
+
+namespace ghoul { class Dictionary; }
+namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 

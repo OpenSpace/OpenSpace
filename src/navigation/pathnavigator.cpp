@@ -26,10 +26,13 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/camera/camerapose.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/waypoint.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -39,7 +42,10 @@
 #include <openspace/util/collisionhelper.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
-#include <vector>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <algorithm>
+#include <iterator>
 
 #include "pathnavigator_lua.inl"
 

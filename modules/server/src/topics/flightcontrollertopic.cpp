@@ -25,7 +25,6 @@
 #include <modules/server/include/topics/flightcontrollertopic.h>
 
 #include <modules/server/include/connection.h>
-#include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/websocketcamerastates.h>
 #include <openspace/interaction/websocketinputstate.h>
@@ -36,14 +35,15 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <iterator>
 #include <unordered_map>
+#include <ghoul/misc/assert.h>
+#include <algorithm>
+#include <string_view>
+#include <vector>
 
 namespace {
     enum class Command {

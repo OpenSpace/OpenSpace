@@ -27,12 +27,9 @@
 
 #include <modules/base/rendering/screenspaceimageonline.h>
 
-#include <openspace/documentation/documentation.h>
 #include <chrono>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class ScreenSpaceCygnet : public ScreenSpaceImageOnline {
 public:

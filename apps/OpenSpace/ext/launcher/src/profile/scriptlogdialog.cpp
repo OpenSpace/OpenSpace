@@ -28,6 +28,7 @@
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <QGridLayout>
 #include <QDialogButtonBox>
 #include <QFileDialog>
@@ -38,11 +39,8 @@
 #include <QTimer>
 #include <algorithm>
 #include <filesystem>
-#include <format>
 #include <new>
-#include <string>
 #include <utility>
-#include <vector>
 
 ScriptLogDialog::ScriptLogDialog(QWidget* parent, std::string filter)
     : QDialog(parent)

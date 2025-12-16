@@ -28,24 +28,22 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/touch/include/directinputsolver.h>
-#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <openspace/util/touch.h>
+#include <ghoul/glm.h>
 #include <array>
 #include <chrono>
-#include <memory>
 
 // #define TOUCH_DEBUG_PROPERTIES
 
 namespace openspace {
 
 class Camera;
-class SceneGraphNode;
 
 // Class used for keeping track of the recent average frame time
 class FrameTimeAverage {
@@ -64,8 +62,6 @@ private:
 
 class TouchInteraction : public properties::PropertyOwner {
 public:
-    TouchInteraction();
-
     enum class InteractionType {
         ROTATION = 0,
         PINCH,
@@ -81,6 +77,8 @@ public:
         double roll = 0.0;
         glm::dvec2 pan = glm::dvec2(0.0);
     };
+
+    TouchInteraction();
 
     /**
      * Main function call:

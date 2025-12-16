@@ -32,7 +32,7 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+class SceneGraphNode;
 
 class SceneGraphLightSource : public LightSource {
 public:

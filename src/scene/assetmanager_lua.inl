@@ -24,6 +24,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <string>
 
 namespace {
 

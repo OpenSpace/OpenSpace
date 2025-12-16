@@ -27,10 +27,15 @@
 
 #include <QDialog>
 
+#include <string>
+#include <vector>
+
+class QKeyEvent;
 class QLineEdit;
 class QListWidget;
 class QListWidgetItem;
 class QPushButton;
+class QWidget;
 
 class MarkNodesDialog final : public QDialog {
 Q_OBJECT

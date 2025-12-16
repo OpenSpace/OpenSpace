@@ -26,6 +26,10 @@
 
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/keyboardinputstate.h>
+#include <openspace/util/keys.h>
+#include <openspace/util/mouse.h>
+#include <algorithm>
+#include <cstdlib>
 
 namespace {
     constexpr double SensitivityAdjustmentIncrease = 8.0;

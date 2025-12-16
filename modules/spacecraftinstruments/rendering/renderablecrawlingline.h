@@ -29,10 +29,9 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <memory>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class RenderableCrawlingLine : public Renderable {
 public:

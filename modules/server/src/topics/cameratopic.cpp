@@ -24,23 +24,18 @@
 
 #include <modules/server/include/topics/cameratopic.h>
 
-#ifdef OPENSPACE_MODULE_SPACE_ENABLED
-#include <modules/globebrowsing/globebrowsingmodule.h>
-#endif // OPENSPACE_MODULE_SPACE_ENABLED
 #include <modules/server/include/connection.h>
 #include <modules/server/servermodule.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/properties/property.h>
 #include <openspace/util/distanceconversion.h>
 #include <openspace/util/geodetic.h>
-#include <ghoul/logging/logmanager.h>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
 } // namespace
-
-using nlohmann::json;
 
 namespace openspace {
 

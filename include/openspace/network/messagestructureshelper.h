@@ -25,9 +25,13 @@
 #ifndef __OPENSPACE_CORE___MESSAGESTRUCTURESHELPER___H__
 #define __OPENSPACE_CORE___MESSAGESTRUCTURESHELPER___H__
 
-#include <openspace/network/messagestructures.h>
+#include <string>
 
 namespace openspace::datamessagestructures {
+
+struct CameraKeyframe;
+struct ScriptMessage;
+struct TimeKeyframe;
 
 /**
  * Method that creates a CameraKeyframe object and populates it with the current

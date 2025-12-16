@@ -25,11 +25,15 @@
 #include "sgctedit/displaywindowunion.h"
 
 #include "sgctedit/windowcontrol.h"
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <algorithm>
 #include <optional>
+#include <cstdint>
+#include <cstdlib>
+#include <variant>
 
 namespace {
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };

@@ -27,7 +27,9 @@
 
 #include <modules/globebrowsing/src/lruthreadpool.h>
 #include <openspace/util/concurrentqueue.h>
+#include <memory>
 #include <mutex>
+#include <vector>
 
 namespace openspace { template <typename T> struct Job; }
 

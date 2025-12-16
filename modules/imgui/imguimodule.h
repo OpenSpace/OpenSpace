@@ -28,6 +28,7 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <modules/imgui/include/guiactioncomponent.h>
+#include <modules/imgui/include/guicomponent.h>
 #include <modules/imgui/include/guifilepathcomponent.h>
 #include <modules/imgui/include/guigibscomponent.h>
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
@@ -49,6 +50,8 @@
 #include <ghoul/opengl/uniformcache.h>
 #include <ghoul/opengl/texture.h>
 #include <array>
+#include <cstdint>
+#include <memory>
 
 struct ImGuiContext;
 

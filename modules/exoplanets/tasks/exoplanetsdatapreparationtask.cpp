@@ -24,9 +24,7 @@
 
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 
-#include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/coordinateconversion.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
@@ -35,8 +33,11 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
 #include <charconv>
-#include <filesystem>
-#include <fstream>
+#include <cmath>
+#include <limits>
+#include <sstream>
+#include <string_view>
+#include <system_error>
 
 namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsDataPreparationTask";

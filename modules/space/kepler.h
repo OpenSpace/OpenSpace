@@ -106,6 +106,7 @@ enum class Format {
     SBDB, ///< Small-Body Database
     MPC   ///< Minor Planet Center
 };
+
 /**
  * Reads the object information from the provided file.
  *

@@ -25,15 +25,8 @@
 #include <modules/server/include/topics/documentationtopic.h>
 
 #include <modules/server/include/connection.h>
-#include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/documentation/documentationengine.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/interaction/keybindingmanager.h>
-#include <ghoul/logging/logmanager.h>
-
-using nlohmann::json;
 
 namespace openspace {
 

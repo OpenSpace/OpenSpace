@@ -29,8 +29,8 @@
 
 namespace openspace::interaction {
 
-class MouseInputState;
 class KeyboardInputState;
+class MouseInputState;
 
 class MouseCameraStates : public CameraInteractionStates {
 public:
@@ -43,7 +43,6 @@ public:
 
 private:
     bool _isMouseButtonInverted = false;
-
     double _currentSensitivityRamp = 1.0;
 };
 

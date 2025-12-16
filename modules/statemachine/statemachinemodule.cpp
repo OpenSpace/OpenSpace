@@ -28,15 +28,15 @@
 #include <modules/statemachine/include/statemachine.h>
 #include <modules/statemachine/include/transition.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/stringhelper.h>
-#include <string>
+#include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <optional>
+#include <string>
+#include <utility>
 
 #include "statemachinemodule_lua.inl"
 
@@ -48,7 +48,7 @@ namespace openspace {
 
 StateMachineModule::StateMachineModule()
     : OpenSpaceModule(Name)
-{ }
+{}
 
 void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
                                                 const ghoul::Dictionary& transitions,

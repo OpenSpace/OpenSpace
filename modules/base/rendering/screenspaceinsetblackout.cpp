@@ -23,19 +23,25 @@
  ****************************************************************************************/
 
 #include <modules/base/rendering/screenspaceinsetblackout.h>
-#include <modules/base/basemodule.h>
 
+#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/events/event.h>
-#include <openspace/events/eventengine.h>
-#include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/clipboard.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/interpolator.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+#include <array>
+#include <filesystem>
+#include <functional>
+#include <optional>
+#include <utility>
 
 namespace {
     constexpr glm::uvec2 BlackoutTextureSize = glm::uvec2(3840, 2160);

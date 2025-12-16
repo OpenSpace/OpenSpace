@@ -35,8 +35,6 @@ namespace ghoul::filesystem { class File; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class LuaTranslation : public Translation {
 public:
     explicit LuaTranslation(const ghoul::Dictionary& dictionary);

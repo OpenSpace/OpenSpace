@@ -26,9 +26,12 @@
 
 #include <openspace/interaction/action.h>
 #include <openspace/properties/property.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <string>
+#include <string_view>
 
 using json = nlohmann::json;
 

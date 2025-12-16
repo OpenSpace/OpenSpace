@@ -25,11 +25,12 @@
 #ifndef __OPENSPACE_CORE___DOWNLOAD_EVENT_ENGINE___H__
 #define __OPENSPACE_CORE___DOWNLOAD_EVENT_ENGINE___H__
 
+#include <cstdint>
 #include <functional>
-#include <map>
 #include <mutex>
 #include <optional>
 #include <string>
+#include <unordered_map>
 
 namespace openspace {
 

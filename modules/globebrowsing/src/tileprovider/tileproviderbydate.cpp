@@ -28,7 +28,12 @@
 #include <openspace/engine/globals.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
-#include <functional>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <map>
+#include <utility>
 
 namespace {
     struct [[codegen::Dictionary(TileProviderByDate)]] Parameters {

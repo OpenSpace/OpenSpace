@@ -30,7 +30,6 @@
 #pragma warning (disable : 4100)
 #endif // _MSC_VER
 
-
 #ifdef __clang__
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"

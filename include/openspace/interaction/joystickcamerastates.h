@@ -28,8 +28,12 @@
 #include <openspace/interaction/camerainteractionstates.h>
 
 #include <openspace/interaction/joystickinputstate.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/boolean.h>
+#include <ghoul/misc/exception.h>
 #include <map>
+#include <string>
+#include <string_view>
 #include <vector>
 
 namespace openspace::interaction {

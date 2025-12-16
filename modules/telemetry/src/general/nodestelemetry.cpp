@@ -24,6 +24,7 @@
 
 #include <modules/telemetry/include/general/nodestelemetry.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <modules/telemetry/include/util.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -31,6 +32,11 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/distanceconversion.h>
+#include <ghoul/logging/logmanager.h>
+#include <cstdlib>
+#include <format>
+#include <limits>
+#include <utility>
 
 #include "nodestelemetry_lua.inl"
 

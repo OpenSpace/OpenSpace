@@ -27,6 +27,7 @@
 
 #include <openspace/util/histogram.h>
 #include <filesystem>
+#include <vector>
 
 namespace openspace {
 

@@ -27,7 +27,13 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
+#include <array>
+
+#ifdef OPENSPACE_HAS_SPOUT
 namespace openspace::spout { class SpoutReceiverPropertyProxy; }
+#endif // OPENSPACE_HAS_SPOUT
 
 namespace openspace::globebrowsing {
 
@@ -57,7 +63,7 @@ private:
     std::unique_ptr<spout::SpoutReceiverPropertyProxy> spoutReceiver;
 #endif // OPENSPACE_HAS_SPOUT
 
-    bool spoutUpdate = false;
+    bool _spoutUpdate = false;
 };
 
 } // namespace openspace::globebrowsing

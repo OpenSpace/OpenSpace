@@ -32,13 +32,21 @@
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/network/messagestructures.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timeline.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/misc/profiling.h>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <limits>
+#include <utility>
 
 #include "parallelpeer_lua.inl"
 
@@ -164,7 +172,7 @@ void ParallelPeer::connect() {
 
     auto socket = std::make_unique<ghoul::io::TcpSocket>(
         _address,
-        atoi(_port.value().c_str())
+        std::atoi(_port.value().c_str())
     );
 
     socket->connect();
@@ -218,7 +226,7 @@ void ParallelPeer::sendAuthentication() {
         passwordSize     + // password
         sizeof(uint16_t) + // host password length
         hostPasswordSize + // host password
-        sizeof(uint8_t) + // server name length
+        sizeof(uint8_t)  + // server name length
         serverNameSize   + // server name
         sizeof(uint8_t)  + // name length
         nameLength;        // name
@@ -308,7 +316,6 @@ double ParallelPeer::convertTimestamp(double messageTimestamp) {
     const std::lock_guard latencyLock(_latencyMutex);
     return messageTimestamp + _initialTimeDiff + _bufferTime;
 }
-
 
 double ParallelPeer::latencyStandardDeviation() const {
     double accumulatedLatencyDiffSquared = 0;

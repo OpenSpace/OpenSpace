@@ -27,13 +27,9 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/navigation/keyframenavigator.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/scripting/lualibrary.h>
-
-#include <functional>
+#include <limits>
 #include <optional>
-#include <queue>
 #include <string>
 #include <vector>
 

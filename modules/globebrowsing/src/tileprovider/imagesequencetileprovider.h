@@ -28,6 +28,9 @@
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
 #include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <filesystem>
 
 namespace openspace::globebrowsing {
 

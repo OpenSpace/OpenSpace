@@ -68,7 +68,6 @@ public:
      */
     bool contains(const Geodetic2& p) const;
 
-
     /**
      * Clamps a point to the patch region.
      */

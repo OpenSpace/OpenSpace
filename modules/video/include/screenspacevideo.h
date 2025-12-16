@@ -28,13 +28,8 @@
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <modules/video/include/videoplayer.h>
-#include <openspace/properties/misc/stringproperty.h>
-
-namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class ScreenSpaceVideo : public ScreenSpaceRenderable {
 public:

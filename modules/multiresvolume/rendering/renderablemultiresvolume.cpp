@@ -24,20 +24,17 @@
 
 #include <modules/multiresvolume/rendering/renderablemultiresvolume.h>
 
-#include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/multiresvolume/rendering/atlasmanager.h>
 #include <modules/multiresvolume/rendering/errorhistogrammanager.h>
 #include <modules/multiresvolume/rendering/histogrammanager.h>
 #include <modules/multiresvolume/rendering/localerrorhistogrammanager.h>
 #include <modules/multiresvolume/rendering/localtfbrickselector.h>
 #include <modules/multiresvolume/rendering/multiresvolumeraycaster.h>
-#include <modules/multiresvolume/rendering/shenbrickselector.h>
 #include <modules/multiresvolume/rendering/simpletfbrickselector.h>
 #include <modules/multiresvolume/rendering/tfbrickselector.h>
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/spicemanager.h>
@@ -48,17 +45,15 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/glm.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <chrono>
 #include <filesystem>
 #include <fstream>
-#include <iterator>
+#include <cmath>
+#include <optional>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableMultiresVolume";

@@ -35,12 +35,17 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/clipboard.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <utility>
 
 namespace {
     constexpr std::string_view HistoryFile = "ConsoleHistory";
@@ -321,8 +326,8 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         return false;
     }
 
-    const bool modifierShift = (modifier == KeyModifier::Shift);
-    const bool modifierControl = (modifier == KeyModifier::Control);
+    const bool modifierShift = hasKeyModifier(modifier, KeyModifier::Shift);
+    const bool modifierControl = hasKeyModifier(modifier, KeyModifier::Control);
 
     // Button left of 1 and above TAB (default)
     // Can be changed to any other key with the setCommandInputButton funciton

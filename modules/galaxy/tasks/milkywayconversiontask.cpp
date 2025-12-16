@@ -29,6 +29,7 @@
 #include <modules/volume/volumesampler.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
+#include <vector>
 
 namespace {
     struct [[codegen::Dictionary(MilkywayConversionTask)]] Parameters {

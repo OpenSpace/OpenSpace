@@ -31,12 +31,11 @@
 #include <modules/iswa/util/dataprocessortext.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
-#include <openspace/json.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "IswaDataGroup";
-    using json = nlohmann::json;
 
     constexpr openspace::properties::Property::PropertyInfo UseLogInfo = {
         "UseLog",

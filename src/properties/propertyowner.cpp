@@ -31,10 +31,12 @@
 #include <openspace/properties/property.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/invariants.h>
+#include <ghoul/misc/profiling.h>
 #include <algorithm>
-#include <numeric>
+#include <memory>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "PropertyOwner";

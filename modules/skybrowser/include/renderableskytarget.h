@@ -27,14 +27,12 @@
 
 #include <modules/base/rendering/renderableplane.h>
 
-#include <openspace/documentation/documentation.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
-namespace openspace::documentation { struct Documentation; }
+#include <ghoul/glm.h>
 
 namespace openspace {
-
-class ScreenSpaceSkyBrowser;
 
 class RenderableSkyTarget : public RenderablePlane {
 public:

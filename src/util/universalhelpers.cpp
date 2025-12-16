@@ -24,6 +24,9 @@
 
 #include <openspace/util/universalhelpers.h>
 
+#include <ghoul/misc/assert.h>
+#include <algorithm>
+
 namespace openspace::helpers {
 
 double shiftAndScale(double t, double start, double end) {

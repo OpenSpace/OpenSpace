@@ -58,8 +58,9 @@
 #include <openspace/util/versionchecker.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/font/fontmanager.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/texture.h>
+#include <algorithm>
 #include <array>
 #include <memory>
 

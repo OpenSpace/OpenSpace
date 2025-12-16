@@ -28,8 +28,10 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <array>
+#include <cstdint>
 #include <unordered_map>
 #include <string>
+#include <string_view>
 
 namespace openspace::interaction {
 

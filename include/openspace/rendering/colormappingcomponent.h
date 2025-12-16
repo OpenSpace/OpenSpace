@@ -34,7 +34,14 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <ghoul/glm.h>
 #include <ghoul/opengl/texture.h>
+#include <memory>
+#include <optional>
+#include <string>
+#include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 

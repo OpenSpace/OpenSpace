@@ -27,6 +27,10 @@
 
 #include <modules/telemetry/include/telemetrybase.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
+
+namespace osc { struct Blob; }
+
 namespace openspace {
 
 class PlanetsOverviewSonification : public TelemetryBase {

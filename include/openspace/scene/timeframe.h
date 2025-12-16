@@ -27,17 +27,15 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties//scalar/boolproperty.h>
-#include <ghoul/glm.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-class Time;
-
 namespace documentation { struct Documentation; }
+class Time;
 
 class TimeFrame : public properties::PropertyOwner {
 public:

@@ -25,9 +25,8 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___LRUCACHE___H__
 #define __OPENSPACE_MODULE_VOLUME___LRUCACHE___H__
 
-#include <ghoul/glm.h>
 #include <list>
-#include <iterator>
+#include <utility>
 
 namespace openspace::volume {
 
@@ -49,6 +48,7 @@ public:
 
 private:
     void insert(const KeyType& key, const ValueType& value);
+
     ContainerType<
         KeyType, std::pair<ValueType, typename std::list<KeyType>::iterator>
     > _cache;

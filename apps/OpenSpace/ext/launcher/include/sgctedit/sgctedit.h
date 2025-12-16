@@ -35,6 +35,7 @@ class DisplayWindowUnion;
 class QCheckBox;
 class QComboBox;
 class QLineEdit;
+class QWidget;
 
 const sgct::config::GeneratorVersion VersionMin { "SgctWindowConfig", 1, 1 };
 const sgct::config::GeneratorVersion VersionLegacy18 { "OpenSpace", 0, 18 };

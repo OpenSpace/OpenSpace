@@ -25,12 +25,13 @@
 #include <openspace/scene/scale.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/misc/dictionary.h>
+#include <optional>
+#include <string>
 
 namespace {
     struct [[codegen::Dictionary(Scale)]] Parameters {

@@ -24,6 +24,8 @@
 
 #include <modules/globebrowsing/src/layergroupid.h>
 
+#include <iterator>
+
 namespace openspace::globebrowsing::layers {
 
 // The order and values of these enums are implicitly used in many places in the code and

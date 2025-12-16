@@ -27,7 +27,12 @@
 
 #include <QDialog>
 
+#include <string>
+#include <vector>
+
+class QPushButton;
 class QTextEdit;
+class QWidget;
 
 class AdditionalScriptsDialog final : public QDialog {
 Q_OBJECT

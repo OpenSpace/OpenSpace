@@ -29,7 +29,16 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <modules/globebrowsing/src/rawtile.h>
+#include <modules/globebrowsing/src/rawtiledatareader.h>
+#include <modules/globebrowsing/src/tileindex.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <algorithm>
 #include <optional>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {

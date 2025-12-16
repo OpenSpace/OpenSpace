@@ -32,6 +32,8 @@
 
 namespace openspace {
 
+class Camera;
+
 class CameraTelemetry : public TelemetryBase {
 public:
     CameraTelemetry(const std::string& ip, int port);

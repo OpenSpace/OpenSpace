@@ -25,8 +25,10 @@
 #ifndef __OPENSPACE_CORE___DATAMAPPING___H__
 #define __OPENSPACE_CORE___DATAMAPPING___H__
 
+#include <filesystem>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace ghoul { class Dictionary; }

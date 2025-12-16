@@ -24,12 +24,13 @@
 
 #include <openspace/rendering/dashboard.h>
 
-#include <openspace/engine/globals.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <utility>
 
 #include "dashboard_lua.inl"
 

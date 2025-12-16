@@ -28,12 +28,14 @@
 #include <QDialog>
 
 #include <openspace/scene/profile.h>
+#include <optional>
 
 class QCheckBox;
 class QDateTimeEdit;
 class QLabel;
 class QLineEdit;
 class QTabWidget;
+class QWidget;
 
 class TimeDialog final : public QDialog {
 Q_OBJECT

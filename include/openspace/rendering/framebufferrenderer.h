@@ -36,7 +36,6 @@
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::filesystem { class File; }
-
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
@@ -186,11 +185,9 @@ private:
         std::unique_ptr<ghoul::opengl::ProgramObject>
     >;
 
-    void resolveMSAA(float blackoutFactor);
     void applyTMO(float blackoutFactor, const glm::ivec4& viewport);
     void applyFXAA(const glm::ivec4& viewport);
     void updateDownscaleTextures() const;
-    void updateExitVolumeTextures();
     void writeDownscaledVolume(const glm::ivec4& viewport);
 
     std::map<VolumeRaycaster*, RaycastData> _raycastData;

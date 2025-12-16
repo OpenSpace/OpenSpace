@@ -25,24 +25,28 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEGEOMETRYFEATURE___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEGEOMETRYFEATURE___H__
 
-#include <openspace/properties/propertyowner.h>
-
-#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/geojson/geojsonproperties.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/texturecomponent.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <chrono>
+#include <memory>
+#include <string>
 #include <vector>
 
-namespace openspace::documentation { struct Documentation; }
+namespace geos::geom { class Geometry; }
+namespace ghoul::opengl { class ProgramObject; }
+namespace openspace {
+    namespace documentation { struct Documentation; }
+    struct Geodetic2;
+    struct Geodetic3;
+    struct RenderData;
+} // namespace openspace
 namespace rendering::helper {
     struct LightSourceRenderData;
     struct VertexXYZNormal;
 } // namespace rendering::helper
-
-namespace geos::geom { class Geometry; }
 
 namespace openspace::globebrowsing {
 
@@ -54,11 +58,12 @@ class RenderableGlobe;
  */
 class GlobeGeometryFeature {
 public:
+    using Vertex = rendering::helper::VertexXYZNormal;
+
     GlobeGeometryFeature(const RenderableGlobe& globe,
         GeoJsonProperties& defaultProperties,
         GeoJsonOverrideProperties& overrideProperties);
 
-    using Vertex = rendering::helper::VertexXYZNormal;
 
     // TODO: Use instead of numbers
     //enum class RenderPass {

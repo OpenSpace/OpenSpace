@@ -28,6 +28,7 @@
 #include <modules/server/include/topics/topic.h>
 
 #include <openspace/events/event.h>
+#include <unordered_map>
 
 namespace openspace::properties { class Property; }
 

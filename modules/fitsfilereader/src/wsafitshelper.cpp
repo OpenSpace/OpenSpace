@@ -23,11 +23,20 @@
  ****************************************************************************************/
 
 #include <modules/fitsfilereader/include/wsafitshelper.h>
+
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <CCfits>
+#include <algorithm>
+#include <string>
+#include <string_view>
+#include <vector>
 
-constexpr std::string_view _loggerCat = "RenderableTimeVaryingSphere";
+namespace {
+    constexpr std::string_view _loggerCat = "RenderableTimeVaryingSphere";
+} // namespace
 
 using namespace CCfits;
 

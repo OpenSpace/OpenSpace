@@ -25,11 +25,10 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___ATLASMANAGER___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___ATLASMANAGER___H__
 
-#include <ghoul/glm.h>
 #include <glm/gtx/std_based_type.hpp>
+#include <limits>
 #include <map>
 #include <set>
-#include <string>
 #include <vector>
 
 namespace ghoul::opengl { class Texture; }

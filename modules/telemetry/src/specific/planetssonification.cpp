@@ -24,7 +24,9 @@
 
 #include <modules/telemetry/include/specific/planetssonification.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <modules/telemetry/include/util.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -33,6 +35,16 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/distanceconversion.h>
 #include <openspace/util/memorymanager.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <osc/OscTypes.h>
+#include <cstdint>
+#include <cstdlib>
+#include <format>
+#include <limits>
+#include <optional>
+#include <utility>
 
 #include "planetssonification_lua.inl"
 

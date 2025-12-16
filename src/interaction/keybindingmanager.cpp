@@ -28,6 +28,9 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <string>
 
 #include "keybindingmanager_lua.inl"
 

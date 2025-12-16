@@ -31,9 +31,17 @@
 #include <openspace/scene/asset.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/util/resourcesynchronization.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/lua/luastate.h>
+#include <algorithm>
+#include <string_view>
+#include <utility>
 
 #include "assetmanager_lua.inl"
 

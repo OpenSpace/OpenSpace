@@ -23,6 +23,9 @@
  ****************************************************************************************/
 
 #include <ghoul/lua/lua_helper.h>
+#include <string>
+#include <utility>
+#include <variant>
 
 namespace {
 

@@ -26,12 +26,18 @@
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
+#include <modules/globebrowsing/src/tileindex.h>
+#include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/opengl/openglstatecache.h>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/texture.h>
+#include <optional>
+#include <utility>
 
 namespace openspace::globebrowsing {
 

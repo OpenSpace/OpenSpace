@@ -29,24 +29,30 @@
 #include <modules/iswa/rendering/iswakameleongroup.h>
 #include <modules/iswa/rendering/renderabledataplane.h>
 #include <modules/iswa/rendering/renderabledatasphere.h>
-#include <modules/iswa/rendering/renderableiswacygnet.h>
 #include <modules/iswa/rendering/renderablekameleonplane.h>
 #include <modules/iswa/rendering/renderabletextureplane.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/json.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/file.h>
+#include <ghoul/designpattern/event.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/constexpr.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/stringconversion.h>
 #include <ghoul/misc/stringhelper.h>
-#include <filesystem>
+#include <algorithm>
+#include <array>
+#include <cctype>
 #include <fstream>
+#include <memory>
+#include <sstream>
+#include <utility>
 
 #include "iswamanager_lua.inl"
 

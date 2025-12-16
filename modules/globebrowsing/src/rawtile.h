@@ -28,15 +28,12 @@
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
-#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <cstddef>
 #include <memory>
 #include <optional>
 
 namespace openspace::globebrowsing {
-
-class TileTextureInitData;
 
 struct RawTile {
     enum class ReadError {

@@ -25,9 +25,10 @@
 #include <modules/base/scale/timedependentscale.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/misc/dictionary.h>
+#include <algorithm>
 #include <optional>
 
 namespace {

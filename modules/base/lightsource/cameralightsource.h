@@ -31,8 +31,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class CameraLightSource : public LightSource {
 public:
     explicit CameraLightSource(const ghoul::Dictionary& dictionary);

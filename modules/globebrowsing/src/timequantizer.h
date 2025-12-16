@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___TIMEQUANTIZER___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TIMEQUANTIZER___H__
 
-#include <openspace/util/timerange.h>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace openspace { class Time; }

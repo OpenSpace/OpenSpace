@@ -27,6 +27,11 @@
 
 #include <modules/iswa/rendering/iswadatagroup.h>
 
+#include <openspace/properties/misc/selectionproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <filesystem>
+#include <tuple>
+
 namespace openspace {
 
 class IswaKameleonGroup : public IswaDataGroup {

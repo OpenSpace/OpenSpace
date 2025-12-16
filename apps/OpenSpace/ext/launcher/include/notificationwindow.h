@@ -30,6 +30,8 @@
 #include <openspace/util/httprequest.h>
 #include <memory>
 
+class QWidget;
+
 class NotificationWindow final : public QTextEdit {
 Q_OBJECT
 public:

@@ -32,10 +32,6 @@
 
 namespace openspace {
 
-bool VersionTopic::isDone() const {
-    return true;
-}
-
 void VersionTopic::handleJson(const nlohmann::json&) {
     nlohmann::json versionJson = {
         {
@@ -68,6 +64,10 @@ void VersionTopic::handleJson(const nlohmann::json&) {
     }
 
     _connection->sendJson(wrappedPayload(versionJson));
+}
+
+bool VersionTopic::isDone() const {
+    return true;
 }
 
 } // namespace openspace

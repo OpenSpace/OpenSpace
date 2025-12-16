@@ -30,12 +30,14 @@
 
 namespace openspace {
 
-namespace properties { class Property; }
-
+namespace properties {
+    class Property;
+    class PropertyOwner;
+} // namespace properties
+class IswaGroup;
 class Renderable;
 class Scene;
 class SceneGraphNode;
-class IswaGroup;
 class ScreenSpaceRenderable;
 
 Scene* sceneGraph();

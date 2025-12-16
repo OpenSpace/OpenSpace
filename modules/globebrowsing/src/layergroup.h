@@ -29,11 +29,13 @@
 
 #include <modules/globebrowsing/src/layergroupid.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <functional>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace::globebrowsing {
 
 class Layer;
-struct TileProvider;
 
 /**
  * Convenience class for dealing with multiple `Layer`s.

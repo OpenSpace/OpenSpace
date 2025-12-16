@@ -27,8 +27,6 @@
 
 #include <modules/imgui/include/guipropertycomponent.h>
 
-#include <string>
-
 namespace openspace::gui {
 
 class GuiGlobeBrowsingComponent : public GuiPropertyComponent {

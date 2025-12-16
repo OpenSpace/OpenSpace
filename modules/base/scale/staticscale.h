@@ -31,8 +31,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class StaticScale : public Scale {
 public:
     explicit StaticScale(const ghoul::Dictionary& dictionary);

@@ -27,14 +27,12 @@
 
 #include <openspace/properties/templateproperty.h>
 
-#include <vector>
-
 namespace openspace::properties {
 
 template <typename T>
 class ListProperty : public TemplateProperty<std::vector<T>> {
 public:
-    ListProperty(Property::PropertyInfo info, std::vector<T> values);
+    explicit ListProperty(Property::PropertyInfo info, std::vector<T> values);
 
     virtual ~ListProperty() override = 0;
 };

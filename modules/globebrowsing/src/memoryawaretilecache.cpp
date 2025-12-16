@@ -25,12 +25,18 @@
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 
 #include <modules/globebrowsing/src/basictypes.h>
-#include <modules/globebrowsing/src/layermanager.h>
+#include <modules/globebrowsing/src/layergroupid.h>
 #include <modules/globebrowsing/src/rawtile.h>
+#include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <algorithm>
+#include <limits>
 #include <numeric>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "MemoryAwareTileCache";

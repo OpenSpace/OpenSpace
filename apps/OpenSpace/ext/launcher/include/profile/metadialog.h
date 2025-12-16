@@ -32,6 +32,7 @@
 
 class QLineEdit;
 class QTextEdit;
+class QWidget;
 
 class MetaDialog final : public QDialog {
 Q_OBJECT
@@ -47,7 +48,6 @@ public:
 
 private:
     void createWidgets();
-
     void save();
 
     std::optional<openspace::Profile::Meta>* _meta = nullptr;

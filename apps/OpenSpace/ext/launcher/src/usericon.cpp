@@ -24,7 +24,10 @@
 
 #include "usericon.h"
 
+#include <QColor>
+#include <QFont>
 #include <QPainter>
+#include <QPixmap>
 
 QIcon userIcon() {
     QPixmap px = QPixmap(40, 50);

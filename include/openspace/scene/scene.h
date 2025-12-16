@@ -28,25 +28,35 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/scene/scenegraphnode.h>
+#include <ghoul/misc/boolean.h>
 #include <ghoul/misc/easing.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/misc/map.h>
+#include <chrono>
+#include <functional>
+#include <memory>
 #include <mutex>
 #include <set>
+#include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
-namespace ghoul {
-
-class Dictionary;
-namespace lua { class LuaState; }
-namespace opengl { class ProgramObject; }
-
-} // namespace ghoul
+namespace ghoul { class Dictionary; }
+namespace ghoul::lua { class LuaState; }
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
+namespace properties { class Property; }
 namespace scripting { struct LuaLibrary; }
+class Camera;
+class Profile;
+struct RenderData;
+struct RendererTasks;
+class SceneInitializer;
+struct UpdateData;
 
 enum class PropertyValueType {
     Boolean = 0,
@@ -55,9 +65,6 @@ enum class PropertyValueType {
     Table,
     Nil
 };
-
-class Profile;
-class SceneInitializer;
 
 // Notifications:
 // SceneGraphFinishedLoading

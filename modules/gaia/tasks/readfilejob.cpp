@@ -24,10 +24,13 @@
 
 #include <modules/gaia/tasks/readfilejob.h>
 
-#include <openspace/util/distanceconversion.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <cmath>
+#include <string_view>
+#include <unordered_map>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "ReadFileJob";

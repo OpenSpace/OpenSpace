@@ -25,11 +25,16 @@
 #ifndef __OPENSPACE_CORE___NAVIGATIONSTATE___H__
 #define __OPENSPACE_CORE___NAVIGATIONSTATE___H__
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/json.h>
+#include <ghoul/glm.h>
 #include <optional>
+#include <string>
 
-namespace openspace { struct CameraPose; }
+namespace ghoul { class Dictionary; }
+namespace openspace {
+    namespace documentation { struct Documentation; }
+    struct CameraPose;
+} // namespace openspace
 
 namespace openspace::interaction {
 

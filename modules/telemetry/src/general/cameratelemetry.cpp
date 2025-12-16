@@ -24,9 +24,13 @@
 
 #include <modules/telemetry/include/general/cameratelemetry.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/util/distanceconversion.h>
+#include <cstdlib>
+#include <limits>
 
 namespace {
     // Indices for data items

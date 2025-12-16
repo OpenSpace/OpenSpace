@@ -28,7 +28,11 @@
 #include <modules/telemetry/include/telemetrybase.h>
 
 #include <modules/telemetry/telemetrymodule.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
+
+namespace ghoul { class Dictionary; }
+namespace osc { struct Blob; }
 
 namespace openspace {
 

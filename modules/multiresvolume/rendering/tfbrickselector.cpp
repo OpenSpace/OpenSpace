@@ -24,12 +24,14 @@
 
 #include <modules/multiresvolume/rendering/tfbrickselector.h>
 
+#include <modules/multiresvolume/rendering/brickcover.h>
 #include <modules/multiresvolume/rendering/errorhistogrammanager.h>
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/histogram.h>
 #include <ghoul/misc/assert.h>
 #include <algorithm>
+#include <cmath>
 
 namespace {
     bool compareSplitPoints(const openspace::BrickSelection& a,

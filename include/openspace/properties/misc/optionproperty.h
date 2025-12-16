@@ -25,9 +25,7 @@
 #ifndef __OPENSPACE_CORE___OPTIONPROPERTY___H__
 #define __OPENSPACE_CORE___OPTIONPROPERTY___H__
 
-#include <openspace/properties/scalar/intproperty.h>
-
-#include <vector>
+#include <openspace/properties/numericalproperty.h>
 
 namespace openspace::properties {
 
@@ -57,7 +55,7 @@ public:
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    OptionProperty(Property::PropertyInfo info);
+    explicit OptionProperty(Property::PropertyInfo info);
 
     /**
      * Returns the name of the class for reflection purposes.

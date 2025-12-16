@@ -31,9 +31,6 @@
 
 namespace openspace {
 
-namespace properties { class Property; }
-namespace documentation { struct Documentation; }
-
 class DashboardItemInputState : public DashboardTextItem {
 public:
     explicit DashboardItemInputState(const ghoul::Dictionary& dictionary);

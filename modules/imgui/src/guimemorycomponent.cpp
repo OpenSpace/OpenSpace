@@ -28,6 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/util/memorymanager.h>
+#include <cstdint>
 
 namespace {
     const ImVec2 Size = ImVec2(350, 500);

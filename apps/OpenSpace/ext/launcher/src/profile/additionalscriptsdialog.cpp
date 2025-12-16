@@ -34,6 +34,7 @@
 #include <QTextEdit>
 #include <ios>
 #include <new>
+#include <numeric>
 #include <sstream>
 #include <string>
 #include <utility>

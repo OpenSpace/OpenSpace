@@ -24,14 +24,17 @@
 
 #include <modules/globebrowsing/src/asynctiledataprovider.h>
 
-#include <modules/globebrowsing/src/memoryawaretilecache.h>
+#include <modules/globebrowsing/src/lruthreadpool.h>
+#include <modules/globebrowsing/src/rawtile.h>
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 #include <modules/globebrowsing/src/tileloadjob.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/engine/globals.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/misc/assert.h>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace openspace::globebrowsing {
 
@@ -40,7 +43,7 @@ namespace {
 } // namespace
 
 AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
-                                    std::unique_ptr<RawTileDataReader> rawTileDataReader)
+                                     std::unique_ptr<RawTileDataReader> rawTileDataReader)
     : _name(std::move(name))
     , _rawTileDataReader(std::move(rawTileDataReader))
     , _concurrentJobManager(LRUThreadPool<TileIndex::TileHashKey>(1, 10))

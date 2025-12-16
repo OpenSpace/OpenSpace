@@ -30,6 +30,17 @@
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scripting/lualibrary.h>
+#include <chrono>
+#include <filesystem>
+#include <functional>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+namespace openspace::properties { class Property; }
 
 namespace openspace::interaction {
 

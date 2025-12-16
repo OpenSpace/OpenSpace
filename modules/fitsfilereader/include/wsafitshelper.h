@@ -25,15 +25,12 @@
 #ifndef __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__
 #define __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__
 
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/texture.h>
+#include <filesystem>
+#include <memory>
+#include <utility>
 #include <valarray>
 
-namespace CCfits {
-    class FITS;
-    class PHDU;
-    class ExtHDU;
-} // namespace CCfits
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 

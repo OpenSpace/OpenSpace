@@ -33,6 +33,11 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <fstream>
+#include <iterator>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <variant>
 
 namespace {
     constexpr int CameraTypeNode = 0;
