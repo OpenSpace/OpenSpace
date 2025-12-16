@@ -36,7 +36,7 @@
 #include <vector>
 
 namespace geos::geom { class Geometry; }
-namespace ghoul::opengl { class ghoul::opengl::ProgramObject; }
+namespace ghoul::opengl { class ProgramObject; }
 namespace openspace {
     namespace documentation { struct Documentation; }
     struct Geodetic2;
