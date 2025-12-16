@@ -26,9 +26,9 @@
 #define __OPENSPACE_CORE___THREAD_POOL___H__
 
 #include <condition_variable>
+#include <deque>
 #include <functional>
 #include <mutex>
-#include <queue>
 #include <thread>
 #include <vector>
 

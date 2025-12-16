@@ -24,7 +24,6 @@
 
 #include "sgctedit/monitorbox.h"
 
-#include <ghoul/misc/assert.h>
 #include "windowcolors.h"
 #include <QPainter>
 

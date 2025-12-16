@@ -24,9 +24,9 @@
 
 #include <openspace/util/dynamicfilesequencedownloader.h>
 
-#include <openspace/util/httprequest.h>
 #include <openspace/json.h>
-#include <openspace/util/timemanager.h>
+#include <openspace/util/httprequest.h>
+#include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/stringhelper.h>
 #include <unordered_set>

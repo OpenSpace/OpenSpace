@@ -26,7 +26,6 @@
 
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/ghoul_lua.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "Coordinateconversion";

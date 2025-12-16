@@ -29,7 +29,7 @@
 
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/easing.h>
-#include <ghoul/misc/memorypool.h>
+#include <ghoul/misc/map.h>
 #include <mutex>
 #include <set>
 #include <unordered_map>
@@ -116,7 +116,7 @@ public:
      * Return the scenegraph node with the specified name or `nullptr` if that name does
      * not exist.
      */
-    SceneGraphNode* sceneGraphNode(const std::string& name) const;
+    SceneGraphNode* sceneGraphNode(std::string_view name) const;
 
     /**
      * Add a node and all its children to the scene.
@@ -137,11 +137,6 @@ public:
      * Return a vector of all scene graph nodes in the scene.
      */
     const std::vector<SceneGraphNode*>& allSceneGraphNodes() const;
-
-    /**
-     * Returns a map from identifier to scene graph node.
-     */
-    const std::unordered_map<std::string, SceneGraphNode*>& nodesByIdentifier() const;
 
     /**
      * Load a scene graph node from a dictionary and return it.
@@ -269,7 +264,6 @@ private:
      */
     void propertyPushProfileValueToLua(ghoul::lua::LuaState& L, const std::string& value);
 
-
     /**
      * Update dependencies.
      */
@@ -279,7 +273,11 @@ private:
     std::unique_ptr<Camera> _camera;
     std::vector<SceneGraphNode*> _topologicallySortedNodes;
     std::vector<SceneGraphNode*> _circularNodes;
-    std::unordered_map<std::string, SceneGraphNode*> _nodesByIdentifier;
+    std::unordered_map<
+        std::string, SceneGraphNode*,
+        transparent_string_hash,
+        std::equal_to<>
+    > _nodesByIdentifier;
     bool _dirtyNodeRegistry = false;
     SceneGraphNode _rootNode;
     std::unique_ptr<SceneInitializer> _initializer;

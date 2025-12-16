@@ -27,7 +27,6 @@
 
 #include <glm/vec2.hpp>
 
-#include <cstdint>
 #include <deque>
 
 namespace openspace {

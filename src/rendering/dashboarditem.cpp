@@ -24,9 +24,7 @@
 
 #include <openspace/rendering/dashboarditem.h>
 
-#include <openspace/engine/globals.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/templatefactory.h>
 #include <optional>

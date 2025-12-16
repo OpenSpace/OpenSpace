@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SCREENSPACEFRAMEBUFFER___H__
-#define __OPENSPACE_CORE___SCREENSPACEFRAMEBUFFER___H__
+#ifndef __OPENSPACE_CORE___SCREENSPACERENDERABLEFRAMEBUFFER___H__
+#define __OPENSPACE_CORE___SCREENSPACERENDERABLEFRAMEBUFFER___H__
 
 #include <openspace/rendering/screenspacerenderable.h>
 
@@ -78,4 +78,4 @@ private:
 
 } //namespace openspace
 
-#endif // __OPENSPACE_CORE___SCREENSPACEFRAMEBUFFER___H__
+#endif // __OPENSPACE_CORE___SCREENSPACERENDERABLEFRAMEBUFFER___H__

@@ -25,11 +25,6 @@
 #include <openspace/scripting/systemcapabilitiesbinding.h>
 
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
-#include <cctype>
 
 #include "systemcapabilitiesbinding_lua.inl"
 

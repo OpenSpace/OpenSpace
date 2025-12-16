@@ -29,9 +29,7 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
 
 namespace {
     struct [[codegen::Dictionary(Translation)]] Parameters {

@@ -37,7 +37,7 @@ namespace CCfits {
 
 namespace openspace {
 
-template<typename T>
+template <typename T>
 struct ImageData {
     std::valarray<T> contents;
     int width;
@@ -67,7 +67,7 @@ void readFitsHeader(const std::filesystem::path& path);
  */
 int nLayers(const std::filesystem::path& path);
 
-template<typename T, typename U>
+template <typename T, typename U>
 std::shared_ptr<ImageData<T>> readImageInternal(U& image);
 
 } // namespace openspace

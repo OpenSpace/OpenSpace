@@ -27,7 +27,6 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/util/memorymanager.h>
-#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>

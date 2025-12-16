@@ -43,7 +43,7 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    // A RenderablePlaneImageOnline creates a textured 3D plane, where the texture image
+    // A `RenderablePlaneImageOnline` creates a textured 3D plane, where the texture image
     // is loaded from the internet though a web URL.
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]

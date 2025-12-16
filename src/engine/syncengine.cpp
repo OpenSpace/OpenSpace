@@ -24,7 +24,7 @@
 
 #include <openspace/engine/syncengine.h>
 
-#include <openspace/util/syncdata.h>
+#include <openspace/util/syncable.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>

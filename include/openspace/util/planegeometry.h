@@ -42,10 +42,10 @@ public:
     void render() const;
 
     void updateSize(const glm::vec2& size);
-    void updateSize(const float size);
+    void updateSize(float size);
 
 private:
-    void updateGeometry();
+    void updateGeometry() const;
 
     GLuint _vaoId = 0;
     GLuint _vBufferId = 0;

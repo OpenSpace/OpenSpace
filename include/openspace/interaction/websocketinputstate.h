@@ -27,9 +27,7 @@
 
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringconversion.h>
 #include <array>
-#include <memory>
 #include <unordered_map>
 #include <string>
 

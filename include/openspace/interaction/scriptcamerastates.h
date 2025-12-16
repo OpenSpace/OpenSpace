@@ -27,6 +27,8 @@
 
 #include <openspace/interaction/camerainteractionstates.h>
 
+#include <ghoul/glm.h>
+
 namespace openspace::interaction {
 
 class ScriptCameraStates : public CameraInteractionStates {

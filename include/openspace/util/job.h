@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_CORE___JOB___H__
 #define __OPENSPACE_CORE___JOB___H__
 
-#include <memory>
-
 namespace openspace {
 
 /**

@@ -26,7 +26,6 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/pathnavigator.h>

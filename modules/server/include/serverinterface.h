@@ -31,8 +31,7 @@
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-
-namespace ghoul::io { class SocketServer; }
+#include <ghoul/io/socket/socketserver.h>
 
 namespace openspace {
 

@@ -36,9 +36,9 @@
 
 namespace openspace::globebrowsing {
 
-template<typename KeyType> class LRUThreadPool;
+template <typename KeyType> class LRUThreadPool;
 
-template<typename KeyType>
+template <typename KeyType>
 class LRUThreadPoolWorker {
 public:
     explicit LRUThreadPoolWorker(LRUThreadPool<KeyType>& pool);
@@ -58,7 +58,7 @@ private:
  * same key will simply be bumped and prioritised before other enqueued tasks. The given
  * task will be ignored.
  */
-template<typename KeyType>
+template <typename KeyType>
 class LRUThreadPool {
 public:
     LRUThreadPool(size_t numThreads, size_t queueSize);

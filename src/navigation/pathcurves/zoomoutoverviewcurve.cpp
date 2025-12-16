@@ -24,10 +24,7 @@
 
 #include <openspace/navigation/pathcurves/zoomoutoverviewcurve.h>
 
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/waypoint.h>
-#include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/projection.hpp>

@@ -24,7 +24,6 @@
 
 #include <openspace/rendering/helper.h>
 
-#include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/scene/lightsource.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -37,7 +36,7 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <string>
+#include <string_view>
 #include <vector>
 
 namespace {

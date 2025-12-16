@@ -27,7 +27,6 @@
 
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/scalar/boolproperty.h>

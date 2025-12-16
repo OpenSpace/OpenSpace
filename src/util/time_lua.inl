@@ -22,9 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/util/timeconstants.h>
-#include <openspace/util/timeconversion.h>
-#include <ghoul/lua/lua_helper.h>
 
 namespace {
 

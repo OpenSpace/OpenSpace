@@ -39,7 +39,6 @@
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
 #include <filesystem>
 #include <fstream>
 
@@ -939,7 +938,8 @@ void LuaConsole::registerKeyHandlers() {
                 return;
             }
 
-            // If the next character after _inputPosition is a JumpCharacter, delete just that
+            // If the next character after _inputPosition is a JumpCharacter, delete just
+            // that
             if (JumpCharacters.find(command[_inputPosition]) != std::string::npos) {
                 command.erase(_inputPosition, 1);
                 return;
@@ -1129,20 +1129,10 @@ bool LuaConsole::gatherPathSuggestions(size_t contextStart) {
             ghoul::filesystem::Sorted::Yes
         );
 
-    auto containsNonAscii = [](const std::filesystem::path& p) {
-        const std::u8string s = p.generic_u8string();
-        for (auto it = s.rbegin(); it != s.rend(); it++) {
-            if (static_cast<unsigned char>(*it) > 0x7F) {
-                return true;
-            }
-        }
-        return false;
-    };
-
     std::vector<std::string> entries;
     for (const std::filesystem::path& entry : suggestions) {
         // Filter paths that contain non-ASCII characters
-        if (containsNonAscii(entry)) {
+        if (ghoul::containsNonAscii(entry)) {
             continue;
         }
 

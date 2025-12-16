@@ -1470,7 +1470,10 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
             if (_ringsComponent->textureTransparency()) {
                 ringTextureTransparencyUnit.activate();
                 _ringsComponent->textureTransparency()->bind();
-                program.setUniform("ringTextureTransparency", ringTextureTransparencyUnit);
+                program.setUniform(
+                    "ringTextureTransparency",
+                    ringTextureTransparencyUnit
+                );
             }
 
             program.setUniform("textureOffset", _ringsComponent->textureOffset());
@@ -1588,7 +1591,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     if (_eclipseShadowsEnabled && !_ellipsoid.shadowConfigurationArray().empty()) {
         calculateEclipseShadows(program, data, ShadowCompType::LOCAL_SHADOW);
     }
-    
+
     // Shadow Mapping
     if (_shadowMappingProperties.shadowMapping) {
         // Bind ring textures for direct projection when rings component is available
@@ -1605,7 +1608,10 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             if (_ringsComponent->textureTransparency()) {
                 ringTextureTransparencyUnit.activate();
                 _ringsComponent->textureTransparency()->bind();
-                program.setUniform("ringTextureTransparency", ringTextureTransparencyUnit);
+                program.setUniform(
+                    "ringTextureTransparency",
+                    ringTextureTransparencyUnit
+                );
             }
 
             program.setUniform("textureOffset", _ringsComponent->textureOffset());
@@ -1788,9 +1794,11 @@ void RenderableGlobe::recompileShaders() {
         std::to_string(_shadowMappingProperties.shadowMapping && _shadowComponent)
     );
     pairs.emplace_back(
-        "useRingShadows", 
-        std::to_string(_shadowMappingProperties.shadowMapping && _ringsComponent && 
-                       _ringsComponent->isEnabled())
+        "useRingShadows",
+        std::to_string(
+            _shadowMappingProperties.shadowMapping && _ringsComponent &&
+            _ringsComponent->isEnabled()
+        )
     );
     pairs.emplace_back("showChunkEdges", std::to_string(_debugProperties.showChunkEdges));
     pairs.emplace_back("showHeightResolution", "0");

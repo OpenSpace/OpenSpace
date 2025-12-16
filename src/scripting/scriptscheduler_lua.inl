@@ -26,7 +26,9 @@
 
 namespace {
 
-// Load timed scripts from a Lua script file that returns a list of scheduled scripts.
+/**
+ * Load timed scripts from a Lua script file that returns a list of scheduled scripts.
+ */
 [[codegen::luawrap]] void loadFile(std::string fileName) {
     using namespace openspace;
 
@@ -80,12 +82,16 @@ namespace {
     global::scriptScheduler->loadScripts(scripts);
 }
 
-// Clears all scheduled scripts.
+/**
+ * Clears all scheduled scripts.
+ */
 [[codegen::luawrap]] void clear(std::optional<int> group) {
     openspace::global::scriptScheduler->clearSchedule(group);
 }
 
-// Returns the list of all scheduled scripts
+/**
+ * Returns the list of all scheduled scripts.
+ */
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> scheduledScripts() {
     using namespace openspace;
 

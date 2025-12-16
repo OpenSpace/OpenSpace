@@ -24,11 +24,8 @@
 
 #include <openspace/properties/list/stringlistproperty.h>
 
-#include <openspace/json.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/stringhelper.h>
 
 namespace openspace::properties {
 

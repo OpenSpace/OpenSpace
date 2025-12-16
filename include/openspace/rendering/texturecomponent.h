@@ -29,7 +29,7 @@
 #include <filesystem>
 
 namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {class Texture; }
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 

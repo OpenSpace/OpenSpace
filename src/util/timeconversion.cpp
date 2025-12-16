@@ -24,10 +24,6 @@
 
 #include <openspace/util/timeconversion.h>
 
-#include <ghoul/glm.h>
-
-#include <cstring>
-
 namespace {
     std::pair<double, openspace::TimeUnit> extractUnit(double seconds) {
         using namespace openspace;

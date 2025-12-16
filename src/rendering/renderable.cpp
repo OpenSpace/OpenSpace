@@ -37,7 +37,6 @@
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
 #include <optional>
 
 namespace {

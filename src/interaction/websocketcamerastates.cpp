@@ -24,12 +24,8 @@
 
 #include <openspace/interaction/websocketcamerastates.h>
 
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/scripting/scriptengine.h>
-#include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringconversion.h>
-#include <utility>
 #include <cmath>
+#include <utility>
 
 namespace openspace::interaction {
 

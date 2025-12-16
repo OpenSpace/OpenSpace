@@ -26,11 +26,7 @@
 
 #include <openspace/events/eventengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/scripting/scriptengine.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
-#include <filesystem>
 
 #include "missionmanager_lua.inl"
 

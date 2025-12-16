@@ -25,7 +25,6 @@
 #include <openspace/rendering/dashboardtextitem.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>

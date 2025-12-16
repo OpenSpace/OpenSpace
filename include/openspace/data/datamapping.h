@@ -29,8 +29,8 @@
 #include <string>
 #include <vector>
 
-namespace openspace::documentation { struct Documentation; }
 namespace ghoul { class Dictionary; }
+namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::dataloader {
 
@@ -62,8 +62,8 @@ struct DataMapping {
 };
 
 /**
- * Generate a string based on the data mapping, that can be used to uniquely
- * identify the dataset.
+ * Generate a string based on the data mapping, that can be used to uniquely identify the
+ * dataset.
  */
 std::string generateHashString(const DataMapping& dm);
 

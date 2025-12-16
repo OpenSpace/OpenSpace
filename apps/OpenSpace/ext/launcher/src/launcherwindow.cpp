@@ -31,17 +31,14 @@
 #include "splitcombobox.h"
 #include <openspace/openspace.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <sgct/config.h>
 #include <QFile>
 #include <QKeyEvent>
-#include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QStandardItemModel>
 #include <filesystem>
-#include <fstream>
 #include <iostream>
 
 using namespace openspace;
@@ -148,9 +145,18 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
 
     {
         QFile file(":/qss/launcher.qss");
-        file.open(QFile::ReadOnly);
-        const QString styleSheet = QLatin1String(file.readAll());
-        setStyleSheet(styleSheet);
+        const bool success = file.open(QFile::ReadOnly);
+        if (!success) {
+            QMessageBox::critical(
+                this,
+                "Missing QSS",
+                "Could not find launcher.qss"
+            );
+        }
+        else {
+            const QString styleSheet = QLatin1String(file.readAll());
+            setStyleSheet(styleSheet);
+        }
     }
 
     QWidget* centralWidget = new QWidget;

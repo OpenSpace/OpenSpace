@@ -32,7 +32,7 @@ namespace openspace {
 
 class Sphere {
 public:
-    Sphere(float radius, int segments = 8);
+    explicit Sphere(float radius, int segments = 8);
     Sphere(glm::vec3 radius, int segments);
     Sphere(const Sphere& cpy);
     ~Sphere();

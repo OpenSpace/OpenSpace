@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___PROFILE___H__
 #define __OPENSPACE_CORE___PROFILE___H__
 
-#include <openspace/engine/globals.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/util/keys.h>
 #include <ghoul/glm.h>

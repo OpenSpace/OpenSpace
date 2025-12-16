@@ -27,10 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/rendering/renderengine.h>
 #include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/textureunit.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {

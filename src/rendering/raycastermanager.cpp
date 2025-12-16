@@ -26,7 +26,6 @@
 
 #include <openspace/rendering/raycasterlistener.h>
 #include <algorithm>
-#include <string>
 
 namespace openspace {
 

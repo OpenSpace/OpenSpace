@@ -23,6 +23,10 @@
  ****************************************************************************************/
 
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/stringhelper.h>
+#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <cctype>
 
 namespace {
 

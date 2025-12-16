@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <ghoul/lua/lua_helper.h>
-
 #include <openspace/util/geodetic.h>
 
 namespace {
@@ -535,8 +534,8 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  *
  * \param horizontal The value to add in the x-direction (a positive value rotates to the
  *                   left and a negative value to the right)
- * \param vertical The value to add in the y-direction (a positive value rotates the camera
- *                 upwards and a negative value downwards)
+ * \param vertical The value to add in the y-direction (a positive value rotates the
+ *                 camera upwards and a negative value downwards)
  */
 [[codegen::luawrap]] void addLocalRotation(double horizontal, double vertical) {
     using namespace openspace;

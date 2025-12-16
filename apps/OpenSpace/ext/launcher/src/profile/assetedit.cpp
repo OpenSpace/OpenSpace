@@ -26,17 +26,10 @@
 
 #include "profile/horizonsdialog.h"
 #include "profile/line.h"
-#include <openspace/scene/asset.h>
-#include <QComboBox>
 #include <QDialogButtonBox>
-#include <QFileDialog>
 #include <QLabel>
-#include <QLineEdit>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <QWidget>
-#include <filesystem>
-#include <string>
 
 AssetEdit::AssetEdit(QWidget* parent)
     : QDialog(parent)

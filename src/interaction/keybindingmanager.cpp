@@ -27,11 +27,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/glm.h>
-#include <sstream>
 
 #include "keybindingmanager_lua.inl"
 

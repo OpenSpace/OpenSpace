@@ -26,11 +26,9 @@
 
 #include "profile/line.h"
 #include <QDialogButtonBox>
-#include <QEvent>
 #include <QKeyEvent>
 #include <QLabel>
 #include <QListWidget>
-#include <QLineEdit>
 #include <QMessageBox>
 #include <QPushButton>
 #include <QVBoxLayout>

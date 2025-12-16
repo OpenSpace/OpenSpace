@@ -104,7 +104,7 @@ local EquatorialSphere = {
     Opacity = 1.0,
     Color = { 0.3, 0.3, 0.15 },
     LineWidth = 2.0,
-    LatSegments = 36,
+    LatSegments = 19,
     LongSegments = 24,
   },
   Tag = { "du_grid" },
@@ -164,7 +164,9 @@ local EclipticSphere = {
     Enabled = false,
     Opacity = 1.0,
     Color = { 0.3, 0.15, 0.15 },
-    LineWidth = 2.0
+    LineWidth = 2.0,
+    LatSegments = 19,
+    LongSegments = 36
   },
   Tag = { "du_grid" },
   GUI = {

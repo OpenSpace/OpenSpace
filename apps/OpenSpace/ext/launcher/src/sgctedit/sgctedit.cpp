@@ -26,13 +26,10 @@
 
 #include <sgctedit/displaywindowunion.h>
 #include <sgctedit/monitorbox.h>
-#include <sgctedit/windowcontrol.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <QApplication>
 #include <QCheckBox>
-#include <QColor>
-#include <QComboBox>
 #include <QFileDialog>
 #include <QLabel>
 #include <QMessageBox>

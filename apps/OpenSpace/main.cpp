@@ -79,9 +79,11 @@
 #include <float.h>
 #endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
 
+#ifdef OPENSPACE_HAS_LAUNCHER
 #include <launcherwindow.h>
 #include <QApplication>
 #include <QMessageBox>
+#endif // OPENSPACE_HAS_LAUNCHER
 
 #ifdef WIN32
 extern "C" {
@@ -1183,7 +1185,7 @@ int main(int argc, char* argv[]) {
     // we need to explicitly tell the operating system where to find the PDB files. We
     // place them right next to the .exe file and this seems to be the only reliable way
     // to do it.
-    // Using SymInitialize and SymSetSearchPath from dbghelp.h didn't work 
+    // Using SymInitialize and SymSetSearchPath from dbghelp.h didn't work
     // https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/symbol-path
 
     std::string exeFolder = std::filesystem::path(argv[0]).parent_path().string();
@@ -1450,6 +1452,7 @@ int main(int argc, char* argv[]) {
 #endif // __APPLE__
 
     if (!global::configuration->bypassLauncher) {
+#ifdef OPENSPACE_HAS_LAUNCHER
 #ifndef __APPLE__
         int qac = 0;
         QApplication app(qac, nullptr);
@@ -1542,6 +1545,9 @@ int main(int argc, char* argv[]) {
             }
             global::configuration->windowConfiguration = config;
         }
+#else // ^^^^ OPENSPACE_HAS_LAUNCHER // !OPENSPACE_HAS_LAUNCHER
+        glfwInit();
+#endif // OPENSPACE_HAS_LAUNCHER
     }
     else {
         glfwInit();

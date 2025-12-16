@@ -25,7 +25,6 @@
 #include <openspace/util/keys.h>
 
 #include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>

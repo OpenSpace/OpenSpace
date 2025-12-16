@@ -31,8 +31,7 @@ namespace openspace {
 
 namespace {
 template <typename T>
-std::optional<T> get_to(nlohmann::json& obj, const std::string& key)
-{
+std::optional<T> get_to(nlohmann::json& obj, const std::string& key) {
     auto it = obj.find(key);
     if (it != obj.end()) {
         return it->get<T>();
@@ -44,7 +43,7 @@ std::optional<T> get_to(nlohmann::json& obj, const std::string& key)
 } // namespace
 
 namespace version1 {
-    Settings parseSettings(nlohmann::json json) {
+    static Settings parseSettings(nlohmann::json json) {
         ghoul_assert(json.at("version").get<int>() == 1, "Wrong value");
 
         Settings settings;

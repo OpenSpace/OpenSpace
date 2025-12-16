@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___SYNCBUFFER___H__
 
 #include <ghoul/glm.h>
-#include <memory>
 #include <string>
 #include <vector>
 

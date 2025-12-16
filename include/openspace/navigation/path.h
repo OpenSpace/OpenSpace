@@ -32,9 +32,7 @@
 #include <optional>
 #include <vector>
 
-namespace openspace {
-    struct CameraPose;
-} // namespace openspace
+namespace openspace { struct CameraPose; }
 
 namespace openspace::interaction {
 

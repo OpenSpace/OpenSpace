@@ -39,11 +39,10 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
-#include <memory>
 #include <optional>
 #include <vector>
 
- //#define Debugging_Core_SceneGraphNode_Indices
+// #define Debugging_Core_SceneGraphNode_Indices
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl { class ProgramObject; }

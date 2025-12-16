@@ -74,14 +74,14 @@ glm::dvec3 geoPositionFromCamera();
 /**
  * Returns the camera view direction relative to the current anchor node as geodetic
  * coordinates. The returned value contains the latitude and longitude in degrees in the
- * x, and y-coordinate respectively. 
+ * x, and y-coordinate respectively.
  */
 glm::dvec3 geoViewFromCamera();
 
 /**
  * Return the coordinates where the sun is at its zenith at the current anchor at the
  * current time. The returned value contains the latitude and longitude in degrees.
- */ 
+ */
 glm::dvec2 subSolarCoordinates();
 
 /**

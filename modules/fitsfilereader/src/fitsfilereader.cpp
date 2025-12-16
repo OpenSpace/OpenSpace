@@ -138,7 +138,7 @@ std::shared_ptr<T> FitsFileReader::readHeaderValue(const std::string key) {
     return nullptr;
 }
 
-template<typename T>
+template <typename T>
 std::shared_ptr<TableData<T>> FitsFileReader::readTable(const std::filesystem::path& path,
                                               const std::vector<std::string>& columnNames,
                                                                              int startRow,
@@ -657,7 +657,7 @@ std::vector<float> FitsFileReader::readSpeckFile(const std::filesystem::path& fi
 
 // This is pretty annoying, the read method is not derived from the HDU class
 // in CCfits - need to explicitly cast to the sub classes to access read
-template<typename T>
+template <typename T>
 std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(ExtHDU& image) {
    try {
         std::valarray<T> contents;
@@ -675,7 +675,7 @@ std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(ExtHDU& image) {
     return nullptr;
 }
 
-template<typename T>
+template <typename T>
 std::shared_ptr<ImageData<T>> FitsFileReader::readImageInternal(PHDU& image) {
     try {
         std::valarray<T> contents;

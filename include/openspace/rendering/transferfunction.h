@@ -29,7 +29,6 @@
 #include <filesystem>
 #include <functional>
 #include <memory>
-#include <string>
 
 namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl { class Texture; }
@@ -57,7 +56,6 @@ public:
 
 private:
     void setTextureFromImage();
-    void uploadTexture();
 
     std::filesystem::path _filepath;
     std::unique_ptr<ghoul::filesystem::File> _file;

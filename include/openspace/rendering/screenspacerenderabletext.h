@@ -31,12 +31,17 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/font/fontrenderer.h>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl {
+namespace ghoul {
+
+class Dictionary;
+
+namespace fontrendering { class Font; }
+namespace opengl {
     class FramebufferObject;
     class Texture;
-} // namespace ghoul::opengl
-namespace ghoul::fontrendering { class Font; }
+} // namespace opengl
+
+} // namespace ghoul
 
 namespace openspace {
 
