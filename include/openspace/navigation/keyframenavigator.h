@@ -38,12 +38,6 @@ namespace openspace {
 
 namespace openspace::interaction {
 
-enum class KeyframeTimeRef {
-    Relative_applicationStart,
-    Relative_recordedStart,
-    Absolute_simTimeJ2000
-};
-
 class KeyframeNavigator {
 public:
     BooleanType(Inclusive);
@@ -79,11 +73,10 @@ public:
     void clearKeyframes();
     size_t nKeyframes() const;
     double currentTime() const;
-    void setTimeReferenceMode(KeyframeTimeRef refType, double referenceTimestamp);
+    void setReferenceTime(double referenceTimestamp);
 
 private:
     Timeline<CameraPose> _cameraPoseTimeline;
-    KeyframeTimeRef _timeframeMode = KeyframeTimeRef::Relative_applicationStart;
     double _referenceTimestamp = 0.0;
 };
 

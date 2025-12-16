@@ -446,8 +446,7 @@ void SessionRecordingHandler::setupPlayback(double startTime) {
     _playback.saveScreenshots.currentRecordedTime = std::chrono::steady_clock::now();
     _playback.saveScreenshots.currentApplicationTime =
         global::windowDelegate->applicationTime();
-    global::navigationHandler->keyframeNavigator().setTimeReferenceMode(
-        KeyframeTimeRef::Relative_recordedStart, startTime);
+    global::navigationHandler->keyframeNavigator().setReferenceTime(startTime);
 
 
     auto firstCamera = _timeline.entries.begin();
