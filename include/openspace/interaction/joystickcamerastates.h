@@ -116,8 +116,10 @@ public:
         int button) const;
 
 private:
-    struct JoystickCameraState {
-        std::string joystickName;
+    // There is one of these structs for each connected joystick, describing the orbital
+    // input mapping for that given joystick
+    struct Joystick {
+        std::string name;
 
         // We use a vector for the axes and a map for the buttons since the axis are going
         // to be accessed much more often and thus have to be more efficient
@@ -144,16 +146,28 @@ private:
         std::multimap<int, ButtonInformation> buttonMapping;
     };
 
-    std::vector<JoystickCameraState> _joystickCameraStates;
+    // There may be multiple joysticks connected, each with their own state and mapping
+    std::vector<Joystick> _joysticks;
 
-    // Find the item in _joystickCameraStates that corresponds to the given joystickName
-    // return a pointer to the item, if not found then return nullptr
-    JoystickCameraState* joystickCameraState(const std::string& joystickName);
-    const JoystickCameraState* joystickCameraState(const std::string& joystickName) const;
+    /**
+     * Get the mapped information for a given joystick.
+     *
+     * \param joystickName The name of the joystick to get the mapping for
+     * \return The joystick mapping information, or nullptr if no mapping exists
+     */
+    Joystick* joystickMapping(const std::string& joystickName);
+    const Joystick* joystickMapping(const std::string& joystickName) const;
 
-    // Ues getJoystickCameraState(name) to find the joystickCameraState that
-    // corresponds to the given joystickName. If not found then add a new item if possible
-    JoystickCameraState* findOrAddJoystickCameraState(const std::string& joystickName);
+    /**
+     * Find the mapped information for a joystick if it exists. Otherwise, add a new
+     * joystick with the provided name, if possible (i.e. if there is not already the
+     * maximum number of joysticks connected).
+     *
+     * \param joystickName The name of the joystick to find or add
+     * \return The joystick mapping information for either the found or added joystick,
+     *         or nullptr if the joystick could not be added
+     */
+    Joystick* findOrAddJoystickMapping(const std::string& joystickName);
 };
 
 } // namespace openspace::interaction
