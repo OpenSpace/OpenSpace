@@ -44,7 +44,6 @@
 namespace openspace {
 
 class Camera;
-class SceneGraphNode;
 
 // Class used for keeping track of the recent average frame time
 class FrameTimeAverage {
@@ -63,8 +62,6 @@ private:
 
 class TouchInteraction : public properties::PropertyOwner {
 public:
-    TouchInteraction();
-
     enum class InteractionType {
         ROTATION = 0,
         PINCH,
@@ -80,6 +77,8 @@ public:
         double roll = 0.0;
         glm::dvec2 pan = glm::dvec2(0.0);
     };
+
+    TouchInteraction();
 
     /**
      * Main function call:

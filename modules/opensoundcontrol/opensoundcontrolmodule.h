@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_OPENSOUNDCONTROL___OPENSOUNDCONTROLMODULE___H__
 #define __OPENSPACE_MODULE_OPENSOUNDCONTROL___OPENSOUNDCONTROLMODULE___H__
 
-#include "openspace/util/openspacemodule.h"
+#include <openspace/util/openspacemodule.h>
 
 namespace openspace {
 

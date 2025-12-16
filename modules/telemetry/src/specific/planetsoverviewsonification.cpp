@@ -27,6 +27,7 @@
 #include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/memorymanager.h>
+#include <osc/OscTypes.h>
 #include <cstdint>
 
 namespace {

@@ -52,7 +52,6 @@
 
 namespace openspace::globebrowsing {
 
-class GPULayerGroup;
 class Layer;
 
 struct BoundingHeights {
@@ -61,9 +60,6 @@ struct BoundingHeights {
     bool available;
     bool tileOK;
 };
-
-namespace chunklevelevaluator { class Evaluator; }
-namespace culling { class ChunkCuller; }
 
 struct Chunk {
     enum class Status : uint8_t {

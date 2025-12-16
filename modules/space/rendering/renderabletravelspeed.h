@@ -56,6 +56,7 @@ private:
     void calculateDirectionVector();
     void updateVertexData();
     void reinitiateTravel();
+
     UniformCache(lineColor, opacity) _uniformCache;
 
     properties::StringProperty _targetName;

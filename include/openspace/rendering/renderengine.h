@@ -43,23 +43,21 @@
 #include <vector>
 
 namespace ghoul {
-namespace fontrendering { class Font; }
-namespace opengl {
-    class ProgramObject;
-    class OpenGLStateCache;
-} // namespace opengl
-
-class Dictionary;
-class SharedMemory;
+    namespace fontrendering { class Font; }
+    namespace opengl {
+        class ProgramObject;
+        class OpenGLStateCache;
+    } // namespace opengl
+    class Dictionary;
+    class SharedMemory;
 } // ghoul
 
 namespace openspace {
 
 namespace scripting { struct LuaLibrary; }
-
 class Camera;
-class RaycasterManager;
 class DeferredcasterManager;
+class RaycasterManager;
 class Scene;
 class SceneManager;
 class ScreenLog;

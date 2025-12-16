@@ -47,9 +47,6 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    /**
-     * Creates a sphere geometry.
-     */
     bool createGeometry() override;
     bool destroyGeometry() override;
     void renderGeometry() const override;

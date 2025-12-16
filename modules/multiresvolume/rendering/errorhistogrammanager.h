@@ -48,17 +48,6 @@ public:
     bool saveToFile(const std::filesystem::path& filename);
 
 private:
-    TSP* _tsp;
-    std::ifstream* _file;
-
-    std::vector<Histogram> _histograms;
-    unsigned int _numInnerNodes;
-    float _minBin;
-    float _maxBin;
-    int _numBins;
-
-    std::map<unsigned int, std::vector<float>> _voxelCache;
-
     bool buildFromLeaf(unsigned int bstOffset, unsigned int octreeOffset);
     std::vector<float> readValues(unsigned int brickIndex) const;
 
@@ -72,6 +61,17 @@ private:
 
     float interpolate(const glm::vec3& samplePoint,
         const std::vector<float>& voxels) const;
+
+    TSP* _tsp;
+    std::ifstream* _file;
+
+    std::vector<Histogram> _histograms;
+    unsigned int _numInnerNodes;
+    float _minBin;
+    float _maxBin;
+    int _numBins;
+
+    std::map<unsigned int, std::vector<float>> _voxelCache;
 };
 
 } // namespace openspace

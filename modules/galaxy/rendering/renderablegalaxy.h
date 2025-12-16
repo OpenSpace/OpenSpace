@@ -39,7 +39,6 @@
 namespace openspace {
 
 namespace volume { template <typename T> class RawVolume; }
-
 class GalaxyRaycaster;
 
 class RenderableGalaxy : public Renderable {

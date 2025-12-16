@@ -35,15 +35,12 @@
 #include <gdal.h>
 #include <array>
 #include <mutex>
-#include <string>
 #include <optional>
+#include <string>
 
 class GDALDataset;
-class GDALRasterBand;
 
 namespace openspace::globebrowsing {
-
-class GeodeticPatch;
 
 class RawTileDataReader {
 public:

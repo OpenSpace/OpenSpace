@@ -24,6 +24,7 @@
 
 #include <modules/globebrowsing/src/layerrendersettings.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
 #include <cmath>
 #include <cstdlib>
 

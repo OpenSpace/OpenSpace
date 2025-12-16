@@ -46,10 +46,9 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
 struct RenderData;
 struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 class RingsComponent : public properties::PropertyOwner, public Fadeable {
 public:

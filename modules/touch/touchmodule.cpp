@@ -26,6 +26,7 @@
 
 #include <modules/touch/include/tuioear.h>
 #include <modules/touch/include/win32_touch.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/openspaceengine.h>

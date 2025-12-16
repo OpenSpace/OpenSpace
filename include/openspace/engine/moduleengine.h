@@ -38,10 +38,9 @@ namespace ghoul::systemcapabilities { struct Version; }
 
 namespace openspace {
 
-class OpenSpaceModule;
-
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
+class OpenSpaceModule;
 
 /**
  * The ModuleEngine is the central repository for registering and accessing

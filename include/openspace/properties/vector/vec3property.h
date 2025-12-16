@@ -28,12 +28,13 @@
 #include <openspace/properties/numericalproperty.h>
 
 #include <ghoul/glm.h>
+#include <limits>
 
 namespace openspace::properties {
 
 class Vec3Property : public NumericalProperty<glm::vec3> {
 public:
-    Vec3Property(Property::PropertyInfo info, glm::vec3 value = glm::vec3(0.f),
+    explicit Vec3Property(Property::PropertyInfo info, glm::vec3 value = glm::vec3(0.f),
         glm::vec3 minValue = glm::vec3(std::numeric_limits<float>::lowest()),
         glm::vec3 maxValue = glm::vec3(std::numeric_limits<float>::max()),
         glm::vec3 stepValue = glm::vec3(0.01f));

@@ -33,11 +33,9 @@
 #include <memory>
 #include <string>
 
-struct CPLXMLNode;
-
 namespace ghoul { class Dictionary; }
-
 namespace openspace { struct Documentation; }
+struct CPLXMLNode;
 
 namespace openspace::globebrowsing {
 
@@ -117,14 +115,11 @@ struct TileProvider : public properties::PropertyOwner {
      */
     virtual float noDataValueAsFloat() = 0;
 
-
     virtual ChunkTile chunkTile(TileIndex tileIndex, int parents = 0,
         int maxParents = 1337);
     ChunkTilePile chunkTilePile(TileIndex tileIndex, int pileSize);
 
-
     std::string name;
-
     uint16_t uniqueIdentifier = 0;
     bool isInitialized = false;
 

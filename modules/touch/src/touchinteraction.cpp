@@ -323,7 +323,10 @@ TouchInteraction::TouchInteraction()
     // projDiffLength/diffLength.
     , _enableDirectManipulation(EnableDirectManipulationInfo, true)
     , _directTouchDistanceThreshold(DirectManipulationThresholdInfo, 5.f, 0.f, 10.f)
-    , _pinchInputs({ TouchInput(0, 0, 0.f, 0.f, 0.0), TouchInput(0, 0, 0.f, 0.f, 0.0) })
+    , _pinchInputs({
+        TouchInputHolder(TouchInput(0, 0, 0.f, 0.f, 0.0)),
+        TouchInputHolder(TouchInput(0, 0, 0.f, 0.f, 0.0))
+    })
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 12.0, 2.75, glm::dvec2(0.08, 0.045) }
 {

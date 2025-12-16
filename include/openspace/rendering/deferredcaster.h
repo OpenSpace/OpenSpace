@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___DEFERREDCASTER___H
 
 #include <filesystem>
-#include <string>
 
 namespace ghoul::opengl {
     class Texture;
@@ -35,8 +34,8 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-struct RenderData;
 struct DeferredcastData;
+struct RenderData;
 struct UpdateData;
 
 class Deferredcaster {

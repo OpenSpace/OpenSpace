@@ -42,8 +42,6 @@
 
 namespace openspace {
 
-namespace planetgeometry { class PlanetGeometry; }
-
 class RenderablePlanetProjection : public Renderable {
 public:
     explicit RenderablePlanetProjection(const ghoul::Dictionary& dict);

@@ -27,8 +27,6 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
-#include <vector>
-
 namespace openspace::globebrowsing {
 
 class TileProviderByLevel : public TileProvider {

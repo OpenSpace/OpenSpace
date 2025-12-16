@@ -41,13 +41,19 @@
 #include <memory>
 #include <optional>
 
-namespace openspace { class LightSource; }
-namespace openspace { struct RenderData; }
-namespace openspace::documentation { struct Documentation; }
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class ProgramObject; }
-namespace geos::geom { class Geometry; }
-namespace geos::io { class GeoJSONFeature; }
+namespace geos {
+    namespace geom { class Geometry; }
+    namespace io { class GeoJSONFeature; }
+} // namespace geos
+namespace ghoul {
+    namespace opengl { class ProgramObject; }
+    class Dictionary;
+} // namespace ghoul
+namespace openspace {
+    namespace documentation { struct Documentation; }
+    class LightSource;
+    struct RenderData;
+} // namespace openspace
 
 namespace openspace::globebrowsing {
 

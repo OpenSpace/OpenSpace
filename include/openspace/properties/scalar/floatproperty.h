@@ -27,6 +27,8 @@
 
 #include <openspace/properties/numericalproperty.h>
 
+#include <limits>
+
 namespace openspace::properties {
 
 /**
@@ -35,7 +37,7 @@ namespace openspace::properties {
  */
 class FloatProperty : public NumericalProperty<float> {
 public:
-    FloatProperty(Property::PropertyInfo info, float value = 0.f,
+    explicit FloatProperty(Property::PropertyInfo info, float value = 0.f,
         float minValue = std::numeric_limits<float>::lowest(),
         float maxValue = std::numeric_limits<float>::max(), float stepValue = 0.01f);
 

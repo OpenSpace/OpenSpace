@@ -54,7 +54,7 @@ void DownloadEventTopic::handleJson(const nlohmann::json& json) {
             // Limit how often we send data to frontend to reduce traffic
             if (event.type == DownloadEventEngine::DownloadEvent::Type::Progress) {
                 const auto now = std::chrono::steady_clock::now();
-                auto& last = _lastCallBack[event.id];
+                auto& last = _lastCallback[event.id];
 
                 if (now - last >= CallbackUpdateInterval) {
                     last = now;

@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___IMAGE___H__
 
 #include <openspace/util/timerange.h>
-
 #include <filesystem>
 #include <string>
 #include <vector>

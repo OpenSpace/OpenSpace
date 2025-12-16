@@ -42,9 +42,9 @@ namespace ghoul { class Dictionary; }
 namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
-struct RenderData;
 
 namespace documentation { struct Documentation; }
+struct RenderData;
 
 class LabelsComponent : public properties::PropertyOwner, public Fadeable {
 public:

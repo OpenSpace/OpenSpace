@@ -45,7 +45,7 @@ struct LuaLibrary {
      * the function.
      */
     struct Function {
-        using lua_CFunction =int(*)(lua_State* L);
+        using lua_CFunction = int(*)(lua_State* L);
 
         /// The name of the function
         std::string name;

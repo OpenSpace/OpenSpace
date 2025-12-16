@@ -36,8 +36,8 @@
 namespace openspace {
 
 class AtlasManager;
-class TSP;
 class TransferFunction;
+class TSP;
 
 class MultiresVolumeRaycaster : public VolumeRaycaster {
 public:
@@ -65,7 +65,6 @@ public:
     std::filesystem::path helperPath() const override;
 
     void setModelTransform(glm::mat4 transform);
-    //void setTime(double time);
     void setStepSizeCoefficient(float coefficient);
 
 private:
@@ -82,8 +81,7 @@ private:
     std::unique_ptr<
         ghoul::opengl::BufferBinding<ghoul::opengl::bufferbinding::Buffer::ShaderStorage>
     > _atlasMapBinding;
-
-}; // MultiresVolumeRaycaster
+};
 
 } // namespace openspace
 

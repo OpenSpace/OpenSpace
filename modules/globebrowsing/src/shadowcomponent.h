@@ -35,16 +35,17 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <array>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul {
+    namespace filesystem { class File; }
+    namespace opengl { class ProgramObject; }
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
 struct RenderData;
 struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 class ShadowComponent : public properties::PropertyOwner {
 public:

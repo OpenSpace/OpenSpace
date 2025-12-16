@@ -29,10 +29,11 @@
 #include <string>
 #include <vector>
 
+namespace ghoul {
+    namespace opengl { class Texture; }
+    class Dictionary;
+} // namespace ghoul
 struct lua_State;
-
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class Texture; }
 
 namespace openspace::volume {
 

@@ -36,12 +36,11 @@
 
 namespace openspace {
 
-class SceneGraphNode;
-
 namespace globebrowsing {
     class RenderableGlobe;
     namespace cache { class MemoryAwareTileCache; }
 } // namespace globebrowsing
+class SceneGraphNode;
 
 class GlobeBrowsingModule : public OpenSpaceModule {
 public:

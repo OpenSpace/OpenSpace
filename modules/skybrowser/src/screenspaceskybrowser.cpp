@@ -464,7 +464,7 @@ void ScreenSpaceSkyBrowser::update() {
     }
     // After the texture has been updated, wait a little bit before updating the border
     // radius so the browser has time to update its size
-    if (_radiusIsDirty && _isInitialized && _borderRadiusTimer > RadiusTimeOut) {
+    if (_radiusIsDirty && _isInitialized && _borderRadiusTimer > RadiusTimeout) {
         _wwtCommunicator.setBorderRadius(_borderRadius);
         _radiusIsDirty = false;
         _borderRadiusTimer = -1;

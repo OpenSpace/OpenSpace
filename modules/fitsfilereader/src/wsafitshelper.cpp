@@ -24,6 +24,7 @@
 
 #include <modules/fitsfilereader/include/wsafitshelper.h>
 
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>

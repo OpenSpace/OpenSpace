@@ -36,12 +36,9 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <memory>
 
-namespace ghoul::filesystem { class File; }
 namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
-
-struct LinePoint;
 
 class RenderableLabel : public Renderable {
 public:

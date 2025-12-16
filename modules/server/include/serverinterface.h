@@ -35,6 +35,8 @@
 #include <ghoul/io/socket/socketserver.h>
 #include <memory>
 
+namespace ghoul { class Dictionary; }
+
 namespace openspace {
 
 class ServerInterface : public properties::PropertyOwner {

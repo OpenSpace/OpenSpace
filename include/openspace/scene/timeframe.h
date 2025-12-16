@@ -34,9 +34,8 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-class Time;
-
 namespace documentation { struct Documentation; }
+class Time;
 
 class TimeFrame : public properties::PropertyOwner {
 public:

@@ -25,6 +25,7 @@
 #include <openspace/navigation/path.h>
 
 #include <openspace/camera/camerapose.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>

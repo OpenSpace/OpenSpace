@@ -45,7 +45,6 @@
 //#pragma clang diagnostic pop
 #endif // _MSC_VER
 
-
 namespace openspace {
 
 class WebRenderHandler : public CefRenderHandler {

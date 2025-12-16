@@ -40,7 +40,6 @@ namespace openspace {
 namespace scripting { struct LuaLibrary; }
 
 class IswaBaseGroup;
-class IswaCygnet;
 
 struct CdfInfo {
     std::string name;

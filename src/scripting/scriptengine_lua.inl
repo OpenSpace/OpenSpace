@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
+#include <ghoul/misc/stringhelper.h>
 #include <vector>
 
 namespace openspace::luascriptfunctions {

@@ -41,7 +41,6 @@
 #include <memory>
 
 namespace ghoul { class Dictionary; }
-
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::globebrowsing {

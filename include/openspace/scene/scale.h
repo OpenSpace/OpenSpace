@@ -36,9 +36,8 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-struct UpdateData;
-
 namespace documentation { struct Documentation; }
+struct UpdateData;
 
 class Scale : public properties::PropertyOwner {
 public:

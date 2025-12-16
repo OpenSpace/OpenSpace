@@ -26,12 +26,13 @@
 #define __OPENSPACE_CORE___SESSIONRECORDING___H__
 
 #include <openspace/navigation/keyframenavigator.h>
-#include <ghoul/misc/dictionary.h>
 #include <filesystem>
 #include <functional>
 #include <string>
 #include <variant>
 #include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace::interaction {
 

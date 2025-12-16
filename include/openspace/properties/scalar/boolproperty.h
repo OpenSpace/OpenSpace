@@ -35,7 +35,7 @@ namespace openspace::properties {
  */
 class BoolProperty : public TemplateProperty<bool> {
 public:
-    BoolProperty(Property::PropertyInfo info, bool value = false);
+    explicit BoolProperty(Property::PropertyInfo info, bool value = false);
 
     std::string_view className() const override final;
     ghoul::lua::LuaTypes typeLua() const override final;

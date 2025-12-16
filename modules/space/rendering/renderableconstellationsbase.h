@@ -27,9 +27,9 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/rendering/labelscomponent.h>
 #include <memory>
 

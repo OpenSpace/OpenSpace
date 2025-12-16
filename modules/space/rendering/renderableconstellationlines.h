@@ -34,9 +34,6 @@
 #include <ghoul/opengl/uniformcache.h>
 #include <unordered_map>
 
-namespace ghoul::filesystem { class File; }
-namespace ghoul::fontrendering { class Font; }
-
 namespace openspace {
 
 class RenderableConstellationLines : public RenderableConstellationsBase {

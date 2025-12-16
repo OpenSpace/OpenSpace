@@ -38,8 +38,6 @@ namespace ghoul::filesystem { class File; }
 
 namespace openspace {
 
-struct LinePoint;
-
 class RenderablePlane : public Renderable {
 public:
     explicit RenderablePlane(const ghoul::Dictionary& dictionary);

@@ -35,17 +35,10 @@
 #include <ghoul/glm.h>
 #include <filesystem>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
-struct ImageData;
 class SceneGraphNode;
-class ScreenSpaceImageLocal;
 class TargetBrowserPair;
-
-namespace documentation { struct Documentation; }
-namespace scripting { struct LuaLibrary; }
 
 class SkyBrowserModule : public OpenSpaceModule {
 public:

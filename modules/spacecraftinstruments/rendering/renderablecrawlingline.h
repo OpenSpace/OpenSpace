@@ -33,8 +33,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class RenderableCrawlingLine : public Renderable {
 public:
     explicit RenderableCrawlingLine(const ghoul::Dictionary& dictionary);

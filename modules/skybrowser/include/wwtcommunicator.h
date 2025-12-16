@@ -37,8 +37,6 @@ namespace openspace {
 
 class BrowserInstance;
 
-using SelectedImageDeque = std::deque<std::pair<std::string, double>>;
-
 class WwtCommunicator {
 public:
     explicit WwtCommunicator(BrowserInstance* browserInstance);
@@ -64,14 +62,15 @@ public:
     void setBorderRadius(double radius);
 
     void setIdInBrowser(const std::string& id) const;
-    SelectedImageDeque::iterator findSelectedImage(const std::string& imageUrl);
+    std::deque<std::pair<std::string, double>>::iterator findSelectedImage(
+        const std::string& imageUrl);
 
 private:
     void executeJavascript(const std::string& script) const;
     void sendMessageToWwt(const ghoul::Dictionary& msg) const;
 
     bool _isImageCollectionLoaded = false;
-    SelectedImageDeque _selectedImages;
+    std::deque<std::pair<std::string, double>> _selectedImages;
 
     BrowserInstance* _browserInstance = nullptr;
 };

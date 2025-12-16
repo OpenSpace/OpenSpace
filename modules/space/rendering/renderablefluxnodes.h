@@ -37,9 +37,9 @@
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <cstdint>
 #include <filesystem>
 #include <memory>
-#include <cstdint>
 
 namespace openspace {
 
@@ -78,10 +78,12 @@ private:
         ByFluxValue = 0,
         Uniform
     };
+
     enum class GoesEnergyBins {
         Emin01 = 0,
         Emin03
     };
+
     enum class ScalingMethod {
         Flux = 0,
         RFlux,
@@ -89,12 +91,14 @@ private:
         Log10RFlux,
         LnRFlux
     };
+
     enum class NodeSkipMethod {
         Uniform = 0,
         Flux,
         Radius,
         Streamnumber
     };
+
     enum class EnhanceMethod {
         SizeScaling = 0,
         ColorTables,

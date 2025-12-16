@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___PROFILE___H__
 #define __OPENSPACE_CORE___PROFILE___H__
 
-#include <openspace/properties/propertyowner.h>
 #include <openspace/util/keys.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
@@ -35,11 +34,12 @@
 #include <string_view>
 #include <variant>
 #include <vector>
+#include <filesystem>
 
 namespace openspace {
 
 namespace interaction { struct NavigationState; }
-
+namespace properties { class PropertyOwner; }
 namespace scripting { struct LuaLibrary; }
 
 class Profile {

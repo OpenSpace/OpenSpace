@@ -215,28 +215,48 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     , _alwaysDrawFov(AlwaysDrawFovInfo, false)
     , _colors({
         properties::PropertyOwner({"Colors", "Colors"}),
-        { DefaultStartColorInfo, glm::vec3(0.4f), glm::vec3(0.f), glm::vec3(1.f) },
-        { ColorDefaultEndInfo, glm::vec3(0.85f), glm::vec3(0.f), glm::vec3(1.f) },
-        { ColorActiveInfo, glm::vec3(0.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f) },
-        {
+        properties::Vec3Property(
+            DefaultStartColorInfo,
+            glm::vec3(0.4f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        ),
+        properties::Vec3Property(
+            ColorDefaultEndInfo,
+            glm::vec3(0.85f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        ),
+        properties::Vec3Property(
+            ColorActiveInfo,
+            glm::vec3(0.f, 1.f, 0.f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        ),
+        properties::Vec3Property(
             ColorTargetInFovInfo,
             glm::vec3(0.f, 0.5f, 0.7f),
             glm::vec3(0.f),
             glm::vec3(1.f)
-        },
-        {
+        ),
+        properties::Vec3Property(
             ColorIntersectionStartInfo,
             glm::vec3(1.f, 0.89f, 0.f),
             glm::vec3(0.f),
             glm::vec3(1.f)
-        },
-        {
+        ),
+        properties::Vec3Property(
             ColorIntersectionEndInfo,
             glm::vec3(1.f, 0.29f, 0.f),
             glm::vec3(0.f),
             glm::vec3(1.f)
-        },
-        { SquareColorInfo, glm::vec3(0.85f), glm::vec3(0.f), glm::vec3(1.f) }
+        ),
+        properties::Vec3Property(
+            SquareColorInfo,
+            glm::vec3(0.85f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        )
     })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

@@ -32,8 +32,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class ReadFitsTask : public Task {
 public:
     explicit ReadFitsTask(const ghoul::Dictionary& dictionary);

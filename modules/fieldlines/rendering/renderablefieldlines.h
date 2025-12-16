@@ -53,7 +53,7 @@ public:
     void update(const UpdateData& data) override;
 
 private:
-    typedef std::vector<LinePoint> Line;
+    using Line = std::vector<LinePoint>;
 
     void initializeDefaultPropertyValues();
     void loadSeedPoints();

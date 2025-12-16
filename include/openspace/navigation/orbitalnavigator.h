@@ -43,14 +43,13 @@
 #include <utility>
 
 namespace openspace {
+    namespace scripting { struct LuaLibrary; }
     class Camera;
     struct CameraPose;
     class SceneGraphNode;
     struct SurfacePositionHandle;
     class Syncable;
 } // namespace
-
-namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 

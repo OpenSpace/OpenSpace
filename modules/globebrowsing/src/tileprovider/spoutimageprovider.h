@@ -31,7 +31,9 @@
 #include <ghoul/opengl/texture.h>
 #include <array>
 
+#ifdef OPENSPACE_HAS_SPOUT
 namespace openspace::spout { class SpoutReceiverPropertyProxy; }
+#endif // OPENSPACE_HAS_SPOUT
 
 namespace openspace::globebrowsing {
 

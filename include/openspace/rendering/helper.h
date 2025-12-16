@@ -43,13 +43,7 @@ namespace openspace {
 
 namespace openspace::rendering::helper {
 
-enum class Anchor {
-    Center,
-    NW,
-    NE,
-    SW,
-    SE
-};
+enum class Anchor { Center, NW, NE, SW, SE };
 
 void initialize();
 void deinitialize();

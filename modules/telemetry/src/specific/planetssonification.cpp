@@ -26,6 +26,7 @@
 
 #include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <modules/telemetry/include/util.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -37,6 +38,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
+#include <osc/OscTypes.h>
 #include <cstdint>
 #include <cstdlib>
 #include <format>

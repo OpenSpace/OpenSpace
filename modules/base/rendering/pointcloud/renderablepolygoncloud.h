@@ -31,7 +31,7 @@ namespace openspace {
 
 /**
  * A billboarded point cloud, but with dynamically created uniform polygon shapes instead
- * of a custom texture. Overwrites the sprite set in parent class, RenderablePointCloud
+ * of a custom texture. Overwrites the sprite set in parent class, RenderablePointCloud.
  */
 class RenderablePolygonCloud : public RenderablePointCloud {
 public:

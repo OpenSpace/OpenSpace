@@ -26,17 +26,14 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBEGEOMETRYHELPER___H__
 
 #include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <vector>
 
 namespace openspace {
-    struct Geodetic2;
-    struct Geodetic3;
-
     namespace globebrowsing { class RenderableGlobe; }
     namespace rendering::helper { struct VertexXYZNormal; }
+    struct Geodetic2;
+    struct Geodetic3;
 } // namespace openspace
-
 namespace geos::geom {
     class Coordinate;
     class Geometry;

@@ -29,8 +29,6 @@
 
 #include <modules/video/include/videoplayer.h>
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
 
 class ScreenSpaceVideo : public ScreenSpaceRenderable {

@@ -36,7 +36,6 @@
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::filesystem { class File; }
-
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;

@@ -27,6 +27,8 @@
 
 #include <openspace/properties/numericalproperty.h>
 
+#include <limits>
+
 namespace openspace::properties {
 
 /**
@@ -35,7 +37,7 @@ namespace openspace::properties {
  */
 class UShortProperty : public NumericalProperty<unsigned short> {
 public:
-    UShortProperty(Property::PropertyInfo info, unsigned short value = 0,
+    explicit UShortProperty(Property::PropertyInfo info, unsigned short value = 0,
         unsigned short minValue = std::numeric_limits<unsigned short>::lowest(),
         unsigned short maxValue = std::numeric_limits<unsigned short>::max(),
         unsigned short stepValue = 1);

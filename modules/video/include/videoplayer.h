@@ -36,6 +36,7 @@
 #include <ghoul/opengl/texture.h>
 #include <client.h>
 #include <render.h>
+#include <cstdint>
 #include <filesystem>
 #include <memory>
 

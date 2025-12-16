@@ -38,7 +38,6 @@ namespace ghoul::lua { class LuaState; }
 namespace openspace {
 
 namespace scripting { struct LuaLibrary; }
-
 class Asset;
 class ResourceSynchronization;
 

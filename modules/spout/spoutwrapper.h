@@ -38,8 +38,10 @@
 struct SPOUTLIBRARY;
 typedef SPOUTLIBRARY* SPOUTHANDLE;
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class Texture; }
+namespace ghoul {
+    namespace opengl { class Texture; }
+    class Dictionary;
+} // namespace ghoul
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::spout {

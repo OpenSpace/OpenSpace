@@ -27,6 +27,8 @@
 
 #include <openspace/properties/templateproperty.h>
 
+#include <ghoul/misc/easing.h>
+
 namespace openspace::properties {
 
 template <typename T>

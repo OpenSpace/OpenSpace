@@ -32,25 +32,6 @@ namespace ghoul::fontrendering { class FontManager; }
 
 namespace openspace {
 
-struct Configuration;
-class Dashboard;
-class DeferredcasterManager;
-class DownloadEventEngine;
-class DownloadManager;
-class EventEngine;
-class LuaConsole;
-class MemoryManager;
-class MissionManager;
-class ModuleEngine;
-class OpenSpaceEngine;
-class ParallelPeer;
-class RaycasterManager;
-class RenderEngine;
-class ScreenSpaceRenderable;
-class SyncEngine;
-class TimeManager;
-class VersionChecker;
-struct WindowDelegate;
 namespace interaction {
     struct JoystickInputStates;
     struct WebsocketInputStates;
@@ -66,7 +47,26 @@ namespace scripting {
     class ScriptEngine;
     class ScriptScheduler;
 } // namespace scripting
+struct Configuration;
+class Dashboard;
+class DeferredcasterManager;
+class DownloadEventEngine;
+class DownloadManager;
+class EventEngine;
+class LuaConsole;
+class MemoryManager;
+class MissionManager;
+class ModuleEngine;
+class OpenSpaceEngine;
+class ParallelPeer;
 class Profile;
+class RaycasterManager;
+class RenderEngine;
+class ScreenSpaceRenderable;
+class SyncEngine;
+class TimeManager;
+class VersionChecker;
+struct WindowDelegate;
 
 namespace global {
 

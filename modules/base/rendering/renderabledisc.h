@@ -34,8 +34,6 @@
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
-namespace ghoul::filesystem { class File; }
-
 namespace openspace {
 
 class RenderableDisc : public Renderable {

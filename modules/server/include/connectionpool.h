@@ -51,10 +51,10 @@ public:
 
 private:
     void disconnectAllConnections();
-    std::mutex _connectionMutex;
     void removeDisconnectedSockets();
     void acceptNewSockets();
 
+    std::mutex _connectionMutex;
     SocketHandleFunc _handleSocket;
     std::vector<std::shared_ptr<ghoul::io::SocketServer>> _socketServers;
     std::vector<std::unique_ptr<ghoul::io::Socket>> _sockets;

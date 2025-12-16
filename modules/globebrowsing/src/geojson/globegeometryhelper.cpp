@@ -29,6 +29,7 @@
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <geos/geom/Coordinate.h>
 #include <geos/geom/Geometry.h>
 #include <geos/geom/GeometryCollection.h>

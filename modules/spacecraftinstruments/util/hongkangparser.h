@@ -29,7 +29,7 @@
 
 #include <filesystem>
 
-namespace ghoul { class Dictioary; }
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 

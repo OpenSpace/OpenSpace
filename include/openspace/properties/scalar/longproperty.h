@@ -27,6 +27,8 @@
 
 #include <openspace/properties/numericalproperty.h>
 
+#include <limits>
+
 namespace openspace::properties {
 
 /**
@@ -35,7 +37,7 @@ namespace openspace::properties {
  */
 class LongProperty : public NumericalProperty<long> {
 public:
-    LongProperty(Property::PropertyInfo info, long value = long(0),
+    explicit LongProperty(Property::PropertyInfo info, long value = long(0),
         long minValue = std::numeric_limits<long>::lowest(),
         long maxValue = std::numeric_limits<long>::max(),
         long stepValue = long(1));

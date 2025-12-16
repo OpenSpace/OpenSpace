@@ -36,8 +36,7 @@ namespace ccmc {
     class Attribute;
     class Interpolator;
     class Kameleon;
-} // namespce ccmc
-
+} // namespace ccmc
 namespace ghoul { class Dictionary; }
 namespace openspace::volume { template <typename T> class RawVolume; }
 

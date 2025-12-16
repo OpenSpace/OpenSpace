@@ -37,9 +37,7 @@
 #include <filesystem>
 #include <memory>
 
-namespace openspace {
-    class Histogram;
-} // namespace openspace
+namespace openspace { class Histogram; }
 
 namespace openspace::volume {
 

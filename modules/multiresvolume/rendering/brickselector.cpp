@@ -22,60 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___LOCALERRORHISTOGRAMMANAGER___H__
-#define __OPENSPACE_MODULE_MULTIRESVOLUME___LOCALERRORHISTOGRAMMANAGER___H__
-
-#include <openspace/util/histogram.h>
-#include <ghoul/glm.h>
-#include <filesystem>
-#include <fstream>
-#include <map>
-#include <vector>
+#include <modules/multiresvolume/rendering/brickselector.h>
 
 namespace openspace {
 
-class TSP;
+BrickSelector::~BrickSelector() {}
 
-class LocalErrorHistogramManager {
-public:
-    explicit LocalErrorHistogramManager(TSP* tsp);
-
-    bool buildHistograms(int numBins);
-    const Histogram* spatialHistogram(unsigned int brickIndex) const;
-    const Histogram* temporalHistogram(unsigned int brickIndex) const;
-
-    bool loadFromFile(const std::filesystem::path& filename);
-    bool saveToFile(const std::filesystem::path& filename);
-
-private:
-    std::map<unsigned int, std::vector<float>> _voxelCache;
-
-    bool buildFromOctreeChild(unsigned int bstOffset, unsigned int octreeOffset);
-    bool buildFromBstChild(unsigned int bstOffset, unsigned int octreeOffset);
-
-    std::vector<float> readValues(unsigned int brickIndex) const;
-
-    int parentOffset(int offset, int base) const;
-
-    unsigned int brickToInnerNodeIndex(unsigned int brickIndex) const;
-    unsigned int innerNodeToBrickIndex(unsigned int innerNodeIndex) const;
-    unsigned int linearCoords(glm::vec3 coords) const;
-    unsigned int linearCoords(int x, int y, int z) const;
-    unsigned int linearCoords(glm::ivec3 coords) const;
-
-    float interpolate(glm::vec3 samplePoint, const std::vector<float>& voxels) const;
-
-    TSP* _tsp = nullptr;
-    std::ifstream* _file;
-
-    std::vector<Histogram> _spatialHistograms;
-    std::vector<Histogram> _temporalHistograms;
-    unsigned int _numInnerNodes = 0;
-    float _minBin = 0.f;
-    float _maxBin = 0.f;
-    int _numBins = 0;
-};
+bool BrickSelector::initialize() { return true; }
 
 } // namespace openspace
-
-#endif // __OPENSPACE_MODULE_MULTIRESVOLUME___LOCALERRORHISTOGRAMMANAGER___H__

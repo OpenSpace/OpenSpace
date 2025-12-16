@@ -53,9 +53,6 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    /**
-     * Creates a plane geometry.
-     */
     bool createGeometry() override;
     bool destroyGeometry() override;
     bool updateTextureResource() override;

@@ -109,8 +109,8 @@ double calculateAngleTo(const Camera* camera, glm::dvec3 nodePosition,
  * \return The angle in radians from the first node (A) with the given identifier to the
  *         second node (B) with the given identifier
  */
-double calculateAngleFromAToB(const Camera* camera,
-    const std::string& nodeIdentifierA, const std::string& nodeIdentifierB,
+double calculateAngleFromAToB(const Camera* camera, const std::string& nodeIdentifierA,
+    const std::string& nodeIdentifierB,
     TelemetryModule::AngleCalculationMode angleCalculationMode);
 
 /**
@@ -129,8 +129,7 @@ double calculateAngleFromAToB(const Camera* camera,
  *         second node (B) with the given position
  */
 double calculateAngleFromAToB(const Camera* camera, glm::dvec3 nodePositionA,
-    glm::dvec3 nodePositionB,
-    TelemetryModule::AngleCalculationMode angleCalculationMode);
+    glm::dvec3 nodePositionB, TelemetryModule::AngleCalculationMode angleCalculationMode);
 
 /**
  * Calculate the elevation angle in radians from the camera to the node with the given
@@ -201,9 +200,8 @@ double calculateElevationAngleFromAToB(const Camera* camera,
  * \return The elevation angle in radians from the first node (A) with the given position
  *         to the second node (B) with the given position
  */
-double calculateElevationAngleFromAToB(const Camera* camera,
-    glm::dvec3 nodePositionA, glm::dvec3 nodePositionB,
-    TelemetryModule::AngleCalculationMode angleCalculationMode);
+double calculateElevationAngleFromAToB(const Camera* camera, glm::dvec3 nodePositionA,
+    glm::dvec3 nodePositionB, TelemetryModule::AngleCalculationMode angleCalculationMode);
 
 } // namespace openspace
 

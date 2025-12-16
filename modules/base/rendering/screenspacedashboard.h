@@ -30,11 +30,6 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/rendering/dashboard.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-} // namespace ghoul::fontrendering
-
 namespace openspace {
 
 namespace scripting { struct LuaLibrary; }

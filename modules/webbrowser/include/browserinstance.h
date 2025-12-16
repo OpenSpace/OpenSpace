@@ -51,8 +51,8 @@
 namespace openspace {
 
 class BrowserClient;
-class WebRenderHandler;
 class WebKeyboardHandler;
+class WebRenderHandler;
 
 class BrowserInstance {
 public:

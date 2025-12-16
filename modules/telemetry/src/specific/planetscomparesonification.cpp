@@ -30,6 +30,7 @@
 #include <openspace/util/memorymanager.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <osc/OscTypes.h>
 #include <array>
 #include <cstdint>
 #include <utility>

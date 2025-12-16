@@ -32,6 +32,8 @@
 
 namespace openspace {
 
+class SceneGraphNode;
+
 class SceneGraphLightSource : public LightSource {
 public:
     explicit SceneGraphLightSource(const ghoul::Dictionary& dictionary);

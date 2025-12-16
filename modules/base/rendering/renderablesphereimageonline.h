@@ -34,7 +34,7 @@
 namespace openspace {
 
 /**
- * This class describes a sphere renderable that displays an image from an online source
+ * This class describes a sphere renderable that displays an image from an online source.
  */
 class RenderableSphereImageOnline : public RenderableSphere {
 public:

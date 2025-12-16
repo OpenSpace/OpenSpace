@@ -27,15 +27,11 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <openspace/documentation/documentation.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <filesystem>
-#include <map>
 #include <memory>
 #include <optional>
-
-namespace ghoul { class Dictionary; }
 
 namespace SoLoud {
     class Soloud;

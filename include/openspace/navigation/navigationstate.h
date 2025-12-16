@@ -31,8 +31,10 @@
 #include <string>
 
 namespace ghoul { class Dictionary; }
-namespace openspace { struct CameraPose; }
-namespace openspace::documentation { struct Documentation; }
+namespace openspace {
+    namespace documentation { struct Documentation; }
+    struct CameraPose;
+} // namespace openspace
 
 namespace openspace::interaction {
 

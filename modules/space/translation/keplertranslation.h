@@ -55,10 +55,10 @@ public:
     ~KeplerTranslation() override = default;
 
     /**
-    * Method returning the translation vector at a given time.
-    *
-    * \param data Provides information from the engine about, for example, the time
-    */
+     * Method returning the translation vector at a given time.
+     *
+     * \param data Provides information from the engine about, for example, the time
+     */
     glm::dvec3 position(const UpdateData& data) const override;
 
     /**
@@ -161,9 +161,9 @@ private:
 
 class KeplerCalculator {
 public:
-    KeplerCalculator(double eccentricity, double semiMajorAxis,
-        double inclination, double ascendingNode, double argumentOfPeriapsis,
-        double meanAnomalyAtEpoch, double orbitalPeriod, double epoch);
+    KeplerCalculator(double eccentricity, double semiMajorAxis, double inclination,
+        double ascendingNode, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
+        double orbitalPeriod, double epoch);
 
     glm::dvec3 position(double time) const;
 

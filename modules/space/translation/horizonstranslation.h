@@ -30,8 +30,8 @@
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/util/timeline.h>
 #include <ghoul/lua/luastate.h>
-#include <filesystem>
 #include <array>
+#include <filesystem>
 
 namespace openspace {
 
@@ -39,8 +39,8 @@ class HorizonsFile;
 
 /**
  * The HorizonsTranslation is based on text files generated from NASA JPL HORIZONS Website
- * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation supports both Vector
- * and Observer as Horizons data table.
+ * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation supports both Vector and
+ * Observer as Horizons data table.
  *
  * In case of Vector table data the implementation expects a file with format:
  * TIME(JulianDayNumber = A.D. YYYY-MM-DD HH:MM:SS TDB)

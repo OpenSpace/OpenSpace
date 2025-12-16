@@ -40,7 +40,6 @@
 #include <memory>
 #include <unordered_map>
 
-namespace ghoul::filesystem { class File; }
 namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {

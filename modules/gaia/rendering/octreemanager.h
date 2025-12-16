@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GAIA___OCTREEMANAGER___H__
 
 #include <modules/gaia/rendering/gaiaoptions.h>
+#include <modules/gaia/rendering/octreeculler.h>
 #include <ghoul/glm.h>
 #include <array>
 #include <filesystem>

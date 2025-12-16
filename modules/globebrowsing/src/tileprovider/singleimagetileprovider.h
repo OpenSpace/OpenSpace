@@ -28,6 +28,7 @@
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
 #include <openspace/properties/misc/stringproperty.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace::globebrowsing {
 

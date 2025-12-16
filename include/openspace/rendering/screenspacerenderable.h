@@ -42,9 +42,8 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
-struct RenderData;
-
 namespace documentation { struct Documentation; }
+struct RenderData;
 
 /**
  * The base class for screen space images and screen space framebuffers. This base class

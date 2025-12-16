@@ -27,6 +27,8 @@
 
 #include <openspace/properties/numericalproperty.h>
 
+#include <limits>
+
 namespace openspace::properties {
 
 /**

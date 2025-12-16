@@ -71,7 +71,6 @@ private:
     glm::dvec3 orthogonalProjection(const glm::dvec3& vecFov, double time,
         const std::string& target) const;
 
-    // properties
     properties::FloatProperty _lineWidth;
     properties::DoubleProperty _standOffDistance;
     properties::BoolProperty _alwaysDrawFov;

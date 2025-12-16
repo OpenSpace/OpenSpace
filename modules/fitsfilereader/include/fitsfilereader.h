@@ -39,8 +39,6 @@ namespace CCfits {
     class ExtHDU;
 } // namespace CCfits
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
 
 template <typename T>

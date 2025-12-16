@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_MODULE_OPENSOUNDCONTROL___OPENSOUNDCONTROLCONNECTION___H__
 #define __OPENSPACE_MODULE_OPENSOUNDCONTROL___OPENSOUNDCONTROLCONNECTION___H__
 
-#include <modules/opensoundcontrol/ext/oscpack/ip/UdpSocket.h>
-#include <modules/opensoundcontrol/ext/oscpack/osc/OscOutboundPacketStream.h>
-#include <modules/opensoundcontrol/ext/oscpack/osc/OscTypes.h>
+#include <ip/UdpSocket.h>
+#include <osc/OscOutboundPacketStream.h>
+#include <osc/OscTypes.h>
 #include <string>
 #include <variant>
 #include <vector>
@@ -43,6 +43,7 @@ public:
 
     void send(const std::string& label,
         const std::vector<OpenSoundControlDataType>& data);
+
 private:
     UdpTransmitSocket _socket;
     char* _buffer = nullptr;

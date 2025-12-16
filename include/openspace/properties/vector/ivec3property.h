@@ -28,12 +28,13 @@
 #include <openspace/properties/numericalproperty.h>
 
 #include <ghoul/glm.h>
+#include <limits>
 
 namespace openspace::properties {
 
 class IVec3Property : public NumericalProperty<glm::ivec3> {
 public:
-    IVec3Property(Property::PropertyInfo info, glm::ivec3 value = glm::ivec3(0),
+    explicit IVec3Property(Property::PropertyInfo info, glm::ivec3 value = glm::ivec3(0),
         glm::ivec3 minValue = glm::ivec3(std::numeric_limits<int>::lowest()),
         glm::ivec3 maxValue = glm::ivec3(std::numeric_limits<int>::max()),
         glm::ivec3 stepValue = glm::ivec3(1));

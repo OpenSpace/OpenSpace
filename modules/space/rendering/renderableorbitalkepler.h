@@ -55,6 +55,7 @@ public:
 private:
     struct Appearance : properties::PropertyOwner {
         Appearance();
+
         /// Specifies the base color of the line/point
         properties::Vec3Property color;
         /// Line width for the line rendering part

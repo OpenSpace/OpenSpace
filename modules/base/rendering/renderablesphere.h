@@ -39,8 +39,6 @@
 
 namespace openspace {
 
-class Sphere;
-
 class RenderableSphere : public Renderable {
 public:
     explicit RenderableSphere(const ghoul::Dictionary& dictionary);

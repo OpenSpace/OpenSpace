@@ -39,7 +39,6 @@
 // #define LOADINGSCREEN_DEBUGGING
 
 namespace ghoul::fontrendering { class Font; }
-
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;

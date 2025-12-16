@@ -36,9 +36,9 @@ namespace ghoul { class Dictionary; }
 namespace openspace {
 
 struct ImageData;
+class RenderableSkyTarget;
 class SceneGraphNode;
 class ScreenSpaceSkyBrowser;
-class RenderableSkyTarget;
 
 class TargetBrowserPair {
 public:
@@ -108,6 +108,7 @@ public:
     void loadImageCollection(const std::string& collection);
     void setImageOpacity(const std::string& imageUrl, float opacity);
     void hideChromeInterface();
+
 private:
     // Target and browser
     RenderableSkyTarget* _targetRenderable = nullptr;

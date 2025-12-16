@@ -32,8 +32,6 @@
 
 namespace openspace {
 
-class SceneGraphNode;
-
 class DashboardItemVelocity : public DashboardTextItem {
 public:
     explicit DashboardItemVelocity(const ghoul::Dictionary& dictionary);

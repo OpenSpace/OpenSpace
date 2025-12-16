@@ -50,11 +50,10 @@
 
 namespace openspace {
 
+namespace scripting { struct LuaLibrary; }
 class AssetManager;
 class LoadingScreen;
 class Scene;
-
-namespace scripting { struct LuaLibrary; }
 
 /**
  * Structure that is responsible for the delayed shutdown of the application.

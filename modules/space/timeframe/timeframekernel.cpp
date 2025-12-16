@@ -434,7 +434,6 @@ bool TimeFrameKernel::initialize() {
         );
     }
 
-
     // Extract the SPK file/files if they were specified
     if (p.spk.has_value()) {
         std::vector<std::filesystem::path> kernels;

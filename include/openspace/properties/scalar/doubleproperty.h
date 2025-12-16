@@ -27,6 +27,8 @@
 
 #include <openspace/properties/numericalproperty.h>
 
+#include <limits>
+
 namespace openspace::properties {
 
 /**
@@ -35,7 +37,7 @@ namespace openspace::properties {
  */
 class DoubleProperty : public NumericalProperty<double> {
 public:
-    DoubleProperty(Property::PropertyInfo info, double value = 0.0,
+    explicit DoubleProperty(Property::PropertyInfo info, double value = 0.0,
         double minValue = std::numeric_limits<double>::lowest(),
         double maxValue = std::numeric_limits<double>::max(), double stepValue = 0.01);
 

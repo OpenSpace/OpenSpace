@@ -29,6 +29,8 @@
 
 namespace openspace {
 
+namespace properties { class SelectionProperty; }
+
 class DataProcessorText : public DataProcessor {
 public:
     DataProcessorText();

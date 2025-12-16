@@ -55,7 +55,7 @@ public:
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    OptionProperty(Property::PropertyInfo info);
+    explicit OptionProperty(Property::PropertyInfo info);
 
     /**
      * Returns the name of the class for reflection purposes.

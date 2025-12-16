@@ -25,8 +25,6 @@
 #ifndef __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___IMAGESEQUENCER___H__
 #define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___IMAGESEQUENCER___H__
 
-//#include <modules/spacecraftinstruments/util/sequenceparser.h>
-
 #include <modules/spacecraftinstruments/util/decoder.h>
 #include <modules/spacecraftinstruments/util/image.h>
 #include <openspace/util/timerange.h>

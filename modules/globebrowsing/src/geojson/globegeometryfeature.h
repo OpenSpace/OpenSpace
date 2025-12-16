@@ -35,20 +35,18 @@
 #include <string>
 #include <vector>
 
+namespace geos::geom { class Geometry; }
 namespace ghoul::opengl { class ghoul::opengl::ProgramObject; }
 namespace openspace {
+    namespace documentation { struct Documentation; }
     struct Geodetic2;
     struct Geodetic3;
     struct RenderData;
-    namespace documentation { struct Documentation; }
 } // namespace openspace
-
 namespace rendering::helper {
     struct LightSourceRenderData;
     struct VertexXYZNormal;
 } // namespace rendering::helper
-
-namespace geos::geom { class Geometry; }
 
 namespace openspace::globebrowsing {
 
@@ -60,11 +58,12 @@ class RenderableGlobe;
  */
 class GlobeGeometryFeature {
 public:
+    using Vertex = rendering::helper::VertexXYZNormal;
+
     GlobeGeometryFeature(const RenderableGlobe& globe,
         GeoJsonProperties& defaultProperties,
         GeoJsonOverrideProperties& overrideProperties);
 
-    using Vertex = rendering::helper::VertexXYZNormal;
 
     // TODO: Use instead of numbers
     //enum class RenderPass {

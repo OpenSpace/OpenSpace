@@ -85,7 +85,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    static constexpr int RadiusTimeOut = 25;
+    static constexpr int RadiusTimeout = 25;
+
     properties::BoolProperty _isHidden;
     properties::BoolProperty _isPointingSpacecraft;
     properties::BoolProperty _updateDuringTargetAnimation;

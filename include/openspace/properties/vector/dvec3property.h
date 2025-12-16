@@ -34,7 +34,8 @@ namespace openspace::properties {
 
 class DVec3Property : public NumericalProperty<glm::dvec3> {
 public:
-    DVec3Property(Property::PropertyInfo info, glm::dvec3 value = glm::dvec3(0.0),
+    explicit DVec3Property(Property::PropertyInfo info,
+        glm::dvec3 value = glm::dvec3(0.0),
         glm::dvec3 minValue = glm::dvec3(std::numeric_limits<double>::lowest()),
         glm::dvec3 maxValue = glm::dvec3(std::numeric_limits<double>::max()),
         glm::dvec3 stepValue = glm::dvec3(0.01));

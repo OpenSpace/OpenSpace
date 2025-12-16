@@ -42,7 +42,7 @@ class SceneGraphNode;
  */
 class SceneInitializer {
 public:
-    SceneInitializer(unsigned int nThreads = 0);
+    explicit SceneInitializer(unsigned int nThreads = 0);
 
     void initializeNode(SceneGraphNode* node);
     std::vector<SceneGraphNode*> takeInitializedNodes();

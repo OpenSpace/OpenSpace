@@ -25,13 +25,13 @@
 #ifndef __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
 #define __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
 
-#include <openspace/network/messagestructures.h>
 #include <openspace/util/timeline.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
 #include <string>
 
 namespace openspace {
+    namespace datamessagestructures { struct CameraKeyframe; }
     class Camera;
     class TimeManager;
 } // namespace openspace

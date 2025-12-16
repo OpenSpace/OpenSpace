@@ -26,8 +26,8 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__
 
 #include <openspace/util/job.h>
-
 #include <modules/globebrowsing/src/rawtile.h>
+
 #include <modules/globebrowsing/src/tileindex.h>
 
 namespace openspace::globebrowsing {

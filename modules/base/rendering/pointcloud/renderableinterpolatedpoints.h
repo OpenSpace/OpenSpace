@@ -36,7 +36,7 @@
 namespace openspace {
 
 /**
- * A specialization of the RenderablePointCloud that supports interpolation beetween
+ * A specialization of the RenderablePointCloud that supports interpolation between
  * different positions for the points.
  */
 class RenderableInterpolatedPoints : public RenderablePointCloud {

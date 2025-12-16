@@ -36,7 +36,6 @@ namespace ghoul::filesystem { class File; }
 namespace openspace {
 
 struct Image;
-struct LinePoint;
 
 class RenderablePlaneProjection : public Renderable {
 public:

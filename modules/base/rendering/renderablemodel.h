@@ -96,12 +96,12 @@ private:
     std::filesystem::path _fragmentShaderPath;
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, normalTransform, meshTransform,
-        meshNormalTransform, ambientIntensity, diffuseIntensity,
-        specularIntensity, performShading, use_forced_color, has_texture_diffuse,
-        has_texture_normal, has_texture_specular, has_color_specular,
-        texture_diffuse, texture_normal, texture_specular, color_diffuse,
-        color_specular, opacity, nLightSources, lightDirectionsViewSpace,
-        lightIntensities, performManualDepthTest, gBufferDepthTexture, resolution
+        meshNormalTransform, ambientIntensity, diffuseIntensity, specularIntensity,
+        performShading, use_forced_color, has_texture_diffuse, has_texture_normal,
+        has_texture_specular, has_color_specular, texture_diffuse, texture_normal,
+        texture_specular, color_diffuse, color_specular, opacity, nLightSources,
+        lightDirectionsViewSpace, lightIntensities, performManualDepthTest,
+        gBufferDepthTexture, resolution
     ) _uniformCache;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;

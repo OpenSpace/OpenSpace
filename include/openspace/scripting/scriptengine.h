@@ -37,11 +37,9 @@
 #include <string_view>
 #include <vector>
 
-struct lua_State;
-
 namespace ghoul { class Dictionary; }
-
 namespace openspace { class SyncBuffer; }
+struct lua_State;
 
 namespace openspace::scripting {
 

@@ -31,11 +31,10 @@
 #include <vector>
 
 namespace openspace {
+    namespace scripting { struct LuaLibrary; }
     class Camera;
     class SceneGraphNode;
 } // namespace openspace
-
-namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 

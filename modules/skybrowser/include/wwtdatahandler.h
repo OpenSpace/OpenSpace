@@ -35,8 +35,6 @@ namespace tinyxml2 { class XMLElement; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 struct ImageData {
     std::string name;
     std::string thumbnailUrl;

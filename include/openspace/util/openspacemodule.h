@@ -35,7 +35,6 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
-
 class ModuleEngine;
 
 /**

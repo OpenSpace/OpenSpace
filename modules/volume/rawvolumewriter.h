@@ -41,7 +41,7 @@ public:
     glm::uvec3 dimensions() const;
     void setDimensions(glm::uvec3 dimensions);
     void write(const std::function<VoxelType(const glm::uvec3&)>& fn,
-               const std::function<void(float)>& onProgress = [](float) {});
+        const std::function<void(float)>& onProgress = [](float) {});
     void write(const RawVolume<VoxelType>& volume);
 
     size_t coordsToIndex(const glm::uvec3& coords) const;

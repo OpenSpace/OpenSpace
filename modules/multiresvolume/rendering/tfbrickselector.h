@@ -31,9 +31,9 @@
 
 namespace openspace {
 
-class TSP;
 class ErrorHistogramManager;
 class TransferFunction;
+class TSP;
 
 class TfBrickSelector : public BrickSelector {
 public:
@@ -49,17 +49,17 @@ public:
     bool calculateBrickErrors();
 
 private:
-    TSP* _tsp;
-    ErrorHistogramManager* _histogramManager;
-    TransferFunction* _transferFunction;
-    std::vector<float> _brickErrors;
-
     float spatialSplitPoints(unsigned int brickIndex);
     float temporalSplitPoints(unsigned int brickIndex);
     float splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType);
 
     int linearCoords(int x, int y, int z) const;
     void writeSelection(BrickSelection coveredBricks, std::vector<int>& bricks) const;
+
+    TSP* _tsp;
+    ErrorHistogramManager* _histogramManager;
+    TransferFunction* _transferFunction;
+    std::vector<float> _brickErrors;
 
     int _memoryBudget;
     int _streamingBudget;
