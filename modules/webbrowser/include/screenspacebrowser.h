@@ -27,7 +27,7 @@
 
 #include <openspace/rendering/screenspacerenderable.h>
 
-#include <modules/webbrowser\include/webkeyboardhandler.h>
+#include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
