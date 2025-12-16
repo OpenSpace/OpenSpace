@@ -677,7 +677,10 @@ void SessionRecordingHandler::checkIfScriptUsesScenegraphNode(
         else {
             // There were no closing quotes so we remove as much as possible
             constexpr std::string_view UnwantedChars = " );";
-            s.remove_suffix(s.find_last_not_of(UnwantedChars));
+            size_t i = s.find_last_not_of(UnwantedChars);
+            if (i != std::string_view::npos) {
+                s.remove_suffix(i);
+            }
             return s;
         }
     };
