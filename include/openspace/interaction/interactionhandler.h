@@ -30,6 +30,7 @@
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/interaction/mouseinputstate.h>
+#include <openspace/interaction/websocketinputstate.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec4property.h>
@@ -51,6 +52,9 @@ public:
 
     const MouseInputState& mouseInputState() const;
     const KeyboardInputState& keyboardInputState() const;
+
+    WebsocketInputStates& websocketInputStates();
+    const WebsocketInputStates& websocketInputStates() const;
 
     bool disabledKeybindings() const;
     bool disabledMouse() const;
@@ -75,6 +79,7 @@ public:
 private:
     MouseInputState _mouseInputState;
     KeyboardInputState _keyboardInputState;
+    WebsocketInputStates _websocketInputStates;
 
     // TODO: add joystick and websocket input state
 

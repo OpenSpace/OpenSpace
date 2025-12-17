@@ -732,11 +732,8 @@ void OrbitalNavigator::resetVelocities() {
     }
 }
 
-void OrbitalNavigator::updateStatesFromInput(const MouseInputState& mouseInputState,
-                                             const KeyboardInputState& keyboardInputState,
-                                             double deltaTime)
-{
-    _inputHandler.updateStatesFromInput(mouseInputState, keyboardInputState, deltaTime);
+void OrbitalNavigator::updateStatesFromInput(double deltaTime) {
+    _inputHandler.updateStatesFromInput(deltaTime);
 
     const bool interactionHappened = _inputHandler.hasNonZeroVelocity();
 

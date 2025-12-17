@@ -25,6 +25,7 @@
 #include <openspace/navigation/orbitalnavigator/orbitalinputhandler.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/interaction/interactionhandler.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo MouseSensitivityInfo = {
@@ -177,14 +178,14 @@ double OrbitalInputHandler::truckMovementVelocity() const {
         _scriptStates.truckMovementVelocity();
 }
 
-// @TODO: Move mouse and keyboard input state handling out of here
-void OrbitalInputHandler::updateStatesFromInput(const MouseInputState& mouseInputState,
-                                             const KeyboardInputState& keyboardInputState,
-                                                                         double deltaTime)
-{
-    _mouseStates.updateStateFromInput(mouseInputState, keyboardInputState, deltaTime);
+void OrbitalInputHandler::updateStatesFromInput(double deltaTime) {
+    _mouseStates.updateStateFromInput(
+        global::interactionHandler->mouseInputState(),
+        global::interactionHandler->keyboardInputState(),
+        deltaTime
+    );
     _joystickStates.updateStateFromInput(*global::joystickInputStates, deltaTime);
-    _websocketStates.updateStateFromInput(*global::websocketInputStates, deltaTime);
+    _websocketStates.updateStateFromInput(global::interactionHandler->websocketInputStates(), deltaTime);
     _scriptStates.updateStateFromInput(deltaTime);
 }
 

@@ -34,7 +34,6 @@ namespace openspace {
 
 namespace interaction {
     struct JoystickInputStates;
-    struct WebsocketInputStates;
     class ActionManager;
     class InteractionHandler;
     class KeybindingManager;
@@ -93,7 +92,6 @@ inline Configuration* configuration;
 inline interaction::ActionManager* actionManager;
 inline interaction::InteractionHandler* interactionHandler;
 inline interaction::JoystickInputStates* joystickInputStates;
-inline interaction::WebsocketInputStates* websocketInputStates;
 inline interaction::KeybindingManager* keybindingManager;
 inline interaction::KeyframeRecordingHandler* keyframeRecording;
 inline interaction::NavigationHandler* navigationHandler;

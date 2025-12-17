@@ -37,7 +37,6 @@
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/keyframerecordinghandler.h>
 #include <openspace/interaction/joystickinputstate.h>
-#include <openspace/interaction/websocketinputstate.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -96,7 +95,6 @@ namespace {
         sizeof(interaction::ActionManager) +
         sizeof(interaction::InteractionHandler) +
         sizeof(interaction::JoystickInputStates) +
-        sizeof(interaction::WebsocketInputStates) +
         sizeof(interaction::KeybindingManager) +
         sizeof(interaction::KeyframeRecordingHandler) +
         sizeof(interaction::NavigationHandler) +
@@ -311,14 +309,6 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    websocketInputStates = new (currentPos) interaction::WebsocketInputStates;
-    ghoul_assert(websocketInputStates, "No websocketInputStates");
-    currentPos += sizeof(interaction::WebsocketInputStates);
-#else // ^^^ WIN32 / !WIN32 vvv
-    websocketInputStates = new interaction::WebsocketInputStates;
-#endif // WIN32
-
-#ifdef WIN32
     keybindingManager = new (currentPos) interaction::KeybindingManager;
     ghoul_assert(keybindingManager, "No keybindingManager");
     currentPos += sizeof(interaction::KeybindingManager);
@@ -492,13 +482,6 @@ void destroy() {
     keybindingManager->~KeybindingManager();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete keybindingManager;
-#endif // WIN32
-
-    LDEBUGC("Globals", "Destroying 'WebsocketInputStates'");
-#ifdef WIN32
-    websocketInputStates->~WebsocketInputStates();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete websocketInputStates;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'JoystickInputStates'");

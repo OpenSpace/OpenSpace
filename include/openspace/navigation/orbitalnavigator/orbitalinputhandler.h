@@ -60,8 +60,7 @@ public:
     glm::dvec2 globalRotationVelocity() const;
     double truckMovementVelocity() const;
 
-    void updateStatesFromInput(const MouseInputState& mouseInputState,
-        const KeyboardInputState& keyboardInputState, double deltaTime);
+    void updateStatesFromInput(double deltaTime);
 
     void updateFrictionFactor(double friction);
     void setRollFrictionEnabled(bool enabled);

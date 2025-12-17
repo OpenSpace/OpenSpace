@@ -30,7 +30,6 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
-#include <openspace/interaction/interactionhandler.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/network/parallelpeer.h>
@@ -234,11 +233,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
         updateCameraTransitions();
     }
     else { // orbital navigator
-        _orbitalNavigator.updateStatesFromInput(
-            global::interactionHandler->mouseInputState(),
-            global::interactionHandler->keyboardInputState(),
-            deltaTime
-        );
+        _orbitalNavigator.updateStatesFromInput(deltaTime);
         _orbitalNavigator.updateCameraStateFromStates(deltaTime);
         updateCameraTransitions();
     }

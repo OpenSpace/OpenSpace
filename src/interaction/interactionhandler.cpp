@@ -136,6 +136,14 @@ const KeyboardInputState& InteractionHandler::keyboardInputState() const {
     return _keyboardInputState;
 }
 
+WebsocketInputStates& InteractionHandler::websocketInputStates() {
+    return _websocketInputStates;
+}
+
+const WebsocketInputStates& InteractionHandler::websocketInputStates() const {
+    return _websocketInputStates;
+}
+
 bool InteractionHandler::disabledKeybindings() const {
     return _disableKeybindings;
 }

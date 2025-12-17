@@ -78,8 +78,7 @@ public:
 
     OrbitalNavigator();
 
-    void updateStatesFromInput(const MouseInputState& mouseInputState,
-        const KeyboardInputState& keyboardInputState, double deltaTime);
+    void updateStatesFromInput(double deltaTime);
     void updateCameraStateFromStates(double deltaTime);
     void updateCameraScalingFromAnchor(double deltaTime);
     void resetVelocities();

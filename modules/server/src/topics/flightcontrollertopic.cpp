@@ -26,6 +26,7 @@
 
 #include <modules/server/include/connection.h>
 #include <openspace/engine/globals.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/websocketinputstate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
@@ -155,13 +156,12 @@ FlightControllerTopic::FlightControllerTopic() {
     }
 
     // Add WebsocketInputState to global states
-    (*global::websocketInputStates)[_topicId] = &_inputState;
+    global::interactionHandler->websocketInputStates()[_topicId] = &_inputState;
 }
 
 FlightControllerTopic::~FlightControllerTopic() {
     // Reset global websocketInputStates
-    global::websocketInputStates->erase(_topicId);
-    *global::websocketInputStates = interaction::WebsocketInputStates();
+    global::interactionHandler->websocketInputStates().erase(_topicId);
 }
 
 bool FlightControllerTopic::isDone() const {
@@ -347,8 +347,9 @@ void FlightControllerTopic::setRenderableEnabled(const nlohmann::json& json) con
 
 void FlightControllerTopic::disconnect() {
     // Reset global websocketInputStates
-    global::websocketInputStates->erase(_topicId);
-    *global::websocketInputStates = interaction::WebsocketInputStates();
+    global::interactionHandler->websocketInputStates().erase(_topicId);
+    // TODO: This assumes only one state. Remove?
+    //global::interactionHandler->websocketInputStates() = interaction::WebsocketInputStates();
 
     // Update FlightController
     nlohmann::json j;
@@ -363,6 +364,8 @@ void FlightControllerTopic::setFriction(bool all) const {
     setFriction(all, all, all);
 }
 
+// @TODO (emmbr, 2025-12-17) Consier removing this function form the topic. It is just
+// setting the properties in orbitalnavigator
 void FlightControllerTopic::setFriction(bool roll, bool rotation, bool zoom) const {
     const interaction::OrbitalNavigator& navigator =
         global::navigationHandler->orbitalNavigator();
