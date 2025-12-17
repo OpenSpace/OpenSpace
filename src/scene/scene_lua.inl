@@ -308,7 +308,9 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
 
     std::mutex mutex;
     std::for_each(
+#ifndef __APPLE__
         std::execution::par_unseq,
+#endif // __APPLE__
         properties.cbegin(),
         properties.cend(),
         [&](Property* prop) {
@@ -356,13 +358,15 @@ std::vector<openspace::properties::PropertyOwner*> findMatchesInAllPropertyOwner
 
     std::mutex mutex;
     std::for_each(
+#ifndef __APPLE__
         std::execution::par_unseq,
+#endif // __APPLE__
         propertyOwners.cbegin(),
         propertyOwners.cend(),
         [&](PropertyOwner* propOwner) {
             if (inputIsOnlyTag) {
                 // If we only got a tag as input, the result is all owners that directly
-                // match the group tag (without looking recusively in parent owners)
+                // match the group tag (without looking recursively in parent owners)
                 if (!ownerMatchesGroupTag(propOwner, groupTag, false)) {
                     return;
                 }

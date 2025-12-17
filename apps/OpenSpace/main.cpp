@@ -22,6 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+// Explicitly including OpenGL for APPLE
+#ifdef __APPLE__
+#define GLFW_INCLUDE_NONE
+#include <OpenGL/gl3.h>
+#endif // __APPLE__
+
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
@@ -44,9 +50,10 @@
 #include <ghoul/logging/visualstudiooutputlog.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/stacktrace.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #ifdef WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
-#endif
+#endif // WIN32
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 #include <sgct/clustermanager.h>
