@@ -329,6 +329,7 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
             }
         }
     );
+
     return matches;
 }
 
@@ -356,7 +357,6 @@ std::vector<openspace::properties::PropertyOwner*> findMatchesInAllPropertyOwner
     std::vector<PropertyOwner*> matches;
 
     std::mutex mutex;
-    // Windows/Linux: Parallel execution
     std::for_each(
 #ifndef __APPLE__
         std::execution::par_unseq,
@@ -390,6 +390,7 @@ std::vector<openspace::properties::PropertyOwner*> findMatchesInAllPropertyOwner
             matches.push_back(propOwner);
         }
     );
+
     return matches;
 }
 
