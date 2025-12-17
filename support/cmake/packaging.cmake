@@ -27,7 +27,7 @@ set(CPACK_MONOLITHIC_INSTALL TRUE)
 include(InstallRequiredSystemLibraries)
 
 if (WIN32 OR APPLE)
-set(CPACK_PACKAGE_NAME "OpenSpace")
+  set(CPACK_PACKAGE_NAME "OpenSpace")
 endif ()
 
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.md")
@@ -40,56 +40,49 @@ set(OPENSPACE_VERSION_NUMBER
   "${OPENSPACE_VERSION_MAJOR}.${OPENSPACE_VERSION_MINOR}.${OPENSPACE_VERSION_PATCH}"
 )
 set(CPACK_PACKAGE_INSTALL_DIRECTORY "OpenSpace ${OPENSPACE_VERSION_NUMBER}")
-set(CPACK_PACKAGE_FILE_NAME
-  "${CPACK_PACKAGE_NAME} ${OPENSPACE_VERSION_NUMBER}"
-)
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME} ${OPENSPACE_VERSION_NUMBER}")
 set(CPACK_STRIP_FILES 1)
 
 if (WIN32 OR APPLE)
-if (EXISTS "${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}")
-  message(STATUS "Directory '${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}' exists. Taking the binaries from there.")
-  install(DIRECTORY
-    ${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/
-    DESTINATION bin
-    USE_SOURCE_PERMISSIONS
-  )
-else ()
-  message(STATUS "Directory '${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}' does not exist. Taking the binaries from '${PROJECT_SOURCE_DIR}/bin'.")
-  install(DIRECTORY
-    ${PROJECT_SOURCE_DIR}/bin/
-    DESTINATION bin
-    USE_SOURCE_PERMISSIONS
-  )
-endif () # if EXISTS
-
+  if (EXISTS "${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}")
+    message(STATUS "Directory '${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}' exists. Taking the binaries from there.")
+    install(
+      DIRECTORY ${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}/
+      DESTINATION bin
+      USE_SOURCE_PERMISSIONS
+    )
+  else ()
+    message(STATUS "Directory '${PROJECT_SOURCE_DIR}/bin/${CMAKE_BUILD_TYPE}' does not exist. Taking the binaries from '${PROJECT_SOURCE_DIR}/bin'.")
+    install(
+      DIRECTORY ${PROJECT_SOURCE_DIR}/bin/
+      DESTINATION bin
+      USE_SOURCE_PERMISSIONS
+    )
+  endif () # if EXISTS
 endif () # WIN32 OR APPLE
 
 if (WIN32)
-
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/config/ DESTINATION config)
-
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/data/ DESTINATION data)
-
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/modules/
-  DESTINATION modules
-  FILES_MATCHING
-  PATTERN "*.glsl"
-  PATTERN "*.hglsl"
-  PATTERN "*.fs"
-  PATTERN "*.vs"
-  PATTERN "*.lua"
-)
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/ DESTINATION scripts)
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/shaders/ DESTINATION shaders)
-
-install(FILES
-  ${PROJECT_SOURCE_DIR}/openspace.cfg
-  ${PROJECT_SOURCE_DIR}/CREDITS.md
-  ${PROJECT_SOURCE_DIR}/LICENSE.md
-  ${PROJECT_SOURCE_DIR}/README.md
-  DESTINATION .
-)
-
+  install(DIRECTORY ${PROJECT_SOURCE_DIR}/config/ DESTINATION config)
+  install(DIRECTORY ${PROJECT_SOURCE_DIR}/data/ DESTINATION data)
+  install(DIRECTORY ${PROJECT_SOURCE_DIR}/modules/
+    DESTINATION modules
+    FILES_MATCHING
+      PATTERN "*.glsl"
+      PATTERN "*.hglsl"
+      PATTERN "*.fs"
+      PATTERN "*.vs"
+      PATTERN "*.lua"
+  )
+  install(DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/ DESTINATION scripts)
+  install(DIRECTORY ${PROJECT_SOURCE_DIR}/shaders/ DESTINATION shaders)
+  install(
+    FILES
+      ${PROJECT_SOURCE_DIR}/openspace.cfg
+      ${PROJECT_SOURCE_DIR}/CREDITS.md
+      ${PROJECT_SOURCE_DIR}/LICENSE.md
+      ${PROJECT_SOURCE_DIR}/README.md
+    DESTINATION .
+  )
 endif ()
 
 if (WIN32)
@@ -125,7 +118,7 @@ if (OPENSPACE_CREATE_INSTALLER)
     # Set the icon for the application in the Add/Remove programs section.
     set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\OpenSpace.exe")
     # The mail address for the maintainer of the application in the Add/Remove programs section
-    set(CPACK_NSIS_CONTACT alexander.bock@liu.se)
+    set(CPACK_NSIS_CONTACT support@openspaceproject.com)
     # The url of the application in the Add/Remove programs section
     set(CPACK_NSIS_URL_INFO_ABOUT "http://openspaceproject.com/")
     # Help URL
@@ -134,130 +127,124 @@ if (OPENSPACE_CREATE_INSTALLER)
 endif ()
 
 if (UNIX AND NOT APPLE)
-
   # for Debian convention, package name should be in lowercase, and docdir path should be as below.
   set(CPACK_PACKAGE_NAME "openspace")
-  set(CPACK_PACKAGE_VERSION "0.21.2")           # upstream version only
+  set(CPACK_PACKAGE_VERSION "${OPENSPACE_VERSION_MAJOR}.${OPENSPACE_VERSION_MINOR}.${OPENSPACE_VERSION_PATCH}")
+
   # Generate a timestamp in the desired format: YYYY.MM.DD.HH.MM
   string(TIMESTAMP BUILD_TIMESTAMP "%Y.%m.%d.%H.%M")
-  # --- Determine distro suffix ---
+
+  # Determine distro suffix ---
   # Default to ubuntu22.04 if OPENSPACE_DISTRO is not set or not ubuntu24.04
-  if(NOT DEFINED OPENSPACE_DISTRO)
-      set(OPENSPACE_DISTRO "ubuntu22.04")
-  elseif(NOT OPENSPACE_DISTRO STREQUAL "ubuntu24.04")
-      set(OPENSPACE_DISTRO "ubuntu22.04")
-  endif()
-  # --- Compose Debian package release string ---
+  if (NOT DEFINED OPENSPACE_DISTRO)
+    set(OPENSPACE_DISTRO "ubuntu22.04")
+  elseif (NOT OPENSPACE_DISTRO STREQUAL "ubuntu24.04")
+    set(OPENSPACE_DISTRO "ubuntu22.04")
+  endif ()
+
+  # Compose Debian package release string
   set(CPACK_DEBIAN_PACKAGE_RELEASE "${BUILD_TIMESTAMP}~${OPENSPACE_DISTRO}")
-  set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")     # get Package_Version-Release_Arch.deb
+  set(CPACK_DEBIAN_FILE_NAME "DEB-DEFAULT")
   set(CMAKE_INSTALL_DATADIR share)
   set(CMAKE_INSTALL_DOCDIR "${CMAKE_INSTALL_DATADIR}/doc/${CPACK_PACKAGE_NAME}" CACHE PATH "" FORCE)
 
   # Binary
-    install(TARGETS OpenSpace RUNTIME DESTINATION lib/openspace/bin)
-    install(TARGETS OpenSpace_Helper RUNTIME DESTINATION lib/openspace/bin)
+  install(TARGETS OpenSpace RUNTIME DESTINATION lib/openspace/bin)
+  install(TARGETS OpenSpace_Helper RUNTIME DESTINATION lib/openspace/bin)
 
-    # man page
-    # Make sure the man directory exists
-    install(CODE "
-      file(MAKE_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}/share/man/man1\")
-      
-      # Compress the man page and install it
-      execute_process(
-        COMMAND gzip -c \"${CMAKE_CURRENT_SOURCE_DIR}/support/deb/openspace.1\"
-        COMMAND ${CMAKE_COMMAND} -E copy /dev/stdin \"\${CMAKE_INSTALL_PREFIX}/share/man/man1/openspace.1.gz\"
-      )
-    ")
+  # man page
+  # Make sure the man directory exists
+  install(CODE "
+    file(MAKE_DIRECTORY \"\${CMAKE_INSTALL_PREFIX}/share/man/man1\")
 
+    # Compress the man page and install it
+    execute_process(
+      COMMAND gzip -c \"${CMAKE_CURRENT_SOURCE_DIR}/support/deb/openspace.1\"
+      COMMAND ${CMAKE_COMMAND} -E copy /dev/stdin \"\${CMAKE_INSTALL_PREFIX}/share/man/man1/openspace.1.gz\"
+    )
+  ")
 
     # ------------------------------------------------------------------------------
     # Bundle Chromium Embedded Framework (CEF) runtime
     # ------------------------------------------------------------------------------
-    
+
     # Path to CEF binary dir - is set as CEF_ROOT in modules/webbrowser/cmake/cef_support.cmake
     # set(CEF_BINARY_DIR "${CMAKE_SOURCE_DIR}/build/modules/webbrowser/ext/cef/cef_binary_127")
 
     # strip in place
     execute_process(
-    COMMAND ${CMAKE_STRIP} --strip-unneeded ${CEF_ROOT}/Release/libcef.so
+      COMMAND ${CMAKE_STRIP} --strip-unneeded ${CEF_ROOT}/Release/libcef.so
     )
 
-    
     # Main CEF shared library
-    install(FILES
-        ${CEF_ROOT}/Release/libcef.so
-        DESTINATION lib/openspace/bin
+    install(
+      FILES ${CEF_ROOT}/Release/libcef.so
+      DESTINATION lib/openspace/bin
     )
-    
+
     # Resources and locales (required for CEF to work properly)
-    install(DIRECTORY
-        ${CEF_ROOT}/Resources/
-        DESTINATION lib/openspace/bin
+    install(
+      DIRECTORY ${CEF_ROOT}/Resources/
+      DESTINATION lib/openspace/bin
     )
 
     # Install EGL/GLES (must be bundled from CEF Release dir)
-    install(FILES
+    install(
+      FILES
         ${CEF_ROOT}/Release/libEGL.so
         ${CEF_ROOT}/Release/libGLESv2.so
-        DESTINATION lib/openspace/bin
+      DESTINATION lib/openspace/bin
     )
-    
+
     # Install Vulkan SwiftShader components (software renderer)
-    install(FILES
+    install(
+      FILES
         ${CEF_ROOT}/Release/libvk_swiftshader.so
         ${CEF_ROOT}/Release/vk_swiftshader_icd.json
-        DESTINATION lib/openspace/bin
+      DESTINATION lib/openspace/bin
     )
-    
+
     # NOTE: Do NOT install libvulkan.so.1 from CEF_ROOT (use system libvulkan1 package)
-    
+
     install(DIRECTORY
-        ${CEF_ROOT}/Resources/locales/
-        DESTINATION lib/openspace/bin/locales
+      ${CEF_ROOT}/Resources/locales/
+      DESTINATION lib/openspace/bin/locales
     )
 
     # Install chrome-sandbox (needed if you want CEF sandboxing)
     install(PROGRAMS
-        ${CEF_ROOT}/Release/chrome-sandbox
-        DESTINATION lib/openspace/bin
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
-                    GROUP_READ GROUP_EXECUTE
-                    WORLD_READ WORLD_EXECUTE
-                    SETUID
+      ${CEF_ROOT}/Release/chrome-sandbox
+      DESTINATION lib/openspace/bin
+      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
+                  GROUP_READ GROUP_EXECUTE
+                  WORLD_READ WORLD_EXECUTE
+                  SETUID
     )
-    
+
     # Install V8 snapshot and blob files (*.bin)
-    file(GLOB CEF_BIN_FILES
-        "${CEF_ROOT}/Release/*.bin"
-    )
-    
-    if(CEF_BIN_FILES)
-        install(FILES ${CEF_BIN_FILES} DESTINATION lib/openspace/bin)
+    file(GLOB CEF_BIN_FILES "${CEF_ROOT}/Release/*.bin")
+
+    if (CEF_BIN_FILES)
+      install(FILES ${CEF_BIN_FILES} DESTINATION lib/openspace/bin)
     endif()
 
-    
-    # ------------------------------------------------------------------------------
     # Ensure executable can find private libcef.so at runtime - $ORIGIN if in same bin directory
-    # ------------------------------------------------------------------------------
     # set an install-time RUNPATH to find bundled CEF
-    set_target_properties(OpenSpace PROPERTIES
-        INSTALL_RPATH "$ORIGIN"
-    )
-    
-    set_target_properties(OpenSpace_Helper PROPERTIES
-        INSTALL_RPATH "$ORIGIN"
-    )
+    set_target_properties(OpenSpace PROPERTIES INSTALL_RPATH "$ORIGIN")
+    set_target_properties(OpenSpace_Helper PROPERTIES INSTALL_RPATH "$ORIGIN")
 
-    
     # Required assets
     install(DIRECTORY config/ DESTINATION lib/openspace/config)
-    install(DIRECTORY modules/ DESTINATION lib/openspace/modules
-                FILES_MATCHING
-              PATTERN "*.glsl"
-              PATTERN "*.hglsl"
-              PATTERN "*.fs"
-              PATTERN "*.vs"
-              PATTERN "*.lua")
+    install(
+      DIRECTORY modules/
+      DESTINATION lib/openspace/modules
+      FILES_MATCHING
+        PATTERN "*.glsl"
+        PATTERN "*.hglsl"
+        PATTERN "*.fs"
+        PATTERN "*.vs"
+        PATTERN "*.lua"
+    )
     install(DIRECTORY data/ DESTINATION lib/openspace/data)
     install(DIRECTORY scripts/ DESTINATION lib/openspace/scripts)
     install(DIRECTORY shaders/ DESTINATION lib/openspace/shaders)
@@ -266,67 +253,61 @@ if (UNIX AND NOT APPLE)
       DESTINATION lib/openspace/modules/globebrowsing
     )
 
-    
     # Documentation
-    install(DIRECTORY documentation/ 
-        DESTINATION ${CMAKE_INSTALL_DOCDIR})
-    install(FILES ACKNOWLEDGMENTS.md CREDITS.md LICENSE.md README.md
-        DESTINATION ${CMAKE_INSTALL_DOCDIR})
-    
+    install(DIRECTORY documentation/ DESTINATION ${CMAKE_INSTALL_DOCDIR})
+    install(
+      FILES ACKNOWLEDGMENTS.md CREDITS.md LICENSE.md README.md
+      DESTINATION ${CMAKE_INSTALL_DOCDIR}
+    )
+
     # Config file - patching it before adding to package
-    # --------------
     # Location of original + patch
     set(ORIG_CFG ${CMAKE_SOURCE_DIR}/openspace.cfg)
     set(PATCH_FILE ${CMAKE_SOURCE_DIR}/support/cmake/openspacecfg.patch)
     set(PATCHED_CFG ${CMAKE_BINARY_DIR}/openspace.cfg)
-    
+
     # Generate the patched file at build time
     add_custom_command(
-        OUTPUT ${PATCHED_CFG}
-        COMMAND ${CMAKE_COMMAND} -E copy ${ORIG_CFG} ${PATCHED_CFG}
-        COMMAND patch ${PATCHED_CFG} ${PATCH_FILE}
-        DEPENDS ${ORIG_CFG} ${PATCH_FILE}
+      OUTPUT ${PATCHED_CFG}
+      COMMAND ${CMAKE_COMMAND} -E copy ${ORIG_CFG} ${PATCHED_CFG}
+      COMMAND patch ${PATCHED_CFG} ${PATCH_FILE}
+      DEPENDS ${ORIG_CFG} ${PATCH_FILE}
     )
-    
+
     add_custom_target(patched_cfg ALL DEPENDS ${PATCHED_CFG})
-    
+
     # Install the patched version
     install(FILES ${PATCHED_CFG} DESTINATION lib/openspace RENAME openspace.cfg)
-    # --------------
 
     # Install node required by webgui (binary + version.txt only)
     install(FILES
-        ${CMAKE_SOURCE_DIR}/modules/webgui/ext/nodejs/node
-        ${CMAKE_SOURCE_DIR}/modules/webgui/ext/nodejs/version.txt
-        DESTINATION lib/openspace/modules/webgui/ext/nodejs
-        PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+      ${CMAKE_SOURCE_DIR}/modules/webgui/ext/nodejs/node
+      ${CMAKE_SOURCE_DIR}/modules/webgui/ext/nodejs/version.txt
+      DESTINATION lib/openspace/modules/webgui/ext/nodejs
+      PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
     )
-
-
-
-
 
   if (DEFINED OPENSPACE_DISTRO AND OPENSPACE_DISTRO STREQUAL "ubuntu24.04")
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libglew2.2, libpng16-16t64, libglut3.12, libjack0, libxrandr2, libgeos-dev, libxinerama1, libx11-6, libxcursor1, libcurl4t64, libxi6, libasound2t64, libgdal34t64, libmpv2, libvulkan1, xclip, coreutils")
   else ()
     set(CPACK_DEBIAN_PACKAGE_DEPENDS "libstdc++6 (>= 13), libglew2.2, libpng16-16, freeglut3, libjack0, libxrandr2, libxinerama1, libx11-6, libxcursor1, libcurl4, libxi6, libasound2, libgdal30, libboost1.74-dev, qt6-base-dev, libmpv1, libvulkan1, xclip, coreutils")
   endif ()
-  
+
   # Map CMAKE_SYSTEM_PROCESSOR to Debian arch names
   if (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|amd64")
-      set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
-    elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
-      set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "arm64")
-    elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "armv7l|armhf")
-      set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "armhf")
-    elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "i686|i386")
-      set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "i386")
-    else ()
-      # Fallback to auto-detected value
-      set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}")
-      message(WARNING "Unknown architecture '${CMAKE_SYSTEM_PROCESSOR}', using as-is for DEB package.")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+  elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "arm64")
+  elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "armv7l|armhf")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "armhf")
+  elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "i686|i386")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "i386")
+  else ()
+    # Fallback to auto-detected value
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}")
+    message(WARNING "Unknown architecture '${CMAKE_SYSTEM_PROCESSOR}', using as-is for DEB package.")
   endif ()
-  
+
   set(CPACK_DEBIAN_PACKAGE_SECTION "science")
   set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
   set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)  # Automatic dependency analysis should append to CPACK_DEBIAN_PACKAGE_DEPENDS
@@ -335,7 +316,7 @@ if (UNIX AND NOT APPLE)
   # keep it concise (< ~80 chars)
   set(CPACK_PACKAGE_DESCRIPTION_SUMMARY
         "interactive 3D visualization of space and planetary data")
-    
+
   # Extended (long) description — full sentences; paragraphs allowed
   set(CPACK_DEBIAN_PACKAGE_DESCRIPTION
 "OpenSpace is an open-source, real-time 3D application for visualizing astronomy
@@ -347,36 +328,29 @@ if (UNIX AND NOT APPLE)
  and live shows, and is suitable for education, outreach, and research
  visualizations.")
 
-  ########
-  # configure_file(<input> <output> @ONLY): What this does is:
-  # Copies the <input> file to <output>.
-  # Substitutes variables inside the input that are written as @VAR@ with their current CMake values.
-  # With @ONLY, only @VAR@ forms are replaced (not ${VAR}).
-  ##########
-    
   # Adding a script in bin which will set the env vars OPENSPACE_USER & OPENSPACE_GLOBEBROWSING
   # since /usr/share would normally be owned by root and not writable by normal users.
-  
+
   configure_file(
       ${CMAKE_SOURCE_DIR}/support/deb/openspace.in
       ${CMAKE_BINARY_DIR}/openspace
       @ONLY
     )
-    
-    install(
-      PROGRAMS ${CMAKE_BINARY_DIR}/openspace
-      DESTINATION bin
-      RENAME openspace
-    )
+
+    install(PROGRAMS ${CMAKE_BINARY_DIR}/openspace DESTINATION bin RENAME openspace)
 
   # Adding mandatory deb files
   string(TIMESTAMP CPACK_DEBIAN_CHANGELOG_DATE "%a, %d %b %Y %H:%M:%S %z")
 
-  configure_file(${CMAKE_SOURCE_DIR}/support/deb/changelog.in
-               ${CMAKE_BINARY_DIR}/support/deb/changelog @ONLY)
+  configure_file(
+    ${CMAKE_SOURCE_DIR}/support/deb/changelog.in
+    ${CMAKE_BINARY_DIR}/support/deb/changelog @ONLY
+  )
 
-  configure_file(${CMAKE_SOURCE_DIR}/support/deb/copyright
-               ${CMAKE_BINARY_DIR}/support/deb/copyright @ONLY)
+  configure_file(
+    ${CMAKE_SOURCE_DIR}/support/deb/copyright
+    ${CMAKE_BINARY_DIR}/support/deb/copyright @ONLY
+  )
 
   set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
     "${CMAKE_BINARY_DIR}/support/deb/changelog"
@@ -384,117 +358,115 @@ if (UNIX AND NOT APPLE)
     "${CMAKE_BINARY_DIR}/support/deb/postinst"
   )
 
-  install(FILES ${CMAKE_BINARY_DIR}/support/deb/changelog
-        DESTINATION ${CMAKE_INSTALL_DOCDIR}
-        RENAME changelog.Debian)
-  install(FILES ${CMAKE_BINARY_DIR}/support/deb/copyright
-        DESTINATION ${CMAKE_INSTALL_DOCDIR})
+  install(
+    FILES ${CMAKE_BINARY_DIR}/support/deb/changelog
+    DESTINATION ${CMAKE_INSTALL_DOCDIR}
+    RENAME changelog.Debian
+  )
+  install(
+    FILES ${CMAKE_BINARY_DIR}/support/deb/copyright
+    DESTINATION ${CMAKE_INSTALL_DOCDIR}
+  )
 
-    # Desktop integration
-    install(FILES ${CMAKE_SOURCE_DIR}/support/deb/openspace.desktop
+  # Desktop integration
+  install(
+    FILES ${CMAKE_SOURCE_DIR}/support/deb/openspace.desktop
     DESTINATION share/applications
-    )
-    install(FILES
-        ${CMAKE_SOURCE_DIR}/support/deb/openspace.png
-        DESTINATION share/icons/hicolor/256x256/apps
-    )
+  )
+  install(
+    FILES ${CMAKE_SOURCE_DIR}/support/deb/openspace.png
+    DESTINATION share/icons/hicolor/256x256/apps
+  )
 
+  # Remove unwanted developer/source files from staged install
+  # Static libraries
+  file(GLOB_RECURSE _static_libs "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.a")
+  if (_static_libs)
+    file(REMOVE ${_static_libs})
+  endif ()
 
-    # --------------------------------------------------------------------------
-    # Remove unwanted developer/source files from staged install
-    # --------------------------------------------------------------------------
-    
-    # Static libraries
-    file(GLOB_RECURSE _static_libs
-      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.a")
-    if (_static_libs)
-        file(REMOVE ${_static_libs})
-    endif ()
-    
-    # Git leftovers
-    file(GLOB_RECURSE _gitfiles
-      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.git")
-    file(GLOB_RECURSE _gitignores
-      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/.gitignore")
-    if (_gitfiles OR _gitignores)
-      file(REMOVE ${_gitfiles} ${_gitignores})
-    endif ()
-    
-    # Source files
-    file(GLOB_RECURSE _srcfiles
-      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.c"
-      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.cpp"
-      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.h"
-      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.hpp")
-    if (_srcfiles)
-        file(REMOVE ${_srcfiles})
-    endif ()
-    
-    # CMake fragments
-    file(GLOB_RECURSE _cmakefiles
-      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.cmake"
-      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/CMakeLists.txt")
-    if (_cmakefiles)
-        file(REMOVE ${_cmakefiles})
-    endif ()
-    
-    # Remove whole unwanted directories
-    file(REMOVE_RECURSE
+  # Git leftovers
+  file(GLOB_RECURSE _gitfiles "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.git")
+  file(GLOB_RECURSE _gitignores "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/.gitignore")
+  if (_gitfiles OR _gitignores)
+    file(REMOVE ${_gitfiles} ${_gitignores})
+  endif ()
+
+  # Source files
+  file(
+    GLOB_RECURSE _srcfiles
+    "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.c"
+    "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.cpp"
+    "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.h"
+    "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.hpp"
+  )
+  if (_srcfiles)
+    file(REMOVE ${_srcfiles})
+  endif ()
+
+  # CMake fragments
+  file(
+    GLOB_RECURSE _cmakefiles
+    "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/*.cmake"
+    "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/CMakeLists.txt"
+  )
+  if (_cmakefiles)
+    file(REMOVE ${_cmakefiles})
+  endif ()
+
+  # Remove whole unwanted directories
+  file(
+    REMOVE_RECURSE
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/include"
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/glbinding"
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/Tracy"
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/SoLoud"
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/pkgconfig"
       "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/pkgconfig"
+  )
+
+  # zlib man page
+  file(GLOB _zlib_man3 "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man/man3/zlib*")
+  if (_zlib_man3)
+    file(REMOVE ${_zlib_man3})
+  endif ()
+
+  ### The above were not sufficient, so adding the lines below.
+
+  install(CODE "
+  message(STATUS \"Pruning developer files from install tree...\")
+  file(REMOVE_RECURSE
+    \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/include\"
+    \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/glbinding\"
+    \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/Tracy\"
+    \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/SoLoud\"
+    \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/pkgconfig\"
+    \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man\"
+    \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/pkgconfig\"
+    \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/modules/globebrowsing/gdal_data\"
+    \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/x86_64-linux-gnu/pkgconfig\"
+    \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/x86_64-linux-gnu/cmake\"
+    \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/aarch64-linux-gnu/pkgconfig\"
+    \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/aarch64-linux-gnu/cmake\"
     )
-    
-    # zlib man page
-    file(GLOB _zlib_man3
-      "$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man/man3/zlib*")
-    if (_zlib_man3)
-        file(REMOVE ${_zlib_man3})
-    endif ()
 
-    ### The above were not sufficient, so adding the lines below.
+  # Multi-arch specific dirs (e.g. x86_64-linux-gnu, aarch64-linux-gnu, etc.)
+  # Remove_Recurse will not emit errors if directories don't exist, as above.
 
-    install(CODE "
-    message(STATUS \"Pruning developer files from install tree...\")
-    file(REMOVE_RECURSE
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/include\"
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/glbinding\"
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/Tracy\"
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/SoLoud\"
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/pkgconfig\"
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/share/man\"
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/pkgconfig\"
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/modules/globebrowsing/gdal_data\"
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/x86_64-linux-gnu/pkgconfig\"
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/x86_64-linux-gnu/cmake\"
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/aarch64-linux-gnu/pkgconfig\"
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/aarch64-linux-gnu/cmake\"
-      )
+  file(REMOVE \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib64/libsoloud.a\")
+  file(REMOVE \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/geos-config\")
 
-    # Multi-arch specific dirs (e.g. x86_64-linux-gnu, aarch64-linux-gnu, etc.)
-    # Remove_Recurse will not emit errors if directories don't exist, as above.
+  file(GLOB _lib_a_files
+    \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/*.a\"
+    )
+  file(REMOVE \${_lib_a_files})
 
-    file(REMOVE \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib64/libsoloud.a\")
-    file(REMOVE \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/bin/geos-config\")
-
-    file(GLOB _lib_a_files
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/*.a\"
-      )
-    file(REMOVE \${_lib_a_files})
-
-    file(GLOB _lib_arch_a_files
-      \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/*/*.a\"
-      )
-    file(REMOVE \${_lib_arch_a_files})
-     
+  file(GLOB _lib_arch_a_files
+    \"\$ENV{DESTDIR}${CMAKE_INSTALL_PREFIX}/lib/*/*.a\"
+    )
+  file(REMOVE \${_lib_arch_a_files})
   ")
 
-
-   # --------------------------------------------------------------------------
-    
 endif () # if UNIX and not APPLE
 
 include (CPack)

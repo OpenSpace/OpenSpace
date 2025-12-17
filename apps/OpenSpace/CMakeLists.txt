@@ -42,14 +42,14 @@ if (OPENSPACE_OPENVR_SUPPORT)
     if (WIN32)
       find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
         NAMES SGCTOpenVR.h
-        PATHS ${PROJECT_SOURCE_DIR}//additional_includes/openvr NO_DEFAULT_PATH
+        PATHS ${PROJECT_SOURCE_DIR}/additional_includes/openvr NO_DEFAULT_PATH
         REQUIRED
       )
     else ()
       find_path(SGCT_OPENVR_INCLUDE_DIRECTORY
         NAMES SGCTOpenVR.h
         PATH_SUFFIXES SGCTOpenVR
-        PATHS ${PROJECT_SOURCE_DIR}//additional_includes/openvr
+        PATHS ${PROJECT_SOURCE_DIR}/additional_includes/openvr
         REQUIRED
       )
     endif ()
