@@ -32,6 +32,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/util/keys.h>
+#include <openspace/util/mouse.h>
 #include <functional>
 #include <map>
 #include <memory>
@@ -54,6 +55,8 @@ public:
 
     bool keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier modifier);
+    bool mouseActivationCallback(glm::vec2 pos, MouseButton button, MouseAction action,
+        KeyModifier mods);
 
     void update();
     void render();

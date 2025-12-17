@@ -1498,6 +1498,18 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         }
     }
 
+    if (action == MouseAction::Press && isGuiWindow) {
+        const bool isConsumed = global::luaConsole->mouseActivationCallback(
+            _mousePosition,
+            button,
+            action,
+            mods
+        );
+        if (isConsumed) {
+            return;
+        }
+    }
+
     global::navigationHandler->mouseButtonCallback(button, action);
     global::interactionMonitor->markInteraction();
 

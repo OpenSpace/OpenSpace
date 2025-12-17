@@ -414,7 +414,7 @@ void LuaConsole::charCallback(unsigned int codepoint,
     if (modifierControl && (codepoint == codepoint_C || codepoint == codepoint_V)) {
         return;
     }
-#endif
+#endif // WIN32
 
     // Disallow all non ASCII characters for now
     if (codepoint > 0x7f) {
@@ -422,6 +422,20 @@ void LuaConsole::charCallback(unsigned int codepoint,
     }
 
     addToCommand(std::string(1, static_cast<char>(codepoint)));
+}
+
+bool LuaConsole::mouseActivationCallback(glm::vec2, MouseButton button,
+                                         MouseAction action, KeyModifier)
+{
+    const bool isMiddleMouseButton = button == MouseButton::Button3;
+    const bool isPress = action == MouseAction::Press;
+
+    if (_isVisible && isMiddleMouseButton && isPress) {
+        addToCommand(sanitizeInput(ghoul::clipboardText()));
+        return true;
+    }
+
+    return false;
 }
 
 void LuaConsole::update() {
