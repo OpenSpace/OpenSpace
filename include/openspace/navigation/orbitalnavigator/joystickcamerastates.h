@@ -118,7 +118,7 @@ public:
 private:
     // There is one of these structs for each connected joystick, describing the orbital
     // input mapping for that given joystick
-    struct Joystick {
+    struct JoystickMapping {
         std::string name;
 
         // We use a vector for the axes and a map for the buttons since the axis are going
@@ -147,7 +147,7 @@ private:
     };
 
     // There may be multiple joysticks connected, each with their own state and mapping
-    std::vector<Joystick> _joysticks;
+    std::vector<JoystickMapping> _joysticks;
 
     /**
      * Get the mapped information for a given joystick.
@@ -155,8 +155,8 @@ private:
      * \param joystickName The name of the joystick to get the mapping for
      * \return The joystick mapping information, or nullptr if no mapping exists
      */
-    Joystick* joystickMapping(const std::string& joystickName);
-    const Joystick* joystickMapping(const std::string& joystickName) const;
+    JoystickMapping* joystickMapping(const std::string& joystickName);
+    const JoystickMapping* joystickMapping(const std::string& joystickName) const;
 
     /**
      * Find the mapped information for a joystick if it exists. Otherwise, add a new
@@ -167,7 +167,7 @@ private:
      * \return The joystick mapping information for either the found or added joystick,
      *         or nullptr if the joystick could not be added
      */
-    Joystick* findOrAddJoystickMapping(const std::string& joystickName);
+    JoystickMapping* findOrAddJoystickMapping(const std::string& joystickName);
 };
 
 } // namespace openspace::interaction

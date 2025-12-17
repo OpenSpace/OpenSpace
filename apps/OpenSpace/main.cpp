@@ -241,60 +241,33 @@ void checkJoystickStatus() {
     for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; i++) {
         ZoneScopedN("Joystick state");
 
-        JoystickInputState& state = global::interactionHandler->joystickInputStates().at(i);
+        JoystickInputState& joystick = global::interactionHandler->joystickInputStates().at(i);
 
-        const int present = glfwJoystickPresent(i);
-        if (present == GLFW_FALSE) {
-            state.isConnected = false;
+        const int isPresent = glfwJoystickPresent(i);
+        if (isPresent == GLFW_FALSE) {
+            joystick.isConnected = false;
             continue;
         }
 
-        if (!state.isConnected) {
+        if (!joystick.isConnected) {
             // Joystick was added
-            state.isConnected = true;
-            state.name = glfwGetJoystickName(i);
+            joystick.isConnected = true;
+            joystick.name = glfwGetJoystickName(i);
 
             // Check axes and buttons
-            glfwGetJoystickAxes(i, &state.nAxes);
-            glfwGetJoystickButtons(i, &state.nButtons);
-            state.axes.resize(state.nAxes);
-            state.buttons.resize(state.nButtons);
+            glfwGetJoystickAxes(i, &joystick.nAxes);
+            glfwGetJoystickButtons(i, &joystick.nButtons);
 
-            std::fill(state.axes.begin(), state.axes.end(), 0.f);
-            std::fill(state.buttons.begin(), state.buttons.end(), JoystickAction::Idle);
+            joystick.initializeAxesAndButtons();
         }
 
-        const float* axes = glfwGetJoystickAxes(i, &state.nAxes);
-        std::memcpy(state.axes.data(), axes, state.nAxes * sizeof(float));
+        const float* axes = glfwGetJoystickAxes(i, &joystick.nAxes);
+        std::memcpy(joystick.axes.data(), axes, joystick.nAxes * sizeof(float));
 
-        const unsigned char* buttons = glfwGetJoystickButtons(i, &state.nButtons);
-        for (int j = 0; j < state.nButtons; j++) {
+        const unsigned char* buttons = glfwGetJoystickButtons(i, &joystick.nButtons);
+        for (int j = 0; j < joystick.nButtons; j++) {
             const bool currentlyPressed = buttons[j] == GLFW_PRESS;
-
-            if (currentlyPressed) {
-                switch (state.buttons[j]) {
-                    case JoystickAction::Idle:
-                    case JoystickAction::Release:
-                        state.buttons[j] = JoystickAction::Press;
-                        break;
-                    case JoystickAction::Press:
-                    case JoystickAction::Repeat:
-                        state.buttons[j] = JoystickAction::Repeat;
-                        break;
-                }
-            }
-            else {
-                switch (state.buttons[j]) {
-                    case JoystickAction::Idle:
-                    case JoystickAction::Release:
-                        state.buttons[j] = JoystickAction::Idle;
-                        break;
-                    case JoystickAction::Press:
-                    case JoystickAction::Repeat:
-                        state.buttons[j] = JoystickAction::Release;
-                        break;
-                }
-            }
+            joystick.updateButtonState(currentlyPressed, j);
         }
     }
 }

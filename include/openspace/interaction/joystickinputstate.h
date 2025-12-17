@@ -71,6 +71,21 @@ struct JoystickInputState {
     int nButtons = 0;
     /// The status of each button
     std::vector<JoystickAction> buttons;
+
+    /**
+     * Initialize the aces and buttons vectors based on the currently set number of
+     * axes and buttons.
+     */
+    void initializeAxesAndButtons();
+
+    /**
+     * Update the button state for the button with the given index, based on the provided
+     * isPressed value and the previous value.
+     *
+     * \param isPressed Whether the button is currently pressed
+     * \param buttonIndex The index of the button to update the state for
+     */
+    void updateButtonState(bool isPressed, int buttonIndex);
 };
 
 /// The maximum number of joysticks that are supported by this system. This number is

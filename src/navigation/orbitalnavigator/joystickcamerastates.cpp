@@ -67,7 +67,7 @@ void JoystickCameraStates::updateStateFromInput(
             continue;
         }
 
-        Joystick* joystick = joystickMapping(joystickInputState.name);
+        JoystickMapping* joystick = joystickMapping(joystickInputState.name);
 
         if (!joystick) {
             continue;
@@ -249,7 +249,7 @@ void JoystickCameraStates::setAxisMapping(const std::string& joystickName,
                                           AxisFlip shouldFlip,
                                           double sensitivity)
 {
-    Joystick* joystickMapping = findOrAddJoystickMapping(joystickName);
+    JoystickMapping* joystickMapping = findOrAddJoystickMapping(joystickName);
     if (!joystickMapping) {
         return;
     }
@@ -278,7 +278,7 @@ void JoystickCameraStates::setAxisMappingProperty(const std::string& joystickNam
                                                   AxisInvert shouldInvert,
                                                   bool isRemote)
 {
-    Joystick* joystickMapping = findOrAddJoystickMapping(joystickName);
+    JoystickMapping* joystickMapping = findOrAddJoystickMapping(joystickName);
     if (!joystickMapping) {
         return;
     }
@@ -304,13 +304,9 @@ JoystickCameraStates::AxisInformation JoystickCameraStates::axisMapping(
                                                           const std::string& joystickName,
                                                                         int axis) const
 {
-    const Joystick* joystick = joystickMapping(joystickName);
-    if (!joystick) {
-        JoystickCameraStates::AxisInformation dummy;
-        return dummy;
-    }
+    const JoystickMapping* joystick = joystickMapping(joystickName);
 
-    if (axis >= static_cast<int>(joystick->axisMapping.size())) {
+    if (!joystick || axis >= static_cast<int>(joystick->axisMapping.size())) {
         JoystickCameraStates::AxisInformation dummy;
         return dummy;
     }
@@ -321,7 +317,7 @@ JoystickCameraStates::AxisInformation JoystickCameraStates::axisMapping(
 void JoystickCameraStates::setDeadzone(const std::string& joystickName, int axis,
                                        float deadzone)
 {
-    Joystick* joystick = findOrAddJoystickMapping(joystickName);
+    JoystickMapping* joystick = findOrAddJoystickMapping(joystickName);
     if (!joystick) {
         return;
     }
@@ -336,7 +332,7 @@ void JoystickCameraStates::setDeadzone(const std::string& joystickName, int axis
 }
 
 float JoystickCameraStates::deadzone(const std::string& joystickName, int axis) const {
-    const Joystick* joystick = joystickMapping(joystickName);
+    const JoystickMapping* joystick = joystickMapping(joystickName);
     if (!joystick) {
         return 0.f;
     }
@@ -354,7 +350,7 @@ void JoystickCameraStates::bindButtonCommand(const std::string& joystickName,
                                              ButtonCommandRemote remote,
                                              std::string documentation)
 {
-    Joystick* joystickMapping = findOrAddJoystickMapping(joystickName);
+    JoystickMapping* joystickMapping = findOrAddJoystickMapping(joystickName);
     if (!joystickMapping) {
         return;
     }
@@ -368,7 +364,7 @@ void JoystickCameraStates::bindButtonCommand(const std::string& joystickName,
 void JoystickCameraStates::clearButtonCommand(const std::string& joystickName,
                                               int button)
 {
-    Joystick* joystick = joystickMapping(joystickName);
+    JoystickMapping* joystick = joystickMapping(joystickName);
     if (!joystick) {
         return;
     }
@@ -392,7 +388,7 @@ std::vector<std::string> JoystickCameraStates::buttonCommand(
                                                              int button) const
 {
     std::vector<std::string> result;
-    const Joystick* joystick = joystickMapping(joystickName);
+    const JoystickMapping* joystick = joystickMapping(joystickName);
     if (!joystick) {
         return result;
     }
@@ -404,10 +400,10 @@ std::vector<std::string> JoystickCameraStates::buttonCommand(
     return result;
 }
 
-JoystickCameraStates::Joystick* JoystickCameraStates::joystickMapping(
+JoystickCameraStates::JoystickMapping* JoystickCameraStates::joystickMapping(
                                                           const std::string& joystickName)
 {
-    for (Joystick& j : _joysticks) {
+    for (JoystickMapping& j : _joysticks) {
         if (j.name == joystickName) {
             return &j;
         }
@@ -415,10 +411,10 @@ JoystickCameraStates::Joystick* JoystickCameraStates::joystickMapping(
     return nullptr;
 }
 
-const JoystickCameraStates::Joystick*
+const JoystickCameraStates::JoystickMapping*
 JoystickCameraStates::joystickMapping(const std::string& joystickName) const
 {
-    for (const Joystick& j : _joysticks) {
+    for (const JoystickMapping& j : _joysticks) {
         if (j.name == joystickName) {
             return &j;
         }
@@ -428,10 +424,10 @@ JoystickCameraStates::joystickMapping(const std::string& joystickName) const
     return nullptr;
 }
 
-JoystickCameraStates::Joystick*
+JoystickCameraStates::JoystickMapping*
 JoystickCameraStates::findOrAddJoystickMapping(const std::string& joystickName)
 {
-    Joystick* joystick = joystickMapping(joystickName);
+    JoystickMapping* joystick = joystickMapping(joystickName);
     if (!joystick) {
         if (_joysticks.size() < JoystickInputStates::MaxNumJoysticks) {
             _joysticks.emplace_back();
@@ -455,6 +451,5 @@ JoystickCameraStates::findOrAddJoystickMapping(const std::string& joystickName)
     }
     return joystick;
 }
-
 
 } // namespace openspace::interaction

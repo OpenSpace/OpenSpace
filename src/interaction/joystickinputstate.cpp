@@ -31,6 +31,40 @@
 
 namespace openspace::interaction {
 
+void JoystickInputState::initializeAxesAndButtons() {
+    axes.resize(nAxes);
+    buttons.resize(nButtons);
+    std::fill(axes.begin(), axes.end(), 0.f);
+    std::fill(buttons.begin(), buttons.end(), JoystickAction::Idle);
+}
+
+void JoystickInputState::updateButtonState(bool isPressed, int buttonIndex) {
+    if (isPressed) {
+        switch (buttons[buttonIndex]) {
+            case JoystickAction::Idle:
+            case JoystickAction::Release:
+                buttons[buttonIndex] = JoystickAction::Press;
+                break;
+            case JoystickAction::Press:
+            case JoystickAction::Repeat:
+                buttons[buttonIndex] = JoystickAction::Repeat;
+                break;
+        }
+    }
+    else {
+        switch (buttons[buttonIndex]) {
+            case JoystickAction::Idle:
+            case JoystickAction::Release:
+                buttons[buttonIndex] = JoystickAction::Idle;
+                break;
+            case JoystickAction::Press:
+            case JoystickAction::Repeat:
+                buttons[buttonIndex] = JoystickAction::Release;
+                break;
+        }
+    }
+}
+
 int JoystickInputStates::numAxes(const std::string& joystickName) const {
     if (joystickName.empty()) {
         int maxNumAxes = -1;

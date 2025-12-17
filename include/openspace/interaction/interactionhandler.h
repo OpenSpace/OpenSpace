@@ -86,8 +86,6 @@ private:
     WebsocketInputStates _websocketInputStates;
     JoystickInputStates _joystickInputStates;
 
-    // TODO: add joystick and websocket input state
-
     // Keeps track of when interaction has happened
     InteractionMonitor _interactionMonitor;
 
