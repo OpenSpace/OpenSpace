@@ -174,7 +174,11 @@ NSArray* focusIdentifiers;
     - (void)pauseResumeButtonAction:(id)sender {
         // No sync or send because time settings are always synced and sent
         // to the connected nodes and peers
-        global::scriptEngine->queueScript("openspace.time.togglePause();");
+        global::scriptEngine->queueScript({
+            .code = "openspace.time.togglePause();",
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
 
         NSButton* button = static_cast<NSButton*>(sender);
         // This check is inverted since the togglePause script has not run yet
@@ -194,7 +198,11 @@ NSArray* focusIdentifiers;
              "NavigationHandler.OrbitalNavigator.Aim",
              "NavigationHandler.OrbitalNavigator.RetargetAnchor"
         );
-        global::scriptEngine->queueScript(str);
+        global::scriptEngine->queueScript({
+            .code = str,
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::Yes,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::Yes
+        });
     }
 
     - (void)hideTextAction:(id)sender {
@@ -206,17 +214,19 @@ NSArray* focusIdentifiers;
              openspace.setPropertyValueSingle('Dashboard.IsEnabled', not isEnabled);\
              openspace.setPropertyValueSingle('RenderEngine.ShowLog', not isEnabled);\
              openspace.setPropertyValueSingle('RenderEngine.ShowVersion', not isEnabled);\
-             openspace.setPropertyValueSingle('RenderEngine.ShowCamera', not isEnabled)"            
+             openspace.setPropertyValueSingle('RenderEngine.ShowCamera', not isEnabled)"
         );
     }
 
     - (void)hideGuiAction:(id)sender {
         // Remove unused variable warning
         (void)sender;
-        global::scriptEngine->queueScript(
-            "local isEnabled = openspace.propertyValue('Modules.CefWebGui.Visible');\
-             openspace.setPropertyValueSingle('Modules.CefWebGui.Visible', not isEnabled);"            
-        );
+        global::scriptEngine->queueScript({
+            .code = "local isEnabled = openspace.propertyValue('Modules.CefWebGui.Visible');\
+             openspace.setPropertyValueSingle('Modules.CefWebGui.Visible', not isEnabled);",
+            .synchronized = scripting::ScriptEngine::ShouldBeSynchronized::No,
+            .sendToRemote = scripting::ScriptEngine::ShouldSendToRemote::No
+        });
     }
 @end
 

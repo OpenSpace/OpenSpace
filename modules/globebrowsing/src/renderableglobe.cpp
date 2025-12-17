@@ -63,7 +63,6 @@
 #include <optional>
 #include <utility>
 #include <variant>
-#include <vector>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableGlobe";
