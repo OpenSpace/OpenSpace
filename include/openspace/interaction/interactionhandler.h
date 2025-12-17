@@ -39,7 +39,8 @@
 namespace openspace::interaction {
 
 /**
- * TODO
+ * This handler is responsible for keeping track of the different input states provided
+ * through the software's interaction system.
  */
 class InteractionHandler: public properties::PropertyOwner {
 public:

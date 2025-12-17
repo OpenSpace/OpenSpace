@@ -254,8 +254,6 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/actionmanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interactionhandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interactionmonitor.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interpolator.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interpolator.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/joystickinputstate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keybindingmanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyboardinputstate.h
@@ -386,6 +384,8 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/util/factorymanager.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/util/geodetic.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/httprequest.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/interpolator.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/interpolator.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/util/job.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/json_helper.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/json_helper.inl

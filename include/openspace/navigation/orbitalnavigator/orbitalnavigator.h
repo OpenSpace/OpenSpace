@@ -27,13 +27,13 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/interaction/interpolator.h>
 #include <openspace/navigation/orbitalnavigator/orbitalinputhandler.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/util/interpolator.h>
 #include <openspace/util/syncdata.h>
 #include <ghoul/glm.h>
 #include <optional>
