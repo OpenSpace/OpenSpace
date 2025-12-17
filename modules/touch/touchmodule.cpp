@@ -31,6 +31,7 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderable.h>
@@ -246,7 +247,7 @@ bool TouchModule::processNewInput() {
 
     // Set touch property to active (to void mouse input, mainly for mtdev bridges)
     if (touchHappened) {
-        global::interactionMonitor->markInteraction();
+        global::interactionHandler->markInteraction();
     }
 
     // Erase old input ids that no longer exist

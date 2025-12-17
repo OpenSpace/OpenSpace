@@ -268,7 +268,7 @@ void EventHandler::initialize() {
 
             _validTouchStates.emplace_back(input);
 
-            global::interactionMonitor->markInteraction();
+            global::interactionHandler->markInteraction();
             return true;
         }
     );
@@ -303,7 +303,7 @@ void EventHandler::initialize() {
                 _leftButton.down = true;
                 _browserInstance->sendMouseMoveEvent(mouseEvent());
 #endif // WIN32
-                global::interactionMonitor->markInteraction();
+                global::interactionHandler->markInteraction();
                 return true;
             }
             else if (it != _validTouchStates.cend()) {
@@ -365,7 +365,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action,
         return false;
     }
 
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->markInteraction();
     MouseButtonState& state = (button == MouseButton::Left) ? _leftButton : _rightButton;
 
     int clickCount = BrowserInstance::SingleClick;
@@ -417,7 +417,7 @@ bool EventHandler::mousePositionCallback(double x, double y) {
     _mousePosition =
         global::windowDelegate->mousePositionViewportRelative(_mousePosition);
     _browserInstance->sendMouseMoveEvent(mouseEvent());
-    global::interactionMonitor->markInteraction();
+    global::interactionHandler->markInteraction();
 
     // Let the mouse event trickle on
     return false;

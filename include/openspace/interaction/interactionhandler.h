@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -46,6 +47,8 @@ public:
     void initialize();
     void deinitialize();
 
+    void preSynchronization();
+
     const MouseInputState& mouseInputState() const;
     const KeyboardInputState& keyboardInputState() const;
 
@@ -61,6 +64,12 @@ public:
 
     void renderOverlay() const;
 
+    /**
+     * Signal to the InteractionMonitor that an interaction happened. Should be called
+     * in any function representing an interaction that is not handled by this handler.
+     */
+    void markInteraction();
+
     void clearGlobalJoystickStates();
 
 private:
@@ -68,6 +77,9 @@ private:
     KeyboardInputState _keyboardInputState;
 
     // TODO: add joystick and websocket input state
+
+    // Keeps track of when interaction has happened
+    InteractionMonitor _interactionMonitor;
 
     properties::BoolProperty _disableKeybindings;
     properties::BoolProperty _disableMouseInputs;

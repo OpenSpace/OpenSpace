@@ -106,6 +106,8 @@ InteractionHandler::InteractionHandler()
         }
     });
 
+    addPropertySubOwner(_interactionMonitor);
+
     addPropertySubOwner(_mouseVisualizer.owner);
     _mouseVisualizer.owner.addProperty(_mouseVisualizer.enable);
     _mouseVisualizer.color.setViewOption(properties::Property::ViewOptions::Color);
@@ -120,6 +122,10 @@ void InteractionHandler::initialize() {
 
 void InteractionHandler::deinitialize() {
     ZoneScoped;
+}
+
+void InteractionHandler::preSynchronization() {
+    _interactionMonitor.updateActivityState();
 }
 
 const MouseInputState& InteractionHandler::mouseInputState() const {
@@ -143,42 +149,51 @@ bool InteractionHandler::disabledJoystick() const {
 }
 
 void InteractionHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
-    if (!_disableMouseInputs) {
-        _mouseInputState.mouseButtonCallback(button, action);
+    if (_disableMouseInputs) {
+        return;
+    }
+    _mouseInputState.mouseButtonCallback(button, action);
 
-        if (_mouseVisualizer.enable) {
-            if (action == MouseAction::Press) {
-                _mouseVisualizer.isMouseFirstPress = true;
-                _mouseVisualizer.isMousePressed = true;
-            }
-            else if (action == MouseAction::Release) {
-                _mouseVisualizer.isMousePressed = false;
-                _mouseVisualizer.currentPosition = glm::vec2(0.f);
-                _mouseVisualizer.clickPosition = glm::vec2(0.f);
-            }
+    if (_mouseVisualizer.enable) {
+        if (action == MouseAction::Press) {
+            _mouseVisualizer.isMouseFirstPress = true;
+            _mouseVisualizer.isMousePressed = true;
+        }
+        else if (action == MouseAction::Release) {
+            _mouseVisualizer.isMousePressed = false;
+            _mouseVisualizer.currentPosition = glm::vec2(0.f);
+            _mouseVisualizer.clickPosition = glm::vec2(0.f);
         }
     }
+
+    _interactionMonitor.markInteraction();
 }
 
 void InteractionHandler::mousePositionCallback(double x, double y) {
-    if (!_disableMouseInputs) {
-        _mouseInputState.mousePositionCallback(x, y);
-
-        if (_mouseVisualizer.enable && _mouseVisualizer.isMousePressed) {
-            if (_mouseVisualizer.isMouseFirstPress) {
-                _mouseVisualizer.clickPosition = glm::vec2(x, y);
-                _mouseVisualizer.isMouseFirstPress = false;
-            }
-
-            _mouseVisualizer.currentPosition = glm::vec2(x, y);
-        }
+    if (_disableMouseInputs) {
+        return;
     }
+    _mouseInputState.mousePositionCallback(x, y);
+
+    if (_mouseVisualizer.enable && _mouseVisualizer.isMousePressed) {
+        if (_mouseVisualizer.isMouseFirstPress) {
+            _mouseVisualizer.clickPosition = glm::vec2(x, y);
+            _mouseVisualizer.isMouseFirstPress = false;
+        }
+
+        _mouseVisualizer.currentPosition = glm::vec2(x, y);
+    }
+
+    _interactionMonitor.markInteraction();
 }
 
 void InteractionHandler::mouseScrollWheelCallback(double pos) {
-    if (!_disableMouseInputs) {
-        _mouseInputState.mouseScrollWheelCallback(pos);
+    if (_disableMouseInputs) {
+        return;
     }
+    _mouseInputState.mouseScrollWheelCallback(pos);
+
+    _interactionMonitor.markInteraction();
 }
 
 void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
@@ -186,6 +201,8 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
     // There is no need to disable the keyboard callback based on a property as the vast
     // majority of input is coming through Lua scripts anyway which are not blocked here
     _keyboardInputState.keyboardCallback(key, modifier, action);
+
+    _interactionMonitor.markInteraction();
 }
 
 void InteractionHandler::renderOverlay() const {
@@ -199,6 +216,10 @@ void InteractionHandler::renderOverlay() const {
             _mouseVisualizer.color
         );
     }
+}
+
+void InteractionHandler::markInteraction() {
+    _interactionMonitor.markInteraction();
 }
 
 void InteractionHandler::clearGlobalJoystickStates() {

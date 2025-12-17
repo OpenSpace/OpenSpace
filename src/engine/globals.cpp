@@ -34,7 +34,6 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionhandler.h>
-#include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/keyframerecordinghandler.h>
 #include <openspace/interaction/joystickinputstate.h>
@@ -96,7 +95,6 @@ namespace {
         sizeof(Configuration) +
         sizeof(interaction::ActionManager) +
         sizeof(interaction::InteractionHandler) +
-        sizeof(interaction::InteractionMonitor) +
         sizeof(interaction::JoystickInputStates) +
         sizeof(interaction::WebsocketInputStates) +
         sizeof(interaction::KeybindingManager) +
@@ -297,14 +295,6 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    interactionMonitor = new (currentPos) interaction::InteractionMonitor;
-    ghoul_assert(interactionMonitor, "No interactionMonitor");
-    currentPos += sizeof(interaction::InteractionMonitor);
-#else // ^^^ WIN32 / !WIN32 vvv
-    interactionMonitor = new interaction::InteractionMonitor;
-#endif // WIN32
-
-#ifdef WIN32
     interactionHandler = new (currentPos) interaction::InteractionHandler;
     ghoul_assert(interactionHandler, "No interactionHandler");
     currentPos += sizeof(interaction::InteractionHandler);
@@ -419,7 +409,6 @@ void initialize() {
     rootPropertyOwner->addPropertySubOwner(global::navigationHandler);
     rootPropertyOwner->addPropertySubOwner(global::keyframeRecording);
     rootPropertyOwner->addPropertySubOwner(global::interactionHandler);
-    rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);
     rootPropertyOwner->addPropertySubOwner(global::sessionRecordingHandler);
     rootPropertyOwner->addPropertySubOwner(global::timeManager);
     rootPropertyOwner->addPropertySubOwner(global::scriptScheduler);
@@ -517,13 +506,6 @@ void destroy() {
     joystickInputStates->~JoystickInputStates();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete joystickInputStates;
-#endif // WIN32
-
-    LDEBUGC("Globals", "Destroying 'InteractionMonitor'");
-#ifdef WIN32
-    interactionMonitor->~InteractionMonitor();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete interactionMonitor;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'InteractionHandler'");

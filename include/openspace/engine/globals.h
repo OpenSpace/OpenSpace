@@ -36,7 +36,6 @@ namespace interaction {
     struct JoystickInputStates;
     struct WebsocketInputStates;
     class ActionManager;
-    class InteractionMonitor;
     class InteractionHandler;
     class KeybindingManager;
     class KeyframeRecordingHandler;
@@ -92,7 +91,6 @@ inline VersionChecker* versionChecker;
 inline WindowDelegate* windowDelegate;
 inline Configuration* configuration;
 inline interaction::ActionManager* actionManager;
-inline interaction::InteractionMonitor* interactionMonitor; // TODO: Move into interactionhandler
 inline interaction::InteractionHandler* interactionHandler;
 inline interaction::JoystickInputStates* joystickInputStates;
 inline interaction::WebsocketInputStates* websocketInputStates;
