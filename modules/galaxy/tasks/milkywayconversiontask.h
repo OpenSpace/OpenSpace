@@ -39,6 +39,7 @@ class MilkywayConversionTask : public Task {
 public:
     explicit MilkywayConversionTask(const ghoul::Dictionary& dictionary);
     ~MilkywayConversionTask() override = default;
+
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;
 

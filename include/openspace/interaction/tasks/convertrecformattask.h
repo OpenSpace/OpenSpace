@@ -30,9 +30,6 @@
 #include <openspace/interaction/sessionrecording.h>
 #include <filesystem>
 
-namespace ghoul { class Dictionary; }
-namespace openspace::documentation { struct Documentation; }
-
 namespace openspace::interaction {
 
 class ConvertRecFormatTask : public Task {

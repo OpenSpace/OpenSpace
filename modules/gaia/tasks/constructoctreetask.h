@@ -34,8 +34,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class ConstructOctreeTask : public Task {
 public:
     explicit ConstructOctreeTask(const ghoul::Dictionary& dictionary);
