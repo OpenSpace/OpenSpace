@@ -41,6 +41,7 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
@@ -1324,7 +1325,7 @@ void OpenSpaceEngine::drawOverlays() {
     if (isGuiWindow) {
         global::renderEngine->renderOverlays(_shutdown);
         global::sessionRecordingHandler->render();
-        global::navigationHandler->renderOverlay();
+        global::interactionHandler->renderOverlay();
     }
 
     for (const std::function<void()>& func : *global::callback::draw2D) {
@@ -1429,9 +1430,9 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
         }
     }
 
-    global::navigationHandler->keyboardCallback(key, mod, action);
+    global::interactionHandler->keyboardCallback(key, mod, action);
 
-    if (!global::navigationHandler->disabledKeybindings()) {
+    if (!global::interactionHandler->disabledKeybindings()) {
         global::keybindingManager->keyboardCallback(key, mod, action);
     }
 
@@ -1498,7 +1499,7 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
         }
     }
 
-    global::navigationHandler->mouseButtonCallback(button, action);
+    global::interactionHandler->mouseButtonCallback(button, action);
     global::interactionMonitor->markInteraction();
 
     if (_shutdown.inShutdown) {
@@ -1521,7 +1522,7 @@ void OpenSpaceEngine::mousePositionCallback(double x, double y, IsGuiWindow isGu
         func(x, y, isGuiWindow);
     }
 
-    global::navigationHandler->mousePositionCallback(x, y);
+    global::interactionHandler->mousePositionCallback(x, y);
     global::interactionMonitor->markInteraction();
 
     _mousePosition = glm::vec2(static_cast<float>(x), static_cast<float>(y));
@@ -1544,7 +1545,7 @@ void OpenSpaceEngine::mouseScrollWheelCallback(double posX, double posY,
         }
     }
 
-    global::navigationHandler->mouseScrollWheelCallback(posY);
+    global::interactionHandler->mouseScrollWheelCallback(posY);
     global::interactionMonitor->markInteraction();
 }
 

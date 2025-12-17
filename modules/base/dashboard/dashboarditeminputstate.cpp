@@ -26,7 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/navigation/navigationhandler.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
@@ -133,7 +133,7 @@ void DashboardItemInputState::update() {
 
     std::vector<std::string> text;
     if (_showKeyboard) {
-        if (global::navigationHandler->disabledKeybindings()) {
+        if (global::interactionHandler->disabledKeybindings()) {
             if (_showWhenDisabled) {
                 text.emplace_back("Keyboard shortcuts disabled");
             }
@@ -146,7 +146,7 @@ void DashboardItemInputState::update() {
     }
 
     if (_showMouse) {
-        if (global::navigationHandler->disabledMouse()) {
+        if (global::interactionHandler->disabledMouse()) {
             if (_showWhenDisabled) {
                 text.emplace_back("Mouse input disabled");
             }
@@ -159,7 +159,7 @@ void DashboardItemInputState::update() {
     }
 
     if (_showJoystick) {
-        if (global::navigationHandler->disabledJoystick()) {
+        if (global::interactionHandler->disabledJoystick()) {
             if (_showWhenDisabled) {
                 text.emplace_back("Joystick input disabled");
             }

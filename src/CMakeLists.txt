@@ -51,14 +51,15 @@ set(OPENSPACE_SOURCE
   events/eventengine_lua.inl
   interaction/actionmanager.cpp
   interaction/actionmanager_lua.inl
+  interaction/interactionhandler.cpp
   interaction/interactionmonitor.cpp
-  interaction/mouseinputstate.cpp
   interaction/joystickinputstate.cpp
   interaction/keybindingmanager.cpp
   interaction/keybindingmanager_lua.inl
   interaction/keyframerecordinghandler.cpp
   interaction/keyframerecordinghandler_lua.inl
   interaction/keyboardinputstate.cpp
+  interaction/mouseinputstate.cpp
   interaction/sessionrecording.cpp
   interaction/sessionrecordinghandler.cpp
   interaction/sessionrecordinghandler_lua.inl
@@ -251,7 +252,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/events/eventengine.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/action.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/actionmanager.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/mouseinputstate.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interactionhandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interactionmonitor.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interpolator.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/interpolator.inl
@@ -259,6 +260,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keybindingmanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyboardinputstate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/keyframerecordinghandler.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/mouseinputstate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecording.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecordinghandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/websocketinputstate.h

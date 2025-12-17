@@ -28,9 +28,9 @@
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keyboardinputstate.h>
-#include <openspace/navigation/navigationhandler.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <algorithm>
@@ -548,7 +548,7 @@ CefTouchEvent EventHandler::touchEvent(const TouchInput& input,
     event.y = windowPos.y;
     event.type = eventType;
     const std::vector<std::pair<Key, KeyModifier>>& keyMods =
-        global::navigationHandler->keyboardInputState().pressedKeys();
+        global::interactionHandler->keyboardInputState().pressedKeys();
     for (const std::pair<Key, KeyModifier>& p : keyMods) {
         const KeyModifier mods = p.second;
         event.modifiers |= static_cast<uint32_t>(mapToCefModifiers(mods));

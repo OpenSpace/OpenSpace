@@ -58,6 +58,10 @@ namespace openspace::interaction {
 struct NavigationState;
 struct NodeCameraStateSpec;
 
+/**
+ * The NavigationHandler is responsible for updating the camera, and switching between
+ * different navigation modes (navigators).
+ */
 class NavigationHandler : public properties::PropertyOwner {
 public:
     NavigationHandler();
@@ -78,8 +82,7 @@ public:
     // Accessors
     Camera* camera() const;
     const SceneGraphNode* anchorNode() const;
-    const MouseInputState& mouseInputState() const;
-    const KeyboardInputState& keyboardInputState() const;
+
     const OrbitalNavigator& orbitalNavigator() const;
     OrbitalNavigator& orbitalNavigator();
     KeyframeNavigator& keyframeNavigator();
@@ -88,19 +91,6 @@ public:
     bool isKeyFrameInteractionEnabled() const;
     float jumpToFadeDuration() const;
     float interpolationTime() const;
-
-    // Callback functions
-    void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
-
-    bool disabledKeybindings() const;
-    bool disabledMouse() const;
-    bool disabledJoystick() const;
-
-    void mouseButtonCallback(MouseButton button, MouseAction action);
-    void mousePositionCallback(double x, double y);
-    void mouseScrollWheelCallback(double pos);
-
-    void renderOverlay() const;
 
     NavigationState navigationState() const;
     NavigationState navigationState(const SceneGraphNode& referenceFrame) const;
@@ -149,10 +139,7 @@ public:
 private:
     void applyPendingState();
     void updateCameraTransitions();
-    void clearGlobalJoystickStates();
 
-    MouseInputState _mouseInputState;
-    KeyboardInputState _keyboardInputState;
     Camera* _camera = nullptr;
     std::function<void()> _playbackEndCallback;
 
@@ -166,22 +153,8 @@ private:
 
     std::optional<std::variant<NodeCameraStateSpec, NavigationState>> _pendingState;
 
-    properties::BoolProperty _disableKeybindings;
-    properties::BoolProperty _disableMouseInputs;
-    properties::BoolProperty _disableJoystickInputs;
     properties::BoolProperty _useKeyFrameInteraction;
     properties::FloatProperty _jumpToFadeDuration;
-
-    struct {
-        properties::PropertyOwner owner;
-        properties::BoolProperty enable;
-        properties::Vec4Property color;
-
-        bool isMouseFirstPress = false;
-        bool isMousePressed = false;
-        glm::vec2 clickPosition;
-        glm::vec2 currentPosition;
-    } _mouseVisualizer;
 };
 
 } // namespace openspace::interaction
