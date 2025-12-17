@@ -28,6 +28,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/util/progressbar.h>
 #include <openspace/util/task.h>
@@ -240,7 +241,7 @@ void checkJoystickStatus() {
     for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; i++) {
         ZoneScopedN("Joystick state");
 
-        JoystickInputState& state = global::joystickInputStates->at(i);
+        JoystickInputState& state = global::interactionHandler->joystickInputStates().at(i);
 
         const int present = glfwJoystickPresent(i);
         if (present == GLFW_FALSE) {

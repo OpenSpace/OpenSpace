@@ -26,6 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
 #include <algorithm>
@@ -182,7 +183,7 @@ void JoystickCameraStates::updateStateFromInput(
         for (int i = 0; i < nButtons; i++) {
             auto itRange = joystick->buttonMapping.equal_range(i);
             for (auto it = itRange.first; it != itRange.second; it++) {
-                const bool active = global::joystickInputStates->button(
+                const bool active = global::interactionHandler->joystickInputStates().button(
                     joystickInputState.name,
                     i,
                     it->second.action
@@ -267,7 +268,7 @@ void JoystickCameraStates::setAxisMapping(const std::string& joystickName,
     joystickMapping->axisMapping[axis].sensitivity = sensitivity;
 
     joystickMapping->prevAxisValues[axis] =
-        global::joystickInputStates->axis(joystickName, axis);
+        global::interactionHandler->joystickInputStates().axis(joystickName, axis);
 }
 
 void JoystickCameraStates::setAxisMappingProperty(const std::string& joystickName,
@@ -296,7 +297,7 @@ void JoystickCameraStates::setAxisMappingProperty(const std::string& joystickNam
     joystickMapping->axisMapping[axis].isRemote = isRemote;
 
     joystickMapping->prevAxisValues[axis] =
-        global::joystickInputStates->axis(joystickName, axis);
+        global::interactionHandler->joystickInputStates().axis(joystickName, axis);
 }
 
 JoystickCameraStates::AxisInformation JoystickCameraStates::axisMapping(
@@ -320,18 +321,18 @@ JoystickCameraStates::AxisInformation JoystickCameraStates::axisMapping(
 void JoystickCameraStates::setDeadzone(const std::string& joystickName, int axis,
                                        float deadzone)
 {
-    Joystick* joystickMapping = findOrAddJoystickMapping(joystickName);
-    if (!joystickMapping) {
+    Joystick* joystick = findOrAddJoystickMapping(joystickName);
+    if (!joystick) {
         return;
     }
 
     // If the axis index is too big for the vector then resize it to have room
-    if (axis >= static_cast<int>(joystickMapping->axisMapping.size())) {
-        joystickMapping->axisMapping.resize(axis + 1);
-        joystickMapping->prevAxisValues.resize(axis + 1);
+    if (axis >= static_cast<int>(joystick->axisMapping.size())) {
+        joystick->axisMapping.resize(axis + 1);
+        joystick->prevAxisValues.resize(axis + 1);
     }
 
-    joystickMapping->axisMapping[axis].deadzone = deadzone;
+    joystick->axisMapping[axis].deadzone = deadzone;
 }
 
 float JoystickCameraStates::deadzone(const std::string& joystickName, int axis) const {

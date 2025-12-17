@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/interaction/interactionmonitor.h>
+#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/websocketinputstate.h>
@@ -56,6 +57,9 @@ public:
     WebsocketInputStates& websocketInputStates();
     const WebsocketInputStates& websocketInputStates() const;
 
+    JoystickInputStates& joystickInputStates();
+    const JoystickInputStates& joystickInputStates() const;
+
     bool disabledKeybindings() const;
     bool disabledMouse() const;
     bool disabledJoystick() const;
@@ -74,12 +78,13 @@ public:
      */
     void markInteraction();
 
-    void clearGlobalJoystickStates();
+    void clearJoystickStates();
 
 private:
     MouseInputState _mouseInputState;
     KeyboardInputState _keyboardInputState;
     WebsocketInputStates _websocketInputStates;
+    JoystickInputStates _joystickInputStates;
 
     // TODO: add joystick and websocket input state
 

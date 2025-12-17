@@ -184,8 +184,17 @@ void OrbitalInputHandler::updateStatesFromInput(double deltaTime) {
         global::interactionHandler->keyboardInputState(),
         deltaTime
     );
-    _joystickStates.updateStateFromInput(*global::joystickInputStates, deltaTime);
-    _websocketStates.updateStateFromInput(global::interactionHandler->websocketInputStates(), deltaTime);
+
+    _joystickStates.updateStateFromInput(
+        global::interactionHandler->joystickInputStates(),
+        deltaTime
+    );
+
+    _websocketStates.updateStateFromInput(
+        global::interactionHandler->websocketInputStates(),
+        deltaTime
+    );
+
     _scriptStates.updateStateFromInput(deltaTime);
 }
 

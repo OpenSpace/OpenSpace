@@ -24,6 +24,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/time.h>
@@ -643,10 +644,13 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  */
 [[codegen::luawrap]] std::vector<std::string> listAllJoysticks() {
     using namespace openspace;
-    std::vector<std::string> result;
-    result.reserve(global::joystickInputStates->size());
 
-    for (const interaction::JoystickInputState& state : *global::joystickInputStates) {
+    interaction::JoystickInputStates joysticks =
+        global::interactionHandler->joystickInputStates();
+
+    std::vector<std::string> result;
+    result.reserve(joysticks.size());
+    for (const interaction::JoystickInputState& state : joysticks) {
         if (!state.name.empty()) {
             result.push_back(state.name);
         }

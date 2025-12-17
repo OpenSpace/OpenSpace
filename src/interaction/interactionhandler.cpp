@@ -102,7 +102,7 @@ InteractionHandler::InteractionHandler()
 
     _disableJoystickInputs.onChange([this]() {
         if (_disableJoystickInputs) {
-            clearGlobalJoystickStates();
+            clearJoystickStates();
         }
     });
 
@@ -142,6 +142,14 @@ WebsocketInputStates& InteractionHandler::websocketInputStates() {
 
 const WebsocketInputStates& InteractionHandler::websocketInputStates() const {
     return _websocketInputStates;
+}
+
+JoystickInputStates& InteractionHandler::joystickInputStates() {
+    return _joystickInputStates;
+}
+
+const JoystickInputStates& InteractionHandler::joystickInputStates() const {
+    return _joystickInputStates;
 }
 
 bool InteractionHandler::disabledKeybindings() const {
@@ -230,10 +238,10 @@ void InteractionHandler::markInteraction() {
     _interactionMonitor.markInteraction();
 }
 
-void InteractionHandler::clearGlobalJoystickStates() {
+void InteractionHandler::clearJoystickStates() {
     std::fill(
-        global::joystickInputStates->begin(),
-        global::joystickInputStates->end(),
+        _joystickInputStates.begin(),
+        _joystickInputStates.end(),
         JoystickInputState()
     );
 }

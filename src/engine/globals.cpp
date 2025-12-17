@@ -36,7 +36,6 @@
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/keyframerecordinghandler.h>
-#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -94,7 +93,6 @@ namespace {
         sizeof(Configuration) +
         sizeof(interaction::ActionManager) +
         sizeof(interaction::InteractionHandler) +
-        sizeof(interaction::JoystickInputStates) +
         sizeof(interaction::KeybindingManager) +
         sizeof(interaction::KeyframeRecordingHandler) +
         sizeof(interaction::NavigationHandler) +
@@ -301,14 +299,6 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    joystickInputStates = new (currentPos) interaction::JoystickInputStates;
-    ghoul_assert(joystickInputStates, "No joystickInputStates");
-    currentPos += sizeof(interaction::JoystickInputStates);
-#else // ^^^ WIN32 / !WIN32 vvv
-    joystickInputStates = new interaction::JoystickInputStates;
-#endif // WIN32
-
-#ifdef WIN32
     keybindingManager = new (currentPos) interaction::KeybindingManager;
     ghoul_assert(keybindingManager, "No keybindingManager");
     currentPos += sizeof(interaction::KeybindingManager);
@@ -482,13 +472,6 @@ void destroy() {
     keybindingManager->~KeybindingManager();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete keybindingManager;
-#endif // WIN32
-
-    LDEBUGC("Globals", "Destroying 'JoystickInputStates'");
-#ifdef WIN32
-    joystickInputStates->~JoystickInputStates();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete joystickInputStates;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'InteractionHandler'");

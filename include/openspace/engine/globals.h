@@ -33,7 +33,6 @@ namespace ghoul::fontrendering { class FontManager; }
 namespace openspace {
 
 namespace interaction {
-    struct JoystickInputStates;
     class ActionManager;
     class InteractionHandler;
     class KeybindingManager;
@@ -91,7 +90,6 @@ inline WindowDelegate* windowDelegate;
 inline Configuration* configuration;
 inline interaction::ActionManager* actionManager;
 inline interaction::InteractionHandler* interactionHandler;
-inline interaction::JoystickInputStates* joystickInputStates;
 inline interaction::KeybindingManager* keybindingManager;
 inline interaction::KeyframeRecordingHandler* keyframeRecording;
 inline interaction::NavigationHandler* navigationHandler;
