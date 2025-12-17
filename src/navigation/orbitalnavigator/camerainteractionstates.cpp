@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/camerainteractionstates.h>
+#include <openspace/navigation/orbitalnavigator/camerainteractionstates.h>
 
 namespace openspace::interaction {
 

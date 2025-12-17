@@ -22,64 +22,65 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
-#define __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+#ifndef __OPENSPACE_CORE___ORBITALINPUTHANDLER___H__
+#define __OPENSPACE_CORE___ORBITALINPUTHANDLER___H__
 
-#include <openspace/interaction/delayedvariable.h>
-#include <ghoul/glm.h>
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/navigation/orbitalnavigator/joystickcamerastates.h>
+#include <openspace/navigation/orbitalnavigator/mousecamerastates.h>
+#include <openspace/navigation/orbitalnavigator/scriptcamerastates.h>
+#include <openspace/navigation/orbitalnavigator/websocketcamerastates.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace::interaction {
 
-class CameraInteractionStates {
+
+class OrbitalInputHandler : public properties::PropertyOwner {
 public:
-    /**
-     * \param sensitivity Interaction sensitivity
-     * \param velocityScaleFactor Can be set to 60 to remove the inertia of the
-     *        interaction. Lower value will make it harder to move the camera
-     */
-    CameraInteractionStates(double sensitivity, double velocityScaleFactor);
-    virtual ~CameraInteractionStates() = default;
+    OrbitalInputHandler(double friction);
 
-    void setRotationalFriction(double friction);
-    void setHorizontalFriction(double friction);
-    void setVerticalFriction(double friction);
-    void setSensitivity(double sensitivity);
-    void setVelocityScaleFactor(double scaleFactor);
+    JoystickCameraStates& joystickStates();
+    const JoystickCameraStates& joystickStates() const;
 
-    glm::dvec2 globalRotationVelocity() const;
-    glm::dvec2 localRotationVelocity() const;
-    double truckMovementVelocity() const;
-    double localRollVelocity() const;
-    double globalRollVelocity() const;
+    WebsocketCameraStates& websocketStates();
+    const WebsocketCameraStates& websocketStates() const;
 
+    ScriptCameraStates& scriptStates();
+    const ScriptCameraStates& scriptStates() const;
+
+    bool hasNonZeroVelocity() const;
+    bool hasTranslationalVelocity() const;
     void resetVelocities();
 
-    /**
-     * Returns true if any of the velocities are larger than zero, i.e. whether an
-     * interaction happened.
-     */
-    bool hasNonZeroVelocities(bool checkOnlyMovement = false) const;
+    double localRollVelocity() const;
+    double globalRollVelocity() const;
+    glm::dvec2 localRotationVelocity() const;
+    glm::dvec2 globalRotationVelocity() const;
+    double truckMovementVelocity() const;
 
-protected:
-    template <typename T>
-    struct InteractionState {
-        explicit InteractionState(double scaleFactor);
-        void setFriction(double friction);
-        void setVelocityScaleFactor(double scaleFactor);
+    void updateStatesFromInput(const MouseInputState& mouseInputState,
+        const KeyboardInputState& keyboardInputState, double deltaTime);
 
-        T previousValue = T(0.0);
-        DelayedVariable<T, double> velocity;
-    };
+    void updateFrictionFactor(double friction);
+    void setRollFrictionEnabled(bool enabled);
+    void setRotationalFrictionEnabled(bool enabled);
+    void setZoomFrictionEnabled(bool enabled);
 
-    double _sensitivity = 0.0;
+private:
+    properties::FloatProperty _mouseSensitivity;
+    properties::FloatProperty _joystickSensitivity;
+    properties::FloatProperty _websocketSensitivity;
 
-    InteractionState<glm::dvec2> _globalRotationState;
-    InteractionState<glm::dvec2> _localRotationState;
-    InteractionState<double> _truckMovementState;
-    InteractionState<double> _localRollState;
-    InteractionState<double> _globalRollState;
+    properties::BoolProperty _invertMouseButtons;
+
+    MouseCameraStates _mouseStates;
+    JoystickCameraStates _joystickStates;
+    WebsocketCameraStates _websocketStates;
+    ScriptCameraStates _scriptStates;
 };
 
 } // namespace openspace::interaction
 
-#endif // __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+#endif // __OPENSPACE_CORE___ORBITALINPUTHANDLER___H__

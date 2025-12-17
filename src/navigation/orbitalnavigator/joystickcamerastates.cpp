@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/joystickcamerastates.h>
+#include <openspace/navigation/orbitalnavigator/joystickcamerastates.h>
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>

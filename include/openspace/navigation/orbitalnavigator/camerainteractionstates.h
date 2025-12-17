@@ -22,87 +22,64 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/scriptcamerastates.h>
+#ifndef __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+#define __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+
+#include <openspace/navigation/orbitalnavigator/delayedvariable.h>
+#include <ghoul/glm.h>
 
 namespace openspace::interaction {
 
-ScriptCameraStates::ScriptCameraStates() : CameraInteractionStates(1.0, 1.0) {}
+class CameraInteractionStates {
+public:
+    /**
+     * \param sensitivity Interaction sensitivity
+     * \param velocityScaleFactor Can be set to 60 to remove the inertia of the
+     *        interaction. Lower value will make it harder to move the camera
+     */
+    CameraInteractionStates(double sensitivity, double velocityScaleFactor);
+    virtual ~CameraInteractionStates() = default;
 
-void ScriptCameraStates::updateStateFromInput(double deltaTime) {
-    if (_localRotation != glm::dvec2(0.0)) {
-        _localRotationState.velocity.set(
-            _localRotation * _sensitivity,
-            deltaTime
-        );
-        _localRotation = glm::dvec2(0.0);
-    }
-    else {
-        _localRotationState.velocity.decelerate(deltaTime);
-    }
+    void setRotationalFriction(double friction);
+    void setHorizontalFriction(double friction);
+    void setVerticalFriction(double friction);
+    void setSensitivity(double sensitivity);
+    void setVelocityScaleFactor(double scaleFactor);
 
-    if (_globalRotation != glm::dvec2(0.0)) {
-        _globalRotationState.velocity.set(
-            _globalRotation * _sensitivity,
-            deltaTime
-        );
-        _globalRotation = glm::dvec2(0.0);
-    }
-    else {
-        _globalRotationState.velocity.decelerate(deltaTime);
-    }
+    glm::dvec2 globalRotationVelocity() const;
+    glm::dvec2 localRotationVelocity() const;
+    double truckMovementVelocity() const;
+    double localRollVelocity() const;
+    double globalRollVelocity() const;
 
-    if (_truckMovement != 0.0) {
-        _truckMovementState.velocity.set(
-            _truckMovement * _sensitivity,
-            deltaTime
-        );
-        _truckMovement = 0.0;
-    }
-    else {
-        _truckMovementState.velocity.decelerate(deltaTime);
-    }
+    void resetVelocities();
 
-    if (_localRoll != 0.0) {
-        _localRollState.velocity.set(
-            _localRoll * _sensitivity,
-            deltaTime
-        );
-        _localRoll = 0.0;
-    }
-    else {
-        _localRollState.velocity.decelerate(deltaTime);
-    }
+    /**
+     * Returns true if any of the velocities are larger than zero, i.e. whether an
+     * interaction happened.
+     */
+    bool hasNonZeroVelocities(bool checkOnlyMovement = false) const;
 
-    if (_globalRoll != 0.0) {
-        _globalRollState.velocity.set(
-            _globalRoll * _sensitivity,
-            deltaTime
-        );
-        _globalRoll = 0.0;
-    }
-    else {
-        _globalRollState.velocity.decelerate(deltaTime);
-    }
-}
+protected:
+    template <typename T>
+    struct InteractionState {
+        explicit InteractionState(double scaleFactor);
+        void setFriction(double friction);
+        void setVelocityScaleFactor(double scaleFactor);
 
-void ScriptCameraStates::addLocalRotation(const glm::dvec2& delta) {
-    _localRotation += delta;
-}
+        T previousValue = T(0.0);
+        DelayedVariable<T, double> velocity;
+    };
 
-void ScriptCameraStates::addGlobalRotation(const glm::dvec2& delta) {
-    _globalRotation += delta;
-}
+    double _sensitivity = 0.0;
 
-void ScriptCameraStates::addTruckMovement(double delta) {
-    _truckMovement += delta;
-}
-
-void ScriptCameraStates::addLocalRoll(double delta) {
-    _localRoll += delta;
-}
-
-void ScriptCameraStates::addGlobalRoll(double delta) {
-    _globalRoll += delta;
-}
+    InteractionState<glm::dvec2> _globalRotationState;
+    InteractionState<glm::dvec2> _localRotationState;
+    InteractionState<double> _truckMovementState;
+    InteractionState<double> _localRollState;
+    InteractionState<double> _globalRollState;
+};
 
 } // namespace openspace::interaction
+
+#endif // __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__

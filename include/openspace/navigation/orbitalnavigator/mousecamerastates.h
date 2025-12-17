@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___MOUSECAMERASTATES___H__
 #define __OPENSPACE_CORE___MOUSECAMERASTATES___H__
 
-#include <openspace/interaction/camerainteractionstates.h>
+#include <openspace/navigation/orbitalnavigator/camerainteractionstates.h>
 
 namespace openspace::interaction {
 

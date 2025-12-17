@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/interaction/websocketcamerastates.h>
+#include <openspace/navigation/orbitalnavigator/websocketcamerastates.h>
 
 #include <ghoul/misc/assert.h>
 #include <cmath>

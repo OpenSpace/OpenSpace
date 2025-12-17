@@ -22,13 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/navigation/orbitalinputhandler.h>
+#include <openspace/navigation/orbitalnavigator/orbitalinputhandler.h>
 
 #include <openspace/engine/globals.h>
 
 namespace {
-    constexpr std::string_view _loggerCat = "OrbitalInputHandler";
-
     constexpr openspace::properties::Property::PropertyInfo MouseSensitivityInfo = {
         "MouseSensitivity",
         "Mouse sensitivity",

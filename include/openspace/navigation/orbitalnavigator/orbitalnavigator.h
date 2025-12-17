@@ -28,7 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/interaction/interpolator.h>
-#include <openspace/navigation/orbitalinputhandler.h>
+#include <openspace/navigation/orbitalnavigator/orbitalinputhandler.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>

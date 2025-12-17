@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___JOYSTICKCAMERASTATES___H__
 #define __OPENSPACE_CORE___JOYSTICKCAMERASTATES___H__
 
-#include <openspace/interaction/camerainteractionstates.h>
+#include <openspace/navigation/orbitalnavigator/camerainteractionstates.h>
 
 #include <openspace/interaction/joystickinputstate.h>
 #include <ghoul/format.h>

@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___WEBSOCKETCAMERASTATES___H__
 #define __OPENSPACE_CORE___WEBSOCKETCAMERASTATES___H__
 
-#include <openspace/interaction/camerainteractionstates.h>
+#include <openspace/navigation/orbitalnavigator/camerainteractionstates.h>
 
 #include <openspace/interaction/websocketinputstate.h>
 #include <ghoul/misc/boolean.h>

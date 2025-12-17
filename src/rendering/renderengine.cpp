@@ -32,7 +32,7 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/framebufferrenderer.h>

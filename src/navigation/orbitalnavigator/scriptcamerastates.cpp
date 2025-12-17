@@ -22,35 +22,87 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SCRIPTCAMERASTATES___H__
-#define __OPENSPACE_CORE___SCRIPTCAMERASTATES___H__
-
-#include <openspace/interaction/camerainteractionstates.h>
-
-#include <ghoul/glm.h>
+#include <openspace/navigation/orbitalnavigator/scriptcamerastates.h>
 
 namespace openspace::interaction {
 
-class ScriptCameraStates : public CameraInteractionStates {
-public:
-    ScriptCameraStates();
+ScriptCameraStates::ScriptCameraStates() : CameraInteractionStates(1.0, 1.0) {}
 
-    void updateStateFromInput(double deltaTime);
+void ScriptCameraStates::updateStateFromInput(double deltaTime) {
+    if (_localRotation != glm::dvec2(0.0)) {
+        _localRotationState.velocity.set(
+            _localRotation * _sensitivity,
+            deltaTime
+        );
+        _localRotation = glm::dvec2(0.0);
+    }
+    else {
+        _localRotationState.velocity.decelerate(deltaTime);
+    }
 
-    void addLocalRotation(const glm::dvec2& delta);
-    void addGlobalRotation(const glm::dvec2& delta);
-    void addTruckMovement(double delta);
-    void addLocalRoll(double delta);
-    void addGlobalRoll(double delta);
+    if (_globalRotation != glm::dvec2(0.0)) {
+        _globalRotationState.velocity.set(
+            _globalRotation * _sensitivity,
+            deltaTime
+        );
+        _globalRotation = glm::dvec2(0.0);
+    }
+    else {
+        _globalRotationState.velocity.decelerate(deltaTime);
+    }
 
-private:
-    glm::dvec2 _localRotation = glm::dvec2(0.0);
-    glm::dvec2 _globalRotation = glm::dvec2(0.0);
-    double _truckMovement = 0.0;
-    double _localRoll = 0.0;
-    double _globalRoll = 0.0;
-};
+    if (_truckMovement != 0.0) {
+        _truckMovementState.velocity.set(
+            _truckMovement * _sensitivity,
+            deltaTime
+        );
+        _truckMovement = 0.0;
+    }
+    else {
+        _truckMovementState.velocity.decelerate(deltaTime);
+    }
+
+    if (_localRoll != 0.0) {
+        _localRollState.velocity.set(
+            _localRoll * _sensitivity,
+            deltaTime
+        );
+        _localRoll = 0.0;
+    }
+    else {
+        _localRollState.velocity.decelerate(deltaTime);
+    }
+
+    if (_globalRoll != 0.0) {
+        _globalRollState.velocity.set(
+            _globalRoll * _sensitivity,
+            deltaTime
+        );
+        _globalRoll = 0.0;
+    }
+    else {
+        _globalRollState.velocity.decelerate(deltaTime);
+    }
+}
+
+void ScriptCameraStates::addLocalRotation(const glm::dvec2& delta) {
+    _localRotation += delta;
+}
+
+void ScriptCameraStates::addGlobalRotation(const glm::dvec2& delta) {
+    _globalRotation += delta;
+}
+
+void ScriptCameraStates::addTruckMovement(double delta) {
+    _truckMovement += delta;
+}
+
+void ScriptCameraStates::addLocalRoll(double delta) {
+    _localRoll += delta;
+}
+
+void ScriptCameraStates::addGlobalRoll(double delta) {
+    _globalRoll += delta;
+}
 
 } // namespace openspace::interaction
-
-#endif // __OPENSPACE_CORE___SCRIPTCAMERASTATES___H__
