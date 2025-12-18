@@ -50,11 +50,13 @@ public:
     const std::string& shadowGroup() const;
     double shadowFrustumSize() const;
 
+    virtual glm::dvec3 center() const = 0;
+
+    virtual void renderForDepthMap(const glm::dmat4& vp) const = 0;
+
     static documentation::Documentation Documentation();
 
 protected:
-    virtual void renderForDepthMap(const glm::dmat4& vp) const = 0;
-
     properties::BoolProperty _castShadow;
     const SceneGraphNode* _lightSource = nullptr;
     std::string _shadowGroup;
@@ -68,6 +70,7 @@ protected:
 class Shadowee {
 public:
     void addShadower(const Shadower* shadower);
+    void removeShadower(const Shadower* shadower);
 
 protected:
     std::vector<const Shadower*> _shadowers;

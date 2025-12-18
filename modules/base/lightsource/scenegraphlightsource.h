@@ -43,7 +43,6 @@ public:
     bool initialize() override;
     glm::vec3 directionViewSpace(const RenderData& renderData) const override;
     float intensity() const override;
-	glm::dvec3 positionWorldSpace() const;
 
 private:
     properties::FloatProperty _intensity;

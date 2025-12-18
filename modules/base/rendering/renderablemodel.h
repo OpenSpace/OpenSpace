@@ -60,9 +60,6 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    void renderForDepthMap(const glm::dmat4& vp) const override;
-
-    glm::dvec3 center() const;
 
     static documentation::Documentation Documentation();
 
@@ -74,6 +71,9 @@ private:
         BounceFromStart,
         BounceInfinitely
     };
+
+    void renderForDepthMap(const glm::dmat4& vp) const override;
+    glm::dvec3 center() const override;
 
     std::filesystem::path _file;
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;

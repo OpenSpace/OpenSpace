@@ -105,4 +105,13 @@ void Shadowee::addShadower(const Shadower* shadower) {
     }
 }
 
+void Shadowee::removeShadower(const Shadower* shadower) {
+    ghoul_precondition(shadower, "Shadower must not be nullptr");
+
+    auto it = std::find(_shadowers.begin(), _shadowers.end(), shadower);
+    if (it != _shadowers.end()) {
+        _shadowers.erase(it);
+    }
+}
+
 } // namespace openspace

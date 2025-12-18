@@ -25,12 +25,9 @@
 #include <modules/base/rendering/renderablemodel.h>
 
 #include <modules/base/basemodule.h>
-#include <modules/base/lightsource/scenegraphlightsource.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/events/event.h>
-#include <openspace/events/eventengine.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconversion.h>
@@ -365,9 +362,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _enableDepthTest(EnableDepthTestInfo, true)
     , _blendingFuncOption(BlendingOptionInfo)
     , _renderWireframe(RenderWireframeInfo, false)
-    , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
     , _useOverrideColor(UseOverrideColorInfo, false)
     , _overrideColor(OverrideColorInfo, glm::vec4(0, 0, 0, 1))
+    , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -526,10 +523,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         setInteractionSphere(boundingSphere() * 0.1);
 
         if (_hasFrustumSize) {
-            const float radius = _geometry->boundingRadius() * _modelScale;
-            _frustumSize = radius;
-            _frustumSize.setMinValue(radius * 0.1f);
-            _frustumSize.setMaxValue(radius * 3.f);
+            const float r = static_cast<float>(_geometry->boundingRadius() * _modelScale);
+            _frustumSize = r;
+            _frustumSize.setMinValue(r * 0.1f);
+            _frustumSize.setMaxValue(r * 3.f);
         }
     });
 
@@ -568,9 +565,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         else {
             releaseDepthMapResources();
         }
-
-        // To update list of shadowers for our parent
-        global::eventEngine->publishEvent<events::CustomEvent>("Cast Shadow Changed");
     });
 
     if (p.rotationVector.has_value()) {
@@ -781,10 +775,10 @@ void RenderableModel::initializeGL() {
     setBoundingSphere(_geometry->boundingRadius() * _modelScale);
 
     if (_hasFrustumSize) {
-        const float radius = _geometry->boundingRadius() * _modelScale;
-        _frustumSize = radius;
-        _frustumSize.setMinValue(radius * 0.1f);
-        _frustumSize.setMaxValue(radius * 3.f);
+        const float r = static_cast<float>(_geometry->boundingRadius() * _modelScale);
+        _frustumSize = r;
+        _frustumSize.setMinValue(r * 0.1f);
+        _frustumSize.setMaxValue(r * 3.f);
     }
 
     // Set Interaction sphere size to be 10% of the bounding sphere
@@ -986,10 +980,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit shadowUnit;
     if (_castShadow && _lightSource) {
-        auto [depthMap, vp] = global::renderEngine->shadowInformation(
-            _lightSource,
-            _shadowGroup
-        );
+        auto [depthMap, vp] = global::renderEngine->shadowInformation(_shadowGroup);
 
         _program->setUniform("model", modelTransform);
         _program->setUniform("light_vp", vp);

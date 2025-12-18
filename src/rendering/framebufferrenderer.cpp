@@ -24,7 +24,6 @@
 
 #include <openspace/rendering/framebufferrenderer.h>
 
-#include <modules/base/rendering/renderablemodel.h>
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/deferredcaster.h>
@@ -34,6 +33,7 @@
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/shadowmapping.h>
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/timemanager.h>
@@ -46,9 +46,11 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <algorithm>
 #include <filesystem>
+#include <limits>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -438,21 +440,25 @@ void FramebufferRenderer::deferredcastersChanged(Deferredcaster&,
     _dirtyDeferredcastData = true;
 }
 
-void FramebufferRenderer::registerShadowCaster(const std::string& shadowgroup,
-                          const SceneGraphNode* lightsource, const SceneGraphNode* target)
+void FramebufferRenderer::registerShadowCaster(const std::string& shadowGroup,
+                                               const SceneGraphNode* lightsource,
+                                               const SceneGraphNode* target)
 {
     constexpr int DepthMapResolutionMultiplier = 4;
 
-    if (!_shadowMaps.contains(shadowgroup)) {
+    if (!_shadowMaps.contains(shadowGroup)) {
         _shadowMaps.insert({});
     }
 
-    ShadowMap& shadowMap = _shadowMaps[shadowgroup];
+    ShadowMap& shadowMap = _shadowMaps[shadowGroup];
 
-    shadowMap.shadowGroups.push_back(target->identifier());
+    shadowMap.targets.push_back(target);
     shadowMap.lightsource = lightsource;
-    shadowMap.depthMapResolution = global::renderEngine->renderingResolution() * DepthMapResolutionMultiplier;
+    shadowMap.depthMapResolution =
+        global::renderEngine->renderingResolution() * DepthMapResolutionMultiplier;
 
+    shadowMap.depthMapResolution =
+        glm::min(shadowMap.depthMapResolution, glm::ivec2(OpenGLCap.max2DTextureSize()));
 
     GLint prevFbo;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
@@ -490,8 +496,39 @@ void FramebufferRenderer::registerShadowCaster(const std::string& shadowgroup,
     glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
 }
 
+void FramebufferRenderer::removeShadowCaster(const std::string& shadowGroup,
+                                             const SceneGraphNode* target)
+{
+    if (!_shadowMaps.contains(shadowGroup)) {
+        throw ghoul::RuntimeError(std::format(
+            "Could not find shadow group '{}'", shadowGroup
+        ));
+    }
+    ShadowMap& shadowMap = _shadowMaps[shadowGroup];
+
+    auto it = std::find(
+        shadowMap.targets.begin(),
+        shadowMap.targets.end(),
+        target
+    );
+    if (it == shadowMap.targets.end()) {
+        throw ghoul::RuntimeError(std::format(
+            "Could not find shadowing target '{}'", target->identifier()
+        ));
+    }
+
+    shadowMap.targets.erase(it);
+
+    // If this was the last target we can destroy the depth map and the FBO
+    if (shadowMap.targets.empty()) {
+        glDeleteTextures(1, &shadowMap.depthMap);
+        glDeleteFramebuffers(1, &shadowMap.fbo);
+        _shadowMaps.erase(shadowGroup);
+    }
+}
+
 std::pair<GLuint, glm::dmat4> FramebufferRenderer::shadowInformation(
-    const SceneGraphNode* node, const std::string& shadowgroup) const
+                                                     const std::string& shadowgroup) const
 {
     ghoul_assert(_shadowMaps.contains(shadowgroup), "Shadow group not registered");
     return {
@@ -1178,26 +1215,30 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     RendererTasks tasks;
 
     if (!_renderedDepthMapsThisFrame) {
+        // We are using this flag to cover the cases where we have multiple draw calls per
+        // frame (for example for fisheye rendering). We only need to generate the shadow
+        // map once in these circumstances
+
         renderDepthMaps();
         _renderedDepthMapsThisFrame = true;
     }
 
     {
-        TracyGpuZone("Background");
+        TracyGpuZone("Background")
         const ghoul::GLDebugGroup group("Background");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Background);
         scene->render(data, tasks);
     }
 
     {
-        TracyGpuZone("Opaque");
+        TracyGpuZone("Opaque")
         const ghoul::GLDebugGroup group("Opaque");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Opaque);
         scene->render(data, tasks);
     }
 
     {
-        TracyGpuZone("PreDeferredTransparent");
+        TracyGpuZone("PreDeferredTransparent")
         const ghoul::GLDebugGroup group("PreDeferredTransparent");
         data.renderBinMask = static_cast<int>(
             Renderable::RenderBin::PreDeferredTransparent
@@ -1207,13 +1248,13 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
 
     // Run Volume Tasks
     {
-        TracyGpuZone("Raycaster Tasks");
+        TracyGpuZone("Raycaster Tasks")
         const ghoul::GLDebugGroup group("Raycaster Tasks");
         performRaycasterTasks(tasks.raycasterTasks, viewport);
     }
 
     if (!tasks.deferredcasterTasks.empty()) {
-        TracyGpuZone("Deferred Caster Tasks");
+        TracyGpuZone("Deferred Caster Tasks")
         const ghoul::GLDebugGroup group("Deferred Caster Tasks");
 
         // We use ping pong rendering in order to be able to render multiple deferred
@@ -1229,14 +1270,14 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     glEnablei(GL_BLEND, 0);
 
     {
-        TracyGpuZone("Overlay");
+        TracyGpuZone("Overlay")
         const ghoul::GLDebugGroup group("Overlay");
         data.renderBinMask = static_cast<int>(Renderable::RenderBin::Overlay);
         scene->render(data, tasks);
     }
 
     {
-        TracyGpuZone("PostDeferredTransparent");
+        TracyGpuZone("PostDeferredTransparent")
         const ghoul::GLDebugGroup group("PostDeferredTransparent");
         data.renderBinMask = static_cast<int>(
             Renderable::RenderBin::PostDeferredTransparent
@@ -1245,7 +1286,7 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     }
 
     {
-        TracyGpuZone("Sticker");
+        TracyGpuZone("Sticker")
         const ghoul::GLDebugGroup group("Sticker");
         data.renderBinMask = static_cast<int>(
             Renderable::RenderBin::Sticker
@@ -1297,24 +1338,24 @@ void FramebufferRenderer::renderDepthMaps() {
     glGetIntegerv(GL_VIEWPORT, prevVp);
 
     for (std::pair<const std::string, ShadowMap>& shadowMap : _shadowMaps) {
-        glm::dvec3 vmin = glm::dvec3(std::numeric_limits<double>::max()),
-                    vmax(-std::numeric_limits<double>::max());
+        glm::dvec3 vmin = glm::dvec3(std::numeric_limits<double>::max());
+        glm::dvec3 vmax = glm::dvec3(-std::numeric_limits<double>::max());
 
-        std::vector<RenderableModel*> torender;
-        for (const std::string& identifier : shadowMap.second.shadowGroups) {
-            SceneGraphNode* node =
-                global::renderEngine->scene()->sceneGraphNode(identifier);
-            if (node) {
-                RenderableModel* model =
-                    dynamic_cast<RenderableModel*>(node->renderable());
-                if (model && model->isEnabled() && model->isCastingShadow() && model->isReady()) {
-                    const double fsz = model->shadowFrustumSize();
-                    glm::dvec3 center = model->center();
-                    vmin = glm::min(vmin, center - fsz / 2);
-                    vmax = glm::max(vmax, center + fsz / 2);
+        std::vector<const Shadower*> torender;
+        for (const SceneGraphNode* node : shadowMap.second.targets) {
+            ghoul_assert(node, "No SceneGraphNode");
+            ghoul_assert(node->renderable(), "No Renderable");
 
-                    torender.push_back(model);
-                }
+            const Shadower* model = dynamic_cast<const Shadower*>(node->renderable());
+            if (model && node->renderable()->isEnabled() &&
+                model->isCastingShadow() && node->renderable()->isReady())
+            {
+                const double fsz = model->shadowFrustumSize();
+                glm::dvec3 center = model->center();
+                vmin = glm::min(vmin, center - fsz / 2);
+                vmax = glm::max(vmax, center + fsz / 2);
+
+                torender.push_back(model);
             }
         }
 
@@ -1342,10 +1383,9 @@ void FramebufferRenderer::renderDepthMaps() {
                     shadowMap.second.depthMapResolution.y);
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        for (const RenderableModel* model : torender) {
+        for (const Shadower* model : torender) {
             model->renderForDepthMap(shadowMap.second.viewProjectionMatrix);
         }
-
     }
 
     // Restore previous FBO and viewport

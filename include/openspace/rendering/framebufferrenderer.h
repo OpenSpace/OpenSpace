@@ -178,9 +178,11 @@ public:
     virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
         DeferredcasterListener::IsAttached isAttached) override;
 
-    void registerShadowCaster(const std::string& shadowgroup, const SceneGraphNode* lightsource,
-            const SceneGraphNode* target);
-    std::pair<GLuint, glm::dmat4> shadowInformation(const SceneGraphNode* node, const std::string& shadowgroup) const;
+    void registerShadowCaster(const std::string& shadowGroup,
+        const SceneGraphNode* lightsource, const SceneGraphNode* target);
+    void removeShadowCaster(const std::string& shadowGroup, const SceneGraphNode* target);
+
+    std::pair<GLuint, glm::dmat4> shadowInformation(const std::string& shadowgroup) const;
 
 private:
     using RaycasterProgObjMap = std::map<
@@ -251,7 +253,7 @@ private:
 
     struct ShadowMap {
         const SceneGraphNode* lightsource = nullptr;
-        std::vector<std::string> shadowGroups;
+        std::vector<const SceneGraphNode*> targets;
         GLuint depthMap = 0;
         glm::ivec2 depthMapResolution = glm::ivec2(0);
         GLuint fbo = 0;

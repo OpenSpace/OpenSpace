@@ -5,7 +5,6 @@ local sun = asset.require("scene/solarsystem/sun/sun")
 local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
 
 
-
 -- Model CC0 from https://sketchfab.com/3d-models/celestial-globe-341fa8a777e94883841409438756f747
 local celestial_globe_folder = asset.resource({
   Name = "Celestial Globe",
@@ -14,8 +13,8 @@ local celestial_globe_folder = asset.resource({
   Version = 1
 })
 
--- These models are in the same shadow group, so will cast onto and receive
---  shadows from each other, as well as the Mars surface
+-- These models are in the same shadow group, so will cast onto and receive shadows from
+-- each other, as well as the Mars surface
 local ModelMarsSmall = {
   Identifier = "celestial-globe-mars1",
   Parent = mars.Mars.Identifier,
@@ -215,12 +214,16 @@ local ModelMoon = {
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ModelMarsSmall)
   openspace.registerShadowcaster(sun.LightSource.Identifier, ModelMarsSmall.Identifier, mars.Mars.Identifier, "mars")
-  openspace.addSceneGraphNode(ModelMarsLarge)
+
+openspace.addSceneGraphNode(ModelMarsLarge)
   openspace.registerShadowcaster(sun.LightSource.Identifier, ModelMarsLarge.Identifier, mars.Mars.Identifier, "mars")
+
   openspace.addSceneGraphNode(ModelMarsOtherGroup)
   openspace.registerShadowcaster(sun.LightSource.Identifier, ModelMarsOtherGroup.Identifier, mars.Mars.Identifier)
+
   openspace.addSceneGraphNode(ModelEarth)
   openspace.registerShadowcaster(sun.LightSource.Identifier, ModelEarth.Identifier, earth.Earth.Identifier, "earth")
+
   openspace.addSceneGraphNode(ModelMoon)
   openspace.registerShadowcaster(sun.LightSource.Identifier, ModelMoon.Identifier, moon.Moon.Identifier, "moon")
 end)
