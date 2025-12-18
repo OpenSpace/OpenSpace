@@ -297,6 +297,9 @@ namespace {
         // [[codegen::verbatim(TargetLodScaleFactorInfo.description)]]
         std::optional<float> targetLodScaleFactor;
 
+        // [[codegen::verbatim(ModelSpaceRenderingInfo.description)]]
+        std::optional<int> modelSpaceRenderingCutoffLevel [[codegen::greater(0)]];
+
         // [[codegen::verbatim(OrenNayarRoughnessInfo.description)]]
         std::optional<float> orenNayarRoughness;
 
@@ -739,6 +742,10 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
     _debugPropertyOwner.addProperty(_debugProperties.performFrustumCulling);
     _debugPropertyOwner.addProperty(_debugProperties.performHorizonCulling);
+    _debugProperties.modelSpaceRenderingCutoffLevel =
+        p.modelSpaceRenderingCutoffLevel.value_or(
+            _debugProperties.modelSpaceRenderingCutoffLevel
+        );
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
     _debugPropertyOwner.addProperty(_debugProperties.dynamicLodIterationCount);
     addPropertySubOwner(_debugPropertyOwner);
