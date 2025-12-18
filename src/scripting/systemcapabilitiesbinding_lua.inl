@@ -23,6 +23,15 @@
  ****************************************************************************************/
 
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/stringconversion.h>
+#include <ghoul/misc/stringhelper.h>
+#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <ghoul/systemcapabilities/version.h>
+#include <cctype>
+#include <vector>
+#include <string>
+#include <string_view>
 
 namespace {
 

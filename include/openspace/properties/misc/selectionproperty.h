@@ -28,7 +28,6 @@
 #include <openspace/properties/templateproperty.h>
 
 #include <set>
-#include <vector>
 
 namespace openspace::properties {
 

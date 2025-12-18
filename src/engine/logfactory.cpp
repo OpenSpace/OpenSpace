@@ -25,14 +25,16 @@
 #include <openspace/engine/logfactory.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/log.h>
 #include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/htmllog.h>
 #include <ghoul/logging/textlog.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
+#include <filesystem>
 #include <optional>
+#include <string_view>
 
 namespace {
     constexpr std::string_view BootstrapPath = "${WEB}/common/bootstrap.min.css";

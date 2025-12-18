@@ -28,9 +28,17 @@
 #include <openspace/util/time.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
 #include <cerrno>
+#include <cmath>
+#include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <iomanip>
+#include <iterator>
+#include <ostream>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "FieldlinesState";
@@ -371,7 +379,7 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
     size_t pointIndex = 0;
     for (size_t lineIndex = 0; lineIndex < nLines; lineIndex++) {
         json jData = json::array();
-        for (GLsizei i = 0; i < _lineCount[lineIndex]; i++, ++pointIndex) {
+        for (GLsizei i = 0; i < _lineCount[lineIndex]; i++, pointIndex++) {
             const glm::vec3 pos = _vertexPositions[pointIndex];
             json jDataElement = { pos.x, pos.y, pos.z };
 

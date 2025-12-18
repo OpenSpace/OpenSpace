@@ -27,14 +27,10 @@
 
 #include <openspace/scene/timeframe.h>
 
-#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
 namespace openspace {
-
-class Time;
-
-namespace documentation { struct Documentation; }
 
 class TimeFrameInterval : public TimeFrame {
 public:

@@ -38,4 +38,5 @@ public:
 } // namespace openspace
 
 #endif // WIN32
+
 #endif // __OPENSPACE_MODULE_TOUCH___WIN32_TOUCH___H__

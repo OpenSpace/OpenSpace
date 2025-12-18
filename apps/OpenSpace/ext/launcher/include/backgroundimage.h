@@ -27,7 +27,10 @@
 
 #include <QLabel>
 
+#include <QRect>
 #include <filesystem>
+
+class QWidget;
 
 class BackgroundImage final : public QLabel {
 Q_OBJECT

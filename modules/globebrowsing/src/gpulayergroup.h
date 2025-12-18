@@ -27,19 +27,11 @@
 
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <memory>
-#include <string>
 #include <vector>
 
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace::globebrowsing {
-
-struct ChunkTile;
-class Layer;
-class GPULayer;
-struct TileDepthTransform;
-struct TileUvTransform;
 
 struct LayerGroup;
 struct TileIndex;

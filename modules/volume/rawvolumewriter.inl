@@ -26,7 +26,10 @@
 #include <modules/volume/volumeutils.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/exception.h>
+#include <algorithm>
 #include <fstream>
+#include <utility>
+#include <vector>
 
 namespace openspace::volume {
 
@@ -66,8 +69,8 @@ void RawVolumeWriter<VoxelType>::write(
     const size_t size = static_cast<size_t>(dims.x) * static_cast<size_t>(dims.y) *
                   static_cast<size_t>(dims.z);
 
-    std::vector<VoxelType> buffer(_bufferSize);
-    std::ofstream file(_path, std::ios::binary);
+    std::vector<VoxelType> buffer = std::vector<VoxelType>(_bufferSize);
+    std::ofstream file = std::ofstream(_path, std::ios::binary);
 
     int nChunks = static_cast<int>(size / _bufferSize);
     if (size % _bufferSize > 0) {
@@ -87,7 +90,6 @@ void RawVolumeWriter<VoxelType>::write(
         );
         onProgress(static_cast<float>(c + 1) / nChunks);
     }
-    file.close();
 }
 
 template <typename VoxelType>

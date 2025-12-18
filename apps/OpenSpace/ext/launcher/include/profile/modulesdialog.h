@@ -28,12 +28,15 @@
 #include <QDialog>
 
 #include <openspace/scene/profile.h>
+#include <vector>
 
 class QDialogButtonBox;
+class QKeyEvent;
 class QLabel;
 class QLineEdit;
 class QListWidget;
 class QPushButton;
+class QWidget;
 
 class ModulesDialog final : public QDialog {
 Q_OBJECT

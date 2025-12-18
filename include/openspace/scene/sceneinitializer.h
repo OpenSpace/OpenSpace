@@ -27,6 +27,7 @@
 
 #include <openspace/util/threadpool.h>
 #include <unordered_set>
+#include <mutex>
 #include <vector>
 
 namespace openspace {
@@ -41,7 +42,7 @@ class SceneGraphNode;
  */
 class SceneInitializer {
 public:
-    SceneInitializer(unsigned int nThreads = 0);
+    explicit SceneInitializer(unsigned int nThreads = 0);
 
     void initializeNode(SceneGraphNode* node);
     std::vector<SceneGraphNode*> takeInitializedNodes();

@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_MODULE_STATEMACHINE___TRANSITION___H__
 #define __OPENSPACE_MODULE_STATEMACHINE___TRANSITION___H__
 
-#include <ghoul/misc/dictionary.h>
 #include <string>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 

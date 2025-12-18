@@ -26,14 +26,16 @@
 
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
-#include <ghoul/ghoul.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/consolelog.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
 #include <cpl_conv.h>
+#include <cpl_error.h>
 #include <gdal.h>
+#include <cstdint>
 
 namespace {
     constexpr std::string_view _loggerCat = "GdalWrapper";

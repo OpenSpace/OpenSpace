@@ -25,15 +25,33 @@
 #include <modules/video/include/renderablevideosphere.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/sphere.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <ghoul/misc/dictionary.h>
+
+namespace {
+    // This `Renderable` creates a textured 3D sphere where the texture is a video. Per
+    // default, the sphere uses an equirectangular projection for the image mapping
+    // and hence expects a video in equirectangular format. However, it can also be used
+    // to play fisheye videos by changing the `TextureProjection`.
+    //
+    // The video can either be played back based on a given simulation time
+    // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
+    // `PlaybackMode` RealTimeLoop). It is also possible to control whether the video
+    // should loop or just be played once.
+    //
+    // Note that, unless playback is mapped to simulation time, the video must be started
+    // manually via the user interface.
+    struct [[codegen::Dictionary(RenderableVideoSphere)]] Parameters {};
+#include "renderablevideosphere_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
 documentation::Documentation RenderableVideoSphere::Documentation() {
-    documentation::Documentation doc = RenderableSphere::Documentation();
-    doc.name = "RenderableVideoSphere";
-    doc.id = "video_renderablevideosphere";
+    documentation::Documentation doc = codegen::doc<Parameters>(
+        "video_renderablevideosphere",
+        RenderableSphere::Documentation()
+    );
 
     documentation::Documentation vp = VideoPlayer::Documentation();
     doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
@@ -68,7 +86,8 @@ void RenderableVideoSphere::render(const RenderData& data, RendererTasks& render
     }
 }
 
-void RenderableVideoSphere::update(const UpdateData&) {
+void RenderableVideoSphere::update(const UpdateData& data) {
+    RenderableSphere::update(data);
     if (!_videoPlayer.isInitialized()) {
         return;
     }

@@ -27,7 +27,7 @@
 
 #include <openspace/util/task.h>
 
-#include <string>
+#include <filesystem>
 
 namespace openspace {
 

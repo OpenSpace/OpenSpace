@@ -25,12 +25,9 @@
 #include <modules/base/rendering/renderablesphereimagelocal.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/sphere.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
-#include <optional>
+#include <filesystem>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -44,6 +41,10 @@ namespace {
     // This `Renderable` shows a sphere with an image provided by a local file on disk. To
     // show a sphere with an image from an online source, see
     // [RenderableSphereImageOnline](#base_screenspace_image_online).
+    //
+    // Per default, the sphere uses an equirectangular projection for the image mapping
+    // and hence expects an equirectangular image. However, it can also be used to show
+    // fisheye images by changing the `TextureProjection`.
     struct [[codegen::Dictionary(RenderableSphereImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;

@@ -31,8 +31,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 /**
  * DataPlane is a concrete IswaCygnet with data files as its input source. The class
  * handles creation, destruction and rendering of a plane geometry. It also specifies what
@@ -50,9 +48,6 @@ public:
      static documentation::Documentation Documentation();
 
 private:
-    /**
-     * Creates a plane geometry.
-     */
     bool createGeometry() override;
     bool destroyGeometry() override;
     void renderGeometry() const override;

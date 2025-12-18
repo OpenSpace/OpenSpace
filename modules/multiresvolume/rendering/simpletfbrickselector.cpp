@@ -24,12 +24,15 @@
 
 #include <modules/multiresvolume/rendering/simpletfbrickselector.h>
 
-#include <modules/multiresvolume/rendering/tsp.h>
+#include <modules/multiresvolume/rendering/brickcover.h>
 #include <modules/multiresvolume/rendering/histogrammanager.h>
+#include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <algorithm>
+#include <cmath>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "SimpleTfBrickSelector";

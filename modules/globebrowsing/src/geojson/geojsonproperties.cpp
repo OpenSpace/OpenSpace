@@ -28,10 +28,13 @@
 #include <openspace/documentation/documentation.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <geos/io/GeoJSON.h>
 #include <scn/scan.h>
 #include <algorithm>
-#include <cstdio>
+#include <array>
+#include <filesystem>
+#include <format>
 
 // Keys used to read properties from GeoJson files
 namespace geojson::propertykeys {

@@ -26,17 +26,24 @@
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/sphere.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <cmath>
+#include <filesystem>
+#include <limits>
+#include <memory>
 #include <optional>
 
 namespace {
@@ -67,8 +74,8 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    enum class Orientation : int {
-        Outside = 0,
+    enum class Orientation {
+        Outside,
         Inside,
         Both
     };
@@ -85,6 +92,20 @@ namespace {
         "MirrorTexture",
         "Mirror texture",
         "If true, mirror the texture along the x-axis.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    enum class TextureProjection {
+        Equirectangular,
+        AngularFisheye
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TextureProjectionInfo = {
+        "TextureProjection",
+        "Texture Projection",
+        "Specifies the projection mapping to use for any texture loaded onto the sphere "
+        "(assumes Equirectangular per default). Note that for \"Angular Fisheye\" only "
+        "half the sphere will be textured - the hemisphere centered around the z-axis.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -145,10 +166,11 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    // This `Renderable` represents a simple sphere with an image. The image that is shown
-    // should be in an equirectangular projection/spherical panoramic image or else
-    // distortions will be introduced. The `Orientation` parameter determines whether the
-    // provided image is shown on the inside, outside, or both sides of the sphere.
+    // This `Renderable` represents a simple sphere with an image. Per default, the
+    // sphere uses an equirectangular projection for the image mapping.
+    //
+    // The `Orientation` parameter determines whether the provided image is shown on
+    // the inside, outside, or both sides of the sphere.
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<float> size [[codegen::greater(0.f)]];
@@ -167,6 +189,14 @@ namespace {
 
         // [[codegen::verbatim(MirrorTextureInfo.description)]]
         std::optional<bool> mirrorTexture;
+
+        enum class [[codegen::map(TextureProjection)]] TextureProjection {
+            Equirectangular,
+            AngularFisheye [[codegen::key("Angular Fisheye")]]
+        };
+
+        // [[codegen::verbatim(TextureProjectionInfo.description)]]
+        std::optional<TextureProjection> textureProjection;
 
         // [[codegen::verbatim(DisableFadeInOutInfo.description)]]
         std::optional<bool> disableFadeInOut;
@@ -204,6 +234,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _segments(SegmentsInfo, 16, 4, 1000)
     , _orientation(OrientationInfo)
     , _mirrorTexture(MirrorTextureInfo, false)
+    , _textureProjection(TextureProjectionInfo)
     , _disableFadeInDistance(DisableFadeInOutInfo, false)
     , _fadeInThreshold(FadeInThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
     , _fadeOutThreshold(FadeOutThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
@@ -242,6 +273,15 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
 
     _mirrorTexture = p.mirrorTexture.value_or(_mirrorTexture);
     addProperty(_mirrorTexture);
+
+    _textureProjection.addOptions({
+        { static_cast<int>(TextureProjection::Equirectangular), "Equirectangular" },
+        { static_cast<int>(TextureProjection::AngularFisheye), "Angular Fisheye" }
+    });
+    _textureProjection = p.textureProjection.has_value() ?
+        static_cast<int>(codegen::map<TextureProjection>(*p.textureProjection)) :
+        static_cast<int>(TextureProjection::Equirectangular);
+    addProperty(_textureProjection);
 
     _disableFadeInDistance = p.disableFadeInOut.value_or(_disableFadeInDistance);
     addProperty(_disableFadeInDistance);
@@ -438,6 +478,8 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     bindTexture();
     defer{ unbindTexture(); };
     _shader->setUniform(_uniformCache.colorTexture, unit);
+
+    _shader->setUniform(_uniformCache.textureProjection, _textureProjection.value());
 
     // Setting these states should not be necessary,
     // since they are the default state in OpenSpace.

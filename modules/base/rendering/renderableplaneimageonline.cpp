@@ -25,13 +25,16 @@
 #include <modules/base/rendering/renderableplaneimageonline.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <cstdlib>
+#include <limits>
+#include <memory>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
@@ -43,7 +46,7 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    // A RenderablePlaneImageOnline creates a textured 3D plane, where the texture image
+    // A `RenderablePlaneImageOnline` creates a textured 3D plane, where the texture image
     // is loaded from the internet though a web URL.
     struct [[codegen::Dictionary(RenderablePlaneImageOnline)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]

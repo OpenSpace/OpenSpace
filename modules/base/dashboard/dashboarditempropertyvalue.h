@@ -33,8 +33,6 @@ namespace openspace {
 
 namespace properties { class Property; }
 
-namespace documentation { struct Documentation; }
-
 class DashboardItemPropertyValue : public DashboardTextItem {
 public:
     DashboardItemPropertyValue(const ghoul::Dictionary& dictionary);

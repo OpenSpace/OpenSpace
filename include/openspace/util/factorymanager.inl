@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/templatefactory.h>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 
@@ -32,7 +33,6 @@ void FactoryManager::addFactory(std::string name) {
     auto f = std::make_unique<ghoul::TemplateFactory<T>>();
     _factories.push_back({ std::move(f), std::move(name) });
 }
-
 
 template <class T>
 ghoul::TemplateFactory<T>* FactoryManager::factory() const {

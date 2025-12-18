@@ -27,9 +27,9 @@
 
 #include <modules/server/include/topics/topic.h>
 
-namespace openspace::properties { class Property; }
-
 namespace openspace {
+
+namespace properties { class Property; }
 
 class SubscriptionTopic : public Topic {
 public:

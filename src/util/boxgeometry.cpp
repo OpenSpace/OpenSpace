@@ -24,9 +24,8 @@
 
 #include <openspace/util/boxgeometry.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <string>
+#include <array>
+#include <utility>
 
 namespace openspace {
 

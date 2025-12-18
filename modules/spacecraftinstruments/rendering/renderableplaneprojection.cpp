@@ -25,21 +25,28 @@
 #include <modules/spacecraftinstruments/rendering/renderableplaneprojection.h>
 
 #include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
+#include <modules/spacecraftinstruments/util/image.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/projection.hpp>
+#include <algorithm>
+#include <array>
+#include <cstdlib>
+#include <limits>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePlaneProjection";

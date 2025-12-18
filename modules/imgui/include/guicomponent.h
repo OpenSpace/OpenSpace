@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_IMGUI___GUICOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
+
 #include <openspace/properties/scalar/boolproperty.h>
 
 namespace openspace::gui {

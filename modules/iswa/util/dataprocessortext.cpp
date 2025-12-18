@@ -25,9 +25,12 @@
 #include <modules/iswa/util/dataprocessortext.h>
 
 #include <openspace/properties/misc/selectionproperty.h>
-#include <openspace/util/histogram.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/stringhelper.h>
 #include <algorithm>
+#include <cmath>
+#include <iterator>
+#include <set>
 #include <sstream>
 
 namespace openspace {

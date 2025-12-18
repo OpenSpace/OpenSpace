@@ -28,13 +28,17 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/texture.h>
-#include <iterator>
+#include <cmath>
 #include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 namespace {
     constexpr std::string_view _loggerCat = "TransferFunction";
@@ -197,7 +201,7 @@ void TransferFunction::setTextureFromTxt() {
 
     _texture = std::make_unique<ghoul::opengl::Texture>(
         transferFunction,
-        glm::size3_t(width, 1, 1),
+        glm::uvec3(width, 1, 1),
         GL_TEXTURE_1D,
         ghoul::opengl::Texture::Format::RGBA,
         GL_RGBA,

@@ -31,22 +31,24 @@
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/glm.h>
+#include <ghoul/font/font.h>
+#include <filesystem>
+#include <memory>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul {
+    namespace opengl { class ProgramObject; }
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 
-struct RenderData;
-
 namespace documentation { struct Documentation; }
 namespace globebrowsing { class RenderableGlobe; }
+struct RenderData;
 
 class GlobeLabelsComponent : public properties::PropertyOwner, public Fadeable {
 public:

@@ -30,13 +30,10 @@
 #include <modules/volume/transferfunctionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/rendering/transferfunction.h>
 #include <memory>
-#include <string>
 
-namespace openspace {
-    class Histogram;
-    class TransferFunction;
-} // namespace openspace
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace::volume {
 

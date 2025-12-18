@@ -26,13 +26,17 @@
 #define __OPENSPACE_CORE___EVENTENGINE___H__
 
 #include <openspace/events/event.h>
-#include <openspace/scripting/lualibrary.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/memorypool.h>
+#include <functional>
+#include <optional>
+#include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace openspace {
 
-namespace events { struct Event; }
+namespace scripting { struct LuaLibrary; }
 
 class EventEngine {
 public:

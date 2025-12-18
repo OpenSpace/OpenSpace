@@ -25,11 +25,14 @@
 #include <openspace/data/datamapping.h>
 
 #include <openspace/documentation/documentation.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/crc32.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringconversion.h>
 #include <ghoul/misc/stringhelper.h>
-#include <string_view>
+#include <algorithm>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePolygonCloud";
@@ -38,9 +41,7 @@ namespace {
     constexpr std::string_view DefaultY = "y";
     constexpr std::string_view DefaultZ = "z";
 
-    enum class PositionColumn {
-        X, Y, Z
-    };
+    enum class PositionColumn { X, Y, Z };
 
     bool checkPosColumnInternal(PositionColumn columnCase, const std::string& c,
                          const std::optional<openspace::dataloader::DataMapping>& mapping,

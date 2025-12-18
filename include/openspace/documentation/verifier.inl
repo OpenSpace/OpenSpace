@@ -22,13 +22,33 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
-#include <functional>
+#include <ghoul/misc/stringconversion.h>
 #include <iterator>
 #include <numeric>
+#include <sstream>
+#include <type_traits>
+#include <utility>
 
 namespace openspace::documentation {
+
+// Workaround for macOS libc++ std::format with std::vector<bool>
+namespace detail {
+    template <typename T>
+    decltype(auto) format_value(T&& value) {
+        using Type = std::remove_cvref_t<T>;
+        if constexpr (std::is_same_v<Type, std::vector<bool>::reference> ||
+                        std::is_same_v<Type, std::vector<bool>::const_reference>)
+        {
+            return static_cast<bool>(std::forward<T>(value));
+        }
+        else {
+            return std::forward<T>(value);
+        }
+    }
+} // detail
 
 template <>
 TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dict,
@@ -71,7 +91,7 @@ TestResult TemplateVerifier<T>::operator()(const ghoul::Dictionary& dict,
 
 template <typename T>
 std::string TemplateVerifier<T>::documentation() const {
-    return "Value of type '" + type() + "'";
+    return std::format("Value of type '{}'", type());
 }
 
 template <typename T>
@@ -83,7 +103,7 @@ std::string Vector2Verifier<T>::type() const {
         return "Vector2<double>";
     }
     else {
-        return std::string("Vector2<") + typeid(T).name() + ">";
+        return std::format("Vector2<{}>", typeid(T).name());
     }
 }
 
@@ -96,7 +116,7 @@ std::string Vector3Verifier<T>::type() const {
         return "Vector3<double>";
     }
     else {
-        return std::string("Vector3<") + typeid(T).name() + ">";
+        return std::format("Vector3<{}>", typeid(T).name());
     }
 }
 
@@ -109,7 +129,7 @@ std::string Vector4Verifier<T>::type() const {
         return "Vector4<double>";
     }
     else {
-        return std::string("Vector4<") + typeid(T).name() + ">";
+        return std::format("Vector4<{}>", typeid(T).name());
     }
 }
 
@@ -122,7 +142,7 @@ std::string Matrix2x2Verifier<T>::type() const {
         return "Matrix2x2<double>";
     }
     else {
-        return std::string("Matrix2x2<") + typeid(T).name() + ">";
+        return std::format("Matrix2x2<{}>", typeid(T).name());
     }
 }
 
@@ -135,7 +155,7 @@ std::string Matrix2x3Verifier<T>::type() const {
         return "Matrix2x3<double>";
     }
     else {
-        return std::string("Matrix2x3<") + typeid(T).name() + ">";
+        return std::format("Matrix2x3<{}>", typeid(T).name());
     }
 }
 
@@ -148,7 +168,7 @@ std::string Matrix2x4Verifier<T>::type() const {
         return "Matrix2x4<double>";
     }
     else {
-        return std::string("Matrix2x4<") + typeid(T).name() + ">";
+        return std::format("Matrix2x4<{}>", typeid(T).name());
     }
 }
 
@@ -161,7 +181,7 @@ std::string Matrix3x2Verifier<T>::type() const {
         return "Matrix3x2<double>";
     }
     else {
-        return std::string("Matrix3x2<") + typeid(T).name() + ">";
+        return std::format("Matrix3x2<{}>", typeid(T).name());
     }
 }
 
@@ -174,7 +194,7 @@ std::string Matrix3x3Verifier<T>::type() const {
         return "Matrix3x3<double>";
     }
     else {
-        return std::string("Matrix3x3<") + typeid(T).name() + ">";
+        return std::format("Matrix3x3<{}>", typeid(T).name());
     }
 }
 
@@ -187,7 +207,7 @@ std::string Matrix3x4Verifier<T>::type() const {
         return "Matrix3x4<double>";
     }
     else {
-        return std::string("Matrix3x4<") + typeid(T).name() + ">";
+        return std::format("Matrix3x4<{}>", typeid(T).name());
     }
 }
 
@@ -200,7 +220,7 @@ std::string Matrix4x2Verifier<T>::type() const {
         return "Matrix4x2<double>";
     }
     else {
-        return std::string("Matrix4x2<") + typeid(T).name() + ">";
+        return std::format("Matrix4x2<{}>", typeid(T).name());
     }
 }
 
@@ -213,7 +233,7 @@ std::string Matrix4x3Verifier<T>::type() const {
         return "Matrix4x3<double>";
     }
     else {
-        return std::string("Matrix4x3<") + typeid(T).name() + ">";
+        return std::format("Matrix4x3<{}>", typeid(T).name());
     }
 }
 
@@ -226,7 +246,7 @@ std::string Matrix4x4Verifier<T>::type() const {
         return "Matrix4x4<double>";
     }
     else {
-        return std::string("Matrix4x4<") + typeid(T).name() + ">";
+        return std::format("Matrix4x4<{}>", typeid(T).name());
     }
 }
 
@@ -254,7 +274,7 @@ TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& di
         else if constexpr (std::is_same_v<typename T::Type, int>) {
             const double d = dict.value<double>(key);
             double intPart;
-            bool isInt = modf(d, &intPart) == 0.0;
+            bool isInt = std::modf(d, &intPart) == 0.0;
             if (isInt) {
                 val = static_cast<int>(d);
             }
@@ -292,32 +312,32 @@ TestResult OperatorVerifier<T, Operator>::operator()(const ghoul::Dictionary& di
 
 template <typename T>
 std::string LessVerifier<T>::documentation() const {
-    return "Less than: " + ghoul::to_string(value);
+    return std::format("Less than: {}", ghoul::to_string(value));
 }
 
 template <typename T>
 std::string LessEqualVerifier<T>::documentation() const {
-    return "Less or equal to: " + ghoul::to_string(value);
+    return std::format("Less or equal to: {}", ghoul::to_string(value));
 }
 
 template <typename T>
 std::string GreaterVerifier<T>::documentation() const {
-    return "Greater than: " + ghoul::to_string(value);
+    return std::format("Greater than: {}", ghoul::to_string(value));
 }
 
 template <typename T>
 std::string GreaterEqualVerifier<T>::documentation() const {
-    return "Greater or equal to: " + ghoul::to_string(value);
+    return std::format("Greater or equal to: {}", ghoul::to_string(value));
 }
 
 template <typename T>
 std::string EqualVerifier<T>::documentation() const {
-    return "Equal to: " + ghoul::to_string(value);
+    return std::format("Equal to: {}", ghoul::to_string(value));
 }
 
 template <typename T>
 std::string UnequalVerifier<T>::documentation() const {
-    return "Unequal to: " + ghoul::to_string(value);
+    return std::format("Unequal to: {}", ghoul::to_string(value));
 }
 
 template <typename T>
@@ -376,7 +396,7 @@ TestResult InListVerifier<T>::operator()(const ghoul::Dictionary& dict,
             std::string list = std::accumulate(
                 values.begin() + 1,
                 values.end(),
-                std::format("{}", values.front()),
+                std::format("{}", detail::format_value(values.front())),
                 [](std::string lhs, typename T::Type rhs) {
                     return std::format("{}, {}", lhs, rhs);
                 }
@@ -543,7 +563,7 @@ TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
         else if constexpr (std::is_same_v<typename T::Type, int>) {
             const double d = dict.value<double>(key);
             double intPart;
-            bool isInt = modf(d, &intPart) == 0.0;
+            const bool isInt = std::modf(d, &intPart) == 0.0;
             if (isInt) {
                 val = static_cast<int>(d);
             }
@@ -583,8 +603,9 @@ TestResult InRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
 
 template <typename T>
 std::string InRangeVerifier<T>::documentation() const {
-    return "In range: ( " + ghoul::to_string(lower) + "," +
-           ghoul::to_string(upper) + " )";
+    return std::format(
+        "In range: ( {}, {})", ghoul::to_string(lower), ghoul::to_string(upper)
+    );
 }
 
 template <typename T>
@@ -636,7 +657,7 @@ TestResult NotInRangeVerifier<T>::operator()(const ghoul::Dictionary& dict,
         else if constexpr (std::is_same_v<typename T::Type, int>) {
             const double d = dict.value<double>(key);
             double intPart;
-            bool isInt = modf(d, &intPart) == 0.0;
+            const bool isInt = std::modf(d, &intPart) == 0.0;
             if (isInt) {
                 val = static_cast<int>(d);
             }

@@ -24,14 +24,15 @@
 
 #include <modules/server/include/topics/setpropertytopic.h>
 
-#include <openspace/json.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
+#include <stdexcept>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "SetPropertyTopic";

@@ -25,9 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___SKIRTEDGRID___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___SKIRTEDGRID___H__
 
-#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <vector>
 
 namespace openspace::globebrowsing {
 

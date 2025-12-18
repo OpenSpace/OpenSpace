@@ -28,11 +28,8 @@
 #include <openspace/util/task.h>
 
 #include <filesystem>
-#include <string>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class ReadSpeckTask : public Task {
 public:

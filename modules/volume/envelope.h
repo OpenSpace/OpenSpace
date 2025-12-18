@@ -27,6 +27,9 @@
 
 #include <openspace/json.h>
 #include <ghoul/glm.h>
+#include <string>
+#include <utility>
+#include <vector>
 
 struct lua_State;
 

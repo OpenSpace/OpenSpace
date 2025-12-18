@@ -26,7 +26,14 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
+#include <openspace/scripting/lualibrary.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
+#include <algorithm>
+#include <cstdint>
+#include <string_view>
+#include <utility>
 
 #include "eventengine_lua.inl"
 

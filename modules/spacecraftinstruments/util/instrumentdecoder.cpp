@@ -25,8 +25,6 @@
 #include <modules/spacecraftinstruments/util/instrumentdecoder.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <ghoul/misc/assert.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>

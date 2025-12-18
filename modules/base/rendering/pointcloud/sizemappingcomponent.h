@@ -31,6 +31,8 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
+namespace ghoul { class Dictionary; }
+
 namespace openspace {
 
 namespace documentation { struct Documentation; }

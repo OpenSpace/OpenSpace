@@ -25,10 +25,13 @@
 #ifndef __OPENSPACE_MODULE_GAIA___READFILEJOB___H__
 #define __OPENSPACE_MODULE_GAIA___READFILEJOB___H__
 
-#include <openspace/util/concurrentjobmanager.h>
+#include <openspace/util/job.h>
 
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <filesystem>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace openspace::gaia {
 

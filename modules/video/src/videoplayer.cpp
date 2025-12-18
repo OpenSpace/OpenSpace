@@ -24,18 +24,26 @@
 
 #include <modules/video/include/videoplayer.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/syncengine.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
+#include <render_gl.h>
+#include <ghoul/opengl/texture.h>
+#include <cstdint>
+#include <cstdlib>
+#include <optional>
 
 namespace {
     constexpr std::string_view _loggerCat = "VideoPlayer";
@@ -74,7 +82,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AudioInfo = {
         "PlayAudio",
         "Play audio",
-        "Play audio."
+        "Decides whether to play audio when playing back the video."
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {
@@ -133,8 +141,9 @@ namespace {
             RealTimeLoop
         };
 
-        // The mode of how the video should be played back.
-        // Default is video is played back according to the set start and end times.
+        // The mode of how the video is played back. The Default is `RealTimeLoop`,
+        // which means that the video is played in realtime using the `Play` command
+        // in the user interface.
         std::optional<PlaybackMode> playbackMode;
     };
 #include "videoplayer_codegen.cpp"
@@ -235,7 +244,7 @@ documentation::Documentation VideoPlayer::Documentation() {
 }
 
 VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
-    : PropertyOwner({ "VideoPlayer" })
+    : PropertyOwner({ "VideoPlayer", "Video Player"})
     , _play(PlayInfo)
     , _pause(PauseInfo)
     , _goToStart(GoToStartInfo)

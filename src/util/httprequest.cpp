@@ -24,12 +24,13 @@
 
 #include <openspace/util/httprequest.h>
 
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <curl/curl.h>
+#include <array>
 #include <filesystem>
+#include <utility>
+#include <cstdint>
 
 namespace openspace {
 
@@ -252,8 +253,6 @@ bool HttpDownload::setup() {
 bool HttpDownload::teardown() {
     return true;
 }
-
-
 
 std::atomic_int HttpFileDownload::nCurrentFileHandles = 0;
 std::mutex HttpFileDownload::_directoryCreationMutex;

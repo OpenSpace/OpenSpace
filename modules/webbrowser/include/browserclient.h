@@ -38,8 +38,8 @@
 
 namespace openspace {
 
-class WebRenderHandler;
 class WebKeyboardHandler;
+class WebRenderHandler;
 
 class BrowserClient : public CefClient {
 public:

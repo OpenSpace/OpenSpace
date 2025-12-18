@@ -24,9 +24,25 @@
 
 #include <openspace/interaction/keyframerecordinghandler.h>
 
+#include <openspace/engine/globals.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/navigation/keyframenavigator.h>
+#include <openspace/network/messagestructures.h>
 #include <openspace/network/messagestructureshelper.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/timemanager.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <algorithm>
+#include <filesystem>
+#include <optional>
+#include <string>
+#include <utility>
+#include <variant>
+#include <vector>
 
 #include "keyframerecordinghandler_lua.inl"
 

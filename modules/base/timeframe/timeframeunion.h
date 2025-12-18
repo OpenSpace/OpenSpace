@@ -29,10 +29,6 @@
 
 namespace openspace {
 
-class Time;
-
-namespace documentation { struct Documentation; }
-
 class TimeFrameUnion : public TimeFrame {
 public:
     explicit TimeFrameUnion(const ghoul::Dictionary& dictionary);

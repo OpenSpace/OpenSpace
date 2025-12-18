@@ -1,6 +1,6 @@
 <GDAL_WMS>
   <Service name="TMS">
-    <ServerURL>http://wms.itn.liu.se/Mars/CTX/tile/${z}/${y}/${x}</ServerURL>
+    <ServerURL>http://liu-se.wms.openspaceproject.com/Mars/CTX/tile/${z}/${y}/${x}</ServerURL>
   </Service>
   <DataWindow>
     <UpperLeftX>-180.0</UpperLeftX>

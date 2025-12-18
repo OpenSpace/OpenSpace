@@ -27,11 +27,9 @@
 
 #include <modules/server/include/topics/topic.h>
 
-#include <openspace/mission/mission.h>
-
-using nlohmann::json;
-
 namespace openspace {
+
+class MissionPhase;
 
 class MissionTopic : public Topic {
 public:

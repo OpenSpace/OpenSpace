@@ -23,7 +23,9 @@
  ****************************************************************************************/
 
 #include <modules/volume/transferfunctionproperty.h>
-#include <ghoul/lua/ghoul_lua.h>
+
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/lua/lua_types.h>
 
 namespace openspace::properties {
 

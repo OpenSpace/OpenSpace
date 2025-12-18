@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <modules/volume/volumeutils.h>
+#include <functional>
 
 namespace openspace::volume {
 
@@ -45,7 +46,7 @@ void RawVolume<VoxelType>::setDimensions(const glm::uvec3& dimensions) {
     _data.resize(nCells());
 }
 
-template<typename VoxelType>
+template <typename VoxelType>
 size_t RawVolume<VoxelType>::nCells() const
 {
     return static_cast<size_t>(_dimensions.x) * static_cast<size_t>(_dimensions.y) *

@@ -26,6 +26,8 @@
 #define __OPENSPACE_MODULE_SERVER___TOPIC___H__
 
 #include <openspace/json.h>
+#include <memory>
+#include <string>
 
 namespace openspace {
 

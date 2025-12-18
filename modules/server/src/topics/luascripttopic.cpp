@@ -24,14 +24,17 @@
 
 #include <modules/server/include/topics/luascripttopic.h>
 
-#include <modules/server/include/jsonconverters.h>
 #include <modules/server/include/connection.h>
-#include <openspace/json.h>
+#include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
+#include <stdexcept>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view KeyScript = "script";

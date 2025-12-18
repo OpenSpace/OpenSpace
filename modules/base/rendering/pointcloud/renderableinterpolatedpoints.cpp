@@ -30,12 +30,14 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/interpolator.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <optional>
+#include <filesystem>
+#include <limits>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableInterpolatedPoints";

@@ -26,13 +26,16 @@
 #define __OPENSPACE_MODULE_SERVER___SERVERINTERFACE___H__
 
 #include <openspace/properties/propertyowner.h>
+
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
+#include <ghoul/io/socket/socketserver.h>
+#include <memory>
 
-namespace ghoul::io { class SocketServer; }
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 

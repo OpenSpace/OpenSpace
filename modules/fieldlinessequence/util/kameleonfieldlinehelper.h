@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONFIELDLINEHELPER___H__
 
 #include <ghoul/glm.h>
+#include <filesystem>
 #include <string>
 #include <unordered_map>
 #include <vector>

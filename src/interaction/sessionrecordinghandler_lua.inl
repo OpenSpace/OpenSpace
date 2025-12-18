@@ -22,7 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/format.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/exception.h>
+#include <filesystem>
+#include <optional>
+#include <string>
+#include <utility>
 
 namespace {
 

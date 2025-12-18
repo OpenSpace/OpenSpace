@@ -29,33 +29,20 @@
 #include <openspace/rendering/shadowmapping.h>
 
 #include <openspace/properties/matrix/dmat4property.h>
-#include <openspace/properties/matrix/mat3property.h>
 #include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
-#include <ghoul/io/model/modelreader.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
-#include <optional>
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
 
 namespace ghoul::modelgeometry { class ModelGeometry; }
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
 class LightSource;
-
-namespace documentation { struct Documentation; }
 
 class RenderableModel : public Renderable, public Shadower {
 public:
@@ -122,12 +109,12 @@ private:
     std::filesystem::path _fragmentShaderPath;
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, normalTransform, meshTransform,
-        meshNormalTransform, ambientIntensity, diffuseIntensity,
-        specularIntensity, specularPower, performShading, use_forced_color, has_texture_diffuse,
-        has_texture_normal, has_texture_specular, has_color_specular,
-        texture_diffuse, texture_normal, texture_specular, color_diffuse,
-        color_specular, opacity, nLightSources, lightDirectionsViewSpace,
-        lightIntensities, performManualDepthTest, gBufferDepthTexture, resolution
+        meshNormalTransform, ambientIntensity, diffuseIntensity, specularIntensity,
+        specularPower, performShading, use_forced_color, has_texture_diffuse,
+        has_texture_normal, has_texture_specular, has_color_specular, texture_diffuse,
+        texture_normal, texture_specular, color_diffuse, color_specular, opacity,
+        nLightSources, lightDirectionsViewSpace, lightIntensities, performManualDepthTest,
+        gBufferDepthTexture, resolution
     ) _uniformCache;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;

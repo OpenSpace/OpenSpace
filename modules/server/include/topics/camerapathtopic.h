@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_SERVER___CAMERAPATHTOPIC___H__
 
 #include <modules/server/include/topics/topic.h>
+
 #include <chrono>
 
 namespace openspace {

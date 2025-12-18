@@ -27,8 +27,10 @@
 #include <openspace/documentation/documentation.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <fstream>
 #include <optional>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "StateMachine";

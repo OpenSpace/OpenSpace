@@ -25,30 +25,29 @@
 #include <modules/globebrowsing/src/ringscomponent.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <array>
+#include <cstddef>
 #include <filesystem>
-#include <fstream>
-#include <cstdlib>
-#include <locale>
+#include <memory>
+#include <optional>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "RingsComponent";
@@ -351,7 +350,7 @@ void RingsComponent::initializeGL() {
     glGenBuffers(1, &_vertexPositionBuffer);
 
     createPlane();
-    
+
     // Check if readiness state has changed after shader compilation
     checkAndNotifyReadinessChange();
 }
@@ -487,9 +486,9 @@ void RingsComponent::draw(const RenderData& data,
         _shader->setUniform(_uniformCache.colorFilterValue, _colorFilter);
         _shader->setUniform(_uniformCache.nightFactor, _nightFactor);
         _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
-        
+
         _shader->setUniform(_uniformCache.sunPositionObj, sunPositionObjectSpace);
-        
+
         _shader->setUniform(
             _uniformCache.modelViewProjectionMatrix,
             modelViewProjectionTransform
@@ -679,7 +678,7 @@ void RingsComponent::loadTexture() {
                 "Loaded transparency texture from '{}'", absPath(_textureTransparencyPath)
             ));
             _textureTransparency = std::move(textureTransparency);
-            
+
             _textureTransparency->uploadTexture();
             _textureTransparency->setFilter(Texture::FilterMode::AnisotropicMipMap);
 
@@ -691,7 +690,7 @@ void RingsComponent::loadTexture() {
     }
 
     _isAdvancedTextureEnabled = _textureForwards && _textureBackwards && _textureUnlit;
-    
+
     // Check if readiness state has changed after loading textures
     checkAndNotifyReadinessChange();
 }
@@ -784,7 +783,7 @@ void RingsComponent::compileShadowShader() {
     catch (const ghoul::RuntimeError& e) {
         LERROR(e.message);
     }
-    
+
     // Check if readiness state has changed after shader compilation
     checkAndNotifyReadinessChange();
 }

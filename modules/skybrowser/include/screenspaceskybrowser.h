@@ -26,12 +26,13 @@
 #define __OPENSPACE_MODULE_SKYBROWSER___SCREENSPACESKYBROWSER___H__
 
 #include <modules/webbrowser/include/screenspacebrowser.h>
-#include <modules/skybrowser/include/wwtcommunicator.h>
 
-#include <openspace/documentation/documentation.h>
+#include <modules/skybrowser/include/wwtcommunicator.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <chrono>
+#include <utility>
 
 namespace openspace {
 
@@ -84,7 +85,8 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    static constexpr int RadiusTimeOut = 25;
+    static constexpr int RadiusTimeout = 25;
+
     properties::BoolProperty _isHidden;
     properties::BoolProperty _isPointingSpacecraft;
     properties::BoolProperty _updateDuringTargetAnimation;

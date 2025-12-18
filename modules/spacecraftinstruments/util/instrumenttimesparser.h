@@ -30,6 +30,8 @@
 #include <filesystem>
 #include <regex>
 
+namespace ghoul { class Dictionary; }
+
 namespace openspace {
 
 class InstrumentTimesParser : public SequenceParser {

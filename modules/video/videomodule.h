@@ -27,8 +27,6 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <openspace/properties/scalar/boolproperty.h>
-
 namespace openspace {
 
 class VideoModule : public OpenSpaceModule {

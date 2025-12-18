@@ -26,7 +26,7 @@
 #define __OPENSPACE_CORE___ELLIPSOID___H__
 
 #include <ghoul/glm.h>
-
+#include <utility>
 #include <vector>
 
 namespace openspace {

@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_ISWA___DATAPROCESSOR___H__
 #define __OPENSPACE_MODULE_ISWA___DATAPROCESSOR___H__
 
+#include <openspace/util/histogram.h>
 #include <ghoul/glm.h>
 #include <glm/gtx/std_based_type.hpp>
 #include <memory>
@@ -35,8 +36,6 @@
 namespace openspace {
 
 namespace properties { class SelectionProperty; }
-
-class Histogram;
 
 class DataProcessor {
 public:

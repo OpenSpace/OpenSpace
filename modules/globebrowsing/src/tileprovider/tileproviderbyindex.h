@@ -27,6 +27,9 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
+#include <modules/globebrowsing/src/tileindex.h>
+#include <unordered_map>
+
 namespace openspace::globebrowsing {
 
 class TileProviderByIndex : public TileProvider {

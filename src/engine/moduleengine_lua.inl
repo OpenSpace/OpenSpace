@@ -22,9 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/globals.h>
+
 namespace {
 
-// Checks whether the passed OpenSpaceModule is loaded.
+/**
+ * Checks whether the passed OpenSpaceModule is loaded.
+ */
 [[codegen::luawrap]] bool isLoaded(std::string moduleName) {
     using namespace openspace;
 

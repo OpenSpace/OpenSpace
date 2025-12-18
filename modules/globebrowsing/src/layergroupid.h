@@ -25,9 +25,11 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 
-#include <ghoul/misc/stringconversion.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/exception.h>
+#include <algorithm>
 #include <array>
-#include <string>
+#include <string_view>
 
 namespace openspace::globebrowsing::layers {
 

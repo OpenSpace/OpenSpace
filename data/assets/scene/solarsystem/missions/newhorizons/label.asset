@@ -10,7 +10,7 @@ local models = asset.resource({
 })
 
 local Labels = {
-  Identifier = "Labels",
+  Identifier = "NewHorizonsLabels",
   Parent = NewHorizonsModel.NewHorizons.Identifier,
   Renderable = {
     Type = "RenderableModel",

@@ -27,7 +27,6 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/network/messagestructures.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -35,6 +34,7 @@
 #include <ghoul/designpattern/event.h>
 #include <atomic>
 #include <deque>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <thread>

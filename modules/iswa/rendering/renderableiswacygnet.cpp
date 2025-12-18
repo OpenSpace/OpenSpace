@@ -29,16 +29,20 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/transferfunction.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/designpattern/event.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
+#include <ghoul/misc/dictionary.h>
+#include <cmath>
+#include <cstdlib>
+#include <optional>
 
 namespace {
     constexpr std::string_view _loggerCat = "IswaCygnet";

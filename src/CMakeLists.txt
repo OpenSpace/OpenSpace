@@ -85,6 +85,7 @@ set(OPENSPACE_SOURCE
   navigation/pathnavigator.cpp
   navigation/pathnavigator_lua.inl
   navigation/waypoint.cpp
+  network/messagestructures.cpp
   network/messagestructureshelper.cpp
   network/parallelconnection.cpp
   network/parallelpeer.cpp
@@ -132,6 +133,7 @@ set(OPENSPACE_SOURCE
   rendering/dashboarditem.cpp
   rendering/dashboardtextitem.cpp
   rendering/framebufferrenderer.cpp
+  rendering/deferredcaster.cpp
   rendering/deferredcastermanager.cpp
   rendering/fadeable.cpp
   rendering/helper.cpp
@@ -175,6 +177,7 @@ set(OPENSPACE_SOURCE
   util/collisionhelper.cpp
   util/coordinateconversion.cpp
   util/distanceconversion.cpp
+  util/downloadeventengine.cpp
   util/dynamicfilesequencedownloader.cpp
   util/ellipsoid.cpp
   util/factorymanager.cpp
@@ -190,6 +193,7 @@ set(OPENSPACE_SOURCE
   util/sphere.cpp
   util/spicemanager.cpp
   util/spicemanager_lua.inl
+  util/syncable.cpp
   util/syncbuffer.cpp
   util/tstring.cpp
   util/histogram.cpp
@@ -374,6 +378,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/util/coordinateconversion.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/distanceconstants.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/distanceconversion.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/util/downloadeventengine.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/dynamicfilesequencedownloader.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/ellipsoid.h
   ${PROJECT_SOURCE_DIR}/include/openspace/util/factorymanager.h

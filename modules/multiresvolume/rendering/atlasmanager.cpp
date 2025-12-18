@@ -26,7 +26,10 @@
 
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/opengl/texture.h>
+#include <glm/gtx/std_based_type.hpp>
+#include <cmath>
 #include <cstring>
 
 namespace openspace {

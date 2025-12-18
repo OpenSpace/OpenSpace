@@ -29,11 +29,28 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/interaction/action.h>
+#include <openspace/util/keys.h>
+#include <ghoul/misc/stringconversion.h>
+#include <algorithm>
+#include <map>
+#include <utility>
+#include <vector>
 
 using nlohmann::json;
 
 namespace openspace {
+
+void ActionKeybindTopic::handleJson(const nlohmann::json& input) {
+    const std::string& event = input.at("event").get<std::string>();
+    if (event == "get_all") {
+        sendData(allActionsKeybinds());
+    }
+    else if (event == "get_action") {
+        const std::string& identifier = input.at("identifier").get<std::string>();
+        sendData(action(identifier));
+    }
+}
 
 bool ActionKeybindTopic::isDone() const {
     return true;
@@ -114,17 +131,6 @@ nlohmann::json ActionKeybindTopic::action(const std::string& identifier) const {
 void ActionKeybindTopic::sendData(nlohmann::json data) const {
     nlohmann::json payload = wrappedPayload({ data });
     _connection->sendJson(std::move(payload));
-}
-
-void ActionKeybindTopic::handleJson(const nlohmann::json& input) {
-    const std::string& event = input.at("event").get<std::string>();
-    if (event == "get_all") {
-        sendData(allActionsKeybinds());
-    }
-    else if (event == "get_action") {
-        const std::string& identifier = input.at("identifier").get<std::string>();
-        sendData(action(identifier));
-    }
 }
 
 } // namespace openspace

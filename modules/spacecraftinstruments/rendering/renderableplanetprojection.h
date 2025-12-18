@@ -28,25 +28,23 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
+#include <modules/spacecraftinstruments/util/image.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/sphere.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <memory>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
-
-struct Image;
-class Sphere;
-
-namespace planetgeometry { class PlanetGeometry; }
 
 class RenderablePlanetProjection : public Renderable {
 public:
     explicit RenderablePlanetProjection(const ghoul::Dictionary& dict);
-    ~RenderablePlanetProjection() override;
 
     void initializeGL() override;
     void deinitializeGL() override;

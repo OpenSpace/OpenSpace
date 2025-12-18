@@ -55,7 +55,7 @@ public:
     void resetVelocities();
 
     /**
-     * Returns true if any of the velocities are larger than zero, i.e. wether an
+     * Returns true if any of the velocities are larger than zero, i.e. whether an
      * interaction happened.
      */
     bool hasNonZeroVelocities(bool checkOnlyMovement = false) const;
@@ -63,7 +63,7 @@ public:
 protected:
     template <typename T>
     struct InteractionState {
-        InteractionState(double scaleFactor);
+        explicit InteractionState(double scaleFactor);
         void setFriction(double friction);
         void setVelocityScaleFactor(double scaleFactor);
 

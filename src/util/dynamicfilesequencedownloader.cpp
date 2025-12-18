@@ -24,12 +24,26 @@
 
 #include <openspace/util/dynamicfilesequencedownloader.h>
 
-#include <openspace/util/httprequest.h>
 #include <openspace/json.h>
-#include <openspace/util/timemanager.h>
+#include <openspace/util/httprequest.h>
+#include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
+#include <algorithm>
+#include <chrono>
+#include <cstdlib>
+#include <fstream>
+#include <iterator>
+#include <ostream>
+#include <string_view>
+#include <system_error>
+#include <thread>
 #include <unordered_set>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "DynamicFileSequenceDownloader";
@@ -136,7 +150,7 @@ DynamicFileSequenceDownloader::DynamicFileSequenceDownloader(int dataID,
     requestAvailableFiles(httpDataRequest, _syncDir);
 }
 
-void DynamicFileSequenceDownloader::deinitialize(bool cacheFiles) {
+void DynamicFileSequenceDownloader::deinitialize(bool cacheFiles) const {
     const std::vector<File*>& currentlyDownloadingFiles = filesCurrentlyDownloading();
     for (File* file : currentlyDownloadingFiles) {
         file->download->cancel();
@@ -338,7 +352,7 @@ void DynamicFileSequenceDownloader::requestAvailableFiles(std::string httpDataRe
             fileElement.state = File::State::Available;
         }
         _availableData.push_back(std::move(fileElement));
-        ++index;
+        index++;
     }
 
     const double cadence = calculateCadence();
@@ -446,7 +460,7 @@ void DynamicFileSequenceDownloader::checkForFinishedDownloads() {
         }
         // The file is not finished downloading, move on to next
         else {
-            ++currentIt;
+            currentIt++;
         }
 
         // Since in the if statement one is removed and else statement it got incremented,

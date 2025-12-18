@@ -24,7 +24,6 @@
 
 #include <modules/opensoundcontrol/opensoundcontrolmodule.h>
 
-
 namespace openspace {
 
 OpenSoundControlModule::OpenSoundControlModule() : OpenSpaceModule("OpenSoundControl") {}

@@ -27,11 +27,11 @@
 
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
-#include <ghoul/misc/stringconversion.h>
 #include <array>
-#include <memory>
+#include <cstdint>
 #include <unordered_map>
 #include <string>
+#include <string_view>
 
 namespace openspace::interaction {
 

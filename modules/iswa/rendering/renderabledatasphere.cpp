@@ -31,8 +31,10 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/sphere.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/opengl/programobject.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/programobject.h>
+#include <cmath>
 
 namespace {
     struct [[codegen::Dictionary(RenderableDataSphere)]] Parameters {

@@ -26,9 +26,8 @@
 #define __OPENSPACE_CORE___SYNCENGINE___H__
 
 #include <openspace/util/syncbuffer.h>
-
 #include <ghoul/misc/boolean.h>
-#include <memory>
+#include <cstddef>
 #include <vector>
 
 namespace openspace {

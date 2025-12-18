@@ -26,14 +26,13 @@
 
 #include <modules/base/rendering/renderablenodeline.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/distanceconversion.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <optional>
-#include <string>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableDistanceLabel";

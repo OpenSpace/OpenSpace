@@ -24,13 +24,14 @@
 
 #include <openspace/mission/missionmanager.h>
 
+#include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/scripting/scriptengine.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <openspace/mission/mission.h>
+#include <openspace/scripting/lualibrary.h>
 #include <ghoul/misc/assert.h>
-#include <filesystem>
+#include <ghoul/misc/exception.h>
+#include <utility>
 
 #include "missionmanager_lua.inl"
 

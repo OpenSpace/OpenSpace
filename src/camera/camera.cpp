@@ -25,7 +25,9 @@
 #include <openspace/camera/camera.h>
 
 #include <openspace/camera/camerapose.h>
-#include <sstream>
+#include <openspace/util/syncable.h>
+#include <cmath>
+#include <utility>
 
 namespace openspace {
 

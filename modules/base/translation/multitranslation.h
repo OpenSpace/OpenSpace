@@ -29,10 +29,6 @@
 
 namespace openspace {
 
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
 class MultiTranslation : public Translation {
 public:
     explicit MultiTranslation(const ghoul::Dictionary& dictionary);

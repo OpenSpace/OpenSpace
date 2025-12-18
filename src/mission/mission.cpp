@@ -24,14 +24,22 @@
 
 #include <openspace/mission/mission.h>
 
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <openspace/util/time.h>
+#include <openspace/util/timerange.h>
 #include <algorithm>
 #include <filesystem>
+#include <functional>
 #include <optional>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace {
     struct [[codegen::Dictionary(MissionPhase)]] Parameters {

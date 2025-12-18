@@ -33,8 +33,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class SpiceRotation : public Rotation {
 public:
     explicit SpiceRotation(const ghoul::Dictionary& dictionary);

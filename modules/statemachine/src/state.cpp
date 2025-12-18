@@ -27,6 +27,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/misc/dictionary.h>
+#include <optional>
 
 namespace {
     struct [[codegen::Dictionary(State)]] Parameters {

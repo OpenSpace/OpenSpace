@@ -27,9 +27,9 @@
 
 #include <modules/iswa/rendering/renderableiswacygnet.h>
 
-namespace openspace {
+#include <openspace/engine/downloadmanager.h>
 
-namespace documentation { struct Documentation; }
+namespace openspace {
 
 /**
  * This class exist to abstract away the loading of images from iSWA and updating of the

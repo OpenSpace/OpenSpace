@@ -28,11 +28,13 @@
 #include <openspace/network/messagestructures.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/misc/exception.h>
+#include <cstdint>
+#include <memory>
 #include <vector>
 
 namespace openspace {
 
-class ParallelConnection  {
+class ParallelConnection {
 public:
     enum class Status : uint32_t {
         Disconnected = 0,

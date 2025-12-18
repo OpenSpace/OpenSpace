@@ -25,15 +25,16 @@
 #include "profile/marknodesdialog.h"
 
 #include "profile/line.h"
-#include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
-#include <QEvent>
 #include <QKeyEvent>
 #include <QLabel>
-#include <QLineEdit>
 #include <QListWidget>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <new>
+#include <string>
+#include <utility>
+#include <vector>
 
 MarkNodesDialog::MarkNodesDialog(QWidget* parent, std::vector<std::string>* markedNodes)
     : QDialog(parent)

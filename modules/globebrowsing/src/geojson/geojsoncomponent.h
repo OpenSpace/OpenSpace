@@ -28,11 +28,9 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/fadeable.h>
 
-#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/geojson/geojsonproperties.h>
 #include <modules/globebrowsing/src/geojson/globegeometryfeature.h>
 #include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -40,20 +38,22 @@
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/helper.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/glm.h>
+#include <memory>
 #include <optional>
-#include <vector>
 
+namespace geos {
+    namespace geom { class Geometry; }
+    namespace io { class GeoJSONFeature; }
+} // namespace geos
+namespace ghoul {
+    namespace opengl { class ProgramObject; }
+    class Dictionary;
+} // namespace ghoul
 namespace openspace {
-    struct RenderData;
-    class LightSource;
     namespace documentation { struct Documentation; }
-    namespace rendering::helper { struct VertexXYZNormal; }
-} // namespace::openspace
-
-namespace ghoul::opengl { class ProgramObject; }
-namespace geos::io { class GeoJSONFeature; }
+    class LightSource;
+    struct RenderData;
+} // namespace openspace
 
 namespace openspace::globebrowsing {
 

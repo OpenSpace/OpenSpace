@@ -27,9 +27,10 @@
 
 #include <modules/volume/volumegridtype.h>
 #include <ghoul/glm.h>
+#include <string>
 
-namespace openspace::documentation { struct Documentation; }
 namespace ghoul { class Dictionary; }
+namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::volume {
 

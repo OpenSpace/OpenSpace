@@ -25,24 +25,29 @@
 #include "launcherwindow.h"
 
 #include "profile/profileedit.h"
+#include "sgctedit/sgctedit.h"
 #include "backgroundimage.h"
 #include "notificationwindow.h"
 #include "settingsdialog.h"
 #include "splitcombobox.h"
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/settings.h>
 #include <openspace/openspace.h>
+#include <openspace/scene/profile.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <sgct/config.h>
 #include <QFile>
 #include <QKeyEvent>
-#include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QStandardItemModel>
-#include <filesystem>
-#include <fstream>
 #include <iostream>
+#include <cassert>
+#include <stdexcept>
+#include <utility>
 
 using namespace openspace;
 
@@ -148,9 +153,18 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
 
     {
         QFile file(":/qss/launcher.qss");
-        file.open(QFile::ReadOnly);
-        const QString styleSheet = QLatin1String(file.readAll());
-        setStyleSheet(styleSheet);
+        const bool success = file.open(QFile::ReadOnly);
+        if (!success) {
+            QMessageBox::critical(
+                this,
+                "Missing QSS",
+                "Could not find launcher.qss"
+            );
+        }
+        else {
+            const QString styleSheet = QLatin1String(file.readAll());
+            setStyleSheet(styleSheet);
+        }
     }
 
     QWidget* centralWidget = new QWidget;

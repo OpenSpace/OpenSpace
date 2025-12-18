@@ -31,12 +31,6 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace ghoul::opengl {
-    class ProgramObject;
-} // namespace ghoul::opengl
-
-namespace openspace::documentation { struct Documentation; }
-
 namespace openspace {
 
 class RenderableBoxGrid : public Renderable {

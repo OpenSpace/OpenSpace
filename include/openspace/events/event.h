@@ -28,10 +28,12 @@
 #include <openspace/util/tstring.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
+#include <cstdint>
+#include <filesystem>
+#include <string_view>
 
 namespace openspace {
     namespace properties { class Property; }
-
     class Camera;
     class Layer;
     class Profile;
@@ -60,7 +62,7 @@ struct Event {
     enum class Type : uint8_t {
         ParallelConnection,
         ProfileLoadingFinished,
-        AssetLoadingFinished,
+        AssetLoading,
         ApplicationShutdown,
         CameraFocusTransition,
         TimeOfInterestReached,
@@ -152,17 +154,32 @@ struct EventProfileLoadingFinished : public Event {
 };
 
 /**
-* This event is created when the loading of all assets are finished. This is emitted
-* regardless of whether it is the initial startup of a profile, or any subsequent asset
-* being loaded e.g., through add or drag-and-drop.
+* This event is created whenever the loading state of an assets changes. An asset can
+* enter one of four states: `Loading`, `Loaded`, `Unloaded`, or `Error`. This event is
+* emitted regardless of whether it is the initial startup of a profile, or any subsequent
+* asset being added or revmoed e.g., through add or drag-and-drop.
 */
-struct EventAssetLoadingFinished : public Event {
-    static constexpr Type Type = Event::Type::AssetLoadingFinished;
+struct EventAssetLoading : public Event {
+    static constexpr Type Type = Event::Type::AssetLoading;
+
+    enum class State {
+        Loaded,
+        Loading,
+        Unloaded,
+        Error
+    };
 
     /**
-     * Creates an instance of an AssetLoadingFinished event.
+     * Creates an instance of an AssetLoading event.
+     *
+     * \param assetPath_ The path to the asset
+     * \param newState The new state of the asset given by 'asstPath_'; is one of
+                       `Loading`, `Loaded`, `Unloaded`, or `Error`
      */
-    EventAssetLoadingFinished();
+    EventAssetLoading(const std::filesystem::path& assetPath_, State newState);
+
+    std::filesystem::path assetPath;
+    State state;
 };
 
 /**

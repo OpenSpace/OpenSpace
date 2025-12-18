@@ -27,7 +27,11 @@
 
 #include <QDialog>
 
+#include <map>
+#include <string>
+
 class QCheckBox;
+class QWidget;
 
 class UiPanelsDialog final : public QDialog {
 Q_OBJECT

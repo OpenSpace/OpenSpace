@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
- #ifndef __OPENSPACE_MODULE_ISWA___ISWAMODULE___H__
- #define __OPENSPACE_MODULE_ISWA___ISWAMODULE___H__
+#ifndef __OPENSPACE_MODULE_ISWA___ISWAMODULE___H__
+#define __OPENSPACE_MODULE_ISWA___ISWAMODULE___H__
 
- #include <openspace/util/openspacemodule.h>
+#include <openspace/util/openspacemodule.h>
 
- namespace openspace {
+namespace openspace {
 
 class IswaModule : public OpenSpaceModule {
 public:

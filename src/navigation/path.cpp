@@ -24,22 +24,35 @@
 
 #include <openspace/navigation/path.h>
 
-#include <openspace/camera/camera.h>
 #include <openspace/camera/camerapose.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/pathcurve.h>
+#include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/pathcurves/avoidcollisioncurve.h>
 #include <openspace/navigation/pathcurves/zoomoutoverviewcurve.h>
 #include <openspace/navigation/pathnavigator.h>
+#include <openspace/properties/property.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
 #include <openspace/util/universalhelpers.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/interpolator.h>
-#include <glm/ext/quaternion_relational.hpp>
+#include <ghoul/glm.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/easing.h>
+#include <ghoul/misc/exception.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <format>
+#include <limits>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "Path";

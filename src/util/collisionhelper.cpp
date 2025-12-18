@@ -24,7 +24,8 @@
 
 #include <openspace/util/collisionhelper.h>
 
-#include <ghoul/misc/exception.h>
+#include <cmath>
+#include <cstdlib>
 
 namespace openspace::collision {
 

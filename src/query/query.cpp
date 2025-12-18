@@ -26,8 +26,11 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/properties/property.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 
 namespace openspace {
 
@@ -35,7 +38,7 @@ Scene* sceneGraph() {
     return global::renderEngine->scene();
 }
 
-SceneGraphNode* sceneGraphNode(const std::string& name) {
+SceneGraphNode* sceneGraphNode(std::string_view name) {
     const Scene* graph = sceneGraph();
     if (!graph) {
         return nullptr;
@@ -43,7 +46,7 @@ SceneGraphNode* sceneGraphNode(const std::string& name) {
     return graph->sceneGraphNode(name);
 }
 
-const Renderable* renderable(const std::string& name) {
+const Renderable* renderable(std::string_view name) {
     SceneGraphNode* node = sceneGraphNode(name);
     if (!node) {
         return nullptr;
@@ -51,12 +54,12 @@ const Renderable* renderable(const std::string& name) {
     return node->renderable();
 }
 
-properties::Property* property(const std::string& uri) {
+properties::Property* property(std::string_view uri) {
     properties::Property* property = global::rootPropertyOwner->property(uri);
     return property;
 }
 
-properties::PropertyOwner* propertyOwner(const std::string& uri) {
+properties::PropertyOwner* propertyOwner(std::string_view uri) {
     properties::PropertyOwner* property = global::rootPropertyOwner->propertyOwner(uri);
     return property;
 }

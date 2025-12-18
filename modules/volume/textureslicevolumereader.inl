@@ -23,7 +23,9 @@
  ****************************************************************************************/
 
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/opengl/texture.h>
+#include <utility>
 
 namespace openspace::volume {
 

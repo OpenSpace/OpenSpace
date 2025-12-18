@@ -31,7 +31,7 @@ namespace openspace::properties {
 
 class IntListProperty : public ListProperty<int> {
 public:
-    IntListProperty(Property::PropertyInfo info,
+    explicit IntListProperty(Property::PropertyInfo info,
         std::vector<int> values = std::vector<int>());
 
     std::string_view className() const override final;

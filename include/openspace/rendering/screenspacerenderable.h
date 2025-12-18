@@ -33,15 +33,17 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/glm.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
+namespace ghoul { class Dictionary; }
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
+struct RenderData;
 
 /**
  * The base class for screen space images and screen space framebuffers. This base class

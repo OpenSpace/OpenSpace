@@ -27,12 +27,13 @@
 #include "sgctedit/windowcontrol.h"
 #include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
-#include <QColor>
-#include <QFrame>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <array>
-#include <string>
+#include <algorithm>
+#include <optional>
+#include <cstdint>
+#include <cstdlib>
+#include <variant>
 
 namespace {
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };

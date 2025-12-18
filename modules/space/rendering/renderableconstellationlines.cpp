@@ -24,21 +24,29 @@
 
 #include <modules/space/rendering/renderableconstellationlines.h>
 
+#include <openspace/data/dataloader.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <scn/scan.h>
-#include <array>
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <optional>
+#include <set>
+#include <sstream>
+#include <tuple>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableConstellationLines";

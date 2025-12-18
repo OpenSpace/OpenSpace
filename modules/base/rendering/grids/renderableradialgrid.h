@@ -35,10 +35,7 @@
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/labelscomponent.h>
 #include <ghoul/opengl/ghoul_gl.h>
-
-namespace ghoul::opengl { class ProgramObject; }
-
-namespace openspace::documentation { struct Documentation; }
+#include <memory>
 
 namespace openspace {
 
@@ -93,6 +90,6 @@ protected:
     std::unique_ptr<LabelsComponent> _labels;
 };
 
-}// namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_BASE___RENDERABLERADIALGRID___H__

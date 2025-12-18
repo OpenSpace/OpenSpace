@@ -27,7 +27,7 @@
 
 #include <modules/globebrowsing/src/basictypes.h>
 #include <ghoul/glm.h>
-#include <stdint.h>
+#include <cstdint>
 
 namespace openspace::globebrowsing {
 

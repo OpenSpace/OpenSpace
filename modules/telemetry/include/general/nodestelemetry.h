@@ -33,6 +33,8 @@
 
 namespace openspace {
 
+class Camera;
+
 namespace scripting { struct LuaLibrary; }
 
 class NodesTelemetry : public TelemetryBase {

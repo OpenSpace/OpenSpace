@@ -28,14 +28,13 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/src/geojson/geojsoncomponent.h>
-
-#include <functional>
 #include <memory>
-#include <vector>
 
 namespace ghoul { class Dictionary; }
-namespace openspace { struct RenderData; }
-namespace openspace::documentation { struct Documentation; }
+namespace openspace {
+    namespace documentation { struct Documentation; }
+    struct RenderData;
+} // namespace openspace
 
 namespace openspace::globebrowsing {
 

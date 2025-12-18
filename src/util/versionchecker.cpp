@@ -34,6 +34,11 @@
 #include <ghoul/systemcapabilities/systemcapabilities.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <sstream>
+#include <string_view>
+#include <filesystem>
+#include <utility>
+#include <vector>
+#include <cstdlib>
 
 namespace {
     constexpr std::string_view _loggerCat = "VersionChecker";
@@ -91,58 +96,61 @@ void VersionChecker::cancel() {
     if (_latestVersion.has_value()) {
         return true;
     }
-    if (_request) {
-        if (_request->hasSucceeded()) {
-            _request->wait();
-            std::vector<char> data = _request->downloadedData();
-            const std::string versionString(data.begin(), data.end());
-            std::istringstream versionData(versionString);
-
-            std::string token;
-            ghoul::getline(versionData, token, '.');
-            const int major = std::atoi(token.c_str());
-            ghoul::getline(versionData, token, '.');
-            const int minor = std::atoi(token.c_str());
-            ghoul::getline(versionData, token, '.');
-            const int patch = std::atoi(token.c_str());
-
-            _latestVersion = { major, minor, patch };
-            _request = nullptr;
-
-            SemanticVersion currentVersion{
-                OPENSPACE_VERSION_MAJOR,
-                OPENSPACE_VERSION_MINOR,
-                OPENSPACE_VERSION_PATCH
-            };
-
-            if (currentVersion < _latestVersion) {
-                LINFO(std::format(
-                    "Newer OpenSpace version {}.{}.{} is available. "
-                    "Currently running {}.{}.{}",
-                    _latestVersion->major,
-                    _latestVersion->minor,
-                    _latestVersion->patch,
-                    currentVersion.major,
-                    currentVersion.minor,
-                    currentVersion.patch
-                ));
-            }
-            return true;
-        }
-        if (_request->hasFailed()) {
-            _request->cancel();
-            _request->wait();
-            std::vector<char> data = _request->downloadedData();
-            const std::string response = std::string(data.begin(), data.end());
-            LWARNING(std::format(
-                "Failed to get OpenSpace version information from {}. Response: {}",
-                _request->url(),
-                response
-            ));
-            _request = nullptr;
-            return false;
-        }
+    if (!_request) {
+        return false;
     }
+
+    if (_request->hasSucceeded()) {
+        _request->wait();
+        std::vector<char> data = _request->downloadedData();
+        const std::string versionString(data.begin(), data.end());
+        std::istringstream versionData(versionString);
+
+        std::string token;
+        ghoul::getline(versionData, token, '.');
+        const int major = std::atoi(token.c_str());
+        ghoul::getline(versionData, token, '.');
+        const int minor = std::atoi(token.c_str());
+        ghoul::getline(versionData, token, '.');
+        const int patch = std::atoi(token.c_str());
+
+        _latestVersion = { major, minor, patch };
+        _request = nullptr;
+
+        SemanticVersion currentVersion{
+            OPENSPACE_VERSION_MAJOR,
+            OPENSPACE_VERSION_MINOR,
+            OPENSPACE_VERSION_PATCH
+        };
+
+        if (currentVersion < _latestVersion) {
+            LINFO(std::format(
+                "Newer OpenSpace version {}.{}.{} is available. "
+                "Currently running {}.{}.{}",
+                _latestVersion->major,
+                _latestVersion->minor,
+                _latestVersion->patch,
+                currentVersion.major,
+                currentVersion.minor,
+                currentVersion.patch
+            ));
+        }
+        return true;
+    }
+
+    if (_request->hasFailed()) {
+        _request->cancel();
+        _request->wait();
+        std::vector<char> data = _request->downloadedData();
+        const std::string response = std::string(data.begin(), data.end());
+        LWARNING(std::format(
+            "Failed to get OpenSpace version information from {}. Response: {}",
+            _request->url(), response
+        ));
+        _request = nullptr;
+        return false;
+    }
+
     return false;
 }
 

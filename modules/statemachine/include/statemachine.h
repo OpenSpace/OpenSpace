@@ -27,7 +27,11 @@
 
 #include <modules/statemachine/include/state.h>
 #include <modules/statemachine/include/transition.h>
+#include <filesystem>
+#include <string>
 #include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 

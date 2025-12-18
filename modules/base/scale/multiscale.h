@@ -29,8 +29,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class MultiScale : public Scale {
 public:
     explicit MultiScale(const ghoul::Dictionary& dictionary);

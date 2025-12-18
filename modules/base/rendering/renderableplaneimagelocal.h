@@ -27,15 +27,10 @@
 
 #include <modules/base/rendering/renderableplane.h>
 
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class Texture; }
+#include <openspace/properties/misc/stringproperty.h>
+#include <memory>
 
 namespace openspace {
-
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 class RenderablePlaneImageLocal : public RenderablePlane {
 public:

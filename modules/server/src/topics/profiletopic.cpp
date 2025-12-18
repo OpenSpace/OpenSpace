@@ -25,17 +25,12 @@
 #include <modules/server/include/topics/profiletopic.h>
 
 #include <modules/server/include/connection.h>
-#include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/settings.h>
 #include <openspace/scene/profile.h>
 
 namespace openspace {
-
-bool ProfileTopic::isDone() const {
-    return true;
-}
 
 void ProfileTopic::handleJson(const nlohmann::json&) {
     // @TODO (2025-04-30, emmbr) If we expose the json converters from profile.cpp, we
@@ -63,6 +58,10 @@ void ProfileTopic::handleJson(const nlohmann::json&) {
     }
 
     _connection->sendJson(wrappedPayload(data));
+}
+
+bool ProfileTopic::isDone() const {
+    return true;
 }
 
 } // namespace openspace

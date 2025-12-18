@@ -27,12 +27,9 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/scalar/doubleproperty.h>
+
 namespace openspace {
-
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 class RenderableSwitch : public Renderable {
 public:

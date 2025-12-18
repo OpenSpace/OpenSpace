@@ -26,8 +26,7 @@
 
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/timeconstants.h>
-
-#include <ghoul/glm.h>
+#include <cstdlib>
 
 namespace openspace {
 
@@ -36,7 +35,7 @@ std::pair<double, std::string_view> simplifyDistance(double meters,
 {
     constexpr double GraceFactor = 0.5;
 
-    const double metersVal = glm::abs(meters);
+    const double metersVal = std::abs(meters);
 
     if (metersVal == 0.0) {
         return { 0.0, forceSingularForm ? "meter" : "meters"};

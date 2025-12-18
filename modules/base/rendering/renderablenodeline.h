@@ -27,21 +27,17 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
-
-namespace ghoul::opengl { class ProgramObject; }
-namespace openspace::documentation { struct Documentation; }
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
-class Translation;
-
 /**
- * This is a class for a line that is drawn between two nodes in OpenSpace.
+ * This is a class for a line that is drawn between two nodes.
  */
 class RenderableNodeLine : public Renderable {
 public:

@@ -32,8 +32,8 @@ namespace openspace {
 struct BrickSelection {
     enum SplitType {
         None = 0,
-        Temporal = 1,
-        Spatial = 2
+        Temporal,
+        Spatial
     };
 
     BrickSelection();

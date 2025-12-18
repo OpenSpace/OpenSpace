@@ -27,13 +27,7 @@
 
 #include <openspace/scene/rotation.h>
 
-#include <vector>
-
 namespace openspace {
-
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 class MultiRotation : public Rotation {
 public:

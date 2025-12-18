@@ -26,13 +26,9 @@
 #define __OPENSPACE_CORE___DYNAMICFILESEQUENCEDOWNLOADER___H__
 
 #include <openspace/util/httprequest.h>
-#include <ghoul/logging/logmanager.h>
 #include <filesystem>
-#include <map>
 #include <memory>
-#include <queue>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 namespace openspace {
@@ -60,7 +56,7 @@ public:
     DynamicFileSequenceDownloader(int dataID, const std::string& identifier,
         std::string infoUrl, std::string dataUrl, size_t nFilesToQueue);
 
-    void deinitialize(bool cacheFiles);
+    void deinitialize(bool cacheFiles) const;
     void requestDataInfo(std::string httpInfoRequest);
     void requestAvailableFiles(std::string httpDataRequest,
         std::filesystem::path syncDir);

@@ -24,10 +24,6 @@
 
 #include <openspace/rendering/fadeable.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <optional>
-
 namespace {
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",

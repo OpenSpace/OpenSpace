@@ -25,10 +25,16 @@
 #include <modules/globebrowsing/src/tileprovider/sizereferencetileprovider.h>
 
 #include <modules/globebrowsing/src/geodeticpatch.h>
+#include <modules/globebrowsing/src/layergroupid.h>
+#include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <cmath>
+#include <limits>
 #include <optional>
 #include <variant>
 

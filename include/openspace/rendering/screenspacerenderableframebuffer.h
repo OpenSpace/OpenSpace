@@ -22,21 +22,17 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___SCREENSPACEFRAMEBUFFER___H__
-#define __OPENSPACE_CORE___SCREENSPACEFRAMEBUFFER___H__
+#ifndef __OPENSPACE_CORE___SCREENSPACERENDERABLEFRAMEBUFFER___H__
+#define __OPENSPACE_CORE___SCREENSPACERENDERABLEFRAMEBUFFER___H__
 
 #include <openspace/rendering/screenspacerenderable.h>
 
 #include <openspace/properties/vector/vec2property.h>
-
-namespace ghoul::opengl {
-    class FramebufferObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/texture.h>
+#include <functional>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 /**
  * Creates a texture by rendering to a framebuffer, this is then used on a screen space
@@ -78,4 +74,4 @@ private:
 
 } //namespace openspace
 
-#endif // __OPENSPACE_CORE___SCREENSPACEFRAMEBUFFER___H__
+#endif // __OPENSPACE_CORE___SCREENSPACERENDERABLEFRAMEBUFFER___H__

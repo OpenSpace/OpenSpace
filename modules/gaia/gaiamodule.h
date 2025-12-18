@@ -27,8 +27,6 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <openspace/documentation/documentation.h>
-
 namespace openspace {
 
 class GaiaModule : public OpenSpaceModule {

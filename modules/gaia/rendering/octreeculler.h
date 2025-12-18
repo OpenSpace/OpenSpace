@@ -40,7 +40,6 @@ namespace openspace {
  */
 class OctreeCuller {
 public:
-
     /**
      * \param viewFrustum This is the view space in normalized device coordinates space.
      *        Hence it is an axis aligned bounding box and not a real frustum

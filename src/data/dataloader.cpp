@@ -27,17 +27,28 @@
 #include <openspace/data/csvloader.h>
 #include <openspace/data/speckloader.h>
 #include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
-#include <cctype>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <cstring>
+#include <filesystem>
+#include <format>
 #include <fstream>
 #include <functional>
+#include <limits>
+#include <optional>
+#include <string>
 #include <string_view>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 namespace {
     constexpr int8_t DataCacheFileVersion = 13;

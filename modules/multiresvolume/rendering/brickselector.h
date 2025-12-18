@@ -31,8 +31,8 @@ namespace openspace {
 
 class BrickSelector {
 public:
-    virtual ~BrickSelector() {}
-    virtual bool initialize() { return true; }
+    virtual ~BrickSelector();
+    virtual bool initialize();
     virtual void selectBricks(int timestep, std::vector<int>& bricks) = 0;
 };
 

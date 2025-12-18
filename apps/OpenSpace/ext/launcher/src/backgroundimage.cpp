@@ -25,9 +25,13 @@
 #include "backgroundimage.h"
 
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <QPainter>
 #include <QPixmap>
 #include <random>
+#include <algorithm>
+#include <string>
+#include <vector>
 
 BackgroundImage::BackgroundImage(QRect size, const std::filesystem::path& syncFolder,
                                  QWidget* parent)

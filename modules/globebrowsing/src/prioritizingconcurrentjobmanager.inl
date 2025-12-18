@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <ghoul/misc/assert.h>
+#include <modules/globebrowsing/src/prioritizingconcurrentjobmanager.h>
 
 namespace openspace::globebrowsing {
 

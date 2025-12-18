@@ -31,13 +31,10 @@
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/glm.h>
 
 namespace openspace {
 
 class SceneGraphNode;
-
-namespace documentation { struct Documentation; }
 
 class FixedRotation : public Rotation {
 public:

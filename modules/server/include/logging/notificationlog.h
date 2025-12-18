@@ -29,6 +29,7 @@
 
 #include <ghoul/misc/profiling.h>
 #include <functional>
+#include <mutex>
 
 namespace openspace {
 

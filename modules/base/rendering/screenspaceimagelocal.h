@@ -33,8 +33,6 @@ namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class ScreenSpaceImageLocal : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceImageLocal(const ghoul::Dictionary& dictionary);

@@ -25,16 +25,23 @@
 #include <openspace/scene/asset.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/events/event.h>
+#include <openspace/events/eventengine.h>
 #include <openspace/scene/assetmanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/file.h>
+#include <openspace/util/resourcesynchronization.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/invariants.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <filesystem>
-#include <unordered_set>
+#include <string_view>
+#include <utility>
+#include <functional>
 
 namespace openspace {
 
@@ -184,6 +191,16 @@ bool Asset::hasInitializedParent() const {
     );
 }
 
+std::vector<std::filesystem::path> Asset::initializedParents() const {
+    std::vector<std::filesystem::path> parents;
+    for (const Asset* parent : _parentAssets) {
+        if (parent->isInitialized()) {
+            parents.push_back(parent->path());
+        }
+    }
+    return parents;
+}
+
 bool Asset::isInitialized() const {
     return _state == State::Initialized;
 }
@@ -284,6 +301,10 @@ void Asset::initialize() {
     }
     LDEBUG(std::format("Initializing asset '{}'", _assetPath));
 
+    global::eventEngine->publishEvent<events::EventAssetLoading>(
+        _assetPath.string(),
+        events::EventAssetLoading::State::Loading
+    );
     // 1. Initialize requirements
     for (Asset* child : _requiredAssets) {
         child->initialize();
@@ -308,6 +329,10 @@ void Asset::initialize() {
 
     // 3. Update state
     setState(State::Initialized);
+    global::eventEngine->publishEvent<events::EventAssetLoading>(
+        _assetPath.string(),
+        events::EventAssetLoading::State::Loaded
+    );
 }
 
 void Asset::deinitialize() {

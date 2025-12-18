@@ -30,12 +30,11 @@
 #include <openspace/engine/downloadmanager.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <filesystem>
+#include <future>
 
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class ScreenSpaceTimeVaryingImageOnline : public ScreenSpaceRenderable {
 public:

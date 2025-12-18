@@ -26,13 +26,13 @@
 #define __OPENSPACE_CORE___DISTANCECONVERSION___H__
 
 #include <openspace/util/distanceconstants.h>
-
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/constexpr.h>
 #include <algorithm>
 #include <array>
 #include <string>
+#include <string_view>
 #include <utility>
+#include <vector>
 
 namespace openspace {
 

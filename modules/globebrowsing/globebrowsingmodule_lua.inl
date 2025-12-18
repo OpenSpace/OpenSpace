@@ -22,7 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/util/collisionhelper.h>
+#include <modules/globebrowsing/src/layergroup.h>
+#include <openspace/engine/moduleengine.h>
+#include <openspace/query/query.h>
+#include <openspace/rendering/renderengine.h>
+#include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/stringhelper.h>
 
@@ -533,6 +539,99 @@ namespace {
     globe->geoJsonManager().addGeoJsonLayer(d);
 }
 
+/**
+ * Returns an object containing a list of all loaded `RenderableGlobe`s sorted first by
+ * the presence of WMS server info, then alphabetically. The index `firstIndexWithoutUrl`
+ * indicates the first item in the list that does not have WMS server info.
+ *
+ * \return Table containing a list of `renderableGlobe` identifiers, and an index
+ *         indicating the first item in the list that does not have a WMS server
+ */
+[[codegen::luawrap]] ghoul::Dictionary globes() {
+    using namespace openspace;
+    using namespace globebrowsing;
+    GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
+
+    std::vector<SceneGraphNode*> nodes =
+        global::renderEngine->scene()->allSceneGraphNodes();
+
+    nodes.erase(
+        std::remove_if(
+            nodes.begin(),
+            nodes.end(),
+            [](const SceneGraphNode* n) {
+                const Renderable* r = n->renderable();
+                const RenderableGlobe* rg = dynamic_cast<const RenderableGlobe*>(r);
+                return rg == nullptr;
+            }
+        ),
+        nodes.end()
+    );
+
+    // Sort the globes with respect to WMS server info followed by alphabetical order
+    std::sort(
+        nodes.begin(),
+        nodes.end(),
+        [module](const SceneGraphNode* lhs, const SceneGraphNode* rhs) {
+            const bool lhsHasUrl = module->hasUrlInfo(lhs->identifier());
+            const bool rhsHasUrl = module->hasUrlInfo(rhs->identifier());
+
+            if (lhsHasUrl && !rhsHasUrl) {
+                return true;
+            }
+            if (!lhsHasUrl && rhsHasUrl) {
+                return false;
+            }
+
+            return lhs->guiName() < rhs->guiName();
+        }
+    );
+    std::vector<std::string> globeIdentifiers;
+    globeIdentifiers.reserve(nodes.size());
+    for (const SceneGraphNode* node : nodes) {
+        globeIdentifiers.push_back(node->identifier());
+    }
+
+    auto firstWithoutUrl = std::find_if(
+        nodes.begin(),
+        nodes.end(),
+        [module](const SceneGraphNode* n) {
+            return !module->hasUrlInfo(n->identifier());
+        }
+    );
+
+    int index = static_cast<int>(firstWithoutUrl - nodes.begin());
+
+    ghoul::Dictionary e;
+    e.setValue("identifiers", globeIdentifiers);
+    e.setValue("firstIndexWithoutUrl", index);
+    return e;
+}
+
+/**
+ * Return a list of all WMS servers associated with the `renderableGlobe` globe.
+ *
+ * \param globe The identifier of the `renderableGlobe` to fetch WMS servers for
+ * \return A list of WMS server info containing its name and URL
+ */
+[[codegen::luawrap]] std::vector<ghoul::Dictionary> urlInfo(std::string globe) {
+    using namespace openspace;
+    using namespace globebrowsing;
+    GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
+    std::vector<GlobeBrowsingModule::UrlInfo> info = module->urlInfo(globe);
+
+    std::vector<ghoul::Dictionary> res;
+    for (const GlobeBrowsingModule::UrlInfo& i : info) {
+        ghoul::Dictionary e;
+        e.setValue("name", i.name);
+        e.setValue("url", i.url);
+        res.push_back(std::move(e));
+    }
+
+    return res;
+}
+
 #include "globebrowsingmodule_lua_codegen.cpp"
 
 } // namespace
+

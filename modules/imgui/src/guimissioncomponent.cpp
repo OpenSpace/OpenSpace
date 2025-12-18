@@ -29,7 +29,9 @@
 #include <openspace/engine/globals.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
+#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/util/timerange.h>
 
 namespace {
     const ImVec2 Size = ImVec2(350, 500);

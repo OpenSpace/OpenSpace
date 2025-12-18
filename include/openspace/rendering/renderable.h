@@ -30,28 +30,30 @@
 
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
+#include <functional>
+#include <optional>
 #include <string_view>
+#include <tuple>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul {
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    } // namespace opengl
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
 class Camera;
 class Ellipsoid;
 struct RenderData;
 struct RendererTasks;
 struct SurfacePositionHandle;
 struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 // Unfortunately we can't move this struct into the Renderable until
 // https://bugs.llvm.org/show_bug.cgi?id=36684 is fixed

@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___ASSETTREEITEM___H__
 #define __OPENSPACE_UI_LAUNCHER___ASSETTREEITEM___H__
 
+#include <QString>
 #include <QVariant>
 #include <vector>
 

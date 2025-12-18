@@ -24,7 +24,12 @@
 
 #include <openspace/util/json_helper.h>
 
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
+#include <functional>
+#include <utility>
 
 namespace openspace {
 
@@ -86,7 +91,7 @@ std::string formatJsonNumber(double d) {
     return std::format("{}", d);
 }
 
-void sortJson(nlohmann::json& json, const std::string& key) {
+void sortJson(nlohmann::json& json, std::string_view key) {
     std::sort(
         json.begin(),
         json.end(),

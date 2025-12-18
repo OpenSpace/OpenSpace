@@ -27,9 +27,11 @@
 
 #include <QWidget>
 
-#include <QColor>
-#include <array>
 #include <vector>
+
+class QPaintEvent;
+class QRect;
+class QRectF;
 
 class MonitorBox final : public QWidget {
 Q_OBJECT

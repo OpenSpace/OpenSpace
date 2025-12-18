@@ -24,7 +24,13 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileproviderbylevel.h>
 
+#include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/documentation/documentation.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <limits>
+#include <utility>
 
 namespace {
     // This tile provider will switch between different tile providers specified within

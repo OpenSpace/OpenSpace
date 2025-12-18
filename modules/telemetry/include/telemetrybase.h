@@ -27,11 +27,12 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
-#include <openspace/camera/camera.h>
 #include <openspace/properties/scalar/boolproperty.h>
 
 namespace openspace {
+
+class Camera;
+class OpenSoundControlConnection;
 
 class TelemetryBase : public properties::PropertyOwner {
 public:

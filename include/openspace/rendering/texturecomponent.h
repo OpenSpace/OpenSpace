@@ -27,9 +27,10 @@
 
 #include <ghoul/opengl/texture.h>
 #include <filesystem>
+#include <memory>
 
 namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {class Texture; }
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 

@@ -39,31 +39,31 @@
 #include <atomic>
 #include <chrono>
 #include <functional>
-#include <memory>
 #include <optional>
+#include <string>
+#include <string_view>
 #include <vector>
 
- //#define Debugging_Core_SceneGraphNode_Indices
+// #define Debugging_Core_SceneGraphNode_Indices
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
 class Camera;
-struct RenderData;
 class Renderable;
+struct RenderData;
 struct RendererTasks;
 class Rotation;
-class Translation;
 class Scale;
 class Scene;
-struct UpdateData;
 struct SurfacePositionHandle;
-class TimeFrame;
 class Time;
-
-namespace documentation { struct Documentation; }
+class TimeFrame;
+class Translation;
+struct UpdateData;
 
 class SceneGraphNode : public properties::PropertyOwner {
 public:

@@ -24,15 +24,14 @@
 
 #include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/blockplaneintersectiongeometry.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
-#include <sstream>
-#include <vector>
+#include <cmath>
+#include <utility>
 
 namespace {
     constexpr std::string_view GlslRaycastPath =

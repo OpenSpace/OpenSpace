@@ -28,9 +28,12 @@
 #include <QComboBox>
 
 #include <filesystem>
+#include <functional>
 #include <optional>
 #include <string>
-#include <vector>
+#include <utility>
+
+class QWidget;
 
 class SplitComboBox final : public QComboBox {
 Q_OBJECT

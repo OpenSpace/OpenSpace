@@ -25,9 +25,16 @@
 #include <modules/multiresvolume/rendering/localerrorhistogrammanager.h>
 
 #include <modules/multiresvolume/rendering/tsp.h>
+#include <openspace/util/histogram.h>
 #include <openspace/util/progressbar.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <fstream>
+#include <string_view>
+#include <vector>
 
 namespace {
     constexpr std::string_view _loggerCat = "LocalErrorHistogramManager";

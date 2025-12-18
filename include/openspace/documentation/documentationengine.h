@@ -28,13 +28,13 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/json.h>
 #include <openspace/properties/propertyowner.h>
-#include <ghoul/misc/exception.h>
+#include <vector>
 
 namespace openspace::documentation {
 
 /**
  * The DocumentationEngine has the ability to collect all Documentation%s that are
- * produced in the application an write them out as a documentation file for human
+ * produced in the application and write them out as a documentation file for human
  * consumption.
  */
 class DocumentationEngine {

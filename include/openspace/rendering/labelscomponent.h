@@ -36,13 +36,15 @@
 #include <openspace/util/distanceconversion.h>
 #include <ghoul/glm.h>
 #include <filesystem>
+#include <memory>
 
+namespace ghoul { class Dictionary; }
 namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
-struct RenderData;
 
 namespace documentation { struct Documentation; }
+struct RenderData;
 
 class LabelsComponent : public properties::PropertyOwner, public Fadeable {
 public:

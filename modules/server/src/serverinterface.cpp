@@ -25,10 +25,11 @@
 #include <modules/server/include/serverinterface.h>
 
 #include <openspace/documentation/documentation.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/io/socket/socketserver.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
 #include <ghoul/io/socket/websocketserver.h>
-#include <functional>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {

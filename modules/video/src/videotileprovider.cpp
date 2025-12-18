@@ -24,28 +24,41 @@
 
 #include <modules/video/include/videotileprovider.h>
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/util/time.h>
-#include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <cmath>
+#include <cstdint>
+#include <limits>
+#include <optional>
 
 namespace {
     constexpr std::string_view _loggerCat = "VideoTileProvider";
+
+    // This `TileProvider` can be used to render a video on the globe.
+    //
+    // The video can either be played back based on a given simulation time
+    // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
+    // `PlaybackMode` RealTimeLoop). It is also possible to control whether the video
+    // should loop or just be played once.
+    //
+    // Note that, unless playback is mapped to simulation time, the video must be started
+    // manually via the user interface.
+    struct [[codegen::Dictionary(VideoTileProvider)]] Parameters {};
+#include "videotileprovider_codegen.cpp"
 } // namespace
 
 namespace openspace::globebrowsing {
 
 documentation::Documentation VideoTileProvider::Documentation() {
-    documentation::Documentation doc = VideoPlayer::Documentation();
-    doc.name = "VideoTileProvider";
-    doc.id = "video_videotileprovider";
+     documentation::Documentation doc = codegen::doc<Parameters>(
+         "video_videotileprovider"
+     );
+
+    documentation::Documentation vp = VideoPlayer::Documentation();
+    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
+
     return doc;
 }
 
@@ -55,8 +68,6 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     ZoneScoped;
     addPropertySubOwner(_videoPlayer);
 }
-
-VideoTileProvider::~VideoTileProvider() {}
 
 globebrowsing::Tile VideoTileProvider::tile(const globebrowsing::TileIndex& tileIndex) {
     ZoneScoped;

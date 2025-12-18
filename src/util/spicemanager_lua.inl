@@ -22,8 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
+#include <ghoul/format.h>
+#include <cstring>
+#include <fstream>
 #include <ios>
+#include <iterator>
+#include <memory>
+#include <variant>
+#include <utility>
 
 namespace {
 

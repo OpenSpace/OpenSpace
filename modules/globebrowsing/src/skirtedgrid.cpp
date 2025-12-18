@@ -24,8 +24,11 @@
 
 #include <modules/globebrowsing/src/skirtedgrid.h>
 
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <algorithm>
+#include <array>
+#include <string>
+#include <vector>
 
 namespace {
     size_t numElements(int xSegments, int ySegments) {

@@ -26,8 +26,10 @@
 
 #include <openspace/util/histogram.h>
 #include <algorithm>
-#include <fstream>
 #include <numeric>
+#include <cmath>
+#include <limits>
+#include <utility>
 
 namespace openspace {
 

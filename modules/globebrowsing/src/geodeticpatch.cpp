@@ -26,6 +26,10 @@
 
 #include <modules/globebrowsing/src/tileindex.h>
 #include <ghoul/misc/assert.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <utility>
 
 namespace {
     // Normalizes the angle to the interval [center - pi, center + pi[

@@ -30,6 +30,7 @@
 #include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
+#include <cstdint>
 
 namespace openspace::globebrowsing {
 

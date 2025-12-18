@@ -24,18 +24,22 @@
 
 #include <modules/gaia/tasks/readfitstask.h>
 
+#include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <modules/gaia/tasks/readfilejob.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-
 #include <ghoul/logging/logmanager.h>
+#include <openspace/util/concurrentjobmanager.h>
+#include <openspace/util/threadpool.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
-#include <filesystem>
+#include <algorithm>
+#include <cstdint>
 #include <fstream>
-#include <set>
 #include <optional>
+#include <set>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "ReadFitsTask";

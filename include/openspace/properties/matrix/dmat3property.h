@@ -34,7 +34,8 @@ namespace openspace::properties {
 
 class DMat3Property : public NumericalProperty<glm::dmat3x3> {
 public:
-    DMat3Property(Property::PropertyInfo info, glm::dmat3x3 value = glm::dmat3x3(0.0),
+    explicit DMat3Property(Property::PropertyInfo info,
+        glm::dmat3x3 value = glm::dmat3x3(0.0),
         glm::dmat3x3 minValue =
             ghoul::createFillMat3x3<double>(std::numeric_limits<double>::lowest()),
         glm::dmat3x3 maxValue =

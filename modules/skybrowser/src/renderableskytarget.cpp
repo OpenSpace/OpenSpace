@@ -24,22 +24,20 @@
 
 #include <modules/skybrowser/include/renderableskytarget.h>
 
-#include <modules/skybrowser/skybrowsermodule.h>
-#include <modules/skybrowser/include/utility.h>
 #include <modules/base/basemodule.h>
 #include <openspace/camera/camera.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
+#include <memory>
+#include <optional>
+#include <utility>
 
 namespace {
     enum BlendMode {

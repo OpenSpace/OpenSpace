@@ -27,7 +27,6 @@
 #include <modules/base/basemodule.h>
 #include <modules/base/lightsource/scenegraphlightsource.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
@@ -38,19 +37,28 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/scene/scene.h>
 #include <openspace/scene/lightsource.h>
+#include <ghoul/format.h>
 #include <ghoul/io/model/modelgeometry.h>
+#include <ghoul/io/model/modelreader.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/invariants.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <array>
+#include <cmath>
+#include <cstdlib>
 #include <filesystem>
+#include <limits>
 #include <optional>
+#include <utility>
+#include <variant>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableModel";
@@ -904,7 +912,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _lightDirectionsViewSpaceBuffer[nLightSources] =
             lightSource->directionViewSpace(data);
 
-        ++nLightSources;
+        nLightSources++;
     }
 
     if (_uniformCache.performShading != -1) {

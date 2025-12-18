@@ -29,8 +29,8 @@
 
 namespace openspace {
 
-class VolumeRaycaster;
 class RaycasterListener;
+class VolumeRaycaster;
 
 class RaycasterManager {
 public:

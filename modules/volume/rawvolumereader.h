@@ -27,7 +27,7 @@
 
 #include <ghoul/glm.h>
 #include <filesystem>
-#include <string>
+#include <memory>
 
 namespace openspace::volume {
 

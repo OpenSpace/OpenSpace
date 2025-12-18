@@ -34,7 +34,7 @@ namespace openspace::properties {
 
 class Vec4Property : public NumericalProperty<glm::vec4> {
 public:
-    Vec4Property(Property::PropertyInfo info, glm::vec4 value = glm::vec4(0.f),
+    explicit Vec4Property(Property::PropertyInfo info, glm::vec4 value = glm::vec4(0.f),
         glm::vec4 minValue = glm::vec4(std::numeric_limits<float>::lowest()),
         glm::vec4 maxValue = glm::vec4(std::numeric_limits<float>::max()),
         glm::vec4 stepValue = glm::vec4(0.01f));

@@ -44,7 +44,7 @@ public:
      * \pre \p info.identifier must not be empty
      * \pre \p info.guiName must not be empty
      */
-    TriggerProperty(PropertyInfo info);
+    explicit TriggerProperty(PropertyInfo info);
 
     /**
      * Returns the class name `TriggerProperty`.

@@ -26,7 +26,10 @@
 #define __OPENSPACE_MODULE_SERVER___ERRORLOGTOPIC____H__
 
 #include <modules/server/include/topics/topic.h>
-#include <ghoul/logging/log.h>
+
+#include <ghoul/logging/loglevel.h>
+
+namespace ghoul::logging { class Log; }
 
 namespace openspace {
 
@@ -46,7 +49,8 @@ private:
     void createLog(ghoul::logging::LogLevel logLevel);
 
     bool _isSubscribedTo = false;
-    // Non owning but we remove the log from LogManager on destruction
+
+    // Non-owning but we remove the log from LogManager on destruction
     ghoul::logging::Log* _log = nullptr;
 };
 

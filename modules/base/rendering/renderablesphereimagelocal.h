@@ -27,16 +27,10 @@
 
 #include <modules/base/rendering/renderablesphere.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/rendering/texturecomponent.h>
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
-
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 class RenderableSphereImageLocal : public RenderableSphere {
 public:
@@ -56,7 +50,6 @@ protected:
     void bindTexture() override;
 
 private:
-
     properties::StringProperty _texturePath;
 
     std::unique_ptr<TextureComponent> _texture;

@@ -30,8 +30,6 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 
-#include <cpl_error.h>
-
 namespace openspace::globebrowsing {
 
 /**

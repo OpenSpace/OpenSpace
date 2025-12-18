@@ -28,6 +28,7 @@
 #include <modules/volume/linearlrucache.h>
 #include <ghoul/glm.h>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace ghoul::opengl { class Texture; }

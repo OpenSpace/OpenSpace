@@ -24,9 +24,9 @@
 
 #include "sgctedit/monitorbox.h"
 
-#include <ghoul/misc/assert.h>
 #include "windowcolors.h"
 #include <QPainter>
+#include <algorithm>
 
 MonitorBox::MonitorBox(QRect widgetSize, const std::vector<QRect>& monitorResolutions,
                        QWidget* parent)

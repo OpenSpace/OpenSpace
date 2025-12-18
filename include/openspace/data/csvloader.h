@@ -26,8 +26,11 @@
 #define __OPENSPACE_CORE___CSVLOADER___H__
 
 #include <openspace/data/dataloader.h>
+#include <openspace/data/datamapping.h>
 #include <filesystem>
 #include <optional>
+#include <set>
+#include <vector>
 
 namespace openspace::dataloader::csv {
 

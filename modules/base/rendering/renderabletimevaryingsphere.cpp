@@ -25,13 +25,15 @@
 #include <modules/base/rendering/renderabletimevaryingsphere.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/sphere.h>
+#include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/crc32.h>
 #include <ghoul/opengl/texture.h>
+#include <algorithm>
+#include <filesystem>
+#include <iterator>
+#include <utility>
 
 namespace {
     // Extract J2000 time from file names

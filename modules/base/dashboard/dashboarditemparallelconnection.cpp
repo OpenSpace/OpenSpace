@@ -25,13 +25,11 @@
 #include <modules/base/dashboard/dashboarditemparallelconnection.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/network/parallelconnection.h>
 #include <openspace/network/parallelpeer.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/distanceconversion.h>
-#include <ghoul/font/font.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 
 namespace {
@@ -44,6 +42,7 @@ namespace {
     // The information presented contains how many clients are connected to the same
     // session and whether this machine is currently the host of the session.
     struct [[codegen::Dictionary(DashboardItemParallelConnection)]] Parameters {};
+
 #include "dashboarditemparallelconnection_codegen.cpp"
 } // namespace
 

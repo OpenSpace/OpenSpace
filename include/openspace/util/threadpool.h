@@ -26,9 +26,9 @@
 #define __OPENSPACE_CORE___THREAD_POOL___H__
 
 #include <condition_variable>
+#include <deque>
 #include <functional>
 #include <mutex>
-#include <queue>
 #include <thread>
 #include <vector>
 
@@ -44,7 +44,7 @@ public:
     void operator()();
 
 private:
-    ThreadPool& pool;
+    ThreadPool& _pool;
 };
 
 class ThreadPool {
@@ -61,14 +61,14 @@ public:
 private:
     friend class Worker;
 
-    std::vector<std::thread> workers;
+    std::vector<std::thread> _workers;
 
-    std::deque<std::function<void()>> tasks;
+    std::deque<std::function<void()>> _tasks;
 
-    std::mutex queue_mutex;
-    std::condition_variable condition;
+    std::mutex _queueMutex;
+    std::condition_variable _condition;
 
-    bool stop;
+    bool _shouldStop = false;
 };
 
 } // namespace openspace

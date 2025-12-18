@@ -31,11 +31,8 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <array>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 /**
  * This concrete implementation of a RenderableTrail renders a fixed trail, regardless of

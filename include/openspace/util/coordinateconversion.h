@@ -27,6 +27,7 @@
 
 #include <ghoul/glm.h>
 #include <string>
+#include <utility>
 
 namespace openspace {
 

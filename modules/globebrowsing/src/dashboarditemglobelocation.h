@@ -28,13 +28,9 @@
 #include <openspace/rendering/dashboardtextitem.h>
 
 #include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class DashboardItemGlobeLocation : public DashboardTextItem {
 public:

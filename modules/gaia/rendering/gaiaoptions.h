@@ -29,24 +29,24 @@ namespace openspace::gaia {
 
 enum RenderMode {
     Static = 0,
-    Color = 1,
-    Motion = 2
+    Color,
+    Motion
 };
 
 enum FileReaderOption {
     Fits = 0,
-    Speck = 1,
-    BinaryRaw = 2,
-    BinaryOctree = 3,
-    StreamOctree = 4
+    Speck,
+    BinaryRaw,
+    BinaryOctree,
+    StreamOctree
 };
 
 enum ShaderOption {
     PointSSBO = 0,
-    PointVBO = 1,
-    BillboardSSBO = 2,
-    BillboardVBO = 3,
-    BillboardSSBONoFBO = 4
+    PointVBO,
+    BillboardSSBO,
+    BillboardVBO,
+    BillboardSSBONoFBO
 };
 
 } // namespace openspace::gaiamission

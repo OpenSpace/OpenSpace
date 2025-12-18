@@ -25,19 +25,17 @@
 #include <modules/base/rendering/renderabletrailorbit.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/engine/globals.h>
-#include <openspace/events/event.h>
-#include <openspace/events/eventengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/scene/scene.h>
-
-#include <ghoul/opengl/programobject.h>
+#include <openspace/util/time.h>
+#include <ghoul/misc/dictionary.h>
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <limits>
 #include <numeric>
-#include <optional>
 
 // This class is using a VBO ring buffer + a constantly updated point as follows:
 // Structure of the array with a _resolution of 16. FF denotes the floating position that
@@ -408,7 +406,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             else {
                 // Move the current pointer fowards one step  to be used as the new
                 // floating
-                ++_primaryRenderInformation.first;
+                _primaryRenderInformation.first++;
             }
         }
 

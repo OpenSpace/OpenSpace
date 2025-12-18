@@ -24,6 +24,9 @@
 
 #include "filesystemaccess.h"
 
+#include <ghoul/format.h>
+#include <utility>
+
 FileSystemAccess::FileSystemAccess(std::string fileExtension,
                                    bool hideFileExtensions, bool useCheckboxes)
     : _fileExtension(std::move(fileExtension))

@@ -30,12 +30,16 @@
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/boolean.h>
 #include <filesystem>
-#include <mutex>
-#include <optional>
-#include <queue>
 #include <functional>
+#include <mutex>
+#include <queue>
+#include <string>
+#include <string_view>
+#include <vector>
 
+namespace ghoul { class Dictionary; }
 namespace openspace { class SyncBuffer; }
+struct lua_State;
 
 namespace openspace::scripting {
 

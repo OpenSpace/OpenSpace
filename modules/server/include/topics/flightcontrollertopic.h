@@ -29,11 +29,6 @@
 
 #include <openspace/interaction/websocketinputstate.h>
 
-namespace openspace::interaction {
-    struct WebsocketInputStates;
-    struct WebsocketInputState;
-} // namespace openspace::interaction
-
 namespace openspace {
 
 class FlightControllerTopic : public Topic {
@@ -49,16 +44,6 @@ public:
     void handleAutopilot(const nlohmann::json &json);
 
 private:
-    bool _isDone = false;
-    bool _autopilotEngaged;
-    nlohmann::json _payload;
-    nlohmann::json _focusNodes;
-    nlohmann::json _allNodes;
-    nlohmann::json _interestingTimes;
-
-    openspace::interaction::WebsocketInputStates _inputStates;
-    openspace::interaction::WebsocketInputState _inputState;
-
     void connect();
     void disconnect();
     void processInputState(const nlohmann::json& json);
@@ -70,6 +55,16 @@ private:
     void setFriction(const nlohmann::json& json) const;
     void setFriction(bool roll, bool rotation, bool zoom) const;
     void setFriction(bool all) const;
+
+    bool _isDone = false;
+    bool _autopilotEngaged;
+    nlohmann::json _payload;
+    nlohmann::json _focusNodes;
+    nlohmann::json _allNodes;
+    nlohmann::json _interestingTimes;
+
+    openspace::interaction::WebsocketInputStates _inputStates;
+    openspace::interaction::WebsocketInputState _inputState;
 };
 
 } // namespace openspace

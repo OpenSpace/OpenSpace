@@ -24,7 +24,10 @@
 
 #include <openspace/scripting/lualibrary.h>
 
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <algorithm>
+#include <utility>
 
 namespace openspace::scripting {
 

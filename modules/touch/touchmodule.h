@@ -31,8 +31,10 @@
 #include <modules/touch/include/touchinteraction.h>
 #include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/util/touch.h>
 #include <memory>
+#include <set>
 
 namespace openspace {
 
@@ -77,6 +79,7 @@ private:
     std::vector<TouchInput> _deferredRemovals;
     std::vector<TouchInput> _lastTouchInputs;
 
+    properties::IntProperty _tuioPort;
     properties::BoolProperty _touchIsEnabled;
     properties::BoolProperty _hasActiveTouchEvent;
     properties::StringListProperty _defaultDirectTouchRenderableTypes;
@@ -88,7 +91,7 @@ private:
     glm::ivec2 _webPositionCallback = glm::ivec2(0);
 #ifdef WIN32
     std::unique_ptr<Win32TouchHook> _win32TouchHook;
-#endif //WIN32
+#endif // WIN32
     bool _tap = false;
 };
 

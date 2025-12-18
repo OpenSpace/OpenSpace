@@ -25,10 +25,9 @@
 #include <modules/volume/envelope.h>
 
 #include <ghoul/lua/ghoul_lua.h>
-
+#include <ghoul/lua/lua_helper.h>
+#include <algorithm>
 #include <cmath>
-
-using json = nlohmann::json;
 
 namespace openspace::volume {
 
@@ -85,7 +84,7 @@ bool Envelope::isValueInEnvelope(float pos) const {
 bool Envelope::isEnvelopeValid() const {
     for (auto currentIter = _points.begin(), nextIter = currentIter + 1;
          nextIter != _points.end();
-         ++currentIter, ++nextIter)
+         currentIter++, nextIter++)
     {
         if (currentIter->position.first > nextIter->position.first) {
             return false;
@@ -104,7 +103,7 @@ glm::vec4 Envelope::valueAtPosition(float pos) const {
         if (afterIter == _points.end()) {
             return glm::vec4(0.f, 0.f, 0.f ,0.f);
         }
-        ++afterIter;
+        afterIter++;
     }
     if (afterIter->position.first == pos) {
         return glm::vec4(afterIter->color, afterIter->position.second);
@@ -186,8 +185,8 @@ std::string EnvelopePoint::hexadecimalFromVec3(const glm::vec3& vec) const {
     return ("#" + r + g + b);
 }
 
-json Envelope::jsonPoints() const {
-    json j;
+nlohmann::json Envelope::jsonPoints() const {
+    nlohmann::json j;
     for (size_t i = 0; i < _points.size(); i++) {
         j[i] = {
             {
@@ -206,8 +205,8 @@ json Envelope::jsonPoints() const {
     return j;
 }
 
-json Envelope::jsonEnvelope() const {
-    json j;
+nlohmann::json Envelope::jsonEnvelope() const {
+    nlohmann::json j;
     j["points"] = jsonPoints();
     return j;
 }

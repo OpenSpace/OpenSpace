@@ -28,17 +28,17 @@
 #include <openspace/util/screenlog.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
-#include <atomic>
+#include <chrono>
+#include <cstdint>
 #include <memory>
 #include <mutex>
 #include <random>
+#include <string>
+#include <vector>
 
 // #define LOADINGSCREEN_DEBUGGING
 
 namespace ghoul::fontrendering { class Font; }
-
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;

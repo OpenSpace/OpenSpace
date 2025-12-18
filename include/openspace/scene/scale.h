@@ -30,14 +30,14 @@
 #include <openspace/scene/timeframe.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
+#include <limits>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-struct UpdateData;
-
 namespace documentation { struct Documentation; }
+struct UpdateData;
 
 class Scale : public properties::PropertyOwner {
 public:

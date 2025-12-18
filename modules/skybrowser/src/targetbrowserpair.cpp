@@ -34,11 +34,15 @@
 #include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
-#include <glm/gtc/constants.hpp>
-#include <functional>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringconversion.h>
 #include <chrono>
+#include <cstdlib>
+#include <string_view>
 
 namespace {
     void aimTargetGalactic(std::string_view id, const glm::dvec3& direction) {

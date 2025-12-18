@@ -31,6 +31,11 @@
 #include <openspace/events/eventengine.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <algorithm>
+#include <cstdint>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "EventTopic";
@@ -42,10 +47,6 @@ namespace {
 using nlohmann::json;
 
 namespace openspace {
-
-bool EventTopic::isDone() const {
-    return !isSubscribed();
-}
 
 void EventTopic::handleJson(const nlohmann::json& json) {
     std::vector<std::string> events;
@@ -104,6 +105,10 @@ void EventTopic::handleJson(const nlohmann::json& json) {
             global::eventEngine->unregisterEventTopic(_topicId, type);
         }
     }
+}
+
+bool EventTopic::isDone() const {
+    return !isSubscribed();
 }
 
 bool EventTopic::isSubscribed() const {

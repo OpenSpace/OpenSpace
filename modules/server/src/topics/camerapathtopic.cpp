@@ -32,7 +32,10 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/path.h>
 #include <openspace/navigation/pathnavigator.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <algorithm>
+#include <cmath>
+#include <string_view>
 
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
@@ -53,10 +56,6 @@ CameraPathTopic::~CameraPathTopic() {
             module->removePreSyncCallback(_dataCallbackHandle);
         }
     }
-}
-
-bool CameraPathTopic::isDone() const {
-    return _isDone;
 }
 
 void CameraPathTopic::handleJson(const nlohmann::json& json) {
@@ -80,6 +79,10 @@ void CameraPathTopic::handleJson(const nlohmann::json& json) {
             }
         }
     );
+}
+
+bool CameraPathTopic::isDone() const {
+    return _isDone;
 }
 
 void CameraPathTopic::sendCameraPathData() {

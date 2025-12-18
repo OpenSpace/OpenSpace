@@ -24,12 +24,13 @@
 
 #include <modules/telemetry/include/util.h>
 
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
+#include <openspace/camera/camera.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <glm/gtx/projection.hpp>
 #include <glm/gtx/vector_angle.hpp>
+#include <cstdlib>
+#include <limits>
 
 namespace {
     /**

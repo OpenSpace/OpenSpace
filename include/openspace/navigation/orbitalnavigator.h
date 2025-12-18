@@ -27,7 +27,6 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/interaction/delayedvariable.h>
 #include <openspace/interaction/interpolator.h>
 #include <openspace/interaction/joystickcamerastates.h>
 #include <openspace/interaction/mousecamerastates.h>
@@ -40,17 +39,17 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/syncdata.h>
 #include <ghoul/glm.h>
-#include <glm/gtx/quaternion.hpp>
 #include <optional>
+#include <utility>
 
 namespace openspace {
+    namespace scripting { struct LuaLibrary; }
     class Camera;
     struct CameraPose;
     class SceneGraphNode;
     struct SurfacePositionHandle;
+    class Syncable;
 } // namespace
-
-namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 

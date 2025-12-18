@@ -26,9 +26,6 @@
 #define __OPENSPACE_CORE___MISSIONMANAGER___H__
 
 #include <openspace/mission/mission.h>
-
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
 #include <map>
 #include <string>
 

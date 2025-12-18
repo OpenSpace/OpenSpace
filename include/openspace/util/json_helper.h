@@ -26,8 +26,10 @@
 #define __OPENSPACE_CORE___JSON_HELPER___H__
 
 #include <openspace/json.h>
-#include <ghoul/misc/dictionary.h>
 #include <string>
+#include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
@@ -74,7 +76,7 @@ std::string formatJson(T value);
  * \param json The JSON object to sort
  * \param key The key the JSON should be sorted by
  */
-void sortJson(nlohmann::json& json, const std::string& key);
+void sortJson(nlohmann::json& json, std::string_view key);
 
 /**
  * Converts the provided JSON object into its corresponding Dictionary format. Please note

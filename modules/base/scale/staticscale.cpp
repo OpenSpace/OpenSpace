@@ -25,7 +25,6 @@
 #include <modules/base/scale/staticscale.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {

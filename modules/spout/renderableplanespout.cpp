@@ -26,10 +26,11 @@
 
 #include <modules/spout/renderableplanespout.h>
 
+#include <modules/base/rendering/renderableplane.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <ghoul/logging/logmanager.h>
-#include <optional>
+#include <openspace/scene/scenegraphnode.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     // This `Renderable` type can be used to render a plane with a texture that is
@@ -38,7 +39,6 @@ namespace {
     struct [[codegen::Dictionary(RenderablePlaneSpout)]] Parameters {
     };
 #include "renderableplanespout_codegen.cpp"
-
 } // namespace
 
 namespace openspace {

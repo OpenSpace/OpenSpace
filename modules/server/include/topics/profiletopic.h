@@ -27,8 +27,6 @@
 
 #include <modules/server/include/topics/topic.h>
 
-using nlohmann::json;
-
 namespace openspace {
 
 class ProfileTopic : public Topic {

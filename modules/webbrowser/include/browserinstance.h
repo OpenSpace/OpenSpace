@@ -25,6 +25,9 @@
 #ifndef __OPENSPACE_MODULE_WEBBROWSER__BROWSER_INSTANCE_H__
 #define __OPENSPACE_MODULE_WEBBROWSER__BROWSER_INSTANCE_H__
 
+#include <ghoul/glm.h>
+#include <string>
+
 #ifdef _MSC_VER
 #pragma warning (push)
 #pragma warning (disable : 4100)
@@ -45,14 +48,11 @@
 #pragma warning (pop)
 #endif // _MSC_VER
 
-#include <ghoul/glm.h>
-#include <string>
-
 namespace openspace {
 
 class BrowserClient;
-class WebRenderHandler;
 class WebKeyboardHandler;
+class WebRenderHandler;
 
 class BrowserInstance {
 public:

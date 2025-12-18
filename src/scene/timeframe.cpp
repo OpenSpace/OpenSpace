@@ -25,14 +25,11 @@
 #include <openspace/scene/timeframe.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/engine/globals.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/memorymanager.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
+#include <string>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo IsInTimeFrameInfo = {

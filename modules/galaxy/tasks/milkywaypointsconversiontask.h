@@ -27,14 +27,10 @@
 
 #include <openspace/util/task.h>
 
-#include <string>
-
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 /**
- * Converts ASCII based point data
+ * Converts ASCII based point data.
  * ```
  * int64_t n
  * (float x, float y, float z, float r, float g, float b) * n

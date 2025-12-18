@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_IMGUI___GUISPACETIMECOMPONENT___H__
 
 #include <modules/imgui/include/guicomponent.h>
+
 #include <openspace/util/timeconversion.h>
 
 namespace openspace::gui {

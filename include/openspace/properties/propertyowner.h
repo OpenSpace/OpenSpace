@@ -27,6 +27,7 @@
 
 #include <map>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace openspace::properties {
@@ -159,7 +160,7 @@ public:
      * \return If the Property cannot be found, `nullptr` is returned, otherwise the
      *         pointer to the Property is returned
      */
-    Property* property(const std::string& uri) const;
+    Property* property(std::string_view uri) const;
 
     /**
      * Retrieves a PropertyOwner identified by \p uri from this PropertyOwner. If \p uri
@@ -173,7 +174,7 @@ public:
      * \return If the PropertyOwner cannot be found, `nullptr` is returned, otherwise the
      *         pointer to the PropertyOwner is returned
      */
-    PropertyOwner* propertyOwner(const std::string& uri) const;
+    PropertyOwner* propertyOwner(std::string_view uri) const;
 
     /**
      * Returns a uri for this PropertyOwner. This is created by looking up all the owners
@@ -223,7 +224,7 @@ public:
      * \param identifier The identifier of the sub-owner that should be returned
      * \return The PropertyOwner with the given \p identifier, or `nullptr`
      */
-    PropertyOwner* propertySubOwner(const std::string& identifier) const;
+    PropertyOwner* propertySubOwner(std::string_view identifier) const;
 
     /**
      * Returns `true` if this PropertyOwner owns a sub-owner with the provided

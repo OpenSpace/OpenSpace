@@ -47,6 +47,7 @@ set(SOURCE_FILES
   rendering/atlasmanager.cpp
   rendering/brickcover.cpp
   rendering/brickmanager.cpp
+  rendering/brickselector.cpp
   rendering/brickselection.cpp
   rendering/multiresvolumeraycaster.cpp
   rendering/shenbrickselector.cpp

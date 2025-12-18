@@ -24,6 +24,7 @@
 
 #include <modules/volume/rendering/volumeclipplanes.h>
 
+#include <modules/volume/rendering/volumeclipplane.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
 

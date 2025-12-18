@@ -32,7 +32,9 @@
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <ghoul/glm.h>
+#include <chrono>
 #include <memory>
+#include <string>
 #include <vector>
 
 namespace openspace {

@@ -33,6 +33,17 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <string_view>
+#include <utility>
+#include <vector>
+
+#ifdef WIN32
+#include <Windows.h>
+#endif // WIN32
 
 namespace {
     constexpr std::string_view _loggerCat = "WebBrowser:EventHandler";
@@ -365,7 +376,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action,
     }
     else {
         if (isDoubleClick(state)) {
-            ++clickCount;
+            clickCount++;
         }
         else {
             state.lastClickTime = std::chrono::high_resolution_clock::now();

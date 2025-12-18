@@ -24,11 +24,16 @@
 
 #include <modules/telemetry/include/specific/planetscomparesonification.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <openspace/engine/globals.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/memorymanager.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <osc/OscTypes.h>
+#include <array>
+#include <cstdint>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "PlanetsCompareSonification";

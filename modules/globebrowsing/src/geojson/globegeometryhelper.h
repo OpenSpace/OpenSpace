@@ -29,13 +29,11 @@
 #include <vector>
 
 namespace openspace {
-    struct Geodetic2;
-    struct Geodetic3;
-
     namespace globebrowsing { class RenderableGlobe; }
     namespace rendering::helper { struct VertexXYZNormal; }
+    struct Geodetic2;
+    struct Geodetic3;
 } // namespace openspace
-
 namespace geos::geom {
     class Coordinate;
     class Geometry;

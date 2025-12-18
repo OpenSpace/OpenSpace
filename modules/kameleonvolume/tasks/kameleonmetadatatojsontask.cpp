@@ -25,12 +25,14 @@
 #include <modules/kameleonvolume/tasks/kameleonmetadatatojsontask.h>
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/util/task.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
-#include <filesystem>
 #include <fstream>
+#include <utility>
 
 namespace {
     struct [[codegen::Dictionary(KameleonMetadataToJsonTask)]] Parameters {

@@ -26,20 +26,17 @@
 
 #include "profile/line.h"
 #include "profile/scriptlogdialog.h"
-#include <ghoul/filesystem/filesystem.h>
 #include <QComboBox>
 #include <QDialogButtonBox>
-#include <QEvent>
-#include <QFile>
 #include <QKeyEvent>
 #include <QLabel>
-#include <QLineEdit>
 #include <QListWidget>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QTextStream>
 #include <QVBoxLayout>
-#include <iostream>
+#include <string>
+#include <string_view>
+#include <utility>
 
 using namespace openspace;
 

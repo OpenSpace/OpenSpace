@@ -22,7 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionary.h>
+#include <string>
+#include <optional>
+#include <utility>
+#include <vector>
 
 namespace {
 

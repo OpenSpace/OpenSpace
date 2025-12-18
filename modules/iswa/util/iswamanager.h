@@ -29,9 +29,9 @@
 
 #include <openspace/engine/downloadmanager.h>
 #include <ghoul/designpattern/event.h>
+#include <filesystem>
 #include <future>
 #include <set>
-#include <string>
 
 namespace ccmc { class Kameleon; }
 
@@ -40,7 +40,6 @@ namespace openspace {
 namespace scripting { struct LuaLibrary; }
 
 class IswaBaseGroup;
-class IswaCygnet;
 
 struct CdfInfo {
     std::string name;

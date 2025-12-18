@@ -24,10 +24,7 @@
 
 #include <modules/telemetry/include/telemetrybase.h>
 
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/query/query.h>
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {

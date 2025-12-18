@@ -30,7 +30,6 @@
 namespace openspace {
 
 class Sphere;
-namespace documentation { struct Documentation; }
 
 /**
  * DataSphere is a concrete IswaCygnet with data files as its input source. The class
@@ -48,9 +47,6 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    /**
-     * Creates a sphere geometry.
-     */
     bool createGeometry() override;
     bool destroyGeometry() override;
     void renderGeometry() const override;

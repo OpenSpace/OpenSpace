@@ -25,22 +25,32 @@
 #include <modules/video/include/screenspacevideo.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/programobject.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureconversion.h>
 #include <filesystem>
-#include <optional>
+
+namespace {
+    // This `ScreenSpaceRenderable` can be used to render a video in front of the camera.
+    //
+    // The video can either be played back based on a given simulation time
+    // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
+    // `PlaybackMode` RealTimeLoop). It is also possible to control whether the video
+    // should loop or just be played once.
+    //
+    // Note that, unless playback is mapped to simulation time, the video must be started
+    // manually via the user interface.
+    struct [[codegen::Dictionary(ScreenSpaceVideo)]] Parameters {};
+#include "screenspacevideo_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
 documentation::Documentation ScreenSpaceVideo::Documentation() {
-    documentation::Documentation doc = VideoPlayer::Documentation();
-    doc.name = "ScreenSpaceVideo";
-    doc.id = "video_screenspacevideo";
+    documentation::Documentation doc = codegen::doc<Parameters>("video_screenspacevideo");
+
+    documentation::Documentation vp = VideoPlayer::Documentation();
+    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
+
     return doc;
 }
 

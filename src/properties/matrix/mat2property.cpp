@@ -24,8 +24,6 @@
 
 #include <openspace/properties/matrix/mat2property.h>
 
-#include <openspace/util/json_helper.h>
-#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {

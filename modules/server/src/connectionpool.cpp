@@ -27,6 +27,7 @@
 #include <ghoul/io/socket/socket.h>
 #include <ghoul/io/socket/socketserver.h>
 #include <algorithm>
+#include <utility>
 
 namespace openspace {
 

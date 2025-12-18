@@ -27,12 +27,16 @@
 
 #include <openspace/util/syncdata.h>
 #include <ghoul/glm.h>
+#include <istream>
 #include <mutex>
+#include <ostream>
+#include <vector>
 
 namespace openspace {
 
 struct CameraPose;
 class SceneGraphNode;
+class Syncable;
 
 /**
  * This class still needs some more love. Suggested improvements:
@@ -56,7 +60,7 @@ public:
      * Used to explicitly show which variables within the Camera class that are used
      * for caching.
      */
-    template<typename T>
+    template <typename T>
     struct Cached {
         T datum = T(0);
         bool isDirty = true;

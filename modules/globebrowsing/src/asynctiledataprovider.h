@@ -29,9 +29,10 @@
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <ghoul/misc/boolean.h>
-#include <map>
+#include <memory>
 #include <optional>
 #include <set>
+#include <string>
 
 namespace openspace::globebrowsing {
 

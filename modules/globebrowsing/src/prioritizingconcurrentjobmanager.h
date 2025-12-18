@@ -27,7 +27,9 @@
 
 #include <modules/globebrowsing/src/lruthreadpool.h>
 #include <openspace/util/concurrentqueue.h>
+#include <memory>
 #include <mutex>
+#include <vector>
 
 namespace openspace { template <typename T> struct Job; }
 
@@ -39,7 +41,7 @@ namespace openspace::globebrowsing {
  * which is used to identify jobs. In case a job need to be explicitly ended. It can be
  * identified using its key.
  */
-template<typename P, typename KeyType>
+template <typename P, typename KeyType>
 class PrioritizingConcurrentJobManager {
 public:
     explicit PrioritizingConcurrentJobManager(LRUThreadPool<KeyType> pool);

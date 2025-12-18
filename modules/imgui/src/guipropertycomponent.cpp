@@ -29,8 +29,12 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/stringhelper.h>
 #include <algorithm>
+#include <memory>
+#include <type_traits>
+#include <utility>
 
 //#define Debugging_ImGui_TreeNode_Indices
 

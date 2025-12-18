@@ -26,19 +26,24 @@
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/glm.h>
 #include <ghoul/misc/defer.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/glm.h>
-#include <glm/gtx/string_cast.hpp>
-#include <optional>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <memory>
+#include <stdexcept>
+#include <utility>
 #include <variant>
 
 namespace {
@@ -169,7 +174,7 @@ namespace {
         std::optional<bool> mirrorBackside;
 
         // [[codegen::verbatim(SizeInfo.description)]]
-        std::variant<float, glm::vec2> size;
+        std::optional<std::variant<float, glm::vec2>> size;
 
         // [[codegen::verbatim(AutoScaleInfo.description)]]
         std::optional<bool> autoScale;
@@ -257,11 +262,13 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     });
     addProperty(Fadeable::_opacity);
 
-    if (std::holds_alternative<float>(p.size)) {
-        _size = glm::vec2(std::get<float>(p.size));
-    }
-    else {
-        _size = std::get<glm::vec2>(p.size);
+    if (p.size.has_value()) {
+        if (std::holds_alternative<float>(*p.size)) {
+            _size = glm::vec2(std::get<float>(*p.size));
+        }
+        else {
+            _size = std::get<glm::vec2>(*p.size);
+        }
     }
     _size.setExponent(15.f);
     _size.onChange([this]() { _planeIsDirty = true; });

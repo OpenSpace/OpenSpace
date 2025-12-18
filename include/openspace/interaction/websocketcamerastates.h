@@ -29,8 +29,11 @@
 
 #include <openspace/interaction/websocketinputstate.h>
 #include <ghoul/misc/boolean.h>
-#include <ghoul/misc/stringconversion.h>
+#include <ghoul/misc/exception.h>
+#include <array>
 #include <map>
+#include <string>
+#include <string_view>
 #include <vector>
 
 namespace openspace::interaction {

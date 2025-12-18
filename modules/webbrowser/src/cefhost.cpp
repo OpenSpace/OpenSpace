@@ -25,14 +25,32 @@
 #include <modules/webbrowser/include/cefhost.h>
 
 #include <modules/webbrowser/include/webbrowserapp.h>
-#include <openspace/engine/globalscallbacks.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
-#include <format>
+#include <include/cef_app.h>
+#include <filesystem>
+#include <string_view>
 
 #ifdef __APPLE__
 #include <include/wrapper/cef_library_loader.h>
 #endif // __APPLE__
+
+#ifdef WIN32
+#pragma warning(push)
+#pragma warning(disable : 4100)
+#endif // WIN32
+
+#include <include/wrapper/cef_helpers.h>
+
+#ifdef WIN32
+#pragma warning(pop)
+#endif // WIN32
+
+struct CefSettingsTraits;
+template <typename T> class CefStructBase;
+using CefSettings = CefStructBase<CefSettingsTraits>;
 
 namespace {
     constexpr std::string_view _loggerCat = "CefHost";

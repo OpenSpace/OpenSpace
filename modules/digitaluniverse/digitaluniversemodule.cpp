@@ -29,7 +29,10 @@
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/objectmanager.h>
 #include <ghoul/misc/templatefactory.h>
+#include <ghoul/opengl/programobjectmanager.h>
 
 namespace openspace {
 

@@ -25,19 +25,16 @@
 #ifndef __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__
 #define __OPENSPACE_MODULE_FITSFILEREADER___WSAFITSHELPER___H__
 
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/opengl/texture.h>
+#include <filesystem>
+#include <memory>
+#include <utility>
 #include <valarray>
 
-namespace CCfits {
-    class FITS;
-    class PHDU;
-    class ExtHDU;
-} // namespace CCfits
+namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-template<typename T>
+template <typename T>
 struct ImageData {
     std::valarray<T> contents;
     int width;
@@ -67,7 +64,7 @@ void readFitsHeader(const std::filesystem::path& path);
  */
 int nLayers(const std::filesystem::path& path);
 
-template<typename T, typename U>
+template <typename T, typename U>
 std::shared_ptr<ImageData<T>> readImageInternal(U& image);
 
 } // namespace openspace

@@ -31,8 +31,6 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class RenderableVideoSphere : public RenderableSphere {
 public:
     explicit RenderableVideoSphere(const ghoul::Dictionary& dictionary);

@@ -75,5 +75,4 @@ bool ConcurrentQueue<T>::empty() const {
     return size() == 0;
 }
 
-
 } // namespace openspace

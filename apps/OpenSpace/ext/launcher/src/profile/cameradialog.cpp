@@ -27,18 +27,17 @@
 #include "profile/line.h"
 #include <openspace/navigation/navigationstate.h>
 #include <QDialogButtonBox>
-#include <QDoubleValidator>
 #include <QFileDialog>
-#include <QFrame>
 #include <QGridLayout>
-#include <QKeyEvent>
 #include <QLabel>
-#include <QLineEdit>
 #include <QMessageBox>
-#include <QPlainTextEdit>
 #include <QPushButton>
-#include <QTabWidget>
 #include <fstream>
+#include <iterator>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <variant>
 
 namespace {
     constexpr int CameraTypeNode = 0;

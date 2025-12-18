@@ -26,13 +26,15 @@
 #define __OPENSPACE_CORE___KEYBINDINGMANAGER___H__
 
 #include <openspace/util/keys.h>
+#include <map>
+#include <utility>
+#include <vector>
 
 namespace openspace {
+    namespace scripting { struct LuaLibrary; }
     class Camera;
     class SceneGraphNode;
 } // namespace openspace
-
-namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 

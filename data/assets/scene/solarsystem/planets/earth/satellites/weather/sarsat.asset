@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Search & Rescue (SARSAT))",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_sarsat",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=sarsat&FORMAT=kvn",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=sarsat&FORMAT=kvn",
   Filename = "sarsat.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })

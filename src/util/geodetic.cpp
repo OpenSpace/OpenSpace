@@ -27,10 +27,12 @@
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/navigation/navigationstate.h>
 #include <openspace/rendering/renderable.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/logging/logmanager.h>
+#include <utility>
 
 namespace openspace {
 
@@ -133,7 +135,7 @@ glm::dvec3 geoViewFromCamera() {
         glm::normalize(cameraPositionModelSpace),
         glm::normalize(glm::transpose(rotationOnly) * cameraViewDirection)
     );
-   
+
     const SurfacePositionHandle posHandle = n->calculateSurfacePositionHandle(
         cameraViewDirectionModelSpace
     );

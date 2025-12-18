@@ -24,12 +24,14 @@
 
 #include <openspace/rendering/dashboarditem.h>
 
-#include <openspace/engine/globals.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 #include <optional>
+#include <string>
+#include <string_view>
 
 namespace {
     constexpr std::string_view KeyType = "Type";

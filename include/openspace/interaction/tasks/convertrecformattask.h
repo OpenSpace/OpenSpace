@@ -26,11 +26,9 @@
 #define __OPENSPACE_CORE___CONVERTRECFORMATTASK___H__
 
 #include <openspace/util/task.h>
-#include <openspace/interaction/sessionrecordinghandler.h>
 
-#include <ghoul/glm.h>
+#include <openspace/interaction/sessionrecording.h>
 #include <filesystem>
-#include <string>
 
 namespace openspace::interaction {
 

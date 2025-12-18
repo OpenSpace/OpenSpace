@@ -24,6 +24,9 @@
 
 #include <modules/volume/volumegridtype.h>
 
+#include <ghoul/format.h>
+#include <ghoul/misc/exception.h>
+
 namespace openspace::volume {
 
 VolumeGridType parseGridType(const std::string& gridType) {
@@ -40,8 +43,8 @@ std::string gridTypeToString(VolumeGridType gridType) {
     switch (gridType) {
         case VolumeGridType::Cartesian: return "Cartesian";
         case VolumeGridType::Spherical: return "Spherical";
+        default:                        return "Unknown";
     }
-    return "Unknown";
 }
 
 } // namespace openspace::volume

@@ -31,10 +31,6 @@
 
 namespace openspace {
 
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
 class StaticTranslation : public Translation {
 public:
     explicit StaticTranslation(const ghoul::Dictionary& dictionary);

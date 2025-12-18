@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___UINTPROPERTY___H__
 
 #include <openspace/properties/numericalproperty.h>
+
 #include <limits>
 
 namespace openspace::properties {
@@ -36,7 +37,7 @@ namespace openspace::properties {
  */
 class UIntProperty : public NumericalProperty<unsigned int> {
 public:
-    UIntProperty(Property::PropertyInfo info, unsigned int value = 0,
+    explicit UIntProperty(Property::PropertyInfo info, unsigned int value = 0,
         unsigned int minValue = std::numeric_limits<unsigned int>::lowest(),
         unsigned int maxValue = std::numeric_limits<unsigned int>::max(),
         unsigned int stepValue = 1);

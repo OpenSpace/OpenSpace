@@ -25,18 +25,15 @@
 #ifndef __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
 #define __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
 
-#include <openspace/rendering/renderable.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/misc/stringproperty.h>
+
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/util/touch.h>
-#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
-#include <vector>
 
 namespace ghoul::opengl { class ProgramObject; }
 
@@ -50,10 +47,10 @@ public:
     void initialize();
     void deinitialize();
 
-    void render(const std::vector<openspace::TouchInputHolder>& list);
+    void render(const std::vector<TouchInputHolder>& list);
 
 private:
-    void createVertexList(const std::vector<openspace::TouchInputHolder>& list);
+    void createVertexList(const std::vector<TouchInputHolder>& list);
 
     properties::BoolProperty _visible;
     properties::FloatProperty _radiusSize;

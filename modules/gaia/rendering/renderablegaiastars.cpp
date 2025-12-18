@@ -26,19 +26,20 @@
 
 #include <modules/fitsfilereader/include/fitsfilereader.h>
 #include <modules/gaia/rendering/gaiaoptions.h>
-#include <modules/gaia/rendering/octreeculler.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/distanceconversion.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/templatefactory.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/opengl/bufferbinding.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -46,6 +47,11 @@
 #include <array>
 #include <fstream>
 #include <cstdint>
+#include <cstdlib>
+#include <algorithm>
+#include <optional>
+#include <set>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableGaiaStars";

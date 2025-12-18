@@ -25,6 +25,7 @@
 #include <modules/globebrowsing/src/tileloadjob.h>
 
 #include <modules/globebrowsing/src/rawtiledatareader.h>
+#include <utility>
 
 namespace openspace::globebrowsing {
 

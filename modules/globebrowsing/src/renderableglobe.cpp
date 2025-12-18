@@ -30,9 +30,10 @@
 #include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
+#include <modules/globebrowsing/src/layergroupid.h>
+#include <modules/globebrowsing/src/layerrendersettings.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
@@ -41,12 +42,16 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
@@ -55,18 +60,13 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <ghoul/io/model/modelgeometry.h>
+#include <algorithm>
+#include <cmath>
+#include <limits>
 #include <numeric>
-#include <queue>
-#include <vector>
-
-#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
-#include <experimental/memory_resource>
-namespace std {
-    using namespace experimental;
-} // namespace std
-#else
-#include <memory_resource>
-#endif
+#include <optional>
+#include <utility>
+#include <variant>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableGlobe";
@@ -1542,7 +1542,10 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
             if (_ringsComponent->textureTransparency()) {
                 ringTextureTransparencyUnit.activate();
                 _ringsComponent->textureTransparency()->bind();
-                program.setUniform("ringTextureTransparency", ringTextureTransparencyUnit);
+                program.setUniform(
+                    "ringTextureTransparency",
+                    ringTextureTransparencyUnit
+                );
             }
 
             program.setUniform("textureOffset", _ringsComponent->textureOffset());
@@ -1661,7 +1664,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     if (_eclipseShadowsEnabled && !_ellipsoid.shadowConfigurationArray().empty()) {
         calculateEclipseShadows(program, data, ShadowCompType::LOCAL_SHADOW);
     }
-    
+
     // Shadow Mapping
     if (_shadowMappingProperties.shadowMapping) {
         // Bind ring textures for direct projection when rings component is available
@@ -1678,7 +1681,10 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             if (_ringsComponent->textureTransparency()) {
                 ringTextureTransparencyUnit.activate();
                 _ringsComponent->textureTransparency()->bind();
-                program.setUniform("ringTextureTransparency", ringTextureTransparencyUnit);
+                program.setUniform(
+                    "ringTextureTransparency",
+                    ringTextureTransparencyUnit
+                );
             }
 
             program.setUniform("textureOffset", _ringsComponent->textureOffset());
@@ -1883,9 +1889,11 @@ void RenderableGlobe::recompileShaders() {
         std::to_string(_shadowMappingProperties.shadowMapping && _shadowComponent)
     );
     pairs.emplace_back(
-        "useRingShadows", 
-        std::to_string(_shadowMappingProperties.shadowMapping&& _ringsComponent &&
-                       _ringsComponent->isEnabled())
+        "useRingShadows",
+        std::to_string(
+            _shadowMappingProperties.shadowMapping && _ringsComponent &&
+            _ringsComponent->isEnabled()
+        )
     );
     pairs.emplace_back("showChunkEdges", std::to_string(_debugProperties.showChunkEdges));
     pairs.emplace_back("showHeightResolution", "0");
@@ -2695,24 +2703,6 @@ void RenderableGlobe::freeChunkNode(Chunk* n) {
         }
     }
     n->children.fill(nullptr);
-}
-
-std::vector<const RenderableModel*> RenderableGlobe::getShadowers(const SceneGraphNode* node) {
-    std::vector<const RenderableModel*> shadowers;
-
-    if (node) {
-        const RenderableModel* model = dynamic_cast<const RenderableModel*>(node->renderable());
-        if (model && model->isCastingShadow()) {
-            shadowers.push_back(model);
-        }
-
-        for (const SceneGraphNode* child : node->children()) {
-            std::vector<const RenderableModel*> res = getShadowers(child);
-            shadowers.insert(shadowers.end(), res.begin(), res.end());
-        }
-    }
-
-    return shadowers;
 }
 
 void RenderableGlobe::mergeChunkNode(Chunk& cn) {

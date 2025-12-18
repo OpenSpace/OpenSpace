@@ -25,6 +25,13 @@
 #include <modules/globebrowsing/src/tileprovider/tileindextileprovider.h>
 
 #include <openspace/documentation/documentation.h>
+#include <modules/globebrowsing/src/layergroupid.h>
+#include <modules/globebrowsing/src/tileindex.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <cstdint>
+#include <limits>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo UniqueBackgroundColors = {

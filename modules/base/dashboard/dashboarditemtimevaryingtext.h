@@ -27,12 +27,11 @@
 
 #include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/json.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <unordered_map>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class DashboardItemTimeVaryingText : public DashboardTextItem {
 public:

@@ -31,14 +31,14 @@
 #include <ghoul/glm.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <functional>
+#include <limits>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
 struct UpdateData;
-
-namespace documentation {  struct Documentation; }
 
 class Translation : public properties::PropertyOwner {
 public:

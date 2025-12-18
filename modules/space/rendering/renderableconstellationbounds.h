@@ -27,13 +27,12 @@
 
 #include <modules/space/rendering/renderableconstellationsbase.h>
 
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::opengl { class ProgramObject; }
-
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 /**
  * This class renders the constellation bounds as defined in

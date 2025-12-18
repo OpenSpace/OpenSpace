@@ -28,7 +28,6 @@
 #include <openspace/util/task.h>
 
 #include <filesystem>
-#include <string>
 
 namespace openspace::kameleonvolume {
 

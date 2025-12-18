@@ -59,9 +59,10 @@
 
 #include <ghoul/misc/stringconversion.h>
 #include <array>
-#include <map>
+#include <cstdint>
 #include <string>
-#include <unordered_map>
+#include <string_view>
+#include <type_traits>
 
 namespace openspace {
 

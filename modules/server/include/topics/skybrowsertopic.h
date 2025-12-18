@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_SERVER___SKY_BROWSER_TOPIC___H__
 
 #include <modules/server/include/topics/topic.h>
+
 #include <chrono>
 
 namespace openspace {

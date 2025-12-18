@@ -32,6 +32,8 @@
 
 class QFrame;
 class QPushButton;
+class QRect;
+class QRectF;
 class QVBoxLayout;
 class WindowControl;
 

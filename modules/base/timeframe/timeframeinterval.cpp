@@ -25,10 +25,12 @@
 #include <modules/base/timeframe/timeframeinterval.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
+#include <string>
+#include <variant>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo HasStartInfo = {

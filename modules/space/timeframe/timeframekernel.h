@@ -28,6 +28,7 @@
 #include <openspace/scene/timeframe.h>
 
 #include <openspace/util/timerange.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace openspace {
 

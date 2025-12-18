@@ -53,6 +53,6 @@ else ()
   target_compile_options(oscpack PRIVATE "-w")
 endif ()
 
-target_include_directories(openspace-module-opensoundcontrol SYSTEM PRIVATE ext/oscpack)
-target_link_libraries(openspace-module-opensoundcontrol PRIVATE oscpack)
+target_include_directories(openspace-module-opensoundcontrol SYSTEM PUBLIC ext/oscpack)
+target_link_libraries(openspace-module-opensoundcontrol PUBLIC oscpack)
 end_dependency("oscpack")

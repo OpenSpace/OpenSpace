@@ -35,8 +35,6 @@ namespace openspace {
 
 class SceneGraphNode;
 
-namespace documentation { struct Documentation; }
-
 class DashboardItemAngle : public DashboardTextItem {
 public:
     explicit DashboardItemAngle(const ghoul::Dictionary& dictionary);

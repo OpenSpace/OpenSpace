@@ -24,7 +24,12 @@
 
 #include <modules/globebrowsing/src/tileprovider/spoutimageprovider.h>
 
+#include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/documentation/documentation.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <limits>
+#include <optional>
 
 #ifdef OPENSPACE_HAS_SPOUT
 #ifndef WIN32_LEAN_AND_MEAN
@@ -175,7 +180,7 @@ void SpoutImageProvider::internalDeinitialize() {
 Tile SpoutImageProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped;
 
-    spoutUpdate = true;
+    _spoutUpdate = true;
     return tiles[tileIndex.x];
 }
 
@@ -189,7 +194,7 @@ TileDepthTransform SpoutImageProvider::depthTransform() {
 
 void SpoutImageProvider::update() {
 #ifdef OPENSPACE_HAS_SPOUT
-    if (!spoutUpdate) {
+    if (!_spoutUpdate) {
         return;
     }
 

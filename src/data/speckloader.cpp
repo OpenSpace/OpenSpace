@@ -24,19 +24,24 @@
 
 #include <openspace/data/speckloader.h>
 
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <openspace/data/dataloader.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
+#include <algorithm>
 #include <cctype>
+#include <cstdlib>
+#include <filesystem>
 #include <fstream>
-#include <functional>
+#include <limits>
+#include <optional>
 #include <sstream>
+#include <string>
 #include <string_view>
-
+#include <utility>
+#include <vector>
 
 namespace {
     bool startsWith(std::string lhs, std::string_view rhs) noexcept {

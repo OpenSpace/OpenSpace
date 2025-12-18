@@ -28,9 +28,9 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
 #include <algorithm>
-#include <cmath>
+#include <cstdlib>
+#include <limits>
 #include <utility>
 
 namespace {

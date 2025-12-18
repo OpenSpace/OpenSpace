@@ -24,9 +24,7 @@
 
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
 
-#include <modules/exoplanets/exoplanetshelper.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/coordinateconversion.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
@@ -35,8 +33,11 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
 #include <charconv>
-#include <filesystem>
-#include <fstream>
+#include <cmath>
+#include <limits>
+#include <sstream>
+#include <string_view>
+#include <system_error>
 
 namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsDataPreparationTask";
@@ -148,7 +149,7 @@ void ExoplanetsDataPreparationTask::perform(
     int total = 0;
     std::string row;
     while (ghoul::getline(inputDataFile, row)) {
-        ++total;
+        total++;
     }
     inputDataFile.clear();
     inputDataFile.seekg(0);
@@ -161,7 +162,7 @@ void ExoplanetsDataPreparationTask::perform(
 
     int exoplanetCount = 0;
     while (ghoul::getline(inputDataFile, row)) {
-        ++exoplanetCount;
+        exoplanetCount++;
         progressCallback(static_cast<float>(exoplanetCount) / static_cast<float>(total));
 
         PlanetData planetData = parseDataRow(

@@ -28,7 +28,6 @@
 #include <modules/multiresvolume/rendering/brickselector.h>
 
 #include <modules/multiresvolume/rendering/brickselection.h>
-#include <vector>
 
 namespace openspace {
 

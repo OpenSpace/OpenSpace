@@ -33,16 +33,14 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/glm.h>
 #include <memory>
 
 namespace openspace {
+    namespace scripting { struct LuaLibrary; }
     class Camera;
     struct CameraPose;
     class SceneGraphNode;
 } // namespace openspace
-
-namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 
