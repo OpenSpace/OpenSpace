@@ -69,7 +69,6 @@ namespace {
 
     // Global flags to modify the RenderableGlobe
     constexpr bool LimitLevelByAvailableData = true;
-    constexpr bool PreformHorizonCulling = true;
 
     // Shadow structure
     struct ShadowRenderingStruct {
@@ -127,6 +126,13 @@ namespace {
         "PerformFrustumCulling",
         "Perform frustum culling",
         "If this value is set to true, frustum culling will be performed.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PerformHorizonCullingInfo = {
+        "PerformHorizonCulling",
+        "Perform horizon culling",
+        "If this value is set to 'true', tiles below the horizon will be culled away.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -606,6 +612,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(LevelProjectedAreaInfo, true),
         TriggerProperty(ResetTileProviderInfo),
         BoolProperty(PerformFrustumCullingInfo, true),
+        BoolProperty(PerformHorizonCullingInfo, true),
         IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
         IntProperty(DynamicLodIterationCountInfo, 16, 4, 128)
     })
@@ -731,6 +738,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugProperties.resetTileProviders.onChange([&]() { _resetTileProviders = true; });
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
     _debugPropertyOwner.addProperty(_debugProperties.performFrustumCulling);
+    _debugPropertyOwner.addProperty(_debugProperties.performHorizonCulling);
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
     _debugPropertyOwner.addProperty(_debugProperties.dynamicLodIterationCount);
     addPropertySubOwner(_debugPropertyOwner);
@@ -1990,9 +1998,12 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
 {
     ZoneScoped;
 
-    return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData, heights)) ||
-           (_debugProperties.performFrustumCulling &&
-               isCullableByFrustum(chunk, renderData, mvp));
+    const bool horizon = _debugProperties.performHorizonCulling &&
+        isCullableByHorizon(chunk, renderData, heights);
+    const bool frustum = _debugProperties.performFrustumCulling &&
+        isCullableByFrustum(chunk, renderData, mvp);
+
+    return horizon || frustum;
 }
 
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData,
