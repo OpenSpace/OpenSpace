@@ -58,10 +58,7 @@ namespace {
 
     constexpr double AngleEpsilon = 1e-7;
     constexpr double DistanceRatioAimThreshold = 1e-4;
-
-    constexpr std::string_view IdleKeyOrbit = "Orbit";
-    constexpr std::string_view IdleKeyOrbitAtConstantLat = "OrbitAtConstantLatitude";
-    constexpr std::string_view IdleKeyOrbitAroundUp = "OrbitAroundUp";
+    constexpr double CameraMovedEventIntervalTime = 5.0;
 
     constexpr openspace::properties::Property::PropertyInfo AnchorInfo = {
         "Anchor",
@@ -221,79 +218,6 @@ namespace {
         openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ApplyIdleBehaviorInfo = {
-        "ApplyIdleBehavior",
-        "Apply idle behavior",
-        "When set to true, the chosen idle behavior will be applied to the camera, "
-        "moving the camera accordingly.",
-        openspace::properties::Property::Visibility::User
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo IdleBehaviorInfo = {
-        "IdleBehavior",
-        "Idle behavior",
-        "The chosen camera behavior that will be triggered when the idle behavior is "
-        "applied. Each option represents a predefined camera behavior.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo
-        ShouldTriggerIdleBehaviorWhenIdleInfo =
-    {
-        "ShouldTriggerWhenIdle",
-        "Should trigger when idle",
-        "If true, the chosen idle behavior will trigger automatically after a certain "
-        "time (see 'IdleWaitTime' property).",
-        openspace::properties::Property::Visibility::User
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo IdleWaitTimeInfo = {
-        "IdleWaitTime",
-        "Idle wait time",
-        "The time (seconds) until idle behavior starts, if no camera interaction "
-        "has been performed. Note that friction counts as camera interaction.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo IdleBehaviorSpeedInfo = {
-        "SpeedFactor",
-        "Speed factor",
-        "A factor that can be used to increase or slow down the speed of an applied "
-        "idle behavior. A negative value will invert the direction. Note that a speed "
-        "of exactly 0 leads to no movement at all.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo InvertIdleBehaviorInfo = {
-        "Invert",
-        "Invert",
-        "If true, the direction of the idle behavior motion will be inverted compared "
-        "to the default. For example, the 'Orbit' option rotates to the right per "
-        "default, and will rotate to the left when inverted.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo AbortOnCameraInteractionInfo =
-    {
-        "AbortOnCameraInteraction",
-        "Abort on camera interaction",
-        "If set to true, the idle behavior is aborted on camera interaction. If false, "
-        "the behavior will be reapplied after the interaction. Examples of camera "
-        "interaction are: changing the anchor node, starting a camera path or session "
-        "recording playback, or navigating manually using an input device.",
-        openspace::properties::Property::Visibility::User
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo
-        IdleBehaviorDampenInterpolationTimeInfo =
-    {
-        "DampenInterpolationTime",
-        "Start/end dampen interpolation time",
-        "The time to interpolate to/from full speed when an idle behavior is triggered "
-        "or canceled, in seconds.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     const openspace::properties::PropertyOwner::PropertyOwnerInfo LimitZoomInfo = {
         "LimitZoom",
         "Limit Zoom",
@@ -419,43 +343,6 @@ OrbitalNavigator::Friction::Friction()
     addProperty(rotational);
     addProperty(zoom);
     addProperty(friction);
-}
-
-OrbitalNavigator::IdleBehavior::IdleBehavior()
-    : properties::PropertyOwner({ "IdleBehavior", "Idle Behavior" })
-    , apply(ApplyIdleBehaviorInfo, false)
-    , shouldTriggerWhenIdle(ShouldTriggerIdleBehaviorWhenIdleInfo, false)
-    , idleWaitTime(IdleWaitTimeInfo, 5.f, 0.f, 3600.f)
-    , abortOnCameraInteraction(AbortOnCameraInteractionInfo, true)
-    , invert(InvertIdleBehaviorInfo, false)
-    , speedScaleFactor(IdleBehaviorSpeedInfo, 1.f, -5.f, 5.f)
-    , dampenInterpolationTime(IdleBehaviorDampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
-    , defaultBehavior(IdleBehaviorInfo)
-{
-    addProperty(apply);
-    defaultBehavior.addOptions({
-        {
-            static_cast<int>(Behavior::Orbit),
-            std::string(IdleKeyOrbit)
-        },
-        {
-            static_cast<int>(Behavior::OrbitAtConstantLat),
-            std::string(IdleKeyOrbitAtConstantLat)
-        },
-        {
-            static_cast<int>(Behavior::OrbitAroundUp),
-            std::string(IdleKeyOrbitAroundUp)
-        }
-    });
-    defaultBehavior = static_cast<int>(IdleBehavior::Behavior::Orbit);
-    addProperty(defaultBehavior);
-    addProperty(shouldTriggerWhenIdle);
-    addProperty(idleWaitTime);
-    idleWaitTime.setExponent(2.2f);
-    addProperty(invert);
-    addProperty(speedScaleFactor);
-    addProperty(abortOnCameraInteraction);
-    addProperty(dampenInterpolationTime);
 }
 
 OrbitalNavigator::LimitZoom::LimitZoom()
@@ -608,35 +495,6 @@ OrbitalNavigator::OrbitalNavigator()
     addPropertySubOwner(_idleBehavior);
     addPropertySubOwner(_limitZoom);
 
-    _idleBehaviorDampenInterpolator.setTransferFunction(
-        ghoul::quadraticEaseInOut<double>
-    );
-    _idleBehavior.dampenInterpolationTime.onChange([this]() {
-        _idleBehaviorDampenInterpolator.setInterpolationTime(
-            _idleBehavior.dampenInterpolationTime
-        );
-     });
-    _idleBehavior.apply.onChange([this]() {
-        if (_idleBehavior.apply) {
-            // Reset velocities to ensure that abort on interaction works correctly
-            resetVelocities();
-            _invertIdleBehaviorInterpolation = false;
-        }
-        else {
-            _invertIdleBehaviorInterpolation = true;
-        }
-        _idleBehaviorDampenInterpolator.start();
-        _idleBehaviorDampenInterpolator.setInterpolationTime(
-            _idleBehavior.dampenInterpolationTime
-        );
-    });
-    _idleBehavior.shouldTriggerWhenIdle.onChange([this]() {
-        _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
-    });
-    _idleBehavior.idleWaitTime.onChange([this]() {
-        _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
-    });
-
     addProperty(_anchor);
     addProperty(_aim);
     addProperty(_retargetAnchor);
@@ -738,17 +596,17 @@ void OrbitalNavigator::updateStatesFromInput(double deltaTime) {
     const bool interactionHappened = _inputHandler.hasNonZeroVelocity();
 
     if (interactionHappened) {
-        updateOnCameraInteraction();
+        markCameraInteraction();
     }
     else {
-        tickIdleBehaviorTimer(deltaTime);
+        _idleBehavior.tickIdleBehaviorTimer(deltaTime);
     }
 
     const bool cameraLocationChanged = _inputHandler.hasTranslationalVelocity();
 
     if (cameraLocationChanged && (_movementTimer < 0.f)) {
         global::eventEngine->publishEvent<events::EventCameraMovedPosition>();
-        _movementTimer = _idleBehavior.idleWaitTime;
+        _movementTimer = CameraMovedEventIntervalTime;
     }
     else if (!cameraLocationChanged) {
         tickMovementTimer(static_cast<float>(deltaTime));
@@ -872,11 +730,12 @@ void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {
 
     // Apply any automatic idle behavior. Note that the idle behavior is aborted if there
     // is no input from interaction. So, it assumes that all the other effects from
-    // user input results in no change
-    applyIdleBehavior(
+    // user input results in no change.
+    _idleBehavior.applyIdleBehavior(
+        _anchorNode,
         deltaTime,
+        horizontalTranslationSpeedScale, // Same speed scale as horizontal translation
         pose.position,
-        camRot.localRotation,
         camRot.globalRotation
     );
 
@@ -976,27 +835,13 @@ void OrbitalNavigator::updateCameraScalingFromAnchor(double deltaTime) {
     }
 }
 
-void OrbitalNavigator::updateOnCameraInteraction() {
+void OrbitalNavigator::markCameraInteraction() {
     // Disable idle behavior if camera interaction happened
-    if (_idleBehavior.apply && _idleBehavior.abortOnCameraInteraction) {
-        resetIdleBehavior();
-    }
+    _idleBehavior.resetIdleBehaviorOnCamera();
 }
 
 void OrbitalNavigator::tickMovementTimer(float deltaTime) {
     _movementTimer -= deltaTime;
-}
-
-void OrbitalNavigator::tickIdleBehaviorTimer(double deltaTime) {
-    if (!_idleBehavior.shouldTriggerWhenIdle) {
-        return;
-    }
-    if (_idleBehaviorTriggerTimer > 0.f) {
-        _idleBehaviorTriggerTimer -= static_cast<float>(deltaTime);
-    }
-    else {
-        triggerIdleBehavior();
-    }
 }
 
 glm::dquat OrbitalNavigator::composeCameraRotation(
@@ -1055,7 +900,7 @@ void OrbitalNavigator::updateAnchorNode(const SceneGraphNode* anchorNode) {
     }
 
     if (changedAnchor) {
-        updateOnCameraInteraction(); // Mark a changed anchor node as a camera interaction
+        markCameraInteraction(); // Mark a changed anchor node as a camera interaction
         updatePreviousAnchorState();
     }
 
@@ -1584,7 +1429,13 @@ void OrbitalNavigator::rotateAroundAnchorUp(double deltaTime, double speedScale,
     const double combinedXInput = _inputHandler.globalRotationVelocity().x;
 
     const double angle = combinedXInput * deltaTime * speedScale;
-    orbitAroundAxis(axis, angle, cameraPosition, globalCameraRotation);
+    IdleBehavior::orbitAroundAxis(
+        _anchorNode,
+        axis,
+        angle,
+        cameraPosition,
+        globalCameraRotation
+    );
 }
 
 glm::dvec3 OrbitalNavigator::translateHorizontally(double deltaTime, double speedScale,
@@ -1746,6 +1597,18 @@ glm::dvec3 OrbitalNavigator::pushToSurface(const glm::dvec3& cameraPosition,
     return cameraPosition + referenceSurfaceOutDirection * adjustment;
 }
 
+void OrbitalNavigator::triggerIdleBehavior(std::string_view choice) {
+    const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode != OpenSpaceEngine::Mode::UserControl) {
+        LERROR(
+            "Could not start idle behavior. The camera is being controlled "
+            "by some other part of the system"
+        );
+        return;
+    }
+    _idleBehavior.triggerIdleBehavior(choice);
+}
+
 glm::dquat OrbitalNavigator::interpolateRotationDifferential(double deltaTime,
                                                           const glm::dvec3 cameraPosition,
                                                            const glm::dquat& rotationDiff)
@@ -1776,164 +1639,6 @@ WebsocketCameraStates& OrbitalNavigator::websocketStates() {
 
 ScriptCameraStates& OrbitalNavigator::scriptStates() {
     return _inputHandler.scriptStates();
-}
-
-void OrbitalNavigator::triggerIdleBehavior(std::string_view choice) {
-    const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
-    if (mode != OpenSpaceEngine::Mode::UserControl) {
-        LERROR(
-            "Could not start idle behavior. The camera is being controlled "
-            "by some other part of the system"
-        );
-        return;
-    }
-
-    if (choice.empty()) {
-        _idleBehavior.chosenBehavior = std::nullopt;
-    }
-    else {
-        IdleBehavior::Behavior behavior = IdleBehavior::Behavior::Orbit;
-        if (choice == IdleKeyOrbit) {
-            behavior = IdleBehavior::Behavior::Orbit;
-        }
-        else if (choice == IdleKeyOrbitAtConstantLat) {
-            behavior = IdleBehavior::Behavior::OrbitAtConstantLat;
-        }
-        else if (choice == IdleKeyOrbitAroundUp) {
-            behavior = IdleBehavior::Behavior::OrbitAroundUp;
-        }
-        else {
-            throw ghoul::RuntimeError(std::format(
-                "No existing IdleBehavior with identifier '{}'", choice
-            ));
-        }
-        _idleBehavior.chosenBehavior = behavior;
-    }
-
-    _idleBehavior.apply = true;
-}
-
-void OrbitalNavigator::resetIdleBehavior() {
-    _idleBehavior.apply = false;
-    _idleBehavior.chosenBehavior = std::nullopt;
-    // Prevent interpolating stop, to avoid weirdness when changing anchor, etc
-    _idleBehaviorDampenInterpolator.setInterpolationTime(0.f);
-    _idleBehaviorTriggerTimer = _idleBehavior.idleWaitTime;
-}
-
-void OrbitalNavigator::applyIdleBehavior(double deltaTime, glm::dvec3& position,
-                                         glm::dquat&, glm::dquat& globalRotation)
-{
-    _idleBehaviorDampenInterpolator.setDeltaTime(static_cast<float>(deltaTime));
-    _idleBehaviorDampenInterpolator.step();
-
-    if (!(_idleBehavior.apply || _idleBehaviorDampenInterpolator.isInterpolating())) {
-        return;
-    }
-
-    const SurfacePositionHandle posHandle = calculateSurfacePositionHandle(
-        *_anchorNode,
-        position
-    );
-
-    // Same speed scale as horizontal translation
-    double speedScale = rotationSpeedScaleFromCameraHeight(position, posHandle);
-
-    speedScale *= _idleBehavior.speedScaleFactor;
-    speedScale *= 0.05; // without this scaling, the motion is way too fast
-
-    if (_idleBehavior.invert) {
-        speedScale *= -1.0;
-    }
-
-    // Interpolate so that the start and end are smooth
-    const double s = _idleBehaviorDampenInterpolator.value();
-    speedScale *= _invertIdleBehaviorInterpolation ? (1.0 - s) : s;
-
-    const double angle = deltaTime * speedScale;
-
-    // Apply the chosen behavior
-    const IdleBehavior::Behavior choice = _idleBehavior.chosenBehavior.value_or(
-        static_cast<IdleBehavior::Behavior>(_idleBehavior.defaultBehavior.value())
-    );
-
-    switch (choice) {
-        case IdleBehavior::Behavior::Orbit:
-            orbitAnchor(angle, position, globalRotation);
-            break;
-        case IdleBehavior::Behavior::OrbitAtConstantLat: {
-            // Assume that "north" coincides with the local z-direction
-            // @TODO (2021-07-09, emmbr) Make each scene graph node aware of its own
-            // north/up, so that we can query this information rather than assuming it.
-            // The we could also combine this idle behavior with the next
-            const glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
-            orbitAroundAxis(north, angle, position, globalRotation);
-            break;
-        }
-        case IdleBehavior::Behavior::OrbitAroundUp: {
-            // Assume that "up" coincides with the local y-direction
-            const glm::dvec3 up = glm::dvec3(0.0, 1.0, 0.0);
-            orbitAroundAxis(up, angle, position, globalRotation);
-            break;
-        }
-        default:
-            throw ghoul::MissingCaseException();
-    }
-}
-
-void OrbitalNavigator::orbitAnchor(double angle, glm::dvec3& position,
-                                   glm::dquat& globalRotation)
-{
-    ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set");
-
-    // Apply a rotation to the right, in camera space
-    // (Maybe we should also let the user decide which direction to rotate?
-    // Or provide a few different orbit options)
-    const glm::dvec3 eulerAngles = glm::dvec3(0.0, -1.0, 0.0) * angle;
-    const glm::dquat rotationDiffCameraSpace = glm::dquat(eulerAngles);
-
-    const glm::dquat rotationDiffWorldSpace = globalRotation *
-        rotationDiffCameraSpace *
-        glm::inverse(globalRotation);
-
-    // Rotate to find the difference in position
-    const glm::dvec3 anchorCenterToCamera = position - _anchorNode->worldPosition();
-    const glm::dvec3 rotationDiffVec3 =
-        anchorCenterToCamera * rotationDiffWorldSpace - anchorCenterToCamera;
-
-    position += rotationDiffVec3;
-}
-
-void OrbitalNavigator::orbitAroundAxis(const glm::dvec3& axis, double angle,
-                                       glm::dvec3& position, glm::dquat& globalRotation)
-{
-    ghoul_assert(_anchorNode != nullptr, "Node to orbit must be set");
-
-    if (glm::abs(angle) < AngleEpsilon) {
-        return;
-    }
-
-    const glm::dmat4 modelTransform = _anchorNode->modelTransform();
-    const glm::dvec3 axisInWorldSpace =
-        glm::normalize(glm::dmat3(modelTransform) * glm::normalize(axis));
-
-    // Compute rotation to be applied around the axis
-    const glm::dquat spinRotation = glm::angleAxis(angle, axisInWorldSpace);
-
-    // Rotate the position vector from the center to camera and update position
-    const glm::dvec3 anchorCenterToCamera = position - _anchorNode->worldPosition();
-    const glm::dvec3 rotationDiffVec3 =
-        spinRotation * anchorCenterToCamera - anchorCenterToCamera;
-
-    if (glm::length(rotationDiffVec3) == 0.0) {
-        return;
-    }
-
-    position += rotationDiffVec3;
-
-    // Also apply the rotation to the global rotation, so the camera up vector is
-    // rotated around the axis as well
-    globalRotation = spinRotation * globalRotation;
 }
 
 double OrbitalNavigator::rotationSpeedScaleFromCameraHeight(

@@ -349,7 +349,7 @@ void PathNavigator::startPath() {
     LINFO("Starting path");
     _isPlaying = true;
 
-    global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
+    global::navigationHandler->orbitalNavigator().markCameraInteraction();
     global::navigationHandler->orbitalNavigator().resetVelocities();
 
     global::eventEngine->publishEvent<events::EventCameraPathStarted>(

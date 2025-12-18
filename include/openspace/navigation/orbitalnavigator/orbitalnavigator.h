@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/navigation/orbitalnavigator/idlebehavior.h>
 #include <openspace/navigation/orbitalnavigator/orbitalinputhandler.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
@@ -37,6 +38,7 @@
 #include <openspace/util/syncdata.h>
 #include <ghoul/glm.h>
 #include <optional>
+#include <string_view>
 #include <utility>
 
 namespace openspace {
@@ -46,36 +48,12 @@ namespace openspace {
     class SceneGraphNode;
     struct SurfacePositionHandle;
     class Syncable;
-} // namespace
+} // namespace openspace
 
 namespace openspace::interaction {
 
-class MouseInputState;
-class KeyboardInputState;
-
 class OrbitalNavigator : public properties::PropertyOwner {
 public:
-    struct IdleBehavior : public properties::PropertyOwner {
-        enum class Behavior {
-            Orbit = 0,
-            OrbitAtConstantLat,
-            OrbitAroundUp
-        };
-
-        IdleBehavior();
-
-        properties::BoolProperty apply;
-        properties::BoolProperty shouldTriggerWhenIdle;
-        properties::FloatProperty idleWaitTime;
-        properties::BoolProperty abortOnCameraInteraction;
-        properties::BoolProperty invert;
-        properties::FloatProperty speedScaleFactor;
-        properties::FloatProperty dampenInterpolationTime;
-
-        properties::OptionProperty defaultBehavior;
-        std::optional<Behavior> chosenBehavior;
-    };
-
     OrbitalNavigator();
 
     void updateStatesFromInput(double deltaTime);
@@ -88,11 +66,7 @@ public:
      * navigating using an input device, changing the focus node or starting a path or a
      * session recording playback
      */
-    void updateOnCameraInteraction();
-
-    void tickIdleBehaviorTimer(double deltaTime);
-    void triggerIdleBehavior(std::string_view choice = "");
-
+    void markCameraInteraction();
     void tickMovementTimer(float deltaTime);
 
     Camera* camera() const;
@@ -137,6 +111,8 @@ public:
      * the anchor node, accounting for the minimal allowed distance
      */
     glm::dvec3 pushToSurfaceOfAnchor(const glm::dvec3& cameraPosition) const;
+
+    void triggerIdleBehavior(std::string_view choice);
 
     void updateAnchorOnSync();
     std::vector<Syncable*> syncables();
@@ -243,12 +219,10 @@ private:
     Interpolator<double> _retargetAnchorInterpolator;
     Interpolator<double> _cameraToSurfaceDistanceInterpolator;
     Interpolator<double> _followRotationInterpolator;
-    Interpolator<double> _idleBehaviorDampenInterpolator;
-    bool _invertIdleBehaviorInterpolation = false;
 
     IdleBehavior _idleBehavior;
-    float _idleBehaviorTriggerTimer = 0.f;
 
+    // Timer that prevents the camera position event to trigger too often
     float _movementTimer = 0.f;
 
     /**
@@ -395,44 +369,6 @@ private:
      */
     glm::dvec3 cameraToSurfaceVector(const glm::dvec3& cameraPos,
         const glm::dvec3& centerPos, const SurfacePositionHandle& posHandle);
-
-    void resetIdleBehavior();
-
-    /**
-     * Apply the currently selected idle behavior to the position and rotations.
-     */
-    void applyIdleBehavior(double deltaTime, glm::dvec3& position,
-        glm::dquat& localRotation, glm::dquat& globalRotation);
-
-    /**
-     * Orbit the current anchor node, in a right-bound orbit, by updating the position
-     * and global rotation of the camera.
-     *
-     * Used for IdleBehavior::Behavior::Orbit
-     *
-     * \param angle The rotation angle to use for the motion
-     * \param position The position of the camera. Will be changed by the function
-     * \param globalRotation The camera's global rotation. Will be changed by the function
-     */
-    void orbitAnchor(double angle, glm::dvec3& position, glm::dquat& globalRotation);
-
-    /**
-     * Orbit the current anchor node, by adding a rotation around the given axis. For
-     * example, when the axis is the north vector, the camera will stay on the current
-     * latitude band. Note that this creates a rolling motion if the camera's forward
-     * vector coincides with the axis, and should be used with care.
-     *
-     * Used for:
-     *   - IdleBehavior::Behavior::OrbitAtConstantLat (axis = north = z-axis) and
-     *   - IdleBehavior::Behavior::OrbitAroundUp (axis = up = y-axis)
-     *
-     * \param axis The axis to arbit around, given in model coordinates of the anchor
-     * \param angle The rotation angle to use for the motion
-     * \param position The position of the camera. Will be changed by the function
-     * \param globalRotation The camera's global rotation. Will be changed by the function
-     */
-    void orbitAroundAxis(const glm::dvec3& axis, double angle, glm::dvec3& position,
-        glm::dquat& globalRotation);
 
     double rotationSpeedScaleFromCameraHeight(const glm::dvec3& cameraPosition,
         const SurfacePositionHandle& positionHandle) const;

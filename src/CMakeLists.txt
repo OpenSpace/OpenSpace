@@ -75,6 +75,7 @@ set(OPENSPACE_SOURCE
   navigation/navigationhandler_lua.inl
   navigation/navigationstate.cpp
   navigation/orbitalnavigator/camerainteractionstates.cpp
+  navigation/orbitalnavigator/idlebehavior.cpp
   navigation/orbitalnavigator/joystickcamerastates.cpp
   navigation/orbitalnavigator/mousecamerastates.cpp
   navigation/orbitalnavigator/orbitalinputhandler.cpp
@@ -273,6 +274,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/delayedvariable.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/delayedvariable.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/camerainteractionstates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/idlebehavior.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/joystickcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/mousecamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/orbitalinputhandler.h

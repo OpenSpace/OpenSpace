@@ -1091,7 +1091,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
         _camera->setRotation(globalCamRot * localCamRot);
 
         // Mark that a camera interaction happened
-        global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
+        global::navigationHandler->orbitalNavigator().markCameraInteraction();
 
 #ifdef TOUCH_DEBUG_PROPERTIES
         // Show velocity status every N frames
