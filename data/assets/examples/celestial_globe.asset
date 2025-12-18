@@ -45,11 +45,10 @@ local ModelMarsSmall = {
       sun_transforms.LightSource
     },
     CastShadow = true,
-    LightSource = sun.LightSource.Identifier,
-    ShadowGroup = "mars"
+    LightSource = sun.LightSource.Identifier
   },
   GUI = {
-    Name = "Celestial Globe - Mars1",
+    Name = "Celestial Globe - Mars Small",
     Path = "/Shadow Casting Models/Celestial Globe"
   }
 }
@@ -87,11 +86,10 @@ local ModelMarsLarge = {
       sun_transforms.LightSource
     },
     CastShadow = true,
-    LightSource = sun.LightSource.Identifier,
-    ShadowGroup = "mars"
+    LightSource = sun.LightSource.Identifier
   },
   GUI = {
-    Name = "Celestial Globe - Mars2",
+    Name = "Celestial Globe - Mars Large",
     Path = "/Shadow Casting Models/Celestial Globe"
   }
 }
@@ -130,11 +128,10 @@ local ModelMarsOtherGroup = {
       sun_transforms.LightSource
     },
     CastShadow = true,
-    LightSource = sun.LightSource.Identifier,
-    ShadowGroup = "second-mars"
+    LightSource = sun.LightSource.Identifier
   },
   GUI = {
-    Name = "Celestial Globe - Mars3",
+    Name = "Celestial Globe - Mars OtherGroup",
     Path = "/Shadow Casting Models/Celestial Globe"
   }
 }
@@ -169,8 +166,7 @@ local ModelEarth = {
       sun_transforms.LightSource
     },
     CastShadow = true,
-    LightSource = sun.LightSource.Identifier,
-    ShadowGroup = "earth"
+    LightSource = sun.LightSource.Identifier
   },
   GUI = {
     Name = "Celestial Globe - Earth",
@@ -207,8 +203,7 @@ local ModelMoon = {
       sun_transforms.LightSource
     },
     CastShadow = true,
-    LightSource = sun.LightSource.Identifier,
-    ShadowGroup = "moon"
+    LightSource = sun.LightSource.Identifier
   },
   GUI = {
     Name = "Celestial Globe - Moon",
@@ -219,10 +214,15 @@ local ModelMoon = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ModelMarsSmall)
+  openspace.registerShadowcaster(sun.LightSource.Identifier, ModelMarsSmall.Identifier, mars.Mars.Identifier, "mars")
   openspace.addSceneGraphNode(ModelMarsLarge)
+  openspace.registerShadowcaster(sun.LightSource.Identifier, ModelMarsLarge.Identifier, mars.Mars.Identifier, "mars")
   openspace.addSceneGraphNode(ModelMarsOtherGroup)
+  openspace.registerShadowcaster(sun.LightSource.Identifier, ModelMarsOtherGroup.Identifier, mars.Mars.Identifier)
   openspace.addSceneGraphNode(ModelEarth)
+  openspace.registerShadowcaster(sun.LightSource.Identifier, ModelEarth.Identifier, earth.Earth.Identifier, "earth")
   openspace.addSceneGraphNode(ModelMoon)
+  openspace.registerShadowcaster(sun.LightSource.Identifier, ModelMoon.Identifier, moon.Moon.Identifier, "moon")
 end)
 
 asset.onDeinitialize(function()

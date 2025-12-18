@@ -1025,6 +1025,48 @@ namespace {
     return res;
 }
 
+[[codegen::luawrap]] void registerShadowcaster(std::string lightSource,
+                                               std::string shadower, std::string shadowee,
+                                               std::optional<std::string> shadowGroup)
+{
+    using namespace openspace;
+
+    if (shadowGroup.has_value() && !shadowGroup->empty() && shadowGroup->at(0) == '_') {
+        throw ghoul::lua::LuaError(std::format(
+            "The 'shadowGroup' parameter must not start with '_': {}", *shadowGroup
+        ));
+    }
+
+    // Synthesize a unique name if none is provided
+    if (!shadowGroup.has_value()) {
+        static int Count = 0;
+        shadowGroup = std::format("_{}|{}|{}|{}", lightSource, shadower, shadowee, Count);
+        Count++;
+    }
+    ghoul_assert(shadowGroup.has_value(), "No shadowgroup specified");
+
+    const Scene* scene = global::renderEngine->scene();
+
+    const SceneGraphNode* ls = scene->sceneGraphNode(lightSource);
+    if (!ls) {
+        throw ghoul::lua::LuaError(std::format(
+            "Could not find light source '{}'", lightSource
+        ));
+    }
+
+    SceneGraphNode* shdr = scene->sceneGraphNode(shadower);
+    if (!shdr) {
+        throw ghoul::lua::LuaError(std::format("Could not find shadower '{}'", shadower));
+    }
+
+    SceneGraphNode* shdee = scene->sceneGraphNode(shadowee);
+    if (!shdee) {
+        throw ghoul::lua::LuaError(std::format("Could not find shadowee '{}'", shadowee));
+    }
+
+    global::renderEngine->registerShadowCaster(*shadowGroup, ls, shdr, shdee);
+}
+
 // Returns a list of all scene graph nodes in the scene that have a renderable of the
 // specific type
 [[codegen::luawrap]] std::vector<std::string> nodeByRenderableType(std::string type) {

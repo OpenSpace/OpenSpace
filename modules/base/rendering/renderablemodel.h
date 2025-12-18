@@ -26,6 +26,8 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/shadowmapping.h>
+
 #include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/matrix/mat3property.h>
 #include <openspace/properties/misc/optionproperty.h>
@@ -55,7 +57,7 @@ class LightSource;
 
 namespace documentation { struct Documentation; }
 
-class RenderableModel : public Renderable {
+class RenderableModel : public Renderable, public Shadower {
 public:
     explicit RenderableModel(const ghoul::Dictionary& dictionary);
     ~RenderableModel() override = default;
@@ -71,15 +73,9 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    bool isCastingShadow() const;
-
-    void renderForDepthMap(const glm::dmat4& vp) const;
+    void renderForDepthMap(const glm::dmat4& vp) const override;
 
     glm::dvec3 center() const;
-
-    const std::string& lightSource() const;
-    const std::string& shadowGroup() const;
-    double shadowFrustumSize() const;
 
     static documentation::Documentation Documentation();
 
@@ -118,15 +114,9 @@ private:
     properties::BoolProperty _enableDepthTest;
     properties::OptionProperty _blendingFuncOption;
     properties::BoolProperty _renderWireframe;
-    properties::FloatProperty _frustumSize;
 
-    properties::BoolProperty _castShadow;
-    std::string _lightSource;
-    std::string _shadowGroup;
     properties::BoolProperty _useOverrideColor;
     properties::Vec4Property _overrideColor;
-
-    bool _autoSizeFrustum = false;
 
     std::filesystem::path _vertexShaderPath;
     std::filesystem::path _fragmentShaderPath;

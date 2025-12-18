@@ -1047,48 +1047,27 @@ void RenderableGlobe::update(const UpdateData& data) {
 
     _geoJsonManager.update();
 
-    // Shadow mapping based on depth maps depend on the number of depthmaps
-    // in use, which is a compile-time define. Therefore we need to rebuild shaders
-    // when this changes.
-    const events::Event* e = global::eventEngine->firstEvent();
-    while (e) {
-        switch (e->type) {
-            case events::Event::Type::PropertyTreeUpdated:
-            case events::Event::Type::PropertyTreePruned:
-            case events::Event::Type::RenderableDisabled:
-            case events::Event::Type::RenderableEnabled:
-            case events::Event::Type::Custom:
-                size_t prevSize = _shadowers.size();
-                _shadowers = getShadowers(this->parent());
-                if (prevSize != _shadowers.size()) {
-                    _shadowersUpdated = true;
-                    _shadowersOk = false;
+    if (_isShadowersDirty) {
+        _shadowersUpdated = true;
+        _shadowersOk = false;
 
-                    _shadowSpec.clear();
-                    for (const RenderableModel* model : _shadowers) {
-                        const std::string& modelLightSource = model->lightSource();
-                        if (!_shadowSpec.contains(modelLightSource)) {
-                            _shadowSpec.emplace(modelLightSource, std::vector<std::string>{});
-                        }
-                        _shadowSpec.at(modelLightSource).push_back(model->shadowGroup());
-                    }
-                }
-                break;
+        _shadowSpec.clear();
+        for (const Shadower* model : _shadowers) {
+            const SceneGraphNode* modelLightSource = model->lightSource();
+            if (!_shadowSpec.contains(modelLightSource)) {
+                _shadowSpec.emplace(modelLightSource, std::vector<std::string>{});
+            }
+            _shadowSpec.at(modelLightSource).push_back(model->shadowGroup());
         }
-        e = e->next;
+
+        _isShadowersDirty = false;
     }
 
     // Note that recompilation only occurs when all models are loaded and ready for rendering
     if (_shadowersUpdated) {
-        bool allOK = true;
-        for (const RenderableModel* model : _shadowers) {
-            allOK &= model->isReady();
-        }
-        if (allOK) {
-            _shadowersUpdated = false;
-            _shadowersOk = true;
-            _shadersNeedRecompilation = true;
-        }
+        _shadowersUpdated = false;
+        _shadowersOk = true;
+        _shadersNeedRecompilation = true;
     }
 }
 
@@ -1360,9 +1339,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
     }
 
     std::vector<DepthMapData> depthMapData;
-    for (const auto& [key, groups] : _shadowSpec) {
-        const auto node = global::renderEngine->scene()->sceneGraphNode(key);
-
+    for (const auto& [node, groups] : _shadowSpec) {
         for (const std::string& grp : groups) {
             auto [depthmap, vp] = global::renderEngine->shadowInformation(node, grp);
             depthMapData.emplace_back(depthmap, vp);

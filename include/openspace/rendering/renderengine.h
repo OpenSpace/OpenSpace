@@ -160,7 +160,7 @@ public:
 
     uint64_t frameNumber() const;
 
-    void registerShadowCaster(const std::string& shadowgroup, const std::string& lightsource, const std::string& target);
+    void registerShadowCaster(const std::string& shadowgroup, const SceneGraphNode* lightsource, SceneGraphNode* shadower, SceneGraphNode* shadowee);
     std::pair<GLuint, glm::dmat4> shadowInformation(const SceneGraphNode* node, const std::string& shadowgroup) const;
 
 private:

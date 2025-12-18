@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLEGLOBE___H__
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/shadowmapping.h>
 
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/geojson/geojsonmanager.h>
@@ -96,7 +97,7 @@ enum class ShadowCompType {
  * A RenderableGlobe is a globe modeled as an ellipsoid using a chunked LOD algorithm for
  * rendering.
  */
-class RenderableGlobe : public Renderable {
+class RenderableGlobe : public Renderable, public Shadowee {
 public:
     explicit RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() override = default;
@@ -312,11 +313,10 @@ private:
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;
 
-    std::vector<const RenderableModel*> _shadowers;
     bool _shadowersUpdated = false;
     bool _shadowersOk = false;
 
-    std::map<std::string, std::vector<std::string>> _shadowSpec;
+    std::map<const SceneGraphNode*, std::vector<std::string>> _shadowSpec;
 
     // Components
     std::unique_ptr<RingsComponent> _ringsComponent;
