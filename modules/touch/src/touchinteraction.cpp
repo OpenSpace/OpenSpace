@@ -372,7 +372,7 @@ TouchInteraction::TouchInteraction()
     _reset.onChange([this]() { resetPropertiesToDefault(); });
 }
 
-void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>& list,
+void TouchInteraction::updateVelocitiesFromInput(const std::vector<TouchInputHolder>& list,
                                             std::vector<TouchInput>& lastProcessed)
 {
     size_t numFingers = list.size();

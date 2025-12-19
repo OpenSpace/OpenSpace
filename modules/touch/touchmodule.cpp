@@ -209,7 +209,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {
 
         bool gotNewInput = processNewInput();
         if (gotNewInput && global::windowDelegate->isMaster()) {
-            _touch.updateStateFromInput(_touchPoints, _lastTouchInputs);
+            _touch.updateVelocitiesFromInput(_touchPoints, _lastTouchInputs);
         }
         else if (_touchPoints.empty()) {
             _touch.resetAfterInput();

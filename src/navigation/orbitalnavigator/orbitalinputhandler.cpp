@@ -179,23 +179,23 @@ double OrbitalInputHandler::truckMovementVelocity() const {
 }
 
 void OrbitalInputHandler::updateStatesFromInput(double deltaTime) {
-    _mouseStates.updateStateFromInput(
+    _mouseStates.updateVelocitiesFromInput(
         global::interactionHandler->mouseInputState(),
         global::interactionHandler->keyboardInputState(),
         deltaTime
     );
 
-    _joystickStates.updateStateFromInput(
+    _joystickStates.updateVelocitiesFromInput(
         global::interactionHandler->joystickInputStates(),
         deltaTime
     );
 
-    _websocketStates.updateStateFromInput(
+    _websocketStates.updateVelocitiesFromInput(
         global::interactionHandler->websocketInputStates(),
         deltaTime
     );
 
-    _scriptStates.updateStateFromInput(deltaTime);
+    _scriptStates.updateVelocitiesFromInput(deltaTime);
 }
 
 void OrbitalInputHandler::updateFrictionFactor(double friction) {

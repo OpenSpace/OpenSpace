@@ -42,7 +42,7 @@ MouseCameraStates::MouseCameraStates(double sensitivity, double velocityScaleFac
     : OrbitalCameraStates(sensitivity, velocityScaleFactor)
 {}
 
-void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
+void MouseCameraStates::updateVelocitiesFromInput(const MouseInputState& mouseState,
                                              const KeyboardInputState& keyboardState,
                                              double deltaTime)
 {
@@ -92,20 +92,16 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
         _currentSensitivityRamp * SensitivityAdjustmentDecrease :
         _currentSensitivityRamp * SensitivityAdjustmentIncrease;
 
-    std::optional<glm::dvec2> globalRotation;
-    std::optional<glm::dvec2> localRotation;
-    std::optional<double> zoom;
-    std::optional<double> localRoll;
-    std::optional<double> globalRoll;
+    UpdateStates updateStates;
 
     // Update the mouse states
     if (primaryPressed && !keyShiftPressed && !keyAltPressed) {
         const glm::dvec2 mousePosDelta = _prevMousePos.primary - mousePosition;
         if (keyCtrlPressed) {
-            localRotation = mousePosDelta * _sensitivity;
+            updateStates.localRotation = mousePosDelta * _sensitivity;
         }
         else {
-            globalRotation = mousePosDelta *
+            updateStates.globalRotation = mousePosDelta *
                 (_sensitivity + _sensitivity * totalSensitivity / 5.0);
         }
     }
@@ -115,7 +111,7 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
 
     if (secondaryPressed || (keyAltPressed && primaryPressed)) {
         const glm::dvec2 mousePosDelta = _prevMousePos.secondary - mousePosition;
-        zoom = mousePosDelta.y * (_sensitivity + _sensitivity * totalSensitivity);
+        updateStates.zoom = mousePosDelta.y * (_sensitivity + _sensitivity * totalSensitivity);
     }
     else {
         _prevMousePos.secondary = mousePosition;
@@ -125,21 +121,17 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
         const glm::dvec2 mousePosDelta = _prevMousePos.button3 - mousePosition;
 
         if (keyCtrlPressed) {
-            localRoll = mousePosDelta.x * _sensitivity;
+            updateStates.localRoll = mousePosDelta.x * _sensitivity;
         }
         else {
-            globalRoll = mousePosDelta.x * _sensitivity;
+            updateStates.globalRoll = mousePosDelta.x * _sensitivity;
         }
     }
     else {
         _prevMousePos.button3 = mousePosition;
     }
 
-    _globalRotationVelocity.update(globalRotation, deltaTime);
-    _truckMovementVelocity.update(zoom, deltaTime);
-    _localRollVelocity.update(localRoll, deltaTime);
-    _globalRollVelocity.update(globalRoll, deltaTime);
-    _localRotationVelocity.update(localRotation, deltaTime);
+    updateVelocities(updateStates, deltaTime);
 }
 
 void MouseCameraStates::setInvertMouseButton(bool value) {

@@ -104,4 +104,14 @@ double OrbitalCameraStates::globalRollVelocity() const{
     return _globalRollVelocity.get();
 }
 
+void OrbitalCameraStates::updateVelocities(const UpdateStates& updateState,
+                                           double deltaTime)
+{
+    _globalRotationVelocity.update(updateState.globalRotation, deltaTime);
+    _localRotationVelocity.update(updateState.localRotation, deltaTime);
+    _truckMovementVelocity.update(updateState.zoom, deltaTime);
+    _localRollVelocity.update(updateState.localRoll, deltaTime);
+    _globalRollVelocity.update(updateState.globalRoll, deltaTime);
+}
+
 } // namespace openspace::interaction

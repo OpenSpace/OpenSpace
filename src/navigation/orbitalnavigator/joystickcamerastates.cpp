@@ -44,7 +44,7 @@ JoystickCameraStates::JoystickCameraStates(double sensitivity, double velocitySc
     : OrbitalCameraStates(sensitivity, velocityScaleFactor)
 {}
 
-void JoystickCameraStates::updateStateFromInput(
+void JoystickCameraStates::updateVelocitiesFromInput(
                                            const JoystickInputStates& joystickInputStates,
                                                 double deltaTime)
 {
@@ -56,11 +56,7 @@ void JoystickCameraStates::updateStateFromInput(
         return;
     }
 
-    std::optional<glm::dvec2> globalRotation;
-    std::optional<double> zoom;
-    std::optional<double> localRoll;
-    std::optional<double> globalRoll;
-    std::optional<glm::dvec2> localRotation;
+    UpdateStates deltaStates;
 
     for (const JoystickInputState& joystickInputState : joystickInputStates) {
         if (joystickInputState.name.empty()) {
@@ -129,53 +125,53 @@ void JoystickCameraStates::updateStateFromInput(
                 case AxisType::None:
                     break;
                 case AxisType::OrbitX:
-                    if (!globalRotation.has_value()) {
-                        globalRotation = glm::dvec2(0.0, 0.0);
+                    if (!deltaStates.globalRotation.has_value()) {
+                        deltaStates.globalRotation = glm::dvec2(0.0, 0.0);
                     }
-                    (*globalRotation).x += value;
+                    (*deltaStates.globalRotation).x += value;
                     break;
                 case AxisType::OrbitY:
-                    if (!globalRotation.has_value()) {
-                        globalRotation = glm::dvec2(0.0, 0.0);
+                    if (!deltaStates.globalRotation.has_value()) {
+                        deltaStates.globalRotation = glm::dvec2(0.0, 0.0);
                     }
-                    (*globalRotation).y += value;
+                    (*deltaStates.globalRotation).y += value;
                     break;
                 case AxisType::Zoom:
                 case AxisType::ZoomIn:
-                    if (!zoom.has_value()) {
-                        zoom = 0.0;
+                    if (!deltaStates.zoom.has_value()) {
+                        deltaStates.zoom = 0.0;
                     }
-                    (*zoom) += value;
+                    (*deltaStates.zoom) += value;
                     break;
                 case AxisType::ZoomOut:
-                    if (!zoom.has_value()) {
-                        zoom = 0.0;
+                    if (!deltaStates.zoom.has_value()) {
+                        deltaStates.zoom = 0.0;
                     }
-                    (*zoom) -= value;
+                    (*deltaStates.zoom) -= value;
                     break;
                 case AxisType::LocalRoll:
-                    if (!localRoll.has_value()) {
-                        localRoll = 0.0;
+                    if (!deltaStates.localRoll.has_value()) {
+                        deltaStates.localRoll = 0.0;
                     }
-                    (*localRoll) += value;
+                    (*deltaStates.localRoll) += value;
                     break;
                 case AxisType::GlobalRoll:
-                    if (!globalRoll.has_value()) {
-                        globalRoll = 0.0;
+                    if (!deltaStates.globalRoll.has_value()) {
+                        deltaStates.globalRoll = 0.0;
                     }
-                    (*globalRoll) += value;
+                    (*deltaStates.globalRoll) += value;
                     break;
                 case AxisType::PanX:
-                    if (!localRotation.has_value()) {
-                        localRotation = glm::dvec2(0.0, 0.0);
+                    if (!deltaStates.localRotation.has_value()) {
+                        deltaStates.localRotation = glm::dvec2(0.0, 0.0);
                     }
-                    (*localRotation).x += value;
+                    (*deltaStates.localRotation).x += value;
                     break;
                 case AxisType::PanY:
-                    if (!localRotation.has_value()) {
-                        localRotation = glm::dvec2(0.0, 0.0);
+                    if (!deltaStates.localRotation.has_value()) {
+                        deltaStates.localRotation = glm::dvec2(0.0, 0.0);
                     }
-                    (*localRotation).y += value;
+                    (*deltaStates.localRotation).y += value;
                     break;
                 case AxisType::Property:
                     const std::string script = std::format(
@@ -219,11 +215,7 @@ void JoystickCameraStates::updateStateFromInput(
         }
     }
 
-    _globalRotationVelocity.update(globalRotation, deltaTime);
-    _truckMovementVelocity.update(zoom, deltaTime);
-    _localRollVelocity.update(localRoll, deltaTime);
-    _globalRollVelocity.update(globalRoll, deltaTime);
-    _localRotationVelocity.update(localRotation, deltaTime);
+    updateVelocities(deltaStates, deltaTime);
 }
 
 void JoystickCameraStates::setAxisMapping(const std::string& joystickName,

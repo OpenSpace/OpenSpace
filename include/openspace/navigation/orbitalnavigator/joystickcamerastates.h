@@ -88,7 +88,7 @@ public:
 
     JoystickCameraStates(double sensitivity, double velocityScaleFactor);
 
-    void updateStateFromInput(
+    void updateVelocitiesFromInput(
         const JoystickInputStates& joystickInputStates, double deltaTime);
 
     void setAxisMapping(const std::string& joystickName, int axis, AxisType mapping,

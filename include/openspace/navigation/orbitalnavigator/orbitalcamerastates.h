@@ -64,6 +64,15 @@ public:
     bool hasNonZeroVelocities(bool checkOnlyMovement = false) const;
 
 protected:
+    struct UpdateStates {
+        std::optional<glm::dvec2> globalRotation;
+        std::optional<double> zoom;
+        std::optional<double> localRoll;
+        std::optional<double> globalRoll;
+        std::optional<glm::dvec2> localRotation;
+    };
+
+    void updateVelocities(const UpdateStates& updateState, double deltaTime);
 
     double _sensitivity = 0.0;
 

@@ -35,7 +35,7 @@ class ScriptCameraStates : public OrbitalCameraStates {
 public:
     ScriptCameraStates();
 
-    void updateStateFromInput(double deltaTime);
+    void updateVelocitiesFromInput(double deltaTime);
 
     void addLocalRotation(const glm::dvec2& delta);
     void addGlobalRotation(const glm::dvec2& delta);

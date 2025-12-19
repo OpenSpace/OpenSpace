@@ -68,7 +68,7 @@ public:
 
     WebsocketCameraStates(double sensitivity, double velocityScaleFactor);
 
-    void updateStateFromInput(
+    void updateVelocitiesFromInput(
         const WebsocketInputStates& websocketInputStates, double deltaTime);
 
     void setAxisMapping(int axis, AxisType mapping,

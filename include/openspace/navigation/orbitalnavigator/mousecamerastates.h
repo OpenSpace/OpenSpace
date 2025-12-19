@@ -36,7 +36,7 @@ class MouseCameraStates : public OrbitalCameraStates {
 public:
     MouseCameraStates(double sensitivity, double velocityScaleFactor);
 
-    void updateStateFromInput(const MouseInputState& mouseState,
+    void updateVelocitiesFromInput(const MouseInputState& mouseState,
         const KeyboardInputState& keyboardState, double deltaTime);
 
     void setInvertMouseButton(bool value);

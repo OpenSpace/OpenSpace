@@ -94,7 +94,7 @@ public:
      *      points select the same node and said node is larger than _nodeRadiusThreshold
      */
 
-    void updateStateFromInput(const std::vector<TouchInputHolder>& list,
+    void updateVelocitiesFromInput(const std::vector<TouchInputHolder>& list,
         std::vector<TouchInput>& lastProcessed);
 
     bool hasNonZeroVelocities() const;
