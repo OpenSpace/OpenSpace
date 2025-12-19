@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___JOYSTICKCAMERASTATES___H__
 #define __OPENSPACE_CORE___JOYSTICKCAMERASTATES___H__
 
-#include <openspace/navigation/orbitalnavigator/camerainteractionstates.h>
+#include <openspace/navigation/orbitalnavigator/orbitalcamerastates.h>
 
 #include <openspace/interaction/joystickinputstate.h>
 #include <ghoul/format.h>
@@ -38,7 +38,7 @@
 
 namespace openspace::interaction {
 
-class JoystickCameraStates : public CameraInteractionStates {
+class JoystickCameraStates : public OrbitalCameraStates {
 public:
     enum class AxisType {
         None = 0,

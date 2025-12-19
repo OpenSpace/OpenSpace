@@ -22,37 +22,40 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___DELAYEDVARIABLE___H__
-#define __OPENSPACE_CORE___DELAYEDVARIABLE___H__
+#ifndef __OPENSPACE_CORE___DAMPENEDVELOCITY___H__
+#define __OPENSPACE_CORE___DAMPENEDVELOCITY___H__
 
 namespace openspace::interaction {
 
 /**
- * Class that acts as a smoothing filter to a variable. The filter has a step response on
- * a form that resembles the function y = 1-e^(-t/scale). The variable will be updated as
- * soon as it is set to a value (calling the set() function).
+ * This class acts as a smoothing filter to a variable representing a velocity.
+ * If friction is enabled, a decelleration can also be applied over time.
+ *
+ * The filter has a step response on a form that resembles the function
+ * y = 1-e^(-t/scale). The variable will be updated as soon as it is set to a
+ * value (calling the set() function).
  */
-template <typename T, typename ScaleType>
-class DelayedVariable {
+template <typename T>
+class DampenedVelocity {
 public:
-    DelayedVariable(ScaleType scaleFactor, ScaleType friction);
+    DampenedVelocity(double scaleFactor, bool useFriction);
 
     void set(T value, double dt);
     void decelerate(double dt);
-    void setHard(T value);
-    void setFriction(ScaleType friction);
-    void setScaleFactor(ScaleType scaleFactor);
+    void setImmediate(T value);
+    void setFriction(bool enabled);
+    void setScaleFactor(double scaleFactor);
     T get() const;
 
 private:
-    ScaleType _scaleFactor;
-    ScaleType _friction;
+    double _scaleFactor;
+    bool _frictionEnabled;
     T _targetValue = T(0);
     T _currentValue = T(0);
 };
 
 } // namespace openspace::interaction
 
-#include "delayedvariable.inl"
+#include "dampenedvelocity.inl"
 
-#endif // __OPENSPACE_CORE___DELAYEDVARIABLE___H__
+#endif // __OPENSPACE_CORE___DAMPENEDVELOCITY___H__

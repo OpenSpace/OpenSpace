@@ -22,64 +22,52 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
-#define __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
-
-#include <openspace/navigation/orbitalnavigator/delayedvariable.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/glm.h>
 
 namespace openspace::interaction {
 
-class CameraInteractionStates {
-public:
-    /**
-     * \param sensitivity Interaction sensitivity
-     * \param velocityScaleFactor Can be set to 60 to remove the inertia of the
-     *        interaction. Lower value will make it harder to move the camera
-     */
-    CameraInteractionStates(double sensitivity, double velocityScaleFactor);
-    virtual ~CameraInteractionStates() = default;
+template <typename T>
+DampenedVelocity<T>::DampenedVelocity(double scaleFactor, bool useFriction)
+    : _scaleFactor(scaleFactor)
+    , _frictionEnabled(useFriction)
+{}
 
-    void setRotationalFriction(double friction);
-    void setHorizontalFriction(double friction);
-    void setVerticalFriction(double friction);
-    void setSensitivity(double sensitivity);
-    void setVelocityScaleFactor(double scaleFactor);
+template <typename T>
+void DampenedVelocity<T>::set(T value, double dt) {
+    _targetValue = value;
+    _currentValue += (_targetValue - _currentValue) * glm::min(_scaleFactor * dt, 1.0);
+    // less or equal to 1.0 keeps it stable
+}
 
-    glm::dvec2 globalRotationVelocity() const;
-    glm::dvec2 localRotationVelocity() const;
-    double truckMovementVelocity() const;
-    double localRollVelocity() const;
-    double globalRollVelocity() const;
+template <typename T>
+void DampenedVelocity<T>::decelerate(double dt) {
+    if (!_frictionEnabled) {
+        return;
+    }
+    _currentValue *= (1.0 - glm::min(_scaleFactor * dt, 1.0));
+    // less or equal to 1.0 keeps it stable
+}
 
-    void resetVelocities();
+template <typename T>
+void DampenedVelocity<T>::setImmediate(T value) {
+    _targetValue = value;
+    _currentValue = value;
+}
 
-    /**
-     * Returns true if any of the velocities are larger than zero, i.e. whether an
-     * interaction happened.
-     */
-    bool hasNonZeroVelocities(bool checkOnlyMovement = false) const;
+template <typename T>
+void DampenedVelocity<T>::setFriction(bool enabled) {
+    _frictionEnabled = enabled;
+}
 
-protected:
-    template <typename T>
-    struct InteractionState {
-        explicit InteractionState(double scaleFactor);
-        void setFriction(double friction);
-        void setVelocityScaleFactor(double scaleFactor);
+template <typename T>
+void DampenedVelocity<T>::setScaleFactor(double scaleFactor) {
+    _scaleFactor = scaleFactor;
+}
 
-        T previousValue = T(0.0);
-        DelayedVariable<T, double> velocity;
-    };
-
-    double _sensitivity = 0.0;
-
-    InteractionState<glm::dvec2> _globalRotationState;
-    InteractionState<glm::dvec2> _localRotationState;
-    InteractionState<double> _truckMovementState;
-    InteractionState<double> _localRollState;
-    InteractionState<double> _globalRollState;
-};
+template <typename T>
+T DampenedVelocity<T>::get() const {
+    return _currentValue;
+}
 
 } // namespace openspace::interaction
-
-#endif // __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__

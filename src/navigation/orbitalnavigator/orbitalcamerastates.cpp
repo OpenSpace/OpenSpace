@@ -22,30 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/navigation/orbitalnavigator/camerainteractionstates.h>
+#include <openspace/navigation/orbitalnavigator/orbitalcamerastates.h>
 
 namespace openspace::interaction {
 
 template <typename T>
-CameraInteractionStates::InteractionState<T>::InteractionState(double scaleFactor)
-    : previousValue(T(0.0))
-    , velocity(scaleFactor, 1)
+OrbitalCameraStates::CameraInteractionState<T>::CameraInteractionState(double scaleFactor)
+    : velocity(scaleFactor, 1.0)
 {}
 
-template <typename T>
-void CameraInteractionStates::InteractionState<T>::setFriction(double friction) {
-    velocity.setFriction(friction);
-}
-
-template <typename T>
-void CameraInteractionStates::InteractionState<T>::setVelocityScaleFactor(
-                                                                       double scaleFactor)
-{
-    velocity.setScaleFactor(scaleFactor);
-}
-
-CameraInteractionStates::CameraInteractionStates(double sensitivity,
-                                                 double velocityScaleFactor)
+OrbitalCameraStates::OrbitalCameraStates(double sensitivity, double velocityScaleFactor)
     : _sensitivity(sensitivity)
     , _globalRotationState(velocityScaleFactor)
     , _localRotationState(velocityScaleFactor)
@@ -54,41 +40,41 @@ CameraInteractionStates::CameraInteractionStates(double sensitivity,
     , _globalRollState(velocityScaleFactor)
 {}
 
-void CameraInteractionStates::setRotationalFriction(double friction) {
-    _localRotationState.setFriction(friction);
-    _localRollState.setFriction(friction);
-    _globalRollState.setFriction(friction);
+void OrbitalCameraStates::setRotationalFriction(bool enabled) {
+    _localRotationState.velocity.setFriction(enabled);
+    _localRollState.velocity.setFriction(enabled);
+    _globalRollState.velocity.setFriction(enabled);
 }
 
-void CameraInteractionStates::setHorizontalFriction(double friction) {
-    _globalRotationState.setFriction(friction);
+void OrbitalCameraStates::setHorizontalFriction(bool enabled) {
+    _globalRotationState.velocity.setFriction(enabled);
 }
 
-void CameraInteractionStates::setVerticalFriction(double friction) {
-    _truckMovementState.setFriction(friction);
+void OrbitalCameraStates::setVerticalFriction(bool enabled) {
+    _truckMovementState.velocity.setFriction(enabled);
 }
 
-void CameraInteractionStates::setSensitivity(double sensitivity) {
+void OrbitalCameraStates::setSensitivity(double sensitivity) {
     _sensitivity = sensitivity;
 }
 
-void CameraInteractionStates::setVelocityScaleFactor(double scaleFactor) {
-    _globalRotationState.setVelocityScaleFactor(scaleFactor);
-    _localRotationState.setVelocityScaleFactor(scaleFactor);
-    _truckMovementState.setVelocityScaleFactor(scaleFactor);
-    _localRollState.setVelocityScaleFactor(scaleFactor);
-    _globalRollState.setVelocityScaleFactor(scaleFactor);
+void OrbitalCameraStates::setVelocityScaleFactor(double scaleFactor) {
+    _globalRotationState.velocity.setScaleFactor(scaleFactor);
+    _localRotationState.velocity.setScaleFactor(scaleFactor);
+    _truckMovementState.velocity.setScaleFactor(scaleFactor);
+    _localRollState.velocity.setScaleFactor(scaleFactor);
+    _globalRollState.velocity.setScaleFactor(scaleFactor);
 }
 
-void CameraInteractionStates::resetVelocities() {
-    _globalRotationState.velocity.setHard({ 0.0, 0.0 });
-    _localRotationState.velocity.setHard({ 0.0, 0.0 });
-    _truckMovementState.velocity.setHard(0.0);
-    _localRollState.velocity.setHard(0.0);
-    _globalRollState.velocity.setHard(0.0);
+void OrbitalCameraStates::resetVelocities() {
+    _globalRotationState.velocity.setImmediate({ 0.0, 0.0 });
+    _localRotationState.velocity.setImmediate({ 0.0, 0.0 });
+    _truckMovementState.velocity.setImmediate(0.0);
+    _localRollState.velocity.setImmediate(0.0);
+    _globalRollState.velocity.setImmediate(0.0);
 }
 
-bool CameraInteractionStates::hasNonZeroVelocities(bool checkOnlyMovement) const {
+bool OrbitalCameraStates::hasNonZeroVelocities(bool checkOnlyMovement) const {
     glm::dvec2 sum = glm::dvec2(0.0);
     sum += globalRotationVelocity();
     sum += truckMovementVelocity();
@@ -103,23 +89,23 @@ bool CameraInteractionStates::hasNonZeroVelocities(bool checkOnlyMovement) const
     return glm::length(sum) > 0.001;
 }
 
-glm::dvec2 CameraInteractionStates::globalRotationVelocity() const{
+glm::dvec2 OrbitalCameraStates::globalRotationVelocity() const{
     return _globalRotationState.velocity.get();
 }
 
-glm::dvec2 CameraInteractionStates::localRotationVelocity() const{
+glm::dvec2 OrbitalCameraStates::localRotationVelocity() const{
     return _localRotationState.velocity.get();
 }
 
-double CameraInteractionStates::truckMovementVelocity() const{
+double OrbitalCameraStates::truckMovementVelocity() const{
     return _truckMovementState.velocity.get();
 }
 
-double CameraInteractionStates::localRollVelocity() const{
+double OrbitalCameraStates::localRollVelocity() const{
     return _localRollState.velocity.get();
 }
 
-double CameraInteractionStates::globalRollVelocity() const{
+double OrbitalCameraStates::globalRollVelocity() const{
     return _globalRollState.velocity.get();
 }
 

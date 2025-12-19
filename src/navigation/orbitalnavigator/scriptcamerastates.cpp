@@ -26,7 +26,7 @@
 
 namespace openspace::interaction {
 
-ScriptCameraStates::ScriptCameraStates() : CameraInteractionStates(1.0, 1.0) {}
+ScriptCameraStates::ScriptCameraStates() : OrbitalCameraStates(1.0, 1.0) {}
 
 void ScriptCameraStates::updateStateFromInput(double deltaTime) {
     if (_localRotation != glm::dvec2(0.0)) {

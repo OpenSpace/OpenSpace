@@ -39,7 +39,7 @@ namespace {
 namespace openspace::interaction {
 
 MouseCameraStates::MouseCameraStates(double sensitivity, double velocityScaleFactor)
-    : CameraInteractionStates(sensitivity, velocityScaleFactor)
+    : OrbitalCameraStates(sensitivity, velocityScaleFactor)
 {}
 
 void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
@@ -125,6 +125,7 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
         _globalRotationState.previousValue = mousePosition;
         _globalRotationState.velocity.decelerate(deltaTime);
     }
+
     if (secondaryPressed || (keyAltPressed && primaryPressed)) {
         const double mousePosDelta = _truckMovementState.previousValue - mousePosition.y;
 
@@ -137,6 +138,7 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
         _truckMovementState.previousValue = mousePosition.y;
         _truckMovementState.velocity.decelerate(deltaTime);
     }
+
     if (button3Pressed || (keyShiftPressed && primaryPressed)) {
         if (keyCtrlPressed) {
             const double mousePosDelta = _localRollState.previousValue - mousePosition.x;

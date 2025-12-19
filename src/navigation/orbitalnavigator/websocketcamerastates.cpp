@@ -32,7 +32,7 @@ namespace openspace::interaction {
 
 WebsocketCameraStates::WebsocketCameraStates(double sensitivity,
                                              double velocityScaleFactor)
-    : CameraInteractionStates(sensitivity, velocityScaleFactor)
+    : OrbitalCameraStates(sensitivity, velocityScaleFactor)
 {}
 
 void WebsocketCameraStates::updateStateFromInput(

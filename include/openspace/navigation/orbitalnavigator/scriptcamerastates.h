@@ -25,13 +25,13 @@
 #ifndef __OPENSPACE_CORE___SCRIPTCAMERASTATES___H__
 #define __OPENSPACE_CORE___SCRIPTCAMERASTATES___H__
 
-#include <openspace/navigation/orbitalnavigator/camerainteractionstates.h>
+#include <openspace/navigation/orbitalnavigator/orbitalcamerastates.h>
 
 #include <ghoul/glm.h>
 
 namespace openspace::interaction {
 
-class ScriptCameraStates : public CameraInteractionStates {
+class ScriptCameraStates : public OrbitalCameraStates {
 public:
     ScriptCameraStates();
 

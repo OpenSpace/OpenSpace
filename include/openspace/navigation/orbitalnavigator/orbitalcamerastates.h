@@ -22,53 +22,65 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/misc/assert.h>
+#ifndef __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+#define __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__
+
+#include <openspace/navigation/orbitalnavigator/dampenedvelocity.h>
 #include <ghoul/glm.h>
 
 namespace openspace::interaction {
 
-template <typename T, typename ScaleType>
-DelayedVariable<T, ScaleType>::DelayedVariable(ScaleType scaleFactor, ScaleType friction)
-    : _scaleFactor(std::move(scaleFactor))
-    , _friction(friction)
-{
-    ghoul_assert(_friction >= ScaleType(0.0), "Friction must be positive");
-}
+/**
+ * Velocity input states for the OrbitalNavigator's camera interaction.
+ */
+class OrbitalCameraStates {
+public:
+    /**
+     * \param sensitivity Interaction sensitivity
+     * \param velocityScaleFactor Can be set to 60 to remove the inertia of the
+     *        interaction. Lower value will make it harder to move the camera
+     */
+    OrbitalCameraStates(double sensitivity, double velocityScaleFactor);
+    virtual ~OrbitalCameraStates() = default;
 
-template <typename T, typename ScaleType>
-void DelayedVariable<T, ScaleType>::set(T value, double dt) {
-    _targetValue = value;
-    _currentValue = _currentValue + (_targetValue - _currentValue) *
-        glm::min(_scaleFactor * dt, 1.0); // less or equal to 1.0 keeps it stable
-}
+    void setRotationalFriction(bool friction);
+    void setHorizontalFriction(bool friction);
+    void setVerticalFriction(bool friction);
+    void setSensitivity(double sensitivity);
+    void setVelocityScaleFactor(double scaleFactor);
 
-template <typename T, typename ScaleType>
-void DelayedVariable<T, ScaleType>::decelerate(double dt) {
-    _currentValue = _currentValue + (- _currentValue) *
-        glm::min(_scaleFactor * _friction * dt, 1.0);
-        // less or equal to 1.0 keeps it stable
-}
+    glm::dvec2 globalRotationVelocity() const;
+    glm::dvec2 localRotationVelocity() const;
+    double truckMovementVelocity() const;
+    double localRollVelocity() const;
+    double globalRollVelocity() const;
 
-template <typename T, typename ScaleType>
-void DelayedVariable<T, ScaleType>::setHard(T value) {
-    _targetValue = value;
-    _currentValue = value;
-}
+    void resetVelocities();
 
-template <typename T, typename ScaleType>
-void DelayedVariable<T, ScaleType>::setFriction(ScaleType friction) {
-    _friction = friction;
-    ghoul_assert(_friction >= ScaleType(0.0), "Friction must be positive");
-}
+    /**
+     * Returns true if any of the velocities are larger than zero, i.e. whether an
+     * interaction happened.
+     */
+    bool hasNonZeroVelocities(bool checkOnlyMovement = false) const;
 
-template <typename T, typename ScaleType>
-void DelayedVariable<T, ScaleType>::setScaleFactor(ScaleType scaleFactor) {
-    _scaleFactor = scaleFactor;
-}
+protected:
 
-template <typename T, typename ScaleType>
-T DelayedVariable<T, ScaleType>::get() const {
-    return _currentValue;
-}
+    double _sensitivity = 0.0;
+
+    template <typename T>
+    struct CameraInteractionState {
+        CameraInteractionState(double scaleFactor);
+        T previousValue = T(0.0);
+        DampenedVelocity<T> velocity;
+    };
+
+    CameraInteractionState<glm::dvec2> _globalRotationState;
+    CameraInteractionState<glm::dvec2> _localRotationState;
+    CameraInteractionState<double> _truckMovementState;
+    CameraInteractionState<double> _localRollState;
+    CameraInteractionState<double> _globalRollState;
+};
 
 } // namespace openspace::interaction
+
+#endif // __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__

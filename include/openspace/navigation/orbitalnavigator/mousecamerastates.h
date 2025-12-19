@@ -25,14 +25,14 @@
 #ifndef __OPENSPACE_CORE___MOUSECAMERASTATES___H__
 #define __OPENSPACE_CORE___MOUSECAMERASTATES___H__
 
-#include <openspace/navigation/orbitalnavigator/camerainteractionstates.h>
+#include <openspace/navigation/orbitalnavigator/orbitalcamerastates.h>
 
 namespace openspace::interaction {
 
 class KeyboardInputState;
 class MouseInputState;
 
-class MouseCameraStates : public CameraInteractionStates {
+class MouseCameraStates : public OrbitalCameraStates {
 public:
     MouseCameraStates(double sensitivity, double velocityScaleFactor);
 

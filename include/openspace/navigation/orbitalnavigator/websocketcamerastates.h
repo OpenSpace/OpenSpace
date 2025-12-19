@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___WEBSOCKETCAMERASTATES___H__
 #define __OPENSPACE_CORE___WEBSOCKETCAMERASTATES___H__
 
-#include <openspace/navigation/orbitalnavigator/camerainteractionstates.h>
+#include <openspace/navigation/orbitalnavigator/orbitalcamerastates.h>
 
 #include <openspace/interaction/websocketinputstate.h>
 #include <ghoul/misc/boolean.h>
@@ -38,7 +38,7 @@
 
 namespace openspace::interaction {
 
-class WebsocketCameraStates : public CameraInteractionStates {
+class WebsocketCameraStates : public OrbitalCameraStates {
 public:
     enum class AxisType {
         None = 0,

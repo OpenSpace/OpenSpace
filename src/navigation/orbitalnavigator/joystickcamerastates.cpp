@@ -41,7 +41,7 @@ namespace {
 namespace openspace::interaction {
 
 JoystickCameraStates::JoystickCameraStates(double sensitivity, double velocityScaleFactor)
-    : CameraInteractionStates(sensitivity, velocityScaleFactor)
+    : OrbitalCameraStates(sensitivity, velocityScaleFactor)
 {}
 
 void JoystickCameraStates::updateStateFromInput(

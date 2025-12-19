@@ -74,10 +74,10 @@ set(OPENSPACE_SOURCE
   navigation/navigationhandler.cpp
   navigation/navigationhandler_lua.inl
   navigation/navigationstate.cpp
-  navigation/orbitalnavigator/camerainteractionstates.cpp
   navigation/orbitalnavigator/idlebehavior.cpp
   navigation/orbitalnavigator/joystickcamerastates.cpp
   navigation/orbitalnavigator/mousecamerastates.cpp
+  navigation/orbitalnavigator/orbitalcamerastates.cpp
   navigation/orbitalnavigator/orbitalinputhandler.cpp
   navigation/orbitalnavigator/orbitalnavigator.cpp
   navigation/orbitalnavigator/orbitalnavigator_lua.inl
@@ -271,12 +271,12 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/keyframenavigator.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/navigationhandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/navigationstate.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/delayedvariable.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/delayedvariable.inl
-  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/camerainteractionstates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/dampenedvelocity.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/dampenedvelocity.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/idlebehavior.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/joystickcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/mousecamerastates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/orbitalcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/orbitalinputhandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/orbitalnavigator.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/websocketcamerastates.h
