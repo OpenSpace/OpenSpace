@@ -29,7 +29,6 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 #include <optional>
-#include <string>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {

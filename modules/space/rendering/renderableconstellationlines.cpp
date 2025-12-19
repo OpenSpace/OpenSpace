@@ -42,7 +42,6 @@
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <optional>
 #include <set>
 #include <sstream>
 #include <tuple>

@@ -35,13 +35,13 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/distanceconversion.h>
 #include <openspace/util/memorymanager.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <osc/OscTypes.h>
 #include <cstdint>
 #include <cstdlib>
-#include <format>
 #include <limits>
 #include <optional>
 #include <utility>

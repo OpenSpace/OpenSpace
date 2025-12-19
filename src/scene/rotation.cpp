@@ -32,7 +32,6 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/misc/dictionary.h>
 #include <optional>
-#include <string>
 
 namespace {
     // A `Rotation` object describes a specific rotation for a scene graph node, which may

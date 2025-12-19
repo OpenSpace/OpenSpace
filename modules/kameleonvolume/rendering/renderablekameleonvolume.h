@@ -38,7 +38,6 @@
 #include <memory>
 
 namespace openspace { class TransferFunction; }
-
 namespace openspace::volume {
     class BasicVolumeRaycaster;
     template <typename T> class RawVolume;

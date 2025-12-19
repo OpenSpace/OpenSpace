@@ -35,7 +35,6 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <memory>
 #include <optional>
 #include <utility>
 

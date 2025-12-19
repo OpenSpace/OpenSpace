@@ -38,8 +38,10 @@
 #include <filesystem>
 #include <memory>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::fontrendering { class Font; }
+namespace ghoul {
+    namespace fontrendering { class Font; }
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 

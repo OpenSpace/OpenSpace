@@ -25,6 +25,7 @@
 #include "profile/deltatimesdialog.h"
 
 #include "profile/line.h"
+#include <ghoul/format.h>
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QKeyEvent>
@@ -36,12 +37,8 @@
 #include <array>
 #include <cstdint>
 #include <cstdlib>
-#include <format>
 #include <new>
-#include <string>
-#include <string_view>
 #include <utility>
-#include <vector>
 
 namespace {
     constexpr int MaxNumberOfKeys = 30;

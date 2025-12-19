@@ -28,7 +28,7 @@
 #include <QAbstractItemModel>
 
 #include "assettreeitem.h"
-#include "openspace/scene/profile.h"
+#include <openspace/scene/profile.h>
 #include <QString>
 #include <QVariant>
 #include <memory>

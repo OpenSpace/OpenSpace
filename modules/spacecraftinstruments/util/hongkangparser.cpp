@@ -33,7 +33,6 @@
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <cstdlib>
-#include <filesystem>
 #include <fstream>
 #include <ios>
 #include <string_view>

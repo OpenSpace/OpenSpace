@@ -28,7 +28,6 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/interaction/action.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/format.h>
@@ -39,7 +38,6 @@
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <string>
 #include <utility>
-#include <vector>
 
 #include "actionmanager_lua.inl"
 

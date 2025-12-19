@@ -32,7 +32,6 @@
 #include <ghoul/misc/dictionary.h>
 #include <algorithm>
 #include <iterator>
-#include <limits>
 #include <utility>
 
 #include "scriptscheduler_lua.inl"

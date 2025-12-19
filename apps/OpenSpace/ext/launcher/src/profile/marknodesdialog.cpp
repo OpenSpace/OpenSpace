@@ -32,9 +32,7 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <new>
-#include <string>
 #include <utility>
-#include <vector>
 
 MarkNodesDialog::MarkNodesDialog(QWidget* parent, std::vector<std::string>* markedNodes)
     : QDialog(parent)

@@ -44,7 +44,6 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <array>
-#include <optional>
 #include <utility>
 #include <variant>
 

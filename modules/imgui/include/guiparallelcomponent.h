@@ -32,6 +32,7 @@ namespace openspace::gui {
 class GuiParallelComponent : public GuiPropertyComponent {
 public:
     GuiParallelComponent();
+
     void render() override;
 
 private:

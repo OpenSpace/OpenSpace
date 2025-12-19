@@ -31,7 +31,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <algorithm>
 #include <cmath>
-#include <filesystem>
 #include <list>
 #include <numeric>
 #include <queue>

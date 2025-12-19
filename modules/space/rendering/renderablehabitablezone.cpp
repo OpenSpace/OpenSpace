@@ -36,7 +36,6 @@
 #include <ghoul/opengl/textureunit.h>
 #include <array>
 #include <cmath>
-#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EffectiveTemperatureInfo = {

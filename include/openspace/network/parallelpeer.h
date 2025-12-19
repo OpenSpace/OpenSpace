@@ -36,9 +36,7 @@
 #include <deque>
 #include <memory>
 #include <mutex>
-#include <string>
 #include <thread>
-#include <vector>
 
 namespace openspace {
 

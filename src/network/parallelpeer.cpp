@@ -38,7 +38,6 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeline.h>
-#include <openspace/util/timemanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/misc/profiling.h>

@@ -24,7 +24,6 @@
 
 #include <modules/spacecraftinstruments/rendering/renderablemodelprojection.h>
 
-#include <modules/spacecraftinstruments/util/image.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>

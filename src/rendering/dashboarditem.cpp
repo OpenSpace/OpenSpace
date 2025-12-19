@@ -30,8 +30,6 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 #include <optional>
-#include <string>
-#include <string_view>
 
 namespace {
     constexpr std::string_view KeyType = "Type";

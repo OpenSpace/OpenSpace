@@ -29,8 +29,6 @@
 
 #include <openspace/interaction/sessionrecording.h>
 #include <filesystem>
-#include <string>
-#include <vector>
 
 namespace ghoul { class Dictionary; }
 namespace openspace::scripting { struct LuaLibrary; }

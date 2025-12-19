@@ -42,9 +42,11 @@
 #include <unordered_map>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::lua { class LuaState; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul {
+    namespace lua { class LuaState; }
+    namespace opengl { class ProgramObject; }
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 

@@ -24,7 +24,6 @@
 
 #include <openspace/engine/settings.h>
 
-#include <openspace/engine/configuration.h>
 #include <openspace/json.h>
 #include <fstream>
 #include <sstream>

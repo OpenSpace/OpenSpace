@@ -25,12 +25,13 @@
 #ifndef __OPENSPACE_MODULE_EXOPLANETS___DATASTRUCTURE___H__
 #define __OPENSPACE_MODULE_EXOPLANETS___DATASTRUCTURE___H__
 
-#include <openspace/documentation/documentation.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/dictionary.h>
 #include <limits>
 #include <string>
 #include <vector>
+
+namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::exoplanets {
 

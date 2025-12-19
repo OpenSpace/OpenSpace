@@ -44,7 +44,6 @@
 #include <optional>
 #include <string_view>
 #include <system_error>
-#include <thread>
 #include <unordered_map>
 #include <utility>
 #include <variant>

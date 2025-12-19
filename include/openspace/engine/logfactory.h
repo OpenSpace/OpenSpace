@@ -27,8 +27,10 @@
 
 #include <memory>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::logging { class Log; }
+namespace ghoul {
+    namespace logging { class Log; }
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 

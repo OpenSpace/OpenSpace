@@ -26,7 +26,6 @@
 
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/layergroupid.h>
-#include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/font/fontmanager.h>

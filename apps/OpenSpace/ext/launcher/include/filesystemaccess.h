@@ -27,7 +27,6 @@
 
 #include <QDir>
 #include <QFileSystemModel>
-
 #include <string>
 #include <vector>
 

@@ -29,7 +29,6 @@
 #include <algorithm>
 #include <cmath>
 #include <string_view>
-#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "Histogram";

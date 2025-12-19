@@ -27,7 +27,6 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -36,6 +35,8 @@
 #include <filesystem>
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 class ExoplanetsModule : public OpenSpaceModule {
 public:

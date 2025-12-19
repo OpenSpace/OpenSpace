@@ -32,9 +32,9 @@
 
 namespace openspace {
 
-class TSP;
 class LocalErrorHistogramManager;
 class TransferFunction;
+class TSP;
 
 class LocalTfBrickSelector : public BrickSelector {
 public:

@@ -39,7 +39,6 @@
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <optional>
-#include <utility>
 
 namespace {
     enum Type {

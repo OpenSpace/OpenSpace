@@ -27,8 +27,6 @@
 
 #include <modules/iswa/rendering/renderableiswacygnet.h>
 
-#include <openspace/engine/downloadmanager.h>
-
 namespace openspace {
 
 /**

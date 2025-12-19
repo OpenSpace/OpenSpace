@@ -32,10 +32,8 @@
 #include <ghoul/misc/thread.h>
 #include <curl/curl.h>
 #include <cerrno>
-#include <chrono>
 #include <cstdio>
 #include <cstring>
-#include <filesystem>
 #include <malloc.h>
 #include <sstream>
 #include <string_view>

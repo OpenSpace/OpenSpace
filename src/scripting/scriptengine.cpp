@@ -40,7 +40,6 @@
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
-#include <filesystem>
 #include <fstream>
 #include <optional>
 #include <utility>

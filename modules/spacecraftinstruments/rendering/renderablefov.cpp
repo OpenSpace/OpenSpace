@@ -38,7 +38,6 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <glm/gtx/projection.hpp>
 #include <optional>
 #include <algorithm>

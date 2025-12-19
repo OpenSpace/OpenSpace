@@ -27,7 +27,6 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/mission/mission.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>

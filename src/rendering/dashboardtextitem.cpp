@@ -30,7 +30,6 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/dictionary.h>
-#include <string_view>
 #include <optional>
 
 namespace {

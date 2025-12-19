@@ -42,7 +42,6 @@
 #include <ghoul/opengl/uniformcache.h>
 #include <filesystem>
 #include <memory>
-#include <vector>
 
 namespace ghoul::filesystem { class File; }
 

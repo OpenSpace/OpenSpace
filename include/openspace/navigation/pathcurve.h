@@ -27,8 +27,8 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
-#include <vector>
 #include <string>
+#include <vector>
 
 namespace openspace::interaction {
 

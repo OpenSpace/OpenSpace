@@ -27,12 +27,10 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/properties/misc/selectionproperty.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
 #include <algorithm>
 #include <filesystem>
 #include <iterator>
-#include <set>
 #include <utility>
 
 namespace openspace {

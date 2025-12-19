@@ -30,7 +30,6 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/texture.h>
 #include <limits>
 #include <optional>
 

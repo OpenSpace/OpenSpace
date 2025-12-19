@@ -25,7 +25,6 @@
 #include <modules/globebrowsing/src/tileprovider/imagesequencetileprovider.h>
 
 #include <modules/globebrowsing/src/tileindex.h>
-#include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>

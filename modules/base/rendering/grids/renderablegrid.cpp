@@ -35,7 +35,6 @@
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <cmath>
-#include <memory>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {

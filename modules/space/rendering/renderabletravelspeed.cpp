@@ -39,7 +39,6 @@
 #include <ghoul/misc/exception.h>
 #include <ghoul/opengl/programobject.h>
 #include <memory>
-#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {

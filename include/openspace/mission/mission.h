@@ -25,8 +25,8 @@
 #ifndef __OPENSPACE_CORE___MISSION___H__
 #define __OPENSPACE_CORE___MISSION___H__
 
-#include <openspace/util/timerange.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timerange.h>
 #include <functional>
 #include <optional>
 #include <string>

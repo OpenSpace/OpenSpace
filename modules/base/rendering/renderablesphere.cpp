@@ -28,7 +28,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/sphere.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
@@ -43,7 +42,6 @@
 #include <cmath>
 #include <filesystem>
 #include <limits>
-#include <memory>
 #include <optional>
 
 namespace {

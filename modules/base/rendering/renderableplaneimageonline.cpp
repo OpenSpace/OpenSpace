@@ -33,7 +33,6 @@
 #include <ghoul/opengl/texture.h>
 #include <cstdlib>
 #include <limits>
-#include <memory>
 #include <utility>
 
 namespace {

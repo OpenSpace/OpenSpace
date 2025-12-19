@@ -33,8 +33,6 @@
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scripting/scriptscheduler.h>
-#include <openspace/util/keys.h>
-#include <openspace/util/timeline.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>

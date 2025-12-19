@@ -39,7 +39,6 @@
 #include <algorithm>
 #include <cmath>
 #include <optional>
-#include <utility>
 
 namespace {
     enum Type {

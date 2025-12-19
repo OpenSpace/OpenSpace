@@ -40,7 +40,6 @@
 #include <array>
 #include <filesystem>
 #include <fstream>
-#include <optional>
 #include <set>
 #include <sstream>
 #include <utility>

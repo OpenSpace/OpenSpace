@@ -24,10 +24,8 @@
 
 #include <openspace/documentation/verifier.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/documentationengine.h>
 #include <ghoul/format.h>
-#include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
@@ -36,14 +34,8 @@
 #include <ctime>
 #include <iomanip>
 #include <filesystem>
-#include <functional>
-#include <memory>
-#include <optional>
 #include <sstream>
-#include <string>
 #include <utility>
-#include <vector>
-#include <variant>
 
 namespace openspace::documentation {
 

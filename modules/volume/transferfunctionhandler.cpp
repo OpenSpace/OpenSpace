@@ -24,7 +24,6 @@
 
 #include <modules/volume/transferfunctionhandler.h>
 
-#include <openspace/rendering/transferfunction.h>
 #include <ghoul/opengl/texture.h>
 #include <utility>
 

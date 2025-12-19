@@ -32,7 +32,6 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
-#include <map>
 #include <utility>
 
 namespace {

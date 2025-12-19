@@ -29,7 +29,6 @@
 #include <array>
 #include <cmath>
 #include <cstdlib>
-#include <utility>
 
 namespace {
     constexpr size_t MaxIterations = 8;

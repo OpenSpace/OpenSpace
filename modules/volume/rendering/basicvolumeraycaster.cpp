@@ -33,7 +33,6 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/texture.h>
-#include <filesystem>
 #include <string>
 #include <string_view>
 #include <utility>

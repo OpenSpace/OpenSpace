@@ -32,9 +32,9 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/distanceconversion.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <cstdlib>
-#include <format>
 #include <limits>
 #include <utility>
 

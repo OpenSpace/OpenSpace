@@ -27,7 +27,6 @@
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/layergroupid.h>
 #include <modules/globebrowsing/src/rawtile.h>
-#include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>

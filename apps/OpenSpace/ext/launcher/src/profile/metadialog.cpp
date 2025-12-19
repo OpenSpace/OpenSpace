@@ -25,12 +25,10 @@
 #include "profile/metadialog.h"
 
 #include "profile/line.h"
-#include <openspace/scene/profile.h>
 #include <QDialogButtonBox>
 #include <QLabel>
 #include <QTextEdit>
 #include <QVBoxLayout>
-#include <optional>
 #include <utility>
 
 MetaDialog::MetaDialog(QWidget* parent, std::optional<openspace::Profile::Meta>* meta)

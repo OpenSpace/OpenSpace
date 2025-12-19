@@ -35,7 +35,6 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <string>
-#include <vector>
 
 namespace openspace::globebrowsing {
 

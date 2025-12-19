@@ -25,11 +25,9 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 
 #include <ghoul/format.h>
-#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/stringhelper.h>
-#include <glm/gtx/std_based_type.hpp>
 #include <ghoul/format.h>
 #include <ghoul/misc/exception.h>
 #include <algorithm>

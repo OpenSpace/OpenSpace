@@ -26,7 +26,6 @@
 
 #include <modules/spout/renderablespherespout.h>
 
-#include <modules/base/rendering/renderablesphere.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/format.h>

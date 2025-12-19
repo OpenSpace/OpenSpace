@@ -26,7 +26,6 @@
 
 #include <openspace/openspace.h>
 #include <openspace/engine/settings.h>
-#include <openspace/util/httprequest.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/logmanager.h>

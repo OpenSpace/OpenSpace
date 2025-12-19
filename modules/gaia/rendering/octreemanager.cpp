@@ -24,7 +24,6 @@
 
 #include <modules/gaia/rendering/octreemanager.h>
 
-#include <modules/gaia/rendering/octreeculler.h>
 #include <modules/globebrowsing/src/basictypes.h>
 #include <openspace/util/distanceconstants.h>
 #include <ghoul/format.h>

@@ -36,7 +36,6 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/programobject.h>
 #include <memory>
-#include <optional>
 #include <utility>
 
 namespace {

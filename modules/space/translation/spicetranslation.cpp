@@ -30,7 +30,6 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/misc/dictionary.h>
 #include <filesystem>
-#include <optional>
 #include <variant>
 
 namespace {

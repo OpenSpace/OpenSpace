@@ -35,7 +35,6 @@
 #include <ghoul/misc/exception.h>
 #include <filesystem>
 #include <fstream>
-#include <optional>
 #include <sstream>
 #include <utility>
 

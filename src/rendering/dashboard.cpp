@@ -24,7 +24,6 @@
 
 #include <openspace/rendering/dashboard.h>
 
-#include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>

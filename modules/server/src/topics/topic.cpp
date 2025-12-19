@@ -25,7 +25,6 @@
 #include <modules/server/include/topics/topic.h>
 
 #include <modules/server/include/connection.h>
-#include <openspace/json.h>
 #include <ghoul/misc/profiling.h>
 #include <utility>
 

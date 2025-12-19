@@ -27,7 +27,6 @@
 #include <modules/server/include/connection.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/websocketcamerastates.h>
-#include <openspace/interaction/websocketinputstate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/renderable.h>
@@ -38,11 +37,11 @@
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
-#include <iterator>
-#include <unordered_map>
 #include <ghoul/misc/assert.h>
 #include <algorithm>
+#include <iterator>
 #include <string_view>
+#include <unordered_map>
 #include <vector>
 
 namespace {

@@ -41,7 +41,6 @@
 #include <array>
 #include <cstddef>
 #include <filesystem>
-#include <optional>
 #include <utility>
 
 namespace {

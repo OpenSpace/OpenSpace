@@ -37,8 +37,10 @@
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul {
+    namespace opengl { class ProgramObject; }
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 

@@ -27,7 +27,6 @@
 #include <modules/volume/rendering/basicvolumeraycaster.h>
 #include <modules/volume/rendering/volumeclipplanes.h>
 #include <modules/volume/rawvolume.h>
-#include <modules/volume/rawvolumemetadata.h>
 #include <modules/volume/rawvolumereader.h>
 #include <modules/volume/volumegridtype.h>
 #include <openspace/documentation/documentation.h>
@@ -46,7 +45,6 @@
 #include <ghoul/misc/exception.h>
 #include <ghoul/opengl/texture.h>
 #include <optional>
-#include <memory>
 #include <type_traits>
 #include <utility>
 

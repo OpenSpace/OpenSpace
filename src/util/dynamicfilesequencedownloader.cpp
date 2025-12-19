@@ -25,7 +25,6 @@
 #include <openspace/util/dynamicfilesequencedownloader.h>
 
 #include <openspace/json.h>
-#include <openspace/util/httprequest.h>
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>

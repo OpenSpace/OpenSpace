@@ -25,13 +25,12 @@
 #include "profile/timedialog.h"
 
 #include "profile/line.h"
+#include <ghoul/format.h>
 #include <QCheckBox>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
 #include <QLabel>
 #include <QVBoxLayout>
-#include <format>
-#include <optional>
 
 using namespace openspace;
 

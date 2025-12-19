@@ -52,7 +52,6 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/objectmanager.h>
 #include <ghoul/misc/templatefactory.h>
-#include <ghoul/opengl/programobjectmanager.h>
 #include <optional>
 
 #include "spacemodule_lua.inl"

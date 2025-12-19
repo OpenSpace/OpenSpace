@@ -38,7 +38,6 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <algorithm>
-#include <filesystem>
 #include <fstream>
 #include <ios>
 #include <limits>

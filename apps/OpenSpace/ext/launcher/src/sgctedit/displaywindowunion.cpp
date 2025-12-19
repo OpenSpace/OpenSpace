@@ -30,9 +30,9 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 #include <algorithm>
-#include <optional>
 #include <cstdint>
 #include <cstdlib>
+#include <optional>
 #include <variant>
 
 namespace {

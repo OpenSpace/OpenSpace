@@ -30,7 +30,6 @@
 #include <ghoul/misc/profiling.h>
 #include <optional>
 #include <string_view>
-#include <vector>
 
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";

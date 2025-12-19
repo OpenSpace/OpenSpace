@@ -25,10 +25,10 @@
 #include <modules/space/rendering/renderablestars.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/util/updatestructures.h>
-#include <openspace/util/distanceconstants.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/updatestructures.h>
+#include <openspace/util/distanceconstants.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/texture/texturereader.h>
@@ -45,7 +45,6 @@
 #include <cstddef>
 #include <filesystem>
 #include <limits>
-#include <optional>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableStars";

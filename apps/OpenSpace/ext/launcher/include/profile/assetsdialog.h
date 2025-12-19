@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___ASSETSDIALOG___H__
 #define __OPENSPACE_UI_LAUNCHER___ASSETSDIALOG___H__
 
-#include <QDialog>
 #include <QSortFilterProxyModel>
 
+#include <QDialog>
 #include "assettreemodel.h"
 #include <filesystem>
 

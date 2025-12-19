@@ -38,9 +38,6 @@
 #include <chrono>
 #include <filesystem>
 #include <memory>
-#include <string>
-#include <string_view>
-#include <vector>
 
 namespace ghoul {
     namespace fontrendering { class Font; }
@@ -50,7 +47,7 @@ namespace ghoul {
     } // namespace opengl
     class Dictionary;
     class SharedMemory;
-} // ghoul
+} // namespace ghoul
 
 namespace openspace {
 

@@ -43,7 +43,6 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
 #include <array>
-#include <filesystem>
 #include <optional>
 
 namespace {

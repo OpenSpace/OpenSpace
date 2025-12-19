@@ -29,8 +29,10 @@
 #include <filesystem>
 #include <memory>
 
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class Texture; }
+namespace ghoul {
+    namespace filesystem { class File; }
+    namespace opengl { class Texture; }
+} // namespace ghoul
 
 namespace openspace {
 

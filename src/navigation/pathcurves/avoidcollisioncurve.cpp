@@ -26,19 +26,16 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/pathcurve.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/navigation/waypoint.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/collisionhelper.h>
-#include <ghoul/glm.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
-#include <format>
 #include <string_view>
 #include <utility>
-#include <vector>
 
 namespace {
     constexpr std::string_view _loggerCat = "AvoidCollisionCurve";

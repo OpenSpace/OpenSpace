@@ -34,14 +34,12 @@
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
 #include <functional>
-#include <map>
 #include <memory>
-#include <string>
-#include <string_view>
-#include <vector>
 
-namespace ghoul::fontrendering { class Font; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul {
+    namespace fontrendering { class Font; }
+    namespace opengl { class ProgramObject; }
+} // namespace ghoul
 
 namespace openspace {
 

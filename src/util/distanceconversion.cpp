@@ -24,7 +24,6 @@
 
 #include <openspace/util/distanceconversion.h>
 
-#include <openspace/util/distanceconstants.h>
 #include <openspace/util/timeconstants.h>
 #include <cstdlib>
 

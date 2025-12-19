@@ -26,12 +26,10 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/scene/timeframe.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/misc/profiling.h>
 #include <optional>
 #include <string>

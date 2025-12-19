@@ -38,11 +38,13 @@
 
 // #define LOADINGSCREEN_DEBUGGING
 
-namespace ghoul::fontrendering { class Font; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul {
+    namespace fontrendering { class Font; }
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    } // namespace ghoul::opengl
+} // namespace ghoul
 
 namespace openspace {
 

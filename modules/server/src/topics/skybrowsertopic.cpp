@@ -32,7 +32,6 @@
 #include <openspace/engine/globals.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
-#include <memory>
 #include <string_view>
 #include <vector>
 

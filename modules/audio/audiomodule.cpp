@@ -35,7 +35,6 @@
 #include <ghoul/misc/exception.h>
 #include <soloud.h>
 #include <soloud_wav.h>
-#include <optional>
 #include <string_view>
 #include <utility>
 

@@ -27,7 +27,6 @@
 #include <ghoul/filesystem/file.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/texture.h>
 #include <string_view>
 #include <utility>
 

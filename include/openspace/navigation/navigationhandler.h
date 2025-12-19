@@ -45,9 +45,7 @@
 #include <filesystem>
 #include <functional>
 #include <optional>
-#include <string>
 #include <variant>
-#include <vector>
 
 namespace openspace {
     namespace scripting { struct LuaLibrary; }
@@ -58,7 +56,6 @@ namespace openspace {
 namespace openspace::interaction {
 
 struct JoystickInputStates;
-struct NavigationState;
 struct NodeCameraStateSpec;
 struct WebsocketInputStates;
 

@@ -34,12 +34,14 @@
 #include <map>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul {
+    namespace filesystem { class File; }
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    } // namespace ghoul::opengl
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 

@@ -25,7 +25,6 @@
 #include <modules/base/rendering/renderablesphereimageonline.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>

@@ -26,7 +26,6 @@
 
 #include <modules/globebrowsing/src/lruthreadpool.h>
 #include <modules/globebrowsing/src/rawtile.h>
-#include <modules/globebrowsing/src/rawtiledatareader.h>
 #include <modules/globebrowsing/src/tileloadjob.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>

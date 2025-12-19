@@ -25,7 +25,6 @@
 #include <modules/statemachine/statemachinemodule.h>
 
 #include <modules/statemachine/include/state.h>
-#include <modules/statemachine/include/statemachine.h>
 #include <modules/statemachine/include/transition.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/scripting/lualibrary.h>
@@ -34,7 +33,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <filesystem>
-#include <optional>
 #include <string>
 #include <utility>
 

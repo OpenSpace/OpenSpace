@@ -31,7 +31,6 @@
 #include <glm/gtx/std_based_type.hpp>
 #include <algorithm>
 #include <cmath>
-#include <format>
 #include <string_view>
 
 namespace {

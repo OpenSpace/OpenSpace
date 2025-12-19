@@ -27,9 +27,9 @@
 #include <modules/webbrowser/include/defaultbrowserlauncher.h>
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <modules/webbrowser/include/webkeyboardhandler.h>
-#include <ghoul/misc/assert.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 

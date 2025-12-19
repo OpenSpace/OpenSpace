@@ -26,7 +26,6 @@
 
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include <openspace/json.h>
 
 namespace openspace::properties {
 

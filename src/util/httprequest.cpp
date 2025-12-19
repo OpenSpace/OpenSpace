@@ -28,9 +28,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <curl/curl.h>
 #include <array>
-#include <filesystem>
-#include <utility>
 #include <cstdint>
+#include <utility>
 
 namespace openspace {
 

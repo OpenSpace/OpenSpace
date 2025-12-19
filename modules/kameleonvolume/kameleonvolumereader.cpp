@@ -30,7 +30,6 @@
 #include <ghoul/format.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
-#include <filesystem>
 #include <limits>
 #include <utility>
 

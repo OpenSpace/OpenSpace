@@ -24,7 +24,6 @@
 
 #include <openspace/data/csvloader.h>
 
-#include <openspace/data/datamapping.h>
 #include <openspace/util/progressbar.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>

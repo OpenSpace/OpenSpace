@@ -25,17 +25,13 @@
 #include <openspace/util/spicemanager.h>
 
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
-#include <array>
 #include <cstring>
 #include <iterator>
-#include <filesystem>
-#include <format>
 #include <fstream>
 #include <string_view>
 #include <utility>

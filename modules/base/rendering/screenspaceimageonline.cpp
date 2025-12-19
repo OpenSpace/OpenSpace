@@ -26,13 +26,11 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/downloadmanager.h>
 #include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <optional>
-#include <future>
 #include <utility>
 
 namespace {

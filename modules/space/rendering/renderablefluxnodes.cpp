@@ -28,7 +28,6 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/transferfunction.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
@@ -43,12 +42,9 @@
 #include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <array>
-#include <cstdint>
-#include <filesystem>
 #include <fstream>
 #include <iterator>
 #include <limits>
-#include <optional>
 #include <sstream>
 
 namespace {

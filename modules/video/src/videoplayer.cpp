@@ -41,7 +41,6 @@
 #include <ghoul/opengl/openglstatecache.h>
 #include <render_gl.h>
 #include <ghoul/opengl/texture.h>
-#include <cstdint>
 #include <cstdlib>
 #include <optional>
 

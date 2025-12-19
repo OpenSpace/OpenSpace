@@ -43,6 +43,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
@@ -50,17 +51,10 @@
 #include <ghoul/misc/invariants.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
-#include <filesystem>
 #include <fstream>
-#include <format>
 #include <iterator>
 #include <limits>
-#include <optional>
-#include <string>
-#include <string_view>
 #include <utility>
-#include <variant>
-#include <vector>
 
 #include "navigationhandler_lua.inl"
 

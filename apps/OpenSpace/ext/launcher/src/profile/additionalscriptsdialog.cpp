@@ -36,9 +36,7 @@
 #include <new>
 #include <numeric>
 #include <sstream>
-#include <string>
 #include <utility>
-#include <vector>
 
 AdditionalScriptsDialog::AdditionalScriptsDialog(QWidget* parent,
                                                  std::vector<std::string>* scripts)

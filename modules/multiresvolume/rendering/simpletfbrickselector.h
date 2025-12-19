@@ -31,9 +31,9 @@
 
 namespace openspace {
 
-class TSP;
 class HistogramManager;
 class TransferFunction;
+class TSP;
 
 class SimpleTfBrickSelector : public BrickSelector {
 public:

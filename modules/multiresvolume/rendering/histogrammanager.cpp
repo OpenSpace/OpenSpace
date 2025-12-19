@@ -25,7 +25,6 @@
 #include <modules/multiresvolume/rendering/histogrammanager.h>
 
 #include <modules/multiresvolume/rendering/tsp.h>
-#include <openspace/util/histogram.h>
 #include <cstring>
 #include <fstream>
 #include <utility>

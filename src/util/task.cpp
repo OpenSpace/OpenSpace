@@ -28,7 +28,6 @@
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
-#include <string>
 
 namespace {
 

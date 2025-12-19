@@ -25,7 +25,6 @@
 #include <openspace/interaction/tasks/convertrecformattask.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/interaction/sessionrecording.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>

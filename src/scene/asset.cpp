@@ -38,10 +38,9 @@
 #include <ghoul/misc/invariants.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
-#include <filesystem>
+#include <functional>
 #include <string_view>
 #include <utility>
-#include <functional>
 
 namespace openspace {
 

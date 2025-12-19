@@ -34,7 +34,6 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
-#include <vector>
 
 namespace openspace {
 

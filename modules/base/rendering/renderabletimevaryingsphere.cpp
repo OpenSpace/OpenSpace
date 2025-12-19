@@ -31,7 +31,6 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
 #include <algorithm>
-#include <filesystem>
 #include <iterator>
 #include <utility>
 

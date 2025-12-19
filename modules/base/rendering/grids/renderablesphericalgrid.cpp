@@ -36,7 +36,6 @@
 #include <ghoul/opengl/programobject.h>
 #include <algorithm>
 #include <cmath>
-#include <memory>
 #include <optional>
 
 namespace {

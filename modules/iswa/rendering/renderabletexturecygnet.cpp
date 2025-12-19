@@ -29,10 +29,7 @@
 #include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/misc/dictionary.h>
-#include <future>
-#include <memory>
 #include <utility>
 
 namespace {

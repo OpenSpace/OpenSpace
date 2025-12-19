@@ -26,7 +26,6 @@
 
 #include <modules/spout/renderableplanespout.h>
 
-#include <modules/base/rendering/renderableplane.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/format.h>

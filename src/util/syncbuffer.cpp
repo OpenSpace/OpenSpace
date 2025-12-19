@@ -24,7 +24,6 @@
 
 #include <openspace/util/syncbuffer.h>
 
-#include <ghoul/glm.h>
 #include <ghoul/misc/profiling.h>
 #include <cstdint>
 #include <cstring>

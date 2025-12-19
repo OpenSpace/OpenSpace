@@ -24,7 +24,6 @@
 
 #include <modules/iswa/util/dataprocessor.h>
 
-#include <openspace/util/histogram.h>
 #include <algorithm>
 #include <numeric>
 #include <cmath>

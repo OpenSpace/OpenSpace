@@ -42,7 +42,6 @@
 #include <ghoul/misc/dictionary.h>
 #include <cmath>
 #include <cstdlib>
-#include <optional>
 
 namespace {
     constexpr std::string_view _loggerCat = "IswaCygnet";

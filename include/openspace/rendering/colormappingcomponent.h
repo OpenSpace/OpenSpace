@@ -38,8 +38,6 @@
 #include <ghoul/opengl/texture.h>
 #include <memory>
 #include <optional>
-#include <string>
-#include <vector>
 
 namespace ghoul { class Dictionary; }
 

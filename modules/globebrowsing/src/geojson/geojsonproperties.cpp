@@ -27,6 +27,7 @@
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <geos/io/GeoJSON.h>
@@ -34,7 +35,6 @@
 #include <algorithm>
 #include <array>
 #include <filesystem>
-#include <format>
 
 // Keys used to read properties from GeoJson files
 namespace geojson::propertykeys {

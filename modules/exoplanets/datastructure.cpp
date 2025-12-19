@@ -32,7 +32,6 @@
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
 #include <cmath>
 #include <optional>
 #include <string_view>

@@ -31,12 +31,10 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/util/keys.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <filesystem>

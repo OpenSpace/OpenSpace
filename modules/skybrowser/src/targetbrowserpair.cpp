@@ -26,7 +26,6 @@
 
 #include <modules/skybrowser/include/renderableskytarget.h>
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
-#include <modules/skybrowser/include/utility.h>
 #include <modules/skybrowser/include/wwtdatahandler.h>
 #include <modules/skybrowser/skybrowsermodule.h>
 #include <openspace/camera/camera.h>

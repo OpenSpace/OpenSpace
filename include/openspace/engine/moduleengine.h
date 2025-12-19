@@ -28,13 +28,12 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/list/stringlistproperty.h>
-#include <map>
 #include <memory>
-#include <string>
-#include <vector>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::systemcapabilities { struct Version; }
+namespace ghoul {
+    namespace systemcapabilities { struct Version; }
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 

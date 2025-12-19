@@ -52,7 +52,6 @@
 #include <filesystem>
 #include <memory>
 #include <numeric>
-#include <optional>
 #include <random>
 #include <thread>
 

@@ -30,9 +30,9 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <algorithm>
+#include <cstring>
 #include <fstream>
 #include <iterator>
-#include <cstring>
 #include <string_view>
 
 namespace {

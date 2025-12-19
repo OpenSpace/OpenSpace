@@ -26,11 +26,9 @@
 
 #include <openspace/navigation/waypoint.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/projection.hpp>
 #include <string_view>
-#include <vector>
 
 namespace {
     constexpr std::string_view _loggerCat = "ZoomOutOverviewCurve";

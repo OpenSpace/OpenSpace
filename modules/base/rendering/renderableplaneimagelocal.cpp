@@ -37,7 +37,6 @@
 #include <ghoul/opengl/texture.h>
 #include <cstdlib>
 #include <limits>
-#include <memory>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {

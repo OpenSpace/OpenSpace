@@ -38,17 +38,12 @@
 #include <cmath>
 #include <cstdint>
 #include <cstring>
-#include <filesystem>
-#include <format>
 #include <fstream>
 #include <functional>
 #include <limits>
-#include <optional>
-#include <string>
 #include <string_view>
 #include <type_traits>
 #include <utility>
-#include <vector>
 
 namespace {
     constexpr int8_t DataCacheFileVersion = 13;

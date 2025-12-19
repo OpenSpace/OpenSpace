@@ -33,10 +33,8 @@
 #include <algorithm>
 #include <cctype>
 #include <cstdlib>
-#include <filesystem>
 #include <fstream>
 #include <limits>
-#include <optional>
 #include <sstream>
 #include <string>
 #include <string_view>

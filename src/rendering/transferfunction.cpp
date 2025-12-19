@@ -32,7 +32,6 @@
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/texture.h>
 #include <cmath>
-#include <filesystem>
 #include <fstream>
 #include <sstream>
 #include <string>

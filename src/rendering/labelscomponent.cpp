@@ -34,7 +34,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <cmath>
 #include <optional>
-#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "LabelsComponent";

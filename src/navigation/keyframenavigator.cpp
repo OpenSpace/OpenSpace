@@ -30,8 +30,6 @@
 #include <openspace/network/messagestructures.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/time.h>
-#include <openspace/util/timemanager.h>
 #include <algorithm>
 #include <cmath>
 #include <utility>

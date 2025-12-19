@@ -27,7 +27,6 @@
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/tileindex.h>
-#include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>

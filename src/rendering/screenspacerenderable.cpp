@@ -43,10 +43,10 @@
 #include <algorithm>
 #include <cmath>
 #include <optional>
-#include <variant>
 #include <string>
-#include <vector>
 #include <utility>
+#include <variant>
+#include <vector>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {

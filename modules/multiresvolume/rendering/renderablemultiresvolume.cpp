@@ -49,11 +49,8 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 #include <algorithm>
-#include <chrono>
-#include <filesystem>
-#include <fstream>
 #include <cmath>
-#include <optional>
+#include <fstream>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableMultiresVolume";

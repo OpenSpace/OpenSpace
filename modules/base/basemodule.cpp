@@ -101,7 +101,6 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/opengl/programobjectmanager.h>
 #include <ghoul/opengl/texturemanager.h>
 
 namespace openspace {

@@ -25,7 +25,6 @@
 #include <modules/webbrowser/include/screenspacebrowser.h>
 
 #include <modules/webbrowser/webbrowsermodule.h>
-#include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/webbrowser/include/browserinstance.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>

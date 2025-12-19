@@ -25,7 +25,6 @@
 #include <openspace/documentation/documentationengine.h>
 
 #include <openspace/documentation/core_registration.h>
-#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/globals.h>
@@ -35,9 +34,7 @@
 #include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/json.h>
 #include <openspace/properties/property.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
@@ -66,7 +63,6 @@
 #include <string_view>
 #include <unordered_map>
 #include <utility>
-#include <vector>
 
 namespace {
     constexpr std::string_view _loggerCat = "DocumentationEngine";

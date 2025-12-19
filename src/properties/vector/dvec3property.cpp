@@ -24,8 +24,6 @@
 
 #include <openspace/properties/vector/dvec3property.h>
 
-#include <ghoul/glm.h>
-
 namespace openspace::properties {
 
 DVec3Property::DVec3Property(Property::PropertyInfo info, glm::dvec3 value,
