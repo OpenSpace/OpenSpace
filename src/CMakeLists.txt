@@ -279,6 +279,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/orbitalcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/orbitalinputhandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/orbitalnavigator.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/scriptcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/websocketcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/path.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/pathcurve.h
