@@ -56,6 +56,7 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
     const bool primaryPressed = mouseState.isMouseButtonPressed(primary);
     const bool secondaryPressed = mouseState.isMouseButtonPressed(secondary);
     const bool button3Pressed = mouseState.isMouseButtonPressed(MouseButton::Button3);
+
     const bool keyCtrlPressed =
         keyboardState.isKeyPressed(Key::LeftControl) ||
         keyboardState.isKeyPressed(Key::RightControl);
@@ -66,19 +67,17 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
         keyboardState.isKeyPressed(Key::LeftAlt) ||
         keyboardState.isKeyPressed(Key::RightAlt);
 
-
+    // @TODO (2025-12-19, emmbr) make this into a keybinding somehow? Or even break
+    // out into the orbital navigator settings so that it can be applied to other input methods
     if (keyboardState.isKeyPressed(Key::Z)) {
+        // Increase sensitivity ramp when Z is pressed
         _currentSensitivityRamp += deltaTime;
     }
-
-    // The reverse for the X key
-    if (keyboardState.isKeyPressed(Key::X)) {
+    else if (keyboardState.isKeyPressed(Key::X)) {
+        // The reverse for the X key
         _currentSensitivityRamp -= deltaTime;
     }
-
-    if (!keyboardState.isKeyPressed(Key::Z) && !keyboardState.isKeyPressed(Key::X) &&
-        _currentSensitivityRamp != 0.0)
-    {
+    else if (_currentSensitivityRamp != 0.0) {
         // If neither key is pressed, the sensitivity ramp falls off by 90% every frame
         // when letting go of the key
         _currentSensitivityRamp = _currentSensitivityRamp * 0.9;
@@ -86,88 +85,61 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
             _currentSensitivityRamp = 0.0;
         }
     }
-
     _currentSensitivityRamp = std::clamp(_currentSensitivityRamp, -1.0, 1.0);
+
     const double totalSensitivity =
         _currentSensitivityRamp < 0.0 ?
         _currentSensitivityRamp * SensitivityAdjustmentDecrease :
         _currentSensitivityRamp * SensitivityAdjustmentIncrease;
 
+    std::optional<glm::dvec2> globalRotation;
+    std::optional<glm::dvec2> localRotation;
+    std::optional<double> zoom;
+    std::optional<double> localRoll;
+    std::optional<double> globalRoll;
+
     // Update the mouse states
     if (primaryPressed && !keyShiftPressed && !keyAltPressed) {
+        const glm::dvec2 mousePosDelta = _prevMousePos.primary - mousePosition;
         if (keyCtrlPressed) {
-            const glm::dvec2 mousePositionDelta =
-                _localRotationState.previousValue - mousePosition;
-            _localRotationState.velocity.set(
-                mousePositionDelta * _sensitivity,
-                deltaTime
-            );
-
-            _globalRotationState.previousValue = mousePosition;
-            _globalRotationState.velocity.decelerate(deltaTime);
+            localRotation = mousePosDelta * _sensitivity;
         }
         else {
-            const glm::dvec2 mousePositionDelta =
-                _globalRotationState.previousValue - mousePosition;
-            _globalRotationState.velocity.set(
-                mousePositionDelta * (_sensitivity + _sensitivity * totalSensitivity / 5),
-                deltaTime
-            );
-
-            _localRotationState.previousValue = mousePosition;
-            _localRotationState.velocity.decelerate(deltaTime);
+            globalRotation = mousePosDelta *
+                (_sensitivity + _sensitivity * totalSensitivity / 5.0);
         }
     }
-    else { // !button1Pressed
-        _localRotationState.previousValue = mousePosition;
-        _localRotationState.velocity.decelerate(deltaTime);
-
-        _globalRotationState.previousValue = mousePosition;
-        _globalRotationState.velocity.decelerate(deltaTime);
+    else {
+        _prevMousePos.primary = mousePosition;
     }
 
     if (secondaryPressed || (keyAltPressed && primaryPressed)) {
-        const double mousePosDelta = _truckMovementState.previousValue - mousePosition.y;
-
-        _truckMovementState.velocity.set(
-            mousePosDelta * (_sensitivity + _sensitivity * totalSensitivity),
-            deltaTime
-        );
+        const glm::dvec2 mousePosDelta = _prevMousePos.secondary - mousePosition;
+        zoom = mousePosDelta.y * (_sensitivity + _sensitivity * totalSensitivity);
     }
-    else { // !button2Pressed
-        _truckMovementState.previousValue = mousePosition.y;
-        _truckMovementState.velocity.decelerate(deltaTime);
+    else {
+        _prevMousePos.secondary = mousePosition;
     }
 
     if (button3Pressed || (keyShiftPressed && primaryPressed)) {
-        if (keyCtrlPressed) {
-            const double mousePosDelta = _localRollState.previousValue - mousePosition.x;
-            _localRollState.velocity.set(
-                mousePosDelta * _sensitivity,
-                deltaTime
-            );
+        const glm::dvec2 mousePosDelta = _prevMousePos.button3 - mousePosition;
 
-            _globalRollState.previousValue = mousePosition.x;
-            _globalRollState.velocity.decelerate(deltaTime);
+        if (keyCtrlPressed) {
+            localRoll = mousePosDelta.x * _sensitivity;
         }
         else {
-            const double mousePosDelta = _globalRollState.previousValue - mousePosition.x;
-            _globalRollState.velocity.set(
-                mousePosDelta * _sensitivity,
-                deltaTime
-            );
-
-            _localRollState.previousValue = mousePosition.x;
-            _localRollState.velocity.decelerate(deltaTime);
+            globalRoll = mousePosDelta.x * _sensitivity;
         }
     }
-    else { // !button3Pressed
-        _globalRollState.previousValue = mousePosition.x;
-        _globalRollState.velocity.decelerate(deltaTime);
-
-        _localRollState.previousValue = mousePosition.x;
-        _localRollState.velocity.decelerate(deltaTime);
+    else {
+        _prevMousePos.button3 = mousePosition;
     }
+
+    _globalRotationVelocity.update(globalRotation, deltaTime);
+    _truckMovementVelocity.update(zoom, deltaTime);
+    _localRollVelocity.update(localRoll, deltaTime);
+    _globalRollVelocity.update(globalRoll, deltaTime);
+    _localRotationVelocity.update(localRotation, deltaTime);
 }
 
 void MouseCameraStates::setInvertMouseButton(bool value) {

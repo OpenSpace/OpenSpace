@@ -67,18 +67,11 @@ protected:
 
     double _sensitivity = 0.0;
 
-    template <typename T>
-    struct CameraInteractionState {
-        CameraInteractionState(double scaleFactor);
-        T previousValue = T(0.0);
-        DampenedVelocity<T> velocity;
-    };
-
-    CameraInteractionState<glm::dvec2> _globalRotationState;
-    CameraInteractionState<glm::dvec2> _localRotationState;
-    CameraInteractionState<double> _truckMovementState;
-    CameraInteractionState<double> _localRollState;
-    CameraInteractionState<double> _globalRollState;
+    DampenedVelocity<glm::dvec2> _globalRotationVelocity;
+    DampenedVelocity<glm::dvec2> _localRotationVelocity;
+    DampenedVelocity<double> _truckMovementVelocity;
+    DampenedVelocity<double> _localRollVelocity;
+    DampenedVelocity<double> _globalRollVelocity;
 };
 
 } // namespace openspace::interaction

@@ -38,7 +38,7 @@ namespace openspace::interaction {
 template <typename T>
 class DampenedVelocity {
 public:
-    DampenedVelocity(double scaleFactor, bool useFriction);
+    DampenedVelocity(double scaleFactor, bool useFriction = true);
 
     void set(T value, double dt);
     void decelerate(double dt);
@@ -46,6 +46,15 @@ public:
     void setFriction(bool enabled);
     void setScaleFactor(double scaleFactor);
     T get() const;
+
+    /**
+     * Update the velocity based on a new input value. If a value was provided, set it.
+     * Otherwise, decellerate based on the given timestep.
+     *
+     * \param value The new value
+     * \param dt The timestep
+     */
+    void update(std::optional<T> value, double dt);
 
 private:
     double _scaleFactor;

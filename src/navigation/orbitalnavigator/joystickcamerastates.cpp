@@ -48,6 +48,7 @@ void JoystickCameraStates::updateStateFromInput(
                                            const JoystickInputStates& joystickInputStates,
                                                 double deltaTime)
 {
+    // TODO: Move this. The joystick camera state thing should not have to care about this mode
     const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
     if (mode == OpenSpaceEngine::Mode::CameraPath ||
         mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
@@ -55,12 +56,11 @@ void JoystickCameraStates::updateStateFromInput(
         return;
     }
 
-    // Pair of "was changed" and new value. @TODO: Bake into generic function
-    std::pair<bool, glm::dvec2> globalRotation = std::pair(false, glm::dvec2(0.0));
-    std::pair<bool, double> zoom = std::pair(false, 0.0);
-    std::pair<bool, double> localRoll = std::pair(false, 0.0);
-    std::pair<bool, double> globalRoll = std::pair(false, 0.0);
-    std::pair<bool, glm::dvec2> localRotation = std::pair(false, glm::dvec2(0.0));
+    std::optional<glm::dvec2> globalRotation;
+    std::optional<double> zoom;
+    std::optional<double> localRoll;
+    std::optional<double> globalRoll;
+    std::optional<glm::dvec2> localRotation;
 
     for (const JoystickInputState& joystickInputState : joystickInputStates) {
         if (joystickInputState.name.empty()) {
@@ -78,102 +78,116 @@ void JoystickCameraStates::updateStateFromInput(
              i < std::min(nAxes, static_cast<int>(joystick->axisMapping.size()));
              i++)
         {
-            AxisInformation t = joystick->axisMapping[i];
-            if (t.type == AxisType::None) {
+            AxisInformation axis = joystick->axisMapping[i];
+            if (axis.type == AxisType::None) {
                 continue;
             }
 
             const float rawValue = joystickInputStates.axis(joystickInputState.name, i);
             float value = rawValue;
 
-            if (t.isSticky) {
+            if (axis.isSticky) {
                 value = rawValue - joystick->prevAxisValues[i];
                 joystick->prevAxisValues[i] = rawValue;
             }
 
-            if ((t.joystickType == JoystickType::JoystickLike &&
-                 std::abs(value) <= t.deadzone) ||
+            if ((axis.joystickType == JoystickType::JoystickLike &&
+                 std::abs(value) <= axis.deadzone) ||
                 (
-                    t.joystickType == JoystickType::TriggerLike &&
-                    value <= -1.f + t.deadzone
+                    axis.joystickType == JoystickType::TriggerLike &&
+                    value <= -1.f + axis.deadzone
                 ))
             {
                 continue;
             }
 
-            if (t.invert) {
+            if (axis.invert) {
                 value *= -1.f;
             }
 
-            if (t.joystickType == JoystickType::TriggerLike ||
-                t.type == AxisType::Property)
+            if (axis.joystickType == JoystickType::TriggerLike ||
+                axis.type == AxisType::Property)
             {
                 value = (value + 1.f) / 2.f;
             }
 
-            if (t.type == AxisType::Property) {
-                value = value * (t.maxValue - t.minValue)  + t.minValue;
+            if (axis.type == AxisType::Property) {
+                value = value * (axis.maxValue - axis.minValue)  + axis.minValue;
             }
             else {
-                if (std::abs(t.sensitivity) > std::numeric_limits<double>::epsilon()) {
-                    value = static_cast<float>(value * t.sensitivity * _sensitivity);
-                }
-                else {
-                    value = static_cast<float>(value * _sensitivity);
+                value = static_cast<float>(value * _sensitivity);
+                if (std::abs(axis.sensitivity) > std::numeric_limits<double>::epsilon()) {
+                    value *= static_cast<float>(axis.sensitivity);
                 }
             }
 
-            if (t.flip) {
+            if (axis.flip) {
                 value = -value;
             }
 
-            switch (t.type) {
+            switch (axis.type) {
                 case AxisType::None:
                     break;
                 case AxisType::OrbitX:
-                    globalRotation.first = true;
-                    globalRotation.second.x += value;
+                    if (!globalRotation.has_value()) {
+                        globalRotation = glm::dvec2(0.0, 0.0);
+                    }
+                    (*globalRotation).x += value;
                     break;
                 case AxisType::OrbitY:
-                    globalRotation.first = true;
-                    globalRotation.second.y += value;
+                    if (!globalRotation.has_value()) {
+                        globalRotation = glm::dvec2(0.0, 0.0);
+                    }
+                    (*globalRotation).y += value;
                     break;
                 case AxisType::Zoom:
                 case AxisType::ZoomIn:
-                    zoom.first = true;
-                    zoom.second += value;
+                    if (!zoom.has_value()) {
+                        zoom = 0.0;
+                    }
+                    (*zoom) += value;
                     break;
                 case AxisType::ZoomOut:
-                    zoom.first = true;
-                    zoom.second -= value;
+                    if (!zoom.has_value()) {
+                        zoom = 0.0;
+                    }
+                    (*zoom) -= value;
                     break;
                 case AxisType::LocalRoll:
-                    localRoll.first = true;
-                    localRoll.second+= value;
+                    if (!localRoll.has_value()) {
+                        localRoll = 0.0;
+                    }
+                    (*localRoll) += value;
                     break;
                 case AxisType::GlobalRoll:
-                    globalRoll.first = true;
-                    globalRoll.second += value;
+                    if (!globalRoll.has_value()) {
+                        globalRoll = 0.0;
+                    }
+                    (*globalRoll) += value;
                     break;
                 case AxisType::PanX:
-                    localRotation.first = true;
-                    localRotation.second.x += value;
+                    if (!localRotation.has_value()) {
+                        localRotation = glm::dvec2(0.0, 0.0);
+                    }
+                    (*localRotation).x += value;
                     break;
                 case AxisType::PanY:
-                    localRotation.first = true;
-                    localRotation.second.y += value;
+                    if (!localRotation.has_value()) {
+                        localRotation = glm::dvec2(0.0, 0.0);
+                    }
+                    (*localRotation).y += value;
                     break;
                 case AxisType::Property:
                     const std::string script = std::format(
                         "openspace.setPropertyValue('{}', {});",
-                        t.propertyUri, value
+                        axis.propertyUri, value
                     );
 
                     using Script = scripting::ScriptEngine::Script;
                     global::scriptEngine->queueScript({
                         .code = script,
-                        .synchronized = Script::ShouldBeSynchronized(t.isRemote),
-                        .sendToRemote = Script::ShouldSendToRemote(t.isRemote)
+                        .synchronized = Script::ShouldBeSynchronized(axis.isRemote),
+                        .sendToRemote = Script::ShouldSendToRemote(axis.isRemote)
                     });
                     break;
             }
@@ -205,40 +219,11 @@ void JoystickCameraStates::updateStateFromInput(
         }
     }
 
-    if (globalRotation.first) {
-        _globalRotationState.velocity.set(globalRotation.second, deltaTime);
-    }
-    else {
-        _globalRotationState.velocity.decelerate(deltaTime);
-    }
-
-    if (zoom.first) {
-        _truckMovementState.velocity.set(zoom.second, deltaTime);
-    }
-    else {
-        _truckMovementState.velocity.decelerate(deltaTime);
-    }
-
-    if (localRoll.first) {
-        _localRollState.velocity.set(localRoll.second, deltaTime);
-    }
-    else {
-        _localRollState.velocity.decelerate(deltaTime);
-    }
-
-    if (globalRoll.first) {
-        _globalRollState.velocity.set(globalRoll.second, deltaTime);
-    }
-    else {
-        _globalRollState.velocity.decelerate(deltaTime);
-    }
-
-    if (localRotation.first) {
-        _localRotationState.velocity.set(localRotation.second, deltaTime);
-    }
-    else {
-        _localRotationState.velocity.decelerate(deltaTime);
-    }
+    _globalRotationVelocity.update(globalRotation, deltaTime);
+    _truckMovementVelocity.update(zoom, deltaTime);
+    _localRollVelocity.update(localRoll, deltaTime);
+    _globalRollVelocity.update(globalRoll, deltaTime);
+    _localRotationVelocity.update(localRotation, deltaTime);
 }
 
 void JoystickCameraStates::setAxisMapping(const std::string& joystickName,

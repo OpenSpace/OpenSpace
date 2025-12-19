@@ -44,6 +44,13 @@ public:
 private:
     bool _isMouseButtonInverted = false;
     double _currentSensitivityRamp = 1.0;
+
+    // Mouse positions before a certain type of interaction is started
+    struct {
+        glm::dvec2 primary = glm::dvec2(0.0);
+        glm::dvec2 secondary = glm::dvec2(0.0);
+        glm::dvec2 button3 = glm::dvec2(0.0);
+    } _prevMousePos;
 };
 
 } // namespace openspace::interaction

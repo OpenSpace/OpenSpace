@@ -70,4 +70,14 @@ T DampenedVelocity<T>::get() const {
     return _currentValue;
 }
 
+template <typename T>
+void DampenedVelocity<T>::update(std::optional<T> value, double dt) {
+    if (value.has_value()) {
+        set(*value, dt);
+    }
+    else {
+        decelerate(dt);
+    }
+}
+
 } // namespace openspace::interaction
