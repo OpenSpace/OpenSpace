@@ -33,7 +33,6 @@ doi: 10.1109/TVCG.2019.2934259
 date-released: 2022-12-24
 url: "https://github.com/OpenSpace/OpenSpace"
 preferred-citation:
-  scope: "If you use this software, please cite it as below"
   type: article
   authors:
   - family-names: "Bock"
