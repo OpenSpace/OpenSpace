@@ -31,6 +31,7 @@
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/rendering/shadowmapping.h>
 #include <openspace/rendering/volumeraycaster.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/timemanager.h>
@@ -42,9 +43,11 @@
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <algorithm>
 #include <filesystem>
+#include <limits>
 #include <memory>
 #include <string>
 #include <string_view>
@@ -327,6 +330,15 @@ void FramebufferRenderer::initialize() {
         );
     }
 
+    //================================================//
+    //===============  ShadowMapping  ================//
+    //================================================//
+    _downscaledVolumeProgram = ghoul::opengl::ProgramObject::Build(
+        "Write Downscaled Volume Program",
+        absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.vert"),
+        absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.frag")
+    );
+
     status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Downscale Volume Rendering framebuffer is not complete");
@@ -380,6 +392,11 @@ void FramebufferRenderer::deinitialize() {
 
     LINFO("Deinitializing FramebufferRenderer");
 
+    for (std::pair<const std::string, ShadowMap>& shadowMap : _shadowMaps) {
+        glDeleteTextures(1, &shadowMap.second.depthMap);
+        glDeleteFramebuffers(1, &shadowMap.second.fbo);
+    }
+
     glDeleteFramebuffers(1, &_gBuffers.framebuffer);
     glDeleteFramebuffers(1, &_exitFramebuffer);
     glDeleteFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
@@ -417,6 +434,103 @@ void FramebufferRenderer::deferredcastersChanged(Deferredcaster&,
                                                  DeferredcasterListener::IsAttached)
 {
     _dirtyDeferredcastData = true;
+}
+
+void FramebufferRenderer::registerShadowCaster(const std::string& shadowGroup,
+                                               const SceneGraphNode* lightsource,
+                                               const SceneGraphNode* target)
+{
+    constexpr int DepthMapResolutionMultiplier = 4;
+
+    if (!_shadowMaps.contains(shadowGroup)) {
+        _shadowMaps.insert({});
+    }
+
+    ShadowMap& shadowMap = _shadowMaps[shadowGroup];
+
+    shadowMap.targets.push_back(target);
+    shadowMap.lightsource = lightsource;
+    shadowMap.depthMapResolution =
+        global::renderEngine->renderingResolution() * DepthMapResolutionMultiplier;
+
+    shadowMap.depthMapResolution =
+        glm::min(shadowMap.depthMapResolution, glm::ivec2(OpenGLCap.max2DTextureSize()));
+
+    GLint prevFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+
+    glGenTextures(1, &shadowMap.depthMap);
+    glBindTexture(GL_TEXTURE_2D, shadowMap.depthMap);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_DEPTH_COMPONENT,
+        shadowMap.depthMapResolution.x,
+        shadowMap.depthMapResolution.y,
+        0,
+        GL_DEPTH_COMPONENT,
+        GL_FLOAT,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    constexpr glm::vec4 borderColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
+    glTexParameterfv(
+        GL_TEXTURE_2D,
+        GL_TEXTURE_BORDER_COLOR,
+        glm::value_ptr(borderColor)
+    );
+
+    glGenFramebuffers(1, &shadowMap.fbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, shadowMap.fbo);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, shadowMap.depthMap, 0);
+    glDrawBuffer(GL_NONE);
+    glReadBuffer(GL_NONE);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
+}
+
+void FramebufferRenderer::removeShadowCaster(const std::string& shadowGroup,
+                                             const SceneGraphNode* target)
+{
+    if (!_shadowMaps.contains(shadowGroup)) {
+        throw ghoul::RuntimeError(std::format(
+            "Could not find shadow group '{}'", shadowGroup
+        ));
+    }
+    ShadowMap& shadowMap = _shadowMaps[shadowGroup];
+
+    auto it = std::find(
+        shadowMap.targets.begin(),
+        shadowMap.targets.end(),
+        target
+    );
+    if (it == shadowMap.targets.end()) {
+        throw ghoul::RuntimeError(std::format(
+            "Could not find shadowing target '{}'", target->identifier()
+        ));
+    }
+
+    shadowMap.targets.erase(it);
+
+    // If this was the last target we can destroy the depth map and the FBO
+    if (shadowMap.targets.empty()) {
+        glDeleteTextures(1, &shadowMap.depthMap);
+        glDeleteFramebuffers(1, &shadowMap.fbo);
+        _shadowMaps.erase(shadowGroup);
+    }
+}
+
+std::pair<GLuint, glm::dmat4> FramebufferRenderer::shadowInformation(
+                                                     const std::string& shadowgroup) const
+{
+    ghoul_assert(_shadowMaps.contains(shadowgroup), "Shadow group not registered");
+    return {
+        _shadowMaps.at(shadowgroup).depthMap,
+        _shadowMaps.at(shadowgroup).viewProjectionMatrix
+    };
 }
 
 void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewport) {
@@ -671,6 +785,8 @@ void FramebufferRenderer::update() {
             }
         }
     }
+
+    _renderedDepthMapsThisFrame = false;
 }
 
 void FramebufferRenderer::updateResolution() {
@@ -1094,6 +1210,15 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     };
     RendererTasks tasks;
 
+    if (!_renderedDepthMapsThisFrame) {
+        // We are using this flag to cover the cases where we have multiple draw calls per
+        // frame (for example for fisheye rendering). We only need to generate the shadow
+        // map once in these circumstances
+
+        renderDepthMaps();
+        _renderedDepthMapsThisFrame = true;
+    }
+
     {
         TracyGpuZone("Background")
         const ghoul::GLDebugGroup group("Background");
@@ -1198,6 +1323,72 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
     }
 }
 
+void FramebufferRenderer::renderDepthMaps() {
+    TracyGpuZone("Shadow Maps");
+    const ghoul::GLDebugGroup group("Shadow Maps");
+
+    // Save previous FBO and viewport
+    GLint prevFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
+    GLint prevVp[4];
+    glGetIntegerv(GL_VIEWPORT, prevVp);
+
+    for (std::pair<const std::string, ShadowMap>& shadowMap : _shadowMaps) {
+        glm::dvec3 vmin = glm::dvec3(std::numeric_limits<double>::max());
+        glm::dvec3 vmax = glm::dvec3(-std::numeric_limits<double>::max());
+
+        std::vector<const Shadower*> torender;
+        for (const SceneGraphNode* node : shadowMap.second.targets) {
+            ghoul_assert(node, "No SceneGraphNode");
+            ghoul_assert(node->renderable(), "No Renderable");
+
+            const Shadower* model = dynamic_cast<const Shadower*>(node->renderable());
+            if (model && node->renderable()->isEnabled() &&
+                model->isCastingShadow() && node->renderable()->isReady())
+            {
+                const double fsz = model->shadowFrustumSize();
+                glm::dvec3 center = model->center();
+                vmin = glm::min(vmin, center - fsz / 2);
+                vmax = glm::max(vmax, center + fsz / 2);
+
+                torender.push_back(model);
+            }
+        }
+
+        constexpr double ShadowFrustumDistanceMultiplier = 500.0;
+
+        const double sz = glm::length(vmax - vmin);
+        const double d = sz * ShadowFrustumDistanceMultiplier;
+        const glm::dvec3 center = vmin + (vmax - vmin) * 0.5;
+
+        const glm::dvec3 light = shadowMap.second.lightsource->modelTransform() *
+                                glm::dvec4(0.0, 0.0, 0.0, 1.0);
+        const glm::dvec3 lightDir = glm::normalize(center - light);
+        const glm::dvec3 right =
+            glm::normalize(glm::cross(glm::dvec3(0.0, 1.0, 0.0), lightDir));
+        const glm::dvec3 eye = center - lightDir * d;
+        const glm::dvec3 up = glm::cross(right, lightDir);
+
+        const glm::dmat4 view = glm::lookAt(eye, center, up);
+        const glm::dmat4 projection =
+            glm::ortho(-sz, sz, -sz, sz, d - sz, d + sz);
+        shadowMap.second.viewProjectionMatrix = projection * view;
+
+        glBindFramebuffer(GL_FRAMEBUFFER, shadowMap.second.fbo);
+        glViewport(0, 0, shadowMap.second.depthMapResolution.x,
+                    shadowMap.second.depthMapResolution.y);
+        glClear(GL_DEPTH_BUFFER_BIT);
+
+        for (const Shadower* model : torender) {
+            model->renderForDepthMap(shadowMap.second.viewProjectionMatrix);
+        }
+    }
+
+    // Restore previous FBO and viewport
+    glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
+    glViewport(prevVp[0], prevVp[1], prevVp[2], prevVp[3]);
+  
+}
 void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>& tasks,
                                                 const glm::ivec4& viewport)
 {

@@ -37,7 +37,10 @@
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/luaconsole.h>
+#include <openspace/rendering/raycastermanager.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/rendering/shadowmapping.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
@@ -682,6 +685,60 @@ glm::mat4 RenderEngine::nodeRotation() const {
 
 uint64_t RenderEngine::frameNumber() const {
     return _frameNumber;
+}
+
+void RenderEngine::registerShadowCaster(const std::string& shadowGroup,
+                                        const SceneGraphNode* lightsource,
+                                        SceneGraphNode* shadower,
+                                        SceneGraphNode* shadowee)
+{
+    ghoul_assert(!shadowGroup.empty(), "No shadowGroup specified");
+    ghoul_assert(lightsource, "No light source specified");
+    ghoul_assert(shadower, "No shadower specified");
+    ghoul_assert(shadowee, "No shadowee specified");
+
+    _renderer.registerShadowCaster(shadowGroup, lightsource, shadower);
+
+    Shadower* sr = dynamic_cast<Shadower*>(shadower->renderable());
+    if (!sr) {
+        throw ghoul::RuntimeError("Provided shadower scene graph node is not a shadower");
+    }
+    sr->setLightSource(lightsource);
+    sr->setShadowGroup(shadowGroup);
+
+    Shadowee* se = dynamic_cast<Shadowee*>(shadowee->renderable());
+    if (!se) {
+        throw ghoul::RuntimeError("Provided shadowee scene graph node is not a shadowee");
+    }
+    se->addShadower(sr);
+}
+
+void RenderEngine::removeShadowCaster(const std::string& shadowGroup,
+                                      SceneGraphNode* shadower,
+                                      SceneGraphNode* shadowee)
+{
+    ghoul_assert(!shadowGroup.empty(), "No shadowGroup specified");
+    ghoul_assert(shadower, "No shadower specified");
+    ghoul_assert(shadowee, "No shadowee specified");
+
+    _renderer.removeShadowCaster(shadowGroup, shadower);
+
+    Shadower* sr = dynamic_cast<Shadower*>(shadower->renderable());
+    if (!sr) {
+        throw ghoul::RuntimeError("Provided shadower scene graph node is not a shadower");
+    }
+
+    Shadowee* se = dynamic_cast<Shadowee*>(shadowee->renderable());
+    if (!se) {
+        throw ghoul::RuntimeError("Provided shadowee scene graph node is not a shadowee");
+    }
+    se->removeShadower(sr);
+}
+
+std::pair<GLuint, glm::dmat4> RenderEngine::shadowInformation(
+                                                     const std::string& shadowgroup) const
+{
+    return _renderer.shadowInformation(shadowgroup);
 }
 
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,

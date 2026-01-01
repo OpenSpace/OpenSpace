@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2026                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,58 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef __OPENSPACE_CORE___SHADOWMAPPING___H__
+#define __OPENSPACE_CORE___SHADOWMAPPING___H__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <vector>
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
-layout(location = 2) in vec3 in_normal;
-layout(location = 3) in vec3 in_tangent;
-layout(location = 4) in vec3 in_color;
+namespace ghoul { class Dictionary; }
 
-out vec2 vs_st;
-out vec3 vs_normalViewSpace;
-out float vs_screenSpaceDepth;
-out vec4 vs_positionCameraSpace;
-out mat3 vs_TBN;
-out vec3 vs_color;
+namespace openspace {
 
-uniform mat4 modelViewTransform;
-uniform mat4 projectionTransform;
-uniform mat4 normalTransform;
-uniform mat4 meshTransform;
-uniform mat4 meshNormalTransform;
+namespace documentation { struct Documentation; }
+class SceneGraphNode;
 
-out vec4 lightspace_position;
-uniform dmat4 model;
-uniform dmat4 light_vp;
-uniform dmat4 inv_vp;
+// This drop-in class is representing that an object is capable of shadowing another
+// object
+class Shadower {
+public:
+    Shadower(const ghoul::Dictionary& dictionary);
+    virtual ~Shadower() = default;
 
-void main() {
-  vs_positionCameraSpace = modelViewTransform * (meshTransform * in_position);
-  vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
-  vec4 positionScreenSpace = z_normalization(positionClipSpace);
+    bool isCastingShadow() const;
+    void setLightSource(const SceneGraphNode* lightSource);
+    const SceneGraphNode* lightSource() const;
+    void setShadowGroup(std::string shadowGroup);
+    const std::string& shadowGroup() const;
+    double shadowFrustumSize() const;
 
-  gl_Position = positionScreenSpace;
-  vs_st = in_st;
-  vs_color = in_color;
-  vs_screenSpaceDepth = positionScreenSpace.w;
+    virtual glm::dvec3 center() const = 0;
 
-  vs_normalViewSpace =
-    normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
+    virtual void renderForDepthMap(const glm::dmat4& vp) const = 0;
 
-  // TBN matrix for normal mapping
-  vec3 T = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_tangent));
-  vec3 N = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
+    static documentation::Documentation Documentation();
 
-  // Re-orthogonalize T with respect to N
-  T = normalize(T - dot(T, N) * N);
+protected:
+    properties::BoolProperty _castShadow;
+    const SceneGraphNode* _lightSource = nullptr;
+    std::string _shadowGroup;
 
-  // Retrieve perpendicular vector B with cross product of T and N
-  vec3 B = normalize(cross(N, T));
+    properties::FloatProperty _frustumSize;
+    bool _hasFrustumSize = false;
+};
 
-  vs_TBN = mat3(T, B, N);
+// This drop-in class is representing that an object can be shadowed by other another
+// object
+class Shadowee {
+public:
+    void addShadower(const Shadower* shadower);
+    void removeShadower(const Shadower* shadower);
 
-  lightspace_position = vec4(light_vp * model * meshTransform * in_position);
-}
+protected:
+    std::vector<const Shadower*> _shadowers;
+    bool _isShadowersDirty = false;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_CORE___SHADOWMAPPING___H__
