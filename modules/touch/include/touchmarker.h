@@ -47,10 +47,10 @@ public:
     void initialize();
     void deinitialize();
 
-    void render(const std::vector<TouchInputHolder>& list);
+    void render(const std::vector<TouchInputHolder>& touchPoints);
 
 private:
-    void createVertexList(const std::vector<TouchInputHolder>& list);
+    void createVertexList(const std::vector<TouchInputHolder>& touchPoints);
 
     properties::BoolProperty _visible;
     properties::FloatProperty _radiusSize;

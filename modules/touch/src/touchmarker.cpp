@@ -32,8 +32,8 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
         "Visibility",
-        "Toggle visibility of markers",
-        "", // @TODO Missing documentation
+        "Show touch markers",
+        "Toggle visibility of markers on touch.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -47,7 +47,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Marker opacity",
-        "", // @TODO Missing documentation
+        "The opcaity of the touch markers.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -61,7 +61,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "MarkerColor",
         "Marker color",
-        "", // @TODO Missing documentation
+        "The color of the touch markers.",
         openspace::properties::Property::Visibility::User
     };
 } // namespace
@@ -87,8 +87,8 @@ TouchMarker::TouchMarker()
 TouchMarker::~TouchMarker() {}
 
 void TouchMarker::initialize() {
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    glGenVertexArrays(1, &_quad);
+    glGenBuffers(1, &_vertexPositionBuffer);
 
     _shader = global::renderEngine->buildRenderProgram(
         "MarkerProgram",
@@ -112,9 +112,9 @@ void TouchMarker::deinitialize() {
     }
 }
 
-void TouchMarker::render(const std::vector<openspace::TouchInputHolder>& list) {
-    if (_visible && !list.empty()) {
-        createVertexList(list);
+void TouchMarker::render(const std::vector<openspace::TouchInputHolder>& touchPoints) {
+    if (_visible && !touchPoints.empty()) {
+        createVertexList(touchPoints);
         _shader->activate();
 
         _shader->setUniform(_uniformCache.radius, _radiusSize);
@@ -133,13 +133,15 @@ void TouchMarker::render(const std::vector<openspace::TouchInputHolder>& list) {
     }
 }
 
-void TouchMarker::createVertexList(const std::vector<openspace::TouchInputHolder>& list) {
-    _vertexData.resize(list.size() * 2);
+void TouchMarker::createVertexList(
+                              const std::vector<openspace::TouchInputHolder>& touchPoints)
+{
+    _vertexData.resize(touchPoints.size() * 2);
 
     int i = 0;
-    for (const openspace::TouchInputHolder& inputHolder : list) {
-        _vertexData[i] = 2.f * (inputHolder.latestInput().x - 0.5f);
-        _vertexData[i + 1] = -2.f * (inputHolder.latestInput().y - 0.5f);
+    for (const openspace::TouchInputHolder& touchPoint : touchPoints) {
+        _vertexData[i] = 2.f * (touchPoint.latestInput().x - 0.5f);
+        _vertexData[i + 1] = -2.f * (touchPoint.latestInput().y - 0.5f);
         i += 2;
     }
 
