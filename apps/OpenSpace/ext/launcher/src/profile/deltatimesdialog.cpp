@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include "profile/deltatimesdialog.h"
 
 #include "profile/line.h"
+#include <ghoul/format.h>
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QKeyEvent>
@@ -36,12 +37,8 @@
 #include <array>
 #include <cstdint>
 #include <cstdlib>
-#include <format>
 #include <new>
-#include <string>
-#include <string_view>
 #include <utility>
-#include <vector>
 
 namespace {
     constexpr int MaxNumberOfKeys = 30;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,6 @@
 
 #include <modules/server/servermodule.h>
 
-#include <modules/server/include/serverinterface.h>
 #include <modules/server/include/connection.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
@@ -38,7 +37,6 @@
 #include <algorithm>
 #include <optional>
 #include <thread>
-#include <utility>
 
 namespace {
     struct [[codegen::Dictionary(ServerModule)]] Parameters {

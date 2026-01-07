@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,11 +26,9 @@
 
 #include <openspace/navigation/waypoint.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <glm/gtx/projection.hpp>
 #include <string_view>
-#include <vector>
 
 namespace {
     constexpr std::string_view _loggerCat = "ZoomOutOverviewCurve";

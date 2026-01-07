@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,6 @@
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/settings.h>
@@ -55,7 +54,6 @@
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/assetmanager.h>
-#include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/sceneinitializer.h>
@@ -63,14 +61,11 @@
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/keys.h>
 #include <openspace/util/memorymanager.h>
-#include <openspace/util/mouse.h>
 #include <openspace/util/openspacemodule.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/task.h>
 #include <openspace/util/timemanager.h>
-#include <openspace/util/touch.h>
 #include <openspace/util/transformationmanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
@@ -103,20 +98,11 @@
 #include <glbinding-aux/types_to_string.h>
 #include <algorithm>
 #include <chrono>
-#include <cstddef>
-#include <cstdint>
-#include <filesystem>
-#include <functional>
-#include <future>
-#include <memory>
 #include <numeric>
 #include <sstream>
-#include <string>
 #include <string_view>
 #include <thread>
-#include <utility>
 #include <variant>
-#include <vector>
 
 #ifdef WIN32
 #include <Windows.h>

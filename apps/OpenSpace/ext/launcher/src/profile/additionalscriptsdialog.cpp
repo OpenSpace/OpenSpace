@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,9 +36,7 @@
 #include <new>
 #include <numeric>
 #include <sstream>
-#include <string>
 #include <utility>
-#include <vector>
 
 AdditionalScriptsDialog::AdditionalScriptsDialog(QWidget* parent,
                                                  std::vector<std::string>* scripts)

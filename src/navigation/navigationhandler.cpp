@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -43,6 +43,7 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
@@ -50,17 +51,10 @@
 #include <ghoul/misc/invariants.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
-#include <filesystem>
 #include <fstream>
-#include <format>
 #include <iterator>
 #include <limits>
-#include <optional>
-#include <string>
-#include <string_view>
 #include <utility>
-#include <variant>
-#include <vector>
 
 #include "navigationhandler_lua.inl"
 
