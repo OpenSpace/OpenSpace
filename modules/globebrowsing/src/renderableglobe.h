@@ -125,6 +125,9 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    static constexpr int MinSplitDepth = 2;
+    static constexpr int MaxSplitDepth = 22;
+
     /**
      * Test if a specific chunk can safely be culled without affecting the rendered image.
      *
@@ -215,9 +218,6 @@ private:
     bool updateChunkTree(Chunk& cn, const RenderData& data, const glm::dmat4& mvp);
     void updateChunk(Chunk& chunk, const RenderData& data, const glm::dmat4& mvp) const;
     void freeChunkNode(Chunk* n);
-
-    static constexpr int MinSplitDepth = 2;
-    static constexpr int MaxSplitDepth = 22;
 
     properties::BoolProperty _performShading;
     properties::BoolProperty _useAccurateNormals;

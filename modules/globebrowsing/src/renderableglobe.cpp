@@ -139,7 +139,7 @@ namespace {
         "ResetTileProviders",
         "Reset tile providers",
         "Reset all tile provides for the globe and reload the data.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelSpaceRenderingInfo = {
@@ -149,7 +149,7 @@ namespace {
         "globe model rendering vs the flat in-game rendering method. The value is a "
         "trade-off between not having precision errors in the rendering and representing "
         "a tile as flat or curved.",
-        openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DynamicLodIterationCountInfo =
@@ -624,7 +624,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f),
         IntProperty(NumberShadowSamplesInfo, 5, 1, 7)
     })
-    , _shadowMappingPropertyOwner({ "ShadowMapping", "Shadow Mapping"})
+    , _shadowMappingPropertyOwner({ "ShadowMapping", "Shadow Mapping" })
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
