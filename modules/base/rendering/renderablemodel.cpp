@@ -332,7 +332,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
     , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
     , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
-    , _specularPower(SpecularPowerInfo, 100.f, 0.5f, 100.f)
+    , _specularPower(SpecularPowerInfo, 100.f, 0.5f, 1000.f)
     , _performShading(ShadingInfo, true)
     , _enableFaceCulling(EnableFaceCullingInfo, true)
     , _modelTransform(
@@ -363,7 +363,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _blendingFuncOption(BlendingOptionInfo)
     , _renderWireframe(RenderWireframeInfo, false)
     , _useOverrideColor(UseOverrideColorInfo, false)
-    , _overrideColor(OverrideColorInfo, glm::vec4(0, 0, 0, 1))
+    , _overrideColor(OverrideColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -504,6 +504,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_pivot);
     addProperty(_rotationVec);
     addProperty(_useOverrideColor);
+    _overrideColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_overrideColor);
 
     addProperty(_modelScale);
@@ -1015,7 +1016,15 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             _program->setUniform(_uniformCache.opacity, 1.f);
         }
 
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+
         _geometry->render(*_program);
+
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
     }
     else {
         // Prepare framebuffer
