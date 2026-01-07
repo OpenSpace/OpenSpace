@@ -12,25 +12,13 @@ if (env.CHANGE_BRANCH) {
   branch = env.CHANGE_BRANCH;
 }
 
-@NonCPS
-def readDir() {
-  def dirsl = [];
-  new File("${workspace}").eachDir() {
-    dirs -> println dirs.getName()
-    if (!dirs.getName().startsWith('.')) {
-      dirsl.add(dirs.getName());
-    }
-  }
-  return dirs;
-}
-
 def moduleCMakeFlags() {
   def modules = [];
   // using new File doesn't work as it is not allowed in the sandbox
 
   if (isUnix()) {
      modules = sh(returnStdout: true, script: 'ls -d modules/*').trim().split('\n');
-  };
+  }
   else {
     modules = bat(returnStdout: true, script: '@dir modules /b /ad /on').trim().split('\r\n');
   }
@@ -159,13 +147,13 @@ linux_clang_make: {
   if (env.USE_BUILD_OS_LINUX == 'true') {
     node('linux-clang') {
       stage('linux-clang-make/scm') {
-        deleteDir()
+        deleteDir();
         gitHelper.checkoutGit(url, branch);
       }
 
       stage('linux-clang-make/build') {
           def cmakeCompileOptions = moduleCMakeFlags()
-          cmakeCompileOptions += ' -DMAKE_BUILD_TYPE=Release'
+          cmakeCompileOptions += ' -DCMAKE_BUILD_TYPE=Release'
           // Not sure why the linking of OpenSpaceTest takes so long
           compileHelper.build(compileHelper.Make(), compileHelper.Clang(), cmakeCompileOptions, '', 'build-make');
           compileHelper.recordCompileIssues(compileHelper.Clang());
@@ -321,19 +309,19 @@ macos_make: {
       if (env.RUN_UNIT_TESTS == 'true') {
         stage('macos-make/test-codegen') {
           timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug/codegentest');\
+            testHelper.runUnitTests('bin/Debug/codegentest');
           }
         }
 
         stage('macos-make/test-sgct') {
           timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug\\SGCTTest');
+            testHelper.runUnitTests('bin/Debug/SGCTTest');
           }
         }
 
         stage('macos-make/test-ghoul') {
           timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug\\GhoulTest');
+            testHelper.runUnitTests('bin/Debug/GhoulTest');
           }
         }
 
@@ -368,13 +356,13 @@ macos_xcode: {
 
         stage('macos-xcode/test-sgct') {
           timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug\\SGCTTest');
+            testHelper.runUnitTests('bin/Debug/SGCTTest');
           }
         }
 
         stage('macos-xcode/test-ghoul') {
           timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug\\GhoulTest');
+            testHelper.runUnitTests('bin/Debug/GhoulTest');
           }
         }
 
