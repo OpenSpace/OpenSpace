@@ -12,18 +12,6 @@ if (env.CHANGE_BRANCH) {
   branch = env.CHANGE_BRANCH;
 }
 
-@NonCPS
-def readDir() {
-  def dirsl = [];
-  new File("${workspace}").eachDir() {
-    dirs -> println dirs.getName()
-    if (!dirs.getName().startsWith('.')) {
-      dirsl.add(dirs.getName());
-    }
-  }
-  return dirsl;
-}
-
 def moduleCMakeFlags() {
   def modules = [];
   // using new File doesn't work as it is not allowed in the sandbox
