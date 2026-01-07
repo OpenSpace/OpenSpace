@@ -41,6 +41,10 @@
 
 // #define TOUCH_DEBUG_PROPERTIES
 
+namespace openspace::interaction {
+    class TouchInputState;
+}
+
 namespace openspace {
 
 class Camera;
@@ -60,6 +64,8 @@ private:
     int _index = 0;
 };
 
+// TODO: This class should be made into a general TouchCameraStates class, similar to
+// MouseCameraStates, and be made to inherit from OrbitalCameraStates.
 class TouchInteraction : public properties::PropertyOwner {
 public:
     enum class InteractionType {
@@ -94,8 +100,7 @@ public:
      *      points select the same node and said node is larger than _nodeRadiusThreshold
      */
 
-    void updateVelocitiesFromInput(const std::vector<TouchInputHolder>& list,
-        std::vector<TouchInput>& lastProcessed);
+    void updateVelocitiesFromInput(const interaction::TouchInputState& touchInputState);
 
     bool hasNonZeroVelocities() const;
 

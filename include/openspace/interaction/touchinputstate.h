@@ -22,73 +22,46 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
-#define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#ifndef __OPENSPACE_CORE___TOUCHINPUTSTATE___H__
+#define __OPENSPACE_CORE___TOUCHINPUTSTATE___H__
 
-#include <openspace/util/openspacemodule.h>
-
-#include <modules/touch/include/touchmarker.h>
-#include <modules/touch/include/touchinteraction.h>
-#include <openspace/properties/list/stringlistproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/util/touch.h>
-#include <memory>
-#include <set>
+#include <vector>
 
-namespace openspace {
+namespace openspace::interaction {
 
-class TuioEar;
-
-#ifdef WIN32
-class Win32TouchHook;
-#endif //WIN32
-
-class TouchModule : public OpenSpaceModule {
+/**
+ * This class represents the global input state of touch interaction.
+ */
+class TouchInputState {
 public:
-    constexpr static const char* Name = "Touch";
+    bool touchDetectedCallback(TouchInput i);
+    bool touchUpdatedCallback(TouchInput i);
+    void touchExitCallback(TouchInput i);
 
-    TouchModule();
-    ~TouchModule();
+    bool isTap() const;
+    const std::vector<TouchInputHolder>& touchPoints() const;
+    const std::vector<TouchInput>& lastProcessedInputs() const;
 
-    /**
-     * Function to check if the given renderable type is one that should use direct
-     * manipulation.
-     */
-    bool isDefaultDirectTouchType(std::string_view renderableType) const;
+    bool processTouchInput(const std::vector<TouchInput>& inputs,
+        const std::vector<TouchInput>& removals);
 
-protected:
-    void internalInitialize(const ghoul::Dictionary& dictionary) override;
+    void clearInputs();
+
+    void updateLastTouchPoints();
 
 private:
-    /**
-     * Process touch input that occured since the last frame.
-     */
-    bool processNewInput();
+    void addTouchInput(TouchInput input);
+    void updateOrAddTouchInput(TouchInput input);
+    void removeTouchInput(TouchInput input);
 
-    std::unique_ptr<TuioEar> _ear;
+    std::vector<TouchInputHolder> _touchPoints;
+    std::vector<TouchInput> _deferredRemovals;
+    std::vector<TouchInput> _lastTouchInputs;
 
-    // TODO: Move to a new "TouchCameraStates" class in core navigation
-    TouchInteraction _touch;
-
-    // TODO: Move to InteractionHandler
-    TouchMarker _markers;
-
-    properties::IntProperty _tuioPort;
-    properties::BoolProperty _touchIsEnabled;
-    properties::BoolProperty _hasActiveTouchEvent;
-    properties::StringListProperty _defaultDirectTouchRenderableTypes;
-
-    // A sorted version of the list in the property
-    std::set<std::string> _sortedDefaultRenderableTypes;
-
-    // contains an id and the Point that was processed last frame
-    glm::ivec2 _webPositionCallback = glm::ivec2(0);
-#ifdef WIN32
-    std::unique_ptr<Win32TouchHook> _win32TouchHook;
-#endif // WIN32
+    bool _tap = false;
 };
 
-} // namespace openspace
+} // namespace openspace::interaction
 
-#endif // __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#endif // __OPENSPACE_CORE___TOUCHINPUTSTATE___H__

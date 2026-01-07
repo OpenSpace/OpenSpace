@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/touchinputstate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
 #include <openspace/rendering/renderable.h>
@@ -372,10 +373,12 @@ TouchInteraction::TouchInteraction()
     _reset.onChange([this]() { resetPropertiesToDefault(); });
 }
 
-void TouchInteraction::updateVelocitiesFromInput(const std::vector<TouchInputHolder>& list,
-                                            std::vector<TouchInput>& lastProcessed)
+void TouchInteraction::updateVelocitiesFromInput(const interaction::TouchInputState& touchInputState)
 {
-    size_t numFingers = list.size();
+    const std::vector<TouchInputHolder>& touchPoints = touchInputState.touchPoints();
+    const std::vector<TouchInput>& lastProcessed = touchInputState.lastProcessedInputs();
+
+    size_t numFingers = touchPoints.size();
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     _debugProperties.nFingers = numFingers;
@@ -388,9 +391,9 @@ void TouchInteraction::updateVelocitiesFromInput(const std::vector<TouchInputHol
 
     if (_tap) {
         // @TODO (2023-02-01, emmbr) This if is not triggered on every touch tap.
-        // Why?
+        // Why? Dependent on frame rate...?
 
-        // Check for doubletap
+        // Check for double tap
         std::chrono::milliseconds timestamp = duration_cast<std::chrono::milliseconds>(
             std::chrono::high_resolution_clock::now().time_since_epoch()
         );
@@ -404,7 +407,7 @@ void TouchInteraction::updateVelocitiesFromInput(const std::vector<TouchInputHol
     // Code for lower-right corner double-tap to zoom-out
     {
         const glm::vec2 res = global::windowDelegate->currentWindowSize();
-        const glm::vec2 pos = list[0].latestInput().screenCoordinates(res);
+        const glm::vec2 pos = touchPoints[0].latestInput().screenCoordinates(res);
 
         const float bottomCornerSizeForZoomTap_fraction = 0.08f;
         const int zoomTapThresholdX = static_cast<int>(
@@ -439,17 +442,17 @@ void TouchInteraction::updateVelocitiesFromInput(const std::vector<TouchInputHol
 #ifdef TOUCH_DEBUG_PROPERTIES
         _debugProperties.interactionMode = "Direct";
 #endif // TOUCH_DEBUG_PROPERTIES
-        directControl(list);
+        directControl(touchPoints);
     }
     else {
 #ifdef TOUCH_DEBUG_PROPERTIES
         _debugProperties.interactionMode = "Velocities";
 #endif // TOUCH_DEBUG_PROPERTIES
-        computeVelocities(list, lastProcessed);
+        computeVelocities(touchPoints, lastProcessed);
     }
 
     if (_enableDirectManipulation && _isWithinDirectTouchDistance) {
-        updateNodeSurfacePoints(list);
+        updateNodeSurfacePoints(touchPoints);
     }
 
     _wasPrevModeDirectTouch = _directTouchMode;
@@ -588,7 +591,7 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
         );
         distInput = latestInput;
     }
-    distInput = lastProcessed[0];
+    distInput = lastProcessed[0]; // TODO: Guard against empty list (and determine that this should not happen)
     for (const TouchInput& p : lastProcessed) {
         lastDist += glm::length(glm::dvec2(p.x, p.y) -
                     glm::dvec2(distInput.x, distInput.y));

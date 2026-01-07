@@ -31,6 +31,7 @@
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/interaction/mouseinputstate.h>
+#include <openspace/interaction/touchinputstate.h>
 #include <openspace/interaction/websocketinputstate.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -61,6 +62,9 @@ public:
     JoystickInputStates& joystickInputStates();
     const JoystickInputStates& joystickInputStates() const;
 
+    TouchInputState& touchInputState();
+    const TouchInputState& touchInputState() const;
+
     bool disabledKeybindings() const;
     bool disabledMouse() const;
     bool disabledJoystick() const;
@@ -86,6 +90,7 @@ private:
     KeyboardInputState _keyboardInputState;
     WebsocketInputStates _websocketInputStates;
     JoystickInputStates _joystickInputStates;
+    TouchInputState _touchInputState;
 
     // Keeps track of when interaction has happened
     InteractionMonitor _interactionMonitor;
@@ -93,6 +98,7 @@ private:
     properties::BoolProperty _disableKeybindings;
     properties::BoolProperty _disableMouseInputs;
     properties::BoolProperty _disableJoystickInputs;
+    //properties::BoolProperty _disableTouchInputs; // TODO
 
     struct {
         properties::PropertyOwner owner;

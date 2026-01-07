@@ -152,6 +152,14 @@ const JoystickInputStates& InteractionHandler::joystickInputStates() const {
     return _joystickInputStates;
 }
 
+TouchInputState& InteractionHandler::touchInputState() {
+    return _touchInputState;
+}
+
+const TouchInputState& InteractionHandler::touchInputState() const {
+    return _touchInputState;
+}
+
 bool InteractionHandler::disabledKeybindings() const {
     return _disableKeybindings;
 }

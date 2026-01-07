@@ -63,6 +63,7 @@ set(OPENSPACE_SOURCE
   interaction/sessionrecording.cpp
   interaction/sessionrecordinghandler.cpp
   interaction/sessionrecordinghandler_lua.inl
+  interaction/touchinputstate.cpp
   interaction/websocketinputstate.cpp
   interaction/tasks/convertrecformattask.cpp
   mission/mission.cpp
@@ -262,6 +263,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/mouseinputstate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecording.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/sessionrecordinghandler.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/interaction/touchinputstate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/websocketinputstate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/interaction/tasks/convertrecformattask.h
   ${PROJECT_SOURCE_DIR}/include/openspace/mission/mission.h

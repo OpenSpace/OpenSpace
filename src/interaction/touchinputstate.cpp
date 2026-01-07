@@ -1,0 +1,179 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2025                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include <openspace/interaction/touchinputstate.h>
+
+namespace openspace::interaction {
+
+bool TouchInputState::touchDetectedCallback(TouchInput i) {
+    addTouchInput(std::move(i));
+    return true;
+}
+
+bool TouchInputState::touchUpdatedCallback(TouchInput i) {
+    updateOrAddTouchInput(std::move(i));
+    return true;
+}
+
+void TouchInputState::touchExitCallback(TouchInput i) {
+    removeTouchInput(std::move(i));
+}
+
+bool TouchInputState::isTap() const {
+    return _tap;
+}
+
+const std::vector<TouchInputHolder>& TouchInputState::touchPoints() const {
+    return _touchPoints;
+}
+
+const std::vector<TouchInput>& TouchInputState::lastProcessedInputs() const {
+    return _lastTouchInputs;
+}
+
+bool TouchInputState::processTouchInput(const std::vector<TouchInput>& inputs,
+                                        const std::vector<TouchInput>& removals)
+{
+    for (const TouchInput& input : inputs) {
+        updateOrAddTouchInput(input);
+    }
+    for (const TouchInput& removal : removals) {
+        removeTouchInput(removal);
+    }
+
+    // Erase old input ids that no longer exist
+    _lastTouchInputs.erase(
+        std::remove_if(
+            _lastTouchInputs.begin(),
+            _lastTouchInputs.end(),
+            [this](const TouchInput& input) {
+                return !std::any_of(
+                    _touchPoints.cbegin(),
+                    _touchPoints.cend(),
+                    [&input](const TouchInputHolder& holder) {
+                        return holder.holdsInput(input);
+                    }
+                );
+            }
+        ),
+        _lastTouchInputs.end()
+    );
+
+    // Check that there is enough input data to update bsaed on process
+    return _touchPoints.size() == _lastTouchInputs.size() && !_touchPoints.empty();
+
+    // OBS This last check used to be the following, which alyays returned true on the
+    // condition above. @TODO check if the isMoving check should be incorportated somehow.
+    //
+    //// Return true if we got new input
+    //if (_touchPoints.size() == _lastTouchInputs.size() && !_touchPoints.empty()) {
+    //    bool newInput = true;
+    //    // Go through list and check if the last registrered time is newer than the
+    //    // last processed touch inputs (last frame)
+    //    std::for_each(
+    //        _lastTouchInputs.begin(),
+    //        _lastTouchInputs.end(),
+    //        [this, &newInput](TouchInput& input) {
+    //            std::vector<TouchInputHolder>::iterator holder = std::find_if(
+    //                _touchPoints.begin(),
+    //                _touchPoints.end(),
+    //                [&input](const TouchInputHolder& inputHolder) {
+    //                    return inputHolder.holdsInput(input);
+    //                }
+    //            );
+    //            if (!holder->isMoving()) {
+    //                newInput = true;
+    //            }
+    //        }
+    //    );
+    //    return newInput;
+    //}
+    //else {
+    //    return false;
+    //}
+}
+
+void TouchInputState::clearInputs() {
+    for (const TouchInput& input : _deferredRemovals) {
+        for (TouchInputHolder& inputHolder : _touchPoints) {
+            if (inputHolder.holdsInput(input)) {
+                inputHolder = std::move(_touchPoints.back());
+                _touchPoints.pop_back();
+                break;
+            }
+        }
+    }
+    _deferredRemovals.clear();
+
+    // Reset tap detected state
+    _tap = false;
+}
+
+void TouchInputState::updateLastTouchPoints() {
+    _lastTouchInputs.clear();
+    for (const TouchInputHolder& points : _touchPoints) {
+        _lastTouchInputs.emplace_back(points.latestInput());
+    }
+}
+
+void TouchInputState::addTouchInput(TouchInput input) {
+    _touchPoints.emplace_back(input);
+}
+
+void TouchInputState::updateOrAddTouchInput(TouchInput input) {
+    for (TouchInputHolder& inputHolder : _touchPoints) {
+        if (inputHolder.holdsInput(input)) {
+            inputHolder.tryAddInput(input);
+            return;
+        }
+    }
+    _touchPoints.emplace_back(input);
+}
+
+void TouchInputState::removeTouchInput(TouchInput input) {
+    _deferredRemovals.emplace_back(input);
+
+    // Check for "tap" gesture:
+    for (TouchInputHolder& inputHolder : _touchPoints) {
+        if (inputHolder.holdsInput(input)) {
+            inputHolder.tryAddInput(input);
+            const double totalTime = inputHolder.gestureTime();
+            const float totalDistance = inputHolder.gestureDistance();
+
+            // @TODO: Thís is copied from tuioear.cpp, should be configurable? Or
+            // moved to the module that takes tuio input?
+            // Magic values taken from tuioear.cpp:
+            const bool isWithinTapTime = totalTime < 0.18;
+            const bool wasStationary = totalDistance < 0.0004f;
+            if (isWithinTapTime && wasStationary && _touchPoints.size() == 1 &&
+                _deferredRemovals.size() == 1)
+            {
+                _tap = true;
+            }
+            return;
+        }
+    }
+}
+
+} // namespace openspace::interaction

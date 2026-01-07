@@ -1553,6 +1553,8 @@ void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
             return;
         }
     }
+
+    global::interactionHandler->touchInputState().touchDetectedCallback(input);
 }
 
 void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
@@ -1564,6 +1566,8 @@ void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
             return;
         }
     }
+
+    global::interactionHandler->touchInputState().touchUpdatedCallback(input);
 }
 
 void OpenSpaceEngine::touchExitCallback(TouchInput input) {
@@ -1572,6 +1576,8 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
     for (const std::function<void(TouchInput)>& func : *global::callback::touchExit) {
         func(input);
     }
+
+    global::interactionHandler->touchInputState().touchExitCallback(input);
 }
 
 void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {
