@@ -50,31 +50,18 @@ local SunLabel = {
   }
 }
 
-local LightSource = {
-  Identifier = "sun-directional-lightsource",
-  Parent = transforms.SunIAU.Identifier,
-  GUI = {
-    Name = "Directional Light Source",
-    Path = "/Solar System/Sun",
-    Description = "Shadow-casting directional light source for our Sun"
-  }
-}
-
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Sun)
   openspace.addSceneGraphNode(SunLabel)
-  openspace.addSceneGraphNode(LightSource)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(LightSource)
   openspace.removeSceneGraphNode(SunLabel)
   openspace.removeSceneGraphNode(Sun)
 end)
 
 asset.export(Sun)
 asset.export(SunLabel)
-asset.export("LightSource", LightSource)
 
 asset.meta = {
   Name = "Sun",

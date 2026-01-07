@@ -1,8 +1,7 @@
 local mars = asset.require("scene/solarsystem/planets/mars/mars")
 local earth = asset.require("scene/solarsystem/planets/earth/earth")
 local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
-local sun = asset.require("scene/solarsystem/sun/sun")
-local sun_transforms = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 
 
 -- Model CC0 from https://sketchfab.com/3d-models/celestial-globe-341fa8a777e94883841409438756f747
@@ -41,10 +40,10 @@ local ModelMarsSmall = {
     GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
     ModelScale = "Kilometer",
     LightSources = {
-      sun_transforms.LightSource
+      sun.LightSource
     },
     CastShadow = true,
-    LightSource = sun.LightSource.Identifier
+    LightSource = sun.SunCenter.Identifier
   },
   GUI = {
     Name = "Celestial Globe - Mars Small",
@@ -82,10 +81,10 @@ local ModelMarsLarge = {
     GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
     ModelScale = "Kilometer",
     LightSources = {
-      sun_transforms.LightSource
+      sun.LightSource
     },
     CastShadow = true,
-    LightSource = sun.LightSource.Identifier
+    LightSource = sun.SunCenter.Identifier
   },
   GUI = {
     Name = "Celestial Globe - Mars Large",
@@ -124,10 +123,10 @@ local ModelMarsOtherGroup = {
     GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
     ModelScale = "Kilometer",
     LightSources = {
-      sun_transforms.LightSource
+      sun.LightSource
     },
     CastShadow = true,
-    LightSource = sun.LightSource.Identifier
+    LightSource = sun.SunCenter.Identifier
   },
   GUI = {
     Name = "Celestial Globe - Mars OtherGroup",
@@ -162,10 +161,10 @@ local ModelEarth = {
     GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
     ModelScale = "Kilometer",
     LightSources = {
-      sun_transforms.LightSource
+      sun.LightSource
     },
     CastShadow = true,
-    LightSource = sun.LightSource.Identifier
+    LightSource = sun.SunCenter.Identifier
   },
   GUI = {
     Name = "Celestial Globe - Earth",
@@ -199,10 +198,10 @@ local ModelMoon = {
     GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
     ModelScale = "Kilometer",
     LightSources = {
-      sun_transforms.LightSource
+      sun.LightSource
     },
     CastShadow = true,
-    LightSource = sun.LightSource.Identifier
+    LightSource = sun.SunCenter.Identifier
   },
   GUI = {
     Name = "Celestial Globe - Moon",
@@ -213,19 +212,19 @@ local ModelMoon = {
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(ModelMarsSmall)
-  openspace.registerShadowcaster(sun.LightSource.Identifier, ModelMarsSmall.Identifier, mars.Mars.Identifier, "mars")
+  openspace.registerShadowcaster(sun.SunCenter.Identifier, ModelMarsSmall.Identifier, mars.Mars.Identifier, "mars")
 
-openspace.addSceneGraphNode(ModelMarsLarge)
-  openspace.registerShadowcaster(sun.LightSource.Identifier, ModelMarsLarge.Identifier, mars.Mars.Identifier, "mars")
+  openspace.addSceneGraphNode(ModelMarsLarge)
+  openspace.registerShadowcaster(sun.SunCenter.Identifier, ModelMarsLarge.Identifier, mars.Mars.Identifier, "mars")
 
   openspace.addSceneGraphNode(ModelMarsOtherGroup)
-  openspace.registerShadowcaster(sun.LightSource.Identifier, ModelMarsOtherGroup.Identifier, mars.Mars.Identifier)
+  openspace.registerShadowcaster(sun.SunCenter.Identifier, ModelMarsOtherGroup.Identifier, mars.Mars.Identifier)
 
   openspace.addSceneGraphNode(ModelEarth)
-  openspace.registerShadowcaster(sun.LightSource.Identifier, ModelEarth.Identifier, earth.Earth.Identifier, "earth")
+  openspace.registerShadowcaster(sun.SunCenter.Identifier, ModelEarth.Identifier, earth.Earth.Identifier, "earth")
 
   openspace.addSceneGraphNode(ModelMoon)
-  openspace.registerShadowcaster(sun.LightSource.Identifier, ModelMoon.Identifier, moon.Moon.Identifier, "moon")
+  openspace.registerShadowcaster(sun.SunCenter.Identifier, ModelMoon.Identifier, moon.Moon.Identifier, "moon")
 end)
 
 asset.onDeinitialize(function()
