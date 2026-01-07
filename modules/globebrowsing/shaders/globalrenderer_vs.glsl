@@ -108,6 +108,7 @@ vec3 getLevelWeights(float distToVertexOnEllipsoid) {
   );
 }
 
+
 void main() {
   PositionNormalPair pair = globalInterpolation(in_uv);
   float distToVertexOnEllipsoid = length((pair.normal * chunkMinHeight + pair.position) - cameraPosition);
