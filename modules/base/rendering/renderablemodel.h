@@ -60,7 +60,6 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-
     static documentation::Documentation Documentation();
 
 private:

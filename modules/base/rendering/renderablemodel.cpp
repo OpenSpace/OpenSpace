@@ -1268,7 +1268,15 @@ void RenderableModel::renderForDepthMap(const glm::dmat4& vp) const {
 
     glCullFace(GL_FRONT);
     if (isEnabled()) {
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+
         _geometry->render(*_depthMapProgram, false, true);
+
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
     }
     glCullFace(GL_BACK);
 }
