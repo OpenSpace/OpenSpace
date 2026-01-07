@@ -59,14 +59,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableTouchInfo = {
-        "EnableTouchInteraction",
-        "Enable touch interaction",
-        "Use this property to turn on/off touch input navigation in the 3D scene. "
-        "Disabling will reset all current touch inputs to the navigation.",
-        openspace::properties::Property::Visibility::User
-    };
-
     constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
         "DetectedTouchEvent",
         "Detected touch event",
@@ -99,7 +91,6 @@ namespace openspace {
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
     , _tuioPort(TuioPortInfo, 3333, 1, 65535)
-    , _touchIsEnabled(EnableTouchInfo, true)
     , _hasActiveTouchEvent(EventsInfo, false)
     , _defaultDirectTouchRenderableTypes(DefaultDirectTouchRenderableTypesInfo)
 {
@@ -107,13 +98,6 @@ TouchModule::TouchModule()
     addPropertySubOwner(_markers);
     _tuioPort.setReadOnly(true);
     addProperty(_tuioPort);
-
-    // TODO: Move to interaction handler
-    //addProperty(_touchIsEnabled);
-    //_touchIsEnabled.onChange([this]() {
-    //    _touch.resetAfterInput();
-    //    _lastTouchInputs.clear();
-    //});
 
     _hasActiveTouchEvent.setReadOnly(true);
     addProperty(_hasActiveTouchEvent);
@@ -172,14 +156,16 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {
     });
 
     global::callback::preSync->push_back([this]() {
-        if (!_touchIsEnabled) {
-            return;
-        }
-
         interaction::TouchInputState& touchInputState =
             global::interactionHandler->touchInputState();
 
-        // TODO: Move to interaction handler
+        if (global::interactionHandler->disabledTouch()) {
+            _touch.resetAfterInput();
+            touchInputState.clearInputs();
+            return;
+        }
+
+        // TODO: Move to interaction handler or navigation handler?
         OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
         if (mode == OpenSpaceEngine::Mode::CameraPath ||
             mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
@@ -204,13 +190,16 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {
         _touch.step(global::windowDelegate->deltaTime());
 
         // TODO: This should be moved somewhere more global, as it's the thing that updates the
-        // Update last processed touch inputs. Interaction handler?
+        // last processed touch inputs. Interaction handler?
         touchInputState.updateLastTouchPoints();
 
         touchInputState.clearInputs();
     });
 
     global::callback::render->push_back([this]() {
+        if (global::interactionHandler->disabledTouch()) {
+            return;
+        }
         const std::vector<TouchInputHolder>& touchPoints =
             global::interactionHandler->touchInputState().touchPoints();
 
@@ -239,11 +228,6 @@ bool TouchModule::processNewInput() {
     // Set touch property to active (to void mouse input, mainly for mtdev bridges)
     if (touchHappened) {
         global::interactionHandler->markInteraction();
-    }
-
-    if (touchInputState.isTap()) {
-        _touch.tap();
-        return true;
     }
 
     return inputIsvalidForUpdate;

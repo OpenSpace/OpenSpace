@@ -89,13 +89,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxTapTimeInfo = {
-        "MaxTapTime",
-        "Max tap delay (in ms) for double tap",
-        "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     constexpr openspace::properties::Property::PropertyInfo DecelatesPerSecondInfo = {
         "DeceleratesPerSecond",
         "Number of times velocity is decelerated per second",
@@ -275,7 +268,6 @@ TouchInteraction::TouchInteraction()
     , _disableZoom(DisableZoomInfo, false)
     , _disableRoll(DisableRollInfo, false)
     , _reset(SetDefaultInfo)
-    , _maxTapTime(MaxTapTimeInfo, 300, 10, 1000)
     , _deceleratesPerSecond(DecelatesPerSecondInfo, 240, 60, 300)
     , _touchScreenSize(TouchScreenSizeInfo, 55.f, 5.5f, 150.f)
     , _tapZoomFactor(TapZoomFactorInfo, 0.2f, 0.f, 0.5f, 0.01f)
@@ -335,7 +327,6 @@ TouchInteraction::TouchInteraction()
     addProperty(_disableRoll);
     addProperty(_unitTest);
     addProperty(_reset);
-    addProperty(_maxTapTime);
     addProperty(_deceleratesPerSecond);
     addProperty(_touchScreenSize);
     addProperty(_tapZoomFactor);
@@ -366,9 +357,6 @@ TouchInteraction::TouchInteraction()
     _zoomOutBoundarySphereMultiplier.setExponent(20.f);
     _zoomInLimit.setExponent(20.f);
     _zoomOutLimit.setExponent(20.f);
-    _time = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::high_resolution_clock::now().time_since_epoch()
-    );
 
     _reset.onChange([this]() { resetPropertiesToDefault(); });
 }
@@ -389,23 +377,8 @@ void TouchInteraction::updateVelocitiesFromInput(const interaction::TouchInputSt
         return;
     }
 
-    if (_tap) {
-        // @TODO (2023-02-01, emmbr) This if is not triggered on every touch tap.
-        // Why? Dependent on frame rate...?
-
-        // Check for double tap
-        std::chrono::milliseconds timestamp = duration_cast<std::chrono::milliseconds>(
-            std::chrono::high_resolution_clock::now().time_since_epoch()
-        );
-        if ((timestamp - _time).count() < _maxTapTime) {
-            _doubleTap = true;
-            _tap = false;
-        }
-        _time = timestamp;
-    }
-
     // Code for lower-right corner double-tap to zoom-out
-    {
+    if (touchInputState.isDoubleTap()) {
         const glm::vec2 res = global::windowDelegate->currentWindowSize();
         const glm::vec2 pos = touchPoints[0].latestInput().screenCoordinates(res);
 
@@ -420,10 +393,8 @@ void TouchInteraction::updateVelocitiesFromInput(const interaction::TouchInputSt
         const bool isTapInLowerRightCorner =
             (std::abs(pos.x) > zoomTapThresholdX && std::abs(pos.y) > zoomTapThresholdY);
 
-        if (_doubleTap && isTapInLowerRightCorner) {
+        if (isTapInLowerRightCorner) {
             _zoomOutTap = true;
-            _tap = false;
-            _doubleTap = false;
         }
     }
 
@@ -569,6 +540,17 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
 {
     ghoul_assert(!list.empty(), "Cannot interpret interaction of no input");
 
+    if (_zoomOutTap) {
+        return InteractionType::ZOOM_OUT;
+    }
+
+    if (list.size() != lastProcessed.size() || list.empty() || lastProcessed.empty()) {
+        // Not a valid gesture. Probably just a tap.
+        // @TODO: Update code so that we dont have to do this check (currently there is a
+        // risk of crashing below)
+        return InteractionType::NONE;
+    }
+
     glm::fvec2 lastCentroid = _centroid;
     _centroid = glm::vec2(0.f, 0.f);
     for (const TouchInputHolder& inputHolder : list) {
@@ -591,7 +573,7 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
         );
         distInput = latestInput;
     }
-    distInput = lastProcessed[0]; // TODO: Guard against empty list (and determine that this should not happen)
+    distInput = lastProcessed[0];
     for (const TouchInput& p : lastProcessed) {
         lastDist += glm::length(glm::dvec2(p.x, p.y) -
                     glm::dvec2(distInput.x, distInput.y));
@@ -671,10 +653,7 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
     _debugProperties.minDiff = minDiff;
 #endif // TOUCH_DEBUG_PROPERTIES
 
-    if (_zoomOutTap) {
-        return InteractionType::ZOOM_OUT;
-    }
-    else if (list.size() == 1) {
+    if (list.size() == 1) {
         return InteractionType::ROTATION;
     }
     else {
@@ -745,6 +724,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
     const glm::ivec2 windowSize = global::windowDelegate->currentWindowSize();
     const float aspectRatio =
         static_cast<float>(windowSize.x) / static_cast<float>(windowSize.y);
+
     switch (action) {
         case InteractionType::ROTATION: {
             // Add rotation velocity
@@ -850,6 +830,9 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             _vel.zoom = computeTapZoomDistance(-1.0);
             _constTimeDecayCoeff.zoom = computeConstTimeDecayCoefficient(_vel.zoom);
         }
+        case InteractionType::NONE:
+        default:
+            break;
     }
 }
 
@@ -1108,8 +1091,6 @@ void TouchInteraction::step(double dt, bool directTouch) {
         }
 #endif // TOUCH_DEBUG_PROPERTIES
 
-        _tap = false;
-        _doubleTap = false;
         _zoomOutTap = false;
     }
 }
@@ -1169,7 +1150,6 @@ void TouchInteraction::resetPropertiesToDefault() {
     _unitTest = false;
     _disableZoom = false;
     _disableRoll = false;
-    _maxTapTime= 300;
     _deceleratesPerSecond = 240;
     _touchScreenSize = 55.f;
     _tapZoomFactor = 0.2f;
@@ -1187,10 +1167,6 @@ void TouchInteraction::resetVelocities() {
     _vel.zoom = 0.0;
     _vel.roll = 0.0;
     _vel.pan = glm::dvec2(0.0);
-}
-
-void TouchInteraction::tap() {
-    _tap = true;
 }
 
 void TouchInteraction::setCamera(Camera* camera) {

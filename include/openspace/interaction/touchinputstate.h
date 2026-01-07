@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___TOUCHINPUTSTATE___H__
 
 #include <openspace/util/touch.h>
+#include <chrono>
 #include <vector>
 
 namespace openspace::interaction {
@@ -35,11 +36,16 @@ namespace openspace::interaction {
  */
 class TouchInputState {
 public:
+    void initialize();
+
     bool touchDetectedCallback(TouchInput i);
     bool touchUpdatedCallback(TouchInput i);
     void touchExitCallback(TouchInput i);
 
     bool isTap() const;
+    bool isDoubleTap() const;
+    void setMaxDoubleTapTime(unsigned int milliseconds);
+
     const std::vector<TouchInputHolder>& touchPoints() const;
     const std::vector<TouchInput>& lastProcessedInputs() const;
 
@@ -60,6 +66,10 @@ private:
     std::vector<TouchInput> _lastTouchInputs;
 
     bool _tap = false;
+    bool _doubleTap = false;
+
+    std::chrono::milliseconds _time;
+    unsigned int _maxDoubleTapTimeInterval = 300; // milliseconds
 };
 
 } // namespace openspace::interaction

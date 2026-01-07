@@ -35,6 +35,7 @@
 #include <openspace/interaction/websocketinputstate.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec4property.h>
 
 namespace openspace::interaction {
@@ -68,6 +69,7 @@ public:
     bool disabledKeybindings() const;
     bool disabledMouse() const;
     bool disabledJoystick() const;
+    bool disabledTouch() const;
 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
@@ -98,7 +100,9 @@ private:
     properties::BoolProperty _disableKeybindings;
     properties::BoolProperty _disableMouseInputs;
     properties::BoolProperty _disableJoystickInputs;
-    //properties::BoolProperty _disableTouchInputs; // TODO
+    properties::BoolProperty _disableTouchInputs;
+
+    properties::IntProperty _maxDoubleTapTime;
 
     struct {
         properties::PropertyOwner owner;

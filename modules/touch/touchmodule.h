@@ -75,7 +75,6 @@ private:
     TouchMarker _markers;
 
     properties::IntProperty _tuioPort;
-    properties::BoolProperty _touchIsEnabled;
     properties::BoolProperty _hasActiveTouchEvent;
     properties::StringListProperty _defaultDirectTouchRenderableTypes;
 

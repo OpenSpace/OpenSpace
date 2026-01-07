@@ -73,7 +73,8 @@ public:
         PINCH,
         PAN,
         ROLL,
-        ZOOM_OUT
+        ZOOM_OUT,
+        NONE
     };
 
     // Stores the velocity in all 6 DOF
@@ -113,11 +114,6 @@ public:
      * Called each frame we have no new input, used to reset data.
      */
     void resetAfterInput();
-
-    /**
-     * Sets _tap to true, called if tap occured current frame (called from touchmodule).
-     */
-    void tap();
 
     void setCamera(Camera* camera);
 
@@ -182,7 +178,6 @@ private:
     properties::BoolProperty _disableZoom;
     properties::BoolProperty _disableRoll;
     properties::TriggerProperty _reset;
-    properties::IntProperty _maxTapTime;
     properties::IntProperty _deceleratesPerSecond;
     properties::FloatProperty _touchScreenSize;
     properties::FloatProperty _tapZoomFactor;
@@ -229,11 +224,8 @@ private:
 
     bool _isWithinDirectTouchDistance = false;
     double _timeSlack = 0.0;
-    std::chrono::milliseconds _time;
     bool _directTouchMode = false;
     bool _wasPrevModeDirectTouch = false;
-    bool _tap = false;
-    bool _doubleTap = false;
     bool _zoomOutTap = false;
     std::vector<DirectInputSolver::SelectedBody> _selectedNodeSurfacePoints;
     DirectInputSolver _directInputSolver;

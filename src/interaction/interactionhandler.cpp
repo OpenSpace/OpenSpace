@@ -26,7 +26,6 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/rendering/helper.h>
 
 namespace {
@@ -39,17 +38,31 @@ namespace {
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
-        "DisableMouseInputs",
+        "DisableMouseInput",
         "Disable all mouse inputs",
         "Disables all mouse inputs and prevents them from affecting the camera.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableJoystickInputInfo = {
-        "DisableJoystickInputs",
+        "DisableJoystickInput",
         "Disable all joystick inputs",
         "Disables all joystick inputs and prevents them from affecting the camera.",
         openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DisableTouchInputInfo = {
+        "DisableTouchInput",
+        "Disable all touch inputs",
+        "Disables all touch inputs and prevents them from affecting the camera.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MaxDoubleTapTimeInfo = {
+        "MaxDoubleTapTime",
+        "Max time for touch double tap detection (milliseconds)",
+        "Max tap delay (in ms) for double tap detection in touch interaction.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     const openspace::properties::PropertyOwner::PropertyOwnerInfo MouseVisualizerInfo = {
@@ -81,6 +94,8 @@ InteractionHandler::InteractionHandler()
     , _disableKeybindings(DisableKeybindingsInfo, false)
     , _disableMouseInputs(DisableMouseInputInfo, false)
     , _disableJoystickInputs(DisableJoystickInputInfo, false)
+    , _disableTouchInputs(DisableTouchInputInfo, false)
+    , _maxDoubleTapTime(MaxDoubleTapTimeInfo, 300, 10, 1000)
     , _mouseVisualizer({
         properties::PropertyOwner(MouseVisualizerInfo),
         properties::BoolProperty(MouseVisualizerEnabledInfo, false),
@@ -98,13 +113,25 @@ InteractionHandler::InteractionHandler()
 {
     addProperty(_disableKeybindings);
     addProperty(_disableMouseInputs);
-    addProperty(_disableJoystickInputs);
 
     _disableJoystickInputs.onChange([this]() {
         if (_disableJoystickInputs) {
             clearJoystickStates();
         }
     });
+    addProperty(_disableJoystickInputs);
+
+    // TODO: This settings behaves pretty weirdly, as touch interaction will still sort of
+    // work through injected mouse events. Consider changing this property (Is it really needed?)
+    _disableTouchInputs.onChange([this]() {
+        _touchInputState.clearInputs();
+    });
+    addProperty(_disableTouchInputs);
+
+    _maxDoubleTapTime.onChange([this]() {
+       _touchInputState.setMaxDoubleTapTime(_maxDoubleTapTime);
+    });
+    addProperty(_maxDoubleTapTime);
 
     addPropertySubOwner(_interactionMonitor);
 
@@ -118,6 +145,7 @@ InteractionHandler::~InteractionHandler() {}
 
 void InteractionHandler::initialize() {
     ZoneScoped;
+    _touchInputState.initialize();
 }
 
 void InteractionHandler::deinitialize() {
@@ -170,6 +198,10 @@ bool InteractionHandler::disabledMouse() const {
 
 bool InteractionHandler::disabledJoystick() const {
     return _disableJoystickInputs;
+}
+
+bool InteractionHandler::disabledTouch() const {
+    return _disableTouchInputs;
 }
 
 void InteractionHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
