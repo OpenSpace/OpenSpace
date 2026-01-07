@@ -50,6 +50,7 @@ local SunLabel = {
   }
 }
 
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Sun)
   openspace.addSceneGraphNode(SunLabel)
@@ -62,6 +63,8 @@ end)
 
 asset.export(Sun)
 asset.export(SunLabel)
+
+
 
 asset.meta = {
   Name = "Sun",
