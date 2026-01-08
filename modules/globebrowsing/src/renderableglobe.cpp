@@ -747,7 +747,6 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         );
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
     _debugPropertyOwner.addProperty(_debugProperties.dynamicLodIterationCount);
-
     addPropertySubOwner(_debugPropertyOwner);
 
     auto notifyShaderRecompilation = [this]() {
@@ -1477,7 +1476,12 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         program.setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
         program.setUniform("light_depth_maps", boundUnits);
         GLint loc = glGetUniformLocation(program, "light_vps");
-        glUniformMatrix4dv(loc, lightViewProjections.size(), GL_FALSE, glm::value_ptr(lightViewProjections.front()));
+        glUniformMatrix4dv(
+            loc,
+            lightViewProjections.size(),
+            GL_FALSE,
+            glm::value_ptr(lightViewProjections.front())
+        );
     }
 
     // The length of the skirts is proportional to its size
@@ -1706,7 +1710,12 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         _localRenderer.program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
         _localRenderer.program->setUniform("light_depth_maps", boundUnits);
         GLint loc = glGetUniformLocation(*_localRenderer.program, "light_vps");
-        glUniformMatrix4dv(loc, lightViewProjections.size(), GL_FALSE, glm::value_ptr(lightViewProjections.front()));
+        glUniformMatrix4dv(
+            loc,
+            lightViewProjections.size(),
+            GL_FALSE,
+            glm::value_ptr(lightViewProjections.front())
+        );
     }
 
     glEnable(GL_DEPTH_TEST);

@@ -330,15 +330,6 @@ void FramebufferRenderer::initialize() {
         );
     }
 
-    //================================================//
-    //===============  ShadowMapping  ================//
-    //================================================//
-    _downscaledVolumeProgram = ghoul::opengl::ProgramObject::Build(
-        "Write Downscaled Volume Program",
-        absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.vert"),
-        absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.frag")
-    );
-
     status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Downscale Volume Rendering framebuffer is not complete");
@@ -1338,6 +1329,7 @@ void FramebufferRenderer::renderDepthMaps() {
         glm::dvec3 vmax = glm::dvec3(-std::numeric_limits<double>::max());
 
         std::vector<const Shadower*> torender;
+        torender.reserve(shadowMap.second.targets.size());
         for (const SceneGraphNode* node : shadowMap.second.targets) {
             ghoul_assert(node, "No SceneGraphNode");
             ghoul_assert(node->renderable(), "No Renderable");
@@ -1361,22 +1353,27 @@ void FramebufferRenderer::renderDepthMaps() {
         const double d = sz * ShadowFrustumDistanceMultiplier;
         const glm::dvec3 center = vmin + (vmax - vmin) * 0.5;
 
-        const glm::dvec3 light = shadowMap.second.lightsource->modelTransform() *
-                                glm::dvec4(0.0, 0.0, 0.0, 1.0);
+        const glm::dvec3 light =
+            shadowMap.second.lightsource->modelTransform() *
+            glm::dvec4(0.0, 0.0, 0.0, 1.0);
         const glm::dvec3 lightDir = glm::normalize(center - light);
-        const glm::dvec3 right =
-            glm::normalize(glm::cross(glm::dvec3(0.0, 1.0, 0.0), lightDir));
+        const glm::dvec3 right = glm::normalize(
+            glm::cross(glm::dvec3(0.0, 1.0, 0.0), lightDir)
+        );
         const glm::dvec3 eye = center - lightDir * d;
         const glm::dvec3 up = glm::cross(right, lightDir);
 
         const glm::dmat4 view = glm::lookAt(eye, center, up);
-        const glm::dmat4 projection =
-            glm::ortho(-sz, sz, -sz, sz, d - sz, d + sz);
+        const glm::dmat4 projection = glm::ortho(-sz, sz, -sz, sz, d - sz, d + sz);
         shadowMap.second.viewProjectionMatrix = projection * view;
 
         glBindFramebuffer(GL_FRAMEBUFFER, shadowMap.second.fbo);
-        glViewport(0, 0, shadowMap.second.depthMapResolution.x,
-                    shadowMap.second.depthMapResolution.y);
+        glViewport(
+            0,
+            0,
+            shadowMap.second.depthMapResolution.x,
+            shadowMap.second.depthMapResolution.y
+        );
         glClear(GL_DEPTH_BUFFER_BIT);
 
         for (const Shadower* model : torender) {

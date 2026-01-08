@@ -339,32 +339,36 @@ Fragment getFragment() {
 #endif // (SHADOW_MAPPING_ENABLED && PERFORM_SHADING && USE_RING_SHADOWS)
 
 #if USE_DEPTHMAP_SHADOWS && nDepthMaps > 0
-  const float bias = 0.005;
-  const int sz = 3;
-  const float norm = pow(2.0 * sz + 1, 2.0);
-  float shadowed = 0.0;
+  const float Bias = 0.005;
+  const int Size = 3;
+  const float Norm = pow(2.0 * Size + 1, 2.0);
   float accum = 1.0;
-  float ambience = 0.2;
   for (int idx = 0; idx < nDepthMaps; idx++) {
     vec2 ssz = 1.f / textureSize(light_depth_maps[idx], 0);
     vec3 coords = 0.5 + 0.5 * positions_lightspace[idx].xyz / positions_lightspace[idx].w;
-    for (int x = -sz; x <= sz; x++) {
-      for (int y = -sz; y <= sz; y++) {
-        float depth = texture(light_depth_maps[idx], coords.xy + vec2(x * ssz.x, y * ssz.y)).r;
+    for (int x = -Size; x <= Size; x++) {
+      for (int y = -Size; y <= Size; y++) {
+        float depth = texture(
+          light_depth_maps[idx],
+          coords.xy + vec2(x * ssz.x, y * ssz.y)
+        ).r;
         // inside of the far plane of the frustum
         if (coords.z < 1) {
-          accum -= float(depth < coords.z - bias) / norm;
+          accum -= float(depth < coords.z - Bias) / Norm;
         }
         else {
           // outside of the far plane of the frustum, typically happens with long shadows
           // cast on the surface of a globe
-          accum -= float(depth < 1.0) / norm;
+          accum -= float(depth < 1.0) / Norm;
         }
       }
     }
   }
 
-  frag.color.xyz *= ambience + (1.f - ambience) * max(0.0, accum);
+  // @TODO (2026-01-08, abock) This should become a property at some point. It determines
+  // how much of the ground of the planet is visible in the shadowed region
+  const float Ambience = 0.2;
+  frag.color.xyz *= mix(max(0.0, accum), 1.0, Ambience);
 #endif // USE_DEPTHMAP_SHADOWS && nDepthMaps > 0
 
   frag.color.a *= opacity;

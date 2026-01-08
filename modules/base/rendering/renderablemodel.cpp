@@ -1259,9 +1259,10 @@ void RenderableModel::update(const UpdateData& data) {
 void RenderableModel::renderForDepthMap(const glm::dmat4& vp) const {
     _depthMapProgram->activate();
 
-    glm::dmat4 transform = glm::translate(glm::dmat4(1.0), glm::dvec3(_pivot.value()));
-    transform *= glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
-    glm::dmat4 model = this->parent()->modelTransform() * transform;
+    const glm::dmat4 model =
+        parent()->modelTransform() *
+        glm::translate(glm::dmat4(1.0), glm::dvec3(_pivot.value())) *
+        glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
 
     _depthMapProgram->setUniform("model", model);
     _depthMapProgram->setUniform("light_vp", vp);
