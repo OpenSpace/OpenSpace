@@ -70,7 +70,7 @@ const std::vector<TouchInput>& TouchInputState::lastProcessedInputs() const {
     return _lastTouchInputs;
 }
 
-bool TouchInputState::processTouchInput(const std::vector<TouchInput>& inputs,
+void TouchInputState::processTouchInput(const std::vector<TouchInput>& inputs,
                                         const std::vector<TouchInput>& removals)
 {
     for (const TouchInput& input : inputs) {
@@ -97,46 +97,6 @@ bool TouchInputState::processTouchInput(const std::vector<TouchInput>& inputs,
         ),
         _lastTouchInputs.end()
     );
-
-    // Always return true if tap or double tap detected (matching touch points does not
-    // matter in this case)
-    // TODO: Decide if this should be moved somewhere else. It seems a bit magic.
-    if (isTap() || isDoubleTap()) {
-        return true;
-    }
-
-    // Check that there is enough input data to update bsaed on process
-    return _touchPoints.size() == _lastTouchInputs.size() && !_touchPoints.empty();
-
-    // OBS This last check used to be the following, which alyays returned true on the
-    // condition above. @TODO check if the isMoving check should be incorportated somehow.
-    //
-    //// Return true if we got new input
-    //if (_touchPoints.size() == _lastTouchInputs.size() && !_touchPoints.empty()) {
-    //    bool newInput = true;
-    //    // Go through list and check if the last registrered time is newer than the
-    //    // last processed touch inputs (last frame)
-    //    std::for_each(
-    //        _lastTouchInputs.begin(),
-    //        _lastTouchInputs.end(),
-    //        [this, &newInput](TouchInput& input) {
-    //            std::vector<TouchInputHolder>::iterator holder = std::find_if(
-    //                _touchPoints.begin(),
-    //                _touchPoints.end(),
-    //                [&input](const TouchInputHolder& inputHolder) {
-    //                    return inputHolder.holdsInput(input);
-    //                }
-    //            );
-    //            if (!holder->isMoving()) {
-    //                newInput = true;
-    //            }
-    //        }
-    //    );
-    //    return newInput;
-    //}
-    //else {
-    //    return false;
-    //}
 }
 
 void TouchInputState::clearInputs() {

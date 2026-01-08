@@ -51,7 +51,7 @@ public:
     const std::vector<TouchInputHolder>& touchPoints() const;
     const std::vector<TouchInput>& lastProcessedInputs() const;
 
-    bool processTouchInput(const std::vector<TouchInput>& inputs,
+    void processTouchInput(const std::vector<TouchInput>& inputs,
         const std::vector<TouchInput>& removals);
 
     void clearInputs();
