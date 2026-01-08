@@ -2,7 +2,7 @@
   "assets": [
     "base",
     "base_keybindings",
-    "examples/celestial_globe"
+    "examples/shadowmapping"
   ],
   "camera": {
     "aim": "",

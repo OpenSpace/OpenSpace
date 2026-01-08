@@ -44,7 +44,7 @@ namespace openspace {
 
 class LightSource;
 
-class RenderableModel : public Renderable, public Shadower {
+class RenderableModel : public Renderable, public shadowmapping::Shadower {
 public:
     explicit RenderableModel(const ghoul::Dictionary& dictionary);
     ~RenderableModel() override = default;

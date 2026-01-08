@@ -1070,7 +1070,7 @@ namespace {
         ));
     }
 
-    // Synthesize a unique name if none is provided
+    // Synthesize a unique name for the shadow group if none is provided
     if (!shadowGroup.has_value()) {
         static int Count = 0;
         shadowGroup = std::format("_{}|{}|{}|{}", lightSource, shadower, shadowee, Count);
@@ -1132,7 +1132,7 @@ namespace {
         ));
     }
 
-    // Synthesize a unique name if none is provided
+    // Synthesize a unique name for the shadow group if none is provided
     if (!shadowGroup.has_value()) {
         static int Count = 0;
         shadowGroup = std::format("_{}|{}|{}|{}", lightSource, shadower, shadowee, Count);

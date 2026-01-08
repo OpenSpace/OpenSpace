@@ -1048,7 +1048,7 @@ void RenderableGlobe::update(const UpdateData& data) {
         _shadowersOk = false;
 
         _shadowSpec.clear();
-        for (const Shadower* shadower : _shadowers) {
+        for (const shadowmapping::Shadower* shadower : _shadowers) {
             const SceneGraphNode* modelLightSource = shadower->lightSource();
             if (!_shadowSpec.contains(modelLightSource)) {
                 _shadowSpec.emplace(modelLightSource, std::vector<std::string>{});
@@ -1337,7 +1337,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
     std::vector<DepthMapData> depthMapData;
     for (const auto& [node, groups] : _shadowSpec) {
         for (const std::string& grp : groups) {
-            FramebufferRenderer::ShadowMap sm =
+            shadowmapping::ShadowInfo sm =
                 global::renderEngine->renderer().shadowInformation(grp);
             depthMapData.emplace_back(sm.depthMap, sm.viewProjectionMatrix);
         }

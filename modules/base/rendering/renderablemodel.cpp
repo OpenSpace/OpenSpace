@@ -987,7 +987,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit shadowUnit;
     if (_castShadow && _lightSource) {
-        FramebufferRenderer::ShadowMap sm =
+        shadowmapping::ShadowInfo sm =
             global::renderEngine->renderer().shadowInformation(_shadowGroup);
 
         _program->setUniform("model", modelTransform);

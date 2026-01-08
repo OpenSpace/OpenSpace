@@ -28,6 +28,7 @@
 #include <openspace/rendering/raycasterlistener.h>
 #include <openspace/rendering/deferredcasterlistener.h>
 
+#include <openspace/rendering/shadowmapping.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -57,15 +58,6 @@ struct UpdateStructures;
 class FramebufferRenderer final : public RaycasterListener, public DeferredcasterListener
 {
 public:
-    struct ShadowMap {
-        const SceneGraphNode* lightsource = nullptr;
-        std::vector<const SceneGraphNode*> targets;
-        GLuint depthMap = 0;
-        glm::ivec2 depthMapResolution = glm::ivec2(0);
-        GLuint fbo = 0;
-        glm::dmat4 viewProjectionMatrix = glm::dmat4(1.0);
-    };
-
     virtual ~FramebufferRenderer() override = default;
 
     //============================//
@@ -193,7 +185,7 @@ public:
         const SceneGraphNode* lightsource, const SceneGraphNode* target);
     void removeShadowCaster(const std::string& shadowGroup, const SceneGraphNode* target);
 
-    ShadowMap shadowInformation(const std::string& shadowgroup) const;
+    shadowmapping::ShadowInfo shadowInformation(const std::string& shadowgroup) const;
     std::vector<std::string> shadowGroups() const;
 
 private:
@@ -263,7 +255,7 @@ private:
         float currentDownscaleFactor  = 1.f;
     } _downscaleVolumeRendering;
 
-    std::map<std::string, ShadowMap> _shadowMaps;
+    std::map<std::string, shadowmapping::ShadowInfo> _shadowMaps;
 
     unsigned int _pingPongIndex = 0u;
 

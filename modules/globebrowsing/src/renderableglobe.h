@@ -93,7 +93,7 @@ enum class ShadowCompType {
  * A RenderableGlobe is a globe modeled as an ellipsoid using a chunked LOD algorithm for
  * rendering.
  */
-class RenderableGlobe : public Renderable, public Shadowee {
+class RenderableGlobe : public Renderable, public shadowmapping::Shadowee {
 public:
     explicit RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() override = default;

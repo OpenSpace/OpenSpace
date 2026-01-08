@@ -49,8 +49,7 @@ local ModelMarsSmall = {
     LightSources = {
       sun.LightSource
     },
-    CastShadow = true,
-    LightSource = sun.SunCenter.Identifier
+    CastShadow = true
   },
   GUI = {
     Name = "Celestial Globe - Mars Small",
@@ -90,8 +89,7 @@ local ModelMarsLarge = {
     LightSources = {
       sun.LightSource
     },
-    CastShadow = true,
-    LightSource = sun.SunCenter.Identifier
+    CastShadow = true
   },
   GUI = {
     Name = "Celestial Globe - Mars Large",
@@ -132,8 +130,7 @@ local AnimatedBox = {
     LightSources = {
       sun.LightSource
     },
-    CastShadow = true,
-    LightSource = sun.SunCenter.Identifier
+    CastShadow = true
   },
   GUI = {
     Name = "Animation Loop Infinitely",
@@ -174,8 +171,7 @@ local ModelMarsOtherGroup = {
     LightSources = {
       sun.LightSource
     },
-    CastShadow = true,
-    LightSource = sun.SunCenter.Identifier
+    CastShadow = true
   },
   GUI = {
     Name = "Celestial Globe - Mars OtherGroup",
@@ -212,8 +208,7 @@ local ModelEarth = {
     LightSources = {
       sun.LightSource
     },
-    CastShadow = true,
-    LightSource = sun.SunCenter.Identifier
+    CastShadow = true
   },
   GUI = {
     Name = "Celestial Globe - Earth",
@@ -249,8 +244,7 @@ local ModelMoon = {
     LightSources = {
       sun.LightSource
     },
-    CastShadow = true,
-    LightSource = sun.SunCenter.Identifier
+    CastShadow = true
   },
   GUI = {
     Name = "Celestial Globe - Moon",

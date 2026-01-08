@@ -27,14 +27,26 @@
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <vector>
 
 namespace ghoul { class Dictionary; }
-
 namespace openspace {
+    namespace documentation { struct Documentation; }
+    class SceneGraphNode;
+} // namespace openspace
 
-namespace documentation { struct Documentation; }
-class SceneGraphNode;
+namespace openspace::shadowmapping {
+
+struct ShadowInfo {
+    const SceneGraphNode* lightsource = nullptr;
+    std::vector<const SceneGraphNode*> targets;
+    GLuint depthMap = 0;
+    glm::ivec2 depthMapResolution = glm::ivec2(0);
+    GLuint fbo = 0;
+    glm::dmat4 viewProjectionMatrix = glm::dmat4(1.0);
+};
 
 // This drop-in class is representing that an object is capable of shadowing another
 // object
@@ -77,6 +89,6 @@ protected:
     bool _isShadowersDirty = false;
 };
 
-} // namespace openspace
+} // namespace openspace::shadowmapping
 
 #endif // __OPENSPACE_CORE___SHADOWMAPPING___H__

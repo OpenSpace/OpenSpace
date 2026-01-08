@@ -37,7 +37,6 @@
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/luaconsole.h>
-#include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/rendering/shadowmapping.h>
@@ -692,6 +691,8 @@ void RenderEngine::registerShadowCaster(const std::string& shadowGroup,
                                         SceneGraphNode* shadower,
                                         SceneGraphNode* shadowee)
 {
+    using namespace shadowmapping;
+
     ghoul_assert(!shadowGroup.empty(), "No shadowGroup specified");
     ghoul_assert(lightsource, "No light source specified");
     ghoul_assert(shadower, "No shadower specified");
@@ -717,6 +718,8 @@ void RenderEngine::removeShadowCaster(const std::string& shadowGroup,
                                       SceneGraphNode* shadower,
                                       SceneGraphNode* shadowee)
 {
+    using namespace shadowmapping;
+
     ghoul_assert(!shadowGroup.empty(), "No shadowGroup specified");
     ghoul_assert(shadower, "No shadower specified");
     ghoul_assert(shadowee, "No shadowee specified");

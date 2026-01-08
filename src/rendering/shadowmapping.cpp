@@ -25,10 +25,15 @@
 #include <openspace/rendering/shadowmapping.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
+#include <openspace/rendering/renderengine.h>
 #include <ghoul/misc/invariants.h>
+#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <optional>
 
 namespace {
+    constexpr int DepthMapResolutionMultiplier = 4;
+
     constexpr openspace::properties::Property::PropertyInfo CastShadowInfo = {
         "CastShadow",
         "Cast shadow",
@@ -53,7 +58,7 @@ namespace {
 #include "shadowmapping_codegen.cpp"
 } // namespace
 
-namespace openspace {
+namespace openspace::shadowmapping {
 
 documentation::Documentation Shadower::Documentation() {
     return codegen::doc<Parameters>("core_shadower");
@@ -114,4 +119,4 @@ void Shadowee::removeShadower(const Shadower* shadower) {
     }
 }
 
-} // namespace openspace
+} // namespace openspace shadowmapping
