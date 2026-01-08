@@ -981,16 +981,17 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit shadowUnit;
     if (_castShadow && _lightSource) {
-        auto [depthMap, vp] = global::renderEngine->shadowInformation(_shadowGroup);
+        FramebufferRenderer::ShadowMap sm =
+            global::renderEngine->renderer().shadowInformation(_shadowGroup);
 
         _program->setUniform("model", modelTransform);
-        _program->setUniform("light_vp", vp);
+        _program->setUniform("light_vp", sm.viewProjectionMatrix);
         _program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
 
         shadowUnit.activate();
         glBindTexture(
             GL_TEXTURE_2D,
-            depthMap
+            sm.depthMap
         );
         _program->setUniform("shadow_depth_map", shadowUnit);
     }

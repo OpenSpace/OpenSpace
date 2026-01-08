@@ -735,12 +735,6 @@ void RenderEngine::removeShadowCaster(const std::string& shadowGroup,
     se->removeShadower(sr);
 }
 
-std::pair<GLuint, glm::dmat4> RenderEngine::shadowInformation(
-                                                     const std::string& shadowgroup) const
-{
-    return _renderer.shadowInformation(shadowgroup);
-}
-
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
                           const glm::mat4& projectionMatrix)
 {

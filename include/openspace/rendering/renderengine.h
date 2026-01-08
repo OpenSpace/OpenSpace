@@ -165,7 +165,6 @@ public:
         SceneGraphNode* shadowee);
     void removeShadowCaster(const std::string& shadowgroup, SceneGraphNode* shadower,
         SceneGraphNode* shadowee);
-    std::pair<GLuint, glm::dmat4> shadowInformation(const std::string& shadowgroup) const;
 
 private:
     void renderScreenLog();

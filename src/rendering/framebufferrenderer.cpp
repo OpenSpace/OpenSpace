@@ -514,14 +514,20 @@ void FramebufferRenderer::removeShadowCaster(const std::string& shadowGroup,
     }
 }
 
-std::pair<GLuint, glm::dmat4> FramebufferRenderer::shadowInformation(
+FramebufferRenderer::ShadowMap FramebufferRenderer::shadowInformation(
                                                      const std::string& shadowgroup) const
 {
     ghoul_assert(_shadowMaps.contains(shadowgroup), "Shadow group not registered");
-    return {
-        _shadowMaps.at(shadowgroup).depthMap,
-        _shadowMaps.at(shadowgroup).viewProjectionMatrix
-    };
+    return _shadowMaps.at(shadowgroup);
+}
+
+std::vector<std::string> FramebufferRenderer::shadowGroups() const {
+    std::vector<std::string> res;
+    res.reserve(_shadowMaps.size());
+    for (auto [key, value] : _shadowMaps) {
+        res.push_back(key);
+    }
+    return res;
 }
 
 void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewport) {
@@ -1328,22 +1334,22 @@ void FramebufferRenderer::renderDepthMaps() {
         glm::dvec3 vmin = glm::dvec3(std::numeric_limits<double>::max());
         glm::dvec3 vmax = glm::dvec3(-std::numeric_limits<double>::max());
 
-        std::vector<const Shadower*> torender;
-        torender.reserve(shadowMap.second.targets.size());
+        std::vector<const Shadower*> toRender;
+        toRender.reserve(shadowMap.second.targets.size());
         for (const SceneGraphNode* node : shadowMap.second.targets) {
             ghoul_assert(node, "No SceneGraphNode");
             ghoul_assert(node->renderable(), "No Renderable");
 
-            const Shadower* model = dynamic_cast<const Shadower*>(node->renderable());
-            if (model && node->renderable()->isEnabled() &&
-                model->isCastingShadow() && node->renderable()->isReady())
+            const Shadower* shadower = dynamic_cast<const Shadower*>(node->renderable());
+            if (shadower && node->renderable()->isEnabled() &&
+                shadower->isCastingShadow() && node->renderable()->isReady())
             {
-                const double fsz = model->shadowFrustumSize();
-                glm::dvec3 center = model->center();
+                const double fsz = shadower->shadowFrustumSize();
+                const glm::dvec3 center = shadower->center();
                 vmin = glm::min(vmin, center - fsz / 2);
                 vmax = glm::max(vmax, center + fsz / 2);
 
-                torender.push_back(model);
+                toRender.push_back(shadower);
             }
         }
 
@@ -1376,8 +1382,8 @@ void FramebufferRenderer::renderDepthMaps() {
         );
         glClear(GL_DEPTH_BUFFER_BIT);
 
-        for (const Shadower* model : torender) {
-            model->renderForDepthMap(shadowMap.second.viewProjectionMatrix);
+        for (const Shadower* shadower : toRender) {
+            shadower->renderForDepthMap(shadowMap.second.viewProjectionMatrix);
         }
     }
 
