@@ -42,6 +42,8 @@ public:
     bool touchUpdatedCallback(TouchInput i);
     void touchExitCallback(TouchInput i);
 
+    bool touchHappened() const;
+
     bool isTap() const;
     bool isDoubleTap() const;
     void setMaxDoubleTapTime(unsigned int milliseconds);

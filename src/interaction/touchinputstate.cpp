@@ -46,6 +46,10 @@ void TouchInputState::touchExitCallback(TouchInput i) {
     removeTouchInput(std::move(i));
 }
 
+bool TouchInputState::touchHappened() const {
+    return !_touchPoints.empty();
+}
+
 bool TouchInputState::isTap() const {
     return _tap;
 }

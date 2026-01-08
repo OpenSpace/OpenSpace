@@ -53,6 +53,7 @@ public:
     void deinitialize();
 
     void preSynchronization();
+    void postDraw();
 
     const MouseInputState& mouseInputState() const;
     const KeyboardInputState& keyboardInputState() const;
@@ -76,6 +77,10 @@ public:
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
+
+    bool touchDetectedCallback(TouchInput i);
+    bool touchUpdatedCallback(TouchInput i);
+    void touchExitCallback(TouchInput i);
 
     void renderOverlay() const;
 

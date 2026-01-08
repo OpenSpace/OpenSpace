@@ -25,6 +25,7 @@
 #include <openspace/interaction/interactionhandler.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/helper.h>
 
@@ -154,6 +155,22 @@ void InteractionHandler::deinitialize() {
 
 void InteractionHandler::preSynchronization() {
     _interactionMonitor.updateActivityState();
+
+    // TODO: Move to orbital or navigation handler?
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode == OpenSpaceEngine::Mode::CameraPath ||
+        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+    {
+        // Reset everything, to avoid problems once we process inputs again
+        _touchInputState.clearInputs();
+        return;
+    }
+}
+
+void InteractionHandler::postDraw() {
+    // Once the fram is finished, reset the touch interaction information
+    _touchInputState.updateLastTouchPoints();
+    _touchInputState.clearInputs();
 }
 
 const MouseInputState& InteractionHandler::mouseInputState() const {
@@ -259,6 +276,21 @@ void InteractionHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActi
     _keyboardInputState.keyboardCallback(key, modifier, action);
 
     _interactionMonitor.markInteraction();
+}
+
+bool InteractionHandler::touchDetectedCallback(TouchInput i) {
+    _interactionMonitor.markInteraction();
+    return _touchInputState.touchDetectedCallback(i);
+}
+
+bool InteractionHandler::touchUpdatedCallback(TouchInput i) {
+    _interactionMonitor.markInteraction();
+    return _touchInputState.touchUpdatedCallback(i);
+}
+
+void InteractionHandler::touchExitCallback(TouchInput i) {
+    _interactionMonitor.markInteraction();
+    _touchInputState.touchExitCallback(i);
 }
 
 void InteractionHandler::renderOverlay() const {

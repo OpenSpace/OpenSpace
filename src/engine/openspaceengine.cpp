@@ -1356,6 +1356,7 @@ void OpenSpaceEngine::postDraw() {
     LTRACE("OpenSpaceEngine::postDraw(begin)");
 
     global::renderEngine->postDraw();
+    global::interactionHandler->postDraw();
 
     for (const std::function<void()>& func : *global::callback::postDraw) {
         ZoneScopedN("[Module] postDraw");
@@ -1554,7 +1555,7 @@ void OpenSpaceEngine::touchDetectionCallback(TouchInput input) {
         }
     }
 
-    global::interactionHandler->touchInputState().touchDetectedCallback(input);
+    global::interactionHandler->touchDetectedCallback(input);
 }
 
 void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
@@ -1567,7 +1568,7 @@ void OpenSpaceEngine::touchUpdateCallback(TouchInput input) {
         }
     }
 
-    global::interactionHandler->touchInputState().touchUpdatedCallback(input);
+    global::interactionHandler->touchUpdatedCallback(input);
 }
 
 void OpenSpaceEngine::touchExitCallback(TouchInput input) {
@@ -1577,7 +1578,7 @@ void OpenSpaceEngine::touchExitCallback(TouchInput input) {
         func(input);
     }
 
-    global::interactionHandler->touchInputState().touchExitCallback(input);
+    global::interactionHandler->touchExitCallback(input);
 }
 
 void OpenSpaceEngine::handleDragDrop(std::filesystem::path file) {

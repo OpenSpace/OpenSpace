@@ -29,7 +29,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/interactionmonitor.h>
@@ -178,40 +177,9 @@ void TouchModule::processNewInput() {
     interaction::TouchInputState& touchInputState =
         global::interactionHandler->touchInputState();
 
-    // TODO Move this check to touch input state or interaction handler?
-    if (global::interactionHandler->disabledTouch()) {
-        touchInputState.clearInputs();
-        return;
-    }
-
-    // TODO: Move to interaction handler or navigation handler?
-    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
-    if (mode == OpenSpaceEngine::Mode::CameraPath ||
-        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
-    {
-        // Reset everything, to avoid problems once we process inputs again
-        touchInputState.clearInputs();
-        return;
-    }
-
     touchInputState.processTouchInput(earInputs, earRemovals);
 
-    const std::vector<TouchInputHolder>& touchPoints = touchInputState.touchPoints();
-
-    bool touchHappened = !touchPoints.empty();
-    _hasActiveTouchEvent = touchHappened;
-
-    // TODO: Move as part of moving handling to interaction handler
-    // Set touch property to active (to void mouse input, mainly for mtdev bridges)
-    if (touchHappened) {
-        global::interactionHandler->markInteraction();
-    }
-
-    // TODO: This should be moved somewhere more global, as it's the thing that updates the
-    // last processed touch inputs. Interaction handler?
-    touchInputState.updateLastTouchPoints();
-
-    touchInputState.clearInputs();
+    _hasActiveTouchEvent = touchInputState.touchHappened();
 }
 
 } // namespace openspace
