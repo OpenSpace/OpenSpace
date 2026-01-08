@@ -74,6 +74,8 @@ uniform vec2 textureOffset;
 #endif // USE_RING_SHADOWS
 #endif // SHADOW_MAPPING_ENABLED
 
+#define USE_DEPTHMAP_SHADOWS #{useDepthmapShadows}
+
 #if USE_ECLIPSE_SHADOWS
 
 #define NSEclipseShadowsMinusOne #{nEclipseShadows}

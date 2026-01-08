@@ -69,7 +69,6 @@
 #define SHADOW_MAPPING_ENABLED #{enableShadowMapping}
 // Show shadow from rings onto globe
 #define USE_RING_SHADOWS #{useRingShadows}
-#define USE_DEPTHMAP_SHADOWS #{useDepthmapShadows}
 
 const vec3 DefaultLevelWeights = vec3(1.0, 0.0, 0.0);
 
