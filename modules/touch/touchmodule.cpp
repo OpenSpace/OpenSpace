@@ -156,44 +156,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {
     });
 
     global::callback::preSync->push_back([this]() {
-        interaction::TouchInputState& touchInputState =
-            global::interactionHandler->touchInputState();
-
-        if (global::interactionHandler->disabledTouch()) {
-            _touch.resetAfterInput();
-            touchInputState.clearInputs();
-            return;
-        }
-
-        // TODO: Move to interaction handler or navigation handler?
-        OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
-        if (mode == OpenSpaceEngine::Mode::CameraPath ||
-            mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
-        {
-            // Reset everything, to avoid problems once we process inputs again
-            _touch.resetAfterInput();
-            touchInputState.clearInputs();
-            return;
-        }
-
-        _touch.setCamera(global::navigationHandler->camera());
-
-        bool inputIsvalidForUpdate = processNewInput();
-        if (inputIsvalidForUpdate && global::windowDelegate->isMaster()) {
-            _touch.updateVelocitiesFromInput(touchInputState); // TODO: Make camera states
-        }
-        else if (touchInputState.touchPoints().empty()) {
-            _touch.resetAfterInput();
-        }
-
-        // Calculate the new camera state for this frame
-        _touch.step(global::windowDelegate->deltaTime());
-
-        // TODO: This should be moved somewhere more global, as it's the thing that updates the
-        // last processed touch inputs. Interaction handler?
-        touchInputState.updateLastTouchPoints();
-
-        touchInputState.clearInputs();
+        processNewInput();
     });
 
     global::callback::render->push_back([this]() {
@@ -207,7 +170,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {
     });
 }
 
-bool TouchModule::processNewInput() {
+void TouchModule::processNewInput() {
     // Get new input from listener
     std::vector<TouchInput> earInputs = _ear->takeInputs();
     std::vector<TouchInput> earRemovals = _ear->takeRemovals();
@@ -215,22 +178,40 @@ bool TouchModule::processNewInput() {
     interaction::TouchInputState& touchInputState =
         global::interactionHandler->touchInputState();
 
-    bool inputIsvalidForUpdate = touchInputState.processTouchInput(
-        earInputs,
-        earRemovals
-    );
+    // TODO Move this check to touch input state or interaction handler?
+    if (global::interactionHandler->disabledTouch()) {
+        touchInputState.clearInputs();
+        return;
+    }
+
+    // TODO: Move to interaction handler or navigation handler?
+    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    if (mode == OpenSpaceEngine::Mode::CameraPath ||
+        mode == OpenSpaceEngine::Mode::SessionRecordingPlayback)
+    {
+        // Reset everything, to avoid problems once we process inputs again
+        touchInputState.clearInputs();
+        return;
+    }
+
+    touchInputState.processTouchInput(earInputs, earRemovals);
 
     const std::vector<TouchInputHolder>& touchPoints = touchInputState.touchPoints();
 
     bool touchHappened = !touchPoints.empty();
     _hasActiveTouchEvent = touchHappened;
 
+    // TODO: Move as part of moving handling to interaction handler
     // Set touch property to active (to void mouse input, mainly for mtdev bridges)
     if (touchHappened) {
         global::interactionHandler->markInteraction();
     }
 
-    return inputIsvalidForUpdate;
+    // TODO: This should be moved somewhere more global, as it's the thing that updates the
+    // last processed touch inputs. Interaction handler?
+    touchInputState.updateLastTouchPoints();
+
+    touchInputState.clearInputs();
 }
 
 } // namespace openspace

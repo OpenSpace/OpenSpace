@@ -31,7 +31,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MouseSensitivityInfo = {
         "MouseSensitivity",
         "Mouse sensitivity",
-        "Determines the sensitivity of the camera motion thorugh the mouse. The lower "
+        "Determines the sensitivity of the camera motion through the mouse. The lower "
         "the sensitivity is the less impact a mouse motion will have.",
         openspace::properties::Property::Visibility::NoviceUser
     };
@@ -39,16 +39,24 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo JoystickSensitivityInfo = {
         "JoystickSensitivity",
         "Joystick sensitivity",
-        "Determines the sensitivity of the camera motion thorugh a joystick. The lower "
+        "Determines the sensitivity of the camera motion through a joystick. The lower "
         "the sensitivity is the less impact a joystick motion will have.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo WebsocketSensitivityInfo = {
         "WebsocketSensitivity",
-        "Websocket Sensitivity",
-        "Determines the sensitivity of the camera motion thorugh a websocket. The lower "
+        "Websocket sensitivity",
+        "Determines the sensitivity of the camera motion through a websocket. The lower "
         "the sensitivity is the less impact a webstick motion will have.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TouchSensitivityInfo = {
+        "TouchSensitivity",
+        "Touch sensitivity",
+        "Determines the sensitivity of the camera motion through touch interaction. The "
+        "lower the sensitivity is the less the impact from touch motion will be.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -73,29 +81,37 @@ OrbitalInputHandler::OrbitalInputHandler(double friction)
     , _mouseSensitivity(MouseSensitivityInfo, 15.f, 1.f, 50.f)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.f, 50.f)
+    , _touchSensitivity(TouchSensitivityInfo, 1.f, 1.f, 50.f)
     , _invertMouseButtons(InvertMouseButtons, false)
     , _mouseStates(_mouseSensitivity * 0.0001, velocityScaleFromFriction(friction))
     , _joystickStates(_joystickSensitivity * 0.1, velocityScaleFromFriction(friction))
     , _websocketStates(_websocketSensitivity, velocityScaleFromFriction(friction))
+    , _touchStates(_touchSensitivity, velocityScaleFromFriction(friction))
 {
     _mouseSensitivity.onChange([this]() {
         _mouseStates.setSensitivity(_mouseSensitivity * pow(10.0, -4));
     });
+    addProperty(_mouseSensitivity);
+
     _joystickSensitivity.onChange([this]() {
         _joystickStates.setSensitivity(_joystickSensitivity * 0.1);
     });
+    addProperty(_joystickSensitivity);
+
     _websocketSensitivity.onChange([this]() {
         _websocketStates.setSensitivity(_websocketSensitivity);
     });
+    addProperty(_websocketSensitivity);
+
+    _touchSensitivity.onChange([this]() {
+        _touchStates.setSensitivity(_touchSensitivity);
+    });
+    addProperty(_touchSensitivity);
 
     _invertMouseButtons.onChange([this]() {
         _mouseStates.setInvertMouseButton(_invertMouseButtons);
     });
     addProperty(_invertMouseButtons);
-
-    addProperty(_mouseSensitivity);
-    addProperty(_joystickSensitivity);
-    addProperty(_websocketSensitivity);
 }
 
 JoystickCameraStates& OrbitalInputHandler::joystickStates() {
@@ -122,18 +138,28 @@ const ScriptCameraStates& OrbitalInputHandler::scriptStates() const {
     return _scriptStates;
 }
 
+TouchCameraStates& OrbitalInputHandler::touchStates() {
+    return _touchStates;
+}
+
+const TouchCameraStates& OrbitalInputHandler::touchStates() const {
+    return _touchStates;
+}
+
 bool OrbitalInputHandler::hasNonZeroVelocity() const {
     return _mouseStates.hasNonZeroVelocities() ||
         _joystickStates.hasNonZeroVelocities() ||
         _websocketStates.hasNonZeroVelocities() ||
-        _scriptStates.hasNonZeroVelocities();
+        _scriptStates.hasNonZeroVelocities() ||
+        _touchStates.hasNonZeroVelocities();
 }
 
 bool OrbitalInputHandler::hasTranslationalVelocity() const {
     return _mouseStates.hasNonZeroVelocities(true) ||
         _joystickStates.hasNonZeroVelocities(true) ||
         _websocketStates.hasNonZeroVelocities(true) ||
-        _scriptStates.hasNonZeroVelocities(true);
+        _scriptStates.hasNonZeroVelocities(true) ||
+        _touchStates.hasNonZeroVelocities(true);
 }
 
 void OrbitalInputHandler::resetVelocities() {
@@ -141,20 +167,23 @@ void OrbitalInputHandler::resetVelocities() {
     _joystickStates.resetVelocities();
     _websocketStates.resetVelocities();
     _scriptStates.resetVelocities();
+    _touchStates.resetVelocities();
 }
 
 double OrbitalInputHandler::localRollVelocity() const {
     return _mouseStates.localRollVelocity() +
         _joystickStates.localRollVelocity() +
         _websocketStates.localRollVelocity() +
-        _scriptStates.localRollVelocity();
+        _scriptStates.localRollVelocity() +
+        _touchStates.localRollVelocity();
 }
 
 double OrbitalInputHandler::globalRollVelocity() const {
     return _mouseStates.globalRollVelocity() +
         _joystickStates.globalRollVelocity() +
         _websocketStates.globalRollVelocity() +
-        _scriptStates.globalRollVelocity();
+        _scriptStates.globalRollVelocity() +
+        _touchStates.globalRollVelocity();
 }
 
 glm::dvec2 OrbitalInputHandler::localRotationVelocity() const {
@@ -168,14 +197,16 @@ glm::dvec2 OrbitalInputHandler::globalRotationVelocity() const {
     return _mouseStates.globalRotationVelocity() +
         _joystickStates.globalRotationVelocity() +
         _websocketStates.globalRotationVelocity() +
-        _scriptStates.globalRotationVelocity();
+        _scriptStates.globalRotationVelocity() +
+        _touchStates.globalRotationVelocity();
 }
 
 double OrbitalInputHandler::truckMovementVelocity() const {
     return _mouseStates.truckMovementVelocity() +
         _joystickStates.truckMovementVelocity() +
         _websocketStates.truckMovementVelocity() +
-        _scriptStates.truckMovementVelocity();
+        _scriptStates.truckMovementVelocity() +
+        _touchStates.truckMovementVelocity();
 }
 
 void OrbitalInputHandler::updateStatesFromInput(double deltaTime) {
@@ -196,6 +227,11 @@ void OrbitalInputHandler::updateStatesFromInput(double deltaTime) {
     );
 
     _scriptStates.updateVelocitiesFromInput(deltaTime);
+
+    _touchStates.updateVelocitiesFromInput(
+        global::interactionHandler->touchInputState(),
+        deltaTime
+    );
 }
 
 void OrbitalInputHandler::updateFrictionFactor(double friction) {
@@ -203,24 +239,28 @@ void OrbitalInputHandler::updateFrictionFactor(double friction) {
     _mouseStates.setVelocityScaleFactor(scaleFactor);
     _joystickStates.setVelocityScaleFactor(scaleFactor);
     _websocketStates.setVelocityScaleFactor(scaleFactor);
+    _touchStates.setVelocityScaleFactor(scaleFactor);
 }
 
 void OrbitalInputHandler::setRollFrictionEnabled(bool enabled) {
     _mouseStates.setRotationalFriction(enabled);
     _joystickStates.setRotationalFriction(enabled);
     _websocketStates.setRotationalFriction(enabled);
+    _touchStates.setRotationalFriction(enabled);
 }
 
 void OrbitalInputHandler::setRotationalFrictionEnabled(bool enabled) {
     _mouseStates.setHorizontalFriction(enabled);
     _joystickStates.setHorizontalFriction(enabled);
     _websocketStates.setHorizontalFriction(enabled);
+    _touchStates.setHorizontalFriction(enabled);
 }
 
 void OrbitalInputHandler::setZoomFrictionEnabled(bool enabled) {
     _mouseStates.setVerticalFriction(enabled);
     _joystickStates.setVerticalFriction(enabled);
     _websocketStates.setVerticalFriction(enabled);
+    _touchStates.setVerticalFriction(enabled);
 }
 
 } // namespace openspace::interaction

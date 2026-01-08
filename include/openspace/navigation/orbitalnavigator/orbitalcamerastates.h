@@ -65,11 +65,11 @@ public:
 
 protected:
     struct UpdateStates {
-        std::optional<glm::dvec2> globalRotation;
+        std::optional<glm::dvec2> globalRotation; // Orbit
         std::optional<double> zoom;
         std::optional<double> localRoll;
         std::optional<double> globalRoll;
-        std::optional<glm::dvec2> localRotation;
+        std::optional<glm::dvec2> localRotation; // Pan
     };
 
     void updateVelocities(const UpdateStates& updateState, double deltaTime);

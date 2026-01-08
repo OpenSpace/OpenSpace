@@ -30,6 +30,7 @@
 #include <openspace/navigation/orbitalnavigator/joystickcamerastates.h>
 #include <openspace/navigation/orbitalnavigator/mousecamerastates.h>
 #include <openspace/navigation/orbitalnavigator/scriptcamerastates.h>
+#include <openspace/navigation/orbitalnavigator//touchcamerastates.h>
 #include <openspace/navigation/orbitalnavigator/websocketcamerastates.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -49,6 +50,9 @@ public:
 
     ScriptCameraStates& scriptStates();
     const ScriptCameraStates& scriptStates() const;
+
+    TouchCameraStates& touchStates();
+    const TouchCameraStates& touchStates() const;
 
     bool hasNonZeroVelocity() const;
     bool hasTranslationalVelocity() const;
@@ -71,6 +75,7 @@ private:
     properties::FloatProperty _mouseSensitivity;
     properties::FloatProperty _joystickSensitivity;
     properties::FloatProperty _websocketSensitivity;
+    properties::FloatProperty _touchSensitivity;
 
     properties::BoolProperty _invertMouseButtons;
 
@@ -78,6 +83,7 @@ private:
     JoystickCameraStates _joystickStates;
     WebsocketCameraStates _websocketStates;
     ScriptCameraStates _scriptStates;
+    TouchCameraStates _touchStates;
 };
 
 } // namespace openspace::interaction

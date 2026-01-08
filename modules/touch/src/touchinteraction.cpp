@@ -304,7 +304,7 @@ TouchInteraction::TouchInteraction()
     // Used to void wrongly interpreted roll interactions
     , _centroidStillThreshold(StationaryCentroidInfo, 0.0018f, 0.f, 0.01f, 0.0001f)
     , _panEnabled(PanModeInfo, false)
-    , _interpretPan(PanDeltaDistanceInfo, 0.015f, 0.f, 0.1f)
+    , _interpretPanDistance(PanDeltaDistanceInfo, 0.015f, 0.f, 0.1f)
     , _friction(
         FrictionInfo,
         glm::vec4(0.025f, 0.025f, 0.02f, 0.001f),
@@ -343,7 +343,7 @@ TouchInteraction::TouchInteraction()
     addProperty(_inputStillThreshold);
     addProperty(_centroidStillThreshold);
     addProperty(_panEnabled);
-    addProperty(_interpretPan);
+    addProperty(_interpretPanDistance);
     addProperty(_friction);
 
     addProperty(_enableDirectManipulation);
@@ -659,7 +659,7 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
     else {
         float avgDistance = static_cast<float>(std::abs(dist - lastDist));
         // If average distance between 3 fingers are constant we have panning
-        if (_panEnabled && (avgDistance < _interpretPan && list.size() == 3)) {
+        if (_panEnabled && (avgDistance < _interpretPanDistance && list.size() == 3)) {
             return InteractionType::PAN;
         }
 
@@ -831,6 +831,7 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             _constTimeDecayCoeff.zoom = computeConstTimeDecayCoefficient(_vel.zoom);
         }
         case InteractionType::NONE:
+            break;
         default:
             break;
     }
@@ -1158,7 +1159,7 @@ void TouchInteraction::resetPropertiesToDefault() {
     _zoomSensitivityExponential = 1.025f;
     _inputStillThreshold = 0.0005f;
     _centroidStillThreshold = 0.0018f;
-    _interpretPan = 0.015f;
+    _interpretPanDistance = 0.015f;
     _friction = glm::vec4(0.025f, 0.025f, 0.02f, 0.02f);
 }
 

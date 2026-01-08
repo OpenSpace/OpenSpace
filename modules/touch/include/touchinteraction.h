@@ -100,7 +100,6 @@ public:
      *   6. Evaluate if directControl should be called next frame- true if all contact
      *      points select the same node and said node is larger than _nodeRadiusThreshold
      */
-
     void updateVelocitiesFromInput(const interaction::TouchInputState& touchInputState);
 
     bool hasNonZeroVelocities() const;
@@ -193,7 +192,7 @@ private:
     properties::FloatProperty _inputStillThreshold;
     properties::FloatProperty _centroidStillThreshold;
     properties::BoolProperty  _panEnabled;
-    properties::FloatProperty _interpretPan;
+    properties::FloatProperty _interpretPanDistance;
     properties::Vec4Property _friction;
     properties::FloatProperty _constTimeDecay_secs;
 

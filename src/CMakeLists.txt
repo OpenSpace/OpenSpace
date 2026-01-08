@@ -83,6 +83,7 @@ set(OPENSPACE_SOURCE
   navigation/orbitalnavigator/orbitalnavigator.cpp
   navigation/orbitalnavigator/orbitalnavigator_lua.inl
   navigation/orbitalnavigator/scriptcamerastates.cpp
+  navigation/orbitalnavigator/touchcamerastates.cpp
   navigation/orbitalnavigator/websocketcamerastates.cpp
   navigation/path.cpp
   navigation/pathcurve.cpp
@@ -282,6 +283,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/orbitalinputhandler.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/orbitalnavigator.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/scriptcamerastates.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/touchcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/websocketcamerastates.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/path.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/pathcurve.h

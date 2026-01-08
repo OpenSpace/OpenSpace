@@ -22,72 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
-#define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#ifndef __OPENSPACE_CORE___TOUCHCAMERASTATES___H__
+#define __OPENSPACE_CORE___TOUCHCAMERASTATES___H__
 
-#include <openspace/util/openspacemodule.h>
+#include <openspace/navigation/orbitalnavigator/orbitalcamerastates.h>
 
-#include <modules/touch/include/touchmarker.h>
-#include <modules/touch/include/touchinteraction.h>
-#include <openspace/properties/list/stringlistproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/util/touch.h>
-#include <memory>
-#include <set>
+#include <ghoul/glm.h>
+#include <array>
 
-namespace openspace {
+#define TOUCH_DEBUG_MODE
 
-class TuioEar;
+namespace openspace::interaction {
 
-#ifdef WIN32
-class Win32TouchHook;
-#endif //WIN32
+class TouchInputState;
 
-class TouchModule : public OpenSpaceModule {
+class TouchCameraStates : public OrbitalCameraStates {
 public:
-    constexpr static const char* Name = "Touch";
+    enum class InteractionType {
+        ROTATION = 0,
+        PINCH,
+        PAN,
+        ROLL,
+        ZOOM_OUT,
+        NONE
+    };
 
-    TouchModule();
-    ~TouchModule();
+    TouchCameraStates(double sensitivity, double velocityScaleFactor);
+    virtual ~TouchCameraStates() override;
 
-    /**
-     * Function to check if the given renderable type is one that should use direct
-     * manipulation.
-     */
-    bool isDefaultDirectTouchType(std::string_view renderableType) const;
-
-protected:
-    void internalInitialize(const ghoul::Dictionary& dictionary) override;
+    void updateVelocitiesFromInput(const TouchInputState& mouseState,
+        double deltaTime);
 
 private:
     /**
-     * Process TUIO touch input that occured since the last frame.
+     * Compute new velocity according to the interpreted action.
      */
-    void processNewInput();
+    UpdateStates computeVelocities(const std::vector<TouchInputHolder>& list,
+        const std::vector<TouchInput>& lastProcessed);
 
-    std::unique_ptr<TuioEar> _ear;
+    /**
+     * Returns an enum for what interaction to be used, depending on what input was
+     * received.
+     */
+    InteractionType interpretInteraction(const std::vector<TouchInputHolder>& list,
+        const std::vector<TouchInput>& lastProcessed);
 
-    // TODO: Move to a new "TouchCameraStates" class in core navigation
-    TouchInteraction _touch;
+    void resetAfterInput();
 
-    // TODO: Move to InteractionHandler
-    TouchMarker _markers;
+    std::array<TouchInputHolder, 2> _pinchInputs;
+    glm::vec2 _centroid = glm::vec2(0.f);
 
-    properties::IntProperty _tuioPort;
-    properties::BoolProperty _hasActiveTouchEvent;
-    properties::StringListProperty _defaultDirectTouchRenderableTypes;
-
-    // A sorted version of the list in the property
-    std::set<std::string> _sortedDefaultRenderableTypes;
-
-    // contains an id and the Point that was processed last frame
-    glm::ivec2 _webPositionCallback = glm::ivec2(0);
-#ifdef WIN32
-    std::unique_ptr<Win32TouchHook> _win32TouchHook;
-#endif // WIN32
+    bool _zoomOutTap = false;
 };
 
-} // namespace openspace
+} // namespace openspace::interaction
 
-#endif // __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#endif // __OPENSPACE_CORE___TOUCHCAMERASTATES___H__
