@@ -12,6 +12,13 @@ local celestial_globe_folder = asset.resource({
   Version = 1
 })
 
+local animated_box = asset.resource({
+  Name = "Animated Box",
+  Type = "HttpSynchronization",
+  Identifier = "animated_box",
+  Version = 1
+})
+
 -- These models are in the same shadow group, so will cast onto and receive shadows from
 -- each other, as well as the Mars surface
 local ModelMarsSmall = {
@@ -89,6 +96,48 @@ local ModelMarsLarge = {
   GUI = {
     Name = "Celestial Globe - Mars Large",
     Path = "/Shadow Casting Models/Celestial Globe"
+  }
+}
+
+local AnimatedBox = {
+  Identifier = "animatexbox-mars",
+  Parent = mars.Mars.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.64325,
+      Latitude = 26.16,
+      UseHeightmap = true,
+      Altitude = 300.0
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.64325,
+      Latitude = 26.16
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 250.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = animated_box .. "BoxAnimated.glb",
+    EnableAnimation = true,
+    AnimationStartTime = "2024 07 09 12:00:00",
+    AnimationMode = "LoopInfinitely",
+    RotationVector = { 0.0, 0.0, 90.0 },
+    LightSources = {
+      sun.LightSource
+    },
+    CastShadow = true,
+    LightSource = sun.SunCenter.Identifier
+  },
+  GUI = {
+    Name = "Animation Loop Infinitely",
+    Path = "/Shadow Casting Models"
   }
 }
 
@@ -217,6 +266,9 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(ModelMarsLarge)
   openspace.registerShadowcaster(sun.SunCenter.Identifier, ModelMarsLarge.Identifier, mars.Mars.Identifier, "mars")
 
+  openspace.addSceneGraphNode(AnimatedBox)
+  openspace.registerShadowcaster(sun.SunCenter.Identifier, AnimatedBox.Identifier, mars.Mars.Identifier)
+
   openspace.addSceneGraphNode(ModelMarsOtherGroup)
   openspace.registerShadowcaster(sun.SunCenter.Identifier, ModelMarsOtherGroup.Identifier, mars.Mars.Identifier)
 
@@ -231,6 +283,7 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(ModelMoon)
   openspace.removeSceneGraphNode(ModelEarth)
   openspace.removeSceneGraphNode(ModelMarsOtherGroup)
+  openspace.removeSceneGraphNode(AnimatedBox)
   openspace.removeSceneGraphNode(ModelMarsLarge)
   openspace.removeSceneGraphNode(ModelMarsSmall)
 end)
