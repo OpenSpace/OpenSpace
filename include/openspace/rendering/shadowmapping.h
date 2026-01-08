@@ -22,40 +22,75 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "floatoperations.glsl"
-#include <#{fragmentPath}>
+#ifndef __OPENSPACE_CORE___SHADOWMAPPING___H__
+#define __OPENSPACE_CORE___SHADOWMAPPING___H__
 
-#define exposure #{rendererData.hdrExposure}
-#define disableHDRPipeline #{rendererData.disableHDR}
-#define DeltaError 0.013f
-#define MaxValueColorBuffer 1E10
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <vector>
 
-layout(location = 0) out vec4 _out_color_;
-layout(location = 1) out vec4 gPosition;
-layout(location = 2) out vec4 gNormal;
+namespace ghoul { class Dictionary; }
+namespace openspace {
+    namespace documentation { struct Documentation; }
+    class SceneGraphNode;
+} // namespace openspace
 
-void main() {
-  Fragment f = getFragment();
+namespace openspace::shadowmapping {
 
-  // Color is already in HDR space
-  if (f.disableLDR2HDR || (disableHDRPipeline == 1)) {
-    _out_color_ = f.color;
-  }
-  else {
-    _out_color_ = vec4((log2(vec3(1.0) - (f.color.rgb - vec3(DeltaError)))/(-exposure)), f.color.a);
-  }
+struct ShadowInfo {
+    const SceneGraphNode* lightSource = nullptr;
+    std::vector<const SceneGraphNode*> targets;
+    struct {
+        GLuint texture = 0;
+        glm::ivec2 resolution = glm::ivec2(0);
+    } depthMap;
+    GLuint fbo = 0;
+    glm::dmat4 viewProjectionMatrix = glm::dmat4(1.0);
+};
 
-  _out_color_.x = isnan(_out_color_.x) ? MaxValueColorBuffer : _out_color_.x;
-  _out_color_.y = isnan(_out_color_.y) ? MaxValueColorBuffer : _out_color_.y;
-  _out_color_.z = isnan(_out_color_.z) ? MaxValueColorBuffer : _out_color_.z;
+// This drop-in class is representing that an object is capable of shadowing another
+// object
+class Shadower {
+public:
+    explicit Shadower(const ghoul::Dictionary& dictionary);
+    virtual ~Shadower() = default;
 
-  gPosition = f.gPosition;
-  gNormal = f.gNormal;
+    bool isCastingShadow() const;
+    void setLightSource(const SceneGraphNode* lightSource);
+    const SceneGraphNode* lightSource() const;
+    void setShadowGroup(std::string shadowGroup);
+    const std::string& shadowGroup() const;
+    double shadowFrustumSize() const;
 
-  if (f.disableDepthNormalization) {
-    gl_FragDepth = f.depth;
-  }
-  else {
-    gl_FragDepth = normalizeFloat(f.depth);
-  }
-}
+    virtual glm::dvec3 center() const = 0;
+
+    virtual void renderForDepthMap(const glm::dmat4& vp) const = 0;
+
+    static documentation::Documentation Documentation();
+
+protected:
+    properties::BoolProperty _castShadow;
+    const SceneGraphNode* _lightSource = nullptr;
+    std::string _shadowGroup;
+
+    properties::FloatProperty _frustumSize;
+    bool _hasFrustumSize = false;
+};
+
+// This drop-in class is representing that an object can be shadowed by other another
+// object
+class Shadowee {
+public:
+    void addShadower(const Shadower* shadower);
+    void removeShadower(const Shadower* shadower);
+
+protected:
+    std::vector<const Shadower*> _shadowers;
+    bool _isShadowersDirty = false;
+};
+
+} // namespace openspace::shadowmapping
+
+#endif // __OPENSPACE_CORE___SHADOWMAPPING___H__

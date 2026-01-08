@@ -34,6 +34,7 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/framebufferrenderer.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <cstdint>
 #include <chrono>
 #include <filesystem>
@@ -56,6 +57,7 @@ class Camera;
 class DeferredcasterManager;
 class RaycasterManager;
 class Scene;
+class SceneGraphNode;
 class SceneManager;
 class ScreenLog;
 class ScreenSpaceRenderable;
@@ -157,6 +159,12 @@ public:
     glm::mat4 nodeRotation() const;
 
     uint64_t frameNumber() const;
+
+    void registerShadowCaster(const std::string& shadowGroup,
+        const SceneGraphNode* lightSource, SceneGraphNode* shadower,
+        SceneGraphNode* shadowee);
+    void removeShadowCaster(const std::string& shadowGroup, SceneGraphNode* shadower,
+        SceneGraphNode* shadowee);
 
 private:
     void renderScreenLog();

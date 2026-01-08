@@ -999,6 +999,8 @@ at the end of the interpolation. If 0 was provided, the script runs immediately.
             codegen::lua::HasSceneGraphNode,
             codegen::lua::SceneGraphNodes,
             codegen::lua::NodeByRenderableType,
+            codegen::lua::RegisterShadowcaster,
+            codegen::lua::RemoveShadowcaster,
             codegen::lua::ScreenSpaceRenderables,
             codegen::lua::WorldPosition,
             codegen::lua::WorldRotation,

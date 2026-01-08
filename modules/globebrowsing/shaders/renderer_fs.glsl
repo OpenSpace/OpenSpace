@@ -74,6 +74,8 @@ uniform vec2 textureOffset;
 #endif // USE_RING_SHADOWS
 #endif // SHADOW_MAPPING_ENABLED
 
+#define USE_DEPTHMAP_SHADOWS #{useDepthmapShadows}
+
 #if USE_ECLIPSE_SHADOWS
 
 #define NSEclipseShadowsMinusOne #{nEclipseShadows}
@@ -178,6 +180,13 @@ in vec3 normalObjSpace;
 
 uniform float opacity;
 
+#if USE_DEPTHMAP_SHADOWS
+#define nDepthMaps #{nDepthMaps}
+#if nDepthMaps > 0
+  in vec4 positions_lightspace[nDepthMaps];
+  uniform sampler2D light_depth_maps[nDepthMaps];
+#endif // nDepthMaps > 0
+#endif // USE_DEPTHMAP_SHADOWS
 
 Fragment getFragment() {
   Fragment frag;
@@ -330,6 +339,39 @@ Fragment getFragment() {
   frag.color.rgb = mix(preShadedColor * lightColor * ambientIntensity, frag.color.rgb, shadow);
 
 #endif // (SHADOW_MAPPING_ENABLED && PERFORM_SHADING && USE_RING_SHADOWS)
+
+#if USE_DEPTHMAP_SHADOWS && nDepthMaps > 0
+  const float Bias = 0.005;
+  const int Size = 3;
+  const float Norm = pow(2.0 * Size + 1, 2.0);
+  float accum = 1.0;
+  for (int idx = 0; idx < nDepthMaps; idx++) {
+    vec2 ssz = 1.f / textureSize(light_depth_maps[idx], 0);
+    vec3 coords = 0.5 + 0.5 * positions_lightspace[idx].xyz / positions_lightspace[idx].w;
+    for (int x = -Size; x <= Size; x++) {
+      for (int y = -Size; y <= Size; y++) {
+        float depth = texture(
+          light_depth_maps[idx],
+          coords.xy + vec2(x * ssz.x, y * ssz.y)
+        ).r;
+        // inside of the far plane of the frustum
+        if (coords.z < 1) {
+          accum -= float(depth < coords.z - Bias) / Norm;
+        }
+        else {
+          // outside of the far plane of the frustum, typically happens with long shadows
+          // cast on the surface of a globe
+          accum -= float(depth < 1.0) / Norm;
+        }
+      }
+    }
+  }
+
+  // @TODO (2026-01-08, abock) This should become a property at some point. It determines
+  // how much of the ground of the planet is visible in the shadowed region
+  const float Ambience = 0.2;
+  frag.color.xyz *= mix(max(0.0, accum), 1.0, Ambience);
+#endif // USE_DEPTHMAP_SHADOWS && nDepthMaps > 0
 
   frag.color.a *= opacity;
   frag.color = clamp(frag.color, 0.0, 1.0);

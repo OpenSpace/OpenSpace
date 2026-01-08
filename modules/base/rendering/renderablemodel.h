@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/shadowmapping.h>
 
 #include <openspace/properties/matrix/dmat4property.h>
 #include <openspace/properties/misc/optionproperty.h>
@@ -43,7 +44,7 @@ namespace openspace {
 
 class LightSource;
 
-class RenderableModel : public Renderable {
+class RenderableModel : public Renderable, public shadowmapping::Shadower {
 public:
     explicit RenderableModel(const ghoul::Dictionary& dictionary);
     ~RenderableModel() override = default;
@@ -51,6 +52,8 @@ public:
     void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
+    void createDepthMapResources();
+    void releaseDepthMapResources();
 
     bool isReady() const override;
 
@@ -67,6 +70,9 @@ private:
         BounceFromStart,
         BounceInfinitely
     };
+
+    void renderForDepthMap(const glm::dmat4& vp) const override;
+    glm::dvec3 center() const override;
 
     std::filesystem::path _file;
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
@@ -107,7 +113,8 @@ private:
         has_texture_normal, has_texture_specular, has_color_specular, texture_diffuse,
         texture_normal, texture_specular, color_diffuse, color_specular, opacity,
         nLightSources, lightDirectionsViewSpace, lightIntensities, performManualDepthTest,
-        gBufferDepthTexture, resolution
+        gBufferDepthTexture, resolution, has_shadow_depth_map, model, light_vp,
+        shadow_depth_map, has_override_color, override_color
     ) _uniformCache;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
@@ -131,6 +138,8 @@ private:
 
     // Store the original RenderBin
     Renderable::RenderBin _originalRenderBin;
+
+    ghoul::opengl::ProgramObject* _depthMapProgram = nullptr;
 };
 
 }  // namespace openspace

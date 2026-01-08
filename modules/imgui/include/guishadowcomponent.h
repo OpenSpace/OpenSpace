@@ -22,40 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "floatoperations.glsl"
-#include <#{fragmentPath}>
+#ifndef __OPENSPACE_MODULE_IMGUI___GUISHADOWCOMPONENT___H__
+#define __OPENSPACE_MODULE_IMGUI___GUISHADOWCOMPONENT___H__
 
-#define exposure #{rendererData.hdrExposure}
-#define disableHDRPipeline #{rendererData.disableHDR}
-#define DeltaError 0.013f
-#define MaxValueColorBuffer 1E10
+#include <modules/imgui/include/guicomponent.h>
 
-layout(location = 0) out vec4 _out_color_;
-layout(location = 1) out vec4 gPosition;
-layout(location = 2) out vec4 gNormal;
+namespace openspace::gui {
 
-void main() {
-  Fragment f = getFragment();
+class GuiShadowComponent : public GuiComponent {
+public:
+    GuiShadowComponent();
 
-  // Color is already in HDR space
-  if (f.disableLDR2HDR || (disableHDRPipeline == 1)) {
-    _out_color_ = f.color;
-  }
-  else {
-    _out_color_ = vec4((log2(vec3(1.0) - (f.color.rgb - vec3(DeltaError)))/(-exposure)), f.color.a);
-  }
+    void render() override;
+};
 
-  _out_color_.x = isnan(_out_color_.x) ? MaxValueColorBuffer : _out_color_.x;
-  _out_color_.y = isnan(_out_color_.y) ? MaxValueColorBuffer : _out_color_.y;
-  _out_color_.z = isnan(_out_color_.z) ? MaxValueColorBuffer : _out_color_.z;
+} // namespace openspace::gui
 
-  gPosition = f.gPosition;
-  gNormal = f.gNormal;
-
-  if (f.disableDepthNormalization) {
-    gl_FragDepth = f.depth;
-  }
-  else {
-    gl_FragDepth = normalizeFloat(f.depth);
-  }
-}
+#endif // __OPENSPACE_MODULE_IMGUI___GUISHADOWCOMPONENT___H__

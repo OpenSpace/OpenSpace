@@ -317,11 +317,17 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableModel::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_model");
+    documentation::Documentation docs = codegen::doc<Parameters>("base_renderable_model");
+
+    documentation::Documentation d = Shadower::Documentation();
+    docs.entries.insert(docs.entries.end(), d.entries.begin(), d.entries.end());
+
+    return docs;
 }
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
+    , Shadower(dictionary)
     , _enableAnimation(EnableAnimationInfo, false)
     , _ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
     , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
@@ -492,6 +498,8 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_enableFaceCulling);
     addProperty(_enableDepthTest);
     addProperty(_renderWireframe);
+    addProperty(_castShadow);
+    addProperty(_frustumSize);
     addProperty(_modelTransform);
     addProperty(_pivot);
     addProperty(_rotationVec);
@@ -514,6 +522,16 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
         // Set Interaction sphere size to be 10% of the bounding sphere
         setInteractionSphere(boundingSphere() * 0.1);
+
+        if (!_hasFrustumSize) {
+            const double bounds = _geometry->boundingRadius();
+            const double scale = _modelScale * glm::compMax(parent()->scale());
+            // The *2 is a fudge-factor to make the shadowing work for most cases
+            const float r = static_cast<float>(bounds * scale * 2.f);
+            _frustumSize = r;
+            _frustumSize.setMinValue(r * 0.1f);
+            _frustumSize.setMaxValue(r * 3.f);
+        }
     });
 
     _rotationVec.onChange([this]() {
@@ -544,6 +562,15 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     });
 
+    _castShadow.onChange([this]() {
+        if (_castShadow) {
+            createDepthMapResources();
+        }
+        else {
+            releaseDepthMapResources();
+        }
+    });
+
     if (p.rotationVector.has_value()) {
         _rotationVec = *p.rotationVector;
     }
@@ -564,7 +591,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableModel::isReady() const {
-    return _program && _quadProgram;
+    return _program && _quadProgram && (!_castShadow || _depthMapProgram);
 }
 
 void RenderableModel::initialize() {
@@ -751,8 +778,22 @@ void RenderableModel::initializeGL() {
     _geometry->calculateBoundingRadius();
     setBoundingSphere(_geometry->boundingRadius() * _modelScale);
 
+    if (!_hasFrustumSize) {
+        const double bounds = _geometry->boundingRadius();
+        const double scale = _modelScale * glm::compMax(parent()->scale());
+        // The *2 is a fudge-factor to make the shadowing work for most cases
+        const float r = static_cast<float>(bounds * scale * 2.f);
+        _frustumSize = r;
+        _frustumSize.setMinValue(r * 0.1f);
+        _frustumSize.setMaxValue(r * 3.f);
+    }
+
     // Set Interaction sphere size to be 10% of the bounding sphere
     setInteractionSphere(boundingSphere() * 0.1);
+
+    if (_castShadow) {
+        createDepthMapResources();
+    }
 }
 
 void RenderableModel::deinitializeGL() {
@@ -788,6 +829,39 @@ void RenderableModel::deinitializeGL() {
     _program = nullptr;
     _quadProgram = nullptr;
     ghoul::opengl::FramebufferObject::deactivate();
+
+    if (_castShadow) {
+        releaseDepthMapResources();
+    }
+}
+
+void RenderableModel::createDepthMapResources() {
+    using ProgramObject = ghoul::opengl::ProgramObject;
+
+    _depthMapProgram = BaseModule::ProgramObjectManager.request(
+        "ModelDepthMapProgram",
+        [&]() -> std::unique_ptr<ProgramObject> {
+            std::filesystem::path vs =
+                absPath("${MODULE_BASE}/shaders/model_depth_vs.glsl");
+            std::filesystem::path fs =
+                absPath("${MODULE_BASE}/shaders/model_depth_fs.glsl");
+
+            std::unique_ptr<ProgramObject> prog =
+                global::renderEngine->buildRenderProgram("ModelDepthMapProgram", vs, fs);
+            prog->setIgnoreAttributeLocationError(ProgramObject::IgnoreError::Yes);
+            prog->setIgnoreUniformLocationError(ProgramObject::IgnoreError::Yes);
+            return prog;
+        }
+    );
+}
+
+void RenderableModel::releaseDepthMapResources() {
+    BaseModule::ProgramObjectManager.release(
+        "ModelDepthMapProgram",
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine->removeRenderProgram(p);
+        }
+    );
 }
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
@@ -900,17 +974,30 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_DEPTH_TEST);
     }
 
-    _program->setUniform("has_override_color", _useOverrideColor);
+    // does only really need to be set when _castShadow changes
+    _program->setUniform(_uniformCache.has_shadow_depth_map, _castShadow);
+
+    ghoul::opengl::TextureUnit shadowUnit;
+    if (_castShadow && _lightSource) {
+        shadowmapping::ShadowInfo sm =
+            global::renderEngine->renderer().shadowInformation(_shadowGroup);
+
+        _program->setUniform(_uniformCache.model, modelTransform);
+        _program->setUniform(_uniformCache.light_vp, sm.viewProjectionMatrix);
+
+        shadowUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, sm.depthMap.texture);
+        _program->setUniform(_uniformCache.shadow_depth_map, shadowUnit);
+    }
+
+    _program->setUniform(_uniformCache.has_override_color, _useOverrideColor);
     if (_useOverrideColor) {
-        _program->setUniform("override_color", _overrideColor);
+        _program->setUniform(_uniformCache.override_color, _overrideColor);
     }
 
     if (!_shouldRenderTwice) {
         // Reset manual depth test
-        _program->setUniform(
-            _uniformCache.performManualDepthTest,
-            false
-        );
+        _program->setUniform(_uniformCache.performManualDepthTest, false);
 
         if (hasOverrideRenderBin()) {
             // If override render bin is set then use the opacity values as normal
@@ -961,10 +1048,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
 
         // Use a manuel depth test to make the models aware of the rest of the scene
-        _program->setUniform(
-            _uniformCache.performManualDepthTest,
-            _enableDepthTest
-        );
+        _program->setUniform(_uniformCache.performManualDepthTest, _enableDepthTest);
 
         // Bind the G-buffer depth texture for a manual depth test towards the rest
         // of the scene
@@ -974,10 +1058,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             GL_TEXTURE_2D,
             global::renderEngine->renderer().gBufferDepthTexture()
         );
-        _program->setUniform(
-            _uniformCache.gBufferDepthTexture,
-            gBufferDepthTextureUnit
-        );
+        _program->setUniform(_uniformCache.gBufferDepthTexture, gBufferDepthTextureUnit);
 
         // Will also need the resolution to get a texture coordinate for the G-buffer
         // depth texture
@@ -1159,6 +1240,39 @@ void RenderableModel::update(const UpdateData& data) {
         }
         _geometry->update(relativeTime);
     }
+}
+
+void RenderableModel::renderForDepthMap(const glm::dmat4& vp) const {
+    _depthMapProgram->activate();
+
+    const glm::dmat4 model =
+        parent()->modelTransform() *
+        glm::translate(glm::dmat4(1.0), glm::dvec3(_pivot.value())) *
+        glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
+
+    _depthMapProgram->setUniform("model", model);
+    _depthMapProgram->setUniform("light_vp", vp);
+
+    glCullFace(GL_FRONT);
+    if (isEnabled()) {
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+
+        _geometry->render(*_depthMapProgram, false, true);
+
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+    }
+    glCullFace(GL_BACK);
+}
+
+glm::dvec3 RenderableModel::center() const {
+    glm::dmat4 transform = glm::translate(glm::dmat4(1.0), glm::dvec3(_pivot.value()));
+    transform *= glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
+    glm::dmat4 model = parent()->modelTransform() * transform;
+    return model * glm::dvec4(0.0, 0.0, 0.0, 1.0);
 }
 
 }  // namespace openspace

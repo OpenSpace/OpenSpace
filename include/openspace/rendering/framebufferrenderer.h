@@ -28,6 +28,7 @@
 #include <openspace/rendering/raycasterlistener.h>
 #include <openspace/rendering/deferredcasterlistener.h>
 
+#include <openspace/rendering/shadowmapping.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -51,6 +52,7 @@ struct DeferredcasterTask;
 struct RaycastData;
 struct RaycasterTask;
 class Scene;
+class SceneGraphNode;
 struct UpdateStructures;
 
 class FramebufferRenderer final : public RaycasterListener, public DeferredcasterListener
@@ -177,6 +179,13 @@ public:
     virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
         DeferredcasterListener::IsAttached isAttached) override;
 
+    void registerShadowCaster(const std::string& shadowGroup,
+        const SceneGraphNode* lightSource, const SceneGraphNode* target);
+    void removeShadowCaster(const std::string& shadowGroup, const SceneGraphNode* target);
+
+    shadowmapping::ShadowInfo shadowInformation(const std::string& shadowGroup) const;
+    std::vector<std::string> shadowGroups() const;
+
 private:
     using RaycasterProgObjMap = std::map<
         VolumeRaycaster*,
@@ -191,6 +200,7 @@ private:
     void applyFXAA(const glm::ivec4& viewport);
     void updateDownscaleTextures() const;
     void writeDownscaledVolume(const glm::ivec4& viewport);
+    void renderDepthMaps();
 
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     RaycasterProgObjMap _exitPrograms;
@@ -244,6 +254,8 @@ private:
         float currentDownscaleFactor  = 1.f;
     } _downscaleVolumeRendering;
 
+    std::map<std::string, shadowmapping::ShadowInfo> _shadowMaps;
+
     unsigned int _pingPongIndex = 0u;
 
     bool _dirtyDeferredcastData;
@@ -260,6 +272,8 @@ private:
     float _hue = 1.f;
     float _saturation = 1.f;
     float _value = 1.f;
+
+    bool _renderedDepthMapsThisFrame = false;
 
     ghoul::Dictionary _rendererData;
 };

@@ -61,6 +61,11 @@ uniform sampler2D gBufferDepthTexture;
 
 uniform vec2 resolution;
 
+// See renderableglobe and renderer_fs.glsl
+uniform bool has_shadow_depth_map;
+uniform sampler2D shadow_depth_map;
+in vec4 lightspace_position;
+
 uniform bool has_override_color;
 uniform vec4 override_color;
 
@@ -173,6 +178,40 @@ Fragment getFragment() {
       totalSpecularColor += lightIntensities[i] * specularColor;
     }
     frag.color.rgb = totalLightColor + totalSpecularColor;
+
+    if (has_shadow_depth_map) {
+      const float Bias = 0.0005;
+      vec3 coords = 0.5 + 0.5 * lightspace_position.xyz / lightspace_position.w;
+
+      // Any fragment that is behind the stored depth is in shadow, multisampling for
+      // smoother shadows
+      const int ShadowFilterSize = 3;
+      int accum = 0;
+      vec2 stepSize = 1.f / textureSize(shadow_depth_map, 0);
+      for (int x = -ShadowFilterSize; x <= ShadowFilterSize; x++) {
+        for (int y = -ShadowFilterSize; y <= ShadowFilterSize; y++) {
+          float depth = texture(
+            shadow_depth_map,
+            coords.xy + vec2(x * stepSize.x, y * stepSize.y)
+          ).r;
+          if (coords.z < 1.f && depth > coords.z - Bias) {
+            accum++;
+          }
+        }
+      }
+
+      // Scale the accumulated shadow factor to [0, 1]
+      const float Norm = pow(2.f * ShadowFilterSize + 1, 2.f);
+      float shadowFactor = float(accum) / Norm;
+      // Apply shadow to diffuse lighting (with ambient contribution)
+      vec3 ambientLightColor = ambientIntensity * lightColor * diffuseAlbedo.rgb;
+      totalLightColor *= ambientLightColor + (1.f - ambientLightColor) * shadowFactor;
+      // Apply shadow to specular lighting (more aggressive - specular highlights should
+      // be sharply attenuated in shadows)
+      totalSpecularColor *= shadowFactor;
+
+      frag.color.rgb = totalLightColor + totalSpecularColor;
+    }
   }
   else {
     frag.color.rgb = diffuseAlbedo.rgb;

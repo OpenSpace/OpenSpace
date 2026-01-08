@@ -39,6 +39,7 @@
 #include <modules/imgui/include/guiparallelcomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
 #include <modules/imgui/include/guiscenecomponent.h>
+#include <modules/imgui/include/guishadowcomponent.h>
 #include <modules/imgui/include/guispacetimecomponent.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -96,6 +97,7 @@ private:
     gui::GuiMissionComponent _mission;
     gui::GuiMemoryComponent _memoryComponent;
     gui::GuiSceneComponent _sceneView;
+    gui::GuiShadowComponent _shadowComponent;
     gui::GuiFilePathComponent _filePath;
     gui::GuiHelpComponent _help;
 
@@ -103,7 +105,7 @@ private:
     properties::FloatProperty _helpTextDelay;
 
     // The ordering of this array determines the order of components in the in-game menu
-    static constexpr int nComponents = 13;
+    static constexpr int nComponents = 14;
     std::array<gui::GuiComponent*, nComponents> _components = {
         &_sceneProperty,
         &_property,
@@ -116,6 +118,7 @@ private:
         &_mission,
         &_memoryComponent,
         &_sceneView,
+        &_shadowComponent,
         &_filePath,
         &_help
     };

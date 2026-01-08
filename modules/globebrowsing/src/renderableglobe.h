@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLEGLOBE___H__
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/shadowmapping.h>
 
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/geojson/geojsonmanager.h>
@@ -92,7 +93,7 @@ enum class ShadowCompType {
  * A RenderableGlobe is a globe modeled as an ellipsoid using a chunked LOD algorithm for
  * rendering.
  */
-class RenderableGlobe : public Renderable {
+class RenderableGlobe : public Renderable, public shadowmapping::Shadowee {
 public:
     explicit RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() override = default;
@@ -127,6 +128,11 @@ public:
 private:
     static constexpr int MinSplitDepth = 2;
     static constexpr int MaxSplitDepth = 22;
+
+    struct DepthMapData {
+        GLuint depthMap;
+        glm::dmat4 viewProjection;
+    };
 
     /**
      * Test if a specific chunk can safely be culled without affecting the rendered image.
@@ -172,7 +178,7 @@ private:
      * lead to jagging. We only render global chunks for lower chunk levels.
      */
     void renderChunkGlobally(const Chunk& chunk, const RenderData& data,
-        bool renderGeomOnly = false
+        std::vector<DepthMapData>& depthMapData, bool renderGeomOnly = false
     );
 
     /**
@@ -187,7 +193,7 @@ private:
      * higher chunk levels.
      */
     void renderChunkLocally(const Chunk& chunk, const RenderData& data,
-        bool renderGeomOnly = false
+        std::vector<DepthMapData>& depthMapData, bool renderGeomOnly = false
     );
 
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
@@ -300,6 +306,11 @@ private:
     size_t _iterationsOfAvailableData = 0;
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;
+
+    bool _shadowersUpdated = false;
+    bool _shadowersOk = false;
+
+    std::map<const SceneGraphNode*, std::vector<std::string>> _shadowSpec;
 
     // Components
     std::unique_ptr<RingsComponent> _ringsComponent;
