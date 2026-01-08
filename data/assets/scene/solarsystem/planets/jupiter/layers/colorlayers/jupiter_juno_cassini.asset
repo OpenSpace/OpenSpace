@@ -12,7 +12,7 @@ local texturesPath = asset.resource({
 
 local Layer = {
   Identifier = "JunoCassini",
-  FilePath = texturesPath .. "jupiter_juno_cassini.tif",
+  FilePath = texturesPath .. "jupiter_juno_cassini.png",
   Enabled = asset.enabled,
   ZIndex = 5,
   Name = "Merged Cassini and Juno",
