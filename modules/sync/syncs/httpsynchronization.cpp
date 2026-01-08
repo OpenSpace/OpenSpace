@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,13 +25,25 @@
 #include <modules/sync/syncs/httpsynchronization.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/engine/globals.h>
+#include <openspace/util/downloadeventengine.h>
 #include <openspace/util/httprequest.h>
 #include <ghoul/ext/assimp/contrib/zip/src/zip.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
+#include <algorithm>
+#include <chrono>
+#include <cstdint>
 #include <fstream>
+#include <istream>
+#include <mutex>
+#include <sstream>
+#include <string_view>
+#include <system_error>
 #include <unordered_map>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "HttpSynchronization";
@@ -332,8 +344,24 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
                 _nSynchronizedBytes += sd.second.downloadedBytes;
             }
 
+            DownloadEventEngine::DownloadEvent event = {
+                .type = DownloadEventEngine::DownloadEvent::Type::Progress,
+                .id = line,
+                .downloadedBytes = downloadedBytes,
+                .totalBytes = totalBytes
+            };
+            global::downloadEventEngine->publish(event);
+
             return !_shouldCancel;
         });
+
+        DownloadEventEngine::DownloadEvent event = {
+            .type = DownloadEventEngine::DownloadEvent::Type::Started,
+            .id = line,
+            .downloadedBytes = 0
+        };
+        global::downloadEventEngine->publish(event);
+        LDEBUG(std::format("Started downloading '{}'", dl->url()));
 
         dl->start();
     }
@@ -373,6 +401,12 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
         if (!d->hasSucceeded()) {
             LERROR(std::format("Error downloading file from URL '{}'", d->url()));
             failed = true;
+
+            global::downloadEventEngine->publish(
+                d->url(),
+                DownloadEventEngine::DownloadEvent::Type::Failed
+            );
+            LERROR(std::format("Failed to download '{}'", d->url()));
             continue;
         }
 
@@ -421,16 +455,39 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
             std::filesystem::remove(source);
         }
     }
-    if (failed) {
-        for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
-            // Store all files that were synced to the ossync
+
+    for (const std::unique_ptr<HttpFileDownload>& d : downloads) {
+        if (failed) {
+            // At least one download failed, (some downloads may have succeeded)
             if (d->hasSucceeded()) {
                 _newSyncedFiles.push_back(d->url());
+                global::downloadEventEngine->publish(
+                    d->url(),
+                    DownloadEventEngine::DownloadEvent::Type::Finished
+                );
+                LDEBUG(std::format("Finished downloading '{}'", d->url()));
+            }
+            else {
+                global::downloadEventEngine->publish(
+                    d->url(),
+                    DownloadEventEngine::DownloadEvent::Type::Failed
+                );
+                LERROR(std::format("Failed to download '{}'", d->url()));
             }
         }
-        return SynchronizationState::FileDownloadFail;
+        else {
+            // All downloads are successful
+            global::downloadEventEngine->publish(
+                d->url(),
+                DownloadEventEngine::DownloadEvent::Type::Finished
+            );
+            LDEBUG(std::format("Finished downloading '{}'", d->url()));
+        }
+
     }
-    return SynchronizationState::Success;
+
+    return
+        failed ? SynchronizationState::FileDownloadFail : SynchronizationState::Success;
 }
 
 } // namespace openspace

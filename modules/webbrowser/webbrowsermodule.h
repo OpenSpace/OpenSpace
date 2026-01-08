@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,19 +31,13 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <chrono>
 #include <filesystem>
+#include <memory>
 
 namespace openspace {
 
 class BrowserInstance;
 class CefHost;
 class EventHandler;
-
-namespace webbrowser {
-    extern std::chrono::microseconds interval;
-    extern std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
-    extern CefHost* cefHost;
-    void update();
-} // namespace webbrowser
 
 class WebBrowserModule : public OpenSpaceModule {
 public:
@@ -78,6 +72,13 @@ private:
     bool _enabled = true;
     static inline bool _disableAcceleratedRendering = false;
 };
+
+namespace webbrowser {
+    extern std::chrono::microseconds interval;
+    extern std::chrono::time_point<std::chrono::high_resolution_clock> latestCall;
+    extern CefHost* cefHost;
+    void update();
+} // namespace webbrowser
 
 } // namespace openspace
 

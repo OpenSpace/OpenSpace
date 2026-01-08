@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,10 +30,10 @@
 #include <modules/skybrowser/include/targetbrowserpair.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/properties/property.h>
-#include <openspace/query/query.h>
-#include <openspace/util/json_helper.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/dictionaryjsonformatter.h>
+#include <string_view>
+#include <vector>
 
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
@@ -62,10 +62,6 @@ SkyBrowserTopic::~SkyBrowserTopic() {
     }
 }
 
-bool SkyBrowserTopic::isDone() const {
-    return _isDone;
-}
-
 void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
     const std::string event = json.at("event").get<std::string>();
     if (event == UnsubscribeEvent) {
@@ -88,6 +84,10 @@ void SkyBrowserTopic::handleJson(const nlohmann::json& json) {
             }
         }
     );
+}
+
+bool SkyBrowserTopic::isDone() const {
+    return _isDone;
 }
 
 void SkyBrowserTopic::sendBrowserData() {

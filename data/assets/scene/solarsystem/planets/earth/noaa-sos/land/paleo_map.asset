@@ -127,7 +127,7 @@ for i,v in ipairs(layers_names) do
   local layer = {
     Identifier = Identifier .. "-" .. v,
     Name = Name .. " " .. v,
-    Enabled = asset.enabled,
+    Enabled = false,
     ZIndex = 100,
     FilePath = imagesDestination .. "/" .. v .. ".jpg",
     Description = Description

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,10 +28,7 @@
 #include <openspace/scene/translation.h>
 
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/util/time.h>
 #include <ghoul/glm.h>
-#include <ghoul/misc/exception.h>
-#include <openspace/util/time.h>
 
 namespace openspace {
 
@@ -58,10 +55,10 @@ public:
     ~KeplerTranslation() override = default;
 
     /**
-    * Method returning the translation vector at a given time.
-    *
-    * \param data Provides information from the engine about, for example, the time
-    */
+     * Method returning the translation vector at a given time.
+     *
+     * \param data Provides information from the engine about, for example, the time
+     */
     glm::dvec3 position(const UpdateData& data) const override;
 
     /**
@@ -164,9 +161,9 @@ private:
 
 class KeplerCalculator {
 public:
-    KeplerCalculator(double eccentricity, double semiMajorAxis,
-        double inclination, double ascendingNode, double argumentOfPeriapsis,
-        double meanAnomalyAtEpoch, double orbitalPeriod, double epoch);
+    KeplerCalculator(double eccentricity, double semiMajorAxis, double inclination,
+        double ascendingNode, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
+        double orbitalPeriod, double epoch);
 
     glm::dvec3 position(double time) const;
 

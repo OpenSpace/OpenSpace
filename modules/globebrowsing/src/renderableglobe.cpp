@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,50 +26,48 @@
 
 #include <modules/debugging/rendering/debugrenderer.h>
 #include <modules/globebrowsing/src/basictypes.h>
-#include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
+#include <modules/globebrowsing/src/layergroupid.h>
+#include <modules/globebrowsing/src/layerrendersettings.h>
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <algorithm>
+#include <cmath>
+#include <limits>
 #include <numeric>
-#include <queue>
-#include <vector>
-
-#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
-#include <experimental/memory_resource>
-namespace std {
-    using namespace experimental;
-} // namespace std
-#else
-#include <memory_resource>
-#endif
+#include <optional>
+#include <utility>
+#include <variant>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableGlobe";
 
     // Global flags to modify the RenderableGlobe
     constexpr bool LimitLevelByAvailableData = true;
-    constexpr bool PreformHorizonCulling = true;
 
     // Shadow structure
     struct ShadowRenderingStruct {
@@ -130,11 +128,18 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo PerformHorizonCullingInfo = {
+        "PerformHorizonCulling",
+        "Perform horizon culling",
+        "If this value is set to 'true', tiles below the horizon will be culled away.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ResetTileProviderInfo = {
         "ResetTileProviders",
         "Reset tile providers",
         "Reset all tile provides for the globe and reload the data.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelSpaceRenderingInfo = {
@@ -144,7 +149,7 @@ namespace {
         "globe model rendering vs the flat in-game rendering method. The value is a "
         "trade-off between not having precision errors in the rendering and representing "
         "a tile as flat or curved.",
-        openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DynamicLodIterationCountInfo =
@@ -290,6 +295,9 @@ namespace {
 
         // [[codegen::verbatim(TargetLodScaleFactorInfo.description)]]
         std::optional<float> targetLodScaleFactor;
+
+        // [[codegen::verbatim(ModelSpaceRenderingInfo.description)]]
+        std::optional<int> modelSpaceRenderingCutoffLevel [[codegen::greater(0)]];
 
         // [[codegen::verbatim(OrenNayarRoughnessInfo.description)]]
         std::optional<float> orenNayarRoughness;
@@ -606,6 +614,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(LevelProjectedAreaInfo, true),
         TriggerProperty(ResetTileProviderInfo),
         BoolProperty(PerformFrustumCullingInfo, true),
+        BoolProperty(PerformHorizonCullingInfo, true),
         IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
         IntProperty(DynamicLodIterationCountInfo, 16, 4, 128)
     })
@@ -615,7 +624,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f),
         IntProperty(NumberShadowSamplesInfo, 5, 1, 7)
     })
-    , _shadowMappingPropertyOwner({ "ShadowMapping", "Shadow Mapping"})
+    , _shadowMappingPropertyOwner({ "ShadowMapping", "Shadow Mapping" })
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
@@ -731,6 +740,11 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugProperties.resetTileProviders.onChange([&]() { _resetTileProviders = true; });
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
     _debugPropertyOwner.addProperty(_debugProperties.performFrustumCulling);
+    _debugPropertyOwner.addProperty(_debugProperties.performHorizonCulling);
+    _debugProperties.modelSpaceRenderingCutoffLevel =
+        p.modelSpaceRenderingCutoffLevel.value_or(
+            _debugProperties.modelSpaceRenderingCutoffLevel
+        );
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
     _debugPropertyOwner.addProperty(_debugProperties.dynamicLodIterationCount);
     addPropertySubOwner(_debugPropertyOwner);
@@ -1470,7 +1484,10 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
             if (_ringsComponent->textureTransparency()) {
                 ringTextureTransparencyUnit.activate();
                 _ringsComponent->textureTransparency()->bind();
-                program.setUniform("ringTextureTransparency", ringTextureTransparencyUnit);
+                program.setUniform(
+                    "ringTextureTransparency",
+                    ringTextureTransparencyUnit
+                );
             }
 
             program.setUniform("textureOffset", _ringsComponent->textureOffset());
@@ -1588,7 +1605,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     if (_eclipseShadowsEnabled && !_ellipsoid.shadowConfigurationArray().empty()) {
         calculateEclipseShadows(program, data, ShadowCompType::LOCAL_SHADOW);
     }
-    
+
     // Shadow Mapping
     if (_shadowMappingProperties.shadowMapping) {
         // Bind ring textures for direct projection when rings component is available
@@ -1605,7 +1622,10 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             if (_ringsComponent->textureTransparency()) {
                 ringTextureTransparencyUnit.activate();
                 _ringsComponent->textureTransparency()->bind();
-                program.setUniform("ringTextureTransparency", ringTextureTransparencyUnit);
+                program.setUniform(
+                    "ringTextureTransparency",
+                    ringTextureTransparencyUnit
+                );
             }
 
             program.setUniform("textureOffset", _ringsComponent->textureOffset());
@@ -1788,9 +1808,11 @@ void RenderableGlobe::recompileShaders() {
         std::to_string(_shadowMappingProperties.shadowMapping && _shadowComponent)
     );
     pairs.emplace_back(
-        "useRingShadows", 
-        std::to_string(_shadowMappingProperties.shadowMapping && _ringsComponent && 
-                       _ringsComponent->isEnabled())
+        "useRingShadows",
+        std::to_string(
+            _shadowMappingProperties.shadowMapping && _ringsComponent &&
+            _ringsComponent->isEnabled()
+        )
     );
     pairs.emplace_back("showChunkEdges", std::to_string(_debugProperties.showChunkEdges));
     pairs.emplace_back("showHeightResolution", "0");
@@ -1982,9 +2004,12 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
 {
     ZoneScoped;
 
-    return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData, heights)) ||
-           (_debugProperties.performFrustumCulling &&
-               isCullableByFrustum(chunk, renderData, mvp));
+    const bool horizon = _debugProperties.performHorizonCulling &&
+        isCullableByHorizon(chunk, renderData, heights);
+    const bool frustum = _debugProperties.performFrustumCulling &&
+        isCullableByFrustum(chunk, renderData, mvp);
+
+    return horizon || frustum;
 }
 
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData,

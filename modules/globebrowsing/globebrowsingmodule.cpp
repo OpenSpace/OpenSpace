@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,15 +29,15 @@
 #include <modules/globebrowsing/src/gdalwrapper.h>
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/geojson/geojsoncomponent.h>
-#include <modules/globebrowsing/src/geojson/geojsonmanager.h>
 #include <modules/globebrowsing/src/geojson/geojsonproperties.h>
 #include <modules/globebrowsing/src/globelabelscomponent.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layeradjustment.h>
-#include <modules/globebrowsing/src/layergroup.h>
-#include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
+#include <modules/globebrowsing/src/ringscomponent.h>
+#include <modules/globebrowsing/src/shadowcomponent.h>
+#include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/imagesequencetileprovider.h>
 #include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
@@ -49,31 +49,32 @@
 #include <modules/globebrowsing/src/tileprovider/tileproviderbydate.h>
 #include <modules/globebrowsing/src/tileprovider/tileproviderbyindex.h>
 #include <modules/globebrowsing/src/tileprovider/tileproviderbylevel.h>
-#include <openspace/camera/camera.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/orbitalnavigator.h>
-#include <openspace/query/query.h>
+#include <openspace/rendering/dashboarditem.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/geodetic.h>
-#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/templatefactory.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
-#include <vector>
+#include <algorithm>
+#include <array>
+#include <cstdint>
+#include <cstdio>
+#include <limits>
+#include <optional>
+#include <utility>
 
 #include <gdal.h>
 
@@ -515,7 +516,9 @@ scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
             codegen::lua::CapabilitiesWMS,
             codegen::lua::AddGeoJson,
             codegen::lua::DeleteGeoJson,
-            codegen::lua::AddGeoJsonFromFile
+            codegen::lua::AddGeoJsonFromFile,
+            codegen::lua::Globes,
+            codegen::lua::UrlInfo
         },
         .scripts = {
             absPath("${MODULE_GLOBEBROWSING}/scripts/layer_support.lua"),

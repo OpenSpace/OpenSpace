@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,14 +25,16 @@
 #include <modules/kameleonvolume/tasks/kameleonvolumetorawtask.h>
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
+#include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumewriter.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <array>
-#include <filesystem>
 #include <optional>
+#include <fstream>
 
 namespace {
     struct [[codegen::Dictionary(KameleonVolumeToRawTask)]] Parameters {

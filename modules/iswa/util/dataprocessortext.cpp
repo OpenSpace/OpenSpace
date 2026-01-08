@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,12 @@
 #include <modules/iswa/util/dataprocessortext.h>
 
 #include <openspace/properties/misc/selectionproperty.h>
-#include <openspace/util/histogram.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/stringhelper.h>
 #include <algorithm>
+#include <cmath>
+#include <iterator>
+#include <set>
 #include <sstream>
 
 namespace openspace {

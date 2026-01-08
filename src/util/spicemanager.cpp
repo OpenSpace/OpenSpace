@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,19 +24,17 @@
 
 #include <openspace/util/spicemanager.h>
 
-#include <openspace/engine/globals.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/misc/assert.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
-#include <filesystem>
-#include <format>
-#include "SpiceUsr.h"
-#include "SpiceZpr.h"
+#include <cstring>
+#include <iterator>
+#include <fstream>
+#include <string_view>
+#include <utility>
 
 #include "spicemanager_lua.inl"
 
@@ -65,6 +63,25 @@ namespace {
             default:                            throw ghoul::MissingCaseException();
         }
     }
+
+
+    void getValueInternal(const std::string& body, const std::string& value, int size,
+                          double* v)
+    {
+        ghoul_assert(!body.empty(), "Empty body");
+        ghoul_assert(!value.empty(), "Empty value");
+        ghoul_assert(v != nullptr, "Empty value pointer");
+
+        SpiceInt n = 0;
+        bodvrd_c(body.c_str(), value.c_str(), size, &n, v);
+
+        if (failed_c()) {
+            openspace::throwSpiceError(std::format(
+                "Error getting value '{}' for body '{}'", value, body
+            ));
+        }
+    }
+
 } // namespace
 
 namespace openspace {
@@ -536,23 +553,6 @@ bool SpiceManager::hasFrameId(const std::string& frame) const {
     SpiceInt id = 0;
     namfrm_c(frame.c_str(), &id);
     return id != 0;
-}
-
-void getValueInternal(const std::string& body, const std::string& value, int size,
-                      double* v)
-{
-    ghoul_assert(!body.empty(), "Empty body");
-    ghoul_assert(!value.empty(), "Empty value");
-    ghoul_assert(v != nullptr, "Empty value pointer");
-
-    SpiceInt n = 0;
-    bodvrd_c(body.c_str(), value.c_str(), size, &n, v);
-
-    if (failed_c()) {
-        throwSpiceError(
-            std::format("Error getting value '{}' for body '{}'", value, body)
-        );
-    }
 }
 
 void SpiceManager::getValue(const std::string& body, const std::string& value,

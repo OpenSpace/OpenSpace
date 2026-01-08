@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,18 +25,17 @@
 #include <openspace/navigation/pathcurves/avoidcollisioncurve.h>
 
 #include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/navigation/waypoint.h>
-#include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/collisionhelper.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/exception.h>
 #include <glm/gtx/projection.hpp>
 #include <algorithm>
-#include <vector>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "AvoidCollisionCurve";
@@ -76,7 +75,7 @@ AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& 
     // Note that the factor 2.0 is arbitrarily chosen to look ok.
     // @TODO: (2022-02-27, emmbr) Should be unified to a "getting close to object sphere"
     // that can be used in multiple cases when creating paths more cleverly later on
-    const double closeToNodeThresholdFactor = glm::max(
+    const double closeToNodeThresholdFactor = std::max(
         CloseToNodeThresholdRadiusMultiplier,
         2.0 * global::navigationHandler->pathNavigator().arrivalDistanceFactor()
     );

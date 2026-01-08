@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,15 +25,23 @@
 #include <openspace/scene/assetmanager.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/scene/asset.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/util/resourcesynchronization.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/lua/luastate.h>
+#include <algorithm>
+#include <string_view>
+#include <utility>
 
 #include "assetmanager_lua.inl"
 
@@ -230,10 +238,6 @@ void AssetManager::runAddQueue() {
 
 void AssetManager::update() {
     ZoneScoped;
-
-    // Flag to keep track of when to emit synchronization event
-    const bool isLoadingAssets = !_toBeInitialized.empty();
-
     // Delete all the assets that have been marked for deletion in the previous frame
     {
         ZoneScopedN("Deleting assets");
@@ -302,11 +306,6 @@ void AssetManager::update() {
         else {
             it++;
         }
-    }
-
-    // If the _toBeInitialized state has changed in this update call we emit the event
-    if (isLoadingAssets && _toBeInitialized.empty()) {
-        global::eventEngine->publishEvent<events::EventAssetLoadingFinished>();
     }
 }
 
@@ -387,6 +386,10 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(std::format("Could not load asset '{}': {}", asset->path(), e.message));
+        global::eventEngine->publishEvent<events::EventAssetLoading>(
+            asset->path().string(),
+            events::EventAssetLoading::State::Error
+        );
         return false;
     }
     catch (const ghoul::RuntimeError& e) {
@@ -466,6 +469,10 @@ void AssetManager::unloadAsset(Asset* asset) {
         // might be painful
         _toBeDeleted.push_back(std::move(*it));
         _assets.erase(it);
+        global::eventEngine->publishEvent<events::EventAssetLoading>(
+            asset->path().string(),
+            events::EventAssetLoading::State::Unloaded
+        );
     }
 }
 
@@ -964,6 +971,10 @@ void AssetManager::callOnInitialize(Asset* asset) const {
     for (const int init : it->second) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
+            global::eventEngine->publishEvent<events::EventAssetLoading>(
+                asset->path().string(),
+                events::EventAssetLoading::State::Error
+            );
             throw ghoul::lua::LuaRuntimeException(std::format(
                 "When initializing '{}': {}",
                 asset->path(),
@@ -1058,7 +1069,8 @@ scripting::LuaLibrary AssetManager::luaLibrary() {
             codegen::lua::RemoveAll,
             codegen::lua::IsLoaded,
             codegen::lua::AllAssets,
-            codegen::lua::RootAssets
+            codegen::lua::RootAssets,
+            codegen::lua::Parents
         }
     };
 }

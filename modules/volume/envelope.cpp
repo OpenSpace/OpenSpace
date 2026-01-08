@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,10 +25,9 @@
 #include <modules/volume/envelope.h>
 
 #include <ghoul/lua/ghoul_lua.h>
-
+#include <ghoul/lua/lua_helper.h>
+#include <algorithm>
 #include <cmath>
-
-using json = nlohmann::json;
 
 namespace openspace::volume {
 
@@ -186,8 +185,8 @@ std::string EnvelopePoint::hexadecimalFromVec3(const glm::vec3& vec) const {
     return ("#" + r + g + b);
 }
 
-json Envelope::jsonPoints() const {
-    json j;
+nlohmann::json Envelope::jsonPoints() const {
+    nlohmann::json j;
     for (size_t i = 0; i < _points.size(); i++) {
         j[i] = {
             {
@@ -206,8 +205,8 @@ json Envelope::jsonPoints() const {
     return j;
 }
 
-json Envelope::jsonEnvelope() const {
-    json j;
+nlohmann::json Envelope::jsonEnvelope() const {
+    nlohmann::json j;
     j["points"] = jsonPoints();
     return j;
 }

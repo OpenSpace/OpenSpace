@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,15 +31,12 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/uintproperty.h>
-
-namespace ghoul::opengl { class Texture; }
+#include <utility>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 /**
- * A specialization of the RenderablePointCloud that supports interpolation beetween
+ * A specialization of the RenderablePointCloud that supports interpolation between
  * different positions for the points.
  */
 class RenderableInterpolatedPoints : public RenderablePointCloud {

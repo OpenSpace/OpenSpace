@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,18 +25,16 @@
 #include <modules/statemachine/statemachinemodule.h>
 
 #include <modules/statemachine/include/state.h>
-#include <modules/statemachine/include/statemachine.h>
 #include <modules/statemachine/include/transition.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/stringhelper.h>
+#include <ghoul/misc/dictionary.h>
+#include <filesystem>
 #include <string>
-#include <optional>
+#include <utility>
 
 #include "statemachinemodule_lua.inl"
 
@@ -48,7 +46,7 @@ namespace openspace {
 
 StateMachineModule::StateMachineModule()
     : OpenSpaceModule(Name)
-{ }
+{}
 
 void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
                                                 const ghoul::Dictionary& transitions,

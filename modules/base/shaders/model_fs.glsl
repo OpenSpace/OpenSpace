@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,7 @@ in vec3 vs_color;
 uniform float ambientIntensity = 0.2;
 uniform float diffuseIntensity = 1.0;
 uniform float specularIntensity = 1.0;
+uniform float specularPower = 100.0;
 uniform bool performShading = true;
 
 uniform bool use_forced_color = false;
@@ -59,6 +60,9 @@ uniform bool performManualDepthTest = false;
 uniform sampler2D gBufferDepthTexture;
 
 uniform vec2 resolution;
+
+uniform bool has_override_color;
+uniform vec4 override_color;
 
 Fragment getFragment() {
   Fragment frag;
@@ -144,12 +148,12 @@ Fragment getFragment() {
 
     // Could be seperated into ambinet, diffuse and specular and passed in as uniforms
     const vec3 lightColor = vec3(1.0);
-    const float specularPower = 100.0;
 
     // Ambient light
     vec3 totalLightColor = ambientIntensity * lightColor * diffuseAlbedo.rgb;
 
     vec3 viewDirection = normalize(vs_positionCameraSpace.xyz);
+    vec3 totalSpecularColor = vec3(0.0);
 
     for (int i = 0; i < nLightSources; i++) {
       // Diffuse light
@@ -165,14 +169,20 @@ Fragment getFragment() {
       vec3 specularColor =
         specularIntensity * lightColor * specularFactor * specularAlbedo;
 
-      totalLightColor += lightIntensities[i] * (diffuseColor + specularColor);
+      totalLightColor += lightIntensities[i] * diffuseColor;
+      totalSpecularColor += lightIntensities[i] * specularColor;
     }
-    frag.color.rgb = totalLightColor;
+    frag.color.rgb = totalLightColor + totalSpecularColor;
   }
   else {
     frag.color.rgb = diffuseAlbedo.rgb;
   }
 
   frag.color.a = diffuseAlbedo.a * opacity;
+
+  if (has_override_color) {
+    frag.color = override_color;
+  }
+
   return frag;
 }

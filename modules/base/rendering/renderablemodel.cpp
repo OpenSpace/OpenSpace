@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,6 @@
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/framebufferrenderer.h>
@@ -35,19 +34,28 @@
 #include <openspace/util/time.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/scene/scene.h>
 #include <openspace/scene/lightsource.h>
+#include <ghoul/format.h>
 #include <ghoul/io/model/modelgeometry.h>
+#include <ghoul/io/model/modelreader.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/invariants.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <array>
+#include <cmath>
+#include <cstdlib>
 #include <filesystem>
+#include <limits>
 #include <optional>
+#include <utility>
+#include <variant>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableModel";
@@ -94,6 +102,13 @@ namespace {
         "SpecularIntensity",
         "Specular intensity",
         "A multiplier for specular lighting.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SpecularPowerInfo = {
+        "SpecularPower",
+        "Specular Power",
+        "Power factor for specular component, higher value gives narrower specularity",
         openspace::properties::Property::Visibility::User
     };
 
@@ -160,11 +175,32 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo RenderWireframeInfo = {
+        "RenderWireframe",
+        "Enable Wireframe Rendering",
+        "Enable Wireframe rendering for the Model",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending options",
         "Controls the blending function used to calculate the colors of the model with "
         "respect to the opacity.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo UseOverrideColorInfo = {
+        "UseOverrideColor",
+        "Use Override Color",
+        "Whether or not to render model with a single color.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OverrideColorInfo = {
+        "OverrideColor",
+        "Override Color",
+        "The single color to use for entire model (RGBA).",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -232,6 +268,9 @@ namespace {
         // [[codegen::verbatim(SpecularIntensityInfo.description)]]
         std::optional<float> specularIntensity;
 
+        // [[codegen::verbatim(SpecularPowerInfo.description)]]
+        std::optional<float> specularPower;
+
         // [[codegen::verbatim(ShadingInfo.description)]]
         std::optional<bool> performShading;
 
@@ -254,6 +293,9 @@ namespace {
         // [[codegen::verbatim(EnableDepthTestInfo.description)]]
         std::optional<bool> enableDepthTest;
 
+        // [[codegen::verbatim(RenderWireframeInfo.description)]]
+        std::optional<bool> renderWireframe;
+
         // [[codegen::verbatim(BlendingOptionInfo.description)]]
         std::optional<std::string> blendingOption;
 
@@ -262,6 +304,12 @@ namespace {
 
         // The path to a fragment shader program to use instead of the default shader.
         std::optional<std::filesystem::path> fragmentShader;
+
+        // [[codegen::verbatim(UseOverrideColorInfo.description)]]
+        std::optional<bool> useOverrideColor;
+
+        // [[codegen::verbatim(OverrideColorInfo.description)]]
+        std::optional<glm::vec4> overrideColor;
     };
 #include "renderablemodel_codegen.cpp"
 } // namespace
@@ -278,6 +326,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
     , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
     , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
+    , _specularPower(SpecularPowerInfo, 100.f, 0.5f, 1000.f)
     , _performShading(ShadingInfo, true)
     , _enableFaceCulling(EnableFaceCullingInfo, true)
     , _modelTransform(
@@ -306,6 +355,9 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
     , _enableDepthTest(EnableDepthTestInfo, true)
     , _blendingFuncOption(BlendingOptionInfo)
+    , _renderWireframe(RenderWireframeInfo, false)
+    , _useOverrideColor(UseOverrideColorInfo, false)
+    , _overrideColor(OverrideColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -407,9 +459,11 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     _ambientIntensity = p.ambientIntensity.value_or(_ambientIntensity);
     _diffuseIntensity = p.diffuseIntensity.value_or(_diffuseIntensity);
     _specularIntensity = p.specularIntensity.value_or(_specularIntensity);
+    _specularPower = p.specularPower.value_or(_specularPower);
     _performShading = p.performShading.value_or(_performShading);
     _enableDepthTest = p.enableDepthTest.value_or(_enableDepthTest);
     _enableFaceCulling = p.enableFaceCulling.value_or(_enableFaceCulling);
+    _renderWireframe = p.renderWireframe.value_or(_renderWireframe);
 
     _vertexShaderPath = p.vertexShader.value_or(_vertexShaderPath);
     _fragmentShaderPath = p.fragmentShader.value_or(_fragmentShaderPath);
@@ -425,17 +479,25 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
+    _useOverrideColor = p.useOverrideColor.value_or(_useOverrideColor);
+    _overrideColor = p.overrideColor.value_or(_overrideColor);
+
     addProperty(_enableAnimation);
     addPropertySubOwner(_lightSourcePropertyOwner);
     addProperty(_ambientIntensity);
     addProperty(_diffuseIntensity);
     addProperty(_specularIntensity);
+    addProperty(_specularPower);
     addProperty(_performShading);
     addProperty(_enableFaceCulling);
     addProperty(_enableDepthTest);
+    addProperty(_renderWireframe);
     addProperty(_modelTransform);
     addProperty(_pivot);
     addProperty(_rotationVec);
+    addProperty(_useOverrideColor);
+    _overrideColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_overrideColor);
 
     addProperty(_modelScale);
     _modelScale.setExponent(20.f);
@@ -793,6 +855,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
         _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
         _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
+        _program->setUniform(_uniformCache.specularPower, _specularPower);
     }
 
     _program->setUniform(
@@ -837,6 +900,10 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glDisable(GL_DEPTH_TEST);
     }
 
+    _program->setUniform("has_override_color", _useOverrideColor);
+    if (_useOverrideColor) {
+        _program->setUniform("override_color", _overrideColor);
+    }
 
     if (!_shouldRenderTwice) {
         // Reset manual depth test
@@ -854,7 +921,15 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             _program->setUniform(_uniformCache.opacity, 1.f);
         }
 
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+
         _geometry->render(*_program);
+
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
     }
     else {
         // Prepare framebuffer
@@ -916,8 +991,16 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         // Render Pass 1
         // Render all parts of the model into the new framebuffer without opacity
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+
         _geometry->render(*_program);
         _program->deactivate();
+
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
 
         // Render pass 2
         // Render the whole model into the G-buffer with the correct opacity

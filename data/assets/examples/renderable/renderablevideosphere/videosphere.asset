@@ -1,0 +1,34 @@
+-- Basic
+-- Creates a 3D sphere with a video texture mapped onto its surface.
+
+-- The video file is here downloaded from a URL. This code returns the path to a folder
+-- where the file is stored after download
+local data = asset.resource({
+  Name = "Example Video",
+  Type = "UrlSynchronization",
+  Identifier = "example_video",
+  Url = "https://liu-se.cdn.openspaceproject.com/files/examples/video/chlorophyll_model_2048.mp4"
+})
+
+-- For a local file, use "asset.resource("path/to/local/video.mp4")" here instead
+local video = data .. "chlorophyll_model_2048.mp4"
+
+local Node = {
+  Identifier = "RenderableVideoSphere_Example",
+  Renderable = {
+    Type = "RenderableVideoSphere",
+    Video = video
+  },
+  GUI = {
+    Name = "RenderableVideoSphere - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

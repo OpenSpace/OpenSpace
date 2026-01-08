@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___ULONGPROPERTY___H__
 
 #include <openspace/properties/numericalproperty.h>
+
 #include <limits>
 
 namespace openspace::properties {
@@ -36,7 +37,7 @@ namespace openspace::properties {
  */
 class ULongProperty : public NumericalProperty<unsigned long> {
 public:
-    ULongProperty(Property::PropertyInfo info, unsigned long value = 0ul,
+    explicit ULongProperty(Property::PropertyInfo info, unsigned long value = 0ul,
         unsigned long minValue = std::numeric_limits<unsigned long>::lowest(),
         unsigned long maxValue = std::numeric_limits<unsigned long>::max(),
         unsigned long stepValue = 1ul);

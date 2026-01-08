@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <functional>
 #include <memory>
+#include <string>
 
 namespace ghoul { class Dictionary; }
 
@@ -38,13 +39,13 @@ class Task {
 public:
     using ProgressCallback = std::function<void(float)>;
 
-    virtual ~Task() = default;
-    virtual void perform(const ProgressCallback& onProgress) = 0;
-    virtual std::string description() = 0;
-
     static std::unique_ptr<Task> createFromDictionary(
         const ghoul::Dictionary& dictionary
     );
+
+    virtual ~Task() = default;
+    virtual void perform(const ProgressCallback& onProgress) = 0;
+    virtual std::string description() = 0;
 
     static documentation::Documentation documentation();
 };

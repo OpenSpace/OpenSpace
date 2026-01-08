@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,16 +30,14 @@ namespace openspace {
 
 template <class ModuleSubClass>
 ModuleSubClass* ModuleEngine::module() const {
-    const auto it = std::find_if(_modules.begin(), _modules.end(),
+    const auto it = std::find_if(
+        _modules.begin(),
+        _modules.end(),
         [](const std::unique_ptr<OpenSpaceModule>& m) {
-        return m->identifier() == ModuleSubClass::Name;
-    });
-    if (it != _modules.end()) {
-        return dynamic_cast<ModuleSubClass*>(it->get());
-    }
-    else {
-        return nullptr;
-    }
+            return m->identifier() == ModuleSubClass::Name;
+        }
+    );
+    return it != _modules.end() ? dynamic_cast<ModuleSubClass*>(it->get()) : nullptr;
 }
 
 } // namespace openspace

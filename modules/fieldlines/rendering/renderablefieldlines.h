@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,8 +34,7 @@
 #include <openspace/properties/vector/vec4property.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/ghoul_gl.h>
-
-namespace ghoul::opengl { class ProgramObject; }
+#include <memory>
 
 namespace openspace {
 
@@ -54,7 +53,7 @@ public:
     void update(const UpdateData& data) override;
 
 private:
-    typedef std::vector<LinePoint> Line;
+    using Line = std::vector<LinePoint>;
 
     void initializeDefaultPropertyValues();
     void loadSeedPoints();

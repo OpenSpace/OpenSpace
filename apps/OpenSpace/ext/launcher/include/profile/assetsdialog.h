@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,13 +25,22 @@
 #ifndef __OPENSPACE_UI_LAUNCHER___ASSETSDIALOG___H__
 #define __OPENSPACE_UI_LAUNCHER___ASSETSDIALOG___H__
 
-#include <QDialog>
-#include <QRegularExpression>
 #include <QSortFilterProxyModel>
-#include "assettreemodel.h"
 
+#include <QDialog>
+#include "assettreemodel.h"
+#include <filesystem>
+
+class QObject;
+class QString;
+class QLineEdit;
+class QModelIndex;
+class QRegularExpression;
 class QTextEdit;
 class QTreeView;
+class QWidget;
+
+namespace openspace { class Profile; }
 
 class SearchProxyModel : public QSortFilterProxyModel {
 Q_OBJECT
@@ -81,7 +90,6 @@ private slots:
     void searchTextChanged(const QString& text);
 
 private:
-    void createWidgets();
     void setViewToBaseModel();
     void parseSelections();
     void selected(const QModelIndex&);

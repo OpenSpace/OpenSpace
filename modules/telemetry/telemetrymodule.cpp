@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <modules/telemetry/include/specific/planetscomparesonification.h>
 #include <modules/telemetry/include/specific/planetsoverviewsonification.h>
 #include <modules/telemetry/include/specific/planetssonification.h>
+#include <modules/telemetry/include/telemetrybase.h>
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
@@ -40,7 +41,11 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <chrono>
+#include <functional>
+#include <limits>
+#include <optional>
 
 namespace {
     // The default Open Sound Control receiver is SuperCollider with these default values.

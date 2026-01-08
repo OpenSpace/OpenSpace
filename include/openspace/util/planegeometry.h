@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,10 +42,10 @@ public:
     void render() const;
 
     void updateSize(const glm::vec2& size);
-    void updateSize(const float size);
+    void updateSize(float size);
 
 private:
-    void updateGeometry();
+    void updateGeometry() const;
 
     GLuint _vaoId = 0;
     GLuint _vBufferId = 0;

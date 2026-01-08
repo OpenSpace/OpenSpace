@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,10 +27,14 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
-#include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <algorithm>
+#include <cstdint>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "EventTopic";
@@ -42,10 +46,6 @@ namespace {
 using nlohmann::json;
 
 namespace openspace {
-
-bool EventTopic::isDone() const {
-    return !isSubscribed();
-}
 
 void EventTopic::handleJson(const nlohmann::json& json) {
     std::vector<std::string> events;
@@ -104,6 +104,10 @@ void EventTopic::handleJson(const nlohmann::json& json) {
             global::eventEngine->unregisterEventTopic(_topicId, type);
         }
     }
+}
+
+bool EventTopic::isDone() const {
+    return !isSubscribed();
 }
 
 bool EventTopic::isSubscribed() const {

@@ -166,7 +166,7 @@ local EclipticSphere = {
     Color = { 0.3, 0.15, 0.15 },
     LineWidth = 2.0,
     LatSegments = 19,
-    LongSegments = 24
+    LongSegments = 36
   },
   Tag = { "du_grid" },
   GUI = {

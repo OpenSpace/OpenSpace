@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,13 +29,14 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/properties/property.h>
-#include <openspace/scene/scene.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/invariants.h>
+#include <ghoul/misc/profiling.h>
 #include <algorithm>
-#include <numeric>
+#include <memory>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "PropertyOwner";
@@ -106,7 +107,7 @@ std::vector<PropertyOwner*> PropertyOwner::subownersRecursive() const {
     return subowners;
 }
 
-Property* PropertyOwner::property(const std::string& uri) const {
+Property* PropertyOwner::property(std::string_view uri) const {
     auto it = std::find_if(
         _properties.begin(),
         _properties.end(),
@@ -122,8 +123,8 @@ Property* PropertyOwner::property(const std::string& uri) const {
             return nullptr;
         }
         else {
-            const std::string ownerName = uri.substr(0, ownerSeparator);
-            const std::string propertyName = uri.substr(ownerSeparator + 1);
+            const std::string_view ownerName = uri.substr(0, ownerSeparator);
+            const std::string_view propertyName = uri.substr(ownerSeparator + 1);
 
             PropertyOwner* owner = propertySubOwner(ownerName);
             if (!owner) {
@@ -140,7 +141,7 @@ Property* PropertyOwner::property(const std::string& uri) const {
     }
 }
 
-PropertyOwner* PropertyOwner::propertyOwner(const std::string& uri) const {
+PropertyOwner* PropertyOwner::propertyOwner(std::string_view uri) const {
     PropertyOwner* directChild = propertySubOwner(uri);
     if (directChild) {
         return directChild;
@@ -154,8 +155,8 @@ PropertyOwner* PropertyOwner::propertyOwner(const std::string& uri) const {
         return nullptr;
     }
     else {
-        const std::string parentName = uri.substr(0, ownerSeparator);
-        const std::string ownerName = uri.substr(ownerSeparator + 1);
+        const std::string_view parentName = uri.substr(0, ownerSeparator);
+        const std::string_view ownerName = uri.substr(ownerSeparator + 1);
 
         PropertyOwner* owner = propertySubOwner(parentName);
         return owner ? owner->propertyOwner(ownerName) : nullptr;
@@ -206,7 +207,7 @@ const std::vector<PropertyOwner*>& PropertyOwner::propertySubOwners() const {
     return _subOwners;
 }
 
-PropertyOwner* PropertyOwner::propertySubOwner(const std::string& identifier) const {
+PropertyOwner* PropertyOwner::propertySubOwner(std::string_view identifier) const {
     std::vector<PropertyOwner*>::const_iterator it = std::find_if(
         _subOwners.begin(),
         _subOwners.end(),

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,18 +28,13 @@
 #include <modules/base/rendering/renderablesphere.h>
 
 #include <openspace/engine/downloadmanager.h>
-
-namespace ghoul::opengl { class Texture; }
+#include <openspace/properties/misc/stringproperty.h>
+#include <future>
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
 /**
- * This class describes a sphere renderable that displays an image from an online source
+ * This class describes a sphere renderable that displays an image from an online source.
  */
 class RenderableSphereImageOnline : public RenderableSphere {
 public:

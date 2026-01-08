@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,11 +29,19 @@
 #include <openspace/util/spicemanager.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
+#include <cctype>
+#include <cmath>
 #include <memory>
 #include <fstream>
+#include <sstream>
+#include <string_view>
+#include <utility>
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+
+#include <modules/kameleon/include/kameleonhelper.h>
 
 #ifdef _MSC_VER
 #pragma warning (push)
@@ -42,9 +50,10 @@
 #endif // _MSC_VER
 
 #include <ccmc/Kameleon.h>
+#include <ccmc/Fieldline.h>
 #include <ccmc/KameleonInterpolator.h>
+#include <ccmc/Point3f.h>
 #include <ccmc/Tracer.h>
-#include <modules/kameleon/include/kameleonhelper.h>
 
 #ifdef _MSC_VER
 #pragma warning (pop)
@@ -89,12 +98,12 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     return false;
 #else // OPENSPACE_MODULE_KAMELEON_ENABLED
     // Create Kameleon object and open CDF file!
-    std::unique_ptr<ccmc::Kameleon> kameleon = kameleonHelper::createKameleonObject(
+    std::unique_ptr<ccmc::Kameleon> kameleon = kameleonhelper::createKameleonObject(
         cdfPath
     );
 
     state.setModel(fls::stringToModel(kameleon->getModelName()));
-    double cdfDoubleTime = kameleonHelper::getTime(kameleon.get(), manualTimeOffset);
+    double cdfDoubleTime = kameleonhelper::getTime(kameleon.get(), manualTimeOffset);
     state.setTriggerTime(cdfDoubleTime);
 
     // get time as string.

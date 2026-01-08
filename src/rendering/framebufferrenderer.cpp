@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,6 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/deferredcaster.h>
 #include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/raycastermanager.h>
@@ -38,15 +37,18 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <fstream>
+#include <algorithm>
+#include <filesystem>
+#include <memory>
 #include <string>
-#include <vector>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "FramebufferRenderer";
@@ -512,8 +514,8 @@ void FramebufferRenderer::updateDownscaleTextures() const {
         GL_TEXTURE_2D,
         0,
         GL_DEPTH_COMPONENT32F,
-        static_cast<GLsizei>(glm::max(_resolution.x * cdf, 1.f)),
-        static_cast<GLsizei>(glm::max(_resolution.y * cdf, 1.f)),
+        static_cast<GLsizei>(std::max(_resolution.x * cdf, 1.f)),
+        static_cast<GLsizei>(std::max(_resolution.y * cdf, 1.f)),
         0,
         GL_DEPTH_COMPONENT,
         GL_FLOAT,

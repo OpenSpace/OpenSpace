@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEREADER___H__
 
 #include <ghoul/glm.h>
+#include <array>
 #include <filesystem>
 #include <memory>
 #include <string>
@@ -35,8 +36,7 @@ namespace ccmc {
     class Attribute;
     class Interpolator;
     class Kameleon;
-} // namespce ccmc
-
+} // namespace ccmc
 namespace ghoul { class Dictionary; }
 namespace openspace::volume { template <typename T> class RawVolume; }
 

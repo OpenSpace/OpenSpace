@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,18 +39,16 @@ namespace CCfits {
     class ExtHDU;
 } // namespace CCfits
 
-namespace ghoul::opengl { class Texture; }
-
 namespace openspace {
 
-template<typename T>
+template <typename T>
 struct ImageData {
     std::valarray<T> contents;
     long int width;
     long int height;
 };
 
-template<typename T>
+template <typename T>
 struct TableData {
     std::unordered_map<std::string, std::vector<T>> contents;
     int readRows;
@@ -63,13 +61,13 @@ public:
     explicit FitsFileReader(bool verboseMode);
     ~FitsFileReader();
 
-    template<typename T>
+    template <typename T>
     std::shared_ptr<ImageData<T>> readImage(const std::filesystem::path& path);
 
-    template<typename T>
+    template <typename T>
     std::shared_ptr<std::unordered_map<std::string, T>> readHeader(
         std::vector<std::string>& keywords);
-    template<typename T>
+    template <typename T>
     std::shared_ptr<T> readHeaderValue(const std::string key);
 
     /**
@@ -78,7 +76,7 @@ public:
      * longer if it's a big file. If no HDU index is given the current Extension HDU will
      * be read from.
      */
-    template<typename T>
+    template <typename T>
     std::shared_ptr<TableData<T>> readTable(const std::filesystem::path& path,
         const std::vector<std::string>& columnNames, int startRow = 1, int endRow = 10,
         int hduIdx = 1, bool readAll = false);
@@ -105,10 +103,10 @@ private:
     bool _verboseMode;
 
     bool isPrimaryHDU();
-    template<typename T>
+    template <typename T>
     std::shared_ptr<ImageData<T>> readImageInternal(CCfits::PHDU& image);
 
-    template<typename T>
+    template <typename T>
     std::shared_ptr<ImageData<T>> readImageInternal(CCfits::ExtHDU& image);
 
     mutable std::mutex _mutex;

@@ -1,6 +1,6 @@
 <GDAL_WMS>
   <Service name="TMS">
-    <ServerUrl>http://wms.itn.liu.se/Enceladus/Cassini_ISS_Global_Mosaic_100m_HPF/tile/${z}/${y}/${x}</ServerUrl>
+    <ServerUrl>http://liu-se.wms.openspaceproject.com/Enceladus/Cassini_ISS_Global_Mosaic_100m_HPF/tile/${z}/${y}/${x}</ServerUrl>
   </Service>
   <DataWindow>
     <UpperLeftX>-180.0</UpperLeftX>
