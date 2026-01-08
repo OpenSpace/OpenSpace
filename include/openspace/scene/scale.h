@@ -44,7 +44,7 @@ public:
     static ghoul::mm_unique_ptr<Scale> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
-    Scale(const ghoul::Dictionary& dictionary);
+    explicit Scale(const ghoul::Dictionary& dictionary);
     virtual ~Scale() override = default;
 
     virtual void initialize();

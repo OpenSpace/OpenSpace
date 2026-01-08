@@ -25,6 +25,7 @@
 #include <modules/base/translation/statictranslation.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/util/updatestructures.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo PositionInfo = {
@@ -65,6 +66,10 @@ StaticTranslation::StaticTranslation(const ghoul::Dictionary& dictionary)
     // negative values very well. When they do, this line can be uncommented
     //_position.setExponent(20.f);
     addProperty(_position);
+
+    // We need to trigger an update or else the `_cacheScale` value will not be the same
+    // as `_scaleValue` until the first "real" update call
+    update(UpdateData());
 }
 
 glm::dvec3 StaticTranslation::position(const UpdateData&) const {
