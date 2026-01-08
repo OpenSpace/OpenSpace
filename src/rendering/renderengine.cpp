@@ -687,24 +687,24 @@ uint64_t RenderEngine::frameNumber() const {
 }
 
 void RenderEngine::registerShadowCaster(const std::string& shadowGroup,
-                                        const SceneGraphNode* lightsource,
+                                        const SceneGraphNode* lightSource,
                                         SceneGraphNode* shadower,
                                         SceneGraphNode* shadowee)
 {
     using namespace shadowmapping;
 
     ghoul_assert(!shadowGroup.empty(), "No shadowGroup specified");
-    ghoul_assert(lightsource, "No light source specified");
+    ghoul_assert(lightSource, "No light source specified");
     ghoul_assert(shadower, "No shadower specified");
     ghoul_assert(shadowee, "No shadowee specified");
 
-    _renderer.registerShadowCaster(shadowGroup, lightsource, shadower);
+    _renderer.registerShadowCaster(shadowGroup, lightSource, shadower);
 
     Shadower* sr = dynamic_cast<Shadower*>(shadower->renderable());
     if (!sr) {
         throw ghoul::RuntimeError("Provided shadower scene graph node is not a shadower");
     }
-    sr->setLightSource(lightsource);
+    sr->setLightSource(lightSource);
     sr->setShadowGroup(shadowGroup);
 
     Shadowee* se = dynamic_cast<Shadowee*>(shadowee->renderable());

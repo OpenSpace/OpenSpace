@@ -40,10 +40,12 @@ namespace openspace {
 namespace openspace::shadowmapping {
 
 struct ShadowInfo {
-    const SceneGraphNode* lightsource = nullptr;
+    const SceneGraphNode* lightSource = nullptr;
     std::vector<const SceneGraphNode*> targets;
-    GLuint depthMap = 0;
-    glm::ivec2 depthMapResolution = glm::ivec2(0);
+    struct {
+        GLuint texture = 0;
+        glm::ivec2 resolution = glm::ivec2(0);
+    } depthMap;
     GLuint fbo = 0;
     glm::dmat4 viewProjectionMatrix = glm::dmat4(1.0);
 };

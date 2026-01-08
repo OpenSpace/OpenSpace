@@ -56,7 +56,7 @@ void GuiShadowComponent::render() {
 
     for (const std::string& group : groups) {
         shadowmapping::ShadowInfo sm = renderer.shadowInformation(group);
-        std::string lightSource = sm.lightsource->identifier();
+        std::string lightSource = sm.lightSource->identifier();
 
         ImGui::BeginGroup();
         ImGui::Text("%s", group.c_str());

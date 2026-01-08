@@ -836,40 +836,32 @@ void RenderableModel::deinitializeGL() {
 }
 
 void RenderableModel::createDepthMapResources() {
+    using ProgramObject = ghoul::opengl::ProgramObject;
+
     _depthMapProgram = BaseModule::ProgramObjectManager.request(
         "ModelDepthMapProgram",
-        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        [&]() -> std::unique_ptr<ProgramObject> {
             std::filesystem::path vs =
                 absPath("${MODULE_BASE}/shaders/model_depth_vs.glsl");
             std::filesystem::path fs =
                 absPath("${MODULE_BASE}/shaders/model_depth_fs.glsl");
 
-            std::unique_ptr<ghoul::opengl::ProgramObject> prog =
-                global::renderEngine->buildRenderProgram(
-                    "ModelDepthMapProgram",
-                    vs,
-                    fs
-                );
-            prog->setIgnoreAttributeLocationError(
-                ghoul::opengl::ProgramObject::IgnoreError::Yes
-            );
-            prog->setIgnoreUniformLocationError(
-                ghoul::opengl::ProgramObject::IgnoreError::Yes
-            );
+            std::unique_ptr<ProgramObject> prog =
+                global::renderEngine->buildRenderProgram("ModelDepthMapProgram", vs, fs);
+            prog->setIgnoreAttributeLocationError(ProgramObject::IgnoreError::Yes);
+            prog->setIgnoreUniformLocationError(ProgramObject::IgnoreError::Yes);
             return prog;
         }
     );
 }
 
 void RenderableModel::releaseDepthMapResources() {
-    if (_depthMapProgram) {
-        BaseModule::ProgramObjectManager.release(
-            _depthMapProgram->name(),
-            [](ghoul::opengl::ProgramObject* p) {
-                global::renderEngine->removeRenderProgram(p);
-            }
-        );
-    }
+    BaseModule::ProgramObjectManager.release(
+        "ModelDepthMapProgram",
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine->removeRenderProgram(p);
+        }
+    );
 }
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
@@ -983,36 +975,29 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     }
 
     // does only really need to be set when _castShadow changes
-    _program->setUniform("has_shadow_depth_map", _castShadow);
+    _program->setUniform(_uniformCache.has_shadow_depth_map, _castShadow);
 
     ghoul::opengl::TextureUnit shadowUnit;
     if (_castShadow && _lightSource) {
         shadowmapping::ShadowInfo sm =
             global::renderEngine->renderer().shadowInformation(_shadowGroup);
 
-        _program->setUniform("model", modelTransform);
-        _program->setUniform("light_vp", sm.viewProjectionMatrix);
-        _program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
+        _program->setUniform(_uniformCache.model, modelTransform);
+        _program->setUniform(_uniformCache.light_vp, sm.viewProjectionMatrix);
 
         shadowUnit.activate();
-        glBindTexture(
-            GL_TEXTURE_2D,
-            sm.depthMap
-        );
-        _program->setUniform("shadow_depth_map", shadowUnit);
+        glBindTexture(GL_TEXTURE_2D, sm.depthMap.texture);
+        _program->setUniform(_uniformCache.shadow_depth_map, shadowUnit);
     }
 
-    _program->setUniform("has_override_color", _useOverrideColor);
+    _program->setUniform(_uniformCache.has_override_color, _useOverrideColor);
     if (_useOverrideColor) {
-        _program->setUniform("override_color", _overrideColor);
+        _program->setUniform(_uniformCache.override_color, _overrideColor);
     }
 
     if (!_shouldRenderTwice) {
         // Reset manual depth test
-        _program->setUniform(
-            _uniformCache.performManualDepthTest,
-            false
-        );
+        _program->setUniform(_uniformCache.performManualDepthTest, false);
 
         if (hasOverrideRenderBin()) {
             // If override render bin is set then use the opacity values as normal
@@ -1063,10 +1048,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
 
         // Use a manuel depth test to make the models aware of the rest of the scene
-        _program->setUniform(
-            _uniformCache.performManualDepthTest,
-            _enableDepthTest
-        );
+        _program->setUniform(_uniformCache.performManualDepthTest, _enableDepthTest);
 
         // Bind the G-buffer depth texture for a manual depth test towards the rest
         // of the scene
@@ -1076,10 +1058,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             GL_TEXTURE_2D,
             global::renderEngine->renderer().gBufferDepthTexture()
         );
-        _program->setUniform(
-            _uniformCache.gBufferDepthTexture,
-            gBufferDepthTextureUnit
-        );
+        _program->setUniform(_uniformCache.gBufferDepthTexture, gBufferDepthTextureUnit);
 
         // Will also need the resolution to get a texture coordinate for the G-buffer
         // depth texture
@@ -1292,12 +1271,7 @@ void RenderableModel::renderForDepthMap(const glm::dmat4& vp) const {
 glm::dvec3 RenderableModel::center() const {
     glm::dmat4 transform = glm::translate(glm::dmat4(1.0), glm::dvec3(_pivot.value()));
     transform *= glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
-    glm::dmat4 model = this->parent()->modelTransform() * transform;
-
-    if (_modelHasAnimation) {
-        return model * glm::dvec4(0.0, 0.0, 0.0, 1.0);
-    }
-
+    glm::dmat4 model = parent()->modelTransform() * transform;
     return model * glm::dvec4(0.0, 0.0, 0.0, 1.0);
 }
 

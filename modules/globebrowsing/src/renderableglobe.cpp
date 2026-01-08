@@ -1337,9 +1337,9 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
     std::vector<DepthMapData> depthMapData;
     for (const auto& [node, groups] : _shadowSpec) {
         for (const std::string& grp : groups) {
-            shadowmapping::ShadowInfo sm =
+            const shadowmapping::ShadowInfo& sm =
                 global::renderEngine->renderer().shadowInformation(grp);
-            depthMapData.emplace_back(sm.depthMap, sm.viewProjectionMatrix);
+            depthMapData.emplace_back(sm.depthMap.texture, sm.viewProjectionMatrix);
         }
     }
 
@@ -1479,7 +1479,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         GLint loc = glGetUniformLocation(program, "light_vps");
         glUniformMatrix4dv(
             loc,
-            lightViewProjections.size(),
+            static_cast<GLsizei>(lightViewProjections.size()),
             GL_FALSE,
             glm::value_ptr(lightViewProjections.front())
         );
@@ -1713,7 +1713,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
         GLint loc = glGetUniformLocation(*_localRenderer.program, "light_vps");
         glUniformMatrix4dv(
             loc,
-            lightViewProjections.size(),
+            static_cast<GLsizei>(lightViewProjections.size()),
             GL_FALSE,
             glm::value_ptr(lightViewProjections.front())
         );

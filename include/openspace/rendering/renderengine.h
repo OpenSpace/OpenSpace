@@ -160,10 +160,10 @@ public:
 
     uint64_t frameNumber() const;
 
-    void registerShadowCaster(const std::string& shadowgroup,
+    void registerShadowCaster(const std::string& shadowGroup,
         const SceneGraphNode* lightSource, SceneGraphNode* shadower,
         SceneGraphNode* shadowee);
-    void removeShadowCaster(const std::string& shadowgroup, SceneGraphNode* shadower,
+    void removeShadowCaster(const std::string& shadowGroup, SceneGraphNode* shadower,
         SceneGraphNode* shadowee);
 
 private:

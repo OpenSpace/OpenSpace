@@ -169,8 +169,6 @@ public:
         const glm::ivec4& viewport);
     void render(Scene* scene, Camera* camera, float blackoutFactor);
 
-    void renderDepthMaps();
-
     /**
      * Update render data. Responsible for calling renderEngine::setRenderData
      */
@@ -182,10 +180,10 @@ public:
         DeferredcasterListener::IsAttached isAttached) override;
 
     void registerShadowCaster(const std::string& shadowGroup,
-        const SceneGraphNode* lightsource, const SceneGraphNode* target);
+        const SceneGraphNode* lightSource, const SceneGraphNode* target);
     void removeShadowCaster(const std::string& shadowGroup, const SceneGraphNode* target);
 
-    shadowmapping::ShadowInfo shadowInformation(const std::string& shadowgroup) const;
+    shadowmapping::ShadowInfo shadowInformation(const std::string& shadowGroup) const;
     std::vector<std::string> shadowGroups() const;
 
 private:
@@ -202,6 +200,7 @@ private:
     void applyFXAA(const glm::ivec4& viewport);
     void updateDownscaleTextures() const;
     void writeDownscaledVolume(const glm::ivec4& viewport);
+    void renderDepthMaps();
 
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     RaycasterProgObjMap _exitPrograms;

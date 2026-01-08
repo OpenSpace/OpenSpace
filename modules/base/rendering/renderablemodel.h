@@ -113,7 +113,8 @@ private:
         has_texture_normal, has_texture_specular, has_color_specular, texture_diffuse,
         texture_normal, texture_specular, color_diffuse, color_specular, opacity,
         nLightSources, lightDirectionsViewSpace, lightIntensities, performManualDepthTest,
-        gBufferDepthTexture, resolution
+        gBufferDepthTexture, resolution, has_shadow_depth_map, model, light_vp,
+        shadow_depth_map, has_override_color, override_color
     ) _uniformCache;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;

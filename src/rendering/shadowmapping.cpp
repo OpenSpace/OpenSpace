@@ -32,8 +32,6 @@
 #include <optional>
 
 namespace {
-    constexpr int DepthMapResolutionMultiplier = 4;
-
     constexpr openspace::properties::Property::PropertyInfo CastShadowInfo = {
         "CastShadow",
         "Cast shadow",
