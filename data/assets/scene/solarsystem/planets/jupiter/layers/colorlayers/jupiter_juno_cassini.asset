@@ -1,5 +1,7 @@
 local globe = asset.require("scene/solarsystem/planets/jupiter/jupiter")
 
+
+
 local texturesPath = asset.resource({
   Name = "Jupiter Textures",
   Type = "HttpSynchronization",
