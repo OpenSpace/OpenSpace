@@ -63,11 +63,10 @@ local Object = {
       ring centered on each host star. The ring is not intended to signify an orbit, but
       serve only as a marker. The labels list the host star name, and if there is more
       than one planet, will list the number of planets in parentheses.
-      Colors: When enabling color mapping, matplotlib 'sequential-cool' is used, by
-      default mapping the number of planets found, with options available for discovery
-      year and method. For number of planets, the colors are start at teal for one planet,
-      and progress to magenta for the maximum number of planets found in a system (which is
-      currently 8). Census: 5,589 planets in 4,139 systems.]]
+      Colors: When enabling color mapping, the colormap matplotlib 'sequential-cool'
+      is used, mapping lower values to the color teal and increasing to magenta. By
+      default the number of found planets is mapped to the colormap, with options
+      available for discovery year and method. Census: 5,589 planets in 4,139 systems.]]
   }
 }
 
