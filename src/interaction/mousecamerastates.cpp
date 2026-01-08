@@ -92,7 +92,7 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
         _currentSensitivityRamp * SensitivityAdjustmentIncrease;
 
     // Update the mouse states
-    if ( (primaryPressed || button4Pressed) && !keyShiftPressed && !keyAltPressed) {
+    if ((primaryPressed || button4Pressed) && !keyShiftPressed && !keyAltPressed) {
         if (keyCtrlPressed || button4Pressed) {
             const glm::dvec2 mousePositionDelta =
                 _localRotationState.previousValue - mousePosition;
