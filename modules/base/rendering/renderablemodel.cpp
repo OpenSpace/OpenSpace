@@ -523,8 +523,10 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         // Set Interaction sphere size to be 10% of the bounding sphere
         setInteractionSphere(boundingSphere() * 0.1);
 
-        if (_hasFrustumSize) {
-            const float r = static_cast<float>(_geometry->boundingRadius() * _modelScale);
+        if (!_hasFrustumSize) {
+            const double bounds = _geometry->boundingRadius();
+            // The *2 is a fudge-factor to make the shadowing work for most cases
+            const float r = static_cast<float>(bounds * _modelScale * 2.f);
             _frustumSize = r;
             _frustumSize.setMinValue(r * 0.1f);
             _frustumSize.setMaxValue(r * 3.f);
@@ -775,8 +777,10 @@ void RenderableModel::initializeGL() {
     _geometry->calculateBoundingRadius();
     setBoundingSphere(_geometry->boundingRadius() * _modelScale);
 
-    if (_hasFrustumSize) {
-        const float r = static_cast<float>(_geometry->boundingRadius() * _modelScale);
+    if (!_hasFrustumSize) {
+        const double bounds = _geometry->boundingRadius();
+        // The *2 is a fudge-factor to make the shadowing work for most cases
+        const float r = static_cast<float>(bounds * _modelScale * 2.f);
         _frustumSize = r;
         _frustumSize.setMinValue(r * 0.1f);
         _frustumSize.setMaxValue(r * 3.f);
