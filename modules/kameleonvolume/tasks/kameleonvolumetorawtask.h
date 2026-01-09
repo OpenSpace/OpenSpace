@@ -47,7 +47,10 @@ private:
     std::filesystem::path _dictionaryOutputPath;
 
     std::string _variable;
+    std::vector<std::string> _variableVector;
     std::string _units;
+    bool _factorRSquared = false;
+    float _innerRadialLimit = -1.f;
     glm::uvec3 _dimensions = glm::uvec3(0);
     bool _autoDomainBounds = false;
     glm::vec3 _lowerDomainBound = glm::vec3(0.f);

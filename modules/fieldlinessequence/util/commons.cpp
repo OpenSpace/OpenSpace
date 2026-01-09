@@ -36,6 +36,9 @@ Model stringToModel(const std::string& s) {
     else if (s == "pfss") {
         return Model::Pfss;
     }
+    else if (s == "mas") {
+        return Model::Mas;
+    }
     return Model::Invalid;
 }
 
