@@ -73,6 +73,7 @@ set(OPENSPACE_SOURCE
   mission/missionmanager.cpp
   mission/missionmanager_lua.inl
   navigation/pathcurves/avoidcollisioncurve.cpp
+  navigation/pathcurves/orbitobjectcurve.cpp
   navigation/pathcurves/zoomoutoverviewcurve.cpp
   navigation/keyframenavigator.cpp
   navigation/navigationhandler.cpp
@@ -273,6 +274,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/mission/mission.h
   ${PROJECT_SOURCE_DIR}/include/openspace/mission/missionmanager.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/pathcurves/avoidcollisioncurve.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/pathcurves/orbitobjectcurve.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/pathcurves/zoomoutoverviewcurve.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/keyframenavigator.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/navigationhandler.h

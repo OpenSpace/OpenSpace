@@ -30,6 +30,7 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/pathcurves/avoidcollisioncurve.h>
+#include <openspace/navigation/pathcurves/orbitobjectcurve.h>
 #include <openspace/navigation/pathcurves/zoomoutoverviewcurve.h>
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/properties/property.h>
@@ -115,6 +116,7 @@ namespace {
         enum class [[codegen::map(openspace::interaction::Path::Type)]] PathType {
             AvoidCollision,
             ZoomOutOverview,
+            OrbitObject,
             Linear,
             AvoidCollisionWithLookAt
         };
@@ -146,6 +148,11 @@ Path::Path(Waypoint start, Waypoint end, Type type, std::optional<float> duratio
         case Type::ZoomOutOverview:
             _curve = std::make_unique<ZoomOutOverviewCurve>(_start, _end);
             break;
+        case Type::OrbitObject:
+            _curve = std::make_unique<OrbitObjectCurve>(_start, _end);
+            break;
+        default:
+            throw ghoul::MissingCaseException();
     }
 
     _prevPose = _start.pose();
@@ -334,6 +341,7 @@ glm::dquat Path::interpolateRotation(double t) const {
             return linearPathRotation(t);
         case Type::ZoomOutOverview:
         case Type::AvoidCollisionWithLookAt:
+        case Type::OrbitObject:
             return lookAtTargetsRotation(t);
         default:
             throw ghoul::MissingCaseException();

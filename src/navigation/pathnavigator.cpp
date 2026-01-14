@@ -138,6 +138,7 @@ PathNavigator::PathNavigator()
     _defaultPathType.addOptions({
         { static_cast<int>(Path::Type::AvoidCollision), "AvoidCollision" },
         { static_cast<int>(Path::Type::ZoomOutOverview), "ZoomOutOverview" },
+        { static_cast<int>(Path::Type::OrbitObject), "OrbitObject" },
         { static_cast<int>(Path::Type::Linear), "Linear" },
         {
             static_cast<int>(Path::Type::AvoidCollisionWithLookAt),

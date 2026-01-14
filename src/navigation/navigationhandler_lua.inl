@@ -773,7 +773,22 @@ void flyToGeoInternal(std::string node, double latitude, double longitude,
     instruction.setValue("TargetType", std::string("Node"));
     instruction.setValue("Target", n->identifier());
     instruction.setValue("Position", positionModelCoords);
-    instruction.setValue("PathType", std::string("ZoomOutOverview"));
+
+    const SceneGraphNode* anchor = global::navigationHandler->orbitalNavigator().anchorNode();
+    if (!anchor) {
+        throw ghoul::lua::LuaError("No anchor node is set");
+    }
+
+    // Is the current anchor the position we're flying from? Then use the orbit path.
+    // Otherwise, first fly to an overview position.
+    // @TODO (emmbr, 2025-01-14) This assumption is too simple for "real use".
+    // We might not want to just rotate if we're very close to the surface, for example.
+    if (anchor->identifier() == n->identifier()) {
+        instruction.setValue("PathType", std::string("OrbitObject"));
+    }
+    else {
+        instruction.setValue("PathType", std::string("ZoomOutOverview"));
+    }
 
     if (duration.has_value()) {
         if (*duration < 0) {

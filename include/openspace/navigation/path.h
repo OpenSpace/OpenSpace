@@ -45,6 +45,7 @@ public:
     enum class Type {
         AvoidCollision = 0,
         ZoomOutOverview,
+        OrbitObject,
         Linear,
 
         // @TODO (2021-08-13, emmbr) This type right now leads to rapid rotations, but is
