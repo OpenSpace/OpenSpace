@@ -41,6 +41,7 @@
 #pragma warning (disable : 4619)
 #endif // _MSC_VER
 
+#include <ccmc/Kameleon.h>
 #include <ccmc/KameleonInterpolator.h>
 #include <ccmc/Tracer.h>
 #include <modules/kameleon/include/kameleonhelper.h>
@@ -72,104 +73,12 @@ namespace openspace::fls {
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 // ------------------------------------------------------------------------------------ //
 
-std::unordered_map<std::string, std::vector<glm::vec3>>
-extractSeedPointsFromFiles(std::filesystem::path filePath) {
-    std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
-
-    if (!std::filesystem::is_directory(filePath)) {
-        LERROR(std::format(
-            "The specified seed point directory: '{}' does not exist", filePath
-        ));
-        return outMap;
-    }
-
-    namespace fs = std::filesystem;
-    for (const fs::directory_entry& spFile : fs::directory_iterator(filePath)) {
-        std::string seedFilePath = spFile.path().string();
-        if (!spFile.is_regular_file() ||
-            seedFilePath.substr(seedFilePath.find_last_of('.') + 1) != "txt")
-        {
-            continue;
-        }
-
-        std::ifstream seedFile(seedFilePath);
-        if (!seedFile.good()) {
-            LERROR(std::format("Could not open seed points file '{}'", seedFilePath));
-            outMap.clear();
-            return {};
-        }
-
-        LDEBUG(std::format("Reading seed points from file '{}'", seedFilePath));
-        std::string line;
-        std::vector<glm::vec3> outVec;
-        while (std::getline(seedFile, line)) {
-            std::stringstream ss(line);
-            glm::vec3 point;
-            ss >> point.x;
-            ss >> point.y;
-            ss >> point.z;
-            outVec.push_back(std::move(point));
-        }
-
-        if (outVec.empty()) {
-            LERROR(std::format("Found no seed points in: {}", seedFilePath));
-            outMap.clear();
-            return {};
-        }
-
-        size_t lastIndex = seedFilePath.find_last_of('.');
-        std::string name = seedFilePath.substr(0, lastIndex);   // remove file extention
-        size_t dateAndTimeSeperator = name.find_last_of('_');
-        std::string time = name.substr(dateAndTimeSeperator + 1, name.length());
-        std::string date = name.substr(dateAndTimeSeperator - 8, 8);    // 8 for yyyymmdd
-        std::string dateAndTime = date + time;
-
-        // add outVec as value and time stamp as int as key
-        outMap[dateAndTime] = outVec;
-    }
-    return outMap;
-}
-
-std::vector<std::string>
-extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars) {
-    std::vector<std::string> extraMagVars;
-    for (int i = 0; i < static_cast<int>(extrVars.size()); i++) {
-        const std::string& str = extrVars[i];
-        // Check if string is in the format specified for magnitude variables
-        if (str.substr(0, 2) == "|(" && str.substr(str.size() - 2, 2) == ")|") {
-            std::istringstream ss(str.substr(2, str.size() - 4));
-            std::string magVar;
-            size_t counter = 0;
-            while (std::getline(ss, magVar, ',')) {
-                magVar.erase(
-                    std::remove_if(
-                        magVar.begin(),
-                        magVar.end(),
-                        ::isspace
-                    ),
-                    magVar.end()
-                );
-                extraMagVars.push_back(magVar);
-                counter++;
-                if (counter == 3) {
-                    break;
-                }
-            }
-            if (counter != 3 && counter > 0) {
-                extraMagVars.erase(extraMagVars.end() - counter, extraMagVars.end());
-            }
-            extrVars.erase(extrVars.begin() + i);
-            i--;
-        }
-    }
-    return extraMagVars;
-}
-
-
-/** Traces field lines from the provided cdf file using kameleon and stores the data in
+/**
+ * Traces field lines from the provided cdf file using kameleon and stores the data in
  * the provided FieldlinesState.
  * Returns `false` if it fails to create a valid state. Requires the kameleon module to
  * be activated!
+ *
  * \param state, FieldlineState which should hold the extracted data
  * \param cdfPath, std::string of the absolute path to a .cdf file
  * \param seedPoints, vector of seed points from which to trace field lines
@@ -233,12 +142,97 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 }
 
-bool traceFromListOfPoints(
-                            FieldlinesState& state, const std::string& cdfPath,
-                            std::vector<glm::vec3>&seedPoints,
-                            const std::string& tracingVar,
-                            std::vector<std::string>& extraVars,
-                            std::vector<std::string>& extraMagVars)
+std::unordered_map<std::string, std::vector<glm::vec3>>
+extractSeedPointsFromFiles(std::filesystem::path path)
+{
+    std::unordered_map<std::string, std::vector<glm::vec3>> outMap;
+
+    if (!std::filesystem::is_directory(path)) {
+        LERROR(std::format(
+            "The specified seed point directory: '{}' does not exist", path
+        ));
+        return outMap;
+    }
+
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& spFile : fs::directory_iterator(path)) {
+        fs::path seedFilePath = spFile.path();
+        if (!spFile.is_regular_file() || seedFilePath.extension() != "txt") {
+            continue;
+        }
+
+        std::ifstream seedFile = std::ifstream(seedFilePath);
+        if (!seedFile.good()) {
+            LERROR(std::format("Could not open seed points file '{}'", seedFilePath));
+            outMap.clear();
+            return {};
+        }
+
+        LDEBUG(std::format("Reading seed points from file '{}'", seedFilePath));
+        std::string line;
+        std::vector<glm::vec3> outVec;
+        while (std::getline(seedFile, line)) {
+            std::stringstream ss = std::stringstream(line);
+            glm::vec3 point;
+            ss >> point.x;
+            ss >> point.y;
+            ss >> point.z;
+            outVec.push_back(std::move(point));
+        }
+
+        if (outVec.empty()) {
+            LERROR(std::format("Found no seed points in: {}", seedFilePath));
+            return {};
+        }
+
+        std::string name = seedFilePath.stem().string();   // remove file extention
+        size_t dateAndTimeSeperator = name.find_last_of('_');
+        std::string time = name.substr(dateAndTimeSeperator + 1, name.length());
+        std::string date = name.substr(dateAndTimeSeperator - 8, 8);    // 8 for yyyymmdd
+        std::string dateAndTime = date + time;
+
+        // Add outVec as value, with time stamp as key
+        outMap[dateAndTime] = outVec;
+    }
+    return outMap;
+}
+
+std::vector<std::string>
+extractMagnitudeVarsFromStrings(std::vector<std::string> vars)
+{
+    std::vector<std::string> extraMagVars;
+    for (size_t i = 0; i < vars.size(); i++) {
+        const std::string& str = vars[i];
+        // Check if string is in the format specified for magnitude variables
+        if (str.substr(0, 2) != "|(" || str.substr(str.size() - 2, 2) != ")|") {
+            continue;
+        }
+
+        std::istringstream ss = std::istringstream(str.substr(2, str.size() - 4));
+        std::string magVar;
+        size_t counter = 0;
+        while (ghoul::getline(ss, magVar, ',')) {
+            std::erase_if(magVar, ::isspace);
+            extraMagVars.push_back(magVar);
+            counter++;
+            if (counter == 3) {
+                break;
+            }
+        }
+        if (counter != 3 && counter > 0) {
+            extraMagVars.erase(extraMagVars.end() - counter, extraMagVars.end());
+        }
+        vars.erase(vars.begin() + i);
+        i--;
+    }
+    return extraMagVars;
+}
+
+bool traceFromListOfPoints(FieldlinesState& state, const std::string& cdfPath,
+                           std::vector<glm::vec3>&seedPoints,
+                           const std::string& tracingVar,
+                           std::vector<std::string>& extraVars,
+                           std::vector<std::string>& extraMagVars)
 {
 #ifndef OPENSPACE_MODULE_KAMELEON_ENABLED
     LERROR("CDF inputs provided but Kameleon module is deactivated");
@@ -278,6 +272,7 @@ bool traceFromListOfPoints(
 }
 
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
+
 /**
  * Traces and adds line vertices to state.
  * Vertices are not scaled to meters nor converted from spherical into cartesian
@@ -327,28 +322,14 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
             seed.y,
             seed.z
         );
-        //ccmcFieldline.getDs();
-        //ccmcFieldline.measure();
-        //ccmc::Fieldline mappedFieldline =
-        //    ccmcFieldline.interpolate(1, ccmcFieldline.getPositions().size());
-        //const std::vector<ccmc::Point3f>& fieldlinePositions =
-        //    mappedFieldline.getPositions();
-
-
-        std::vector<glm::vec3> vertices;
-        //for (const ccmc::Point3f& pt : fieldlinePositions) {
-        //    vertices.emplace_back(pt.component1, pt.component2, pt.component3);
-        //}
-
 
         const std::vector<ccmc::Point3f>& positions = ccmcFieldline.getPositions();
-
-
+        std::vector<glm::vec3> vertices;
         for (const ccmc::Point3f& p : positions) {
             vertices.emplace_back(p.component1, p.component2, p.component3);
         }
         state.addLine(vertices);
-        success |= (vertices.size() > 0);
+        success |= !vertices.empty();
     }
 
     return success;
@@ -445,7 +426,8 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
 }
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
-/** Validate the provided extra quantity variables -> load the data from the validated
+/**
+ * Validate the provided extra quantity variables -> load the data from the validated
  *  quantities into the kameleon object & add the quantity names into the state's
  *  _extraQuantityNames vector.
  *

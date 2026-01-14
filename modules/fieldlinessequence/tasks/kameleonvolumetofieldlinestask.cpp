@@ -23,46 +23,53 @@
  ****************************************************************************************/
 
 #include <modules/fieldlinessequence/tasks/kameleonvolumetofieldlinestask.h>
-#include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
 #include <modules/volume/rawvolumewriter.h>
-//#include <openspace/documentation/documentation.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/dictionary.h>
-
+#include <ghoul/misc/dictionaryluaformatter.h>
 #include <optional>
 
 namespace {
     constexpr std::string_view _loggerCat = "KameleonVolumeToFieldlinesTask";
 
     struct [[codegen::Dictionary(KameleonVolumeToFieldlinesTask)]] Parameters {
-        // The folder to the cdf files to extract data from
+        // The folder to the cdf files to extract data from.
         std::filesystem::path input [[codegen::directory()]];
+
         // A text file with seedpoints with the format x1 y1 z1 x2 y2 z2 ...
         // Seedpoints are expressed in the native coordinate system of the model.
         std::filesystem::path seedpoints [[codegen::directory()]];
+
         // If data sets parameter start_time differ from start of run,
         // elapsed_time_in_seconds might be in relation to start of run.
         // ManuelTimeOffset will be added to trigger time.
         std::optional<double> manualTimeOffset;
-        // The name of the kameleon variable to use for tracing, like b, or u
+
+        // The name of the kameleon variable to use for tracing, like b, or u.
         std::string tracingVar;
-        // The folder to write the files to
+
+        // The folder to write the files to.
         std::filesystem::path outputFolder [[codegen::directory()]];
 
-        enum class [[codegen::map(openspace::KameleonVolumeToFieldlinesTask::conversionType)]] ConversionType {
+        enum class
+        [[codegen::map(openspace::KameleonVolumeToFieldlinesTask::ConversionType)]]
+        ConversionType
+        {
             Json,
             Osfls
         };
+
         // Output type. Either osfls (OpenSpace FieldLineSequence) or json
         ConversionType outputType;
+
         // A list of vector variables to extract along the fieldlines
         std::optional<std::vector<std::string>> extraVars;
     };
@@ -72,65 +79,43 @@ namespace {
 namespace openspace {
 
 documentation::Documentation KameleonVolumeToFieldlinesTask::Documentation() {
-    return codegen::doc<Parameters>("kameleon_volume_to_fieldlines_task");
+    return codegen::doc<Parameters>("fieldlinessequence_task_kameleonvolumetofieldlines");
 }
 
 KameleonVolumeToFieldlinesTask::KameleonVolumeToFieldlinesTask(
                                                       const ghoul::Dictionary& dictionary)
 {
-    SpiceManager::ref().loadKernel(absPath("${ASSETS}/spice/naif0012.tls").string());
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _inputPath = p.input;
     _seedpointsPath = p.seedpoints;
     _manualTimeOffset = p.manualTimeOffset.value_or(_manualTimeOffset);
     _outputFolder = p.outputFolder;
-    if (&_outputFolder.string().back() != "/") {
-        _outputFolder += "/";
+    if (_outputFolder.string().back() != '/') {
+        _outputFolder += '/';
     }
 
-    _outputType = codegen::map<openspace::KameleonVolumeToFieldlinesTask::conversionType>(p.outputType);
-
-  /*  switch (p.outputType) {
-    case Parameters::ConversionType::Json:
-        break;
-        _outputType = conversionType::Json;
-    case Parameters::ConversionType::Osfls:
-        _outputType = conversionType::Osfls;
-        break;
-    default:
-        LERROR("outputType must be either json or osfls");
-    }*/
+    _outputType = codegen::map<openspace::KameleonVolumeToFieldlinesTask::OutputType>(
+        p.outputType
+    );
 
     _tracingVar = p.tracingVar;
 
-    //_tracingVar = p.tracingVar.value_or(_tractingVar);
-    if (p.extraVars.has_value()) {
-        for (auto var : p.extraVars.value()) {
-            _extraVars.push_back(var);
-        }
-    }
+    _extraVars = p.extraVars.value_or(std::vector<std::string>());
 
     if (!std::filesystem::is_directory(_inputPath)) {
-        LERROR(std::format(
-            "KameleonVolumeToFieldlineTask: {} is not a valid directory",
-            _inputPath
+        throw ghoul::RuntimeError(std::format(
+            "KameleonVolumeToFieldlineTask: {} is not a valid directory", _inputPath
         ));
     }
 
-    namespace fsm = std::filesystem;
-    for (const fsm::directory_entry& e : fsm::directory_iterator(_inputPath)){
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::directory_iterator(_inputPath)) {
         if (e.is_regular_file()) {
             std::string eStr = e.path().string();
             _sourceFiles.push_back(eStr);
         }
     }
-
-}
-
-KameleonVolumeToFieldlinesTask::~KameleonVolumeToFieldlinesTask() {
-    SpiceManager::ref().unloadKernel(absPath("${ASSETS}/spice/naif0012.tls").string());
-
 }
 
 std::string KameleonVolumeToFieldlinesTask::description() {
@@ -168,10 +153,10 @@ void KameleonVolumeToFieldlinesTask::perform(
         );
 
         if (isSuccessful) {
-            if (_outputType == conversionType::Osfls) {
+            if (_outputType == OutputType::Osfls) {
                 newState.saveStateToOsfls(absPath(_outputFolder).string());
             }
-            else if (_outputType == conversionType::Json) {
+            else if (_outputType == OutputType::Json) {
                 std::string timeStr = std::string(Time(newState.triggerTime()).ISO8601());
                 timeStr.replace(13, 1, "-");
                 timeStr.replace(16, 1, "-");
@@ -182,10 +167,9 @@ void KameleonVolumeToFieldlinesTask::perform(
         }
     }
 
-
     // Ideally, we would want to signal about progress earlier as well, but
     // convertCdfToFieldlinesState does all the work encapsulated in one function call.
-    progressCallback(1.0f);
+    progressCallback(1.f);
 }
 
 } // namespace openspace

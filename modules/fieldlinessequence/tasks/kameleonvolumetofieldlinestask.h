@@ -32,29 +32,30 @@
 #include <string>
 
 namespace openspace {
-    class KameleonVolumeToFieldlinesTask : public Task {
-    public:
-        enum class conversionType {
-            Json,
-            Osfls
-        };
-        KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
-        ~KameleonVolumeToFieldlinesTask();
 
-        std::string description() override;
-        void perform(const Task::ProgressCallback& progressCallback) override;
-        static documentation::Documentation Documentation();
-
-    private:
-        std::string _tracingVar;
-        std::vector<std::string> _extraVars;
-        std::filesystem::path _inputPath;
-        std::vector<std::string> _sourceFiles;
-        double _manualTimeOffset = 0.0;
-        std::filesystem::path _seedpointsPath;
-        conversionType _outputType;
-        std::filesystem::path _outputFolder;
+class KameleonVolumeToFieldlinesTask : public Task {
+public:
+    enum class OutputType {
+        Json,
+        Osfls
     };
+
+    explicit KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
+
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static documentation::Documentation Documentation();
+
+private:
+    std::string _tracingVar;
+    std::vector<std::string> _extraVars;
+    std::filesystem::path _inputPath;
+    std::vector<std::string> _sourceFiles;
+    std::filesystem::path _seedpointsPath;
+    OutputType _outputType;
+    std::filesystem::path _outputFolder;
+    double _manualTimeOffset = 0.0;
+};
 
 } // namespace openspace
 

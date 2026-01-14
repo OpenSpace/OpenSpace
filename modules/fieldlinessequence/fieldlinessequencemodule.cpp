@@ -25,8 +25,8 @@
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
-#include <modules/fieldlinessequence/tasks/kameleonvolumetofieldlinestask.h>
 #include <modules/fieldlinessequence/tasks/findlastclosedfieldlinestask.h>
+#include <modules/fieldlinessequence/tasks/kameleonvolumetofieldlinestask.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -60,20 +60,26 @@ FieldlinesSequenceModule::FieldlinesSequenceModule() : OpenSpaceModule(Name) {
 }
 
 void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
-    ghoul::TemplateFactory<Renderable>* factory =
+    ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(factory, "No renderable factory existed");
-    fTask->registerClass<KameleonVolumeToFieldlinesTask>("KameleonVolumeToFieldlinesTask");
+    ghoul_assert(fRenderable, "No renderable factory existed");
+    fRenderable->registerClass<RenderableFieldlinesSequence>(
+        "RenderableFieldlinesSequence"
+    );
+
+    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    ghoul_assert(fTask, "No task factory existed");
+    fTask->registerClass<KameleonVolumeToFieldlinesTask>(
+        "KameleonVolumeToFieldlinesTask"
+    );
     fTask->registerClass<FindLastClosedFieldlinesTask>("FindLastClosedFieldlinesTask");
-    factory->registerClass<RenderableFieldlinesSequence>("RenderableFieldlinesSequence");
 }
 
 std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const
 {
     return {
-        KameleonVolumeToFieldlinesTask::Documentation(),
         FindLastClosedFieldlinesTask::Documentation(),
+        KameleonVolumeToFieldlinesTask::Documentation(),
         RenderableFieldlinesSequence::Documentation()
     };
 }

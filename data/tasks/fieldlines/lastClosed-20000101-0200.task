@@ -1,7 +1,7 @@
 return {
-    {
-        Type = "FindLastClosedFieldlinesTask",
-        Input = "C:/Users/elono/Downloads/cdfFilesForLastClosedTaskTest",
-        Output = "C:/Users/elono/Downloads/outputFromLastClosedTaskTest"
-    }
+  {
+    Type = "FindLastClosedFieldlinesTask",
+    Input = "C:/Users/elono/Downloads/cdfFilesForLastClosedTaskTest",
+    Output = "C:/Users/elono/Downloads/outputFromLastClosedTaskTest"
+  }
 }
