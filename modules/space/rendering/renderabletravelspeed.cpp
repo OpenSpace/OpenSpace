@@ -105,6 +105,10 @@ namespace {
     // to show more information related to the distance traveled. For example, a length
     // of 1 shows how far an object would move over a duration of one second based on the
     // selected speed.
+    //
+    // The indicator will from the parent to the target node based on the currently set
+    // simulation time, and the `TravelSpeed` settings. That is, increasing the simulation
+    // time makes the indicator move faster.
     struct [[codegen::Dictionary(RenderableTravelSpeed)]] Parameters {
         // [[codegen::verbatim(TargetInfo.description)]]
         std::string target [[codegen::identifier()]];
