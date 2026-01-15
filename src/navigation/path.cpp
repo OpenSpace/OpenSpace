@@ -39,6 +39,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
 #include <openspace/util/universalhelpers.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
@@ -165,6 +166,11 @@ Path::Path(Waypoint start, Waypoint end, Type type, std::optional<float> duratio
     float estimatedDuration = _progressedTime;
     resetPlaybackVariables();
 
+    const float speedScale = static_cast<float>(
+        global::navigationHandler->pathNavigator().speedScale()
+    );
+    const float minimalDurationSeconds = 2.f / speedScale;
+
     // We now know how long it took to traverse the path. Use that to compute the
     // speed factor to match any given duration
     _speedFactorFromDuration = 1.0;
@@ -178,6 +184,11 @@ Path::Path(Waypoint start, Waypoint end, Type type, std::optional<float> duratio
             _speedFactorFromDuration = std::numeric_limits<float>::infinity();
             estimatedDuration = 0.f;
         }
+    }
+    else if (estimatedDuration < minimalDurationSeconds) {
+        // If no duration was provided, add a minimal duration to avoid super fast motions
+        _speedFactorFromDuration = estimatedDuration / minimalDurationSeconds;
+        estimatedDuration = minimalDurationSeconds;
     }
     _expectedDuration = estimatedDuration;
 }
@@ -476,8 +487,13 @@ double Path::speedAlongPath(double traveledDistance) const {
     const double distanceToStartNode = glm::distance(_prevPose.position, startNodePos);
     const bool isCloserToEnd = (distanceToEndNode < distanceToStartNode);
 
-    const glm::dvec3 closestPos = isCloserToEnd ? endNodePos : startNodePos;
-    const double distanceToClosestNode = glm::distance(closestPos, _prevPose.position);
+    const SceneGraphNode* closestNode = isCloserToEnd ? _end.node() : _start.node();
+
+    double distanceToClosestNode = glm::distance(closestNode->worldPosition(), _prevPose.position);
+
+    // Subtract the distance to the interaction sphere, to get more reasonable speeds closer
+    // to objects
+    distanceToClosestNode -= 0.8 * closestNode->interactionSphere();
 
     const double speed = distanceToClosestNode;
 
