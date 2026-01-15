@@ -1,0 +1,33 @@
+-- Custom Travel Speed
+-- This example creates a speed indicator; a line that moves with a given speed from the
+-- parent node (Earth) to the target node (Jupiter). The travel speed is here set to 1
+-- light-hour per second.
+
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local jupiterAsset = asset.require("scene/solarsystem/planets/jupiter/jupiter")
+
+local Node = {
+  Identifier = "RenderableTravelSpeed_Example_TravelSpeed",
+  Parent = earthAsset.Earth.Identifier,
+  Renderable = {
+    Type = "RenderableTravelSpeed",
+    Target = jupiterAsset.Jupiter.Identifier,
+    TravelSpeed = 1.07925285e9 -- 1 light-hour in meters
+
+    -- Increase line width and indicator length for visibility
+    LineWidth = 5.0,
+    IndicatorLength = 60 -- Distance traveled in 60 seconds at the set travel speed
+  },
+   GUI = {
+     Name = "RenderableTravelSpeed - Light-hour Speed Indicator",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
