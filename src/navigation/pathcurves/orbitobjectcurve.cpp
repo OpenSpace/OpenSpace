@@ -91,26 +91,28 @@ OrbitObjectCurve::OrbitObjectCurve(const Waypoint& start, const Waypoint& end) {
     double distancePerStep = distanceDiff / nSteps;
 
     // Compute intermediate points, by rotating the start position step by step towards the end
-    for (int i = 1; i < nSteps - 1; i++) {
-        double angle = anglePerStep * i;
+    if (anglePerStep > 1.0) {
+        for (int i = 1; i < nSteps - 1; i++) {
+            double angle = anglePerStep * i;
 
-        // Compute rotation to be applied around the axis
-        const glm::dquat spinRotation = glm::angleAxis(angle, rotationAxis);
+            // Compute rotation to be applied around the axis
+            const glm::dquat spinRotation = glm::angleAxis(angle, rotationAxis);
 
-        // Rotate the position vector from the center to camera and update position
-        const glm::dvec3 rotatedPositionLocal = spinRotation * startLocal;
+            // Rotate the position vector from the center to camera and update position
+            const glm::dvec3 rotatedPosLocal = spinRotation * startLocal;
 
-        // Also interpolate the distance
-        const double interpolatedDistance = startDistance + distancePerStep * i;
+            // Also interpolate the distance
+            const double interpolatedDistance = startDistance + distancePerStep * i;
 
-        const glm::dvec3 rotatedPositionLocalScaled =
-            glm::normalize(rotatedPositionLocal) * interpolatedDistance;
+            const glm::dvec3 rotatedPosLocalScaled =
+                glm::normalize(rotatedPosLocal) * interpolatedDistance;
 
-        const glm::dvec3 rotatedPosition = glm::dvec3(
-            start.node()->modelTransform() * glm::dvec4(rotatedPositionLocalScaled, 1.0)
-        );
+            const glm::dvec3 rotatedPos = glm::dvec3(
+                start.node()->modelTransform() * glm::dvec4(rotatedPosLocalScaled, 1.0)
+            );
 
-        _points.push_back(rotatedPosition);
+            _points.push_back(rotatedPos);
+        }
     }
 
     _points.push_back(end.position());
