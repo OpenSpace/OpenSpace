@@ -285,7 +285,7 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
         glm::inverse(sourceNode->modelTransform()) * glm::dvec4(_targetNode->worldPosition(), 1.0)
     );
 
-    // Assumes source position is at origin, i.e. a the parent node position
+    // Assumes source position is at origin, i.e. the parent node position
     _travelTime = glm::length(targetPosition) / _travelSpeed;
     _directionVector = glm::normalize(targetPosition);
 
