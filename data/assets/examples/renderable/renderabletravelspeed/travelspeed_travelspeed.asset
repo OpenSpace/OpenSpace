@@ -12,15 +12,19 @@ local Node = {
   Renderable = {
     Type = "RenderableTravelSpeed",
     Target = jupiterAsset.Jupiter.Identifier,
-    TravelSpeed = 1.07925285e9 -- 1 light-hour in meters
+    TravelSpeed = 1.07925285e9, -- 1 light-hour in meters
 
     -- Increase line width and indicator length for visibility
     LineWidth = 5.0,
     IndicatorLength = 60 -- Distance traveled in 60 seconds at the set travel speed
   },
    GUI = {
-     Name = "RenderableTravelSpeed - Light-hour Speed Indicator",
-    Path = "/Examples"
+    Name = "RenderableTravelSpeed - Light-hour Speed Indicator",
+    Path = "/Examples",
+    Description = [[
+      A speed indicator from Earth to Jupiter, moving at 1 light-hour per second. The
+      indicator's length corresponds to 60 seconds of travel at the set travel speed.
+    ]]
   }
 }
 
