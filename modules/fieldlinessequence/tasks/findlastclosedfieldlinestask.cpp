@@ -107,7 +107,7 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
         ZoneScopedN("Per Path");
 
         std::unique_ptr<ccmc::Kameleon> kameleon =
-            kameleonHelper::createKameleonObject(cdfPath.string());
+            kameleonhelper::createKameleonObject(cdfPath.string());
         ccmc::Tracer tracer(kameleon.get());
         if (kameleon->doesAttributeExist("r_body")) {
             auto innerBoundary = kameleon->getVariableAttribute("r_body", "r_body");
@@ -121,7 +121,7 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
         const std::string& modelname = kameleon->getModelName();
         LINFO(std::format("Model name: {}", modelname));
         state.setModel(fls::stringToModel(modelname));
-        state.setTriggerTime(kameleonHelper::getTime(kameleon.get(),0.0));
+        state.setTriggerTime(kameleonhelper::getTime(kameleon.get(),0.0));
 
         std::vector<std::string> variableNames;
         std::vector<std::string> magVariableNames;

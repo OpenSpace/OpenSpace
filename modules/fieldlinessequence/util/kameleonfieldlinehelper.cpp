@@ -180,7 +180,7 @@ extractSeedPointsFromFiles(std::filesystem::path path)
         LDEBUG(std::format("Reading seed points from file '{}'", seedFilePath));
         std::string line;
         std::vector<glm::vec3> outVec;
-        while (std::getline(seedFile, line)) {
+        while (ghoul::getline(seedFile, line)) {
             std::stringstream ss = std::stringstream(line);
             glm::vec3 point;
             ss >> point.x;
@@ -248,7 +248,7 @@ bool traceFromListOfPoints(FieldlinesState& state, const std::string& cdfPath,
     return false;
 #else // OPENSPACE_MODULE_KAMELEON_ENABLED
     // Create Kameleon object and open CDF file!
-    std::unique_ptr<ccmc::Kameleon> kameleon = kameleonHelper::createKameleonObject(
+    std::unique_ptr<ccmc::Kameleon> kameleon = kameleonhelper::createKameleonObject(
         cdfPath
     );
 

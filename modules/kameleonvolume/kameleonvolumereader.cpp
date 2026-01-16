@@ -80,7 +80,7 @@ KameleonVolumeReader::KameleonVolumeReader(std::filesystem::path path)
     if (!std::filesystem::is_regular_file(_path)) {
         throw ghoul::FileNotFoundError(_path);
     }
-    _kameleon = kameleonHelper::createKameleonObject(_path.string());
+    _kameleon = kameleonhelper::createKameleonObject(_path.string());
 
     // Possibly use a kameleon interpolator instead of a model interpolator?
     _interpolator = std::unique_ptr<ccmc::Interpolator>(

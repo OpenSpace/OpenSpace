@@ -26,16 +26,13 @@
 
 #include <modules/fieldlinessequence/util/fieldlinesstate.h>
 #include <modules/fieldlinessequence/util/kameleonfieldlinehelper.h>
-#include <modules/volume/rawvolumewriter.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/task.h>
 #include <openspace/util/time.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/misc/exception.h>
 #include <optional>
 
 namespace {
@@ -61,15 +58,15 @@ namespace {
         std::filesystem::path outputFolder [[codegen::directory()]];
 
         enum class
-        [[codegen::map(openspace::KameleonVolumeToFieldlinesTask::ConversionType)]]
-        ConversionType
+        [[codegen::map(openspace::KameleonVolumeToFieldlinesTask::OutputType)]]
+        OutputType
         {
             Json,
             Osfls
         };
 
         // Output type. Either osfls (OpenSpace FieldLineSequence) or json
-        ConversionType outputType;
+        OutputType outputType;
 
         // A list of vector variables to extract along the fieldlines
         std::optional<std::vector<std::string>> extraVars;
@@ -155,7 +152,7 @@ void KameleonVolumeToFieldlinesTask::perform(
 
         if (isSuccessful) {
             if (_outputType == OutputType::Osfls) {
-                newState.saveStateToOsfls(absPath(_outputFolder).string());
+                newState.saveStateToOsfls(_outputFolder.string());
             }
             else if (_outputType == OutputType::Json) {
                 std::string timeStr = std::string(Time(newState.triggerTime()).ISO8601());
