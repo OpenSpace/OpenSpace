@@ -65,18 +65,6 @@ namespace {
         openspace::properties::Property::Visibility::Hidden
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DefaultDirectTouchRenderableTypesInfo =
-    {
-        "DefaultDirectTouchRenderableTypes",
-        "Default direct touch renderable types",
-        "A list of renderable types that will automatically use the \'direct "
-        "manipulation\' scheme when interacted with, keeping the finger on a static "
-        "position on the interaction sphere of the object when touching. Good for "
-        "relatively spherical objects.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
     struct [[codegen::Dictionary(TouchModule)]] Parameters {
         // [[codegen::verbatim(TuioPortInfo.description)]]
         std::optional<int> tuioPort [[codegen::inrange(1, 65535)]];
@@ -91,43 +79,17 @@ TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
     , _tuioPort(TuioPortInfo, 3333, 1, 65535)
     , _hasActiveTouchEvent(EventsInfo, false)
-    , _defaultDirectTouchRenderableTypes(DefaultDirectTouchRenderableTypesInfo)
 {
-    addPropertySubOwner(_touch);
     addPropertySubOwner(_markers);
     _tuioPort.setReadOnly(true);
     addProperty(_tuioPort);
 
     _hasActiveTouchEvent.setReadOnly(true);
     addProperty(_hasActiveTouchEvent);
-
-    _defaultDirectTouchRenderableTypes.onChange([this]() {
-        _sortedDefaultRenderableTypes.clear();
-        for (const std::string& s : _defaultDirectTouchRenderableTypes.value()) {
-            ghoul::TemplateFactory<Renderable>* fRenderable =
-                FactoryManager::ref().factory<Renderable>();
-
-            if (!fRenderable->hasClass(s)) {
-                LWARNING(std::format(
-                    "In property 'DefaultDirectTouchRenderableTypes': '{}' is not a "
-                    "registered renderable type. Ignoring", s
-                ));
-                continue;
-            }
-
-            _sortedDefaultRenderableTypes.insert(s);
-        }
-    });
-    addProperty(_defaultDirectTouchRenderableTypes);
 }
 
 TouchModule::~TouchModule() {
     // intentionally left empty
-}
-
-bool TouchModule::isDefaultDirectTouchType(std::string_view renderableType) const {
-    return _sortedDefaultRenderableTypes.find(std::string(renderableType)) !=
-        _sortedDefaultRenderableTypes.end();
 }
 
 void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {

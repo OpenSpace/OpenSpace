@@ -233,8 +233,7 @@ void NavigationHandler::updateCamera(double deltaTime) {
         updateCameraTransitions();
     }
     else { // orbital navigator
-        _orbitalNavigator.updateStatesFromInput(deltaTime);
-        _orbitalNavigator.updateCameraStateFromStates(deltaTime);
+        _orbitalNavigator.updateCamera(deltaTime);
         updateCameraTransitions();
     }
 

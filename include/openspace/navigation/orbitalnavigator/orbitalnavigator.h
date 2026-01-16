@@ -27,6 +27,7 @@
 
 #include <openspace/properties/propertyowner.h>
 
+#include <openspace/navigation/orbitalnavigator/directmanipulation/directmanipulation.h>
 #include <openspace/navigation/orbitalnavigator/idlebehavior.h>
 #include <openspace/navigation/orbitalnavigator/orbitalinputhandler.h>
 #include <openspace/properties/misc/optionproperty.h>
@@ -56,7 +57,7 @@ class OrbitalNavigator : public properties::PropertyOwner {
 public:
     OrbitalNavigator();
 
-    void updateStatesFromInput(double deltaTime);
+    void updateCamera(double deltaTime);
     void updateCameraStateFromStates(double deltaTime);
     void updateCameraScalingFromAnchor(double deltaTime);
     void resetVelocities();
@@ -221,6 +222,8 @@ private:
     Interpolator<double> _followRotationInterpolator;
 
     IdleBehavior _idleBehavior;
+
+    DirectManipulation _directManipulation;
 
     // Timer that prevents the camera position event to trigger too often
     float _movementTimer = 0.f;

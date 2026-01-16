@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,9 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/touch/include/touchinteraction.h>
+#include <openspace/navigation/orbitalnavigator/directmanipulation/directinputsolver.h>
 
-#include <modules/touch/include/directinputsolver.h>
 #include <openspace/camera/camera.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/assert.h>
@@ -211,7 +210,7 @@ namespace {
     }
 } // namespace
 
-namespace openspace {
+namespace openspace::interaction {
 
 DirectInputSolver::DirectInputSolver() {
     levmarq_init(&_lmstat);
@@ -280,5 +279,5 @@ void DirectInputSolver::setLevMarqVerbosity(bool verbose) {
     _lmstat.verbose = verbose;
 }
 
-} // openspace namespace
+} // namespace openspace::interaction
 

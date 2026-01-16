@@ -552,6 +552,8 @@ OrbitalNavigator::OrbitalNavigator()
     });
     _upToUseForRotation = static_cast<int>(UpDirectionChoice::ZAxis);
     addProperty(_upToUseForRotation);
+
+    addPropertySubOwner(_directManipulation);
 }
 
 glm::dvec3 OrbitalNavigator::anchorNodeToCameraVector() const {
@@ -590,7 +592,7 @@ void OrbitalNavigator::resetVelocities() {
     }
 }
 
-void OrbitalNavigator::updateStatesFromInput(double deltaTime) {
+void OrbitalNavigator::updateCamera(double deltaTime) {
     _inputHandler.updateStatesFromInput(deltaTime);
 
     const bool interactionHappened = _inputHandler.hasNonZeroVelocity();
@@ -611,6 +613,12 @@ void OrbitalNavigator::updateStatesFromInput(double deltaTime) {
     else if (!cameraLocationChanged) {
         tickMovementTimer(static_cast<float>(deltaTime));
     }
+
+
+    // TODO: Mkae usre the variables above are also updates for direct manipulation
+    _directManipulation.updateStateFromInput();
+
+    updateCameraStateFromStates(deltaTime);
 }
 
 void OrbitalNavigator::updateCameraStateFromStates(double deltaTime) {

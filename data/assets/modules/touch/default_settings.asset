@@ -11,7 +11,10 @@ asset.onInitialize(function()
   -- as the bounding sphere.
   -- Can also be set for each scene graph node using the "IsDirectlyTouchable" property
   local directTouchList = { "RenderableGlobe" }
-  openspace.setPropertyValueSingle("Modules.Touch.DefaultDirectTouchRenderableTypes", directTouchList)
+  openspace.setPropertyValueSingle(
+    "Modules.Touch.TouchInteraction.DefaultDirectTouchRenderableTypes",
+    directTouchList
+  )
 end)
 
 

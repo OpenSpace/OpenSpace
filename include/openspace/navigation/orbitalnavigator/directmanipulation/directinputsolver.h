@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,57 +22,60 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
-#define __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#ifndef __OPENSPACE_CORE___DIRECTINPUT_SOLVER___H__
+#define __OPENSPACE_CORE___DIRECTINPUT_SOLVER___H__
 
-#include <openspace/util/openspacemodule.h>
-
-#include <modules/touch/include/touchmarker.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/navigation/orbitalnavigator/directmanipulation/levmarq.h> // TODO: Move to ghoul
 #include <openspace/util/touch.h>
-#include <memory>
-#include <set>
+#include <ghoul/glm.h>
+#include <vector>
 
 namespace openspace {
+    class Camera;
+    class SceneGraphNode;
+}
 
-class TuioEar;
+namespace openspace::interaction {
 
-#ifdef WIN32
-class Win32TouchHook;
-#endif //WIN32
-
-class TouchModule : public OpenSpaceModule {
+/**
+ * The DirectInputSolver is used to minimize the L2 error of touch input to 3D camera
+ * position. It uses the levmarq algorithm in order to do this.
+ */
+class DirectInputSolver {
 public:
-    constexpr static const char* Name = "Touch";
+    /**
+     * Stores the selected node, the cursor ID as well as the surface coordinates the
+     * cursor touched
+     */
+    struct SelectedBody {
+        size_t id = 0;
+        SceneGraphNode* node = nullptr;
+        glm::dvec3 coordinates = glm::dvec3(0.0);
+    };
 
-    TouchModule();
-    ~TouchModule();
+    DirectInputSolver();
 
-protected:
-    void internalInitialize(const ghoul::Dictionary& dictionary) override;
+    /**
+     * Returns true if the error could be minimized within certain bounds. If the error is
+     * found to be outside the bounds after a certain amount of iterations, this function
+     * fails.
+     */
+    bool solve(const std::vector<TouchInputHolder>& list,
+        const std::vector<SelectedBody>& selectedBodies,
+        std::vector<double>* calculatedValues, const Camera& camera);
+
+    int nDof() const;
+
+    const LMstat& levMarqStat();
+
+    void setLevMarqVerbosity(bool verbose);
 
 private:
-    /**
-     * Process TUIO touch input that occured since the last frame.
-     */
-    void processNewInput();
-
-    std::unique_ptr<TuioEar> _ear;
-
-    // TODO: Move to InteractionHandler
-    TouchMarker _markers;
-
-    properties::IntProperty _tuioPort;
-    properties::BoolProperty _hasActiveTouchEvent;
-
-    // contains an id and the Point that was processed last frame
-    glm::ivec2 _webPositionCallback = glm::ivec2(0);
-#ifdef WIN32
-    std::unique_ptr<Win32TouchHook> _win32TouchHook;
-#endif // WIN32
+    int _nDof = 0;
+    LMstat _lmstat;
 };
 
-} // namespace openspace
+} // namespace openspace::interaction
 
-#endif // __OPENSPACE_MODULE_TOUCH___TOUCHMODULE___H__
+#endif // __OPENSPACE_CORE___DIRECTINPUT_SOLVER___H__
+

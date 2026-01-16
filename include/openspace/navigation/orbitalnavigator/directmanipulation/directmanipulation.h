@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,58 +22,64 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
-#define __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
+#ifndef __OPENSPACE_CORE___DIRECTMANIPULATION___H__
+#define __OPENSPACE_CORE___DIRECTMANIPULATION___H__
 
-#include <modules/touch/ext/levmarq.h>
+#include <openspace/properties/propertyowner.h>
+
+#include <openspace/navigation/orbitalnavigator/directmanipulation/directinputsolver.h>
+#include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/touch.h>
 #include <ghoul/glm.h>
-#include <vector>
+#include <set>
 
-namespace openspace {
+namespace openspace::interaction {
 
-class Camera;
-class SceneGraphNode;
-
-/**
- * The DirectInputSolver is used to minimize the L2 error of touch input to 3D camera
- * position. It uses the levmarq algorithm in order to do this.
- */
-class DirectInputSolver {
+class DirectManipulation : public properties::PropertyOwner {
 public:
-    /**
-     * Stores the selected node, the cursor ID as well as the surface coordinates the
-     * cursor touched
-     */
-    struct SelectedBody {
-        size_t id = 0;
-        SceneGraphNode* node = nullptr;
-        glm::dvec3 coordinates = glm::dvec3(0.0);
+    struct VelocityStates {
+        glm::dvec2 orbit = glm::dvec2(0.0);
+        double zoom = 0.0;
+        double roll = 0.0;
+        glm::dvec2 pan = glm::dvec2(0.0);
     };
 
-    DirectInputSolver();
+    DirectManipulation();
 
-    /**
-     * Returns true if the error could be minimized within certain bounds. If the error is
-     * found to be outside the bounds after a certain amount of iterations, this function
-     * fails.
-     */
-    bool solve(const std::vector<TouchInputHolder>& list,
-        const std::vector<SelectedBody>& selectedBodies,
-        std::vector<double>* calculatedValues, const Camera& camera);
-
-    int nDof() const;
-
-    const LMstat& levMarqStat();
-
-    void setLevMarqVerbosity(bool verbose);
+    void updateStateFromInput();
 
 private:
-    int _nDof = 0;
-    LMstat _lmstat;
+    void stepDirectTouch(const VelocityStates& velocities);
+
+    /**
+     * Calculates the new camera state such that it minimizes the L2 error in screenspace
+     * between contact points and surface coordinates projected to clip space using LMA.
+     */
+    void applyDirectControl(const std::vector<TouchInputHolder>& touchPoints);
+
+    /**
+     * Traces each contact point into the scene as a ray and find the intersection points
+     * on the surface of the current anchor node, if any. Saves the input id the node and
+     * surface coordinates the cursor hit.
+     */
+    void updateNodeSurfacePoints(const std::vector<TouchInputHolder>& touchPoints);
+
+    bool isValidDirectTouchNode() const;
+    bool isWithinDirectTouchDistance() const;
+
+    properties::BoolProperty _enabled;
+    properties::FloatProperty _directTouchDistanceThreshold;
+    properties::StringListProperty _defaultDirectTouchRenderableTypes;
+
+    // A sorted version of the list in the property
+    std::set<std::string> _sortedDefaultRenderableTypes;
+
+    std::vector<DirectInputSolver::SelectedBody> _selectedNodeSurfacePoints;
+    DirectInputSolver _directInputSolver;
 };
 
-} // openspace namespace
+} // namespace openspace::interaction
 
-#endif // __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
-
+#endif // __OPENSPACE_CORE___DIRECTMANIPULATION___H__
