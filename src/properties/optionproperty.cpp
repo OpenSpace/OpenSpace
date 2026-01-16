@@ -91,13 +91,19 @@ void OptionProperty::addOptions(std::vector<std::string> options) {
 
 void OptionProperty::clearOptions() {
     _options.clear();
+    _value = 0;
 }
 
 void OptionProperty::setValue(int value) {
     // Check if the passed value belongs to any option
-    for (Option& o : _options) {
+    for (size_t i = 0; i < _options.size(); ++i) {
+        const Option& o = _options[i];
         if (o.value == value) {
-            NumericalProperty::setValue(value);
+            // If it does, set it by calling the superclasses setValue method
+            // @TODO(abock): This should be setValue(value) instead or otherwise the
+            //               stored indices and option values start to drift if the
+            //               operator T of the OptionProperty is used
+            NumericalProperty::setValue(static_cast<int>(value));
             return;
         }
     }

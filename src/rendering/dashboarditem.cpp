@@ -43,7 +43,7 @@ namespace {
     struct [[codegen::Dictionary(DashboardItem)]] Parameters {
         std::string type;
 
-        std::string identifier [[codegen::identifier()]];
+        std::string identifier;
 
         std::optional<std::string> guiName;
 

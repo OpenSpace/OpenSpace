@@ -100,7 +100,7 @@ namespace {
 
         // A list of all identifiers that are exposed by this asset. This list is needed
         // to populate the descriptions in the main user interface
-        std::optional<std::vector<std::string>> identifiers [[codegen::identifier()]];
+        std::optional<std::vector<std::string>> identifiers;
     };
 
 #include "assetmanager_codegen.cpp"

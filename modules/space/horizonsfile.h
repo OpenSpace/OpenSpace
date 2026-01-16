@@ -64,7 +64,7 @@ enum class HorizonsResultCode {
     Valid,
     Empty,
 
-    // Errors caught by the error field in the json output
+    // Erros caught by the error field in the json output
     ErrorSize,
     ErrorSpan,
     ErrorTimeRange,
@@ -73,7 +73,7 @@ enum class HorizonsResultCode {
     ErrorNoData,
     MultipleObserverStations,
 
-    // Errors/problems NOT caught by the error field in the json output
+    // Erros/problems NOT caught by the error field in the json output
     MultipleObserver,
     ErrorNoTarget,
     MultipleTarget,
@@ -95,20 +95,21 @@ struct HorizonsKeyframe {
 struct HorizonsResult {
     HorizonsType type = HorizonsType::Invalid;
     HorizonsResultCode errorCode = HorizonsResultCode::UnknownError;
-    std::vector<HorizonsKeyframe> data;
+    std::vector<HorizonsKeyframe> data = std::vector<HorizonsKeyframe>();
 };
 
 class HorizonsFile {
 public:
     HorizonsFile() = default;
     HorizonsFile(std::filesystem::path file);
-    HorizonsFile(std::filesystem::path filePath, std::string result);
+    HorizonsFile(std::filesystem::path filePath, const std::string& result);
 
     void setFile(std::filesystem::path file);
     const std::filesystem::path& file() const;
+    std::filesystem::path& file();
 
     bool hasFile() const;
-    void displayErrorMessage(HorizonsResultCode code) const;
+    void displayErrorMessage(const HorizonsResultCode code) const;
 
 
     std::vector<std::string> parseMatches(const std::string& startPhrase,

@@ -469,7 +469,7 @@ void RenderEngine::initializeGL() {
 
     // set the close clip plane and the far clip plane to extreme values while in
     // development
-    global::windowDelegate->setNearFarClippingPlane(0.1f, 1000.f);
+    global::windowDelegate->setNearFarClippingPlane(0.001f, 1000.f);
 
     // Set horizontal FOV value with whatever the field of view (in degrees) is of the
     // initialized window
@@ -1231,24 +1231,6 @@ void RenderEngine::renderVersionInformation() {
         );
     }
 
-    float debugOffset = 0.f;
-#ifdef _DEBUG
-    {
-        const glm::vec2 debugBox = _fontVersionInfo->boundingBox("Debug build");
-        debugOffset = debugBox.y;
-        const glm::vec2 penPosition = glm::vec2(
-            fontResolution().x - debugBox.x - 10.f,
-            versionBox.y + commitBox.y + 5.f
-        );
-        FR::defaultRenderer().render(
-            *_fontVersionInfo,
-            penPosition,
-            "Debug build",
-            glm::vec4(0.2f, 0.75f, 0.15f, 1.f)
-        );
-    }
-#endif // _DEBUG
-
 #ifdef TRACY_ENABLE
     {
         // If we have Tracy enabled, we should inform the user about it that the
@@ -1259,7 +1241,7 @@ void RenderEngine::renderVersionInformation() {
         const glm::vec2 tracyBox = _fontVersionInfo->boundingBox("TRACY PROFILING");
         const glm::vec2 penPosition = glm::vec2(
             fontResolution().x - tracyBox.x - 10.f,
-            versionBox.y + commitBox.y + debugOffset + 5.f
+            versionBox.y + commitBox.y + 5.f
         );
         FR::defaultRenderer().render(
             *_fontVersionInfo,

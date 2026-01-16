@@ -179,13 +179,16 @@ namespace {
         // The identifier of this scene graph node. This name must be unique among all
         // scene graph nodes that are loaded in a specific scene. If a duplicate is
         // detected the loading of the node will fail, as will all childing that depend on
-        // the node.
-        std::string identifier [[codegen::identifier()]];
+        // the node. The identifier must not contain any whitespaces or '.'
+        std::string identifier;
 
         // This names the parent of the currently specified scene graph node. The parent
         // must already exist in the scene graph. If not specified, the node will be
         // attached to the root of the scene graph
-        std::optional<std::string> parent [[codegen::identifier()]];
+        std::optional<std::string> parent
+            [[codegen::annotation(
+                "If specified, this must be a name for another scene graph node"
+            )]];
 
         // The renderable that is to be created for this scene graph node. A renderable is
         // a component of a scene graph node that will lead to some visual result on the
