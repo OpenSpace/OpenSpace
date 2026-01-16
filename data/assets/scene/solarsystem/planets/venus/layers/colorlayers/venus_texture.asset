@@ -25,7 +25,7 @@ asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
-asset.export(layer)
+asset.export("layer", layer)
 
 
 

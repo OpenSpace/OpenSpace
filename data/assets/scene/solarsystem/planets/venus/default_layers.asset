@@ -1,5 +1,4 @@
 -- Color layers
-asset.require("./layers/colorlayers/magellan_mosaic_utah", false)
 asset.require("./layers/colorlayers/venus_texture", false)
 asset.require("./layers/colorlayers/magellan_mosaic_utah", true)
 
