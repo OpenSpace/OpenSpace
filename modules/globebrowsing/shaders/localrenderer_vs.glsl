@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,23 +37,25 @@ out vec4 fs_position;
 out vec3 ellipsoidNormalCameraSpace;
 out vec3 levelWeights;
 out vec3 positionCameraSpace;
+out vec3 posObjSpace;
+out vec3 normalObjSpace;
 
 #if USE_ACCURATE_NORMALS
   out vec3 ellipsoidTangentThetaCameraSpace;
   out vec3 ellipsoidTangentPhiCameraSpace;
 #endif // USE_ACCURATE_NORMALS
 
-#if USE_ECLIPSE_SHADOWS
-out vec3 positionWorldSpace;
 uniform dmat4 inverseViewTransform;
+uniform dmat4 modelTransform;
+
+#if USE_ECLIPSE_SHADOWS
+  // Position in world space
+  out vec3 positionWorldSpace;
 #endif // USE_ECLIPSE_SHADOWS
 
 #if SHADOW_MAPPING_ENABLED
-  // ShadowMatrix is the matrix defined by:
-  // textureCoordsMatrix * projectionMatrix * combinedViewMatrix * modelMatrix
-  // where textureCoordsMatrix is just a scale and bias computation: [-1,1] to [0,1]
-  uniform dmat4 shadowMatrix;
   out vec4 shadowCoords;
+  uniform dmat4 shadowMatrix;
 #endif // SHADOW_MAPPING_ENABLED
 
 uniform mat4 projectionTransform;
@@ -66,6 +68,13 @@ uniform vec3 patchNormalCameraSpace;
 uniform float chunkMinHeight;
 uniform float distanceScaleFactor;
 uniform int chunkLevel;
+
+#define nDepthMaps #{nDepthMaps}
+#if nDepthMaps > 0
+  uniform dmat4 inv_vp;
+  uniform dmat4 light_vps[nDepthMaps];
+  out vec4 positions_lightspace[nDepthMaps];
+#endif // nDepthMaps > 0
 
 
 vec3 bilinearInterpolation(vec2 uv) {
@@ -118,12 +127,19 @@ void main() {
   gl_Position = fs_position;
   ellipsoidNormalCameraSpace = patchNormalCameraSpace;
   positionCameraSpace = p;
+  posObjSpace = vec3(inverseViewTransform * dvec4(p, 1.0));
 
 #if USE_ECLIPSE_SHADOWS
-  positionWorldSpace = vec3(inverseViewTransform * dvec4(p, 1.0));
+  positionWorldSpace = vec3(modelTransform * dvec4(p, 1.0));
 #endif // USE_ECLIPSE_SHADOWS
 
 #if SHADOW_MAPPING_ENABLED
   shadowCoords = vec4(shadowMatrix * dvec4(p, 1.0));
 #endif // SHADOW_MAPPING_ENABLED
+
+#if nDepthMaps > 0
+  for (int idx = 0; idx < nDepthMaps; idx++) {
+    positions_lightspace[idx] = vec4(light_vps[idx] * (inv_vp * dvec4(p, 1.0)));
+  }
+#endif // nDepthMaps > 0
 }

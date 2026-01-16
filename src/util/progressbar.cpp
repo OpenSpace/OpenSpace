@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #include <openspace/util/progressbar.h>
 
 #include <iomanip>
+#include <ostream>
 
 namespace openspace {
 
@@ -42,7 +43,7 @@ ProgressBar::~ProgressBar() {
 
 void ProgressBar::print(int current) {
     const float progress = static_cast<float>(current) / static_cast<float>(_end);
-    const int iprogress = static_cast<int>(progress * 100.0f);
+    const int iprogress = static_cast<int>(progress * 100.f);
     if (iprogress != _previous) {
         const int pos = static_cast<int>(static_cast<float>(_width)* progress);
         const int eqWidth = pos + 1;

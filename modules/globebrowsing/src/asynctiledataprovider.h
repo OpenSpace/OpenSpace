@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,9 +29,10 @@
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <ghoul/misc/boolean.h>
-#include <map>
+#include <memory>
 #include <optional>
 #include <set>
+#include <string>
 
 namespace openspace::globebrowsing {
 
@@ -44,8 +45,9 @@ struct RawTile;
 class AsyncTileDataProvider {
 public:
     /**
-     * \param rawTileDataReader is the reader that will be used for the asynchronous
-     * tile loading.
+     * \param name is the name for this provider
+     * \param rawTileDataReader is the reader that will be used for the asynchronous tile
+     *        loading
      */
     AsyncTileDataProvider(std::string name,
         std::unique_ptr<RawTileDataReader> rawTileDataReader);
@@ -64,7 +66,7 @@ public:
     void reset();
     void prepareToBeDeleted();
 
-    bool shouldBeDeleted();
+    bool shouldBeDeleted() const;
 
     const RawTileDataReader& rawTileDataReader() const;
     float noDataValueAsFloat() const;
@@ -80,7 +82,7 @@ protected:
     };
 
     /**
-     * \returns true if tile of index `tileIndex` is not already enqueued.
+     * \return `true` if tile of index \p tileIndex is not already enqueued
      */
     bool satisfiesEnqueueCriteria(const TileIndex& tileIndex);
 

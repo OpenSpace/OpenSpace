@@ -1,0 +1,35 @@
+{
+  "profile": "missions/rosetta",
+  "commands": [
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.67P.Renderable.ProjectionComponent.PerformProjection",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "67P",
+        "position": [
+          -53005.02685546875,
+          -46823.655029296875,
+          57367.818603515625
+        ],
+        "pitch": 0.00042312941218080723,
+        "referenceFrame": "Root",
+        "up": [
+          0.2610300243714455,
+          -0.851852658653037,
+          -0.45410392458378407
+        ],
+        "yaw": 0.005186222868218083,
+        "timestamp": "2014 NOV 10 18:33:12"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

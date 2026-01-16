@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,20 +27,22 @@
 #include "profile/line.h"
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
-#include <openspace/scene/profile.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <QGridLayout>
 #include <QDialogButtonBox>
 #include <QFileDialog>
 #include <QLabel>
-#include <QLineEdit>
 #include <QListWidget>
-#include <QFile>
 #include <QPushButton>
 #include <QTextStream>
+#include <QTimer>
+#include <algorithm>
+#include <filesystem>
+#include <new>
+#include <utility>
 
-ScriptlogDialog::ScriptlogDialog(QWidget* parent, std::string filter)
+ScriptLogDialog::ScriptLogDialog(QWidget* parent, std::string filter)
     : QDialog(parent)
     , _scriptLogFile(openspace::global::configuration->scriptLog)
     , _fixedFilter(std::move(filter))
@@ -51,7 +53,7 @@ ScriptlogDialog::ScriptlogDialog(QWidget* parent, std::string filter)
     loadScriptFile();
 }
 
-void ScriptlogDialog::createWidgets() {
+void ScriptLogDialog::createWidgets() {
     //         Column 0              Column 1
     //  *-------------------------*------------*
     //  | Title                                |
@@ -65,7 +67,7 @@ void ScriptlogDialog::createWidgets() {
 
     QGridLayout* layout = new QGridLayout(this);
     {
-        QLabel* heading = new QLabel(QString::fromStdString(fmt::format(
+        QLabel* heading = new QLabel(QString::fromStdString(std::format(
             "Choose commands from \"{}\"", _scriptLogFile
         )));
         heading->setObjectName("heading");
@@ -76,7 +78,7 @@ void ScriptlogDialog::createWidgets() {
         connect(
             open, &QPushButton::clicked,
             [this, heading]() {
-                QString file = QFileDialog::getOpenFileName(
+                const QString file = QFileDialog::getOpenFileName(
                     this,
                     "Select log file",
                     "",
@@ -84,7 +86,7 @@ void ScriptlogDialog::createWidgets() {
                 );
                 _scriptLogFile = file.toStdString();
         
-                heading->setText(QString::fromStdString(fmt::format(
+                heading->setText(QString::fromStdString(std::format(
                     "Choose commands from \"{}\"", _scriptLogFile
                 )));
                 loadScriptFile();
@@ -95,12 +97,12 @@ void ScriptlogDialog::createWidgets() {
 
     _filter = new QLineEdit;
     _filter->setPlaceholderText("Filter the list of scripts");
-    connect(_filter, &QLineEdit::textEdited, this, &ScriptlogDialog::updateScriptList);
+    connect(_filter, &QLineEdit::textEdited, this, &ScriptLogDialog::updateScriptList);
     layout->addWidget(_filter, 1, 0);
 
     _reloadFile = new QPushButton("Reload");
     _reloadFile->setToolTip("Reload the script log file");
-    connect(_reloadFile, &QPushButton::clicked, this, &ScriptlogDialog::loadScriptFile);
+    connect(_reloadFile, &QPushButton::clicked, this, &ScriptLogDialog::loadScriptFile);
     layout->addWidget(_reloadFile, 1, 1);
 
     _scriptlogList = new QListWidget;
@@ -113,21 +115,21 @@ void ScriptlogDialog::createWidgets() {
         buttons->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
         connect(
             buttons, &QDialogButtonBox::accepted,
-            this, &ScriptlogDialog::saveChosenScripts
+            this, &ScriptLogDialog::saveChosenScripts
         );
         connect(
             buttons, &QDialogButtonBox::rejected,
-            this, &ScriptlogDialog::reject
+            this, &ScriptLogDialog::reject
         );
         layout->addWidget(buttons, 3, 0, 1, 2);
     }
 }
 
-void ScriptlogDialog::loadScriptFile() {
+void ScriptLogDialog::loadScriptFile() {
     _scripts.clear();
 
-    std::string log = absPath(_scriptLogFile).string();
-    QFile file(QString::fromStdString(log));
+    const std::filesystem::path log = absPath(_scriptLogFile);
+    QFile file = QFile(QString::fromStdString(log.string()));
     if (file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&file);
         while (!in.atEnd()) {
@@ -140,10 +142,15 @@ void ScriptlogDialog::loadScriptFile() {
         }
     }
     updateScriptList();
+
+    // It's not possible to call the `scrollToBottom` function directly as it only will
+    // scroll to the middle of the list. By doing it this way, we correctly end up at the
+    // bottom of the list
+    QTimer::singleShot(0, _scriptlogList, &QListWidget::scrollToBottom);
 }
 
-void ScriptlogDialog::updateScriptList() {
-    std::string filter = _filter->text().toStdString();
+void ScriptLogDialog::updateScriptList() {
+    const std::string filter = _filter->text().toStdString();
     QListWidgetItem* curr = _scriptlogList->currentItem();
     std::string selection;
     if (curr) {
@@ -152,8 +159,8 @@ void ScriptlogDialog::updateScriptList() {
     int index = -1;
     _scriptlogList->clear();
     for (const std::string& script : _scripts) {
-        bool foundDynamic = script.find(filter) != std::string::npos;
-        bool foundStatic =
+        const bool foundDynamic = script.find(filter) != std::string::npos;
+        const bool foundStatic =
             _fixedFilter.empty() ? true : script.find(_fixedFilter) != std::string::npos;
         if (foundDynamic && foundStatic) {
             if (script == selection && index == -1) {
@@ -164,10 +171,21 @@ void ScriptlogDialog::updateScriptList() {
     }
 }
 
-void ScriptlogDialog::saveChosenScripts() {
+void ScriptLogDialog::saveChosenScripts() {
     std::vector<std::string> chosenScripts;
     QList<QListWidgetItem*> itemList = _scriptlogList->selectedItems();
-    for (QListWidgetItem* item : _scriptlogList->selectedItems()) {
+
+    // The selected items are returned in order of **selection** not in row-order, so we
+    // need to sort them first
+    std::sort(
+        itemList.begin(),
+        itemList.end(),
+        [this](QListWidgetItem* lhs, QListWidgetItem* rhs) {
+            return _scriptlogList->row(lhs) < _scriptlogList->row(rhs);
+        }
+    );
+
+    for (QListWidgetItem* item : itemList) {
         chosenScripts.push_back(item->text().toStdString());
     }
     emit scriptsSelected(chosenScripts);

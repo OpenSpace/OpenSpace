@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,13 +25,19 @@
 #include <openspace/engine/moduleengine.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
 #include <openspace/moduleregistration.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/util/openspacemodule.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/systemcapabilities/version.h>
+#include <algorithm>
+#include <string_view>
+#include <utility>
 
 #include "moduleengine_lua.inl"
 
@@ -40,9 +46,10 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AllModulesInfo = {
         "AllModules",
-        "All Modules",
+        "All modules",
         "The list of all modules that were compiled for this version of OpenSpace in the "
-        "same order in which they were initialized"
+        "same order in which they were initialized.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 
@@ -61,7 +68,7 @@ void ModuleEngine::initialize(
 {
     ZoneScoped;
 
-    std::vector<OpenSpaceModule*> modules = AllModules();
+    const std::vector<OpenSpaceModule*> modules = AllModules();
 
     std::vector<std::string> moduleNames;
     moduleNames.reserve(modules.size());
@@ -95,7 +102,7 @@ void ModuleEngine::initializeGL() {
 
     LDEBUG("Initializing OpenGL of modules");
     for (std::unique_ptr<OpenSpaceModule>& m : _modules) {
-        LDEBUG(fmt::format("Initializing OpenGL of module '{}'", m->identifier()));
+        LDEBUG(std::format("Initializing OpenGL of module '{}'", m->identifier()));
         m->initializeGL();
     }
     LDEBUG("Finished initializing OpenGL of modules");
@@ -106,14 +113,14 @@ void ModuleEngine::deinitialize() {
 
     LDEBUG("Deinitializing modules");
 
-    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
-        LDEBUG(fmt::format("Deinitializing module '{}'", (*mIt)->identifier()));
+    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); mIt++) {
+        LDEBUG(std::format("Deinitializing module '{}'", (*mIt)->identifier()));
         (*mIt)->deinitialize();
     }
     LDEBUG("Finished deinitializing modules");
 
-    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
-        LDEBUG(fmt::format("Destroying module '{}'", (*mIt)->identifier()));
+    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); mIt++) {
+        LDEBUG(std::format("Destroying module '{}'", (*mIt)->identifier()));
         (*mIt) = nullptr;
     }
     LDEBUG("Finished destroying modules");
@@ -125,35 +132,35 @@ void ModuleEngine::deinitializeGL() {
     ZoneScoped;
 
     LDEBUG("Deinitializing OpenGL of modules");
-    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); ++mIt) {
-        LDEBUG(fmt::format("Deinitializing OpenGL of module '{}'", (*mIt)->identifier()));
+    for (auto mIt = _modules.rbegin(); mIt != _modules.rend(); mIt++) {
+        LDEBUG(std::format("Deinitializing OpenGL of module '{}'", (*mIt)->identifier()));
         (*mIt)->deinitializeGL();
 
     }
     LDEBUG("Finished deinitializing OpenGL of modules");
 }
 
-void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> mod) {
+void ModuleEngine::registerModule(std::unique_ptr<OpenSpaceModule> module) {
     ZoneScoped;
 
-    ghoul_assert(mod, "Module must not be nullptr");
+    ghoul_assert(module, "Module must not be nullptr");
 
     auto it = std::find_if(
         _modules.begin(),
         _modules.end(),
-        [&mod](std::unique_ptr<OpenSpaceModule>& rhs) {
-            return rhs->identifier() == mod->identifier();
+        [&module](std::unique_ptr<OpenSpaceModule>& rhs) {
+            return rhs->identifier() == module->identifier();
         }
     );
     if (it != _modules.end()) {
         throw ghoul::RuntimeError(
-            fmt::format("Module name '{}' was registered before", mod->identifier()),
+            std::format("Module name '{}' was registered before", module->identifier()),
             "ModuleEngine"
         );
     }
 
-    LDEBUG(fmt::format("Registered module '{}'", mod->identifier()));
-    _modules.push_back(std::move(mod));
+    LDEBUG(std::format("Registered module '{}'", module->identifier()));
+    _modules.push_back(std::move(module));
 }
 
 std::vector<OpenSpaceModule*> ModuleEngine::modules() const {
@@ -182,6 +189,10 @@ scripting::LuaLibrary ModuleEngine::luaLibrary() {
             codegen::lua::IsLoaded
         }
     };
+}
+
+std::vector<documentation::Documentation> ModuleEngine::moduleDocumentations() const {
+    return AllModuleDocumentation();
 }
 
 } // namespace openspace

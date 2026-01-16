@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,6 @@
 
 #include <openspace/properties/vector/dvec3property.h>
 
-#include <ghoul/lua/ghoul_lua.h>
-#include <ghoul/lua/lua_helper.h>
-
 namespace openspace::properties {
 
 DVec3Property::DVec3Property(Property::PropertyInfo info, glm::dvec3 value,
@@ -45,8 +42,20 @@ std::string_view DVec3Property::className() const {
     return "DVec3Property";
 }
 
-int DVec3Property::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes DVec3Property::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
+}
+
+void DVec3Property::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+glm::dvec3 DVec3Property::toValue(lua_State* state) const {
+    return ghoul::lua::value<glm::dvec3>(state);
+}
+
+std::string DVec3Property::stringValue() const {
+    return formatJson(_value);
 }
 
 } // namespace openspace::properties

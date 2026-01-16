@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,23 +26,36 @@
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/distanceconversion.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/scene/scene.h>
 #include <openspace/scene/lightsource.h>
+#include <ghoul/format.h>
 #include <ghoul/io/model/modelgeometry.h>
+#include <ghoul/io/model/modelreader.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/invariants.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/textureunit.h>
+#include <array>
+#include <cmath>
+#include <cstdlib>
 #include <filesystem>
+#include <limits>
 #include <optional>
+#include <utility>
+#include <variant>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableModel";
@@ -62,120 +75,160 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
-    constexpr std::array<const char*, 12> UniformNames = {
-        "opacity", "nLightSources", "lightDirectionsViewSpace", "lightIntensities",
-        "modelViewTransform", "normalTransform", "projectionTransform",
-        "performShading", "ambientIntensity", "diffuseIntensity",
-        "specularIntensity", "opacityBlending"
-    };
+    constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
     constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
         "EnableAnimation",
-        "Enable Animation",
-        "Enable or disable the animation for the model if it has any"
+        "Enable animation",
+        "Enable or disable the animation for the model if it has any.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
-        "Ambient Intensity",
-        "A multiplier for ambient lighting"
+        "Ambient intensity",
+        "A multiplier for ambient lighting.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
-        "Diffuse Intensity",
-        "A multiplier for diffuse lighting"
+        "Diffuse intensity",
+        "A multiplier for diffuse lighting.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
-        "Specular Intensity",
-        "A multiplier for specular lighting"
+        "Specular intensity",
+        "A multiplier for specular lighting.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo SpecularPowerInfo = {
+        "SpecularPower",
+        "Specular Power",
+        "Power factor for specular component, higher value gives narrower specularity",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ShadingInfo = {
         "PerformShading",
-        "Perform Shading",
-        "This value determines whether this model should be shaded by using the position "
-        "of the Sun"
+        "Perform shading",
+        "Determines whether shading should be applied to this model, based on the "
+        "provided list of light sources. If false, the model will be fully illuminated.",
+        openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableFaceCullingInfo = {
-        "DisableFaceCulling",
-        "Disable Face Culling",
-        "Disable OpenGL automatic face culling optimization"
+    constexpr openspace::properties::Property::PropertyInfo EnableFaceCullingInfo = {
+        "EnableFaceCulling",
+        "Enable face culling",
+        "Enable OpenGL automatic face culling optimization.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
         "ModelTransform",
-        "Model Transform",
-        "This value specifies the model transform that is applied to the model before "
-        "all other transformations are applied"
+        "Model transform",
+        "An extra model transform matrix that is applied to the model before all other "
+        "transformations are applied.",
+        openspace::properties::Property::Visibility::Developer
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PivotInfo = {
+        "Pivot",
+        "Pivot",
+        "A vector that moves the place of origin for the model.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ModelScaleInfo = {
+        "ModelScale",
+        "Model scale",
+        "The scale of the model. If a numeric value is provided in the asset file, the "
+        "scale will be that exact value. If instead a unit name is provided, this is the "
+        "value that that name represents. For example 'Centimeter' becomes 0.01.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
         "RotationVector",
-        "Rotation Vector",
-        "Rotation Vector using degrees"
+        "Rotation vector",
+        "A rotation vector with Euler angles, specified in degrees.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
         "LightSources",
-        "Light Sources",
-        "A list of light sources that this model should accept light from"
+        "Light sources",
+        "A list of light sources that this model should accept light from.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableDepthTestInfo = {
-        "DisableDepthTest",
-        "Disable Depth Test",
-        "Disable Depth Testing for the Model"
+    constexpr openspace::properties::Property::PropertyInfo EnableDepthTestInfo = {
+        "EnableDepthTest",
+        "Enable depth test",
+        "If true, depth testing is enabled for the model. This means that parts of the "
+        "model that are occluded by other parts will not be rendered. If disabled, the "
+        "depth of the model part will not be taken into account in rendering and some "
+        "parts that should be hidden behind a model might be rendered in front.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RenderWireframeInfo = {
+        "RenderWireframe",
+        "Enable Wireframe Rendering",
+        "Enable Wireframe rendering for the Model",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
-        "Blending Options",
-        "Changes the blending function used to calculate the colors of the model with "
-        "respect to the opacity"
+        "Blending options",
+        "Controls the blending function used to calculate the colors of the model with "
+        "respect to the opacity.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableOpacityBlendingInfo = {
-        "EnableOpacityBlending",
-        "Enable Opacity Blending",
-        "Enable Opacity Blending"
+    constexpr openspace::properties::Property::PropertyInfo UseOverrideColorInfo = {
+        "UseOverrideColor",
+        "Use Override Color",
+        "Whether or not to render model with a single color.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo OverrideColorInfo = {
+        "OverrideColor",
+        "Override Color",
+        "The single color to use for entire model (RGBA).",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    // This `Renderable` shows a three-dimensional model. The provided model may contain
+    // textures and animations and is affected by the optionally-provided light sources.
+    // Each model's scale can be adapted by the `ModelScale` and `InvertModelScale`
+    // parameters to account for discrepancies in the units that a model was created in.
+    // See the Documentation page "Scaling of models" for more detailed information.
+    //
+    // Limitation: At the time, only animations of the "Keyframe" type are supported. See
+    // each specific model format to see if it supports that type of animation.
     struct [[codegen::Dictionary(RenderableModel)]] Parameters {
-        // The file or files that should be loaded in this RenderableModel. The file can
-        // contain filesystem tokens. This specifies the model that is rendered by
-        // the Renderable.
+        // The file or files that should be loaded in this RenderableModel. Most common
+        // model formats, such as .obj, .fbx, or .gltf. For a full list of supported file
+        // formats, see https://github.com/assimp/assimp/blob/master/doc/Fileformats.md
         std::filesystem::path geometryFile;
 
-        enum class [[codegen::map(openspace::DistanceUnit)]] ScaleUnit {
-            Nanometer,
-            Micrometer,
-            Millimeter,
-            Centimeter,
-            Decimeter,
-            Meter,
-            Kilometer,
+        // The scale of the model. For example, if the model is in centimeters then
+        // `ModelScale = 'Centimeter'` or `ModelScale = 0.01`. The value that this needs
+        // to be in order for the model to be in the correct scale relative to the rest
+        // of OpenSpace can be tricky to find. Essentially, it depends on the model
+        // software that the model was created with and the original intention of the
+        // modeler.
+        std::optional<std::variant<std::string, double>> modelScale;
 
-            // Weird units
-            Thou,
-            Inch,
-            Foot,
-            Yard,
-            Chain,
-            Furlong,
-            Mile
-        };
-
-        // The scale of the model. For example if the model is in centimeters
-        // then ModelScale = Centimeter or ModelScale = 0.01
-        std::optional<std::variant<ScaleUnit, double>> modelScale;
-
-        // By default the given ModelScale is used to scale the model down,
-        // by setting this setting to true the model is instead scaled up with the
-        // given ModelScale
+        // By default the given `ModelScale` is used to scale down the model. By setting
+        // this setting to true the scaling is inverted to that the model is instead
+        // scaled up with the given `ModelScale`.
         std::optional<bool> invertModelScale;
 
         // Set if invisible parts (parts with no textures or materials) of the model
@@ -186,21 +239,13 @@ namespace {
         std::optional<bool> enableAnimation;
 
         // The date and time that the model animation should start.
-        // In format 'YYYY MM DD hh:mm:ss'.
+        // In format `'YYYY MM DD hh:mm:ss'`.
         std::optional<std::string> animationStartTime [[codegen::datetime()]];
 
-        enum class [[codegen::map(openspace::TimeUnit)]] AnimationTimeUnit {
-            Nanosecond,
-            Microsecond,
-            Millisecond,
-            Second,
-            Minute
-        };
-
-        // The time scale for the animation relative to seconds.
-        // Ex, if animation is in milliseconds then AnimationTimeScale = 0.001 or
-        // AnimationTimeScale = Millisecond, default is Second
-        std::optional<std::variant<AnimationTimeUnit, float>> animationTimeScale;
+        // The time scale for the animation relative to seconds. For example, if the
+        // animation is in milliseconds then `AnimationTimeScale = 0.001` or
+        // `AnimationTimeScale = \"Millisecond\"`.
+        std::optional<std::variant<std::string, float>> animationTimeScale;
 
         enum class AnimationMode {
             Once,
@@ -210,10 +255,8 @@ namespace {
             BounceInfinitely
         };
 
-        // The mode of how the animation should be played back.
-        // Default is animation is played back once at the start time.
-        // For a more detailed description see:
-        // http://wiki.openspaceproject.com/docs/builders/model-animation
+        // The mode of how the animation should be played back. Default is that the
+        // animation is played back once at the start time.
         std::optional<AnimationMode> animationMode;
 
         // [[codegen::verbatim(AmbientIntensityInfo.description)]]
@@ -225,14 +268,20 @@ namespace {
         // [[codegen::verbatim(SpecularIntensityInfo.description)]]
         std::optional<float> specularIntensity;
 
+        // [[codegen::verbatim(SpecularPowerInfo.description)]]
+        std::optional<float> specularPower;
+
         // [[codegen::verbatim(ShadingInfo.description)]]
         std::optional<bool> performShading;
 
-        // [[codegen::verbatim(DisableFaceCullingInfo.description)]]
-        std::optional<bool> disableFaceCulling;
+        // [[codegen::verbatim(EnableFaceCullingInfo.description)]]
+        std::optional<bool> enableFaceCulling;
 
         // [[codegen::verbatim(ModelTransformInfo.description)]]
-        std::optional<glm::dmat3x3> modelTransform;
+        std::optional<glm::dmat4x4> modelTransform;
+
+        // [[codegen::verbatim(PivotInfo.description)]]
+        std::optional<glm::vec3> pivot;
 
         // [[codegen::verbatim(RotationVecInfo.description)]]
         std::optional<glm::dvec3> rotationVector;
@@ -241,22 +290,26 @@ namespace {
         std::optional<std::vector<ghoul::Dictionary>> lightSources
             [[codegen::reference("core_light_source")]];
 
-        // [[codegen::verbatim(DisableDepthTestInfo.description)]]
-        std::optional<bool> disableDepthTest;
+        // [[codegen::verbatim(EnableDepthTestInfo.description)]]
+        std::optional<bool> enableDepthTest;
+
+        // [[codegen::verbatim(RenderWireframeInfo.description)]]
+        std::optional<bool> renderWireframe;
 
         // [[codegen::verbatim(BlendingOptionInfo.description)]]
         std::optional<std::string> blendingOption;
 
-        // [[codegen::verbatim(EnableOpacityBlendingInfo.description)]]
-        std::optional<bool> enableOpacityBlending;
-
-        // The path to the vertex shader program that is used instead of the default
-        // shader.
+        // The path to a vertex shader program to use instead of the default shader.
         std::optional<std::filesystem::path> vertexShader;
 
-        // The path to the fragment shader program that is used instead of the default
-        // shader.
+        // The path to a fragment shader program to use instead of the default shader.
         std::optional<std::filesystem::path> fragmentShader;
+
+        // [[codegen::verbatim(UseOverrideColorInfo.description)]]
+        std::optional<bool> useOverrideColor;
+
+        // [[codegen::verbatim(OverrideColorInfo.description)]]
+        std::optional<glm::vec4> overrideColor;
     };
 #include "renderablemodel_codegen.cpp"
 } // namespace
@@ -264,62 +317,89 @@ namespace {
 namespace openspace {
 
 documentation::Documentation RenderableModel::Documentation() {
-    return codegen::doc<Parameters>("base_renderable_model");
+    documentation::Documentation docs = codegen::doc<Parameters>("base_renderable_model");
+
+    documentation::Documentation d = Shadower::Documentation();
+    docs.entries.insert(docs.entries.end(), d.entries.begin(), d.entries.end());
+
+    return docs;
 }
 
 RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
+    : Renderable(dictionary, { .automaticallyUpdateRenderBin = false })
+    , Shadower(dictionary)
     , _enableAnimation(EnableAnimationInfo, false)
     , _ambientIntensity(AmbientIntensityInfo, 0.2f, 0.f, 1.f)
     , _diffuseIntensity(DiffuseIntensityInfo, 1.f, 0.f, 1.f)
     , _specularIntensity(SpecularIntensityInfo, 1.f, 0.f, 1.f)
+    , _specularPower(SpecularPowerInfo, 100.f, 0.5f, 1000.f)
     , _performShading(ShadingInfo, true)
-    , _disableFaceCulling(DisableFaceCullingInfo, false)
+    , _enableFaceCulling(EnableFaceCullingInfo, true)
     , _modelTransform(
         ModelTransformInfo,
-        glm::dmat3(1.0),
-        glm::dmat3(-1.0),
-        glm::dmat3(1.0)
+        glm::dmat4(1.0),
+        glm::dmat4(
+            -1.0, -1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0, -1.0,
+            -1.0, -1.0, -1.0, -1.0
+        ),
+        glm::dmat4(
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0,
+            1.0, 1.0, 1.0, 1.0
+        )
     )
+    , _pivot(
+        PivotInfo,
+        glm::vec3(0.f),
+        glm::vec3(-std::numeric_limits<float>::max()),
+        glm::vec3(std::numeric_limits<float>::max())
+    )
+    , _modelScale(ModelScaleInfo, 1.0, std::numeric_limits<double>::epsilon(), 4e+27)
     , _rotationVec(RotationVecInfo, glm::dvec3(0.0), glm::dvec3(0.0), glm::dvec3(360.0))
-    , _disableDepthTest(DisableDepthTestInfo, false)
-    , _enableOpacityBlending(EnableOpacityBlendingInfo, false)
-    , _blendingFuncOption(
-        BlendingOptionInfo,
-        properties::OptionProperty::DisplayType::Dropdown
-    )
+    , _enableDepthTest(EnableDepthTestInfo, true)
+    , _blendingFuncOption(BlendingOptionInfo)
+    , _renderWireframe(RenderWireframeInfo, false)
+    , _useOverrideColor(UseOverrideColorInfo, false)
+    , _overrideColor(OverrideColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
     , _lightSourcePropertyOwner({ "LightSources", "Light Sources" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
-    if (p.forceRenderInvisible.has_value()) {
-        _forceRenderInvisible = *p.forceRenderInvisible;
-
-        if (!_forceRenderInvisible) {
-            // Asset file have specifically said to not render invisible parts,
-            // do not notify in the log if invisible parts are detected and dropped
-            _notifyInvisibleDropped = false;
-        }
+    _forceRenderInvisible = p.forceRenderInvisible.value_or(_forceRenderInvisible);
+    if (p.forceRenderInvisible.has_value() && !_forceRenderInvisible) {
+        // Asset file have specifically said to not render invisible parts, do not notify
+        // in the log if invisible parts are detected and dropped
+        _notifyInvisibleDropped = false;
     }
 
-    std::string file = absPath(p.geometryFile.string()).string();
-    _geometry = ghoul::io::ModelReader::ref().loadModel(
-        file,
-        ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
-        ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
-    );
+    _file = p.geometryFile;
+    if (!std::filesystem::exists(_file)) {
+        throw ghoul::RuntimeError(std::format("Cannot find model file '{}'", _file));
+    }
 
     _invertModelScale = p.invertModelScale.value_or(_invertModelScale);
 
     if (p.modelScale.has_value()) {
-        if (std::holds_alternative<Parameters::ScaleUnit>(*p.modelScale)) {
-            Parameters::ScaleUnit scaleUnit =
-                std::get<Parameters::ScaleUnit>(*p.modelScale);
-            DistanceUnit distanceUnit = codegen::map<DistanceUnit>(scaleUnit);
-            _modelScale = toMeter(distanceUnit);
+        if (std::holds_alternative<std::string>(*p.modelScale)) {
+            const std::string stringUnit = std::get<std::string>(*p.modelScale);
+
+            // Find matching unit name in list of supported unit names
+            if (isValidDistanceUnitName(stringUnit)) {
+                DistanceUnit distanceUnit = distanceUnitFromString(stringUnit);
+                _modelScale = toMeter(distanceUnit);
+            }
+            else {
+                LERROR(std::format(
+                    "The given unit name '{}' does not match any currently supported "
+                    "unit names", stringUnit
+                ));
+                _modelScale = 1.0;
+            }
         }
         else if (std::holds_alternative<double>(*p.modelScale)) {
             _modelScale = std::get<double>(*p.modelScale);
@@ -333,44 +413,29 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (p.animationStartTime.has_value()) {
-        if (!_geometry->hasAnimation()) {
-            LWARNING("Animation start time given to model without animation");
-        }
-        _animationStart = *p.animationStartTime;
-    }
-
-    if (p.enableAnimation.has_value()) {
-        if (!_geometry->hasAnimation()) {
-            LWARNING("Attempting to enable animation for a model that does not have any");
-        }
-        else if (*p.enableAnimation && _animationStart.empty()) {
-            LWARNING("Cannot enable animation without a given start time");
-        }
-        else {
-            _enableAnimation = *p.enableAnimation;
-            _geometry->enableAnimation(_enableAnimation);
-        }
-    }
+    _modelTransform = p.modelTransform.value_or(_modelTransform);
+    _pivot = p.pivot.value_or(_pivot);
+    _animationStart = p.animationStartTime.value_or(_animationStart);
+    _enableAnimation = p.enableAnimation.value_or(_enableAnimation);
 
     if (p.animationTimeScale.has_value()) {
-        if (!_geometry->hasAnimation()) {
-            LWARNING("Animation time scale given to model without animation");
+        if (std::holds_alternative<float>(*p.animationTimeScale)) {
+            _animationTimeScale = std::get<float>(*p.animationTimeScale);
         }
-        else if (std::holds_alternative<float>(*p.animationTimeScale)) {
-            _geometry->setTimeScale(std::get<float>(*p.animationTimeScale));
-        }
-        else if (std::holds_alternative<Parameters::AnimationTimeUnit>(
-                    *p.animationTimeScale)
-                )
-        {
-            Parameters::AnimationTimeUnit animationTimeUnit =
-                std::get<Parameters::AnimationTimeUnit>(*p.animationTimeScale);
-            TimeUnit timeUnit = codegen::map<TimeUnit>(animationTimeUnit);
+        else if (std::holds_alternative<std::string>(*p.animationTimeScale)) {
+            const std::string stringUnit = std::get<std::string>(*p.animationTimeScale);
 
-            _geometry->setTimeScale(static_cast<float>(
-                convertTime(1.0, timeUnit, TimeUnit::Second))
-            );
+            if (isValidTimeUnitName(stringUnit)) {
+                TimeUnit timeUnit = timeUnitFromString(stringUnit);
+                _animationTimeScale = convertTime(1.0, timeUnit, TimeUnit::Second);
+            }
+            else {
+                LERROR(std::format(
+                    "The given unit name '{}' does not match any currently supported "
+                    "unit names", stringUnit
+                ));
+                _animationTimeScale = 1.0;
+            }
         }
         else {
             throw ghoul::MissingCaseException();
@@ -378,10 +443,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     }
 
     if (p.animationMode.has_value()) {
-        if (!_geometry->hasAnimation()) {
-            LWARNING("Animation mode given to model without animation");
-        }
-
         switch (*p.animationMode) {
             case Parameters::AnimationMode::LoopFromStart:
                 _animationMode = AnimationMode::LoopFromStart;
@@ -398,31 +459,23 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
             case Parameters::AnimationMode::Once:
                 _animationMode = AnimationMode::Once;
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
-    }
-
-    if (p.modelTransform.has_value()) {
-        _modelTransform = *p.modelTransform;
     }
 
     _ambientIntensity = p.ambientIntensity.value_or(_ambientIntensity);
     _diffuseIntensity = p.diffuseIntensity.value_or(_diffuseIntensity);
     _specularIntensity = p.specularIntensity.value_or(_specularIntensity);
+    _specularPower = p.specularPower.value_or(_specularPower);
     _performShading = p.performShading.value_or(_performShading);
-    _disableDepthTest = p.disableDepthTest.value_or(_disableDepthTest);
-    _disableFaceCulling = p.disableFaceCulling.value_or(_disableFaceCulling);
+    _enableDepthTest = p.enableDepthTest.value_or(_enableDepthTest);
+    _enableFaceCulling = p.enableFaceCulling.value_or(_enableFaceCulling);
+    _renderWireframe = p.renderWireframe.value_or(_renderWireframe);
 
-    if (p.vertexShader.has_value()) {
-        _vertexShaderPath = p.vertexShader->string();
-    }
-    if (p.fragmentShader.has_value()) {
-        _fragmentShaderPath = p.fragmentShader->string();
-    }
+    _vertexShaderPath = p.vertexShader.value_or(_vertexShaderPath);
+    _fragmentShaderPath = p.fragmentShader.value_or(_fragmentShaderPath);
 
     if (p.lightSources.has_value()) {
-        std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
+        const std::vector<ghoul::Dictionary> lightsources = *p.lightSources;
 
         for (const ghoul::Dictionary& lsDictionary : lightsources) {
             std::unique_ptr<LightSource> lightSource =
@@ -432,34 +485,89 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
         }
     }
 
-    if (_geometry->hasAnimation()) {
-        addProperty(_enableAnimation);
-    }
+    _useOverrideColor = p.useOverrideColor.value_or(_useOverrideColor);
+    _overrideColor = p.overrideColor.value_or(_overrideColor);
 
+    addProperty(_enableAnimation);
     addPropertySubOwner(_lightSourcePropertyOwner);
     addProperty(_ambientIntensity);
     addProperty(_diffuseIntensity);
     addProperty(_specularIntensity);
+    addProperty(_specularPower);
     addProperty(_performShading);
-    addProperty(_disableFaceCulling);
-    addProperty(_disableDepthTest);
+    addProperty(_enableFaceCulling);
+    addProperty(_enableDepthTest);
+    addProperty(_renderWireframe);
+    addProperty(_castShadow);
+    addProperty(_frustumSize);
     addProperty(_modelTransform);
+    addProperty(_pivot);
     addProperty(_rotationVec);
+    addProperty(_useOverrideColor);
+    _overrideColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(_overrideColor);
+
+    addProperty(_modelScale);
+    _modelScale.setExponent(20.f);
+
+    _modelScale.onChange([this]() {
+        if (!_geometry) {
+            LWARNING(std::format(
+                "Cannot set scale for model '{}': not loaded yet", _file
+            ));
+            return;
+        }
+
+        setBoundingSphere(_geometry->boundingRadius() * _modelScale);
+
+        // Set Interaction sphere size to be 10% of the bounding sphere
+        setInteractionSphere(boundingSphere() * 0.1);
+
+        if (!_hasFrustumSize) {
+            const double bounds = _geometry->boundingRadius();
+            const double scale = _modelScale * glm::compMax(parent()->scale());
+            // The *2 is a fudge-factor to make the shadowing work for most cases
+            const float r = static_cast<float>(bounds * scale * 2.f);
+            _frustumSize = r;
+            _frustumSize.setMinValue(r * 0.1f);
+            _frustumSize.setMaxValue(r * 3.f);
+        }
+    });
 
     _rotationVec.onChange([this]() {
         _modelTransform = glm::mat4_cast(glm::quat(glm::radians(_rotationVec.value())));
     });
 
     _enableAnimation.onChange([this]() {
-        if (!_geometry->hasAnimation()) {
-            LWARNING("Attempting to enable animation for a model that does not have any");
+        if (!_modelHasAnimation) {
+            LWARNING(std::format(
+                "Cannot enable animation for model '{}': it does not have any", _file
+            ));
         }
         else if (_enableAnimation && _animationStart.empty()) {
-            LWARNING("Cannot enable animation without a given start time");
+            LWARNING(std::format(
+                "Cannot enable animation for model '{}': it does not have a start time",
+                _file
+            ));
             _enableAnimation = false;
         }
         else {
+            if (!_geometry) {
+                LWARNING(std::format(
+                    "Cannot enable animation for model '{}': not loaded yet", _file
+                ));
+                return;
+            }
             _geometry->enableAnimation(_enableAnimation);
+        }
+    });
+
+    _castShadow.onChange([this]() {
+        if (_castShadow) {
+            createDepthMapResources();
+        }
+        else {
+            releaseDepthMapResources();
         }
     });
 
@@ -469,7 +577,6 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     _blendingFuncOption.addOption(DefaultBlending, "Default");
     _blendingFuncOption.addOption(AdditiveBlending, "Additive");
-    _blendingFuncOption.addOption(PointsAndLinesBlending, "Points and Lines");
     _blendingFuncOption.addOption(PolygonBlending, "Polygon");
     _blendingFuncOption.addOption(ColorAddingBlending, "Color Adding");
 
@@ -477,29 +584,18 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
 
     if (p.blendingOption.has_value()) {
         const std::string blendingOpt = *p.blendingOption;
-        _blendingFuncOption.set(BlendingMapping[blendingOpt]);
+        _blendingFuncOption = BlendingMapping[blendingOpt];
     }
 
-    _enableOpacityBlending = p.enableOpacityBlending.value_or(_enableOpacityBlending);
-
-    addProperty(_enableOpacityBlending);
+    _originalRenderBin = renderBin();
 }
 
 bool RenderableModel::isReady() const {
-    return _program;
+    return _program && _quadProgram && (!_castShadow || _depthMapProgram);
 }
 
 void RenderableModel::initialize() {
     ZoneScoped;
-
-    if (_geometry->hasAnimation() && _enableAnimation && _animationStart.empty()) {
-        LWARNING("Model with animation not given any start time");
-    }
-    else if (_geometry->hasAnimation() && !_enableAnimation) {
-        LINFO("Model with deactivated animation was found. "
-            "The animation can be activated by entering a start time in the asset file"
-        );
-    }
 
     for (const std::unique_ptr<LightSource>& ls : _lightSources) {
         ls->initialize();
@@ -509,24 +605,74 @@ void RenderableModel::initialize() {
 void RenderableModel::initializeGL() {
     ZoneScoped;
 
+    // Load model
+    _geometry = ghoul::io::ModelReader::ref().loadModel(
+        _file,
+        ghoul::io::ModelReader::ForceRenderInvisible(_forceRenderInvisible),
+        ghoul::io::ModelReader::NotifyInvisibleDropped(_notifyInvisibleDropped)
+    );
+    _modelHasAnimation = _geometry->hasAnimation();
+
+    // @TODO (abock, 2023-06-03) Leaving this here to address issue #2731. The
+    // _modelHasAnimation has not been set to true in the constructor causing the
+    // `enableAnimation` function not to be called
+    if (_enableAnimation) {
+        _geometry->enableAnimation(true);
+    }
+
+    if (!_modelHasAnimation) {
+        if (!_animationStart.empty()) {
+            LWARNING(std::format(
+                "Animation start time given to model '{}' without animation", _file
+            ));
+        }
+
+        if (_enableAnimation) {
+            LWARNING(std::format(
+                "Cannot enable animation for model '{}': it does not have any", _file
+            ));
+            _enableAnimation = false;
+        }
+
+        _enableAnimation.setReadOnly(true);
+    }
+    else {
+        if (_enableAnimation && _animationStart.empty()) {
+            LWARNING(std::format(
+                "Cannot enable animation for model '{}': it does not have a start time",
+                _file
+            ));
+        }
+        else if (!_enableAnimation) {
+            LINFO(std::format(
+                "Model '{}' with deactivated animation was found. The animation can be "
+                "activated by entering a start time in the asset file", _file
+            ));
+        }
+
+        // Set animation settings
+        _geometry->setTimeScale(static_cast<float>(_animationTimeScale));
+    }
+
+    // Initialize shaders
     std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
-        program += "|vs=" + _vertexShaderPath;
+        program += "|vs=" + _vertexShaderPath.string();
     }
     if (!_fragmentShaderPath.empty()) {
-        program += "|fs=" + _fragmentShaderPath;
+        program += "|fs=" + _fragmentShaderPath.string();
     }
     _program = BaseModule::ProgramObjectManager.request(
         program,
-        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            std::filesystem::path vs =
+        [this, program]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            const std::filesystem::path vs =
                 _vertexShaderPath.empty() ?
                 absPath("${MODULE_BASE}/shaders/model_vs.glsl") :
-                std::filesystem::path(_vertexShaderPath);
-            std::filesystem::path fs =
+                _vertexShaderPath;
+            const std::filesystem::path fs =
                 _fragmentShaderPath.empty() ?
                 absPath("${MODULE_BASE}/shaders/model_fs.glsl") :
-                std::filesystem::path(_fragmentShaderPath);
+                _fragmentShaderPath;
 
             return global::renderEngine->buildRenderProgram(program, vs, fs);
         }
@@ -537,22 +683,134 @@ void RenderableModel::initializeGL() {
         ghoul::opengl::ProgramObject::IgnoreError::Yes
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
+    _quadProgram = BaseModule::ProgramObjectManager.request(
+        "ModelOpacityProgram",
+        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            const std::filesystem::path vs =
+                absPath("${MODULE_BASE}/shaders/modelOpacity_vs.glsl");
+            const std::filesystem::path fs =
+                absPath("${MODULE_BASE}/shaders/modelOpacity_fs.glsl");
+
+            return global::renderEngine->buildRenderProgram(
+                "ModelOpacityProgram",
+                vs,
+                fs
+            );
+        }
+    );
+    ghoul::opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
+
+    // Screen quad VAO
+    constexpr std::array<GLfloat, 24> QuadVtx = {
+        // x     y     s     t
+        -1.f, -1.f,  0.f,  0.f,
+         1.f,  1.f,  1.f,  1.f,
+        -1.f,  1.f,  0.f,  1.f,
+        -1.f, -1.f,  0.f,  0.f,
+         1.f, -1.f,  1.f,  0.f,
+         1.f,  1.f,  1.f,  1.f
+    };
+
+    glGenVertexArrays(1, &_quadVao);
+    glBindVertexArray(_quadVao);
+
+    glGenBuffers(1, &_quadVbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _quadVbo);
+
+    glBufferData(GL_ARRAY_BUFFER, sizeof(QuadVtx), QuadVtx.data(), GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        4 * sizeof(GLfloat),
+        reinterpret_cast<void*>(2 * sizeof(GLfloat))
+    );
+
+    // Generate textures and the frame buffer
+    glGenFramebuffers(1, &_framebuffer);
+
+    // Bind textures to the framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        global::renderEngine->renderer().additionalColorTexture1(),
+        0
+    );
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT1,
+        global::renderEngine->renderer().additionalColorTexture2(),
+        0
+    );
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT2,
+        global::renderEngine->renderer().additionalColorTexture3(),
+        0
+    );
+    glFramebufferTexture(
+        GL_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        global::renderEngine->renderer().additionalDepthTexture(),
+        0
+    );
+
+    if (glbinding::Binding::ObjectLabel.isResolved()) {
+        glObjectLabel(GL_FRAMEBUFFER, _framebuffer, -1, "RenderableModel Framebuffer");
+    }
+
+    // Check status
+    const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        LERROR("Framebuffer is not complete");
+    }
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    // Initialize geometry
     _geometry->initialize();
     _geometry->calculateBoundingRadius();
+    setBoundingSphere(_geometry->boundingRadius() * _modelScale);
+
+    if (!_hasFrustumSize) {
+        const double bounds = _geometry->boundingRadius();
+        const double scale = _modelScale * glm::compMax(parent()->scale());
+        // The *2 is a fudge-factor to make the shadowing work for most cases
+        const float r = static_cast<float>(bounds * scale * 2.f);
+        _frustumSize = r;
+        _frustumSize.setMinValue(r * 0.1f);
+        _frustumSize.setMaxValue(r * 3.f);
+    }
+
+    // Set Interaction sphere size to be 10% of the bounding sphere
+    setInteractionSphere(boundingSphere() * 0.1);
+
+    if (_castShadow) {
+        createDepthMapResources();
+    }
 }
 
 void RenderableModel::deinitializeGL() {
     _geometry->deinitialize();
     _geometry.reset();
 
+    glDeleteFramebuffers(1, &_framebuffer);
+
+    glDeleteBuffers(1, &_quadVbo);
+    glDeleteVertexArrays(1, &_quadVao);
+
     std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
-        program += "|vs=" + _vertexShaderPath;
+        program += "|vs=" + _vertexShaderPath.string();
     }
     if (!_fragmentShaderPath.empty()) {
-        program += "|fs=" + _fragmentShaderPath;
+        program += "|fs=" + _fragmentShaderPath.string();
     }
     BaseModule::ProgramObjectManager.release(
         program,
@@ -560,7 +818,50 @@ void RenderableModel::deinitializeGL() {
             global::renderEngine->removeRenderProgram(p);
         }
     );
+
+    BaseModule::ProgramObjectManager.release(
+        "ModelOpacityProgram",
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine->removeRenderProgram(p);
+        }
+    );
+
     _program = nullptr;
+    _quadProgram = nullptr;
+    ghoul::opengl::FramebufferObject::deactivate();
+
+    if (_castShadow) {
+        releaseDepthMapResources();
+    }
+}
+
+void RenderableModel::createDepthMapResources() {
+    using ProgramObject = ghoul::opengl::ProgramObject;
+
+    _depthMapProgram = BaseModule::ProgramObjectManager.request(
+        "ModelDepthMapProgram",
+        [&]() -> std::unique_ptr<ProgramObject> {
+            std::filesystem::path vs =
+                absPath("${MODULE_BASE}/shaders/model_depth_vs.glsl");
+            std::filesystem::path fs =
+                absPath("${MODULE_BASE}/shaders/model_depth_fs.glsl");
+
+            std::unique_ptr<ProgramObject> prog =
+                global::renderEngine->buildRenderProgram("ModelDepthMapProgram", vs, fs);
+            prog->setIgnoreAttributeLocationError(ProgramObject::IgnoreError::Yes);
+            prog->setIgnoreUniformLocationError(ProgramObject::IgnoreError::Yes);
+            return prog;
+        }
+    );
+}
+
+void RenderableModel::releaseDepthMapResources() {
+    BaseModule::ProgramObjectManager.release(
+        "ModelDepthMapProgram",
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine->removeRenderProgram(p);
+        }
+    );
 }
 
 void RenderableModel::render(const RenderData& data, RendererTasks&) {
@@ -574,36 +875,44 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     // Formula from RenderableGlobe
     constexpr double tfov = 0.5773502691896257;
     constexpr int res = 2880;
-    const double maxDistance = res * boundingSphere() / tfov;
 
-    if (distanceToCamera < maxDistance) {
-        _program->activate();
+    // @TODO (malej 13-APR-23): This should only use the boundingSphere function once
+    // that takes the gui scale into account too for all renderables
+    const double maxDistance =
+        res * boundingSphere() * glm::compMax(data.modelTransform.scale) / tfov;
 
-        _program->setUniform(_uniformCache.opacity, opacity());
+    // Don't render if model is too far away
+    if (distanceToCamera >= maxDistance) {
+        return;
+    }
 
-        // Model transform and view transform needs to be in double precision
-        const glm::dmat4 modelTransform =
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-            glm::dmat4(data.modelTransform.rotation) *
-            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
-            glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
-        const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() *
-            modelTransform;
+    _program->activate();
 
-        int nLightSources = 0;
-        _lightIntensitiesBuffer.resize(_lightSources.size());
-        _lightDirectionsViewSpaceBuffer.resize(_lightSources.size());
-        for (const std::unique_ptr<LightSource>& lightSource : _lightSources) {
-            if (!lightSource->isEnabled()) {
-                continue;
-            }
-            _lightIntensitiesBuffer[nLightSources] = lightSource->intensity();
-            _lightDirectionsViewSpaceBuffer[nLightSources] =
-                lightSource->directionViewSpace(data);
+    // Model transform and view transform needs to be in double precision
+    glm::dmat4 modelTransform = calcModelTransform(data);
+    modelTransform = glm::translate(modelTransform, glm::dvec3(_pivot.value()));
+    modelTransform *= glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
 
-            ++nLightSources;
+    int nLightSources = 0;
+    _lightIntensitiesBuffer.resize(_lightSources.size());
+    _lightDirectionsViewSpaceBuffer.resize(_lightSources.size());
+    for (const std::unique_ptr<LightSource>& lightSource : _lightSources) {
+        if (!lightSource->isEnabled()) {
+            continue;
         }
+        _lightIntensitiesBuffer[nLightSources] = lightSource->intensity();
+        _lightDirectionsViewSpaceBuffer[nLightSources] =
+            lightSource->directionViewSpace(data);
 
+        nLightSources++;
+    }
+
+    if (_uniformCache.performShading != -1) {
+        _program->setUniform(_uniformCache.performShading, _performShading);
+    }
+
+    if (_performShading) {
         _program->setUniform(
             _uniformCache.nLightSources,
             nLightSources
@@ -616,87 +925,261 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
             _uniformCache.lightDirectionsViewSpace,
             _lightDirectionsViewSpaceBuffer
         );
-        _program->setUniform(
-            _uniformCache.modelViewTransform,
-            glm::mat4(modelViewTransform)
-        );
 
-        glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
-
-        _program->setUniform(
-            _uniformCache.normalTransform,
-            glm::mat4(normalTransform)
-        );
-
-        _program->setUniform(
-            _uniformCache.projectionTransform,
-            data.camera.projectionMatrix()
-        );
         _program->setUniform(_uniformCache.ambientIntensity, _ambientIntensity);
         _program->setUniform(_uniformCache.diffuseIntensity, _diffuseIntensity);
         _program->setUniform(_uniformCache.specularIntensity, _specularIntensity);
-        _program->setUniform(_uniformCache.performShading, _performShading);
-        _program->setUniform(_uniformCache.opacityBlending, _enableOpacityBlending);
+        _program->setUniform(_uniformCache.specularPower, _specularPower);
+    }
 
-        if (_disableFaceCulling) {
-            glDisable(GL_CULL_FACE);
+    _program->setUniform(
+        _uniformCache.modelViewTransform,
+        glm::mat4(modelViewTransform)
+    );
+
+    const glm::dmat4 normalTransform = glm::transpose(glm::inverse(modelViewTransform));
+
+    _program->setUniform(
+        _uniformCache.normalTransform,
+        glm::mat4(normalTransform)
+    );
+
+    _program->setUniform(
+        _uniformCache.projectionTransform,
+        data.camera.projectionMatrix()
+    );
+
+    if (!_enableFaceCulling) {
+        glDisable(GL_CULL_FACE);
+    }
+
+    // Configure blending
+    glEnablei(GL_BLEND, 0);
+    switch (_blendingFuncOption) {
+        case DefaultBlending:
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case AdditiveBlending:
+            glBlendFunc(GL_ONE, GL_ONE);
+            break;
+        case PolygonBlending:
+            glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
+            break;
+        case ColorAddingBlending:
+            glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
+            break;
+    }
+
+    if (!_enableDepthTest) {
+        glDisable(GL_DEPTH_TEST);
+    }
+
+    // does only really need to be set when _castShadow changes
+    _program->setUniform(_uniformCache.has_shadow_depth_map, _castShadow);
+
+    ghoul::opengl::TextureUnit shadowUnit;
+    if (_castShadow && _lightSource) {
+        shadowmapping::ShadowInfo sm =
+            global::renderEngine->renderer().shadowInformation(_shadowGroup);
+
+        _program->setUniform(_uniformCache.model, modelTransform);
+        _program->setUniform(_uniformCache.light_vp, sm.viewProjectionMatrix);
+
+        shadowUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, sm.depthMap.texture);
+        _program->setUniform(_uniformCache.shadow_depth_map, shadowUnit);
+    }
+
+    _program->setUniform(_uniformCache.has_override_color, _useOverrideColor);
+    if (_useOverrideColor) {
+        _program->setUniform(_uniformCache.override_color, _overrideColor);
+    }
+
+    if (!_shouldRenderTwice) {
+        // Reset manual depth test
+        _program->setUniform(_uniformCache.performManualDepthTest, false);
+
+        if (hasOverrideRenderBin()) {
+            // If override render bin is set then use the opacity values as normal
+            _program->setUniform(_uniformCache.opacity, opacity());
+        }
+        else {
+            // Otherwise reset to 1
+            _program->setUniform(_uniformCache.opacity, 1.f);
         }
 
-        glEnablei(GL_BLEND, 0);
-        switch (_blendingFuncOption) {
-            case DefaultBlending:
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                break;
-            case AdditiveBlending:
-                glBlendFunc(GL_ONE, GL_ONE);
-                break;
-            case PointsAndLinesBlending:
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-                break;
-            case PolygonBlending:
-                glBlendFunc(GL_SRC_ALPHA_SATURATE, GL_ONE);
-                break;
-            case ColorAddingBlending:
-                glBlendFunc(GL_SRC_COLOR, GL_DST_COLOR);
-                break;
-        };
-
-        if (_disableDepthTest) {
-            glDisable(GL_DEPTH_TEST);
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
         }
 
         _geometry->render(*_program);
-        if (_disableFaceCulling) {
-            glEnable(GL_CULL_FACE);
+
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         }
-
-        global::renderEngine->openglStateCache().resetBlendState();
-
-        if (_disableDepthTest) {
-            glEnable(GL_DEPTH_TEST);
-        }
-
-        _program->deactivate();
     }
+    else {
+        // Prepare framebuffer
+        const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
+        glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+
+        // Re-bind first texture to use the currently not used Ping-Pong texture in the
+        // FramebufferRenderer
+        glFramebufferTexture(
+            GL_FRAMEBUFFER,
+            GL_COLOR_ATTACHMENT0,
+            global::renderEngine->renderer().additionalColorTexture1(),
+            0
+        );
+        // Check status
+        const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE) {
+            LERROR("Framebuffer is not complete");
+        }
+
+        constexpr std::array<GLenum, 3> ColorAttachmentArray = {
+           GL_COLOR_ATTACHMENT0,
+           GL_COLOR_ATTACHMENT1,
+           GL_COLOR_ATTACHMENT2,
+        };
+        glDrawBuffers(3, ColorAttachmentArray.data());
+        glClearColor(0.f, 0.f, 0.f, 0.f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
+
+        // Use a manuel depth test to make the models aware of the rest of the scene
+        _program->setUniform(_uniformCache.performManualDepthTest, _enableDepthTest);
+
+        // Bind the G-buffer depth texture for a manual depth test towards the rest
+        // of the scene
+        ghoul::opengl::TextureUnit gBufferDepthTextureUnit;
+        gBufferDepthTextureUnit.activate();
+        glBindTexture(
+            GL_TEXTURE_2D,
+            global::renderEngine->renderer().gBufferDepthTexture()
+        );
+        _program->setUniform(_uniformCache.gBufferDepthTexture, gBufferDepthTextureUnit);
+
+        // Will also need the resolution to get a texture coordinate for the G-buffer
+        // depth texture
+        _program->setUniform(
+            _uniformCache.resolution,
+            glm::vec2(global::windowDelegate->currentDrawBufferResolution())
+        );
+
+        // Make sure opacity in first pass is always 1
+        _program->setUniform(_uniformCache.opacity, 1.f);
+
+        // Render Pass 1
+        // Render all parts of the model into the new framebuffer without opacity
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+
+        _geometry->render(*_program);
+        _program->deactivate();
+
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+
+        // Render pass 2
+        // Render the whole model into the G-buffer with the correct opacity
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+
+        // Screen-space quad should not be discarded due to depth test,
+        // but we still want to be able to write to the depth buffer -> GL_ALWAYS
+        glEnable(GL_DEPTH_TEST);
+        glDepthFunc(GL_ALWAYS);
+
+        _quadProgram->activate();
+
+        _quadProgram->setUniform(_uniformOpacityCache.opacity, opacity());
+
+        // Bind textures
+        ghoul::opengl::TextureUnit colorTextureUnit;
+        colorTextureUnit.activate();
+        glBindTexture(
+            GL_TEXTURE_2D,
+            global::renderEngine->renderer().additionalColorTexture1()
+        );
+        _quadProgram->setUniform(_uniformOpacityCache.colorTexture, colorTextureUnit);
+
+        ghoul::opengl::TextureUnit depthTextureUnit;
+        depthTextureUnit.activate();
+        glBindTexture(
+            GL_TEXTURE_2D,
+            global::renderEngine->renderer().additionalDepthTexture()
+        );
+        _quadProgram->setUniform(_uniformOpacityCache.depthTexture, depthTextureUnit);
+
+        // Will also need the resolution and viewport to get a texture coordinate
+        _quadProgram->setUniform(
+            _uniformOpacityCache.resolution,
+            glm::vec2(global::windowDelegate->currentDrawBufferResolution())
+        );
+
+        std::array<GLint, 4> vp = {};
+        global::renderEngine->openglStateCache().viewport(vp.data());
+        glm::ivec4 viewport = glm::ivec4(vp[0], vp[1], vp[2], vp[3]);
+        _quadProgram->setUniform(
+            _uniformOpacityCache.viewport,
+            viewport[0],
+            viewport[1],
+            viewport[2],
+            viewport[3]
+        );
+
+        // Draw
+        glBindVertexArray(_quadVao);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        _quadProgram->deactivate();
+    }
+
+    // Reset
+    if (!_enableFaceCulling) {
+        glEnable(GL_CULL_FACE);
+    }
+
+    if (!_enableDepthTest) {
+        glEnable(GL_DEPTH_TEST);
+    }
+
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetDepthState();
+    glActiveTexture(GL_TEXTURE0);
 }
 
 void RenderableModel::update(const UpdateData& data) {
-    if (_program->isDirty()) {
+    if (_program->isDirty()) [[unlikely]] {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
-    setBoundingSphere(_geometry->boundingRadius() * _modelScale *
-        glm::compMax(data.modelTransform.scale)
-    );
-    // Set Interaction sphere size to be 10% of the bounding sphere
-    setInteractionSphere(_boundingSphere * 0.1);
+    if (_quadProgram->isDirty()) [[unlikely]] {
+        _quadProgram->rebuildFromFile();
+        ghoul::opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
+    }
+
+    if (!hasOverrideRenderBin()) {
+        // Only render two pass if the model is in any way transparent
+        const float o = opacity();
+        if ((o >= 0.f && o < 1.f) || _geometry->isTransparent()) {
+            setRenderBin(Renderable::RenderBin::PostDeferredTransparent);
+            _shouldRenderTwice = true;
+        }
+        else {
+            setRenderBin(_originalRenderBin);
+            _shouldRenderTwice = false;
+        }
+    }
+
 
     if (_geometry->hasAnimation() && !_animationStart.empty()) {
-        double relativeTime;
-        double now = data.time.j2000Seconds();
-        double startTime = data.time.convertTime(_animationStart);
-        double duration = _geometry->animationDuration();
+        double relativeTime = 0.0;
+        const double now = data.time.j2000Seconds();
+        const double startTime = Time::convertTime(_animationStart);
+        const double duration = _geometry->animationDuration();
 
         // The animation works in a time range 0 to duration where 0 in the animation is
         // the given _animationStart time in OpenSpace. The time in OpenSpace then has to
@@ -754,11 +1237,42 @@ void RenderableModel::update(const UpdateData& data) {
                     relativeTime = duration;
                 }
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
         _geometry->update(relativeTime);
     }
+}
+
+void RenderableModel::renderForDepthMap(const glm::dmat4& vp) const {
+    _depthMapProgram->activate();
+
+    const glm::dmat4 model =
+        parent()->modelTransform() *
+        glm::translate(glm::dmat4(1.0), glm::dvec3(_pivot.value())) *
+        glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
+
+    _depthMapProgram->setUniform("model", model);
+    _depthMapProgram->setUniform("light_vp", vp);
+
+    glCullFace(GL_FRONT);
+    if (isEnabled()) {
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        }
+
+        _geometry->render(*_depthMapProgram, false, true);
+
+        if (_renderWireframe) {
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        }
+    }
+    glCullFace(GL_BACK);
+}
+
+glm::dvec3 RenderableModel::center() const {
+    glm::dmat4 transform = glm::translate(glm::dmat4(1.0), glm::dvec3(_pivot.value()));
+    transform *= glm::scale(_modelTransform.value(), glm::dvec3(_modelScale));
+    glm::dmat4 model = parent()->modelTransform() * transform;
+    return model * glm::dvec4(0.0, 0.0, 0.0, 1.0);
 }
 
 }  // namespace openspace

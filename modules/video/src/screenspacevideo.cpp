@@ -1,0 +1,110 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include <modules/video/include/screenspacevideo.h>
+
+#include <openspace/documentation/documentation.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/texture.h>
+#include <filesystem>
+
+namespace {
+    // This `ScreenSpaceRenderable` can be used to render a video in front of the camera.
+    //
+    // The video can either be played back based on a given simulation time
+    // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
+    // `PlaybackMode` RealTimeLoop). It is also possible to control whether the video
+    // should loop or just be played once.
+    //
+    // Note that, unless playback is mapped to simulation time, the video must be started
+    // manually via the user interface.
+    struct [[codegen::Dictionary(ScreenSpaceVideo)]] Parameters {};
+#include "screenspacevideo_codegen.cpp"
+} // namespace
+
+namespace openspace {
+
+documentation::Documentation ScreenSpaceVideo::Documentation() {
+    documentation::Documentation doc = codegen::doc<Parameters>("video_screenspacevideo");
+
+    documentation::Documentation vp = VideoPlayer::Documentation();
+    doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
+
+    return doc;
+}
+
+ScreenSpaceVideo::ScreenSpaceVideo(const ghoul::Dictionary& dictionary)
+    : ScreenSpaceRenderable(dictionary)
+    , _videoPlayer(dictionary)
+{
+    // @TODO (abock, 2021-02-02) Should this be the name variable? The identifier wasn't
+    // declared in the documentation
+    std::string identifier;
+    if (dictionary.hasValue<std::string>(KeyIdentifier)) {
+        identifier = dictionary.value<std::string>(KeyIdentifier);
+    }
+    else {
+        identifier = "ScreenSpaceVideo";
+    }
+    identifier = makeUniqueIdentifier(identifier);
+    setIdentifier(identifier);
+
+    addPropertySubOwner(_videoPlayer);
+}
+
+void ScreenSpaceVideo::update() {
+    _videoPlayer.update();
+
+    if (!_videoPlayer.isInitialized()) {
+        return;
+    }
+    const glm::uvec3& texDimensions = _videoPlayer.frameTexture()->dimensions();
+    if (_objectSize != glm::ivec2(texDimensions.x, texDimensions.y)) {
+        _objectSize = texDimensions;
+    }
+}
+
+void ScreenSpaceVideo::render(const RenderData& renderData) {
+    if (_videoPlayer.isInitialized()) {
+        ScreenSpaceRenderable::render(renderData);
+    }
+}
+
+void ScreenSpaceVideo::initializeGL() {
+    ScreenSpaceRenderable::initializeGL();
+
+    _videoPlayer.initialize();
+}
+
+void ScreenSpaceVideo::deinitializeGL() {
+    _videoPlayer.destroy();
+
+    ScreenSpaceRenderable::deinitializeGL();
+}
+
+void ScreenSpaceVideo::bindTexture() {
+    _videoPlayer.frameTexture()->bind();
+}
+
+} // namespace openspace

@@ -1,0 +1,22 @@
+local image = asset.resource({
+  Name = "Ring Nebula Image",
+  Type = "HttpSynchronization",
+  Identifier = "ring_image",
+  Version = 1
+})
+
+
+asset.export("image", image)
+
+
+
+asset.meta = {
+  Name = "Ring Nebula",
+  Description = "Ring Nebula Image",
+  Author = [[
+    NASA, ESA, C.R. O'Dell (Vanderbilt University), and
+    D. Thompson (Large Binocular Telescope Observatory)
+  ]],
+  URL = "https://hubblesite.org/contents/media/images/2013/13/3167-Image.html?keyword=ring%2520nebula&news=true",
+  License = "https://hubblesite.org/copyright"
+}

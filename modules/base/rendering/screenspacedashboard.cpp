@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,36 +25,41 @@
 #include <modules/base/rendering/screenspacedashboard.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <optional>
+#include <utility>
+
+#include "screenspacedashboard_lua.inl"
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo UseMainInfo = {
         "UseMainDashboard",
         "Use main dashboard",
-        "If this value is set to 'true', this ScreenSpaceDashboard will use the "
-        "main dashboard instead of creating an independent one"
+        "If true, this ScreenSpaceDashboard will use the main dashboard instead of "
+        "creating an independent one.",
+        openspace::properties::Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(ScreenSpaceDashboard)]] Parameters {
-        // Specifies the GUI name of the ScreenSpaceDashboard
-        std::optional<std::string> name;
+        std::optional<std::string> identifier [[codegen::private()]];
 
         // [[codegen::verbatim(UseMainInfo.description)]]
         std::optional<bool> useMainDashboard;
+
+        // A list of DashboardItems that are added automatically upon construction of the
+        // ScreenSpaceDashboard. This value must not be specified if `UseMainDashboard` is
+        // specified.
+        std::optional<std::vector<ghoul::Dictionary>>
+            items [[codegen::reference("dashboarditem")]];
     };
 #include "screenspacedashboard_codegen.cpp"
 } // namespace
-
-#include "screenspacedashboard_lua.inl"
 
 namespace openspace {
 
@@ -63,35 +68,39 @@ documentation::Documentation ScreenSpaceDashboard::Documentation() {
 }
 
 ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
-    : ScreenSpaceFramebuffer(dictionary)
+    : ScreenSpaceRenderableFramebuffer(dictionary)
     , _useMainDashboard(UseMainInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    // @TODO (abock, 2021-01-29) Should this be the name variable? The identifier wasn't
-    // declared in the documentation
-    std::string identifier;
-    if (dictionary.hasValue<std::string>(KeyIdentifier)) {
-        identifier = dictionary.value<std::string>(KeyIdentifier);
-    }
-    else {
-        identifier = "ScreenSpaceDashboard";
-    }
-    identifier = makeUniqueIdentifier(identifier);
-    setIdentifier(std::move(identifier));
+    std::string identifier = p.identifier.value_or("ScreenSpaceDashboard");
+    setIdentifier(makeUniqueIdentifier(std::move(identifier)));
 
     _useMainDashboard = p.useMainDashboard.value_or(_useMainDashboard);
     addProperty(_useMainDashboard);
 
-    _scale = 1.f;
-    _scale.setMaxValue(15.f);
+    if (_useMainDashboard && p.items.has_value()) {
+        throw ghoul::RuntimeError("Cannot specify items when using the main dashboard");
+    }
+
+    if (!_useMainDashboard) {
+        addPropertySubOwner(_dashboard);
+    }
+
+    if (p.items.has_value()) {
+        ghoul_assert(!_useMainDashboard, "Cannot add items to the main dashboard");
+        for (const ghoul::Dictionary& item : *p.items) {
+            std::unique_ptr<DashboardItem> i = DashboardItem::createFromDictionary(item);
+            _dashboard.addDashboardItem(std::move(i));
+        }
+    }
 }
 
-bool ScreenSpaceDashboard::initializeGL() {
-    ScreenSpaceFramebuffer::initializeGL();
+void ScreenSpaceDashboard::initializeGL() {
+    ScreenSpaceRenderableFramebuffer::initializeGL();
 
     addRenderFunction([this]() {
-        glm::vec2 penPosition = glm::vec2(10.f, _size.value().w);
+        glm::vec2 penPosition = glm::vec2(0.f, _size.value().x);
 
         if (_useMainDashboard) {
             global::dashboard->render(penPosition);
@@ -100,20 +109,6 @@ bool ScreenSpaceDashboard::initializeGL() {
             _dashboard.render(penPosition);
         }
     });
-
-    return true;
-}
-
-bool ScreenSpaceDashboard::deinitializeGL() {
-    //_fontRenderer = nullptr;
-    return ScreenSpaceFramebuffer::deinitializeGL();
-}
-
-bool ScreenSpaceDashboard::isReady() const {
-    return /*(_fontRenderer != nullptr) &&
-           (_fontDate != nullptr) &&
-           (_fontInfo != nullptr) &&*/
-           ScreenSpaceFramebuffer::isReady();
 }
 
 void ScreenSpaceDashboard::update() {

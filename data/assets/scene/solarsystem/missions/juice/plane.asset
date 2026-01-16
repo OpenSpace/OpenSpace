@@ -1,8 +1,10 @@
-local transforms = asset.require('./transforms')
+local transforms = asset.require("./transforms")
+
+
 
 -- Datasets created using the script found at:
 -- https://github.com/OpenSpace/scripts/tree/master/juice-gphio-image-conversion
-local data = asset.syncedResource({
+local data = asset.resource({
   Type = "HttpSynchronization",
   Name = "Ganymede Plane Simulations",
   Identifier = "juice_ganymede_plane_cuts",
@@ -19,13 +21,14 @@ local xy_n = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-n.png",
-    Enabled = false
+    Texture = data .. "XY-n.png"
   },
   GUI = {
     Name = "Ganymede XY Plane N",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = "A cut plane in Ganymede's XY plane showing the number of particles"
   }
 }
@@ -35,13 +38,14 @@ local xy_t = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-T.png",
-    Enabled = false
+    Texture = data .. "XY-T.png"
   },
   GUI = {
     Name = "Ganymede XY Plane T",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = "A cut plane in Ganymede's XY plane showing the temperature"
   }
 }
@@ -51,14 +55,15 @@ local xy_u = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-U.png",
-    Enabled = false
+    Texture = data .. "XY-U.png"
   },
   GUI = {
     Name = "Ganymede XY Plane U",
     Path = "/Solar System/Missions/Juice/Plane",
-    Description = [[A cut plane in Ganymede's XY plane showing the strength of the 
+    Focusable = false,
+    Description = [[A cut plane in Ganymede's XY plane showing the strength of the
       magnetic field]]
   }
 }
@@ -68,13 +73,14 @@ local xy_utot = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-Utot.png",
-    Enabled = false
+    Texture = data .. "XY-Utot.png"
   },
   GUI = {
     Name = "Ganymede XY Plane U_tot",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XY plane showing the X, Y, and Z components
       of the magnetic field mapped to the RGB components]]
   }
@@ -85,13 +91,14 @@ local xy_ux = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-Ux.png",
-    Enabled = false
+    Texture = data .. "XY-Ux.png"
   },
   GUI = {
     Name = "Ganymede XY Plane Ux",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XY plane showing the X component of
       Ganymede's magnetic field]]
   }
@@ -102,13 +109,14 @@ local xy_uy = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-Uy.png",
-    Enabled = false
+    Texture = data .. "XY-Uy.png"
   },
   GUI = {
     Name = "Ganymede XY Plane Uy",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XY plane showing the Y component of
       Ganymede's magnetic field]]
   }
@@ -119,13 +127,14 @@ local xy_uz = {
   Parent = transforms.GPHIO.Identifier,
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XY-Uz.png",
-    Enabled = false
+    Texture = data .. "XY-Uz.png"
   },
   GUI = {
     Name = "Ganymede XY Plane Uz",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XY plane showing the Z component of
       Ganymede's magnetic field]]
   }
@@ -137,18 +146,19 @@ local xz_n = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-n.png",
-    Enabled = false
+    Texture = data .. "XZ-n.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane N",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = "A cut plane in Ganymede's XZ plane showing the number of particles"
   }
 }
@@ -159,18 +169,19 @@ local xz_t = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-T.png",
-    Enabled = false
+    Texture = data .. "XZ-T.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane T",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = "A cut plane in Ganymede's XZ plane showing the temperature"
   }
 }
@@ -181,19 +192,20 @@ local xz_u = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-U.png",
-    Enabled = false
+    Texture = data .. "XZ-U.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane U",
     Path = "/Solar System/Missions/Juice/Plane",
-    Description = [[A cut plane in Ganymede's XZ plane showing the strength of the 
+    Focusable = false,
+    Description = [[A cut plane in Ganymede's XZ plane showing the strength of the
       magnetic field]]
   }
 }
@@ -204,18 +216,19 @@ local xz_utot = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-Utot.png",
-    Enabled = false
+    Texture = data .. "XZ-Utot.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane U_tot",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XZ plane showing the X, Y, and Z components
       of the magnetic field mapped to the RGB components]]
   }
@@ -227,18 +240,19 @@ local xz_ux = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-Ux.png",
-    Enabled = false
+    Texture = data .. "XZ-Ux.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane Ux",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XZ plane showing the X component of
       Ganymede's magnetic field]]
   }
@@ -250,18 +264,19 @@ local xz_uy = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-Uy.png",
-    Enabled = false
+    Texture = data .. "XZ-Uy.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane Uy",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XZ plane showing the Y component of
       Ganymede's magnetic field]]
   }
@@ -273,18 +288,19 @@ local xz_uz = {
   Transform = {
     Rotation = {
       Type = "StaticRotation",
-      Rotation = { -math.pi/2, 0.0, 0.0 }
+      Rotation = { -math.pi / 2, 0.0, 0.0 }
     }
   },
   Renderable = {
     Type = "RenderablePlaneImageLocal",
+    Enabled = false,
     Size = Size,
-    Texture = data .. "XZ-Uz.png",
-    Enabled = false
+    Texture = data .. "XZ-Uz.png"
   },
   GUI = {
     Name = "Ganymede XZ Plane Uz",
     Path = "/Solar System/Missions/Juice/Plane",
+    Focusable = false,
     Description = [[A cut plane in Ganymede's XZ plane showing the Z component of
       Ganymede's magnetic field]]
   }
@@ -343,9 +359,9 @@ asset.export(xz_uy)
 asset.export(xz_uz)
 
 
+
 asset.meta = {
   Name = "Ganymede Cut Planes",
-  Version = "1.0",
   Description = [[
     Cutplane visualizations of Ganymede's magnetic field as prepared by Ronan Modolo.
   ]],

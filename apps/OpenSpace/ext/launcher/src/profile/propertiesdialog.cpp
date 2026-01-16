@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,19 +26,17 @@
 
 #include "profile/line.h"
 #include "profile/scriptlogdialog.h"
-#include <ghoul/filesystem/filesystem.h>
 #include <QComboBox>
 #include <QDialogButtonBox>
-#include <QEvent>
-#include <QFile>
 #include <QKeyEvent>
 #include <QLabel>
-#include <QLineEdit>
 #include <QListWidget>
+#include <QMessageBox>
 #include <QPushButton>
-#include <QTextStream>
 #include <QVBoxLayout>
-#include <iostream>
+#include <string>
+#include <string_view>
+#include <utility>
 
 using namespace openspace;
 
@@ -48,6 +46,18 @@ namespace {
         "",
         ""
     };
+
+    QString createOneLineSummary(const Profile::Property& p) {
+        QString summary = QString::fromStdString(p.name);
+        summary += " = ";
+        summary += QString::fromStdString(p.value);
+        summary += " (SetPropertyValue";
+        if (p.setType == Profile::Property::SetType::SetPropertyValueSingle) {
+            summary += "Single";
+        }
+        summary += ")";
+        return summary;
+    }
 } // namespace
 
 PropertiesDialog::PropertiesDialog(QWidget* parent,
@@ -70,8 +80,8 @@ void PropertiesDialog::createWidgets() {
             _list, &QListWidget::itemSelectionChanged,
             this, &PropertiesDialog::listItemSelected
         );
-        for (size_t i = 0; i < _propertyData.size(); ++i) {
-            _list->addItem(new QListWidgetItem(createOneLineSummary(_propertyData[i])));
+        for (const Profile::Property& property : _propertyData) {
+            _list->addItem(new QListWidgetItem(createOneLineSummary(property)));
         }
         layout->addWidget(_list);
     }
@@ -93,12 +103,12 @@ void PropertiesDialog::createWidgets() {
 
         box->addStretch();
 
-        _fillFromScriptLog = new QPushButton("Fill from ScriptLog");
+        _addFromScriptLog = new QPushButton("Add from ScriptLog");
         connect(
-            _fillFromScriptLog, &QPushButton::clicked,
+            _addFromScriptLog, &QPushButton::clicked,
             this, &PropertiesDialog::selectLineFromScriptLog
         );
-        box->addWidget(_fillFromScriptLog);
+        box->addWidget(_addFromScriptLog);
 
         layout->addLayout(box);
     }
@@ -145,13 +155,11 @@ void PropertiesDialog::createWidgets() {
     }
     layout->addWidget(new Line);
     {
+        _errorMsg = new QMessageBox(this);
+        _errorMsg->setIcon(QMessageBox::Critical);
+        _errorMsg->setText("Invalid input data");
+
         QBoxLayout* footerLayout = new QHBoxLayout;
-
-        _errorMsg = new QLabel;
-        _errorMsg->setObjectName("error-message");
-        _errorMsg->setWordWrap(true);
-        footerLayout->addWidget(_errorMsg);
-
         _buttonBox = new QDialogButtonBox;
         _buttonBox->setStandardButtons(QDialogButtonBox::Save | QDialogButtonBox::Cancel);
 
@@ -168,24 +176,12 @@ void PropertiesDialog::createWidgets() {
     }
 }
 
-QString PropertiesDialog::createOneLineSummary(Profile::Property p) {
-    QString summary = QString::fromStdString(p.name);
-    summary += " = ";
-    summary += QString::fromStdString(p.value);
-    summary += " (SetPropertyValue";
-    if (p.setType == Profile::Property::SetType::SetPropertyValueSingle) {
-        summary += "Single";
-    }
-    summary += ")";
-    return summary;
-}
-
 void PropertiesDialog::listItemSelected() {
     QListWidgetItem* item = _list->currentItem();
-    int index = _list->row(item);
+    const int index = _list->row(item);
 
     if (!_propertyData.empty()) {
-        Profile::Property& p = _propertyData[index];
+        const Profile::Property& p = _propertyData[index];
         if (p.setType == Profile::Property::SetType::SetPropertyValueSingle) {
             _commandCombo->setCurrentIndex(0);
         }
@@ -210,7 +206,7 @@ bool PropertiesDialog::isLineEmpty(int index) {
 }
 
 void PropertiesDialog::listItemAdded() {
-    int currentListSize = _list->count();
+    const int currentListSize = _list->count();
 
     if ((currentListSize == 1) && (isLineEmpty(0))) {
         // Special case where list is "empty" but really has one line that is blank.
@@ -238,11 +234,12 @@ void PropertiesDialog::listItemAdded() {
 
 void PropertiesDialog::listItemSave() {
     if (!areRequiredFormsFilled()) {
+        _errorMsg->exec();
         return;
     }
 
     QListWidgetItem* item = _list->currentItem();
-    int index = _list->row(item);
+    const int index = _list->row(item);
 
     if (!_propertyData.empty()) {
         if (_commandCombo->currentIndex() == 0) {
@@ -274,7 +271,7 @@ bool PropertiesDialog::areRequiredFormsFilled() {
         errors += "Missing value";
         requiredFormsFilled = false;
     }
-    _errorMsg->setText("<font color='red'>" + errors + "</font>");
+    _errorMsg->setInformativeText(errors);
     return requiredFormsFilled;
 }
 
@@ -300,10 +297,10 @@ void PropertiesDialog::listItemRemove() {
             _list->item(0)->setText("");
         }
         else {
-            int index = _list->currentRow();
+            const int index = _list->currentRow();
             if (index >= 0 && index < _list->count()) {
                 delete _list->takeItem(index);
-                if (_propertyData.size() > 0) {
+                if (!_propertyData.empty()) {
                     _propertyData.erase(_propertyData.begin() + index);
                 }
             }
@@ -316,12 +313,12 @@ void PropertiesDialog::transitionToEditMode() {
     _saveButton->setDisabled(true);
     _cancelButton->setDisabled(true);
     _buttonBox->setDisabled(true);
+    _addFromScriptLog->setDisabled(true);
 
     _commandLabel->setText("<font color='black'>Property Set Command</font>");
     _propertyLabel->setText("<font color='black'>Property</font>");
     _valueLabel->setText("<font color='black'>Value to set</font>");
     editBoxDisabled(false);
-    _errorMsg->setText("");
 }
 
 void PropertiesDialog::transitionFromEditMode() {
@@ -331,12 +328,12 @@ void PropertiesDialog::transitionFromEditMode() {
     _saveButton->setDisabled(false);
     _cancelButton->setDisabled(false);
     _buttonBox->setDisabled(false);
+    _addFromScriptLog->setDisabled(false);
 
     _commandLabel->setText("<font color='light gray'>Property Set Command</font>");
     _propertyLabel->setText("<font color='light gray'>Property</font>");
     _valueLabel->setText("<font color='light gray'>Value to set</font>");
     editBoxDisabled(true);
-    _errorMsg->setText("");
 }
 
 void PropertiesDialog::editBoxDisabled(bool disabled) {
@@ -374,10 +371,10 @@ void PropertiesDialog::keyPressEvent(QKeyEvent* evt) {
 }
 
 void PropertiesDialog::selectLineFromScriptLog() {
-    ScriptlogDialog d(this, "openspace.setPropertyValue");
+    ScriptLogDialog d = ScriptLogDialog(this, "openspace.setPropertyValue");
     connect(
-        &d, &ScriptlogDialog::scriptsSelected,
-        [this](std::vector<std::string> scripts) {
+        &d, &ScriptLogDialog::scriptsSelected,
+        [this](const std::vector<std::string>& scripts) {
             for (const std::string& script : scripts) {
                 listItemAdded();
 
@@ -390,13 +387,13 @@ void PropertiesDialog::selectLineFromScriptLog() {
                 // openspace.setPropertyValue('prop', value);
                 if (text.startsWith("openspace.setPropertyValueSingle")) {
                     _commandCombo->setCurrentIndex(0);
-                    std::string_view prefix = "openspace.setPropertyValueSingle";
+                    const std::string_view prefix = "openspace.setPropertyValueSingle";
                     text = text.mid(static_cast<int>(prefix.size()) + 1); // +1 for (
                 }
                 else {
                     // command == "openspace.setPropertyValue"
                     _commandCombo->setCurrentIndex(1);
-                    std::string_view prefix = "openspace.setPropertyValue";
+                    const std::string_view prefix = "openspace.setPropertyValue";
                     text = text.mid(static_cast<int>(prefix.size()) + 1); // +1 for (
                 }
 
@@ -409,13 +406,21 @@ void PropertiesDialog::selectLineFromScriptLog() {
                 }
 
                 // Remove the string markers around the property
-                QString property = textList[0].mid(1, textList[0].size() - 2);
+                const QString prop = textList[0].mid(1, textList[0].size() - 2).trimmed();
 
-                textList.removeFirst();
-                QString value = textList.join(",");
+                QString value = textList[1].trimmed();
+                // If they exist, we need to replace the single string markers around the
+                // property, with double string markers
+                if (value.size() > 2) {
+                    if (value[0] == '\'') {
+                        value[0] = '"';
+                    }
+                    if (value[value.size() - 1] == '\'') {
+                        value[value.size() - 1] = '"';
+                    }
+                }
 
-
-                _propertyEdit->setText(property.trimmed());
+                _propertyEdit->setText(prop);
                 _valueEdit->setText(value.trimmed());
                 listItemSave();
             }

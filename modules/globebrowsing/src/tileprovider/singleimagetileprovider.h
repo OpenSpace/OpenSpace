@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,14 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
-namespace openspace { struct Documentation; }
+#include <openspace/properties/misc/stringproperty.h>
+#include <ghoul/opengl/texture.h>
 
 namespace openspace::globebrowsing {
 
 class SingleImageProvider : public TileProvider {
 public:
-    SingleImageProvider(const ghoul::Dictionary& dictionary);
+    explicit SingleImageProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;

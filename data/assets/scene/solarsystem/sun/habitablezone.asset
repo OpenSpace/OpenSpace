@@ -1,24 +1,28 @@
 local transforms = asset.require("./transforms")
-local textures = asset.require("scene/milkyway/habitable_zones/habitable_zone_textures").TexturesPath
+local textures = asset.require("scene/milkyway/habitable_zones/habitable_zone_textures")
+
+
 
 local HabitableZone = {
   Identifier = "SunHabitableZone",
-  Parent =  transforms.SunECLIPJ2000.Identifier,
+  Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableHabitableZone",
     Enabled = false,
-    Texture = textures .. "hot_to_cold_faded.png",
+    Texture = textures.TexturesPath .. "hot_to_cold_faded.png",
     EffectiveTemperature = 5780, -- Kelvin
     Luminosity = 1, -- solar
     Opacity = 0.1,
     Optimistic = true
   },
   GUI = {
-    Name = "Sun Habitable Zone",
+    Name = "Sun's Habitable Zone",
     Path = "/Solar System/Sun",
+    Focusable = false,
     Description = "Habitable zone for the sun in our solar system"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(HabitableZone)
@@ -31,10 +35,10 @@ end)
 asset.export(HabitableZone)
 
 
+
 asset.meta = {
   Name = "Sun Habitable Zone",
-  Version = "1.1",
-  Description = [[The habitable zone around our sun, computed using formula and 
+  Description = [[The habitable zone around our sun, computed using formula and
     coefficients by Kopparapu et al. (2015) https://arxiv.org/abs/1404.5292]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

@@ -1,12 +1,10 @@
-local colorLayersPath = "./layers/colorlayers"
+asset.require("./layers/colorlayers/jupiter_juno_cassini", true)
 
-asset.require(colorLayersPath .. "/jupiter_texture", true)
 
 
 asset.meta = {
   Name = "Default Jupiter Layers",
-  Version = "1.0",
-  Description = "Default Jupiter layers are: Jupiter Texture",
+  Description = "Default Jupiter layers are: 'Merged Cassini and Juno global map of Jupiter'",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

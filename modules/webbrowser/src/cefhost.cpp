@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,14 +25,32 @@
 #include <modules/webbrowser/include/cefhost.h>
 
 #include <modules/webbrowser/include/webbrowserapp.h>
-#include <openspace/engine/globalscallbacks.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
-#include <fmt/format.h>
+#include <include/cef_app.h>
+#include <filesystem>
+#include <string_view>
 
 #ifdef __APPLE__
 #include <include/wrapper/cef_library_loader.h>
 #endif // __APPLE__
+
+#ifdef WIN32
+#pragma warning(push)
+#pragma warning(disable : 4100)
+#endif // WIN32
+
+#include <include/wrapper/cef_helpers.h>
+
+#ifdef WIN32
+#pragma warning(pop)
+#endif // WIN32
+
+struct CefSettingsTraits;
+template <typename T> class CefStructBase;
+using CefSettings = CefStructBase<CefSettingsTraits>;
 
 namespace {
     constexpr std::string_view _loggerCat = "CefHost";
@@ -45,18 +63,31 @@ CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
 
     CefSettings settings;
 
+#ifndef CEF_USE_SANDBOX
+    LDEBUG("Disabling sandbox for CEF");
+    settings.no_sandbox = 1;
+#endif
+
+    const std::filesystem::path root =
+        std::filesystem::path(helperLocation).parent_path();
+    const std::filesystem::path cefcache = std::format("{}/cefcache", root);
+    CefString(&settings.root_cache_path).FromString(cefcache.string());
+
 #ifndef __APPLE__
     // Apple will always look for helper in a fixed location
     CefString(&settings.browser_subprocess_path).FromString(helperLocation);
 #endif // __APPLE__
 
-    settings.windowless_rendering_enabled = true;
-    attachDebugSettings(settings);
+    settings.windowless_rendering_enabled = 1;
 
-#ifdef WIN32
-    // Enable High-DPI support on Windows 7 or newer
-    CefEnableHighDPISupport();
-#endif // WIN32
+    settings.remote_debugging_port = 8088;
+    LDEBUG(std::format(
+        "Remote WebBrowser debugging available on http://localhost:{}",
+        settings.remote_debugging_port
+    ));
+
+    // cf. https://github.com/chromiumembedded/cef/issues/3685
+    settings.chrome_runtime = 1;
 
 #ifdef __APPLE__
     // Load the CEF framework library at runtime instead of linking directly as required
@@ -67,24 +98,18 @@ CefHost::CefHost([[maybe_unused]] const std::string& helperLocation) {
     }
 #endif // __APPLE__
 
-    CefRefPtr<WebBrowserApp> app(new WebBrowserApp);
+    const CefRefPtr<WebBrowserApp> app = CefRefPtr<WebBrowserApp>(new WebBrowserApp);
 
-    CefMainArgs args;
-    CefInitialize(args, settings, app.get(), nullptr);
+    const CefMainArgs args;
+    const bool success = CefInitialize(args, settings, app.get(), nullptr);
+    if (!success) {
+        throw ghoul::RuntimeError("Failed initializing CEF Browser");
+    }
     LDEBUG("Initializing CEF... done");
 }
 
 CefHost::~CefHost() {
     CefShutdown();
-}
-
-void CefHost::attachDebugSettings(CefSettings &settings) {
-    settings.remote_debugging_port = 8088;
-
-    LDEBUG(fmt::format(
-        "Remote WebBrowser debugging available on http://localhost:{}",
-        settings.remote_debugging_port
-    ));
 }
 
 void CefHost::doMessageLoopWork() {

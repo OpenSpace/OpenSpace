@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,12 @@
 
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/util/progressbar.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/fmt.h>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <limits>
 
 namespace openspace {
 
@@ -44,21 +48,21 @@ bool ErrorHistogramManager::buildHistograms(int numBins) {
     _maxBin = 1.f; // Should be calculated from tsp file as (maxValue - minValue)
 
     unsigned int numOtLevels = _tsp->numOTLevels();
-    unsigned int numOtLeaves = static_cast<unsigned int>(pow(8, numOtLevels - 1));
+    unsigned int numOtLeaves = static_cast<unsigned int>(std::pow(8, numOtLevels - 1));
     unsigned int numBstLeaves = static_cast<unsigned int>(
-        pow(2, _tsp->numBSTLevels() - 1)
+        std::pow(2, _tsp->numBSTLevels() - 1)
     );
 
     _numInnerNodes = _tsp->numTotalNodes() - numOtLeaves * numBstLeaves;
     _histograms = std::vector<Histogram>(_numInnerNodes);
     LINFOC(
         "ErrorHistogramManager",
-        fmt::format("Build {} histograms with {} bins each", _numInnerNodes, numBins)
+        std::format("Build {} histograms with {} bins each", _numInnerNodes, numBins)
     );
 
     // All TSP Leaves
     int numOtNodes = _tsp->numOTNodes();
-    int otOffset = static_cast<int>((pow(8, numOtLevels - 1) - 1) / 7);
+    int otOffset = static_cast<int>((std::pow(8, numOtLevels - 1) - 1) / 7);
 
     int numBstNodes = _tsp->numBSTNodes();
     int bstOffset = numBstNodes / 2;
@@ -73,7 +77,8 @@ bool ErrorHistogramManager::buildHistograms(int numBins) {
             if (!success) {
                 return false;
             }
-            pb.print(++processedLeaves);
+            processedLeaves++;
+            pb.print(processedLeaves);
         }
     }
 
@@ -96,7 +101,7 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
 
     int bstNode = bstOffset;
     bool bstRightOnly = true;
-    unsigned int bstLevel = 0;
+    //unsigned int bstLevel = 0;
 
     do {
         glm::vec3 leafOffset(0.f); // Leaf offset in leaf sized voxels
@@ -122,7 +127,7 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
                     ancestorVoxels = it->second;
                 }
 
-                float voxelScale = static_cast<float>(pow(2.f, octreeLevel));
+                float voxelScale = static_cast<float>(std::pow(2.f, octreeLevel));
                 float invVoxelScale = 1.f / voxelScale;
 
                 // Calculate leaf offset in ancestor sized voxels
@@ -161,7 +166,7 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
             octreeLastOnly &= octreeChild == 7;
             octreeNode = parentOffset(octreeNode, 8);
 
-            int childSize = static_cast<int>(pow(2, octreeLevel) * brickDim);
+            int childSize = static_cast<int>(std::pow(2, octreeLevel) * brickDim);
             leafOffset.x += (octreeChild % 2) * childSize;
             leafOffset.y += ((octreeChild / 2) % 2) * childSize;
             leafOffset.z += (octreeChild / 4) * childSize;
@@ -173,14 +178,14 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
         bstRightOnly &= (bstNode % 2 == 0);
         bstNode = parentOffset(bstNode, 2);
 
-        bstLevel++;
+        //bstLevel++;
     } while (bstNode != -1);
 
     return true;
 }
 
 bool ErrorHistogramManager::loadFromFile(const std::filesystem::path& filename) {
-    std::ifstream file(filename, std::ios::in | std::ios::binary);
+    std::ifstream file = std::ifstream(filename, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
         return false;
     }
@@ -196,7 +201,7 @@ bool ErrorHistogramManager::loadFromFile(const std::filesystem::path& filename) 
 
     _histograms = std::vector<Histogram>(_numInnerNodes);
 
-    for (int i = 0; i < static_cast<int>(_numInnerNodes); ++i) {
+    for (int i = 0; i < static_cast<int>(_numInnerNodes); i++) {
         int offset = i * _numBins;
         float* data = new float[_numBins];
         memcpy(data, &histogramData[offset], sizeof(float) * _numBins);
@@ -205,13 +210,12 @@ bool ErrorHistogramManager::loadFromFile(const std::filesystem::path& filename) 
 
     delete[] histogramData;
     // No need to deallocate histogram data, since histograms take ownership.
-    file.close();
     return true;
 }
 
 
 bool ErrorHistogramManager::saveToFile(const std::filesystem::path& filename) {
-    std::ofstream file(filename, std::ios::out | std::ios::binary);
+    std::ofstream file = std::ofstream(filename, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
         return false;
     }
@@ -224,7 +228,7 @@ bool ErrorHistogramManager::saveToFile(const std::filesystem::path& filename) {
     int nFloats = _numInnerNodes * _numBins;
     float* histogramData = new float[nFloats];
 
-    for (unsigned int i = 0; i < _numInnerNodes; ++i) {
+    for (unsigned int i = 0; i < _numInnerNodes; i++) {
         int offset = i * _numBins;
         memcpy(&histogramData[offset], _histograms[i].data(), sizeof(float) * _numBins);
     }
@@ -232,7 +236,6 @@ bool ErrorHistogramManager::saveToFile(const std::filesystem::path& filename) {
     file.write(reinterpret_cast<char*>(histogramData), sizeof(float) * nFloats);
     delete[] histogramData;
 
-    file.close();
     return true;
 }
 
@@ -301,14 +304,14 @@ int ErrorHistogramManager::parentOffset(int offset, int base) const {
         return -1;
     }
     const int depth = static_cast<int>(
-        floor(log1p(((base - 1) * offset)) / log(base))
+        std::floor(std::log1p(((base - 1) * offset)) / std::log(base))
     );
-    const int firstInLevel = static_cast<int>((pow(base, depth) - 1) / (base - 1));
+    const int firstInLevel = static_cast<int>((std::pow(base, depth) - 1) / (base - 1));
     const int inLevelOffset = offset - firstInLevel;
 
     const int parentDepth = depth - 1;
     const int firstInParentLevel = static_cast<int>(
-        (pow(base, parentDepth) - 1) / (base - 1)
+        (std::pow(base, parentDepth) - 1) / (base - 1)
     );
     const int parentInLevelOffset = inLevelOffset / base;
 
@@ -338,14 +341,14 @@ unsigned int ErrorHistogramManager::brickToInnerNodeIndex(unsigned int brickInde
     const unsigned int numBstLevels = _tsp->numBSTLevels();
 
     const unsigned int numInnerBstNodes = static_cast<int>(
-        (pow(2, numBstLevels - 1) - 1) * numOtNodes
+        (std::pow(2, numBstLevels - 1) - 1) * numOtNodes
     );
     if (brickIndex < numInnerBstNodes) {
         return brickIndex;
     }
 
     const unsigned int numOtLeaves = static_cast<unsigned int>(
-        pow(8, _tsp->numOTLevels() - 1)
+        std::pow(8, _tsp->numOTLevels() - 1)
     );
     const unsigned int numOtInnerNodes = (numOtNodes - numOtLeaves);
 
@@ -374,14 +377,14 @@ unsigned int ErrorHistogramManager::innerNodeToBrickIndex(
     const unsigned int numBstLevels = _tsp->numBSTLevels();
 
     const unsigned int numInnerBstNodes = static_cast<unsigned int>(
-        (pow(2, numBstLevels - 1) - 1) * numOtNodes
+        (std::pow(2, numBstLevels - 1) - 1) * numOtNodes
     );
     if (innerNodeIndex < numInnerBstNodes) {
         return innerNodeIndex;
     }
 
     const unsigned int numOtLeaves = static_cast<unsigned int>(
-        pow(8, _tsp->numOTLevels() - 1)
+        std::pow(8, _tsp->numOTLevels() - 1)
     );
     const unsigned int numOtInnerNodes = (numOtNodes - numOtLeaves);
 

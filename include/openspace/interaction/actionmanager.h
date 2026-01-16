@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,9 @@
 #define __OPENSPACE_CORE___ACTIONMANAGER___H__
 
 #include <openspace/interaction/action.h>
+#include <ghoul/misc/boolean.h>
 #include <unordered_map>
+#include <vector>
 
 namespace ghoul { class Dictionary; }
 namespace openspace::scripting { struct LuaLibrary; }
@@ -35,14 +37,18 @@ namespace openspace::interaction {
 
 class ActionManager {
 public:
+    BooleanType(ShouldBeSynchronized);
+    BooleanType(ShouldBeLogged);
+
     bool hasAction(const std::string& identifier) const;
     void registerAction(Action action);
     void removeAction(const std::string& identifier);
     const Action& action(const std::string& identifier) const;
     std::vector<Action> actions() const;
 
-    void triggerAction(const std::string& identifier,
-        const ghoul::Dictionary& arguments) const;
+    void triggerAction(const std::string& identifier, const ghoul::Dictionary& arguments,
+        ShouldBeSynchronized shouldBeSynchronized,
+        ShouldBeLogged shouldBeLogged = ShouldBeLogged::No) const;
     static scripting::LuaLibrary luaLibrary();
 
 private:

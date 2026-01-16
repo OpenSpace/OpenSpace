@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,8 @@
 
 #include <modules/server/include/connection.h>
 #include <openspace/engine/globals.h>
-#include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "EngineModeTopic";
@@ -51,10 +51,6 @@ EngineModeTopic::~EngineModeTopic() {
     }
 }
 
-bool EngineModeTopic::isDone() const {
-    return _isDone;
-}
-
 void EngineModeTopic::handleJson(const nlohmann::json& json) {
     const std::string event = json.at("event").get<std::string>();
     if (event != SubscribeEvent && event != UnsubscribeEvent &&
@@ -75,21 +71,22 @@ void EngineModeTopic::handleJson(const nlohmann::json& json) {
     if (event == SubscribeEvent) {
         _modeCallbackHandle = global::openSpaceEngine->addModeChangeCallback(
             [this]() {
-                OpenSpaceEngine::Mode currentMode =
-                    global::openSpaceEngine->currentMode();
-                if (currentMode != _lastMode) {
+                const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+                if (mode != _lastMode) {
                     sendJsonData();
-                    _lastMode = currentMode;
+                    _lastMode = mode;
                 }
             }
         );
     }
 }
 
-void EngineModeTopic::sendJsonData() {
-    json stateJson;
+bool EngineModeTopic::isDone() const {
+    return _isDone;
+}
 
-    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+void EngineModeTopic::sendJsonData() {
+    const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
     std::string modeString;
     switch (mode) {
         case OpenSpaceEngine::Mode::UserControl:
@@ -101,9 +98,9 @@ void EngineModeTopic::sendJsonData() {
         case OpenSpaceEngine::Mode::CameraPath:
             modeString = "camera_path";
             break;
-        default:
-            throw ghoul::MissingCaseException();
     }
+
+    json stateJson;
     stateJson["mode"] = modeString;
 
     if (!stateJson.empty()) {

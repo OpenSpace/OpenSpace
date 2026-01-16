@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,11 +27,13 @@
 
 #include <modules/globebrowsing/src/tileprovider/texttileprovider.h>
 
+#include <openspace/util/ellipsoid.h>
+
 namespace openspace::globebrowsing {
 
 class SizeReferenceTileProvider : public TextTileProvider {
 public:
-    SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
+    explicit SizeReferenceTileProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;

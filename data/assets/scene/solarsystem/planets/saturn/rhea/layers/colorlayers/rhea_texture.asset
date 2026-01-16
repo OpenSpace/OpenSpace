@@ -1,33 +1,37 @@
-local globeIdentifier = asset.require("../../rhea").Rhea.Identifier
+local globe = asset.require("../../rhea")
 
-local texturesPath = asset.syncedResource({
+
+
+local texturesPath = asset.resource({
   Name = "Rhea textures",
   Type = "HttpSynchronization",
   Identifier = "rhea_textures",
   Version = 1
 })
 
-local layer = {
+
+local Layer = {
   Identifier = "Texture",
   FilePath = texturesPath .. "rhea.jpg",
-  Enabled = asset.enabled
+  Enabled = asset.enabled,
+  ZIndex = 5
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Rhea.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Rhea.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 
 asset.meta = {
   Name = "Rhea Texutre",
-  Version = "1.0",
   Description = "Default jpg texture for Rhea",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

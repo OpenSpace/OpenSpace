@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/rotation/multirotation/multi.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "MultiRotation_Example",
+        "position": [
+          -1.244458787935574,
+          -0.7644214405203152,
+          -1.4212161652308366
+        ],
+        "pitch": 1.708620199491846e-07,
+        "referenceFrame": "Root",
+        "up": [
+          -0.6159654703120403,
+          -0.32846670483617935,
+          0.7160280463762075
+        ],
+        "yaw": 1.7767095805700588e-07,
+        "timestamp": "2025 JUL 13 12:45:06"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

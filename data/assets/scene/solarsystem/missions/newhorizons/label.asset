@@ -1,9 +1,8 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local transforms = asset.require("./transforms")
 local NewHorizonsModel = asset.require("./model")
 
 
-local models = asset.syncedResource({
+
+local models = asset.resource({
   Name = "New Horizons Model",
   Type = "HttpSynchronization",
   Identifier = "newhorizons_model",
@@ -11,18 +10,19 @@ local models = asset.syncedResource({
 })
 
 local Labels = {
-  Identifier = "Labels",
+  Identifier = "NewHorizonsLabels",
   Parent = NewHorizonsModel.NewHorizons.Identifier,
   Renderable = {
     Type = "RenderableModel",
-    Body = "NEW HORIZONS",
     GeometryFile = models .. "Labels.obj",
     AmbientIntensity = 0.8
   },
   GUI = {
-    Path = "/Solar System/Missions/New Horizons"
+    Path = "/Solar System/Missions/New Horizons",
+    Focusable = false
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Labels)

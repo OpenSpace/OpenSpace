@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,75 +25,82 @@
 #include <modules/base/rendering/grids/renderablegrid.h>
 
 #include <modules/base/basemodule.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <cmath>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered"
+        "The color of the grid lines.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
         "HighlightColor",
-        "Highlight Color",
-        "This value determines the color of the highlighted lines in the grid"
+        "Highlight color",
+        "The color of the highlighted lines in the grid.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
-        "Number of Segments",
-        "This value specifies the number of segments that are used to render the "
-        "grid in each direction"
+        "Number of segments",
+        "The number of segments to split the grid into, in each direction (x and y).",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightRateInfo = {
         "HighlightRate",
-        "Highlight Rate",
+        "Highlight rate",
         "The rate that the columns and rows are highlighted, counted with respect to the "
         "center of the grid. If the number of segments in the grid is odd, the "
-        "highlighting might be offset from the center."
+        "highlighting might be offset from the center.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
-        "This value specifies the line width of the grid"
+        "Line width",
+        "The width of the grid lines. The larger number, the thicker the lines.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightLineWidthInfo = {
         "HighlightLineWidth",
-        "Highlight Line Width",
-        "This value specifies the line width of the highlighted lines in the grid"
+        "Highlight line width",
+        "The width of the highlighted grid lines. The larger number, the thicker the "
+        "lines.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
-        "Grid Size",
-        "This value species the size of each dimensions of the grid"
+        "Grid size",
+        "The size of the grid (in the x and y direction), given in meters.",
+        openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
-        "DrawLabels",
-        "Draw Labels",
-        "Determines whether labels should be drawn or hidden"
-    };
-
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
-    {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the grid"
+        "The labels for the grid."
     };
 
+    // This `Renderable` can be used to create a planar grid, to for example illustrate
+    // distances in 3D space.
+    //
+    // The grid is created by specifying a size and how many segments to split each
+    // dimension into. A secondary color can be used to highlight grid lines with a
+    // given interval.
     struct [[codegen::Dictionary(RenderableGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -116,12 +123,8 @@ namespace {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<glm::vec2> size;
 
-        // [[codegen::verbatim(DrawLabelInfo.description)]]
-        std::optional<bool> drawLabels;
-
         // [[codegen::verbatim(LabelsInfo.description)]]
-        std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("space_labelscomponent")]];
+        std::optional<ghoul::Dictionary> labels [[codegen::reference("labelscomponent")]];
     };
 #include "renderablegrid_codegen.cpp"
 } // namespace
@@ -141,12 +144,10 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
     , _highlightLineWidth(HighlightLineWidthInfo, 0.5f, 1.f, 20.f)
     , _size(SizeInfo, glm::vec2(1.f), glm::vec2(1.f), glm::vec2(1e11f))
-    , _drawLabels(DrawLabelInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
@@ -158,11 +159,11 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     addProperty(_highlightColor);
 
     _segments = p.segments.value_or(_segments);
-    _segments.onChange([&]() { _gridIsDirty = true; });
+    _segments.onChange([this]() { _gridIsDirty = true; });
     addProperty(_segments);
 
     _highlightRate = p.highlightRate.value_or(_highlightRate);
-    _highlightRate.onChange([&]() { _gridIsDirty = true; });
+    _highlightRate.onChange([this]() { _gridIsDirty = true; });
     addProperty(_highlightRate);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
@@ -174,27 +175,25 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
 
     _size.setExponent(10.f);
     _size = p.size.value_or(_size);
-    _size.onChange([&]() { _gridIsDirty = true; });
+    _size.onChange([this]() { _gridIsDirty = true; });
     addProperty(_size);
 
     if (p.labels.has_value()) {
-        _drawLabels = p.drawLabels.value_or(_drawLabels);
-        addProperty(_drawLabels);
-
         _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
+        // Fading of the labels should also depend on the fading of the renderable
+        _labels->setParentFadeable(this);
     }
 }
 
 bool RenderableGrid::isReady() const {
-    return _hasLabels ? _gridProgram && _labels->isReady() : _gridProgram != nullptr;
+    return _gridProgram && (_hasLabels ? _labels->isReady() : true);
 }
 
 void RenderableGrid::initialize() {
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 
@@ -244,15 +243,12 @@ void RenderableGrid::deinitializeGL() {
     _gridProgram = nullptr;
 }
 
-void RenderableGrid::render(const RenderData& data, RendererTasks&){
+void RenderableGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->activate();
 
-    const glm::dmat4 modelMatrix =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+    const glm::dmat4 modelTransform = calcModelTransform(data);
+    const glm::dmat4 modelViewTransform = calcModelViewTransform(data, modelTransform);
 
-    const glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelMatrix;
     const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
 
     const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewTransform;
@@ -262,13 +258,13 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     glm::vec3 right = glm::cross(viewDirection, lookup);
     const glm::vec3 up = glm::cross(right, viewDirection);
 
-    const glm::dmat4 worldToModelTransform = glm::inverse(modelMatrix);
+    const glm::mat4 worldToModelTransform = glm::inverse(modelTransform);
     glm::vec3 orthoRight = glm::normalize(
         glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
     );
 
     if (orthoRight == glm::vec3(0.0)) {
-        glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+        const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
         right = glm::cross(viewDirection, otherVector);
         orthoRight = glm::normalize(
             glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
@@ -283,9 +279,9 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     // Change GL state:
 #ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     glLineWidth(1.f);
-#endif
+#endif // __APPLE__
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
@@ -298,9 +294,9 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     // Render major grid
 #ifndef __APPLE__
     glLineWidth(_highlightLineWidth);
-#else
+#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     glLineWidth(1.f);
-#endif
+#endif // __APPLE__
     _gridProgram->setUniform("gridColor", _highlightColor);
 
     glBindVertexArray(_highlightVaoID);
@@ -314,16 +310,16 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&){
     global::renderEngine->openglStateCache().resetDepthState();
 
     // Draw labels
-    if (_drawLabels && _hasLabels) {
+    if (_hasLabels && _labels->enabled()) {
         const glm::vec3 orthoUp = glm::normalize(
             glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
         );
-         _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+        _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp);
     }
 }
 
 void RenderableGrid::update(const UpdateData&) {
-    if (!_gridIsDirty) {
+    if (!_gridIsDirty) [[likely]] {
         return;
     }
 
@@ -342,8 +338,8 @@ void RenderableGrid::update(const UpdateData&) {
 
     // If the number of segments are uneven the center won't be completly centered
     const glm::uvec2 center = glm::uvec2(nSegments.x / 2.f, nSegments.y / 2.f);
-    for (unsigned int i = 0; i < nSegments.x; ++i) {
-        for (unsigned int j = 0; j < nSegments.y; ++j) {
+    for (unsigned int i = 0; i < nSegments.x; i++) {
+        for (unsigned int j = 0; j < nSegments.y; j++) {
             const double y0 = -halfSize.y + j * step.y;
             const double y1 = y0 + step.y;
 
@@ -353,8 +349,8 @@ void RenderableGrid::update(const UpdateData&) {
             // Line in y direction
             bool shouldHighlight = false;
             if (_highlightRate.value().x != 0) {
-                int dist = abs(static_cast<int>(i) - static_cast<int>(center.x));
-                int rest = dist % _highlightRate.value().x;
+                const int dist = abs(static_cast<int>(i) - static_cast<int>(center.x));
+                const int rest = dist % _highlightRate.value().x;
                 shouldHighlight = rest == 0;
             }
 
@@ -370,8 +366,8 @@ void RenderableGrid::update(const UpdateData&) {
             // Line in x direction
             shouldHighlight = false;
             if (_highlightRate.value().y != 0) {
-                int dist = abs(static_cast<int>(j) - static_cast<int>(center.y));
-                int rest = dist % _highlightRate.value().y;
+                const int dist = abs(static_cast<int>(j) - static_cast<int>(center.y));
+                const int rest = dist % _highlightRate.value().y;
                 shouldHighlight = abs(rest) == 0;
             }
 
@@ -387,15 +383,17 @@ void RenderableGrid::update(const UpdateData&) {
     }
 
     // last x row
-    for (unsigned int i = 0; i < nSegments.x; ++i) {
+    for (unsigned int i = 0; i < nSegments.x; i++) {
         const double x0 = -halfSize.x + i * step.x;
         const double x1 = x0 + step.x;
 
         bool shouldHighlight = false;
         if (_highlightRate.value().y != 0) {
-            int dist = abs(static_cast<int>(nSegments.y) - static_cast<int>(center.y));
-            int rest = dist % _highlightRate.value().y;
-            shouldHighlight = abs(rest) == 0;
+            const int dist = std::abs(
+                static_cast<int>(nSegments.y) - static_cast<int>(center.y)
+            );
+            const int rest = dist % _highlightRate.value().y;
+            shouldHighlight = std::abs(rest) == 0;
         }
 
         if (shouldHighlight) {
@@ -409,15 +407,17 @@ void RenderableGrid::update(const UpdateData&) {
     }
 
     // last y col
-    for (unsigned int j = 0; j < nSegments.y; ++j) {
+    for (unsigned int j = 0; j < nSegments.y; j++) {
         const double y0 = -halfSize.y + j * step.y;
         const double y1 = y0 + step.y;
 
         bool shouldHighlight = false;
         if (_highlightRate.value().x != 0) {
-            int dist = abs(static_cast<int>(nSegments.x) - static_cast<int>(center.x));
-            int rest = dist % _highlightRate.value().x;
-            shouldHighlight = abs(rest) == 0;
+            const int dist = std::abs(
+                static_cast<int>(nSegments.x) - static_cast<int>(center.x)
+            );
+            const int rest = dist % _highlightRate.value().x;
+            shouldHighlight = std::abs(rest) == 0;
         }
         if (shouldHighlight) {
             _highlightArray.push_back({ halfSize.x, y0, 0.0 });

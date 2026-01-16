@@ -1,13 +1,17 @@
-local transforms = asset.require("../transforms")
-local kernel = asset.require("../kernels").sat375
 asset.require("./trail")
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
-local labelsPath = asset.syncedResource({
+
+
+local labelsPath = asset.resource({
   Name = "Saturn Labels",
   Type = "HttpSynchronization",
   Identifier = "saturn_labels",
   Version = 1
 })
+
 
 local Mimas = {
   Identifier = "Mimas",
@@ -15,21 +19,18 @@ local Mimas = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MIMAS",
-      Observer = "SATURN BARYCENTER",
-      Kernels = kernel
+      Target = kernels.ID.Mimas,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_MIMAS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Mimas,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 207000, 197000, 191000 },
-    SegmentsPerPatch = 64,
-    Layers = { },
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "mimas.labels",
@@ -46,18 +47,17 @@ local Mimas = {
   Tag = { "moon_solarSystem", "moon_giants", "moon_saturn" },
   GUI = {
     Name = "Mimas",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Mimas",
     Description = "That's no moon..."
   }
 }
-
 
 local MimasLabel = {
   Identifier = "MimasLabel",
   Parent = Mimas.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Mimas",
     FontSize = 70.0,
     Size = 6.0,
@@ -69,10 +69,11 @@ local MimasLabel = {
     FadeDistances = { 0.3, 10.0 },
     FadeWidths = { 0.15, 10.0 }
   },
-  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
+  Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels", "moon_major_saturn" },
   GUI = {
     Name = "Mimas Label",
-    Path = "/Solar System/Planets/Saturn/Moons",
+    Path = "/Solar System/Planets/Saturn/Major Moons/Mimas",
+    Focusable = false,
     Description = "Label for Saturn's moon Mimas"
   }
 }
@@ -89,12 +90,12 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Mimas)
+asset.export(MimasLabel)
 
 
 
 asset.meta = {
   Name = "Mimas",
-  Version = "1.1",
   Description = "Mimas globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

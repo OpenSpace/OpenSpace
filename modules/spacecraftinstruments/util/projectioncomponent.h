@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,12 +27,14 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/util/spicemanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <filesystem>
+#include <memory>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::opengl {
@@ -54,22 +56,22 @@ public:
 
     bool isReady() const;
 
-    ghoul::opengl::Texture& depthTexture();
+    ghoul::opengl::Texture& depthTexture() const;
     void imageProjectBegin();
     void imageProjectEnd();
     void depthMapRenderBegin();
     void depthMapRenderEnd();
 
-    void update();
+    void update() const;
 
     bool auxiliaryRendertarget();
     bool depthRendertarget();
 
     std::shared_ptr<ghoul::opengl::Texture> loadProjectionTexture(
-        const std::string& texturePath, bool isPlaceholder = false);
+        const std::filesystem::path& texturePath, bool isPlaceholder = false);
 
-    glm::mat4 computeProjectorMatrix(const glm::vec3 loc, glm::dvec3 aim,
-        const glm::vec3 up, const glm::dmat3& instrumentMatrix, float fieldOfViewY,
+    glm::mat4 computeProjectorMatrix(const glm::vec3& loc, const glm::dvec3& aim,
+        const glm::vec3& up, const glm::dmat3& instrumentMatrix, float fieldOfViewY,
         float aspectRatio, float nearPlane, float farPlane, glm::vec3& boreSight);
 
     bool doesPerformProjection() const;
@@ -100,7 +102,7 @@ private:
 
 protected:
     properties::BoolProperty _performProjection;
-    properties::BoolProperty _clearAllProjections;
+    properties::TriggerProperty _clearAllProjections;
     properties::FloatProperty _projectionFading;
 
     properties::IVec2Property _textureSize;
@@ -125,7 +127,8 @@ protected:
     GLuint _depthFboID = 0;
 
     GLint _defaultFBO = 0;
-    GLint _viewport[4] = { 0, 0, 0, 0};
+    GLint _viewport[4] = { 0, 0, 0, 0 };
+    bool _needsClearProjection = false;
 
     struct {
         bool isEnabled = false;

@@ -1,11 +1,12 @@
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "ESO Milky Way Textures",
   Type = "HttpSynchronization",
   Identifier = "milkyway-eso_textures",
   Version = 1
 })
 
-local object = {
+
+local Object = {
   Identifier = "MilkyWay-ESO",
   Transform = {
     Rotation = {
@@ -14,41 +15,41 @@ local object = {
     }
   },
   Renderable = {
-    Type = "RenderableSphere",
+    Type = "RenderableSphereImageLocal",
     Size = 9.2E20,
     Segments = 40,
     Opacity = 0.4,
     Texture = textures .. "eso0932a_blend.png",
-    RenderBinMode = "PreDeferredTransparent",
     Orientation = "Inside",
     MirrorTexture = true,
     FadeOutThreshold = 0.01,
-    Background = true
+    BlendingOption = "Additive",
+    DisableDepth = true
   },
   GUI = {
     Name = "Milky Way (ESO)",
     Path = "/Milky Way/Milky Way",
+    Focusable = false,
     Description = "Milky Way Galaxy image (alternate)"
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
-
+asset.export(Object)
 
 
 
 asset.meta = {
   Name = "MilkyWay Galaxy (ESO)",
-  Version = "1.0",
-  Description = [[This asset contains an alternate to the Digital Universe image for the 
+  Description = [[This asset contains an alternate to the Digital Universe image for the
     Milky Way from ESO]],
   Author = "ESO/S. Brunier",
   URL = "https://www.eso.org/public/usa/images/eso0932a/",

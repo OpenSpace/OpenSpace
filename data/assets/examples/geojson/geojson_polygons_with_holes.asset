@@ -1,0 +1,42 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+
+
+local data = asset.resource({
+  Name = "GeoJSON Example Polygon with holes",
+  Type = "UrlSynchronization",
+  Identifier = "geojson_example_polygon_with_holes",
+  Url = "http://liu-se.cdn.openspaceproject.com/files/examples/geojson/polygon_with_holes.geojson"
+})
+
+
+local ExampleHoles = {
+  Identifier = "PolygonWithHoles",
+  File = data .. "polygon_with_holes.geojson",
+  HeightOffset = 2000.0,
+  DefaultProperties = {
+    Color = { 0.0, 1.0, 1.0 }
+  },
+  Name = "Example Polygon (holes)"
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addGeoJson(earth.Earth.Identifier, ExampleHoles)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteGeoJson(earth.Earth.Identifier, ExampleHoles)
+end)
+
+asset.export(ExampleHoles)
+
+
+
+asset.meta = {
+  Name = "GeoJson Example - Polygon with holes",
+  Description = [[GeoJson example asset with polygon that has holes in it]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

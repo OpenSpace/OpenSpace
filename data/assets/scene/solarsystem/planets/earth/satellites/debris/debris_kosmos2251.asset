@@ -1,16 +1,19 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local omm = asset.syncedResource({
+
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (Kosmos 2251 Debris)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_cosmos-2251-debris",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=cosmos-2251-debris&FORMAT=kvn",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=cosmos-2251-debris&FORMAT=kvn",
   Filename = "cosmos-2251-debris.txt",
-  Override = true
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
-local satellites = {
-  Identifier = "cosmos-2251-debris",
+
+local DebrisCosmos = {
+  Identifier = "DebrisCosmos-2251",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
@@ -18,31 +21,33 @@ local satellites = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.66, 0.8, 0.5 },
-    Fade = 1.5,
+    TrailFade = 1.5,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Kosmos 2251 Debris",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(satellites)
+  openspace.addSceneGraphNode(DebrisCosmos)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(satellites)
+  openspace.removeSceneGraphNode(DebrisCosmos)
 end)
 
-asset.export(satellites)
+asset.export(DebrisCosmos)
 
 
 
 asset.meta = {
   Name = "Satellites Debris - Kosmos 2251 Debris",
-  Version = "1.0",
   Description = "Satellites asset for Debris - Kosmos 2251 Debris. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,36 +24,42 @@
 
 #include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/basictypes.h>
-#include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/distanceconversion.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/font/font.h>
+#include <openspace/util/geodetic.h>
 #include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <optional>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo DisplayFormatInfo = {
         "DisplayFormat",
-        "Display Format",
-        "Choosing the format in which the camera location is displayed"
+        "Display format",
+        "Choosing the format in which the camera location is displayed.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SignificantDigitsInfo = {
         "SignificantDigits",
-        "Significant Digits",
-        "Determines the number of significant digits that are shown in the location text"
+        "Significant digits",
+        "Determines the number of significant digits that are shown in the location "
+        "text.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `DashboardItem` shows the longitude/latitude location of the camera and its
+    // distance to the current focus node. If the current focus node is Earth, these are
+    // provided in the WGS84 reference frame; if the focus is on another planetary body,
+    // it is in the native coordinate frame for that planetary body. If the current focus
+    // node is not a planetary body, a position of (0,0) with a distance of 0 will be
+    // displayed.
     struct [[codegen::Dictionary(DashboardItemGlobeLocation)]] Parameters {
         enum class DisplayFormat {
             DecimalDegrees,
@@ -89,14 +95,14 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
     auto updateFormatString = [this]() {
         switch (_displayFormat.value()) {
             case static_cast<int>(DisplayFormat::DecimalDegrees):
-                _formatString = fmt::format(
+                _formatString = std::format(
                     "Position: {{:03.{0}f}}, {{:03.{0}f}}  "
                     "Altitude: {{:03.{0}f}} {{}}",
                     _significantDigits.value()
                 );
                 break;
             case static_cast<int>(DisplayFormat::DegreeMinuteSeconds):
-                _formatString = fmt::format(
+                _formatString = std::format(
                     "Position: {{}}d {{}}' {{:03.{0}f}}\" {{}}, "
                     "{{}}d {{}}' {{:03.{0}f}}\" {{}}  "
                     "Altitude: {{:03.{0}f}} {{}}",
@@ -133,30 +139,30 @@ DashboardItemGlobeLocation::DashboardItemGlobeLocation(
     addProperty(_significantDigits);
 
     _font = global::fontManager->font(_fontName, _fontSize);
-    _buffer.resize(128);
+    _localBuffer.resize(128);
     updateFormatString();
 }
 
-void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
+void DashboardItemGlobeLocation::update() {
     ZoneScoped;
 
-    GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
-
-    glm::dvec3 position = module->geoPosition();
+    const glm::dvec3 position = geoPositionFromCamera();
     double lat = position.x;
     double lon = position.y;
-    double altitude = position.z;
+    const double altitude = position.z;
 
     std::pair<double, std::string_view> dist = simplifyDistance(altitude);
 
-    std::fill(_buffer.begin(), _buffer.end(), char(0));
+    std::fill(_localBuffer.begin(), _localBuffer.end(), char(0));
     char* end = nullptr;
     switch (_displayFormat.value()) {
         case static_cast<int>(DisplayFormat::DecimalDegrees):
         {
-            end = fmt::format_to(
-                _buffer.data(),
-                fmt::runtime(_formatString), lat, lon, dist.first, dist.second
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            end = std::vformat_to(
+                _localBuffer.data(),
+                _formatString,
+                std::make_format_args(lat, lon, dist.first, dist.second)
             );
             break;
         }
@@ -181,30 +187,22 @@ void DashboardItemGlobeLocation::render(glm::vec2& penPosition) {
             const double lonSec = lonMinRemainder * 60.f;
 
 
-            end = fmt::format_to(
-                _buffer.data(),
-                fmt::runtime(_formatString),
-                latDeg, latMin, latSec, isNorth ? "N" : "S",
-                lonDeg, lonMin, lonSec, isEast ? "E" : "W",
-                dist.first, dist.second
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            end = std::vformat_to(
+                _localBuffer.data(),
+                _formatString,
+                std::make_format_args(
+                    latDeg, latMin, latSec, isNorth ? "N" : "S",
+                    lonDeg, lonMin, lonSec, isEast ? "E" : "W",
+                    dist.first, dist.second
+                )
             );
 
             break;
         }
     }
 
-    std::string_view text = std::string_view(_buffer.data(), end - _buffer.data());
-
-    RenderFont(*_font, penPosition, text);
-    penPosition.y -= _font->height();
-}
-
-glm::vec2 DashboardItemGlobeLocation::size() const {
-    ZoneScoped;
-
-    return _font->boundingBox(
-        fmt::format("Position: {}, {}  Altitude: {}", 1.f, 1.f, 1.f)
-    );
+    _buffer = std::string(_localBuffer.data(), end - _localBuffer.data());
 }
 
 } // namespace openspace

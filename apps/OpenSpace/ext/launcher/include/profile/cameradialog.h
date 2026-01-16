@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,7 +32,10 @@
 
 class QLabel;
 class QLineEdit;
+class QMessageBox;
+class QString;
 class QTabWidget;
+class QWidget;
 
 class CameraDialog final : public QDialog {
 Q_OBJECT
@@ -40,9 +43,9 @@ public:
     /**
      * Constructor for camera gui class
      *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
-     * \param parent Pointer to parent Qt widget (optional)
+     * \param parent Pointer to parent Qt widget
+     * \param camera The #openspace::Profile::CameraType object containing all data of the
+     *        new or imported profile
      */
     CameraDialog(QWidget* parent, std::optional<openspace::Profile::CameraType>* camera);
 
@@ -52,14 +55,21 @@ private slots:
 
 private:
     void createWidgets();
+    QWidget* createNodeWidget();
     QWidget* createNavStateWidget();
     QWidget* createGeoWidget();
 
-    void addErrorMsg(QString errorDescription);
+    void addErrorMsg(const QString& errorDescription);
     bool areRequiredFormsFilledAndValid();
 
     std::optional<openspace::Profile::CameraType>* _camera = nullptr;
     QTabWidget* _tabWidget = nullptr;
+
+    struct {
+        QLineEdit* anchor = nullptr;
+        QLineEdit* height = nullptr;
+    } _nodeState;
+
     struct {
         QLineEdit* anchor = nullptr;
         QLineEdit* aim = nullptr;
@@ -81,7 +91,7 @@ private:
         QLineEdit* altitude = nullptr;
     } _geoState;
 
-    QLabel* _errorMsg = nullptr;
+    QMessageBox* _errorMsg = nullptr;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___CAMERA___H__

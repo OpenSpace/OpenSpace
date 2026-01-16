@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,13 +30,14 @@
 #include <filesystem>
 #include <string>
 #include <vector>
+#include <utility>
 
 namespace openspace {
 
 /**
  * A Horizons file is a text file generated from NASA JPL HORIZONS Website
- * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation supports both Vector
- * and Observer as Horizons data table
+ * (https://ssd.jpl.nasa.gov/horizons.cgi). The implementation supports both Vector and
+ * Observer as Horizons data table.
  *
  * In case of Vector table data the implementation expects a file with format:
  * TIME(JulianDayNumber = A.D. YYYY-MM-DD HH:MM:SS TDB)
@@ -46,8 +47,9 @@ namespace openspace {
  * Y - Y position in kilometers in Ecliptic J2000 reference frame
  * Z - Z position in kilometers in Ecliptic J2000 reference frame
  * Changes required in the "Table Settings" for compatible data:
- * 1. Under "Select Output Quantities" choose option "Position components {x, y, z} only"
- * 2. Uncheck the "Vector labels" options
+ *   1. Under "Select Output Quantities" choose option "Position components {x, y, z}
+ *      only"
+ *   2. Uncheck the "Vector labels" options
  *
  * In case of Observer table data the implementation expects a file with format:
  * TIME(YYYY-MM-DD HH:MM:SS) Range(km) GalLon(degrees) GalLat(degrees)
@@ -55,16 +57,16 @@ namespace openspace {
  * GalLon - Galactic Longitude in degrees
  * GalLat - Galactic Latitude in degrees
  * Changes required in the "Table Settings" for compatible data:
- * 1. Under "Observer Table Settings" uncheck all options except
- *    "Observer range & range-rate" and "Galactic longitude & latitude"
- * 2. Change "Range units" to "kilometers (km)" instead of "astronomical units (au)"
- * 3. Check the "Suppress range-rate" option
+ *   1. Under "Observer Table Settings" uncheck all options except
+ *      "Observer range & range-rate" and "Galactic longitude & latitude"
+ *   2. Change "Range units" to "kilometers (km)" instead of "astronomical units (au)"
+ *   3. Check the "Suppress range-rate" option
  */
 enum class HorizonsResultCode {
     Valid,
     Empty,
 
-    // Erros caught by the error field in the json output
+    // Errors caught by the error field in the json output
     ErrorSize,
     ErrorSpan,
     ErrorTimeRange,
@@ -72,8 +74,9 @@ enum class HorizonsResultCode {
     ErrorObserverTargetSame,
     ErrorNoData,
     MultipleObserverStations,
+    News,
 
-    // Erros/problems NOT caught by the error field in the json output
+    // Errors/problems NOT caught by the error field in the json output
     MultipleObserver,
     ErrorNoTarget,
     MultipleTarget,
@@ -95,21 +98,20 @@ struct HorizonsKeyframe {
 struct HorizonsResult {
     HorizonsType type = HorizonsType::Invalid;
     HorizonsResultCode errorCode = HorizonsResultCode::UnknownError;
-    std::vector<HorizonsKeyframe> data = std::vector<HorizonsKeyframe>();
+    std::vector<HorizonsKeyframe> data;
 };
 
 class HorizonsFile {
 public:
     HorizonsFile() = default;
-    HorizonsFile(std::filesystem::path file);
-    HorizonsFile(std::filesystem::path filePath, const std::string& result);
+    explicit HorizonsFile(std::filesystem::path file);
+    HorizonsFile(std::filesystem::path filePath, std::string result);
 
     void setFile(std::filesystem::path file);
     const std::filesystem::path& file() const;
-    std::filesystem::path& file();
 
     bool hasFile() const;
-    void displayErrorMessage(const HorizonsResultCode code) const;
+    void displayErrorMessage(HorizonsResultCode code) const;
 
 
     std::vector<std::string> parseMatches(const std::string& startPhrase,
@@ -125,13 +127,12 @@ private:
 // Free functions
 std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
     const std::string& observer, const std::string& startTime,
-    const std::string& stopTime, const std::string& stepSize,
-    const std::string& unit);
+    const std::string& stopTime, const std::string& stepSize, const std::string& unit);
 nlohmann::json sendHorizonsRequest(const std::string& url,
-    std::filesystem::path filePath);
-nlohmann::json convertHorizonsDownloadToJson(std::filesystem::path filePath);
+    const std::filesystem::path& filePath);
+nlohmann::json convertHorizonsDownloadToJson(const std::filesystem::path& filePath);
 HorizonsResultCode isValidHorizonsAnswer(const nlohmann::json& answer);
-HorizonsResultCode isValidHorizonsFile(std::filesystem::path file);
+HorizonsResultCode isValidHorizonsFile(const std::filesystem::path& file);
 HorizonsResult readHorizonsFile(std::filesystem::path file);
 
 HorizonsResult readHorizonsVectorFile(std::filesystem::path file);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,21 +27,17 @@
 
 #include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/triggerproperty.h>
-
-namespace ghoul { class Dictionary; }
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class DashboardItemFramerate : public DashboardTextItem {
 public:
-    DashboardItemFramerate(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemFramerate(const ghoul::Dictionary& dictionary);
 
-    void render(glm::vec2& penPosition) override;
-    glm::vec2 size() const override;
+    void update() override;
+
     static documentation::Documentation Documentation();
 
 private:
@@ -51,7 +47,7 @@ private:
     double _minDeltaTimeCache = 1.0;
     double _maxDeltaTimeCache = -1.0;
     bool _shouldClearCache = true;
-    mutable std::vector<char> _buffer;
+    mutable std::vector<char> _localBuffer;
 };
 
 } // openspace

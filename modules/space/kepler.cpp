@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,12 +24,12 @@
 
 #include <modules/space/kepler.h>
 
+#include <openspace/util/distanceconstants.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/misc.h>
-#include <scn/scn.h>
-#include <scn/tuple_return.h>
+#include <ghoul/misc/stringhelper.h>
+#include <scn/scan.h>
 #include <fstream>
 #include <optional>
 #include <sstream>
@@ -127,7 +127,7 @@ namespace {
             LeapSecond { .year = 2017, .dayOfYear =   1 }
         };
         // Get the position of the last leap second before the desired date
-        LeapSecond date{ year, dayOfYear };
+        const LeapSecond date = { year, dayOfYear };
         const auto it = std::lower_bound(LeapSeconds.begin(), LeapSeconds.end(), date);
 
         // Get the position of the Epoch
@@ -150,7 +150,7 @@ namespace {
         const bool isInLeapYear =
             std::find(LeapYears.begin(), LeapYears.end(), year) != LeapYears.end();
 
-        for (int m = 0; m < month; ++m) {
+        for (int m = 0; m < month; m++) {
             dayCount += DaysOfMonths[m];
             if (m == February && isInLeapYear) {
                 dayCount += 1;
@@ -205,10 +205,29 @@ namespace {
         // 00-56 correspond to 2000-2056. We'll see each other again in 2057!
 
         // 1,2. Get the full year and days
-        auto [res, year, daysInYear] = scn::scan_tuple<int, double>(epoch, "{:2}{}");
-        if (!res) {
-            throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
+        std::string e = epoch;
+        if (e.find('.') == std::string::npos) {
+            e += ".0";
         }
+        if (e.size() <= 2) {
+            throw ghoul::RuntimeError(std::format(
+                "Error parsing epoch '{}'. Invalid date string", epoch
+            ));
+        }
+
+        std::string_view yearStr = std::string_view(e).substr(0, 2);
+        std::string_view daysInYearStr = std::string_view(e).substr(2);
+        auto resYear = scn::scan<int>(yearStr, "{}");
+        if (!resYear) {
+            throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
+        }
+        int year = resYear->value();
+
+        auto resDaysInYear = scn::scan<double>(daysInYearStr, "{}");
+        if (!resDaysInYear) {
+            throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
+        }
+        double daysInYear = resDaysInYear->value();
         year += year > 57 ? 1900 : 2000;
         const int daysSince2000 = countDays(year);
 
@@ -235,8 +254,9 @@ namespace {
     }
 
     double epochFromYMDdSubstring(const std::string& epoch) {
-        // The epochString is in the form:
+        // The epochString can be in one of two forms:
         // YYYYMMDD.ddddddd
+        // YYYY-MM-DD.ddddddd
         // With YYYY as the year, MM the month (1 - 12), DD the day of month (1-31),
         // and dddd the fraction of that day.
 
@@ -248,15 +268,31 @@ namespace {
         // 5. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
         // midnight
 
-        // 1, 2
-        auto [res, year, monthNum, dayOfMonthNum, fractionOfDay] =
-            scn::scan_tuple<int, int, int, double>(epoch, "{:4}{:2}{:2}{}");
-        if (!res) {
-            throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
+        std::string e = epoch;
+        if (e.find('.') == std::string::npos) {
+            // No . was found so the epoch was provided as an integer number (see #2551)
+            e += ".0";
         }
+        // 1, 2
+        const size_t nDashes = std::count_if(
+            epoch.begin(),
+            epoch.end(),
+            [](char c) { return c == '-'; }
+        );
+        if (nDashes == 0) {
+            // Insert the two dashes; once after the year and one after the month
+            e.insert(4, "-");
+            e.insert(7, "-");
+        }
+
+        auto res = scn::scan<int, int, int, double>(e, "{:4d}-{:2d}-{:2d}.{}");
+        if (!res) {
+            throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
+        }
+        auto [year, monthNum, day, fraction] = res->values();
         const int daysSince2000 = countDays(year);
-        int wholeDaysInto = daysIntoGivenYear(year, monthNum, dayOfMonthNum);
-        double daysInYear = static_cast<double>(wholeDaysInto) + fractionOfDay;
+        const int daysInto = daysIntoGivenYear(year, monthNum, day);
+        const double daysInYear = static_cast<double>(daysInto) + fraction;
 
         // 3
         using namespace std::chrono;
@@ -312,30 +348,33 @@ namespace {
         const size_t pos = epoch.find('T');
         if (pos == 10) {
             // We have the first form
-            int month;
-            int days;
-            auto res = scn::scan(
-                epoch, "{:4}-{:2}-{:2}T{:2}:{:2}:{}",
-                date.year, month, days, date.hours, date.minutes, date.seconds
+            int month = 0;
+            int days = 0;
+            auto res = scn::scan<int, int, int, int, int, double>(
+                epoch, "{:4}-{:2}-{:2}T{:2}:{:2}:{}"
             );
             if (!res) {
-                throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
+                throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
             }
+            std::tie(date.year, month, days, date.hours, date.minutes, date.seconds) =
+                res->values();
             date.nDays = daysIntoGivenYear(date.year, month, days);
         }
         else if (pos == 8) {
             // We have the second form
 
-            auto res = scn::scan(
-                epoch, "{:4}-{:3}T{:2}:{:2}:{}",
-                date.year, date.nDays, date.hours, date.minutes, date.seconds
+            auto res = scn::scan<int, int, int, int, double>(
+                epoch, "{:4}-{:3}T{:2}:{:2}:{}"
+                //date.year, date.nDays, date.hours, date.minutes, date.seconds
             );
             if (!res) {
-                throw ghoul::RuntimeError(fmt::format("Error parsing epoch '{}'", epoch));
+                throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
             }
+            std::tie(date.year, date.nDays, date.hours, date.minutes, date.seconds) =
+                res->values();
         }
         else {
-            throw ghoul::RuntimeError(fmt::format("Malformed epoch string '{}'", epoch));
+            throw ghoul::RuntimeError(std::format("Malformed epoch string '{}'", epoch));
         }
 
         const int daysSince2000 = countDays(date.year);
@@ -365,22 +404,123 @@ namespace {
         return
             nSecondsSince2000 + totalSeconds + nLeapSecondsOffset - offset + date.seconds;
     }
+
+    std::string unpackDate(std::string_view packedDate) {
+        // Some data in the MPC dataset are stored in a packed data format that this
+        // function unpacks. More information on packed dates can be found here:
+        // http://www.minorplanetcenter.org/iau/info/PackedDates.html
+
+        if (packedDate.size() < 5) {
+            throw ghoul::RuntimeError(std::format(
+                "Illformed packed date. Size must be 5 characters. {}", packedDate
+            ));
+        }
+
+        int year = [packedDate](char m) {
+            switch (m) {
+                case 'I': return 1800;
+                case 'J': return 1900;
+                case 'K': return 2000;
+                default:
+                    throw ghoul::RuntimeError(std::format(
+                        "Illformed packed date. Illegal year marker. {}", packedDate
+                    ));
+            }
+        }(packedDate[0]);
+
+        auto yearRes = scn::scan<int>(packedDate.substr(1, 2), "{}");
+        if (!yearRes) {
+            throw ghoul::RuntimeError(std::format(
+                "Illformed packed date. Second and third characters must be numbers. {}",
+                packedDate
+            ));
+        }
+        year += yearRes->value();
+
+        int month = [](char m) {
+            switch (m) {
+                case '1':  return 1;
+                case '2':  return 2;
+                case '3':  return 3;
+                case '4':  return 4;
+                case '5':  return 5;
+                case '6':  return 6;
+                case '7':  return 7;
+                case '8':  return 8;
+                case '9':  return 9;
+                case 'A':  return 10;
+                case 'B':  return 11;
+                case 'C':  return 12;
+                default:   return -1;
+            }
+        }(packedDate[3]);
+
+        if (month == -1) {
+            throw ghoul::RuntimeError(std::format(
+                "Illformed packed date. Wrong month marker. {}", packedDate
+            ));
+        }
+
+        int day = [](char d) {
+            switch (d) {
+                case '1': return 1;
+                case '2': return 2;
+                case '3': return 3;
+                case '4': return 4;
+                case '5': return 5;
+                case '6': return 6;
+                case '7': return 7;
+                case '8': return 8;
+                case '9': return 9;
+                case 'A': return 10;
+                case 'B': return 11;
+                case 'C': return 12;
+                case 'D': return 13;
+                case 'E': return 14;
+                case 'F': return 15;
+                case 'G': return 16;
+                case 'H': return 17;
+                case 'I': return 18;
+                case 'J': return 19;
+                case 'K': return 20;
+                case 'L': return 21;
+                case 'M': return 22;
+                case 'N': return 23;
+                case 'O': return 24;
+                case 'P': return 25;
+                case 'Q': return 26;
+                case 'R': return 27;
+                case 'S': return 28;
+                case 'T': return 29;
+                case 'U': return 30;
+                case 'V': return 31;
+                default:  return -1;
+            }
+        }(packedDate[4]);
+
+        if (day == -1) {
+            throw ghoul::RuntimeError(std::format(
+                "Illformed packed date. Wrong day marker. {}", packedDate
+            ));
+        }
+
+        return std::format("{}{:0>2}{:0>2}", year, month, day);
+    }
 } // namespace
 
 namespace openspace::kepler {
 
-std::vector<Parameters> readTleFile(std::filesystem::path file) {
+std::vector<Parameters> readTleFile(const std::filesystem::path& file) {
     ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
 
     std::vector<Parameters> result;
 
-    std::ifstream f;
-    f.open(file);
+    std::ifstream f = std::ifstream(file);
 
     int lineNum = 1;
 
     std::string header;
-    while (std::getline(f, header)) {
+    while (ghoul::getline(f, header)) {
         Parameters p;
 
         // Header
@@ -403,21 +543,21 @@ std::vector<Parameters> readTleFile(std::filesystem::path file) {
         //    13   65-68   Element set  number.Incremented when a new TLE is generated
         //    14   69-69   Checksum (modulo 10)
         std::string firstLine;
-        std::getline(f, firstLine);
+        ghoul::getline(f, firstLine);
         if (f.bad() || firstLine[0] != '1') {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Malformed TLE file '{}' at line {}", file, lineNum + 1
             ));
         }
         // The id only contains the last two digits of the launch year, so we have to
         // patch it to the full year
         {
-            std::string id = firstLine.substr(9, 6);
-            std::string prefix = [y = id.substr(0, 2)](){
-                int year = std::atoi(y.c_str());
+            const std::string id = firstLine.substr(9, 6);
+            const std::string prefix = [y = id.substr(0, 2)]() {
+                const int year = std::atoi(y.c_str());
                 return year >= 57 ? "19" : "20";
             }();
-            p.id = fmt::format("{}{}-{}", prefix, id.substr(0, 2), id.substr(3));
+            p.id = std::format("{}{}-{}", prefix, id.substr(0, 2), id.substr(3));
         }
         p.epoch = epochFromSubstring(firstLine.substr(18, 14)); // should be 13?
 
@@ -435,9 +575,9 @@ std::vector<Parameters> readTleFile(std::filesystem::path file) {
         //     9      64-68   Revolution number at epoch (revolutions)
         //    10      69-69   Checksum (modulo 10)
         std::string secondLine;
-        std::getline(f, secondLine);
+        ghoul::getline(f, secondLine);
         if (f.bad() || secondLine[0] != '2') {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Malformed TLE file '{}' at line {}", file, lineNum + 1
             ));
         }
@@ -472,7 +612,7 @@ std::vector<Parameters> readTleFile(std::filesystem::path file) {
 
         // Get mean motion
         stream.str(secondLine.substr(52, 11));
-        float meanMotion;
+        float meanMotion = 0.f;
         stream >> meanMotion;
 
         p.semiMajorAxis = calculateSemiMajorAxis(meanMotion);
@@ -486,18 +626,17 @@ std::vector<Parameters> readTleFile(std::filesystem::path file) {
     return result;
 }
 
-std::vector<Parameters> readOmmFile(std::filesystem::path file) {
+std::vector<Parameters> readOmmFile(const std::filesystem::path& file) {
     ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
 
     std::vector<Parameters> result;
 
-    std::ifstream f;
-    f.open(file);
+    std::ifstream f = std::ifstream(file);
 
     int lineNum = 1;
     std::optional<Parameters> current = std::nullopt;
     std::string line;
-    while (std::getline(f, line)) {
+    while (ghoul::getline(f, line)) {
         if (line.empty() || line == "\r") {
             continue;
         }
@@ -509,7 +648,7 @@ std::vector<Parameters> readOmmFile(std::filesystem::path file) {
         }
 
         if (parts.size() != 2) {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Malformed line '{}' at {}", line, lineNum
             ));
         }
@@ -518,7 +657,7 @@ std::vector<Parameters> readOmmFile(std::filesystem::path file) {
             if (parts[1] != "2.0") {
                 LWARNINGC(
                     "OMM",
-                    fmt::format(
+                    std::format(
                         "Only version 2.0 is currently supported but found {}. "
                         "Parsing might fail",
                         parts[1]
@@ -547,7 +686,7 @@ std::vector<Parameters> readOmmFile(std::filesystem::path file) {
             current->epoch = epochFromOmmString(parts[1]);
         }
         else if (parts[0] == "MEAN_MOTION") {
-            float mm = std::stof(parts[1]);
+            const float mm = std::stof(parts[1]);
             current->semiMajorAxis = calculateSemiMajorAxis(mm);
             current->period = std::chrono::seconds(std::chrono::hours(24)).count() / mm;
         }
@@ -578,31 +717,30 @@ std::vector<Parameters> readOmmFile(std::filesystem::path file) {
     return result;
 }
 
-std::vector<Parameters> readSbdbFile(std::filesystem::path file) {
+std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
     constexpr int NDataFields = 9;
     constexpr std::string_view ExpectedHeader = "full_name,epoch_cal,e,a,i,om,w,ma,per";
 
     ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
 
-    std::ifstream f;
-    f.open(file);
+    std::ifstream f = std::ifstream(file);
 
     std::string line;
-    std::getline(f, line);
+    ghoul::getline(f, line);
+    // Newer versions downloaded from the JPL SBDB website have " around variables
+    line.erase(remove(line.begin(), line.end(), '\"'), line.end());
     if (line != ExpectedHeader) {
-        throw ghoul::RuntimeError(fmt::format(
+        throw ghoul::RuntimeError(std::format(
             "Expected JPL SBDB file to start with '{}' but found '{}' instead",
-            ExpectedHeader, line
+            ExpectedHeader, line.substr(0, 100)
         ));
     }
 
     std::vector<Parameters> result;
-    while (std::getline(f, line)) {
-        constexpr double AuToKm = 1.496e8;
-
+    while (ghoul::getline(f, line)) {
         std::vector<std::string> parts = ghoul::tokenizeString(line, ',');
         if (parts.size() != NDataFields) {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Malformed line {}, expected 8 data fields, got {}", line, parts.size()
             ));
         }
@@ -613,7 +751,9 @@ std::vector<Parameters> readSbdbFile(std::filesystem::path file) {
 
         p.epoch = epochFromYMDdSubstring(parts[1]);
         p.eccentricity = std::stod(parts[2]);
-        p.semiMajorAxis = std::stod(parts[3]) * AuToKm;
+        // AU -> km
+        p.semiMajorAxis =
+            std::stod(parts[3]) * distanceconstants::AstronomicalUnit / 1000.0;
 
         auto importAngleValue = [](const std::string& angle) {
             if (angle.empty()) {
@@ -640,8 +780,84 @@ std::vector<Parameters> readSbdbFile(std::filesystem::path file) {
     return result;
 }
 
-void saveCache(const std::vector<Parameters>& params, std::filesystem::path file) {
-    std::ofstream stream(file, std::ofstream::binary);
+std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
+    ghoul_assert(std::filesystem::is_regular_file(file), "File must exist");
+
+    std::ifstream f = std::ifstream(file);
+
+    // Automatically detecting the header in an MPC file is unfortuntely not trivially
+    // The data lines in the MPC file format must be at least 160 character in length and
+    // none of the header lines (with one exception) encountered thus far are less than
+    // these 160 characters long. The exception is a line exactly 160 characters long with
+    // all `-` characters as a delimiter between header and data. Furthermore, the MPC
+    // file format is a fixed-width format where columns are located at specific positions
+    // and with a fixed length. More information about the file format is available at
+    // http://www.minorplanetcenter.org/iau/info/MPOrbitFormat.html
+    std::vector<Parameters> result;
+    std::string line;
+    int i = 0;
+    while (ghoul::getline(f, line)) {
+        i++;
+
+        if (line.size() < 160) {
+            // The line is too short to be a data line
+            continue;
+        }
+        if (line.starts_with("------------------")) {
+            // It is the special case of the header seperator
+            continue;
+        }
+
+        std::string designation = line.substr(0, 6);
+
+        // We skip over the definitions of the magnitude and slope since we are not using
+        // those values anyway
+        line = line.substr(20);
+
+        // If we get this far, we should be in the data segment of the file
+        auto initial = scn::scan<
+            std::string, double, double, double, double, double, double, double>
+            (
+                line, "{} {} {} {} {} {} {} {}"
+            );
+        if (!initial) {
+            throw ghoul::RuntimeError(std::format(
+                "Unable to parse initial block of line {} in data file '{}'. {}",
+                i, file, line
+            ));
+        }
+
+        auto& [epoch, meanAnomaly, argPeriapsis, ascNode, inclination, eccentricity,
+            meanMotion, semiMajorAxis] = initial->values();
+
+        std::string name = designation;
+        if (line.size() >= 194) {
+            name = line.substr(166, 28);
+            ghoul::trimWhitespace(name);
+        }
+
+        std::string epochDate = unpackDate(epoch);
+        result.emplace_back(
+            std::move(name),
+            std::move(designation),
+            inclination,
+            // AU -> km
+            semiMajorAxis * distanceconstants::AstronomicalUnit / 1000.0,
+            ascNode,
+            eccentricity,
+            argPeriapsis,
+            meanAnomaly,
+            epochFromYMDdSubstring(epochDate),
+            (360.0 / meanMotion) * std::chrono::seconds(std::chrono::hours(24)).count()
+        );
+
+    }
+
+    return result;
+}
+
+void saveCache(const std::vector<Parameters>& params, const std::filesystem::path& file) {
+    std::ofstream stream = std::ofstream(file, std::ofstream::binary);
 
     stream.write(reinterpret_cast<const char*>(&CurrentCacheVersion), sizeof(int8_t));
 
@@ -670,8 +886,8 @@ void saveCache(const std::vector<Parameters>& params, std::filesystem::path file
     }
 }
 
-std::optional<std::vector<Parameters>> loadCache(std::filesystem::path file) {
-    std::ifstream stream(file, std::ifstream::binary);
+std::optional<std::vector<Parameters>> loadCache(const std::filesystem::path& file) {
+    std::ifstream stream = std::ifstream(file, std::ifstream::binary);
 
     int8_t version = 0;
     stream.read(reinterpret_cast<char*>(&version), sizeof(int8_t));
@@ -715,8 +931,8 @@ std::optional<std::vector<Parameters>> loadCache(std::filesystem::path file) {
 std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
     std::filesystem::path cachedFile = FileSys.cacheManager()->cachedFilename(file);
     if (std::filesystem::is_regular_file(cachedFile)) {
-        LINFO(fmt::format(
-            "Cached file {} used for Kepler file {}", cachedFile, file
+        LINFO(std::format(
+            "Cached file '{}' used for Kepler file '{}'", cachedFile, file
         ));
 
         std::optional<std::vector<Parameters>> res = loadCache(cachedFile);
@@ -738,11 +954,12 @@ std::vector<Parameters> readFile(std::filesystem::path file, Format format) {
         case Format::SBDB:
             res = readSbdbFile(file);
             break;
-        default:
-            throw ghoul::MissingCaseException();
+        case Format::MPC:
+            res = readMpcFile(file);
+            break;
     }
 
-    LINFO(fmt::format("Saving cache {} for Kepler file {}", cachedFile, file));
+    LINFO(std::format("Saving cache '{}' for Kepler file '{}'", cachedFile, file));
     saveCache(res, cachedFile);
     return res;
 }

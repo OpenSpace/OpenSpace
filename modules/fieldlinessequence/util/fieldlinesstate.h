@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,10 @@ namespace openspace {
 
 class FieldlinesState {
 public:
+    static FieldlinesState createStateFromOsfls(const std::string& pathToSoflsFile);
+
+    FieldlinesState() = default;
+
     void convertLatLonToCartesian(float scale = 1.f);
     void scalePositions(float scale);
 
@@ -44,6 +48,8 @@ public:
     bool loadStateFromJson(const std::string& pathToJsonFile, fls::Model model,
         float coordToMeters);
     void saveStateToJson(const std::string& pathToJsonFile);
+
+    void clear();
 
     const std::vector<std::vector<float>>& extraQuantities() const;
     const std::vector<std::string>& extraQuantityNames() const;
@@ -66,9 +72,9 @@ public:
     void appendToExtra(size_t idx, float val);
 
 private:
-    bool _isMorphable = false;
+    uint8_t _isMorphable = 0;
     double _triggerTime = -1.0;
-    fls::Model _model;
+    fls::Model _model = fls::Model::Invalid;
 
     std::vector<std::vector<float>> _extraQuantities;
     std::vector<std::string> _extraQuantityNames;

@@ -1,7 +1,8 @@
 local helper = asset.require("util/slide_deck_helper")
 local deck = nil
 
-asset.onInitialize(function ()
+
+asset.onInitialize(function()
   deck = helper.createDeck("example", {
     UseRadiusAzimuthElevation = true,
     RadiusAzimuthElevation = { 1.0, 0.0, 0.0 }, -- use for dome
@@ -10,8 +11,8 @@ asset.onInitialize(function ()
     Scale = 0.7
   })
 
-  helper.addSlide(deck, "${DATA}/test2.jpg")
-  helper.addSlide(deck, "${DATA}/test3.jpg")
+  helper.addSlide(deck, openspace.absPath("${DATA}/test2.jpg"))
+  helper.addSlide(deck, openspace.absPath("${DATA}/test3.jpg"))
 
   local interpolationDuration = 0.5
 
@@ -38,7 +39,7 @@ asset.onInitialize(function ()
     GuiPath = "/Slides",
     IsLocal = false
   })
-  openspace.bindKey("KP_4", "slide_deck.prevslide");
+  openspace.bindKey("KP_4", "slide_deck.prevslide")
 
   openspace.action.registerAction({
     Identifier = "slide_deck.nextslide",
@@ -64,8 +65,11 @@ end)
 
 
 asset.onDeinitialize(function()
-  openspace.clearKey("KP_6")
   openspace.clearKey("KP_4")
+  openspace.action.removeAction("slide_deck.prevslide")
+  openspace.clearKey("KP_6")
+  openspace.action.removeAction("slide_deck.nextslide")
   openspace.clearKey("KP_0")
+  openspace.action.removeAction("slide_deck.toggleslides")
   helper.removeDeck(deck)
 end)

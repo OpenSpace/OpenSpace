@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,11 +46,11 @@ void main() {
   vs_st = in_st;
 
   vec3 tmp = in_position.xyz;
-  
-  // This is wrong for the normal. 
+
+  // This is wrong for the normal.
   // The normal transform is the transposed inverse of the model transform
   vs_normal = normalize(modelTransform * vec4(in_normal, 0.0)).xyz;
-  
+
   if (hasHeightMap) {
     vec2 st = vs_st;
     if (meridianShift) {

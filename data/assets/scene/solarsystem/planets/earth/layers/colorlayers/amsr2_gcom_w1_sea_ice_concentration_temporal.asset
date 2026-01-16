@@ -1,10 +1,13 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
-local layer = {
+
+
+local Layer = {
   Identifier = "AMSR2_GCOM_W1_Sea_Ice_Concentration_Temporal",
   Name = "AMSR2 GCOM W1 Sea Ice Concentration (Temporal)",
   Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+  ZIndex = 100,
+  Type = "TemporalTileProvider",
   Mode = "Prototyped",
   Prototyped = {
     Time = {
@@ -27,21 +30,21 @@ local layer = {
     Worldview)]]
 }
 
+
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "ColorLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 
 asset.meta = {
   Name = "AMSR2 GCOM W1 Sea Ice Concentration (Temporal)",
-  Version = "1.1",
   Description = "GIBS hosted layer",
   Author = "NASA EOSDIS Global Imagery Browse Services",
   URL = "https://earthdata.nasa.gov/eosdis/science-system-description/eosdis-components/gibs",

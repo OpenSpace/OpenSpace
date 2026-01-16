@@ -1,5 +1,7 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-asset.require("spice/base")
+local coreKernels = asset.require("spice/core")
+
+
 
 local MercuryBarycenter = {
   Identifier = "MercuryBarycenter",
@@ -7,17 +9,18 @@ local MercuryBarycenter = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MERCURY BARYCENTER",
-      Observer = "SSB"
+      Target = coreKernels.ID.MercuryBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   GUI = {
     Name = "Mercury Barycenter",
     Path = "/Solar System/Planets/Mercury",
-    Hidden = true,
-    Description = "Mercury Barycenter position",
+    Focusable = false,
+    Hidden = true
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(MercuryBarycenter)
@@ -33,7 +36,6 @@ asset.export(MercuryBarycenter)
 
 asset.meta = {
   Name = "Mercury Transforms",
-  Version = "1.1",
   Description = "Mercury Barycenter transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

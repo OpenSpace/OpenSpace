@@ -1,21 +1,24 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
-local moon_asset = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
 
-local models = asset.syncedResource({
+
+
+local models = asset.resource({
   Name = "Apollo Boulders Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_boulders",
   Version = 2
 })
 
+
 local Station2Boulder1Holder = {
   Identifier = "Station_2_Boulder1",
-  Parent = moon_asset.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon_asset.Moon.Identifier,
-      Longitude = -360+30.5294692,
+      Globe = moon.Moon.Identifier,
+      Longitude = -360 + 30.5294692,
       Latitude = 20.098824,
       Altitude = -2442.8,
       UseHeightMap = false
@@ -23,7 +26,8 @@ local Station2Boulder1Holder = {
   },
   GUI = {
     Name = "Station 2 Boulder 1",
-    Path = "/Solar System/Missions/Apollo/17/Station 2"
+    Path = "/Solar System/Missions/Apollo/17/Station 2",
+    Focusable = false
   }
 }
 
@@ -39,7 +43,7 @@ local Station2Boulder1Model = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "b1-v2.obj",
-    RotationVector = { 243.243256 ,206.270264, 309.677429 },
+    RotationVector = { 243.243256, 206.270264, 309.677429 },
     LightSources = {
       sun.LightSource,
       {
@@ -49,7 +53,7 @@ local Station2Boulder1Model = {
       }
     },
     PerformShading = false,
-    DisableFaceCulling = true
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Station 2 Boulder 1 Model",
@@ -59,12 +63,12 @@ local Station2Boulder1Model = {
 
 local Station2Boulder2Holder = {
   Identifier = "Station_2_Boulder2",
-  Parent = moon_asset.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon_asset.Moon.Identifier,
-      Longitude = -360+30.5287892,
+      Globe = moon.Moon.Identifier,
+      Longitude = -360 + 30.5287892,
       Latitude = 20.098240,
       Altitude = -2434.6,
       UseHeightMap = false
@@ -72,7 +76,8 @@ local Station2Boulder2Holder = {
   },
   GUI = {
     Name = "Station 2 Boulder 2",
-    Path = "/Solar System/Missions/Apollo/17/Station 2"
+    Path = "/Solar System/Missions/Apollo/17/Station 2",
+    Focusable = false
   }
 }
 
@@ -98,7 +103,7 @@ local Station2Boulder2Model = {
       }
     },
     PerformShading = false,
-    DisableFaceCulling = true
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Station 2 Boulder 2 Model",
@@ -108,12 +113,12 @@ local Station2Boulder2Model = {
 
 local Station2Boulder3Holder = {
   Identifier = "Station_2_Boulder3",
-  Parent = moon_asset.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Transform = {
     Translation = {
       Type = "GlobeTranslation",
-      Globe = moon_asset.Moon.Identifier,
-      Longitude = -360+30.5294692,
+      Globe = moon.Moon.Identifier,
+      Longitude = -360 + 30.5294692,
       Latitude = 20.098610,
       Altitude = -2441.55,
       UseHeightMap = false
@@ -121,7 +126,8 @@ local Station2Boulder3Holder = {
   },
   GUI = {
     Name = "Station 2 Boulder 3",
-    Path = "/Solar System/Missions/Apollo/17/Station 2"
+    Path = "/Solar System/Missions/Apollo/17/Station 2",
+    Focusable = false
   }
 }
 
@@ -137,7 +143,7 @@ local Station2Boulder3Model = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = models .. "b3model.obj",
-    RotationVector = { 161.513519 ,243.243256, 65.806450 },
+    RotationVector = { 161.513519, 243.243256, 65.806450 },
     LightSources = {
       sun.LightSource,
       {
@@ -147,7 +153,7 @@ local Station2Boulder3Model = {
       }
     },
     PerformShading = false,
-    DisableFaceCulling = true
+    EnableFaceCulling = false
   },
   GUI = {
     Name = "Station 2 Boulder 3 Model",
@@ -155,25 +161,39 @@ local Station2Boulder3Model = {
   }
 }
 
-local nodes = {
-  Station2Boulder1Holder, Station2Boulder1Model,
-  Station2Boulder2Holder, Station2Boulder2Model,
-  Station2Boulder3Holder, Station2Boulder3Model
-}
 
 asset.onInitialize(function()
-  for i, node in ipairs(nodes) do
-    openspace.addSceneGraphNode(node)
-  end
+  openspace.addSceneGraphNode(Station2Boulder1Holder)
+  openspace.addSceneGraphNode(Station2Boulder1Model)
+  openspace.addSceneGraphNode(Station2Boulder2Holder)
+  openspace.addSceneGraphNode(Station2Boulder2Model)
+  openspace.addSceneGraphNode(Station2Boulder3Holder)
+  openspace.addSceneGraphNode(Station2Boulder3Model)
 end)
 
 asset.onDeinitialize(function()
-  for i = #nodes, 1, -1 do
-    local node = nodes[i]
-    openspace.removeSceneGraphNode(node)
-  end
+  openspace.removeSceneGraphNode(Station2Boulder3Model)
+  openspace.removeSceneGraphNode(Station2Boulder3Holder)
+  openspace.removeSceneGraphNode(Station2Boulder2Model)
+  openspace.removeSceneGraphNode(Station2Boulder2Holder)
+  openspace.removeSceneGraphNode(Station2Boulder1Model)
+  openspace.removeSceneGraphNode(Station2Boulder1Holder)
 end)
 
-for i, node in ipairs(nodes) do
-  asset.export(node)
-end
+asset.export(Station2Boulder1Holder)
+asset.export(Station2Boulder1Model)
+asset.export(Station2Boulder2Holder)
+asset.export(Station2Boulder2Model)
+asset.export(Station2Boulder3Holder)
+asset.export(Station2Boulder3Model)
+
+
+
+asset.meta = {
+  Name = "Apollo 17 - Boulder Station 2",
+  Description = [[This asset shows 3D models of the boulders at station 2, which have been
+    reconstructed from the imagery taken of the Apollo 17 crew.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,46 @@
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("./transforms")
+
+
+
+local Trail = {
+  Identifier = "VestaTrail",
+  Parent = sunTransforms.SunEclipJ2000.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Enabled = asset.enabled,
+    Translation = transforms.Translation,
+    Color = { 0.2, 0.8, 0.3 },
+    Period = 1326.797192349944,
+    Resolution = 10000,
+    Fade = 1.24
+  },
+  Tag = { "planetTrail_dwarf" },
+  GUI = {
+    Name = "Vesta Trail",
+    Path = "/Solar System/Dwarf Planets/Vesta",
+    Focusable = false,
+    Description = "Trail of Vesta"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Trail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Trail)
+end)
+
+asset.export("Trail", Trail)
+
+
+
+asset.meta = {
+  Name = "Vesta Trail",
+  Description = [[Trail of Vesta]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

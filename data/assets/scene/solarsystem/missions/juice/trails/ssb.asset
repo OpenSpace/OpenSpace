@@ -1,26 +1,28 @@
-local sunTransforms = asset.require('scene/solarsystem/sun/transforms')
-local kernels = asset.require('../kernels')
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
+
 
 
 local JuiceTrail = {
   Identifier = "JuiceTrail",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "JUICE",
-      Observer = "SSB",
-      Kernels = kernels.Kernels
+      Target = kernels.ID.Juice,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.85, 0.85, 0.85 },
     StartTime = "2023 APR 05 12:00:00.000",
-    EndTime = "2035 OCT 05 00:00:00.000",
+    EndTime = "2035 OCT 05 01:58:58.683",
     SampleInterval = 3600
   },
   GUI = {
     Name = "Juice Trail",
     Path = "/Solar System/Missions/Juice",
+    Focusable = false,
     Description = "Juice's trajectory relative to the solar system's barycenter"
   }
 }
@@ -37,9 +39,9 @@ end)
 asset.export(JuiceTrail)
 
 
+
 asset.meta = {
   Name = "Juice trajectory relative to the solar system's barycenter",
-  Version = "1.0",
   Description = [[
     The trajectory of the Juice spacecraft relative to the solar system's barycenter
   ]],

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,19 +26,27 @@
 
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <openspace/openspace.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/util/task.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/dictionaryjsonformatter.h>
-#include <filesystem>
+#include <algorithm>
 #include <fstream>
+#include <iostream>
+#include <iterator>
+#include <sstream>
+#include <utility>
 
 namespace {
     constexpr std::string_view MainTemplateFilename =
         "${WEB}/kameleondocumentation/main.hbs";
-    constexpr std::string_view HandlebarsFilename = "${WEB}/common/handlebars-v4.0.5.js";
+    constexpr std::string_view HandlebarsFilename =
+        "${WEB}/documentation/handlebars-v4.0.5.js";
     constexpr std::string_view JsFilename = "${WEB}/kameleondocumentation/script.js";
     constexpr std::string_view BootstrapFilename = "${WEB}/common/bootstrap.min.css";
-    constexpr std::string_view CssFilename = "${WEB}/common/style.css";
+    constexpr std::string_view CssFilename = "${WEB}/documentation/style.css";
 
     struct [[codegen::Dictionary(KameleonDocumentationTask)]] Parameters {
         // The CDF file to extract data from
@@ -53,31 +61,31 @@ namespace {
 namespace openspace::kameleonvolume {
 
 documentation::Documentation KameleonDocumentationTask::documentation() {
-    return codegen::doc<Parameters>("kameleon_documentation_task");
+    return codegen::doc<Parameters>("kameleon_task_documentation");
 }
 
 KameleonDocumentationTask::KameleonDocumentationTask(const ghoul::Dictionary& dictionary)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _inputPath = absPath(p.input.string());
+    _inputPath = absPath(p.input);
     _outputPath = absPath(p.output);
 }
 
 std::string KameleonDocumentationTask::description() {
-    return fmt::format(
-        "Extract metadata from cdf file {} and output html documentation to {}",
+    return std::format(
+        "Extract metadata from CDF file '{}' and output HTML documentation to '{}'",
         _inputPath, _outputPath
     );
 }
 
 void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressCallback) {
-    KameleonVolumeReader reader(_inputPath.string());
+    KameleonVolumeReader reader = KameleonVolumeReader(_inputPath.string());
     ghoul::Dictionary kameleonDictionary = reader.readMetaData();
     progressCallback(0.33f);
 
     ghoul::Dictionary dictionary;
     dictionary.setValue("kameleon", std::move(kameleonDictionary));
-    dictionary.setValue("version", std::string(OPENSPACE_VERSION_NUMBER));
+    dictionary.setValue("version", std::string(OPENSPACE_VERSION));
     dictionary.setValue("input", _inputPath.string());
 
     std::string json = ghoul::formatJson(dictionary);
@@ -126,8 +134,7 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     std::ofstream file;
     file.exceptions(~std::ofstream::goodbit);
     file.open(_outputPath);
-
-     std::stringstream html;
+    std::stringstream html;
         html << "<!DOCTYPE html>\n"
             << "<html>\n"
             << "\t<head>\n"
@@ -151,7 +158,7 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
 
     file << html.str();
 
-    progressCallback(1.0f);
+    progressCallback(1.f);
 }
 
 } // namespace openspace::kameleonvolume

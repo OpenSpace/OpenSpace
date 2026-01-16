@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,14 +31,9 @@
 
 namespace openspace {
 
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
 class StaticTranslation : public Translation {
 public:
-    StaticTranslation();
-    StaticTranslation(const ghoul::Dictionary& dictionary);
+    explicit StaticTranslation(const ghoul::Dictionary& dictionary);
 
     glm::dvec3 position(const UpdateData& data) const override;
     static documentation::Documentation Documentation();

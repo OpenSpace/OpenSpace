@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,19 +25,27 @@
 #include <modules/base/translation/timelinetranslation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/scene/scene.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/time.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ShouldInterpolateInfo = {
         "ShouldInterpolate",
-        "Should Interpolate",
+        "Should interpolate",
         "If this value is set to 'true', an interpolation is applied between the given "
-        "keyframes. If this value is set to 'false', the interpolation is not applied"
+        "keyframes. If this value is set to 'false', the interpolation is not applied.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This `Translation` uses a timeline of other `Translation` classes to calculate the
+    // final translation for the attached scene graph node. The current in-game time is
+    // used to determine which specific keyframe to currently use. It is also possible to
+    // disable the interpolation between two adjacent keyframes by setting the
+    // `ShouldInterpolate` parameter to `false`.
     struct [[codegen::Dictionary(TimelineTranslation)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
         // that are valid Translation objects
@@ -57,7 +65,8 @@ documentation::Documentation TimelineTranslation::Documentation() {
 }
 
 TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary)
-    : _shouldInterpolate(ShouldInterpolateInfo, true)
+    : Translation(dictionary)
+    , _shouldInterpolate(ShouldInterpolateInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -66,13 +75,34 @@ TimelineTranslation::TimelineTranslation(const ghoul::Dictionary& dictionary)
 
         ghoul::mm_unique_ptr<Translation> translation =
             Translation::createFromDictionary(kf.second);
-        if (translation) {
-            _timeline.addKeyframe(t, std::move(translation));
-        }
+        translation->setIdentifier(makeIdentifier(kf.first));
+        addPropertySubOwner(translation.get());
+        _timeline.addKeyframe(t, std::move(translation));
     }
 
     _shouldInterpolate = p.shouldInterpolate.value_or(_shouldInterpolate);
     addProperty(_shouldInterpolate);
+}
+
+void TimelineTranslation::initialize() {
+    Translation::initialize();
+    for (const Keyframe<ghoul::mm_unique_ptr<Translation>>& kf : _timeline.keyframes()) {
+        kf.data->initialize();
+    }
+}
+
+void TimelineTranslation::update(const UpdateData& data) {
+    const double now = data.time.j2000Seconds();
+    using KeyframePointer = const Keyframe<ghoul::mm_unique_ptr<Translation>>*;
+
+    if (KeyframePointer prev = _timeline.lastKeyframeBefore(now, true);  prev) {
+        prev->data->update(data);
+    }
+    if (KeyframePointer next = _timeline.firstKeyframeAfter(now, true);  next) {
+        next->data->update(data);
+    }
+
+    Translation::update(data);
 }
 
 glm::dvec3 TimelineTranslation::position(const UpdateData& data) const {
@@ -99,7 +129,7 @@ glm::dvec3 TimelineTranslation::position(const UpdateData& data) const {
         if (nextTime - prevTime > 0.0) {
             t = (now - prevTime) / (nextTime - prevTime);
         }
-        return t * next->data->position(data) + (1.0 - t) * prev->data->position(data);
+        return glm::mix(prev->data->position(data), next->data->position(data), t);
     }
     else {
         if (prevTime <= now && now < nextTime) {

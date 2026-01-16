@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -27,17 +27,17 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 set(HEADER_FILES
   horizonsfile.h
   kepler.h
-  labelscomponent.h
-  speckloader.h
   rendering/renderableconstellationsbase.h
   rendering/renderableconstellationbounds.h
   rendering/renderableconstellationlines.h
+  rendering/renderableeclipsecone.h
   rendering/renderablefluxnodes.h
   rendering/renderablehabitablezone.h
   rendering/renderablerings.h
   rendering/renderableorbitalkepler.h
   rendering/renderablestars.h
   rendering/renderabletravelspeed.h
+  timeframe/timeframekernel.h
   translation/gptranslation.h
   translation/keplertranslation.h
   translation/spicetranslation.h
@@ -50,17 +50,17 @@ set(SOURCE_FILES
   horizonsfile.cpp
   kepler.cpp
   spacemodule_lua.inl
-  labelscomponent.cpp
-  speckloader.cpp
   rendering/renderableconstellationsbase.cpp
   rendering/renderableconstellationbounds.cpp
   rendering/renderableconstellationlines.cpp
+  rendering/renderableeclipsecone.cpp
   rendering/renderablefluxnodes.cpp
   rendering/renderablehabitablezone.cpp
   rendering/renderablerings.cpp
   rendering/renderableorbitalkepler.cpp
   rendering/renderablestars.cpp
   rendering/renderabletravelspeed.cpp
+  timeframe/timeframekernel.cpp
   translation/gptranslation.cpp
   translation/keplertranslation.cpp
   translation/spicetranslation.cpp
@@ -74,8 +74,11 @@ set(SHADER_FILES
   shaders/constellationbounds_vs.glsl
   shaders/constellationlines_fs.glsl
   shaders/constellationlines_vs.glsl
-  shaders/debrisViz_fs.glsl
-  shaders/debrisViz_vs.glsl
+  shaders/keplerpoints_fs.glsl
+  shaders/keplerpoints_gs.glsl
+  shaders/keplerpoints_vs.glsl
+  shaders/keplertrails_fs.glsl
+  shaders/keplertrails_vs.glsl
   shaders/fluxnodes_fs.glsl
   shaders/fluxnodes_vs.glsl
   shaders/habitablezone_vs.glsl

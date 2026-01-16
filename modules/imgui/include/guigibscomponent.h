@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,12 @@
 
 #include <modules/imgui/include/guicomponent.h>
 
-#include <string>
-
 namespace openspace::gui {
 
 class GuiGIBSComponent : public GuiComponent {
 public:
     GuiGIBSComponent();
+
     void render() override;
 };
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,21 +29,18 @@
 
 #include <modules/volume/rendering/volumeclipplane.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <vector>
+#include <ghoul/glm.h>
 
 namespace ghoul { class Dictionary; }
 
 namespace openspace::volume {
 
-class VolumeClipPlane;
-
 class VolumeClipPlanes : public properties::PropertyOwner {
 public:
-    VolumeClipPlanes(const ghoul::Dictionary& dictionary);
+    explicit VolumeClipPlanes(const ghoul::Dictionary& dictionary);
     ~VolumeClipPlanes() override = default;
 
     void initialize();
-    void deinitialize();
 
     std::vector<glm::vec3> normals();
     std::vector<glm::vec2> offsets();

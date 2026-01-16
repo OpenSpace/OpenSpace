@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,10 @@
 #include "profile/assetsdialog.h"
 
 #include "profile/assetedit.h"
+#include <profile/assettreeitem.h>
 #include "profile/line.h"
 #include <openspace/scene/profile.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <QDialogButtonBox>
 #include <QHeaderView>
 #include <QLabel>
@@ -35,6 +36,8 @@
 #include <QVBoxLayout>
 #include <QTextEdit>
 #include <QTreeView>
+#include <string>
+#include <vector>
 
 namespace {
     bool traverseToExpandSelectedItems(QTreeView& tree, AssetTreeModel& model, int rows,
@@ -46,7 +49,7 @@ namespace {
             QModelIndex idx = model.index(r, 0, parent);
 
             if (!model.isAsset(idx)) {
-                int nChildRows = model.childCount(idx);
+                const int nChildRows = model.childCount(idx);
                 if (traverseToExpandSelectedItems(tree, model, nChildRows, idx)) {
                     tree.setExpanded(idx, true);
                     isExpanded = true;
@@ -62,27 +65,26 @@ namespace {
     void traverseToFindFilesystemMatch(AssetTreeModel& model, QModelIndex parent,
                                        int nRows, const std::string& path)
     {
-
         int startIndex = 0;
-        std::string token = "${USER_ASSETS}/";
-        if (path.find(token) == 0) {
+        const std::string token = "${USER_ASSETS}/";
+        if (path.starts_with(token)) {
             startIndex = static_cast<int>(token.length());
         }
         const size_t slash = path.find_first_of('/', startIndex);
         const bool endOfPath = (slash == std::string::npos);
-        std::string firstDir = endOfPath ? "" : path.substr(0, slash);
+        const std::string firstDir = endOfPath ? "" : path.substr(0, slash);
 
         if (!endOfPath) {
-            std::string nextPath = (slash == std::string::npos) ?
+            const std::string nextPath = (slash == std::string::npos) ?
                 path :
                 path.substr(slash + 1);
             bool foundDirMatch = false;
             for (int r = 0; r < nRows; r++) {
                 QModelIndex idx = model.index(r, 0, parent);
-                std::string assetName = model.name(idx).toStdString();
+                const std::string assetName = model.name(idx).toStdString();
                 if (!model.isAsset(idx)) {
                     if (firstDir == assetName) {
-                        int nChildRows = model.childCount(idx);
+                        const int nChildRows = model.childCount(idx);
                         foundDirMatch = true;
                         traverseToFindFilesystemMatch(model, idx, nChildRows, nextPath);
                         break;
@@ -105,7 +107,7 @@ namespace {
             bool foundFileMatch = false;
             for (int r = 0; r < nRows; r++) {
                 QModelIndex idx = model.index(r, 0, parent);
-                std::string assetName = model.name(idx).toStdString();
+                const std::string assetName = model.name(idx).toStdString();
                 // Need to check if it actually is an asset to prevent issue #2154
                 if (model.isAsset(idx) && path == assetName) {
                     foundFileMatch = true;
@@ -126,13 +128,13 @@ namespace {
 } // namespace
 
 AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
-                           const std::string& assetBasePath,
-                           const std::string& userAssetBasePath)
+                           const std::filesystem::path& assetBasePath,
+                           const std::filesystem::path& userAssetBasePath)
     : QDialog(parent)
     , _profile(profile)
 {
     setWindowTitle("Assets");
-    _assetTreeModel.importModelData(assetBasePath, userAssetBasePath);
+    _assetTreeModel.importModelData(assetBasePath.string(), userAssetBasePath.string());
 
     QBoxLayout* layout = new QVBoxLayout(this);
     {
@@ -152,6 +154,15 @@ AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
         newAssetButton->setDefault(false);
         container->addWidget(newAssetButton, 0, 2);
         layout->addLayout(container);
+
+        QLabel* searchLabel = new QLabel("Search: ");
+        searchLabel->setObjectName("heading");
+        _searchTextBox = new QLineEdit;
+        _searchTextBox->setClearButtonEnabled(true);
+        QBoxLayout* layoutSearchBox = new QHBoxLayout;
+        layoutSearchBox->addWidget(searchLabel);
+        layoutSearchBox->addWidget(_searchTextBox);
+        layout->addLayout(layoutSearchBox);
     }
     {
         _assetTree = new QTreeView;
@@ -160,27 +171,17 @@ AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
             "Enable checkbox to include an asset. Those assets highlighted in red are "
             "present in the profile but do not exist in this OpenSpace installation"
         );
-        _assetTree->setAlternatingRowColors(true);
-        _assetTree->setModel(&_assetTreeModel);
-        _assetTree->setRootIndex(_assetTreeModel.index(-1, 0));
-        _assetTree->setColumnWidth(1, 60);
-        _assetTree->setColumnWidth(0, _assetTree->width() - 60);
-        _assetTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
-        _assetTree->header()->setSectionResizeMode(1, QHeaderView::Fixed);
-        _assetTree->header()->setStretchLastSection(false);
-        _assetTree->setAnimated(true);
-        _assetTree->setSortingEnabled(false);
-        _assetTree->setSelectionMode(QAbstractItemView::SingleSelection);
+        setViewToBaseModel();
         connect(_assetTree, &QTreeView::clicked, this, &AssetsDialog::selected);
 
 
         for (const std::string& a : _profile->assets) {
-            QModelIndex p = _assetTreeModel.index(-1, 0);
-            int nRows = _assetTreeModel.rowCount(p);
+            const QModelIndex p = _assetTreeModel.index(-1, 0);
+            const int nRows = _assetTreeModel.rowCount(p);
             traverseToFindFilesystemMatch(_assetTreeModel, p, nRows, a);
         }
 
-        int nRows = _assetTreeModel.rowCount(_assetTreeModel.index(-1, 0));
+        const int nRows = _assetTreeModel.rowCount(_assetTreeModel.index(-1, 0));
         traverseToExpandSelectedItems(
             *_assetTree,
             _assetTreeModel,
@@ -215,8 +216,31 @@ AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
             buttons, &QDialogButtonBox::rejected,
             this, &AssetsDialog::reject
         );
+        connect(
+            _searchTextBox, &QLineEdit::textChanged,
+            this, &AssetsDialog::searchTextChanged
+        );
         layout->addWidget(buttons);
     }
+    {
+        _searchProxyModel = new SearchProxyModel(this);
+        _searchProxyModel->setSourceModel(&_assetTreeModel);
+        _assetProxyModel = qobject_cast<QSortFilterProxyModel*>(_searchProxyModel);
+    }
+}
+
+void AssetsDialog::setViewToBaseModel() {
+    _assetTree->setAlternatingRowColors(true);
+    _assetTree->setModel(&_assetTreeModel);
+    _assetTree->setRootIndex(_assetTreeModel.index(-1, 0));
+    _assetTree->setColumnWidth(1, 60);
+    _assetTree->setColumnWidth(0, _assetTree->width() - 60);
+    _assetTree->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    _assetTree->header()->setSectionResizeMode(1, QHeaderView::Fixed);
+    _assetTree->header()->setStretchLastSection(false);
+    _assetTree->setAnimated(true);
+    _assetTree->setSortingEnabled(false);
+    _assetTree->setSelectionMode(QAbstractItemView::SingleSelection);
 }
 
 QString AssetsDialog::createTextSummary() {
@@ -228,12 +252,12 @@ QString AssetsDialog::createTextSummary() {
         return "";
     }
     QString summary;
-    for (size_t i = 0; i < summaryItems.size(); ++i) {
-        bool existsInFilesystem = summaryItems.at(i)->doesExistInFilesystem();
+    for (size_t i = 0; i < summaryItems.size(); i++) {
+        const bool existsInFilesystem = summaryItems.at(i)->doesExistInFilesystem();
 
-        std::string s = existsInFilesystem ?
-            fmt::format("{}<br>", summaryPaths.at(i)) :
-            fmt::format("<font color='red'>{}</font><br>", summaryPaths.at(i));
+        const std::string s = existsInFilesystem ?
+            std::format("{}<br>", summaryPaths.at(i)) :
+            std::format("<font color='red'>{}</font><br>", summaryPaths.at(i));
         summary += QString::fromStdString(s);
     }
     return summary;
@@ -258,4 +282,62 @@ void AssetsDialog::parseSelections() {
 
 void AssetsDialog::selected(const QModelIndex&) {
     _summary->setText(createTextSummary());
+}
+
+void AssetsDialog::searchTextChanged(const QString& text) {
+    if (!_assetProxyModel) {
+        return;
+    }
+    if (text.isEmpty()) {
+        setViewToBaseModel();
+        traverseToExpandSelectedItems(
+            *_assetTree,
+            _assetTreeModel,
+            _assetTreeModel.rowCount(_assetTreeModel.index(-1, 0)),
+            _assetTreeModel.index(-1, 0)
+        );
+    }
+    else {
+        _assetTree->setModel(_searchProxyModel);
+        _searchProxyModel->setFilterRegularExpression(text);
+        _assetTree->expandAll();
+    }
+}
+
+SearchProxyModel::SearchProxyModel(QObject* parent)
+    : QSortFilterProxyModel(parent)
+{}
+
+void SearchProxyModel::setFilterRegularExpression(const QString& pattern) {
+    _regExPattern = new QRegularExpression(
+        pattern,
+        QRegularExpression::CaseInsensitiveOption
+    );
+    QSortFilterProxyModel::setFilterRegularExpression(*_regExPattern);
+}
+
+bool SearchProxyModel::filterAcceptsRow(int sourceRow,
+                                        const QModelIndex& sourceParent) const
+{
+    const QModelIndex idx = sourceModel()->index(sourceRow, 0, sourceParent);
+    return acceptIndex(idx);
+}
+
+bool SearchProxyModel::acceptIndex(const QModelIndex& idx) const {
+    if (!idx.isValid() || !_regExPattern) {
+        return false;
+    }
+    const QString text = idx.data(Qt::DisplayRole).toString();
+    const QRegularExpressionMatchIterator matchIt = _regExPattern->globalMatch(text);
+    if (matchIt.hasNext()) {
+        return true;
+    }
+    for (int row = 0; row < idx.model()->rowCount(idx); row++) {
+        const bool accept = acceptIndex(idx.model()->index(row, 0, idx));
+        if (accept) {
+            return true;
+        }
+    }
+
+    return false;
 }

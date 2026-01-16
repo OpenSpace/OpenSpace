@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,15 +27,18 @@
 #include <modules/webbrowser/include/browserclient.h>
 #include <modules/webbrowser/include/webrenderhandler.h>
 #include <modules/webbrowser/include/webkeyboardhandler.h>
+#include <modules/webbrowser/webbrowsermodule.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/fmt.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <cmath>
 #include <filesystem>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "CEF BrowserInstance";
@@ -47,22 +50,27 @@ BrowserInstance::BrowserInstance(WebRenderHandler* renderer,
                                  WebKeyboardHandler* keyboardHandler)
     : _renderHandler(renderer)
     , _keyboardHandler(keyboardHandler)
+    , _client(new BrowserClient(_renderHandler.get(), _keyboardHandler.get()))
 {
-    _client = new BrowserClient(_renderHandler.get(), _keyboardHandler.get());
-
     CefWindowInfo windowInfo;
     // On Windows and MacOS this function takes a pointer as a parameter, but Linux
     // requires this to be a long unsigned int, so we can't use nullptr here
     windowInfo.SetAsWindowless(0);
 
+    // Use accelerated rendering if possible
+    if (WebBrowserModule::canUseAcceleratedRendering()) {
+        windowInfo.shared_texture_enabled = true;
+        LINFO("Enabling shared texture mode for CEF");
+    }
+
     CefBrowserSettings browserSettings;
     browserSettings.windowless_frame_rate = 60;
+    browserSettings.webgl = cef_state_t::STATE_ENABLED;
 
-    std::string url;
     _browser = CefBrowserHost::CreateBrowserSync(
         windowInfo,
         _client.get(),
-        url,
+        "",
         browserSettings,
         nullptr,
         nullptr
@@ -79,20 +87,19 @@ BrowserInstance::~BrowserInstance() {
 
 void BrowserInstance::initialize() {
     reshape(static_cast<glm::ivec2>(
-        static_cast<glm::vec2>(global::windowDelegate->currentSubwindowSize()) *
+        static_cast<glm::vec2>(global::windowDelegate->guiWindowResolution()) *
         global::windowDelegate->dpiScaling()
     ));
     _isInitialized = true;
     _shouldReshape = true;
 }
 
-void BrowserInstance::loadUrl(std::string url) {
+void BrowserInstance::loadUrl(const std::string& url) {
     ghoul_assert(_isInitialized, "BrowserInstance should be initialized");
 
     if (!url.empty()) {
-        LDEBUG(fmt::format("Loading URL: {}", url));
-        CefString cefUrl = std::move(url);
-        _browser->GetMainFrame()->LoadURL(cefUrl);
+        LDEBUG(std::format("Loading URL '{}'", url));
+        _browser->GetMainFrame()->LoadURL(url);
     }
     else {
         LWARNING("Provided browser URL is empty");
@@ -101,7 +108,7 @@ void BrowserInstance::loadUrl(std::string url) {
 
 bool BrowserInstance::loadLocalPath(std::string path) {
     if (!std::filesystem::is_regular_file(path)) {
-        LDEBUG(fmt::format("Could not find path '{}', verify that it is correct", path));
+        LDEBUG(std::format("Could not find path '{}', verify that it is correct", path));
         return false;
     }
 
@@ -118,6 +125,7 @@ void BrowserInstance::reshape(const glm::ivec2& windowSize) {
 
 void BrowserInstance::draw() {
     ZoneScoped;
+    TracyGpuZone("CEF Draw");
 
     if (_zoomLevel != _browser->GetHost()->GetZoomLevel()) {
         _browser->GetHost()->SetZoomLevel(_zoomLevel);

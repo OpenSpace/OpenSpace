@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -33,15 +33,30 @@
 
 function(set_current_cef_build_platform)
   if ("${CMAKE_SYSTEM_NAME}" STREQUAL "Darwin")
-    set(CEF_PLATFORM "macosx64" PARENT_SCOPE)
+    # Use CMAKE_OSX_ARCHITECTURES if set, otherwise fallback to CMAKE_SYSTEM_PROCESSOR
+    if (DEFINED CMAKE_OSX_ARCHITECTURES AND NOT "${CMAKE_OSX_ARCHITECTURES}" STREQUAL "")
+      # CMAKE_OSX_ARCHITECTURES can be a list; just use the first architecture
+      list(GET CMAKE_OSX_ARCHITECTURES 0 CEF_ARCH)
+    else()
+      set(CEF_ARCH "${CMAKE_SYSTEM_PROCESSOR}")
+    endif()
+    if ("${CEF_ARCH}" STREQUAL "arm64")
+      set(CEF_PLATFORM "macosarm64" PARENT_SCOPE)
+    else()
+      set(CEF_PLATFORM "macosx64" PARENT_SCOPE)
+    endif()
   elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-    if (CMAKE_SIZEOF_VOID_P MATCHES 8)
+    if ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "aarch64")
+      set(CEF_PLATFORM "linuxarm64" PARENT_SCOPE)
+    elseif (CMAKE_SIZEOF_VOID_P MATCHES 8)
       set(CEF_PLATFORM "linux64" PARENT_SCOPE)
     else ()
       set(CEF_PLATFORM "linux32" PARENT_SCOPE)
     endif ()
   elseif ("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-    if (CMAKE_SIZEOF_VOID_P MATCHES 8)
+    if ("${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "ARM64")
+      set(CEF_PLATFORM "windowsarm64" PARENT_SCOPE)
+    elseif (CMAKE_SIZEOF_VOID_P MATCHES 8)
       set(CEF_PLATFORM "windows64" PARENT_SCOPE)
     else()
       set(CEF_PLATFORM "windows32" PARENT_SCOPE)
@@ -52,7 +67,7 @@ endfunction ()
 # Download the CEF binary distribution for |platform| and |version| to
 # |download_dir|. The |CEF_ROOT| variable will be set in global scope pointing
 # to the extracted location.
-# Visit http://opensource.spotify.com/cefbuilds/index.html for the list of
+# Visit https://cef-builds.spotifycdn.com/index.html for the list of
 # supported platforms and versions.
 
 function(download_cef platform version download_dir)

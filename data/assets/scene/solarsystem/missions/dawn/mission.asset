@@ -1,0 +1,41 @@
+local Mission = {
+  Identifier = "Dawn",
+  Name = "Dawn",
+  Image = "https://data.openspaceproject.com/missions/dawn/PIA19375_modest.jpg",
+  TimeRange = { Start = "2007 SEP 07 11:34:00", End = "2018 OCT 30 00:00:00" },
+  Description = "Dawn was the first spacecraft to orbit two extraterrestrial destinations (Vesta and Ceres). When Dawn arrived at Vesta, it became the first spacecraft to orbit an object in the main asteroid belt. When Dawn arrived at Ceres, it was the first spacecraft to visit a dwarf planet.",
+  Milestones = {
+    {
+      Name = "Launch",
+      Date = "2007 SEP 07 11:34:00",
+      Image = "https://data.openspaceproject.com/missions/dawn/190740main_dawnlaunch_330.jpg"
+    },
+    {
+      Name = "Flyby of Mars",
+      Date = "2009 FEB 18 00:27:58"
+    }
+  },
+  Phases = {
+    {
+      Name = "Vesta orbit",
+      TimeRange = { Start = "2011 JUL 16 04:47:00", End = "2012 SEP 05 06:26:00" },
+      Image = "https://data.openspaceproject.com/missions/dawn/PIA15678_hires.jpg",
+      Description = "Dawn orbited Vesta for more than a year, from July 2011 to September 2012. Its investigation confirmed that Vesta is the parent of the HED (howardites, eucrites, and diogenites) meteorites, which Dawn connected to Vesta's large south polar basin, a priceless cosmic connection between samples in hand and a singular event on a small planet."
+    },
+    {
+      Name = "Ceres orbit",
+      TimeRange = { Start = "2015 MAR 06 12:29:00", End = "2018 OCT 30 00:00:00" },
+      Image = "https://data.openspaceproject.com/missions/dawn/PIA21079.jpg",
+      Description = "After its escape from Vesta and its journey onward, Dawn entered orbit around Ceres in March 2015. Dawn discovered that the inner solar system's only dwarf planet was an ocean world where water and ammonia reacted with silicate rocks. As the ocean froze, salts and other telltale minerals concentrated into deposits that are now exposed in many locations across the surface. Dawn also found organics in several locations on Ceres' surface."
+    }
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.loadMission(Mission)
+end)
+
+asset.onDeinitialize(function()
+  openspace.unloadMission(Mission)
+end)

@@ -1,15 +1,16 @@
--- Color layers
-asset.require("./layers/colorlayers/venus_texture", false)
-asset.require("./layers/colorlayers/magellan_mosaic_utah", true)
+asset.require("./layers/base_layers", false)
+asset.require("./layers/newyork_layers", false)
+asset.require("./layers/utah_layers", true)
 
--- Height layers
-asset.require("./layers/heightlayers/magellan_utah", true)
 
 
 asset.meta = {
   Name = "Default Venus Layers",
-  Version = "1.1",
-  Description = "Default Venus layers are: Venus Magellan Mosaic and Venus Magellan DEM",
+  Description = [[Default Venus layers are: Venus Texture, Magellan Mosaic,
+    Clouds Magellan Combo, and Magellan Elevation (3D).
+
+    Layers loaded from all available servers
+  ]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

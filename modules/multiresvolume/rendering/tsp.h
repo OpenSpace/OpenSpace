@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,10 @@
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___TSP___H__
 
 #include <ghoul/opengl/ghoul_gl.h>
+#include <filesystem>
 #include <fstream>
+#include <ios>
 #include <list>
-#include <string>
 #include <vector>
 
 namespace openspace {
@@ -55,7 +56,7 @@ public:
         NUM_DATA
     };
 
-    TSP(const std::string& filename);
+    explicit TSP(const std::filesystem::path& filename);
     ~TSP();
 
     // load performs readHeader, readCache, writeCache and construct
@@ -96,19 +97,19 @@ public:
     bool isOctreeLeaf(unsigned int brickIndex) const;
 
 private:
-    // Returns a list of the octree leaf nodes that a given input
-    // brick covers. If the input is already a leaf, the list will
-    // only contain that one index.
+    /**
+     * Returns a list of the octree leaf nodes that a given input brick covers. If the
+     * input is already a leaf, the list will only contain that one index.
+     */
     std::list<unsigned int> coveredLeafBricks(unsigned int brickIndex) const;
 
-    // Returns a list of the BST leaf nodes that a given input brick
-    // covers (at the same spatial subdivision level).
+    /**
+     * Returns a list of the BST leaf nodes that a given input brick covers (at the same
+     * spatial subdivision level).
+     */
     std::list<unsigned int> coveredBSTLeafBricks(unsigned int brickIndex) const;
 
-    // Return a list of eight children brick incices given a brick index
-    std::list<unsigned int> childBricks(unsigned int brickIndex);
-
-    std::string _filename;
+    std::filesystem::path _filename;
     std::ifstream _file;
     std::streampos _dataOffset;
 

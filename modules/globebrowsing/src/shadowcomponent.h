@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,28 +28,24 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/camera/camera.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/glm.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/uniformcache.h>
-#include <string>
-#include <sstream>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <array>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul {
+    namespace filesystem { class File; }
+    namespace opengl { class ProgramObject; }
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
-    struct RenderData;
-    struct UpdateData;
 
 namespace documentation { struct Documentation; }
+struct RenderData;
+struct UpdateData;
 
 class ShadowComponent : public properties::PropertyOwner {
 public:
@@ -58,12 +54,11 @@ public:
         GLuint shadowDepthTexture = 0;
     };
 
-    ShadowComponent(const ghoul::Dictionary& dictionary);
+    explicit ShadowComponent(const ghoul::Dictionary& dictionary);
 
     void initialize();
     void initializeGL();
     void deinitializeGL();
-    //bool deinitialize();
 
     bool isReady() const;
 
@@ -75,28 +70,20 @@ public:
 
     bool isEnabled() const;
 
-    ShadowComponent::ShadowMapData shadowMapData() const;
+    ShadowMapData shadowMapData() const;
 
     GLuint dDepthTexture() const;
 
 private:
     void createDepthTexture();
     void createShadowFBO();
-    void updateDepthTexture();
+    void updateDepthTexture() const;
     void buildDDepthTexture();
 
     // Debug
-    void saveDepthBuffer();
+    void saveDepthBuffer() const;
 
     ShadowMapData _shadowData;
-
-    // Texture coords in [0, 1], while clip coords in [-1, 1]
-    const glm::dmat4 _toTextureCoordsMatrix = glm::dmat4(
-        glm::dvec4(0.5, 0.0, 0.0, 0.0),
-        glm::dvec4(0.0, 0.5, 0.0, 0.0),
-        glm::dvec4(0.0, 0.0, 1.0, 0.0),
-        glm::dvec4(0.5, 0.5, 0.0, 1.0)
-    );
 
     // DEBUG
     properties::TriggerProperty _saveDepthTexture;
@@ -114,7 +101,7 @@ private:
     GLuint _positionInLightSpaceTexture = 0;
     GLuint _shadowFBO = 0;
     GLint _currentFBO = 0;
-    GLint _mViewport[4];
+    std::array<GLint, 4> _viewport;
 
     GLboolean _faceCulling;
     GLboolean _polygonOffSet;
@@ -128,8 +115,6 @@ private:
     glm::dvec3 _cameraPos = glm::dvec3(0.0);
     glm::dvec3 _cameraFocus = glm::dvec3(0.0);
     glm::dquat _cameraRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
-
-    std::stringstream _serializedCamera;
 
     std::unique_ptr<Camera> _lightCamera;
 

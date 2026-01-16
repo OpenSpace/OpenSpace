@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,19 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/texture.h>
+#include <array>
+
+#ifdef OPENSPACE_HAS_SPOUT
 namespace openspace::spout { class SpoutReceiverPropertyProxy; }
+#endif // OPENSPACE_HAS_SPOUT
 
 namespace openspace::globebrowsing {
 
 class SpoutImageProvider : public TileProvider {
 public:
-    SpoutImageProvider(const ghoul::Dictionary& dictionary);
+    explicit SpoutImageProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;
@@ -51,14 +57,13 @@ private:
     void internalDeinitialize() override final;
 
     std::array<std::unique_ptr<ghoul::opengl::Texture>, 2> tileTexture;
-    std::array<GLuint, 2> fbo = { 0, 0 };
     std::array<Tile, 2> tiles;
-
 #ifdef OPENSPACE_HAS_SPOUT
+    std::array<GLuint, 2> fbo = { 0, 0 };
     std::unique_ptr<spout::SpoutReceiverPropertyProxy> spoutReceiver;
-#endif
+#endif // OPENSPACE_HAS_SPOUT
 
-    bool spoutUpdate = false;
+    bool _spoutUpdate = false;
 };
 
 } // namespace openspace::globebrowsing

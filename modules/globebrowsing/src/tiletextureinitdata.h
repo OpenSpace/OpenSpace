@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,32 +30,31 @@
 #include <ghoul/misc/boolean.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
+#include <cstdint>
 
 namespace openspace::globebrowsing {
 
-
-/// All information needed to create a texture used for a Tile.
+/**
+ * All information needed to create a texture used for a Tile.
+ */
 class TileTextureInitData {
 public:
     using HashKey = uint64_t;
     BooleanType(ShouldAllocateDataOnCPU);
-    BooleanType(PadTiles);
 
     TileTextureInitData(size_t width, size_t height, GLenum type,
-        ghoul::opengl::Texture::Format textureFormat, PadTiles pad,
+        ghoul::opengl::Texture::Format textureFormat,
         ShouldAllocateDataOnCPU allocCpu = ShouldAllocateDataOnCPU::No);
 
     TileTextureInitData(const TileTextureInitData& original) = default;
     TileTextureInitData(TileTextureInitData&& original) = default;
 
-    TileTextureInitData operator=(const TileTextureInitData& rhs);
-    TileTextureInitData operator=(TileTextureInitData&& rhs) noexcept;
+    TileTextureInitData& operator=(const TileTextureInitData& rhs);
+    TileTextureInitData& operator=(TileTextureInitData&& rhs) noexcept;
 
     ~TileTextureInitData() = default;
 
     const glm::ivec3 dimensions;
-    const glm::ivec2 tilePixelStartOffset;
-    const glm::ivec2 tilePixelSizeDifference;
     const GLenum glType;
     const ghoul::opengl::Texture::Format ghoulTextureFormat;
     const size_t nRasters;
@@ -64,11 +63,10 @@ public:
     const size_t bytesPerLine;
     const size_t totalNumBytes;
     const bool shouldAllocateDataOnCPU;
-    const bool padTiles;
     const HashKey hashKey;
 };
 
-TileTextureInitData tileTextureInitData(layers::Group::ID id, bool shouldPadTiles,
+TileTextureInitData tileTextureInitData(layers::Group::ID id,
     size_t preferredTileSize = 0);
 
 } // namespace openspace::globebrowsing

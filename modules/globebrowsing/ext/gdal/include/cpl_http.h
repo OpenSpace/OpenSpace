@@ -148,7 +148,7 @@ bool CPLIsMachinePotentiallyGCEInstance();
 bool CPLIsMachineForSureGCEInstance();
 
 /** Manager of Google OAuth2 authentication.
- * 
+ *
  * This class handles different authentication methods and handles renewal
  * of access token.
  *

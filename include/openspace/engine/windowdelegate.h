@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,13 +26,15 @@
 #define __OPENSPACE_CORE__WINDOWDELEGATE___H__
 
 #include <ghoul/glm.h>
-#include <glbinding/glbinding.h>
 #include <vector>
 
 namespace openspace {
 
 struct WindowDelegate {
     enum class Frustum { Mono, LeftEye, RightEye };
+
+    enum class Cursor { Arrow, IBeam, CrossHair, PointingHand, ResizeEW, ResizeNS,
+        ResizeNWSE, ResizeNESW, ResizeAll, NotAllowed };
 
     void (*terminate)() = [](){};
 
@@ -41,6 +43,7 @@ struct WindowDelegate {
     void (*setSynchronization)(bool enabled) = [](bool) {};
 
     bool (*windowHasResized)() = []() { return false; };
+    bool (*anyWindowHasResized)() = []() { return false; };
 
     double (*averageDeltaTime)() = []() { return 0.0; };
 
@@ -62,7 +65,13 @@ struct WindowDelegate {
 
     glm::ivec2 (*currentViewportSize)() = []() { return glm::ivec2(0); };
 
+    glm::ivec2(*currentViewportResolution)() = []() { return glm::ivec2(0); };
+
     glm::vec2 (*dpiScaling)() = []() { return glm::vec2(1.f); };
+
+    glm::ivec2(*firstWindowResolution)() = []() { return glm::ivec2(0); };
+
+    glm::ivec2(*guiWindowResolution)() = []() { return glm::ivec2(0); };
 
     float (*osDpiScaling)() = []() { return 1.f; };
 
@@ -85,13 +94,17 @@ struct WindowDelegate {
 
     void (*swapBuffer)() = []() {};
 
-    int (*nWindows)() = []() { return 0; };
+    size_t (*nWindows)() = []() { return size_t(0); };
 
     int (*currentWindowId)() = []() { return 0; };
 
-    double (*getHorizFieldOfView)() = []() { return 0.0; };
+    int (*firstWindowId)() = []() { return 0; };
 
-    void (*setHorizFieldOfView)(float hFovDeg) = [](float) { };
+    std::string (*nameForWindow)(size_t windowIdx) = [](size_t) { return std::string(); };
+
+    float (*horizFieldOfView)(size_t windowIdx) = [](size_t) { return 0.f; };
+
+    void (*setHorizFieldOfView)(size_t windowIdx, float hFovDeg) = [](size_t, float) {};
 
     void* (*getNativeWindowHandle)(size_t windowIndex) = [](size_t) -> void* {
         return nullptr;
@@ -106,13 +119,21 @@ struct WindowDelegate {
 
     uint64_t (*swapGroupFrameNumber)() = []() { return uint64_t(0); };
 
-    void (*setScreenshotFolder)(std::string) = [](std::string) {};
+    void (*setScreenshotFolder)(std::filesystem::path) = [](std::filesystem::path) {};
 
     void (*showStatistics)(bool) = [](bool) {};
 
     int (*numberOfNodes)() = []() { return 0; };
 
     int (*currentNode)() = []() { return 0; };
+
+    glm::vec2 (*mousePositionViewportRelative)(const glm::vec2& mousePosition) =
+        [](const glm::vec2&) { return glm::vec2(0); };
+
+    void (*setStatisticsGraphScale)(float scale) = [](float) {};
+    void (*setStatisticsGraphOffset)(glm::vec2 offset) = [](glm::vec2) {};
+
+    void (*setMouseCursor)(Cursor cursor) = [](Cursor) {};
 };
 
 } // namespace openspace

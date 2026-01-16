@@ -1,15 +1,15 @@
-local globeIdentifier = asset.require("../../earth").Earth.Identifier
+local globe = asset.require("../../earth")
 
-local layer =  {
-  Identifier = "Earth_at_Night_Temporal",
-  Name = "Earth at Night (Temporal)",
-  Enabled = asset.enabled,
-  Type = "TemporalTileLayer",
+
+local NearConstantContrastLayer = {
+  Identifier = "VIIRS_SNPP_DayNightBand_ENCC",
+  Name = "Nighttime Imagery (Day/Night Band, Enhanced Near Constant Contrast)",
+  Type = "TemporalTileProvider",
   Mode = "Prototyped",
   Prototyped = {
     Time = {
-      Start = "2012-05-08",
-      End = "Yesterday"
+      Start = "2016-11-30",
+      End = "2020-11-18"
     },
     TemporalResolution = "1d",
     TimeFormat = "YYYY-MM-DD",
@@ -36,24 +36,123 @@ local layer =  {
     available from the Visible Infrared Imaging Radiometer Suite (VIIRS) on the joint
     NASA/NOAA Suomi National Polar orbiting Partnership (Suomi NPP) satellite.
     The sensor resolution is 750 m at nadir, imagery resolution is 500 m, and the
-    temporal resolution is daily. (Description from NASA Worldview)]],
+    temporal resolution is daily. (Description from NASA Worldview)]]
+}
+
+local BlackMarbleRadianceSNPP = {
+  Identifier = "VIIRS_SNPP_DayNightBand_At_Sensor_Radiance",
+  Name = "Black Marble Nighttime At Sensor Radiance (Day/Night Band)",
+  Type = "TemporalTileProvider",
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2020-11-18",
+      End = "2024-03-25"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "VIIRS_SNPP_DayNightBand_At_Sensor_Radiance",
+      "500m",
+      "png"
+    )
+  },
+  Description = [[The Black Marble Nighttime At Sensor Radiance (Day/Night Band) layer is
+    created from NASA's Black Marble daily at-sensor top-of-atmosphere nighttime radiance
+    product (VNP46A1). It is displayed as a grayscale image. The layer is expressed in
+    radiance units (nW/(cm2 sr)) with log10 conversion. It is stretched up to
+    38 nW/(cm2 sr) resulting in improvements in capturing city lights in greater spatial
+    detail than traditional Nighttime Imagery resampled at 0-255 (e.g., Day/Night Band,
+    Enhanced Near Constant Contrast).
+
+    The ultra-sensitivity of the VIIRS Day/Night Band enables scientists to capture the
+    Earth's surface and atmosphere in low light conditions, allowing for better monitoring
+    of nighttime phenomena. These images are also useful for assessing anthropogenic
+    sources of light emissions under varying illumination conditions. For instance, during
+    partial to full moon conditions, the layer can identify the location and features of
+    clouds and other natural terrestrial features such as sea ice and snow cover, while
+    enabling temporal observations in urban regions, regardless of moonlit conditions. As
+    such, the layer is particularly useful for detecting city lights, lightning, auroras,
+    fires, gas flares, and fishing fleets.
+
+    The Black Marble Nighttime At Sensor Radiance (Day/Night Band) layer is available in
+    near real-time from the Visible Infrared Imaging Radiometer Suite (VIIRS) aboard the
+    joint NASA/NOAA Suomi National Polar orbiting Partnership (Suomi NPP) satellite. The
+    sensor resolution is 750 m at nadir, imagery resolution is 500 m, and the temporal
+    resolution is daily.)]]
+}
+
+local BlackMarbleRadianceNOAA20 = {
+  Identifier = "VIIRS_NOAA20_DayNightBand_At_Sensor_Radiance",
+  Name = "Black Marble Nighttime At Sensor Radiance (Day/Night Band) ",
+  Type = "TemporalTileProvider",
+  Mode = "Prototyped",
+  Prototyped = {
+    Time = {
+      Start = "2024-03-25",
+      End = "Yesterday"
+    },
+    TemporalResolution = "1d",
+    TimeFormat = "YYYY-MM-DD",
+    Prototype = openspace.globebrowsing.createTemporalGibsGdalXml(
+      "VIIRS_NOAA20_DayNightBand_At_Sensor_Radiance",
+      "500m",
+      "png"
+    )
+  },
+  Description = [[The Black Marble Nighttime At Sensor Radiance (Day/Night Band) layer is
+    created from NASA's Black Marble daily at-sensor top-of-atmosphere nighttime radiance
+    product (VJ146A1). It is displayed as a grayscale image. The layer is expressed in
+    radiance units (nW/(cm2 sr)) with log10 conversion. It is stretched up to
+    38 nW/(cm2 sr) resulting in improvements in capturing city lights in greater spatial
+    detail than traditional Nighttime Imagery resampled at 0-255 (e.g., Day/Night Band,
+    Enhanced Near Constant Contrast).
+
+    The ultra-sensitivity of the VIIRS Day/Night Band enables scientists to capture the
+    Earth's surface and atmosphere in low light conditions, allowing for better monitoring
+    of nighttime phenomena. These images are also useful for assessing anthropogenic
+    sources of light emissions under varying illumination conditions. For instance, during
+    partial to full moon conditions, the layer can identify the location and features of
+    clouds and other natural terrestrial features such as sea ice and snow cover, while
+    enabling temporal observations in urban regions, regardless of moonlit conditions. As
+    such, the layer is particularly useful for detecting city lights, lightning, auroras,
+    fires, gas flares, and fishing fleets.
+
+    The Black Marble Nighttime At Sensor Radiance (Day/Night Band) layer is available in
+    near real-time from the Visible Infrared Imaging Radiometer Suite (VIIRS) aboard the
+    joint NASA/NOAA NOAA-20 (JPSS-1) satellite. The sensor resolution is 750 m at nadir,
+    imagery resolution is 500 m, and the temporal resolution is daily.]]
+}
+
+local Layer = {
+  Identifier = "Earth_at_Night_Temporal",
+  Name = "Earth at Night (Temporal)",
+  Enabled = asset.enabled,
+  ZIndex = 20,
+  Type = "TileProviderByDate",
+  Providers = {
+    ["2016-11-30"] = NearConstantContrastLayer,
+    ["2020-11-18"] = BlackMarbleRadianceSNPP,
+    ["2024-03-25"] = BlackMarbleRadianceNOAA20
+  },
+  Description = [[This layer combines multiple other layers to provide a constant view
+    of Earth's nocturnal landscape. See the individual layers for more information.]]
 }
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "NightLayers", layer)
+  openspace.globebrowsing.addLayer(globe.Earth.Identifier, "NightLayers", Layer)
 end)
 
 asset.onDeinitialize(function()
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "NightLayers", layer)
+  openspace.globebrowsing.deleteLayer(globe.Earth.Identifier, "NightLayers", Layer)
 end)
 
-asset.export("layer", layer)
+asset.export("layer", Layer)
 
 
 
 asset.meta = {
   Name = "Earth at Night (Temporal)",
-  Version = "1.1",
   Description = "Temporal layer for earth with daily night image",
   Author = "OpenSpace Team",
   URL = "https://worldview.earthdata.nasa.gov/?l=VIIRS_SNPP_DayNightBand_ENCC",

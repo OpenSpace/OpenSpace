@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,80 +26,181 @@
 
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/spacemodule.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/misc/csvreader.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/logging/logmanager.h>
-#include <chrono>
-#include <fstream>
-#include <math.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/uniformcache.h>
+#include <openspace/properties/property.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
+#include <openspace/rendering/renderable.h>
+#include <modules/space/kepler.h>
+#include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <ctime>
+#include <execution>
+#include <filesystem>
+#include <memory>
+#include <numeric>
 #include <random>
-#include <vector>
+#include <thread>
 
 namespace {
+    // The possible values for the _renderingModes property
+    enum class RenderMode {
+        RenderingModeTrail = 0,
+        RenderingModePoint,
+        RenderingModePointTrail
+    };
+
+    enum class PointRenderingMode {
+        ViewDirection = 0,
+        PositionNormal
+    };
+
     constexpr openspace::properties::Property::PropertyInfo PathInfo = {
         "Path",
         "Path",
-        "The file path to the data file to read"
+        "The file path to the data file to read.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PointRenderingModeInfo = {
+        "PointRenderingMode",
+        "Point Rendering Mode",
+        "Controls how the points will be oriented. \"Camera View Direction\" rotates the "
+        "points so that they are orthogonal to the viewing direction of the camera "
+        "(useful for planar displays), and \"Camera Position Normal\" rotates the points "
+        "towards the position of the camera (useful for spherical displays, like dome "
+        "theaters).",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
         "SegmentQuality",
-        "Segment Quality",
+        "Segment quality",
         "A segment quality value for the orbital trail. A value from 1 (lowest) to "
         "10 (highest) that controls the number of line segments in the rendering of the "
         "orbital trail. This does not control the direct number of segments because "
-        "these automatically increase according to the eccentricity of the orbit"
+        "these automatically increase according to the eccentricity of the orbit.",
+        openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
-        "LineWidth",
-        "Line Width",
-        "This value specifies the line width of the trail if the selected rendering "
-        "method includes lines. If the rendering mode is set to Points, this value is "
-        "ignored"
+    constexpr openspace::properties::Property::PropertyInfo TrailWidthInfo = {
+        "TrailWidth",
+        "Trail width",
+        "The line width used for the trail, if the selected rendering method includes "
+        "lines. If the rendering mode is set to Points, this value is ignored.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+    constexpr openspace::properties::Property::PropertyInfo PointSizeExponentInfo = {
+        "PointSizeExponent",
+        "Point size exponent",
+        "An exponential scale value to set the absolute size of the point.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableMaxSizeInfo = {
+        "EnableMaxSize",
+        "Enable max size",
+        "If true, the Max Size property will be used as an upper limit for the size of "
+        "the point. This reduces the size of the points when approaching them, so that "
+        "they stick to a maximum visual size depending on the Max Size value.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
+        "MaxSize",
+        "Max size",
+        "Controls the maximum allowed size for the points, when the max size control "
+        "feature is enabled. This limits the visual size of the points based on the "
+        "distance to the camera. The larger the value, the larger the points are allowed "
+        "to be. In the background, the computations are made to limit the size of the "
+        "angle between the CameraToPointMid and CameraToPointEdge vectors.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
+        "Rendering",
+        "Rendering mode",
+        "Determines how the trail should be rendered. If 'Trail' is selected, "
+        "only the line part is visible, if 'Point' is selected, only the "
+        "current satellite/debris point is visible.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the RGB main color for the lines and points of the trail"
+        "The RGB main color for the trails and points.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
-        "Trail Fade",
-        "This value determines how fast the trail fades and is an appearance property."
+        "Trail fade",
+        "Determines how fast the trail fades out. A smaller number shows less of the "
+        "trail and a larger number shows more.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
+        "EnableOutline",
+        "Enable point outline",
+        "Determines if the points should be rendered with an outline or not.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OutlineColorInfo = {
+        "OutlineColor",
+        "Outline color",
+        "The color of the outline.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo OutlineWidthInfo = {
+        "OutlineWidth",
+        "Outline width",
+        "Determines the thickness of the outline. A value of 0 will not show any "
+        "outline, while a value of 1 will cover the whole point.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
         "StartRenderIdx",
-        "Contiguous Starting Index of Render",
-        "Index of object in renderable group to start rendering (all prior objects will "
-        "be ignored)"
+        "Contiguous starting index of render",
+        "Index of the first object in the block to render (all prior objects will be "
+        "ignored). The block of objects to render will be determined by StartRenderIdx "
+        "and RenderSize.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RenderSizeInfo = {
         "RenderSize",
-        "Contiguous Size of Render Block",
-        "Number of objects to render sequentially from StartRenderIdx"
+        "Contiguous size of render block",
+        "Number of objects to render sequentially from StartRenderIdx.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
         "ContiguousMode",
-        "Contiguous Mode",
-        "If enabled, then the contiguous set of objects starting from StartRenderIdx "
-        "of size RenderSize will be rendered. If disabled, then the number of objects "
+        "Contiguous mode",
+        "If enabled, the contiguous set of objects starting from StartRenderIdx "
+        "of size RenderSize will be rendered. If disabled, the number of objects "
         "defined by UpperLimit will rendered from an evenly dispersed sample of the "
-        "full length of the data file."
+        "full length of the data file.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableOrbitalKepler)]] Parameters {
@@ -107,27 +208,44 @@ namespace {
         std::filesystem::path path;
 
         enum class [[codegen::map(openspace::kepler::Format)]] Format {
-            // A NORAD-style Two-Line element
+            // A NORAD-style Two-Line element.
             TLE,
-            // Orbit Mean-Elements Message in the KVN notation
+            // Orbit Mean-Elements Message in the KVN notation.
             OMM,
-            // JPL's Small Bodies Database
-            SBDB
+            // JPL's Small Bodies Database.
+            SBDB,
+            // Minor Planet Center.
+            MPC
         };
-        // The file format that is contained in the file
+        // The file format that is contained in the file.
         Format format;
+
+        enum class [[codegen::map(PointRenderingMode)]] PointRenderingMode {
+            ViewDirection [[codegen::key("Camera View Direction")]],
+            PositionNormal [[codegen::key("Camera Position Normal")]]
+        };
+        // [[codegen::verbatim(PointRenderingModeInfo.description)]]
+        std::optional<PointRenderingMode> pointRenderingMode;
 
         // [[codegen::verbatim(SegmentQualityInfo.description)]]
         int segmentQuality;
 
-        // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        // [[codegen::verbatim(TrailWidthInfo.description)]]
+        std::optional<float> trailWidth;
 
-        // [[codegen::verbatim(LineColorInfo.description)]]
+        // [[codegen::verbatim(ColorInfo.description)]]
         glm::dvec3 color [[codegen::color()]];
 
         // [[codegen::verbatim(TrailFadeInfo.description)]]
         std::optional<float> trailFade;
+
+        enum class RenderingMode {
+            Trail,
+            Point,
+            PointsTrails
+        };
+        // [[codegen::verbatim(RenderingModeInfo.description)]]
+        std::optional<RenderingMode> renderingMode [[codegen::key("Rendering")]];
 
         // [[codegen::verbatim(StartRenderIdxInfo.description)]]
         std::optional<int> startRenderIdx;
@@ -137,6 +255,24 @@ namespace {
 
         // [[codegen::verbatim(ContiguousModeInfo.description)]]
         std::optional<bool> contiguousMode;
+
+        // [[codegen::verbatim(PointSizeExponentInfo.description)]]
+        std::optional<float> pointSizeExponent;
+
+        // [[codegen::verbatim(EnableMaxSizeInfo.description)]]
+        std::optional<bool> enableMaxSize;
+
+        // [[codegen::verbatim(MaxSizeInfo.description)]]
+        std::optional<float> maxSize;
+
+        // [[codegen::verbatim(EnableOutlineInfo.description)]]
+        std::optional<bool> enableOutline;
+
+        // [[codegen::verbatim(OutlineColorInfo.description)]]
+        std::optional<glm::vec3> outlineColor;
+
+        // [[codegen::verbatim(OutlineWidthInfo.description)]]
+        std::optional<float> outlineWidth;
     };
 #include "renderableorbitalkepler_codegen.cpp"
 } // namespace
@@ -147,8 +283,48 @@ documentation::Documentation RenderableOrbitalKepler::Documentation() {
     return codegen::doc<Parameters>("space_renderableorbitalkepler");
 }
 
+RenderableOrbitalKepler::Appearance::Appearance()
+    : properties::PropertyOwner({
+        "Appearance",
+        "Appearance",
+        "Appearance of RenderableOrbitalKepler"
+    })
+    , color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
+    , trailWidth(TrailWidthInfo, 2.f, 1.f, 20.f)
+    , pointSizeExponent(PointSizeExponentInfo, 1.0f, 0.f, 11.f)
+    , enableMaxSize(EnableMaxSizeInfo, true)
+    , maxSize(MaxSizeInfo, 5.f, 0.f, 45.f)
+    , renderingModes(RenderingModeInfo)
+    , pointRenderOption(PointRenderingModeInfo)
+    , trailFade(TrailFadeInfo, 20.f, 0.f, 30.f)
+    , enableOutline(EnableOutlineInfo, true)
+    , outlineColor(OutlineColorInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(1.f))
+    , outlineWidth(OutlineWidthInfo, 0.2f, 0.f, 1.f)
+{
+    renderingModes.addOptions({
+        { static_cast<int>(RenderMode::RenderingModeTrail), "Trails" },
+        { static_cast<int>(RenderMode::RenderingModePoint), "Points"},
+        { static_cast<int>(RenderMode::RenderingModePointTrail) , "Points and Trails" }
+    });
+    renderingModes.onChange([this]() { isRenderTypeDirty = true; });
+    addProperty(renderingModes);
+    color.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(color);
+    addProperty(trailWidth);
+    addProperty(trailFade);
+    addProperty(pointRenderOption);
+    addProperty(pointSizeExponent);
+    addProperty(enableMaxSize);
+    addProperty(maxSize);
+    addProperty(enableOutline);
+    outlineColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(outlineColor);
+    addProperty(outlineWidth);
+}
+
 RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     : Renderable(dict)
+    , _nThreads(std::max(1u, std::thread::hardware_concurrency() / 2u))
     , _segmentQuality(SegmentQualityInfo, 2, 1, 10)
     , _startRenderIdx(StartRenderIdxInfo, 0, 0, 1)
     , _sizeRender(RenderSizeInfo, 1, 1, 2)
@@ -157,28 +333,77 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
 {
     const Parameters p = codegen::bake<Parameters>(dict);
 
-    addProperty(_opacity);
+    addProperty(Fadeable::_opacity);
 
     _segmentQuality = static_cast<unsigned int>(p.segmentQuality);
-    _segmentQuality.onChange([this]() { updateBuffers(); });
+    _segmentQuality.onChange([this]() { _updateDataBuffersAtNextRender = true; });
     addProperty(_segmentQuality);
 
-    _appearance.lineColor = p.color;
-    _appearance.lineFade = p.trailFade.value_or(20.f);
-    _appearance.lineWidth = p.lineWidth.value_or(2.f);
-    addPropertySubOwner(_appearance);
+    _appearance.color = p.color;
+    _appearance.trailFade = p.trailFade.value_or(_appearance.trailFade);
+    _appearance.trailFade.onChange([this]() { _forceUpdate = true; });
+    _appearance.trailWidth = p.trailWidth.value_or(_appearance.trailWidth);
+    _appearance.enableMaxSize = p.enableMaxSize.value_or(_appearance.enableMaxSize);
+    _appearance.maxSize = p.maxSize.value_or(_appearance.maxSize);
+    _appearance.enableOutline = p.enableOutline.value_or(_appearance.enableOutline);
+    _appearance.outlineColor = p.outlineColor.value_or(_appearance.outlineColor);
+    _appearance.outlineWidth = p.outlineWidth.value_or(_appearance.outlineWidth);
+    _appearance.pointSizeExponent =
+        p.pointSizeExponent.value_or(_appearance.pointSizeExponent);
 
-    _path = p.path.string();
-    _path.onChange([this]() { updateBuffers(); });
-    addProperty(_path);
+    _appearance.pointRenderOption.addOption(
+        static_cast<int>(PointRenderingMode::ViewDirection),
+        "Camera View Direction"
+    );
+    _appearance.pointRenderOption.addOption(
+        static_cast<int>(PointRenderingMode::PositionNormal),
+        "Camera Position Normal"
+    );
+    if (p.pointRenderingMode.has_value()) {
+        switch (*p.pointRenderingMode) {
+            case Parameters::PointRenderingMode::ViewDirection:
+                _appearance.pointRenderOption =
+                    static_cast<int>(PointRenderingMode::ViewDirection);
+                break;
+            case Parameters::PointRenderingMode::PositionNormal:
+                _appearance.pointRenderOption =
+                    static_cast<int>(PointRenderingMode::PositionNormal);
+                break;
+        }
+    }
+    else {
+        _appearance.pointRenderOption =
+            static_cast<int>(PointRenderingMode::ViewDirection);
+    }
+
+    if (p.renderingMode.has_value()) {
+        switch (*p.renderingMode) {
+            case Parameters::RenderingMode::Trail:
+                _appearance.renderingModes =
+                    static_cast<int>(RenderMode::RenderingModeTrail);
+                break;
+            case Parameters::RenderingMode::Point:
+                _appearance.renderingModes =
+                    static_cast<int>(RenderMode::RenderingModePoint);
+                break;
+            case Parameters::RenderingMode::PointsTrails:
+                _appearance.renderingModes =
+                    static_cast<int>(RenderMode::RenderingModePointTrail);
+                break;
+        }
+    }
+    else {
+        _appearance.renderingModes = static_cast<int>(RenderMode::RenderingModeTrail);
+    }
+    addPropertySubOwner(_appearance);
 
     _format = codegen::map<kepler::Format>(p.format);
 
     _startRenderIdx = p.startRenderIdx.value_or(0);
     _startRenderIdx.onChange([this]() {
         if (_contiguousMode) {
-            if ((_numObjects - _startRenderIdx) < _sizeRender) {
-                _sizeRender = static_cast<unsigned int>(_numObjects - _startRenderIdx);
+            if ((_nOrbits - _startRenderIdx) < _sizeRender) {
+                _sizeRender = static_cast<unsigned int>(_nOrbits - _startRenderIdx);
             }
             _updateDataBuffersAtNextRender = true;
         }
@@ -188,8 +413,8 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _sizeRender = p.renderSize.value_or(0u);
     _sizeRender.onChange([this]() {
         if (_contiguousMode) {
-            if (_sizeRender > (_numObjects - _startRenderIdx)) {
-                _startRenderIdx = static_cast<unsigned int>(_numObjects - _sizeRender);
+            if (_sizeRender > (_nOrbits - _startRenderIdx)) {
+                _startRenderIdx = static_cast<unsigned int>(_nOrbits - _sizeRender);
             }
         }
         _updateDataBuffersAtNextRender = true;
@@ -199,6 +424,10 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
     _contiguousMode = p.contiguousMode.value_or(false);
     _contiguousMode.onChange([this]() { _updateDataBuffersAtNextRender = true; });
     addProperty(_contiguousMode);
+
+    _path = p.path.string();
+    _path.onChange([this]() { _updateDataBuffersAtNextRender = true; });
+    addProperty(_path);
 }
 
 void RenderableOrbitalKepler::initializeGL() {
@@ -207,25 +436,35 @@ void RenderableOrbitalKepler::initializeGL() {
     glGenVertexArrays(1, &_vertexArray);
     glGenBuffers(1, &_vertexBuffer);
 
-    _programObject = SpaceModule::ProgramObjectManager.request(
-        "OrbitalKepler",
+    // Program for line rendering
+    _trailProgram = SpaceModule::ProgramObjectManager.request(
+        "OrbitalKeplerTrails",
        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
            return global::renderEngine->buildRenderProgram(
-               "OrbitalKepler",
-               absPath("${MODULE_SPACE}/shaders/debrisViz_vs.glsl"),
-               absPath("${MODULE_SPACE}/shaders/debrisViz_fs.glsl")
+               "OrbitalKeplerTrails",
+               absPath("${MODULE_SPACE}/shaders/keplertrails_vs.glsl"),
+               absPath("${MODULE_SPACE}/shaders/keplertrails_fs.glsl")
            );
        }
    );
 
-    _uniformCache.modelView = _programObject->uniformLocation("modelViewTransform");
-    _uniformCache.projection = _programObject->uniformLocation("projectionTransform");
-    _uniformCache.lineFade = _programObject->uniformLocation("lineFade");
-    _uniformCache.inGameTime = _programObject->uniformLocation("inGameTime");
-    _uniformCache.color = _programObject->uniformLocation("color");
-    _uniformCache.opacity = _programObject->uniformLocation("opacity");
+    // Program for point rendering
+    _pointProgram = SpaceModule::ProgramObjectManager.request(
+        "OrbitalKeplerPoints",
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return global::renderEngine->buildRenderProgram(
+                "OrbitalKeplerPoints",
+                absPath("${MODULE_SPACE}/shaders/keplerpoints_vs.glsl"),
+                absPath("${MODULE_SPACE}/shaders/keplerpoints_fs.glsl"),
+                absPath("${MODULE_SPACE}/shaders/keplerpoints_gs.glsl")
+            );
+        }
+    );
 
-    updateBuffers();
+    ghoul::opengl::updateUniformLocations(*_trailProgram, _uniformTrailCache);
+    ghoul::opengl::updateUniformLocations(*_pointProgram, _uniformPointCache);
+
+    _updateDataBuffersAtNextRender = true;
 }
 
 void RenderableOrbitalKepler::deinitializeGL() {
@@ -233,23 +472,53 @@ void RenderableOrbitalKepler::deinitializeGL() {
     glDeleteVertexArrays(1, &_vertexArray);
 
     SpaceModule::ProgramObjectManager.release(
-        "OrbitalKepler",
+        "OrbitalKeplerTrails",
         [](ghoul::opengl::ProgramObject* p) {
             global::renderEngine->removeRenderProgram(p);
         }
     );
-    _programObject = nullptr;
+
+    SpaceModule::ProgramObjectManager.release(
+        "OrbitalKeplerPoints",
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine->removeRenderProgram(p);
+        }
+    );
+
+    _pointProgram = nullptr;
+    _trailProgram = nullptr;
 }
 
 bool RenderableOrbitalKepler::isReady() const {
-    return _programObject != nullptr;
+    return _pointProgram != nullptr && _trailProgram != nullptr;
 }
 
-void RenderableOrbitalKepler::update(const UpdateData&) {
+void RenderableOrbitalKepler::update(const UpdateData& data) {
     if (_updateDataBuffersAtNextRender) {
-        _updateDataBuffersAtNextRender = false;
         updateBuffers();
+        _forceUpdate = true;
     }
+
+    if (_appearance.isRenderTypeDirty) {
+        _forceUpdate = true;
+    }
+
+    bool isPaused = data.time.j2000Seconds() == data.previousFrameTime.j2000Seconds();
+    if (!isPaused || _forceUpdate) {
+        std::for_each(
+            std::execution::par_unseq,
+            _threadIds.begin(),
+            _threadIds.end(),
+            [&](int threadId) {
+                threadedSegmentCalculations(threadId, data);
+            }
+        );
+    }
+
+    _lineDrawCount = static_cast<GLsizei>(_segmentsPerOrbit.size() * 2);
+    _updateDataBuffersAtNextRender = false;
+    _appearance.isRenderTypeDirty = false;
+    _forceUpdate = false;
 }
 
 void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
@@ -257,152 +526,302 @@ void RenderableOrbitalKepler::render(const RenderData& data, RendererTasks&) {
         return;
     }
 
-    _programObject->activate();
-    _programObject->setUniform(_uniformCache.opacity, opacity());
-    _programObject->setUniform(_uniformCache.inGameTime, data.time.j2000Seconds());
+    if (_renderPoints) {
+        glm::vec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
+        glm::vec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
+        glm::vec3 orthoRight = glm::normalize(
+            glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
+        );
+        if (orthoRight == glm::vec3(0.f)) {
+            glm::vec3 otherVector = glm::vec3(
+                cameraUpDirectionWorld.y,
+                cameraUpDirectionWorld.x,
+                cameraUpDirectionWorld.z
+            );
+            orthoRight = glm::normalize(
+                glm::cross(otherVector, cameraViewDirectionWorld)
+            );
+        }
+        glm::vec3 orthoUp = glm::normalize(
+            glm::cross(cameraViewDirectionWorld, orthoRight)
+        );
 
-    glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::dmat4(data.modelTransform.rotation) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
+        _pointProgram->activate();
+        _pointProgram->setUniform(
+            _uniformPointCache.modelTransform,
+            calcModelTransform(data)
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.viewTransform,
+            data.camera.combinedViewMatrix()
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.projectionTransform,
+            data.camera.projectionMatrix()
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.renderOption,
+            _appearance.pointRenderOption
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.cameraViewDirectionUp,
+            orthoUp
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.cameraViewDirectionRight,
+            orthoRight
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.cameraPositionWorld,
+            data.camera.positionVec3()
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.cameraUpWorld,
+            static_cast<glm::vec3>(data.camera.lookUpVectorWorldSpace())
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.inGameTime,
+            data.time.j2000Seconds()
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.pointSizeExponent,
+            _appearance.pointSizeExponent
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.enableMaxSize,
+            _appearance.enableMaxSize
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.enableOutline,
+            _appearance.enableOutline
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.outlineColor,
+            _appearance.outlineColor
+        );
+        _pointProgram->setUniform(
+            _uniformPointCache.outlineWeight,
+            _appearance.outlineWidth
+        );
+        _pointProgram->setUniform(_uniformPointCache.color, _appearance.color);
+        _pointProgram->setUniform(_uniformPointCache.maxSize, _appearance.maxSize);
+        _pointProgram->setUniform(_uniformPointCache.opacity, opacity());
 
-    _programObject->setUniform(
-        _uniformCache.modelView,
-        data.camera.combinedViewMatrix() * modelTransform
-    );
+        glBindVertexArray(_vertexArray);
+        glMultiDrawArrays(
+            GL_LINE_STRIP,
+            _startIndexPoints.data(),
+            _segmentSizePoints.data(),
+            static_cast<GLsizei>(_startIndexPoints.size())
+        );
+        glBindVertexArray(0);
 
-    // Because we want the property to work similar to the planet trails
-    const float fade = pow(_appearance.lineFade.maxValue() - _appearance.lineFade, 2.f);
-
-    _programObject->setUniform(_uniformCache.projection, data.camera.projectionMatrix());
-    _programObject->setUniform(_uniformCache.color, _appearance.lineColor);
-    _programObject->setUniform(_uniformCache.lineFade, fade);
-
-    glLineWidth(_appearance.lineWidth);
-
-    const size_t nrOrbits = _segmentSize.size();
-    gl::GLint vertices = 0;
-
-    //glDepthMask(false);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE)
-
-    glBindVertexArray(_vertexArray);
-    for (size_t i = 0; i < nrOrbits; ++i) {
-        glDrawArrays(GL_LINE_STRIP, vertices, static_cast<GLsizei>(_segmentSize[i] + 1));
-        vertices = vertices + static_cast<GLint>(_segmentSize[i]) + 1;
+        _pointProgram->deactivate();
     }
-    glBindVertexArray(0);
 
-    _programObject->deactivate();
+    if (_renderTrails) {
+        _trailProgram->activate();
+        _trailProgram->setUniform(_uniformTrailCache.opacity, opacity());
+        _trailProgram->setUniform(_uniformTrailCache.color, _appearance.color);
+        _trailProgram->setUniform(
+            _uniformTrailCache.inGameTime,
+            data.time.j2000Seconds()
+        );
+        _trailProgram->setUniform(
+            _uniformTrailCache.modelViewTransform,
+            calcModelViewTransform(data)
+        );
+        _trailProgram->setUniform(
+            _uniformTrailCache.projectionTransform,
+            data.camera.projectionMatrix()
+        );
+
+        // Because we want the property to work similar to the planet trails
+        const float fade = std::pow(
+            _appearance.trailFade.maxValue() - _appearance.trailFade, 2.f
+        );
+        _trailProgram->setUniform(_uniformTrailCache.trailFadeExponent, fade);
+
+        // 0.05 is the "alpha value" for which the trail should no longer be rendered.
+        // The value that's compared to 0.05 is calculated in the shader and depends
+        // on the distance from the head of the trail to the part that's being rendered.
+        // Value is passed as uniform due to it being used in both geometry and fragment
+        // shader.
+        _trailProgram->setUniform(_uniformTrailCache.colorFadeCutoffValue, 0.05f);
+
+        glLineWidth(_appearance.trailWidth);
+
+        glBindVertexArray(_vertexArray);
+        glMultiDrawArrays(
+            GL_LINE_STRIP,
+            _startIndexTrails.data(),
+            _segmentSizeTrails.data(),
+            _lineDrawCount
+        );
+        glBindVertexArray(0);
+
+        _trailProgram->deactivate();
+    }
 }
 
 void RenderableOrbitalKepler::updateBuffers() {
-    std::vector<kepler::Parameters> parameters = kepler::readFile(
-       _path.value(),
-        _format
-    );
+    _parameters = kepler::readFile(_path.value(), _format);
+    _nOrbits = static_cast<unsigned int>(_parameters.size());
 
-    _numObjects = parameters.size();
-
-    if (_startRenderIdx >= _numObjects) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Start index {} out of range [0, {}]", _startRenderIdx, _numObjects
+    if (_startRenderIdx >= _nOrbits) {
+        throw ghoul::RuntimeError(std::format(
+            "Start index {} out of range [0, {}]", _startRenderIdx.value(), _nOrbits
         ));
     }
 
     long long endElement = _startRenderIdx + _sizeRender - 1;
-    endElement = (endElement >= _numObjects) ? _numObjects - 1 : endElement;
-    if (endElement < 0 || endElement >= _numObjects) {
-        throw ghoul::RuntimeError(fmt::format(
-            "End index {} out of range [0, {}]", endElement, _numObjects
+    endElement = (endElement >= _nOrbits) ? _nOrbits - 1 : endElement;
+    if (endElement < 0 || endElement >= _nOrbits) {
+        throw ghoul::RuntimeError(std::format(
+            "End index {} out of range [0, {}]", endElement, _nOrbits
         ));
     }
 
-    _startRenderIdx.setMaxValue(static_cast<unsigned int>(_numObjects - 1));
-    _sizeRender.setMaxValue(static_cast<unsigned int>(_numObjects));
+    _startRenderIdx.setMaxValue(static_cast<unsigned int>(_nOrbits - 1));
+    _sizeRender.setMaxValue(static_cast<unsigned int>(_nOrbits));
     if (_sizeRender == 0u) {
-        _sizeRender = static_cast<unsigned int>(_numObjects);
+        _sizeRender = static_cast<unsigned int>(_nOrbits);
     }
 
     if (_contiguousMode) {
-        if (_startRenderIdx >= parameters.size() ||
-            (_startRenderIdx + _sizeRender) >= parameters.size())
+        if (_startRenderIdx >= _parameters.size() ||
+            (_startRenderIdx + _sizeRender) > _parameters.size())
         {
-            throw ghoul::RuntimeError(fmt::format(
+            throw ghoul::RuntimeError(std::format(
                 "Tried to load {} objects but only {} are available",
-                _startRenderIdx + _sizeRender, parameters.size()
+                _startRenderIdx + _sizeRender, _parameters.size()
             ));
         }
 
         // Extract subset that starts at _startRenderIdx and contains _sizeRender obejcts
-        parameters = std::vector<kepler::Parameters>(
-            parameters.begin() + _startRenderIdx,
-            parameters.begin() + _startRenderIdx + _sizeRender
+        _parameters = std::vector<kepler::Parameters>(
+            _parameters.begin() + _startRenderIdx,
+            _parameters.begin() + _startRenderIdx + _sizeRender
         );
     }
     else {
         // First shuffle the whole array
         std::default_random_engine rng;
-        std::shuffle(parameters.begin(), parameters.end(), rng);
+        std::shuffle(_parameters.begin(), _parameters.end(), rng);
 
         // Then take the first _sizeRender values
-        parameters = std::vector<kepler::Parameters>(
-            parameters.begin(),
-            parameters.begin() + _sizeRender
+        _parameters = std::vector<kepler::Parameters>(
+            _parameters.begin(),
+            _parameters.begin() + _sizeRender
         );
     }
 
-    _segmentSize.clear();
-    for (const kepler::Parameters& p : parameters) {
-        const double scale = static_cast<double>(_segmentQuality) * 10.0;
-        _segmentSize.push_back(
-            static_cast<size_t>(scale + (scale / pow(1 - p.eccentricity, 1.2)))
-        );
-    }
+    _threadIds.clear();
+    _orbitsPerThread.clear();
+    _updateHelper.clear();
+    _startIndexPoints.clear();
+    _segmentSizePoints.clear();
+    _vertexBufferOffset.clear();
+    _startIndexTrails.clear();
+    _segmentSizeTrails.clear();
+    _segmentsPerOrbit.clear();
 
+    _updateHelper.resize(_sizeRender);
+    _startIndexPoints.resize(_sizeRender);
+    _segmentSizePoints.resize(_sizeRender);
+    _vertexBufferOffset.resize(_sizeRender);
+    _segmentsPerOrbit.resize(_sizeRender);
+
+    // Trail vectors needs double length as it may use two trails per orbit
+    _startIndexTrails.resize(_sizeRender * 2);
+    _segmentSizeTrails.resize(_sizeRender * 2);
+
+    double maxSemiMajorAxis = 0.0;
     size_t nVerticesTotal = 0;
+    for (unsigned int i = 0; i < _sizeRender; i++) {
+        // For points rendering as they are always two vertices long
+        _segmentSizePoints[i] = 2;
 
-    int numOrbits = static_cast<int>(parameters.size());
-    for (int i = 0; i < numOrbits; ++i) {
-        nVerticesTotal += _segmentSize[i] + 1;
+        const double scale = static_cast<double>(_segmentQuality) * 10.0;
+        const kepler::Parameters& p = _parameters[i];
+        _segmentsPerOrbit[i] = static_cast<int>(
+            scale + (scale / std::pow(1.0 - p.eccentricity, 1.2))
+        );
+        _vertexBufferOffset[i] = static_cast<int>(nVerticesTotal);
+        nVerticesTotal += _segmentsPerOrbit[i];
+
+        // Find largest value for bounding sphere
+        if (p.semiMajorAxis > maxSemiMajorAxis) {
+            maxSemiMajorAxis = p.semiMajorAxis;
+        }
     }
+    setBoundingSphere(maxSemiMajorAxis * 1000);
     _vertexBufferData.resize(nVerticesTotal);
 
-    size_t vertexBufIdx = 0;
-    KeplerTranslation keplerTranslator;
-    for (int orbitIdx = 0; orbitIdx < numOrbits; ++orbitIdx) {
-        const kepler::Parameters& orbit = parameters[orbitIdx];
+    std::vector<int> orbitIdHolder;
+    orbitIdHolder.resize(_sizeRender);
+    std::iota(orbitIdHolder.begin(), orbitIdHolder.end(), 0);
 
-        keplerTranslator.setKeplerElements(
-            orbit.eccentricity,
-            orbit.semiMajorAxis,
-            orbit.inclination,
-            orbit.ascendingNode,
-            orbit.argumentOfPeriapsis,
-            orbit.meanAnomaly,
-            orbit.period,
-            orbit.epoch
-        );
+    std::for_each(
+        std::execution::par_unseq,
+        orbitIdHolder.begin(),
+        orbitIdHolder.end(),
+        [&](int index) {
+            ZoneScoped;
 
-        for (size_t j = 0 ; j < (_segmentSize[orbitIdx] + 1); ++j) {
-            double timeOffset = orbit.period *
-                static_cast<double>(j) / static_cast<double>(_segmentSize[orbitIdx]);
+            const kepler::Parameters& orbit = _parameters[index];
 
-            glm::dvec3 position = keplerTranslator.position({
-                {},
-                Time(timeOffset + orbit.epoch),
-                Time(0.0)
-            });
+            const KeplerCalculator calc = KeplerCalculator(
+                orbit.eccentricity,
+                orbit.semiMajorAxis,
+                orbit.inclination,
+                orbit.ascendingNode,
+                orbit.argumentOfPeriapsis,
+                orbit.meanAnomaly,
+                orbit.period,
+                orbit.epoch
+            );
 
-            _vertexBufferData[vertexBufIdx].x = static_cast<float>(position.x);
-            _vertexBufferData[vertexBufIdx].y = static_cast<float>(position.y);
-            _vertexBufferData[vertexBufIdx].z = static_cast<float>(position.z);
-            _vertexBufferData[vertexBufIdx].time = static_cast<float>(timeOffset);
-            _vertexBufferData[vertexBufIdx].epoch = orbit.epoch;
-            _vertexBufferData[vertexBufIdx].period = orbit.period;
+            const int nVerts = _segmentsPerOrbit[index];
+            const int offset = _vertexBufferOffset[index];
+            const int nSegments = nVerts - 1;
+            for (GLint j = 0; j < nVerts; j++) {
+                const double timeOffset = orbit.period *
+                    static_cast<double>(j) / static_cast<double>(nSegments);
 
-            vertexBufIdx++;
+                const glm::dvec3 position = calc.position(timeOffset + orbit.epoch);
+
+                _vertexBufferData[offset + j].x = static_cast<float>(position.x);
+                _vertexBufferData[offset + j].y = static_cast<float>(position.y);
+                _vertexBufferData[offset + j].z = static_cast<float>(position.z);
+                _vertexBufferData[offset + j].time = timeOffset;
+                _vertexBufferData[offset + j].epoch = orbit.epoch;
+                _vertexBufferData[offset + j].period = orbit.period;
+            }
+
+            _updateHelper[index].timePerStep = orbit.period / nSegments;
         }
+    );
+
+    // Calculate how many orbits we calculate per thread
+    // 1000 per thread (arbitrary) to not create threads that do little to no work
+    unsigned int orbitsPerThread = std::max(
+        1000,
+        static_cast<int>(std::ceil(static_cast<double>(_sizeRender) / _nThreads))
+    );
+
+    // Vector that maps thread index to number of orbits to render
+    int threadId = 0;
+    unsigned int remainingOrbits = _sizeRender;
+    while (remainingOrbits >= orbitsPerThread) {
+        _threadIds.push_back(threadId);
+        _orbitsPerThread.push_back(orbitsPerThread);
+        remainingOrbits -= orbitsPerThread;
+        threadId++;
+    }
+    if (remainingOrbits > 0) {
+        _threadIds.push_back(threadId);
+        _orbitsPerThread.push_back(remainingOrbits);
     }
 
     glBindVertexArray(_vertexArray);
@@ -416,27 +835,145 @@ void RenderableOrbitalKepler::updateBuffers() {
     );
 
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), nullptr);
 
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
+    glVertexAttribLPointer(
         1,
-        2,
+        3,
         GL_DOUBLE,
-        GL_FALSE,
         sizeof(TrailVBOLayout),
-        reinterpret_cast<GLvoid*>(4 * sizeof(GL_FLOAT))
+        reinterpret_cast<GLvoid*>(offsetof(TrailVBOLayout, time))
     );
 
     glBindVertexArray(0);
-
-    double maxSemiMajorAxis = 0.0;
-    for (const kepler::Parameters& kp : parameters) {
-        if (kp.semiMajorAxis > maxSemiMajorAxis) {
-            maxSemiMajorAxis = kp.semiMajorAxis;
-        }
-    }
-    setBoundingSphere(maxSemiMajorAxis * 1000);
 }
 
-} // namespace opensapce
+void RenderableOrbitalKepler::threadedSegmentCalculations(int threadId,
+                                                          const UpdateData& data)
+{
+    ZoneScoped;
+
+    const int selection = _appearance.renderingModes;
+    _renderPoints = (
+        selection == static_cast<int>(RenderMode::RenderingModePoint) ||
+        selection == static_cast<int>(RenderMode::RenderingModePointTrail)
+    );
+    _renderTrails = (
+        selection == static_cast<int>(RenderMode::RenderingModeTrail) ||
+        selection == static_cast<int>(RenderMode::RenderingModePointTrail)
+    );
+
+    const float fade = std::pow(
+        _appearance.trailFade.maxValue() - _appearance.trailFade,
+        2.f
+    );
+    const float threshold = 1.f - std::pow(0.05f, 1.f / fade);
+
+    int offset = std::accumulate(
+        _orbitsPerThread.begin(),
+        _orbitsPerThread.begin() + threadId,
+        0
+    );
+    const int cutoff = offset + _orbitsPerThread[threadId];
+
+    const double now = data.time.j2000Seconds();
+    int startVertexIndex = _vertexBufferOffset[offset];
+    for (int i = offset; i < cutoff; i++) {
+        UpdateInfo* helper = &_updateHelper[i];
+        double upper = helper->timestamp + (helper->timePerStep);
+        double lower = helper->timestamp - (helper->timePerStep);
+        const bool shouldUpdate = (now >= upper || now <= lower);
+
+        const int nVerts = _segmentsPerOrbit[i];
+        if (shouldUpdate || _forceUpdate) {
+            // Check how far along the trail we are
+            const kepler::Parameters& orbit = _parameters[i];
+            const double nRevs = (data.time.j2000Seconds() - orbit.epoch) / orbit.period;
+            double frac = static_cast<double>(nRevs - std::trunc(nRevs));
+            frac += (frac < 0.0) ? 1.0 : 0.0;
+
+            const int nSegments = nVerts - 1;
+            const int pointHead = static_cast<int>(std::floor(frac * nSegments));
+
+            // We can always do this since it has no cost
+            _startIndexPoints[i] = startVertexIndex + pointHead;
+
+            // There is a lot of what seems to be "magic numbers" in this section.
+            // They will most likely disappear when we change our method of determining
+            // the trail fade amount is changed.
+            if (_renderTrails) {
+                // When rendering a trail we don't know if the trail will pass over
+                // the starting point of the orbit or not. If the trail passes over the
+                // starting point of the orbit, then we can't draw the entire trail as
+                // line strip. Instead we need to divide the line strip into two parts,
+                // where p0 and p1 denotes the respctive line strips (parts).
+                int p0Start = -1;
+                int p0Length = -1;
+                int p1Start = -1;
+                int p1Length = -1;
+
+                const int trailLength =
+                    static_cast<int>(std::ceil(threshold * nSegments));
+                if (trailLength == nSegments) {
+                    // Whole trail should be visible
+                    p0Start = startVertexIndex;
+                    p0Length = nVerts;
+                    p1Start = 0;
+                    p1Length = 0;
+                }
+                else {
+                    const int trailHead = static_cast<int>(std::ceil(frac * nSegments));
+                    const int headVertexIndex = startVertexIndex + trailHead + 1;
+                    const int correctTrailLength = trailLength + 3;
+
+                    // Need to do this due to order of vertex data in the vertex buffer
+                    int correctVertexIndex = headVertexIndex - correctTrailLength;
+
+                    // If the start of the trail should be at the end of the orbit
+                    if (correctVertexIndex < startVertexIndex) {
+                        correctVertexIndex += nVerts;
+                    }
+
+                    // If the trail is length passes over the last point of the orbit
+                    const int lastVertexIndex = startVertexIndex + nVerts;
+                    if (correctVertexIndex + correctTrailLength > lastVertexIndex) {
+                        p0Start = startVertexIndex;
+                        p1Start = correctVertexIndex;
+
+                        // Special check to make sure we don't end up with segment
+                        // sections 1 vertex length. A segment must contain at least 2
+                        // vertices or more.
+                        if (lastVertexIndex - correctVertexIndex == 1) {
+                            p1Length = 0;
+                            p0Length = correctTrailLength - 1;
+                        }
+                        else {
+                            p1Length = lastVertexIndex - correctVertexIndex;
+                            p0Length = correctTrailLength - p1Length;
+                        }
+                    }
+                    else {
+                        // If the entire trail is within the bounds of the orbit
+                        p0Start = correctVertexIndex;
+                        p0Length = correctTrailLength;
+                        p1Start = 0;
+                        p1Length = 0;
+                    }
+                }
+                _startIndexTrails[i * 2] = p0Start;
+                _segmentSizeTrails[i * 2] = p0Length;
+                _startIndexTrails[i * 2 + 1] = p1Start;
+                _segmentSizeTrails[i * 2 + 1] = p1Length;
+            }
+
+            _updateHelper[i].timestamp = orbit.epoch +
+                (std::floor(frac * nSegments) * _updateHelper[i].timePerStep) +
+                (std::floor(nRevs) * orbit.period);
+        }
+
+        startVertexIndex += nVerts;
+    }
+}
+
+} // namespace openspace

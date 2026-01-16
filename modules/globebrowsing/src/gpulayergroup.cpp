@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,17 @@
 
 #include <modules/globebrowsing/src/gpulayergroup.h>
 
+#include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
-#include <modules/globebrowsing/src/layermanager.h>
+#include <modules/globebrowsing/src/layergroupid.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <string>
 
 namespace openspace::globebrowsing {
 
@@ -43,12 +49,12 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
     );
 
     const std::vector<Layer*>& activeLayers = layerGroup.activeLayers();
-    for (unsigned int i = 0; i < activeLayers.size(); ++i) {
+    for (unsigned int i = 0; i < activeLayers.size(); i++) {
         const GPULayer& gal = _gpuActiveLayers[i];
-        auto& galuc = gal.uniformCache;
+        const auto& galuc = gal.uniformCache;
         const Layer& al = *activeLayers[i];
 
-        program.setUniform(galuc.opacity, al.renderSettings().opacity);
+        program.setUniform(galuc.opacity, al.opacity());
         program.setUniform(galuc.gamma, al.renderSettings().gamma);
         program.setUniform(galuc.multiplier, al.renderSettings().multiplier);
         program.setUniform(galuc.offset, al.renderSettings().offset);
@@ -66,20 +72,22 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
 
         switch (al.type()) {
             // Intentional fall through. Same for all tile layers
-            case layers::Layer::ID::DefaultTileLayer:
-            case layers::Layer::ID::SingleImageTileLayer:
-            case layers::Layer::ID::SpoutImageTileLayer:
-            case layers::Layer::ID::ImageSequenceTileLayer:
-            case layers::Layer::ID::SizeReferenceTileLayer:
-            case layers::Layer::ID::TemporalTileLayer:
-            case layers::Layer::ID::TileIndexTileLayer:
-            case layers::Layer::ID::ByIndexTileLayer:
-            case layers::Layer::ID::ByLevelTileLayer: {
+            case layers::Layer::ID::DefaultTileProvider:
+            case layers::Layer::ID::SingleImageProvider:
+            case layers::Layer::ID::SpoutImageProvider:
+            case layers::Layer::ID::VideoTileProvider:
+            case layers::Layer::ID::ImageSequenceTileProvider:
+            case layers::Layer::ID::SizeReferenceTileProvider:
+            case layers::Layer::ID::TemporalTileProvider:
+            case layers::Layer::ID::TileIndexTileProvider:
+            case layers::Layer::ID::TileProviderByDate:
+            case layers::Layer::ID::TileProviderByIndex:
+            case layers::Layer::ID::TileProviderByLevel: {
                 const ChunkTilePile& ctp = al.chunkTilePile(
                     tileIndex,
                     layerGroup.pileSize()
                 );
-                for (size_t j = 0; j < _gpuActiveLayers[i].gpuChunkTiles.size(); ++j) {
+                for (size_t j = 0; j < _gpuActiveLayers[i].gpuChunkTiles.size(); j++) {
                     GPULayer::GPUChunkTile& t = _gpuActiveLayers[i].gpuChunkTiles[j];
                     ghoul_assert(ctp[j].has_value(), "Wrong ChunkTiles number in pile");
                     const ChunkTile& ct = *ctp[j];
@@ -93,19 +101,11 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                     program.setUniform(t.uniformCache.uvOffset, ct.uvTransform.uvOffset);
                     program.setUniform(t.uniformCache.uvScale, ct.uvTransform.uvScale);
                 }
-
-                program.setUniform(galuc.paddingStartOffset, al.tilePixelStartOffset());
-                program.setUniform(
-                    galuc.paddingSizeDifference,
-                    al.tilePixelSizeDifference()
-                );
                 break;
             }
             case layers::Layer::ID::SolidColor:
                 program.setUniform(galuc.color, al.solidColor());
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
 
         if (gal.isHeightLayer) {
@@ -119,11 +119,11 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& laye
     const std::vector<Layer*>& activeLayers = layerGroup.activeLayers();
     _gpuActiveLayers.resize(activeLayers.size());
     const int pileSize = layerGroup.pileSize();
-    for (size_t i = 0; i < _gpuActiveLayers.size(); ++i) {
+    for (size_t i = 0; i < _gpuActiveLayers.size(); i++) {
         GPULayer& gal = _gpuActiveLayers[i];
         auto& galuc = gal.uniformCache;
         const Layer& al = *activeLayers[i];
-        std::string name = fmt::format("{}[{}].", layerGroup.identifier(), i);
+        const std::string name = std::format("{}[{}].", layerGroup.identifier(), i);
 
         if (layerGroup.isHeightLayer()) {
             gal.isHeightLayer = true;
@@ -145,40 +145,32 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& laye
 
         switch (al.type()) {
             // Intentional fall through. Same for all tile layers
-            case layers::Layer::ID::DefaultTileLayer:
-            case layers::Layer::ID::SingleImageTileLayer:
-            case layers::Layer::ID::SpoutImageTileLayer:
-            case layers::Layer::ID::ImageSequenceTileLayer:
-            case layers::Layer::ID::SizeReferenceTileLayer:
-            case layers::Layer::ID::TemporalTileLayer:
-            case layers::Layer::ID::TileIndexTileLayer:
-            case layers::Layer::ID::ByIndexTileLayer:
-            case layers::Layer::ID::ByLevelTileLayer: {
+            case layers::Layer::ID::DefaultTileProvider:
+            case layers::Layer::ID::SingleImageProvider:
+            case layers::Layer::ID::SpoutImageProvider:
+            case layers::Layer::ID::VideoTileProvider:
+            case layers::Layer::ID::ImageSequenceTileProvider:
+            case layers::Layer::ID::SizeReferenceTileProvider:
+            case layers::Layer::ID::TemporalTileProvider:
+            case layers::Layer::ID::TileIndexTileProvider:
+            case layers::Layer::ID::TileProviderByDate:
+            case layers::Layer::ID::TileProviderByIndex:
+            case layers::Layer::ID::TileProviderByLevel: {
                 gal.gpuChunkTiles.resize(pileSize);
-                for (size_t j = 0; j < gal.gpuChunkTiles.size(); ++j) {
+                for (size_t j = 0; j < gal.gpuChunkTiles.size(); j++) {
                     GPULayer::GPUChunkTile& t = gal.gpuChunkTiles[j];
                     auto& tuc = t.uniformCache;
-                    std::string n = name + "pile.chunkTile" + std::to_string(j) + ".";
+                    const std::string n = std::format("{}pile.chunkTile{}.", name, j);
 
                     tuc.texture = p.uniformLocation(n + "textureSampler");
                     tuc.uvOffset = p.uniformLocation(n + "uvTransform.uvOffset");
                     tuc.uvScale = p.uniformLocation(n + "uvTransform.uvScale");
                 }
-
-                galuc.paddingStartOffset = p.uniformLocation(
-                    name + "padding.startOffset"
-                );
-                galuc.paddingSizeDifference = p.uniformLocation(
-                    name + "padding.sizeDifference"
-                );
-
                 break;
             }
             case layers::Layer::ID::SolidColor:
                 galuc.color = p.uniformLocation(name + "color");
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
 
         if (gal.isHeightLayer) {

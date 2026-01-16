@@ -1,16 +1,19 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local omm = asset.syncedResource({
+
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (Fengyun Debris)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_1999-025",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?INTDES=1999-025&FORMAT=kvn",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?INTDES=1999-025&FORMAT=kvn",
   Filename = "1999-025.txt",
-  Override = true
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
-local satellites = {
-  Identifier = "1999-025",
+
+local DebrisFengyun = {
+  Identifier = "DebrisFengyun-1999-025",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
@@ -18,31 +21,33 @@ local satellites = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.784, 1.0, 0.737 },
-    Fade = 1.5,
+    TrailFade = 1.5,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Fengyun Debris",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(satellites)
+  openspace.addSceneGraphNode(DebrisFengyun)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(satellites)
+  openspace.removeSceneGraphNode(DebrisFengyun)
 end)
 
-asset.export(satellites)
+asset.export(DebrisFengyun)
 
 
 
 asset.meta = {
   Name = "Satellites Debris - Fengyun Debris",
-  Version = "1.0",
   Description = "Satellites asset for Debris - Fengyun Debris. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

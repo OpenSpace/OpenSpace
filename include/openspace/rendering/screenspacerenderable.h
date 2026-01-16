@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,30 +26,35 @@
 #define __OPENSPACE_CORE___SCREENSPACERENDERABLE___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
-#include <openspace/properties/triggerproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/glm.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul {
+    namespace opengl { class ProgramObject; }
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
+struct RenderData;
 
 /**
- * The base class for screen space images and screen space framebuffers.
- * This base class handles general functionality specific to planes that are rendered in
- * front of the camera. It implements protected methods and properties for converting
- * the planes from Spherical to Cartesian coordinates and back. It also specifies the
- * interface that its children need to implement.
+ * The base class for screen space images and screen space framebuffers. This base class
+ * handles general functionality specific to planes that are rendered in front of the
+ * camera. It implements protected methods and properties for converting the planes from
+ * Spherical to Cartesian coordinates and back. It also specifies the interface that its
+ * children need to implement.
  */
-class ScreenSpaceRenderable : public properties::PropertyOwner {
+class ScreenSpaceRenderable : public properties::PropertyOwner, public Fadeable {
 public:
     static std::unique_ptr<ScreenSpaceRenderable> createFromDictionary(
         const ghoul::Dictionary& dictionary);
@@ -57,15 +62,22 @@ public:
     static constexpr std::string_view KeyName = "Name";
     static constexpr std::string_view KeyIdentifier = "Identifier";
 
-    ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceRenderable() override;
 
-    virtual void render();
+    struct RenderData {
+        float blackoutFactor;
+        float hue;
+        float value;
+        float saturation;
+        float gamma;
+    };
+    virtual void render(const RenderData& renderData);
 
-    virtual bool initialize();
-    virtual bool initializeGL();
-    virtual bool deinitialize();
-    virtual bool deinitializeGL();
+    virtual void initialize();
+    virtual void initializeGL();
+    virtual void deinitialize();
+    virtual void deinitializeGL();
 
     virtual void update();
     virtual bool isReady() const;
@@ -81,7 +93,7 @@ public:
     glm::vec2 screenSpaceDimensions();
     glm::vec2 upperRightCornerScreenSpace();
     glm::vec2 lowerLeftCornerScreenSpace();
-    bool isIntersecting(glm::vec2 coord);
+    bool isIntersecting(const glm::vec2& coord);
     void translate(glm::vec2 translation, glm::vec2 position);
     void setCartesianPosition(const glm::vec3& position);
     void setRaeFromCartesianPosition(const glm::vec3& position);
@@ -90,7 +102,7 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    void createShaders();
+    void createShaders(ghoul::Dictionary dict = ghoul::Dictionary());
     std::string makeUniqueIdentifier(std::string name);
 
     virtual glm::mat4 scaleMatrix();
@@ -101,19 +113,20 @@ protected:
     glm::vec3 raeToCartesian(const glm::vec3& rae) const;
     glm::vec3 cartesianToRae(const glm::vec3& cartesian) const;
 
-    void draw(glm::mat4 modelTransform);
+    void draw(const glm::mat4& modelTransform, const RenderData& renderData,
+        bool useAcceleratedRendering = false);
 
     virtual void bindTexture() = 0;
     virtual void unbindTexture();
 
-    glm::vec3 sphericalToRae(glm::vec3 spherical) const;
-    glm::vec3 raeToSpherical(glm::vec3 rae) const;
+    glm::vec3 sphericalToRae(const glm::vec3& spherical) const;
+    glm::vec3 raeToSpherical(const glm::vec3& rae) const;
     glm::vec3 cartesianToSpherical(const glm::vec3& cartesian) const;
     glm::vec3 sphericalToCartesian(glm::vec3 spherical) const;
     glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) const;
-    float opacity() const;
 
     properties::BoolProperty _enabled;
+    properties::BoolProperty _renderDuringBlackout;
     properties::BoolProperty _usePerspectiveProjection;
     properties::BoolProperty _useRadiusAzimuthElevation;
     properties::BoolProperty _faceCamera;
@@ -129,17 +142,25 @@ protected:
     // Local rotation (roll, pitch, yaw)
     properties::Vec3Property _localRotation;
 
+    // Border
+    properties::FloatProperty _borderWidth;
+    properties::Vec3Property _borderColor;
+    properties::BoolProperty _borderFeather;
+
     properties::FloatProperty _scale;
-    properties::FloatProperty _gamma;
+    properties::FloatProperty _gammaOffset;
     properties::Vec3Property _multiplyColor;
     properties::Vec4Property _backgroundColor;
-    properties::FloatProperty _opacity;
-    properties::FloatProperty _fade;
     properties::TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
-    UniformCache(color, opacity, mvp, texture, backgroundColor, gamma) _uniformCache;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
+
+private:
+    UniformCache(color, opacity, blackoutFactor, hue, value, saturation, mvpMatrix, tex,
+        backgroundColor, gamma, borderColor, borderWidth, borderFeather,
+        useAcceleratedRendering) _uniformCache;
 };
 
 } // namespace openspace

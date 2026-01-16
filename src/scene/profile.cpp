@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,26 +24,25 @@
 
 #include <openspace/scene/profile.h>
 
-#include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
+#include <openspace/json.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/scene/scene.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/fmt.h>
-#include <ghoul/misc/assert.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/misc.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
-#include <ctime>
+#include <algorithm>
 #include <filesystem>
+#include <fstream>
+#include <ios>
+#include <iterator>
 #include <set>
-#include <json/json.hpp>
+#include <utility>
 
 #include "profile_lua.inl"
 
@@ -78,12 +77,12 @@ namespace {
             if (!isOptional) {
                 throw Profile::ParsingError(
                     Profile::ParsingError::Severity::Error,
-                    fmt::format("'{}.{}' field is missing", keyPrefix, key)
+                    std::format("'{}.{}' field is missing", keyPrefix, key)
                 );
             }
         }
         else {
-            const nlohmann::json value = j[key];
+            const nlohmann::json& value = j[key];
             if (!(value.*checkFunc)()) {
                 std::string type = [](auto c) {
                     if (c == &nlohmann::json::is_string) { return "a string"; }
@@ -98,7 +97,7 @@ namespace {
 
                 throw Profile::ParsingError(
                     Profile::ParsingError::Severity::Error,
-                    fmt::format("'{}.{}' must be {}", keyPrefix, key, type)
+                    std::format("'{}.{}' must be {}", keyPrefix, key, type)
                 );
             }
         }
@@ -111,7 +110,7 @@ namespace {
             if (allowedKeys.find(key) == allowedKeys.end()) {
                 LINFOC(
                     "Profile",
-                    fmt::format("Key '{}' not supported in '{}'", key, prefix)
+                    std::format("Key '{}' not supported in '{}'", key, prefix)
                 );
             }
         }
@@ -122,12 +121,12 @@ namespace {
 // Current version:
 //
 
-void to_json(nlohmann::json& j, const Profile::Version& v) {
+static void to_json(nlohmann::json& j, const Profile::Version& v) {
     j["major"] = v.major;
     j["minor"] = v.minor;
 }
 
-void from_json(const nlohmann::json& j, Profile::Version& v) {
+static void from_json(const nlohmann::json& j, Profile::Version& v) {
     checkValue(j, "major", &nlohmann::json::is_number, "version", false);
     checkValue(j, "minor", &nlohmann::json::is_number, "version", false);
     checkExtraKeys(j, "version", { "major", "minor" });
@@ -136,7 +135,7 @@ void from_json(const nlohmann::json& j, Profile::Version& v) {
     j["minor"].get_to(v.minor);
 }
 
-void to_json(nlohmann::json& j, const Profile::Module& v) {
+static void to_json(nlohmann::json& j, const Profile::Module& v) {
     j["name"] = v.name;
     if (v.loadedInstruction.has_value()) {
         j["loadedInstruction"] = *v.loadedInstruction;
@@ -146,7 +145,7 @@ void to_json(nlohmann::json& j, const Profile::Module& v) {
     }
 }
 
-void from_json(const nlohmann::json& j, Profile::Module& v) {
+static void from_json(const nlohmann::json& j, Profile::Module& v) {
     checkValue(j, "name", &nlohmann::json::is_string, "module", false);
     checkValue(j, "loadedInstruction", &nlohmann::json::is_string, "module", true);
     checkValue(j, "notLoadedInstruction", &nlohmann::json::is_string, "module", true);
@@ -161,7 +160,7 @@ void from_json(const nlohmann::json& j, Profile::Module& v) {
     }
 }
 
-void to_json(nlohmann::json& j, const Profile::Meta& v) {
+static void to_json(nlohmann::json& j, const Profile::Meta& v) {
     if (v.name.has_value()) {
         j["name"] = *v.name;
     }
@@ -182,7 +181,7 @@ void to_json(nlohmann::json& j, const Profile::Meta& v) {
     }
 }
 
-void from_json(const nlohmann::json& j, Profile::Meta& v) {
+static void from_json(const nlohmann::json& j, Profile::Meta& v) {
     checkValue(j, "name", &nlohmann::json::is_string, "meta", true);
     checkValue(j, "version", &nlohmann::json::is_string, "meta", true);
     checkValue(j, "description", &nlohmann::json::is_string, "meta", true);
@@ -215,7 +214,7 @@ void from_json(const nlohmann::json& j, Profile::Meta& v) {
     }
 }
 
-void to_json(nlohmann::json& j, const Profile::Property::SetType& v) {
+static void to_json(nlohmann::json& j, const Profile::Property::SetType& v) {
     j = [](Profile::Property::SetType t) {
         switch (t) {
             case Profile::Property::SetType::SetPropertyValue:
@@ -228,8 +227,8 @@ void to_json(nlohmann::json& j, const Profile::Property::SetType& v) {
     }(v);
 }
 
-void from_json(const nlohmann::json& j, Profile::Property::SetType& v) {
-    std::string value = j.get<std::string>();
+static void from_json(const nlohmann::json& j, Profile::Property::SetType& v) {
+    const std::string value = j.get<std::string>();
     if (value == "setPropertyValue") {
         v = Profile::Property::SetType::SetPropertyValue;
     }
@@ -243,13 +242,13 @@ void from_json(const nlohmann::json& j, Profile::Property::SetType& v) {
     }
 }
 
-void to_json(nlohmann::json& j, const Profile::Property& v) {
+static void to_json(nlohmann::json& j, const Profile::Property& v) {
     j["type"] = v.setType;
     j["name"] = v.name;
     j["value"] = v.value;
 }
 
-void from_json(const nlohmann::json& j, Profile::Property& v) {
+static void from_json(const nlohmann::json& j, Profile::Property& v) {
     checkValue(j, "type", &nlohmann::json::is_string, "property", false);
     checkValue(j, "name", &nlohmann::json::is_string, "property", false);
     checkValue(j, "value", &nlohmann::json::is_string, "property", false);
@@ -260,7 +259,7 @@ void from_json(const nlohmann::json& j, Profile::Property& v) {
     j["value"].get_to(v.value);
 }
 
-void to_json(nlohmann::json& j, const Profile::Action& v) {
+static void to_json(nlohmann::json& j, const Profile::Action& v) {
     j["identifier"] = v.identifier;
     j["documentation"] = v.documentation;
     j["name"] = v.name;
@@ -269,7 +268,7 @@ void to_json(nlohmann::json& j, const Profile::Action& v) {
     j["script"] = v.script;
 }
 
-void from_json(const nlohmann::json& j, Profile::Action& v) {
+static void from_json(const nlohmann::json& j, Profile::Action& v) {
     checkValue(j, "identifier", &nlohmann::json::is_string, "action", false);
     checkValue(j, "documentation", &nlohmann::json::is_string, "action", false);
     checkValue(j, "name", &nlohmann::json::is_string, "action", false);
@@ -290,12 +289,12 @@ void from_json(const nlohmann::json& j, Profile::Action& v) {
     j["script"].get_to(v.script);
 }
 
-void to_json(nlohmann::json& j, const Profile::Keybinding& v) {
+static void to_json(nlohmann::json& j, const Profile::Keybinding& v) {
     j["key"] = keyToString(v.key);
     j["action"] = v.action;
 }
 
-void from_json(const nlohmann::json& j, Profile::Keybinding& v) {
+static void from_json(const nlohmann::json& j, Profile::Keybinding& v) {
     checkValue(j, "key", &nlohmann::json::is_string, "keybinding", false);
     checkValue(j, "action", &nlohmann::json::is_string, "keybinding", false);
     checkExtraKeys(j, "keybinding", { "key", "action" });
@@ -304,7 +303,7 @@ void from_json(const nlohmann::json& j, Profile::Keybinding& v) {
     j["action"].get_to(v.action);
 }
 
-void to_json(nlohmann::json& j, const Profile::Time::Type& v) {
+static void to_json(nlohmann::json& j, const Profile::Time::Type& v) {
     j = [](Profile::Time::Type t) {
         switch (t) {
             case Profile::Time::Type::Absolute: return "absolute";
@@ -314,8 +313,8 @@ void to_json(nlohmann::json& j, const Profile::Time::Type& v) {
     }(v);
 }
 
-void from_json(const nlohmann::json& j, Profile::Time::Type& v) {
-    std::string value = j.get<std::string>();
+static void from_json(const nlohmann::json& j, Profile::Time::Type& v) {
+    const std::string value = j.get<std::string>();
     if (value == "absolute") {
         v = Profile::Time::Type::Absolute;
     }
@@ -329,13 +328,13 @@ void from_json(const nlohmann::json& j, Profile::Time::Type& v) {
     }
 }
 
-void to_json(nlohmann::json& j, const Profile::Time& v) {
+static void to_json(nlohmann::json& j, const Profile::Time& v) {
     j["type"] = v.type;
     j["value"] = v.value;
     j["is_paused"] = v.startPaused;
 }
 
-void from_json(const nlohmann::json& j, Profile::Time& v) {
+static void from_json(const nlohmann::json& j, Profile::Time& v) {
     checkValue(j, "type", &nlohmann::json::is_string, "time", false);
     checkValue(j, "value", &nlohmann::json::is_string, "time", false);
     checkValue(j, "is_paused", &nlohmann::json::is_boolean, "time", false);
@@ -346,21 +345,49 @@ void from_json(const nlohmann::json& j, Profile::Time& v) {
     j["is_paused"].get_to(v.startPaused);
 }
 
-void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
+static void to_json(nlohmann::json& j, const Profile::CameraGoToNode& v) {
+    j["type"] = Profile::CameraGoToNode::Type;
+    j["anchor"] = v.anchor;
+    if (v.height.has_value()) {
+        j["height"] = *v.height;
+    }
+}
+
+static void from_json(const nlohmann::json& j, Profile::CameraGoToNode& v) {
+    ghoul_assert(
+        j.at("type").get<std::string>() == Profile::CameraGoToNode::Type,
+        "Wrong type for Camera"
+    );
+
+    checkValue(j, "anchor", &nlohmann::json::is_string, "camera", false);
+    checkValue(j, "height", &nlohmann::json::is_number, "camera", true);
+    checkExtraKeys(
+        j,
+        "camera",
+        { "type", "anchor", "height"}
+    );
+
+    j["anchor"].get_to(v.anchor);
+    if (j.find("height") != j.end()) {
+        v.height = j["height"].get<double>();
+    }
+}
+
+static void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
     j["type"] = Profile::CameraNavState::Type;
     j["anchor"] = v.anchor;
     if (v.aim.has_value()) {
         j["aim"] = *v.aim;
     }
     j["frame"] = v.referenceFrame;
-    nlohmann::json p {
+    const nlohmann::json p {
         { "x", v.position.x },
         { "y", v.position.y },
         { "z", v.position.z }
     };
     j["position"] = p;
     if (v.up.has_value()) {
-        nlohmann::json u {
+        const nlohmann::json u {
             { "x", v.up->x },
             { "y", v.up->y },
             { "z", v.up->z }
@@ -375,7 +402,7 @@ void to_json(nlohmann::json& j, const Profile::CameraNavState& v) {
     }
 }
 
-void from_json(const nlohmann::json& j, Profile::CameraNavState& v) {
+static void from_json(const nlohmann::json& j, Profile::CameraNavState& v) {
     ghoul_assert(
         j.at("type").get<std::string>() == Profile::CameraNavState::Type,
         "Wrong type for Camera"
@@ -432,7 +459,7 @@ void from_json(const nlohmann::json& j, Profile::CameraNavState& v) {
     }
 }
 
-void to_json(nlohmann::json& j, const Profile::CameraGoToGeo& v) {
+static void to_json(nlohmann::json& j, const Profile::CameraGoToGeo& v) {
     j["type"] = Profile::CameraGoToGeo::Type;
     j["anchor"] = v.anchor;
     j["latitude"] = v.latitude;
@@ -442,7 +469,7 @@ void to_json(nlohmann::json& j, const Profile::CameraGoToGeo& v) {
     }
 }
 
-void from_json(const nlohmann::json& j, Profile::CameraGoToGeo& v) {
+static void from_json(const nlohmann::json& j, Profile::CameraGoToGeo& v) {
     ghoul_assert(
         j.at("type").get<std::string>() == Profile::CameraGoToGeo::Type,
         "Wrong type for Camera"
@@ -480,7 +507,7 @@ struct Keybinding {
     std::string script;
 };
 
-void from_json(const nlohmann::json& j, version10::Keybinding& v) {
+static void from_json(const nlohmann::json& j, version10::Keybinding& v) {
     checkValue(j, "key", &nlohmann::json::is_string, "keybinding", false);
     checkValue(j, "documentation", &nlohmann::json::is_string, "keybinding", false);
     checkValue(j, "name", &nlohmann::json::is_string, "keybinding", false);
@@ -533,7 +560,7 @@ void from_json(const nlohmann::json& j, version10::Keybinding& v) {
     j["script"].get_to(v.script);
 }
 
-void convertVersion10to11(nlohmann::json& profile) {
+static void convertVersion10to11(nlohmann::json& profile) {
     // Version 1.1 introduced actions and remove Lua function calling from keybindings
     profile["version"] = Profile::Version{ 1, 1 };
 
@@ -547,16 +574,16 @@ void convertVersion10to11(nlohmann::json& profile) {
 
     std::vector<version10::Keybinding> kbs =
         profile.at("keybindings").get<std::vector<version10::Keybinding>>();
-    for (size_t i = 0; i < kbs.size(); ++i) {
+    for (size_t i = 0; i < kbs.size(); i++) {
         version10::Keybinding& kb = kbs[i];
-        std::string identifier = fmt::format("profile.keybind.{}", i);
+        const std::string identifier = std::format("profile.keybind.{}", i);
 
         Profile::Action action;
         action.identifier = identifier;
         action.documentation = std::move(kb.documentation);
         action.name = std::move(kb.name);
         action.guiPath = std::move(kb.guiPath);
-        action.isLocal = std::move(kb.isLocal);
+        action.isLocal = kb.isLocal;
         action.script = std::move(kb.script);
         actions.push_back(std::move(action));
 
@@ -574,7 +601,7 @@ void convertVersion10to11(nlohmann::json& profile) {
 
 namespace version11 {
 
-void convertVersion11to12(nlohmann::json& profile) {
+static void convertVersion11to12(nlohmann::json& profile) {
     // Version 1.2 introduced a state whether the delta time starts out as paused
     profile["version"] = Profile::Version{ 1, 2 };
 
@@ -586,6 +613,23 @@ void convertVersion11to12(nlohmann::json& profile) {
 
 } // namespace version11
 
+namespace version12 {
+
+static void convertVersion12to13(nlohmann::json& profile) {
+    // Version 1.3 introduced to GoToNode camera initial position
+    profile["version"] = Profile::Version{ 1, 3 };
+}
+
+} // namespace version12
+
+namespace version13 {
+
+static void convertVersion13to14(nlohmann::json& profile) {
+    // Version 1.4 introduced the ui panel view
+    profile["version"] = Profile::Version{ 1, 4 };
+}
+
+} // namespace version13
 
 Profile::ParsingError::ParsingError(Severity severity_, std::string msg)
     : ghoul::RuntimeError(std::move(msg), "profile")
@@ -599,12 +643,12 @@ void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& root
     version = Profile::CurrentVersion;
 
     // Update properties
-    std::vector<properties::Property*> ps = changedProperties(rootOwner);
+    const std::vector<properties::Property*> ps = changedProperties(rootOwner);
 
     for (properties::Property* prop : ps) {
         Property p;
         p.setType = Property::SetType::SetPropertyValueSingle;
-        p.name = prop->fullyQualifiedIdentifier();
+        p.name = prop->uri();
         p.value = prop->stringValue();
         properties.push_back(std::move(p));
     }
@@ -687,8 +731,9 @@ std::string Profile::serialize() const {
     if (camera.has_value()) {
         r["camera"] = std::visit(
             overloaded {
+                [](const CameraGoToNode& c) { return nlohmann::json(c); },
                 [](const CameraNavState& c) { return nlohmann::json(c); },
-                [](const Profile::CameraGoToGeo& c) { return nlohmann::json(c); }
+                [](const CameraGoToGeo& c) { return nlohmann::json(c); }
             },
             *camera
         );
@@ -700,11 +745,31 @@ std::string Profile::serialize() const {
     if (!additionalScripts.empty()) {
         r["additional_scripts"] = additionalScripts;
     }
+    if (!uiPanelVisibility.empty()) {
+        r["panel_visibility"] = uiPanelVisibility;
+    }
 
     return r.dump(2);
 }
 
-Profile::Profile(const std::string& content) {
+Profile::Profile(const std::filesystem::path& path) {
+    ghoul_assert(std::filesystem::is_regular_file(path), "Path must exist");
+
+    std::ifstream inFile;
+    try {
+        inFile.open(path, std::ifstream::in);
+    }
+    catch (const std::ifstream::failure& e) {
+        throw ghoul::RuntimeError(std::format(
+            "Exception opening profile file for read '{}': {}", path, e.what()
+        ));
+    }
+
+    const std::string content = std::string(
+        std::istreambuf_iterator<char>(inFile),
+        std::istreambuf_iterator<char>()
+    );
+
     try {
         nlohmann::json profile = nlohmann::json::parse(content);
         profile.at("version").get_to(version);
@@ -717,6 +782,16 @@ Profile::Profile(const std::string& content) {
 
         if (version.major == 1 && version.minor == 1) {
             version11::convertVersion11to12(profile);
+            profile["version"].get_to(version);
+        }
+
+        if (version.major == 1 && version.minor == 2) {
+            version12::convertVersion12to13(profile);
+            profile["version"].get_to(version);
+        }
+
+        if (version.major == 1 && version.minor == 3) {
+            version13::convertVersion13to14(profile);
             profile["version"].get_to(version);
         }
 
@@ -749,7 +824,10 @@ Profile::Profile(const std::string& content) {
         }
         if (profile.find("camera") != profile.end()) {
             nlohmann::json c = profile.at("camera");
-            if (c["type"].get<std::string>() == CameraNavState::Type) {
+            if (c["type"].get<std::string>() == CameraGoToNode::Type) {
+                camera = c.get<CameraGoToNode>();
+            }
+            else if (c["type"].get<std::string>() == CameraNavState::Type) {
                 camera = c.get<CameraNavState>();
             }
             else if (c["type"].get<std::string>() == CameraGoToGeo::Type) {
@@ -765,10 +843,13 @@ Profile::Profile(const std::string& content) {
         if (profile.find("additional_scripts") != profile.end()) {
             profile["additional_scripts"].get_to(additionalScripts);
         }
+        if (profile.find("panel_visibility") != profile.end()) {
+            profile["panel_visibility"].get_to(uiPanelVisibility);
+        }
     }
     catch (const nlohmann::json::exception& e) {
         std::string err = e.what();
-        throw ParsingError(ParsingError::Severity::Error, err);
+        throw ParsingError(ParsingError::Severity::Error, std::move(err));
     }
 }
 
@@ -776,6 +857,8 @@ scripting::LuaLibrary Profile::luaLibrary() {
     return {
         "",
         {
+            codegen::lua::ProfileName,
+            codegen::lua::ProfilePath,
             codegen::lua::SaveSettingsToProfile
         }
     };

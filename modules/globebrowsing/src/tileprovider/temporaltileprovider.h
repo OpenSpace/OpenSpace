@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,7 +28,20 @@
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
 #include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
-#include <modules/globebrowsing/src/tileprovider/singleimagetileprovider.h>
+#include <modules/globebrowsing/src/timequantizer.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <filesystem>
+#include <unordered_map>
+#include <utility>
+
+namespace ghoul::opengl {
+    class ProgramObject;
+    class Texture;
+} // namespace ghoul::opengl
+
+namespace openspace { class Time; }
 
 namespace openspace::globebrowsing {
 
@@ -39,12 +52,13 @@ namespace openspace::globebrowsing {
  * filepath to a Openspace Temporal dataset description file. This is an xml-file that
  * defines the same meta data as the GDAL wms description
  * (http://www.gdal.org/frmt_wms.html), but augmented with some extra tags describing the
- * temporal properties of the dataset. See
- * `TemporalTileProvider::TemporalXMLTags`
+ * temporal properties of the dataset.
+ *
+ * \sa TemporalTileProvider::TemporalXMLTags
  */
 class TemporalTileProvider : public TileProvider {
 public:
-    TemporalTileProvider(const ghoul::Dictionary& dictionary);
+    explicit TemporalTileProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;
@@ -64,7 +78,7 @@ private:
     };
 
     struct InterpolateTileProvider : public TileProvider {
-        InterpolateTileProvider(const ghoul::Dictionary&);
+        explicit InterpolateTileProvider(const ghoul::Dictionary&);
         ~InterpolateTileProvider() override;
 
         Tile tile(const TileIndex& tileIndex) override final;

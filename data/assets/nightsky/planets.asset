@@ -1,0 +1,281 @@
+local mercury = asset.require("scene/solarsystem/planets/mercury/transforms")
+local venus = asset.require("scene/solarsystem/planets/venus/transforms")
+local mars = asset.require("scene/solarsystem/planets/mars/transforms")
+local jupiter = asset.require("scene/solarsystem/planets/jupiter/transforms")
+local saturn = asset.require("scene/solarsystem/planets/saturn/transforms")
+
+
+
+local textures = asset.resource({
+  Name = "Night Sky Planet Textures",
+  Type = "HttpSynchronization",
+  Identifier = "night_sky_planet_textures",
+  Version = 1
+})
+
+local csv = asset.resource({
+  Name = "Zero Point Data",
+  Type = "HttpSynchronization",
+  Identifier = "zeropoint_data",
+  Version = 1
+})
+
+
+local Mercury = {
+  Identifier = "NightSkyMercury",
+  Parent = mercury.MercuryBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = csv .. "zeropointdata.csv",
+    Coloring = {
+      FixedColor = { 0.608, 0.604, 0.455 }
+    },
+    Texture = {
+      File = textures .. "glare.png"
+    },
+    SizeSettings = {
+      ScaleFactor = 10,
+      ScaleExponent = 15,
+      MaxSize = 0.209,
+      EnableMaxSizeControl = true
+    },
+    Enabled = asset.enabled,
+    DimInAtmosphere = true,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "nightsky_billboard" },
+  GUI = {
+    Name = "Night Sky Mercury",
+    Path = "/Night Sky/Planets",
+    Focusable = false,
+    OrderingNumber = 1,
+    Description = [[A night sky version of the planet Mercury, making it visible as
+      a bright object on the sky (textured representation).]]
+  }
+}
+
+local Venus = {
+  Identifier = "NightSkyVenus",
+  Parent = venus.VenusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = csv .. "zeropointdata.csv",
+    Coloring = {
+      FixedColor = { 1.0 , 0.992, 0.757 }
+    },
+    Texture = {
+      File = textures .. "glare.png"
+    },
+    SizeSettings = {
+      ScaleFactor = 10,
+      ScaleExponent = 15,
+      MaxSize = 1.14,
+      EnableMaxSizeControl = true
+    },
+    Enabled = asset.enabled,
+    DimInAtmosphere = true,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "nightsky_billboard" },
+  GUI = {
+    Name = "Night Sky Venus",
+    Path = "/Night Sky/Planets",
+    Focusable = false,
+    OrderingNumber = 2,
+    Description = [[A night sky version of the planet Venus, making it visible as
+      a bright object on the sky (textured representation).]]
+  }
+}
+
+local Mars = {
+  Identifier = "NightSkyMars",
+  Parent = mars.MarsBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = csv .. "zeropointdata.csv",
+    Coloring = {
+      FixedColor = { 0.756, 0.267, 0.054 }
+    },
+    Texture = {
+      File = textures .. "glare.png"
+    },
+    SizeSettings = {
+      ScaleFactor = 10,
+      ScaleExponent = 15,
+      MaxSize = 0.404, --mars max angular size / 62
+      EnableMaxSizeControl = true
+    },
+    Enabled = asset.enabled,
+    DimInAtmosphere = true,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "nightsky_billboard" },
+  GUI = {
+    Name = "Night Sky Mars",
+    Path = "/Night Sky/Planets",
+    Focusable = false,
+    OrderingNumber = 4
+  }
+}
+
+local Jupiter = {
+  Identifier = "NightSkyJupiter",
+  Parent = jupiter.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = csv .. "zeropointdata.csv",
+    Coloring = {
+      FixedColor = { 0.608, 0.604, 0.455 },
+    },
+    Texture = {
+      File = textures .. "glare.png"
+    },
+    SizeSettings = {
+      ScaleFactor = 10,
+      ScaleExponent = 15,
+      MaxSize = 0.82,
+      EnableMaxSizeControl = true
+    },
+    Enabled = asset.enabled,
+    DimInAtmosphere = true,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "nightsky_billboard" },
+  GUI = {
+    Name = "Night Sky Jupiter",
+    Path = "/Night Sky/Planets",
+    Focusable = false,
+    OrderingNumber = 5,
+    Description = [[A night sky version of the planet Jupiter, making it visible as
+      a bright object on the sky (textured representation).]]
+  }
+}
+
+local Saturn = {
+  Identifier = "NightSkySaturn",
+  Parent = saturn.SaturnBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderablePointCloud",
+    File = csv .. "zeropointdata.csv",
+    Coloring = {
+      FixedColor =  { 0.85098, 0.843137, 0.619608 },
+    },
+    Texture = {
+      File = textures .. "glare.png"
+    },
+    SizeSettings = {
+      ScaleFactor = 10,
+      ScaleExponent = 15,
+      MaxSize = 0.332,
+      EnableMaxSizeControl = true
+    },
+    Enabled = asset.enabled,
+    DimInAtmosphere = true,
+    RenderBinMode = "PostDeferredTransparent"
+  },
+  Tag = { "nightsky_billboard" },
+  GUI = {
+    Name = "Night Sky Saturn",
+    Path = "/Night Sky/Planets",
+    Focusable = false,
+    OrderingNumber = 6,
+    Description = [[A night sky version of the planet Saturn, making it visible as
+      a bright object on the sky (textured representation).]]
+  }
+}
+
+local ShowNightSkyPlanets = {
+  Identifier = "os.nightsky.ShowNightSkyPlanets",
+  Name = "Show night sky planets",
+  Command = [[
+    openspace.fadeIn("Scene.NightSkyMercury.Renderable")
+    openspace.fadeIn("Scene.NightSkyVenus.Renderable")
+    openspace.fadeIn("Scene.NightSkyMars.Renderable")
+    openspace.fadeIn("Scene.NightSkyJupiter.Renderable")
+    openspace.fadeIn("Scene.NightSkySaturn.Renderable")
+    openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 2)
+  ]],
+  Documentation = "Show night sky versions of the planets (Note: Increases the scale of the Moon)",
+  GuiPath = "/Night Sky/Planets",
+  IsLocal = false
+}
+
+local HideNightSkyPlanets = {
+  Identifier = "os.nightsky.HideNightSkyPlanets",
+  Name = "Hide night sky planets",
+  Command = [[
+    openspace.fadeOut("Scene.NightSkyMercury.Renderable")
+    openspace.fadeOut("Scene.NightSkyVenus.Renderable")
+    openspace.fadeOut("Scene.NightSkyMars.Renderable")
+    openspace.fadeOut("Scene.NightSkyJupiter.Renderable")
+    openspace.fadeOut("Scene.NightSkySaturn.Renderable")
+    openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 1)
+  ]],
+  Documentation = "Hides night sky versions of the planets",
+  GuiPath = "/Night Sky/Planets",
+  IsLocal = false
+}
+
+local ToggleNightSkyPlanets = {
+  Identifier = "os.nightsky.ToggleNightSkyPlanets",
+  Name = "Toggle night sky planets",
+  Command = [[
+    openspace.toggleFade("Scene.NightSkyMercury.Renderable")
+    openspace.toggleFade("Scene.NightSkyVenus.Renderable")
+    openspace.toggleFade("Scene.NightSkyMars.Renderable")
+    openspace.toggleFade("Scene.NightSkyJupiter.Renderable")
+    openspace.toggleFade("Scene.NightSkySaturn.Renderable")
+    local scale = openspace.propertyValue("Scene.Moon.Scale.Scale")
+    if (scale > 1) then
+      openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 1.0)
+    else
+      openspace.setPropertyValueSingle("Scene.Moon.Scale.Scale", 2.0)
+    end
+  ]],
+  Documentation = "Toggles visibility of the night sky versions of the planets (Note: Increases the scale of the Moon)",
+  GuiPath = "/Night Sky/Planets",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Mercury)
+  openspace.addSceneGraphNode(Venus)
+  openspace.addSceneGraphNode(Mars)
+  openspace.addSceneGraphNode(Jupiter)
+  openspace.addSceneGraphNode(Saturn)
+  openspace.action.registerAction(ShowNightSkyPlanets)
+  openspace.action.registerAction(HideNightSkyPlanets)
+  openspace.action.registerAction(ToggleNightSkyPlanets)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleNightSkyPlanets)
+  openspace.action.removeAction(HideNightSkyPlanets)
+  openspace.action.removeAction(ShowNightSkyPlanets)
+  openspace.removeSceneGraphNode(Saturn)
+  openspace.removeSceneGraphNode(Jupiter)
+  openspace.removeSceneGraphNode(Mars)
+  openspace.removeSceneGraphNode(Venus)
+  openspace.removeSceneGraphNode(Mercury)
+end)
+
+asset.export(Mercury)
+asset.export(Venus)
+asset.export(Mars)
+asset.export(Jupiter)
+asset.export(Saturn)
+asset.export("ShowNightSkyPlanets", ShowNightSkyPlanets.Identifier)
+asset.export("HideNightSkyPlanets", HideNightSkyPlanets.Identifier)
+asset.export("ToggleNightSkyPlanets", ToggleNightSkyPlanets.Identifier)
+
+
+
+asset.meta = {
+  Name = "Night Sky Planets",
+  Description = [[A collection of night sky versions of the planets Mercury, Venus,
+    Mars, Jupiter and Saturn, including actions to toggle, hide and show them.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

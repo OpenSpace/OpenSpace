@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,28 +26,31 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___GLOBELABELSCOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/ivec2property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/font/fontrenderer.h>
 #include <ghoul/glm.h>
+#include <ghoul/font/font.h>
+#include <filesystem>
+#include <memory>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul {
+    namespace opengl { class ProgramObject; }
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 
-struct RenderData;
-
 namespace documentation { struct Documentation; }
 namespace globebrowsing { class RenderableGlobe; }
+struct RenderData;
 
-class GlobeLabelsComponent : public properties::PropertyOwner {
+class GlobeLabelsComponent : public properties::PropertyOwner, public Fadeable {
 public:
     GlobeLabelsComponent();
     ~GlobeLabelsComponent() override = default;
@@ -68,7 +71,6 @@ private:
     bool saveCachedFile(const std::filesystem::path& file) const;
     void renderLabels(const RenderData& data, const glm::dmat4& modelViewProjectionMatrix,
         float distToCamera, float fadeInVariable);
-    bool isLabelInFrustum(const glm::dmat4& MVMatrix, const glm::dvec3& position) const;
 
     // Labels Structures
     struct LabelEntry {
@@ -85,14 +87,11 @@ private:
     };
 
     properties::BoolProperty _enabled;
+    properties::Vec3Property _color;
     properties::FloatProperty _fontSize;
     properties::FloatProperty _size;
     properties::IVec2Property _minMaxSize;
     properties::FloatProperty _heightOffset;
-
-    properties::Vec3Property _color;
-    properties::FloatProperty _opacity;
-
     properties::Vec2Property _fadeDistances;
     properties::BoolProperty _fadeInEnabled;
     properties::BoolProperty _fadeOutEnabled;

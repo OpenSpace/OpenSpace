@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,25 +27,18 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <chrono>
 #include <filesystem>
-
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <memory>
 
 namespace openspace {
 
 class AtlasManager;
-class BrickSelector;
 class ErrorHistogramManager;
 class HistogramManager;
 class LocalErrorHistogramManager;
@@ -58,7 +51,7 @@ class TSP;
 
 class RenderableMultiresVolume : public Renderable {
 public:
-    RenderableMultiresVolume(const ghoul::Dictionary& dictionary);
+    explicit RenderableMultiresVolume(const ghoul::Dictionary& dictionary);
     ~RenderableMultiresVolume();
 
     enum Selector {
@@ -77,12 +70,6 @@ public:
 
     virtual void update(const UpdateData& data) override;
     virtual void render(const RenderData& data, RendererTasks& tasks) override;
-
-    //virtual void preResolve(ghoul::opengl::ProgramObject* program) override;
-    //virtual std::string getHeaderPath() override;
-    //virtual std::string getHelperPath() override;
-    //virtual std::vector<ghoul::opengl::Texture*> getTextures() override;
-    //virtual std::vector<unsigned int> getBuffers() override;
 
 private:
     properties::BoolProperty _useGlobalTime;
@@ -104,7 +91,6 @@ private:
     double _startTime;
     double _endTime;
 
-
     // Stats timers
     std::string _statsFileName;
     bool _gatheringStats = false;
@@ -117,12 +103,12 @@ private:
 
     int _timestep = 0;
 
-    std::string _filename;
+    std::filesystem::path _filename;
 
     std::string _transferFunctionName;
     std::string _volumeName;
 
-    std::string _transferFunctionPath;
+    std::filesystem::path _transferFunctionPath;
     std::filesystem::path _errorHistogramsPath;
 
     std::shared_ptr<TransferFunction> _transferFunction;

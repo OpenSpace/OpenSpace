@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,25 +28,23 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/triggerproperty.h>
+#include <modules/spacecraftinstruments/util/image.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <openspace/util/sphere.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <memory>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
-struct Image;
-class Sphere;
-
-namespace planetgeometry { class PlanetGeometry; }
-
 class RenderablePlanetProjection : public Renderable {
 public:
-    RenderablePlanetProjection(const ghoul::Dictionary& dict);
-    ~RenderablePlanetProjection() override;
+    explicit RenderablePlanetProjection(const ghoul::Dictionary& dict);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -79,12 +77,12 @@ private:
 
     ghoul::opengl::ProgramObject* _programObject = nullptr;
     ghoul::opengl::ProgramObject* _fboProgramObject = nullptr;
-    UniformCache(sunPos, modelTransform, modelViewProjectionTransform, hasBaseMap,
+    UniformCache(sun_pos, modelTransform, modelViewProjectionTransform, hasBaseMap,
         hasHeightMap, heightExaggeration, meridianShift, ambientBrightness,
-        projectionFading, baseTexture, projectionTexture, heightTexture)
-        _mainUniformCache;
+        projectionFading, baseTexture, projectionTexture,
+        heightTexture) _mainUniformCache;
 
-    UniformCache(projectionTexture, projectorMatrix, modelTransform, boresight,
+    UniformCache(projectionTexture, ProjectorMatrix, ModelTransform, boresight,
         radius, segments) _fboUniformCache;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,12 +24,14 @@
 
 #include <modules/multiresvolume/rendering/tfbrickselector.h>
 
+#include <modules/multiresvolume/rendering/brickcover.h>
 #include <modules/multiresvolume/rendering/errorhistogrammanager.h>
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/histogram.h>
 #include <ghoul/misc/assert.h>
 #include <algorithm>
+#include <cmath>
 
 namespace {
     bool compareSplitPoints(const openspace::BrickSelection& a,
@@ -187,9 +189,9 @@ void TfBrickSelector::selectBricks(int timestep, std::vector<int>& bricks) {
                 float childSplitPoints = splitPoints(childBrickIndex, childSplitType);
                 //std::cout << "Splitting spatially" << std::endl;
                 BrickSelection childSelection = bs.splitSpatially(
-                    i % 2,
-                    (i / 2) % 2, // abock: isn't this always 0?
-                    i / 4,
+                    i % 2 != 0,
+                    (i / 2) % 2 != 0, // abock: isn't this always 0?
+                    i / 4 != 0,
                     childBrickIndex,
                     childSplitType,
                     childSplitPoints

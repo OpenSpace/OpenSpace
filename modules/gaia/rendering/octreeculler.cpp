@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,7 @@
 #include <modules/gaia/rendering/octreeculler.h>
 
 #include <ghoul/glm.h>
-#include <ghoul/logging/logmanager.h>
+#include <utility>
 
 namespace openspace {
 
@@ -72,9 +72,10 @@ void OctreeCuller::createNodeBounds(const std::vector<glm::dvec4>& corners,
     // Create a bounding box in clipping space from node boundaries.
     _nodeBounds = globebrowsing::AABB3();
 
-    for (size_t i = 0; i < 8; ++i) {
-        glm::dvec4 cornerClippingSpace = mvp * corners[i];
-        glm::dvec4 ndc = (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
+    for (size_t i = 0; i < 8; i++) {
+        const glm::dvec4 cornerClippingSpace = mvp * corners[i];
+        const glm::dvec4 ndc =
+            (1.f / glm::abs(cornerClippingSpace.w)) * cornerClippingSpace;
         expand(_nodeBounds, glm::dvec3(ndc));
     }
 }

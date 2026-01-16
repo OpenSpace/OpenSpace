@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,15 +27,14 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/ghoul_gl.h>
-
-namespace ghoul::opengl { class ProgramObject; }
+#include <memory>
 
 namespace openspace {
 
@@ -43,7 +42,7 @@ struct LinePoint;
 
 class RenderableFieldlines : public Renderable {
 public:
-    RenderableFieldlines(const ghoul::Dictionary& dictionary);
+    explicit RenderableFieldlines(const ghoul::Dictionary& dictionary);
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -54,10 +53,9 @@ public:
     void update(const UpdateData& data) override;
 
 private:
-    typedef std::vector<LinePoint> Line;
+    using Line = std::vector<LinePoint>;
 
     void initializeDefaultPropertyValues();
-    std::vector<Line> getFieldlinesData();
     void loadSeedPoints();
     void loadSeedPointsFromFile();
     void loadSeedPointsFromTable();

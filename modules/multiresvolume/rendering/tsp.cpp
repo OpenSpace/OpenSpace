@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,17 @@
 
 #include <modules/multiresvolume/rendering/tsp.h>
 
-#include <ghoul/fmt.h>
-#include <ghoul/glm.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/filesystem/cachemanager.h>
+#include <ghoul/format.h>
+#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
-#include <filesystem>
+#include <algorithm>
+#include <cmath>
+#include <list>
 #include <numeric>
 #include <queue>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "TSP";
@@ -40,7 +42,7 @@ namespace {
 
 namespace openspace {
 
-TSP::TSP(const std::string& filename)
+TSP::TSP(const std::filesystem::path& filename)
     : _filename(filename)
 {
     _file.open(_filename, std::ios::in | std::ios::binary);
@@ -67,20 +69,20 @@ bool TSP::load() {
             return false;
         }
 
-        if (false) {
-            if (!calculateSpatialError()) {
-                LERROR("Could not calculate spatial error");
-                return false;
-            }
-            if (!calculateTemporalError()) {
-                LERROR("Could not calculate temporal error");
-                return false;
-            }
-            if (!writeCache()) {
-                LERROR("Could not write cache");
-                return false;
-            }
+#if 0
+        if (!calculateSpatialError()) {
+            LERROR("Could not calculate spatial error");
+            return false;
         }
+        if (!calculateTemporalError()) {
+            LERROR("Could not calculate temporal error");
+            return false;
+        }
+        if (!writeCache()) {
+            LERROR("Could not write cache");
+            return false;
+        }
+#endif
     }
     initalizeSSO();
 
@@ -96,12 +98,12 @@ bool TSP::readHeader() {
 
     _file.read(reinterpret_cast<char*>(&_header), sizeof(Header));
 
-    LDEBUG(fmt::format("Grid type: {}", _header.gridType));
-    LDEBUG(fmt::format(
+    LDEBUG(std::format("Grid type: {}", _header.gridType));
+    LDEBUG(std::format(
         "Brick dimensions: {} {} {}",
         _header.xBrickDim, _header.yBrickDim, _header.zBrickDim
     ));
-    LDEBUG(fmt::format(
+    LDEBUG(std::format(
         "Num bricks: {} {} {}",
         _header.xNumBricks, _header.yNumBricks, _header.zNumBricks
     ));
@@ -118,15 +120,15 @@ bool TSP::readHeader() {
     _numBSTNodes = _header.numTimesteps * 2 - 1;
     _numTotalNodes = _numOTNodes * _numBSTNodes;
 
-    LDEBUG(fmt::format("Num OT levels: {}", _numOTLevels));
-    LDEBUG(fmt::format("Num OT nodes: {}", _numOTNodes));
-    LDEBUG(fmt::format("Num BST levels: {}", _numBSTLevels));
-    LDEBUG(fmt::format("Num BST nodes: {}", _numBSTNodes));
-    LDEBUG(fmt::format("Num total nodes: {}", _numTotalNodes));
+    LDEBUG(std::format("Num OT levels: {}", _numOTLevels));
+    LDEBUG(std::format("Num OT nodes: {}", _numOTNodes));
+    LDEBUG(std::format("Num BST levels: {}", _numBSTLevels));
+    LDEBUG(std::format("Num BST nodes: {}", _numBSTNodes));
+    LDEBUG(std::format("Num total nodes: {}", _numTotalNodes));
 
     // Allocate space for TSP structure
     _data.resize(_numTotalNodes*NUM_DATA);
-    LDEBUG(fmt::format("Data size: {}",  _data.size()));
+    LDEBUG(std::format("Data size: {}",  _data.size()));
 
     return true;
 }
@@ -135,7 +137,7 @@ bool TSP::construct() {
     LDEBUG("Constructing TSP tree");
 
     // Loop over the OTs (one per BST node)
-    for (unsigned int OT = 0; OT < _numBSTNodes; ++OT) {
+    for (unsigned int OT = 0; OT < _numBSTNodes; OT++) {
         // Start at the root of each OT
         unsigned int OTNode = OT * _numOTNodes;
 
@@ -147,7 +149,7 @@ bool TSP::construct() {
         unsigned int OTLevel = 0;
         while (OTLevel < _numOTLevels) {
             unsigned int OTNodesInLevel = static_cast<unsigned int>(pow(8, OTLevel));
-            for (unsigned int i = 0; i<OTNodesInLevel; ++i) {
+            for (unsigned int i = 0; i<OTNodesInLevel; i++) {
                 // Brick index
                 _data[OTNode*NUM_DATA + BRICK_INDEX] = static_cast<int>(OTNode);
 
@@ -279,7 +281,7 @@ bool TSP::calculateSpatialError() {
 
     // First pass: Calculate average color for each brick
     LDEBUG("Calculating spatial error, first pass");
-    for (unsigned int brick = 0; brick<_numTotalNodes; ++brick) {
+    for (unsigned int brick = 0; brick<_numTotalNodes; brick++) {
         // Offset in file
         std::streampos offset = dataPosition() +
                                 static_cast<long long>(brick*numBrickVals*sizeof(float));
@@ -307,7 +309,7 @@ bool TSP::calculateSpatialError() {
     // Second pass: For each brick, compare the covered leaf voxels with
     // the brick average
     LDEBUG("Calculating spatial error, second pass");
-    for (unsigned int brick = 0; brick < _numTotalNodes; ++brick) {
+    for (unsigned int brick = 0; brick < _numTotalNodes; brick++) {
         // Fetch mean intensity
         float brickAvg = averages[brick];
 
@@ -326,7 +328,7 @@ bool TSP::calculateSpatialError() {
         else {
 
             // Calculate "standard deviation" corresponding to leaves
-            for (auto lb = leafBricksCovered.begin(); lb != leafBricksCovered.end(); ++lb)
+            for (auto lb = leafBricksCovered.begin(); lb != leafBricksCovered.end(); lb++)
             {
                 // Read brick
                 std::streampos offset = dataPosition() +
@@ -337,7 +339,7 @@ bool TSP::calculateSpatialError() {
                     static_cast<size_t>(numBrickVals)*sizeof(float));
 
                 // Add to sum
-                for (auto v = buffer.begin(); v != buffer.end(); ++v) {
+                for (auto v = buffer.begin(); v != buffer.end(); v++) {
                     stdDev += pow(*v - brickAvg, 2.f);
                 }
             }
@@ -363,7 +365,7 @@ bool TSP::calculateSpatialError() {
     // "Normalize" errors
     float minNorm = 1e20f;
     float maxNorm = 0.f;
-    for (unsigned int i = 0; i<_numTotalNodes; ++i) {
+    for (unsigned int i = 0; i<_numTotalNodes; i++) {
         //float normalized = (stdDevs[i]-minError)/(maxError-minError);
         if (stdDevs[i] > 0.f) {
             stdDevs[i] = pow(stdDevs[i], 0.5f);
@@ -385,9 +387,9 @@ bool TSP::calculateSpatialError() {
     _maxSpatialError = maxNorm;
     _medianSpatialError = medNorm;
 
-    LDEBUG(fmt::format("Min normalized spatial std dev: {}", minNorm));
-    LDEBUG(fmt::format("Max normalized spatial std dev: {}", maxNorm));
-    LDEBUG(fmt::format("Median normalized spatial std dev: {}", medNorm));
+    LDEBUG(std::format("Min normalized spatial std dev: {}", minNorm));
+    LDEBUG(std::format("Max normalized spatial std dev: {}", maxNorm));
+    LDEBUG(std::format("Median normalized spatial std dev: {}", medNorm));
 
     return true;
 }
@@ -408,7 +410,7 @@ bool TSP::calculateTemporalError() {
     std::vector<float> errors(_numTotalNodes);
 
     // Calculate temporal error for one brick at a time
-    for (unsigned int brick = 0; brick<_numTotalNodes; ++brick) {
+    for (unsigned int brick = 0; brick<_numTotalNodes; brick++) {
         unsigned int numBrickVals = _paddedBrickDim * _paddedBrickDim * _paddedBrickDim;
 
         // Save the individual voxel's average over timesteps. Because the
@@ -441,10 +443,10 @@ bool TSP::calculateTemporalError() {
         else {
             // Calculate standard deviation per voxel, average over brick
             float avgStdDev = 0.f;
-            for (unsigned int voxel = 0; voxel<numBrickVals; ++voxel) {
+            for (unsigned int voxel = 0; voxel<numBrickVals; voxel++) {
                 float stdDev = 0.f;
                 for (auto leaf = coveredBricks.begin();
-                    leaf != coveredBricks.end(); ++leaf)
+                    leaf != coveredBricks.end(); leaf++)
                 {
                     // Sample the leaves at the corresponding voxel position
                     _file.seekg(dataPosition() +
@@ -476,7 +478,7 @@ bool TSP::calculateTemporalError() {
     // Adjust errors using user-provided exponents
     float minNorm = 1e20f;
     float maxNorm = 0.f;
-    for (unsigned int i = 0; i < _numTotalNodes; ++i) {
+    for (unsigned int i = 0; i < _numTotalNodes; i++) {
         if (errors[i] > 0.f) {
             errors[i] = pow(errors[i], 0.25f);
         }
@@ -496,9 +498,9 @@ bool TSP::calculateTemporalError() {
     _maxTemporalError = maxNorm;
     _medianTemporalError = medNorm;
 
-    LDEBUG(fmt::format("Min normalized temporal std dev: {}", minNorm));
-    LDEBUG(fmt::format("Max normalized temporal std dev: {}", maxNorm));
-    LDEBUG(fmt::format("Median normalized temporal std dev: {}", medNorm));
+    LDEBUG(std::format("Min normalized temporal std dev: {}", minNorm));
+    LDEBUG(std::format("Max normalized temporal std dev: {}", maxNorm));
+    LDEBUG(std::format("Median normalized temporal std dev: {}", medNorm));
 
     return true;
 }
@@ -514,7 +516,7 @@ bool TSP::readCache() {
 
     std::ifstream file(cacheFilename, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
-        LWARNING(fmt::format("Failed to open {}", cacheFilename));
+        LWARNING(std::format("Failed to open {}", cacheFilename));
         return false;
     }
 
@@ -530,12 +532,12 @@ bool TSP::readCache() {
     file.close();
 
     LDEBUG("Cached errors:");
-    LDEBUG(fmt::format("Min spatial error: {}", _minSpatialError));
-    LDEBUG(fmt::format("Max spatial error: {}", _maxSpatialError));
-    LDEBUG(fmt::format("Median spatial error: {}", _medianSpatialError));
-    LDEBUG(fmt::format("Min temporal error: {}", _minTemporalError));
-    LDEBUG(fmt::format("Max temporal error: {}", _maxTemporalError));
-    LDEBUG(fmt::format("Median temporal error: {}", _medianTemporalError));
+    LDEBUG(std::format("Min spatial error: {}", _minSpatialError));
+    LDEBUG(std::format("Max spatial error: {}", _maxSpatialError));
+    LDEBUG(std::format("Median spatial error: {}", _medianSpatialError));
+    LDEBUG(std::format("Min temporal error: {}", _minTemporalError));
+    LDEBUG(std::format("Max temporal error: {}", _maxTemporalError));
+    LDEBUG(std::format("Median temporal error: {}", _medianTemporalError));
 
     return true;
 }
@@ -552,10 +554,10 @@ bool TSP::writeCache() {
 
     std::ofstream file(cacheFilename, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
-        LWARNING(fmt::format("Failed to open {}", cacheFilename));
+        LWARNING(std::format("Failed to open {}", cacheFilename));
         return false;
     }
-    LINFO(fmt::format("Writing cache to {}", cacheFilename));
+    LINFO(std::format("Writing cache to {}", cacheFilename));
 
     file.write(reinterpret_cast<char*>(&_minSpatialError), sizeof(float));
     file.write(reinterpret_cast<char*>(&_maxSpatialError), sizeof(float));
@@ -571,11 +573,11 @@ bool TSP::writeCache() {
 }
 
 float TSP::spatialError(unsigned int brickIndex) const {
-    return *reinterpret_cast<const float*>(_data[brickIndex*NUM_DATA + SPATIAL_ERR]);
+    return *reinterpret_cast<const float*>(&_data[brickIndex*NUM_DATA + SPATIAL_ERR]);
 }
 
 float TSP::temporalError(unsigned int brickIndex) const {
-    return *reinterpret_cast<const float*>(_data[brickIndex*NUM_DATA + TEMPORAL_ERR]);
+    return *reinterpret_cast<const float*>(&_data[brickIndex*NUM_DATA + TEMPORAL_ERR]);
 }
 
 unsigned int TSP::firstOctreeChild(unsigned int brickIndex) const {
@@ -649,7 +651,7 @@ std::list<unsigned int> TSP::coveredLeafBricks(unsigned int brickIndex) const {
         }
         else {
             // Queue the eight children
-            for (int i = 0; i<8; ++i) {
+            for (int i = 0; i<8; i++) {
                 queue.push(child + i);
             }
         }

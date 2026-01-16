@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,16 @@
 
 #include <modules/space/spacemodule.h>
 
-#include <modules/space/labelscomponent.h>
 #include <modules/space/rendering/renderableconstellationbounds.h>
 #include <modules/space/rendering/renderableconstellationlines.h>
+#include <modules/space/rendering/renderableeclipsecone.h>
 #include <modules/space/rendering/renderablefluxnodes.h>
 #include <modules/space/rendering/renderablehabitablezone.h>
 #include <modules/space/rendering/renderableorbitalkepler.h>
 #include <modules/space/rendering/renderablerings.h>
 #include <modules/space/rendering/renderablestars.h>
 #include <modules/space/rendering/renderabletravelspeed.h>
+#include <modules/space/timeframe/timeframekernel.h>
 #include <modules/space/translation/keplertranslation.h>
 #include <modules/space/translation/spicetranslation.h>
 #include <modules/space/translation/gptranslation.h>
@@ -40,28 +41,45 @@
 #include <modules/space/rotation/spicerotation.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/scene/timeframe.h>
+#include <openspace/scene/translation.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/util/coordinateconversion.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/spicemanager.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/objectmanager.h>
 #include <ghoul/misc/templatefactory.h>
+#include <optional>
 
 #include "spacemodule_lua.inl"
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo SpiceExceptionInfo = {
         "ShowExceptions",
-        "Show Exceptions",
+        "Show exceptions",
         "If enabled, errors from SPICE will be thrown and show up in the log. If "
-        "disabled, the errors will be ignored silently"
+        "disabled, the errors will be ignored silently.",
+        openspace::properties::Property::Visibility::Developer
     };
+
+    struct [[codegen::Dictionary(SpaceModule)]] Parameters {
+        // [[codegen::verbatim(SpiceExceptionInfo.description)]]
+        std::optional<bool> showExceptions;
+    };
+#include "spacemodule_codegen.cpp"
+
 } // namespace
 
 namespace openspace {
 
 ghoul::opengl::ProgramObjectManager SpaceModule::ProgramObjectManager;
+
+documentation::Documentation SpaceModule::Documentation() {
+    return codegen::doc<Parameters>("module_space");
+}
 
 SpaceModule::SpaceModule()
     : OpenSpaceModule(Name)
@@ -84,12 +102,14 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fRenderable->registerClass<RenderableConstellationLines>(
         "RenderableConstellationLines"
     );
+    fRenderable->registerClass<RenderableEclipseCone>("RenderableEclipseCone");
     fRenderable->registerClass<RenderableFluxNodes>("RenderableFluxNodes");
     fRenderable->registerClass<RenderableHabitableZone>("RenderableHabitableZone");
     fRenderable->registerClass<RenderableRings>("RenderableRings");
     fRenderable->registerClass<RenderableOrbitalKepler>("RenderableOrbitalKepler");
     fRenderable->registerClass<RenderableStars>("RenderableStars");
     fRenderable->registerClass<RenderableTravelSpeed>("RenderableTravelSpeed");
+
 
     ghoul::TemplateFactory<Translation>* fTranslation =
         FactoryManager::ref().factory<Translation>();
@@ -100,15 +120,21 @@ void SpaceModule::internalInitialize(const ghoul::Dictionary& dictionary) {
     fTranslation->registerClass<GPTranslation>("GPTranslation");
     fTranslation->registerClass<HorizonsTranslation>("HorizonsTranslation");
 
+
     ghoul::TemplateFactory<Rotation>* fRotation =
         FactoryManager::ref().factory<Rotation>();
     ghoul_assert(fRotation, "Rotation factory was not created");
 
     fRotation->registerClass<SpiceRotation>("SpiceRotation");
 
-    if (dictionary.hasValue<bool>(SpiceExceptionInfo.identifier)) {
-        _showSpiceExceptions = dictionary.value<bool>(SpiceExceptionInfo.identifier);
-    }
+
+    ghoul::TemplateFactory<TimeFrame>* fTimeFrame =
+        FactoryManager::ref().factory<TimeFrame>();
+    ghoul_assert(fTimeFrame, "Scale factory was not created");
+    fTimeFrame->registerClass<TimeFrameKernel>("TimeFrameKernel");
+
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+    _showSpiceExceptions = p.showExceptions.value_or(_showSpiceExceptions);
 }
 
 void SpaceModule::internalDeinitializeGL() {
@@ -121,6 +147,7 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         KeplerTranslation::Documentation(),
         RenderableConstellationBounds::Documentation(),
         RenderableConstellationLines::Documentation(),
+        RenderableEclipseCone::Documentation(),
         RenderableFluxNodes::Documentation(),
         RenderableHabitableZone::Documentation(),
         RenderableRings::Documentation(),
@@ -129,18 +156,20 @@ std::vector<documentation::Documentation> SpaceModule::documentations() const {
         RenderableTravelSpeed::Documentation(),
         SpiceRotation::Documentation(),
         SpiceTranslation::Documentation(),
-        LabelsComponent::Documentation(),
         GPTranslation::Documentation()
     };
 }
 
 scripting::LuaLibrary SpaceModule::luaLibrary() const {
     return {
-        "space",
-        {
+        .name = "space",
+        .functions = {
             codegen::lua::ConvertFromRaDec,
             codegen::lua::ConvertToRaDec,
             codegen::lua::ReadKeplerFile
+        },
+        .scripts = {
+            absPath("${MODULE_SPACE}/scripts/spice.lua")
         }
     };
 }

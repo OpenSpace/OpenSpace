@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,14 +28,21 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/windowdelegate.h>
+#include <openspace/util/touch.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <TUIO/TuioServer.h>
+#include <Windows.h>
 #include <chrono>
-#include <thread>
-#include <tchar.h>
-#include <tpcshrd.h>
 #include <debugapi.h>
+#include <memory>
+#include <ratio>
+#include <string_view>
+#include <tchar.h>
+#include <thread>
+#include <tpcshrd.h>
+#include <unordered_map>
+#include <utility>
 
 // #define ENABLE_TUIOMESSAGES
 #define ENABLE_DIRECTMSG
@@ -55,14 +62,13 @@ namespace {
 #ifdef ENABLE_TUIOMESSAGES
     TUIO::TuioServer* gTuioServer = nullptr;
     std::unordered_map<UINT, TUIO::TuioCursor*> gCursorMap;
-#endif
+#endif // ENABLE_TUIOMESSAGES
 
     const long long gFrequency = []() -> long long {
         LARGE_INTEGER frequency;
         QueryPerformanceFrequency(&frequency);
         return frequency.QuadPart;
     }();
-
 } // namespace
 
 namespace openspace {
@@ -122,13 +128,13 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 auto points = std::make_unique<TouchInputHolder>(touchInput);
                 gTouchInputsMap.emplace(info.pointerId, std::move(points));
                 global::openSpaceEngine->touchDetectionCallback(touchInput);
-#endif
+#endif // ENABLE_DIRECTMSG
 #ifdef ENABLE_TUIOMESSAGES
                 // Handle new touchpoint
                 gTuioServer->initFrame(TUIO::TuioTime::getSessionTime());
                 gCursorMap[info.pointerId] = gTuioServer->addTuioCursor(xPos, yPos);
                 gTuioServer->commitFrame();
-#endif
+#endif // ENABLE_TUIOMESSAGES
             }
             else if (info.pointerFlags & POINTER_FLAG_UPDATE) {
                 // Handle update of touchpoint
@@ -138,7 +144,7 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 if (points->tryAddInput(touchInput)) {
                     global::openSpaceEngine->touchUpdateCallback(points->latestInput());
                 }
-#endif
+#endif // ENABLE_DIRECTMSG
 #ifdef ENABLE_TUIOMESSAGES
                 TUIO::TuioTime frameTime = TUIO::TuioTime::getSessionTime();
                 if (gCursorMap[info.pointerId]->getTuioTime() == frameTime) {
@@ -147,20 +153,20 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
                 gTuioServer->initFrame(frameTime);
                 gTuioServer->updateTuioCursor(gCursorMap[info.pointerId], xPos, yPos);
                 gTuioServer->commitFrame();
-#endif
+#endif // ENABLE_TUIOMESSAGES
             }
             else if (info.pointerFlags & POINTER_FLAG_UP) {
 #ifdef ENABLE_DIRECTMSG
                 gTouchInputsMap.erase(info.pointerId);
                 global::openSpaceEngine->touchExitCallback(touchInput);
-#endif
+#endif // ENABLE_DIRECTMSG
 #ifdef ENABLE_TUIOMESSAGES
                 // Handle removed touchpoint
                 gTuioServer->initFrame(TUIO::TuioTime::getSessionTime());
                 gTuioServer->removeTuioCursor(gCursorMap[info.pointerId]);
                 gTuioServer->commitFrame();
                 gCursorMap.erase(info.pointerId);
-#endif
+#endif // ENABLE_TUIOMESSAGES
             }
             break;
         }
@@ -219,7 +225,7 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow) {
 #ifdef ENABLE_TUIOMESSAGES
         gTuioServer = new TUIO::TuioServer("localhost", 3333);
         TUIO::TuioTime::initSession();
-#endif
+#endif // ENABLE_TUIOMESSAGES
         gTouchHook = SetWindowsHookExW(
             WH_GETMESSAGE,
             HookCallback,
@@ -254,10 +260,10 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow) {
         }
 
         if (!gTouchHook) {
-            LINFO(fmt::format("Failed to setup WindowsHook for touch input redirection"));
+            LINFO(std::format("Failed to setup WindowsHook for touch input redirection"));
 #ifdef ENABLE_TUIOMESSAGES
             delete gTuioServer;
-#endif
+#endif // ENABLE_TUIOMESSAGES
             gStarted = false;
         }
     }
@@ -270,7 +276,7 @@ Win32TouchHook::~Win32TouchHook() {
         UnhookWindowsHookEx(gMouseHook);
 #ifdef ENABLE_TUIOMESSAGES
         delete gTuioServer;
-#endif
+#endif // ENABLE_TUIOMESSAGES
     }
 }
 

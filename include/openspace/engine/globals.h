@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #ifndef __OPENSPACE_CORE___GLOBALS___H__
 #define __OPENSPACE_CORE___GLOBALS___H__
 
-#include <functional>
 #include <memory>
 #include <vector>
 
@@ -33,8 +32,25 @@ namespace ghoul::fontrendering { class FontManager; }
 
 namespace openspace {
 
+namespace interaction {
+    struct JoystickInputStates;
+    struct WebsocketInputStates;
+    class ActionManager;
+    class InteractionMonitor;
+    class KeybindingManager;
+    class KeyframeRecordingHandler;
+    class NavigationHandler;
+    class SessionRecordingHandler;
+} // namespace interaction
+namespace properties { class PropertyOwner; }
+namespace scripting {
+    class ScriptEngine;
+    class ScriptScheduler;
+} // namespace scripting
+struct Configuration;
 class Dashboard;
 class DeferredcasterManager;
+class DownloadEventEngine;
 class DownloadManager;
 class EventEngine;
 class LuaConsole;
@@ -43,6 +59,7 @@ class MissionManager;
 class ModuleEngine;
 class OpenSpaceEngine;
 class ParallelPeer;
+class Profile;
 class RaycasterManager;
 class RenderEngine;
 class ScreenSpaceRenderable;
@@ -50,29 +67,13 @@ class SyncEngine;
 class TimeManager;
 class VersionChecker;
 struct WindowDelegate;
-namespace configuration { struct Configuration; }
-namespace interaction {
-    struct JoystickInputStates;
-    struct WebsocketInputStates;
-    class ActionManager;
-    class InteractionMonitor;
-    class KeybindingManager;
-    class NavigationHandler;
-    class SessionRecording;
-    class ShortcutManager;
-} // namespace interaction
-namespace properties { class PropertyOwner; }
-namespace scripting {
-    class ScriptEngine;
-    class ScriptScheduler;
-} // namespace scripting
-class Profile;
 
 namespace global {
 
 inline ghoul::fontrendering::FontManager* fontManager;
 inline Dashboard* dashboard;
 inline DeferredcasterManager* deferredcasterManager;
+inline DownloadEventEngine* downloadEventEngine;
 inline DownloadManager* downloadManager;
 inline EventEngine* eventEngine;
 inline LuaConsole* luaConsole;
@@ -88,15 +89,15 @@ inline SyncEngine* syncEngine;
 inline TimeManager* timeManager;
 inline VersionChecker* versionChecker;
 inline WindowDelegate* windowDelegate;
-inline configuration::Configuration* configuration;
+inline Configuration* configuration;
 inline interaction::ActionManager* actionManager;
 inline interaction::InteractionMonitor* interactionMonitor;
 inline interaction::JoystickInputStates* joystickInputStates;
 inline interaction::WebsocketInputStates* websocketInputStates;
 inline interaction::KeybindingManager* keybindingManager;
+inline interaction::KeyframeRecordingHandler* keyframeRecording;
 inline interaction::NavigationHandler* navigationHandler;
-inline interaction::SessionRecording* sessionRecording;
-inline interaction::ShortcutManager* shortcutManager;
+inline interaction::SessionRecordingHandler* sessionRecordingHandler;
 inline properties::PropertyOwner* rootPropertyOwner;
 inline properties::PropertyOwner* screenSpaceRootPropertyOwner;
 inline properties::PropertyOwner* userPropertyOwner;

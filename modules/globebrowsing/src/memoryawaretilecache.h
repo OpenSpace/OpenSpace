@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,18 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_TILE_CACHE___H__
-#define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_TILE_CACHE___H__
+#ifndef __OPENSPACE_MODULE_GLOBEBROWSING___MEMORYAWARETILECACHE___H__
+#define __OPENSPACE_MODULE_GLOBEBROWSING___MEMORYAWARETILECACHE___H__
 
 #include <modules/globebrowsing/src/lrucache.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/triggerproperty.h>
+#include <ghoul/opengl/texture.h>
+#include <cstdint>
 #include <memory>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace openspace::globebrowsing {
@@ -57,7 +59,7 @@ struct ProviderTileHasher {
      * Creates a hash which can be used as key in hash maps.
      * First set the bits to be unique for all tiles.
      * +-------+------------+-------+------------+
-     * | USAGE | BIT RANGE  | #BITS | MAX VALUE  |
+     * | USAGE | BIT RANGE  |  BITS | MAX VALUE  |
      * +-------+------------+-------+------------+
      * | level |   0 -  5   |   5   |         31 |
      * |     x |   5 - 35   |  30   | 1073741824 |
@@ -107,8 +109,8 @@ private:
     class TextureContainer {
     public:
         /**
-         * \param initData is the description of the texture type.
-         * \param numTextures is the number of textures to allocate.
+         * \param initData is the description of the texture type
+         * \param numTextures is the number of textures to allocate
          */
         TextureContainer(TileTextureInitData initData, size_t numTextures);
 
@@ -167,4 +169,4 @@ private:
 
 } // namespace openspace::globebrowsing::cache
 
-#endif // __OPENSPACE_MODULE_GLOBEBROWSING___MEMORY_AWARE_TILE_CACHE___H__
+#endif // __OPENSPACE_MODULE_GLOBEBROWSING___MEMORYAWARETILECACHE___H__

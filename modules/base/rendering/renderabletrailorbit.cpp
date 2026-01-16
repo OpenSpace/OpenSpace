@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,19 +25,17 @@
 #include <modules/base/rendering/renderabletrailorbit.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/engine/globals.h>
-#include <openspace/events/event.h>
-#include <openspace/events/eventengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/scene/scene.h>
-
-#include <ghoul/opengl/programobject.h>
+#include <openspace/util/time.h>
+#include <ghoul/misc/dictionary.h>
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <limits>
 #include <numeric>
-#include <optional>
 
 // This class is using a VBO ring buffer + a constantly updated point as follows:
 // Structure of the array with a _resolution of 16. FF denotes the floating position that
@@ -93,7 +91,8 @@ namespace {
         "The objects period, i.e. the length of its orbit around the parent object given "
         "in (Earth) days. In the case of Earth, this would be a sidereal year "
         "(=365.242 days). If this values is specified as multiples of the period, it is "
-        "possible to show the effects of precession"
+        "possible to show the effects of precession.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
@@ -102,14 +101,8 @@ namespace {
         "The number of samples along the orbit. This determines the resolution of the "
         "trail; the tradeoff being that a higher resolution is able to resolve more "
         "detail, but will take more resources while rendering, too. The higher, the "
-        "smoother the trail, but also more memory will be used"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
-       "RenderableType",
-       "RenderableType",
-       "This value specifies if the orbit should be rendered in the Background,"
-       "Opaque, Transparent, or Overlay rendering step. Default is Transparent"
+        "smoother the trail, but also more memory will be used.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {
@@ -118,17 +111,6 @@ namespace {
 
         // [[codegen::verbatim(ResolutionInfo.description)]]
         int resolution;
-
-        enum class [[codegen::map(openspace::Renderable::RenderBin)]] RenderableType {
-            Background,
-            Opaque,
-            PreDeferredTransparent,
-            PostDeferredTransparent,
-            Overlay
-        };
-
-        // [[codegen::verbatim(RenderableTypeInfo.description)]]
-        std::optional<RenderableType> renderableType;
     };
 #include "renderabletrailorbit_codegen.cpp"
 } // namespace
@@ -164,13 +146,6 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
 
     // We store the vertices with (excluding the wrapping) decending temporal order
     _primaryRenderInformation.sorting = RenderInformation::VertexSorting::NewestFirst;
-
-    if (p.renderableType.has_value()) {
-        setRenderBin(codegen::map<Renderable::RenderBin>(*p.renderableType));
-    }
-    else {
-        setRenderBin(Renderable::RenderBin::Overlay);
-    }
 }
 
 void RenderableTrailOrbit::initializeGL() {
@@ -208,11 +183,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
 
     // 2
     // Write the current location into the floating position
-    const glm::vec3 p = _translation->position({
-        {},
-        data.time,
-        Time(0.0)
-    });
+    const glm::vec3 p = translationPosition(data.time);
     _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
     glBindVertexArray(_primaryRenderInformation._vaoID);
@@ -225,8 +196,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             // floating value
             glBufferSubData(
                 GL_ARRAY_BUFFER,
-                _primaryRenderInformation.first * sizeof(TrailVBOLayout),
-                sizeof(TrailVBOLayout),
+                _primaryRenderInformation.first * sizeof(TrailVBOLayout<float>),
+                sizeof(TrailVBOLayout<float>),
                 _vertexArray.data() + _primaryRenderInformation.first
             );
         }
@@ -238,7 +209,7 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             // array
             glBufferData(
                 GL_ARRAY_BUFFER,
-                _vertexArray.size() * sizeof(TrailVBOLayout),
+                _vertexArray.size() * sizeof(TrailVBOLayout<float>),
                 _vertexArray.data(),
                 GL_STREAM_DRAW
             );
@@ -265,8 +236,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             auto upload = [this](int begin, int length) {
                 glBufferSubData(
                     GL_ARRAY_BUFFER,
-                    begin * sizeof(TrailVBOLayout),
-                    sizeof(TrailVBOLayout) * length,
+                    begin * sizeof(TrailVBOLayout<float>),
+                    sizeof(TrailVBOLayout<float>) * length,
                     _vertexArray.data() + begin
                 );
             };
@@ -332,24 +303,6 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindVertexArray(0);
-
-    // Updating bounding sphere
-    glm::vec3 maxVertex(-std::numeric_limits<float>::max());
-    glm::vec3 minVertex(std::numeric_limits<float>::max());
-
-    auto setMax = [&maxVertex, &minVertex](const TrailVBOLayout& vertexData) {
-        maxVertex.x = std::max(maxVertex.x, vertexData.x);
-        maxVertex.y = std::max(maxVertex.y, vertexData.y);
-        maxVertex.z = std::max(maxVertex.z, vertexData.z);
-
-        minVertex.x = std::min(minVertex.x, vertexData.x);
-        minVertex.y = std::min(minVertex.y, vertexData.y);
-        minVertex.z = std::min(minVertex.z, vertexData.z);
-    };
-
-    std::for_each(_vertexArray.begin(), _vertexArray.end(), setMax);
-
-    setBoundingSphere(glm::distance(maxVertex, minVertex) / 2.f);
 }
 
 RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
@@ -368,7 +321,7 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     }
 
     using namespace std::chrono;
-    double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
+    const double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
     const double secondsPerPoint = periodSeconds / (_resolution - 1);
     // How much time has passed since the last permanent point
     const double delta = data.time.j2000Seconds() - _lastPointTime;
@@ -392,25 +345,21 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         }
 
         // See how many points we need to drop
-        const int nNewPoints = static_cast<int>(floor(delta / secondsPerPoint));
+        const uint64_t nNewPoints = static_cast<uint64_t>(floor(delta / secondsPerPoint));
 
         // If we would need to generate more new points than there are total points in the
         // array, it is faster to regenerate the entire array
-        if (nNewPoints >= _resolution) {
+        if (nNewPoints >= static_cast<uint64_t>(_resolution)) {
             fullSweep(data.time.j2000Seconds());
             return { false, true, UpdateReport::All };
         }
 
-        for (int i = 0; i < nNewPoints; ++i) {
+        for (uint64_t i = 0; i < nNewPoints; i++) {
             _lastPointTime += secondsPerPoint;
 
             // Get the new permanent point and write it into the (previously) floating
             // location
-            const glm::vec3 p = _translation->position({
-                {},
-                Time(_lastPointTime),
-                Time(0.0)
-            });
+            const glm::vec3 p = translationPosition(Time(_lastPointTime));
             _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
             // Move the current pointer back one step to be used as the new floating
@@ -426,12 +375,13 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // future
         _firstPointTime += nNewPoints * secondsPerPoint;
 
-        return { false, true, nNewPoints };
+        return { false, true, static_cast<int>(nNewPoints) };
     }
     else {
         // See how many new points needs to be generated. Delta is negative, so we need
         // to invert the ratio
-        const int nNewPoints = -(static_cast<int>(floor(delta / secondsPerPoint)));
+        const int nNewPoints =
+            -(static_cast<int>(floor(delta / secondsPerPoint)));
 
         // If we would need to generate more new points than there are total points in the
         // array, it is faster to regenerate the entire array
@@ -440,16 +390,12 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             return { false, true, UpdateReport::All };
         }
 
-        for (int i = 0; i < nNewPoints; ++i) {
+        for (int i = 0; i < nNewPoints; i++) {
             _firstPointTime -= secondsPerPoint;
 
             // Get the new permanent point and write it into the (previously) floating
             // location
-            const glm::vec3 p = _translation->position({
-                {},
-                Time(_firstPointTime),
-                Time(0.0)
-            });
+            const glm::vec3 p = translationPosition(Time(_firstPointTime));
             _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
             // if we are on the upper bounds of the array, we start at 0
@@ -460,14 +406,14 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
             else {
                 // Move the current pointer fowards one step  to be used as the new
                 // floating
-                ++_primaryRenderInformation.first;
+                _primaryRenderInformation.first++;
             }
         }
 
         // The previously youngest point has become nNewPoints steps older
         _lastPointTime -= nNewPoints * secondsPerPoint;
 
-        return { false, true, -nNewPoints };
+        return { false, true, static_cast<int>(-nNewPoints) };
     }
 }
 
@@ -491,8 +437,8 @@ void RenderableTrailOrbit::fullSweep(double time) {
     const double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
     const double secondsPerPoint = periodSeconds / (_resolution - 1);
     // starting at 1 because the first position is a floating current one
-    for (int i = 1; i < _resolution; ++i) {
-        const glm::vec3 p = _translation->position({ {}, Time(time), Time(0.0) });
+    for (int i = 1; i < _resolution; i++) {
+        const glm::vec3 p = translationPosition(Time(time));
         _vertexArray[i] = { p.x, p.y, p.z };
 
         time -= secondsPerPoint;
@@ -502,6 +448,25 @@ void RenderableTrailOrbit::fullSweep(double time) {
     _primaryRenderInformation.count = _resolution;
 
     _firstPointTime = time + secondsPerPoint;
+
+    // Updating bounding sphere
+    glm::vec3 maxVertex(-std::numeric_limits<float>::max());
+    glm::vec3 minVertex(std::numeric_limits<float>::max());
+
+    auto setMax = [&maxVertex, &minVertex](const TrailVBOLayout<float>& vertexData) {
+        maxVertex.x = std::max(maxVertex.x, vertexData.x);
+        maxVertex.y = std::max(maxVertex.y, vertexData.y);
+        maxVertex.z = std::max(maxVertex.z, vertexData.z);
+
+        minVertex.x = std::min(minVertex.x, vertexData.x);
+        minVertex.y = std::min(minVertex.y, vertexData.y);
+        minVertex.z = std::min(minVertex.z, vertexData.z);
+    };
+
+    std::for_each(_vertexArray.begin(), _vertexArray.end(), setMax);
+
+    setBoundingSphere(glm::distance(maxVertex, minVertex) / 2.f);
+
     _needsFullSweep = false;
 }
 

@@ -1,0 +1,28 @@
+{
+  "profile": "missions/juice",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Juice",
+        "position": [
+          -7.98333740234375,
+          -17.86676025390625,
+          20.4049072265625
+        ],
+        "pitch": 0.0019337177001225744,
+        "referenceFrame": "Root",
+        "up": [
+          0.1299970343247075,
+          0.720201304325268,
+          0.681476963891637
+        ],
+        "yaw": 0.0064882842013934405,
+        "timestamp": "2033 AUG 08 07:44:47"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

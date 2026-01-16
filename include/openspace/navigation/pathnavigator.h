@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,20 +29,18 @@
 
 #include <openspace/navigation/path.h>
 #include <openspace/properties/list/stringlistproperty.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/glm.h>
 #include <memory>
 
 namespace openspace {
+    namespace scripting { struct LuaLibrary; }
     class Camera;
     struct CameraPose;
     class SceneGraphNode;
 } // namespace openspace
-
-namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 
@@ -64,6 +62,9 @@ public:
     bool hasCurrentPath() const;
     bool hasFinished() const;
     bool isPlayingPath() const;
+    bool isPaused() const;
+
+    float estimatedRemainingTimeInPath() const;
 
     void updateCamera(double deltaTime);
     void createPath(const ghoul::Dictionary& dictionary);
@@ -78,30 +79,33 @@ public:
     double minValidBoundingSphere() const;
     double findValidBoundingSphere(const SceneGraphNode* node) const;
 
+    double defaultArrivalHeight(const std::string& sgnIdentifier) const;
+
     const std::vector<SceneGraphNode*>& relevantNodes();
 
     /**
-    * Find a node close to the given node. Closeness is determined by a factor times
-    * the bounding sphere of the object
-    * \return pointer to the SGN if one was found, nullptr otherwise
-    */
+     * Find a node close to the given node. Closeness is determined by a factor times
+     * the bounding sphere of the object.
+     *
+     * \return Pointer to the SGN if one was found, nullptr otherwise
+     */
     static SceneGraphNode* findNodeNearTarget(const SceneGraphNode* node);
 
     /**
-    * \return The Lua library that contains all Lua functions available to affect the
-    * path navigation
-    */
+     * \return The Lua library that contains all Lua functions available to affect the
+     *         path navigation
+     */
     static scripting::LuaLibrary luaLibrary();
 
 private:
     void handlePathEnd();
 
     /**
-    * Populate list of nodes that are relevant for collision checks, etc
-    */
+     * Populate list of nodes that are relevant for collision checks, etc.
+     */
     void findRelevantNodes();
 
-    void removeRollRotation(CameraPose& pose, double deltaTime);
+    void removeRollRotation(CameraPose& pose) const;
 
     std::unique_ptr<Path> _currentPath = nullptr;
     bool _isPlaying = false;

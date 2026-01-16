@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,23 +27,17 @@
 
 #include <openspace/rendering/dashboardtextitem.h>
 
-#include <openspace/properties/optionproperty.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class DashboardItemGlobeLocation : public DashboardTextItem {
 public:
-    DashboardItemGlobeLocation(const ghoul::Dictionary& dictionary);
+    explicit DashboardItemGlobeLocation(const ghoul::Dictionary& dictionary);
     ~DashboardItemGlobeLocation() override = default;
 
-    void render(glm::vec2& penPosition) override;
-
-    glm::vec2 size() const override;
+    void update() override;
 
     static documentation::Documentation Documentation();
 
@@ -57,7 +51,7 @@ private:
     properties::IntProperty _significantDigits;
 
     std::string _formatString;
-    std::vector<char> _buffer;
+    std::vector<char> _localBuffer;
 };
 
 } // namespace openspace

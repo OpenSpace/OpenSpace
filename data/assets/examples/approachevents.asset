@@ -1,9 +1,19 @@
-local sun = asset.require("scene/solarsystem/sun/sun")
+local sun = asset.require("scene/solarsystem/sun/transforms")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local generic_action = {
+
+
+local model = asset.resource({
+  Name = "Animated Box",
+  Type = "HttpSynchronization",
+  Identifier = "animated_box",
+  Version = 1
+})
+
+
+local GenericAction = {
   Identifier = "os.example.generic",
-  Name = "Generic Example",
+  Name = "Generic example",
   Command = [[
     openspace.printInfo("Node: " .. args.Node)
     openspace.printInfo("Transition: " .. args.Transition)
@@ -13,14 +23,7 @@ local generic_action = {
   IsLocal = true
 }
 
-local model = asset.syncedResource({
-  Name = "Animated Box",
-  Type = "HttpSynchronization",
-  Identifier = "animated_box",
-  Version = 1
-})
-
-local obj = {
+local Model = {
   Identifier = "ExampleEventModel",
   Parent = transforms.EarthCenter.Identifier,
   Transform = {
@@ -32,31 +35,31 @@ local obj = {
   Renderable = {
     Type = "RenderableModel",
     GeometryFile = model .. "BoxAnimated.glb",
-    ModelScale = 1.0,
+    ModelScale = 1000,
     LightSources = {
       sun.LightSource
-    },
-    PerformShading = true,
-    DisableFaceCulling = true
+    }
   },
-  InteractionSphere = 1000.0,
+  InteractionSphere = 900,
+  ApproachFactor = 50.0,
+  ReachFactor = 5.0,
   OnApproach = { "os.example.generic" },
   OnReach = { "os.example.generic" },
   OnRecede = { "os.example.generic" },
   OnExit = { "os.example.generic" },
   GUI = {
-    Name = "Example Event Model",
-    Path = "/Example",
-    Description = "",
+    Name = "Event Model",
+    Path = "/Examples"
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.action.registerAction(generic_action)
-  openspace.addSceneGraphNode(obj)
+  openspace.action.registerAction(GenericAction)
+  openspace.addSceneGraphNode(Model)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(obj)
-  openspace.action.removeAction(generic_action)
+  openspace.removeSceneGraphNode(Model)
+  openspace.action.removeAction(GenericAction)
 end)

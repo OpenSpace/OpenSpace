@@ -1,0 +1,30 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/screenspacerenderable/screenspacebrowser/browser.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "ScreenSpace.ScreenSpaceBrowser_Example.Scale",
+        "value": 1.0
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "ScreenSpace.ScreenSpaceBrowser_Example.Url",
+        "value": "https://example.org"
+      }
+    },
+    {
+      "type": "wait",
+      "value": 10.0
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

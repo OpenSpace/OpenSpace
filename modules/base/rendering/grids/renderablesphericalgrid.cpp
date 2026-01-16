@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,65 +25,93 @@
 #include <modules/base/rendering/grids/renderablesphericalgrid.h>
 
 #include <modules/base/basemodule.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <algorithm>
+#include <cmath>
 #include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered"
+        "The color of the grid lines.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
-        "Segments",
-        "Number of Segments",
-        "This value specifies the number of segments that are used to render the "
-        "surrounding sphere"
+    constexpr openspace::properties::Property::PropertyInfo LongSegmentsInfo = {
+        "LongSegments",
+        "Number of longitudinal segments",
+        "The number of longitudinal segments the sphere is split into. Determines the "
+        "resolution of the rendered sphere in a left/right direction when looking "
+        "straight at the equator. Should be an even value (if an odd value is provided, "
+        "the value will be set to the new value minus one). If the `Segments` value is "
+        "provided as well, it will have precedence over this value",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo LatSegmentsInfo = {
+        "LatSegments",
+        "Number of latitudinal segments",
+        "The number of latitudinal segments the sphere is split into. Determines the "
+        "resolution of the rendered sphere in a up/down direction when looking "
+        "straight at the equator. Should be an even value (if an odd value is provided, "
+        "the value will be set to the new value minus one). If the `Segments` value is "
+        "provided as well, it will have precedence over this value",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
-        "This value specifies the line width of the spherical grid"
+        "Line width",
+        "The width of the grid lines. The larger number, the thicker the lines.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
-        "DrawLabels",
-        "Draw Labels",
-        "Determines whether labels should be drawn or hidden"
-    };
-
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
-    {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the grid"
+        "The labels for the grid."
     };
 
+    // This `Renderable` creates a grid in the shape of a sphere. Note that the sphere
+    // will always be given a radius of one meter. To change its size, use a `Scale`
+    // transform, such as the [StaticScale](#base_transform_scale_static).
+    //
+    // The grid may be split up into equal segments in both directions using the
+    // `Segments` parameter, or different number of segments in the latitudal and
+    // longtudal direction using the `LatSegments` and `LongSegments` parameters.
     struct [[codegen::Dictionary(RenderableSphericalGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
 
-        // [[codegen::verbatim(SegmentsInfo.description)]]
+        // [[codegen::verbatim(LongSegmentsInfo.description)]]
+        std::optional<int> longSegments;
+
+        // [[codegen::verbatim(LatSegmentsInfo.description)]]
+        std::optional<int> latSegments;
+
+        // The number of segments the sphere is split into. Determines the resolution
+        // of the rendered sphere. Should be an even value (if an odd value is provided,
+        // the value will be set to the new value minus one). Setting this value is equal
+        // to setting `LongSegments` and `LatSegments` to the same value. If this value is
+        // specified, it will overwrite the values provided in `LongSegments` and
+        //`LatSegments`.
         std::optional<int> segments;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth;
 
-        // [[codegen::verbatim(DrawLabelInfo.description)]]
-        std::optional<bool> drawLabels;
-
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("space_labelscomponent")]];
+            [[codegen::reference("labelscomponent")]];
     };
 #include "renderablesphericalgrid_codegen.cpp"
 } // namespace
@@ -98,27 +126,30 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     : Renderable(dictionary)
     , _gridProgram(nullptr)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , _segments(SegmentsInfo, 36, 4, 200)
+    , _longSegments(LongSegmentsInfo, 36, 4, 200)
+    , _latSegments(LatSegmentsInfo, 19, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
-    , _drawLabels(DrawLabelInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
-    _segments = p.segments.value_or(_segments);
-    _segments.onChange([&]() {
-        if (_segments.value() % 2 == 1) {
-            _segments = _segments - 1;
-        }
+    auto gridDirty = [this]() {
+        _longSegments = std::max<int>(_longSegments, 3);
+        _latSegments = std::max<int>(_latSegments, 3);
         _gridIsDirty = true;
-    });
-    addProperty(_segments);
+    };
+    _longSegments = p.segments.value_or(p.longSegments.value_or(_longSegments));
+    _longSegments.onChange(gridDirty);
+    addProperty(_longSegments);
+
+    _latSegments = p.segments.value_or(p.latSegments.value_or(_latSegments));
+    _latSegments.onChange(gridDirty);
+    addProperty(_latSegments);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
@@ -127,23 +158,21 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     setBoundingSphere(1.0);
 
     if (p.labels.has_value()) {
-        _drawLabels = p.drawLabels.value_or(_drawLabels);
-        addProperty(_drawLabels);
-
         _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
+        // Fading of the labels should also depend on the fading of the renderable
+        _labels->setParentFadeable(this);
     }
 }
 
 bool RenderableSphericalGrid::isReady() const {
-    return _hasLabels ? _gridProgram && _labels->isReady() : _gridProgram != nullptr;
+    return _gridProgram && (_hasLabels ? _labels->isReady() : true);
 }
 
 void RenderableSphericalGrid::initialize() {
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 
@@ -161,11 +190,9 @@ void RenderableSphericalGrid::initializeGL() {
 
     glGenVertexArrays(1, &_vaoID);
     glGenBuffers(1, &_vBufferID);
-    glGenBuffers(1, &_iBufferID);
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 }
@@ -177,9 +204,6 @@ void RenderableSphericalGrid::deinitializeGL() {
     glDeleteBuffers(1, &_vBufferID);
     _vBufferID = 0;
 
-    glDeleteBuffers(1, &_iBufferID);
-    _iBufferID = 0;
-
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
         [](ghoul::opengl::ProgramObject* p) {
@@ -189,39 +213,46 @@ void RenderableSphericalGrid::deinitializeGL() {
     _gridProgram = nullptr;
 }
 
-void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
+void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->activate();
 
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    const glm::dmat4 modelViewTransform =
-        data.camera.combinedViewMatrix() * modelTransform;
-    const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
-
-    const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewTransform;
+    auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
+        calcAllTransforms(data);
 
     _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform("MVPTransform", modelViewProjectionMatrix);
+    _gridProgram->setUniform("MVPTransform", modelViewProjectionTransform);
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
     // Change GL state:
 #ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else
+#else // ^^^^ !__APPLE__ // __APPLE__ vvvv
     glLineWidth(1.f);
-#endif
+#endif // __APPLE__
+
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
-    glDepthMask(false);
 
     glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-    glDrawElements(_mode, _isize, GL_UNSIGNED_INT, nullptr);
+
+    // Render latitude rings
+    glMultiDrawArrays(
+        GL_LINE_LOOP,
+        _latitudeRenderInfo.first.data(),
+        _latitudeRenderInfo.count.data(),
+        _latSegments
+    );
+
+    // Render longitude segments
+    glMultiDrawArrays(
+        GL_LINE_STRIP,
+        _longitudeRenderInfo.first.data(),
+        _longitudeRenderInfo.count.data(),
+        _longSegments
+    );
+
     glBindVertexArray(0);
 
     _gridProgram->deactivate();
@@ -232,7 +263,7 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
     global::renderEngine->openglStateCache().resetDepthState();
 
     // Draw labels
-    if (_drawLabels && _hasLabels) {
+    if (_hasLabels && _labels->enabled()) {
         const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
         const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
         glm::vec3 right = glm::cross(viewDirection, lookup);
@@ -240,105 +271,100 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&){
 
         const glm::dmat4 worldToModelTransform = glm::inverse(modelTransform);
         glm::vec3 orthoRight = glm::normalize(
-            glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+            glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
         );
 
-        if (orthoRight == glm::vec3(0.0)) {
-            glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+        if (orthoRight == glm::vec3(0.f)) {
+            const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
             right = glm::cross(viewDirection, otherVector);
             orthoRight = glm::normalize(
-                glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
+                glm::vec3(worldToModelTransform * glm::vec4(right, 0.f))
             );
         }
         const glm::vec3 orthoUp = glm::normalize(
             glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
         );
-        _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+        _labels->render(data, modelViewProjectionTransform, orthoRight, orthoUp);
     }
+
+    // Reset
+    global::renderEngine->openglStateCache().resetBlendState();
+    global::renderEngine->openglStateCache().resetLineState();
+    global::renderEngine->openglStateCache().resetDepthState();
 }
 
 void RenderableSphericalGrid::update(const UpdateData&) {
-    if (_gridIsDirty) {
-        _isize = 6 * _segments * _segments;
-        _vsize = (_segments + 1) * (_segments + 1);
-        _varray.resize(_vsize);
-        Vertex v = { 0.f, 0.f, 0.f };
-        std::fill(_varray.begin(), _varray.end(), v);
-        _iarray.resize(_isize);
-        std::fill(_iarray.begin(), _iarray.end(), 0);
-
-        int nr = 0;
-        const float fsegments = static_cast<float>(_segments);
-
-        for (int nSegment = 0; nSegment <= _segments; ++nSegment) {
-            // define an extra vertex around the y-axis due to texture mapping
-            for (int j = 0; j <= _segments; j++) {
-                const float fi = static_cast<float>(nSegment);
-                const float fj = static_cast<float>(j);
-
-                // inclination angle (north to south)
-                const float theta = fi * glm::pi<float>() / fsegments * 2.f;  // 0 -> PI
-
-                // azimuth angle (east to west)
-                const float phi = fj * glm::pi<float>() * 2.0f / fsegments;  // 0 -> 2*PI
-
-                const float x = sin(phi) * sin(theta);  //
-                const float y = cos(theta);             // up
-                const float z = cos(phi) * sin(theta);  //
-
-                glm::vec3 normal = glm::vec3(x, y, z);
-                if (!(x == 0.f && y == 0.f && z == 0.f)) {
-                    normal = glm::normalize(normal);
-                }
-
-                glm::vec4 tmp(x, y, z, 1.f);
-                glm::mat4 rot = glm::rotate(
-                    glm::mat4(1.f),
-                    glm::half_pi<float>(),
-                    glm::vec3(1.f, 0.f, 0.f)
-                );
-                tmp = glm::vec4(glm::dmat4(rot) * glm::dvec4(tmp));
-
-                for (int i = 0; i < 3; i++) {
-                    _varray[nr].location[i] = tmp[i];
-                }
-                ++nr;
-            }
-        }
-        nr = 0;
-        // define indices for all triangles
-        for (int i = 1; i <= _segments; ++i) {
-            for (int j = 0; j < _segments; ++j) {
-                const int t = _segments + 1;
-                _iarray[nr] = t * (i - 1) + j + 0; ++nr;
-                _iarray[nr] = t * (i + 0) + j + 0; ++nr;
-                _iarray[nr] = t * (i + 0) + j + 1; ++nr;
-                _iarray[nr] = t * (i - 1) + j + 1; ++nr;
-                _iarray[nr] = t * (i - 1) + j + 0; ++nr;
-            }
-        }
-
-        glBindVertexArray(_vaoID);
-        glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            _vsize * sizeof(Vertex),
-            _varray.data(),
-            GL_STATIC_DRAW
-        );
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-        glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER,
-            _isize * sizeof(int),
-            _iarray.data(),
-            GL_STATIC_DRAW
-        );
-
-        _gridIsDirty = false;
+    if (!_gridIsDirty) [[likely]] {
+        return;
     }
+
+    // Instead of using an element buffer which didn't save that much memory and just
+    // caused some indirections, we are creating two sets of vertices in the same vertex
+    // buffer in this function. First all of the vertices for the longitudinal rings, one
+    // ring after another. After that it is all the vertices for the latitudinal arcs, one
+    // arc after another
+
+    // * 2 since we store all vertices twice
+    const unsigned int vertSize = _longSegments * _latSegments * 2;
+    std::vector<Vertex> vert;
+    vert.reserve(vertSize);
+    for (int lat = 0; lat < _latSegments; lat++) {
+        for (int lng = 0; lng < _longSegments; lng++) {
+            // inclination angle (north to south)
+            const float theta =
+                static_cast<float>(lat) / static_cast<float>(_latSegments - 1) *
+                glm::pi<float>(); // 0 -> PI
+
+            // azimuth angle (east to west)
+            // Dividing by one segment more as the points for 0 and 2*pi are identical
+            const float phi =
+                static_cast<float>(lng) / static_cast<float>(_longSegments) *
+                2.f * glm::pi<float>();  // 0 -> 2*PI
+
+            const float x = std::sin(phi) * std::sin(theta);  //
+            const float y = std::cos(phi) * std::sin(theta);  //
+            const float z = std::cos(theta);                  // up
+            vert.push_back({ x, y, z });
+        }
+    }
+
+    // Create the render info struct to be able to render the longitude rings using
+    // glMultiDrawArrays in the render function
+    _latitudeRenderInfo.first.clear();
+    _latitudeRenderInfo.count.clear();
+    for (int i = 0; i < _latSegments; i++) {
+        _latitudeRenderInfo.first.push_back(i * _longSegments);
+        _latitudeRenderInfo.count.push_back(_longSegments);
+    }
+
+    // Create the duplicate vertex entries to efficiently render the latitude arcs. We
+    // take every vertex in a longitude segment and connect it to the same index along all
+    // latitude arcs
+    for (int lng = 0; lng < _longSegments; lng++) {
+        for (int lat = 0; lat < _latSegments; lat++) {
+            Vertex v = vert[lat * _longSegments + lng];
+            vert.push_back(v);
+        }
+    }
+
+    // Create the render info struct to be able to render the latitude arcs using
+    // glMultiDrawArrays in the render function. The `base` is the offset to make this
+    // render call use the vertices that are in the second "block" of the VBO
+    _longitudeRenderInfo.first.clear();
+    _longitudeRenderInfo.count.clear();
+    const int base = _longSegments * _latSegments;
+    for (int i = 0; i < _longSegments; i++) {
+        _longitudeRenderInfo.first.push_back(i * _latSegments + base);
+        _longitudeRenderInfo.count.push_back(_latSegments);
+    }
+
+
+    glBindVertexArray(_vaoID);
+    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
+    glBufferData(GL_ARRAY_BUFFER, vertSize * sizeof(Vertex), vert.data(), GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+
+    _gridIsDirty = false;
 }
 
 } // namespace openspace

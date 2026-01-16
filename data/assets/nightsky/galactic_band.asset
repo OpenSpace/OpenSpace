@@ -1,0 +1,92 @@
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+local GalacticEquator = {
+  Identifier = "GalacticEquator",
+  Parent = transforms.SolarSystemBarycenter.Name,
+  Transform = {
+    Scale = {
+      Type = "StaticScale",
+      Scale = 9.46377307652E18
+    }
+  },
+  Renderable = {
+    Type = "RenderableRadialGrid",
+    Opacity = 0.8,
+    Color = { 0.08, 0.40, 0.40 },
+    LineWidth = 4.0,
+    GridSegments = { 1, 1 },
+    Enabled = asset.enabled
+  },
+  Tag = { "nightsky_marking" },
+  GUI = {
+    Name = "Galactic Equator",
+    Description = "A line representation of the Galactic Equator plane.",
+    Path = "/Night Sky/Coordinate Systems/Galactic"
+  }
+}
+
+
+local ShowGalacticEquator = {
+  Identifier = "os.nightsky.ShowGalacticEquator",
+  Name = "Show galactic equator",
+  Command = [[
+    openspace.fadeIn("Scene.GalacticEquator.Renderable")
+  ]],
+  Documentation = "Shows the galactic equator",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local HideGalacticEquator = {
+  Identifier = "os.nightsky.HideGalacticEquator",
+  Name = "Hide galactic equator",
+  Command = [[
+    openspace.fadeOut("Scene.GalacticEquator.Renderable")
+  ]],
+  Documentation = "Hides the galactic equator",
+  GuiPath = "/Night Sky/Lines and Grids/Show and Hide",
+  IsLocal = false
+}
+
+local ToggleGalacticEquator = {
+  Identifier = "os.nightsky.ToggleGalacticEquator",
+  Name = "Toggle galactic equator",
+  Command = "openspace.toggleFade('Scene.GalacticEquator.Renderable')",
+  Documentation = "Toggles the galactic equator visibilty",
+  GuiPath = "/Night Sky/Lines and Grids",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(GalacticEquator)
+  openspace.action.registerAction(ShowGalacticEquator)
+  openspace.action.registerAction(HideGalacticEquator)
+  openspace.action.registerAction(ToggleGalacticEquator)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(ToggleGalacticEquator)
+  openspace.action.removeAction(HideGalacticEquator)
+  openspace.action.removeAction(ShowGalacticEquator)
+  openspace.removeSceneGraphNode(GalacticEquator)
+end)
+
+asset.export(GalacticEquator)
+asset.export("ShowGalacticEquator", ShowGalacticEquator.Identifier)
+asset.export("HideGalacticEquator", HideGalacticEquator.Identifier)
+asset.export("ToggleGalacticEquator", ToggleGalacticEquator.Identifier)
+
+
+
+asset.meta = {
+  Name = "Galactic Equator",
+  Description = [[A line representation of the Galactic Equator plane, including actions
+    to toggle, hide and show it.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
+

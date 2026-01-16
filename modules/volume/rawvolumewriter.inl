@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,12 @@
 
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/volumeutils.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/exception.h>
-#include <ghoul/fmt.h>
+#include <algorithm>
 #include <fstream>
+#include <utility>
+#include <vector>
 
 namespace openspace::volume {
 
@@ -66,8 +69,8 @@ void RawVolumeWriter<VoxelType>::write(
     const size_t size = static_cast<size_t>(dims.x) * static_cast<size_t>(dims.y) *
                   static_cast<size_t>(dims.z);
 
-    std::vector<VoxelType> buffer(_bufferSize);
-    std::ofstream file(_path, std::ios::binary);
+    std::vector<VoxelType> buffer = std::vector<VoxelType>(_bufferSize);
+    std::ofstream file = std::ofstream(_path, std::ios::binary);
 
     int nChunks = static_cast<int>(size / _bufferSize);
     if (size % _bufferSize > 0) {
@@ -87,7 +90,6 @@ void RawVolumeWriter<VoxelType>::write(
         );
         onProgress(static_cast<float>(c + 1) / nChunks);
     }
-    file.close();
 }
 
 template <typename VoxelType>
@@ -97,14 +99,13 @@ void RawVolumeWriter<VoxelType>::write(const RawVolume<VoxelType>& volume) {
     const char* const buffer = reinterpret_cast<const char*>(volume.data());
     size_t length = volume.nCells() * sizeof(VoxelType);
 
-    std::ofstream file(_path, std::ios::binary);
+    std::ofstream file = std::ofstream(_path, std::ios::binary);
 
     if (!file.good()) {
-        throw ghoul::RuntimeError(fmt::format("Could not create file {}", _path));
+        throw ghoul::RuntimeError(std::format("Could not create file '{}'", _path));
     }
 
     file.write(buffer, length);
-    file.close();
 }
 
 } // namespace openspace::volume

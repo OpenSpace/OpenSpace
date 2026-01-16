@@ -1,28 +1,31 @@
 local transforms = asset.require("./transforms")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
-local models = asset.syncedResource({
+
+
+local models = asset.resource({
   Name = "Bennu Models",
   Type = "HttpSynchronization",
   Identifier = "bennu_models",
   Version = 2
 })
 
-local BENNU_BODY = "2101955"
-
-local images = asset.syncedResource({
+local images = asset.resource({
   Name = "Bennu Images Approach",
   Type = "HttpSynchronization",
   Identifier = "osirisrex_bennu_images_approach",
   Version = 1
 })
 
-local imagesA = asset.syncedResource({
+local imagesA = asset.resource({
   Name = "Bennu Images A",
   Type = "HttpSynchronization",
   Identifier = "osirisrex_bennu_images_orbit_a",
   Version = 1
 })
+
 
 local BennuProjection = {
   Identifier = "BennuProjection",
@@ -30,31 +33,31 @@ local BennuProjection = {
   Transform = {
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_BENNU",
-      DestinationFrame = "GALACTIC"
-    },
+      SourceFrame = kernels.Frame.Bennu,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
   },
   Renderable = {
     Enabled = true,
     Type = "RenderableModelProjection",
-    Body = BENNU_BODY,
+    Body = kernels.ID.Bennu,
     GeometryFile = models .. "Bennu_v20_200k_an.obj",
     Projection = {
-      Sequence   = { images, imagesA },
+      Sequence = { images, imagesA },
       SequenceType = "image-sequence",
-      Observer   = "OSIRIS-REX",
-      Target     = BENNU_BODY,
+      Observer = kernels.ID.OsirisRex,
+      Target = kernels.ID.Bennu,
       Aberration = "NONE",
       TextureMap = true,
       DataInputTranslation = {
         Instruments = {
           ORX_OCAMS_POLYCAM = {
             DetectorType = "Camera",
-            Spice = { "ORX_OCAMS_POLYCAM" },
+            Spice = { kernels.Frame.Polycam },
           },
         },
         Target = {
-          Read  = {
+          Read = {
             "TARGET_NAME",
             "INSTRUMENT_HOST_NAME",
             "INSTRUMENT_ID",
@@ -69,7 +72,7 @@ local BennuProjection = {
         }
       },
       Instrument = { -- INVALID DATA - JUST FOR TESTING
-        Name = "ORX_OCAMS_POLYCAM",
+        Name = kernels.Frame.Polycam,
         Method = "ELLIPSOID",
         Aberration = "NONE",
         Fovy = 0.792,
@@ -80,6 +83,7 @@ local BennuProjection = {
     }
   },
   GUI = {
+    Name = "Bennu Projection",
     Path = "/Solar System/Asteroid"
   }
 }
@@ -91,8 +95,8 @@ local BennuTrail = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = BENNU_BODY,
-      Observer = "SSB"
+      Target = kernels.ID.Bennu,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
     Color = { 0.4, 0.0, 0.7 },
     StartTime = "2015 JAN 01 00:00:00.000",
@@ -101,9 +105,11 @@ local BennuTrail = {
   },
   GUI = {
     Name = "Bennu Trail",
-    Path = "/Solar System/Asteroid"
+    Path = "/Solar System/Asteroid",
+    Focusable = false
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(BennuProjection)

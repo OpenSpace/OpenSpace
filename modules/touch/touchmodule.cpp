@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 
 #include <modules/touch/include/tuioear.h>
 #include <modules/touch/include/win32_touch.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/openspaceengine.h>
@@ -34,24 +35,39 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/templatefactory.h>
 #include <algorithm>
+#include <functional>
+#include <optional>
+#include <utility>
 
 using namespace TUIO;
 
 namespace {
     constexpr std::string_view _loggerCat = "TouchModule";
 
+    constexpr openspace::properties::Property::PropertyInfo TuioPortInfo = {
+        "TuioPort",
+        "TUIO Port",
+        "TUIO UDP port, by default 3333. The port cannot be changed after startup.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo EnableTouchInfo = {
         "EnableTouchInteraction",
-        "Enable Touch Interaction",
+        "Enable touch interaction",
         "Use this property to turn on/off touch input navigation in the 3D scene. "
-        "Disabling will reset all current touch inputs to the navigation."
+        "Disabling will reset all current touch inputs to the navigation.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
         "DetectedTouchEvent",
-        "Detected Touch Event",
-        "True when there is an active touch event",
+        "Detected touch event",
+        "True when there is an active touch event.",
         openspace::properties::Property::Visibility::Hidden
     };
 
@@ -59,26 +75,37 @@ namespace {
         DefaultDirectTouchRenderableTypesInfo =
     {
         "DefaultDirectTouchRenderableTypes",
-        "Default Direct Touch Renderable Types",
+        "Default direct touch renderable types",
         "A list of renderable types that will automatically use the \'direct "
         "manipulation\' scheme when interacted with, keeping the finger on a static "
         "position on the interaction sphere of the object when touching. Good for "
         "relatively spherical objects.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
-}
+
+    struct [[codegen::Dictionary(TouchModule)]] Parameters {
+        // [[codegen::verbatim(TuioPortInfo.description)]]
+        std::optional<int> tuioPort [[codegen::inrange(1, 65535)]];
+    };
+
+    #include "touchmodule_codegen.cpp"
+} // namespace
+
 namespace openspace {
 
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
+    , _tuioPort(TuioPortInfo, 3333, 1, 65535)
     , _touchIsEnabled(EnableTouchInfo, true)
     , _hasActiveTouchEvent(EventsInfo, false)
     , _defaultDirectTouchRenderableTypes(DefaultDirectTouchRenderableTypesInfo)
 {
     addPropertySubOwner(_touch);
     addPropertySubOwner(_markers);
+    _tuioPort.setReadOnly(true);
+    addProperty(_tuioPort);
     addProperty(_touchIsEnabled);
-    _touchIsEnabled.onChange([&]() {
+    _touchIsEnabled.onChange([this]() {
         _touch.resetAfterInput();
         _lastTouchInputs.clear();
     });
@@ -86,14 +113,14 @@ TouchModule::TouchModule()
     _hasActiveTouchEvent.setReadOnly(true);
     addProperty(_hasActiveTouchEvent);
 
-    _defaultDirectTouchRenderableTypes.onChange([&]() {
+    _defaultDirectTouchRenderableTypes.onChange([this]() {
         _sortedDefaultRenderableTypes.clear();
         for (const std::string& s : _defaultDirectTouchRenderableTypes.value()) {
             ghoul::TemplateFactory<Renderable>* fRenderable =
                 FactoryManager::ref().factory<Renderable>();
 
             if (!fRenderable->hasClass(s)) {
-                LWARNING(fmt::format(
+                LWARNING(std::format(
                     "In property 'DefaultDirectTouchRenderableTypes': '{}' is not a "
                     "registered renderable type. Ignoring", s
                 ));
@@ -115,10 +142,13 @@ bool TouchModule::isDefaultDirectTouchType(std::string_view renderableType) cons
         _sortedDefaultRenderableTypes.end();
 }
 
-void TouchModule::internalInitialize(const ghoul::Dictionary&){
-    _ear.reset(new TuioEar());
+void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {
+    const Parameters p = codegen::bake<Parameters>(dict);
 
-    global::callback::initializeGL->push_back([&]() {
+    _tuioPort = p.tuioPort.value_or(_tuioPort);
+    _ear = std::make_unique<TuioEar>(_tuioPort);
+
+    global::callback::initializeGL->push_back([this]() {
         LDEBUG("Initializing TouchMarker OpenGL");
         _markers.initialize();
 #ifdef WIN32
@@ -128,10 +158,10 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&){
         if (nativeWindowHandle) {
             _win32TouchHook = std::make_unique<Win32TouchHook>(nativeWindowHandle);
         }
-#endif
+#endif // WIN32
     });
 
-    global::callback::deinitializeGL->push_back([&]() {
+    global::callback::deinitializeGL->push_back([this]() {
         LDEBUG("Deinitialize TouchMarker OpenGL");
         _markers.deinitialize();
     });
@@ -140,14 +170,14 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&){
     // thread so we don't need a mutex here
     global::callback::touchDetected->push_back(
         [this](TouchInput i) {
-            addTouchInput(i);
+            addTouchInput(std::move(i));
             return true;
         }
     );
 
     global::callback::touchUpdated->push_back(
         [this](TouchInput i) {
-            updateOrAddTouchInput(i);
+            updateOrAddTouchInput(std::move(i));
             return true;
         }
     );
@@ -157,7 +187,7 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&){
     );
 
 
-    global::callback::preSync->push_back([&]() {
+    global::callback::preSync->push_back([this]() {
         if (!_touchIsEnabled) {
             return;
         }
@@ -193,14 +223,14 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&){
         clearInputs();
     });
 
-    global::callback::render->push_back([&]() {
+    global::callback::render->push_back([this]() {
         _markers.render(_touchPoints);
     });
 }
 
 bool TouchModule::processNewInput() {
     // Get new input from listener
-    std::vector<TouchInput> earInputs = _ear->takeInput();
+    std::vector<TouchInput> earInputs = _ear->takeInputs();
     std::vector<TouchInput> earRemovals = _ear->takeRemovals();
 
     for (const TouchInput& input : earInputs) {
@@ -243,9 +273,7 @@ bool TouchModule::processNewInput() {
     }
 
     // Return true if we got new input
-    if (_touchPoints.size() == _lastTouchInputs.size() &&
-        !_touchPoints.empty())
-    {
+    if (_touchPoints.size() == _lastTouchInputs.size() && !_touchPoints.empty()) {
         // @TODO (emmbr26, 2023-02-03) Looks to me like this code will always return
         // true? That's a bit weird and should probably be investigated
         bool newInput = true;

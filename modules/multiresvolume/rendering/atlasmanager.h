@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,10 @@
 #ifndef __OPENSPACE_MODULE_MULTIRESVOLUME___ATLASMANAGER___H__
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___ATLASMANAGER___H__
 
-#include <ghoul/glm.h>
 #include <glm/gtx/std_based_type.hpp>
+#include <limits>
 #include <map>
 #include <set>
-#include <string>
 #include <vector>
 
 namespace ghoul::opengl { class Texture; }
@@ -45,7 +44,7 @@ public:
         ODD = 1
     };
 
-    AtlasManager(TSP* tsp);
+    explicit AtlasManager(TSP* tsp);
     ~AtlasManager() = default;
 
     void updateAtlas(BufferIndex bufferIndex, std::vector<int>& brickIndices);

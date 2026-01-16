@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,36 +26,36 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RINGSCOMPONENT___H__
 
 #include <openspace/properties/propertyowner.h>
+#include <openspace/rendering/fadeable.h>
 
 #include <modules/globebrowsing/src/shadowcomponent.h>
-#include <openspace/properties/stringproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <functional>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
-    struct RenderData;
-    struct UpdateData;
 
 namespace documentation { struct Documentation; }
+struct RenderData;
+struct UpdateData;
 
-class RingsComponent : public properties::PropertyOwner {
+class RingsComponent : public properties::PropertyOwner, public Fadeable {
 public:
-    enum class RenderPass {
-        GeometryOnly,
-        GeometryAndShading
-    };
+    // Callback for when readiness state changes
+    using ReadinessChangeCallback = std::function<void()>;
 
-    RingsComponent(const ghoul::Dictionary& dictionary);
+    explicit RingsComponent(const ghoul::Dictionary& dictionary);
 
     void initialize();
     void initializeGL();
@@ -63,20 +63,35 @@ public:
 
     bool isReady() const;
 
-    void draw(const RenderData& data, RenderPass renderPass,
+    void draw(const RenderData& data,
         const ShadowComponent::ShadowMapData& shadowData = {}
     );
     void update(const UpdateData& data);
+    bool isEnabled() const;
 
     static documentation::Documentation Documentation();
-
-    bool isEnabled() const;
     double size() const;
+
+    // Readiness change callback
+    void onReadinessChange(ReadinessChangeCallback callback);
+
+    // Texture access methods for globe rendering
+    ghoul::opengl::Texture* textureForwards() const;
+    ghoul::opengl::Texture* textureBackwards() const;
+    ghoul::opengl::Texture* textureUnlit() const;
+    ghoul::opengl::Texture* textureColor() const;
+    ghoul::opengl::Texture* textureTransparency() const;
+    glm::vec2 textureOffset() const;
+    glm::vec3 sunPositionObj() const;
+    glm::vec3 camPositionObj() const;
+
+    void setEllipsoidRadii(glm::vec3 radii);
 
 private:
     void loadTexture();
     void createPlane();
     void compileShadowShader();
+    void checkAndNotifyReadinessChange();
 
     properties::StringProperty _texturePath;
     properties::StringProperty _textureFwrdPath;
@@ -95,15 +110,16 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, ringTexture, shadowMatrix, shadowMapTexture, zFightingPercentage
+        sunPosition, sunPositionObj, ringTexture,
+        opacity, ellipsoidRadii
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, sunPositionObj, camPositionObj, ringTextureFwrd, ringTextureBckwrd,
-        ringTextureUnlit, ringTextureColor, ringTextureTransparency, shadowMatrix,
-        shadowMapTexture, zFightingPercentage
+        sunPosition, sunPositionObj, camPositionObj, textureForwards, textureBackwards,
+        textureUnlit, textureColor, textureTransparency,
+        opacity, ellipsoidRadii
     ) _uniformCacheAdvancedRings;
-    UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture
-    ) _geomUniformCache;
+    UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture) _geomUniformCache;
+
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     std::unique_ptr<ghoul::opengl::Texture> _textureForwards;
     std::unique_ptr<ghoul::opengl::Texture> _textureBackwards;
@@ -126,6 +142,11 @@ private:
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
     glm::vec3 _camPositionObjectSpace = glm::vec3(0.f);
+    glm::vec3 _ellipsoidRadii = glm::vec3(1.f);
+
+    // Callback for readiness state changes
+    ReadinessChangeCallback _readinessChangeCallback;
+    bool _wasReady = false;
 };
 
 } // namespace openspace

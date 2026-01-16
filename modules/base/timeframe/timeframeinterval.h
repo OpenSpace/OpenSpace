@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,20 +27,16 @@
 
 #include <openspace/scene/timeframe.h>
 
-#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 
 namespace openspace {
 
-class Time;
-
-namespace documentation { struct Documentation; }
-
 class TimeFrameInterval : public TimeFrame {
 public:
-    TimeFrameInterval();
-    TimeFrameInterval(const ghoul::Dictionary& dictionary);
-    bool isActive(const Time&) const override;
+    explicit TimeFrameInterval(const ghoul::Dictionary& dictionary);
+
+    void update(const Time& time) override;
 
     static documentation::Documentation Documentation();
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,8 +28,9 @@
 #include <openspace/util/histogram.h>
 #include <ghoul/glm.h>
 #include <filesystem>
-#include <iosfwd>
+#include <fstream>
 #include <map>
+#include <vector>
 
 namespace openspace {
 
@@ -37,7 +38,7 @@ class TSP;
 
 class ErrorHistogramManager {
 public:
-    ErrorHistogramManager(TSP* tsp);
+    explicit ErrorHistogramManager(TSP* tsp);
     ~ErrorHistogramManager() = default;
 
     bool buildHistograms(int numBins);
@@ -47,17 +48,6 @@ public:
     bool saveToFile(const std::filesystem::path& filename);
 
 private:
-    TSP* _tsp;
-    std::ifstream* _file;
-
-    std::vector<Histogram> _histograms;
-    unsigned int _numInnerNodes;
-    float _minBin;
-    float _maxBin;
-    int _numBins;
-
-    std::map<unsigned int, std::vector<float>> _voxelCache;
-
     bool buildFromLeaf(unsigned int bstOffset, unsigned int octreeOffset);
     std::vector<float> readValues(unsigned int brickIndex) const;
 
@@ -71,6 +61,17 @@ private:
 
     float interpolate(const glm::vec3& samplePoint,
         const std::vector<float>& voxels) const;
+
+    TSP* _tsp;
+    std::ifstream* _file;
+
+    std::vector<Histogram> _histograms;
+    unsigned int _numInnerNodes;
+    float _minBin;
+    float _maxBin;
+    int _numBins;
+
+    std::map<unsigned int, std::vector<float>> _voxelCache;
 };
 
 } // namespace openspace

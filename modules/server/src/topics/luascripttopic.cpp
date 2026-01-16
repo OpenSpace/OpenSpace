@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,19 +24,24 @@
 
 #include <modules/server/include/topics/luascripttopic.h>
 
-#include <modules/server/include/jsonconverters.h>
 #include <modules/server/include/connection.h>
-#include <openspace/json.h>
+#include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
+#include <stdexcept>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view KeyScript = "script";
     constexpr std::string_view KeyFunction = "function";
     constexpr std::string_view KeyArguments = "arguments";
     constexpr std::string_view KeyReturn = "return";
+    constexpr std::string_view KeyShouldBeSynchronized = "shouldBeSynchronized";
     constexpr std::string_view _loggerCat = "LuaScriptTopic";
 
     std::string formatLua(const nlohmann::json::const_iterator& it);
@@ -72,7 +77,7 @@ namespace {
     std::string formatObjectAsLuaTable(const nlohmann::json& json) {
         std::string output = "{";
         auto it = json.begin();
-        for (size_t i = 0; i < json.size(); ++i, ++it) {
+        for (size_t i = 0; i < json.size(); i++, it++) {
             output += formatKeyValuePair(it);
             if (i < json.size() - 1) {
                 output += ",";
@@ -84,7 +89,7 @@ namespace {
     std::string formatArrayAsLuaTable(const nlohmann::json& json) {
         std::string output = "{";
         auto it = json.begin();
-        for (size_t i = 0; i < json.size(); ++i, ++it) {
+        for (size_t i = 0; i < json.size(); i++, it++) {
             output += formatLua(it);
             if (i < json.size() - 1) {
                 output += ",";
@@ -101,7 +106,7 @@ namespace {
             return formatArrayAsLuaTable(it->get<nlohmann::json>());
         }
         if (it->is_number()) {
-            return fmt::format("{}", it->get<double>());
+            return std::format("{}", it->get<double>());
         }
         if (it->is_string()) {
             return formatLuaString(it->get<std::string>());
@@ -120,7 +125,7 @@ namespace {
     {
         std::string script = "return " + function + "(";
         auto it = args.begin();
-        for (size_t i = 0; i < args.size(); ++i, ++it) {
+        for (size_t i = 0; i < args.size(); i++, it++) {
             script += *it;
             if (i < args.size() - 1) {
                 script += ",";
@@ -136,38 +141,48 @@ namespace openspace {
 
 void LuaScriptTopic::handleJson(const nlohmann::json& json) {
     try {
-        nlohmann::json::const_iterator script = json.find(KeyScript);
-        nlohmann::json::const_iterator function = json.find(KeyFunction);
+        const auto script = json.find(KeyScript);
+        const auto function = json.find(KeyFunction);
 
         if (script != json.end() && script->is_string()) {
             std::string luaScript = script->get<std::string>();
-            nlohmann::json::const_iterator ret = json.find(KeyReturn);
-            bool shouldReturn = (ret != json.end()) &&
-                                 ret->is_boolean() &&
-                                 ret->get<bool>();
+            const auto ret = json.find(KeyReturn);
+            const bool shouldReturn =
+                (ret != json.end()) && ret->is_boolean() && ret->get<bool>();
 
-            runScript(luaScript, shouldReturn);
+            const auto sync = json.find(KeyShouldBeSynchronized);
+            bool shouldBeSynchronized = true;
+            if (sync != json.end() && sync->is_boolean()) {
+                shouldBeSynchronized = sync->get<bool>();
+            }
+
+            runScript(std::move(luaScript), shouldReturn, shouldBeSynchronized);
         }
         else if (function != json.end() && function->is_string()) {
-            std::string luaFunction = function->get<std::string>();
-            nlohmann::json::const_iterator ret = json.find(KeyReturn);
-            bool shouldReturn = (ret != json.end()) &&
-                                 ret->is_boolean() &&
-                                 ret->get<bool>();
+            const std::string luaFunction = function->get<std::string>();
+            const auto ret = json.find(KeyReturn);
+            const bool shouldReturn =
+                (ret != json.end()) && ret->is_boolean() && ret->get<bool>();
 
-            nlohmann::json::const_iterator args = json.find(KeyArguments);
+            const auto sync = json.find(KeyShouldBeSynchronized);
+            bool shouldBeSynchronized = true;
+            if (sync != json.end() && sync->is_boolean()) {
+                shouldBeSynchronized = sync->get<bool>();
+            }
+
+            const nlohmann::json::const_iterator args = json.find(KeyArguments);
             if (!args->is_array()) {
                 return;
             }
 
             std::vector<std::string> formattedArgs;
             formattedArgs.reserve(args->size());
-            for (auto it = args->begin(); it != args->end(); ++it) {
+            for (auto it = args->begin(); it != args->end(); it++) {
                 formattedArgs.push_back(formatLua(it));
             }
 
             std::string luaScript = generateScript(luaFunction, formattedArgs);
-            runScript(luaScript, shouldReturn);
+            runScript(std::move(luaScript), shouldReturn, shouldBeSynchronized);
         }
     }
     catch (const std::out_of_range& e) {
@@ -176,13 +191,16 @@ void LuaScriptTopic::handleJson(const nlohmann::json& json) {
     }
 }
 
-void LuaScriptTopic::runScript(std::string script, bool shouldReturn) {
-    scripting::ScriptEngine::ScriptCallback callback;
+void LuaScriptTopic::runScript(std::string script, bool shouldReturn,
+                               bool shouldBeSynchronized)
+{
+    using namespace scripting;
+
+    ScriptEngine::Script::Callback callback;
     if (shouldReturn) {
-        callback = [this](ghoul::Dictionary data) {
+        callback = [this](const ghoul::Dictionary& data) {
             if (_connection) {
-                nlohmann::json j = data;
-                nlohmann::json payload = wrappedPayload(j);
+                const nlohmann::json payload = wrappedPayload(data);
                 _connection->sendJson(payload);
                 _waitingForReturnValue = false;
             }
@@ -193,11 +211,12 @@ void LuaScriptTopic::runScript(std::string script, bool shouldReturn) {
         _waitingForReturnValue = false;
     }
 
-    global::scriptEngine->queueScript(
-        std::move(script),
-        scripting::ScriptEngine::RemoteScripting::No,
-        callback
-    );
+    global::scriptEngine->queueScript({
+        .code = std::move(script),
+        .synchronized = ScriptEngine::Script::ShouldBeSynchronized(shouldBeSynchronized),
+        .sendToRemote = ScriptEngine::Script::ShouldSendToRemote(shouldBeSynchronized),
+        .callback = callback
+    });
 }
 
 bool LuaScriptTopic::isDone() const {

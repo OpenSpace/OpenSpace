@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,13 @@
 
 #include <modules/iswa/util/dataprocessortext.h>
 
-#include <openspace/properties/selectionproperty.h>
-#include <openspace/util/histogram.h>
+#include <openspace/properties/misc/selectionproperty.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
+#include <cmath>
+#include <iterator>
+#include <set>
 #include <sstream>
 
 namespace openspace {
@@ -51,21 +55,21 @@ std::vector<std::string> DataProcessorText::readMetadata(const std::string& data
     std::vector<std::string> options;
     std::string line;
     std::stringstream memorystream(data);
-    while (getline(memorystream, line)) {
+    while (ghoul::getline(memorystream, line)) {
         if (line.find(info) == 0) {
             line = line.substr(info.size());
             std::stringstream ss(line);
 
             std::string token;
-            getline(ss, token, 'x');
+            ghoul::getline(ss, token, 'x');
             const int x = std::stoi(token);
 
-            getline(ss, token, '=');
+            ghoul::getline(ss, token, '=');
             const int y = std::stoi(token);
 
             dimensions = glm::size3_t(x, y, 1);
 
-            getline(memorystream, line);
+            ghoul::getline(memorystream, line);
             line = line.substr(1); //because of the # char
 
             ss = std::stringstream(line);
@@ -98,7 +102,7 @@ void DataProcessorText::addDataValues(const std::string& data,
     std::vector<std::vector<float>> optionValues(numOptions);
 
     // for each data point
-    while (getline(memorystream, line)) {
+    while (ghoul::getline(memorystream, line)) {
         if (!line.empty() && line[0] == '#') {
             continue;
         }
@@ -125,7 +129,7 @@ void DataProcessorText::addDataValues(const std::string& data,
             continue;
         }
 
-        for (int i = 0; i < numOptions; ++i) {
+        for (int i = 0; i < numOptions; i++) {
             const float value = values[i];
 
             optionValues[i].push_back(value);
@@ -170,7 +174,7 @@ std::vector<float*> DataProcessorText::processData(const std::string& data,
     }
 
     int numValues = 0;
-    while (getline(memorystream, line)) {
+    while (ghoul::getline(memorystream, line)) {
         if (!line.empty() && line[0] == '#') {
             continue;
         }

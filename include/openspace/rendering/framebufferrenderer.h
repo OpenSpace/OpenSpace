@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,21 +28,21 @@
 #include <openspace/rendering/raycasterlistener.h>
 #include <openspace/rendering/deferredcasterlistener.h>
 
+#include <openspace/rendering/shadowmapping.h>
 #include <ghoul/glm.h>
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <map>
-#include <string>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul {
+    namespace filesystem { class File; }
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    } // namespace ghoul::opengl
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 
@@ -52,12 +52,97 @@ struct DeferredcasterTask;
 struct RaycastData;
 struct RaycasterTask;
 class Scene;
+class SceneGraphNode;
 struct UpdateStructures;
 
 class FramebufferRenderer final : public RaycasterListener, public DeferredcasterListener
 {
 public:
     virtual ~FramebufferRenderer() override = default;
+
+    //============================//
+    //=====  Reuse textures  =====//
+    //============================//
+    /**
+     * Gives access to the currently NOT used pingPongTexture. This texture is available
+     * for all RenderBins. However, it cannot be used at the same time as the Deferred
+     * Caster Tasks. The size of the texture is the resolution of the viewport.
+     *
+     * NOTE (malej 2023-02-21): The currently NOT used pingPongTexture might change
+     * depending on where in the render cycle you are. Especially after the Deferred
+     * Caster Tasks.
+     *
+     * \return The identifier of the currently NOT used pingPongTexture
+     */
+    GLuint additionalColorTexture1() const;
+
+    /**
+     * Gives access to the exitColorTexture. This texture is available for all RenderBins.
+     * However, it cannot be used at the same time as the Raycaster Tasks. The size of the
+     * texture is the resolution of the viewport.
+     *
+     * \return The identifier of the exitColorTexture
+     */
+    GLuint additionalColorTexture2() const;
+
+    /**
+     * Gives access to the fxaaTexture. This texture is available for all RenderBins.
+     * However, it cannot be used at the same time as the FXAA Task. The size of the
+     * texture is the resolution of the viewport.
+     *
+     * \return The identifier of the fxaaTexture
+     */
+    GLuint additionalColorTexture3() const;
+
+    /**
+     * Gives access to the exitDepthTexture. This texture is available for all RenderBins.
+     * However, it cannot be used at the same time as the Raycaster Tasks. The size of the
+     * texture is the resolution of the viewport.
+     *
+     * \return The identifier of the exitDepthTexture
+     */
+    GLuint additionalDepthTexture() const;
+
+    //=============================//
+    //=====  Access G-buffer  =====//
+    //=============================//
+    // Functions to access the G-buffer textures
+    /**
+     * Gives access to the color texture of the G-buffer. NOTE: This texture is used for
+     * the majority of rendering the scene and might be already in use. Use CAUTION when
+     * using this function. The size of the texture is the resolution of the viewport.
+     *
+     * \return The identifier of the color texture of the G-buffer
+     */
+    GLuint gBufferColorTexture() const;
+
+    /**
+     * Gives access to the position texture of the G-buffer. NOTE: This texture is used
+     * for the majority of rendering the scene and might be already in use. Use CAUTION
+     * when using this function. The size of the texture is the resolution of the
+     * viewport.
+     *
+     * \return The identifier of the position texture of the G-buffer
+     */
+    GLuint gBufferPositionTexture() const;
+
+    /**
+     * Gives access to the normal texture of the G-buffer. NOTE: This texture is used for
+     * the majority of rendering the scene and might be already in use. Use CAUTION when
+     * using this function. The size of the texture is the resolution of the viewport.
+     *
+     * \return The identifier of the normal texture of the G-buffer
+     */
+    GLuint gBufferNormalTexture() const;
+
+    /**
+     * Gives access to the depth texture of the G-buffer. NOTE: This texture is used for
+     * the majority of rendering the scene and might be already in use. Use CAUTION when
+     * using this function. The size of the texture is the resolution of the viewport.
+     *
+     * \return The identifier of the depth texture of the G-buffer
+     */
+    GLuint gBufferDepthTexture() const;
 
     void initialize();
     void deinitialize();
@@ -72,9 +157,7 @@ public:
     void setResolution(glm::ivec2 res);
     void setHDRExposure(float hdrExposure);
     void setGamma(float gamma);
-    void setHue(float hue);
-    void setValue(float value);
-    void setSaturation(float sat);
+    void setHueValueSaturation(float hue, float value, float saturation);
 
     void enableFXAA(bool enable);
     void setDisableHDR(bool disable);
@@ -87,8 +170,7 @@ public:
     void render(Scene* scene, Camera* camera, float blackoutFactor);
 
     /**
-     * Update render data
-     * Responsible for calling renderEngine::setRenderData
+     * Update render data. Responsible for calling renderEngine::setRenderData
      */
     virtual void updateRendererData();
 
@@ -96,6 +178,13 @@ public:
         RaycasterListener::IsAttached attached) override;
     virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
         DeferredcasterListener::IsAttached isAttached) override;
+
+    void registerShadowCaster(const std::string& shadowGroup,
+        const SceneGraphNode* lightSource, const SceneGraphNode* target);
+    void removeShadowCaster(const std::string& shadowGroup, const SceneGraphNode* target);
+
+    shadowmapping::ShadowInfo shadowInformation(const std::string& shadowGroup) const;
+    std::vector<std::string> shadowGroups() const;
 
 private:
     using RaycasterProgObjMap = std::map<
@@ -107,12 +196,11 @@ private:
         std::unique_ptr<ghoul::opengl::ProgramObject>
     >;
 
-    void resolveMSAA(float blackoutFactor);
     void applyTMO(float blackoutFactor, const glm::ivec4& viewport);
     void applyFXAA(const glm::ivec4& viewport);
-    void updateDownscaleTextures();
-    void updateExitVolumeTextures();
+    void updateDownscaleTextures() const;
     void writeDownscaledVolume(const glm::ivec4& viewport);
+    void renderDepthMaps();
 
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     RaycasterProgObjMap _exitPrograms;
@@ -155,11 +243,6 @@ private:
     } _pingPongBuffers;
 
     struct {
-        GLuint hdrFilteringFramebuffer;
-        GLuint hdrFilteringTexture;
-    } _hdrBuffers;
-
-    struct {
         GLuint fxaaFramebuffer;
         GLuint fxaaTexture;
     } _fxaaBuffers;
@@ -170,6 +253,8 @@ private:
         GLuint depthbuffer;
         float currentDownscaleFactor  = 1.f;
     } _downscaleVolumeRendering;
+
+    std::map<std::string, shadowmapping::ShadowInfo> _shadowMaps;
 
     unsigned int _pingPongIndex = 0u;
 
@@ -187,6 +272,8 @@ private:
     float _hue = 1.f;
     float _saturation = 1.f;
     float _value = 1.f;
+
+    bool _renderedDepthMapsThisFrame = false;
 
     ghoul::Dictionary _rendererData;
 };

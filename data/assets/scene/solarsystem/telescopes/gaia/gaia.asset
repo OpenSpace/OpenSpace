@@ -1,0 +1,79 @@
+local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local sunTransform = asset.require("scene/solarsystem/sun/transforms")
+local sun = asset.require("scene/solarsystem/sun/sun")
+
+
+
+local model = asset.resource({
+  Name = "Gaia Model",
+  Type = "HttpSynchronization",
+  Identifier = "gaia_model",
+  Version = 2
+})
+
+local trail = asset.resource({
+  Name = "Gaia Trail",
+  Type = "HttpSynchronization",
+  Identifier = "gaia_trail",
+  Version = 3
+})
+
+
+local Gaia = {
+  Identifier = "Gaia",
+  Parent = earthTransforms.EarthCenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "HorizonsTranslation",
+      HorizonsTextFile = {
+        trail .. "gaia_orbit_horizons_1.hrz", --2013-12-19 09:55:27 to 2014-01-19 00:00:00
+        trail .. "gaia_orbit_horizons_2.hrz"  --2014-01-19 00:00:00 to 2026-09-14 00:00:00
+        -- Target: Gaia (spacecraft) (-139479)
+        -- Observer: Earth (399 GEOCENTRIC)
+        -- Start time: 2013-Dec-19 09:55:27 (first data point)
+        -- End time: 2026-Sep-14 00:00:00 (last data point)
+        -- Step size: First file has 40 minutes and seocnd has 1 day step size
+      }
+    },
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "Gaia",
+      XAxis = { 1.0, 0.0, 0.0 },
+      XAxisOrthogonal = true,
+      YAxis = sun.Sun.Identifier,
+      YAxisInvert = true
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 10.0
+    }
+  },
+  -- X Orthogonal
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = model .. "gaia.obj",
+    LightSources = {
+      sunTransform.LightSource,
+      {
+        Identifier = "Camera",
+        Type = "CameraLightSource",
+        Intensity = 0.4
+      }
+    }
+  },
+  GUI = {
+    Name = "Gaia",
+    Path = "/Solar System/Telescopes/Gaia"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Gaia)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Gaia)
+end)
+
+asset.export(Gaia)

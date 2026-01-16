@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,11 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentation.h>
+#include <ghoul/glm.h>
+#include <ghoul/lua/lua_helper.h>
+#include <variant>
+#include <utility>
 
 namespace {
 
-// Checks if the passed identifier corresponds to an action.
+/**
+ * Checks if the passed identifier corresponds to an action.
+ */
 [[codegen::luawrap]] bool hasAction(std::string identifier) {
     if (identifier.empty()) {
         throw ghoul::lua::LuaError("Identifier must not be empty");
@@ -36,7 +41,7 @@ namespace {
 }
 
 /**
- * Removes an existing action from the list of possible actions.The action is identifies
+ * Removes an existing action from the list of possible actions. The action is identifies
  * either by the passed name, or if it is a table, the value behind the 'Identifier' key
  * is extract and used instead.
  */
@@ -64,7 +69,7 @@ namespace {
     }
     if (!global::actionManager->hasAction(identifier)) {
         throw ghoul::lua::LuaError(
-            fmt::format("Identifier '{}' for action not found", identifier)
+            std::format("Identifier '{}' for action not found", identifier)
         );
     }
 
@@ -72,26 +77,37 @@ namespace {
 }
 
 struct [[codegen::Dictionary(Action)]] Action {
-    // The identifier under which the action is registered
+    /// The identifier under which the action is registered
     std::string identifier;
 
-    // The Lua script that is to be executed when the action is triggered
+    /// The Lua script that is to be executed when the action is triggered
     std::string command;
 
-    // The user-facing name of the action
+    /// The user-facing name of the action
     std::optional<std::string> name;
 
-    // A documentation that explains what the action does
+    /// A documentation that explains what the action does
     std::optional<std::string> documentation;
 
-    // The path in the GUI under which the action is shown to the user. If the value is
-    // not provided, the default value is /
+    /// The path in the GUI under which the action is shown to the user. If the value is
+    /// not provided, the default value is /
     std::optional<std::string> guiPath;
 
-    // Determines whether the provided command will be executed locally or will be sent to
-    // connected computers in a cluster or parallel connection environment
+    /// This parameter, if specified, will be used as a hint to any potential user
+    /// interface as a desired background color. This can be used, for example, to
+    /// visually group similar Actions together
+    std::optional<glm::vec4> color [[codegen::color()]];
+
+    /// This parameter, if specified, will be used as a hint to any potential user
+    /// interface as a desired text color. This can be used, for example, to visually
+    /// group similar Actions together
+    std::optional<glm::vec4> textColor [[codegen::color()]];
+
+    /// Determines whether the provided command will be executed locally or will be sent
+    /// to connected computers in a cluster or parallel connection environment
     std::optional<bool> isLocal;
 };
+
 /**
  * Registers a new action. The first argument is the identifier which cannot have been
  * used to register a previous action before, the second argument is the Lua command that
@@ -105,7 +121,7 @@ struct [[codegen::Dictionary(Action)]] Action {
     using namespace openspace;
 
     if (global::actionManager->hasAction(action.identifier)) {
-        throw ghoul::lua::LuaError(fmt::format(
+        throw ghoul::lua::LuaError(std::format(
             "Identifier '{}' for action already registered", action.identifier
         ));
     }
@@ -115,12 +131,18 @@ struct [[codegen::Dictionary(Action)]] Action {
     a.command = std::move(action.command);
     a.name = action.name.value_or(a.name);
     a.documentation = action.documentation.value_or(a.documentation);
+    a.color = action.color;
+    a.textColor = action.textColor;
     a.guiPath = action.guiPath.value_or(a.guiPath);
     if (!a.guiPath.starts_with('/')) {
-        throw ghoul::RuntimeError("Action's GuiPath must start with /");
+        throw ghoul::RuntimeError(std::format(
+            "Tried to register action: '{}'. The field 'GuiPath' is set to '{}' but "
+            "should be '/{}'",
+            a.name, a.guiPath, a.guiPath
+        ));
     }
     if (action.isLocal.has_value()) {
-        a.synchronization = interaction::Action::IsSynchronized(*action.isLocal);
+        a.isLocal = interaction::Action::IsLocal(*action.isLocal);
     }
     global::actionManager->registerAction(std::move(a));
 }
@@ -137,7 +159,7 @@ struct [[codegen::Dictionary(Action)]] Action {
     }
     if (!global::actionManager->hasAction(identifier)) {
         throw ghoul::lua::LuaError(
-            fmt::format("Identifier '{}' for action not found", identifier)
+            std::format("Identifier '{}' for action not found", identifier)
         );
     }
 
@@ -147,11 +169,14 @@ struct [[codegen::Dictionary(Action)]] Action {
     res.setValue("Command", action.command);
     res.setValue("Name", action.name);
     res.setValue("Documentation", action.documentation);
+    if (action.color.has_value()) {
+        res.setValue("Color", glm::dvec4(*action.color));
+    }
+    if (action.textColor.has_value()) {
+        res.setValue("TextColor", glm::dvec4(*action.textColor));
+    }
     res.setValue("GuiPath", action.guiPath);
-    res.setValue(
-        "Synchronization",
-        action.synchronization == interaction::Action::IsSynchronized::Yes
-    );
+    res.setValue("IsLocal", action.isLocal == interaction::Action::IsLocal::Yes);
     return res;
 }
 
@@ -171,18 +196,22 @@ struct [[codegen::Dictionary(Action)]] Action {
         d.setValue("Command", a.command);
         d.setValue("Name", a.name);
         d.setValue("Documentation", a.documentation);
+        if (a.color.has_value()) {
+            d.setValue("Color", glm::dvec4(*a.color));
+        }
+        if (a.textColor.has_value()) {
+            d.setValue("TextColor", glm::dvec4(*a.textColor));
+        }
         d.setValue("GuiPath", a.guiPath);
-        d.setValue(
-            "Synchronization",
-            a.synchronization == interaction::Action::IsSynchronized::Yes
-        );
-
+        d.setValue("IsLocal", a.isLocal == interaction::Action::IsLocal::Yes);
         res.push_back(d);
     }
     return res;
 }
 
-// Triggers the action given by the specified identifier.
+/**
+ * Triggers the action given by the specified identifier.
+ */
 [[codegen::luawrap]] void triggerAction(std::string id,
                                         ghoul::Dictionary arg = ghoul::Dictionary())
 {
@@ -192,10 +221,16 @@ struct [[codegen::Dictionary(Action)]] Action {
         throw ghoul::lua::LuaError("Identifier must not be empty");
     }
     if (!global::actionManager->hasAction(id)) {
-        throw ghoul::lua::LuaError(fmt::format("Action '{}' not found", id));
+        throw ghoul::lua::LuaError(std::format("Action '{}' not found", id));
     }
 
-    global::actionManager->triggerAction(id, arg);
+    // No sync because this is already inside a Lua script, therefor it has
+    // already been synced and sent to the connected nodes and peers
+    global::actionManager->triggerAction(
+        id,
+        arg,
+        interaction::ActionManager::ShouldBeSynchronized::No
+    );
 }
 
 #include "actionmanager_lua_codegen.cpp"

@@ -1,0 +1,43 @@
+local globe = asset.require("../../moon")
+
+
+
+local Layer = {
+  Identifier = "WAC_V1_Sweden",
+  Name = "WAC V1 [Sweden]",
+  Enabled = asset.enabled,
+  ZIndex = 10,
+  FilePath = asset.resource("wac_v1_sweden.wms"),
+  Settings = { Gamma = 0.84 },
+  Description = [[Lunar Reconnaissance Orbiter Camera (LROC) Wide Angle Camera (WAC)
+    aboard the Lunar Reconnaissance Orbiter (LRO) has allowed the instrument team to
+    create a global mosaic comprised of over 15,000 images acquired between November 2009
+    and February 2011. The WAC maps the whole Moon in one month, however the solar
+    incidence angle at the equator changes about 28° from the beginning to the end of the
+    month. To even out the incidence angle variations (generally angles between 55-75
+    degrees), this morphology mosaic (at 643 nm), is comprised of data collected over
+    three periods (1/20/2010 to 1/28/2010, 5/30/2010 to 6/6/2010, 7/24/2010 to 7/31/2010).
+    (Description from URL)]]
+}
+
+
+asset.onInitialize(function()
+  openspace.globebrowsing.addLayer(globe.Moon.Identifier, "ColorLayers", Layer)
+end)
+
+asset.onDeinitialize(function()
+  openspace.globebrowsing.deleteLayer(globe.Moon.Identifier, "ColorLayers", Layer)
+end)
+
+asset.export("layer", Layer)
+
+
+
+asset.meta = {
+  Name = "WAC [Sweden]",
+  Description = [[Wide Angle Color map of the Moon. This map is hosted on the OpenSpace
+    server in Sweden]],
+  Author = "USGS",
+  URL = "https://astrogeology.usgs.gov/search/map/Moon/LRO/LROC_WAC/Lunar_LRO_LROC-WAC_Mosaic_global_100m_June2013",
+  License = "NASA/PDS"
+}

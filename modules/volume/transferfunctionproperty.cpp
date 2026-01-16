@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,35 +23,36 @@
  ****************************************************************************************/
 
 #include <modules/volume/transferfunctionproperty.h>
-#include <ghoul/lua/ghoul_lua.h>
+
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/lua/lua_types.h>
 
 namespace openspace::properties {
 
 TransferFunctionProperty::TransferFunctionProperty(Property::PropertyInfo info,
                                                    volume::TransferFunction value)
-    : TemplateProperty<volume::TransferFunction>(std::move(info), value)
+    : TemplateProperty<volume::TransferFunction>(std::move(info), std::move(value))
 {}
 
 std::string_view TransferFunctionProperty::className() const {
     return "TransferFunctionProperty";
 }
 
-int TransferFunctionProperty::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes TransferFunctionProperty::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
 }
 
-openspace::volume::TransferFunction
-TransferFunctionProperty::fromLuaConversion(lua_State* state) const {
+void TransferFunctionProperty::getLuaValue(lua_State* state) const {
+    _value.envelopesToLua(state);
+}
+
+volume::TransferFunction TransferFunctionProperty::toValue(lua_State* state) const {
     openspace::volume::TransferFunction tf;
     tf.setEnvelopesFromLua(state);
     return tf;
 }
 
-void TransferFunctionProperty::toLuaConversion(lua_State* state) const {
-    _value.envelopesToLua(state);
-}
-
-std::string TransferFunctionProperty::toStringConversion() const {
+std::string TransferFunctionProperty::stringValue() const {
     return _value.serializedToString();
 }
 

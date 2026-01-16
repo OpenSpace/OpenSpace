@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,16 +27,20 @@
 #include <modules/spout/renderableplanespout.h>
 #include <modules/spout/renderablespherespout.h>
 #include <modules/spout/screenspacespout.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/misc/templatefactory.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/templatefactory.h>
+#include <vector>
 
 namespace openspace {
 
 SpoutModule::SpoutModule() : OpenSpaceModule(Name) {}
 
 void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
-
 #ifdef WIN32
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =
         FactoryManager::ref().factory<ScreenSpaceRenderable>();
@@ -49,6 +53,14 @@ void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderablePlaneSpout>("RenderablePlaneSpout");
     fRenderable->registerClass<RenderableSphereSpout>("RenderableSphereSpout");
 #endif // WIN32
+}
+
+std::vector<documentation::Documentation> SpoutModule::documentations() const {
+    return {
+        ScreenSpaceSpout::Documentation(),
+        RenderablePlaneSpout::Documentation(),
+        RenderableSphereSpout::Documentation()
+    };
 }
 
 } // namespace openspace

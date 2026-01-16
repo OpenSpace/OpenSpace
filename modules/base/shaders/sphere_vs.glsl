@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,18 +30,21 @@ layout(location = 1) in vec2 in_textureCoords;
 out vec2 vs_textureCoords;
 out vec4 vs_position;
 out vec3 vs_normal;
+out float vs_screenSpaceDepth;
 
 uniform mat4 modelViewProjection;
+uniform mat4 modelViewTransform;
 uniform mat3 modelViewRotation;
 
-
 void main() {
-  vs_normal = modelViewRotation * normalize(in_position.xyz);
   vs_textureCoords = in_textureCoords;
 
+  vs_normal = modelViewRotation * normalize(in_position.xyz);
   vec4 position = modelViewProjection * vec4(in_position.xyz, 1.0);
-  vs_position = position;
+  vs_position = modelViewTransform * vec4(in_position.xyz, 1.0);
 
   // Set z to 0 to disable near/far-plane clipping
   gl_Position = vec4(position.xy, 0.0, position.w);
+
+  vs_screenSpaceDepth = position.w;
 }

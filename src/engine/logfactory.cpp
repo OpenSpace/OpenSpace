@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,14 +25,16 @@
 #include <openspace/engine/logfactory.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/log.h>
 #include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/htmllog.h>
 #include <ghoul/logging/textlog.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
+#include <filesystem>
 #include <optional>
+#include <string_view>
 
 namespace {
     constexpr std::string_view BootstrapPath = "${WEB}/common/bootstrap.min.css";
@@ -53,6 +55,9 @@ namespace {
         // Determines whether the file will be cleared at startup or if the contents will
         // be appended to previous runs
         std::optional<bool> append;
+
+        // The number of files that should be kept around for this Log
+        std::optional<int> logRotation [[codegen::greater(0)]];
 
         // Determines whether the log entires should be stamped with the time at which the
         // message was logged
@@ -95,28 +100,29 @@ documentation::Documentation LogFactoryDocumentation() {
 std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::filesystem::path filename = absPath(p.file);
-    bool append = p.append.value_or(true);
-    bool timeStamp = p.timeStamping.value_or(true);
-    bool dateStamp = p.dateStamping.value_or(true);
-    bool categoryStamp = p.categoryStamping.value_or(true);
-    bool logLevelStamp = p.logLevelStamping.value_or(true);
-    ghoul::logging::LogLevel level = codegen::map<ghoul::logging::LogLevel>(
+    const std::filesystem::path filename = absPath(p.file);
+    const bool append = p.append.value_or(true);
+    const int nLogRotation = p.logRotation.value_or(0);
+    const bool timeStamp = p.timeStamping.value_or(true);
+    const bool dateStamp = p.dateStamping.value_or(true);
+    const bool categoryStamp = p.categoryStamping.value_or(true);
+    const bool logLevelStamp = p.logLevelStamping.value_or(true);
+    const ghoul::logging::LogLevel level = codegen::map<ghoul::logging::LogLevel>(
         p.logLevel.value_or(Parameters::LogLevel::AllLogging)
     );
 
     switch (p.type) {
         case Parameters::Type::Html:
         {
-            std::vector<std::string> cssFiles{
-                absPath(BootstrapPath).string(),
-                absPath(CssPath).string()
+            const std::vector<std::filesystem::path> cssFiles = {
+                absPath(BootstrapPath),
+                absPath(CssPath)
             };
-            std::vector<std::string> jsFiles{ absPath(JsPath).string() };
+            const std::vector<std::filesystem::path> jsFiles = { absPath(JsPath) };
 
             return std::make_unique<ghoul::logging::HTMLLog>(
-                filename.string(),
-                ghoul::logging::TextLog::Append(append),
+                filename,
+                nLogRotation,
                 ghoul::logging::Log::TimeStamping(timeStamp),
                 ghoul::logging::Log::DateStamping(dateStamp),
                 ghoul::logging::Log::CategoryStamping(categoryStamp),
@@ -124,11 +130,12 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
                 cssFiles,
                 jsFiles,
                 level
-                );
+            );
         }
         case Parameters::Type::Text:
             return std::make_unique<ghoul::logging::TextLog>(
-                filename.string(),
+                filename,
+                nLogRotation,
                 ghoul::logging::TextLog::Append(append),
                 ghoul::logging::Log::TimeStamping(timeStamp),
                 ghoul::logging::Log::DateStamping(dateStamp),
@@ -137,7 +144,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
                 level
             );
         default:
-            throw new ghoul::MissingCaseException();
+            throw ghoul::MissingCaseException();
     }
 }
 

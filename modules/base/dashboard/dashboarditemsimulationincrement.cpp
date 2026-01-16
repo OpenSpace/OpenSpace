@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,50 +25,59 @@
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <optional>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
         "Simplification",
-        "Time Simplification",
+        "Do time simplification",
         "If this value is enabled, the time is displayed in nuanced units, such as "
         "minutes, hours, days, years, etc. If this value is disabled, it is always "
-        "displayed in seconds"
+        "displayed in seconds.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
-        "Requested Unit",
+        "Requested unit",
         "If the simplification is disabled, this time unit is used as a destination to "
-        "convert the seconds into"
+        "convert the seconds into.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransitionFormatInfo = {
         "TransitionFormat",
-        "Transition Format",
+        "Transition format",
         "Format string used to format the text used while in a delta time transition, "
         "that is if the current delta time is being interpolated to reach a target "
         "delta time. This format gets five parameters in this order:  The target delta "
         "time value, the target delta time unit, the string 'Paused' if the delta time "
         "is paused or the empty string otherwise, the current delta time value, and the "
-        "current delta time unit"
+        "current delta time unit. More information about how to make use of the format "
+        "string, see the documentation at "
+        "https://en.cppreference.com/w/cpp/utility/format/spec.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RegularFormatInfo = {
         "RegularFormat",
-        "Regular Format",
+        "Regular format",
         "The format string used to format the text if the target delta time is the same "
         "as the current delta time. This format gets three parameters in this order:  "
         "The target delta value, the target delta unit, and the string 'Paused' if the "
-        "delta time is paused or the empty string otherwise"
+        "delta time is paused or the empty string otherwise. More information about how "
+        "to make use of the format string, see the documentation at "
+        "https://en.cppreference.com/w/cpp/utility/format/spec.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     std::vector<std::string> unitList() {
@@ -84,6 +93,10 @@ namespace {
         return res;
     }
 
+    // This `DashboardItem` shows how fast the in-game time progresses. The display string
+    // for the `RegularFormat` is used when the current simulation increment is not
+    // changing, the `TransitionFormat` is used if the simulation increment is currently
+    // interpolating to a new value.
     struct [[codegen::Dictionary(DashboardItemSimulationIncrement)]] Parameters {
         // [[codegen::verbatim(SimplificationInfo.description)]]
         std::optional<bool> simplification;
@@ -113,7 +126,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
                                                       const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _doSimplification(SimplificationInfo, true)
-    , _requestedUnit(RequestedUnitInfo, properties::OptionProperty::DisplayType::Dropdown)
+    , _requestedUnit(RequestedUnitInfo)
     , _transitionFormat(
         TransitionFormatInfo,
         "Simulation increment: {:.1f} {:s} / second{:s} (current: {:.1f} {:s})"
@@ -132,15 +145,20 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     });
     addProperty(_doSimplification);
 
-    for (TimeUnit u : TimeUnits) {
+    for (const TimeUnit u : TimeUnits) {
         _requestedUnit.addOption(static_cast<int>(u), std::string(nameForTimeUnit(u)));
     }
     _requestedUnit = static_cast<int>(TimeUnit::Second);
     if (p.requestedUnit.has_value()) {
-        TimeUnit unit = timeUnitFromString(p.requestedUnit->c_str());
+        const TimeUnit unit = timeUnitFromString(*p.requestedUnit);
         _requestedUnit = static_cast<int>(unit);
+        _doSimplification = false;
     }
-    _requestedUnit.setVisibility(properties::Property::Visibility::Hidden);
+    _requestedUnit.setVisibility(
+        _doSimplification ?
+        properties::Property::Visibility::Hidden :
+        properties::Property::Visibility::User
+    );
     addProperty(_requestedUnit);
 
     _transitionFormat = p.transitionFormat.value_or(_transitionFormat);
@@ -150,7 +168,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     addProperty(_regularFormat);
 }
 
-void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
+void DashboardItemSimulationIncrement::update() {
     ZoneScoped;
 
     const double targetDt = global::timeManager->targetDeltaTime();
@@ -186,11 +204,10 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
     try {
         if (targetDt != currentDt && !global::timeManager->isPaused()) {
             // We are in the middle of a transition
-            RenderFont(
-                *_font,
-                penPosition,
-                fmt::format(
-                    fmt::runtime(_transitionFormat.value()),
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            _buffer = std::vformat(
+                _transitionFormat.value(),
+                std::make_format_args(
                     targetDeltaTime.first, targetDeltaTime.second,
                     pauseText,
                     currentDeltaTime.first, currentDeltaTime.second
@@ -198,45 +215,20 @@ void DashboardItemSimulationIncrement::render(glm::vec2& penPosition) {
             );
         }
         else {
-            RenderFont(
-                *_font,
-                penPosition,
-                fmt::format(
-                    fmt::runtime(_regularFormat.value()),
-                    targetDeltaTime.first, targetDeltaTime.second, pauseText
+            // @CPP26(abock): This can be replaced with std::runtime_format
+            _buffer = std::vformat(
+                _regularFormat.value(),
+                std::make_format_args(
+                    targetDeltaTime.first,
+                    targetDeltaTime.second,
+                    pauseText
                 )
             );
         }
     }
-    catch (const fmt::format_error&) {
+    catch (const std::format_error&) {
         LERRORC("DashboardItemDate", "Illegal format string");
     }
-    penPosition.y -= _font->height();
-}
-
-glm::vec2 DashboardItemSimulationIncrement::size() const {
-    ZoneScoped;
-
-    double t = global::timeManager->targetDeltaTime();
-    std::pair<double, std::string> deltaTime;
-    if (_doSimplification) {
-        deltaTime = simplifyTime(t);
-    }
-    else {
-        TimeUnit unit = static_cast<TimeUnit>(_requestedUnit.value());
-        double convertedT = convertTime(t, TimeUnit::Second, unit);
-        deltaTime = std::pair(
-            convertedT,
-            std::string(nameForTimeUnit(unit, convertedT != 1.0))
-        );
-    }
-
-    return _font->boundingBox(
-        fmt::format(
-            "Simulation increment: {:.1f} {:s} / second",
-            deltaTime.first, deltaTime.second
-        )
-    );
 }
 
 } // namespace openspace

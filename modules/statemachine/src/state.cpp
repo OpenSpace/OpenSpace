@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/misc/dictionary.h>
+#include <optional>
 
 namespace {
     struct [[codegen::Dictionary(State)]] Parameters {
@@ -60,17 +62,11 @@ State::State(const ghoul::Dictionary& dictionary) {
 }
 
 void State::enter() const {
-    global::scriptEngine->queueScript(
-        _enter,
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
+    global::scriptEngine->queueScript(_enter);
 }
 
 void State::exit() const {
-    global::scriptEngine->queueScript(
-        _exit,
-        scripting::ScriptEngine::RemoteScripting::Yes
-    );
+    global::scriptEngine->queueScript(_exit);
 }
 
 std::string State::name() const {

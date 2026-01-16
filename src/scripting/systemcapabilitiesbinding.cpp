@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,6 @@
 #include <openspace/scripting/systemcapabilitiesbinding.h>
 
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/misc.h>
-#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
-#include <cctype>
 
 #include "systemcapabilitiesbinding_lua.inl"
 

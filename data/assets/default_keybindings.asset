@@ -1,0 +1,76 @@
+local actions = asset.require("actions/default_actions")
+
+
+asset.onInitialize(function()
+  openspace.bindKey("Ctrl+Q", actions.ToggleShutdown)
+
+  openspace.bindKey("F12", actions.TakeScreenshot)
+  openspace.bindKey("PRINT_SCREEN", actions.TakeScreenshot)
+
+  openspace.bindKey("SPACE", actions.TogglePauseInterpolated)
+  openspace.bindKey("Shift+SPACE", actions.TogglePauseImmediate)
+
+  openspace.bindKey("F", actions.ToggleRotationFriction)
+  openspace.bindKey("Shift+F", actions.ToggleZoomFriction)
+  openspace.bindKey("Ctrl+F", actions.ToggleRollFriction)
+
+  openspace.bindKey("B", actions.FadeToBlack)
+
+  openspace.bindKey("F1", actions.ToggleMainGui)
+  openspace.bindKey("Shift+F1", actions.ToggleOverlays)
+
+  openspace.bindKey("F2", actions.ToggleNativeUi)
+
+  openspace.bindKey("Right", actions.NextDeltaStepInterpolate)
+  openspace.bindKey("Shift+Right", actions.NextDeltaStepImmediate)
+
+  openspace.bindKey("Left", actions.PreviousDeltaStepInterpolate)
+  openspace.bindKey("Shift+Left", actions.PreviousDeltaStepImmediate)
+
+  openspace.bindKey("Down", actions.RealTimeDeltaStepInterpolate)
+  openspace.bindKey("Shift+Down", actions.RealTimeDeltaStepImmediate)
+
+  openspace.bindKey("F5", actions.ReloadGui)
+end)
+
+asset.onDeinitialize(function()
+  openspace.clearKey("F5")           -- actions.ReloadGui
+
+  openspace.clearKey("Shift+Down")   -- actions.RealTimeDeltaStepImmediate
+  openspace.clearKey("Down")         -- actions.RealTimeDeltaStepInterpolate
+
+  openspace.clearKey("Shift+Left")   -- actions.PreviousDeltaStepImmediate
+  openspace.clearKey("Left")         -- actions.PreviousDeltaStepInterpolate
+
+  openspace.clearKey("Shift+Right")  -- actions.NextDeltaStepImmediate
+  openspace.clearKey("Right")        -- actions.NextDeltaStepInterpolate
+
+  openspace.clearKey("F2")           -- actions.ToggleNativeUi
+
+  openspace.clearKey("Shift+F1")     -- actions.ToggleOverlays
+  openspace.clearKey("F1")           -- actions.ToggleMainGui
+
+  openspace.clearKey("B")            -- actions.FadeToBlack
+
+  openspace.clearKey("Ctrl+F")       -- actions.ToggleRollFriction
+  openspace.clearKey("Shift+F")      -- actions.ToggleZoomFriction
+  openspace.clearKey("F")            -- actions.ToggleRotationFriction
+
+  openspace.clearKey("Shift+SPACE")  -- actions.TogglePauseImmediate
+  openspace.clearKey("SPACE")        -- actions.TogglePauseInterpolated
+
+  openspace.clearKey("F12")          -- actions.TakeScreenshot
+  openspace.clearKey("PRINT_SCREEN") -- actions.TakeScreenshot
+
+  openspace.clearKey("Ctrl+Q")       -- actions.ToggleShutdown
+end)
+
+
+
+asset.meta = {
+  Name = "Default Keybindings",
+  Description ="Asset with default key bindings that are useful for all profiles",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

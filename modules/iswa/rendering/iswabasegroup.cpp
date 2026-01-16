@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,29 +24,32 @@
 
 #include <modules/iswa/rendering/iswabasegroup.h>
 
-#include <openspace/json.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "IswaBaseGroup";
-    using json = nlohmann::json;
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AlphaInfo = {
         "Alpha",
         "Alpha",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
-        "" // @TODO Missing documentation
+        "", // @TODO Missing documentation
+        openspace::properties::Property::Visibility::Developer
     };
 } // namespace
 
@@ -57,7 +60,7 @@ IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
     , _enabled(EnabledInfo, true)
     , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
     , _delete(DeleteInfo)
-    , _type(std::move(type))
+    , _iswaType(std::move(type))
 {
     addProperty(_enabled);
     addProperty(_alpha);
@@ -69,7 +72,7 @@ IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
 IswaBaseGroup::~IswaBaseGroup() {}
 
 bool IswaBaseGroup::isType(const std::string& type) const {
-    return (_type == type);
+    return (_iswaType == type);
 }
 
 void IswaBaseGroup::updateGroup() {

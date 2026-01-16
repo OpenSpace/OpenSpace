@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,30 +25,36 @@
 #include <openspace/navigation/navigationhandler.h>
 
 #include <openspace/camera/camera.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
-#include <openspace/interaction/scriptcamerastates.h>
-#include <openspace/navigation/navigationstate.h>
+#include <openspace/navigation/waypoint.h>
+#include <openspace/network/parallelconnection.h>
 #include <openspace/network/parallelpeer.h>
-#include <openspace/scene/profile.h>
+#include <openspace/query/query.h>
+#include <openspace/rendering/helper.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/query/query.h>
-#include <ghoul/filesystem/file.h>
+#include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/invariants.h>
 #include <ghoul/misc/profiling.h>
-#include <glm/gtx/vector_angle.hpp>
-#include <filesystem>
+#include <algorithm>
 #include <fstream>
-#include <numeric>
+#include <iterator>
+#include <limits>
+#include <utility>
 
 #include "navigationhandler_lua.inl"
 
@@ -61,28 +67,63 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DisableKeybindingsInfo = {
         "DisableKeybindings",
-        "Disable all Keybindings",
+        "Disable all keybindings",
         "Disables all keybindings without removing them. Please note that this does not "
-        "apply to the key to open the console"
+        "apply to the key to open the console.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInputs",
         "Disable all mouse inputs",
-        "Disables all mouse inputs and prevents them from affecting the camera"
+        "Disables all mouse inputs and prevents them from affecting the camera.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableJoystickInputInfo = {
         "DisableJoystickInputs",
         "Disable all joystick inputs",
-        "Disables all joystick inputs and prevents them from affecting the camera"
+        "Disables all joystick inputs and prevents them from affecting the camera.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FrameInfo = {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
         "If this is set to 'true' the entire interaction is based off key frames rather "
-        "than using the mouse interaction"
+        "than using the mouse interaction.",
+        openspace::properties::Property::Visibility::Developer
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo JumpToFadeDurationInfo = {
+        "JumpToFadeDuration",
+        "Jump to fade duration",
+        "The number of seconds the fading of the rendering should take per default when "
+        "navigating through a 'jump' transition. This is when the rendering is first "
+        "faded to black, then the camera is moved, and then the rendering fades in "
+        "again.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo MouseVisualizerInfo = {
+        "MouseInteractionVisualizer",
+        "Mouse Interaction Visualizer",
+        "The mouse interaction visualizer shows the distance the mouse has been moved "
+        "since it was pressed down."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MouseVisualizerEnabledInfo = {
+        "Enabled",
+        "Enabled",
+        "If this setting is enabled, the mouse interaction will be visualized on the "
+        "screen by showing the distance the mouse has been moved since it was pressed "
+        "down."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo MouseVisualizerColorInfo = {
+        "Color",
+        "Color",
+        "The color used to render the line showing the mouse visualizer."
     };
 } // namespace
 
@@ -94,6 +135,21 @@ NavigationHandler::NavigationHandler()
     , _disableMouseInputs(DisableMouseInputInfo, false)
     , _disableJoystickInputs(DisableJoystickInputInfo, false)
     , _useKeyFrameInteraction(FrameInfo, false)
+    , _jumpToFadeDuration(JumpToFadeDurationInfo, 1.f, 0.f, 10.f)
+    , _mouseVisualizer({
+        properties::PropertyOwner(MouseVisualizerInfo),
+        properties::BoolProperty(MouseVisualizerEnabledInfo, false),
+        properties::Vec4Property(
+            MouseVisualizerColorInfo,
+            glm::vec4(1.f),
+            glm::vec4(0.f),
+            glm::vec4(1.f)
+        ),
+        false,
+        false,
+        glm::vec2(0.f),
+        glm::vec2(0.f)
+    })
 {
     addPropertySubOwner(_orbitalNavigator);
     addPropertySubOwner(_pathNavigator);
@@ -102,6 +158,12 @@ NavigationHandler::NavigationHandler()
     addProperty(_disableMouseInputs);
     addProperty(_disableJoystickInputs);
     addProperty(_useKeyFrameInteraction);
+    addProperty(_jumpToFadeDuration);
+
+    addPropertySubOwner(_mouseVisualizer.owner);
+    _mouseVisualizer.owner.addProperty(_mouseVisualizer.enable);
+    _mouseVisualizer.color.setViewOption(properties::Property::ViewOptions::Color);
+    _mouseVisualizer.owner.addProperty(_mouseVisualizer.color);
 }
 
 NavigationHandler::~NavigationHandler() {}
@@ -136,8 +198,12 @@ void NavigationHandler::setCamera(Camera* camera) {
     _orbitalNavigator.setCamera(camera);
 }
 
-void NavigationHandler::setNavigationStateNextFrame(NavigationState state) {
-    _pendingNavigationState = std::move(state);
+void NavigationHandler::setNavigationStateNextFrame(const NavigationState& state) {
+    _pendingState = state;
+}
+
+void NavigationHandler::setCameraFromNodeSpecNextFrame(NodeCameraStateSpec spec) {
+    _pendingState = std::move(spec);
 }
 
 OrbitalNavigator& NavigationHandler::orbitalNavigator() {
@@ -160,6 +226,10 @@ bool NavigationHandler::isKeyFrameInteractionEnabled() const {
     return _useKeyFrameInteraction;
 }
 
+float NavigationHandler::jumpToFadeDuration() const {
+    return _jumpToFadeDuration;
+}
+
 float NavigationHandler::interpolationTime() const {
     return _orbitalNavigator.retargetInterpolationTime();
 }
@@ -168,17 +238,49 @@ void NavigationHandler::setInterpolationTime(float durationInSeconds) {
     _orbitalNavigator.setRetargetInterpolationTime(durationInSeconds);
 }
 
+void NavigationHandler::triggerFadeToTransition(std::string transitionScript,
+                                                std::optional<float> fadeDuration)
+{
+    const float duration = fadeDuration.value_or(_jumpToFadeDuration);
+
+    std::string script;
+    if (duration < std::numeric_limits<float>::epsilon()) {
+        script = std::move(transitionScript);
+    }
+    else {
+        const std::string onArrivalScript = std::format(
+            "{} "
+            "openspace.setPropertyValueSingle("
+            "'RenderEngine.BlackoutFactor', 1, {}, 'QuadraticEaseIn'"
+            ")", transitionScript, duration
+        );
+        script = std::format(
+            "openspace.setPropertyValueSingle("
+            "'RenderEngine.BlackoutFactor', 0, {}, 'QuadraticEaseOut', [[{}]]"
+            ")", duration, onArrivalScript
+        );
+    }
+
+    // No syncing, as this was called from a script that should have been synced already
+    global::scriptEngine->queueScript({
+        .code = std::move(script),
+        .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
+        .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+    });
+}
+
 void NavigationHandler::updateCamera(double deltaTime) {
     ghoul_assert(_camera != nullptr, "Camera must not be nullptr");
 
-    // If there is a navigation state to set, do so immediately and then return
-    if (_pendingNavigationState.has_value()) {
-        applyNavigationState(*_pendingNavigationState);
+    // If there is a state to set, do so immediately and then return
+    if (_pendingState.has_value()) {
+        applyPendingState();
+        updateCameraTransitions();
         return;
     }
 
-    OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
-    bool playbackMode = (mode == OpenSpaceEngine::Mode::SessionRecordingPlayback);
+    const OpenSpaceEngine::Mode mode = global::openSpaceEngine->currentMode();
+    const bool playbackMode = (mode == OpenSpaceEngine::Mode::SessionRecordingPlayback);
 
     // If we're in session recording payback mode, the session recording is responsible
     // for navigation. So don't do anything more here
@@ -210,13 +312,27 @@ void NavigationHandler::updateCamera(double deltaTime) {
     _orbitalNavigator.updateCameraScalingFromAnchor(deltaTime);
 }
 
-void NavigationHandler::applyNavigationState(const NavigationState& ns) {
-    _orbitalNavigator.setAnchorNode(ns.anchor);
-    _orbitalNavigator.setAimNode(ns.aim);
-    _camera->setPose(ns.cameraPose());
+void NavigationHandler::applyPendingState() {
+    ghoul_assert(_pendingState.has_value(), "Pending pose must have a value");
+
+    std::variant<NodeCameraStateSpec, NavigationState> pending = *_pendingState;
+    if (std::holds_alternative<NavigationState>(pending)) {
+        const NavigationState ns = std::get<NavigationState>(pending);
+        _orbitalNavigator.setAnchorNode(ns.anchor);
+        _orbitalNavigator.setAimNode(ns.aim);
+        _camera->setPose(ns.cameraPose());
+    }
+    else if (std::holds_alternative<NodeCameraStateSpec>(pending)) {
+        const NodeCameraStateSpec spec = std::get<NodeCameraStateSpec>(pending);
+        const Waypoint wp = computeWaypointFromNodeInfo(spec);
+
+        _orbitalNavigator.setAnchorNode(wp.nodeIdentifier());
+        _orbitalNavigator.setAimNode("");
+        _camera->setPose(wp.pose());
+    }
 
     resetNavigationUpdateVariables();
-    _pendingNavigationState.reset();
+    _pendingState.reset();
 }
 
 void NavigationHandler::updateCameraTransitions() {
@@ -245,89 +361,158 @@ void NavigationHandler::updateCameraTransitions() {
     const double af = anchorNode()->approachFactor();
     const double rf = anchorNode()->reachFactor();
 
-    using namespace std::string_literals;
-    if (_inAnchorApproachSphere) {
-        if (currDistance > d * (af + InteractionHystersis)) {
-            // We left the approach sphere outwards
-            _inAnchorApproachSphere = false;
+    // Updated checks compared to last time, so we can check if we are still in the
+    // approach or anchor sphere
+    const bool isInApproachSphere = currDistance < d * af;
+    const bool isInReachSphere = currDistance < d * rf;
 
-            if (!anchorNode()->onExitAction().empty()) {
-                ghoul::Dictionary dict;
-                dict.setValue("Node", anchorNode()->identifier());
-                dict.setValue("Transition", "Exiting"s);
-                for (const std::string& action : anchorNode()->onExitAction()) {
-                    global::actionManager->triggerAction(action, dict);
-                }
-            }
+    // Compare these to the values from last frame, to trigger the correct transition
+    // events
+    const bool wasInApproachSphere = _inAnchorApproachSphere;
+    const bool wasInReachSphere = _inAnchorReachSphere;
+    _inAnchorApproachSphere = isInApproachSphere;
+    _inAnchorReachSphere = isInReachSphere;
 
-            global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
-                _camera,
-                anchorNode(),
-                events::EventCameraFocusTransition::Transition::Exiting
-            );
-        }
-        else if (currDistance < d * (rf - InteractionHystersis)) {
-            // We transitioned from the approach sphere into the reach sphere
-            _inAnchorApproachSphere = false;
-            _inAnchorReachSphere = true;
-
-            if (!anchorNode()->onReachAction().empty()) {
-                ghoul::Dictionary dict;
-                dict.setValue("Node", anchorNode()->identifier());
-                dict.setValue("Transition", "Reaching"s);
-                for (const std::string& action : anchorNode()->onReachAction()) {
-                    global::actionManager->triggerAction(action, dict);
-                }
-            }
-
-            global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
-                _camera,
-                anchorNode(),
-                events::EventCameraFocusTransition::Transition::Reaching
-            );
-        }
-    }
-    else if (_inAnchorReachSphere && currDistance > d * (rf + InteractionHystersis)) {
-        // We transitioned from the reach sphere to the approach sphere
-        _inAnchorReachSphere = false;
-        _inAnchorApproachSphere = true;
-
-        if (!anchorNode()->onRecedeAction().empty()) {
+    auto triggerApproachEvent = [this](const SceneGraphNode* node) {
+        using namespace std::string_literals;
+        if (!node->onApproachAction().empty()) {
             ghoul::Dictionary dict;
-            dict.setValue("Node", anchorNode()->identifier());
-            dict.setValue("Transition", "Receding"s);
-            for (const std::string& action : anchorNode()->onRecedeAction()) {
-                global::actionManager->triggerAction(action, dict);
-            }
-        }
-
-        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
-            _camera,
-            anchorNode(),
-            events::EventCameraFocusTransition::Transition::Receding
-        );
-    }
-    else if (!_inAnchorApproachSphere && !_inAnchorReachSphere &&
-             currDistance < d * (af - InteractionHystersis))
-    {
-        // We moved into the approach sphere
-        _inAnchorApproachSphere = true;
-
-        if (!anchorNode()->onApproachAction().empty()) {
-            ghoul::Dictionary dict;
-            dict.setValue("Node", anchorNode()->identifier());
+            dict.setValue("Node", node->identifier());
             dict.setValue("Transition", "Approaching"s);
-            for (const std::string& action : anchorNode()->onApproachAction()) {
-                global::actionManager->triggerAction(action, dict);
+            for (const std::string& action : node->onApproachAction()) {
+                // No sync because events are always synced and sent to the connected
+                // nodes and peers
+                global::actionManager->triggerAction(
+                    action,
+                    dict,
+                    interaction::ActionManager::ShouldBeSynchronized::No
+                );
             }
         }
 
         global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
             _camera,
-            anchorNode(),
+            node,
             events::EventCameraFocusTransition::Transition::Approaching
         );
+    };
+
+    auto triggerReachEvent = [this](const SceneGraphNode* node) {
+        using namespace std::string_literals;
+        if (!node->onReachAction().empty()) {
+            ghoul::Dictionary dict;
+            dict.setValue("Node", node->identifier());
+            dict.setValue("Transition", "Reaching"s);
+            for (const std::string& action : node->onReachAction()) {
+                // No sync because events are always synced and sent to the connected
+                // nodes and peers
+                global::actionManager->triggerAction(
+                    action,
+                    dict,
+                    interaction::ActionManager::ShouldBeSynchronized::No
+                );
+            }
+        }
+
+        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
+            _camera,
+            node,
+            events::EventCameraFocusTransition::Transition::Reaching
+        );
+     };
+
+    auto triggerRecedeEvent = [this](const SceneGraphNode* node) {
+        using namespace std::string_literals;
+        if (!node->onRecedeAction().empty()) {
+            ghoul::Dictionary dict;
+            dict.setValue("Node", node->identifier());
+            dict.setValue("Transition", "Receding"s);
+            for (const std::string& action : node->onRecedeAction()) {
+                // No sync because events are always synced and sent to the connected
+                // nodes and peers
+                global::actionManager->triggerAction(
+                    action,
+                    dict,
+                    interaction::ActionManager::ShouldBeSynchronized::No
+                );
+            }
+        }
+
+        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
+            _camera,
+            node,
+            events::EventCameraFocusTransition::Transition::Receding
+        );
+    };
+
+    auto triggerExitEvent = [this](const SceneGraphNode* node) {
+        using namespace std::string_literals;
+        if (!node->onExitAction().empty()) {
+            ghoul::Dictionary dict;
+            dict.setValue("Node", node->identifier());
+            dict.setValue("Transition", "Exiting"s);
+            for (const std::string& action : node->onExitAction()) {
+                // No sync because events are always synced and sent to the connected
+                // nodes and peers
+                global::actionManager->triggerAction(
+                    action,
+                    dict,
+                    interaction::ActionManager::ShouldBeSynchronized::No
+                );
+            }
+        }
+
+        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
+            _camera,
+            node,
+            events::EventCameraFocusTransition::Transition::Exiting
+        );
+    };
+
+    const bool anchorWasChanged = anchorNode() != _lastAnchor;
+    if (anchorWasChanged) {
+        // The anchor was changed between frames, so the transitions we have to check
+        // are a bit different. Just directly trigger the relevant events for the
+        // respective node
+        if (wasInReachSphere) {
+            triggerRecedeEvent(_lastAnchor);
+        }
+
+        if (wasInApproachSphere) {
+            triggerExitEvent(_lastAnchor);
+        }
+
+        if (_inAnchorApproachSphere) {
+            triggerApproachEvent(anchorNode());
+        }
+
+        if (_inAnchorReachSphere) {
+            triggerReachEvent(anchorNode());
+        }
     }
+    else {
+        if (_inAnchorApproachSphere && !wasInApproachSphere) {
+            // Transitioned to the approach sphere from somewhere further away => approach
+            triggerApproachEvent(anchorNode());
+        }
+
+        if (_inAnchorReachSphere && !wasInReachSphere) {
+            // Transitioned to the reach sphere from somewhere further away => reach
+            triggerReachEvent(anchorNode());
+        }
+
+        if (!_inAnchorReachSphere && wasInReachSphere) {
+            // Transitioned out of the reach sphere => recede / move away
+            triggerRecedeEvent(anchorNode());
+        }
+
+        if (!_inAnchorApproachSphere && wasInApproachSphere) {
+            // We transitioned out of the approach sphere => on exit
+            triggerExitEvent(anchorNode());
+        }
+    }
+
+    _lastAnchor = anchorNode();
 }
 
 void NavigationHandler::resetNavigationUpdateVariables() {
@@ -354,12 +539,33 @@ const KeyboardInputState& NavigationHandler::keyboardInputState() const {
 void NavigationHandler::mouseButtonCallback(MouseButton button, MouseAction action) {
     if (!_disableMouseInputs) {
         _mouseInputState.mouseButtonCallback(button, action);
+
+        if (_mouseVisualizer.enable) {
+            if (action == MouseAction::Press) {
+                _mouseVisualizer.isMouseFirstPress = true;
+                _mouseVisualizer.isMousePressed = true;
+            }
+            else if (action == MouseAction::Release) {
+                _mouseVisualizer.isMousePressed = false;
+                _mouseVisualizer.currentPosition = glm::vec2(0.f);
+                _mouseVisualizer.clickPosition = glm::vec2(0.f);
+            }
+        }
     }
 }
 
 void NavigationHandler::mousePositionCallback(double x, double y) {
     if (!_disableMouseInputs) {
         _mouseInputState.mousePositionCallback(x, y);
+
+        if (_mouseVisualizer.enable && _mouseVisualizer.isMousePressed) {
+            if (_mouseVisualizer.isMouseFirstPress) {
+                _mouseVisualizer.clickPosition = glm::vec2(x, y);
+                _mouseVisualizer.isMouseFirstPress = false;
+            }
+
+            _mouseVisualizer.currentPosition = glm::vec2(x, y);
+        }
     }
 }
 
@@ -374,6 +580,19 @@ void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActio
     // There is no need to disable the keyboard callback based on a property as the vast
     // majority of input is coming through Lua scripts anyway which are not blocked here
     _keyboardInputState.keyboardCallback(key, modifier, action);
+}
+
+void NavigationHandler::renderOverlay() const {
+    if (_mouseVisualizer.enable && _mouseVisualizer.isMousePressed) {
+        constexpr glm::vec4 StartColor = glm::vec4(0.4f, 0.4f, 0.4f, 0.25f);
+        rendering::helper::renderLine(
+            _mouseVisualizer.clickPosition,
+            _mouseVisualizer.currentPosition,
+            global::windowDelegate->currentWindowSize(),
+            StartColor,
+            _mouseVisualizer.color
+        );
+    }
 }
 
 bool NavigationHandler::disabledKeybindings() const {
@@ -416,8 +635,8 @@ NavigationState NavigationHandler::navigationState(
         glm::normalize(_camera->lookUpVectorWorldSpace())
     ));
 
-    glm::dquat localRotation = invNeutralRotation * _camera->rotationQuaternion();
-    glm::dvec3 eulerAngles = glm::eulerAngles(localRotation);
+    const glm::dquat localRotation = invNeutralRotation * _camera->rotationQuaternion();
+    const glm::dvec3 eulerAngles = glm::eulerAngles(localRotation);
 
     const double pitch = eulerAngles.x;
     const double yaw = -eulerAngles.y;
@@ -438,12 +657,15 @@ NavigationState NavigationHandler::navigationState(
         _orbitalNavigator.aimNode() ? _orbitalNavigator.aimNode()->identifier() : "",
         referenceFrame.identifier(),
         position,
-        invReferenceFrameTransform * neutralUp, yaw, pitch
+        invReferenceFrameTransform * neutralUp,
+        yaw,
+        pitch,
+        global::timeManager->time().j2000Seconds()
     );
 }
 
 void NavigationHandler::saveNavigationState(const std::filesystem::path& filepath,
-                                            const std::string& referenceFrameIdentifier)
+                                        const std::string& referenceFrameIdentifier) const
 {
     ghoul_precondition(!filepath.empty(), "File path must not be empty");
 
@@ -451,7 +673,7 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
     if (!referenceFrameIdentifier.empty()) {
         const SceneGraphNode* referenceFrame = sceneGraphNode(referenceFrameIdentifier);
         if (!referenceFrame) {
-            LERROR(fmt::format(
+            LERROR(std::format(
                 "Could not find node '{}' to use as reference frame",
                 referenceFrameIdentifier
             ));
@@ -464,42 +686,57 @@ void NavigationHandler::saveNavigationState(const std::filesystem::path& filepat
     }
 
     std::filesystem::path absolutePath = absPath(filepath);
-    LINFO(fmt::format("Saving camera position: {}", absolutePath));
+    if (!absolutePath.has_extension()) {
+        // Adding the .navstate extension to the filepath if it came without one
+        absolutePath.replace_extension(".navstate");
+    }
+    LINFO(std::format("Saving camera position: {}", absolutePath));
 
     std::ofstream ofs(absolutePath);
 
     if (!ofs.good()) {
-        throw ghoul::RuntimeError(fmt::format(
-            "Error saving navigation state to {}", filepath
+        throw ghoul::RuntimeError(std::format(
+            "Error saving navigation state to '{}'", filepath
         ));
     }
 
-    ofs << "return " << ghoul::formatLua(state.dictionary());
+    ofs << state.toJson().dump(2);
 }
 
-void NavigationHandler::loadNavigationState(const std::string& filepath) {
-    const std::filesystem::path absolutePath = absPath(filepath);
-    LINFO(fmt::format("Reading camera state from file: {}", absolutePath));
+void NavigationHandler::loadNavigationState(const std::string& filepath,
+                                            bool useTimeStamp)
+{
+    std::filesystem::path absolutePath = absPath(filepath);
+    LINFO(std::format("Reading camera state from file: {}", absolutePath));
+
+    if (!absolutePath.has_extension()) {
+        // Adding the .navstate extension to the filepath if it came without one
+        absolutePath.replace_extension(".navstate");
+    }
 
     if (!std::filesystem::is_regular_file(absolutePath)) {
-        throw ghoul::FileNotFoundError(absolutePath.string(), "NavigationState");
+        throw ghoul::FileNotFoundError(absolutePath, "NavigationState");
     }
 
-    ghoul::Dictionary navigationStateDictionary;
-    try {
-        ghoul::lua::loadDictionaryFromFile(
-            absolutePath.string(),
-            navigationStateDictionary
-        );
-        openspace::documentation::testSpecificationAndThrow(
-            NavigationState::Documentation(),
-            navigationStateDictionary,
-            "NavigationState"
-        );
-        setNavigationStateNextFrame(NavigationState(navigationStateDictionary));
+    std::ifstream f = std::ifstream(absolutePath);
+    const std::string contents = std::string(
+        std::istreambuf_iterator<char>(f),
+        std::istreambuf_iterator<char>()
+    );
+
+    if (contents.empty()) {
+        throw::ghoul::RuntimeError(std::format(
+            "Failed reading camera state from file: {}. File is empty", absolutePath
+        ));
     }
-    catch (ghoul::RuntimeError& e) {
-        LERROR(fmt::format("Unable to set camera position: {}", e.message));
+
+    const nlohmann::json json = nlohmann::json::parse(contents);
+
+    const NavigationState state = NavigationState(json);
+    setNavigationStateNextFrame(state);
+
+    if (useTimeStamp && state.timestamp.has_value()) {
+        global::timeManager->setTimeNextFrame(Time(*state.timestamp));
     }
 }
 
@@ -520,6 +757,7 @@ void NavigationHandler::setJoystickAxisMapping(std::string joystickName, int axi
                                             JoystickCameraStates::AxisInvert shouldInvert,
                                           JoystickCameraStates::JoystickType joystickType,
                                                bool isSticky,
+                                               JoystickCameraStates::AxisFlip shouldFlip,
                                                double sensitivity)
 {
     _orbitalNavigator.joystickStates().setAxisMapping(
@@ -529,6 +767,7 @@ void NavigationHandler::setJoystickAxisMapping(std::string joystickName, int axi
         shouldInvert,
         joystickType,
         isSticky,
+        shouldFlip,
         sensitivity
     );
 }
@@ -646,9 +885,23 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
             codegen::lua::ListAllJoysticks,
             codegen::lua::TargetNextInterestingAnchor,
             codegen::lua::TargetPreviousInterestingAnchor,
+            codegen::lua::SetFocus,
             codegen::lua::DistanceToFocus,
             codegen::lua::DistanceToFocusBoundingSphere,
-            codegen::lua::DistanceToFocusInteractionSphere
+            codegen::lua::DistanceToFocusInteractionSphere,
+            codegen::lua::JumpToGeo,
+            codegen::lua::FlyToGeo2,
+            codegen::lua::FlyToGeo,
+            codegen::lua::LocalPositionFromGeo,
+            codegen::lua::IsFlying,
+            codegen::lua::FlyTo,
+            codegen::lua::FlyToHeight,
+            codegen::lua::FlyToNavigationState,
+            codegen::lua::ZoomToFocus,
+            codegen::lua::ZoomToDistance,
+            codegen::lua::ZoomToDistanceRelative,
+            codegen::lua::JumpTo,
+            codegen::lua::JumpToNavigationState
         }
     };
 }

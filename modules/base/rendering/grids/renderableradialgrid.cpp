@@ -3,7 +3,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,64 +26,69 @@
 #include <modules/base/rendering/grids/renderableradialgrid.h>
 
 #include <modules/base/basemodule.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <ghoul/misc/dictionary.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <optional>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "This value determines the color of the grid lines that are rendered"
+        "The color used for the grid lines.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GridSegmentsInfo = {
         "GridSegments",
-        "Number of Grid Segments",
+        "Number of grid segments",
         "Specifies the number of segments for the grid, in the radial and angular "
-        "direction respectively"
+        "direction respectively.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo CircleSegmentsInfo = {
         "CircleSegments",
-        "Number of Circle Segments",
-        "This value specifies the number of segments that is used to render each circle "
-        "in the grid"
+        "Number of circle segments",
+        "The number of segments that is used to render each circle in the grid.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
-        "This value specifies the line width of the spherical grid"
+        "Line width",
+        "The width of the grid lines. The larger number, the thicker the lines.",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiiInfo = {
         "Radii",
-        "Inner and Outer Radius",
+        "Inner and outer radius",
         "The radii values that determine the size of the circular grid. The first value "
         "is the radius of the inmost ring and the second is the radius of the outmost "
-        "ring"
+        "ring.",
+        openspace::properties::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
-        "DrawLabels",
-        "Draw Labels",
-        "Determines whether labels should be drawn or hidden"
-    };
-
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo =
-    {
+    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
-        "The labels for the grid"
+        "The labels for the grid."
     };
 
+    // This `Renderable` creates a planar circular grid with a given size. Optionally, it
+    // may have a hole in the center.
+    //
+    // The size is determined by two radii values: The first (inner) radius defines the
+    // hole in the center. The second (outer) radius defines the full grid size. To create
+    // a solid circle that connects at the center, set the inner radius to zero (default).
     struct [[codegen::Dictionary(RenderableRadialGrid)]] Parameters {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
@@ -100,12 +105,9 @@ namespace {
         // [[codegen::verbatim(RadiiInfo.description)]]
         std::optional<glm::vec2> radii;
 
-        // [[codegen::verbatim(DrawLabelInfo.description)]]
-        std::optional<bool> drawLabels;
-
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels
-            [[codegen::reference("space_labelscomponent")]];
+            [[codegen::reference("labelscomponent")]];
     };
 #include "renderableradialgrid_codegen.cpp"
 } // namespace
@@ -119,27 +121,25 @@ documentation::Documentation RenderableRadialGrid::Documentation() {
 RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
-    , _gridSegments(GridSegmentsInfo, glm::ivec2(1), glm::ivec2(1), glm::ivec2(200))
+    , _gridSegments(GridSegmentsInfo, glm::ivec2(10), glm::ivec2(1), glm::ivec2(200))
     , _circleSegments(CircleSegmentsInfo, 36, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
     , _radii(RadiiInfo, glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(20.f))
-    , _drawLabels(DrawLabelInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_opacity);
-    registerUpdateRenderBinFromOpacity();
+    addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
     _color.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_color);
 
     _gridSegments = p.gridSegments.value_or(_gridSegments);
-    _gridSegments.onChange([&]() { _gridIsDirty = true; });
+    _gridSegments.onChange([this]() { _gridIsDirty = true; });
     addProperty(_gridSegments);
 
     _circleSegments = p.circleSegments.value_or(_circleSegments);
-    _circleSegments.onChange([&]() {
+    _circleSegments.onChange([this]() {
         if (_circleSegments.value() % 2 == 1) {
             _circleSegments = _circleSegments - 1;
         }
@@ -152,28 +152,26 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
 
     _radii = p.radii.value_or(_radii);
     _radii.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-    _radii.onChange([&]() { _gridIsDirty = true; });
+    _radii.onChange([this]() { _gridIsDirty = true; });
 
     addProperty(_radii);
 
     if (p.labels.has_value()) {
-        _drawLabels = p.drawLabels.value_or(_drawLabels);
-        addProperty(_drawLabels);
-
         _labels = std::make_unique<LabelsComponent>(*p.labels);
         _hasLabels = true;
         addPropertySubOwner(_labels.get());
+        // Fading of the labels should also depend on the fading of the renderable
+        _labels->setParentFadeable(this);
     }
 }
 
 bool RenderableRadialGrid::isReady() const {
-    return _hasLabels ? _gridProgram && _labels->isReady() : _gridProgram != nullptr;
+    return _gridProgram && (_hasLabels ? _labels->isReady() : true);
 }
 
 void RenderableRadialGrid::initialize() {
     if (_hasLabels) {
         _labels->initialize();
-        _labels->loadLabels();
     }
 }
 
@@ -203,19 +201,11 @@ void RenderableRadialGrid::deinitializeGL() {
 void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->activate();
 
-    const glm::dmat4 modelTransform =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
-        glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
-
-    const glm::dmat4 modelViewTransform =
-        data.camera.combinedViewMatrix() * modelTransform;
-    const glm::dmat4 projectionMatrix = data.camera.projectionMatrix();
-
-    const glm::dmat4 modelViewProjectionMatrix = projectionMatrix * modelViewTransform;
+    auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
+        calcAllTransforms(data);
 
     _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform("MVPTransform", modelViewProjectionMatrix);
+    _gridProgram->setUniform("MVPTransform", modelViewProjectionTransform);
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
@@ -230,7 +220,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_LINE_SMOOTH);
     glDepthMask(false);
 
-    for (GeometryData& c : _circles) {
+    for (const GeometryData& c : _circles) {
         c.render();
     }
 
@@ -244,7 +234,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     global::renderEngine->openglStateCache().resetDepthState();
 
     // Draw labels
-    if (_drawLabels && _hasLabels) {
+    if (_hasLabels && _labels->enabled()) {
         const glm::vec3 lookup = data.camera.lookUpVectorWorldSpace();
         const glm::vec3 viewDirection = data.camera.viewDirectionWorldSpace();
         glm::vec3 right = glm::cross(viewDirection, lookup);
@@ -256,7 +246,7 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
         );
 
         if (orthoRight == glm::vec3(0.0)) {
-            glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
+            const glm::vec3 otherVector = glm::vec3(lookup.y, lookup.x, lookup.z);
             right = glm::cross(viewDirection, otherVector);
             orthoRight = glm::normalize(
                 glm::vec3(worldToModelTransform * glm::vec4(right, 0.0))
@@ -265,12 +255,12 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
         const glm::vec3 orthoUp = glm::normalize(
             glm::vec3(worldToModelTransform * glm::dvec4(up, 0.0))
         );
-        _labels->render(data, modelViewProjectionMatrix, orthoRight, orthoUp);
+        _labels->render(data, modelViewProjectionTransform, orthoRight, orthoUp);
     }
 }
 
 void RenderableRadialGrid::update(const UpdateData&) {
-    if (!_gridIsDirty) {
+    if (!_gridIsDirty) [[likely]] {
         return;
     }
 
@@ -292,8 +282,8 @@ void RenderableRadialGrid::update(const UpdateData&) {
         std::vector<rendering::helper::Vertex> vertices =
             rendering::helper::createRing(nSegments, radius);
 
-        _circles.push_back(GeometryData(GL_LINE_STRIP));
-        _circles.back().varray = rendering::helper::convert(vertices);
+        _circles.emplace_back(GL_LINE_STRIP);
+        _circles.back().varray = rendering::helper::convert(std::move(vertices));
         _circles.back().update();
     };
 
@@ -302,7 +292,7 @@ void RenderableRadialGrid::update(const UpdateData&) {
         addRing(_circleSegments, innerRadius);
     }
 
-    for (int i = 0; i < nRadialSegments; ++i) {
+    for (int i = 0; i < nRadialSegments; i++) {
         const float ri = static_cast<float>(i + 1) * deltaRadius + innerRadius;
         addRing(_circleSegments, ri);
     }
@@ -321,7 +311,7 @@ void RenderableRadialGrid::update(const UpdateData&) {
         std::vector<rendering::helper::Vertex> innerVertices =
             rendering::helper::createRing(nLines, innerRadius);
 
-        for (int i = 0; i < nLines; ++i) {
+        for (int i = 0; i < nLines; i++) {
             const rendering::helper::VertexXYZ vOut =
                 rendering::helper::convertToXYZ(outerVertices[i]);
 
@@ -352,7 +342,10 @@ RenderableRadialGrid::GeometryData::GeometryData(GLenum renderMode)
 }
 
 RenderableRadialGrid::GeometryData::GeometryData(GeometryData&& other) noexcept {
-    if (this == &other) return;
+    if (this == &other) {
+        return;
+    }
+
     vao = other.vao;
     vbo = other.vbo;
     varray = std::move(other.varray);
@@ -385,7 +378,7 @@ RenderableRadialGrid::GeometryData::~GeometryData() {
     vbo = 0;
 }
 
-void RenderableRadialGrid::GeometryData::update() {
+void RenderableRadialGrid::GeometryData::update() const {
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(
@@ -405,7 +398,7 @@ void RenderableRadialGrid::GeometryData::update() {
     );
 }
 
-void RenderableRadialGrid::GeometryData::render() {
+void RenderableRadialGrid::GeometryData::render() const {
     glBindVertexArray(vao);
     glDrawArrays(mode, 0, static_cast<GLsizei>(varray.size()));
     glBindVertexArray(0);

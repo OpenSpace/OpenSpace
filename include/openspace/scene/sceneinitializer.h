@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___SCENEINITIALIZER___H__
 
 #include <openspace/util/threadpool.h>
+#include <mutex>
 #include <unordered_set>
 #include <vector>
 
@@ -33,35 +34,24 @@ namespace openspace {
 
 class SceneGraphNode;
 
+/**
+ * This class is responsible for initializing nodes, in a multithreaded fashion if needed,
+ * that are passed into it. The constructor takes the number of extra separate threads
+ * that are used to initialize nodes. Passing `0` for the number of threads results in
+ * nodes being initialized on the main thread instead.
+ */
 class SceneInitializer {
 public:
-    virtual ~SceneInitializer() = default;
-    virtual void initializeNode(SceneGraphNode* node) = 0;
-    virtual std::vector<SceneGraphNode*> takeInitializedNodes() = 0;
-    virtual bool isInitializing() const = 0;
-};
+    explicit SceneInitializer(unsigned int nThreads = 0);
 
-class SingleThreadedSceneInitializer final : public SceneInitializer {
-public:
-    void initializeNode(SceneGraphNode* node) override;
-    std::vector<SceneGraphNode*> takeInitializedNodes() override;
-    bool isInitializing() const override;
-
-private:
-    std::vector<SceneGraphNode*> _initializedNodes;
-};
-
-class MultiThreadedSceneInitializer final : public SceneInitializer {
-public:
-    MultiThreadedSceneInitializer(unsigned int nThreads);
-
-    void initializeNode(SceneGraphNode* node) override;
-    std::vector<SceneGraphNode*> takeInitializedNodes() override;
-    bool isInitializing() const override;
+    void initializeNode(SceneGraphNode* node);
+    std::vector<SceneGraphNode*> takeInitializedNodes();
+    bool isInitializing() const;
 
 private:
     std::vector<SceneGraphNode*> _initializedNodes;
     std::unordered_set<SceneGraphNode*> _initializingNodes;
+    const unsigned int _nThreads;
     ThreadPool _threadPool;
     mutable std::mutex _mutex;
 };

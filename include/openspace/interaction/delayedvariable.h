@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,14 +28,15 @@
 namespace openspace::interaction {
 
 /**
- * Class that acts as a smoothing filter to a variable. The filter has a step
- * response on a form that resembles the function y = 1-e^(-t/scale). The variable
- * will be updated as soon as it is set to a value (calling the set() function).
+ * Class that acts as a smoothing filter to a variable. The filter has a step response on
+ * a form that resembles the function y = 1-e^(-t/scale). The variable will be updated as
+ * soon as it is set to a value (calling the set() function).
  */
 template <typename T, typename ScaleType>
 class DelayedVariable {
 public:
     DelayedVariable(ScaleType scaleFactor, ScaleType friction);
+
     void set(T value, double dt);
     void decelerate(double dt);
     void setHard(T value);

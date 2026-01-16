@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,12 +24,12 @@
 
 #include <openspace/rendering/dashboard.h>
 
-#include <openspace/engine/globals.h>
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/scripting/scriptengine.h>
+#include <openspace/scripting/lualibrary.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <utility>
 
 #include "dashboard_lua.inl"
 
@@ -38,14 +38,24 @@ namespace {
         "IsEnabled",
         "Enabled",
         "If this value is 'false', this dashboard will be invisible, regardless of the "
-        "state of the individual components"
+        "state of the individual components.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartPositionOffsetInfo = {
         "StartPositionOffset",
-        "Start Position Offset",
+        "Start position offset",
         "A 2D vector controlling where the dashboard rendering starts. Adding an offset "
-        "in x and y-direction on screen"
+        "in x and y-direction on screen.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo RefreshRateInfo = {
+        "RefreshRate",
+        "Refresh rate (in ms)",
+        "The number of milliseconds between refreshes of the dashboard items. If the "
+        "value is 0 the dashboard is refreshed at the same rate as the main rendering.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 
@@ -55,11 +65,17 @@ Dashboard::Dashboard()
     : properties::PropertyOwner({ "Dashboard" })
     , _isEnabled(EnabledInfo, true)
     , _startPositionOffset(
-        properties::IVec2Property(StartPositionOffsetInfo, glm::ivec2(10, -25))
+        StartPositionOffsetInfo,
+        glm::ivec2(10, 10),
+        glm::ivec2(0),
+        glm::ivec2(8192)
     )
+    , _refreshRate(RefreshRateInfo, 0, 0, 1000)
+    , _lastRefresh(std::chrono::steady_clock::now())
 {
     addProperty(_isEnabled);
     addProperty(_startPositionOffset);
+    addProperty(_refreshRate);
 }
 
 void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
@@ -81,7 +97,7 @@ void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
         else {
             item->setIdentifier(originalIdentifier + std::to_string(suffix));
             item->setGuiName(originalIdentifier + " " + std::to_string(suffix));
-            ++suffix;
+            suffix++;
         }
     }
 
@@ -133,19 +149,37 @@ void Dashboard::clearDashboardItems() {
 void Dashboard::render(glm::vec2& penPosition) {
     ZoneScoped;
 
-    if (!_isEnabled) {
+    if (!_isEnabled || _items.empty()) {
         return;
+    }
+
+    auto now = std::chrono::steady_clock::now();
+    bool needsUpdate = (now - _lastRefresh) > std::chrono::milliseconds(_refreshRate);
+    if (needsUpdate) {
+        _lastRefresh = now;
     }
 
     for (const std::unique_ptr<DashboardItem>& item : _items) {
         if (item->isEnabled()) {
+            if (needsUpdate) {
+                item->update();
+            }
             item->render(penPosition);
         }
     }
 }
 
-glm::vec2 Dashboard::getStartPositionOffset() {
-    return _startPositionOffset.value();
+glm::ivec2 Dashboard::startPositionOffset() {
+    return _startPositionOffset;
+}
+
+std::vector<DashboardItem*> Dashboard::dashboardItems() const {
+    std::vector<DashboardItem*> result;
+    result.reserve(_items.size());
+    for (const std::unique_ptr<DashboardItem>& d : _items) {
+        result.push_back(d.get());
+    }
+    return result;
 }
 
 scripting::LuaLibrary Dashboard::luaLibrary() {
@@ -154,7 +188,8 @@ scripting::LuaLibrary Dashboard::luaLibrary() {
         {
             codegen::lua::AddDashboardItem,
             codegen::lua::RemoveDashboardItem,
-            codegen::lua::ClearDashboardItems
+            codegen::lua::ClearDashboardItems,
+            codegen::lua::DashboardItems
         }
     };
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,55 +32,90 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/util/keys.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
+#include <openspace/util/mouse.h>
+#include <functional>
 #include <memory>
-#include <string>
-#include <vector>
 
-namespace ghoul::fontrendering { class Font; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul {
+    namespace fontrendering { class Font; }
+    namespace opengl { class ProgramObject; }
+} // namespace ghoul
 
 namespace openspace {
 
 class LuaConsole : public properties::PropertyOwner {
 public:
     LuaConsole();
-    ~LuaConsole() override;
+    ~LuaConsole() override = default;
 
     void initialize();
     void deinitialize();
 
     bool keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier modifier);
+    bool mouseActivationCallback(glm::vec2 pos, MouseButton button, MouseAction action,
+        KeyModifier mods);
 
     void update();
     void render();
     float currentHeight() const;
 
+    void setCommandInputButton(Key key);
+
 private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
+    void addToCommand(const std::string& c);
+    void registerKeyHandlers();
+    void registerKeyHandler(Key key, KeyModifier modifier,
+        std::function<void()> callback);
 
-    void addToCommand(std::string c);
+    // Helper functions for tab autocomplete
+    void autoCompleteCommand();
+    size_t detectContext(std::string_view command);
+    bool gatherPathSuggestions(size_t contextStart);
+    void gatherFunctionSuggestions(size_t contextStart);
+    void filterSuggestions();
+    void cycleSuggestion();
+    void applySuggestion();
 
     properties::BoolProperty _isVisible;
-    properties::BoolProperty _remoteScripting;
+    properties::BoolProperty _shouldBeSynchronized;
+    properties::BoolProperty _shouldSendToRemote;
 
     properties::Vec4Property _backgroundColor;
     properties::Vec4Property _entryTextColor;
     properties::Vec4Property _historyTextColor;
     properties::IntProperty _historyLength;
 
+    Key _commandInputButton = Key::GraveAccent;
+
     size_t _inputPosition = 0;
     std::vector<std::string> _commandsHistory;
     size_t _activeCommand = 0;
     std::vector<std::string> _commands;
+    // Map of registered keybinds and their corresponding callbacks
+    std::map<KeyWithModifier, std::function<void()>> _keyHandlers;
 
-    struct {
-        int lastIndex;
-        bool hasInitialValue;
-        std::string initialValue;
-    } _autoCompleteInfo;
+    enum class Context {
+        None = 0,
+        Function,
+        Path
+    };
+
+    struct AutoCompleteState {
+        AutoCompleteState();
+
+        Context context; // Assumed context we are currently in based on
+        bool isDataDirty; // Flag indicating if we need to update the suggestion data
+        std::string input; // Part of the command that we're intrested in
+        std::vector<std::string> suggestions; // All suggestions found so far
+        int currentIndex; // Current suggestion index
+        std::string suggestion; // Current suggestion to show
+        bool cycleReverse; // Whether we should cycle suggestions forward or backwards
+        size_t insertPosition; // Where to insert the suggestion in the command
+    };
+
+    AutoCompleteState  _autoCompleteState;
 
     float _currentHeight = 0.f;
     float _targetHeight = 0.f;

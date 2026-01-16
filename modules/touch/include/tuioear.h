@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,8 +33,9 @@
 #pragma GCC diagnostic ignored "-Wold-style-cast"
 #endif
 
-#include <modules/touch/ext/libTUIO11/TUIO/TuioListener.h>
-#include <modules/touch/ext/libTUIO11/TUIO/TuioClient.h>
+#include <TuioClient.h>
+#include <TuioListener.h>
+#include <TuioTime.h>
 
 #ifdef __clang__
 #pragma clang diagnostic pop
@@ -43,41 +44,43 @@
 #endif
 
 #include <openspace/util/touch.h>
-#include <ghoul/glm.h>
-#include <algorithm>
-#include <math.h>
 #include <mutex>
-#include <numeric>
 #include <vector>
+
+namespace TUIO {
+    class TuioBlob;
+    class TuioCursor;
+    class TuioObject;
+} // namespace TUIO
 
 namespace openspace {
 
 class TuioEar : public TUIO::TuioListener {
 public:
-    TuioEar();
+    explicit TuioEar(int port = 3333);
     ~TuioEar();
 
     /**
-    * Callback functions, listens to the TUIO server
-    */
-    void addTuioObject(TUIO::TuioObject *tobj);
-    void updateTuioObject(TUIO::TuioObject *tobj);
-    void removeTuioObject(TUIO::TuioObject *tobj);
+     * Callback functions, listens to the TUIO server.
+     */
+    void addTuioObject(TUIO::TuioObject* tobj) override;
+    void updateTuioObject(TUIO::TuioObject* tobj) override;
+    void removeTuioObject(TUIO::TuioObject* tobj) override;
 
-    void addTuioCursor(TUIO::TuioCursor *tcur);
-    void updateTuioCursor(TUIO::TuioCursor *tcur);
-    void removeTuioCursor(TUIO::TuioCursor *tcur);
+    void addTuioCursor(TUIO::TuioCursor* tcur) override;
+    void updateTuioCursor(TUIO::TuioCursor* tcur) override;
+    void removeTuioCursor(TUIO::TuioCursor* tcur) override;
 
-    void addTuioBlob(TUIO::TuioBlob *tblb);
-    void updateTuioBlob(TUIO::TuioBlob *tblb);
-    void removeTuioBlob(TUIO::TuioBlob *tblb);
+    void addTuioBlob(TUIO::TuioBlob* tblb) override;
+    void updateTuioBlob(TUIO::TuioBlob* tblb) override;
+    void removeTuioBlob(TUIO::TuioBlob* tblb) override;
 
-    void refresh(TUIO::TuioTime frameTime);
+    void refresh(TUIO::TuioTime frameTime) override;
 
     /**
-        * Lock-swap the containers of this listener
-        */
-    std::vector<TouchInput> takeInput();
+     * Lock-swap the containers of this listener.
+     */
+    std::vector<TouchInput> takeInputs();
     std::vector<TouchInput> takeRemovals();
 
 private:

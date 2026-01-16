@@ -1,16 +1,19 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local omm = asset.syncedResource({
+
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (Breeze-M Breakup)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_2012-044",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?INTDES=2012-044&FORMAT=kvn",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?INTDES=2012-044&FORMAT=kvn",
   Filename = "2012-044.txt",
-  Override = true
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
-local satellites = {
-  Identifier = "2012-044",
+
+local DebrisBreezem = {
+  Identifier = "DebrisBreezem-2012-044",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
@@ -18,31 +21,33 @@ local satellites = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.25, 0.35, 0.45 },
-    Fade = 1.5,
+    TrailFade = 15,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Breeze-M Breakup",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(satellites)
+  openspace.addSceneGraphNode(DebrisBreezem)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(satellites)
+  openspace.removeSceneGraphNode(DebrisBreezem)
 end)
 
-asset.export(satellites)
+asset.export(DebrisBreezem)
 
 
 
 asset.meta = {
   Name = "Satellites Debris - Breeze-M Breakup",
-  Version = "1.0",
   Description = "Satellites asset for Debris - Breeze-M Breakup. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/events/38746-Breakup/",

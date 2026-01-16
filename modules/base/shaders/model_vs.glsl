@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,12 +30,14 @@ layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 layout(location = 3) in vec3 in_tangent;
+layout(location = 4) in vec3 in_color;
 
 out vec2 vs_st;
 out vec3 vs_normalViewSpace;
 out float vs_screenSpaceDepth;
 out vec4 vs_positionCameraSpace;
-out mat3 TBN;
+out mat3 vs_TBN;
+out vec3 vs_color;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
@@ -43,6 +45,9 @@ uniform mat4 normalTransform;
 uniform mat4 meshTransform;
 uniform mat4 meshNormalTransform;
 
+out vec4 lightspace_position;
+uniform dmat4 model;
+uniform dmat4 light_vp;
 
 void main() {
   vs_positionCameraSpace = modelViewTransform * (meshTransform * in_position);
@@ -51,19 +56,23 @@ void main() {
 
   gl_Position = positionScreenSpace;
   vs_st = in_st;
+  vs_color = in_color;
   vs_screenSpaceDepth = positionScreenSpace.w;
-    
-  vs_normalViewSpace = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
 
-	// TBN matrix for normal mapping
-	vec3 T = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_tangent));
-	vec3 N = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
+  vs_normalViewSpace =
+    normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
 
-	// Re-orthogonalize T with respect to N
-	T = normalize(T - dot(T, N) * N);
+  // TBN matrix for normal mapping
+  vec3 T = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_tangent));
+  vec3 N = normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
 
-	// Retrieve perpendicular vector B with cross product of T and N
-	vec3 B = normalize(cross(N, T));
+  // Re-orthogonalize T with respect to N
+  T = normalize(T - dot(T, N) * N);
 
-	TBN = mat3(T, B, N);
+  // Retrieve perpendicular vector B with cross product of T and N
+  vec3 B = normalize(cross(N, T));
+
+  vs_TBN = mat3(T, B, N);
+
+  lightspace_position = vec4(light_vp * model * meshTransform * in_position);
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,7 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/invariants.h>
-#include <ghoul/misc/stringconversion.h>
 #include <algorithm>
-#include <map>
 #include <numeric>
 
 namespace openspace::interaction {
@@ -36,7 +34,7 @@ namespace openspace::interaction {
 int JoystickInputStates::numAxes(const std::string& joystickName) const {
     if (joystickName.empty()) {
         int maxNumAxes = -1;
-        for (auto it = begin(); it < end(); ++it) {
+        for (auto it = begin(); it < end(); it++) {
             if (it->nAxes > maxNumAxes) {
                 maxNumAxes = it->nAxes;
             }
@@ -44,9 +42,9 @@ int JoystickInputStates::numAxes(const std::string& joystickName) const {
         return maxNumAxes;
     }
 
-    for (auto it = begin(); it < end(); ++it) {
-        if (it->name == joystickName) {
-            return it->nAxes;
+    for (const JoystickInputState& state : *this) {
+        if (state.name == joystickName) {
+            return state.nAxes;
         }
     }
     return -1;
@@ -55,19 +53,20 @@ int JoystickInputStates::numAxes(const std::string& joystickName) const {
 int JoystickInputStates::numButtons(const std::string& joystickName) const {
     if (joystickName.empty()) {
         int maxNumButtons = -1;
-        for (auto it = begin(); it < end(); ++it) {
-            if (it->nButtons > maxNumButtons) {
-                maxNumButtons = it->nButtons;
+        for (const JoystickInputState& state : *this) {
+            if (state.nButtons > maxNumButtons) {
+                maxNumButtons = state.nButtons;
             }
         }
         return maxNumButtons;
     }
 
-    for (auto it = begin(); it < end(); ++it) {
-        if (it->name == joystickName) {
-            return it->nButtons;
+    for (const JoystickInputState& state : *this) {
+        if (state.name == joystickName) {
+            return state.nButtons;
         }
     }
+
     return -1;
 }
 
@@ -75,7 +74,7 @@ float JoystickInputStates::axis(const std::string& joystickName, int axis) const
     ghoul_precondition(axis >= 0, "axis must be 0 or positive");
 
     if (joystickName.empty()) {
-        float res = std::accumulate(
+        const float res = std::accumulate(
             begin(),
             end(),
             0.f,
@@ -89,22 +88,16 @@ float JoystickInputStates::axis(const std::string& joystickName, int axis) const
 
         // If multiple joysticks are connected, we might get values outside the -1,1 range
         // by summing them up
-        glm::clamp(res, -1.f, 1.f);
-        return res;
+        return glm::clamp(res, -1.f, 1.f);
     }
 
-    const JoystickInputState* state = nullptr;
-    for (auto it = begin(); it < end(); ++it) {
-        if (it->name == joystickName) {
-            state = &(*it);
+    for (const JoystickInputState& state : *this) {
+        if (state.name == joystickName) {
+            return state.axes[axis];
         }
     }
 
-    if (!state) {
-        return 0.f;
-    }
-
-    return state->axes[axis];
+    return 0.f;
 }
 
 bool JoystickInputStates::button(const std::string& joystickName, int button,
@@ -113,7 +106,7 @@ bool JoystickInputStates::button(const std::string& joystickName, int button,
     ghoul_precondition(button >= 0, "button must be 0 or positive");
 
     if (joystickName.empty()) {
-        bool res = std::any_of(
+        const bool res = std::any_of(
             begin(),
             end(),
             [button, action](const JoystickInputState& state) {
@@ -123,18 +116,13 @@ bool JoystickInputStates::button(const std::string& joystickName, int button,
         return res;
     }
 
-    const JoystickInputState* state = nullptr;
-    for (auto it = begin(); it < end(); ++it) {
-        if (it->name == joystickName) {
-            state = &(*it);
+    for (const JoystickInputState& state : *this) {
+        if (state.name == joystickName) {
+            return state.isConnected ? (state.buttons[button] == action) : false;
         }
     }
 
-    if (!state) {
-        return false;
-    }
-
-    return state->isConnected ? (state->buttons[button] == action) : false;
+    return false;
 }
 
 } // namespace openspace::interaction

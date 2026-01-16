@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,17 +27,18 @@
 
 #include <openspace/properties/propertyowner.h>
 
-#include <openspace/properties/optionproperty.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <openspace/properties/triggerproperty.h>
 #include <openspace/rendering/framebufferrenderer.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <cstdint>
 #include <chrono>
 #include <filesystem>
+#include <memory>
 
 namespace ghoul {
     namespace fontrendering { class Font; }
@@ -45,19 +46,18 @@ namespace ghoul {
         class ProgramObject;
         class OpenGLStateCache;
     } // namespace opengl
-
     class Dictionary;
     class SharedMemory;
-} // ghoul
+} // namespace ghoul
 
 namespace openspace {
 
 namespace scripting { struct LuaLibrary; }
-
 class Camera;
-class RaycasterManager;
 class DeferredcasterManager;
+class RaycasterManager;
 class Scene;
+class SceneGraphNode;
 class SceneManager;
 class ScreenLog;
 class ScreenSpaceRenderable;
@@ -67,6 +67,8 @@ class RenderEngine : public properties::PropertyOwner {
 public:
     RenderEngine();
     virtual ~RenderEngine() override;
+
+    const FramebufferRenderer& renderer() const;
 
     void initialize();
     void initializeGL();
@@ -90,9 +92,6 @@ public:
     void renderEndscreen();
     void postDraw();
 
-    float globalBlackOutFactor() const;
-    void setGlobalBlackOutFactor(float opacity);
-
     float hdrExposure() const;
     bool isHdrDisabled() const;
 
@@ -104,17 +103,18 @@ public:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         const std::string& name, const std::filesystem::path& vsPath,
-        std::filesystem::path fsPath, ghoul::Dictionary data = ghoul::Dictionary());
+        const std::filesystem::path& fsPath,
+        ghoul::Dictionary data = ghoul::Dictionary());
 
     std::unique_ptr<ghoul::opengl::ProgramObject> buildRenderProgram(
         const std::string& name, const std::filesystem::path& vsPath,
-        std::filesystem::path fsPath, const std::filesystem::path& csPath,
+        const std::filesystem::path& fsPath, const std::filesystem::path& csPath,
         ghoul::Dictionary data = ghoul::Dictionary());
 
     void removeRenderProgram(ghoul::opengl::ProgramObject* program);
 
     /**
-     * Set the camera to use for rendering
+     * Set the camera to use for rendering.
      */
     void setCamera(Camera* camera);
 
@@ -131,17 +131,17 @@ public:
     void setResolveData(ghoul::Dictionary resolveData);
 
     /**
-     * Take a screenshot and store in the ${SCREENSHOTS} directory
+     * Take a screenshot and store in the ${SCREENSHOTS} directory.
      */
     void takeScreenshot();
 
     /**
-     * Resets the screenshot index to 0
+     * Resets the screenshot index to 0.
      */
     void resetScreenshotNumber();
 
     /**
-     * Get the filename of the latest screenshot
+     * Get the filename of the latest screenshot.
      */
     unsigned int latestScreenshotNumber() const;
 
@@ -160,12 +160,19 @@ public:
 
     uint64_t frameNumber() const;
 
+    void registerShadowCaster(const std::string& shadowGroup,
+        const SceneGraphNode* lightSource, SceneGraphNode* shadower,
+        SceneGraphNode* shadowee);
+    void removeShadowCaster(const std::string& shadowGroup, SceneGraphNode* shadower,
+        SceneGraphNode* shadowee);
+
 private:
     void renderScreenLog();
     void renderVersionInformation();
     void renderCameraInformation();
     void renderShutdownInformation(float timer, float fullTime);
-    void renderDashboard();
+    void renderDashboard() const;
+    float combinedBlackoutFactor() const;
 
     Camera* _camera = nullptr;
     Scene* _scene = nullptr;
@@ -185,12 +192,11 @@ private:
 
     properties::IntListProperty _screenshotWindowIds;
     properties::BoolProperty _applyWarping;
-    properties::BoolProperty _showStatistics;
     properties::BoolProperty _screenshotUseDate;
-    properties::BoolProperty _showFrameInformation;
     properties::BoolProperty _disableMasterRendering;
 
     properties::FloatProperty _globalBlackOutFactor;
+    properties::BoolProperty _applyBlackoutToMaster;
 
     properties::BoolProperty _enableFXAA;
 
@@ -204,7 +210,15 @@ private:
 
     properties::IntProperty _framerateLimit;
     std::chrono::high_resolution_clock::time_point _lastFrameTime;
-    properties::FloatProperty _horizFieldOfView;
+
+    struct Window : properties::PropertyOwner {
+        Window(PropertyOwnerInfo info, size_t id);
+
+        properties::FloatProperty horizFieldOfView;
+    };
+
+    properties::PropertyOwner _windowing;
+    std::vector<std::unique_ptr<Window>> _windows;
 
     properties::Vec3Property _globalRotation;
     properties::Vec3Property _screenSpaceRotation;
@@ -215,7 +229,6 @@ private:
 
     std::vector<ghoul::opengl::ProgramObject*> _programs;
 
-    std::shared_ptr<ghoul::fontrendering::Font> _fontFrameInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontCameraInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontVersionInfo;
     std::shared_ptr<ghoul::fontrendering::Font> _fontShutdown;
@@ -226,8 +239,6 @@ private:
         glm::ivec4 zoom = glm::ivec4(0);
         glm::ivec4 roll = glm::ivec4(0);
     } _cameraButtonLocations;
-
-    std::string _versionString;
 
     properties::Vec4Property _enabledFontColor;
     properties::Vec4Property _disabledFontColor;

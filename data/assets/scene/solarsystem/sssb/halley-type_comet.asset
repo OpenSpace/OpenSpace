@@ -1,46 +1,50 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local sssb = asset.syncedResource({
+
+
+local sssb = asset.resource({
   Name = "Small SolarSystem Body Data (Halley-type Comet)",
   Type = "HttpSynchronization",
   Identifier = "sssb_data_halley-type_comet",
-  Version = 1
+  Version = 4
 })
 
-local object = {
+
+local Object = {
   Identifier = "sssb_halley-type_comet",
-  Parent = transforms.SunECLIPJ2000.Identifier,
+  Parent = transforms.SunEclipJ2000.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
     Path = sssb .. "sssb_data_halley-type_comet.csv",
     Format = "SBDB",
-    Segments = 200,
     SegmentQuality = 9,
     Color = { 0.66, 0.66, 0.66 },
-    TrailFade = 18
+    TrailFade = 18,
+    PointSizeExponent = 10.6
   },
   GUI = {
     Name = "Halley-type Comets",
     Path = "/Solar System/Small Bodies",
+    Focusable = false,
     Description = "Periodic comets with an orbital period between 20 and 200 years."
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(object)
+  openspace.addSceneGraphNode(Object)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(object)
+  openspace.removeSceneGraphNode(Object)
 end)
 
-asset.export(object)
+asset.export(Object)
 
 
 
 asset.meta = {
   Name = "Halley-Type Comets",
-  Version = "1.1",
   Description = [[RenderableSmallBody asset with data from from JPL Horizons containing
     the Halley-Type group]],
   Author = "JPL Small-Body Database hosted by California Institute of Technology",

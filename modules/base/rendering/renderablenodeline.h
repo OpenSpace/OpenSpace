@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,25 +27,21 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/glm.h>
-
-namespace ghoul::opengl { class ProgramObject; }
-namespace openspace::documentation { struct Documentation; }
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
-class Translation;
-
 /**
- * This is a class for a line that is drawn between two nodes in OpenSpace.
+ * This is a class for a line that is drawn between two nodes.
  */
 class RenderableNodeLine : public Renderable {
 public:
-    RenderableNodeLine(const ghoul::Dictionary& dictionary);
+    explicit RenderableNodeLine(const ghoul::Dictionary& dictionary);
     ~RenderableNodeLine() override = default;
 
     static documentation::Documentation Documentation();
@@ -65,10 +61,7 @@ private:
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    void unbindGL();
-    void bindGL();
-
-    ghoul::opengl::ProgramObject* _program;
+    ghoul::opengl::ProgramObject* _program = nullptr;
     /// The vertex attribute location for position
     /// must correlate to layout location in vertex shader
     const GLuint _locVertex = 0;

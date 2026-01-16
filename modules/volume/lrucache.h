@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,20 +25,19 @@
 #ifndef __OPENSPACE_MODULE_VOLUME___LRUCACHE___H__
 #define __OPENSPACE_MODULE_VOLUME___LRUCACHE___H__
 
-#include <ghoul/glm.h>
 #include <list>
-#include <iterator>
+#include <utility>
 
 namespace openspace::volume {
 
-template<
+template <
     typename KeyType,
     typename ValueType,
-    template<typename...> class ContainerType
+    template <typename...> class ContainerType
 >
 class LruCache {
 public:
-    LruCache(size_t capacity);
+    explicit LruCache(size_t capacity);
 
     bool has(const KeyType& key);
     void set(const KeyType& key, ValueType value);
@@ -49,6 +48,7 @@ public:
 
 private:
     void insert(const KeyType& key, const ValueType& value);
+
     ContainerType<
         KeyType, std::pair<ValueType, typename std::list<KeyType>::iterator>
     > _cache;

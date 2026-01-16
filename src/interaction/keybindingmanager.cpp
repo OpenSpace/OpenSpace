@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,40 +27,33 @@
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/scripting/lualibrary.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/json_helper.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/glm.h>
-#include <sstream>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <string>
 
 #include "keybindingmanager_lua.inl"
 
 namespace openspace::interaction {
-
-KeybindingManager::KeybindingManager()
-    : DocumentationGenerator(
-        "Keybindings",
-        "keybinding",
-        {
-            { "keybindingTemplate", "${WEB}/documentation/keybinding.hbs" }
-        }
-    )
-{}
 
 void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
     if (action == KeyAction::Press || action == KeyAction::Repeat) {
         // iterate over key bindings
         auto ret = _keyLua.equal_range({ key, modifier });
-        for (auto it = ret.first; it != ret.second; ++it) {
+        for (auto it = ret.first; it != ret.second; it++) {
             ghoul_assert(!it->second.empty(), "Action must not be empty");
             if (!global::actionManager->hasAction(it->second)) {
                 // Silently ignoring the unknown action as the user might have intended to
                 // bind a key to multiple actions, only one of which could be defined
                 continue;
             }
-            global::actionManager->triggerAction(it->second, ghoul::Dictionary());
+            global::actionManager->triggerAction(
+                it->second,
+                ghoul::Dictionary(),
+                interaction::ActionManager::ShouldBeSynchronized::Yes,
+                interaction::ActionManager::ShouldBeLogged::Yes
+            );
         }
     }
 }
@@ -82,7 +75,7 @@ void KeybindingManager::bindKey(Key key, KeyModifier modifier, std::string actio
 #endif // WIN32
     ghoul_assert(!action.empty(), "Action must not be empty");
 
-    KeyWithModifier km = { key, modifier };
+    const KeyWithModifier km = { key, modifier };
     _keyLua.insert({ km, std::move(action) });
 }
 
@@ -97,7 +90,7 @@ void KeybindingManager::removeKeyBinding(const KeyWithModifier& key) {
         }
         else {
             // If it is not, we continue iteration
-            ++it;
+            it++;
         }
     }
 }
@@ -108,7 +101,7 @@ std::vector<std::pair<KeyWithModifier, std::string>> KeybindingManager::keyBindi
     std::vector<std::pair<KeyWithModifier, std::string>> result;
 
     auto itRange = _keyLua.equal_range(key);
-    for (auto it = itRange.first; it != itRange.second; ++it) {
+    for (auto it = itRange.first; it != itRange.second; it++) {
         result.emplace_back(it->first, it->second);
     }
     return result;
@@ -119,33 +112,13 @@ const std::multimap<KeyWithModifier, std::string>& KeybindingManager::keyBinding
     return _keyLua;
 }
 
-std::string KeybindingManager::generateJson() const {
-    ZoneScoped;
-
-    std::stringstream json;
-    json << "[";
-    bool first = true;
-    for (const std::pair<const KeyWithModifier, std::string>& p : _keyLua) {
-        if (!first) {
-            json << ",";
-        }
-        first = false;
-        json << "{";
-        json << R"("key": ")" << ghoul::to_string(p.first) << "\",";
-        json << R"("action": ")" << p.second << "\"";
-        json << "}";
-    }
-    json << "]";
-
-    return json.str();
-}
-
 scripting::LuaLibrary KeybindingManager::luaLibrary() {
     return {
         "",
         {
             codegen::lua::BindKey,
             codegen::lua::KeyBindings,
+            codegen::lua::KeyBindingsForAction,
             codegen::lua::ClearKey,
             codegen::lua::ClearKeys
         }

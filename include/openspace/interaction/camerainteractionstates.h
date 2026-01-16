@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,9 +33,9 @@ namespace openspace::interaction {
 class CameraInteractionStates {
 public:
     /**
-     * \param sensitivity
-     * \param velocityScaleFactor can be set to 60 to remove the inertia of the
-     * interaction. Lower value will make it harder to move the camera.
+     * \param sensitivity Interaction sensitivity
+     * \param velocityScaleFactor Can be set to 60 to remove the inertia of the
+     *        interaction. Lower value will make it harder to move the camera
      */
     CameraInteractionStates(double sensitivity, double velocityScaleFactor);
     virtual ~CameraInteractionStates() = default;
@@ -48,35 +48,36 @@ public:
 
     glm::dvec2 globalRotationVelocity() const;
     glm::dvec2 localRotationVelocity() const;
-    glm::dvec2 truckMovementVelocity() const;
-    glm::dvec2 localRollVelocity() const;
-    glm::dvec2 globalRollVelocity() const;
+    double truckMovementVelocity() const;
+    double localRollVelocity() const;
+    double globalRollVelocity() const;
 
     void resetVelocities();
 
-    /*
-     * Returns true if any of the velocities are larger than zero,
-     * i.e. wether an interaction happened
+    /**
+     * Returns true if any of the velocities are larger than zero, i.e. whether an
+     * interaction happened.
      */
-    bool hasNonZeroVelocities();
+    bool hasNonZeroVelocities(bool checkOnlyMovement = false) const;
 
 protected:
+    template <typename T>
     struct InteractionState {
-        InteractionState(double scaleFactor);
+        explicit InteractionState(double scaleFactor);
         void setFriction(double friction);
         void setVelocityScaleFactor(double scaleFactor);
 
-        glm::dvec2 previousPosition = glm::dvec2(0.0);
-        DelayedVariable<glm::dvec2, double> velocity;
+        T previousValue = T(0.0);
+        DelayedVariable<T, double> velocity;
     };
 
     double _sensitivity = 0.0;
 
-    InteractionState _globalRotationState;
-    InteractionState _localRotationState;
-    InteractionState _truckMovementState;
-    InteractionState _localRollState;
-    InteractionState _globalRollState;
+    InteractionState<glm::dvec2> _globalRotationState;
+    InteractionState<glm::dvec2> _localRotationState;
+    InteractionState<double> _truckMovementState;
+    InteractionState<double> _localRollState;
+    InteractionState<double> _globalRollState;
 };
 
 } // namespace openspace::interaction

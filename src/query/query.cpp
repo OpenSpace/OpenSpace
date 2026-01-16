@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,8 +25,12 @@
 #include <openspace/query/query.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/properties/property.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 
 namespace openspace {
 
@@ -34,7 +38,7 @@ Scene* sceneGraph() {
     return global::renderEngine->scene();
 }
 
-SceneGraphNode* sceneGraphNode(const std::string& name) {
+SceneGraphNode* sceneGraphNode(std::string_view name) {
     const Scene* graph = sceneGraph();
     if (!graph) {
         return nullptr;
@@ -42,7 +46,7 @@ SceneGraphNode* sceneGraphNode(const std::string& name) {
     return graph->sceneGraphNode(name);
 }
 
-const Renderable* renderable(const std::string& name) {
+const Renderable* renderable(std::string_view name) {
     SceneGraphNode* node = sceneGraphNode(name);
     if (!node) {
         return nullptr;
@@ -50,20 +54,22 @@ const Renderable* renderable(const std::string& name) {
     return node->renderable();
 }
 
-properties::Property* property(const std::string& uri) {
+properties::Property* property(std::string_view uri) {
     properties::Property* property = global::rootPropertyOwner->property(uri);
     return property;
 }
 
-std::vector<properties::Property*> allProperties() {
-    std::vector<properties::Property*> properties;
-
-    std::vector<properties::Property*> p =
-        global::rootPropertyOwner->propertiesRecursive();
-
-    properties.insert(properties.end(), p.begin(), p.end());
-
-    return properties;
+properties::PropertyOwner* propertyOwner(std::string_view uri) {
+    properties::PropertyOwner* property = global::rootPropertyOwner->propertyOwner(uri);
+    return property;
 }
 
-}  // namespace
+const std::vector<properties::Property*>& allProperties() {
+    return global::openSpaceEngine->allProperties();
+}
+
+const std::vector<properties::PropertyOwner*>& allPropertyOwners() {
+    return global::openSpaceEngine->allPropertyOwners();
+}
+
+}  // namespace openspace

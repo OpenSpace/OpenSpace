@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,17 +27,16 @@
 
 #include <openspace/scene/lightsource.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/stringproperty.h>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+class SceneGraphNode;
 
 class SceneGraphLightSource : public LightSource {
 public:
-    SceneGraphLightSource();
-    SceneGraphLightSource(const ghoul::Dictionary& dictionary);
+    explicit SceneGraphLightSource(const ghoul::Dictionary& dictionary);
 
     static documentation::Documentation Documentation();
 

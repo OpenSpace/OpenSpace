@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,9 +35,10 @@
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
+#include <openspace/interaction/keyframerecordinghandler.h>
 #include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/websocketinputstate.h>
-#include <openspace/interaction/sessionrecording.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>
@@ -51,15 +52,15 @@
 #include <openspace/scene/profile.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/scriptscheduler.h>
+#include <openspace/util/downloadeventengine.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/versionchecker.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/glm.h>
 #include <ghoul/font/fontmanager.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/misc/sharedmemory.h>
-#include <ghoul/opengl/texture.h>
+#include <algorithm>
 #include <array>
 
 namespace openspace {
@@ -72,6 +73,7 @@ namespace {
 #ifdef WIN32
     constexpr int TotalSize =
         sizeof(MemoryManager) +
+        sizeof(DownloadEventEngine) +
         sizeof(EventEngine) +
         sizeof(ghoul::fontrendering::FontManager) +
         sizeof(Dashboard) +
@@ -89,13 +91,15 @@ namespace {
         sizeof(TimeManager) +
         sizeof(VersionChecker) +
         sizeof(WindowDelegate) +
-        sizeof(configuration::Configuration) +
+        sizeof(Configuration) +
         sizeof(interaction::ActionManager) +
         sizeof(interaction::InteractionMonitor) +
+        sizeof(interaction::JoystickInputStates) +
         sizeof(interaction::WebsocketInputStates) +
         sizeof(interaction::KeybindingManager) +
+        sizeof(interaction::KeyframeRecordingHandler) +
         sizeof(interaction::NavigationHandler) +
-        sizeof(interaction::SessionRecording) +
+        sizeof(interaction::SessionRecordingHandler) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
         sizeof(properties::PropertyOwner) +
@@ -126,6 +130,22 @@ void create() {
     currentPos += sizeof(MemoryManager);
 #else // ^^^ WIN32 / !WIN32 vvv
     memoryManager = new MemoryManager;
+#endif // WIN32
+
+#ifdef WIN32
+    openSpaceEngine = new (currentPos) OpenSpaceEngine;
+    ghoul_assert(openSpaceEngine, "No openSpaceEngine");
+    currentPos += sizeof(OpenSpaceEngine);
+#else // ^^^ WIN32 / !WIN32 vvv
+    openSpaceEngine = new OpenSpaceEngine;
+#endif // WIN32
+
+#ifdef WIN32
+    downloadEventEngine = new (currentPos) DownloadEventEngine;
+    ghoul_assert(downloadEventEngine, "No downloadEventEngine");
+    currentPos += sizeof(DownloadEventEngine);
+#else // ^^^^ WIN32 / !WIN32 vvv
+    downloadEventEngine = new DownloadEventEngine;
 #endif // WIN32
 
 #ifdef WIN32
@@ -190,14 +210,6 @@ void create() {
     currentPos += sizeof(ModuleEngine);
 #else // ^^^ WIN32 / !WIN32 vvv
     moduleEngine = new ModuleEngine;
-#endif // WIN32
-
-#ifdef WIN32
-    openSpaceEngine = new (currentPos) OpenSpaceEngine;
-    ghoul_assert(openSpaceEngine, "No openSpaceEngine");
-    currentPos += sizeof(OpenSpaceEngine);
-#else // ^^^ WIN32 / !WIN32 vvv
-    openSpaceEngine = new OpenSpaceEngine;
 #endif // WIN32
 
 #ifdef WIN32
@@ -266,11 +278,11 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    configuration = new (currentPos) configuration::Configuration;
+    configuration = new (currentPos) Configuration;
     ghoul_assert(configuration, "No configuration");
-    currentPos += sizeof(configuration::Configuration);
+    currentPos += sizeof(Configuration);
 #else // ^^^ WIN32 / !WIN32 vvv
-    configuration = new configuration::Configuration;
+    configuration = new Configuration;
 #endif // WIN32
 
 #ifdef WIN32
@@ -314,6 +326,14 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
+    keyframeRecording = new (currentPos) interaction::KeyframeRecordingHandler;
+    ghoul_assert(keyframeRecording, "No keyframeRecording");
+    currentPos += sizeof(interaction::KeyframeRecordingHandler);
+#else // ^^^ WIN32 / !WIN32 vvv
+    keyframeRecording = new interaction::KeyframeRecordingHandler;
+#endif // WIN32
+
+#ifdef WIN32
     navigationHandler = new (currentPos) interaction::NavigationHandler;
     ghoul_assert(navigationHandler, "No navigationHandler");
     currentPos += sizeof(interaction::NavigationHandler);
@@ -322,11 +342,11 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    sessionRecording = new (currentPos) interaction::SessionRecording(true);
-    ghoul_assert(sessionRecording, "No sessionRecording");
-    currentPos += sizeof(interaction::SessionRecording);
+    sessionRecordingHandler = new (currentPos) interaction::SessionRecordingHandler;
+    ghoul_assert(sessionRecordingHandler, "No sessionRecording");
+    currentPos += sizeof(interaction::SessionRecordingHandler);
 #else // ^^^ WIN32 / !WIN32 vvv
-    sessionRecording = new interaction::SessionRecording(true);
+    sessionRecordingHandler = new interaction::SessionRecordingHandler;
 #endif // WIN32
 
 #ifdef WIN32
@@ -386,8 +406,9 @@ void initialize() {
 
     // New property subowners also have to be added to the ImGuiModule callback!
     rootPropertyOwner->addPropertySubOwner(global::navigationHandler);
+    rootPropertyOwner->addPropertySubOwner(global::keyframeRecording);
     rootPropertyOwner->addPropertySubOwner(global::interactionMonitor);
-    rootPropertyOwner->addPropertySubOwner(global::sessionRecording);
+    rootPropertyOwner->addPropertySubOwner(global::sessionRecordingHandler);
     rootPropertyOwner->addPropertySubOwner(global::timeManager);
     rootPropertyOwner->addPropertySubOwner(global::scriptScheduler);
 
@@ -444,11 +465,11 @@ void destroy() {
     delete rootPropertyOwner;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'SessionRecording'");
+    LDEBUGC("Globals", "Destroying 'SessionRecordingHandler'");
 #ifdef WIN32
-    sessionRecording->~SessionRecording();
+    sessionRecordingHandler->~SessionRecordingHandler();
 #else // ^^^ WIN32 / !WIN32 vvv
-    delete sessionRecording;
+    delete sessionRecordingHandler;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'NavigationHandler'");
@@ -456,6 +477,13 @@ void destroy() {
     navigationHandler->~NavigationHandler();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete navigationHandler;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'KeyframeRecordingHandler'");
+#ifdef WIN32
+    keyframeRecording->~KeyframeRecordingHandler();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete keyframeRecording;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'KeybindingManager'");
@@ -556,13 +584,6 @@ void destroy() {
     delete parallelPeer;
 #endif // WIN32
 
-    LDEBUGC("Globals", "Destroying 'OpenSpaceEngine'");
-#ifdef WIN32
-    openSpaceEngine->~OpenSpaceEngine();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete openSpaceEngine;
-#endif // WIN32
-
     LDEBUGC("Globals", "Destroying 'ModuleEngine'");
 #ifdef WIN32
     moduleEngine->~ModuleEngine();
@@ -612,11 +633,25 @@ void destroy() {
     delete fontManager;
 #endif // WIN32
 
+    LDEBUGC("Globals", "Destroying 'DownloadEventEngine'");
+#ifdef WIN32
+    downloadEventEngine->~DownloadEventEngine();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete downloadEventEngine;
+#endif // WIN32
+
     LDEBUGC("Globals", "Destroying 'EventEngine'");
 #ifdef WIN32
     eventEngine->~EventEngine();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete eventEngine;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'OpenSpaceEngine'");
+#ifdef WIN32
+    openSpaceEngine->~OpenSpaceEngine();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete openSpaceEngine;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'MemoryManager'");

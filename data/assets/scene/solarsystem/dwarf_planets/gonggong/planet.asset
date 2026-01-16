@@ -1,0 +1,44 @@
+local transforms = asset.require("./transforms")
+
+
+
+local Planet = {
+  Identifier = "GonggongGlobe",
+  Parent = transforms.Position.Identifier,
+  Transform = {
+    Rotation = {
+      Type = "ConstantRotation",
+      RotationAxis = { 0.0, 0.0, 1.0 },
+      RotationRate = 1.0 / (22.4 * 60.0 * 60.0)
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 615000, 615000, 615000 }
+  },
+  GUI = {
+    Name = "Gonggong",
+    Path = "/Solar System/Dwarf Planets/Gonggong"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Planet)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Planet)
+end)
+
+asset.export("Planet", Planet)
+
+
+
+asset.meta = {
+  Name = "Gonggong Globe",
+  Description = [[Globe of Gonggong]],
+  Author = "OpenSpace Team",
+  URL = "https://www.openspaceproject.com",
+  License = "MIT"
+}

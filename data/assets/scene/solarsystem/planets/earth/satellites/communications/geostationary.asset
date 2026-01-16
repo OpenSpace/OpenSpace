@@ -1,16 +1,19 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local omm = asset.syncedResource({
+
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (Geostationary)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_geo",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=geo&FORMAT=kvn",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=geo&FORMAT=kvn",
   Filename = "geo.txt",
-  Override = true
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
-local satellites = {
-  Identifier = "geo",
+
+local GeoStationarySatellites = {
+  Identifier = "GeoStationarySatellites",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
@@ -18,34 +21,36 @@ local satellites = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.9, 0.9, 0.0 },
-    Fade = 1.5,
+    TrailFade = 5,
+    PointSizeExponent = 5.2,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Geostationary",
     Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false,
     Description = [[Satellites that are currently active and in a Geosynchronous orbit,
       meaning their orbital period matches Earth's rotation.]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(satellites)
+  openspace.addSceneGraphNode(GeoStationarySatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(satellites)
+  openspace.removeSceneGraphNode(GeoStationarySatellites)
 end)
 
-asset.export(satellites)
+asset.export(GeoStationarySatellites)
 
 
 
 asset.meta = {
   Name = "Satellites Communications - Geostationary",
-  Version = "1.0",
-  Description = [[Satellites asset for Communications - Geostationary. Data from 
+  Description = [[Satellites asset for Communications - Geostationary. Data from
     Celestrak]],
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

@@ -1,16 +1,19 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local omm = asset.syncedResource({
+
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (SpaceStations)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_stations",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=stations&FORMAT=kvn",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=stations&FORMAT=kvn",
   Filename = "stations.txt",
-  Override = true
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
-local satellites = {
-  Identifier = "stations",
+
+local SpaceStations = {
+  Identifier = "SpaceStations",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
@@ -18,34 +21,36 @@ local satellites = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.9, 0.1, 0.0 },
-    Fade = 1.5,
+    TrailFade = 20,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
   GUI = {
-    Name = "SpaceStations",
+    Name = "Space Stations",
     Path = "/Solar System/Planets/Earth/Satellites",
-    Description = [[A collection of space stations (including the ISS and China's 
-      Tiangong), along with certain cubesats and satellite constellations from space 
+    Focusable = false,
+    Description = [[A collection of space stations (including the ISS and China's
+      Tiangong), along with certain cubesats and satellite constellations from space
       agencies.]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(satellites)
+  openspace.addSceneGraphNode(SpaceStations)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(satellites)
+  openspace.removeSceneGraphNode(SpaceStations)
 end)
 
-asset.export(satellites)
+asset.export(SpaceStations)
 
 
 
 asset.meta = {
   Name = "Satellites SpaceStations",
-  Version = "1.0",
   Description = "Satellites asset for SpaceStations. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

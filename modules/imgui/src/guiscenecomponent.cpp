@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,9 +31,9 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
+#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/misc/misc.h>
-#include <algorithm>
+#include <ghoul/misc/assert.h>
 
 namespace {
     const ImVec2 Size = ImVec2(350, 500);
@@ -44,12 +44,12 @@ namespace {
         using namespace openspace;
 
         if (ImGui::TreeNode(node.identifier().c_str())) {
-            std::vector<SceneGraphNode*> children = node.children();
+            const std::vector<SceneGraphNode*> children = node.children();
             for (SceneGraphNode* c : children) {
                 renderSceneGraphNode(*c, time);
             }
 
-            bool timeRangeActive = node.isTimeFrameActive(time);
+            bool timeRangeActive = node.isTimeFrameActive();
             ImGui::Checkbox("Time Range Active", &timeRangeActive);
 
             const Renderable* renderable = node.renderable();
@@ -67,8 +67,8 @@ namespace {
                 bool isReady = renderable->isReady();
                 ImGui::Checkbox("Is Ready", &isReady);
 
-                Renderable::RenderBin bin = renderable->renderBin();
-                std::string binStr = [](Renderable::RenderBin b) {
+                const Renderable::RenderBin bin = renderable->renderBin();
+                const std::string binStr = [](Renderable::RenderBin b) {
                     switch (b) {
                         case Renderable::RenderBin::Background:
                             return "Background";

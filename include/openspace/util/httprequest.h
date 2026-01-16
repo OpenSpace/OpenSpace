@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,17 +25,19 @@
 #ifndef __OPENSPACE_CORE___HTTPREQUEST___H__
 #define __OPENSPACE_CORE___HTTPREQUEST___H__
 
+#include <ghoul/logging/loglevel.h>
 #include <ghoul/misc/boolean.h>
 #include <atomic>
+#include <chrono>
 #include <condition_variable>
 #include <filesystem>
 #include <fstream>
 #include <functional>
+#include <mutex>
 #include <optional>
 #include <string>
 #include <thread>
 #include <vector>
-#include <chrono>
 
 namespace openspace {
 
@@ -43,14 +45,14 @@ namespace openspace {
  * This class performs a synchronous HTTP request to the provided URL. Any result that is
  * returned based on this request is returned through three callback functions that can be
  * registered using the #onHeader, #onProgress, and #onData functions. Calling these
- * functions will overwrite any previously registered handler.
- * The ProgressCallback can be used to stop the download if the handler returns `false`.
+ * functions will overwrite any previously registered handler. The ProgressCallback can be
+ * used to stop the download if the handler returns `false`.
  *
  * The workflow for this class:
- * 1. Create a new object with the URL that points to the location from which the data
- *    should be loaded
- * 2. Register the callbacks that are needed (at least the #onData callback)
- * 3. Start the download with the #perform function
+ *   1. Create a new object with the URL that points to the location from which the data
+ *      should be loaded
+ *   2. Register the callbacks that are needed (at least the #onData callback)
+ *   3. Start the download with the #perform function
  */
 class HttpRequest {
 public:
@@ -77,8 +79,8 @@ public:
      * that have arrived. The buffer pointed to will most likely only be valid during the
      * time of the callback and it is the callbacks responsibility to store the contents
      * of the buffer before the callback returns. If the return value is `true`, the
-     * download continues, if it is `false`, this signals to the library that an error
-     * has occurred from which recovery is not possible.
+     * download continues, if it is `false`, this signals to the library that an error has
+     * occurred from which recovery is not possible.
      *
      * \param buffer The pointer to the beginning of the buffer where the new incoming
      *        data is located. This buffer is only valid during the execution of this
@@ -95,9 +97,9 @@ public:
      * for the response. The buffer pointed to will most likely only be valid during the
      * time of the callback and it is the callbacks responsibility to store the contents
      * of the buffer before the callback returns. If the return value is `true`, the
-     * download continues, if it is `false`, this signals to the library that an error
-     * has occurred from which recovery is not possible. If this function returns
-     * `false`, it will cause the main download to not start at all.
+     * download continues, if it is `false`, this signals to the library that an error has
+     * occurred from which recovery is not possible. If this function returns `false`, it
+     * will cause the main download to not start at all.
      *
      * \param buffer The pointer to the beginning of the buffer where the header
      *        information is located. This buffer is only valid during the execution of
@@ -113,10 +115,12 @@ public:
      * provided \p url.
      *
      * \param url The URL that should be requested by this HttpRequest
+     * \param failureVerbosity The verbosity of the log message when the download fails
      *
      * \pre \p url must not be empty
      */
-    explicit HttpRequest(std::string url);
+    explicit HttpRequest(std::string url,
+        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
 
     /**
      * Registers a callback that will be called when the header for the request has been
@@ -164,7 +168,6 @@ public:
      * \param timeout The amount of time the request will wait before aborting due to the
      *        server not responding. If this value is 0, there is no timeout on the
      *        request.
-     *
      * \return `true` if the request completed successfully, `false` otherwise
      */
     bool perform(std::chrono::milliseconds timeout = std::chrono::milliseconds(0));
@@ -188,6 +191,9 @@ private:
 
     /// The URL that this HttpRequest is going to request
     std::string _url;
+
+    /// The verbosity of the log message that is used if the download fails
+    const ghoul::logging::LogLevel _failureVerbosity;
 };
 
 /**
@@ -206,10 +212,12 @@ public:
      * \p url parameter as soon as the download is #start ed.
      *
      * \param url The URL that should be downloaded by this HttpDownload
+     * \param failureVerbosity The verbosity of the log message when the download fails
      *
      * \pre \p url must not be empty
      */
-    explicit HttpDownload(std::string url);
+    explicit HttpDownload(std::string url,
+        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
 
     /**
      * Virtual destructor that will cancel the ongoing download and block until the
@@ -287,13 +295,12 @@ protected:
      * pointed to will most likely only be valid during the time of the callback and it is
      * the callbacks responsibility to store the contents of the buffer before the
      * callback returns. If the return value is `true`, the download continues, if it is
-     * `false`, this signals to the library that an error has occurred from which
-     * recovery is not possible. This function will be called on a different thread from
-     * the one that called the #start method.
+     * `false`, this signals to the library that an error has occurred from which recovery
+     * is not possible. This function will be called on a different thread from the one
+     * that called the #start method.
      *
      * \param buffer The beginning of the buffer of this chunk of data
      * \param size The number of bytes that the \p buffer contains
-     *
      * \return The implementation should return `true` if the downloading should continue
      *         and `false` if the handling of the data caused some error that the
      *         subclass is incapable of recovering from
@@ -303,8 +310,8 @@ protected:
     /**
      * This function is called before the downloading starts and can be used by subclasses
      * to perform one-time setup functions, such as opening a file, reserving a block of
-     * storage, etc. This function guaranteed to be only called once per HttpDownload.
-     * The return value determines if the setup operation completed successfully or if an
+     * storage, etc. This function guaranteed to be only called once per HttpDownload. The
+     * return value determines if the setup operation completed successfully or if an
      * error occurred that will cause the download to be terminated. This function will be
      * called on a different thread from the one that called the #start method.
      *
@@ -369,7 +376,8 @@ public:
      * Overwrite::Yes, the existing content at the \p destinationPath will be overwritten.
      */
     HttpFileDownload(std::string url, std::filesystem::path destinationPath,
-        Overwrite overwrite = Overwrite::No);
+        Overwrite overwrite = Overwrite::No,
+        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
 
     /**
      * This destructor will cancel any ongoing download and wait for its completion, so it
@@ -386,15 +394,21 @@ public:
     std::filesystem::path destination() const;
 
 private:
-    /// Will create all directories that are necessary to reach _destination and then
-    /// fight with other HttpFileDownloads to get one of a limited number of file handles
-    /// to open _file
+    /**
+     * Will create all directories that are necessary to reach _destination and then
+     * fight with other HttpFileDownloads to get one of a limited number of file handles
+     * to open _file.
+     */
     bool setup() override;
 
-    /// Closes the _file and returns the handle back to the pool of available handles
+    /**
+     * Closes the _file and returns the handle back to the pool of available handles.
+     */
     bool teardown() override;
 
-    /// Stores the chunk of data into the _file handle
+    /**
+     * Stores the chunk of data into the _file handle.
+     */
     bool handleData(char* buffer, size_t size) override;
 
     /// A flag whether this HttpFileDownload got a handle from the limited supply of
@@ -402,7 +416,7 @@ private:
     /// handles from the operating system as that resource is limited and downloads would
     /// fail unrecoverably if no handles are available. So we limit the maximum number and
     /// if that number is exceeded, the HttpFileDownload will wait until a handle is
-    /// available.
+    /// available
     std::atomic_bool _hasHandle = false;
 
     /// The destination path where the contents of the URL provided in the constructor
@@ -433,11 +447,12 @@ class HttpMemoryDownload : public HttpDownload {
 public:
     /**
      * Creates an instance of a HttpMemoryDownload that will download the contents of the
-     * \p url into memory
+     * \p url into memory.
      *
      * \param url The URL whose contents should be downloaded
      */
-    explicit HttpMemoryDownload(std::string url);
+    explicit HttpMemoryDownload(std::string url,
+        ghoul::logging::LogLevel failureVerbosity = ghoul::logging::LogLevel::Error);
 
     /**
      * This destructor will cancel any ongoing download and wait for its completion, so it
@@ -449,15 +464,17 @@ public:
      * Returns a reference to the buffer that is used to store the contents of the URL
      * passed in the constructor. Please observe that while the HttpDownload::hasFinished
      * method returns `false`, this buffer will be changed by a different thread and
-     * access is not thread-safe. After that function returns `true`, it is safe to
-     * access the buffer.
+     * access is not thread-safe. After that function returns `true`, it is safe to access
+     * the buffer.
      *
      * \return A reference to the buffer used to hold the contents of the URL
      */
     const std::vector<char>& downloadedData() const;
 
 private:
-    /// Stores each downloaded chunk into the stored buffer
+    /**
+     * Stores each downloaded chunk into the stored buffer.
+     */
     bool handleData(char* buffer, size_t size) override;
 
     /// The buffer where the downloaded chunks are accumulated

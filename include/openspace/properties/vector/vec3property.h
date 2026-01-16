@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,15 +34,21 @@ namespace openspace::properties {
 
 class Vec3Property : public NumericalProperty<glm::vec3> {
 public:
-    Vec3Property(Property::PropertyInfo info, glm::vec3 value = glm::vec3(0.f),
+    explicit Vec3Property(Property::PropertyInfo info, glm::vec3 value = glm::vec3(0.f),
         glm::vec3 minValue = glm::vec3(std::numeric_limits<float>::lowest()),
         glm::vec3 maxValue = glm::vec3(std::numeric_limits<float>::max()),
         glm::vec3 stepValue = glm::vec3(0.01f));
 
-    std::string_view className() const override;
-    int typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
     using TemplateProperty<glm::vec3>::operator=;
+
+private:
+    glm::vec3 toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

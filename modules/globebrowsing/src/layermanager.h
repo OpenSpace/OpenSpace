@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,20 +28,17 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/src/layergroupid.h>
-#include <ghoul/misc/boolean.h>
 #include <array>
 #include <functional>
 #include <memory>
 
 namespace ghoul { class Dictionary; }
-
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::globebrowsing {
 
 class Layer;
 struct LayerGroup;
-class TileTextureInitData;
 
 /**
  * Manages multiple LayerGroups.
@@ -52,11 +49,12 @@ public:
 
     LayerManager();
 
-    void initialize(const ghoul::Dictionary& layerGroupsDict);
+    void initialize(
+        const std::map<layers::Group::ID, std::vector<ghoul::Dictionary>>& dict);
     void deinitialize();
 
-    Layer* addLayer(layers::Group::ID groupId, const ghoul::Dictionary& layerDict);
-    void deleteLayer(layers::Group::ID groupId, const std::string& layerName);
+    Layer* addLayer(layers::Group::ID id, const ghoul::Dictionary& layerDict);
+    void deleteLayer(layers::Group::ID id, const std::string& layerName);
 
     LayerGroup& layerGroup(layers::Group::ID groupId);
     const LayerGroup& layerGroup(layers::Group::ID groupId) const;
@@ -68,9 +66,7 @@ public:
     void update();
     void reset(bool includeDisabled = false);
 
-    void onChange(std::function<void(Layer* l)> callback);
-
-    static documentation::Documentation Documentation();
+    void onChange(const std::function<void(Layer* l)>& callback);
 
 private:
     std::array<std::unique_ptr<LayerGroup>, NumLayerGroups> _layerGroups;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,20 +25,22 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___WWTCOMMUNICATOR___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___WWTCOMMUNICATOR___H__
 
-#include <modules/skybrowser/include/browser.h>
-#include <openspace/properties/scalar/doubleproperty.h>
-
+#include <ghoul/glm.h>
 #include <deque>
+#include <string>
+#include <utility>
+#include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
-using SelectedImageDeque = std::deque<std::pair<std::string, double>>;
 
-class WwtCommunicator : public Browser {
+class BrowserInstance;
+
+class WwtCommunicator {
 public:
-    explicit WwtCommunicator(const ghoul::Dictionary& dictionary);
-    ~WwtCommunicator() override = default;
-
-    void update();
+    explicit WwtCommunicator(BrowserInstance* browserInstance);
+    ~WwtCommunicator() = default;
 
     // WorldWide Telescope communication
     void selectImage(const std::string& imageUrl);
@@ -51,48 +53,26 @@ public:
 
     bool isImageCollectionLoaded() const;
 
-    double verticalFov() const;
-    glm::ivec3 borderColor() const;
-    glm::dvec2 equatorialAim() const;
-    glm::dvec2 fieldsOfView() const;
     std::vector<std::string> selectedImages() const;
     std::vector<double> opacities() const;
-    double borderRadius() const;
 
     void setImageCollectionIsLoaded(bool isLoaded);
-    void setVerticalFov(double vfov);
-    void setEquatorialAim(glm::dvec2 equatorial);
+    void setAim(glm::dvec2 equatorialAim, double vFov, double roll);
     void setBorderColor(glm::ivec3 color);
     void setBorderRadius(double radius);
-    void setTargetRoll(double roll);
 
-    void updateBorderColor() const;
-    void updateAim() const;
-
-protected:
     void setIdInBrowser(const std::string& id) const;
-    SelectedImageDeque::iterator findSelectedImage(const std::string& id);
-
-    properties::DoubleProperty _verticalFov;
-
-    double _borderRadius = 0.0;
-    glm::ivec3 _borderColor = glm::ivec3(70);
-    glm::dvec2 _equatorialAim = glm::dvec2(0.0);
-    double _targetRoll = 0.0;
-    bool _isImageCollectionLoaded = false;
-    SelectedImageDeque _selectedImages;
+    std::deque<std::pair<std::string, double>>::iterator findSelectedImage(
+        const std::string& imageUrl);
 
 private:
+    void executeJavascript(const std::string& script) const;
     void sendMessageToWwt(const ghoul::Dictionary& msg) const;
 
-    bool _borderColorIsDirty = false;
-    bool _equatorialAimIsDirty = false;
+    bool _isImageCollectionLoaded = false;
+    std::deque<std::pair<std::string, double>> _selectedImages;
 
-    // Time variables
-    // For capping the message passing to WWT
-    static constexpr std::chrono::milliseconds TimeUpdateInterval =
-        std::chrono::milliseconds(10);
-    std::chrono::system_clock::time_point _lastUpdateTime;
+    BrowserInstance* _browserInstance = nullptr;
 };
 } // namespace openspace
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,22 +25,28 @@
 #include <openspace/scene/rotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
+#include <optional>
 
 namespace {
+    // A `Rotation` object describes a specific rotation for a scene graph node, which may
+    // or may not be time-dependent. The exact method of determining the rotation depends
+    // on the concrete type.
     struct [[codegen::Dictionary(Rotation)]] Parameters {
         // The type of the rotation that is described in this element. The available types
         // of rotations depend on the configuration of the application and can be written
         // to disk on application startup into the FactoryDocumentation
         std::string type [[codegen::annotation("Must name a valid Rotation type")]];
+
+        // The time frame in which this `Rotation` is applied. If the in-game time is
+        // outside this range, no rotation will be applied.
+        std::optional<ghoul::Dictionary> timeFrame
+            [[codegen::reference("core_time_frame")]];
     };
 #include "rotation_codegen.cpp"
 } // namespace
@@ -54,6 +60,8 @@ documentation::Documentation Rotation::Documentation() {
 ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
 {
+    ZoneScoped;
+
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     Rotation* result = FactoryManager::ref().factory<Rotation>()->create(
@@ -61,17 +69,29 @@ ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(
         dictionary,
         &global::memoryManager->PersistentMemory
     );
+    result->_type = p.type;
     return ghoul::mm_unique_ptr<Rotation>(result);
 }
 
-Rotation::Rotation() : properties::PropertyOwner({ "Rotation" }) {}
+Rotation::Rotation(const ghoul::Dictionary& dictionary)
+    : properties::PropertyOwner({ "Rotation" })
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    if (p.timeFrame.has_value()) {
+        _timeFrame = TimeFrame::createFromDictionary(*p.timeFrame);
+        addPropertySubOwner(_timeFrame.get());
+    }
+}
 
 void Rotation::requireUpdate() {
     _needsUpdate = true;
 }
 
-bool Rotation::initialize() {
-    return true;
+void Rotation::initialize() {
+    if (_timeFrame) {
+        _timeFrame->initialize();
+    }
 }
 
 const glm::dmat3& Rotation::matrix() const {
@@ -79,12 +99,24 @@ const glm::dmat3& Rotation::matrix() const {
 }
 
 void Rotation::update(const UpdateData& data) {
+    ZoneScoped;
+
     if (!_needsUpdate && (data.time.j2000Seconds() == _cachedTime)) {
         return;
     }
-    _cachedMatrix = matrix(data);
-    _cachedTime = data.time.j2000Seconds();
-    _needsUpdate = false;
+
+    if (_timeFrame) {
+        _timeFrame->update(data.time);
+    }
+
+    if (_timeFrame && !_timeFrame->isActive()) {
+        _cachedMatrix = glm::dmat3(1.0);
+    }
+    else {
+        _cachedMatrix = matrix(data);
+        _cachedTime = data.time.j2000Seconds();
+        _needsUpdate = false;
+    }
 }
 
 } // namespace openspace

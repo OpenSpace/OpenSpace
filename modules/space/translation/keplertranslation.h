@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,10 +28,7 @@
 #include <openspace/scene/translation.h>
 
 #include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/util/time.h>
 #include <ghoul/glm.h>
-#include <ghoul/misc/exception.h>
-#include <openspace/util/time.h>
 
 namespace openspace {
 
@@ -43,31 +40,25 @@ namespace openspace {
  */
 class KeplerTranslation : public Translation {
 public:
-    struct RangeError : public ghoul::RuntimeError {
-        explicit RangeError(std::string off);
-
-        std::string offender;
-    };
-
     /**
      * The constructor that retrieves the required Keplerian elements from the passed
      * \p dictionary. These values are then apssed to the setKeplerElements method for
-     * further processing.
-     * The \p dictionary is tested against the Documentation for conformance.
+     * further processing. The \p dictionary is tested against the Documentation for
+     * conformance.
      *
      * \param dictionary The ghoul::Dictionary containing all the information about the
      *        Keplerian elements (see Documentation)
      */
-    KeplerTranslation(const ghoul::Dictionary& dictionary);
+    explicit KeplerTranslation(const ghoul::Dictionary& dictionary);
 
     /// Default destructor
     ~KeplerTranslation() override = default;
 
     /**
-    * Method returning the translation vector at a given time.
-    *
-    * \param time The time to use when doing the position lookup
-    */
+     * Method returning the translation vector at a given time.
+     *
+     * \param data Provides information from the engine about, for example, the time
+     */
     glm::dvec3 position(const UpdateData& data) const override;
 
     /**
@@ -121,13 +112,12 @@ public:
         double ascendingNode, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
         double orbitalPeriod, double epoch);
 
-    /// Default construct that initializes all the properties and member variables
-    KeplerTranslation();
+    /**
+     * Recombutes the rotation matrix used in the update method.
+     */
+    static glm::dmat3 computeOrbitPlane(double ascendingNode, double inclination,
+        double argumentOfPeriapsis);
 
-    /// Recombutes the rotation matrix used in the update method
-    void computeOrbitPlane() const;
-
-private:
     /**
      * This method computes the eccentric anomaly (location of the space craft taking the
      * eccentricity into acount) based on the mean anomaly (location of the space craft
@@ -135,10 +125,13 @@ private:
      *
      * \param meanAnomaly The mean anomaly for which the eccentric anomaly shall be
      *        computed
+     * \param eccentricity The eccentricity for which the eccentric anomaly shall be
+     *        computed
      * \return The eccentric anomaly for the provided \p meanAnomaly
      */
-    double eccentricAnomaly(double meanAnomaly) const;
+    static double eccentricAnomaly(double meanAnomaly, double eccentricity);
 
+private:
     /// The eccentricity of the orbit in [0, 1)
     properties::DoubleProperty _eccentricity;
     /// The semi-major axis in km
@@ -164,6 +157,27 @@ private:
 
     /// The cached position for the last time with which the update method was called
     glm::dvec3 _position = glm::dvec3(0.0);
+};
+
+class KeplerCalculator {
+public:
+    KeplerCalculator(double eccentricity, double semiMajorAxis, double inclination,
+        double ascendingNode, double argumentOfPeriapsis, double meanAnomalyAtEpoch,
+        double orbitalPeriod, double epoch);
+
+    glm::dvec3 position(double time) const;
+
+private:
+    const double _eccentricity;
+    const double _semiMajorAxis;
+    const double _inclination;
+    const double _ascendingNode;
+    const double _argumentOfPeriapsis;
+    const double _meanAnomalyAtEpoch;
+    const double _orbitalPeriod;
+    const double _epoch;
+
+    const glm::dmat3 _orbitPlaneRotation;
 };
 
 } // namespace openspace

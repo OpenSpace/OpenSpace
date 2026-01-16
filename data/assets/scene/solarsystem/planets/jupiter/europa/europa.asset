@@ -1,37 +1,36 @@
-local transforms = asset.require("../transforms")
-asset.require("spice/base")
 asset.require("./trail")
-local kernel = asset.require("../kernels").jup310
+local transforms = asset.require("../transforms")
+local kernels = asset.require("../kernels")
+local coreKernels = asset.require("spice/core")
 
-local labelsPath = asset.syncedResource({
+
+
+local labelsPath = asset.resource({
   Name = "Jupiter Labels",
   Type = "HttpSynchronization",
   Identifier = "jupiter_labels",
   Version = 1
 })
 
+
 local Europa = {
   Identifier = "Europa",
   Parent = transforms.JupiterBarycenter.Identifier,
   Transform = {
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "IAU_EUROPA",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernel
-    },
     Translation = {
       Type = "SpiceTranslation",
-      Target = "EUROPA",
-      Observer = "JUPITER BARYCENTER",
-      Kernels = kernel
+      Target = kernels.ID.Europa,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Europa,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = 1560800,
-    SegmentsPerPatch = 64,
-    Layers = {},
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "europa.labels",
@@ -45,9 +44,9 @@ local Europa = {
       Color = { 1.0, 1.0, 0.0 }
     }
   },
-  Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter" },
+  Tag = { "moon_solarSystem", "moon_giants", "moon_jupiter", "moon_major_jupiter" },
   GUI = {
-    Path = "/Solar System/Planets/Jupiter/Moons"
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Europa"
   }
 }
 
@@ -55,8 +54,8 @@ local EuropaLabel = {
   Identifier = "EuropaLabel",
   Parent = Europa.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Europa",
     FontSize = 70.0,
     Size = 6.0,
@@ -71,10 +70,12 @@ local EuropaLabel = {
   Tag = { "solarsystem_labels", "moon_labels", "major_moon_labels" },
   GUI = {
     Name = "Europa Label",
-    Path = "/Solar System/Planets/Jupiter/Moons",
+    Path = "/Solar System/Planets/Jupiter/Major Moons/Europa",
+    Focusable = false,
     Description = "Label for Jupiter's moon Europa"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Europa)
@@ -87,13 +88,12 @@ asset.onDeinitialize(function()
 end)
 
 asset.export(Europa)
-
+asset.export(EuropaLabel)
 
 
 
 asset.meta = {
-  Name = "Mimas",
-  Version = "1.1",
+  Name = "Europa",
   Description = "Europa globe with labels",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

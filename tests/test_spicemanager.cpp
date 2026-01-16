@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,298 +30,159 @@
 #include "SpiceUsr.h"
 #include "SpiceZpr.h"
 
+using namespace openspace;
+
 namespace {
-    constexpr int FILLEN = 128;
-    constexpr int TYPLEN = 32;
-    constexpr int SRCLEN = 128;
-
-    namespace spicemanager_constants {
-        SpiceInt handle;
-        char file[FILLEN], filtyp[TYPLEN], source[SRCLEN];
-    } // namespace spicemanager_constants
-
-
-
     // In this testclass only a handset of the testfunctions require a single kernel.
     // The remaining methods rely on multiple kernels, loaded as a SPICE 'meta-kernel'
     void loadMetaKernel() {
-        const int k1 = openspace::SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+        const int k1 = SpiceManager::ref().loadKernel(
+            absPath("${TESTDIR}/SpiceTest/spicekernels/cas00084.tsc")
         );
-        CHECK(k1 == 1);
+        CHECK(k1 == 3);
 
-        const int k2 = openspace::SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/cas00084.tsc").string()
+        const int k2 = SpiceManager::ref().loadKernel(
+            absPath("${TESTDIR}/SpiceTest/spicekernels/981005_PLTEPH-DE405S.bsp")
         );
-        CHECK(k2 == 2);
+        CHECK(k2 == 4);
 
-        const int k3 = openspace::SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/981005_PLTEPH-DE405S.bsp").string()
+        const int k3 = SpiceManager::ref().loadKernel(
+            absPath("${TESTDIR}/SpiceTest/spicekernels/020514_SE_SAT105.bsp")
         );
-        CHECK(k3 == 3);
+        CHECK(k3 == 5);
 
-        const int k4 = openspace::SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/020514_SE_SAT105.bsp").string()
+        const int k4 = SpiceManager::ref().loadKernel(
+            absPath("${TESTDIR}/SpiceTest/spicekernels/030201AP_SK_SM546_T45.bsp")
         );
-        CHECK(k4 == 4);
+        CHECK(k4 == 6);
 
-        const int k5 = openspace::SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/030201AP_SK_SM546_T45.bsp").string()
+        const int k5 = SpiceManager::ref().loadKernel(
+            absPath("${TESTDIR}/SpiceTest/spicekernels/cas_v37.tf")
         );
-        CHECK(k5 == 5);
+        CHECK(k5 == 7);
 
-        const int k6 = openspace::SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/cas_v37.tf").string()
+        const int k6 = SpiceManager::ref().loadKernel(
+            absPath("${TESTDIR}/SpiceTest/spicekernels/04135_04171pc_psiv2.bc")
         );
-        CHECK(k6 == 6);
+        CHECK(k6 == 8);
 
-        const int k7 = openspace::SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/04135_04171pc_psiv2.bc").string()
+        const int k7 = SpiceManager::ref().loadKernel(
+            absPath("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc")
         );
-        CHECK(k7 == 7);
+        CHECK(k7 == 9);
 
-        const int k8 = openspace::SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc").string()
+        const int k8 = SpiceManager::ref().loadKernel(
+            absPath("${TESTDIR}/SpiceTest/spicekernels/cas_iss_v09.ti")
         );
-        CHECK(k8 == 8);
-
-        const int k9 = openspace::SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/cas_iss_v09.ti").string()
-        );
-        CHECK(k9 == 9);
+        CHECK(k8 == 10);
     }
 
-    int loadLSKKernel()  { 
-        int kernelID = openspace::SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
+    int loadPCKKernel() {
+        const int kernelID = SpiceManager::ref().loadKernel(
+            absPath("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc")
         );
-        CHECK(kernelID == 1);
-        return kernelID;
-    }
-
-    int loadPCKKernel()  {
-        int kernelID = openspace::SpiceManager::ref().loadKernel(
-            absPath("${TESTDIR}/SpiceTest/spicekernels/cpck05Mar2004.tpc").string()
-        );
-        CHECK(kernelID == 1);
+        CHECK(kernelID == 3);
         return kernelID;
     }
 } // namespace
 
-TEST_CASE("SpiceManager: Load Single Kernel", "[spicemanager]") {
-    openspace::SpiceManager::initialize();
-
-    loadLSKKernel();
-    // naif0008.tls is a text file, check if loaded.
-    SpiceBoolean found;
-    kdata_c(
-        0,
-        "text",
-        FILLEN,
-        TYPLEN,
-        SRCLEN,
-        spicemanager_constants::file,
-        spicemanager_constants::filtyp,
-        spicemanager_constants::source,
-        &spicemanager_constants::handle,
-        &found
-    );
-    
-    CHECK(found == SPICETRUE);
-
-    openspace::SpiceManager::deinitialize();
-}
-
-TEST_CASE("SpiceManager: Unload Kernel String", "[spicemanager]") {
-    openspace::SpiceManager::initialize();
-
-    loadLSKKernel();
-    // naif0008.tls is a text file, check if loaded.
-    SpiceBoolean found;
-    kdata_c(
-        0,
-        "text",
-        FILLEN,
-        TYPLEN,
-        SRCLEN,
-        spicemanager_constants::file,
-        spicemanager_constants::filtyp,
-        spicemanager_constants::source,
-        &spicemanager_constants::handle,
-        &found
-    );
-    CHECK(found == SPICETRUE);
-
-    // unload using string keyword
-    openspace::SpiceManager::ref().unloadKernel(
-        absPath("${TESTDIR}/SpiceTest/spicekernels/naif0008.tls").string()
-    );
-
-    found = SPICEFALSE;
-    kdata_c(
-        0,
-        "text",
-        FILLEN,
-        TYPLEN,
-        SRCLEN,
-        spicemanager_constants::file,
-        spicemanager_constants::filtyp,
-        spicemanager_constants::source,
-        &spicemanager_constants::handle,
-        &found
-    );
-    CHECK(found != SPICETRUE);
-
-    openspace::SpiceManager::deinitialize();
-}
-
-TEST_CASE("SpiceManager: Unload Kernel Integer", "[spicemanager]") {
-    openspace::SpiceManager::initialize();
-
-    int kernelID = loadLSKKernel();
-    // naif0008.tls is a text file, check if loaded.
-    SpiceBoolean found;
-    kdata_c(
-        0,
-        "text",
-        FILLEN,
-        TYPLEN,
-        SRCLEN,
-        spicemanager_constants::file,
-        spicemanager_constants::filtyp,
-        spicemanager_constants::source,
-        &spicemanager_constants::handle,
-        &found
-    );
-    CHECK(found == SPICETRUE);
-
-    // unload using unique int ID
-    openspace::SpiceManager::ref().unloadKernel(kernelID);
-
-    found = SPICEFALSE;
-    kdata_c(
-        0,
-        "text",
-        FILLEN,
-        TYPLEN,
-        SRCLEN,
-        spicemanager_constants::file,
-        spicemanager_constants::filtyp,
-        spicemanager_constants::source,
-        &spicemanager_constants::handle,
-        &found
-    );
-    CHECK(found != SPICETRUE);
-
-    openspace::SpiceManager::deinitialize();
-}
-
 TEST_CASE("SpiceManager: Has Value", "[spicemanager]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
     loadPCKKernel();
 
-    int naifId = 399; // Earth
-
-    std::string kernelPoolValue = "RADII";
-
-    const bool found = openspace::SpiceManager::ref().hasValue(naifId, kernelPoolValue);
+    const int naifId = 399; // Earth
+    const std::string kernelPoolValue = "RADII";
+    const bool found = SpiceManager::ref().hasValue(naifId, kernelPoolValue);
     CHECK(found);
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("SpiceManager: Get Value From ID 1D", "[spicemanager]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
     loadPCKKernel();
 
-    std::string target  = "EARTH";
-    std::string value1D = "MAG_NORTH_POLE_LAT";
-
+    const std::string target  = "EARTH";
+    const std::string value1D = "MAG_NORTH_POLE_LAT";
     double return1D = 0.0;
-    CHECK_NOTHROW(openspace::SpiceManager::ref().getValue(target, value1D, return1D));
+    CHECK_NOTHROW(SpiceManager::ref().getValue(target, value1D, return1D));
     CHECK(return1D == 78.565);
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("SpiceManager: Get Value From ID 3D", "[spicemanager]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
     loadPCKKernel();
 
-    std::string target  = "EARTH";
-    std::string value3D = "RADII";
-
+    const std::string target  = "EARTH";
+    const std::string value3D = "RADII";
     glm::dvec3 return3D = glm::dvec3(0.0);
-    CHECK_NOTHROW(openspace::SpiceManager::ref().getValue(target, value3D, return3D));
+    CHECK_NOTHROW(SpiceManager::ref().getValue(target, value3D, return3D));
 
     CHECK(return3D.x == 6378.14);
     CHECK(return3D.y == 6378.14);
     CHECK(return3D.z == 6356.75);
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("SpiceManager: Get Value From ID ND", "[spicemanager]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
     loadPCKKernel();
 
-    std::string target  = "SATURN";
-    std::string valueND = "RING6_A";
+    const std::string target = "SATURN";
+    const std::string valueND = "RING6_A";
+    std::vector<double> returnND;
+    returnND.resize(5);
+    CHECK_NOTHROW(SpiceManager::ref().getValue(target, valueND, returnND));
 
-    std::vector<double> returnND(5);
-    CHECK_NOTHROW(openspace::SpiceManager::ref().getValue(target, valueND, returnND));
+    std::vector<double> controlVec = { 189870.0, 256900.0, 9000.0, 9000.0, 0.000003 };
 
-    std::vector<double> controlVec{ 189870.0, 256900.0, 9000.0, 9000.0, 0.000003 };
-    
     CHECK(controlVec.size() == returnND.size());
 
-    for (unsigned int i = 0; i < returnND.size(); ++i){
+    for (unsigned int i = 0; i < returnND.size(); i++) {
         CHECK(controlVec[i] == returnND[i]);
     }
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("SpiceManager: String To Ephemeris Time", "[spicemanager]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
-    loadLSKKernel();
+    double control_ephemerisTime = 0.0;
+    const std::string date = "Thu Mar 20 12:53:29 PST 1997";
+    str2et_c(date.c_str(), &control_ephemerisTime);
 
     double ephemerisTime = -1.0;
-    double control_ephemerisTime = 0.0;
-    char date[SRCLEN] = "Thu Mar 20 12:53:29 PST 1997";
-    str2et_c(date, &control_ephemerisTime);
-
-    CHECK_NOTHROW(
-        ephemerisTime = openspace::SpiceManager::ref().ephemerisTimeFromDate(date)
-    );
+    CHECK_NOTHROW(ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date));
 
     CHECK(ephemerisTime == control_ephemerisTime);
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("SpiceManager: Get Target Position", "[spicemanager]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
-    using openspace::SpiceManager;
     loadMetaKernel();
 
+    const std::string utctime = "2004 JUN 11 19:32:00";
     double et = 0.0;
-    double pos[3] = { 0.0, 0.0, 0.0 };
-    double lt = 0.0;
-    char utctime[SRCLEN] = "2004 jun 11 19:32:00";
+    str2et_c(utctime.c_str(), &et);
 
-    str2et_c(utctime, &et);
-    spkpos_c("EARTH", et, "J2000", "LT+S", "CASSINI", pos, &lt);
+    std::array<double, 3> pos = { 0.0, 0.0, 0.0 };
+    double lt = 0.0;
+    spkpos_c("EARTH", et, "J2000", "LT+S", "CASSINI", pos.data(), &lt);
 
     glm::dvec3 targetPosition = glm::dvec3(0.0);
     double lightTime = 0.0;
-    SpiceManager::AberrationCorrection corr = {
+    const SpiceManager::AberrationCorrection corr = {
         SpiceManager::AberrationCorrection::Type::LightTimeStellar,
         SpiceManager::AberrationCorrection::Direction::Reception
     };
@@ -329,7 +190,12 @@ TEST_CASE("SpiceManager: Get Target Position", "[spicemanager]") {
     CHECK_NOTHROW(
         [&]() {
             targetPosition = SpiceManager::ref().targetPosition(
-                "EARTH", "CASSINI", "J2000", corr, et, lightTime
+                "EARTH",
+                "CASSINI",
+                "J2000",
+                corr,
+                et,
+                lightTime
             );
         }()
     );
@@ -337,24 +203,23 @@ TEST_CASE("SpiceManager: Get Target Position", "[spicemanager]") {
     CHECK(pos[1] == Catch::Approx(targetPosition[1]));
     CHECK(pos[2] == Catch::Approx(targetPosition[2]));
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("SpiceManager: Get Target State", "[spicemanager]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
-    using openspace::SpiceManager;
     loadMetaKernel();
 
-    double et;
-    double state[6];
-    double lt;
-    char utctime[SRCLEN] = "2004 jun 11 19:32:00";
+    double et = 0.0;
+    const std::string utctime = "2004 JUN 11 19:32:00";
+    str2et_c(utctime.c_str(), &et);
 
-    str2et_c(utctime, &et);
-    spkezr_c("EARTH", et, "J2000", "LT+S", "CASSINI", state, &lt);
+    std::array<double, 6> state;
+    double lt = 0.0;
+    spkezr_c("EARTH", et, "J2000", "LT+S", "CASSINI", state.data(), &lt);
 
-    SpiceManager::AberrationCorrection corr = {
+    const SpiceManager::AberrationCorrection corr = {
         SpiceManager::AberrationCorrection::Type::LightTimeStellar,
         SpiceManager::AberrationCorrection::Direction::Reception
     };
@@ -364,35 +229,39 @@ TEST_CASE("SpiceManager: Get Target State", "[spicemanager]") {
         res = SpiceManager::ref().targetState("EARTH", "CASSINI", "J2000", corr, et)
     );
 
-    // x,y,z
-    for (int i = 0; i < 3; i++){
+    for (int i = 0; i < 3; i++) {
         CHECK(state[i] == Catch::Approx(res.position[i]));
         CHECK(state[i+3] == Catch::Approx(res.velocity[i]));
     }
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("SpiceManager: Transform matrix", "[spicemanager]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
-   loadMetaKernel();
+    loadMetaKernel();
 
-   double et;
-   double state[6];
-   double lt;
-   double referenceMatrix[6][6];
 
-   str2et_c("2004 jun 11 19:32:00", &et);
-   spkezr_c("PHOEBE", et, "J2000", "LT+S", "CASSINI", state, &lt);
-   sxform_c("J2000", "IAU_PHOEBE", et, referenceMatrix);
+    double et = 0.0;
+    str2et_c("2004 JUN 11 19:32:00", &et);
 
-   openspace::SpiceManager::TransformMatrix stateMatrix;
-   CHECK_NOTHROW(
-     stateMatrix = openspace::SpiceManager::ref().stateTransformMatrix(
-        "J2000", "IAU_PHOEBE", et)
+    std::array<double, 6> state;
+    double lt = 0.0;
+    spkezr_c("PHOEBE", et, "J2000", "LT+S", "CASSINI", state.data(), &lt);
+
+    std::array<double[6], 6> referenceMatrix;
+    sxform_c("J2000", "IAU_PHOEBE", et, referenceMatrix.data());
+
+    SpiceManager::TransformMatrix stateMatrix;
+    CHECK_NOTHROW(
+        stateMatrix = SpiceManager::ref().stateTransformMatrix(
+            "J2000",
+             "IAU_PHOEBE",
+             et
+        )
     );
-   
+
    // check for matrix consistency
    for (int i = 0; i < 6; i++) {
        for (int j = 0; j < 6; j++) {
@@ -400,24 +269,23 @@ TEST_CASE("SpiceManager: Transform matrix", "[spicemanager]") {
        }
    }
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("SpiceManager: Get Position Transform Matrix", "[spicemanager]") {
-    openspace::SpiceManager::initialize();
+    SpiceManager::initialize();
 
-    using openspace::SpiceManager;
     loadMetaKernel();
 
-    double et;
-    double state[3] = { 1.0, 1.0, 1.0 };
-    double state_t[3];
-    double referenceMatrix[3][3];
 
-    str2et_c("2004 jun 11 19:32:00", &et);
-    pxform_c("CASSINI_HGA", "J2000", et, referenceMatrix);
+    double et = 0.0;
+    str2et_c("2004 JUN 11 19:32:00", &et);
+
+    std::array<double[3], 3> referenceMatrix;
+    pxform_c("CASSINI_HGA", "J2000", et, referenceMatrix.data());
 
     glm::dmat3 positionMatrix = glm::dmat3(1.0);
+    std::array<double, 3> state = { 1.0, 1.0, 1.0 };
     glm::dvec3 position(state[0], state[1], state[2]);
     CHECK_NOTHROW(
         [&]() {
@@ -443,7 +311,8 @@ TEST_CASE("SpiceManager: Get Position Transform Matrix", "[spicemanager]") {
 #endif
 
     // transform reference position into new frame
-    mxvg_c(referenceMatrix, state, 3, 3, state_t);
+    std::array<double, 3> stateTransformed;
+    mxvg_c(referenceMatrix.data(), state.data(), 3, 3, stateTransformed.data());
 
 #if defined __clang__
 #pragma clang diagnostic pop
@@ -452,34 +321,47 @@ TEST_CASE("SpiceManager: Get Position Transform Matrix", "[spicemanager]") {
 #endif
 
     position = positionMatrix * position;
-    // check transformed values match 
+    // check transformed values match
     for (int i = 0; i < 3; i++) {
-        CHECK(position[i] == Catch::Approx(state_t[i]));
+        CHECK(position[i] == Catch::Approx(stateTransformed[i]));
     }
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("SpiceManager: Get Field Of View", "[spicemanager]") {
-    openspace::SpiceManager::initialize();
+    constexpr int NameLength = 128;
+    constexpr int ShapeLength = 32;
 
-    using openspace::SpiceManager;
+    SpiceManager::initialize();
+
     loadMetaKernel();
-    
-    SpiceInt n;
-    SpiceInt cassini_ID;
-    double et;
-    double bounds_ref[5][3];
-    char shape_ref[TYPLEN];
-    char name_ref[FILLEN];
-    double boresightVec[3];
 
-    str2et_c("2004 jun 11 19:32:00", &et);
-    SpiceBoolean found;
-    bodn2c_c("CASSINI_ISS_NAC", &cassini_ID, &found);
+
+    double et = 0.0;
+    str2et_c("2004 JUN 11 19:32:00", &et);
+
+    SpiceInt id = 0;
+    SpiceBoolean found = SPICETRUE;
+    bodn2c_c("CASSINI_ISS_NAC", &id, &found);
     CHECK(found == SPICETRUE);
 
-    getfov_c(cassini_ID, 5, TYPLEN, TYPLEN, shape_ref, name_ref, boresightVec, &n, bounds_ref);
+    std::array<char, ShapeLength> shapeRef;
+    std::array<char, NameLength> nameRef;
+    std::array<double, 3> boresightVec;
+    SpiceInt n = 0;
+    std::array<double[3], 5> boundsRef;
+    getfov_c(
+        id,
+        5,
+        ShapeLength,
+        NameLength,
+        shapeRef.data(),
+        nameRef.data(),
+        boresightVec.data(),
+        &n,
+        boundsRef.data()
+    );
 
     SpiceManager::FieldOfViewResult res;
 
@@ -490,10 +372,11 @@ TEST_CASE("SpiceManager: Get Field Of View", "[spicemanager]") {
     for (size_t i = 0; i < res.bounds.size(); i++) {
         for (size_t j = 0; j < 3; j++) {
             CHECK(
-                bounds_ref[i][j] == Catch::Approx(res.bounds[i][static_cast<glm::length_t>(j)])
+                boundsRef[i][j] ==
+                Catch::Approx(res.bounds[i][static_cast<glm::length_t>(j)])
             );
         }
     }
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }

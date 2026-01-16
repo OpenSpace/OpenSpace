@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,8 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -36,11 +37,9 @@ namespace openspace {
 
 class SceneGraphNode;
 
-namespace documentation { struct Documentation; }
-
 class RenderableTravelSpeed : public Renderable {
 public:
-    RenderableTravelSpeed(const ghoul::Dictionary& dictionary);
+    explicit RenderableTravelSpeed(const ghoul::Dictionary& dictionary);
 
     static documentation::Documentation Documentation();
     void initializeGL() override;
@@ -53,14 +52,13 @@ public:
     void update(const UpdateData& data) override;
 
 private:
-    double calculateLightTravelTime(glm::dvec3 startPosition, glm::dvec3 targetPosition);
     void calculateVerticesPositions();
-    void calculateDirectionVector();
     void updateVertexData();
     void reinitiateTravel();
+
     UniformCache(lineColor, opacity) _uniformCache;
 
-    properties::StringProperty _targetName;
+    properties::StringProperty _targetIdentifier;
     SceneGraphNode* _targetNode = nullptr;
     properties::DoubleProperty _travelSpeed;
     properties::FloatProperty _indicatorLength;
@@ -75,17 +73,15 @@ private:
     };
     VertexPositions _vertexPositions;
 
-    glm::dvec3 _sourcePosition;
-    glm::dvec3 _targetPosition;
-    double _lightTravelTime;
+    double _travelTime = 0.0;
     glm::dvec3 _directionVector;
     double _initiationTime = -1.0;
-    double _arrivalTime;
+    double _arrivalTime = -1.0;
     double _timeSinceStart = -1.0;
 
     ghoul::opengl::ProgramObject* _shaderProgram = nullptr;
-    // The vertex attribute location for position
-    // must correlate to layout location in vertex shader
+    // The vertex attribute location for position must correlate to layout location in
+    // vertex shader
     GLuint _vaoId = 0;
     GLuint _vBufferId = 0;
 };

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,14 @@
 
 #include <modules/multiresvolume/rendering/brickmanager.h>
 
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <glm/gtx/std_based_type.hpp>
+#include <algorithm>
+#include <cmath>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "BrickManager";
@@ -49,13 +52,13 @@ bool BrickManager::readHeader() {
 
     _header = _tsp->header();
 
-    LDEBUG(fmt::format("Grid type: {}", _header.gridType));
-    LDEBUG(fmt::format("Original num timesteps: {}", _header.numOrigTimesteps));
-    LDEBUG(fmt::format("Num timesteps: {}", _header.numTimesteps));
-    LDEBUG(fmt::format(
+    LDEBUG(std::format("Grid type: {}", _header.gridType));
+    LDEBUG(std::format("Original num timesteps: {}", _header.numOrigTimesteps));
+    LDEBUG(std::format("Num timesteps: {}", _header.numTimesteps));
+    LDEBUG(std::format(
         "Brick dims: {} {} {}", _header.xBrickDim, _header.yBrickDim, _header.zBrickDim
     ));
-    LDEBUG(fmt::format(
+    LDEBUG(std::format(
         "Num bricks: {} {} {}",
         _header.xNumBricks,
         _header.yNumBricks,
@@ -67,8 +70,8 @@ bool BrickManager::readHeader() {
     _paddedBrickDim = _brickDim + _paddingWidth * 2;
     _atlasDim = _paddedBrickDim*_numBricks;
 
-    LDEBUG(fmt::format("Padded brick dim: {}", _paddedBrickDim));
-    LDEBUG(fmt::format("Atlas dim: {}", _atlasDim));
+    LDEBUG(std::format("Padded brick dim: {}", _paddedBrickDim));
+    LDEBUG(std::format("Atlas dim: {}", _atlasDim));
 
     _numBrickVals = _paddedBrickDim*_paddedBrickDim*_paddedBrickDim;
     // Number of bricks per frame
@@ -81,11 +84,11 @@ bool BrickManager::readHeader() {
     unsigned int numOTNodes = static_cast<unsigned int>((pow(8, numOTLevels) - 1) / 7);
     unsigned int numBSTNodes = _header.numTimesteps * 2 - 1;
     _numBricksTree = numOTNodes * numBSTNodes;
-    LDEBUG(fmt::format("Num OT levels: {}", numOTLevels));
-    LDEBUG(fmt::format("Num OT nodes: {}", numOTNodes));
-    LDEBUG(fmt::format("Num BST nodes: {}", numBSTNodes));
-    LDEBUG(fmt::format("Num bricks in tree: {}", _numBricksTree));
-    LDEBUG(fmt::format("Num values per brick: {}", _numBrickVals));
+    LDEBUG(std::format("Num OT levels: {}", numOTLevels));
+    LDEBUG(std::format("Num OT nodes: {}", numOTNodes));
+    LDEBUG(std::format("Num BST nodes: {}", numBSTNodes));
+    LDEBUG(std::format("Num bricks in tree: {}", _numBricksTree));
+    LDEBUG(std::format("Num values per brick: {}", _numBrickVals));
 
     _brickSize = sizeof(float) * _numBrickVals;
     _volumeSize = _brickSize * _numBricksFrame;
@@ -99,8 +102,8 @@ bool BrickManager::readHeader() {
 
     if (fileSize != calcFileSize) {
         LERROR("Sizes do not match");
-        LERROR(fmt::format("Calculated file size: {}", calcFileSize));
-        LERROR(fmt::format("File size: {}", fileSize));
+        LERROR(std::format("Calculated file size: {}", calcFileSize));
+        LERROR(std::format("File size: {}", fileSize));
         return false;
     }
 
@@ -157,26 +160,25 @@ bool BrickManager::initialize() {
     return true;
 }
 
-bool BrickManager::buildBrickList(BUFFER_INDEX bufferIndex,
-                                  std::vector<int> &brickRequest)
+bool BrickManager::buildBrickList(BufferIndex bufferIndex, std::vector<int>& brickRequest)
 {
     // Keep track of number bricks used and number of bricks cached
     // (for benchmarking)
-    int numBricks = 0;
-    int numCached = 0;
+    //int numBricks = 0;
+    //int numCached = 0;
 
     // For every non-zero entry in the request list, assign a texture atlas
     // coordinate. For zero entries, signal "no brick" using -1.
 
-    for (unsigned int i = 0; i < brickRequest.size(); ++i) {
+    for (unsigned int i = 0; i < brickRequest.size(); i++) {
         if (brickRequest[i] > 0) {
-            numBricks++;
+            //numBricks++;
 
             //INFO("Checking brick " << i);
 
             // If the brick is already in the atlas, keep the coordinate
             if (_bricksInPBO[bufferIndex][i] != -1) {
-                numCached++;
+                //numCached++;
 
                 // Get the corresponding coordinates from index
                 int x, y, z;
@@ -239,9 +241,9 @@ bool BrickManager::fillVolume(float* in, float* out, unsigned int x, unsigned in
 
     // Loop over the brick using three loops
     unsigned int from = 0;
-    for (unsigned int zValCoord = zMin; zValCoord < zMax; ++zValCoord) {
-        for (unsigned int yValCoord = yMin; yValCoord < yMax; ++yValCoord) {
-            for (unsigned int xValCoord = xMin; xValCoord < xMax; ++xValCoord) {
+    for (unsigned int zValCoord = zMin; zValCoord < zMax; zValCoord++) {
+        for (unsigned int yValCoord = yMin; yValCoord < yMax; yValCoord++) {
+            for (unsigned int xValCoord = xMin; xValCoord < xMax; xValCoord++) {
                 unsigned int idx = xValCoord + yValCoord * _atlasDim +
                                    zValCoord * _atlasDim * _atlasDim;
 
@@ -281,7 +283,7 @@ void BrickManager::coordinatesFromLinear(int idx, int& x, int& y, int& z) {
     z = idx;
 }
 
-bool BrickManager::diskToPBO(BUFFER_INDEX pboIndex) {
+bool BrickManager::diskToPBO(BufferIndex pboIndex) {
     // Map PBO
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[pboIndex]);
     glBufferData(GL_PIXEL_UNPACK_BUFFER, _volumeSize, nullptr, GL_STREAM_DRAW);
@@ -367,7 +369,7 @@ bool BrickManager::diskToPBO(BUFFER_INDEX pboIndex) {
             //INFO("Disk read "<<mb<<" MB in "<<time<<" s, "<< mb/time<<" MB/s");
 
             // For each brick in the buffer, put it the correct buffer spot
-            for (unsigned int i = 0; i < sequence; ++i) {
+            for (unsigned int i = 0; i < sequence; i++) {
                 // Only upload if needed
                 // Pointless if implementation only skips reading when ALL bricks in
                 // sequence are in PBO, but could be useful if other solutions that
@@ -406,8 +408,8 @@ bool BrickManager::diskToPBO(BUFFER_INDEX pboIndex) {
     return true;
 }
 
-bool BrickManager::pboToAtlas(BUFFER_INDEX _pboIndex) {
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[_pboIndex]);
+bool BrickManager::pboToAtlas(BufferIndex pboIndex) {
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[pboIndex]);
     glm::size3_t dim = _textureAtlas->dimensions();
     glBindTexture(GL_TEXTURE_3D, *_textureAtlas);
     glTexSubImage3D(
@@ -433,11 +435,11 @@ ghoul::opengl::Texture* BrickManager::textureAtlas() {
     return _textureAtlas;
 }
 
-unsigned int BrickManager::pbo(BUFFER_INDEX pboIndex) const {
+unsigned int BrickManager::pbo(BufferIndex pboIndex) const {
     return _pboHandle[pboIndex];
 }
 
-const std::vector<int>& BrickManager::brickList(BUFFER_INDEX index) const {
+const std::vector<int>& BrickManager::brickList(BufferIndex index) const {
     return _brickLists.at(index);
 }
 

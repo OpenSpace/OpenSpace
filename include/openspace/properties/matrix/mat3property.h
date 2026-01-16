@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,17 +34,24 @@ namespace openspace::properties {
 
 class Mat3Property : public NumericalProperty<glm::mat3x3> {
 public:
-    Mat3Property(Property::PropertyInfo info, glm::mat3x3 value = glm::mat3x3(),
+    explicit Mat3Property(Property::PropertyInfo info,
+        glm::mat3x3 value = glm::mat3x3(0.f),
         glm::mat3x3 minValue =
             ghoul::createFillMat3x3<float>(std::numeric_limits<float>::lowest()),
         glm::mat3x3 maxValue =
             ghoul::createFillMat3x3<float>(std::numeric_limits<float>::max()),
         glm::mat3x3 stepValue = ghoul::createFillMat3x3<float>(0.01f));
 
-    std::string_view className() const override;
-    int typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
     using TemplateProperty<glm::mat3x3>::operator=;
+
+private:
+    glm::mat3x3 toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

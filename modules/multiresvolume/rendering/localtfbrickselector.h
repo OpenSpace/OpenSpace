@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,9 +32,9 @@
 
 namespace openspace {
 
-class TSP;
 class LocalErrorHistogramManager;
 class TransferFunction;
+class TSP;
 
 class LocalTfBrickSelector : public BrickSelector {
 public:
@@ -55,11 +55,6 @@ public:
     bool calculateBrickErrors();
 
 private:
-    TSP* _tsp;
-    LocalErrorHistogramManager* _histogramManager;
-    TransferFunction* _transferFunction;
-    std::vector<Error> _brickErrors;
-
     float spatialSplitPoints(unsigned int brickIndex) const;
     float temporalSplitPoints(unsigned int brickIndex) const;
     float splitPoints(unsigned int brickIndex, BrickSelection::SplitType& splitType);
@@ -67,6 +62,10 @@ private:
     int linearCoordinates(int x, int y, int z) const;
     void writeSelection(BrickSelection coveredBricks, std::vector<int>& bricks);
 
+    TSP* _tsp;
+    LocalErrorHistogramManager* _histogramManager;
+    TransferFunction* _transferFunction;
+    std::vector<Error> _brickErrors;
     int _memoryBudget;
     int _streamingBudget;
 };

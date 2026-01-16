@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,32 +26,35 @@
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/crc32.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
-#include <fstream>
-#include <optional>
+#include <cstdlib>
+#include <limits>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
-        "This value specifies an image that is loaded from disk and is used as a texture "
-        "that is applied to this plane. This image has to be square"
+        "A path to an image file to use as a texture for the plane.",
+        openspace::properties::Property::Visibility::User
     };
 
+    // A `RenderablePlaneImageLocal` creates a textured 3D plane, where the texture is
+    // provided by a local file on disk.
     struct [[codegen::Dictionary(RenderablePlaneImageLocal)]] Parameters {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string texture;
 
-        // If this value is set to 'true', the image for this plane will not be loaded at
+        // If this value is set to true, the image for this plane will not be loaded at
         // startup but rather when image is shown for the first time. Additionally, if the
-        // plane is hidden, the image will automatically be unloaded
+        // plane is hidden, the image will automatically be unloaded.
         std::optional<bool> lazyLoading;
     };
 #include "renderableplaneimagelocal_codegen.cpp"
@@ -72,8 +75,6 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    addProperty(_blendMode);
-
     _texturePath = absPath(p.texture).string();
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
 
@@ -93,10 +94,31 @@ RenderablePlaneImageLocal::RenderablePlaneImageLocal(const ghoul::Dictionary& di
             }
         });
     }
-}
 
-bool RenderablePlaneImageLocal::isReady() const {
-    return RenderablePlane::isReady();
+    _autoScale.onChange([this]() {
+        if (!_autoScale) {
+            return;
+        }
+
+        // Shape the plane based on the aspect ration of the image
+        const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+        if (_textureDimensions != textureDim) {
+            const float aspectRatio = textureDim.x / textureDim.y;
+            const float planeAspectRatio = _size.value().x / _size.value().y;
+
+            if (std::abs(planeAspectRatio - aspectRatio) >
+                std::numeric_limits<float>::epsilon())
+            {
+                const glm::vec2 newSize =
+                    aspectRatio > 0.f ?
+                    glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                    glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+                _size = newSize;
+            }
+
+            _textureDimensions = textureDim;
+        }
+    });
 }
 
 void RenderablePlaneImageLocal::initializeGL() {
@@ -123,7 +145,7 @@ void RenderablePlaneImageLocal::update(const UpdateData& data) {
 
     RenderablePlane::update(data);
 
-    if (_textureIsDirty) {
+    if (_textureIsDirty) [[unlikely]] {
         loadTexture();
         _textureIsDirty = false;
     }
@@ -135,20 +157,17 @@ void RenderablePlaneImageLocal::loadTexture() {
     if (!_texturePath.value().empty()) {
         ghoul::opengl::Texture* t = _texture;
 
-        unsigned int hash = ghoul::hashCRC32File(_texturePath);
+        const unsigned int hash = ghoul::hashCRC32File(_texturePath);
 
         _texture = BaseModule::TextureManager.request(
             std::to_string(hash),
-            [path = _texturePath]() -> std::unique_ptr<ghoul::opengl::Texture> {
+            [path = _texturePath.value()]() -> std::unique_ptr<ghoul::opengl::Texture> {
                 std::unique_ptr<ghoul::opengl::Texture> texture =
-                    ghoul::io::TextureReader::ref().loadTexture(
-                        absPath(path).string(),
-                        2
-                    );
+                    ghoul::io::TextureReader::ref().loadTexture(absPath(path), 2);
 
                 LDEBUGC(
                     "RenderablePlaneImageLocal",
-                    fmt::format("Loaded texture from {}", absPath(path))
+                    std::format("Loaded texture from '{}'", absPath(path))
                 );
                 texture->uploadTexture();
                 texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
@@ -162,6 +181,29 @@ void RenderablePlaneImageLocal::loadTexture() {
 
         _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
         _textureFile->setCallback([this]() { _textureIsDirty = true; });
+
+        if (!_autoScale) {
+            return;
+        }
+
+        // Shape the plane based on the aspect ration of the image
+        const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+        if (_textureDimensions != textureDim) {
+            const float aspectRatio = textureDim.x / textureDim.y;
+            const float planeAspectRatio = _size.value().x / _size.value().y;
+
+            if (std::abs(planeAspectRatio - aspectRatio) >
+                std::numeric_limits<float>::epsilon())
+            {
+                const glm::vec2 newSize =
+                    aspectRatio > 0.f ?
+                    glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                    glm::vec2(_size.value().x, _size.value().y * aspectRatio);
+                _size = newSize;
+            }
+
+            _textureDimensions = textureDim;
+        }
     }
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,19 +27,16 @@
 
 #include <modules/base/rendering/renderableplane.h>
 
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class Texture; }
+#include <openspace/properties/misc/stringproperty.h>
+#include <filesystem>
+#include <limits>
+#include <memory>
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
-
 class RenderablePlaneTimeVaryingImage : public RenderablePlane {
 public:
-    RenderablePlaneTimeVaryingImage(const ghoul::Dictionary& dictionary);
+    explicit RenderablePlaneTimeVaryingImage(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -57,12 +54,12 @@ private:
     ghoul::opengl::Texture* loadTexture() const;
     void extractTriggerTimesFromFileNames();
     bool extractMandatoryInfoFromDictionary();
-    int updateActiveTriggerTimeIndex(double currenttime) const;
+    int updateActiveTriggerTimeIndex(double currentTime) const;
     void computeSequenceEndTime();
 
     // If there's just one state it should never disappear
     double _sequenceEndTime = std::numeric_limits<double>::max();
-    std::vector<std::string> _sourceFiles;
+    std::vector<std::filesystem::path> _sourceFiles;
     std::vector<double> _startTimes;
     int _activeTriggerTimeIndex = 0;
     properties::StringProperty _sourceFolder;

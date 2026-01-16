@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -38,17 +38,43 @@
 
 namespace openspace {
 
-class WebRenderHandler;
 class WebKeyboardHandler;
+class WebRenderHandler;
 
 class BrowserClient : public CefClient {
 public:
     class NoContextMenuHandler : public CefContextMenuHandler {
-        bool RunContextMenu(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame> frame,
-            CefRefPtr<CefContextMenuParams> params, CefRefPtr<CefMenuModel> model,
-            CefRefPtr<CefRunContextMenuCallback> callback) override;
+        bool RunContextMenu(CefRefPtr<CefBrowser>, CefRefPtr<CefFrame>,
+            CefRefPtr<CefContextMenuParams>, CefRefPtr<CefMenuModel>,
+            CefRefPtr<CefRunContextMenuCallback>) override;
 
         IMPLEMENT_REFCOUNTING(NoContextMenuHandler);
+    };
+
+    class DisplayHandler : public CefDisplayHandler {
+        bool OnCursorChange(CefRefPtr<CefBrowser>,
+            CefCursorHandle,
+            cef_cursor_type_t type,
+            const CefCursorInfo&) override;
+        IMPLEMENT_REFCOUNTING(DisplayHandler);
+    };
+
+    // This is a fallback to fix a bug with the focus that CEF has. The browser can lose
+    // the focus and this is a hacky way to recover it. Solution from this post:
+    // https://magpcss.org/ceforum/viewtopic.php?f=6&t=20161&p=56949&hilit=css+focus#
+    // TODO (ylvse 2025-02-18): Update CEF when they have fixed this issue
+    // https://github.com/chromiumembedded/cef/issues/3870
+    class FocusHandler : public CefFocusHandler {
+        void OnTakeFocus(CefRefPtr<CefBrowser>, bool) override;
+        bool OnSetFocus(CefRefPtr<CefBrowser>, FocusSource) override;
+
+        IMPLEMENT_REFCOUNTING(FocusHandler);
+    };
+
+    class LoadHandler : public CefLoadHandler {
+        void OnLoadEnd(CefRefPtr<CefBrowser> browser, CefRefPtr<CefFrame>, int) override;
+
+        IMPLEMENT_REFCOUNTING(LoadHandler);
     };
 
     BrowserClient(WebRenderHandler* handler, WebKeyboardHandler* keyboardHandler);
@@ -58,6 +84,12 @@ public:
     CefRefPtr<CefRequestHandler> GetRequestHandler() override;
     CefRefPtr<CefKeyboardHandler> GetKeyboardHandler() override;
     CefRefPtr<CefContextMenuHandler> GetContextMenuHandler() override;
+    CefRefPtr<CefDisplayHandler> GetDisplayHandler() override;
+    CefRefPtr<CefLoadHandler> GetLoadHandler() override;
+    CefRefPtr<CefFocusHandler> GetFocusHandler() override;
+
+protected:
+    static bool _hasFocus;
 
 private:
     CefRefPtr<CefRenderHandler> _renderHandler;
@@ -65,6 +97,11 @@ private:
     CefRefPtr<CefLifeSpanHandler> _lifeSpanHandler;
     CefRefPtr<CefRequestHandler> _requestHandler;
     CefRefPtr<CefContextMenuHandler> _contextMenuHandler;
+    CefRefPtr<CefDisplayHandler> _displayHandler;
+
+    // Try to fix the focus bug
+    CefRefPtr<CefLoadHandler> _loadHandler;
+    CefRefPtr<CefFocusHandler> _focusHandler;
 
     IMPLEMENT_REFCOUNTING(BrowserClient);
 };

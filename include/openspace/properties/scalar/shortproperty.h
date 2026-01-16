@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,20 +25,8 @@
 #ifndef __OPENSPACE_CORE___SHORTPROPERTY___H__
 #define __OPENSPACE_CORE___SHORTPROPERTY___H__
 
- /**
- * \file shortproperty.h
- *
- * \addtogroup openspace
- * @{
- * \addtogroup properties
- * @{
-
- * \class ShortProperty
-
- * @} @}
- */
-
 #include <openspace/properties/numericalproperty.h>
+
 #include <limits>
 
 namespace openspace::properties {
@@ -49,15 +37,21 @@ namespace openspace::properties {
  */
 class ShortProperty : public NumericalProperty<short> {
 public:
-    ShortProperty(Property::PropertyInfo info, short value = short(0),
+    explicit ShortProperty(Property::PropertyInfo info, short value = short(0),
         short minValue = std::numeric_limits<short>::lowest(),
         short maxValue = std::numeric_limits<short>::max(),
         short stepValue = short(1));
 
-    std::string_view className() const override;
-    int typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
     using TemplateProperty<short>::operator=;
+
+private:
+    short toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

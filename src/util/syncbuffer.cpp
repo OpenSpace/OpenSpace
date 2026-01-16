@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,9 @@
 #include <openspace/util/syncbuffer.h>
 
 #include <ghoul/misc/profiling.h>
+#include <cstdint>
+#include <cstring>
+#include <utility>
 
 namespace openspace {
 
@@ -34,12 +37,10 @@ SyncBuffer::SyncBuffer(size_t n)
     _dataStream.resize(_n);
 }
 
-SyncBuffer::~SyncBuffer() {}
-
 void SyncBuffer::encode(const std::string& s) {
     ZoneScoped;
 
-    int32_t anticpatedBufferSize = static_cast<int32_t>(
+    const int32_t anticpatedBufferSize = static_cast<int32_t>(
         _encodeOffset + (sizeof(char) * s.size()) + sizeof(int32_t)
     );
     if (anticpatedBufferSize >= static_cast<int32_t>(_n)) {
@@ -47,21 +48,21 @@ void SyncBuffer::encode(const std::string& s) {
     }
 
     int32_t length = static_cast<int32_t>(s.size() * sizeof(char));
-    memcpy(
+    std::memcpy(
         _dataStream.data() + _encodeOffset,
         reinterpret_cast<const char*>(&length),
         sizeof(int32_t)
     );
     _encodeOffset += sizeof(int32_t);
-    memcpy(_dataStream.data() + _encodeOffset, s.c_str(), length);
+    std::memcpy(_dataStream.data() + _encodeOffset, s.c_str(), length);
     _encodeOffset += length;
 }
 
 std::string SyncBuffer::decode() {
     ZoneScoped;
 
-    int32_t length;
-    memcpy(
+    int32_t length = 0;
+    std::memcpy(
         reinterpret_cast<char*>(&length),
         _dataStream.data() + _decodeOffset,
         sizeof(int32_t)
@@ -113,7 +114,6 @@ void SyncBuffer::setData(std::vector<std::byte> data) {
 
 std::vector<std::byte> SyncBuffer::data() {
     _dataStream.resize(_encodeOffset);
-
     return _dataStream;
 }
 

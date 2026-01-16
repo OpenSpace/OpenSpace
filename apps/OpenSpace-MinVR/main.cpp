@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,18 +26,19 @@
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/settings.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/util/keys.h>
 #include <openspace/util/mouse.h>
-#include <ghoul/fmt.h>
-#include <ghoul/ghoul.h>
 #include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/ghoul.h>
 #include <ghoul/logging/consolelog.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <api/MinVR.h>
-#include <GLFW/glfw3.h>
 #include <numeric>
 
 // @TODO:  Add Spout support
@@ -49,7 +50,6 @@
 using namespace MinVR;
 using namespace openspace;
 
-namespace {
 
 class Handler : public VREventHandler, public VRRenderHandler, public VRInputDevice {
 public:
@@ -59,6 +59,8 @@ public:
 
     void appendNewInputEventsSinceLastCall(VRDataQueue* queue) override;
 };
+
+namespace {
 
 constexpr std::string_view _loggerCat = "main_minvr";
 
@@ -103,7 +105,7 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
     else {
         LERRORC(
             "onVREvent()",
-            fmt::format("Received an event named {} of unknown type", eventData.getName())
+            std::format("Received an event named {} of unknown type", eventData.getName())
         );
     }
 
@@ -114,7 +116,7 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
         const VRAnalogEvent& event = static_cast<const VRAnalogEvent&>(eventData);
     }
     else if (isButtonEvent) {
-        if (!global::windowDelegate.isMaster()) {
+        if (!global::windowDelegate->isMaster()) {
             return;
         }
         const VRButtonEvent& event = static_cast<const VRButtonEvent&>(eventData);
@@ -129,7 +131,7 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
             std::string keyName = buttonName.substr(beg, sep - beg);
             std::string actionName = buttonName.substr(sep + 1);
 
-            Key key = KeyMapping.find(keyName)->second;
+            Key key = stringToKey(keyName).key;
 
             KeyAction action;
             if (actionName == "Up") {
@@ -156,12 +158,12 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
             }
 
             using KM = KeyModifier;
-            KM mod = KM::NoModifier;
-            mod |= keyboardState.modifierShift ? KM::Shift : KM::NoModifier;
-            mod |= keyboardState.modifierCtrl ? KM::Control : KM::NoModifier;
-            mod |= keyboardState.modifierAlt ? KM::Alt : KM::NoModifier;
+            KM mod = KM::None;
+            mod |= keyboardState.modifierShift ? KM::Shift : KM::None;
+            mod |= keyboardState.modifierCtrl ? KM::Control : KM::None;
+            mod |= keyboardState.modifierAlt ? KM::Alt : KM::None;
 
-            openspace::global::openSpaceEngine.keyboardCallback(key, mod, action);
+            global::openSpaceEngine->keyboardCallback(key, mod, action, IsGuiWindow::Yes);
         }
 
         if (buttonName.size() >= 8 && buttonName.substr(0, 8) == "MouseBtn") {
@@ -202,24 +204,29 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
             }
 
             using KM = KeyModifier;
-            KM mod = KM::NoModifier;
-            mod |= keyboardState.modifierShift ? KM::Shift : KM::NoModifier;
-            mod |= keyboardState.modifierCtrl ? KM::Control : KM::NoModifier;
-            mod |= keyboardState.modifierAlt ? KM::Alt : KM::NoModifier;
+            KM mod = KM::None;
+            mod |= keyboardState.modifierShift ? KM::Shift : KM::None;
+            mod |= keyboardState.modifierCtrl ? KM::Control : KM::None;
+            mod |= keyboardState.modifierAlt ? KM::Alt : KM::None;
 
-            global::openSpaceEngine.mouseButtonCallback(button, action, mod);
+            global::openSpaceEngine->mouseButtonCallback(
+                button,
+                action,
+                mod,
+                IsGuiWindow::Yes
+            );
         }
 
     }
     else if (type == "CursorMove") {
-        if (!global::windowDelegate.isMaster()) {
+        if (!global::windowDelegate->isMaster()) {
             return;
         }
         const VRCursorEvent& event = static_cast<const VRCursorEvent&>(eventData);
 
         const float* pos = event.getPos();
         windowingGlobals.mousePosition = glm::vec2(pos[0], pos[1]);
-        openspace::global::openSpaceEngine.mousePositionCallback(pos[0], pos[1]);
+        global::openSpaceEngine->mousePositionCallback(pos[0], pos[1], IsGuiWindow::Yes);
 
         // @TODO(abock): Support mouse wheel
         //openspace::global::openSpaceEngine.mouseScrollWheelCallback(posX, posY);
@@ -228,22 +235,22 @@ void Handler::onVREvent(const VRDataIndex& eventData) {
         const VRTrackerEvent& event = static_cast<const VRTrackerEvent&>(eventData);
     }
     else if (type == "OpenSpaceMessage") {
-        if (global::windowDelegate.isMaster()) {
+        if (global::windowDelegate->isMaster()) {
             // We don't want the message if we are the master as we already have the state
             return;
         }
         const int frameNumber = eventData.getValue("FrameNumber");
         const int nBytes = eventData.getValue("NBytes");
         std::vector<int> intData = eventData.getValue("SynchronizationData");
-        char* data = reinterpret_cast<char*>(intData.data());
+        std::byte* data = reinterpret_cast<std::byte*>(intData.data());
 
-        std::vector<char> synchronizationBuffer(nBytes);
+        std::vector<std::byte> synchronizationBuffer(nBytes);
         std::copy(data, data + nBytes, synchronizationBuffer.begin());
 
-        global::openSpaceEngine.decode(std::move(synchronizationBuffer));
+        global::openSpaceEngine->decode(std::move(synchronizationBuffer));
     }
     else {
-        LERRORC("onVREvent()", fmt::format("Received an event of unknown type {}", type));
+        LERRORC("onVREvent()", std::format("Received an event of unknown type {}", type));
     }
 }
 
@@ -262,7 +269,7 @@ void Handler::onVRRenderContext(const VRDataIndex& stateData) {
             windowingGlobals.framebufferSize.x = stateData.getValue("FramebufferWidth");
             windowingGlobals.framebufferSize.y = stateData.getValue("FramebufferHeight");
 
-            global::openSpaceEngine.initializeGL();
+            global::openSpaceEngine->initializeGL();
 
             HasInitializedGL = true;
         }
@@ -278,14 +285,14 @@ void Handler::onVRRenderScene(const VRDataIndex& stateData) {
         glm::mat4 projectionMatrix = glm::make_mat4(state.getProjectionMatrix());
         glm::mat4 viewMatrix = glm::make_mat4(state.getViewMatrix());
         try {
-            openspace::global::openSpaceEngine.render(
+            openspace::global::openSpaceEngine->render(
                 // @TODO(abock) we should probably use the user position here?
                 glm::mat4(1.f),
                 viewMatrix,
                 projectionMatrix
             );
-            openspace::global::openSpaceEngine.drawOverlays();
-            openspace::global::openSpaceEngine.postDraw();
+            openspace::global::openSpaceEngine->drawOverlays();
+            openspace::global::openSpaceEngine->postDraw();
         }
         catch (const ghoul::RuntimeError& e) {
             LERRORC(e.component, e.message);
@@ -300,29 +307,22 @@ void Handler::appendNewInputEventsSinceLastCall(VRDataQueue* queue) {
 
 void setupMinVrDelegateFunctions(VRMain& main) {
     // Sets up the OpenSpace WindowDelegate callback functions
-    WindowDelegate& delegate = global::windowDelegate;
+    WindowDelegate* delegate = global::windowDelegate;
 
-    delegate.nWindows = []() { return windowingGlobals.nWindows; };
-    delegate.currentWindowSize = []() { return windowingGlobals.windowSize; };
-    delegate.currentWindowResolution = delegate.currentWindowSize;
-    delegate.currentDrawBufferResolution = delegate.currentWindowResolution;
-    delegate.currentViewportSize = delegate.currentWindowResolution;
+    delegate->nWindows = []() { return windowingGlobals.nWindows; };
+    delegate->currentWindowSize = []() { return windowingGlobals.windowSize; };
+    delegate->currentDrawBufferResolution = delegate->currentWindowSize;
+    delegate->currentViewportSize = delegate->currentWindowSize;
 
-    delegate.averageDeltaTime = []() -> double {
+    delegate->averageDeltaTime = []() -> double {
         return windowingGlobals.averageDeltatime;
     };
-    delegate.deltaTime = []() -> double { return windowingGlobals.deltaTime; };
+    delegate->deltaTime = []() -> double { return windowingGlobals.deltaTime; };
 
-    delegate.mousePosition = []() {
-        return windowingGlobals.mousePosition;
-    };
-    delegate.mouseButtons = [](int) {
-        return windowingGlobals.mouseButtons;
-    };
 
-    delegate.isMaster = []() { return IsMasterNode; };
+    delegate->isMaster = []() { return IsMasterNode; };
 
-    delegate.openGLProcedureAddress = [](const char* func) {
+    delegate->openGLProcedureAddress = [](const char* func) {
         VRWindowToolkit* wtk = engine.getWindowToolkit("VRGLFWWindowToolkit");
         VRglproc procAddress = wtk->getProcAddress(func);
         return procAddress;
@@ -347,12 +347,13 @@ int main(int argc, char** argv) {
     }
 
     ghoul::initialize();
+    global::create();
 
     // Register the path of the executable,
     // to make it possible to find other files in the same directory.
     FileSys.registerPathToken(
         "${BIN}",
-        ghoul::filesystem::File(absPath(argv[0])).directoryName(),
+        absPath(argv[0]).parent_path(),
         ghoul::filesystem::FileSystem::Override::Yes
     );
 
@@ -361,22 +362,42 @@ int main(int argc, char** argv) {
     try {
         // Find configuration
         //std::string configurationFilePath = commandlineArguments.configurationName;
-        //if (commandlineArguments.configurationName.empty()) {
         LDEBUG("Finding configuration");
-        std::string configurationFilePath = configuration::findConfiguration();
-        //}
+        std::filesystem::path configurationFilePath = findConfiguration();
         configurationFilePath = absPath(configurationFilePath);
 
-        if (!FileSys.fileExists(configurationFilePath)) {
-            LFATALC("main", "Could not find configuration: " + configurationFilePath);
+        if (!std::filesystem::exists(configurationFilePath)) {
+            LFATALC(
+                "main",
+                std::format("Could not find configuration: {}", configurationFilePath)
+            );
             exit(EXIT_FAILURE);
         }
-        LINFO(fmt::format("Configuration Path: '{}'", configurationFilePath));
+        LINFO(std::format("Configuration Path: '{}'", configurationFilePath));
+
+        // Register the base path as the directory where the configuration file lives
+        std::filesystem::path base = configurationFilePath.parent_path();
+        FileSys.registerPathToken("${BASE}", std::move(base));
+
+#ifdef WIN32
+        glm::ivec2 size = glm::ivec2(1920, 1080);
+        DEVMODEW dm = { 0 };
+        dm.dmSize = sizeof(DEVMODEW);
+        BOOL success = EnumDisplaySettingsW(nullptr, ENUM_CURRENT_SETTINGS, &dm);
+        if (success) {
+            size.x = dm.dmPelsWidth;
+            size.y = dm.dmPelsHeight;
+        }
+#else // ^^^^ WIN32 // !WIN32 vvvv
+        const glm::ivec2 size = glm::ivec2(1920, 1080);
+#endif // WIN32
 
         // Loading configuration from disk
         LDEBUG("Loading configuration from disk");
-        global::configuration = configuration::loadConfigurationFromFile(
-            configurationFilePath
+        *global::configuration = loadConfigurationFromFile(
+            configurationFilePath,
+            findSettings(),
+            size
         );
 
         // If the user requested a commandline-based configuation script that should
@@ -392,9 +413,9 @@ int main(int argc, char** argv) {
         //}
 
         // Determining MinVR configuration file
-        LDEBUG("MinVR Configuration file: " + global::configuration.windowConfiguration);
+        LDEBUG("MinVR Configuration file: " + global::configuration->windowConfiguration);
 
-        windowConfiguration = global::configuration.windowConfiguration;
+        windowConfiguration = global::configuration->windowConfiguration;
     }
     catch (const documentation::SpecificationError& e) {
         LFATALC("main", "Loading of configuration file failed");
@@ -415,12 +436,12 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    global::openSpaceEngine.registerPathTokens();
-    global::openSpaceEngine.initialize();
+    global::openSpaceEngine->registerPathTokens();
+    global::openSpaceEngine->initialize();
 
     engine.addEventHandler(&handler);
     engine.addRenderHandler(&handler);
-    engine.loadConfig(global::configuration.windowConfiguration);
+    engine.loadConfig(global::configuration->windowConfiguration);
     // Yes, this still contains the OpenSpace-specific commandline arguments, but no one
     // will ever know if we use the remaining arguments or not; both commandline parsers
     // just ignore the arguments they don't understand
@@ -431,7 +452,7 @@ int main(int argc, char** argv) {
     const std::string& name = engine.getName();
     IsMasterNode = (name == MasterNode);
 
-    if (global::windowDelegate.isMaster()) {
+    if (global::windowDelegate->isMaster()) {
         engine.addInputDevice(&handler);
     }
 
@@ -459,10 +480,10 @@ int main(int argc, char** argv) {
 
 
 
-            global::openSpaceEngine.preSynchronization();
+            global::openSpaceEngine->preSynchronization();
 
-            if (global::windowDelegate.isMaster()) {
-                std::vector<char> syncBuffer = global::openSpaceEngine.encode();
+            if (global::windowDelegate->isMaster()) {
+                std::vector<std::byte> syncBuffer = global::openSpaceEngine->encode();
                 VRDataIndex e("OpenSpace_Sync");
 
                 e.addData("EventType", "OpenSpaceMessage");
@@ -488,7 +509,7 @@ int main(int argc, char** argv) {
             engine.updateAllModels();
 
             // @TODO(abock): Not sure if this should be before updateAllModels or here
-            global::openSpaceEngine.postSynchronizationPreDraw();
+            global::openSpaceEngine->postSynchronizationPreDraw();
 
             ++FrameNumber;
         }
@@ -496,12 +517,12 @@ int main(int argc, char** argv) {
         engine.renderOnAllDisplays();
     } while (!engine.getShutdown());
 
-    global::openSpaceEngine.deinitializeGL();
+    global::openSpaceEngine->deinitializeGL();
 
     // This assumes that `shutdown` destroys the OpenGL state and thus have to happen
     // after the deinitializeGL function
     engine.shutdown();
-    global::openSpaceEngine.deinitialize();
+    global::openSpaceEngine->deinitialize();
 
     exit(EXIT_SUCCESS);
 }

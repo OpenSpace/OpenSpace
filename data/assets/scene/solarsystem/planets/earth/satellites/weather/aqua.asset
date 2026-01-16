@@ -1,13 +1,17 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
+local coreKernels = asset.require("spice/core")
 
-local omm = asset.syncedResource({
+
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (Aqua)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_aqua",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=27424&FORMAT=kvn",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?CATNR=27424&FORMAT=kvn",
   Filename = "Aqua.txt",
-  Override = true
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
+
 
 local Aqua = {
   Identifier = "Aqua",
@@ -22,11 +26,11 @@ local Aqua = {
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "GALACTIC",
-      DestinationFrame = "J2000",
+      SourceFrame = coreKernels.Frame.Galactic,
+      DestinationFrame = coreKernels.Frame.J2000
     }
   },
-  Tag = { "earth_satellite", "Aqua" },
+  Tag = { "earth_satellites", "Aqua" },
   GUI = {
     Name = "Aqua",
     Path = "/Solar System/Planets/Earth/Satellites/Aqua"
@@ -49,10 +53,11 @@ local AquaTrail = {
     Fade = 1.5,
     Resolution = 320
   },
-  Tag = { "earth_satellite", "Aqua" },
+  Tag = { "earth_satellites", "Aqua" },
   GUI = {
     Name = "Aqua Trail",
-    Path = "/Solar System/Planets/Earth/Satellites/Aqua"
+    Path = "/Solar System/Planets/Earth/Satellites/Aqua",
+    Focusable = false
   }
 }
 
@@ -62,8 +67,8 @@ local AquaLabel = {
   Identifier = "AquaLabel",
   Parent = Aqua.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Aqua",
     FontSize = 70.0,
     Size = 4.0,
@@ -82,16 +87,17 @@ local AquaLabel = {
   }
 }
 
-asset.onInitialize(function ()
+
+asset.onInitialize(function()
   local a = openspace.space.readKeplerFile(omm .. "Aqua.txt", "OMM")
-  AquaTrail.Renderable.Period = a[0].Period / (60 * 60 * 24)
+  AquaTrail.Renderable.Period = a[1].Period / (60 * 60 * 24)
 
   openspace.addSceneGraphNode(Aqua)
   openspace.addSceneGraphNode(AquaTrail)
   openspace.addSceneGraphNode(AquaLabel)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(AquaLabel)
   openspace.removeSceneGraphNode(AquaTrail)
   openspace.removeSceneGraphNode(Aqua)
@@ -101,9 +107,10 @@ asset.export(Aqua)
 asset.export(AquaTrail)
 asset.export(AquaLabel)
 
+
+
 asset.meta = {
   Name = "Aqua",
-  Version = "1.0",
   Description = [[Trail for Aqua. trail from Celestrak. Can be used in conjuntion with
     Aqua Modis (Temporal) layer for Earth]],
   Author = "OpenSpace Team",

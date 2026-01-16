@@ -1,0 +1,31 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablepointcloud/pointcloud_colormapped_moresettings.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderablePointCloud_Example_ColorMapped_More",
+        "position": [
+          83097496.10525651,
+          71995402.88131548,
+          64430821.50031951
+        ],
+        "pitch": -0.005462881077904899,
+        "up": [
+          0.13302776880191378,
+          0.5712706642303764,
+          -0.8099095263777117
+        ],
+        "yaw": -0.004130253806707314,
+        "timestamp": "2025 JUL 13 12:05:54"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

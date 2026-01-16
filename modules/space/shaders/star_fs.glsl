@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,17 +32,27 @@ flat in float ge_speed;
 flat in float gs_screenSpaceDepth;
 
 uniform sampler1D colorTexture;
-uniform sampler2D psfTexture;
-uniform float alphaValue;
+uniform sampler2D glareTexture;
+uniform float opacity;
 uniform vec3 fixedColor;
 uniform int colorOption;
 uniform sampler1D otherDataTexture;
 uniform vec2 otherDataRange;
 uniform bool filterOutOfRange;
 
+uniform float glareMultiplier;
+uniform float glareGamma;
+uniform float glareScale;
+
+uniform bool hasCore;
+uniform sampler2D coreTexture;
+uniform float coreMultiplier;
+uniform float coreGamma;
+uniform float coreScale;
+
 // keep in sync with renderablestars.h:ColorOption enum
 const int ColorOptionColor = 0;
-const int ColorOptionVelocity = 1; 
+const int ColorOptionVelocity = 1;
 const int ColorOptionSpeed = 2;
 const int ColorOptionOtherData = 3;
 const int ColorOptionFixedColor = 4;
@@ -51,6 +61,7 @@ const int ColorOptionFixedColor = 4;
 vec4 bv2rgb(float bv) {
   // BV is [-0.4,2.0]
   float t = (bv + 0.4) / (2.0 + 0.4);
+  t = clamp(t, 0.0, 1.0);
   return texture(colorTexture, t);
 }
 
@@ -68,8 +79,9 @@ vec4 otherDataValue() {
 
 Fragment getFragment() {
   vec4 color = vec4(0.0);
+
   switch (colorOption) {
-    case ColorOptionColor: 
+    case ColorOptionColor:
       color = bv2rgb(ge_bv);
       break;
     case ColorOptionVelocity:
@@ -92,9 +104,22 @@ Fragment getFragment() {
       break;
   }
 
-  vec4 textureColor = texture(psfTexture, texCoords);
-  vec4 fullColor = vec4(color.rgb, textureColor.a * alphaValue);
-  
+  vec2 shiftedCoords = (texCoords - 0.5) * 2;
+
+  vec2 scaledCoordsGlare = shiftedCoords / glareScale;
+  vec2 unshiftedCoordsGlare = (scaledCoordsGlare + 1.0) / 2.0;
+  float glareValue = texture(glareTexture, unshiftedCoordsGlare).a;
+  float alpha = pow(glareValue, glareGamma) * glareMultiplier;
+  if (hasCore) {
+    vec2 scaledCoordsCore = shiftedCoords / coreScale;
+    vec2 unshiftedCoordsCore = (scaledCoordsCore + 1.0) / 2.0;
+    float coreValue = texture(coreTexture, unshiftedCoordsCore).a;
+    float core = pow(coreValue, coreGamma) * coreMultiplier;
+    alpha += core;
+  }
+
+  vec4 fullColor = vec4(color.rgb, alpha * opacity);
+
   if (fullColor.a < 0.001) {
     discard;
   }
@@ -105,6 +130,6 @@ Fragment getFragment() {
   frag.gPosition = vec4(vs_position, 1.0);
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   frag.disableLDR2HDR = true;
-  
+
   return frag;
 }

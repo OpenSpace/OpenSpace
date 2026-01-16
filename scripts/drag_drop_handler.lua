@@ -22,29 +22,69 @@ filename = filename:gsub("\\", "/")
 basename = basename:gsub("\\", "/")
 basename_without_extension = basename:sub(0, #basename - extension:len())
 
-is_image_file = function(extension)
+local is_image_file = function(extension)
   return extension == ".png" or extension == ".jpg" or extension == ".jpeg" or
          extension == ".tif" or extension == ".tga" or extension == ".bmp" or
-         extension == ".psd" or extension == ".gif" or extension == ".hdr" or
+         extension == ".psd"  or extension == ".hdr" or
          extension == ".pic" or extension == ".pnm"
 end
 
-local ReloadUIScript = [[ if openspace.hasProperty('Modules.CefWebGui.Reload') then openspace.setPropertyValue('Modules.CefWebGui.Reload', nil) end ]]
+local is_video_file = function(extension)
+  return extension == ".mp4" or extension == ".webm" or extension == ".mkv" or
+         extension == ".avi" or extension == ".mov" or extension == ".wmv" or
+         extension == ".mpg" or extension == ".m4v" or extension == ".gif"
+end
+
+local is_asset_file = function(extension)
+  return extension == ".asset"
+end
+
+local is_recording_file = function(extension)
+  return extension == ".osrec" or extension == ".osrectxt"
+end
+
+local is_geojson_file = function(extension)
+  return extension == ".geojson"
+end
+
+local is_wms_file = function(extension)
+  return extension == ".wms"
+end
+
 
 if is_image_file(extension) then
-  identifier = basename_without_extension:gsub(" ", "_")
-  identifier = identifier:gsub("%p", "_") -- replace all punctuation characters with '_'
-  return [[openspace.addScreenSpaceRenderable({
-    Identifier = "]] .. identifier .. [[",
+  return [[
+  openspace.addScreenSpaceRenderable({
+    Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
     Type = "ScreenSpaceImageLocal",
     TexturePath = "]] .. filename .. [["
-  });]] .. ReloadUIScript
-elseif extension == ".asset" then
+  });]]
+elseif is_video_file(extension) then
+  return [[
+    openspace.addScreenSpaceRenderable({
+      Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
+      Type = "ScreenSpaceVideo",
+      Video = "]] .. filename .. [["
+    });]]
+elseif is_asset_file(extension) then
   return [[
     if openspace.asset.isLoaded("]] .. filename .. [[") ~= true then
       openspace.printInfo("Adding asset: ']] .. filename .. [[' (drag-and-drop)");
     end
-    openspace.asset.add("]] .. filename .. '");' .. ReloadUIScript
-elseif extension == ".osrec" or extension == ".osrectxt" then
+    openspace.asset.add("]] .. filename .. '");'
+elseif is_recording_file(extension) then
   return 'openspace.sessionRecording.startPlayback("' .. filename .. '")'
+elseif is_geojson_file(extension) then
+  return 'openspace.globebrowsing.addGeoJsonFromFile("' .. filename .. '")'
+elseif is_wms_file(extension) then
+  return [[
+    openspace.globebrowsing.addLayer(
+      openspace.navigation.getNavigationState().Anchor,
+      "ColorLayers",
+      {
+        Identifier = openspace.makeIdentifier("]] .. basename_without_extension .. [["),
+        FilePath = ']] .. filename .. [['
+      }
+    )
+  ]]
 end

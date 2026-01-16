@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,30 +25,22 @@
 #ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
 #define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/rendering/screenspacerenderableframebuffer.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/rendering/dashboard.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-} // namespace ghoul::fontrendering
-
 namespace openspace {
 
-namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
-class ScreenSpaceDashboard: public ScreenSpaceFramebuffer {
+class ScreenSpaceDashboard : public ScreenSpaceRenderableFramebuffer {
 public:
-    ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
+    explicit ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceDashboard() override = default;
 
-    bool initializeGL() override;
-    bool deinitializeGL() override;
+    void initializeGL() override;
 
-    bool isReady() const override;
     void update() override;
 
     Dashboard& dashboard();
@@ -61,10 +53,6 @@ public:
 private:
     Dashboard _dashboard;
     properties::BoolProperty _useMainDashboard;
-    //std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
-
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontDate;
-    //std::shared_ptr<ghoul::fontrendering::Font> _fontInfo;
 };
 
 } // namespace openspace

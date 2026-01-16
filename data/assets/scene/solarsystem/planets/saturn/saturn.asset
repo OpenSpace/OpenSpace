@@ -1,13 +1,16 @@
-local transforms = asset.require("./transforms")
-asset.require("spice/base")
 asset.require("./trail")
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
-local texturesPath = asset.syncedResource({
+
+
+local texturesPath = asset.resource({
   Type = "HttpSynchronization",
   Name = "Saturn textures",
   Identifier = "saturn_textures",
   Version = 4
 })
+
 
 local Saturn = {
   Identifier = "Saturn",
@@ -15,20 +18,18 @@ local Saturn = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "SATURN",
-      Observer = "SATURN BARYCENTER"
+      Target = coreKernels.ID.Saturn,
+      Observer = coreKernels.ID.SaturnBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_SATURN",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Saturn,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
     Radii = { 60268000, 60268000, 54364000 },
-    SegmentsPerPatch = 64,
-    Layers = {},
     Rings = {
       -- Single Texture Values:
       --Texture = texturesPath .. "/saturn_rings.png",
@@ -40,14 +41,28 @@ local Saturn = {
       TextureUnlit = texturesPath .. "unlit_original_single.png",
       TextureColor = texturesPath .. "color_original_single.png",
       TextureTransparency = texturesPath .. "trans_original_single.png",
-      ColorFilter = 0.8,
+      ColorFilter = 0.9,
 
       NightFactor = 1.0,
       Size = 140445000,
       Offset = { 74500 / 140445.100671159, 1.0 }, -- min / max extend
     },
+    ShadowGroup = {
+      Sources = {
+        { Name = "Sun", Radius = 696300000 },
+      },
+      Casters = {
+        { Name = "Mimas", Radius = 207000 },
+        { Name = "Enceladus", Radius = 252000 },
+        { Name = "Tethys", Radius = 531100 },
+        { Name = "Dione", Radius = 561400 },
+        { Name = "Rhea", Radius = 765000 },
+        { Name = "Titan", Radius = 2576000 },
+        { Name = "Iapetus", Radius = 734000 }
+      }
+    },
     Shadows = {
-      Enabled = true,
+      Enabled = false,
       DistanceFraction = 40.0
     }
   },
@@ -63,8 +78,8 @@ local SaturnLabel = {
   Identifier = "SaturnLabel",
   Parent = Saturn.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Saturn",
     FontSize = 70.0,
     Size = 8.9,
@@ -80,9 +95,11 @@ local SaturnLabel = {
   GUI = {
     Name = "Saturn Label",
     Path = "/Solar System/Planets/Saturn",
-    Description = "Main planet label for Saturn",
+    Focusable = false,
+    Description = "Main planet label for Saturn"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Saturn)
@@ -101,7 +118,6 @@ asset.export(SaturnLabel)
 
 asset.meta = {
   Name = "Saturn",
-  Version = "1.1",
   Description = "Saturn globe, and main planet label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

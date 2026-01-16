@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,13 @@
 
 #include <openspace/properties/matrix/mat4property.h>
 
-#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
 
-Mat4Property::Mat4Property(Property::PropertyInfo info, glm::mat4x4 value,
-                           glm::mat4x4 minValue, glm::mat4x4 maxValue,
-                           glm::mat4x4 stepValue)
-    : NumericalProperty<glm::mat4x4>(
+Mat4Property::Mat4Property(Property::PropertyInfo info, glm::mat4 value,
+                           glm::mat4 minValue, glm::mat4 maxValue, glm::mat4 stepValue)
+    : NumericalProperty<glm::mat4>(
         std::move(info),
         std::move(value),
         std::move(minValue),
@@ -45,8 +43,20 @@ std::string_view Mat4Property::className() const {
     return "Mat4Property";
 }
 
-int Mat4Property::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes Mat4Property::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
+}
+
+void Mat4Property::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+glm::mat4 Mat4Property::toValue(lua_State* state) const {
+    return ghoul::lua::value<glm::mat4>(state);
+}
+
+std::string Mat4Property::stringValue() const {
+    return formatJson(_value);
 }
 
 }  // namespace openspace::properties

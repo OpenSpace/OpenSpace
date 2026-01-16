@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,7 @@ uniform float viewScaling;
 // Keep in sync with gaiaoptions.h:RenderOption enum
 const int RENDEROPTION_STATIC = 0;
 const int RENDEROPTION_COLOR = 1;
-const int RENDEROPTION_MOTION = 2; 
+const int RENDEROPTION_MOTION = 2;
 const float ONE_PARSEC = 3.08567758e16; // 1 Parsec
 const float LUM_LOWER_CAP = 0.01;
 
@@ -95,5 +95,5 @@ void main() {
     //color *= ratio * ratioMultiplier;
   }
 
-  outColor = vec4(color, 1.0f);
+  outColor = vec4(color, 1.0);
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,6 @@
 #define __OPENSPACE_CORE___DEFERREDCASTER___H
 
 #include <filesystem>
-#include <string>
 
 namespace ghoul::opengl {
     class Texture;
@@ -35,21 +34,21 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-struct RenderData;
 struct DeferredcastData;
+struct RenderData;
 struct UpdateData;
 
 class Deferredcaster {
 public:
     virtual ~Deferredcaster() = default;
 
-    virtual void preRaycast(const RenderData& /*renderData*/,
-        const DeferredcastData& /*deferredData*/,
-        ghoul::opengl::ProgramObject& /*program*/) {}
+    virtual void preRaycast(const RenderData& renderData,
+        const DeferredcastData& deferredData,
+        ghoul::opengl::ProgramObject& program);
 
-    virtual void postRaycast(const RenderData& /*renderData*/,
-        const DeferredcastData& /*deferredData*/,
-        ghoul::opengl::ProgramObject& /*program*/) {}
+    virtual void postRaycast(const RenderData& renderData,
+        const DeferredcastData& deferredData,
+        ghoul::opengl::ProgramObject& program);
 
     virtual std::filesystem::path deferredcastVSPath() const = 0;
 

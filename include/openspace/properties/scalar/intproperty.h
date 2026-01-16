@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___INTPROPERTY___H__
 
 #include <openspace/properties/numericalproperty.h>
+
 #include <limits>
 
 namespace openspace::properties {
@@ -36,17 +37,20 @@ namespace openspace::properties {
  */
 class IntProperty : public NumericalProperty<int> {
 public:
-    IntProperty(Property::PropertyInfo info, int value = 0,
+    explicit IntProperty(Property::PropertyInfo info, int value = 0,
         int minValue = std::numeric_limits<int>::lowest(),
         int maxValue = std::numeric_limits<int>::max(), int stepValue = 1);
 
-    std::string_view className() const override;
-    int typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
     using TemplateProperty<int>::operator=;
 
 private:
-    int fromLuaConversion(lua_State* state) const override;
+    int toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,16 +25,18 @@
 #include <modules/base/dashboard/dashboarditemmission.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
 #include <stack>
+#include <utility>
 
 namespace {
     std::string progressToStr(int size, double t) {
@@ -51,20 +53,28 @@ namespace {
         progress.append("|");
         return progress;
     }
+
+    // This `DashboardItem` shows information about the currently active mission. This
+    // includes information about the currently active mission phase, the next phase, and
+    // all subphases of the currently active phase.
+    struct [[codegen::Dictionary(DashboardItemMission)]] Parameters {};
+#include "dashboarditemmission_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 documentation::Documentation DashboardItemMission::Documentation() {
-    documentation::Documentation doc = DashboardTextItem::Documentation();
-    doc.name = "DashboardItemMission";
-    doc.id = "base_dashboarditem_mission";
-    return doc;
+    return codegen::doc<Parameters>(
+        "base_dashboarditem_mission",
+        DashboardTextItem::Documentation()
+    );
 }
 
 DashboardItemMission::DashboardItemMission(const ghoul::Dictionary& dictionary)
-    : DashboardTextItem(dictionary, 15.f)
+    : DashboardTextItem(dictionary)
 {}
+
+void DashboardItemMission::update() {}
 
 void DashboardItemMission::render(glm::vec2& penPosition) {
     ZoneScoped;
@@ -72,7 +82,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
     if (!global::missionManager->hasCurrentMission()) {
         return;
     }
-    double currentTime = global::timeManager->time().j2000Seconds();
+    const double currentTime = global::timeManager->time().j2000Seconds();
     const Mission& mission = global::missionManager->currentMission();
 
     if (mission.phases().empty()) {
@@ -84,13 +94,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
     static constexpr glm::vec4 nonCurrentMissionColor = glm::vec4(0.3f, 0.3f, 0.3f, 1.f);
 
     // Add spacing
-    RenderFont(
-        *_font,
-        penPosition,
-        " ",
-        nonCurrentMissionColor,
-        ghoul::fontrendering::CrDirection::Down
-    );
+    penPosition.y -= _font->height();
 
     MissionPhase::Trace phaseTrace = mission.phaseTrace(currentTime);
     if (!phaseTrace.empty()) {
@@ -99,7 +103,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         penPosition.y -= _font->height();
         RenderFont(*_font, penPosition, title, missionProgressColor);
         double remaining = phase.timeRange().end - currentTime;
-        float t = static_cast<float>(
+        const float t = static_cast<float>(
             1.0 - remaining / phase.timeRange().duration()
         );
         std::string progress = progressToStr(25, t);
@@ -107,7 +111,7 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         RenderFont(
             *_font,
             penPosition,
-            fmt::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100),
+            std::format("{:.0f} s {:s} {:.1f} %", remaining, progress, t * 100),
             missionProgressColor
         );
     }
@@ -119,18 +123,21 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         RenderFont(
             *_font,
             penPosition,
-            fmt::format("{:.0f} s", remaining),
+            std::format("{:.0f} s", remaining),
             nextMissionColor
         );
     }
 
-    bool showAllPhases = false;
+    // Add spacing
+    penPosition.y -= _font->height();
+
+    constexpr bool ShowAllPhases = false;
 
     using PhaseWithDepth = std::pair<const MissionPhase*, int>;
     std::stack<PhaseWithDepth> S;
 
     constexpr int PixelIndentation = 20;
-    S.push({ &mission, 0 });
+    S.emplace(&mission, 0);
     while (!S.empty()) {
         const MissionPhase* phase = S.top().first;
         const int depth = S.top().second;
@@ -145,16 +152,16 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
                 1.0 - remaining / phase->timeRange().duration()
             );
             const std::string progress = progressToStr(25, t);
+            penPosition.y -= _font->height();
             RenderFont(
                 *_font,
                 penPosition,
-                fmt::format(
+                std::format(
                     "{:s}  {:s} {:.1f} %",
                     phase->name(),progress,t * 100
                 ),
                 currentMissionColor
             );
-            penPosition.y -= _font->height();
         }
         else {
             if (!phase->name().empty()) {
@@ -169,25 +176,18 @@ void DashboardItemMission::render(glm::vec2& penPosition) {
         }
         penPosition.x -= depth * PixelIndentation;
 
-        if (isCurrentPhase || showAllPhases) {
+        if (isCurrentPhase || ShowAllPhases) {
             // phases are sorted increasingly by start time, and will be
             // popped last-in-first-out from the stack, so add them in
             // reversed order.
-            int indexLastPhase = static_cast<int>(
-                phase->phases().size()
-            ) - 1;
+            const int indexLastPhase = static_cast<int>(phase->phases().size()) - 1;
             for (int i = indexLastPhase; 0 <= i; --i) {
-                S.push({ &phase->phases()[i], depth + 1 });
+                S.emplace(&phase->phases()[i], depth + 1);
             }
         }
     }
-}
 
-glm::vec2 DashboardItemMission::size() const {
-    ZoneScoped;
-
-    // @TODO fix this up ---abock
-    return { 0.f, 0.f };
+    penPosition.y += _font->height();
 }
 
 } // namespace openspace

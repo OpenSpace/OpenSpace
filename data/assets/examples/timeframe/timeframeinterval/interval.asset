@@ -1,0 +1,28 @@
+-- Basic
+-- This example creates time frame interval and uses it for a scene graph node displaying
+-- a set of coordinate axes. The time frame interval causes the scene graph node to only
+-- be valid between January 1st, 2000 and March 1st, 2002.
+
+local Node = {
+  Identifier = "TimeFrameInterval_Example",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2000 JAN 01 00:00:00.000",
+    End = "2002 MAR 02 00:00:00.00"
+  },
+  Renderable = {
+    Type = "RenderableCartesianAxes"
+  },
+  GUI = {
+    Name = "TimeFrameInterval - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)

@@ -1,16 +1,19 @@
-local transforms = asset.require("./transforms")
-asset.require("spice/base")
 asset.require("./trail")
+local transforms = asset.require("./transforms")
+local coreKernels = asset.require("spice/core")
 
-local labelsPath = asset.syncedResource({
+
+
+local labelsPath = asset.resource({
   Name = "Mars Labels",
   Type = "HttpSynchronization",
   Identifier = "mars_labels",
   Version = 1
 })
 
--- local marsRadii = { 3396190.0, 3396190.0, 3376200.0 }
-local marsRadii = { 3396190.0, 3396190.0, 3396190.0 }
+
+-- local MarsRadii = { 3396190.0, 3396190.0, 3376200.0 }
+local MarsRadii = { 3396190.0, 3396190.0, 3396190.0 }
 
 local Mars = {
   Identifier = "Mars",
@@ -18,20 +21,18 @@ local Mars = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "MARS",
-      Observer = "MARS BARYCENTER"
+      Target = coreKernels.ID.Mars,
+      Observer = coreKernels.ID.MarsBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "IAU_MARS",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = coreKernels.Frame.Mars,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = marsRadii,
-    SegmentsPerPatch = 90,
-    Layers = {},
+    Radii = MarsRadii,
     Labels = {
       Enabled = false,
       FileName = labelsPath .. "mars.labels",
@@ -57,8 +58,8 @@ local MarsLabel = {
   Identifier = "MarsLabel",
   Parent = Mars.Identifier,
   Renderable = {
-    Enabled = false,
     Type = "RenderableLabel",
+    Enabled = false,
     Text = "Mars",
     FontSize = 70.0,
     Size = 8.50,
@@ -80,9 +81,11 @@ local MarsLabel = {
   GUI = {
     Name = "Mars Label",
     Path = "/Solar System/Planets/Mars",
+    Focusable = false,
     Description = "Main label for Mars"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Mars)
@@ -101,7 +104,6 @@ asset.export(MarsLabel)
 
 asset.meta = {
   Name = "Mars",
-  Version = "1.1",
   Description = "Mars globe, and main globe label",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

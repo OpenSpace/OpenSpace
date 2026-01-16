@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,16 +25,12 @@
 #include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 
 #include <openspace/util/updatestructures.h>
-#include <openspace/rendering/renderable.h>
-#include <vector>
-#include <openspace/util/blockplaneintersectiongeometry.h>
-
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/filesystem/filesystem.h>
-
-#include <sstream>
+#include <ghoul/format.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
+#include <cmath>
+#include <utility>
 
 namespace {
     constexpr std::string_view GlslRaycastPath =
@@ -91,7 +87,7 @@ void ToyVolumeRaycaster::renderExitPoints(const RenderData& data,
 }
 
 glm::dmat4 ToyVolumeRaycaster::modelViewTransform(const RenderData& data) {
-    glm::dmat4 modelTransform =
+    const glm::dmat4 modelTransform =
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
@@ -103,41 +99,41 @@ glm::dmat4 ToyVolumeRaycaster::modelViewTransform(const RenderData& data) {
 void ToyVolumeRaycaster::preRaycast(const RaycastData& data,
                                     ghoul::opengl::ProgramObject& program)
 {
-    const std::string& colorUniformName = "color" + std::to_string(data.id);
-    const std::string& timeUniformName = "time" + std::to_string(data.id);
-    const std::string& stepSizeUniformName = "maxStepSize" + std::to_string(data.id);
-    program.setUniform(colorUniformName, _color);
-    program.setUniform(stepSizeUniformName, _stepSize);
-    program.setUniform(timeUniformName, static_cast<float>(std::fmod(_time, 3600.0)));
+    program.setUniform(std::format("color{}", data.id), _color);
+    program.setUniform(std::format("maxStepSize{}", data.id), _stepSize);
+    program.setUniform(
+        std::format("time{}", data.id),
+        static_cast<float>(std::fmod(_time, 3600.0))
+    );
 }
 
 void ToyVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&) {}
 
 bool ToyVolumeRaycaster::isCameraInside(const RenderData& data, glm::vec3& localPosition)
 {
-    glm::vec4 modelPos = glm::inverse(modelViewTransform(data)) *
-                         glm::vec4(0.f, 0.f, 0.f, 1.f);
+    const glm::vec4 modelPos =
+        glm::inverse(modelViewTransform(data)) * glm::vec4(0.f, 0.f, 0.f, 1.f);
 
     localPosition = (glm::vec3(modelPos) + glm::vec3(0.5f));
 
-    return (localPosition.x > 0 && localPosition.x < 1 &&
-            localPosition.y > 0 && localPosition.y < 1 &&
-            localPosition.z > 0 && localPosition.z < 1);
+    return (localPosition.x > 0.f && localPosition.x < 1.f &&
+            localPosition.y > 0.f && localPosition.y < 1.f &&
+            localPosition.z > 0.f && localPosition.z < 1.f);
 }
 
-std::string ToyVolumeRaycaster::boundsVertexShaderPath() const {
-    return absPath(GlslBoundsVsPath).string();
+std::filesystem::path ToyVolumeRaycaster::boundsVertexShaderPath() const {
+    return absPath(GlslBoundsVsPath);
 }
 
-std::string ToyVolumeRaycaster::boundsFragmentShaderPath() const {
-    return absPath(GlslBoundsFsPath).string();
+std::filesystem::path ToyVolumeRaycaster::boundsFragmentShaderPath() const {
+    return absPath(GlslBoundsFsPath);
 }
 
-std::string ToyVolumeRaycaster::raycasterPath() const {
-    return absPath(GlslRaycastPath).string();
+std::filesystem::path ToyVolumeRaycaster::raycasterPath() const {
+    return absPath(GlslRaycastPath);
 }
 
-std::string ToyVolumeRaycaster::helperPath() const {
+std::filesystem::path ToyVolumeRaycaster::helperPath() const {
     return ""; // no helper file
 }
 

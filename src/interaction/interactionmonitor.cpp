@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,20 +26,22 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <ghoul/logging/logmanager.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo IdleTimeInfo = {
         "IdleTime",
-        "Idle Time",
+        "Idle time",
         "Time in seconds that has passed from latest registered interaction until the "
-        "application goes idle"
+        "application goes idle.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
+
     constexpr openspace::properties::Property::PropertyInfo IsInActiveStateInfo = {
         "IsInActiveState",
-        "Is State Active",
+        "Is state active",
         "Keeps track whether the interaction session is in active state or not. False if "
-        "application is in idle state, true if it is in active state"
+        "application is in idle state, true if it is in active state.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 } // namespace
 

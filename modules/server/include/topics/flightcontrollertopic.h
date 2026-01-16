@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,11 +29,6 @@
 
 #include <openspace/interaction/websocketinputstate.h>
 
-namespace openspace::interaction {
-    struct WebsocketInputStates;
-    struct WebsocketInputState;
-}
-
 namespace openspace {
 
 class FlightControllerTopic : public Topic {
@@ -49,6 +44,18 @@ public:
     void handleAutopilot(const nlohmann::json &json);
 
 private:
+    void connect();
+    void disconnect();
+    void processInputState(const nlohmann::json& json);
+    void setFocusNodes();
+    void updateView(const nlohmann::json& json) const;
+    void changeFocus(const nlohmann::json& json) const;
+    void setRenderableEnabled(const nlohmann::json& json) const;
+    void processLua(const nlohmann::json& json);
+    void setFriction(const nlohmann::json& json) const;
+    void setFriction(bool roll, bool rotation, bool zoom) const;
+    void setFriction(bool all) const;
+
     bool _isDone = false;
     bool _autopilotEngaged;
     nlohmann::json _payload;
@@ -58,19 +65,6 @@ private:
 
     openspace::interaction::WebsocketInputStates _inputStates;
     openspace::interaction::WebsocketInputState _inputState;
-
-    void connect();
-    void disconnect();
-    void processInputState(const nlohmann::json& json);
-    void setFocusNodes();
-    void setInterestingTimes();
-    void updateView(const nlohmann::json& json) const;
-    void changeFocus(const nlohmann::json& json) const;
-    void setRenderableEnabled(const nlohmann::json& json) const;
-    void processLua(const nlohmann::json& json);
-    void setFriction(const nlohmann::json& json) const;
-    void setFriction(bool roll, bool rotation, bool zoom) const;
-    void setFriction(bool all) const;
 };
 
 } // namespace openspace

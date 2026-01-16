@@ -1,16 +1,19 @@
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
-local omm = asset.syncedResource({
+
+
+local omm = asset.resource({
   Name = "Satellite OMM Data (Other comm)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_other-comm",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=other-comm&FORMAT=kvn",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=other-comm&FORMAT=kvn",
   Filename = "other-comm.txt",
-  Override = true
+  SecondsUntilResync = openspace.time.secondsPerDay()
 })
 
-local satellites = {
-  Identifier = "other-comm",
+
+local OtherCommunicationSatellites = {
+  Identifier = "OtherCommunicationSatellites",
   Parent = transforms.EarthInertial.Identifier,
   Renderable = {
     Type = "RenderableOrbitalKepler",
@@ -18,31 +21,33 @@ local satellites = {
     Format = "OMM",
     SegmentQuality = 3,
     Color = { 0.75, 0.75, 0.35 },
-    Fade = 1.5,
+    TrailFade = 15,
+    PointSizeExponent = 5.0,
     RenderBinMode = "PostDeferredTransparent"
   },
   Tag = { "earth_satellites" },
   GUI = {
     Name = "Other comm",
-    Path = "/Solar System/Planets/Earth/Satellites"
+    Path = "/Solar System/Planets/Earth/Satellites",
+    Focusable = false
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(satellites)
+  openspace.addSceneGraphNode(OtherCommunicationSatellites)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(satellites)
+  openspace.removeSceneGraphNode(OtherCommunicationSatellites)
 end)
 
-asset.export(satellites)
+asset.export(OtherCommunicationSatellites)
 
 
 
 asset.meta = {
   Name = "Satellites Communications - Other comm",
-  Version = "1.0",
   Description = "Satellites asset for Communications - Other comm. Data from Celestrak",
   Author = "OpenSpace Team",
   URL = "https://celestrak.com/NORAD/elements/",

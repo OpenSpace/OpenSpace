@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,25 +27,17 @@
 
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <memory>
-#include <string>
 #include <vector>
 
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace::globebrowsing {
 
-struct ChunkTile;
-class Layer;
-class GPULayer;
-struct TileDepthTransform;
-struct TileUvTransform;
-
 struct LayerGroup;
 struct TileIndex;
 
 /**
- * Manages a GPU representation of a `LayerGroup`
+ * Manages a GPU representation of a `LayerGroup`.
  */
 class GPULayerGroup {
 public:
@@ -64,8 +56,8 @@ public:
     void bind(ghoul::opengl::ProgramObject& programObject, const LayerGroup& layerGroup);
 
     /**
-    * Deactivates any `TextureUnit`s assigned by this object.
-    * This method should be called after the OpenGL draw call.
+    * Deactivates any `TextureUnit`s assigned by this object. This method should be called
+    * after the OpenGL draw call.
     */
     void deactivate();
 
@@ -78,8 +70,7 @@ private:
         std::vector<GPUChunkTile> gpuChunkTiles;
 
         UniformCache(opacity, gamma, multiplier, offset, valueBlending, chromaKeyColor,
-            chromaKeyTolerance, paddingStartOffset, paddingSizeDifference, color,
-            depthOffset, depthScale) uniformCache;
+            chromaKeyTolerance, color, depthOffset, depthScale) uniformCache;
 
         bool isHeightLayer = false;
     };

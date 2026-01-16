@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,14 +24,15 @@
 
 #include <modules/server/include/topics/setpropertytopic.h>
 
-#include <openspace/json.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/fmt.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
+#include <stdexcept>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "SetPropertyTopic";
@@ -81,7 +82,7 @@ namespace {
             }
 
             std::string literal = "{";
-            for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
+            for (nlohmann::json::iterator it = value.begin(); it != value.end(); it++) {
                 literal += luaLiteralFromJson(it.value()) += ",";
             }
             literal.pop_back(); // remove last comma
@@ -94,7 +95,7 @@ namespace {
             }
 
             std::string literal = "{";
-            for (nlohmann::json::iterator it = value.begin(); it != value.end(); ++it) {
+            for (nlohmann::json::iterator it = value.begin(); it != value.end(); it++) {
                 literal += it.key() + "=" + luaLiteralFromJson(it.value()) += ",";
             }
             literal.pop_back(); // remove last comma
@@ -119,15 +120,13 @@ void SetPropertyTopic::handleJson(const nlohmann::json& json) {
             global::timeManager->setTimeNextFrame(newTime);
         }
         else {
-            nlohmann::json value = json.at("value");
+            const nlohmann::json value = json.at("value");
             std::string literal = luaLiteralFromJson(value);
 
-            global::scriptEngine->queueScript(
-                fmt::format(
-                    "openspace.setPropertyValueSingle(\"{}\", {})", propertyKey, literal
-                ),
-                 scripting::ScriptEngine::RemoteScripting::Yes
-             );
+            const std::string script = std::format(
+                "openspace.setPropertyValueSingle(\"{}\", {})", propertyKey, literal
+            );
+            global::scriptEngine->queueScript(script);
         }
     }
     catch (const std::out_of_range& e) {

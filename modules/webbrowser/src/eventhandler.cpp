@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,8 +31,19 @@
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <fmt/format.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <string_view>
+#include <utility>
+#include <vector>
+
+#ifdef WIN32
+#include <Windows.h>
+#endif // WIN32
 
 namespace {
     constexpr std::string_view _loggerCat = "WebBrowser:EventHandler";
@@ -41,19 +52,42 @@ namespace {
      * Map from GLFW key codes to windows key codes, supported by JS and CEF.
      * See http://keycode.info/ for lookup
      *
-     * \param key
-     * \return the key code, if mapped or the GLFW key code
+     * \param key The key that we need to make
+     * \return The key code, if mapped or the GLFW key code
      */
     int mapFromGlfwToWindows(openspace::Key key) {
         switch (key) {
-            case openspace::Key::BackSpace:   return 8;
-            case openspace::Key::Tab:         return 9;
-            case openspace::Key::Enter:       return 13;
-            case openspace::Key::Left:        return 37;
-            case openspace::Key::Up:          return 38;
-            case openspace::Key::Right:       return 39;
-            case openspace::Key::Down:        return 40;
-            case openspace::Key::Delete:      return 46;
+            case openspace::Key::BackSpace:      return 8;
+            case openspace::Key::Tab:            return 9;
+            case openspace::Key::Enter:          return 13;
+            case openspace::Key::KeypadEnter:    return 13;
+            case openspace::Key::LeftShift:      return 16;
+            case openspace::Key::RightShift:     return 16;
+            case openspace::Key::LeftControl:    return 17;
+            case openspace::Key::RightControl:   return 17;
+            case openspace::Key::LeftAlt:        return 18;
+            case openspace::Key::RightAlt:       return 18;
+            case openspace::Key::Escape:         return 27;
+            case openspace::Key::Left:           return 37;
+            case openspace::Key::Up:             return 38;
+            case openspace::Key::Right:          return 39;
+            case openspace::Key::Down:           return 40;
+            case openspace::Key::Delete:         return 46;
+            case openspace::Key::Keypad0:        return 96;
+            case openspace::Key::Keypad1:        return 97;
+            case openspace::Key::Keypad2:        return 98;
+            case openspace::Key::Keypad3:        return 99;
+            case openspace::Key::Keypad4:        return 100;
+            case openspace::Key::Keypad5:        return 101;
+            case openspace::Key::Keypad6:        return 102;
+            case openspace::Key::Keypad7:        return 103;
+            case openspace::Key::Keypad8:        return 104;
+            case openspace::Key::Keypad9:        return 105;
+            case openspace::Key::KeypadMultiply: return 106;
+            case openspace::Key::KeypadAdd:      return 107;
+            case openspace::Key::KeypadSubtract: return 109;
+            case openspace::Key::KeypadDecimal:  return 110;
+            case openspace::Key::KeypadDivide:   return 111;
             default:                          return static_cast<int>(key);
         }
     }
@@ -127,9 +161,9 @@ namespace {
     int doubleClickTime() {
 #ifdef WIN32
         return GetDoubleClickTime();
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
         return 500;
-#endif
+#endif // WIN32
     }
 
     /**
@@ -139,9 +173,9 @@ namespace {
     int maxDoubleClickDistance() {
 #ifdef WIN32
         return GetSystemMetrics(SM_CXDOUBLECLK);
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
         return 4;
-#endif
+#endif // WIN32
     }
 
 } // namespace
@@ -161,7 +195,7 @@ void EventHandler::initialize() {
     global::callback::keyboard->emplace(
         global::callback::keyboard->begin(),
         [this](Key key, KeyModifier mod, KeyAction action,
-            IsGuiWindow isGuiWindow) -> bool
+               IsGuiWindow isGuiWindow) -> bool
         {
             if (_browserInstance && isGuiWindow) {
                 return keyboardCallback(key, mod, action);
@@ -201,7 +235,7 @@ void EventHandler::initialize() {
 
     global::callback::touchDetected->emplace(
         global::callback::touchDetected->begin(),
-        [&](TouchInput input) -> bool {
+        [this](TouchInput input) -> bool {
             if (!_browserInstance) {
                 return false;
             }
@@ -219,7 +253,7 @@ void EventHandler::initialize() {
                     cef_touch_event_type_t::CEF_TET_PRESSED
                 );
                 _browserInstance->sendTouchEvent(event);
-#else
+#else  // ^^^^ WIN32 // !WIN32 vvvv
                 _mousePosition.x = windowPos.x;
                 _mousePosition.y = windowPos.y;
                 _leftButton.down = true;
@@ -229,7 +263,7 @@ void EventHandler::initialize() {
                     false,
                     BrowserInstance::SingleClick
                 );
-#endif
+#endif // WIN32
             }
 
             _validTouchStates.emplace_back(input);
@@ -241,7 +275,7 @@ void EventHandler::initialize() {
 
     global::callback::touchUpdated->emplace(
         global::callback::touchUpdated->begin(),
-        [&](TouchInput input) -> bool {
+        [this](TouchInput input) -> bool {
             if (!_browserInstance || _validTouchStates.empty()) {
                 return false;
             }
@@ -249,7 +283,7 @@ void EventHandler::initialize() {
             auto it = std::find_if(
                 _validTouchStates.cbegin(),
                 _validTouchStates.cend(),
-                [&](const TouchInput& state){
+                [&input](const TouchInput& state) {
                     return state.fingerId == input.fingerId &&
                            state.touchDeviceId == input.touchDeviceId;
                 }
@@ -263,7 +297,7 @@ void EventHandler::initialize() {
                 );
                 _browserInstance->sendTouchEvent(event);
 #else // ^^^^ WIN32 // !WIN32 vvvv
-                glm::vec2 windowPos = input.currentWindowCoordinates();
+                const glm::vec2 windowPos = input.currentWindowCoordinates();
                 _mousePosition.x = windowPos.x;
                 _mousePosition.y = windowPos.y;
                 _leftButton.down = true;
@@ -281,18 +315,15 @@ void EventHandler::initialize() {
 
     global::callback::touchExit->emplace(
         global::callback::touchExit->begin(),
-        [&](TouchInput input) {
-            if (!_browserInstance) {
-                return;
-            }
-            if (_validTouchStates.empty()) {
+        [this](TouchInput input) {
+            if (!_browserInstance || _validTouchStates.empty()) {
                 return;
             }
 
             const auto found = std::find_if(
                 _validTouchStates.cbegin(),
                 _validTouchStates.cend(),
-                [&](const TouchInput& state){
+                [&input](const TouchInput& state) {
                     return state.fingerId == input.fingerId &&
                     state.touchDeviceId == input.touchDeviceId;
                 }
@@ -311,7 +342,7 @@ void EventHandler::initialize() {
             _validTouchStates.erase(found);
 #ifndef WIN32
             if (_validTouchStates.empty()) {
-                glm::vec2 windowPos = input.currentWindowCoordinates();
+                const glm::vec2 windowPos = input.currentWindowCoordinates();
                 _mousePosition.x = windowPos.x;
                 _mousePosition.y = windowPos.y;
                 _leftButton.down = false;
@@ -345,7 +376,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action,
     }
     else {
         if (isDoubleClick(state)) {
-            ++clickCount;
+            clickCount++;
         }
         else {
             state.lastClickTime = std::chrono::high_resolution_clock::now();
@@ -365,7 +396,7 @@ bool EventHandler::mouseButtonCallback(MouseButton button, MouseAction action,
 
 bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
     auto now = std::chrono::high_resolution_clock::now();
-    std::chrono::milliseconds maxTimeDifference(doubleClickTime());
+    const std::chrono::milliseconds maxTimeDifference(doubleClickTime());
     auto requiredTime = button.lastClickTime + maxTimeDifference;
     if (requiredTime < now) {
         return false;
@@ -381,8 +412,10 @@ bool EventHandler::isDoubleClick(const MouseButtonState& button) const {
 
 bool EventHandler::mousePositionCallback(double x, double y) {
     const glm::vec2 dpiScaling = global::windowDelegate->dpiScaling();
-    _mousePosition.x = floor(static_cast<float>(x) * dpiScaling.x);
-    _mousePosition.y = floor(static_cast<float>(y) * dpiScaling.y);
+    _mousePosition.x = std::floor(static_cast<float>(x) * dpiScaling.x);
+    _mousePosition.y = std::floor(static_cast<float>(y) * dpiScaling.y);
+    _mousePosition =
+        global::windowDelegate->mousePositionViewportRelative(_mousePosition);
     _browserInstance->sendMouseMoveEvent(mouseEvent());
     global::interactionMonitor->markInteraction();
 
@@ -395,18 +428,18 @@ bool EventHandler::mouseWheelCallback(glm::ivec2 delta) {
     // scroll wheel returns very low numbers on Windows machines
     delta.x *= 50;
     delta.y *= 50;
-#endif
+#endif // WIN32
     return _browserInstance->sendMouseWheelEvent(mouseEvent(), delta);
 }
 
 bool EventHandler::charCallback(unsigned int charCode, KeyModifier modifier) {
     CefKeyEvent keyEvent;
+
     keyEvent.windows_key_code = mapFromGlfwToWindows(Key(charCode));
     keyEvent.character = mapFromGlfwToCharacter(Key(charCode));
     keyEvent.native_key_code = mapFromGlfwToNative(Key(charCode));
-    keyEvent.modifiers = static_cast<uint32>(modifier);
+    keyEvent.modifiers = static_cast<uint32_t>(modifier);
     keyEvent.type = KEYEVENT_CHAR;
-
     return _browserInstance->sendKeyEvent(keyEvent);
 }
 
@@ -424,20 +457,60 @@ bool EventHandler::keyboardCallback(Key key, KeyModifier modifier, KeyAction act
     keyEvent.modifiers = mapToCefModifiers(modifier);
     keyEvent.type = keyEventType(action);
 
-    return _browserInstance->sendKeyEvent(keyEvent);
+    const bool KeyEventFlag = _browserInstance->sendKeyEvent(keyEvent);
+
+    // The `Enter` key does not produce a `charCallback` event like other character keys.
+    // Some web elements (e.g., buttons) rely on receiving a char event in addition to
+    // `keydown` to properly register an `onClick`. Since GLFW does not generate this
+    // event for Enter, we manually invoke it to ensure expected behavior.
+    constexpr int EnterKeyCode = 13;
+    if (keyEvent.windows_key_code == EnterKeyCode && keyEvent.type == KEYEVENT_KEYDOWN) {
+        return charCallback(static_cast<unsigned int>(Key::Enter), modifier);
+    }
+
+    return KeyEventFlag;
 }
 
-bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction) {
+bool EventHandler::specialKeyEvent(Key key, KeyModifier mod, KeyAction action) {
     switch (key) {
-        case Key::F5:
-            _browserInstance->reloadBrowser();
-            return true;
         case Key::A:
             if (hasKeyModifier(mod, KeyModifier::Super)) {
                 _browserInstance->selectAll();
                 return true;
             }
             return false;
+        case Key::Minus:
+            if (hasKeyModifier(mod, KeyModifier::Shift)) {
+                CefKeyEvent keyEvent;
+                keyEvent.windows_key_code = mapFromGlfwToWindows(Key(45));
+                keyEvent.character = mapFromGlfwToCharacter(Key(45));
+                keyEvent.native_key_code = mapFromGlfwToNative(Key(45));
+                keyEvent.modifiers = static_cast<uint32_t>(mod);
+                keyEvent.type = keyEventType(action);
+                _browserInstance->sendKeyEvent(keyEvent);
+                return true;
+            }
+            return false;
+        case Key::Period: {
+            CefKeyEvent keyEvent;
+            keyEvent.windows_key_code = mapFromGlfwToWindows(Key::KeypadDecimal);
+            keyEvent.character = mapFromGlfwToCharacter(Key::KeypadDecimal);
+            keyEvent.native_key_code = mapFromGlfwToNative(Key::KeypadDecimal);
+            keyEvent.modifiers = static_cast<uint32_t>(mod);
+            keyEvent.type = keyEventType(action);
+            _browserInstance->sendKeyEvent(keyEvent);
+            return true;
+        }
+        case Key::Apostrophe: {
+            CefKeyEvent keyEvent;
+            keyEvent.windows_key_code = mapFromGlfwToWindows(Key(222));
+            keyEvent.character = mapFromGlfwToCharacter(Key(222));
+            keyEvent.native_key_code = mapFromGlfwToNative(Key(222));
+            keyEvent.modifiers = static_cast<uint32_t>(mod);
+            keyEvent.type = keyEventType(action);
+            _browserInstance->sendKeyEvent(keyEvent);
+            return true;
+        }
         default:
             return false;
     }
@@ -447,7 +520,7 @@ cef_key_event_type_t EventHandler::keyEventType(KeyAction action) {
     return action == KeyAction::Release ? KEYEVENT_KEYUP : KEYEVENT_KEYDOWN;
 }
 
-CefMouseEvent EventHandler::mouseEvent(KeyModifier mods) {
+CefMouseEvent EventHandler::mouseEvent(KeyModifier mods) const {
     CefMouseEvent event;
     event.x = static_cast<int>(_mousePosition.x);
     event.y = static_cast<int>(_mousePosition.y);

@@ -1,0 +1,36 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablemodel/model_lighting.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Root",
+        "position": [
+          1.3978625076029212,
+          1.3978625076029088,
+          1.3978625076028846
+        ],
+        "up": [
+          -0.408248290463867,
+          0.8164965809277249,
+          -0.40824829046386124
+        ],
+        "timestamp": "2025 AUG 30 12:37:00"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

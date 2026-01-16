@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,13 @@
 
 #include <openspace/util/resourcesynchronization.h>
 
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 #include <fstream>
+#include <utility>
 
 namespace {
     struct [[codegen::Dictionary(ResourceSynchronization)]] Parameters {
@@ -41,7 +43,7 @@ namespace {
 
         // A unique identifier that is used to reference this specific
         // ResourceSynchronization object
-        std::string identifier;
+        std::string identifier [[codegen::identifier()]];
 
         // A user readable name of this synchronization
         std::string name;
@@ -105,7 +107,7 @@ const std::string& ResourceSynchronization::name() const {
     return _name;
 }
 
-void ResourceSynchronization::createSyncFile() const {
+void ResourceSynchronization::createSyncFile(bool) const {
     std::filesystem::path dir = directory();
     std::filesystem::create_directories(dir);
 

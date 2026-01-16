@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,24 +25,20 @@
 #ifndef __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
 #define __OPENSPACE_MODULE_BASE___RENDERABLEDISC___H__
 
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/rendering/renderable.h>
+
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/rendering/texturecomponent.h>
 #include <openspace/util/planegeometry.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <ghoul/opengl/ghoul_gl.h>
-
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class ProgramObject; }
+#include <memory>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class RenderableDisc : public Renderable {
 public:
-    RenderableDisc(const ghoul::Dictionary& dictionary);
+    explicit RenderableDisc(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -67,11 +63,12 @@ protected:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 
-    std::unique_ptr<PlaneGeometry> _plane;
+    PlaneGeometry _plane;
     std::unique_ptr<TextureComponent> _texture;
 
 private:
-    UniformCache(modelViewProjection, opacity, width, texture) _uniformCache;
+    UniformCache(modelViewProjectionTransform, opacity, width,
+        colorTexture) _uniformCache;
 
     bool _planeIsDirty = false;
 };

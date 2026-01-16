@@ -1,0 +1,21 @@
+<GDAL_WMS>
+  <Service name="TMS">
+    <ServerUrl>https://wms.openspace.amnh.org/Moon/Apollo15_MetricCam/tile/${z}/${y}/${x}</ServerUrl>
+  </Service>
+  <DataWindow>
+    <UpperLeftX>-180.0</UpperLeftX>
+    <UpperLeftY>90.0</UpperLeftY>
+    <LowerRightX>180.0</LowerRightX>
+    <LowerRightY>-90.0</LowerRightY>
+    <SizeX>655360</SizeX>
+    <SizeY>327680</SizeY>
+    <TileLevel>9</TileLevel>
+    <YOrigin>top</YOrigin>
+  </DataWindow>
+  <Projection>GEOGCS["GCS_Moon_2000",DATUM["Moon_2000",SPHEROID["Moon_2000_IAU_IAG",1737400,0]],PRIMEM["Reference_Meridian",0],UNIT["degree",0.0174532925199433]]</Projection>
+  <BlockSizeX>512</BlockSizeX>
+  <BlockSizeY>512</BlockSizeY>
+  <BandsCount>1</BandsCount>
+  <MaxConnections>10</MaxConnections>
+  <Timeout>5</Timeout>
+</GDAL_WMS>

@@ -1,9 +1,11 @@
 {
   "assets": [
     "base",
+    "base_keybindings",
     "events/toggle_sun",
     "scene/solarsystem/planets/earth/earth",
-    "scene/solarsystem/planets/earth/satellites/satellites"
+    "scene/solarsystem/planets/earth/satellites/satellites",
+    "scene/solarsystem/planets/earth/noaa-sos/overlays/latlon_grid-white"
   ],
   "camera": {
     "altitude": 17000000.0,
@@ -36,15 +38,15 @@
   ],
   "keybindings": [
     {
-      "action": "os.solarsystem.earth.togglesatellitetrails",
+      "action": "os.solarsystem.ToggleSatelliteTrails",
       "key": "S"
     },
     {
-      "action": "os.solarsystem.earth.iss.focus",
+      "action": "os.solarsystem.FocusIss",
       "key": "I"
     },
     {
-      "action": "os.solarsystem.earth.focus",
+      "action": "os.solarsystem.FocusEarth",
       "key": "HOME"
     }
   ],
@@ -58,7 +60,7 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles",
+    "description": "Default OpenSpace Profile. Adds Earth satellites not contained in other profiles.",
     "license": "MIT License",
     "name": "Default",
     "url": "https://www.openspaceproject.com",
@@ -66,17 +68,23 @@
   },
   "properties": [
     {
-      "name": "{earth_satellites}.Renderable.Enabled",
+      "name": "{earth_satellites~space_stations}.Renderable.Enabled",
       "type": "setPropertyValue",
+      "value": "false"
+    },
+    {
+      "name": "Scene.Earth.Renderable.Layers.Overlays.noaa-sos-overlays-latlon_grid-white.Enabled",
+      "type": "setPropertyValueSingle",
       "value": "false"
     }
   ],
   "time": {
+    "is_paused": false,
     "type": "relative",
     "value": "-1d"
   },
   "version": {
     "major": 1,
-    "minor": 1
+    "minor": 4
   }
 }

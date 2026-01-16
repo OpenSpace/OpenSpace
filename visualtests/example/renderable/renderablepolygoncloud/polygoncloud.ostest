@@ -1,0 +1,29 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablepolygoncloud/polygoncloud.asset"
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "RenderablePolygonCloud_Example",
+        "position": [
+          68648515.12660027,
+          66865024.69519251,
+          83274880.04976767
+        ],
+        "up": [
+          -0.40263028575110543,
+          0.8466670788080239,
+          -0.3479133665996043
+        ],
+        "timestamp": "2025 JUL 13 12:25:52"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

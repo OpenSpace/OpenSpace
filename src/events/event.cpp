@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,14 +26,16 @@
 
 #include <openspace/properties/property.h>
 #include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/profile.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/tstring.h>
-#include <ghoul/fmt.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
-#include <functional>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/logging/logmanager.h>
+#include <filesystem>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "EventInfo";
@@ -43,17 +45,7 @@ using namespace std::string_literals;
 
 namespace openspace::events {
 
-void log(int i, const EventSceneGraphNodeAdded& e) {
-    ghoul_assert(e.type == EventSceneGraphNodeAdded::Type, "Wrong type");
-    LINFO(fmt::format("[{}] SceneGraphNodeAdded: {}", i, e.node));
-}
-
-void log(int i, const EventSceneGraphNodeRemoved& e) {
-    ghoul_assert(e.type == EventSceneGraphNodeRemoved::Type, "Wrong type");
-    LINFO(fmt::format("[{}] SceneGraphNodeRemoved: {}", i, e.node));
-}
-
-void log(int i, const EventParallelConnection& e) {
+static void log(int i, const EventParallelConnection& e) {
     ghoul_assert(e.type == EventParallelConnection::Type, "Wrong type");
     std::string_view state = [](EventParallelConnection::State s) {
         switch (s) {
@@ -64,17 +56,31 @@ void log(int i, const EventParallelConnection& e) {
             default:                                  throw ghoul::MissingCaseException();
         }
     }(e.state);
-    LINFO(fmt::format("[{}] ParallelConnection ({})", i, state));
+    LINFO(std::format("[{}] ParallelConnection ({})", i, state));
 }
 
-void log(int i, [[ maybe_unused ]] const EventProfileLoadingFinished& e) {
+static void log(int i, [[maybe_unused]] const EventProfileLoadingFinished& e) {
     ghoul_assert(e.type == EventProfileLoadingFinished::Type, "Wrong type");
-    LINFO(fmt::format("[{}] ProfileLoadingFinished", i));
+    LINFO(std::format("[{}] ProfileLoadingFinished", i));
 }
 
-void log(int i, const EventApplicationShutdown& e) {
+static void log(int i, const EventAssetLoading& e) {
+    ghoul_assert(e.type == EventAssetLoading::Type, "Wrong type");
+    std::string_view state = [](EventAssetLoading::State s) {
+        switch (s) {
+            case EventAssetLoading::State::Loaded:   return "Loaded";
+            case EventAssetLoading::State::Loading:  return "Loading";
+            case EventAssetLoading::State::Unloaded: return "Unloaded";
+            case EventAssetLoading::State::Error:    return "Error";
+            default:                                 throw ghoul::MissingCaseException();
+        }
+    }(e.state);
+    LINFO(std::format("[{}] AssetLoading: '{}': ({})", i, e.assetPath, state));
+}
+
+static void log(int i, const EventApplicationShutdown& e) {
     ghoul_assert(e.type == EventApplicationShutdown::Type, "Wrong type");
-    std::string t = [](EventApplicationShutdown::State state) {
+    const std::string t = [](EventApplicationShutdown::State state) {
         switch (state) {
             case EventApplicationShutdown::State::Started:  return "started";
             case EventApplicationShutdown::State::Aborted:  return "aborted";
@@ -82,20 +88,10 @@ void log(int i, const EventApplicationShutdown& e) {
             default:                                  throw ghoul::MissingCaseException();
         }
     }(e.state);
-    LINFO(fmt::format("[{}] ApplicationShutdown", i));
+    LINFO(std::format("[{}] ApplicationShutdown", i));
 }
 
-void log(int i, const EventScreenSpaceRenderableAdded& e) {
-    ghoul_assert(e.type == EventScreenSpaceRenderableAdded::Type, "Wrong type");
-    LINFO(fmt::format("[{}] ScreenSpaceRenderableAdded: {}", i, e.renderable));
-}
-
-void log(int i, const EventScreenSpaceRenderableRemoved& e) {
-    ghoul_assert(e.type == EventScreenSpaceRenderableRemoved::Type, "Wrong type");
-    LINFO(fmt::format("[{}] ScreenSpaceRenderableRemoved: {}", i, e.renderable));
-}
-
-void log(int i, const EventCameraFocusTransition& e) {
+static void log(int i, const EventCameraFocusTransition& e) {
     ghoul_assert(e.type == EventCameraFocusTransition::Type, "Wrong type");
     std::string_view t = [](EventCameraFocusTransition::Transition transition) {
         switch (transition) {
@@ -107,55 +103,76 @@ void log(int i, const EventCameraFocusTransition& e) {
                 return "Receding";
             case EventCameraFocusTransition::Transition::Exiting:
                 return "Exiting";
-            default:                                  throw ghoul::MissingCaseException();
+            default:
+                throw ghoul::MissingCaseException();
         }
     }(e.transition);
 
-    LINFO(fmt::format(
+    LINFO(std::format(
         "[{}] CameraTransition: {}, {} ({})",
         i, reinterpret_cast<const void*>(e.camera), e.node, t
     ));
 }
 
-void log(int i, const EventTimeOfInterestReached& e) {
+static void log(int i, const EventTimeOfInterestReached& e) {
     ghoul_assert(e.type == EventTimeOfInterestReached::Type, "Wrong type");
-    LINFO(fmt::format(
+    LINFO(std::format(
         "[{}] TimeOfInterestReached: {},  {}",
         i, e.time->UTC(), reinterpret_cast<const void*>(e.camera)
     ));
 }
 
-void log(int i, [[ maybe_unused ]] const EventMissionEventReached& e) {
+static void log(int i, const EventMissionAdded& e) {
+    ghoul_assert(e.type == EventMissionAdded::Type, "Wrong type");
+    LINFO(std::format("[{}] MissionAdded: {}", i, e.identifier));
+}
+
+static void log(int i, const EventMissionRemoved& e) {
+    ghoul_assert(e.type == EventMissionRemoved::Type, "Wrong type");
+    LINFO(std::format("[{}] MissionRemoved: {}", i, e.identifier));
+}
+
+static void log(int i, [[maybe_unused]] const EventMissionEventReached& e) {
     ghoul_assert(e.type == EventMissionEventReached::Type, "Wrong type");
-    LINFO(fmt::format("[{}] MissionEventReached", i));
+    LINFO(std::format("[{}] MissionEventReached", i));
 }
 
-void log(int i, const EventPlanetEclipsed& e) {
+static void log(int i, const EventPlanetEclipsed& e) {
     ghoul_assert(e.type == EventPlanetEclipsed::Type, "Wrong type");
-    LINFO(fmt::format("[{}] PlanetEclipsed: {} -> {}", i, e.eclipsee, e.eclipser));
+    LINFO(std::format("[{}] PlanetEclipsed: {} -> {}", i, e.eclipsee, e.eclipser));
 }
 
-void log(int i, [[ maybe_unused ]] const EventInterpolationFinished& e) {
+static void log(int i, [[maybe_unused]] const EventInterpolationFinished& e) {
     ghoul_assert(e.type == EventInterpolationFinished::Type, "Wrong type");
-    LINFO(fmt::format("[{}] InterpolationFinished", i));
+    LINFO(std::format("[{}] InterpolationFinished", i));
 }
 
-void log(int i, const EventFocusNodeChanged& e) {
+static void log(int i, const EventFocusNodeChanged& e) {
     ghoul_assert(e.type == EventFocusNodeChanged::Type, "Wrong type");
-    LINFO(fmt::format("[{}] FocusNodeChanged: {} -> {}", i, e.oldNode, e.newNode));
+    LINFO(std::format("[{}] FocusNodeChanged: {} -> {}", i, e.oldNode, e.newNode));
 }
 
-void log(int i, const EventLayerAdded& e) {
-    ghoul_assert(e.type == EventLayerAdded::Type, "Wrong type");
-    LINFO(fmt::format("[{}] LayerAdded: {}", i, e.layer));
+static void log(int i, const EventPropertyTreeUpdated& e) {
+    ghoul_assert(e.type == EventPropertyTreeUpdated::Type, "Wrong type");
+    LINFO(std::format("[{}] PropertyTreeUpdated: {}", i, e.uri));
 }
 
-void log(int i, const EventLayerRemoved& e) {
-    ghoul_assert(e.type == EventLayerRemoved::Type, "Wrong type");
-    LINFO(fmt::format("[{}] LayerRemoved: {}", i, e.layer));
+static void log(int i, const EventPropertyTreePruned& e) {
+    ghoul_assert(e.type == EventPropertyTreePruned::Type, "Wrong type");
+    LINFO(std::format("[{}] PropertyTreePruned: {}", i, e.uri));
 }
 
-void log(int i, const EventSessionRecordingPlayback& e) {
+static void log(int i, const EventActionAdded& e) {
+    ghoul_assert(e.type == EventActionAdded::Type, "Wrong type");
+    LINFO(std::format("[{}] ActionAdded: {}", i, e.uri));
+}
+
+static void log(int i, const EventActionRemoved& e) {
+    ghoul_assert(e.type == EventActionRemoved::Type, "Wrong type");
+    LINFO(std::format("[{}] ActionRemoved: {}", i, e.uri));
+}
+
+static void log(int i, const EventSessionRecordingPlayback& e) {
     ghoul_assert(e.type == EventSessionRecordingPlayback::Type, "Wrong type");
 
     std::string_view state = [](EventSessionRecordingPlayback::State s) {
@@ -168,55 +185,90 @@ void log(int i, const EventSessionRecordingPlayback& e) {
         }
     }(e.state);
 
-    LINFO(fmt::format("[{}] SessionRecordingPlayback: {}", i, state));
+    LINFO(std::format("[{}] SessionRecordingPlayback: {}", i, state));
 }
 
-void log(int i, const EventPointSpacecraft& e) {
+static void log(int i, const EventPointSpacecraft& e) {
     ghoul_assert(e.type == EventPointSpacecraft::Type, "Wrong type");
-    LINFO(fmt::format(
+    LINFO(std::format(
         "[{}] PointSpacecraft: Ra: {}, Dec: {}, Duration: {}", i, e.ra, e.dec,
         e.duration
     ));
 }
 
-void log(int i, const CustomEvent& e) {
-    ghoul_assert(e.type == CustomEvent::Type, "Wrong type");
-    LINFO(fmt::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
-}
-
-void log(int i, const EventRenderableEnabled& e) {
+static void log(int i, const EventRenderableEnabled& e) {
     ghoul_assert(e.type == EventRenderableEnabled::Type, "Wrong type");
-    LINFO(fmt::format("[{}] EventRenderableEnabled: {}", i, e.node));
+    LINFO(std::format("[{}] EventRenderableEnabled: {}", i, e.node));
 }
 
-void log(int i, const EventRenderableDisabled& e) {
+static void log(int i, const EventRenderableDisabled& e) {
     ghoul_assert(e.type == EventRenderableDisabled::Type, "Wrong type");
-    LINFO(fmt::format("[{}] EventRenderableDisabled: {}", i, e.node));
+    LINFO(std::format("[{}] EventRenderableDisabled: {}", i, e.node));
 }
 
+static void log(int i, const EventCameraPathStarted& e) {
+    ghoul_assert(e.type == EventCameraPathStarted::Type, "Wrong type");
+    LINFO(std::format(
+        "[{}] EventCameraPathStarted:  Origin: '{}'  Destination: '{}'",
+        i, e.origin, e.destination
+    ));
+}
+
+static void log(int i, const EventCameraPathFinished& e) {
+    ghoul_assert(e.type == EventCameraPathFinished::Type, "Wrong type");
+    LINFO(std::format(
+        "[{}] EventCameraPathFinished:  Origin: '{}'  Destination: '{}'",
+        i, e.origin, e.destination
+    ));
+}
+
+static void log(int i, const EventCameraMovedPosition& e) {
+    ghoul_assert(e.type == EventCameraMovedPosition::Type, "Wrong type");
+    LINFO(std::format("[{}] EventCameraMovedPosition", i));
+}
+
+static void log(int i, const EventScheduledScriptExecuted& e) {
+    ghoul_assert(e.type == EventScheduledScriptExecuted::Type, "Wrong type");
+    LINFO(std::format("[{}] ScheduledScriptExecuted: Script '{}'", i, e.script));
+}
+
+static void log(int i, const EventGuiTreeUpdated& e) {
+    ghoul_assert(e.type == EventGuiTreeUpdated::Type, "Wrong type");
+    LINFO(std::format("[{}] EventGuiTreeUpdated", i));
+}
+
+static void log(int i, const CustomEvent& e) {
+    ghoul_assert(e.type == CustomEvent::Type, "Wrong type");
+    LINFO(std::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
+}
 
 std::string_view toString(Event::Type type) {
     switch (type) {
-        case Event::Type::SceneGraphNodeAdded: return "SceneGraphNodeAdded";
-        case Event::Type::SceneGraphNodeRemoved: return "SceneGraphNodeRemoved";
         case Event::Type::ParallelConnection: return "ParallelConnection";
         case Event::Type::ProfileLoadingFinished: return "ProfileLoadingFinished";
+        case Event::Type::AssetLoading: return "AssetLoading";
         case Event::Type::ApplicationShutdown: return "ApplicationShutdown";
-        case Event::Type::ScreenSpaceRenderableAdded: return "ScreenSpaceRenderableAdded";
-        case Event::Type::ScreenSpaceRenderableRemoved:
-            return "ScreenSpaceRenderableRemoved";
         case Event::Type::CameraFocusTransition: return "CameraFocusTransition";
         case Event::Type::TimeOfInterestReached: return "TimeOfInterestReached";
+        case Event::Type::MissionAdded: return "MissionAdded";
+        case Event::Type::MissionRemoved: return "MissionRemoved";
         case Event::Type::MissionEventReached: return "MissionEventReached";
         case Event::Type::PlanetEclipsed: return "PlanetEclipsed";
         case Event::Type::InterpolationFinished: return "InterpolationFinished";
         case Event::Type::FocusNodeChanged: return "FocusNodeChanged";
-        case Event::Type::LayerAdded: return "LayerAdded";
-        case Event::Type::LayerRemoved: return "LayerRemoved";
+        case Event::Type::PropertyTreeUpdated: return "PropertyTreeUpdated";
+        case Event::Type::PropertyTreePruned: return "PropertyTreePruned";
+        case Event::Type::ActionAdded: return "ActionAdded";
+        case Event::Type::ActionRemoved: return "ActionRemoved";
         case Event::Type::SessionRecordingPlayback: return "SessionRecordingPlayback";
         case Event::Type::PointSpacecraft: return "PointSpacecraft";
         case Event::Type::RenderableEnabled: return "RenderableEnabled";
         case Event::Type::RenderableDisabled: return "RenderableDisabled";
+        case Event::Type::CameraPathStarted: return "CameraPathStarted";
+        case Event::Type::CameraPathFinished: return "CameraPathFinished";
+        case Event::Type::CameraMovedPosition: return "CameraMovedPosition";
+        case Event::Type::ScheduledScriptExecuted: return "ScheduledScriptExecuted";
+        case Event::Type::GuiTreeUpdated: return "GuiTreeUpdated";
         case Event::Type::Custom: return "Custom";
         default:
             throw ghoul::MissingCaseException();
@@ -224,32 +276,29 @@ std::string_view toString(Event::Type type) {
 }
 
 Event::Type fromString(std::string_view str) {
-    if (str == "SceneGraphNodeAdded") {
-        return Event::Type::SceneGraphNodeAdded;
-    }
-    else if (str == "SceneGraphNodeRemoved") {
-        return Event::Type::SceneGraphNodeRemoved;
-    }
-    else if (str == "ParallelConnection") {
+    if (str == "ParallelConnection") {
         return Event::Type::ParallelConnection;
     }
     else if (str == "ProfileLoadingFinished") {
         return Event::Type::ProfileLoadingFinished;
     }
+    else if (str == "AssetLoading") {
+        return Event::Type::AssetLoading;
+    }
     else if (str == "ApplicationShutdown") {
         return Event::Type::ApplicationShutdown;
-    }
-    else if (str == "ScreenSpaceRenderableAdded") {
-        return Event::Type::ScreenSpaceRenderableAdded;
-    }
-    else if (str == "ScreenSpaceRenderableRemoved") {
-        return Event::Type::ScreenSpaceRenderableRemoved;
     }
     else if (str == "CameraFocusTransition") {
         return Event::Type::CameraFocusTransition;
     }
     else if (str == "TimeOfInterestReached") {
         return Event::Type::TimeOfInterestReached;
+    }
+    else if (str == "MissionAdded") {
+        return Event::Type::MissionAdded;
+    }
+    else if (str == "MissionRemoved") {
+        return Event::Type::MissionRemoved;
     }
     else if (str == "MissionEventReached") {
         return Event::Type::MissionEventReached;
@@ -263,11 +312,17 @@ Event::Type fromString(std::string_view str) {
     else if (str == "FocusNodeChanged") {
         return Event::Type::FocusNodeChanged;
     }
-    else if (str == "LayerAdded") {
-        return Event::Type::LayerAdded;
+    else if (str == "PropertyTreeUpdated") {
+        return Event::Type::PropertyTreeUpdated;
     }
-    else if (str == "LayerRemoved") {
-        return Event::Type::LayerRemoved;
+    else if (str == "PropertyTreePruned") {
+        return Event::Type::PropertyTreePruned;
+    }
+    else if (str == "ActionAdded") {
+        return Event::Type::ActionAdded;
+    }
+    else if (str == "ActionRemoved") {
+        return Event::Type::ActionRemoved;
     }
     else if (str == "SessionRecordingPlayback") {
         return Event::Type::SessionRecordingPlayback;
@@ -281,28 +336,31 @@ Event::Type fromString(std::string_view str) {
     else if (str == "RenderableDisabled") {
         return Event::Type::RenderableDisabled;
     }
+    else if (str == "CameraPathStarted") {
+        return Event::Type::CameraPathStarted;
+    }
+    else if (str == "CameraPathFinished") {
+        return Event::Type::CameraPathFinished;
+    }
+    else if (str == "CameraMovedPosition") {
+        return Event::Type::CameraMovedPosition;
+    }
+    else if (str == "ScheduledScriptExecuted") {
+        return Event::Type::ScheduledScriptExecuted;
+    }
+    else if (str == "GuiTreeUpdated") {
+        return Event::Type::GuiTreeUpdated;
+    }
     else if (str == "Custom") {
         return Event::Type::Custom;
     }
 
-    throw ghoul::RuntimeError(fmt::format("Unknown event type '{}'", str));
+    throw ghoul::RuntimeError(std::format("Unknown event type '{}'", str));
 }
 
 ghoul::Dictionary toParameter(const Event& e) {
     ghoul::Dictionary d;
     switch (e.type) {
-        case Event::Type::SceneGraphNodeAdded:
-            d.setValue(
-                "Node",
-                std::string(static_cast<const EventSceneGraphNodeAdded&>(e).node)
-            );
-            break;
-        case Event::Type::SceneGraphNodeRemoved:
-            d.setValue(
-                "Node",
-                std::string(static_cast<const EventSceneGraphNodeRemoved&>(e).node)
-            );
-            break;
         case Event::Type::ParallelConnection:
             switch (static_cast<const EventParallelConnection&>(e).state) {
                 case EventParallelConnection::State::Established:
@@ -317,8 +375,26 @@ ghoul::Dictionary toParameter(const Event& e) {
                 case EventParallelConnection::State::HostshipLost:
                     d.setValue("State", "HostshipLost"s);
                     break;
-                default:
-                    throw ghoul::MissingCaseException();
+            }
+            break;
+        case Event::Type::AssetLoading:
+            d.setValue(
+                "AssetPath",
+                static_cast<const EventAssetLoading&>(e).assetPath
+            );
+            switch (static_cast<const EventAssetLoading&>(e).state) {
+                case EventAssetLoading::State::Loaded:
+                    d.setValue("State", "Loaded"s);
+                    break;
+                case EventAssetLoading::State::Loading:
+                    d.setValue("State", "Loading"s);
+                    break;
+                case EventAssetLoading::State::Unloaded:
+                    d.setValue("State", "Unloaded"s);
+                    break;
+                case EventAssetLoading::State::Error:
+                    d.setValue("State", "Error"s);
+                    break;
             }
             break;
         case Event::Type::ApplicationShutdown:
@@ -333,22 +409,6 @@ ghoul::Dictionary toParameter(const Event& e) {
                     d.setValue("State", "Finished"s);
                     break;
             }
-            break;
-        case Event::Type::ScreenSpaceRenderableAdded:
-            d.setValue(
-                "Renderable",
-                std::string(
-                    static_cast<const EventScreenSpaceRenderableAdded&>(e).renderable
-                )
-            );
-            break;
-        case Event::Type::ScreenSpaceRenderableRemoved:
-            d.setValue(
-                "Renderable",
-                std::string(
-                    static_cast<const EventScreenSpaceRenderableRemoved&>(e).renderable
-                )
-            );
             break;
         case Event::Type::CameraFocusTransition:
             d.setValue(
@@ -368,9 +428,19 @@ ghoul::Dictionary toParameter(const Event& e) {
                 case EventCameraFocusTransition::Transition::Exiting:
                     d.setValue("Transition", "Exiting"s);
                     break;
-                default:
-                    throw ghoul::MissingCaseException();
             }
+            break;
+        case Event::Type::MissionAdded:
+            d.setValue(
+                "Identifier",
+                std::string(static_cast<const EventMissionAdded&>(e).identifier)
+            );
+            break;
+        case Event::Type::MissionRemoved:
+            d.setValue(
+                "Identifier",
+                std::string(static_cast<const EventMissionRemoved&>(e).identifier)
+            );
             break;
         case Event::Type::PlanetEclipsed:
             d.setValue(
@@ -398,32 +468,28 @@ ghoul::Dictionary toParameter(const Event& e) {
                 std::string(static_cast<const EventFocusNodeChanged&>(e).newNode)
             );
             break;
-        case Event::Type::LayerAdded:
+        case Event::Type::PropertyTreeUpdated:
             d.setValue(
-                "Globe",
-                std::string(static_cast<const EventLayerAdded&>(e).node)
-            );
-            d.setValue(
-                "Group",
-                std::string(static_cast<const EventLayerAdded&>(e).layerGroup)
-            );
-            d.setValue(
-                "Layer",
-                std::string(static_cast<const EventLayerAdded&>(e).layer)
+                "Uri",
+                std::string(static_cast<const EventPropertyTreeUpdated&>(e).uri)
             );
             break;
-        case Event::Type::LayerRemoved:
+        case Event::Type::PropertyTreePruned:
             d.setValue(
-                "Globe",
-                std::string(static_cast<const EventLayerRemoved&>(e).node)
+                "Uri",
+                std::string(static_cast<const EventPropertyTreePruned&>(e).uri)
             );
+            break;
+        case Event::Type::ActionAdded:
             d.setValue(
-                "Group",
-                std::string(static_cast<const EventLayerRemoved&>(e).layerGroup)
+                "Uri",
+                std::string(static_cast<const EventActionAdded&>(e).uri)
             );
+            break;
+        case Event::Type::ActionRemoved:
             d.setValue(
-                "Layer",
-                std::string(static_cast<const EventLayerRemoved&>(e).layer)
+                "Uri",
+                std::string(static_cast<const EventActionRemoved&>(e).uri)
             );
             break;
         case Event::Type::SessionRecordingPlayback:
@@ -459,6 +525,32 @@ ghoul::Dictionary toParameter(const Event& e) {
                 std::string(static_cast<const EventRenderableDisabled&>(e).node)
             );
             break;
+        case Event::Type::CameraPathStarted:
+            d.setValue(
+                "Origin",
+                std::string(static_cast<const EventCameraPathStarted&>(e).origin)
+            );
+            d.setValue(
+                "Destination",
+                std::string(static_cast<const EventCameraPathStarted&>(e).destination)
+            );
+            break;
+        case Event::Type::CameraPathFinished:
+            d.setValue(
+                "Origin",
+                std::string(static_cast<const EventCameraPathFinished&>(e).origin)
+            );
+            d.setValue(
+                "Destination",
+                std::string(static_cast<const EventCameraPathFinished&>(e).destination)
+            );
+            break;
+        case Event::Type::ScheduledScriptExecuted:
+            d.setValue(
+                "Script",
+                std::string(static_cast<const EventScheduledScriptExecuted&>(e).script)
+            );
+            break;
         case Event::Type::Custom:
             d.setValue(
                 "Subtype", std::string(static_cast<const CustomEvent&>(e).subtype)
@@ -477,32 +569,29 @@ void logAllEvents(const Event* e) {
     int i = 0;
     while (e) {
         switch (e->type) {
-            case Event::Type::SceneGraphNodeAdded:
-                log(i, *static_cast<const EventSceneGraphNodeAdded*>(e));
-                break;
-            case Event::Type::SceneGraphNodeRemoved:
-                log(i, *static_cast<const EventSceneGraphNodeRemoved*>(e));
-                break;
             case Event::Type::ParallelConnection:
                 log(i, *static_cast<const EventParallelConnection*>(e));
                 break;
             case Event::Type::ProfileLoadingFinished:
                 log(i, *static_cast<const EventProfileLoadingFinished*>(e));
                 break;
+            case Event::Type::AssetLoading:
+                log(i, *static_cast<const EventAssetLoading*>(e));
+                break;
             case Event::Type::ApplicationShutdown:
                 log(i, *static_cast<const EventApplicationShutdown*>(e));
-                break;
-            case Event::Type::ScreenSpaceRenderableAdded:
-                log(i, *static_cast<const EventScreenSpaceRenderableAdded*>(e));
-                break;
-            case Event::Type::ScreenSpaceRenderableRemoved:
-                log(i, *static_cast<const EventScreenSpaceRenderableRemoved*>(e));
                 break;
             case Event::Type::CameraFocusTransition:
                 log(i, *static_cast<const EventCameraFocusTransition*>(e));
                 break;
             case Event::Type::TimeOfInterestReached:
                 log(i, *static_cast<const EventTimeOfInterestReached*>(e));
+                break;
+            case Event::Type::MissionAdded:
+                log(i, *static_cast<const EventMissionAdded*>(e));
+                break;
+            case Event::Type::MissionRemoved:
+                log(i, *static_cast<const EventMissionRemoved*>(e));
                 break;
             case Event::Type::MissionEventReached:
                 log(i, *static_cast<const EventMissionEventReached*>(e));
@@ -516,11 +605,17 @@ void logAllEvents(const Event* e) {
             case Event::Type::FocusNodeChanged:
                 log(i, *static_cast<const EventFocusNodeChanged*>(e));
                 break;
-            case Event::Type::LayerAdded:
-                log(i, *static_cast<const EventLayerAdded*>(e));
+            case Event::Type::PropertyTreeUpdated:
+                log(i, *static_cast<const EventPropertyTreeUpdated*>(e));
                 break;
-            case Event::Type::LayerRemoved:
-                log(i, *static_cast<const EventLayerRemoved*>(e));
+            case Event::Type::PropertyTreePruned:
+                log(i, *static_cast<const EventPropertyTreePruned*>(e));
+                break;
+            case Event::Type::ActionAdded:
+                log(i, *static_cast<const EventActionAdded*>(e));
+                break;
+            case Event::Type::ActionRemoved:
+                log(i, *static_cast<const EventActionRemoved*>(e));
                 break;
             case Event::Type::SessionRecordingPlayback:
                 log(i, *static_cast<const EventSessionRecordingPlayback*>(e));
@@ -534,27 +629,32 @@ void logAllEvents(const Event* e) {
             case Event::Type::RenderableDisabled:
                 log(i, *static_cast<const EventRenderableDisabled*>(e));
                 break;
+            case Event::Type::CameraPathStarted:
+                log(i, *static_cast<const EventCameraPathStarted*>(e));
+                break;
+            case Event::Type::CameraPathFinished:
+                log(i, *static_cast<const EventCameraPathFinished*>(e));
+                break;
+            case Event::Type::CameraMovedPosition:
+                log(i, *static_cast<const EventCameraMovedPosition*>(e));
+                break;
+            case Event::Type::ScheduledScriptExecuted:
+                log(i, *static_cast<const EventScheduledScriptExecuted*>(e));
+                break;
+            case Event::Type::GuiTreeUpdated:
+                log(i, *static_cast<const EventGuiTreeUpdated*>(e));
+                break;
             case Event::Type::Custom:
                 log(i, *static_cast<const CustomEvent*>(e));
                 break;
             default:
-                throw ghoul::MissingCaseException();
+                break;
         }
 
         i++;
         e = e->next;
     }
 }
-
-EventSceneGraphNodeAdded::EventSceneGraphNodeAdded(const SceneGraphNode* node_)
-    : Event(Type)
-    , node(temporaryString(node_->identifier()))
-{}
-
-EventSceneGraphNodeRemoved::EventSceneGraphNodeRemoved(const SceneGraphNode* node_)
-    : Event(Type)
-    , node(temporaryString(node_->identifier()))
-{}
 
 EventParallelConnection::EventParallelConnection(State state_)
     : Event(Type)
@@ -565,21 +665,16 @@ EventProfileLoadingFinished::EventProfileLoadingFinished()
     : Event(Type)
 {}
 
+EventAssetLoading::EventAssetLoading(const std::filesystem::path& assetPath_,
+                                     State newState)
+    : Event(Type)
+    , assetPath(assetPath_)
+    , state(newState)
+{}
+
 EventApplicationShutdown::EventApplicationShutdown(State state_)
     : Event(Type)
     , state(state_)
-{}
-
-EventScreenSpaceRenderableAdded::EventScreenSpaceRenderableAdded(
-                                                 const ScreenSpaceRenderable* renderable_)
-    : Event(Type)
-    , renderable(temporaryString(renderable_->identifier()))
-{}
-
-EventScreenSpaceRenderableRemoved::EventScreenSpaceRenderableRemoved(
-                                                 const ScreenSpaceRenderable* renderable_)
-    : Event(Type)
-    , renderable(temporaryString(renderable_->identifier()))
 {}
 
 EventCameraFocusTransition::EventCameraFocusTransition(const Camera* camera_,
@@ -598,6 +693,16 @@ EventTimeOfInterestReached::EventTimeOfInterestReached(const Time* time_,
     , camera(camera_)
 {}
 
+EventMissionAdded::EventMissionAdded(const std::string_view identifier_)
+    : Event(Type)
+    , identifier(temporaryString(identifier_))
+{}
+
+EventMissionRemoved::EventMissionRemoved(const std::string_view identifier_)
+    : Event(Type)
+    , identifier(temporaryString(identifier_))
+{}
+
 EventMissionEventReached::EventMissionEventReached()
     : Event(Type)
 {}
@@ -612,7 +717,7 @@ EventPlanetEclipsed::EventPlanetEclipsed(const SceneGraphNode* eclipsee_,
 EventInterpolationFinished::EventInterpolationFinished(
                                                     const properties::Property* property_)
     : Event(Type)
-    , property(temporaryString(property_->fullyQualifiedIdentifier()))
+    , property(temporaryString(property_->uri()))
 {}
 
 EventFocusNodeChanged::EventFocusNodeChanged(const SceneGraphNode* oldNode_,
@@ -624,20 +729,24 @@ EventFocusNodeChanged::EventFocusNodeChanged(const SceneGraphNode* oldNode_,
     ghoul_assert(newNode_, "There must be a new node");
 }
 
-EventLayerAdded::EventLayerAdded(std::string_view node_, std::string_view layerGroup_,
-                                 std::string_view layer_)
+EventPropertyTreeUpdated::EventPropertyTreeUpdated(std::string_view uri_)
     : Event(Type)
-    , node(temporaryString(node_))
-    , layerGroup(temporaryString(layerGroup_))
-    , layer(temporaryString(layer_))
+    , uri(temporaryString(uri_))
 {}
 
-EventLayerRemoved::EventLayerRemoved(std::string_view node_, std::string_view layerGroup_,
-                                     std::string_view layer_)
+EventPropertyTreePruned::EventPropertyTreePruned(std::string_view uri_)
     : Event(Type)
-    , node(temporaryString(node_))
-    , layerGroup(temporaryString(layerGroup_))
-    , layer(temporaryString(layer_))
+    , uri(temporaryString(uri_))
+{}
+
+EventActionAdded::EventActionAdded(std::string_view uri_)
+    : Event(Type)
+    , uri(temporaryString(uri_))
+{}
+
+EventActionRemoved::EventActionRemoved(std::string_view uri_)
+    : Event(Type)
+    , uri(temporaryString(uri_))
 {}
 
 EventSessionRecordingPlayback::EventSessionRecordingPlayback(State state_)
@@ -662,6 +771,32 @@ EventRenderableDisabled::EventRenderableDisabled(const SceneGraphNode* node_)
     , node(temporaryString(node_->identifier()))
 {}
 
+EventCameraPathStarted::EventCameraPathStarted(const SceneGraphNode* origin_,
+                                               const SceneGraphNode* destination_)
+    : Event(Type)
+    , origin(temporaryString(origin_->identifier()))
+    , destination(temporaryString(destination_->identifier()))
+{}
+
+EventCameraPathFinished::EventCameraPathFinished(const SceneGraphNode* origin_,
+                                                 const SceneGraphNode* destination_)
+    : Event(Type)
+    , origin(temporaryString(origin_->identifier()))
+    , destination(temporaryString(destination_->identifier()))
+{}
+
+EventCameraMovedPosition::EventCameraMovedPosition()
+    : Event(Type)
+{}
+
+EventScheduledScriptExecuted::EventScheduledScriptExecuted(std::string_view script_)
+    : Event(Type)
+    , script(temporaryString(script_))
+{}
+
+EventGuiTreeUpdated::EventGuiTreeUpdated()
+    : Event(Type)
+{}
 
 CustomEvent::CustomEvent(std::string_view subtype_, std::string_view payload_)
     : Event(Type)

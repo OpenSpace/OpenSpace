@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,40 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentationgenerator.h>
-
 #include <openspace/openspace.h>
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/invariants.h>
 #include <fstream>
-
-namespace openspace {
-
-DocumentationGenerator::DocumentationGenerator(std::string name,
-                                               std::string jsonName,
-                                        std::vector<HandlebarTemplate> handlebarTemplates)
-    : _name(std::move(name))
-    , _jsonName(std::move(jsonName))
-    , _handlebarTemplates(std::move(handlebarTemplates))
-{
-    ghoul_precondition(!_name.empty(), "name must not be empty");
-    ghoul_precondition(!_jsonName.empty(), "jsonName must not be empty");
-    for (const HandlebarTemplate& t : _handlebarTemplates) {
-        (void)t; // Unused variable in Release mode
-        ghoul_precondition(!t.name.empty(), "name must not be empty");
-        ghoul_precondition(!t.filename.empty(), "filename must not be empty");
-    }
-}
-
-std::vector<DocumentationGenerator::HandlebarTemplate>
-DocumentationGenerator::templatesToRegister()
-{
-    return _handlebarTemplates;
-}
-
-std::string DocumentationGenerator::jsonName() {
-    return _jsonName;
-}
-
-} // namespace openspace

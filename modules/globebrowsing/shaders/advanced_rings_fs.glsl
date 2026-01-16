@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,7 @@
 
 #include "PowerScaling/powerScaling_fs.hglsl"
 #include "fragment.glsl"
+#include "ellipsoid.glsl"
 
 #define NSSamplesMinusOne #{nShadowSamples}
 #define NSSamples (NSSamplesMinusOne + 1)
@@ -31,13 +32,15 @@
 in vec2 vs_st;
 in float vs_screenSpaceDepth;
 in vec4 shadowCoords;
+in vec3 vs_normal;
+// Fragment position in object space
+in vec3 posObj;
 
-uniform sampler2DShadow shadowMapTexture;
-uniform sampler1D ringTextureFwrd;
-uniform sampler1D ringTextureBckwrd;
-uniform sampler1D ringTextureUnlit;
-uniform sampler1D ringTextureColor;
-uniform sampler1D ringTextureTransparency;
+uniform sampler1D textureForwards;
+uniform sampler1D textureBackwards;
+uniform sampler1D textureUnlit;
+uniform sampler1D textureColor;
+uniform sampler1D textureTransparency;
 uniform vec2 textureOffset;
 uniform float colorFilterValue;
 uniform vec3 sunPosition;
@@ -45,6 +48,8 @@ uniform vec3 sunPositionObj;
 uniform vec3 camPositionObj;
 uniform float nightFactor;
 uniform float zFightingPercentage;
+uniform float opacity;
+uniform vec3 ellipsoidRadii;
 
 
 Fragment getFragment() {
@@ -68,44 +73,37 @@ Fragment getFragment() {
     discard;
   }
 
-  vec4 colorBckwrd = texture(ringTextureBckwrd, texCoord);
-  vec4 colorFwrd = texture(ringTextureFwrd, texCoord);
-  vec4 colorMult = texture(ringTextureColor, texCoord);
-  vec4 transparency = texture(ringTextureTransparency, texCoord);
+  vec4 colorBckwrd = texture(textureBackwards, texCoord);
+  vec4 colorFwrd = texture(textureForwards, texCoord);
+  vec4 colorMult = texture(textureColor, texCoord);
+  float transparency = 1.0 - texture(textureTransparency, texCoord).r;
 
   float lerpFactor = dot(camPositionObj, sunPositionObj);
 
   // Jon Colors:
-  //vec4 diffuse = mix(colorFwrd * vec4(1, 0.88, 0.82, 1.0), colorBckwrd * vec4(1, 0.88, 0.82, 1.0), lerpFactor);
-  vec4 diffuse = mix(colorFwrd * colorMult, colorBckwrd * colorMult, lerpFactor);
-  diffuse.a = colorFilterValue * transparency.a;
+  // vec4 diffuse = mix(
+  //   colorFwrd * vec4(1, 0.88, 0.82, 1.0),
+  //   colorBckwrd * vec4(1, 0.88, 0.82, 1.0),
+  //   lerpFactor
+  // );
+  vec4 diffuse = mix(colorFwrd, colorBckwrd, lerpFactor) * colorMult;
+  diffuse.a = colorFilterValue * transparency;
   float colorValue = length(diffuse.rgb) / 0.57735026919;
-  if (colorValue < 0.1) {
+  if (colorValue < 0.001) {
     discard;
   }
 
-  // shadow == 1.0 means it is not in shadow
-  float shadow = 1.0;
-  if (shadowCoords.z >= 0) {
-    vec4 normalizedShadowCoords = shadowCoords;
-    normalizedShadowCoords.z = normalizeFloat(zFightingPercentage * normalizedShadowCoords.w);
-    normalizedShadowCoords.xy = normalizedShadowCoords.xy / normalizedShadowCoords.w;
-    normalizedShadowCoords.w = 1.0;
+  // Check if ray from fragment to sun intersects the ellipsoid (globe)
+  // This creates more accurate shadowing for rings
+  bool intersectsGlobe = rayIntersectsEllipsoid(
+    posObj,
+    sunPositionObj,
+    vec3(0.0),
+    ellipsoidRadii
+  );
 
-    float sum = 0;
-    #for i in 0..#{nShadowSamples}
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i}, -NSSamples + #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  0));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(-NSSamples + #{i},  NSSamples - #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(                0, -NSSamples + #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(                0,  NSSamples - #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i}, -NSSamples + #{i}));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  0));
-      sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2( NSSamples - #{i},  NSSamples - #{i}));
-    #endfor
-    sum += textureProjOffset(shadowMapTexture, normalizedShadowCoords, ivec2(0, 0));
-    shadow = clamp(sum / (8.0 * NSSamples + 1.f), 0.35, 1.0);
-  }
+  // shadow == 1.0 means it is not in shadow
+  float shadow = intersectsGlobe ? 0.05 : 1.0;
 
   // The normal for the one plane depends on whether we are dealing
   // with a front facing or back facing fragment
@@ -117,12 +115,13 @@ Fragment getFragment() {
   // if we are facing away from the Sun
   if (dot(sunPosition, normal) < 0.0) {
     diffuse.xyz =
-      vec3(1.0, 0.97075, 0.952) *  texture(ringTextureUnlit, texCoord).xyz * nightFactor;
+      vec3(1.0, 0.97075, 0.952) *  texture(textureUnlit, texCoord).xyz * nightFactor;
   }
 
   Fragment frag;
 
   frag.color = diffuse * shadow;
+  frag.color.a = frag.color.a * opacity + (1.0 - shadow) * 0.5;
   frag.depth = vs_screenSpaceDepth;
   frag.gPosition = vec4(1e30, 1e30, 1e30, 1.0);
   frag.gNormal = vec4(normal, 1.0);

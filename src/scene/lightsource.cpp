@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,7 @@
 #include <openspace/scene/lightsource.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 #include <optional>
@@ -38,17 +34,25 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Whether the light source is enabled or not"
+        "Whether the light source is enabled or not.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // This is the base class of all `LightSource` types, which are components that can be
+    // added to certain `Renderable` types to add lighting effects.
+    //
+    // A `LightSource`, in this case, is just a table that describes properties such as
+    // the location of the light. It _does not physically exist in the scene_, and the
+    // table of parameters have to be added to each `Renderable` that should be affected
+    // by the light source. This is commonly done by exporting a light source table from
+    // an Asset file that represents an illuminating object in the scene, such as the Sun
+    // in our solar system.
     struct [[codegen::Dictionary(LightSource)]] Parameters {
-        // The type of the light source that is described in this element. The available
-        // types of light sources depend on the configuration of the application and can
-        // be written to disk on application startup into the FactoryDocumentation
-        std::string type [[codegen::annotation("Must name a valid LightSource type")]];
+        // The type of light source that is described in this element.
+        std::string type [[codegen::annotation("Must name a valid `LightSource` type")]];
 
-        // The identifier of the light source
-        std::string identifier;
+        // The identifier of the light source.
+        std::string identifier [[codegen::identifier()]];
 
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
@@ -76,20 +80,16 @@ std::unique_ptr<LightSource> LightSource::createFromDictionary(
     LightSource* source = factory->create(p.type, dictionary);
     source->setIdentifier(p.identifier);
 
+    source->_type = p.type;
     return std::unique_ptr<LightSource>(source);
 }
 
-LightSource::LightSource()
+LightSource::LightSource(const ghoul::Dictionary& dictionary)
     : properties::PropertyOwner({ "LightSource", "Light Source" })
     , _enabled(EnabledInfo, true)
 {
-    addProperty(_enabled);
-}
-
-LightSource::LightSource(const ghoul::Dictionary& dictionary)
-    : LightSource()
-{
     const Parameters p = codegen::bake<Parameters>(dictionary);
+    addProperty(_enabled);
     _enabled = p.enabled.value_or(_enabled);
 }
 

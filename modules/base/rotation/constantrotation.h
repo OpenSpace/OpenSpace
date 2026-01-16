@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,11 +32,9 @@
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class ConstantRotation : public Rotation {
 public:
-    ConstantRotation(const ghoul::Dictionary& dictionary);
+    explicit ConstantRotation(const ghoul::Dictionary& dictionary);
 
     glm::dmat3 matrix(const UpdateData& data) const override;
 

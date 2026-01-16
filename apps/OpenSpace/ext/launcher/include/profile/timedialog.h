@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,38 +28,37 @@
 #include <QDialog>
 
 #include <openspace/scene/profile.h>
+#include <optional>
 
 class QCheckBox;
-class QComboBox;
 class QDateTimeEdit;
 class QLabel;
 class QLineEdit;
+class QTabWidget;
+class QWidget;
 
 class TimeDialog final : public QDialog {
 Q_OBJECT
 public:
     /**
-     * Constructor for ostime class
+     * Constructor for ostime class.
      *
-     * \param profile The #openspace::Profile object containing all data of the
-     *                new or imported profile.
      * \param parent Pointer to parent Qt widget
+     * \param time The #openspace::Profile::Time object containing all data of the new or
+     *        imported profile.
      */
     TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>* time);
 
 private slots:
-    void enableAccordingToType(int);
     void approved();
 
 private:
     void createWidgets();
-    void enableFormatForAbsolute(bool enableAbs);
 
     std::optional<openspace::Profile::Time>* _time = nullptr;
     openspace::Profile::Time _timeData;
-    bool _initializedAsAbsolute = true;
 
-    QComboBox* _typeCombo = nullptr;
+    QTabWidget* _tabWidget = nullptr;
     QLabel* _absoluteLabel = nullptr;
     QDateTimeEdit* _absoluteEdit = nullptr;
     QLabel* _relativeLabel = nullptr;

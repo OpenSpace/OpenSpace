@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,19 +27,21 @@
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumemetadata.h>
 #include <modules/volume/rawvolumewriter.h>
-#include <openspace/documentation/verifier.h>
+#include <modules/volume/volumegridtype.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/time.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/fmt.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/format.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/lua/lua_helper.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/misc/defer.h>
-#include <filesystem>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
+#include <algorithm>
+#include <ios>
 #include <fstream>
+#include <limits>
 
 namespace {
     struct [[codegen::Dictionary(GenerateRawVolumeTask)]] Parameters {
@@ -88,11 +90,11 @@ GenerateRawVolumeTask::GenerateRawVolumeTask(const ghoul::Dictionary& dictionary
 }
 
 std::string GenerateRawVolumeTask::description() {
-    return fmt::format(
+    return std::format(
         "Generate a raw volume with dimenstions: ({}, {}, {}). For each cell, set the "
         "value by evaluating the lua function: `{}`, with three arguments (x, y, z) "
-        "ranging from ({}, {}, {}) to ({}, {}, {}). Write raw volume data into {} and "
-        "dictionary with metadata to {}",
+        "ranging from ({}, {}, {}) to ({}, {}, {}). Write raw volume data into '{}' and "
+        "dictionary with metadata to '{}'",
         _dimensions.x, _dimensions.y, _dimensions.z, _valueFunctionLua,
         _lowerDomainBound.x, _lowerDomainBound.y, _lowerDomainBound.z,
         _upperDomainBound.x, _upperDomainBound.y, _upperDomainBound.z,
@@ -104,7 +106,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     // Spice kernel is required for time conversions.
     // Todo: Make this dependency less hard coded.
     SpiceManager::KernelHandle kernel = SpiceManager::ref().loadKernel(
-        absPath("${DATA}/assets/spice/naif0012.tls").string()
+        absPath("${DATA}/assets/spice/naif0012.tls")
     );
 
     defer {
@@ -117,15 +119,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     ghoul::lua::LuaState state;
     ghoul::lua::runScript(state, _valueFunctionLua);
 
-#if (defined(NDEBUG) || defined(DEBUG))
-    ghoul::lua::verifyStackSize(state, 1);
-#endif
-
     int functionReference = luaL_ref(state, LUA_REGISTRYINDEX);
-
-#if (defined(NDEBUG) || defined(DEBUG))
-    ghoul::lua::verifyStackSize(state, 0);
-#endif
 
     glm::vec3 domainSize = _upperDomainBound - _lowerDomainBound;
 
@@ -133,28 +127,21 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     float minVal = std::numeric_limits<float>::max();
     float maxVal = std::numeric_limits<float>::min();
 
-    rawVolume.forEachVoxel([&](glm::uvec3 cell, float) {
-        glm::vec3 coord = _lowerDomainBound +
+    rawVolume.forEachVoxel([&](const glm::uvec3& cell, float) {
+        const glm::vec3 coord = _lowerDomainBound +
             glm::vec3(cell) / glm::vec3(_dimensions) * domainSize;
 
-#if (defined(NDEBUG) || defined(DEBUG))
-        ghoul::lua::verifyStackSize(state, 0);
-#endif
         lua_rawgeti(state, LUA_REGISTRYINDEX, functionReference);
 
         lua_pushnumber(state, coord.x);
         lua_pushnumber(state, coord.y);
         lua_pushnumber(state, coord.z);
 
-#if (defined(NDEBUG) || defined(DEBUG))
-        ghoul::lua::verifyStackSize(state, 4);
-#endif
-
         if (lua_pcall(state, 3, 1, 0) != LUA_OK) {
             return;
         }
 
-        float value = static_cast<float>(luaL_checknumber(state, 1));
+        const float value = static_cast<float>(luaL_checknumber(state, 1));
         lua_pop(state, 1);
         rawVolume.set(cell, value);
 
@@ -169,7 +156,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
         std::filesystem::create_directories(directory);
     }
 
-    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath.string());
+    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
     writer.write(rawVolume);
 
     progressCallback(0.9f);
@@ -189,14 +176,13 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     metadata.minValue = minVal;
     metadata.maxValue = maxVal;
 
-    ghoul::Dictionary outputDictionary = metadata.dictionary();
-    std::string metadataString = ghoul::formatLua(outputDictionary);
+    const ghoul::Dictionary outputDictionary = metadata.dictionary();
+    const std::string metadataString = ghoul::formatLua(outputDictionary);
 
-    std::fstream f(_dictionaryOutputPath, std::ios::out);
+    std::fstream f = std::fstream(_dictionaryOutputPath, std::ios::out);
     f << "return " << metadataString;
-    f.close();
 
-    progressCallback(1.0f);
+    progressCallback(1.f);
 }
 
 } // namespace openspace::volume

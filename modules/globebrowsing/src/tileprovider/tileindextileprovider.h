@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,11 +27,13 @@
 
 #include <modules/globebrowsing/src/tileprovider/texttileprovider.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
+
 namespace openspace::globebrowsing {
 
 class TileIndexTileProvider : public TextTileProvider {
 public:
-    TileIndexTileProvider(const ghoul::Dictionary& dictionary);
+    explicit TileIndexTileProvider(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;
@@ -40,6 +42,11 @@ public:
     int minLevel() override final;
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
+
+    static documentation::Documentation Documentation();
+
+private:
+    properties::BoolProperty _uniqueBackgroundColors;
 };
 
 } // namespace openspace::globebrowsing

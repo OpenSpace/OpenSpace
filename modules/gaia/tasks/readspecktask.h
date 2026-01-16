@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,15 +28,12 @@
 #include <openspace/util/task.h>
 
 #include <filesystem>
-#include <string>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class ReadSpeckTask : public Task {
 public:
-    ReadSpeckTask(const ghoul::Dictionary& dictionary);
+    explicit ReadSpeckTask(const ghoul::Dictionary& dictionary);
     ~ReadSpeckTask() override = default;
 
     std::string description() override;

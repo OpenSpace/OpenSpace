@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,22 +25,22 @@
 #ifndef __OPENSPACE_CORE___TIMELINE___H__
 #define __OPENSPACE_CORE___TIMELINE___H__
 
-#include <algorithm>
 #include <deque>
-#include <cstddef>
 
 namespace openspace {
 
 /**
- * Base class for keyframes
+ * Base class for keyframes.
  */
 struct KeyframeBase {
+    KeyframeBase(size_t id_, double timestamp_);
+
     size_t id;
     double timestamp;
 };
 
 /**
- * Templated class for keyframes containing data
+ * Templated class for keyframes containing data.
  */
 template <typename T>
 struct Keyframe : public KeyframeBase {
@@ -54,7 +54,7 @@ struct Keyframe : public KeyframeBase {
 };
 
 /**
- * Templated class for timelines
+ * Templated class for timelines.
  */
 template <typename T>
 class Timeline {
@@ -81,27 +81,27 @@ private:
 };
 
 /**
- * Return true if the timestamp of a is smaller the timestamp of b.
+ * Return `true` if the timestamp of a is smaller the timestamp of b.
  */
 bool compareKeyframeTimes(const KeyframeBase& a, const KeyframeBase& b);
 
 /**
- * Return true if a is smaller than the timestamp of b.
+ * Return `true` if a is smaller than the timestamp of b.
  */
 bool compareTimeWithKeyframeTime(double a, const KeyframeBase& b);
 
 /**
- * Return true if the timestamp of a is smaller than b.
+ * Return `true` if the timestamp of a is smaller than b.
  */
 bool compareKeyframeTimeWithTime(const KeyframeBase& a, double b);
 
 /**
- * Return true if the timestamp of a is smaller than or equal to b.
- * This is used only in the mode of saving render frames during session recording
- * playback. This was necessary to correct a small timing issue caused by fixing
- * the application time according to the playback framerate. In normal operation,
- * the application time at the instant the keyframes are evaluated is always a
- * little bit newer than the first keyframe in the timeline.
+ * Return true if the timestamp of a is smaller than or equal to b. This is used only in
+ * the mode of saving render frames during session recording playback. This was necessary
+ * to correct a small timing issue caused by fixing the application time according to the
+ * playback framerate. In normal operation, the application time at the instant the
+ * keyframes are evaluated is always a little bit newer than the first keyframe in the
+ * timeline.
  */
 bool compareKeyframeTimeWithTime_playbackWithFrames(const KeyframeBase& a, double b);
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,24 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "modules/server/include/topics/cameratopic.h"
+#include <modules/server/include/topics/cameratopic.h>
 
 #include <modules/server/include/connection.h>
 #include <modules/server/servermodule.h>
-#include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/dashboarditemglobelocation.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/properties/property.h>
-#include <openspace/query/query.h>
 #include <openspace/util/distanceconversion.h>
-#include <ghoul/logging/logmanager.h>
+#include <openspace/util/geodetic.h>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
 } // namespace
-
-using nlohmann::json;
 
 namespace openspace {
 
@@ -61,7 +57,7 @@ bool CameraTopic::isDone() const {
 }
 
 void CameraTopic::handleJson(const nlohmann::json& json) {
-    std::string event = json.at("event").get<std::string>();
+    const std::string event = json.at("event").get<std::string>();
 
     if (event != SubscribeEvent) {
         _isDone = true;
@@ -71,7 +67,7 @@ void CameraTopic::handleJson(const nlohmann::json& json) {
     ServerModule* module = global::moduleEngine->module<ServerModule>();
     _dataCallbackHandle = module->addPreSyncCallback(
         [this]() {
-            std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+            const auto now = std::chrono::system_clock::now();
             if (now - _lastUpdateTime > _cameraPositionUpdateTime) {
                 sendCameraData();
                 _lastUpdateTime = std::chrono::system_clock::now();
@@ -81,20 +77,39 @@ void CameraTopic::handleJson(const nlohmann::json& json) {
 }
 
 void CameraTopic::sendCameraData() {
-    using namespace openspace;
-
-    GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
-    glm::dvec3 position = module->geoPosition();
+#ifdef OPENSPACE_MODULE_SPACE_ENABLED
+    glm::dvec3 position = geoPositionFromCamera();
+    glm::dvec3 direction = geoViewFromCamera();
+    const double viewLength = direction.z;
     std::pair<double, std::string_view> altSimplified = simplifyDistance(position.z);
+    glm::dvec2 subSolar = subSolarCoordinates();
+
+    glm::dvec2 dir = glm::dvec2(direction) - glm::dvec2(position);
+    if (glm::length(dir) > 1e-6) {
+        // Avoid sending NaNs/null from bad normalization
+        dir = glm::normalize(dir);
+    }
 
     nlohmann::json jsonData = {
         { "latitude", position.x },
         { "longitude", position.y },
         { "altitude", altSimplified.first },
-        { "altitudeUnit", altSimplified.second }
+        { "altitudeUnit", altSimplified.second },
+        { "altitudeMeters", position.z },
+        { "viewLatitude", dir.x },
+        { "viewLongitude", dir.y },
+        { "viewLength", viewLength },
+        { "subSolarLatitude", subSolar.x },
+        { "subSolarLongitude", subSolar.y },
     };
 
     _connection->sendJson(wrappedPayload(jsonData));
+#else // ^^^ OPENSPACE_MODULE_SPACE_ENABLED ||| !OPENSPACE_MODULE_SPACE_ENABLED vvv
+    LWARNINGC(
+        "CameraTopic",
+        "Cannot send camera data, compiled without globebrowsing support"
+    );
+#endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
 
 } // namespace openspace

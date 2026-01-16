@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,23 +28,29 @@
 #include <openspace/properties/numericalproperty.h>
 
 #include <ghoul/glm.h>
-#include <limits>
 
 namespace openspace::properties {
 
 class Mat2Property : public NumericalProperty<glm::mat2x2> {
 public:
-    Mat2Property(Property::PropertyInfo info, glm::mat2x2 value = glm::mat2x2(0.f),
+    explicit Mat2Property(Property::PropertyInfo info,
+        glm::mat2x2 value = glm::mat2x2(0.f),
         glm::mat2x2 minValue =
             ghoul::createFillMat2x2<float>(std::numeric_limits<float>::lowest()),
         glm::mat2x2 maxValue =
             ghoul::createFillMat2x2<float>(std::numeric_limits<float>::max()),
         glm::mat2x2 stepValue = ghoul::createFillMat2x2<float>(0.01f));
 
-    std::string_view className() const override;
-    int typeLua() const override;
+    std::string_view className() const override final;
+    ghoul::lua::LuaTypes typeLua() const override final;
 
+    void getLuaValue(lua_State* state) const override final;
+
+    std::string stringValue() const override final;
     using TemplateProperty<glm::mat2x2>::operator=;
+
+private:
+    glm::mat2x2 toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

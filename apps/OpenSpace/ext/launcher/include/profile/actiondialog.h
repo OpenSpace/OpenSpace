@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,16 +28,20 @@
 #include <QDialog>
 
 #include <openspace/scene/profile.h>
+#include <string>
+#include <vector>
 
 class QCheckBox;
 class QComboBox;
 class QDialogButtonBox;
+class QErrorMessage;
 class QGridLayout;
 class QLabel;
 class QLineEdit;
 class QListWidget;
 class QPushButton;
 class QTextEdit;
+class QWidget;
 
 class ActionDialog final : public QDialog {
 Q_OBJECT
@@ -49,25 +53,25 @@ private:
     void createWidgets();
     void createActionWidgets(QGridLayout* layout);
     void createKeyboardWidgets(QGridLayout* layout);
-    void applyChanges();
 
     openspace::Profile::Action* selectedAction();
     void actionAdd();
     void actionRemove();
+    void actionDuplicate();
     void actionSelected();
     void actionSaved();
-    void clearActionFields();
+    void clearActionFields() const;
     void actionRejected();
     void chooseScripts();
-    void appendScriptsToTextfield(std::vector<std::string> scripts);
+    void appendScriptsToTextfield(const std::vector<std::string>& scripts) const;
 
     openspace::Profile::Keybinding* selectedKeybinding();
     void keybindingAdd();
     void keybindingRemove();
     void keybindingSelected();
-    void keybindingActionSelected(int);
+    void keybindingActionSelected(int) const;
     void keybindingSaved();
-    void clearKeybindingFields();
+    void clearKeybindingFields() const;
     void keybindingRejected();
 
     std::vector<openspace::Profile::Action>* _actions = nullptr;
@@ -78,7 +82,7 @@ private:
     struct {
         QListWidget* list = nullptr;
         QLineEdit* identifier = nullptr;
-        QLabel* infoText = nullptr;
+        QErrorMessage* infoText = nullptr;
         QLineEdit* name = nullptr;
         QLineEdit* guiPath = nullptr;
         QLineEdit* documentation = nullptr;
@@ -87,6 +91,7 @@ private:
         QTextEdit* script = nullptr;
         QPushButton* addButton = nullptr;
         QPushButton* removeButton = nullptr;
+        QPushButton* duplicateButton = nullptr;
         QDialogButtonBox* saveButtons = nullptr;
     } _actionWidgets;
 

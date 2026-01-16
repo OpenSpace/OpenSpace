@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,6 @@
 
 #include <openspace/properties/vector/ivec3property.h>
 
-#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
 namespace openspace::properties {
@@ -45,8 +44,20 @@ std::string_view IVec3Property::className() const {
     return "IVec3Property";
 }
 
-int IVec3Property::typeLua() const {
-    return LUA_TTABLE;
+ghoul::lua::LuaTypes IVec3Property::typeLua() const {
+    return ghoul::lua::LuaTypes::Table;
+}
+
+void IVec3Property::getLuaValue(lua_State* state) const {
+    ghoul::lua::push(state, _value);
+}
+
+glm::ivec3 IVec3Property::toValue(lua_State* state) const {
+    return ghoul::lua::value<glm::ivec3>(state);
+}
+
+std::string IVec3Property::stringValue() const {
+    return formatJson(_value);
 }
 
 } // namespace openspace::properties

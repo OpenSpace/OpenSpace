@@ -1,45 +1,38 @@
-local transforms = asset.require('../transforms')
+local transforms = asset.require("../transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
-local kernels = asset.syncedResource({
-  Name = "Mars Spice Kernels",
-  Type = "HttpSynchronization",
-  Identifier = "mars_kernels",
-  Version = 1
-})
 
 
 local DeimosGlobe = {
   Identifier = "Deimos_Globe",
   Parent = transforms.MarsBarycenter.Identifier,
   Transform = {
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "IAU_DEIMOS",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernels .. "mar097.bsp"
-    },
     Translation = {
       Type = "SpiceTranslation",
-      Target = "DEIMOS",
-      Observer = "MARS BARYCENTER",
-      Kernels = kernels .. "mar097.bsp"
+      Target = kernels.ID.Deimos,
+      Observer = coreKernels.ID.MarsBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Deimos,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
     Type = "RenderableGlobe",
-    Radii = { 7500, 6100, 5200 },
---Radius source
---https://sci.esa.int/documents/35171/36506/1567259108230-5-ESLAB46-Day2-Rosenblatt.pdf
-    SegmentsPerPatch = 90,
-    Layers = {}
+    -- Radius source
+    -- https://sci.esa.int/documents/35171/36506/1567259108230-5-ESLAB46-Day2-Rosenblatt.pdf
+    Radii = { 7500, 6100, 5200 }
   },
   Tag = { "moon_solarSystem", "moon_terrestrial", "moon_mars" },
   GUI = {
     Name = "Deimos_Globe",
-    Path = "/Solar System/Planets/Mars",
+    Path = "/Solar System/Planets/Mars/Moons/Deimos",
     Description = "One of two moons of Mars"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(DeimosGlobe)
@@ -52,9 +45,9 @@ end)
 asset.export(DeimosGlobe)
 
 
+
 asset.meta = {
   Name = "Deimos Globe",
-  Version = "1.0",
   Description = "RenderableGlobe for Deimos",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

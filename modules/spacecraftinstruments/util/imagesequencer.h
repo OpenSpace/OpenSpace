@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,17 +25,20 @@
 #ifndef __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___IMAGESEQUENCER___H__
 #define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___IMAGESEQUENCER___H__
 
-#include <modules/spacecraftinstruments/util/sequenceparser.h>
-
+#include <modules/spacecraftinstruments/util/decoder.h>
+#include <modules/spacecraftinstruments/util/image.h>
+#include <openspace/util/timerange.h>
+#include <filesystem>
 #include <map>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
 namespace openspace {
 
-class Time;
 class SequenceParser;
+class Time;
 
 /**
  * The ImageSequencer singleton function is to manage the timekeeping and distribution of
@@ -47,13 +50,13 @@ class SequenceParser;
  * to function the client must provide or write a parser that fills the ImageSequencers
  * private members.
  *
- * \see SequenceParser
- * \see ImageSequencer::runSequenceParser(SequenceParser* parser)
+ * \sa SequenceParser
+ * \sa ImageSequencer::runSequenceParser(SequenceParser* parser)
  */
 class ImageSequencer {
 public:
     /**
-     * Singleton instantiation
+     * Singleton instantiation.
      */
     static ImageSequencer* _instance;
 
@@ -82,6 +85,7 @@ public:
 
     /**
      * Runs parser and recieves the datastructures filled by it.
+     *
      * \see SequenceParser
      */
     void runSequenceParser(SequenceParser& parser);
@@ -128,9 +132,11 @@ public:
     float instrumentActiveTime(double time, const std::string& instrumentID) const;
 
     /**
-     * Returns latest captured image
+     * Returns latest captured image.
      */
     Image latestImageForInstrument(const std::string& instrumentID) const;
+
+    const std::vector<double>& captureProgression() const;
 
 private:
     void sortData();
@@ -139,14 +145,16 @@ private:
      * This handles any types of ambiguities between the data and SPICE calls. This map is
      * composed of a key that is a string in the data to be translated and a Decoder that
      * holds the corresponding translation provided through as asset.
-     * \see Decoder
+     *
+     * \sa Decoder
      */
     std::map<std::string, std::unique_ptr<Decoder>> _fileTranslation;
 
     /**
      * This is the main container of image data. The key is the target name, the value is
      * a subset of images.
-     * \see SequenceParser
+     *
+     * \sa SequenceParser
      */
     std::map<std::string, ImageSubset> _subsetMap;
 
@@ -166,7 +174,7 @@ private:
 
     /**
      * Holds the time ranges of each instruments on and off periods. An instrument
-     * rendering class may ask the ImageSequencer whether or not it
+     * rendering class may ask the ImageSequencer whether or not it.
      */
     std::vector<std::pair<std::string, TimeRange>> _instrumentTimes;
 
@@ -176,7 +184,7 @@ private:
     std::vector<double> _captureProgression;
 
     // default capture image
-    std::string _defaultCaptureImage;
+    std::filesystem::path _defaultCaptureImage;
 
     std::map<std::string, Image> _latestImages;
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,18 +24,34 @@
 
 #include <modules/space/translation/keplertranslation.h>
 
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <glm/gtx/transform.hpp>
+#include <cmath>
+#include <cstdlib>
+#include <variant>
 
 namespace {
+    struct RangeError final : public ghoul::RuntimeError {
+        explicit RangeError(std::string off) :
+            ghoul::RuntimeError(
+                std::format("Value '{}' out of range", off),
+                "KeplerTranslation"
+            )
+        {}
+    };
+
     template <typename T, typename Func>
     T solveIteration(const Func& function, T x0, const T& err = 0.0, int maxIter = 100) {
         T x2 = x0;
 
-        for (int i = 0; i < maxIter; ++i) {
+        for (int i = 0; i < maxIter; i++) {
             T x = x2;
             x2 = function(x);
             if (std::abs(x2 - x) < err) {
@@ -51,7 +67,8 @@ namespace {
         "Eccentricity",
         "This value determines the eccentricity, that is the deviation from a perfect "
         "sphere, for this orbit. Currently, hyperbolic orbits using Keplerian elements "
-        "are not supported"
+        "are not supported.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SemiMajorAxisInfo = {
@@ -59,7 +76,8 @@ namespace {
         "Semi-major axis",
         "This value determines the semi-major axis, that is the distance of the object "
         "from the central body in kilometers (semi-major axis = average of periapsis and "
-        "apoapsis)"
+        "apoapsis).",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo InclinationInfo = {
@@ -67,42 +85,48 @@ namespace {
         "Inclination",
         "This value determines the degrees of inclination, or the angle of the orbital "
         "plane, relative to the reference plane, on which the object orbits around the "
-        "central body"
+        "central body.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AscendingNodeInfo = {
         "AscendingNode",
-        "Right ascension of ascending Node",
+        "Right ascension of ascending node",
         "This value determines the right ascension of the ascending node in degrees, "
         "that is the location of position along the orbit where the inclined plane and "
-        "the horizonal reference plane intersect"
+        "the horizonal reference plane intersect.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ArgumentOfPeriapsisInfo = {
         "ArgumentOfPeriapsis",
-        "Argument of Periapsis",
+        "Argument of periapsis",
         "This value determines the argument of periapsis in degrees, that is the "
-        "position on the orbit that is closest to the orbiting body"
+        "position on the orbit that is closest to the orbiting body.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MeanAnomalyAtEpochInfo = {
         "MeanAnomaly",
         "Mean anomaly at epoch",
         "This value determines the mean anomaly at the epoch in degrees, which "
-        "determines the initial location of the object along the orbit at epoch"
+        "determines the initial location of the object along the orbit at epoch.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo EpochInfo = {
         "Epoch",
         "Epoch",
-        "This value determines the epoch for which the initial location is defined in "
-        "the form of YYYY MM DD HH:mm:ss"
+        "Specifies the epoch in which the first position of the Kepler arguments are "
+        "provided. The epoch is specified in numbers of seconds past the J2000 epoch.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo PeriodInfo = {
         "Period",
         "Orbit period",
-        "Specifies the orbital period (in seconds)"
+        "Specifies the orbital period (in seconds).",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(KeplerTranslation)]] Parameters {
@@ -113,19 +137,21 @@ namespace {
         double semiMajorAxis;
 
         // [[codegen::verbatim(InclinationInfo.description)]]
-        double inclination [[codegen::inrange(0.0, 360.0)]];
+        double inclination [[codegen::inrange(-360.0, 360.0)]];
 
         // [[codegen::verbatim(AscendingNodeInfo.description)]]
-        double ascendingNode [[codegen::inrange(0.0, 360.0)]];
+        double ascendingNode [[codegen::inrange(-360.0, 360.0)]];
 
         // [[codegen::verbatim(ArgumentOfPeriapsisInfo.description)]]
-        double argumentOfPeriapsis [[codegen::inrange(0.0, 360.0)]];
+        double argumentOfPeriapsis [[codegen::inrange(-360.0, 360.0)]];
 
         // [[codegen::verbatim(MeanAnomalyAtEpochInfo.description)]]
-        double meanAnomaly [[codegen::inrange(0.0, 360.0)]];
+        double meanAnomaly [[codegen::inrange(-360.0, 360.0)]];
 
-        // [[codegen::verbatim(EpochInfo.description)]]
-        std::string epoch;
+        // This value determines the epoch for which the initial location is defined in.
+        // This is specified either in the form of a date (YYYY MM DD HH:mm:ss) or in the
+        // number of seconds past the J2000 epoch.
+        std::variant<std::string, double> epoch;
 
         // [[codegen::verbatim(PeriodInfo.description)]]
         double period [[codegen::greater(0.0)]];
@@ -135,17 +161,13 @@ namespace {
 
 namespace openspace {
 
-KeplerTranslation::RangeError::RangeError(std::string off)
-    : ghoul::RuntimeError("Value '" + off + "' out of range", "KeplerTranslation")
-    , offender(std::move(off))
-{}
-
 documentation::Documentation KeplerTranslation::Documentation() {
     return codegen::doc<Parameters>("space_transform_kepler");
 }
 
-KeplerTranslation::KeplerTranslation()
-    : _eccentricity(EccentricityInfo, 0.0, 0.0, 1.0)
+KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
+    : Translation(dictionary)
+    , _eccentricity(EccentricityInfo, 0.0, 0.0, 1.0)
     , _semiMajorAxis(SemiMajorAxisInfo, 0.0, 0.0, 1e6)
     , _inclination(InclinationInfo, 0.0, 0.0, 360.0)
     , _ascendingNode(AscendingNodeInfo, 0.0, 0.0, 360.0)
@@ -154,6 +176,8 @@ KeplerTranslation::KeplerTranslation()
     , _epoch(EpochInfo, 0.0, 0.0, 1e9)
     , _period(PeriodInfo, 0.0, 0.0, 1e6)
 {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
     auto update = [this]() {
         _orbitPlaneDirty = true;
         requireUpdate();
@@ -180,62 +204,63 @@ KeplerTranslation::KeplerTranslation()
     addProperty(_meanAnomalyAtEpoch);
     addProperty(_epoch);
     addProperty(_period);
-}
 
-KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
-    : KeplerTranslation()
-{
-    const Parameters p = codegen::bake<Parameters>(dictionary);
+    const double epoch =
+        std::holds_alternative<double>(p.epoch) ?
+        std::get<double>(p.epoch) :
+        SpiceManager::ref().ephemerisTimeFromDate(std::get<std::string>(p.epoch));
 
     setKeplerElements(
         p.eccentricity,
         p.semiMajorAxis,
-        p.inclination,
-        p.ascendingNode,
+        p.inclination < 0.0 ? p.inclination + 360.0 : p.inclination,
+        p.ascendingNode < 0.0 ? p.ascendingNode + 360.0 : p.ascendingNode,
+        p.argumentOfPeriapsis < 0.0 ?
+        p.argumentOfPeriapsis + 360.0 :
         p.argumentOfPeriapsis,
-        p.meanAnomaly,
+        p.meanAnomaly < 0.0 ? p.meanAnomaly + 360.0 : p.meanAnomaly,
         p.period,
-        p.epoch
+        epoch
     );
 }
 
-double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
+double KeplerTranslation::eccentricAnomaly(double meanAnomaly, double eccentricity) {
     // Compute the eccentric anomaly (the location of the spacecraft taking the
     // eccentricity of the orbit into account) using different solves for the regimes in
     // which they are most efficient
 
-    if (_eccentricity == 0.0) {
+    if (eccentricity == 0.0) {
         // In a circular orbit, the eccentric anomaly = mean anomaly
         return meanAnomaly;
     }
-    else if (_eccentricity < 0.2) {
-        auto solver = [this, &meanAnomaly](double x) -> double {
+    else if (eccentricity < 0.2) {
+        auto solver = [&](double x) -> double {
             // For low eccentricity, using a first order solver sufficient
-            return meanAnomaly + _eccentricity * sin(x);
+            return meanAnomaly + eccentricity * std::sin(x);
         };
         return solveIteration(solver, meanAnomaly, 0.0, 5);
     }
-    else if (_eccentricity < 0.9) {
-        auto solver = [this, &meanAnomaly](double x) -> double {
-            const double e = _eccentricity;
-            return x + (meanAnomaly + e * sin(x) - x) / (1.0 - e * cos(x));
+    else if (eccentricity < 0.9) {
+        auto solver = [&](double x) -> double {
+            const double e = eccentricity;
+            return x + (meanAnomaly + e * std::sin(x) - x) / (1.0 - e * std::cos(x));
         };
         return solveIteration(solver, meanAnomaly, 0.0, 6);
     }
-    else if (_eccentricity < 1.0) {
+    else if (eccentricity < 1.0) {
         auto sign = [](double val) -> double {
             return val > 0.0 ? 1.0 : ((val < 0.0) ? -1.0 : 0.0);
         };
-        double e = meanAnomaly + 0.85 * _eccentricity * sign(sin(meanAnomaly));
+        const double e = meanAnomaly + 0.85 * eccentricity * sign(std::sin(meanAnomaly));
 
-        auto solver = [this, &meanAnomaly, &sign](double x) -> double {
-            const double s = _eccentricity * sin(x);
-            const double c = _eccentricity * cos(x);
+        auto solver = [&](double x) -> double {
+            const double s = eccentricity * std::sin(x);
+            const double c = eccentricity * std::cos(x);
             const double f = x - s - meanAnomaly;
             const double f1 = 1 - c;
             const double f2 = s;
             return x + (-5 * f / (f1 + sign(f1) *
-                sqrt(std::abs(16 * f1 * f1 - 20 * f * f2))));
+                std::sqrt(std::abs(16 * f1 * f1 - 20 * f * f2))));
         };
         return solveIteration(solver, e, 0.0, 8);
     }
@@ -248,25 +273,32 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
 
 glm::dvec3 KeplerTranslation::position(const UpdateData& data) const {
     if (_orbitPlaneDirty) {
-        computeOrbitPlane();
+        _orbitPlaneRotation = computeOrbitPlane(
+            _ascendingNode,
+            _inclination,
+            _argumentOfPeriapsis
+        );
+        notifyObservers();
         _orbitPlaneDirty = false;
     }
 
     const double t = data.time.j2000Seconds() - _epoch;
     const double meanMotion = glm::two_pi<double>() / _period;
     const double meanAnomaly = glm::radians(_meanAnomalyAtEpoch.value()) + t * meanMotion;
-    const double e = eccentricAnomaly(meanAnomaly);
+    const double e = eccentricAnomaly(meanAnomaly, _eccentricity);
 
     // Use the eccentric anomaly to compute the actual location
     const glm::dvec3 p = glm::dvec3(
-        _semiMajorAxis * 1000.0 * (cos(e) - _eccentricity),
-        _semiMajorAxis * 1000.0 * sin(e) * sqrt(1.0 - _eccentricity * _eccentricity),
+        _semiMajorAxis * (std::cos(e) - _eccentricity),
+        _semiMajorAxis * std::sin(e) * std::sqrt(1.0 - _eccentricity * _eccentricity),
         0.0
     );
-    return _orbitPlaneRotation * p;
+    return _orbitPlaneRotation * p * 1000.0;
 }
 
-void KeplerTranslation::computeOrbitPlane() const {
+glm::dmat3 KeplerTranslation::computeOrbitPlane(double ascendingNode, double inclination,
+                                                double argumentOfPeriapsis)
+{
     // We assume the following coordinate system:
     // z = axis of rotation
     // x = pointing towards the first point of Aries
@@ -278,20 +310,17 @@ void KeplerTranslation::computeOrbitPlane() const {
     // inclination
     // 3. Around the new z axis to place the closest approach to the correct location
 
-    const glm::vec3 ascendingNodeAxisRot = glm::vec3(0.f, 0.f, 1.f);
-    const glm::vec3 inclinationAxisRot = glm::vec3(1.f, 0.f, 0.f);
-    const glm::vec3 argPeriapsisAxisRot = glm::vec3(0.f, 0.f, 1.f);
+    const glm::dvec3 ascendingNodeAxisRot = glm::dvec3(0.f, 0.f, 1.f);
+    const glm::dvec3 inclinationAxisRot = glm::dvec3(1.f, 0.f, 0.f);
+    const glm::dvec3 argPeriapsisAxisRot = glm::dvec3(0.f, 0.f, 1.f);
 
-    const double asc = glm::radians(_ascendingNode.value());
-    const double inc = glm::radians(_inclination.value());
-    const double per = glm::radians(_argumentOfPeriapsis.value());
+    const double asc = glm::radians(ascendingNode);
+    const double inc = glm::radians(inclination);
+    const double per = glm::radians(argumentOfPeriapsis);
 
-    _orbitPlaneRotation = glm::rotate(asc, glm::dvec3(ascendingNodeAxisRot)) *
-                          glm::rotate(inc, glm::dvec3(inclinationAxisRot)) *
-                          glm::rotate(per, glm::dvec3(argPeriapsisAxisRot));
-
-    notifyObservers();
-    _orbitPlaneDirty = false;
+    return glm::rotate(asc, ascendingNodeAxisRot) *
+           glm::rotate(inc, inclinationAxisRot) *
+           glm::rotate(per, argPeriapsisAxisRot);
 }
 
 void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorAxis,
@@ -321,7 +350,6 @@ void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorA
     auto isInRange = [](double val, double min, double max) -> bool {
         return val >= min && val <= max;
     };
-
     if (isInRange(eccentricity, 0.0, 1.0)) {
         _eccentricity = eccentricity;
     }
@@ -361,7 +389,47 @@ void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorA
     _period = orbitalPeriod;
     _epoch = epoch;
 
-    computeOrbitPlane();
+    _orbitPlaneRotation = computeOrbitPlane(
+        _ascendingNode,
+        _inclination,
+        _argumentOfPeriapsis
+    );
+    notifyObservers();
+    _orbitPlaneDirty = false;
+}
+
+KeplerCalculator::KeplerCalculator(double eccentricity, double semiMajorAxis,
+                                   double inclination, double ascendingNode,
+                                   double argumentOfPeriapsis, double meanAnomalyAtEpoch,
+                                   double orbitalPeriod, double epoch)
+    : _eccentricity(eccentricity)
+    , _semiMajorAxis(semiMajorAxis)
+    , _inclination(inclination)
+    , _ascendingNode(ascendingNode)
+    , _argumentOfPeriapsis(argumentOfPeriapsis)
+    , _meanAnomalyAtEpoch(meanAnomalyAtEpoch)
+    , _orbitalPeriod(orbitalPeriod)
+    , _epoch(epoch)
+    , _orbitPlaneRotation(KeplerTranslation::computeOrbitPlane(
+        ascendingNode,
+        inclination,
+        argumentOfPeriapsis
+    ))
+{}
+
+glm::dvec3 KeplerCalculator::position(double time) const {
+    const double t = time - _epoch;
+    const double meanMotion = glm::two_pi<double>() / _orbitalPeriod;
+    const double meanAnomaly = glm::radians(_meanAnomalyAtEpoch) + t * meanMotion;
+    const double e = KeplerTranslation::eccentricAnomaly(meanAnomaly, _eccentricity);
+
+    // Use the eccentric anomaly to compute the actual location
+    const glm::dvec3 p = glm::dvec3(
+        _semiMajorAxis * (std::cos(e) - _eccentricity),
+        _semiMajorAxis * std::sin(e) * std::sqrt(1.0 - _eccentricity * _eccentricity),
+        0.0
+    );
+    return _orbitPlaneRotation * p * 1000.0;
 }
 
 } // namespace openspace

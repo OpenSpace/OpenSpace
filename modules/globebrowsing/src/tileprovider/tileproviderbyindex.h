@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,11 +27,14 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
+#include <modules/globebrowsing/src/tileindex.h>
+#include <unordered_map>
+
 namespace openspace::globebrowsing {
 
 class TileProviderByIndex : public TileProvider {
 public:
-    TileProviderByIndex(const ghoul::Dictionary& dictionary);
+    explicit TileProviderByIndex(const ghoul::Dictionary& dictionary);
 
     Tile tile(const TileIndex& tileIndex) override final;
     Tile::Status tileStatus(const TileIndex& index) override final;

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -28,7 +28,6 @@ add_executable(
   test_assetloader.cpp
   test_concurrentqueue.cpp
   test_distanceconversion.cpp
-  test_configuration.cpp
   test_documentation.cpp
   test_horizons.cpp
   test_iswamanager.cpp
@@ -36,9 +35,15 @@ add_executable(
   test_latlonpatch.cpp
   test_lrucache.cpp
   test_lua_createsinglecolorimage.cpp
+  test_lua_property.cpp
+  test_lua_propertyvalue.cpp
+  test_lua_setpropertyvalue.cpp
   test_profile.cpp
   test_rawvolumeio.cpp
   test_scriptscheduler.cpp
+  test_sessionrecording.cpp
+  test_settings.cpp
+  test_sgctedit.cpp
   test_spicemanager.cpp
   test_timeconversion.cpp
   test_timeline.cpp
@@ -53,8 +58,18 @@ add_executable(
 
 set_openspace_compile_settings(OpenSpaceTest)
 
+target_include_directories(OpenSpaceTest
+  PUBLIC
+    "../apps/OpenSpace/ext/sgct/ext/json/include"
+    "../apps/OpenSpace/ext/sgct/ext/json-schema-validator/src"
+)
+
 target_compile_definitions(OpenSpaceTest PUBLIC "GHL_THROW_ON_ASSERT")
-target_link_libraries(OpenSpaceTest PUBLIC Catch2 openspace-core)
+target_link_libraries(OpenSpaceTest PUBLIC Catch2 openspace-core sgct)
+
+target_precompile_headers(OpenSpaceTest PRIVATE
+  <catch2/catch_test_macros.hpp>
+)
 
 foreach (library_name ${all_enabled_modules})
   get_target_property(library_type ${library_name} TYPE)

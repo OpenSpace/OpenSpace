@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,10 +28,12 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <modules/globebrowsing/src/layergroupid.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <functional>
 
+namespace ghoul { class Dictionary; }
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::globebrowsing {
@@ -59,7 +61,7 @@ private:
     properties::FloatProperty _chromaKeyTolerance;
 
     properties::OptionProperty _typeOption;
-    layers::Adjustment::ID _type;
+    layers::Adjustment::ID _typeId;
 
     std::function<void(void)> _onChangeCallback;
 };

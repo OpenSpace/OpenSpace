@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -41,11 +41,11 @@ void main() {
   // First we convert the window's fragment coordinate to texel coordinates
   vec3 rst = vec3(gl_FragCoord.xy, float(layer) + 0.5) /
     vec3(ivec3(SAMPLES_MU_S * SAMPLES_NU, SAMPLES_MU, SAMPLES_R));
-  
+
   vec3 rayleighInscattering = texture(deltaSRTexture, rst).rgb;
   float mieInscattering = texture(deltaSMTexture, rst).r;
-  
+
   // We are using only the red component of the Mie scattering. See the Precomputed
   // Atmosphere Scattering paper for details about the angular precision
-  renderTarget = vec4(rayleighInscattering, mieInscattering); 
+  renderTarget = vec4(rayleighInscattering, mieInscattering);
 }

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2023                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -37,6 +37,7 @@ set(HEADER_FILES
   include/guiparallelcomponent.h
   include/guipropertycomponent.h
   include/guiscenecomponent.h
+  include/guishadowcomponent.h
   include/guispacetimecomponent.h
   include/imgui_include.h
   include/renderproperties.h
@@ -56,6 +57,7 @@ set(SOURCE_FILES
   src/guiparallelcomponent.cpp
   src/guipropertycomponent.cpp
   src/guiscenecomponent.cpp
+  src/guishadowcomponent.cpp
   src/guispacetimecomponent.cpp
   src/renderproperties.cpp
 )
@@ -76,4 +78,5 @@ create_new_module(
 
 add_subdirectory(ext/imgui SYSTEM)
 target_link_libraries(${imgui_module} PUBLIC Imgui)
+disable_compiler_warnings(Imgui)
 set_target_properties(Imgui PROPERTIES FOLDER "External")

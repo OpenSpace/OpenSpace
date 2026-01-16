@@ -1,15 +1,18 @@
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local horizons = asset.syncedResource({
+
+
+local horizons = asset.resource({
   Name = "5 Astraea Trajectory",
   Type = "HttpSynchronization",
   Identifier = "astraea_horizons",
-  Version = 1
+  Version = 2
 })
+
 
 local AstraeaTrail = {
   Identifier = "AstraeaTrail",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SolarSystemBarycenter.Identifier,
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
@@ -27,13 +30,14 @@ local AstraeaTrail = {
   },
   GUI = {
     Name = "5 Astraea Trail",
-    Path = "/Solar System/Interstellar"
+    Path = "/Solar System/Interstellar",
+    Focusable = false
   }
 }
 
 local AstraeaPosition = {
   Identifier = "AstraeaPosition",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "HorizonsTranslation",
@@ -45,6 +49,7 @@ local AstraeaPosition = {
     Path = "/Solar System/Interstellar"
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(AstraeaPosition)
@@ -63,7 +68,6 @@ asset.export(AstraeaTrail)
 
 asset.meta = {
   Name = "5 Astraea",
-  Version = "1.2",
   Description = [[This asset contains the trail and position of 5 Astraea from
     2014 JAN 01 00:00:00 to 2050 JAN 01 00:00:00. Data from JPL Horizons]],
   Author = "Zach Shaffer",

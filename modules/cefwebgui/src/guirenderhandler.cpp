@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,12 @@
 
 #include <modules/cefwebgui/include/guirenderhandler.h>
 
-#include <openspace/engine/globalscallbacks.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <array>
 
 namespace {
     constexpr std::string_view _loggerCat = "WebGUI:RenderHandler";
@@ -38,24 +39,27 @@ namespace openspace {
 
 GUIRenderHandler::GUIRenderHandler() {
     LDEBUG("Initializing CEF GL environment...");
+    ghoul::Dictionary define;
+    define.setValue("useAcceleratedRendering", _acceleratedRendering);
+
     _programObject = ghoul::opengl::ProgramObject::Build(
         "WebGUICEFProgram",
         absPath("${MODULE_CEFWEBGUI}/shaders/gui_vs.glsl"),
-        absPath("${MODULE_CEFWEBGUI}/shaders/gui_fs.glsl")
+        absPath("${MODULE_CEFWEBGUI}/shaders/gui_fs.glsl"),
+        define
     );
-    float data[] = {
-        -1.0f, -1.0f, -1.0f,
-         1.0f,  1.0f, -1.0f,
-         1.0f, -1.0f, -1.0f,
-         1.0f,  1.0f,  1.0f
+    constexpr std::array<float, 12> Vtx = {
+        -1.f, -1.f, -1.f,
+         1.f,  1.f, -1.f,
+         1.f, -1.f, -1.f,
+         1.f,  1.f,  1.f
     };
 
     glGenVertexArrays(1, &_vao);
     glBindVertexArray(_vao);
     glGenBuffers(1, &_vbo);
-    glGenTextures(1, &_texture);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, Vtx.size() * sizeof(float), Vtx.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
     glBindVertexArray(0);

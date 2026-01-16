@@ -1,40 +1,38 @@
-local moon_transforms = asset.require("scene/solarsystem/planets/earth/moon/moon")
-local sun = asset.require("scene/solarsystem/sun/sun")
-asset.require("spice/base")
 asset.require("../actions")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local sun = asset.require("scene/solarsystem/sun/transforms")
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
 
-local models = asset.syncedResource({
+
+
+local models = asset.resource({
   Name = "Apollo Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_models",
   Version = 4
 })
 
-local kernels = asset.require("scene/solarsystem/missions/apollo/15/kernels").kernels
-
-
--- local models = asset.syncedResource({
---   Name = "Apollo 15 Models",
---   Type = "HttpSynchronization",
---   Identifier = "apollo_models",
---   Version = 1
--- })
 
 local Apollo15 = {
   Identifier = "Apollo15",
-  Parent = moon_transforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "1971-07-30T02:22:00.00",
+    End = "1971-08-01T18:05:00.00"
+  },
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = "APOLLO 15",
-      Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels
+      Target = kernels.ID.Apollo15,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
     },
     Rotation = {
       Type = "SpiceRotation",
-      SourceFrame = "A15_METRIC",
-      DestinationFrame = "GALACTIC"
+      SourceFrame = kernels.Frame.Apollo15Metric,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   Renderable = {
@@ -44,13 +42,7 @@ local Apollo15 = {
     LightSources = {
       sun.LightSource
     },
-    PerformShading = true,
-    DisableFaceCulling = true
-  },
-  TimeFrame = {
-    Type = "TimeFrameInterval",
-    Start = "1971-07-30T02:22:00.00",
-    End = "1971-08-01T18:05:00.00"
+    PerformShading = true
   },
   GUI = {
     Name = "Apollo 15",
@@ -60,15 +52,14 @@ local Apollo15 = {
 
 local Apollo15Trail = {
   Identifier = "Apollo15Trail",
-  Parent = moon_transforms.Moon.Identifier,
+  Parent = moon.Moon.Identifier,
   Renderable = {
     Type = "RenderableTrailTrajectory",
     Translation = {
       Type = "SpiceTranslation",
-      Target = "APOLLO 15",
-      Observer = "MOON",
-      Frame = "IAU_MOON",
-      Kernels = kernels
+      Target = kernels.ID.Apollo15,
+      Observer = coreKernels.ID.Moon,
+      Frame = coreKernels.Frame.Moon
     },
     Color = { 0.70, 0.50, 0.20 },
     StartTime = "1971 JUL 26",
@@ -77,9 +68,11 @@ local Apollo15Trail = {
   },
   GUI = {
     Name = "Apollo 15 Trail",
-    Path = "/Solar System/Missions/Apollo/15"
+    Path = "/Solar System/Missions/Apollo/15",
+    Focusable = false
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Apollo15)
@@ -93,3 +86,14 @@ end)
 
 asset.export(Apollo15)
 asset.export(Apollo15Trail)
+
+
+
+asset.meta = {
+  Name = "Apollo 15",
+  Description = [[This asset provides a 3D model and a Moon-centered trail of the Apollo
+    15 command and service module.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,0 +1,16 @@
+-- Basic
+-- This example adds a dashboard item that adds a spacing to the dashboard. This example
+-- will not show anything by itself.
+
+local Item = {
+  Identifier = "DashboardItemSpacing_Example",
+  Type = "DashboardItemSpacing"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

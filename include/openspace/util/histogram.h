@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_CORE___HISTOGRAM___H__
 #define __OPENSPACE_CORE___HISTOGRAM___H__
 
+#include <utility>
 #include <vector>
 
 namespace openspace {
@@ -44,23 +45,21 @@ public:
     bool isValid() const;
 
     /**
-     * Enter value into the histogram. The add method takes the given
-     * value, works out which bin this corresponds to, and increments
-     * this bin by 'repeat'.
+     * Enter value into the histogram. The add method takes the given value, works out
+     * which bin this corresponds to, and increments this bin by 'repeat'.
      *
-     * @param value The Value to insert into the histogram
-     * @param repeat How many times you want to insert it
-     *
-     * @return Returns true if succesful insertion, otherwise return false
+     * \param value The Value to insert into the histogram
+     * \param repeat How many times you want to insert it
+     * \return Returns `true` if succesful insertion, otherwise return `false`
      */
-    bool add(float value, float repeat = 1.0f);
+    bool add(float value, float repeat = 1.f);
     bool add(const Histogram& histogram);
     bool addRectangle(float lowBin, float highBin, float value);
 
     float interpolate(float bin) const;
     float sample(int binIndex) const;
     const float* data() const;
-    std::vector<std::pair<float,float>> getDecimated(int numBins) const;
+    std::vector<std::pair<float, float>> getDecimated(int numBins) const;
 
     void normalize();
     void print() const;
@@ -71,7 +70,7 @@ public:
     std::vector<char> getBinaryData() const;
 
     float highestBinValue(bool equalized, int overBins=0);
-    float binWidth();
+    float binWidth() const;
 
     void changeRange(float minValue, float maxValue);
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,7 @@ void main() {
   else {
     vs_color = vec3(0.0);
   }
-  
+
   // Transform the damn psc to homogenous coordinate
   vec4 position = vec4(in_point_position.xyz * pow(10, in_point_position.w), 1.0);
   vec4 positionClipSpace = modelViewProjectionTransform * position;

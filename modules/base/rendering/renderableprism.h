@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,17 +32,14 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <ghoul/glm.h>
-
-namespace ghoul::opengl { class ProgramObject; }
+#include <cstdint>
+#include <memory>
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class RenderablePrism : public Renderable {
 public:
-    RenderablePrism(const ghoul::Dictionary& dictionary);
+    explicit RenderablePrism(const ghoul::Dictionary& dictionary);
 
     void initialize() override;
     void initializeGL() override;
@@ -67,7 +64,7 @@ private:
     properties::FloatProperty _lineWidth;
     properties::Vec3Property _lineColor;
     properties::FloatProperty _length;
-    UniformCache(modelViewProjection, color) _uniformCache;
+    UniformCache(modelViewProjectionTransform, color) _uniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     GLuint _vaoId = 0;

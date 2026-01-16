@@ -1,4 +1,4 @@
-local createDeck = function (identifier, defaultRenderableProperties)
+function createDeck(identifier, defaultRenderableProperties)
   return {
     SlideIdentifiers = {},
     IdentifierPrefix = identifier,
@@ -8,13 +8,13 @@ local createDeck = function (identifier, defaultRenderableProperties)
   }
 end
 
-local removeDeck = function (deck)
+function removeDeck(deck)
   for i, identifier in pairs(deck.SlideIdentifiers) do
     openspace.removeScreenSpaceRenderable(identifier)
   end
 end
 
-local addSlide = function (deck, path)
+function addSlide(deck, path)
   local index = #deck.SlideIdentifiers + 1
   local identifier = deck.IdentifierPrefix .. index
 
@@ -23,7 +23,7 @@ local addSlide = function (deck, path)
     Identifier = identifier,
     Name = identifier,
     TexturePath = path
-  };
+  }
 
   for key, value in pairs(deck.DefaultRenderableProperties) do
     spec[key] = value
@@ -34,8 +34,7 @@ local addSlide = function (deck, path)
   deck.SlideIdentifiers[#deck.SlideIdentifiers + 1] = identifier
 end
 
-
-local setCurrentSlide = function (deck, index, interpolationDuration)
+function setCurrentSlide(deck, index, interpolationDuration)
   if (interpolationDuration == nil) then
     interpolationDuration = 0
   end
@@ -67,15 +66,15 @@ local setCurrentSlide = function (deck, index, interpolationDuration)
   end
 end
 
-local goToNextSlide = function (deck, interpolationDuration)
+function goToNextSlide(deck, interpolationDuration)
   setCurrentSlide(deck, deck.CurrentSlideIndex + 1, interpolationDuration)
 end
 
-local goToPreviousSlide = function (deck, interpolationDuration)
+function goToPreviousSlide(deck, interpolationDuration)
   setCurrentSlide(deck, deck.CurrentSlideIndex - 1, interpolationDuration)
 end
 
-local toggleSlides = function (deck, interpolationDuration)
+function toggleSlides(deck, interpolationDuration)
   deck.Visible = not deck.Visible
   if deck.Visible then
     for i, identifier in pairs(deck.SlideIdentifiers) do

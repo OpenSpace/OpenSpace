@@ -1,33 +1,32 @@
-local propertyHelper = asset.require("util/property_helper")
-local transforms = asset.require("scene/solarsystem/sun/transforms_heliosphere")
-local rot = asset.require("./carringtonToHEEQRotation.asset")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+local transformsHelio = asset.require("scene/solarsystem/heliosphere/transforms_heliosphere")
 
-local TexturesPathEquatorial = asset.syncedResource({
+
+
+local TexturesPathEquatorial = asset.resource({
 Type = "HttpSynchronization",
   Name = "cutplanes_textures",
   Identifier = "cutplanes_textures",
   Version = 1
 })
 
-local TexturesPathMeridial = asset.syncedResource({
+local TexturesPathMeridial = asset.resource({
   Type = "HttpSynchronization",
   Name = "cutplane_meridial_textures",
   Identifier = "cutplane_meridial_textures",
   Version = 1
 })
 
+
 local EquatorialCutplane = {
   Identifier = "EquatorialCutplane-bastille-day-2000",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = transforms.SunIAU.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
   InteractionSphere = 695700000.0,
-  Transform = {
-    Rotation = rot.CarringtonLongitudeToHEEQ180Rotation
-  },
   Renderable = {
     Type = "RenderablePlaneTimeVaryingImage",
-    Size = 1.57E11,
+    Size = 157000000000,
     Enabled = true,
     SourceFolder = TexturesPathEquatorial,
     BlendMode = "Normal",
@@ -35,15 +34,17 @@ local EquatorialCutplane = {
     Opacity = 0.7
   },
   GUI = {
-    Name = "Cutplane Equitorial",
+    Name = "Cutplane Equatorial",
     Path = "/Solar System/Heliosphere/Bastille Day 2000",
-    Description = "Equatorial cutplane sequence for the bastille day CME event. This asset contains data from 2000-07-14 08:38 to 2000-07-14 12:00"
+    Focusable = false,
+    Description = [[Equatorial cutplane sequence for the bastille day CME event. This
+      asset contains data from 2000-07-14 08:38 to 2000-07-14 12:00]]
   }
 }
 
 local MeridialCutplane = {
   Identifier = "MeridialCutplane-bastille-day-2000",
-  Parent = transforms.HEEQ180ReferenceFrame.Identifier,
+  Parent = transformsHelio.HeliocentricEarthEquatorial180.Identifier,
   -- TODO Elon: 21 April 2022. Interaction sphere should not depend on the transform scale.
   -- InteractionSphere = sunAsset.Sun.Renderable.Radii[1] * 1.05,
   InteractionSphere = 695700000,
@@ -55,7 +56,7 @@ local MeridialCutplane = {
   },
   Renderable = {
     Type = "RenderablePlaneTimeVaryingImage",
-    Size = 1.57E11,
+    Size = 157000000000,
     Enabled = true,
     SourceFolder = TexturesPathMeridial,
     BlendMode = "Normal",
@@ -65,48 +66,58 @@ local MeridialCutplane = {
   GUI = {
     Name = "Cutplane Meridial",
     Path = "/Solar System/Heliosphere/Bastille Day 2000",
-    Description = "Meridial cutplane sequence for the bastille day CME event. This asset contains data from 2000-07-14 08:38 to 2000-07-14 12:00"
+    Focusable = false,
+    Description = [[Meridial cutplane sequence for the bastille day CME event. This asset
+      contains data from 2000-07-14 08:38 to 2000-07-14 12:00]]
   }
 }
 
-local toggle_equatorial = {
-  Identifier = "os.events.bastilleday.fluxnodescutplane.toggleequatorial",
+local ToggleEquatorial = {
+  Identifier = "os.bastilleday.fluxnodescutplane.ToggleEquatorial",
   Name = "Toggle equatorial cutplane",
-  Command = propertyHelper.invert("Scene.EquatorialCutplane-bastille-day-2000.Renderable.Enabled"),
+  Command = [[
+    openspace.toggleFade("Scene.EquatorialCutplane-bastille-day-2000.Renderable")
+  ]],
   Documentation = "Toggle equatorial cutplane of CME",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
 }
-local toggle_meridial = {
-  Identifier = "os.events.bastilleday.fluxnodescutplane.togglemeridial",
+
+local ToggleMeridial = {
+  Identifier = "os.bastilleday.fluxnodescutplane.ToggleMeridial",
   Name = "Toggle meridial cutplane",
-  Command = propertyHelper.invert("Scene.MeridialCutplane-bastille-day-2000.Renderable.Enabled"),
+  Command = [[
+    openspace.toggleFade("Scene.MeridialCutplane-bastille-day-2000.Renderable")
+  ]],
   Documentation = "Toggle meridial cutplane of CME",
   GuiPath = "/Bastille-Day 2000",
   IsLocal = false
 }
 
-asset.onInitialize(function ()
-  openspace.action.registerAction(toggle_equatorial)
-  openspace.action.registerAction(toggle_meridial)
+
+asset.onInitialize(function()
+  openspace.action.registerAction(ToggleEquatorial)
+  openspace.action.registerAction(ToggleMeridial)
   openspace.addSceneGraphNode(EquatorialCutplane)
   openspace.addSceneGraphNode(MeridialCutplane)
 end)
 
-asset.onDeinitialize(function ()
+asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MeridialCutplane)
   openspace.removeSceneGraphNode(EquatorialCutplane)
-  openspace.action.removeAction(toggle_equatorial)
-  openspace.action.removeAction(toggle_meridial)
+  openspace.action.removeAction(ToggleEquatorial)
+  openspace.action.removeAction(ToggleMeridial)
 end)
 
+asset.export("ToggleEquatorial", ToggleEquatorial.Identifier)
+asset.export("ToggleMeridial", ToggleMeridial.Identifier)
 asset.export(EquatorialCutplane)
 asset.export(MeridialCutplane)
 
 
+
 asset.meta = {
   Name = "Predictive Science Inc. Cutplanes Bastille Days",
-  Version = "1.1",
   Description = "Cutplanes for the bastille day CME event",
   Author = "CCMC, Christian Adamsson, Emilie Ho",
   URL = "https://dx.doi.org/10.3847/1538-4357/aab36d",

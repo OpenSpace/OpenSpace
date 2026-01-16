@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,28 +29,16 @@
 
 #include <modules/spacecraftinstruments/util/image.h>
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/uniformcache.h>
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <memory>
 
 namespace ghoul::modelgeometry { class ModelGeometry; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
-struct RenderData;
-struct UpdateData;
-
 class RenderableModelProjection : public Renderable {
 public:
-    RenderableModelProjection(const ghoul::Dictionary& dictionary);
+    explicit RenderableModelProjection(const ghoul::Dictionary& dictionary);
     ~RenderableModelProjection() override;
 
     void initializeGL() override;
@@ -80,10 +68,13 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
     UniformCache(projectionTexture, depthTexture, needShadowMap, ProjectorMatrix,
         ModelTransform, boresight) _fboUniformCache;
+
     std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;
     UniformCache(ProjectorMatrix, ModelTransform) _depthFboUniformCache;
 
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
+    double _modelScale = 1.0;
+    bool _invertModelScale = false;
 
     glm::dmat3 _instrumentMatrix = glm::dmat3(1.0);
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,19 +25,15 @@
 #include <modules/base/dashboard/dashboarditemtext.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/engine/globals.h>
-#include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/misc/profiling.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextInfo = {
         "Text",
         "Text",
-        "The text to be displayed"
+        "The text to be displayed.",
+        openspace::properties::Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(DashboardItemText)]] Parameters {
@@ -65,17 +61,8 @@ DashboardItemText::DashboardItemText(const ghoul::Dictionary& dictionary)
     addProperty(_text);
 }
 
-void DashboardItemText::render(glm::vec2& penPosition) {
-    ZoneScoped;
-
-    RenderFont(*_font, penPosition, _text.value());
-    penPosition.y -= _font->height();
-}
-
-glm::vec2 DashboardItemText::size() const {
-    ZoneScoped;
-
-    return _font->boundingBox(_text.value());
+void DashboardItemText::update() {
+    _buffer = _text.value();
 }
 
 } // namespace openspace

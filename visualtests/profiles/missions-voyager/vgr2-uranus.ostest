@@ -1,0 +1,37 @@
+{
+  "profile": "missions/voyager",
+  "commands": [
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Voyager_2",
+        "position": [
+          -4.359452727218082,
+          -3.040351894077846,
+          -17.149335009602495
+        ],
+        "pitch": -1.5336505447828446e-06,
+        "up": [
+          -0.7917015523643336,
+          0.6035946171720363,
+          0.09424537179536709
+        ],
+        "timestamp": "1986 JAN 24 11:00:59"
+      }
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.StereoscopicDepthOfFocusSurface",
+        "value": 5.0
+      }
+    },
+    {
+      "type": "wait",
+      "value": 15
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

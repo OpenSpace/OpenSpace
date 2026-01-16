@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,6 +23,10 @@
  ****************************************************************************************/
 
 #include "profile/assettreeitem.h"
+
+#include <algorithm>
+#include <iterator>
+#include <utility>
 
 AssetTreeItem::AssetTreeItem(std::vector<QVariant> data, AssetTreeItem* parentItem)
     : _itemData(std::move(data))
@@ -120,9 +124,9 @@ bool AssetTreeItem::insertChildren(int position, int count, int columns) {
         return false;
     }
 
-    for (int row = 0; row < count; ++row) {
-        std::vector<QVariant> data(columns);
-        AssetTreeItem*item = new AssetTreeItem(data, this);
+    for (int row = 0; row < count; row++) {
+        std::vector<QVariant> data = std::vector<QVariant>(columns);
+        AssetTreeItem* item = new AssetTreeItem(std::move(data), this);
         _childItems.insert(_childItems.begin() + position, item);
     }
 
@@ -134,7 +138,7 @@ bool AssetTreeItem::removeChildren(int position, int count) {
         return false;
     }
 
-    for (int row = 0; row < count; ++row) {
+    for (int row = 0; row < count; row++) {
         delete _childItems[position];
         _childItems.erase(_childItems.begin() + position);
     }
@@ -147,11 +151,11 @@ bool AssetTreeItem::insertColumns(int position, int columns) {
         return false;
     }
 
-    for (int column = 0; column < columns; ++column) {
+    for (int column = 0; column < columns; column++) {
         _itemData.insert(_itemData.begin() + position, QVariant());
     }
 
-    for (AssetTreeItem* child : qAsConst(_childItems)) {
+    for (AssetTreeItem* child : _childItems) {
         child->insertColumns(position, columns);
     }
 

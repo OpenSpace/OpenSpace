@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,66 +28,57 @@
 #include <QDialog>
 
 #include <sgct/config.h>
-#include <QColor>
-#include <array>
 #include <filesystem>
 #include <string>
 
 class DisplayWindowUnion;
-class SettingsWidget;
-class QBoxLayout;
+class QCheckBox;
+class QComboBox;
+class QLineEdit;
 class QWidget;
+
+const sgct::config::GeneratorVersion VersionMin { "SgctWindowConfig", 1, 1 };
+const sgct::config::GeneratorVersion VersionLegacy18 { "OpenSpace", 0, 18 };
+const sgct::config::GeneratorVersion VersionLegacy19 { "OpenSpace", 0, 19 };
 
 class SgctEdit final : public QDialog {
 Q_OBJECT
 public:
     /**
      * Constructor for SgctEdit class, the underlying class for the full window
-     * configuration editor
+     * configuration editor. Used when editing an existing config.
      *
-     * \param parent The Qt QWidget parent object
-     * \param userConfigPath A string containing the file path of the user config
-     *                       directory where all window configs are stored
+     * \param cluster The #sgct::config::Cluster object containing all data of the
+     *                imported window cluster configuration.
+     * \param configName The name of the window configuration filename
+     * \param configBasePath The path to the folder where default config files reside
+     * \param parent Pointer to parent Qt widget
      */
-    SgctEdit(QWidget* parent, std::string userConfigPath);
+    SgctEdit(sgct::config::Cluster cluster, std::string configName,
+        std::filesystem::path configBasePath, QWidget* parent);
 
     /**
-     * Returns the saved filename
+     * Returns the saved filename.
      *
-     * \return saved filename in std::string
+     * \return The saved filename in std::string
      */
     std::filesystem::path saveFilename() const;
 
-    /**
-     * Returns the generated Cluster object.
-     * 
-     * \return The generated Cluster object
-     */
-    sgct::config::Cluster cluster() const;
-
 private:
-    void createWidgets(const std::vector<QRect>& monitorSizes);
-    sgct::config::Cluster generateConfiguration() const;
-
-    void save();
+    void saveCluster();
     void apply();
 
     DisplayWindowUnion* _displayWidget = nullptr;
-    SettingsWidget* _settingsWidget = nullptr;
-    sgct::config::Cluster _cluster;
-    const std::string _userConfigPath;
-    const std::array<QColor, 4> _colorsForWindows = {
-        QColor(0x2B, 0x9E, 0xC3),
-        QColor(0xFC, 0xAB, 0x10),
-        QColor(0x44, 0xAF, 0x69),
-        QColor(0xF8, 0x33, 0x3C)
-    };
 
-    QBoxLayout* _layoutButtonBox = nullptr;
-    QPushButton* _saveButton = nullptr;
-    QPushButton* _cancelButton = nullptr;
-    QPushButton* _applyButton = nullptr;
-    std::string _saveTarget;
+    QCheckBox* _checkBoxVsync = nullptr;
+    QLineEdit* _linePitch = nullptr;
+    QLineEdit* _lineRoll = nullptr;
+    QLineEdit* _lineYaw = nullptr;
+
+    sgct::config::Cluster _cluster;
+    const std::filesystem::path _userConfigPath;
+
+    std::string _configurationFilename;
 };
 
 #endif // __OPENSPACE_UI_LAUNCHER___SGCTEDIT___H__

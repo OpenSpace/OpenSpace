@@ -1,0 +1,16 @@
+-- Basic
+-- This example adds a dashboard item that shows the position of the camera relative to
+-- the focus node, if that focus node is a globe.
+
+local Item = {
+  Identifier = "DashboardItemGlobeLocation_Example",
+  Type = "DashboardItemGlobeLocation"
+}
+
+asset.onInitialize(function()
+  openspace.dashboard.addDashboardItem(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.dashboard.removeDashboardItem(Item)
+end)

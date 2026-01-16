@@ -4,7 +4,28 @@ local bookmarkHelper = asset.require("util/generate_bookmarks")
 -- ensure that it is loaded first
 asset.require("scene/solarsystem/planets/earth/earth")
 
-local nodes = bookmarkHelper.getBookmarks("Local Bookmarks", "${ASSETS}/customization/localbookmarks.csv")
+
+
+local localBookmarks = openspace.absPath("${USER}/bookmarks/localbookmarks.csv")
+local bookmarksDirectory = openspace.absPath("${USER}/bookmarks")
+
+if not openspace.directoryExists(bookmarksDirectory) then
+  openspace.createDirectory(bookmarksDirectory)
+end
+
+-- Create bookmarks file if it does not exist
+if not openspace.fileExists(localBookmarks) then
+  openspace.downloadFile(
+    "http://liu-se.cdn.openspaceproject.com/files/misc/localbookmarks.csv",
+    openspace.absPath("${USER}/bookmarks/localbookmarks.csv"),
+    true
+  )
+end
+
+local nodes = bookmarkHelper.loadBookmarks(
+  "Local Bookmarks",
+  "${USER}/bookmarks/localbookmarks.csv"
+)
 
 
 asset.onInitialize(function()

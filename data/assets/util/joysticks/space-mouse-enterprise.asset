@@ -1,5 +1,6 @@
-local propertyHelper = asset.require("../property_helper")
 local joystickHelper = asset.require("./joystick_helper")
+
+
 
 -- Allowed values for the third parameter of bindJoystickAxis:
 -- "None"
@@ -8,10 +9,8 @@ local joystickHelper = asset.require("./joystick_helper")
 -- "Zoom" -- both in and out
 -- "Zoom In"
 -- "Zoom Out"
--- "LocalRoll X"
--- "LocalRoll Y"
--- "GlobalRoll X"
--- "GlobalRoll Y"
+-- "LocalRoll"
+-- "GlobalRoll"
 -- "Pan X"
 -- "Pan Y"
 -- Fourth parameter determines whether the axis should be inverted
@@ -22,33 +21,54 @@ local joystickHelper = asset.require("./joystick_helper")
 --       stay at the value it was before the joystick was released.
 --       The latter is called a sticky axis, when the values don't go back to 0.
 --       This version of the SpaceMouse is NOT Sticky.
--- Seventh parameter is the sensitivity for the axis
+-- Seventh parameter can be used to reverse the camera movement for the axis
+-- Eighth parameter is the sensitivity for the axis
 
 local SpaceMouse = {
-  Push = {0, 1, 2}, -- left/right, back/forth, up/down
-  Twist = {5}, -- left/right
-  Tilt = {4, 3}, -- left/right, back/forth
+  -- Axes
+  Push = {
+    LeftRight = 0,
+    BackForth = 1,
+    UpDown = 2
+  },
+  Twist = 5,
+  Tilt = {
+    LeftRight = 4,
+    BackForth = 3
+  }
 
   -- Buttons on the Enterprise version of the SpaceMouse is not detectable, use regular
-  -- keybindings instead, for more information see our wiki page.
+  -- keybindings instead, for more information see our wiki page
+  -- http://wiki.openspaceproject.com/docs/users/navigation/joysticks.html.
 }
 
+
 asset.onInitialize(function()
-  local controller = SpaceMouse;
-  local name = "SpaceMouse Enterprise";
+  local controller = SpaceMouse
+  local name = "SpaceMouse Enterprise"
 
   local deadzone = 0.15
-  openspace.navigation.setAxisDeadZone(name, controller.Push[1], deadzone)
-  openspace.navigation.setAxisDeadZone(name, controller.Push[2], deadzone)
-  openspace.navigation.setAxisDeadZone(name, controller.Twist[1], deadzone)
-  openspace.navigation.setAxisDeadZone(name, controller.Tilt[2], deadzone)
-  openspace.navigation.setAxisDeadZone(name, controller.Push[3], deadzone)
-  openspace.navigation.setAxisDeadZone(name, controller.Tilt[1], deadzone)
+  openspace.navigation.setAxisDeadZone(name, controller.Push.LeftRight, deadzone)
+  openspace.navigation.setAxisDeadZone(name, controller.Push.BackForth, deadzone)
+  openspace.navigation.setAxisDeadZone(name, controller.Twist, deadzone)
+  openspace.navigation.setAxisDeadZone(name, controller.Tilt.BackForth, deadzone)
+  openspace.navigation.setAxisDeadZone(name, controller.Push.UpDown, deadzone)
+  openspace.navigation.setAxisDeadZone(name, controller.Tilt.LeftRight, deadzone)
 
-  openspace.navigation.bindJoystickAxis(name, controller.Push[1], "Orbit X");
-  openspace.navigation.bindJoystickAxis(name, controller.Push[2], "Orbit Y");
-  openspace.navigation.bindJoystickAxis(name, controller.Twist[1], "Pan X", true);
-  openspace.navigation.bindJoystickAxis(name, controller.Tilt[2], "Pan Y");
-  openspace.navigation.bindJoystickAxis(name, controller.Push[3], "Zoom");
-  openspace.navigation.bindJoystickAxis(name, controller.Tilt[1], "LocalRoll X");
+  openspace.navigation.bindJoystickAxis(name, controller.Push.LeftRight, "Orbit X")
+  openspace.navigation.bindJoystickAxis(name, controller.Push.BackForth, "Orbit Y")
+  openspace.navigation.bindJoystickAxis(name, controller.Twist, "Pan X", true)
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt.BackForth, "Pan Y")
+  openspace.navigation.bindJoystickAxis(name, controller.Push.UpDown, "Zoom")
+  openspace.navigation.bindJoystickAxis(name, controller.Tilt.LeftRight, "LocalRoll")
 end)
+
+
+
+asset.meta = {
+  Name = "Joystick controller: SpaceMouse enterprise (wired)",
+  Description = "Joystick controller configuration for SpaceMouse enterprise (wired)",
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

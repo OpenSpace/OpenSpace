@@ -1,0 +1,69 @@
+local AddSunTrail = {
+  Identifier = "os.nightsky.AddSunTrail",
+  Name = "Add sun trail",
+  Command = [[
+    local date
+    if is_declared("args") then
+      if (args.Date == "NOW") then
+        date = openspace.time.currentWallTime()
+      elseif (args.Date == "UTC") then
+        date = openspace.time.UTC()
+      else
+        date = args.Date
+      end
+    else
+      date = openspace.time.UTC()
+    end
+
+    dateSub = string.sub(date, 1, string.find(date, "T") - 1)
+    date = dateSub .. "T00:00:00Z"
+    local datePlus = dateSub .. "T23:59:59Z"
+
+    local SunTrailEarth = {
+      Identifier = "SunTrailEarth" .. dateSub,
+      Parent = "Earth",
+      Renderable = {
+        Type = "RenderableTrailTrajectory",
+        Translation = {
+          Type = "SpiceTranslation",
+          Target = "SUN",
+          Observer = "EARTH",
+          Frame = "IAU_EARTH",
+        },
+        EnableFade = false,
+        StartTime = date,
+        EndTime = datePlus,
+        SampleInterval = 1000,
+        ShowFullTrail = true,
+        Color = { 0.9, 1.0, 0.0 },
+      },
+      Tag = { "sun_trail" },
+      GUI = {
+        Name = "Sun Trail " .. dateSub,
+        Path = "/Night Sky/Sun Trails",
+      }
+    }
+
+    if not openspace.hasSceneGraphNode(SunTrailEarth.Identifier) then
+      openspace.addSceneGraphNode(SunTrailEarth)
+    else
+      openspace.printWarning("Sun trail for date " .. dateSub .. " already exists.")
+    end
+  ]],
+  Documentation = [[
+    Adds a trail for the sun, if an argument is provided, that date will be used instead of now
+  ]],
+  GuiPath = "/Night Sky/Sun Trails",
+  IsLocal = false
+}
+
+
+asset.onInitialize(function()
+  openspace.action.registerAction(AddSunTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.action.removeAction(AddSunTrail)
+end)
+
+asset.export("AddSunTrail", AddSunTrail.Identifier)

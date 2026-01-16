@@ -1,25 +1,26 @@
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Apogee Speck Files",
   Type = "HttpSynchronization",
   Identifier = "gaia_apogee",
   Version = 1
 })
 
-local colormaps = asset.syncedResource({
+local colormaps = asset.resource({
   Name = "Stars Color Table",
   Type = "HttpSynchronization",
   Identifier = "stars_colormap",
   Version = 3
 })
 
-local textures = asset.syncedResource({
+local textures = asset.resource({
   Name = "Stars Textures",
   Type = "HttpSynchronization",
   Identifier = "stars_textures",
   Version = 1
 })
 
-local gaia_abundance_apogee = {
+
+local GaiaAbundanceApogee = {
   Identifier = "GaiaAbundanceApogee",
   Renderable = {
     Type = "RenderableStars",
@@ -29,8 +30,9 @@ local gaia_abundance_apogee = {
     OtherData = "FeH",
     MagnitudeExponent = 7.25,
     SizeComposition = "Distance Modulus",
-    RenderMethod = "Texture Based",
-    Texture = textures .. "halo.png",
+    Glare = {
+      Texture = textures .. "halo.png"
+    },
     ColorRange = { { -0.8, 0.6 } },
     -- ShapeTexture = textures .. "disc.png",
     ColorMap = colormaps .. "colorbv.cmap",
@@ -51,25 +53,26 @@ local gaia_abundance_apogee = {
   GUI = {
     Path = "/Milky Way/Gaia",
     Name = "Gaia Abundance Apogee",
+    Focusable = false,
     Description = "Data set of stars color coded by metallicity"
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(gaia_abundance_apogee)
+  openspace.addSceneGraphNode(GaiaAbundanceApogee)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(gaia_abundance_apogee)
+  openspace.removeSceneGraphNode(GaiaAbundanceApogee)
 end)
 
-asset.export(gaia_abundance_apogee)
+asset.export(GaiaAbundanceApogee)
 
 
 
 asset.meta = {
   Name = "Gaia Abundance Apogee",
-  Version = "1.0",
   Description = "This asset contains a RenderableStars dataset with metallicity data",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

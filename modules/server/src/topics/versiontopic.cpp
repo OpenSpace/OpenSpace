@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,10 +31,6 @@
 #include <openspace/util/versionchecker.h>
 
 namespace openspace {
-
-bool VersionTopic::isDone() const {
-    return true;
-}
 
 void VersionTopic::handleJson(const nlohmann::json&) {
     nlohmann::json versionJson = {
@@ -68,6 +64,10 @@ void VersionTopic::handleJson(const nlohmann::json&) {
     }
 
     _connection->sendJson(wrappedPayload(versionJson));
+}
+
+bool VersionTopic::isDone() const {
+    return true;
 }
 
 } // namespace openspace

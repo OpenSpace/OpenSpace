@@ -1,0 +1,38 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablepointcloud/advanced/pointcloud_datamapping.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "Scene.RenderablePointCloud_Example_DataMapping.Renderable.Sizing.ScaleFactor",
+        "value": 5.0
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Root",
+        "position": [
+          1.1597384597471084e+18,
+          -7.844861498540243e+17,
+          8.240322603461533e+18
+        ],
+        "pitch": 0.007151529211622581,
+        "up": [
+          -0.988253688126433,
+          0.05126593565499182,
+          0.14396684252257935
+        ],
+        "yaw": -0.00398236742276883,
+        "timestamp": "2025 AUG 30 12:47:23"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

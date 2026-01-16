@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -46,7 +46,7 @@ namespace {
         return o << key.x << ", " << key.y;
     }
 
-    // custom specialization 
+    // custom specialization
     struct DefaultHasherMyKey {
         unsigned long long operator()(const MyKey& s) const {
             return s.x ^ (s.y << 1);

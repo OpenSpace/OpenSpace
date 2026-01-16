@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <modules/imgui/include/guiactioncomponent.h>
+#include <modules/imgui/include/guicomponent.h>
 #include <modules/imgui/include/guifilepathcomponent.h>
 #include <modules/imgui/include/guigibscomponent.h>
 #include <modules/imgui/include/guiglobebrowsingcomponent.h>
@@ -38,6 +39,7 @@
 #include <modules/imgui/include/guiparallelcomponent.h>
 #include <modules/imgui/include/guipropertycomponent.h>
 #include <modules/imgui/include/guiscenecomponent.h>
+#include <modules/imgui/include/guishadowcomponent.h>
 #include <modules/imgui/include/guispacetimecomponent.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -46,9 +48,11 @@
 #include <openspace/util/touch.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/uniformcache.h>
 #include <array>
+#include <cstdint>
+#include <memory>
 
 struct ImGuiContext;
 
@@ -93,6 +97,7 @@ private:
     gui::GuiMissionComponent _mission;
     gui::GuiMemoryComponent _memoryComponent;
     gui::GuiSceneComponent _sceneView;
+    gui::GuiShadowComponent _shadowComponent;
     gui::GuiFilePathComponent _filePath;
     gui::GuiHelpComponent _help;
 
@@ -100,7 +105,7 @@ private:
     properties::FloatProperty _helpTextDelay;
 
     // The ordering of this array determines the order of components in the in-game menu
-    static constexpr int nComponents = 13;
+    static constexpr int nComponents = 14;
     std::array<gui::GuiComponent*, nComponents> _components = {
         &_sceneProperty,
         &_property,
@@ -113,6 +118,7 @@ private:
         &_mission,
         &_memoryComponent,
         &_sceneView,
+        &_shadowComponent,
         &_filePath,
         &_help
     };
@@ -120,6 +126,7 @@ private:
     GLuint vao = 0;
     GLuint vbo = 0;
     GLuint vboElements = 0;
+    bool _hasContext = false;
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(tex, ortho) _uniformCache;
     std::unique_ptr<ghoul::opengl::Texture> _fontTexture;

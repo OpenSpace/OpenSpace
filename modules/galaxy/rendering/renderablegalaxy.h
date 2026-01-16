@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,20 +27,19 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/properties/optionproperty.h>
+#include <ghoul/glm.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-
-namespace ghoul::opengl { class ProgramObject; }
+#include <filesystem>
+#include <memory>
 
 namespace openspace {
 
 namespace volume { template <typename T> class RawVolume; }
-
 class GalaxyRaycaster;
-struct RenderData;
 
 class RenderableGalaxy : public Renderable {
 public:
@@ -84,10 +83,11 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
     std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
 
-    std::string _volumeFilename;
+    std::filesystem::path _volumeFilename;
     glm::ivec3 _volumeDimensions = glm::ivec3(0);
-    std::string _pointsFilename;
-    std::string _pointSpreadFunctionTexturePath;
+    std::filesystem::path _pointsFilename;
+    std::filesystem::path _pointSpreadFunctionTexturePath;
+    std::filesystem::path _raycastingShader;
 
     std::unique_ptr<GalaxyRaycaster> _raycaster;
     std::unique_ptr<volume::RawVolume<glm::tvec4<GLubyte>>> _volume;
@@ -99,12 +99,10 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _pointsProgram;
     std::unique_ptr<ghoul::opengl::ProgramObject> _billboardsProgram;
     UniformCache(
-        modelMatrix, cameraViewProjectionMatrix, eyePosition,
-        opacityCoefficient
+        modelMatrix, viewProjectionMatrix, eyePosition, opacityCoefficient
     ) _uniformCachePoints;
     UniformCache(
-        modelMatrix, cameraViewProjectionMatrix,
-        cameraUp, eyePosition, psfTexture
+        modelMatrix, viewProjectionMatrix, cameraUp, eyePosition, psfTexture
     ) _uniformCacheBillboards;
     std::vector<float> _pointsData;
     size_t _nPoints = 0;

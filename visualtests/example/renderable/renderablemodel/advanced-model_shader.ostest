@@ -1,0 +1,36 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/renderable/renderablemodel/advanced/model_shader.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "Root",
+        "position": [
+          1.2920014356651963,
+          1.199386656952609,
+          1.3523478842471102
+        ],
+        "up": [
+          -0.38231583249387135,
+          0.8417129797960237,
+          -0.3812530181748292
+        ],
+        "timestamp": "2025 AUG 30 12:32:46"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

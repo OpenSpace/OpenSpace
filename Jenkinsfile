@@ -12,25 +12,13 @@ if (env.CHANGE_BRANCH) {
   branch = env.CHANGE_BRANCH;
 }
 
-@NonCPS
-def readDir() {
-  def dirsl = [];
-  new File("${workspace}").eachDir() {
-    dirs -> println dirs.getName() 
-    if (!dirs.getName().startsWith('.')) {
-      dirsl.add(dirs.getName());
-    }
-  }
-  return dirs;
-}
-
 def moduleCMakeFlags() {
   def modules = [];
   // using new File doesn't work as it is not allowed in the sandbox
-  
+
   if (isUnix()) {
      modules = sh(returnStdout: true, script: 'ls -d modules/*').trim().split('\n');
-  };
+  }
   else {
     modules = bat(returnStdout: true, script: '@dir modules /b /ad /on').trim().split('\r\n');
   }
@@ -51,18 +39,17 @@ parallel tools: {
     stage('tools/scm') {
       deleteDir();
       gitHelper.checkoutGit(url, branch, false);
-      helper.createDirectory('build');
     }
     stage('tools/cppcheck') {
       sh(
-        script: 'cppcheck --enable=all --xml --xml-version=2 -i ext --suppressions-list=support/cppcheck/suppressions.txt include modules src tests 2> build/cppcheck.xml',
+        script: 'cppcheck --enable=all --xml --xml-version=2 -i ext --suppressions-list=support/cppcheck/suppressions.txt include modules src tests 2> cppcheck.xml',
         label: 'CPPCheck'
       )
       recordIssues(
         id: 'tools-cppcheck',
-        tool: cppCheck(pattern: 'build/cppcheck.xml')
-      ) 
-    }  
+        tool: cppCheck(pattern: 'cppcheck.xml')
+      )
+    }
     cleanWs()
   } // node('tools')
 },
@@ -101,7 +88,7 @@ linux_gcc_make: {
             testHelper.runUnitTests('bin/GhoulTest');
           }
         }
-      
+
         stage('linux-gcc-make/test-openspace') {
           timeout(time: 2, unit: 'MINUTES') {
             testHelper.runUnitTests('bin/OpenSpaceTest');
@@ -112,61 +99,61 @@ linux_gcc_make: {
     } // node('linux')
   }
 },
-linux_gcc_ninja: {
-  if (env.USE_BUILD_OS_LINUX == 'true') {
-    node('linux-gcc') {
-      stage('linux-gcc-ninja/scm') {
-        deleteDir();
-        gitHelper.checkoutGit(url, branch);
-      }
-
-      stage('linux-gcc-ninja/build') {
-          def cmakeCompileOptions = moduleCMakeFlags();
-          cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release';
-          // Not sure why the linking of OpenSpaceTest takes so long
-          compileHelper.build(compileHelper.Ninja(), compileHelper.Gcc(), cmakeCompileOptions, '', 'build-ninja');
-      }
-
-      if (env.RUN_UNIT_TESTS == 'true') {
-        stage('linux-gcc-ninja/test-codegen') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/codegentest');
-          }
-        }
-
-        stage('linux-gcc-ninja/test-sgct') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/SGCTTest');
-          }
-        }
-
-        stage('linux-gcc-ninja/test-ghoul') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/GhoulTest');
-          }
-        }
-
-        stage('linux-gcc-ninja/test-openspace') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/OpenSpaceTest');
-          }
-        }
-      }
-      cleanWs()
-    } // node('linux')
-  }
-},
+// linux_gcc_ninja: {
+//   if (env.USE_BUILD_OS_LINUX == 'true') {
+//     node('linux-gcc') {
+//       stage('linux-gcc-ninja/scm') {
+//         deleteDir();
+//         gitHelper.checkoutGit(url, branch);
+//       }
+// 
+//       stage('linux-gcc-ninja/build') {
+//           def cmakeCompileOptions = moduleCMakeFlags();
+//           cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release';
+//           // Not sure why the linking of OpenSpaceTest takes so long
+//           compileHelper.build(compileHelper.Ninja(), compileHelper.Gcc(), cmakeCompileOptions, '', 'build-ninja');
+//       }
+// 
+//       if (env.RUN_UNIT_TESTS == 'true') {
+//         stage('linux-gcc-ninja/test-codegen') {
+//           timeout(time: 2, unit: 'MINUTES') {
+//             testHelper.runUnitTests('bin/codegentest');
+//           }
+//         }
+// 
+//         stage('linux-gcc-ninja/test-sgct') {
+//           timeout(time: 2, unit: 'MINUTES') {
+//             testHelper.runUnitTests('bin/SGCTTest');
+//           }
+//         }
+// 
+//         stage('linux-gcc-ninja/test-ghoul') {
+//           timeout(time: 2, unit: 'MINUTES') {
+//             testHelper.runUnitTests('bin/GhoulTest');
+//           }
+//         }
+// 
+//         stage('linux-gcc-ninja/test-openspace') {
+//           timeout(time: 2, unit: 'MINUTES') {
+//             testHelper.runUnitTests('bin/OpenSpaceTest');
+//           }
+//         }
+//       }
+//       cleanWs()
+//     } // node('linux')
+//   }
+// },
 linux_clang_make: {
   if (env.USE_BUILD_OS_LINUX == 'true') {
     node('linux-clang') {
       stage('linux-clang-make/scm') {
-        deleteDir()
+        deleteDir();
         gitHelper.checkoutGit(url, branch);
       }
 
       stage('linux-clang-make/build') {
           def cmakeCompileOptions = moduleCMakeFlags()
-          cmakeCompileOptions += ' -DMAKE_BUILD_TYPE=Release'
+          cmakeCompileOptions += ' -DCMAKE_BUILD_TYPE=Release'
           // Not sure why the linking of OpenSpaceTest takes so long
           compileHelper.build(compileHelper.Make(), compileHelper.Clang(), cmakeCompileOptions, '', 'build-make');
           compileHelper.recordCompileIssues(compileHelper.Clang());
@@ -201,50 +188,50 @@ linux_clang_make: {
     } // node('linux')
   }
 },
-linux_clang_ninja: {
-  if (env.USE_BUILD_OS_LINUX == 'true') {
-    node('linux-clang') {
-      stage('linux-clang-ninja/scm') {
-        deleteDir()
-        gitHelper.checkoutGit(url, branch);
-      }
-
-      stage('linux-clang-ninja/build') {
-          def cmakeCompileOptions = moduleCMakeFlags()
-          cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release'
-          // Not sure why the linking of OpenSpaceTest takes so long
-          compileHelper.build(compileHelper.Ninja(), compileHelper.Clang(), cmakeCompileOptions, '', 'build-ninja');
-      }
-
-      if (env.RUN_UNIT_TESTS == 'true') {
-        stage('linux-clang-ninja/test-codegen') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/codegentest');
-          }
-        }
-
-        stage('linux-clang-ninja/test-sgct') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/SGCTTest');
-          }
-        }
-
-        stage('linux-clang-ninja/test-ghoul') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/GhoulTest');
-          }
-        }
-
-        stage('linux-clang-ninja/test-openspace') {
-          timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/OpenSpaceTest');
-          }
-        }
-      }
-      cleanWs()
-    } // node('linux')
-  }
-},
+// linux_clang_ninja: {
+//   if (env.USE_BUILD_OS_LINUX == 'true') {
+//     node('linux-clang') {
+//       stage('linux-clang-ninja/scm') {
+//         deleteDir()
+//         gitHelper.checkoutGit(url, branch);
+//       }
+// 
+//       stage('linux-clang-ninja/build') {
+//           def cmakeCompileOptions = moduleCMakeFlags()
+//           cmakeCompileOptions += '-DMAKE_BUILD_TYPE=Release'
+//           // Not sure why the linking of OpenSpaceTest takes so long
+//           compileHelper.build(compileHelper.Ninja(), compileHelper.Clang(), cmakeCompileOptions, '', 'build-ninja');
+//       }
+// 
+//       if (env.RUN_UNIT_TESTS == 'true') {
+//         stage('linux-clang-ninja/test-codegen') {
+//           timeout(time: 2, unit: 'MINUTES') {
+//             testHelper.runUnitTests('bin/codegentest');
+//           }
+//         }
+// 
+//         stage('linux-clang-ninja/test-sgct') {
+//           timeout(time: 2, unit: 'MINUTES') {
+//             testHelper.runUnitTests('bin/SGCTTest');
+//           }
+//         }
+// 
+//         stage('linux-clang-ninja/test-ghoul') {
+//           timeout(time: 2, unit: 'MINUTES') {
+//             testHelper.runUnitTests('bin/GhoulTest');
+//           }
+//         }
+// 
+//         stage('linux-clang-ninja/test-openspace') {
+//           timeout(time: 2, unit: 'MINUTES') {
+//             testHelper.runUnitTests('bin/OpenSpaceTest');
+//           }
+//         }
+//       }
+//       cleanWs()
+//     } // node('linux')
+//   }
+// },
 windows_msvc: {
   if (env.USE_BUILD_OS_WINDOWS == 'true') {
     node('windows') {
@@ -264,7 +251,7 @@ windows_msvc: {
             testHelper.runUnitTests('bin\\Debug\\codegentest');
           }
         }
-      
+
         stage('windows-msvc/test-sgct') {
           timeout(time: 2, unit: 'MINUTES') {
             testHelper.runUnitTests('bin\\Debug\\SGCTTest');
@@ -282,7 +269,7 @@ windows_msvc: {
             testHelper.runUnitTests('bin\\Debug\\OpenSpaceTest');
           }
         }
-      }      
+      }
       cleanWs()
     } // node('windows')
   }
@@ -322,19 +309,19 @@ macos_make: {
       if (env.RUN_UNIT_TESTS == 'true') {
         stage('macos-make/test-codegen') {
           timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug/codegentest');\
+            testHelper.runUnitTests('bin/Debug/codegentest');
           }
         }
 
         stage('macos-make/test-sgct') {
           timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug\\SGCTTest');
+            testHelper.runUnitTests('bin/Debug/SGCTTest');
           }
         }
 
         stage('macos-make/test-ghoul') {
           timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug\\GhoulTest');
+            testHelper.runUnitTests('bin/Debug/GhoulTest');
           }
         }
 
@@ -343,7 +330,7 @@ macos_make: {
             testHelper.runUnitTests('bin/Debug/OpenSpaceTest');
           }
         }
-      }        
+      }
       cleanWs()
     } // node('macos')
   }
@@ -369,13 +356,13 @@ macos_xcode: {
 
         stage('macos-xcode/test-sgct') {
           timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug\\SGCTTest');
+            testHelper.runUnitTests('bin/Debug/SGCTTest');
           }
         }
 
         stage('macos-xcode/test-ghoul') {
           timeout(time: 2, unit: 'MINUTES') {
-            testHelper.runUnitTests('bin/Debug\\GhoulTest');
+            testHelper.runUnitTests('bin/Debug/GhoulTest');
           }
         }
 
@@ -384,7 +371,7 @@ macos_xcode: {
             testHelper.runUnitTests('bin/Debug/OpenSpaceTest');
           }
         }
-      } 
+      }
        cleanWs()
     } // node('macos')
   }

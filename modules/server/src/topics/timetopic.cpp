@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,10 +26,10 @@
 
 #include <modules/server/include/connection.h>
 #include <openspace/engine/globals.h>
-#include <openspace/properties/property.h>
-#include <openspace/query/query.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/profiling.h>
+#include <optional>
+#include <string_view>
 
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
@@ -59,12 +59,8 @@ TimeTopic::~TimeTopic() {
     }
 }
 
-bool TimeTopic::isDone() const {
-    return _isDone;
-}
-
 void TimeTopic::handleJson(const nlohmann::json& json) {
-    std::string event = json.at("event").get<std::string>();
+    const std::string event = json.at("event").get<std::string>();
     if (event == UnsubscribeEvent) {
         _isDone = true;
         return;
@@ -79,7 +75,7 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
     }
 
     _timeCallbackHandle = global::timeManager->addTimeChangeCallback([this]() {
-        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        const auto now = std::chrono::system_clock::now();
         if (now - _lastUpdateTime > TimeUpdateInterval) {
             sendCurrentTime();
         }
@@ -89,7 +85,7 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
         // Throttle by last update,
         // but force update if pause state or target delta changes.
 
-        std::chrono::system_clock::time_point now = std::chrono::system_clock::now();
+        const auto now = std::chrono::system_clock::now();
         const double targetDeltaTime = global::timeManager->targetDeltaTime();
         const bool isPaused = global::timeManager->isPaused();
         const bool forceUpdate =
@@ -110,7 +106,11 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
     );
 }
 
-const json TimeTopic::getNextPrevDeltaTimeStepJson() {
+bool TimeTopic::isDone() const {
+    return _isDone;
+}
+
+json TimeTopic::getNextPrevDeltaTimeStepJson() {
     const std::optional<double> nextStep = global::timeManager->nextDeltaTimeStep();
     const std::optional<double> prevStep = global::timeManager->previousDeltaTimeStep();
     const bool hasNext = nextStep.has_value();

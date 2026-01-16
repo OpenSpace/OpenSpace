@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,20 +27,13 @@
 
 #include <openspace/rendering/volumeraycaster.h>
 
-#include <openspace/util/boxgeometry.h>
 #include <modules/volume/volumegridtype.h>
+#include <openspace/util/boxgeometry.h>
+#include <memory>
 
-namespace ghoul::opengl {
-    class Texture;
-    class ProgramObject;
-    class TextureUnit;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class TextureUnit; }
 
-namespace openspace {
-    struct RenderData;
-    struct RaycastData;
-    class TransferFunction;
-} // namespace openspace
+namespace openspace { class TransferFunction; }
 
 namespace openspace::volume {
 
@@ -68,10 +61,10 @@ public:
         ghoul::opengl::ProgramObject& program) override;
     bool isCameraInside(const RenderData& data, glm::vec3& localPosition) override;
 
-    std::string boundsVertexShaderPath() const override;
-    std::string boundsFragmentShaderPath() const override;
-    std::string raycasterPath() const override;
-    std::string helperPath() const override;
+    std::filesystem::path boundsVertexShaderPath() const override;
+    std::filesystem::path boundsFragmentShaderPath() const override;
+    std::filesystem::path raycasterPath() const override;
+    std::filesystem::path helperPath() const override;
 
 
     void setVolumeTexture(std::shared_ptr<ghoul::opengl::Texture> texture);
@@ -85,7 +78,7 @@ public:
     float rNormalization() const;
     void setRNormalization(float rNormalization);
     float rUpperBound() const;
-    void setRUpperBound(float rNormalization);
+    void setRUpperBound(float rUpperBound);
     VolumeGridType gridType() const;
     void setGridType(VolumeGridType gridType);
     void setModelTransform(glm::mat4 transform);
@@ -97,7 +90,7 @@ private:
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
     std::shared_ptr<openspace::TransferFunction> _transferFunction;
     BoxGeometry _boundingBox;
-    VolumeGridType _gridType;
+    VolumeGridType _gridType = VolumeGridType::Cartesian;
     glm::mat4 _modelTransform = glm::mat4(1.f);
     float _brightness = 1.f;
     float _rNormalization = 0.f;

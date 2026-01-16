@@ -1,0 +1,39 @@
+{
+  "profile": "empty",
+  "commands": [
+    {
+      "type": "asset",
+      "value": "examples/translation/statictranslation/static_timeframe.asset"
+    },
+    {
+      "type": "property",
+      "value": {
+        "property": "NavigationHandler.OrbitalNavigator.LimitZoom.EnableMinimumAllowedDistance",
+        "value": false
+      }
+    },
+    {
+      "type": "navigationstate",
+      "value": {
+        "anchor": "StaticTranslation_TimeFrame",
+        "position": [
+          1.4505755930791184,
+          2.24946192456747,
+          1.8363560905554444
+        ],
+        "pitch": 0.006775542157272766,
+        "referenceFrame": "Root",
+        "up": [
+          -0.716242751116924,
+          0.6560592078287665,
+          -0.2378710518233595
+        ],
+        "yaw": 0.004073452731568117,
+        "timestamp": "2001 JUL 13 13:54:28"
+      }
+    },
+    {
+      "type": "screenshot"
+    }
+  ]
+}

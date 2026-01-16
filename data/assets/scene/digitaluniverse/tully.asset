@@ -1,134 +1,140 @@
-local textures = asset.syncedResource({
+local transforms = asset.require("./transforms")
+
+
+
+local textures = asset.resource({
   Name = "Tully Textures",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_tully_textures",
   Version = 3
 })
 
-local speck = asset.syncedResource({
+local speck = asset.resource({
   Name = "Tully Speck Files",
   Type = "HttpSynchronization",
   Identifier = "digitaluniverse_tully_speck",
-  Version = 2
+  Version = 4
 })
 
-local tullyPoints = {
+
+local TullyGalaxies = {
   Identifier = "TullyGalaxies",
   Renderable = {
-    Type = "RenderableBillboardsCloud",
+    Type = "RenderablePointCloud",
     Enabled = true,
     Labels = {
       File = speck .. "tully.label",
       Color = { 0.7, 0.7, 0.7 },
       Size = 19.36,
       MinMaxSize = { 8, 20 },
-      Unit = "Mpc"
+      Unit = "Mpc",
+      TransformationMatrix = transforms.Supergalactic
     },
-    Color = { 1.0, 0.4, 0.2 },
     Opacity = 0.99,
-    ScaleFactor = 504.0,
     File = speck .. "tully.speck",
-    Texture = textures .. "point3A.png",
-    --ColorMap = speck .. "tully.cmap",
-    ColorMap = speck .. "lss.cmap",
-    --ColorOption = { "proximity" },
-    ColorOption = { "prox5Mpc" },
-    ColorRange = { { 1.0, 30.0 } },
-    DrawLabels = false,
-    Unit = "Mpc",
-    TransformationMatrix = {
-      -0.7357425748,    0.67726129641,  0.0,           0.0,
-      -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-      0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-      0.0,              0.0,            0.0,           1.0
+    SkipFirstDataPoint = true,
+    Texture = {
+      File = textures .. "point3A.png"
     },
-    FadeInDistances = { 0.001, 1.0 }, -- Fade in value in the same unit as "Unit"
-    BillboardMinMaxSize = { 0.0, 7.0 }, -- in pixels
-    --CorrectionSizeEndDistance = 22.0,
-    --CorrectionSizeFactor = 10.45
-    EnablePixelSizeControl = true
+    Coloring = {
+      FixedColor = { 1.0, 0.4, 0.2 },
+      ColorMapping = {
+        File = speck .. "lss.cmap",
+        ParameterOptions = {
+          { Key = "prox5Mpc", Range = { 1.0, 30.0 } }
+        }
+      }
+    },
+    Unit = "Mpc",
+    TransformationMatrix = transforms.Supergalactic,
+    Fading = {
+      FadeInDistances = { 0.001, 1.0 } -- Fade in value in the same unit as "Unit"
+    },
+    SizeSettings = {
+      ScaleExponent = 21.7,
+      MaxSize = 0.3,
+      EnableMaxSizeControl = true
+    }
   },
   GUI = {
     Name = "Tully Galaxies",
-    Path = "/Universe/Galaxies",
-    Description = [[Census: 30,059 galaxies. DU Version 1.5.<br> The Tully Catalog is
-      the most polished, accurate catalog of nearby galaxies. It includes over 30,000
-      galaxies in the local universe that surround the Milky Way. This catalog
-      demonstrates the large-scale structure of the universe exceptionally well. And,
-      each galaxy has a representative image reflecting its morphological type, and is
-      properly sized and inclined. Size and shape. The data form a cube, which is an
+    Path = "/Universe/Nearby Surveys",
+    Focusable = false,
+    Description = [[The Tully Catalog is the most polished, accurate catalog of nearby
+      galaxies. It includes over 30,000 galaxies in the local universe that surround the
+      Milky Way. This catalog demonstrates the large-scale structure of the universe
+      exceptionally well. Each galaxy has a representative image that is properly sized
+      and inclined and reflects its morphological type. The data form a cube, which is an
       arbitrary cutoff based on the completeness of these data. Beyond this, data from
-      these sources are not as reliable, so effort is made to show a complete picture,
-      albeit limited by observations (for example, we cannot see dwarf galaxies much
-      beyond the Local Group). The size of the cube is roughly 1 billion light years on
-      a diagonal (so the farthest galaxies in the dataset are about 1 billion light
-      years from the Milky Way), or about 700 million light years per side.
-      <br><br>Colors. Orange denotes more dense regions of the local universe, aqua is
-      given to galaxies in an intermediate-density area, and green is given to lower
-      density regions.(Description from URL) <br><br> Data Reference: Tully Galaxy
-      Catalog: Brent Tully (U Hawaii), Stuart Levy (NCSA/UIUC)]]
+      these sources are not as reliable. The size of the cube is roughly 1 billion light
+      years on a diagonal, or about 700 million light years per side. Colors: Orange
+      denotes more dense regions of the local universe, aqua is given to galaxies in an
+      intermediate-density area, and green is given to lower density regions. Census:
+      30,059 galaxies.]]
   }
 }
 
-local tullyImages = {
+local TullyGalaxiesImages = {
   Identifier = "TullyGalaxiesImages",
   Renderable = {
-    Type = "RenderablePlanesCloud",
-    Enabled = true,
-    Color = { 1.0, 1.0, 1.0 },
+    Type = "RenderablePointCloud",
     Opacity = 0.99,
-    ScaleFactor = 1.0,
     File = speck .. "tully.speck",
-    TexturePath = textures,
-    Luminosity = "diamkpc",
-    ScaleLuminosity = 0.001,
-    TransformationMatrix = {
-      -0.7357425748,    0.67726129641,  0.0,           0.0,
-      -0.074553778365, -0.080991471307, 0.9939225904,  0.0,
-      0.67314530211,    0.73127116582,  0.11008126223, 0.0,
-      0.0,              0.0,            0.0,           1.0
+    SkipFirstDataPoint = true,
+    Texture = {
+      Folder = textures
     },
+    TransformationMatrix = transforms.Supergalactic,
+    -- Use fixed orientation, and rotate planes based on orientation information in
+    -- the dataset
+    Billboard = "Fixed Rotation",
+    UseOrientationData = true,
     Unit = "Mpc",
-    -- Fade in value in the same unit as "Unit"
-    FadeInDistances = {0.0005, 0.003},
-    PlaneMinSize = 1.0
+    Fading = {
+      FadeInDistances = { 0.0005, 0.003 } -- Fade in value in the same unit as "Unit"
+    },
+    SizeSettings = {
+      SizeMapping = {
+        ParameterOptions = { "diamkpc" },
+        ScaleFactor = "Kiloparsec"
+      },
+      -- No exponential scaling, just use size mapping to set the correct size
+      ScaleExponent = 0.0
+    }
   },
   GUI = {
-    Name = "Tully Galaxies Images",
-    Path = "/Universe/Galaxies",
-    Description = [[Each galaxy is represented by an image
-      that represents its morphological type (spiral, elliptical, etc.). Most of these
-      come from The Galaxy Catalog. A handful of nearby galaxies are represented by
-      their actual images, which come mostly from the National Optical Astronomy
-      Observatory (NOAO). Each of these images has been altered from its original state.
-      These images were taken from Earth on some of the world's largest telescopes, so
-      foreground stars from our own Galaxy appear in each image. We are representing
-      galaxies in extragalactic space, so we have removed the stars from each image.
-      (Description from URL) <br><br> Data Reference: Tully Galaxy Catalog: Brent Tully
-      (U Hawaii), Stuart Levy (NCSA/UIUC)]]
+    Name = "Tully Galaxy Images",
+    Path = "/Universe/Nearby Surveys",
+    Focusable = false,
+    Description = [[Each Tully galaxy is represented by an image that represents its
+      morphological type (spiral, elliptical, etc.). Most of these come from The Galaxy
+      Catalog. A handful of nearby galaxies are represented by their actual images, which
+      come mostly from the National Optical Astronomy Observatory (NOAO). Each of these
+      images has been altered from its original state. Taken from Earth, foreground stars
+      from our own Galaxy appear in each image and were removed. Census: 30,159 galaxy
+      images.]]
   }
 }
 
+
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(tullyPoints)
-  openspace.addSceneGraphNode(tullyImages)
+  openspace.addSceneGraphNode(TullyGalaxies)
+  openspace.addSceneGraphNode(TullyGalaxiesImages)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(tullyImages)
-  openspace.removeSceneGraphNode(tullyPoints)
+  openspace.removeSceneGraphNode(TullyGalaxiesImages)
+  openspace.removeSceneGraphNode(TullyGalaxies)
 end)
 
-asset.export(tullyPoints)
-asset.export(tullyImages)
+asset.export(TullyGalaxies)
+asset.export(TullyGalaxiesImages)
 
 
 
 asset.meta = {
   Name = "Tully Galaxies",
-  Version = "3.1",
-  Description = [[Digital Universe asset for Tully Galaxies, including point cloud and
-    images]],
+  Description = TullyGalaxies.GUI.Description,
   Author = "Stuart Levy (NCSA/UIUC), Brian Abbott (AMNH)",
   URL = "https://www.amnh.org/research/hayden-planetarium/digital-universe",
   License = "AMNH Digital Universe"

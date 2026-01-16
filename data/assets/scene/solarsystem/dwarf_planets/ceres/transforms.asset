@@ -1,30 +1,32 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
-asset.require("spice/base")
-local kernels = asset.require("./kernels").CeresKernels
+local kernels = asset.require("./kernels")
+local coreKernels = asset.require("spice/core")
+
+
 
 local CeresPosition = {
   Identifier = "CeresPosition",
   Parent = transforms.SolarSystemBarycenter.Identifier,
   Transform = {
-    Rotation = {
-      Type = "SpiceRotation",
-      SourceFrame = "IAU_CERES",
-      DestinationFrame = "GALACTIC",
-      Kernels = kernels
-    },
     Translation = {
       Type = "SpiceTranslation",
-      Target = "CERES",
-      Observer = "SSB",
-      Kernels = kernels
+      Target = kernels.ID.Ceres,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    },
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = kernels.Frame.Ceres,
+      DestinationFrame = coreKernels.Frame.Galactic
     }
   },
   GUI = {
     Name = "Ceres Position",
     Path = "/Solar System/Dwarf Planets/Ceres",
+    Focusable = false,
     Hidden = true
   }
 }
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(CeresPosition)
@@ -36,9 +38,10 @@ end)
 
 asset.export(CeresPosition)
 
+
+
 asset.meta = {
   Name = "Ceres Transforms",
-  Version = "1.0",
   Description = "Ceres transform",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

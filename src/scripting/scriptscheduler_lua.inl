@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2023                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,9 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <ghoul/lua/lua_helper.h>
+
 namespace {
 
-// Load timed scripts from a Lua script file that returns a list of scheduled scripts.
+/**
+ * Load timed scripts from a Lua script file that returns a list of scheduled scripts.
+ */
 [[codegen::luawrap]] void loadFile(std::string fileName) {
     using namespace openspace;
 
@@ -41,7 +45,7 @@ namespace {
     );
 
     std::vector<scripting::ScriptScheduler::ScheduledScript> scripts;
-    for (size_t i = 1; i <= scriptsDict.size(); ++i) {
+    for (size_t i = 1; i <= scriptsDict.size(); i++) {
         ghoul::Dictionary d = scriptsDict.value<ghoul::Dictionary>(std::to_string(i));
 
         scripting::ScriptScheduler::ScheduledScript script =
@@ -79,32 +83,42 @@ namespace {
 }
 
 /**
- * Sets the time reference for scheduled scripts to application time (seconds since
- * OpenSpace application started).
+ * Clears all scheduled scripts.
  */
-[[codegen::luawrap]] void setModeApplicationTime() {
-    openspace::global::scriptScheduler->setModeApplicationTime();
-}
-
-/**
- * Sets the time reference for scheduled scripts to the time since the recording was
- * started (the same relative time applies to playback).
- */
-[[codegen::luawrap]] void setModeRecordedTime() {
-    openspace::global::scriptScheduler->setModeRecordedTime();
-}
-
-/**
- * Sets the time reference for scheduled scripts to the simulated date & time (J2000 epoch
- * seconds).
- */
-[[codegen::luawrap]] void setModeSimulationTime() {
-    openspace::global::scriptScheduler->setModeSimulationTime();
-}
-
-// Clears all scheduled scripts.
 [[codegen::luawrap]] void clear(std::optional<int> group) {
     openspace::global::scriptScheduler->clearSchedule(group);
+}
+
+/**
+ * Returns the list of all scheduled scripts.
+ */
+[[codegen::luawrap]] std::vector<ghoul::Dictionary> scheduledScripts() {
+    using namespace openspace;
+
+    std::vector<scripting::ScriptScheduler::ScheduledScript> scripts =
+        global::scriptScheduler->allScripts();
+
+    std::vector<ghoul::Dictionary> result;
+    result.reserve(scripts.size());
+
+    for (const scripting::ScriptScheduler::ScheduledScript& script : scripts) {
+        ghoul::Dictionary d;
+        d.setValue("Time", script.time);
+        if (!script.forwardScript.empty()) {
+            d.setValue("ForwardScript", script.forwardScript);
+        }
+        if (!script.backwardScript.empty()) {
+            d.setValue("BackwardScript", script.backwardScript);
+        }
+        if (!script.universalScript.empty()) {
+            d.setValue("UniversalScript", script.universalScript);
+        }
+        d.setValue("Group", script.group);
+
+        result.push_back(d);
+    }
+
+    return result;
 }
 
 #include "scriptscheduler_lua_codegen.cpp"
