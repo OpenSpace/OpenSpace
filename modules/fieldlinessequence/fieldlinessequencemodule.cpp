@@ -25,6 +25,7 @@
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
+#include <modules/fieldlinessequence/tasks/findlastclosedfieldlinestask.h>
 #include <modules/fieldlinessequence/tasks/kameleonvolumetofieldlinestask.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
@@ -74,13 +75,15 @@ void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
     fTask->registerClass<KameleonVolumeToFieldlinesTask>(
         "KameleonVolumeToFieldlinesTask"
     );
+    fTask->registerClass<FindLastClosedFieldlinesTask>("FindLastClosedFieldlinesTask");
 }
 
 std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const
 {
     return {
-        RenderableFieldlinesSequence::Documentation(),
-        KameleonVolumeToFieldlinesTask::Documentation()
+        FindLastClosedFieldlinesTask::Documentation(),
+        KameleonVolumeToFieldlinesTask::Documentation(),
+        RenderableFieldlinesSequence::Documentation()
     };
 }
 

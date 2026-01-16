@@ -22,39 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__
-#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__
+#ifndef __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FINDLASTCLOSEDFIELDLINESTASK___H__
+#define __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FINDLASTCLOSEDFIELDLINESTASK___H__
 
 #include <openspace/util/task.h>
 
 #include <filesystem>
 
 namespace openspace {
-
-class KameleonVolumeToFieldlinesTask : public Task {
+class FindLastClosedFieldlinesTask : public Task {
 public:
-    enum class OutputType {
-        Json,
-        Osfls
-    };
-
-    explicit KameleonVolumeToFieldlinesTask(const ghoul::Dictionary& dictionary);
+    explicit FindLastClosedFieldlinesTask(const ghoul::Dictionary& dictionary);
+    ~FindLastClosedFieldlinesTask();
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation Documentation();
 
 private:
-    std::string _tracingVar;
-    std::vector<std::string> _extraVars;
+    std::string _tracingVar = "b";
     std::filesystem::path _inputPath;
-    std::vector<std::string> _sourceFiles;
-    std::filesystem::path _seedpointsPath;
-    OutputType _outputType;
+    std::vector<std::filesystem::path> _sourceFiles;
+    int _numberOfPointsOnBoundary = 1;
+    float _threshold = 0.5f; // in EarthRadii
     std::filesystem::path _outputFolder;
-    double _manualTimeOffset = 0.0;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONVOLUMETOFIELDLINESTASK___H__
+#endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___FINDLASTCLOSEDFIELDLINESTASK___H__

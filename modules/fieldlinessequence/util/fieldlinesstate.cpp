@@ -245,7 +245,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
 }
 
 /**
- * \param absPath must be the path to the file (incl. filename but excl. extension!)
+ * \param absPath must be the path to the folder to save to.
  * Directory must exist! File is created (or overwritten if already existing).
  * File is structured like this: (for version 0)
  *  0. int                    - version number of binary state file! (in case something

@@ -31,25 +31,28 @@
 #include <unordered_map>
 #include <vector>
 
-namespace openspace {
+namespace ccmc { class Kameleon; }
+namespace openspace { class FieldlinesState; }
 
-class FieldlinesState;
+namespace openspace::fls {
 
-namespace fls {
 std::vector<std::string>
     extractMagnitudeVarsFromStrings(std::vector<std::string> extrVars);
+
+void addExtraQuantities(ccmc::Kameleon* kameleon,
+    std::vector<std::string>& extraScalarVars, std::vector<std::string>& extraMagVars,
+    FieldlinesState& state);
 
 /**
  * Extract seedpoints from a text file. This function is used both in
  * RenderableFieldlinesSequence and the .cdf to .osfls converter task.
  *
  * \param path The path to a directory with files containing list of seedpoints
- * \param nth Is 1 on default to incluse every seedpoint. nth can be used to reduce the
-          amount of data produced be only including every nth seed point
  * \return A list of seedpoints, mapped by their corresponding time step
  */
 std::unordered_map<std::string, std::vector<glm::vec3>> extractSeedPointsFromFiles(
-    std::filesystem::path path, size_t nth = 1);
+    std::filesystem::path path);
+
 /**
  * Traces field lines from the provided cdf file using kameleon and stores the data in the
  * provided FieldlinesState. Returns `false` if it fails to create a valid state. Requires
@@ -72,7 +75,10 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     double manualTimeOffset, const std::string& tracingVar,
     std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars);
 
-} // namespace fls
-} // namespace openspace
+bool traceFromListOfPoints(FieldlinesState& state, const std::string& cdfPath,
+    std::vector<glm::vec3>& seedpoints, const std::string& tracingVar,
+    std::vector<std::string>& extraVars, std::vector<std::string>& extraMagVars);
+
+} // namespace openspace::fls
 
 #endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___KAMELEONFIELDLINEHELPER___H__
