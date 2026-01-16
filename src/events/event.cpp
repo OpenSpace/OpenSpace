@@ -194,6 +194,7 @@ void log(int i, const EventRenderableDisabled& e) {
     LINFO(fmt::format("[{}] EventRenderableDisabled: {}", i, e.node));
 }
 
+
 std::string_view toString(Event::Type type) {
     switch (type) {
         case Event::Type::SceneGraphNodeAdded: return "SceneGraphNodeAdded";
@@ -660,6 +661,7 @@ EventRenderableDisabled::EventRenderableDisabled(const SceneGraphNode* node_)
     : Event(Type)
     , node(temporaryString(node_->identifier()))
 {}
+
 
 CustomEvent::CustomEvent(std::string_view subtype_, std::string_view payload_)
     : Event(Type)

@@ -4,14 +4,8 @@ local texturesPath = asset.syncedResource({
   Name = "Venus Textures",
   Type = "HttpSynchronization",
   Identifier = "venus_textures",
-  Version = 2
+  Version = 1
 })
-
-local clouds = {
-  Identifier = "Clouds",
-  FilePath = texturesPath .. "venus_clouds.jpg",
-  Enabled = asset.enabled,
-}
 
 local layer = {
   Identifier = "Texture",
@@ -24,23 +18,20 @@ local layer = {
 }
 
 asset.onInitialize(function()
-  openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", clouds)
   openspace.globebrowsing.addLayer(globeIdentifier, "ColorLayers", layer)
 end)
 
 asset.onDeinitialize(function()
   openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", layer)
-  openspace.globebrowsing.deleteLayer(globeIdentifier, "ColorLayers", clouds)
 end)
 
 asset.export(layer)
-asset.export(clouds)
 
 
 
 asset.meta = {
   Name = "Venus Texture",
-  Version = "2.0",
+  Version = "1.0",
   Description = "This asset supplies a default texture for Venus",
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",

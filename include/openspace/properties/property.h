@@ -199,8 +199,10 @@ public:
      * no-op.
      *
      * \param state The Lua state from which the value will be decoded
+     * \return `true` if the decoding and setting of the value succeeded, `false`
+     *         otherwise
      */
-    virtual void setLuaValue(lua_State* state);
+    virtual bool setLuaValue(lua_State* state);
 
     /**
      * Returns the Lua type that will be put onto the stack in the Property::getLua method

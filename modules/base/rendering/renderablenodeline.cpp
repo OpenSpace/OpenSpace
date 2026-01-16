@@ -112,10 +112,10 @@ namespace {
 
     struct [[codegen::Dictionary(RenderableNodeLine)]] Parameters {
         // [[codegen::verbatim(StartNodeInfo.description)]]
-        std::optional<std::string> startNode [[codegen::identifier()]];
+        std::optional<std::string> startNode;
 
         // [[codegen::verbatim(EndNodeInfo.description)]]
-        std::optional<std::string> endNode [[codegen::identifier()]];
+        std::optional<std::string> endNode;
 
         // [[codegen::verbatim(LineColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];

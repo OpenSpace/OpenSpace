@@ -85,9 +85,15 @@ bool TemplateProperty<T>::getLuaValue(lua_State* state) const {
 }
 
 template <typename T>
-void TemplateProperty<T>::setLuaValue(lua_State* state) {
-    T thisValue = fromLuaConversion(state);
-    set(std::any(thisValue));
+bool TemplateProperty<T>::setLuaValue(lua_State* state) {
+    try {
+        T thisValue = fromLuaConversion(state);
+        set(std::any(thisValue));
+        return true;
+    }
+    catch (const ghoul::lua::LuaFormatException&) {
+        return false;
+    }
 }
 
 template <typename T>
