@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -101,11 +101,12 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file);
  * The different formats that the readFile function is capable of loading.
  */
 enum class Format {
-    TLE,  //< Two-line elements
-    OMM,  //< Orbit Mean-Elements Message
-    SBDB, //< Small-Body Database
-    MPC   //< Minor Planet Center
+    TLE,  ///< Two-line elements
+    OMM,  ///< Orbit Mean-Elements Message
+    SBDB, ///< Small-Body Database
+    MPC   ///< Minor Planet Center
 };
+
 /**
  * Reads the object information from the provided file.
  *

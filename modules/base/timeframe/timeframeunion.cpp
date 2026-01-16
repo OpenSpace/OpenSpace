@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,14 +26,16 @@
 
 #include <openspace/properties/property.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <algorithm>
+#include <functional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TimeFramesInfo = {
         "TimeFrames",
-        "Time Frames",
+        "Time frames",
         "A vector of time frames to combine into one. The time frame is active when any "
         "of the contained time frames are, but not in gaps between contained time "
         "frames.",

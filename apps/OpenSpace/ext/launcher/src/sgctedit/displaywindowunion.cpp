@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,12 +27,13 @@
 #include "sgctedit/windowcontrol.h"
 #include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
-#include <QColor>
-#include <QFrame>
 #include <QPushButton>
 #include <QVBoxLayout>
-#include <array>
-#include <string>
+#include <algorithm>
+#include <cstdint>
+#include <cstdlib>
+#include <optional>
+#include <variant>
 
 namespace {
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
@@ -113,7 +114,7 @@ DisplayWindowUnion::DisplayWindowUnion(const std::vector<QRect>& monitorResoluti
 void DisplayWindowUnion::initialize(const std::vector<QRect>& monitorSizeList,
                                     const sgct::config::Cluster& cluster)
 {
-    for (int i = 0; i < cluster.nodes.front().windows.size(); i++) {
+    for (size_t i = 0; i < cluster.nodes.front().windows.size(); i++) {
         addWindow();
     }
 

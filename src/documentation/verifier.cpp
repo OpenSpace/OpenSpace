@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,17 @@
 #include <openspace/documentation/verifier.h>
 
 #include <openspace/documentation/documentationengine.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
+#include <algorithm>
+#include <cmath>
+#include <ctime>
+#include <iomanip>
+#include <filesystem>
+#include <sstream>
+#include <utility>
 
 namespace openspace::documentation {
 
@@ -136,7 +146,7 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
                 // If we have a double value, we need to check if it is integer
                 const double value = dict.value<double>(key);
                 double intPart = 0.0;
-                const bool isInt = modf(value, &intPart) == 0.0;
+                const bool isInt = std::modf(value, &intPart) == 0.0;
                 if (isInt) {
                     TestResult res;
                     res.success = true;
@@ -644,7 +654,7 @@ TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dic
 }
 
 TableVerifier::TableVerifier(std::vector<DocumentationEntry> documentationEntries,
-                             std::optional<int> nEntries)
+                             std::optional<size_t> nEntries)
     : documentations(std::move(documentationEntries))
     , count(nEntries)
 {}

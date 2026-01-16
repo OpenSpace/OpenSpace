@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,18 +26,22 @@
 
 #include <modules/fitsfilereader/include/wsafitshelper.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/properties/property.h>
-#include <openspace/util/sphere.h>
+#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/crc32.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <string>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <algorithm>
+#include <cctype>
+#include <iterator>
+#include <sstream>
+#include <optional>
+#include <vector>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableTimeVaryingFitsSphere";
@@ -91,14 +95,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
         "TextureSource",
-        "Texture Source",
+        "Texture source",
         "A directory on disk from which to load the texture files for the sphere.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FitsLayerInfo = {
         "FitsLayer",
-        "Texture Layer",
+        "Texture layer",
         "The index, a whole positive number, of the layer in the FITS file to use as "
         "texture. If not specified, the first layer in the data will be used regardless. "
         "When specified, that data layer will be the option used.",
@@ -107,21 +111,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FitsLayerNameInfo = {
         "LayerNames",
-        "Texture Layer Options",
+        "Texture layer options",
         "This value specifies which name of the fits layer to use as texture.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextureFilterInfo = {
         "TextureFilter",
-        "Texture Filter",
+        "Texture filter",
         "Option to choose nearest neighbor or linear filtering for the texture.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SaveDownloadsOnShutdown = {
         "SaveDownloadsOnShutdown",
-        "Save Downloads On Shutdown",
+        "Save downloads on shutdown",
         "This is an option for if dynamically downloaded files should be saved for the"
         "next run or not.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -447,8 +451,8 @@ glm::vec2 RenderableTimeVaryingFitsSphere::minMaxTextureDataValues(
     std::vector<float> pixelValues;
     pixelValues.reserve(width * height * 4);
 
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
             glm::vec4 texel = t->texelAsFloat(x, y);
             pixelValues.push_back(texel.r);
             pixelValues.push_back(texel.g);
@@ -626,7 +630,7 @@ void RenderableTimeVaryingFitsSphere::updateDynamicDownloading(double currentTim
 
         if (isInInterval &&
             _activeTriggerTimeIndex != -1 &&
-            _activeTriggerTimeIndex < _files.size())
+            _activeTriggerTimeIndex < static_cast<int>(_files.size()))
         {
             _firstUpdate = false;
             loadTexture();

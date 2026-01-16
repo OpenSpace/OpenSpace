@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,31 +25,20 @@
 #include <modules/globebrowsing/src/shadowcomponent.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/renderableglobe.h>
-#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <glm/gtc/matrix_transform.hpp>
 #include <fstream>
-#include <cstdlib>
-#include <locale>
+#include <memory>
+#include <optional>
 
 namespace {
     constexpr std::string_view _loggerCat = "ShadowComponent";
@@ -71,14 +60,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SaveDepthTextureInfo = {
         "SaveDepthTextureInfo",
-        "Save Depth Texture",
+        "Save depth texture",
         "Debug.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DistanceFractionInfo = {
         "DistanceFraction",
-        "Distance Fraction",
+        "Distance fraction",
         "Distance fraction of original distance from light source to the globe to be "
         "considered as the new light source distance.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -86,7 +75,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DepthMapSizeInfo = {
         "DepthMapSize",
-        "Depth Map Size",
+        "Depth map size",
         "The depth map size in pixels. You must entry the width and height values.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -311,12 +300,6 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     //============= Light Matrix by Camera Matrices Composition =============
     //=======================================================================
     const glm::dmat4 lightProjectionMatrix = glm::dmat4(_lightCamera->projectionMatrix());
-
-    // The model transformation missing in the final shadow matrix is add when rendering
-    // each object (using its transformations provided by the RenderData structure)
-    _shadowData.shadowMatrix =
-        ToTextureCoordsMatrix * lightProjectionMatrix *
-        _lightCamera->combinedViewMatrix();
 
 
     // Saves current state

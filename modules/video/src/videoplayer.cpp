@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,18 +24,25 @@
 
 #include <modules/video/include/videoplayer.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/syncengine.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/openglstatecache.h>
+#include <render_gl.h>
+#include <ghoul/opengl/texture.h>
+#include <cstdlib>
+#include <optional>
 
 namespace {
     constexpr std::string_view _loggerCat = "VideoPlayer";
@@ -60,7 +67,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GoToStartInfo = {
         "GoToStart",
-        "Go To Start",
+        "Go To start",
         "Sets the time to the beginning of the video and pauses it."
     };
 
@@ -73,27 +80,27 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AudioInfo = {
         "PlayAudio",
-        "Play Audio",
-        "Play audio."
+        "Play audio",
+        "Decides whether to play audio when playing back the video."
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {
         "StartTime",
-        "Start Time",
+        "Start time",
         "The date and time that the video should start in the format "
         "'YYYY MM DD hh:mm:ss'."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EndTimeInfo = {
         "EndTime",
-        "End Time",
+        "End time",
         "The date and time that the video should end in the format "
         "'YYYY MM DD hh:mm:ss'."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LoopVideoInfo = {
         "LoopVideo",
-        "Loop Video",
+        "Loop video",
         "If checked, the video is continues playing from the start when it reaches the "
         "end of the video."
     };
@@ -133,8 +140,9 @@ namespace {
             RealTimeLoop
         };
 
-        // The mode of how the video should be played back.
-        // Default is video is played back according to the set start and end times.
+        // The mode of how the video is played back. The Default is `RealTimeLoop`,
+        // which means that the video is played in realtime using the `Play` command
+        // in the user interface.
         std::optional<PlaybackMode> playbackMode;
     };
 #include "videoplayer_codegen.cpp"
@@ -235,7 +243,7 @@ documentation::Documentation VideoPlayer::Documentation() {
 }
 
 VideoPlayer::VideoPlayer(const ghoul::Dictionary& dictionary)
-    : PropertyOwner({ "VideoPlayer" })
+    : PropertyOwner({ "VideoPlayer", "Video Player"})
     , _play(PlayInfo)
     , _pause(PauseInfo)
     , _goToStart(GoToStartInfo)

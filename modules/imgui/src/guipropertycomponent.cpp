@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,8 +29,12 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/stringhelper.h>
 #include <algorithm>
+#include <memory>
+#include <type_traits>
+#include <utility>
 
 //#define Debugging_ImGui_TreeNode_Indices
 
@@ -39,7 +43,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseTreeInfo = {
         "TreeLayout",
-        "Use Tree Layout",
+        "Use tree layout",
         "If this value is checked, this component will display the properties using a "
         "tree layout, rather than using a flat map. This value should only be set on "
         "property windows that display SceneGraphNodes, or the application might crash.",

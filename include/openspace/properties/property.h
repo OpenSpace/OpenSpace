@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,9 +29,16 @@
 #include <ghoul/misc/boolean.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/lua/lua_types.h>
+#include <cstdint>
 #include <functional>
+#include <limits>
+#include <optional>
 #include <string>
 #include <string_view>
+#include <typeinfo>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 struct lua_State;
 
@@ -97,21 +104,21 @@ public:
          * argument for the struct initialization.
          */
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
-                              NeedsConfirmation needsConfirmation = NeedsConfirmation::No)
+                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
-            , needsConfirmation(needsConfirmation)
+            , needsConfirmation(needsConfirmation_)
         {}
 
         constexpr PropertyInfo(const char* ident, const char* gui, const char* desc,
                                Visibility vis,
-                              NeedsConfirmation needsConfirmation = NeedsConfirmation::No)
+                             NeedsConfirmation needsConfirmation_ = NeedsConfirmation::No)
             : identifier(ident)
             , guiName(gui)
             , description(desc)
             , visibility(vis)
-            , needsConfirmation(needsConfirmation)
+            , needsConfirmation(needsConfirmation_)
         {}
 
         /// The unique identifier that is part of the fully qualified URI of this Property
@@ -170,6 +177,8 @@ public:
      */
     virtual ~Property();
 
+    Property(Property&&) noexcept = default;
+
     /**
      * This method returns the class name of the Property. The method is used by the
      * TemplateFactory to create new instances of Propertys. The returned value is almost
@@ -195,7 +204,6 @@ public:
      * no-op.
      *
      * \param state The Lua state to which the value will be encoded
-     * \return `true` if the encoding succeeded, `false` otherwise
      */
     virtual void getLuaValue(lua_State* state) const = 0;
 

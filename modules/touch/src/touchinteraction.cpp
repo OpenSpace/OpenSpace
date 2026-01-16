@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,8 +31,18 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <numeric>
+#include <utility>
 
 #ifdef WIN32
 #pragma warning (push)
@@ -94,7 +104,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TouchScreenSizeInfo = {
         "TouchScreenSize",
-        "Touch Screen size in inches",
+        "Touch screen size in inches",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -207,7 +217,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ZoomOutLimitInfo = {
         "ZoomOutLimit",
-        "Zoom Out Limit",
+        "Zoom out Limit",
         "The maximum distance you are allowed to navigate away from the anchor. "
         "This should always be larger than the zoom in value if you want to be able "
         "to zoom. Defaults to maximum allowed double.",
@@ -216,7 +226,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ZoomInLimitInfo = {
         "ZoomInLimit",
-        "Zoom In Limit",
+        "Zoom in Limit",
         "The minimum distance from the anchor that you are allowed to navigate to. "
         "Its purpose is to limit zooming in on a node. If this value is not set it "
         "defaults to the surface of the current anchor.",
@@ -313,7 +323,10 @@ TouchInteraction::TouchInteraction()
     // projDiffLength/diffLength.
     , _enableDirectManipulation(EnableDirectManipulationInfo, true)
     , _directTouchDistanceThreshold(DirectManipulationThresholdInfo, 5.f, 0.f, 10.f)
-    , _pinchInputs({ TouchInput(0, 0, 0.f, 0.f, 0.0), TouchInput(0, 0, 0.f, 0.f, 0.0) })
+    , _pinchInputs({
+        TouchInputHolder(TouchInput(0, 0, 0.f, 0.f, 0.0)),
+        TouchInputHolder(TouchInput(0, 0, 0.f, 0.f, 0.0))
+    })
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 12.0, 2.75, glm::dvec2(0.08, 0.045) }
 {
@@ -1065,7 +1078,8 @@ void TouchInteraction::step(double dt, bool directTouch) {
         // should make the touch interaction tap into the orbitalnavigator and let that
         // do the updating of the camera, instead of handling them separately. Then we
         // would keep them in sync and avoid duplicated camera updating code.
-        auto orbitalNavigator = global::navigationHandler->orbitalNavigator();
+        interaction::OrbitalNavigator& orbitalNavigator =
+            global::navigationHandler->orbitalNavigator();
         camPos = orbitalNavigator.pushToSurfaceOfAnchor(camPos);
 
         // @TODO (emmbr, 2023-02-08) with the line above, the ZoomInLimit might not be
@@ -1080,8 +1094,9 @@ void TouchInteraction::step(double dt, bool directTouch) {
         global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
 
 #ifdef TOUCH_DEBUG_PROPERTIES
-        //Show velocity status every N frames
-        if (++stepVelUpdate >= 60) {
+        // Show velocity status every N frames
+        stepVelUpdate++;
+        if (stepVelUpdate >= 60) {
             stepVelUpdate = 0;
             LINFO(std::format(
                 "DistToFocusNode {} stepZoomVelUpdate {}",

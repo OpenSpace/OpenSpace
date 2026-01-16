@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,20 +28,11 @@
 #include <openspace/rendering/volumeraycaster.h>
 
 #include <openspace/util/boxgeometry.h>
-#include <ghoul/glm.h>
-#include <string>
 #include <memory>
 
-namespace ghoul::opengl {
-    class Texture;
-    class TextureUnit;
-    class ProgramObject;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class TextureUnit; }
 
 namespace openspace {
-
-struct RenderData;
-struct RaycastData;
 
 class GalaxyRaycaster : public VolumeRaycaster {
 public:
@@ -89,8 +80,7 @@ private:
     ghoul::opengl::Texture& _texture;
     std::unique_ptr<ghoul::opengl::TextureUnit> _textureUnit;
     std::filesystem::path _raycastingShader;
-
-}; // GalaxyRaycaster
+};
 
 } // namespace openspace
 

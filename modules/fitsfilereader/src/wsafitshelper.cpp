@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,11 +23,20 @@
  ****************************************************************************************/
 
 #include <modules/fitsfilereader/include/wsafitshelper.h>
+
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <CCfits>
+#include <algorithm>
+#include <string>
+#include <string_view>
+#include <vector>
 
-constexpr std::string_view _loggerCat = "RenderableTimeVaryingSphere";
+namespace {
+    constexpr std::string_view _loggerCat = "RenderableTimeVaryingSphere";
+} // namespace
 
 using namespace CCfits;
 
@@ -43,7 +52,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
         if (!file.get()) {
             LERROR(std::format(
-                "Failed to open, therefor removing file {}", path.string()
+                "Failed to open, therefore removing file {}", path.string()
             ));
             std::filesystem::remove(path);
             return nullptr;
@@ -51,19 +60,27 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         // Convert fits path with fits-file-reader functions
         const std::shared_ptr<ImageData<float>> fitsValues =
             readImageInternal<float>(file->pHDU());
-        int layerSize = fitsValues->width * fitsValues->height;
+        const int layerSize = fitsValues->width * fitsValues->height;
 
-        int nLayers = static_cast<int>(fitsValues->contents.size()) / layerSize;
-        if (layerIndex > nLayers -1) {
+        const int nLayers = static_cast<int>(fitsValues->contents.size()) / layerSize;
+        if (static_cast<int>(layerIndex) >= nLayers) {
             LERROR(
                 "Chosen layer in fits file is not supported. Index too high. "
                 "First layer chosen instead"
             );
             layerIndex = 0;
+            return nullptr;
         }
 
         std::valarray<float> layerValues =
             fitsValues->contents[std::slice(layerIndex*layerSize, layerSize, 1)];
+
+        if (layerValues.size() == 0) {
+            LERROR(std::format(
+                "Failed to load {} as no layers were available", path.string()
+            ));
+            return nullptr;
+        }
 
         float* imageData = new float[layerValues.size()];
         std::vector<glm::vec3> rgbLayers;
@@ -81,7 +98,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         // Create texture from imagedata
         auto texture = std::make_unique<ghoul::opengl::Texture>(
             imageData,
-            glm::size3_t(fitsValues->width, fitsValues->height, 1),
+            glm::uvec3(fitsValues->width, fitsValues->height, 1),
             GL_TEXTURE_2D,
             ghoul::opengl::Texture::Format::Red,
             GL_RED,
@@ -132,7 +149,7 @@ int nLayers(const std::filesystem::path& path) {
     }
 }
 
-template<typename T, typename U>
+template <typename T, typename U>
 std::shared_ptr<ImageData<T>> readImageInternal(U& image) {
     try {
         std::valarray<T> contents;

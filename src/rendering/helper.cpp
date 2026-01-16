@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,23 +24,30 @@
 
 #include <openspace/rendering/helper.h>
 
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/scene/lightsource.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/closest_point.hpp>
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
-#include <string>
-#include <vector>
+#include <limits>
+#include <string_view>
 
 namespace {
+
+struct VertexXYUVRGBA {
+    std::array<GLfloat, 2> xy;
+    std::array<GLfloat, 2> uv;
+    std::array<GLfloat, 4> rgba;
+};
 
 bool isInitialized = false;
 
@@ -218,20 +225,15 @@ void initialize() {
     glBindVertexArray(vertexObjects.square.vao);
     glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.square.vbo);
 
-    struct VertexXYUVRGBA {
-        std::array<GLfloat, 2> xy;
-        std::array<GLfloat, 2> uv;
-        std::array<GLfloat, 4> rgba;
-    };
     constexpr std::array<VertexXYUVRGBA, 6> Vtx = {
         // X     Y    U    V    R    G    B    A
-        -1.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f,
-        -1.f,  1.f, 0.f, 1.f, 1.f, 1.f, 1.f, 1.f,
-         1.f,  1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f,
+        VertexXYUVRGBA{ { -1.f, -1.f }, { 0.f, 0.f }, { 1.f, 1.f, 1.f, 1.f } },
+        VertexXYUVRGBA{ { -1.f,  1.f }, { 0.f, 1.f }, { 1.f, 1.f, 1.f, 1.f } },
+        VertexXYUVRGBA{ {  1.f,  1.f }, { 1.f, 1.f }, { 1.f, 1.f, 1.f, 1.f } },
 
-        -1.f, -1.f, 0.f, 0.f, 1.f, 1.f, 1.f, 1.f,
-         1.f,  1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f,
-         1.f, -1.f, 1.f, 0.f, 1.f, 1.f, 1.f, 1.f
+        VertexXYUVRGBA{ { -1.f, -1.f }, { 0.f, 0.f }, { 1.f, 1.f, 1.f, 1.f } },
+        VertexXYUVRGBA{ {  1.f,  1.f }, { 1.f, 1.f }, { 1.f, 1.f, 1.f, 1.f } },
+        VertexXYUVRGBA{ {  1.f, -1.f }, { 1.f, 0.f }, { 1.f, 1.f, 1.f, 1.f } }
     };
     glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(VertexXYUVRGBA), Vtx.data(), GL_STATIC_DRAW);
 
@@ -288,11 +290,23 @@ void initialize() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-        reinterpret_cast<GLvoid*>(offsetof(Vertex, uv)));
+    glVertexAttribPointer(
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(Vertex),
+        reinterpret_cast<GLvoid*>(offsetof(Vertex, uv))
+    );
     glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex),
-        reinterpret_cast<GLvoid*>(offsetof(Vertex, rgba)));
+    glVertexAttribPointer(
+        2,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(Vertex),
+        reinterpret_cast<GLvoid*>(offsetof(Vertex, rgba))
+    );
     glBindVertexArray(0);
     vertexObjects.sphere.nElements = static_cast<int>(sphereData.indices.size());
 
@@ -325,8 +339,14 @@ void initialize() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexXYZNormal), nullptr);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexXYZNormal),
-        reinterpret_cast<GLvoid*>(offsetof(VertexXYZNormal, normal)));
+    glVertexAttribPointer(
+        1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(VertexXYZNormal),
+        reinterpret_cast<GLvoid*>(offsetof(VertexXYZNormal, normal))
+    );
     glBindVertexArray(0);
     vertexObjects.cylinder.nElements = static_cast<int>(cylinderData.indices.size());
 
@@ -359,10 +379,52 @@ void initialize() {
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexXYZNormal), nullptr);
     glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexXYZNormal),
-        reinterpret_cast<GLvoid*>(offsetof(VertexXYZNormal, normal)));
+    glVertexAttribPointer(
+        1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(VertexXYZNormal),
+        reinterpret_cast<GLvoid*>(offsetof(VertexXYZNormal, normal))
+    );
     glBindVertexArray(0);
     vertexObjects.cone.nElements = static_cast<int>(coneData.indices.size());
+
+
+    //
+    // Line vertex array object
+    //
+    glGenVertexArrays(1, &vertexObjects.line.vao);
+    glGenBuffers(1, &vertexObjects.line.vbo);
+
+    glBindVertexArray(vertexObjects.line.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.line.vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        2 * sizeof(VertexXYUVRGBA),
+        nullptr,
+        GL_STATIC_DRAW
+    );
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA), nullptr);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(VertexXYUVRGBA),
+        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, uv))
+    );
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(VertexXYUVRGBA),
+        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, rgba))
+    );
+
+    glBindVertexArray(0);
 
 
     //
@@ -501,6 +563,48 @@ void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4
     shdr.program->deactivate();
 }
 
+void renderLine(const glm::vec2& startPosition, const glm::vec2& endPosition,
+                const glm::vec2& size, const glm::vec4& startColor,
+                const glm::vec4& endColor)
+{
+    auto& shdr = shaders.xyuvrgba;
+    shdr.program->activate();
+    shdr.program->setUniform(shdr.cache.proj, ortho(glm::vec2(0.f), glm::vec2(1.f)));
+    shdr.program->setUniform(shdr.cache.hasTexture, 0);
+
+    glBindVertexArray(vertexObjects.line.vao);
+
+    // Move the start and end position from a [0,res] range to a [-1, 1] range
+    const glm::vec2 start = (startPosition / size) * 2.f - glm::vec2(1.f);
+    const glm::vec2 end = (endPosition / size) * 2.f - glm::vec2(1.f);
+    std::array<VertexXYUVRGBA, 2> vertexData = {
+        VertexXYUVRGBA{
+            { start.x, -start.y },
+            { 0.f, 0.f },
+            { startColor.r, startColor.g, startColor.b, startColor.a }
+        },
+        VertexXYUVRGBA{
+            { end.x, -end.y },
+            { 0.f, 0.f },
+            { endColor.r, endColor.g, endColor.b, endColor.a }
+        }
+    };
+    glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.line.vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        2 * sizeof(VertexXYUVRGBA),
+        vertexData.data(),
+        GL_STATIC_DRAW
+    );
+
+    glEnable(GL_LINE_SMOOTH);
+    glLineWidth(6.f);
+    glDrawArrays(GL_LINES, 0, 2);
+    glPointSize(6.f);
+    glDrawArrays(GL_POINTS, 0, 2);
+    glBindVertexArray(0);
+}
+
 VertexXYZ convertToXYZ(const Vertex& v) {
     return VertexXYZ{ v.xyz[0], v.xyz[1], v.xyz[2] };
 }
@@ -511,7 +615,7 @@ std::vector<VertexXYZ> convert(std::vector<Vertex> v) {
     return result;
 }
 
-Vertex computeCircleVertex(int i, int nSegments, float radius,
+static Vertex computeCircleVertex(int i, int nSegments, float radius,
                            const glm::vec4& color = glm::vec4(1.f))
 {
     const float fsegments = static_cast<float>(nSegments);
@@ -527,7 +631,7 @@ Vertex computeCircleVertex(int i, int nSegments, float radius,
     const float u = std::cos(theta);
     const float v = std::sin(theta);
 
-    return { x, y, z, u, v, color.r, color.g, color.b, color.a };
+    return { { x, y, z }, { u, v }, { color.r, color.g, color.b, color.a } };
 }
 
 std::vector<Vertex> createRing(int nSegments, float radius, const glm::vec4& colors) {
@@ -610,10 +714,10 @@ VertexIndexListCombo<Vertex> createSphere(int nSegments, glm::vec3 radii,
     return { vertices, indices };
 }
 
-VertexIndexListCombo<VertexXYZNormal> createConicalCylinder(unsigned int nSegments,
-                                                            float bottomRadius,
-                                                            float topRadius,
-                                                            float height)
+static VertexIndexListCombo<VertexXYZNormal> createConicalCylinder(unsigned int nSegments,
+                                                                   float bottomRadius,
+                                                                   float topRadius,
+                                                                   float height)
 {
     // Create a ring for the top and bottom vertices (XY plane)
     std::vector<VertexXYZ> bottomVertices = createRingXYZ(nSegments, bottomRadius);
@@ -777,7 +881,7 @@ void LightSourceRenderData::updateBasedOnLightSources(const RenderData& renderDa
         directionsViewSpaceBuffer[nEnabledLightSources] =
             lightSource->directionViewSpace(renderData);
 
-        ++nEnabledLightSources;
+        nEnabledLightSources++;
     }
     nLightSources = nEnabledLightSources;
 }

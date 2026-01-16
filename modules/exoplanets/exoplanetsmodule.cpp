@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,27 +25,17 @@
 #include <modules/exoplanets/exoplanetsmodule.h>
 
 #include <modules/exoplanets/datastructure.h>
-#include <modules/exoplanets/exoplanetshelper.h>
 #include <modules/exoplanets/rendering/renderableorbitdisc.h>
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/distanceconstants.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/timeconversion.h>
-#include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
-#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <filesystem>
-#include <fstream>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/templatefactory.h>
+#include <optional>
 #include <sstream>
 
 #include "exoplanetsmodule_lua.inl"
@@ -53,28 +43,28 @@
 namespace {
     constexpr openspace::properties::Property::PropertyInfo DataFolderInfo = {
         "DataFolder",
-        "Data Folder",
+        "Data folder",
         "The path to the folder containing the exoplanets data and lookup table.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BvColorMapInfo = {
         "BvColormap",
-        "B-V Colormap",
+        "B-V colormap",
         "The path to a cmap file that maps a B-V color index to an RGB color.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StarTextureInfo = {
         "StarTexture",
-        "Star Texture",
+        "Star texture",
         "The path to a grayscale image that is used for the host star surfaces.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StarGlareTextureInfo = {
         "StarGlareTexture",
-        "Star Glare Texture",
+        "Star glare texture",
         "The path to a grayscale image that is used for the glare effect of the "
         "host stars.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -82,7 +72,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo NoDataTextureInfo = {
         "NoDataTexture",
-        "No Data Star Texture",
+        "No data star texture",
         "A path to a texture that is used to represent that there is missing data about "
         "the star. For example no color information.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -90,7 +80,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PlanetDefaultTextureInfo = {
         "PlanetDefaultTexture",
-        "Planet Default Texture",
+        "Planet default texture",
         "The path to an image that should be used by default for the planets in all "
         "added exoplanet systems. If not specified, the planets are rendered without a "
         "texture when added.",
@@ -99,7 +89,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo OrbitDiscTextureInfo = {
         "OrbitDiscTexture",
-        "Orbit Disc Texture",
+        "Orbit disc texture",
         "A path to a 1-dimensional image used as a transfer function for the "
         "exoplanets' orbit uncertainty disc.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -107,7 +97,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HabitableZoneTextureInfo = {
         "HabitableZoneTexture",
-        "Habitable Zone Texture",
+        "Habitable zone texture",
         "A path to a 1-dimensional image used as a transfer function for the "
         "habitable zone disc.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -115,7 +105,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ComparisonCircleColorInfo = {
         "ComparisonCircleColor",
-        "Comparison Circle Color",
+        "Comparison circle color",
         "Decides the color of the 1 AU size comparison circles that are generated as "
         "part of an exoplanet system. Changing the color will not modify already "
         "existing circles.",
@@ -124,7 +114,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShowComparisonCircleInfo = {
         "ShowComparisonCircle",
-        "Show Comparison Circle",
+        "Show comparison circle",
         "If true, the 1 AU size comparison circle is enabled per default when an "
         "exoplanet system is created.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -132,7 +122,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShowOrbitUncertaintyInfo = {
         "ShowOrbitUncertainty",
-        "Show Orbit Uncertainty",
+        "Show orbit uncertainty",
         "If true, a disc showing the uncertainty for each planetary orbit is enabled per "
         "default when an exoplanet system is created.",
         openspace::properties::Property::Visibility::User
@@ -140,7 +130,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShowHabitableZoneInfo = {
         "ShowHabitableZone",
-        "Show Habitable Zone",
+        "Show habitable zone",
         "If true, the habitable zone disc is enabled per default when an exoplanet "
         "system is created.",
         openspace::properties::Property::Visibility::User
@@ -148,7 +138,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseOptimisticZoneInfo = {
         "UseOptimisticZone",
-        "Use Optimistic Zone Boundaries",
+        "Use optimistic zone boundaries",
         "If true, the habitable zone is computed with optimistic boundaries per default "
         "when an exoplanet system is created.",
         openspace::properties::Property::Visibility::User
@@ -156,7 +146,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HabitableZoneOpacityInfo = {
         "HabitableZoneOpacity",
-        "Habitable Zone Opacity",
+        "Habitable zone opacity",
         "The opacity value used for the habitable zone renderable for a created "
         "exoplanet system.",
         openspace::properties::Property::Visibility::NoviceUser

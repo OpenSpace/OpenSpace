@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,19 +26,20 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/programobject.h>
-#include <optional>
+#include <ghoul/misc/templatefactory.h>
+#include <variant>
+#include <utility>
 
 namespace {
     constexpr std::string_view KeyType = "Type";
@@ -52,7 +53,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
         "Type",
-        "Renderable Type",
+        "Renderable type",
         "The type of the renderable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -60,7 +61,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RenderableRenderBinModeInfo =
     {
         "RenderBinMode",
-        "Render Bin Mode",
+        "Render bin mode",
         "A value that specifies if the renderable should be rendered in the Background, "
         "Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -68,7 +69,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DimInAtmosphereInfo = {
         "DimInAtmosphere",
-        "Dim In Atmosphere",
+        "Dim in atmosphere",
         "Decides if the object should be dimmed (i.e. faded out) when the camera is in "
         "the sunny part of an atmosphere.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -149,8 +150,6 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
     result->_type = renderableType;
     return ghoul::mm_unique_ptr<Renderable>(result);
 }
-
-
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings settings)
     : properties::PropertyOwner({ "Renderable" })

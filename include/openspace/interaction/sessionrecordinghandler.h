@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,6 +30,17 @@
 #include <openspace/interaction/sessionrecording.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/scripting/lualibrary.h>
+#include <chrono>
+#include <filesystem>
+#include <functional>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+namespace openspace::properties { class Property; }
 
 namespace openspace::interaction {
 
@@ -96,8 +107,6 @@ public:
      * Starts a recording session, which will save data to the provided filename according
      * to the data format specified, and will continue until recording is stopped using
      * stopRecording() method.
-     *
-     * \return `true` if recording to file starts without errors
      */
     void startRecording();
 
@@ -119,16 +128,16 @@ public:
     /**
      * Starts a playback session, which can run in one of three different time modes.
      *
-     * \param filename File containing recorded keyframes to play back. The file path is
-     *                 relative to the base recordings directory specified in the config
-     *                 file by the RECORDINGS variable
-     * \param timeMode Which of the 3 time modes to use for time reference during
+     * \param timeline The session recording timeline that should be played back
      * \param loop If true then the file will playback in loop mode, continuously looping
      *        back to the beginning until it is manually stopped
      * \param shouldWaitForFinishedTiles If true, the playback will wait for tiles to be
      *        finished before progressing to the next frame. This value is only used when
      *        `enableTakeScreenShotDuringPlayback` was called before. Otherwise this value
      *        will be ignored
+     * \param saveScreenshotFps If this value is specified, screenshots will be taken at
+     *        the provided framerate. If the value is not specified, no screenshots will
+     *        be taken
      */
     void startPlayback(SessionRecording timeline, bool loop,
         bool shouldWaitForFinishedTiles, std::optional<int> saveScreenshotFps);
@@ -214,7 +223,7 @@ public:
     /**
      * Removes the callback for notification of playback state change.
      *
-     * \param callback Function handle for the callback
+     * \param handle Function handle for the callback
      */
     void removeStateChangeCallback(CallbackHandle handle);
 

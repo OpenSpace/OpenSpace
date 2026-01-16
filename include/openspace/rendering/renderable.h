@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,28 +30,29 @@
 
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/doubleproperty.h>
-#include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/managedmemoryuniqueptr.h>
-#include <string_view>
+#include <functional>
+#include <optional>
+#include <tuple>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul {
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    } // namespace opengl
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 
+namespace documentation { struct Documentation; }
 class Camera;
 class Ellipsoid;
 struct RenderData;
 struct RendererTasks;
 struct SurfacePositionHandle;
 struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 // Unfortunately we can't move this struct into the Renderable until
 // https://bugs.llvm.org/show_bug.cgi?id=36684 is fixed

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,16 @@
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/glm.h>
+#include <functional>
+#include <memory>
+#include <optional>
+#include <string>
+#include <type_traits>
+#include <utility>
 #include <variant>
+#include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace::documentation {
 
@@ -265,7 +274,7 @@ public:
      *        value is not provided, any number (including 0) is allowed
      */
     explicit TableVerifier(std::vector<DocumentationEntry> documentationEntries = {},
-        std::optional<int> nEntries = std::nullopt);
+        std::optional<size_t> nEntries = std::nullopt);
 
     /**
      * Checks whether the \p key%'s value is a table (= ghoul::Dictionary) and (if
@@ -288,7 +297,7 @@ public:
 
     /// The documentations passed in the constructor
     std::vector<DocumentationEntry> documentations;
-    std::optional<int> count;
+    std::optional<size_t> count;
 };
 
 /**

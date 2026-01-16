@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 
 #include <ghoul/glm.h>
 #include <string>
+#include <utility>
 
 namespace openspace {
 
@@ -54,7 +55,9 @@ glm::dvec2 icrsToDecimalDegrees(const std::string& ra, const std::string& dec);
  * Converts from galactic cartesian coordinates to ICRS decimal degrees coordinates
  * and distance.
  *
- * \param x, y, z X, Y, and Z coordinates
+ * \param x The x coordinate
+ * \param y The y coordinate
+ * \param z The z coordinate
  * \return A vector with the ra and dec decimal degrees in degrees and distance
  */
 glm::dvec3 galacticCartesianToIcrs(double x, double y, double z);

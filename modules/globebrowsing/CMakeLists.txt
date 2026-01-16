@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -178,6 +178,12 @@ endif () # WIN32
 begin_dependency("GEOS")
 add_subdirectory(ext/geos SYSTEM)
 target_link_libraries(openspace-module-globebrowsing PRIVATE geos)
+
+if (MSVC)
+  target_compile_options(geos PRIVATE "/W0")
+else ()
+  target_compile_options(geos PRIVATE "-w")
+endif ()
 
 set_property(TARGET geos PROPERTY FOLDER "External")
 set_property(TARGET geos_c PROPERTY FOLDER "External")

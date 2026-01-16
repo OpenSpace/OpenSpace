@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,12 +29,11 @@
 #include <openspace/properties/property.h>
 #include <filesystem>
 #include <optional>
+#include <string>
 
 namespace openspace {
 
 struct Settings {
-    auto operator<=>(const Settings&) const = default;
-
     // Settings that are not configurable by the user and that represent a persistent
     // state for the system
     std::optional<bool> hasStartedBefore;
@@ -50,12 +49,14 @@ struct Settings {
     std::optional<Configuration::LayerServer> layerServer;
 
     struct MRF {
-        auto operator<=>(const MRF&) const = default;
-
         std::optional<bool> isEnabled;
         std::optional<std::string> location;
+
+        bool operator==(const MRF&) const noexcept = default;
     };
     MRF mrf;
+
+    bool operator==(const Settings&) const noexcept = default;
 };
 
 std::filesystem::path findSettings(const std::string& filename = "settings.json");

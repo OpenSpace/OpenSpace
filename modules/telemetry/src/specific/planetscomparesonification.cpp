@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,16 @@
 
 #include <modules/telemetry/include/specific/planetscomparesonification.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <openspace/engine/globals.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/memorymanager.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <osc/OscTypes.h>
+#include <array>
+#include <cstdint>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "PlanetsCompareSonification";
@@ -65,7 +70,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SelectedUpscaleInfo = {
         "SelectedUpscale",
-        "Selected Planet Upscale Multiplier",
+        "Selected planet upscale multiplier",
         "When a planet is selected to be compared, it is also upscaled as a visual "
         "indicator of which planets are currently being compared. This property "
         "determines how much the planet is scaled up as a multiplier of the original "
@@ -77,7 +82,7 @@ namespace {
         SelectedScaleInterpolationTimeInfo =
     {
         "SelectedScaleInterpolationTimeInfo",
-        "Selected Planet Scale Interpolation Time",
+        "Selected planet scale interpolation time",
         "When a planet is selected to be compared, it is also upscaled as a visual "
         "indicator of which planets are currently being compared. This property "
         "determines over how many seconds the scaling animation should play.",
@@ -107,7 +112,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SizeDayInfo = {
         "SizeDay",
-        "Size/Day",
+        "Size/day",
         "Toggle size/day sonification for both selected planets.",
         openspace::properties::Property::Visibility::User
     };
@@ -171,7 +176,7 @@ PlanetsCompareSonification::PlanetsCompareSonification(const std::string& ip, in
     addProperty(_selectedScaleInterpolationTime);
 
     // Planet selection properties
-    for (int i = 0; i < PlanetsOptions.size(); ++i) {
+    for (int i = 0; i < PlanetsOptions.size(); i++) {
         _firstPlanet.addOption(i, PlanetsOptions[i].data());
         _secondPlanet.addOption(i, PlanetsOptions[i].data());
     }

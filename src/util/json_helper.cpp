@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,12 @@
 
 #include <openspace/util/json_helper.h>
 
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
+#include <functional>
+#include <utility>
 
 namespace openspace {
 
@@ -86,7 +91,7 @@ std::string formatJsonNumber(double d) {
     return std::format("{}", d);
 }
 
-void sortJson(nlohmann::json& json, const std::string& key) {
+void sortJson(nlohmann::json& json, std::string_view key) {
     std::sort(
         json.begin(),
         json.end(),
@@ -123,7 +128,7 @@ ghoul::Dictionary jsonToDictionary(const nlohmann::json& json) {
                 // We can't represent arrays with different types, so we have to use a
                 // Dictionary for that instead
                 ghoul::Dictionary subDict;
-                for (int i = 0; i < j.size(); i++) {
+                for (size_t i = 0; i < j.size(); i++) {
                     const nlohmann::json& value = j[i];
                     // We add 1 to the key to make Lua happy :-/
                     addToDict(subDict, std::format("{}", i + 1), value);

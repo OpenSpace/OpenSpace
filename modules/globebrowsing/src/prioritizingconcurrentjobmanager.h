@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,9 @@
 
 #include <modules/globebrowsing/src/lruthreadpool.h>
 #include <openspace/util/concurrentqueue.h>
+#include <memory>
 #include <mutex>
+#include <vector>
 
 namespace openspace { template <typename T> struct Job; }
 
@@ -39,7 +41,7 @@ namespace openspace::globebrowsing {
  * which is used to identify jobs. In case a job need to be explicitly ended. It can be
  * identified using its key.
  */
-template<typename P, typename KeyType>
+template <typename P, typename KeyType>
 class PrioritizingConcurrentJobManager {
 public:
     explicit PrioritizingConcurrentJobManager(LRUThreadPool<KeyType> pool);

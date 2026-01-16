@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,17 +30,13 @@
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-namespace ghoul { class Dictionary; }
 namespace ghoul::fontrendering { class Font; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class DashboardTextItem : public DashboardItem {
 public:
-    explicit DashboardTextItem(const ghoul::Dictionary& dictionary, float fontSize = 10.f,
-        const std::string& fontName = "Mono");
+    explicit DashboardTextItem(const ghoul::Dictionary& dictionary);
 
     void render(glm::vec2& penPosition) override;
 

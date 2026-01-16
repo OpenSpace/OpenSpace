@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,10 @@
 
 #include <openspace/json.h>
 #include <openspace/properties/misc/selectionproperty.h>
-#include <openspace/util/histogram.h>
-
-using json = nlohmann::json;
+#include <ghoul/misc/assert.h>
+#include <algorithm>
+#include <iterator>
+#include <utility>
 
 namespace openspace {
 
@@ -41,14 +42,17 @@ std::vector<std::string> DataProcessorJson::readMetadata(const std::string& data
 {
     std::vector<std::string> options = std::vector<std::string>();
     if (!data.empty()) {
-        const json& j = json::parse(data);
-        json variables = j["variables"];
+        const nlohmann::json& j = nlohmann::json::parse(data);
+        nlohmann::json variables = j["variables"];
 
-        for (json::iterator it = variables.begin(); it != variables.end(); it++) {
+        for (nlohmann::json::iterator it = variables.begin();
+             it != variables.end();
+             it++)
+        {
             std::string option = it.key();
             if (option == "ep") {
-                const json& row = it.value();
-                const json& col = row.at(0);
+                const nlohmann::json& row = it.value();
+                const nlohmann::json& col = row.at(0);
 
                 dimensions = glm::size3_t(col.size(), row.size(), 1);
             }
@@ -68,22 +72,22 @@ void DataProcessorJson::addDataValues(const std::string& data,
     initializeVectors(numOptions);
 
     if (!data.empty()) {
-        const json& j = json::parse(data);
-        json variables = j["variables"];
+        const nlohmann::json& j = nlohmann::json::parse(data);
+        nlohmann::json variables = j["variables"];
 
         std::vector<float> sum(numOptions, 0.f);
         std::vector<std::vector<float>> optionValues(numOptions, std::vector<float>());
         const std::vector<std::string>& options = dataOptions.options();
 
         for (int i = 0; i < numOptions; i++) {
-            const json& row = variables[options[i]];
+            const nlohmann::json& row = variables[options[i]];
 //            int rowsize = row.size();
 
-            for (size_t y = 0; y < row.size(); ++y) {
-                const json& col = row.at(y);
+            for (size_t y = 0; y < row.size(); y++) {
+                const nlohmann::json& col = row.at(y);
                 const int colsize = static_cast<int>(col.size());
 
-                for (int x = 0; x < colsize; ++x) {
+                for (int x = 0; x < colsize; x++) {
                     const float value = col.at(x).get<float>();
                     optionValues[i].push_back(value);
                     _min[i] = std::min(_min[i], value);
@@ -104,8 +108,8 @@ std::vector<float*> DataProcessorJson::processData(const std::string& data,
     if (data.empty()) {
         return std::vector<float*>();
     }
-    const json& j = json::parse(data);
-    json variables = j["variables"];
+    const nlohmann::json& j = nlohmann::json::parse(data);
+    nlohmann::json variables = j["variables"];
 
     const std::set<std::string>& selectedOptions = optionProp;
     const std::vector<std::string>& options = optionProp.options();
@@ -123,14 +127,14 @@ std::vector<float*> DataProcessorJson::processData(const std::string& data,
         //           other mechanism (std::vector<float> most likely)
         dataOptions[option] = new float[dimensions.x * dimensions.y] { 0.f };
 
-        json row = variables[options[option]];
+        nlohmann::json row = variables[options[option]];
         const int rowsize = static_cast<int>(row.size());
 
-        for (int y = 0; y < rowsize; ++y) {
-            json col = row.at(y);
+        for (int y = 0; y < rowsize; y++) {
+            nlohmann::json col = row.at(y);
             const int colsize = static_cast<int>(col.size());
 
-            for (int x = 0; x < colsize; ++x) {
+            for (int x = 0; x < colsize; x++) {
                 const float value = col.at(x).get<float>();
                 const int i = x + y * colsize;
 

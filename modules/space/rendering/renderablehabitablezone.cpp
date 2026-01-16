@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,24 +25,22 @@
 #include <modules/space/rendering/renderablehabitablezone.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scene.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-#include <optional>
+#include <array>
+#include <cmath>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EffectiveTemperatureInfo = {
         "EffectiveTemperature",
-        "Effective Temperature",
+        "Effective temperature",
         "The effective temperature of the corresponding star, in Kelvin. Used to compute "
         "the width and size of the disc.",
         openspace::properties::Property::Visibility::User
@@ -197,7 +195,7 @@ void RenderableHabitableZone::computeZone() {
 
     // Compute the coservative bounds normalized by the size of the disc, i.e. in [0, 1]
     _conservativeBounds = glm::vec2(innerConservative, outerConservative);
-    _conservativeBounds /= _size;
+    _conservativeBounds /= _size.value();
 }
 
 glm::dvec4 RenderableHabitableZone::computeKopparapuZoneBoundaries(float teff,

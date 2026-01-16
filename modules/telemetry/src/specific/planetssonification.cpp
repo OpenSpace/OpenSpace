@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,9 @@
 
 #include <modules/telemetry/include/specific/planetssonification.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <modules/telemetry/include/util.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -33,6 +35,16 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/distanceconversion.h>
 #include <openspace/util/memorymanager.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <osc/OscTypes.h>
+#include <cstdint>
+#include <cstdlib>
+#include <limits>
+#include <optional>
+#include <utility>
 
 #include "planetssonification_lua.inl"
 
@@ -73,7 +85,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
         "ToggleAll",
-        "Toggle All",
+        "Toggle all",
         "Toggle all sonifications for all planets.",
         openspace::properties::Property::Visibility::User
     };
@@ -183,7 +195,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LowDistancePrecisionInfo = {
         "LowDistancePrecision",
-        "Distance Precision (Low)",
+        "Distance precision (low)",
         "The precision in meters used to determine when to send updated distance data "
         "to the Open Sound Control receiver. This is the low precision value (low level "
         "of detail) that is used for objects that are not the current focus, saving "
@@ -193,7 +205,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HighDistancePrecisionInfo = {
         "HighDistancePrecision",
-        "Distance Precision (High)",
+        "Distance Precision (high)",
         "The precision in meters used to determine when to send updated distance data "
         "to the Open Sound Control receiver. This is the high precision value (high "
         "level of detail) that is used when the monitored object is the current focus, "
@@ -203,7 +215,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LowAnglePrecisionInfo = {
         "LowAnglePrecision",
-        "Angle Precision (Low)",
+        "Angle precision (low)",
         "The precision in radians used to determine when to send updated angle data "
         "to the Open Sound Control receiver. This is the low precision value (low level "
         "of detail) that is used for objects that are not the current focus, saving "
@@ -213,7 +225,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HighAnglePrecisionInfo = {
         "HighAnglePrecision",
-        "Angle Precision (High)",
+        "Angle precision (high)",
         "The precision in radians used to determine when to send updated angle data "
         "to the Open Sound Control receiver. This is the high precision value (high "
         "level of detail) that is used when the monitored object is the current focus, "
@@ -432,7 +444,7 @@ void PlanetsSonification::update(const Camera* camera) {
     }
 
     // Update data for all planets
-    for (int i = 0; i < _planets.size(); ++i) {
+    for (int i = 0; i < _planets.size(); i++) {
         // Increase presision if the planet is in focus
         if (focusNode->identifier() == _planets[i].name) {
             _anglePrecision = _precisionProperties.highAnglePrecision;

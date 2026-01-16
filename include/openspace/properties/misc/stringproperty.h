@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,7 +31,7 @@ namespace openspace::properties {
 
 class StringProperty : public TemplateProperty<std::string> {
 public:
-    StringProperty(Property::PropertyInfo info, std::string value = "");
+    explicit StringProperty(Property::PropertyInfo info, std::string value = "");
 
     std::string_view className() const override final;
     ghoul::lua::LuaTypes typeLua() const override final;

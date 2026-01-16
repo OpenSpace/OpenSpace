@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -37,6 +37,18 @@ set(OPENSPACE_RELEASE_BUILD OFF)
 set(OPENSPACE_VERSION_MAJOR)
 set(OPENSPACE_VERSION_MINOR)
 set(OPENSPACE_VERSION_PATCH)
+
+# Optionally disable vcpkg to prevent dependency conflicts
+set(DISABLE_VCPKG OFF CACHE BOOL "Disable the use of vcpkg libs for Windows builds")
+if (WIN32 AND DISABLE_VCPKG)
+  # This works for all subprojects due to MSBuild's hierarchical search
+  configure_file(
+    "${CMAKE_SOURCE_DIR}/support/cmake/Directory.Build.Props.template"
+    "${CMAKE_BINARY_DIR}/Directory.Build.props"
+    COPYONLY
+  )
+  message(STATUS "Vcpkg disabled through CMake option DISABLE_VCPKG")
+endif ()
 
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_common.cmake)
 include(${PROJECT_SOURCE_DIR}/ext/ghoul/support/cmake/message_macros.cmake)
@@ -98,28 +110,6 @@ option(OPENSPACE_HAVE_TESTS "Activate the OpenSpace unit tests" ON)
 
 if (MSVC)
   option(OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION "Raise exceptions when encountering Inf's or Nan's in floating point numbers" OFF)
-
-  option(OPENSPACE_OPTIMIZATION_ENABLE_AVX "Enable AVX instruction set for compilation" OFF)
-  option(OPENSPACE_OPTIMIZATION_ENABLE_AVX2 "Enable AVX2 instruction set for compilation" OFF)
-  option(OPENSPACE_OPTIMIZATION_ENABLE_AVX512 "Enable AVX2 instruction set for compilation" OFF)
-  option(OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS "Enable other optimizations, like LTCG, intrinsics, etc")
-
-  if (OPENSPACE_OPTIMIZATION_ENABLE_AVX AND OPENSPACE_OPTIMIZATION_ENABLE_AVX2)
-    message(FATAL_ERROR "Cannot enable AVX and AVX2 instructions simultaneously")
-  endif ()
-
-  if (OPENSPACE_OPTIMIZATION_ENABLE_AVX AND OPENSPACE_OPTIMIZATION_ENABLE_AVX512)
-    message(FATAL_ERROR "Cannot enable AVX and AVX512 instructions simultaneously")
-  endif ()
-
-  if (OPENSPACE_OPTIMIZATION_ENABLE_AVX2 AND OPENSPACE_OPTIMIZATION_ENABLE_AVX512)
-    message(FATAL_ERROR "Cannot enable AVX2 and AVX512 instructions simultaneously")
-  endif ()
-
-  set(GHOUL_OPTIMIZATION_ENABLE_AVX ${OPENSPACE_OPTIMIZATION_ENABLE_AVX} CACHE BOOL "" FORCE)
-  set(GHOUL_OPTIMIZATION_ENABLE_AVX2 ${OPENSPACE_OPTIMIZATION_ENABLE_AVX2} CACHE BOOL "" FORCE)
-  set(GHOUL_OPTIMIZATION_ENABLE_AVX512 ${OPENSPACE_OPTIMIZATION_ENABLE_AVX512} CACHE BOOL "" FORCE)
-  set(GHOUL_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS ${OPENSPACE_OPTIMIZATION_ENABLE_OTHER_OPTIMIZATIONS} CACHE BOOL "" FORCE)
 endif ()
 
 if (UNIX AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -228,7 +218,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
   # find CEF to initialize it properly.
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${WEBBROWSER_MODULE_PATH}/cmake")
   include(webbrowser_helpers)
-elseif ()
+else ()
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again")
 endif ()
 

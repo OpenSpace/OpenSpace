@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,27 +25,26 @@
 #include <modules/space/rendering/renderablestars.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/updatestructures.h>
-#include <openspace/util/distanceconstants.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/updatestructures.h>
+#include <openspace/util/distanceconstants.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/templatefactory.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/filesystem/file.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <algorithm>
 #include <array>
-#include <cstdint>
+#include <cstddef>
 #include <filesystem>
-#include <fstream>
-#include <iostream>
 #include <limits>
-#include <type_traits>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableStars";
@@ -96,14 +95,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SpeckFileInfo = {
         "SpeckFile",
-        "SPECK File",
+        "SPECK file",
         "The path to the SPECK file containing the data for rendering these stars.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
-        "ColorBV Texture",
+        "ColorBV texture",
         "The path to the texture that is used to convert from the B-V value of the star "
         "to its color. The texture is used as a one dimensional lookup function.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -166,7 +165,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorOptionInfo = {
         "ColorOption",
-        "Color Option",
+        "Color option",
         "This value determines which quantity is used for determining the color of the "
         "stars.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -174,7 +173,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo OtherDataOptionInfo = {
         "OtherData",
-        "Other Data Column",
+        "Other data column",
         "The index of the SPECK file data column that is used as the color input.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -196,14 +195,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo OtherDataColorMapInfo = {
         "OtherDataColorMap",
-        "Other Data Color Map",
+        "Other data color map",
         "The color map that is used if the 'Other Data' rendering method is selected.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterOutOfRangeInfo = {
         "FilterOutOfRange",
-        "Filter Out of Range",
+        "Filter out of range",
         "Determines whether other data values outside the value range should be visible "
         "or filtered away.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -223,7 +222,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
         "Texture",
-        "Texture Path",
+        "Texture path",
         "The path to the texture that should be used.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -248,7 +247,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MagnitudeExponentInfo = {
         "MagnitudeExponent",
-        "Magnitude Exponent",
+        "Magnitude exponent",
         "Adjust star magnitude by 10^MagnitudeExponent. Stars closer than this distance "
         "are given full opacity. Farther away, stars dim proportionally to the "
         "logarithm of their distance.",
@@ -279,21 +278,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LumPercentInfo = {
         "LumPercent",
-        "Luminosity Contribution",
+        "Luminosity contribution",
         "Luminosity Contribution.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo RadiusPercentInfo = {
         "RadiusPercent",
-        "Radius Contribution",
+        "Radius contribution",
         "Radius Contribution.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInDistancesInfo = {
         "FadeInDistances",
-        "Fade-In Start and End Distances",
+        "Fade-in start and end distances",
         "These values determine the initial and final distances from the center of "
         "our galaxy from which the astronomical object will start and end "
         "fading-in.",
@@ -322,7 +321,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EnableFadeInInfo = {
         "EnableFadeIn",
-        "Enable Fade-in effect",
+        "Enable fade-in effect",
         "Enables/Disables the Fade-in effect.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

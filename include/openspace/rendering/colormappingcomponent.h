@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +34,12 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <ghoul/glm.h>
 #include <ghoul/opengl/texture.h>
+#include <memory>
+#include <optional>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
@@ -46,9 +51,9 @@ namespace documentation { struct Documentation; }
  * like the color map file itself (converted to a texture), colors to use for missing
  * values and the available data columns and value ranges.
  *
- * @TODO Also provide a small shader snippet that can be included in fragment shaders
- * that use this color mapping. As well as a set of uniforms? Now every
- * renderable needs to handle this separately.  (emmbr, 2023-10-13)
+ * \todo Also provide a small shader snippet that can be included in fragment shaders that
+ * use this color mapping. As well as a set of uniforms? Now every renderable needs to
+ * handle this separately.  (emmbr, 2023-10-13)
  */
 class ColorMappingComponent : public properties::PropertyOwner {
 public:

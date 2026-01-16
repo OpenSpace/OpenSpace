@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,17 +29,19 @@
 #include <modules/webbrowser/include/eventhandler.h>
 #include <modules/webbrowser/include/screenspacebrowser.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/windowdelegate.h>
+#include <openspace/rendering/screenspacerenderable.h>
 #include <openspace/util/factorymanager.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <ghoul/misc/templatefactory.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
-#include <filesystem>
+#include <algorithm>
+#include <optional>
 
 namespace {
     constexpr std::string_view _loggerCat = "WebBrowser";
@@ -48,7 +50,7 @@ namespace {
         UpdateBrowserBetweenRenderablesInfo =
     {
         "UpdateBrowserBetweenRenderables",
-        "Update Browser Between Renderables",
+        "Update browser between renderables",
         "Run the message loop of the browser between calls to render individual "
         "renderables. When disabled, the browser message loop only runs once per frame.",
         openspace::properties::Property::Visibility::Developer
@@ -56,7 +58,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BrowserUpdateIntervalInfo = {
         "BrowserUpdateInterval",
-        "Browser Update Interval",
+        "Browser update interval",
         "The time in microseconds between running the message loop of the browser. Only "
         "used if UpdateBrowserBetweenRenderables is true.",
         openspace::properties::Property::Visibility::Developer

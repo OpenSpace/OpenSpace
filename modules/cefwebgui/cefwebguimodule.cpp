@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,6 +37,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -55,21 +56,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
         "Visible",
-        "Is Visible",
+        "Is visible",
         "This setting determines whether the browser should be visible or not.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiUrlInfo = {
         "GuiUrl",
-        "GUI URL",
+        "Gui URL",
         "The URL of the webpage that is used to load the WebGUI from.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GuiScaleInfo = {
         "GuiScale",
-        "Gui Scale",
+        "Gui scale",
         "GUI scale multiplier.",
         openspace::properties::Property::Visibility::Always
     };

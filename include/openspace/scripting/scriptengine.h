@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,16 +26,21 @@
 #define __OPENSPACE_CORE___SCRIPTENGINE___H__
 
 #include <openspace/util/syncable.h>
+
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/misc/boolean.h>
 #include <filesystem>
-#include <mutex>
-#include <optional>
-#include <queue>
 #include <functional>
+#include <mutex>
+#include <queue>
+#include <string>
+#include <string_view>
+#include <vector>
 
+namespace ghoul { class Dictionary; }
 namespace openspace { class SyncBuffer; }
+struct lua_State;
 
 namespace openspace::scripting {
 

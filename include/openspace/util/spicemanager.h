@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,6 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/util/memorymanager.h>
-#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/boolean.h>
@@ -69,7 +68,7 @@ public:
     using TransformMatrix = std::array<double, 36>;
     using KernelHandle = unsigned int;
 
-    struct SpiceException : public ghoul::RuntimeError {
+    struct SpiceException final : public ghoul::RuntimeError {
         explicit SpiceException(std::string msg);
     };
 
@@ -612,6 +611,9 @@ public:
     }
 
     std::string dateFromEphemerisTime(double ephemerisTime, const char* format);
+
+    void dateFromEphemerisTime(double ephemerisTime, char* outBuf, int bufferSize,
+        const std::string& format = "YYYY MON DDTHR:MN:SC.### ::RND") const;
 
     /**
      * Returns the \p position of a \p target body relative to an \p observer in a

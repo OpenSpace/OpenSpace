@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,20 +24,20 @@
 
 #include <openspace/mission/missionmanager.h>
 
+#include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/engine/globals.h>
-#include <openspace/scripting/scriptengine.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <openspace/scripting/lualibrary.h>
 #include <ghoul/misc/assert.h>
-#include <filesystem>
+#include <ghoul/misc/exception.h>
+#include <utility>
 
 #include "missionmanager_lua.inl"
 
 namespace {
-    struct MissionManagerException : public ghoul::RuntimeError {
-        explicit MissionManagerException(std::string message)
-            : ghoul::RuntimeError(std::move(message), "MissionManager")
+    struct MissionManagerException final : public ghoul::RuntimeError {
+        explicit MissionManagerException(std::string msg)
+            : ghoul::RuntimeError(std::move(msg), "MissionManager")
         {}
     };
 } // namespace

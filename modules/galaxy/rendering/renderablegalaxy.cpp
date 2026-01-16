@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,27 +32,29 @@
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/boxgeometry.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
-#include <ghoul/glm.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/component_wise.hpp>
-#include <filesystem>
+#include <algorithm>
+#include <cstdint>
+#include <cstdlib>
 #include <fstream>
-#include <optional>
+#include <sstream>
+#include <utility>
 
 namespace {
     constexpr int8_t CurrentCacheVersion = 1;
@@ -66,7 +68,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo VolumeRenderingEnabledInfo = {
         "VolumeRenderingEnabled",
-        "Volume Rendering",
+        "Volume rendering",
         "Decides whether the volume rendering component of the galaxy rendering should "
         "be enabled or not. If disabled, the volume rendering is skipped.",
         openspace::properties::Property::Visibility::User
@@ -74,7 +76,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StarRenderingEnabledInfo = {
         "StarRenderingEnabled",
-        "Star Rendering",
+        "Star rendering",
         "Decides whether the point-based star rendering component of the galaxy "
         "rendering should be enabled or not. If disabled, the point-based star rendering "
         "is skipped.",
@@ -83,7 +85,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
-        "Step Size",
+        "Step size",
         "Determines the distance between steps taken in the volume rendering. The lower "
         "the number is, the better the rendering looks, but also takes more "
         "computational resources to render.",
@@ -92,7 +94,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AbsorptionMultiplyInfo = {
         "AbsorptionMultiply",
-        "Absorption Multiplier",
+        "Absorption multiplier",
         "A unit-less scale factor for the probability of dust absorbing a light "
         "particle. The amount of absorption determines the spectrum of the light that is "
         "emitted from the galaxy.",
@@ -101,7 +103,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EmissionMultiplyInfo = {
         "EmissionMultiply",
-        "Emission Multiplier",
+        "Emission multiplier",
         "A unit-less scale factor for the amount of light being emitted by dust in the "
         "galaxy.",
         openspace::properties::Property::Visibility::User
@@ -116,7 +118,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StarRenderingMethodInfo = {
         "StarRenderingMethod",
-        "Star Rendering Method",
+        "Star rendering method",
         "The rendering method used for visualizing the stars.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -134,7 +136,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo =
     {
         "Downscale",
-        "Downscale Factor Volume Rendering",
+        "Downscale factor volume rendering",
         "The downscaling factor used when rendering the volume.",
         openspace::properties::Property::Visibility::User
     };
@@ -142,7 +144,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo NumberOfRayCastingStepsInfo =
     {
         "Steps",
-        "Number of RayCasting Steps",
+        "Number of raycasting steps",
         "The number of integration steps used during the raycasting procedure.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

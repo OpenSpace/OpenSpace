@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,14 +32,14 @@
 
 namespace openspace::properties {
 
-class Mat4Property : public NumericalProperty<glm::mat4x4> {
+class Mat4Property : public NumericalProperty<glm::mat4> {
 public:
-    Mat4Property(Property::PropertyInfo info, glm::mat4x4 value = glm::mat4x4(),
-        glm::mat4x4 minValue =
+    explicit Mat4Property(Property::PropertyInfo info, glm::mat4 value = glm::mat4(0.f),
+        glm::mat4 minValue =
             ghoul::createFillMat4x4<float>(std::numeric_limits<float>::lowest()),
-        glm::mat4x4 maxValue =
+        glm::mat4 maxValue =
             ghoul::createFillMat4x4<float>(std::numeric_limits<float>::max()),
-        glm::mat4x4 stepValue = ghoul::createFillMat4x4<float>(0.01f));
+        glm::mat4 stepValue = ghoul::createFillMat4x4<float>(0.01f));
 
     std::string_view className() const override final;
     ghoul::lua::LuaTypes typeLua() const override final;
@@ -47,10 +47,10 @@ public:
     void getLuaValue(lua_State* state) const override final;
 
     std::string stringValue() const override final;
-    using TemplateProperty<glm::mat4x4>::operator=;
+    using TemplateProperty<glm::mat4>::operator=;
 
 private:
-    glm::mat4x4 toValue(lua_State* state) const override final;
+    glm::mat4 toValue(lua_State* state) const override final;
 };
 
 } // namespace openspace::properties

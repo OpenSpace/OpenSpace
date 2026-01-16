@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,14 +27,17 @@
 
 #include <modules/base/rendering/renderablesphere.h>
 
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/util/dynamicfilesequencedownloader.h>
+#include <ghoul/glm.h>
+#include <deque>
+#include <filesystem>
+#include <limits>
+#include <utility>
 
 namespace openspace {
-
-struct RenderData;
-struct UpdateData;
-namespace documentation { struct Documentation; }
 
 class RenderableTimeVaryingFitsSphere : public RenderableSphere {
 public:
@@ -109,7 +112,6 @@ private:
     bool _renderForever = true;
     bool _inInterval = false;
 
-    bool _isLoadingStateFromDisk = false;
     // DynamicFileSequenceDownloader downloads and updates the renderable with
     // data downloaded from the web
     std::unique_ptr<DynamicFileSequenceDownloader> _dynamicFileDownloader;

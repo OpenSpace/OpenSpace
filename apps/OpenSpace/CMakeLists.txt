@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -143,22 +143,26 @@ add_custom_command(TARGET OpenSpace POST_BUILD
 
 end_header("Dependency: SGCT")
 
-begin_header("Dependency: Profile Editor")
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher)
-target_link_libraries(OpenSpace PRIVATE openspace-ui-launcher)
-end_header("Dependency: Profile Editor")
+# Profile Editor / Launcher GUI
+option(OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER "Build Launcher GUI" ON)
+if (OPENSPACE_APPLICATION_OPENSPACE-LAUNCHER)
+  begin_header("Dependency: Profile Editor")
+  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/ext/launcher)
+  target_link_libraries(OpenSpace PRIVATE openspace-ui-launcher)
+  target_compile_definitions(OpenSpace PRIVATE OPENSPACE_HAS_LAUNCHER)
+  end_header("Dependency: Profile Editor")
 
-if (WIN32)
-  # Find the windeployqt application
-  get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
-  get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
-  add_custom_command(
-    TARGET OpenSpace POST_BUILD
-    COMMAND "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations \"$<TARGET_FILE:OpenSpace>\"
-    COMMENT "Deploying Qt libraries"
-  )
+  if (WIN32)
+    # Find the windeployqt application
+    get_target_property(_qmake_executable Qt6::qmake IMPORTED_LOCATION)
+    get_filename_component(_qt_bin_dir "${_qmake_executable}" DIRECTORY)
+    add_custom_command(
+      TARGET OpenSpace POST_BUILD
+      COMMAND "${WINDEPLOYQT_EXECUTABLE}" --verbose 0 --no-compiler-runtime --no-translations \"$<TARGET_FILE:OpenSpace>\"
+      COMMENT "Deploying Qt libraries"
+    )
+  endif ()
 endif ()
-
 
 # Web Browser and Web gui
 # Why not put these in the module's path? Because they do not have access to the
@@ -178,7 +182,7 @@ if (OPENSPACE_MODULE_WEBBROWSER AND CEF_ROOT)
 
   set_cef_targets("${CEF_ROOT}" OpenSpace)
   run_cef_platform_config("${CEF_ROOT}" "${CEF_TARGET}" "${WEBBROWSER_MODULE_PATH}")
-elseif ()
+else ()
   message(WARNING "Web configured to be included, but no CEF_ROOT was found, please try configuring CMake again")
 endif ()
 

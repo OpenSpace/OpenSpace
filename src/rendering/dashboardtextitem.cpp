@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,17 +25,17 @@
 #include <openspace/rendering/dashboardtextitem.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo FontNameInfo = {
         "FontName",
-        "Font Name",
+        "Font name",
         "This value is the name of the font that is used. It can either refer to an "
         "internal name registered previously, or it can refer to a path that is used.",
         openspace::properties::Property::Visibility::User
@@ -43,7 +43,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
-        "Font Size",
+        "Font size",
         "This value determines the size of the font that is used to render the distance.",
         openspace::properties::Property::Visibility::User
     };
@@ -64,11 +64,10 @@ documentation::Documentation DashboardTextItem::Documentation() {
     return codegen::doc<Parameters>("dashboardtextitem");
 }
 
-DashboardTextItem::DashboardTextItem(const ghoul::Dictionary& dictionary, float fontSize,
-                                     const std::string& fontName)
+DashboardTextItem::DashboardTextItem(const ghoul::Dictionary& dictionary)
     : DashboardItem(dictionary)
-    , _fontName(FontNameInfo, fontName)
-    , _fontSize(FontSizeInfo, fontSize, 6.f, 144.f, 1.f)
+    , _fontName(FontNameInfo, "Mono")
+    , _fontSize(FontSizeInfo, 10.f, 6.f, 144.f, 1.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

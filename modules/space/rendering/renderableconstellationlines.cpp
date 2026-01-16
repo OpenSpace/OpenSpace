@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,35 +24,42 @@
 
 #include <modules/space/rendering/renderableconstellationlines.h>
 
+#include <openspace/data/dataloader.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <scn/scan.h>
-#include <array>
+#include <algorithm>
 #include <filesystem>
 #include <fstream>
-#include <optional>
+#include <set>
+#include <sstream>
+#include <tuple>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableConstellationLines";
 
     constexpr openspace::properties::Property::PropertyInfo FileInfo = {
         "File",
-        "Constellation Data File Path",
+        "Constellation data file path",
         "The path to a SPECK file that contains the data for the constellation lines.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
-        "Draw Elements",
+        "Draw elements",
         "Enables/Disables the drawing of the constellations.",
         openspace::properties::Property::Visibility::NoviceUser
     };
@@ -66,7 +73,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorsInfo = {
         "Colors",
-        "Constellation Colors",
+        "Constellation colors",
         "A list of colors to use for the constellations. A data file may include several "
         "groups of constellations, where each group can have a distinct color. The index "
         "for the color parameter for each constellation in the data file corresponds to "
@@ -416,7 +423,7 @@ void RenderableConstellationLines::loadData() {
         dim >> constellationLine.numV;
 
         // We can now read the vertices data:
-        for (int l = 0; l < constellationLine.numV; ++l) {
+        for (int l = 0; l < constellationLine.numV; l++) {
             ghoul::getline(file, line);
             if (line.substr(0, 1) == "}") {
                 break;

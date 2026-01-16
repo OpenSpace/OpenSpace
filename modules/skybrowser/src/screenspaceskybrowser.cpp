@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,23 +25,25 @@
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 
 #include <modules/skybrowser/skybrowsermodule.h>
-#include <modules/webbrowser/include/webkeyboardhandler.h>
 #include <modules/skybrowser/include/utility.h>
+#include <modules/webbrowser/include/browserinstance.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/rendering/renderengine.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionaryjsonformatter.h>
-#include <ghoul/opengl/texture.h>
-#include <optional>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 #include <glm/gtx/color_space.hpp>
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <optional>
 #include <random>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TextureQualityInfo = {
         "TextureQuality",
-        "Quality of Texture",
+        "Quality of texture",
         "A parameter to set the resolution of the texture. 1 is full resolution and "
         "slower frame rate. Lower value means lower resolution of texture and faster "
         "frame rate.",
@@ -50,7 +52,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DisplayCopyInfo = {
         "DisplayCopy",
-        "Display Copy Position",
+        "Display copy position",
         "Display a copy of this sky browser at an additional position. This copy will "
         "not be interactive. The position is in RAE (Radius, Azimuth, Elevation) "
         "coordinates or Cartesian, depending on if the browser uses RAE or Cartesian "
@@ -60,14 +62,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DisplayCopyShowInfo = {
         "ShowDisplayCopy",
-        "Show Display Copy",
+        "Show display copy",
         "Show the display copy.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IsHiddenInfo = {
         "IsHidden",
-        "Is Hidden",
+        "Is hidden",
         "If checked, the browser will be not be displayed. If it is not checked, it will "
         "be.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -75,7 +77,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PointSpacecraftInfo = {
         "PointSpacecraft",
-        "Point Spacecraft",
+        "Point spacecraft",
         "If checked, spacecrafts will point towards the coordinate of an image upon "
         "selection.",
         openspace::properties::Property::Visibility::User
@@ -83,7 +85,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UpdateDuringAnimationInfo = {
         "UpdateDuringTargetAnimation",
-        "Update During Target Animation",
+        "Update during target animation",
         "If checked, the sky browser display copy will update its coordinates while "
         "the target is animating.",
         openspace::properties::Property::Visibility::User
@@ -91,7 +93,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo VerticalFovInfo = {
         "VerticalFov",
-        "Vertical Field Of View",
+        "Vertical field of view",
         "The vertical field of view of the target.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -462,7 +464,7 @@ void ScreenSpaceSkyBrowser::update() {
     }
     // After the texture has been updated, wait a little bit before updating the border
     // radius so the browser has time to update its size
-    if (_radiusIsDirty && _isInitialized && _borderRadiusTimer > RadiusTimeOut) {
+    if (_radiusIsDirty && _isInitialized && _borderRadiusTimer > RadiusTimeout) {
         _wwtCommunicator.setBorderRadius(_borderRadius);
         _radiusIsDirty = false;
         _borderRadiusTimer = -1;

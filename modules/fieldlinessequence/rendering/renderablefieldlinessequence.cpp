@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,14 +30,23 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-#include <iostream>
-#include <thread>
+#include <algorithm>
+#include <filesystem>
+#include <iterator>
+#include <unordered_map>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableFieldlinesSequence";
@@ -58,7 +67,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorMethodInfo = {
         "ColorMethod",
-        "Color Method",
+        "Color method",
         "Color lines uniformly or using color tables based on extra quantities like, for "
         "examples, temperature or particle density.",
         openspace::properties::Property::Visibility::User
@@ -66,14 +75,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
         "ColorQuantity",
-        "Quantity to Color By",
+        "Quantity to color by",
         "Quantity used to color lines if the 'By Quantity' color method is selected.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorMinMaxInfo = {
         "ColorMinMaxRange",
-        "Color Min Max Range",
+        "Color min max range",
         "A min-max range for what the lowest and highest values of the color table can "
         "be set to.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -81,28 +90,28 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
-        "Path to Color Table",
+        "Path to color table",
         "Color Table/Transfer Function to use for 'By Quantity' coloring.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorUniformInfo = {
         "Color",
-        "Uniform Line Color",
+        "Uniform line color",
         "The uniform color of lines shown when 'Color Method' is set to 'Uniform'.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorUseABlendingInfo = {
         "ABlendingEnabled",
-        "Additive Blending",
+        "Additive blending",
         "Activate/deactivate additive blending.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
         "DomainEnabled",
-        "Domain Limits",
+        "Domain limits",
         "Enable/Disable domain limits.",
         openspace::properties::Property::Visibility::User
     };
@@ -137,7 +146,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
         "FlowEnabled",
-        "Flow Enabled",
+        "Flow enabled",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
         "illustrate magnetic flow.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -145,28 +154,28 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
         "FlowColor",
-        "Flow Color",
+        "Flow color",
         "Color of particles flow direction indication.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FlowReversedInfo = {
         "ReversedFlow",
-        "Reversed Flow",
+        "Reversed flow",
         "Toggle to make the flow move in the opposite direction.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
         "ParticleSize",
-        "Particle Size",
+        "Particle size",
         "Size of the particles.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FlowParticleSpacingInfo = {
         "ParticleSpacing",
-        "Particle Spacing",
+        "Particle spacing",
         "Spacing inbetween particles.",
         openspace::properties::Property::Visibility::User
     };
@@ -180,7 +189,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MaskingEnabledInfo = {
         "MaskingEnabled",
-        "Masking Enabled",
+        "Masking enabled",
         "Enable/disable masking. Use masking to show lines where a given quantity is "
         "within a given range, for example, if you only want to see where the "
         "temperature is between 10 and 20 degrees. Also used for masking out line "
@@ -190,35 +199,35 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MaskingMinMaxInfo = {
         "MaskingMinLimit",
-        "Lower Limit",
+        "Lower limit",
         "Lower and upper limit of the valid masking range.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaskingQuantityInfo = {
         "MaskingQuantity",
-        "Quantity used for Masking",
+        "Quantity used for masking",
         "Quantity used for masking.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "This value specifies the line width of the fieldlines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
         "TimeJumpToStart",
-        "Jump to Start Of Sequence",
+        "Jump to start of sequence",
         "Performs a time jump to the start of the sequence.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SaveDownloadsOnShutdown = {
         "SaveDownloadsOnShutdown",
-        "Save Downloads On Shutdown",
+        "Save downloads on shutdown",
         "This is an option for if dynamically downloaded should be saved between runs "
         "or not.",
         openspace::properties::Property::Visibility::User
@@ -601,7 +610,9 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     if (p.colorTableRanges.has_value()) {
         _colorTableRanges = *p.colorTableRanges;
-        if (_colorTableRanges.size() > _colorQuantityTemp && _colorQuantityTemp >= 0) {
+        if (_colorQuantityTemp < static_cast<int>(_colorTableRanges.size()) &&
+            _colorQuantityTemp >= 0)
+        {
             _selectedColorRange = _colorTableRanges[_colorQuantityTemp];
         }
         else {
@@ -639,7 +650,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
         // Note that we do not need to set _selectedColorRange in the constructor, due to
         // this onChange being declared before firstupdate() function that sets
         // _colorQuantity.
-        if (_colorTableRanges.size() > _colorQuantity) {
+        if (_colorQuantity < static_cast<int>(_colorTableRanges.size())) {
             _selectedColorRange = _colorTableRanges[_colorQuantity];
         }
         // If fewer data ranges are given than there are parameters in the data, use the
@@ -650,7 +661,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
             _selectedColorRange = _colorTableRanges[0];
         }
 
-        if (_colorTablePaths.size() > _colorQuantity) {
+        if (_colorQuantity < static_cast<int>(_colorTablePaths.size())) {
             _colorTablePath = _colorTablePaths[_colorQuantity].string();
         }
         else {
@@ -660,7 +671,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     // This is to save the changes done in the gui for when you switch between options
     _selectedColorRange.onChange([this]() {
-        if (_colorTableRanges.size() > _colorQuantity) {
+        if (_colorQuantity < static_cast<int>(_colorTableRanges.size())) {
             _colorTableRanges[_colorQuantity] = _selectedColorRange;
         }
     });
@@ -680,7 +691,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
 
     _maskingQuantity.onChange([this]() {
         _shouldUpdateMaskingBuffer = true;
-        if (_maskingRanges.size() > _maskingQuantity) {
+        if (_maskingQuantity < static_cast<int>(_maskingRanges.size())) {
             _selectedMaskingRange = _maskingRanges[_maskingQuantity];
         }
         else if (!_maskingRanges.empty()) {
@@ -692,7 +703,7 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     });
 
     _selectedMaskingRange.onChange([this]() {
-        if (_maskingRanges.size() > _maskingQuantity) {
+        if (_maskingQuantity < static_cast<int>(_maskingRanges.size())) {
             _maskingRanges[_maskingQuantity] = _selectedMaskingRange;
         }
     });
@@ -1034,14 +1045,14 @@ void RenderableFieldlinesSequence::firstUpdate() {
     const std::vector<std::string>& extraNamesVec =
         file->state.extraQuantityNames();
 
-    for (int i = 0; i < quantities.size(); ++i) {
-        _colorQuantity.addOption(i, extraNamesVec[i]);
-        _maskingQuantity.addOption(i, extraNamesVec[i]);
+    for (size_t i = 0; i < quantities.size(); i++) {
+        _colorQuantity.addOption(static_cast<int>(i), extraNamesVec[i]);
+        _maskingQuantity.addOption(static_cast<int>(i), extraNamesVec[i]);
     }
     _colorQuantity = _colorQuantityTemp;
     _maskingQuantity = _maskingQuantityTemp;
 
-    if (_colorTablePaths.size() > _colorQuantity) {
+    if (_colorQuantity < static_cast<int>(_colorTablePaths.size())) {
         _colorTablePath = _colorTablePaths[_colorQuantity].string();
     }
     else {
@@ -1094,7 +1105,11 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         currentTime >= _files[0].timestamp &&
         currentTime < _sequenceEndTime;
 
-    // For the sake of this if statment, it is easiest to think of activeIndex as the
+    // Track if we need to update buffers
+    bool needsBufferUpdate = false;
+    bool fileWasJustLoaded = false;
+
+    // For the sake of this if statement, it is easiest to think of activeIndex as the
     // previous index and nextIndex as the current
     const int nextIndex = _activeIndex + 1;
     // if _activeIndex is -1 but we are in interval, it means we were before the start
@@ -1106,7 +1121,8 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
         currentTime < _files[_activeIndex].timestamp ||
         // if currentTime >= next timestamp, it means that we stepped forward to a
         // time represented by another state
-        (nextIndex < _files.size() && currentTime >= _files[nextIndex].timestamp) ||
+        (nextIndex < static_cast<int>(_files.size()) &&
+        currentTime >= _files[nextIndex].timestamp) ||
         // The case when we jumped passed last file. where nextIndex is not < file.size()
         currentTime >= _files[_activeIndex].timestamp)
     {
@@ -1127,14 +1143,20 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
             _atLeastOneFileLoaded = true;
             computeSequenceEndTime();
             trackOldest(file);
-        }
-        // If we have a new index, buffers needs to update
-        if (previousIndex != _activeIndex) {
-            _shouldUpdateColorBuffer = true;
-            _shouldUpdateMaskingBuffer = true;
+            fileWasJustLoaded = true;
         }
 
+        // If we have a new index or just loaded a file, buffers need to update
+        if (previousIndex != _activeIndex || fileWasJustLoaded) {
+            needsBufferUpdate = true;
+        }
+    }
+
+    // Update all buffers together to maintain consistency
+    if (needsBufferUpdate) {
         updateVertexPositionBuffer();
+        _shouldUpdateColorBuffer = true;
+        _shouldUpdateMaskingBuffer = true;
     }
 
     if (_shouldUpdateColorBuffer) {

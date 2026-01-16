@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,28 +24,19 @@
 
 #include <modules/base/rendering/renderablelabel.h>
 
-#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/glm.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/io/texture/texturereader.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/crc32.h>
-#include <ghoul/misc/defer.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/misc/templatefactory.h>
 #include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <glm/gtx/string_cast.hpp>
+#include <algorithm>
+#include <cmath>
 #include <optional>
 
 namespace {
@@ -91,7 +82,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
-        "Blending Mode",
+        "Blending mode",
         "This determines the blending mode that is applied to the renderable.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -105,7 +96,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
-        "Font Size",
+        "Font size",
         "The font size (in points) for the label.",
         openspace::properties::Property::Visibility::User
     };
@@ -127,35 +118,35 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
-        "Min and Max Size",
+        "Min and max size",
         "The minimum and maximum size (in pixels) of the label.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
-        "Transformation Matrix",
+        "Transformation matrix",
         "Transformation matrix to be applied to the label.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrientationOptionInfo = {
         "OrientationOption",
-        "Orientation Option",
+        "Orientation option",
         "Label orientation rendering mode.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnableFadingEffectInfo = {
         "EnableFading",
-        "Enable/Disable Fade-in Effect",
+        "Enable/disable fade-in effect",
         "Enable/Disable the Fade-in effect.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeWidthsInfo = {
         "FadeWidths",
-        "Fade Widths",
+        "Fade widths",
         "The distances over which the fading takes place, given in the specified unit. "
         "The first value is the distance before the closest distance and the second "
         "the one after the furthest distance. For example, with the unit Parsec (pc), "
@@ -166,7 +157,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeDistancesInfo = {
         "FadeDistances",
-        "Fade Distances",
+        "Fade distances",
         "The distance range in which the labels should be fully opaque, specified in "
         "the chosen unit. The distance from the position of the label to the camera.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -174,7 +165,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeUnitOptionInfo = {
         "FadeUnit",
-        "Fade Distance Unit",
+        "Fade distance Unit",
         "Distance unit for fade-in/-out distance calculations. Defaults to \"au\".",
         openspace::properties::Property::Visibility::AdvancedUser
     };

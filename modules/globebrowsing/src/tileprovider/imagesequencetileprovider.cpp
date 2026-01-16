@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,8 +24,12 @@
 
 #include <modules/globebrowsing/src/tileprovider/imagesequencetileprovider.h>
 
-#include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
+#include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/documentation/documentation.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <limits>
 #include <optional>
 
 namespace {
@@ -39,7 +43,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo NumImagesInfo = {
         "NumberImages",
-        "Number of Images",
+        "Number of images",
         "The number of images that can be shown. The 'Index' value must be between 0 and "
         "this value - 1.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -47,14 +51,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CurrentImageInfo = {
         "CurrentImage",
-        "Current Image",
+        "Current image",
         "The read-only value of the currently selected image.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FolderPathInfo = {
         "FolderPath",
-        "Folder Path",
+        "Folder path",
         "The path that is used to look for images for this image provider. The path must "
         "point to an existing folder that contains images.",
         openspace::properties::Property::Visibility::AdvancedUser

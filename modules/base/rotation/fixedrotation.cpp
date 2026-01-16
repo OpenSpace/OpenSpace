@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,15 +25,14 @@
 #include <modules/base/rotation/fixedrotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <optional>
-#include <string>
 #include <variant>
 
 namespace {
@@ -50,7 +49,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo XAxisTypeInfo = {
         "xAxisType",
-        "xAxis: Specification Type",
+        "xAxis: Specification type",
         "This value specifies how this axis is being specified, that is whether it is "
         "referencing another object, specifying an absolute vector, or whether it is "
         "using the right handed coordinate system completion based off the other two "
@@ -60,7 +59,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo YAxisTypeInfo = {
         "yAxisType",
-        "yAxis: Specification Type",
+        "yAxis: Specification type",
         "This value specifies how this axis is being specified, that is whether it is "
         "referencing another object, specifying an absolute vector, or whether it is "
         "using the right handed coordinate system completion based off the other two "
@@ -70,7 +69,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ZAxisTypeInfo = {
         "zAxisType",
-        "zAxis: Specification Type",
+        "zAxis: Specification type",
         "This value specifies how this axis is being specified, that is whether it is "
         "referencing another object, specifying an absolute vector, or whether it is "
         "using the right handed coordinate system completion based off the other two "
@@ -80,7 +79,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo XAxisObjectInfo = {
         "xAxisObject",
-        "xAxis: Focus Object",
+        "xAxis: Focus object",
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
         "stay fixed to the current position of that object.",
@@ -89,7 +88,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo YAxisObjectInfo = {
         "yAxisObject",
-        "yAxis: Focus Object",
+        "yAxis: Focus object",
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
         "stay fixed to the current position of that object.",
@@ -98,7 +97,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ZAxisObjectInfo = {
         "zAxisObject",
-        "zAxis: Focus Object",
+        "zAxis: Focus object",
         "This is the object that the axis will focus on. This object must name an "
         "existing scene graph node in the currently loaded scene and the rotation will "
         "stay fixed to the current position of that object.",
@@ -107,7 +106,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo XAxisInvertObjectInfo = {
         "xAxisInvertObject",
-        "xAxis: Invert Object Point Direction",
+        "xAxis: Invert object point direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
         "referenced object.",
@@ -116,7 +115,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo YAxisInvertObjectInfo = {
         "yAxisInvertObject",
-        "yAxis: Invert Object Point Direction",
+        "yAxis: Invert object point direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
         "referenced object.",
@@ -125,7 +124,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ZAxisInvertObjectInfo = {
         "zAxisInvertObject",
-        "zAxis: Invert Object Point Direction",
+        "zAxis: Invert object point direction",
         "If this value is set to 'true', and the type is set to 'Object', the inverse of "
         "the pointing direction is used, causing the object to point away from the "
         "referenced object.",
@@ -185,7 +184,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AttachedInfo = {
         "Attached",
-        "Attached Node",
+        "Attached node",
         "This is the name of the node that this rotation is attached to, this value is "
         "only needed if any of the three axis uses the Object type. In this case, the "
         "location of the attached node is required to compute the relative direction.",

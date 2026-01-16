@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,18 +28,24 @@
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <modules/spacecraftinstruments/util/instrumenttimesparser.h>
 #include <modules/spacecraftinstruments/util/labelparser.h>
+#include <modules/spacecraftinstruments/util/sequenceparser.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/framebufferobject.h>
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
-#include <optional>
+#include <array>
+#include <utility>
+#include <variant>
 
 namespace {
     constexpr std::string_view PlaceholderFile = "${DATA}/placeholder.png";
@@ -48,7 +54,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ProjectionInfo = {
         "PerformProjection",
-        "Perform Projections",
+        "Perform projections",
         "If this value is enabled, this ProjectionComponent will perform projections. If "
         "it is disabled, projections will be ignored.",
         openspace::properties::Property::Visibility::User
@@ -56,7 +62,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ClearProjectionInfo = {
         "ClearAllProjections",
-        "Clear Projections",
+        "Clear projections",
         "If this property is triggered, it will remove all the projections that have "
         "already been applied.",
         openspace::properties::Property::Visibility::User
@@ -64,7 +70,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadingInfo = {
         "ProjectionFading",
-        "Projection Fading",
+        "Projection fading",
         "This value fades the previously performed projections in or out. If this value "
         "is equal to '1', the projections are fully visible, if the value is equal to "
         "'0', the performed projections are completely invisible.",
@@ -73,7 +79,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextureSizeInfo = {
         "TextureSize",
-        "Texture Size",
+        "Texture size",
         "This value determines the size of the texture into which the images are "
         "projected and thus provides the limit to the resolution of projections that can "
         "be applied. Changing this value will not cause the texture to be automatically "
@@ -83,7 +89,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ApplyTextureSizeInfo = {
         "ApplyTextureSize",
-        "Apply Texture Size",
+        "Apply texture size",
         "Triggering this property applies a new size to the underlying projection "
         "texture. The old texture is resized and interpolated to fit the new size.",
         openspace::properties::Property::Visibility::AdvancedUser

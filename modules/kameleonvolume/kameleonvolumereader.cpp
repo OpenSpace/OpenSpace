@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,12 +27,11 @@
 #include <modules/kameleon/include/kameleonhelper.h>
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/volume/rawvolume.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
-#include <filesystem>
+#include <ghoul/misc/exception.h>
+#include <limits>
+#include <utility>
 
 #ifdef WIN32
 #pragma warning (push)
@@ -92,29 +91,34 @@ KameleonVolumeReader::KameleonVolumeReader(std::filesystem::path path)
 KameleonVolumeReader::~KameleonVolumeReader() {}
 
 std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
-                                                            const glm::uvec3 & dimensions,
+                                                             const glm::uvec3& dimensions,
                                                               const std::string& variable,
                                                         const glm::vec3& lowerDomainBound,
                                                   const glm::vec3& upperDomainBound) const
 {
     float min, max;
+    std::vector<std::string> emptyVec;
     return readFloatVolume(
         dimensions,
         variable,
         lowerDomainBound,
         upperDomainBound,
+        emptyVec,
         min,
         max
     );
 }
 
 std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
-                                                            const glm::uvec3 & dimensions,
+                                                             const glm::uvec3& dimensions,
                                                               const std::string& variable,
                                                               const glm::vec3& lowerBound,
                                                               const glm::vec3& upperBound,
+                                                 std::vector<std::string>& variableVector,
                                                                           float& minValue,
-                                                                    float& maxValue) const
+                                                                          float& maxValue,
+                                                                      bool factorRSquared,
+                                                             float innerRadialLimit) const
 {
     minValue = std::numeric_limits<float>::max();
     maxValue = -std::numeric_limits<float>::max();
@@ -128,16 +132,55 @@ std::unique_ptr<volume::RawVolume<float>> KameleonVolumeReader::readFloatVolume(
         return _interpolator->interpolate(var, coords[0], coords[1], coords[2]);
     };
 
+    auto sample = [&variable, &interpolate](glm::vec3 volumeCoords) {
+        return interpolate(variable, volumeCoords);
+    };
+
+    auto sampleVectorVariablesLength =
+        [&variableVector, &interpolate](glm::vec3 volumeCoords) {
+            float x = interpolate(variableVector[0], volumeCoords);
+            float y = interpolate(variableVector[1], volumeCoords);
+            float z = interpolate(variableVector[2], volumeCoords);
+            return glm::sqrt(x * x + y * y + z * z);
+        };
+
     float* data = volume->data();
+
+    size_t progressUpdateStep = volume->nCells() / 10;
+
     for (size_t index = 0; index < volume->nCells(); index++) {
         const glm::vec3 coords = volume->indexToCoords(index);
         const glm::vec3 coordsZeroToOne = coords / dims;
         const glm::vec3 volumeCoords = lowerBound + diff * coordsZeroToOne;
 
-        data[index] = interpolate(variable, volumeCoords);
+        // Radius is within custom limit of exclusion, skip value
+        if (volumeCoords.x < innerRadialLimit) {
+            continue;
+        }
 
-        minValue = glm::min(minValue, data[index]);
-        maxValue = glm::max(maxValue, data[index]);
+        float value =
+            !variable.empty() ?
+            sample(volumeCoords) :
+            sampleVectorVariablesLength(volumeCoords);
+
+        // Multiply value by the squared first coordinate
+        // (radial distance for spherical coords)
+        if (factorRSquared) {
+            value *= volumeCoords.x * volumeCoords.x;
+        }
+
+        if (value < minValue) {
+            minValue = value;
+        }
+        if (value > maxValue) {
+            maxValue = value;
+        }
+
+        data[index] = value;
+
+        if (_readerCallback && index % progressUpdateStep == 0) {
+            _readerCallback(static_cast<float>(index) / volume->nCells());
+        }
     }
 
     return volume;
@@ -298,5 +341,9 @@ double KameleonVolumeReader::maxValue(const std::string & variable) const {
     ccmc::Model& m = *_kameleon->model;
     return m.getVariableAttribute(variable, "actual_max").getAttributeFloat();
 }
+
+void KameleonVolumeReader::setReaderCallback(Callback cb) {
+    _readerCallback = std::move(cb);
+};
 
 } // namespace openspace::kameleonvolume

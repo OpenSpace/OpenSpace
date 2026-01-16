@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLEGLOBE___H__
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/shadowmapping.h>
 
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/geojson/geojsonmanager.h>
@@ -37,22 +38,22 @@
 #include <modules/globebrowsing/src/skirtedgrid.h>
 #include <modules/globebrowsing/src/tileindex.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/util/ellipsoid.h>
+#include <ghoul/glm.h>
 #include <ghoul/misc/memorypool.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <cstddef>
+#include <array>
+#include <cstdint>
 #include <memory>
-
-namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::globebrowsing {
 
-class GPULayerGroup;
-class RenderableGlobe;
-struct TileIndex;
+class Layer;
 
 struct BoundingHeights {
     float min;
@@ -60,9 +61,6 @@ struct BoundingHeights {
     bool available;
     bool tileOK;
 };
-
-namespace chunklevelevaluator { class Evaluator; }
-namespace culling { class ChunkCuller; }
 
 struct Chunk {
     enum class Status : uint8_t {
@@ -95,7 +93,7 @@ enum class ShadowCompType {
  * A RenderableGlobe is a globe modeled as an ellipsoid using a chunked LOD algorithm for
  * rendering.
  */
-class RenderableGlobe : public Renderable {
+class RenderableGlobe : public Renderable, public shadowmapping::Shadowee {
 public:
     explicit RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() override = default;
@@ -105,9 +103,9 @@ public:
     void deinitializeGL() override;
     bool isReady() const override;
 
+    void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void renderSecondary(const RenderData& data, RendererTasks&) override;
-    void update(const UpdateData& data) override;
 
     SurfacePositionHandle calculateSurfacePositionHandle(
         const glm::dvec3& targetModelSpace) const override;
@@ -128,6 +126,14 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    static constexpr int MinSplitDepth = 2;
+    static constexpr int MaxSplitDepth = 22;
+
+    struct DepthMapData {
+        GLuint depthMap;
+        glm::dmat4 viewProjection;
+    };
+
     /**
      * Test if a specific chunk can safely be culled without affecting the rendered image.
      *
@@ -155,15 +161,13 @@ private:
      *
      * The height can be negative if the height map contains negative values.
      *
-     * \param `position` is the position of a point that gets geodetically projected on
+     * \param position This is the position of a point that gets geodetically projected on
      *        the reference ellipsoid. `position` must be in Cartesian model space
      * \return The height from the reference ellipsoid to the globe surface
      */
     float getHeight(const glm::dvec3& position) const;
 
-    void renderChunks(const RenderData& data, RendererTasks& rendererTask,
-        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
-    );
+    void renderChunks(const RenderData& data, bool renderGeomOnly = false);
 
     /**
      * Chunks can be rendered either globally or locally. Global rendering is performed
@@ -174,7 +178,7 @@ private:
      * lead to jagging. We only render global chunks for lower chunk levels.
      */
     void renderChunkGlobally(const Chunk& chunk, const RenderData& data,
-        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
+        std::vector<DepthMapData>& depthMapData, bool renderGeomOnly = false
     );
 
     /**
@@ -189,7 +193,7 @@ private:
      * higher chunk levels.
      */
     void renderChunkLocally(const Chunk& chunk, const RenderData& data,
-        const ShadowComponent::ShadowMapData& shadowData = {}, bool renderGeomOnly = false
+        std::vector<DepthMapData>& depthMapData, bool renderGeomOnly = false
     );
 
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
@@ -221,9 +225,6 @@ private:
     void updateChunk(Chunk& chunk, const RenderData& data, const glm::dmat4& mvp) const;
     void freeChunkNode(Chunk* n);
 
-    static constexpr int MinSplitDepth = 2;
-    static constexpr int MaxSplitDepth = 22;
-
     properties::BoolProperty _performShading;
     properties::BoolProperty _useAccurateNormals;
     properties::FloatProperty _ambientIntensity;
@@ -242,8 +243,9 @@ private:
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::TriggerProperty resetTileProviders;
         properties::BoolProperty performFrustumCulling;
-        properties::IntProperty  modelSpaceRenderingCutoffLevel;
-        properties::IntProperty  dynamicLodIterationCount;
+        properties::BoolProperty performHorizonCulling;
+        properties::IntProperty modelSpaceRenderingCutoffLevel;
+        properties::IntProperty dynamicLodIterationCount;
     } _debugProperties;
 
     properties::PropertyOwner _debugPropertyOwner;
@@ -304,6 +306,11 @@ private:
     size_t _iterationsOfAvailableData = 0;
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;
+
+    bool _shadowersUpdated = false;
+    bool _shadowersOk = false;
+
+    std::map<const SceneGraphNode*, std::vector<std::string>> _shadowSpec;
 
     // Components
     std::unique_ptr<RingsComponent> _ringsComponent;

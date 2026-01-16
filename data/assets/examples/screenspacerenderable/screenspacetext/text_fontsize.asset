@@ -1,0 +1,20 @@
+-- Font Size
+-- This example creates a screen space renderable that displays a static text with a
+-- larger font. The FontSize parameter is increased to improve the fidelity of the text
+-- being rendered. The Scale parameter will make the text show up larger on the screen.
+
+local Item = {
+  Type = "ScreenSpaceText",
+  Identifier = "ScreenSpaceText_Example_FontSize",
+  Text = "Example Text - Font Size",
+  Scale = 0.5,
+  FontSize = 72
+}
+
+asset.onInitialize(function()
+  openspace.addScreenSpaceRenderable(Item)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeScreenSpaceRenderable(Item)
+end)

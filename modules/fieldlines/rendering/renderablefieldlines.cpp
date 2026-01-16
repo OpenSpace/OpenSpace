@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,13 +29,17 @@
 #include <modules/kameleon/include/kameleonwrapper.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
+#include <filesystem>
 #include <fstream>
+#include <sstream>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableFieldlines";
@@ -71,35 +75,35 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "Stepsize",
-        "Fieldline Step Size.",
+        "Fieldline step size.",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo Classification = {
         "Classification",
-        "Fieldline Classification",
+        "Fieldline classification",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FieldlineColorInfo = {
         "FieldlineColor",
-        "Fieldline Color",
+        "Fieldline color",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SeedPointSourceInfo = {
         "Source",
-        "SeedPoint Source",
+        "SeedPoint source",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SeedPointFileInfo = {
         "SourceFile",
-        "SeedPoint File",
+        "SeedPoint file",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };

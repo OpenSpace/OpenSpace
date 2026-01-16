@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,19 +28,21 @@
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/interaction/sessionrecording.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
 #include <openspace/network/parallelpeer.h>
 #include <openspace/util/syncbuffer.h>
-#include <openspace/documentation/documentation.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/ext/assimp/contrib/zip/src/zip.h>
-#include <filesystem>
+#include <algorithm>
 #include <fstream>
+#include <optional>
+#include <utility>
 
 #include "scriptengine_lua.inl"
 
@@ -527,7 +529,7 @@ void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     size_t nScripts;
     syncBuffer->decode(nScripts);
 
-    for (size_t i = 0; i < nScripts; ++i) {
+    for (size_t i = 0; i < nScripts; i++) {
         std::string script;
         syncBuffer->decode(script);
         _clientScriptQueue.push(std::move(script));

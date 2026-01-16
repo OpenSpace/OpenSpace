@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -150,7 +150,7 @@ namespace {
         const bool isInLeapYear =
             std::find(LeapYears.begin(), LeapYears.end(), year) != LeapYears.end();
 
-        for (int m = 0; m < month; ++m) {
+        for (int m = 0; m < month; m++) {
             dayCount += DaysOfMonths[m];
             if (m == February && isInLeapYear) {
                 dayCount += 1;
@@ -425,7 +425,7 @@ namespace {
                     throw ghoul::RuntimeError(std::format(
                         "Illformed packed date. Illegal year marker. {}", packedDate
                     ));
-            };
+            }
         }(packedDate[0]);
 
         auto yearRes = scn::scan<int>(packedDate.substr(1, 2), "{}");
@@ -848,7 +848,7 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
             argPeriapsis,
             meanAnomaly,
             epochFromYMDdSubstring(epochDate),
-            std::chrono::seconds(std::chrono::hours(24)).count() / meanMotion
+            (360.0 / meanMotion) * std::chrono::seconds(std::chrono::hours(24)).count()
         );
 
     }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,20 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/stringhelper.h>
+#include <algorithm>
 #include <array>
-#include <format>
+#include <cstddef>
+#include <cstdint>
+#include <fstream>
+#include <istream>
 #include <optional>
+#include <ostream>
+#include <stdexcept>
+#include <string_view>
+#include <utility>
 
 namespace {
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
@@ -36,7 +47,7 @@ namespace {
 
     using namespace openspace::interaction;
 
-    class LoadingError : public ghoul::RuntimeError {
+    class LoadingError final : public ghoul::RuntimeError {
     public:
         LoadingError(std::string error_, std::filesystem::path file_, int entry_)
             : ghoul::RuntimeError(
@@ -628,7 +639,7 @@ SessionRecording loadSessionRecording(const std::filesystem::path& filename) {
         }
 
         sessionRecording.entries.push_back(std::move(*entry));
-    };
+    }
 
     ghoul_assert(
         std::is_sorted(

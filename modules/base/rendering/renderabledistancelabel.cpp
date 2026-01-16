@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,21 +26,20 @@
 
 #include <modules/base/rendering/renderablenodeline.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/distanceconversion.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <optional>
-#include <string>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableDistanceLabel";
 
     constexpr openspace::properties::Property::PropertyInfo NodeLineInfo = {
         "NodeLine",
-        "Node Line",
+        "Node line",
         "The identifier of a scene graph node with a RenderableNodeLine that this label "
         "should track. The label text will be updating based on the distance from the "
         "node line's start and end.",
@@ -49,7 +48,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DistanceUnitInfo = {
         "DistanceUnit",
-        "Display Distance Unit",
+        "Display distance unit",
         "The unit in which the distance value should be displayed. Defaults to 'km' if "
         "not specified.",
         openspace::properties::Property::Visibility::User
@@ -57,7 +56,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CustomUnitDescriptorInfo = {
         "CustomUnitDescriptor",
-        "Custom Unit Descriptor",
+        "Custom unit descriptor",
         "Property to define a custom unit descriptor to use to describe the distance "
         "value. Defaults to the selected unit's SI descriptor if not specified.",
         openspace::properties::Property::Visibility::AdvancedUser

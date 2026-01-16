@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,9 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <glm/gtx/std_based_type.hpp>
+#include <algorithm>
+#include <cmath>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "BrickManager";
@@ -157,8 +160,7 @@ bool BrickManager::initialize() {
     return true;
 }
 
-bool BrickManager::buildBrickList(BUFFER_INDEX bufferIndex,
-                                  std::vector<int> &brickRequest)
+bool BrickManager::buildBrickList(BufferIndex bufferIndex, std::vector<int>& brickRequest)
 {
     // Keep track of number bricks used and number of bricks cached
     // (for benchmarking)
@@ -239,9 +241,9 @@ bool BrickManager::fillVolume(float* in, float* out, unsigned int x, unsigned in
 
     // Loop over the brick using three loops
     unsigned int from = 0;
-    for (unsigned int zValCoord = zMin; zValCoord < zMax; ++zValCoord) {
-        for (unsigned int yValCoord = yMin; yValCoord < yMax; ++yValCoord) {
-            for (unsigned int xValCoord = xMin; xValCoord < xMax; ++xValCoord) {
+    for (unsigned int zValCoord = zMin; zValCoord < zMax; zValCoord++) {
+        for (unsigned int yValCoord = yMin; yValCoord < yMax; yValCoord++) {
+            for (unsigned int xValCoord = xMin; xValCoord < xMax; xValCoord++) {
                 unsigned int idx = xValCoord + yValCoord * _atlasDim +
                                    zValCoord * _atlasDim * _atlasDim;
 
@@ -281,7 +283,7 @@ void BrickManager::coordinatesFromLinear(int idx, int& x, int& y, int& z) {
     z = idx;
 }
 
-bool BrickManager::diskToPBO(BUFFER_INDEX pboIndex) {
+bool BrickManager::diskToPBO(BufferIndex pboIndex) {
     // Map PBO
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[pboIndex]);
     glBufferData(GL_PIXEL_UNPACK_BUFFER, _volumeSize, nullptr, GL_STREAM_DRAW);
@@ -406,8 +408,8 @@ bool BrickManager::diskToPBO(BUFFER_INDEX pboIndex) {
     return true;
 }
 
-bool BrickManager::pboToAtlas(BUFFER_INDEX _pboIndex) {
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[_pboIndex]);
+bool BrickManager::pboToAtlas(BufferIndex pboIndex) {
+    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[pboIndex]);
     glm::size3_t dim = _textureAtlas->dimensions();
     glBindTexture(GL_TEXTURE_3D, *_textureAtlas);
     glTexSubImage3D(
@@ -433,11 +435,11 @@ ghoul::opengl::Texture* BrickManager::textureAtlas() {
     return _textureAtlas;
 }
 
-unsigned int BrickManager::pbo(BUFFER_INDEX pboIndex) const {
+unsigned int BrickManager::pbo(BufferIndex pboIndex) const {
     return _pboHandle[pboIndex];
 }
 
-const std::vector<int>& BrickManager::brickList(BUFFER_INDEX index) const {
+const std::vector<int>& BrickManager::brickList(BufferIndex index) const {
     return _brickLists.at(index);
 }
 

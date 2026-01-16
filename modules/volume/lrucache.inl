@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,18 +24,18 @@
 
 namespace openspace::volume {
 
-template <typename KeyType, typename ValueType, template<typename...> class ContainerType>
-LruCache<KeyType, ValueType, ContainerType>::LruCache(size_t capacity) {
+template <typename Key, typename Value, template <typename...> class Container>
+LruCache<Key, Value, Container>::LruCache(size_t capacity) {
     _capacity = capacity;
 }
 
-template <typename KeyType, typename ValueType, template<typename...> class ContainerType>
-bool LruCache<KeyType, ValueType, ContainerType>::has(const KeyType& key) {
+template <typename Key, typename Value, template <typename...> class Container>
+bool LruCache<Key, Value, Container>::has(const Key& key) {
     return (_cache.find(key) != _cache.end());
 }
 
-template <typename KeyType, typename ValueType, template<typename...> class ContainerType>
-void LruCache<KeyType, ValueType, ContainerType>::set(const KeyType& key, ValueType value)
+template <typename Key, typename Value, template <typename...> class Container>
+void LruCache<Key, Value, Container>::set(const Key& key, Value value)
 {
     auto prev = _cache.find(key);
     if (prev != _cache.end()) {
@@ -48,35 +48,33 @@ void LruCache<KeyType, ValueType, ContainerType>::set(const KeyType& key, ValueT
     }
 }
 
-template <typename KeyType, typename ValueType, template<typename...> class ContainerType>
-ValueType& LruCache<KeyType, ValueType, ContainerType>::use(const KeyType& key) {
+template <typename Key, typename Value, template <typename...> class Container>
+ValueType& LruCache<Key, Value, Container>::use(const Key& key) {
     auto iter = _cache.find(key);
     std::list<KeyType>::iterator trackerIter = iter->second.second;
     _tracker.splice(_tracker.end(), _tracker, trackerIter);
     return iter->second.first;
 }
 
-template <typename KeyType, typename ValueType, template<typename...> class ContainerType>
-ValueType& LruCache<KeyType, ValueType, ContainerType>::get(const KeyType& key) {
+template <typename Key, typename Value, template <typename...> class Container>
+ValueType& LruCache<Key, Value, Container>::get(const Key& key) {
     auto iter = _cache.find(key);
     return iter->second.first;
 }
 
-template <typename KeyType, typename ValueType, template<typename...> class ContainerType>
-void LruCache<KeyType, ValueType, ContainerType>::evict() {
+template <typename Key, typename Value, template <typename...> class Container>
+void LruCache<Key, Value, ContainerType>::evict() {
     _cache.erase(_cache.find(_tracker.front()));
     _tracker.pop_front();
 }
 
-template <typename KeyType, typename ValueType, template<typename...> class ContainerType>
-size_t LruCache<KeyType, ValueType, ContainerType>::capacity() const {
+template <typename Key, typename Value, template <typename...> class Container>
+size_t LruCache<Key, Value, Container>::capacity() const {
     return _capacity;
 }
 
-template <typename KeyType, typename ValueType, template<typename...> class ContainerType>
-void LruCache<KeyType, ValueType, ContainerType>::insert(const KeyType& key,
-                                                         const ValueType& value)
-{
+template <typename Key, typename Value, template <typename...> class Container>
+void LruCache<Key, Value, Container>::insert(const Key& key, const Value& value) {
     if (_cache.size() == _capacity) {
         evict();
     }

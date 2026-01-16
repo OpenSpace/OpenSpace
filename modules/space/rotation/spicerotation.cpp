@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,10 @@
 #include <modules/space/rotation/spicerotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <optional>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo SourceInfo = {
@@ -50,7 +49,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
-        "Fixed Date",
+        "Fixed date",
         "A time to lock the rotation to. Setting this to an empty string will "
         "unlock the time and return to rotation based on current simulation time.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -58,7 +57,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TimeOffsetInfo = {
         "TimeOffset",
-        "Time Offset",
+        "Time offset",
         "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
         "at which to compute the rotation.",
         openspace::properties::Property::Visibility::User

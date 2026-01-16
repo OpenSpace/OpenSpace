@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,9 +28,10 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <ghoul/misc/easing.h>
 #include <glm/gtx/vector_angle.hpp>
+#include <algorithm>
 #include <cmath>
+#include <cstdlib>
 
 namespace {
     // Galactic coordinates are projected onto the celestial sphere
@@ -231,50 +232,6 @@ double sizeFromFov(double fov, const glm::dvec3& worldPosition) {
     const double adjacent = glm::length(worldPosition);
     const double opposite = 2.0 * adjacent * glm::tan(glm::radians(fov * 0.5));
     return opposite;
-}
-
-template <>
-double Animation<double>::newValue() const {
-    if (!isAnimating()) {
-        return _goal;
-    }
-    else {
-        const double percentage = percentageSpent();
-        const double diff = (_goal - _start) * ghoul::exponentialEaseOut(percentage);
-        return _start + diff;
-    }
-}
-
-template <>
-glm::dmat4 Animation<glm::dvec3>::rotationMatrix() {
-    if (!isAnimating()) {
-        return glm::dmat4(1.0);
-    }
-
-    const double percentage = ghoul::sineEaseInOut(percentageSpent());
-    const double increment = percentage - _lastPercentage;
-    _lastPercentage = percentage;
-
-    glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
-        glm::normalize(_start),
-        glm::normalize(_goal),
-        increment
-    );
-    return rotMat;
-}
-
-template <>
-glm::dvec3 Animation<glm::dvec3>::newValue() const {
-    if (!isAnimating()) {
-        return _goal;
-    }
-    const glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
-        glm::normalize(_start),
-        glm::normalize(_goal),
-        ghoul::exponentialEaseOut(percentageSpent())
-    );
-    // Rotate direction
-    return glm::dvec3(rotMat * glm::dvec4(_start, 1.0));;
 }
 
 } // namespace openspace::skybrowser

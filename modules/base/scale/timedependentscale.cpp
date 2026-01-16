@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,15 +25,16 @@
 #include <modules/base/scale/timedependentscale.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/misc/dictionary.h>
+#include <algorithm>
 #include <optional>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ReferenceDateInfo = {
         "ReferenceDate",
-        "Reference Date",
+        "Reference date",
         "The date at which this scale will be 0. The current value of the scale is "
         "computed by taking the difference between the current time and the reference "
         "date and multiplying it by the speed. This field must be formatted as: "
@@ -51,7 +52,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ClampToPositiveInfo = {
         "ClampToPositive",
-        "Clamp to Positive",
+        "Clamp to positive",
         "If this value is true, the velocity computation will be clamped to a positive "
         "value if the current simulation time is before the `ReferenceDate`. This is "
         "useful for instantaneous events that only propagate forwards in time. The "

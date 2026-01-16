@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,9 +28,17 @@
 #include <openspace/util/time.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/exception.h>
 #include <cerrno>
+#include <cmath>
+#include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <iomanip>
+#include <iterator>
+#include <ostream>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "FieldlinesState";
@@ -50,9 +58,12 @@ void FieldlinesState::convertLatLonToCartesian(float scale) {
         const float r = p.x * scale;
         const float lat = glm::radians(p.y);
         const float lon = glm::radians(p.z);
-        const float rCosLat = r * cos(lat);
 
-        p = glm::vec3(rCosLat * cos(lon), rCosLat* sin(lon), r * sin(lat));
+        p = glm::vec3(
+            r * std::cos(lat) * std::cos(lon),
+            r * std::cos(lat) * std::sin(lon),
+            r * std::sin(lat)
+        );
     }
 }
 
@@ -198,7 +209,7 @@ bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
 
     size_t lineStartIdx = 0;
     // Loop through all fieldlines
-    for (json::iterator lineIter = jFile.begin(); lineIter != jFile.end(); ++lineIter) {
+    for (json::iterator lineIter = jFile.begin(); lineIter != jFile.end(); lineIter++) {
         // The 'data' field in the 'trace' variable contains all vertex positions and the
         // extra quantities. Each element is an array related to one vertex point.
         const std::vector<std::vector<float>>& jData =
@@ -366,13 +377,13 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
     const size_t nExtras = _extraQuantities.size();
 
     size_t pointIndex = 0;
-    for (size_t lineIndex = 0; lineIndex < nLines; ++lineIndex) {
+    for (size_t lineIndex = 0; lineIndex < nLines; lineIndex++) {
         json jData = json::array();
-        for (GLsizei i = 0; i < _lineCount[lineIndex]; i++, ++pointIndex) {
+        for (GLsizei i = 0; i < _lineCount[lineIndex]; i++, pointIndex++) {
             const glm::vec3 pos = _vertexPositions[pointIndex];
             json jDataElement = { pos.x, pos.y, pos.z };
 
-            for (size_t extraIndex = 0; extraIndex < nExtras; ++extraIndex) {
+            for (size_t extraIndex = 0; extraIndex < nExtras; extraIndex++) {
                 jDataElement.push_back(_extraQuantities[extraIndex][pointIndex]);
             }
             jData.push_back(jDataElement);
@@ -418,10 +429,6 @@ void FieldlinesState::setTriggerTime(double t) {
 // If index is out of scope an empty vector is returned and the referenced bool is false.
 std::vector<float> FieldlinesState::extraQuantity(size_t index, bool& isSuccessful) const
 {
-    if (index == -1) {
-        isSuccessful = false;
-        return std::vector<float>();
-    }
     if (index < _extraQuantities.size()) {
         isSuccessful = true;
         return _extraQuantities[index];

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,27 +27,39 @@
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/geojson/globegeometryhelper.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
-#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <geos/util/GEOSException.h>
 #include <geos/triangulate/polygon/ConstrainedDelaunayTriangulator.h>
 #include <geos/util/IllegalStateException.h>
+#include <openspace/util/geodetic.h>
+#include <geos/geom/Coordinate.h>
+#include <geos/geom/Geometry.h>
+#include <geos/geom/LinearRing.h>
+#include <geos/geom/Polygon.h>
+#include <geos/triangulate/tri/Tri.h>
+#include <geos/triangulate/tri/TriList.h>
 #include <algorithm>
+#include <array>
+#include <cstdlib>
 #include <filesystem>
-#include <fstream>
+#include <limits>
+#include <stdexcept>
+#include <string_view>
+#include <utility>
 
 namespace {
-    constexpr const char* _loggerCat = "GlobeGeometryFeature";
+    constexpr std::string_view _loggerCat = "GlobeGeometryFeature";
 
     constexpr std::chrono::milliseconds HeightUpdateInterval(10000);
 } // namespace
@@ -187,7 +199,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
                 // Note that Constrained Delaunay triangulation supports polygons with
                 // holes :)
                 std::vector<geos::geom::Coordinate> triCoords;
-                TriList<Tri> triangles;
+                geos::triangulate::tri::TriList<geos::triangulate::tri::Tri> triangles;
                 using geos::triangulate::polygon::ConstrainedDelaunayTriangulator;
                 ConstrainedDelaunayTriangulator::triangulatePolygon(p, triangles);
 
@@ -195,7 +207,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
 
                 // Add three coordinates per triangle. Note flipped winding order
                 // (want counter clockwise, but GEOS provides clockwise)
-                for (const Tri* t : triangles) {
+                for (const geos::triangulate::tri::Tri* t : triangles) {
                     triCoords.push_back(t->getCoordinate(0));
                     triCoords.push_back(t->getCoordinate(2));
                     triCoords.push_back(t->getCoordinate(1));
@@ -205,7 +217,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
                 // Boundaries / Lines
 
                 // Normalize to make sure rings have correct orientation
-                std::unique_ptr<Polygon> pNormalized = p->clone();
+                std::unique_ptr<geos::geom::Polygon> pNormalized = p->clone();
                 pNormalized->normalize();
 
                 const geos::geom::LinearRing* outerRing = pNormalized->getExteriorRing();
@@ -263,7 +275,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
     geo->getCentroid(centroid);
     Geodetic3 geoCentroid = geometryhelper::coordsToGeodetic({ centroid }).front();
     _heightUpdateReferencePoints.push_back(std::move(geoCentroid));
-;
+
     std::vector<Geodetic3> envelopeGeoCoords =
         geometryhelper::geometryCoordsAsGeoVector(geo->getEnvelope().get());
 
@@ -569,7 +581,7 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
             );
 
             const auto addLinePos = [&vertices, &positions](const glm::vec3& pos) {
-                vertices.push_back({ pos.x, pos.y, pos.z, 0.f, 0.f, 0.f });
+                vertices.push_back({ { pos.x, pos.y, pos.z }, { 0.f, 0.f, 0.f } });
                 positions.push_back(pos);
             };
 
@@ -597,7 +609,7 @@ std::vector<std::vector<glm::vec3>> GlobeGeometryFeature::createLineGeometry() {
                     );
 
                 // Don't add the first position. Has been added as last in previous step
-                for (size_t si = 1; si < subdividedPositions.size(); ++si) {
+                for (size_t si = 1; si < subdividedPositions.size(); si++) {
                     const geometryhelper::PosHeightPair& pair = subdividedPositions[si];
                     addLinePos(glm::vec3(pair.position));
                 }
@@ -651,11 +663,13 @@ void GlobeGeometryFeature::createPointGeometry() {
             // Normal is the out direction
             const glm::vec3 normal = glm::normalize(vf);
 
-            vertices.push_back({ vf.x, vf.y, vf.z, normal.x, normal.y, normal.z });
+            vertices.push_back({
+                { vf.x, vf.y, vf.z }, { normal.x, normal.y, normal.z }
+            });
 
             // Lines from center of the globe out to the point
-            extrudedLineVertices.push_back({ 0.f, 0.f, 0.f, 0.f, 0.f, 0.f });
-            extrudedLineVertices.push_back({ vf.x, vf.y, vf.z, 0.f, 0.f, 0.f });
+            extrudedLineVertices.push_back({ { 0.f, 0.f, 0.f }, { 0.f, 0.f, 0.f } });
+            extrudedLineVertices.push_back({ { vf.x, vf.y, vf.z }, { 0.f, 0.f, 0.f } });
         }
 
         vertices.shrink_to_fit();
@@ -746,9 +760,9 @@ void GlobeGeometryFeature::createPolygonGeometry() {
             else {
                 // Just add a triangle consisting of the three vertices
                 const glm::vec3 n = -glm::normalize(glm::cross(v1 - v0, v2 - v0));
-                polyVertices.push_back({ v0.x, v0.y, v0.z, n.x, n.y, n.z });
-                polyVertices.push_back({ v1.x, v1.y, v1.z, n.x, n.y, n.z });
-                polyVertices.push_back({ v2.x, v2.y, v2.z, n.x, n.y, n.z });
+                polyVertices.push_back({ { v0.x, v0.y, v0.z }, { n.x, n.y, n.z } });
+                polyVertices.push_back({ { v1.x, v1.y, v1.z }, { n.x, n.y, n.z } });
+                polyVertices.push_back({ { v2.x, v2.y, v2.z }, { n.x, n.y, n.z } });
             }
         }
     }

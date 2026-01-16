@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,12 @@
 #ifndef __OPENSPACE_MODULE_SKYBROWSER___UTILITY___H__
 #define __OPENSPACE_MODULE_SKYBROWSER___UTILITY___H__
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/util/distanceconstants.h>
+#include <ghoul/glm.h>
+#include <ghoul/misc/easing.h>
 #include <chrono>
+#include <ratio>
+#include <type_traits>
 
 namespace openspace::skybrowser {
 
@@ -225,8 +228,46 @@ public:
         return timeLeft && _isStarted;
     }
 
-    T newValue() const;
-    glm::dmat4 rotationMatrix();
+    T newValue() const {
+        if (!isAnimating()) {
+            return _goal;
+        }
+
+        if constexpr (std::is_same_v<T, double>) {
+            const double percentage = percentageSpent();
+            const double diff = (_goal - _start) * ghoul::exponentialEaseOut(percentage);
+            return _start + diff;
+        }
+        else if constexpr (std::is_same_v<T, glm::dvec3>) {
+            const glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
+                glm::normalize(_start),
+                glm::normalize(_goal),
+                ghoul::exponentialEaseOut(percentageSpent())
+            );
+            // Rotate direction
+            return glm::dvec3(rotMat * glm::dvec4(_start, 1.0));
+        }
+        else {
+            static_assert(sizeof(T) == 0, "Unimplemented");
+        }
+    }
+
+    glm::dmat4 rotationMatrix() {
+        if (!isAnimating()) {
+            return glm::dmat4(1.0);
+        }
+
+        const double percentage = ghoul::sineEaseInOut(percentageSpent());
+        const double increment = percentage - _lastPercentage;
+        _lastPercentage = percentage;
+
+        glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
+            glm::normalize(_start),
+            glm::normalize(_goal),
+            increment
+        );
+        return rotMat;
+    }
 
 private:
     std::chrono::duration<double, std::milli> timeSpent() const {

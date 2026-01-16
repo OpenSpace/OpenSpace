@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,6 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/helper.h>
@@ -35,12 +34,19 @@
 #include <openspace/scene/scene.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <algorithm>
+#include <cmath>
 #include <optional>
+#include <string>
+#include <utility>
 #include <variant>
+#include <vector>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -52,7 +58,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RenderDuringBlackoutInfo = {
         "RenderDuringBlackout",
-        "Render during Blackout",
+        "Render during blackout",
         "If true, this screen space renderable is going to ignore the global blackout "
         "factor from the Render Engine and will always render at full opacity. If "
         "false, it will adhere to the factor and fade out like the rest of the 3D "
@@ -64,7 +70,7 @@ namespace {
         UseRadiusAzimuthElevationInfo =
     {
         "UseRadiusAzimuthElevation",
-        "Use Radius Azimuth and Elevation",
+        "Use radius azimuth and elevation",
         "Determines whether the location of this screen space plane will be specified "
         "using radius, azimuth and elevation (if 'true') or using Cartesian coordinates. "
         "The Cartesian coordinate system is useful if a regular rendering is applied, "
@@ -76,14 +82,14 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo UsePerspectiveProjectionInfo =
     {
         "UsePerspectiveProjection",
-        "Use Perspective Projection",
+        "Use perspective projection",
         "Determines whetether the z/radius values affects the size of the plane or not.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo CartesianPositionInfo = {
         "CartesianPosition",
-        "Cartesian Coordinates",
+        "Cartesian coordinates",
         "Determines the position of this screen space plane in Cartesian "
         "three-dimensional coordinates (meters).",
         openspace::properties::Property::Visibility::NoviceUser
@@ -91,7 +97,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RadiusAzimuthElevationInfo = {
         "RadiusAzimuthElevation",
-        "Radius Azimuth Elevation",
+        "Radius azimuth elevation",
         "Determines the position of this screen space plane in a coordinate system based "
         "on radius (meters), azimuth (radians), and elevation (radians).",
         openspace::properties::Property::Visibility::NoviceUser
@@ -99,7 +105,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
         "Scale",
-        "Scale Value",
+        "Scale value",
         "A scale factor for the plane that can be used to increase or decrease the "
         "visual size. The default size is determined separately for each screen space "
         "renderable type and may for example be affected by the size of an image being "
@@ -109,14 +115,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LocalRotationInfo = {
         "Rotation",
-        "Local Rotation",
+        "Local rotation",
         "An Euler rotation (x, y, z) to apply to the screen space object.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
-        "Multiply Color",
+        "Multiply color",
         "If set, the plane's texture is multiplied with this color. Useful for applying "
         "a color grayscale images.",
         openspace::properties::Property::Visibility::User
@@ -124,7 +130,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
-        "Background Color",
+        "Background color",
         "A fixed color that is combined with the screen space renderable to create the "
         "final color. The actual color of the screen space renderable is alpha-blended "
         "with the background color to produce the final result.",
@@ -141,7 +147,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
         "FaceCamera",
-        "Face Camera",
+        "Face camera",
         "If enabled, the object will be rotated to face the camera position. Any local "
         "rotation is then applied after this rotation.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -149,7 +155,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo GammaOffsetInfo = {
         "GammaOffset",
-        "Gamma Correction Offset",
+        "Gamma correction offset",
         "Sets the gamma correction of the texture that is applied in addition to the "
         "global gamma value.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -157,21 +163,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BorderWidthInfo = {
         "BorderWidth",
-        "Border Width",
+        "Border width",
         "The width of the border.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BorderColorInfo = {
         "BorderColor",
-        "Border Color",
+        "Border color",
         "The color of the border.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BorderFeatherInfo = {
         "BorderFeather",
-        "Border Feather",
+        "Border feather",
         "If this value is enabled and a border width is set, the border will be rendered "
         "as a feathered border rather than a hard corner."
     };
@@ -547,7 +553,7 @@ glm::mat4 ScreenSpaceRenderable::scaleMatrix() {
 
     glm::mat4 scale = glm::scale(
         glm::mat4(1.f),
-        glm::vec3(_scale, textureRatio*_scale, 1.f)
+        glm::vec3(_scale.value(), textureRatio * _scale, 1.f)
     );
 
     return scale;
@@ -724,9 +730,9 @@ glm::vec3 ScreenSpaceRenderable::sphericalToCartesian(glm::vec3 spherical) const
     // and phi is the azimuth.
 
     const glm::vec3 sanitized = sanitizeSphericalCoordinates(std::move(spherical));
-    const float x = sanitized[0] * sin(sanitized[1]) * cos(sanitized[2]);
-    const float y = sanitized[0] * sin(sanitized[1]) * sin(sanitized[2]);
-    const float z = sanitized[0] * cos(sanitized[1]);
+    const float x = sanitized[0] * std::sin(sanitized[1]) * std::cos(sanitized[2]);
+    const float y = sanitized[0] * std::sin(sanitized[1]) * std::sin(sanitized[2]);
+    const float z = sanitized[0] * std::cos(sanitized[1]);
 
     // Now, convert rotate the coordinate system, so that z maps to y,
     // and y maps to -z. We want the pole to be in y instead of z.

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,16 +25,15 @@
 #include <modules/base/rendering/screenspacedashboard.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/dashboarditem.h>
 #include <openspace/scripting/lualibrary.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <optional>
+#include <utility>
 
 #include "screenspacedashboard_lua.inl"
 
@@ -69,7 +68,7 @@ documentation::Documentation ScreenSpaceDashboard::Documentation() {
 }
 
 ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
-    : ScreenSpaceFramebuffer(dictionary)
+    : ScreenSpaceRenderableFramebuffer(dictionary)
     , _useMainDashboard(UseMainInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -98,7 +97,7 @@ ScreenSpaceDashboard::ScreenSpaceDashboard(const ghoul::Dictionary& dictionary)
 }
 
 void ScreenSpaceDashboard::initializeGL() {
-    ScreenSpaceFramebuffer::initializeGL();
+    ScreenSpaceRenderableFramebuffer::initializeGL();
 
     addRenderFunction([this]() {
         glm::vec2 penPosition = glm::vec2(0.f, _size.value().x);

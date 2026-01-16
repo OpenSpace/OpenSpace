@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
+#include <ghoul/glm.h>
 
 namespace ghoul { class Dictionary; }
 
@@ -37,7 +38,6 @@ namespace openspace::volume {
 class VolumeClipPlane : public properties::PropertyOwner {
 public:
     explicit VolumeClipPlane(const ghoul::Dictionary& dictionary);
-    ~VolumeClipPlane() override = default;
 
     glm::vec3 normal() const;
     glm::vec2 offsets() const;

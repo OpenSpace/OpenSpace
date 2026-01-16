@@ -17,7 +17,6 @@ local Object = {
     Type = "RenderableOrbitalKepler",
     Path = sssb .. "sssb_data_transneptunian_object_asteroid.csv",
     Format = "SBDB",
-    Segments = 200,
     SegmentQuality = 8,
     Color = { 0.56, 0.64, 0.95 },
     TrailFade = 10,

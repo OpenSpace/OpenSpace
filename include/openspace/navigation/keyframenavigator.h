@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,39 +25,33 @@
 #ifndef __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
 #define __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
 
-#include <openspace/network/messagestructures.h>
 #include <openspace/util/timeline.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
-#include <glm/gtx/quaternion.hpp>
+#include <string>
 
 namespace openspace {
+    namespace datamessagestructures { struct CameraKeyframe; }
     class Camera;
     class TimeManager;
 } // namespace openspace
 
 namespace openspace::interaction {
 
-enum class KeyframeTimeRef {
-    Relative_applicationStart,
-    Relative_recordedStart,
-    Absolute_simTimeJ2000
-};
-
 class KeyframeNavigator {
 public:
     BooleanType(Inclusive);
 
     struct CameraPose {
+        CameraPose() = default;
+        CameraPose(datamessagestructures::CameraKeyframe&& kf);
+        bool operator==(const CameraPose&) const noexcept = default;
+
         glm::dvec3 position = glm::dvec3(0.0);
         glm::quat rotation = glm::quat(0.f, 0.f, 0.f, 0.f);
         std::string focusNode;
         float scale = 1.f;
         bool followFocusNodeRotation = false;
-
-        CameraPose() = default;
-        CameraPose(datamessagestructures::CameraKeyframe&& kf);
-        auto operator<=>(const CameraPose&) const = default;
     };
 
     /**
@@ -67,9 +61,9 @@ public:
      *
      * \param camera A reference to the camera object to have its pose updated
      * \param ignoreFutureKeyframes `true` if only past keyframes are to be used
-     * \return true only if a new future keyframe is available to set camera pose
      */
     void updateCamera(Camera& camera, bool ignoreFutureKeyframes);
+
     static void updateCamera(Camera* camera, const CameraPose& prevPose,
         const CameraPose& nextPose, double t, bool ignoreFutureKeyframes);
 
@@ -79,11 +73,10 @@ public:
     void clearKeyframes();
     size_t nKeyframes() const;
     double currentTime() const;
-    void setTimeReferenceMode(KeyframeTimeRef refType, double referenceTimestamp);
+    void setReferenceTime(double referenceTimestamp);
 
 private:
     Timeline<CameraPose> _cameraPoseTimeline;
-    KeyframeTimeRef _timeframeMode = KeyframeTimeRef::Relative_applicationStart;
     double _referenceTimestamp = 0.0;
 };
 

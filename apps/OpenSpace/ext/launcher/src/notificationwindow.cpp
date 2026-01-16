@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,16 +26,20 @@
 
 #include <openspace/openspace.h>
 #include <openspace/engine/settings.h>
-#include <openspace/util/httprequest.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/stringhelper.h>
 #include <QGuiApplication>
-#include <QStyleHints>
 #include <QTimer>
 #include <scn/scan.h>
 #include <date/date.h>
-#include <string_view>
+#include <chrono>
+#include <numeric>
+#include <string>
+#include <thread>
+#include <utility>
 #include <vector>
 
 using namespace openspace;
@@ -156,8 +160,8 @@ NotificationWindow::NotificationWindow(QWidget* parent)
         }
 
         // 1. Get the downloaded data
-        const std::vector<char>& data = _request->downloadedData();
-        std::string notificationText = std::string(data.begin(), data.end());
+        const std::vector<char>& d = _request->downloadedData();
+        std::string notificationText = std::string(d.begin(), d.end());
 
         // 2. Parse the retrieved data into entries
         std::vector<Entry> entries = parseEntries(notificationText);

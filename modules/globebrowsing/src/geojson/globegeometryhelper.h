@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,13 +29,11 @@
 #include <vector>
 
 namespace openspace {
-    struct Geodetic2;
-    struct Geodetic3;
-
     namespace globebrowsing { class RenderableGlobe; }
     namespace rendering::helper { struct VertexXYZNormal; }
+    struct Geodetic2;
+    struct Geodetic3;
 } // namespace openspace
-
 namespace geos::geom {
     class Coordinate;
     class Geometry;

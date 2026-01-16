@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -135,6 +135,13 @@ public:
      * \return The current time as a formatted date string
      */
     std::string_view UTC() const;
+
+    /**
+     * Returns the current time as a formatted date string. The date string can be
+     * formatted using the SPICE picture parameters as described in
+     * https://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/timout_c.html
+     */
+    std::string_view string(const std::string& format) const;
 
     /**
      * Returns the current time as a ISO 8601 formatted, i.e YYYY-MM-DDThh:mm:ssZ.

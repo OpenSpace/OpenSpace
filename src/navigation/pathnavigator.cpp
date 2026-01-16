@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,12 +26,13 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/camera/camerapose.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/navigationstate.h>
+#include <openspace/navigation/waypoint.h>
 #include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
@@ -40,14 +41,11 @@
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/collisionhelper.h>
 #include <openspace/util/timemanager.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionaryluaformatter.h>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtx/vector_angle.hpp>
-#include <vector>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <algorithm>
+#include <iterator>
 
 #include "pathnavigator_lua.inl"
 
@@ -56,7 +54,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DefaultCurveOptionInfo = {
         "DefaultPathType",
-        "Default Path Type",
+        "Default path type",
         "The default path type chosen when generating a path or flying to a target. "
         "See wiki for alternatives. The shape of the generated path will be different "
         "depending on the path type.",
@@ -65,14 +63,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo IncludeRollInfo = {
         "IncludeRoll",
-        "Include Roll",
+        "Include roll",
         "If disabled, roll is removed from the interpolation of camera orientation.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpeedScaleInfo = {
         "SpeedScale",
-        "Speed Scale",
+        "Speed scale",
         "Scale factor that the speed will be multiplied with during path traversal. "
         "Can be used to speed up or slow down the camera motion, depending on if the "
         "value is larger than or smaller than one.",
@@ -81,7 +79,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo IdleBehaviorOnFinishInfo = {
         "ApplyIdleBehaviorOnFinish",
-        "Apply Idle Behavior on Finish",
+        "Apply idle behavior on finish",
         "If set to true, the chosen IdleBehavior of the OrbitalNavigator will be "
         "triggered once the path has reached its target.",
         openspace::properties::Property::Visibility::User
@@ -89,7 +87,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ArrivalDistanceFactorInfo = {
         "ArrivalDistanceFactor",
-        "Arrival Distance Factor",
+        "Arrival distance factor",
         "A factor used to compute the default distance from a target scene graph node "
         "when creating a camera path. The factor will be multipled with the node's "
         "bounding sphere to compute the target height from the bounding sphere of the "
@@ -99,7 +97,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RotationSpeedFactorInfo = {
         "RotationSpeedFactor",
-        "Rotation Speed Factor (Linear Path)",
+        "Rotation speed factor (linear path)",
         "Affects how fast the camera rotates to the target rotation during a linear "
         "path. A value of 1 means that the camera will rotate 90 degrees in about 5 "
         "seconds. A value of 2 means twice that time, i.e. 10 seconds, and so on.",
@@ -108,7 +106,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MinBoundingSphereInfo = {
         "MinimalValidBoundingSphere",
-        "Minimal Valid Bounding Sphere",
+        "Minimal valid bounding sphere",
         "The minimal allowed value for a bounding sphere, in meters. Used for "
         "computation of target positions and path generation, to avoid issues when "
         "there is no bounding sphere.",
@@ -117,7 +115,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RelevantNodeTagsInfo = {
         "RelevantNodeTags",
-        "Relevant Node Tags",
+        "Relevant node tags",
         "List of tags for the nodes that are relevant for path creation, for example "
         "when avoiding collisions.",
         openspace::properties::Property::Visibility::AdvancedUser

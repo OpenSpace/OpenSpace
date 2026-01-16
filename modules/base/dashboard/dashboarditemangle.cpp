@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,18 +26,19 @@
 
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <cmath>
+#include <optional>
 
 namespace {
     enum Type {
@@ -48,7 +49,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
-        "Source Type",
+        "Source type",
         "The type of position that is used as the triangle apex used to calculate the "
         "angle.",
         openspace::properties::Property::Visibility::User
@@ -56,7 +57,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SourceNodeIdentifierInfo = {
         "SourceNodeIdentifier",
-        "Source Node Identifier",
+        "Source node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the apex of the triangle used to calculate "
         "the angle. The computed angle is the incident angle to Source in the triangle ("
@@ -66,7 +67,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ReferenceTypeInfo = {
         "ReferenceType",
-        "Reference Type",
+        "Reference type",
         "The type of position that is used as the destination of the reference line used "
         "to calculate the angle. The computed angle is the incident angle to Source in "
         "the triangle (Source, Reference, Destination).",
@@ -76,7 +77,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ReferenceNodeIdentifierInfo =
     {
         "ReferenceNodeIdentifier",
-        "Reference Node Identifier",
+        "Reference node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the reference direction to compute the angle.",
         openspace::properties::Property::Visibility::User
@@ -84,7 +85,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
         "DestinationType",
-        "Destination Type",
+        "Destination type",
         "The type of position that is used as the destination to calculate the angle. "
         "The computed angle is the incident angle to Source in the triangle ("
         "Source, Reference, Destination).",
@@ -95,7 +96,7 @@ namespace {
         DestinationNodeIdentifierInfo =
     {
         "DestinationNodeIdentifier",
-        "Destination Node Identifier",
+        "Destination node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the destination for computing the angle.",
         openspace::properties::Property::Visibility::User

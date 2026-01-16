@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,19 +28,18 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/list/stringlistproperty.h>
-#include <map>
 #include <memory>
-#include <vector>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::systemcapabilities { struct Version; }
+namespace ghoul {
+    namespace systemcapabilities { struct Version; }
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 
-class OpenSpaceModule;
-
 namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
+class OpenSpaceModule;
 
 /**
  * The ModuleEngine is the central repository for registering and accessing
