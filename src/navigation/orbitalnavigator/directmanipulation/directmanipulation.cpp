@@ -65,22 +65,26 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DirectManipulationThresholdInfo =
-    {
-        "DirectManipulationThreshold",
-        "Direct manipulation threshold",
+
+    constexpr openspace::properties::Property::PropertyInfo IsActiveInfo = {
+        "IsActive",
+        "Is active",
+        "True if the direct manipulation scheme is currently being applied.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
+        "DistanceThreshold",
+        "Distance threshold factor",
         "This threshold affects the distance from the interaction sphere at which the "
         "direct manipulation interaction mode starts being active. The value is given "
         "as a factor times the interaction sphere.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DefaultDirectTouchRenderableTypesInfo =
-    {
-        "DefaultDirectTouchRenderableTypes",
-        "Default direct touch renderable types",
+    constexpr openspace::properties::Property::PropertyInfo DefaultRenderableTypesInfo = {
+        "DefaultRenderableTypes",
+        "Default renderable types",
         "A list of renderable types that will automatically use the \'direct "
         "manipulation\' scheme when interacted with, keeping the finger on a static "
         "position on the interaction sphere of the object when touching. Good for "
@@ -94,15 +98,20 @@ namespace openspace::interaction {
 DirectManipulation::DirectManipulation()
     : properties::PropertyOwner({ "DirectManipulation", "Direct Manipulation" })
     , _enabled(EnabledInfo, true)
-    , _directTouchDistanceThreshold(DirectManipulationThresholdInfo, 5.f, 0.f, 10.f)
-    , _defaultDirectTouchRenderableTypes(DefaultDirectTouchRenderableTypesInfo)
+    , _isActive(IsActiveInfo, false)
+    , _distanceThreshold(DistanceThresholdInfo, 5.f, 0.f, 10.f)
+    , _defaultRenderableTypes(DefaultRenderableTypesInfo)
 {
     addProperty(_enabled);
-    addProperty(_directTouchDistanceThreshold);
 
-    _defaultDirectTouchRenderableTypes.onChange([this]() {
+    _isActive.setReadOnly(true);
+    addProperty(_isActive);
+
+    addProperty(_distanceThreshold);
+
+    _defaultRenderableTypes.onChange([this]() {
         _sortedDefaultRenderableTypes.clear();
-        for (const std::string& s : _defaultDirectTouchRenderableTypes.value()) {
+        for (const std::string& s : _defaultRenderableTypes.value()) {
             ghoul::TemplateFactory<Renderable>* fRenderable =
                 FactoryManager::ref().factory<Renderable>();
 
@@ -117,16 +126,18 @@ DirectManipulation::DirectManipulation()
             _sortedDefaultRenderableTypes.insert(s);
         }
     });
-    addProperty(_defaultDirectTouchRenderableTypes);
+    addProperty(_defaultRenderableTypes);
 }
 
 void DirectManipulation::updateStateFromInput() {
     const std::vector<TouchInputHolder>& touchPoints =
         global::interactionHandler->touchInputState().touchPoints();
 
+
     if (!_enabled || touchPoints.empty()) {
         // No fingers, no input
         _selectedNodeSurfacePoints.clear();
+        _isActive = false;
         return;
     }
 
@@ -139,6 +150,10 @@ void DirectManipulation::updateStateFromInput() {
 
     if (shouldApply) {
         applyDirectControl(touchPoints);
+        _isActive = true;
+    }
+    else {
+        _isActive = false;
     }
 
     if (isCloseEnough && isValidNode) {
@@ -349,7 +364,7 @@ bool DirectManipulation::isWithinDirectTouchDistance() const {
             length(centerToCamera) - interactionSphere,
             0.0
         );
-        const double maxDistance = interactionSphere * _directTouchDistanceThreshold;
+        const double maxDistance = interactionSphere * _distanceThreshold;
         return distance <= maxDistance;
     }
 

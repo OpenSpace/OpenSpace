@@ -70,8 +70,9 @@ private:
     bool isWithinDirectTouchDistance() const;
 
     properties::BoolProperty _enabled;
-    properties::FloatProperty _directTouchDistanceThreshold;
-    properties::StringListProperty _defaultDirectTouchRenderableTypes;
+    properties::BoolProperty _isActive;
+    properties::FloatProperty _distanceThreshold;
+    properties::StringListProperty _defaultRenderableTypes;
 
     // A sorted version of the list in the property
     std::set<std::string> _sortedDefaultRenderableTypes;
