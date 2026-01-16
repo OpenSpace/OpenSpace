@@ -1,0 +1,192 @@
+local moleculeDb = "https://home.thissma.fr/moldata/"
+local choury = asset.require("scene/solarsystem/missions/rosetta/67p.asset")
+
+local moleculeFiles = asset.syncedResource({
+    Name = "Molecule Files",
+    Type = "UrlSynchronization",
+    Identifier = "molecule_files",
+    Url = {
+        moleculeDb .. "67P-molecules/acetaldehyde.arc",
+        moleculeDb .. "67P-molecules/acetic-acid.arc",
+        moleculeDb .. "67P-molecules/butanal.arc",
+        moleculeDb .. "67P-molecules/co2.arc",
+        moleculeDb .. "67P-molecules/eg.arc",
+        moleculeDb .. "67P-molecules/ethanol.arc",
+        moleculeDb .. "67P-molecules/formaldehyde.arc",
+        moleculeDb .. "67P-molecules/formic.arc",
+        moleculeDb .. "67P-molecules/h2o.arc",
+        moleculeDb .. "67P-molecules/methanol.arc",
+        moleculeDb .. "67P-molecules/methyl-acetate.arc",
+        moleculeDb .. "67P-molecules/n2.arc",
+        moleculeDb .. "67P-molecules/o2.arc",
+        moleculeDb .. "67P-molecules/propanal.arc",
+
+        moleculeDb .. "aspirin/aspirin.gro",
+        moleculeDb .. "aspirin/aspirin.xtc",
+        moleculeDb .. "ice-melting/ice.gro",
+        moleculeDb .. "ice-melting/ice.xtc",
+        moleculeDb .. "c60.arc",
+
+        moleculeDb .. "amyloid-marker/60pft_in_tau.gro",
+        moleculeDb .. "amyloid-marker/60pft_in_tau-traj-96-106ns.xtc",
+    }
+})
+
+local animSpeed = 100
+
+local moleculeAssets = {}
+local moleculeInfos = {
+    {
+        id = "acetaldehyde",
+        name = "Acetaldehyde",
+        file = "acetaldehyde.arc",
+        x = 0.0,
+        y = 0.0,
+    }, {
+        id = "acetic-acid",
+        name = "acetic-acid",
+        file = "acetic-acid.arc",
+        x = 20.0,
+        y = 0.0,
+    }, {
+        id = "butanal",
+        name = "butanal",
+        file = "butanal.arc",
+        x = 20.0,
+        y = 0.0,
+    }, {
+        id = "co2",
+        name = "co2",
+        file = "co2.arc",
+        x = 20.0,
+        y = 0.0,
+    }, {
+        id = "eg",
+        name = "eg",
+        file = "eg.arc",
+        x = 0.0,
+        y = 20.0,
+    }, {
+        id = "ethanol",
+        name = "ethanol",
+        file = "ethanol.arc",
+        x = -20.0,
+        y = 0.0,
+    }, {
+        id = "formaldehyde",
+        name = "formaldehyde",
+        file = "formaldehyde.arc",
+        x = -20.0,
+        y = 0.0,
+    }, {
+        id = "formic",
+        name = "formic",
+        file = "formic.arc",
+        x = -20.0,
+        y = 0.0,
+    }, {
+        id = "h2o",
+        name = "h2o",
+        file = "h2o.arc",
+        x = 0.0,
+        y = 20.0,
+    }, {
+        id = "methanol",
+        name = "methanol",
+        file = "methanol.arc",
+        x = 20.0,
+        y = 0.0,
+    }, {
+        id = "methyl-acetate",
+        name = "methyl-acetate",
+        file = "methyl-acetate.arc",
+        x = 20.0,
+        y = 0.0,
+    }, {
+        id = "n2",
+        name = "n2",
+        file = "n2.arc",
+        x = 20.0,
+        y = 0.0,
+    }, {
+        id = "o2",
+        name = "o2",
+        file = "o2.arc",
+        x = 0.0,
+        y = 20.0,
+    }, {
+        id = "propanal",
+        name = "propanal",
+        file = "propanal.arc",
+        x = -20.0,
+        y = 0.0,
+    }
+}
+
+local root = {
+  Identifier = "RosettaMolecules",
+  Parent = choury.Barycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 1E4, 0.0, 0.0 }
+    }
+  },
+  GUI = {
+    Name = "Molecule Museum",
+    Path = "/Microcosmos/Molecules/Rosetta/Root",
+    Hidden = true
+  }
+}
+
+local xOffset = 0.0
+local yOffset = 0.0
+
+for i, info in ipairs(moleculeInfos) do
+    xOffset = xOffset + info.x
+    yOffset = yOffset + info.y
+
+    moleculeAssets[i] = {
+        Identifier = "RosettaMolecules_" .. info.id,
+        Parent = root.Identifier,
+        Renderable = {
+            Type = "RenderableMolecule",
+            MoleculeFile = moleculeFiles .. info.file,
+            TrajectoryFile = info.traj and (moleculeFiles .. info.traj) or "",
+            AnimationSpeed = info.speed or animSpeed,
+            RepType = info.repr or "SpaceFill",
+        },
+        GUI = {
+            Path = "/Microcosmos/Molecules/Rosetta" .. info.id,
+            Name = info.name
+        },
+        Transform = {
+            Translation = {
+                Type = "StaticTranslation",
+                Position = { xOffset, yOffset, 0.0 }
+            }
+        },
+    }
+end
+
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(root)
+    for _, molAsset in ipairs(moleculeAssets) do
+        openspace.addSceneGraphNode(molAsset)
+    end
+end)
+    
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(root)
+    for _, molAsset in ipairs(moleculeAssets) do
+        openspace.removeSceneGraphNode(molAsset)
+    end
+end)
+    
+asset.export(root)
+for _, molAsset in ipairs(moleculeAssets) do
+    asset.export(molAsset)
+end
+
+

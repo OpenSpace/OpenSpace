@@ -1,0 +1,165 @@
+local moleculeDb = "https://home.thissma.fr/moldata/"
+
+local moleculeFiles = asset.syncedResource({
+    Name = "Molecule Files",
+    Type = "UrlSynchronization",
+    Identifier = "molecule_files",
+    Url = {
+        moleculeDb .. "67P-molecules/acetaldehyde.arc",
+        moleculeDb .. "67P-molecules/acetic-acid.arc",
+        moleculeDb .. "67P-molecules/butanal.arc",
+        moleculeDb .. "67P-molecules/co2.arc",
+        moleculeDb .. "67P-molecules/eg.arc",
+        moleculeDb .. "67P-molecules/ethanol.arc",
+        moleculeDb .. "67P-molecules/formaldehyde.arc",
+        moleculeDb .. "67P-molecules/formic.arc",
+        moleculeDb .. "67P-molecules/h2o.arc",
+        moleculeDb .. "67P-molecules/methanol.arc",
+        moleculeDb .. "67P-molecules/methyl-acetate.arc",
+        moleculeDb .. "67P-molecules/n2.arc",
+        moleculeDb .. "67P-molecules/o2.arc",
+        moleculeDb .. "67P-molecules/propanal.arc",
+
+        moleculeDb .. "aspirin/aspirin.gro",
+        moleculeDb .. "aspirin/aspirin.xtc",
+        moleculeDb .. "ice-melting/ice.gro",
+        moleculeDb .. "ice-melting/ice.xtc",
+        moleculeDb .. "alanin/1ALA-500.pdb",
+        moleculeDb .. "dna/1bna.pdb",
+        moleculeDb .. "c60.arc",
+
+        moleculeDb .. "amyloid-marker/60pft_in_tau.gro",
+        moleculeDb .. "amyloid-marker/60pft_in_tau-traj-96-106ns.xtc",
+    }
+})
+
+local animSpeed = 100
+
+local moleculeAssets = {}
+local moleculeInfos = {
+    {
+        id = "O2",
+        name = "Dioxygen (O2)",
+        file = "o2.arc",
+        traj = "o2.arc",
+        distance = 0.0,
+    }, {
+        id = "H2O",
+        name = "Water (H2O)",
+        file = "h2o.arc",
+        distance = 20.0,
+    }, {
+        id = "CO2",
+        name = "Carbon Dioxyde (CO2)",
+        file = "co2.arc",
+        repr = "Licorice",
+        distance = 20.0,
+    }, {
+        id = "C60",
+        name = "C60",
+        file = "c60.arc",
+        repr = "Licorice",
+        distance = 20.0,
+    }, {
+        id = "Alanin",
+        name = "Alanin",
+        file = "1ALA-500.pdb",
+        traj = "1ALA-500.pdb",
+        repr = "Licorice",
+        distance = 50.0,
+    }, {
+        id = "DNA",
+        name = "DNA",
+        file = "1bna.pdb",
+        repr = "Licorice",
+        distance = 50.0,
+    -- }, {
+    --     id = "Ice",
+    --     name = "Ice Melting",
+    --     file = "ice.gro",
+    --     traj = "ice.xtc",
+    --     speed = 10,
+    --     distance = 50.0,
+    }, {
+        id = "Aspirin",
+        name = "Aspirin",
+        file = "aspirin.gro",
+        traj = "aspirin.xtc",
+        repr = "Licorice",
+        filter = "not water",
+        distance = 100.0,
+        speed = 0.1,
+    }, {
+        id = "Amyloid Marker",
+        name = "AmyloidMarker",
+        file = "60pft_in_tau.gro",
+        traj = "60pft_in_tau-traj-96-106ns.xtc",
+        -- repr = "Cartoon",
+        distance = 200.0,
+        speed = 0.1,
+    }
+}
+
+local root = {
+  Identifier = "MoleculeMuseum",
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0, 0.0, 0.0 }
+    }
+  },
+  GUI = {
+    Name = "Molecule Museum",
+    Path = "/Microcosmos/Molecules/Museum/Root",
+    Hidden = true
+  }
+}
+
+local xOffset = 0.0
+
+for i, info in ipairs(moleculeInfos) do
+    xOffset = xOffset + info.distance
+    moleculeAssets[i] = {
+        Identifier = "MoleculeMuseum" .. info.id,
+        Parent = root.Identifier,
+        Renderable = {
+            Type = "RenderableMolecule",
+            MoleculeFile = moleculeFiles .. info.file,
+            TrajectoryFile = info.traj and (moleculeFiles .. info.traj) or "",
+            AnimationSpeed = info.speed or animSpeed,
+            RepType = info.repr or "SpaceFill",
+            ViamdFilter = info.filter or "",
+        },
+        GUI = {
+            Path = "/Microcosmos/Molecules/Museum/" .. info.id,
+            Name = info.name
+        },
+        Transform = {
+            Translation = {
+                Type = "StaticTranslation",
+                Position = { xOffset, 0.0, 0.0 }
+            }
+        },
+    }
+end
+
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(root)
+    for _, molAsset in ipairs(moleculeAssets) do
+        openspace.addSceneGraphNode(molAsset)
+    end
+end)
+    
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(root)
+    for _, molAsset in ipairs(moleculeAssets) do
+        openspace.removeSceneGraphNode(molAsset)
+    end
+end)
+    
+asset.export(root)
+for _, molAsset in ipairs(moleculeAssets) do
+    asset.export(molAsset)
+end
+
