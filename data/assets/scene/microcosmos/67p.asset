@@ -1,0 +1,491 @@
+local 67p = asset.require("scene/solarsystem/missions/rosetta/67p.asset")
+
+
+local moleculeAcetaldehyde = asset.resource({
+  Name = "Molecule Acetaldehyte",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_acetaldehyde",
+  Version = 1
+})
+
+local moleculeAceticacid = asset.resource({
+  Name = "Molecule Acetic Acid",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_acetic-acid",
+  Version = 1
+})
+
+local moleculeButanal = asset.resource({
+  Name = "Molecule Butanal",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_butanal-acid",
+  Version = 1
+})
+
+local moleculeCO2 = asset.resource({
+  Name = "Molecule CO2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_co2",
+  Version = 1
+})
+
+local moleculeEG = asset.resource({
+  Name = "Molecule EG",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_eg",
+  Version = 1
+})
+
+local moleculeEthanol = asset.resource({
+  Name = "Molecule Ethanol",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_ethanol",
+  Version = 1
+})
+
+local moleculeFormaldehyde = asset.resource({
+  Name = "Molecule Formaldehyde",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_formaldehyde",
+  Version = 1
+})
+
+local moleculeFormic = asset.resource({
+  Name = "Molecule Formic",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_formic",
+  Version = 1
+})
+
+local moleculeH2O = asset.resource({
+  Name = "Molecule H2O",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_h2o",
+  Version = 1
+})
+
+local moleculeMethanol = asset.resource({
+  Name = "Molecule Methanol",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_methanol",
+  Version = 1
+})
+
+local moleculeMethylAcetate = asset.resource({
+  Name = "Molecule Methyl Acetate",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_methyl-acetate",
+  Version = 1
+})
+
+local moleculeN2 = asset.resource({
+  Name = "Molecule N2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_n2",
+  Version = 1
+})
+
+local moleculeO2 = asset.resource({
+  Name = "Molecule O2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_o2",
+  Version = 1
+})
+
+local moleculePropanal = asset.resource({
+  Name = "Molecule Propanal",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_propanal",
+  Version = 1
+})
+
+
+local DefaultAnimSpeed = 100
+
+local MoleculeRosetta = {
+  Identifier = "MoleculeRosetta",
+  Parent = 67p.Barycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 10000.0, 0.0, 0.0 }
+    }
+  },
+  GUI = {
+    Name = "Molecule Rosetta",
+    Path = "/Microcosmos/Molecules/Rosetta",
+    Hidden = true
+  }
+}
+
+local MoleculeAcetaldehyde = {
+  Identifier = "MoleculeRosettaAcetaldehyde",
+  Parent = MoleculeRosetta.Identifier,
+  Transform = {
+    Translation = {
+        Type = "StaticTranslation",
+        Position = { 0.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeAcetaldehyde .. "acetaldehyde.arc",
+    TrajectoryFile = "",
+    AnimationSpeed = DefaultAnimSpeed,
+    RepType = "SpaceFill"
+  },
+  GUI = {
+    Name = "Acetaldehyde",
+    Path = "/Microcosmos/Molecules/Rosetta"
+  }
+}
+
+local MoleculeAceticAcid = {
+  Identifier = "MoleculeRosettaAceticAcid",
+  Parent = MoleculeRosetta.Identifier,
+  Transform = {
+    Translation = {
+        Type = "StaticTranslation",
+        Position = { 20.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeAceticacid .. "acetic-acid.arc",
+    TrajectoryFile = "",
+    AnimationSpeed = DefaultAnimSpeed,
+    RepType = "SpaceFill"
+  },
+  GUI = {
+    Name = "Acetic Acid",
+    Path = "/Microcosmos/Molecules/Rosetta"
+  }
+}
+
+local MoleculeButanal = {
+  Identifier = "MoleculeRosettaButanal",
+  Parent = MoleculeRosetta.Identifier,
+  Transform = {
+    Translation = {
+        Type = "StaticTranslation",
+        Position = { 40.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeButanal .. "butanal.arc",
+    TrajectoryFile = "",
+    AnimationSpeed = DefaultAnimSpeed,
+    RepType = "SpaceFill"
+  },
+  GUI = {
+    Name = "Butanal",
+    Path = "/Microcosmos/Molecules/Rosetta"
+  }
+}
+
+local MoleculeCo2 = {
+  Identifier = "MoleculeRosettaCo2",
+  Parent = MoleculeRosetta.Identifier,
+  Transform = {
+    Translation = {
+        Type = "StaticTranslation",
+        Position = { 60.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeCO2 .. "co2.arc",
+    TrajectoryFile = "",
+    AnimationSpeed = DefaultAnimSpeed,
+    RepType = "SpaceFill"
+  },
+  GUI = {
+    Name = "Co2",
+    Path = "/Microcosmos/Molecules/Rosetta"
+  }
+}
+
+local MoleculeEg = {
+  Identifier = "MoleculeRosettaEg",
+  Parent = MoleculeRosetta.Identifier,
+  Transform = {
+    Translation = {
+        Type = "StaticTranslation",
+        Position = { 0.0, 20.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeEG .. "eg",
+    TrajectoryFile = "",
+    AnimationSpeed = DefaultAnimSpeed,
+    RepType = "SpaceFill"
+  },
+  GUI = {
+    Name = "Eg",
+    Path = "/Microcosmos/Molecules/Rosetta"
+  }
+}
+
+local MoleculeEthanol = {
+  Identifier = "MoleculeRosettaEthanol",
+  Parent = MoleculeRosetta.Identifier,
+  Transform = {
+    Translation = {
+        Type = "StaticTranslation",
+        Position = { 20.0, 20.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeEthanol .. "ethanol.arc",
+    TrajectoryFile = "",
+    AnimationSpeed = DefaultAnimSpeed,
+    RepType = "SpaceFill"
+  },
+  GUI = {
+    Name = "Ethanol",
+    Path = "/Microcosmos/Molecules/Rosetta"
+  }
+}
+
+local MoleculeFormaldehyde = {
+  Identifier = "MoleculeRosettaFormaldehyde",
+  Parent = MoleculeRosetta.Identifier,
+  Transform = {
+    Translation = {
+        Type = "StaticTranslation",
+        Position = { 40.0, 20.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeFormaldehyde .. "formaldehyde.arc",
+    TrajectoryFile = "",
+    AnimationSpeed = DefaultAnimSpeed,
+    RepType = "SpaceFill"
+  },
+  GUI = {
+    Name = "Formaldehyde",
+    Path = "/Microcosmos/Molecules/Rosetta"
+  }
+}
+
+local MoleculeFormic = {
+  Identifier = "MoleculeRosettaFormic",
+  Parent = MoleculeRosetta.Identifier,
+  Transform = {
+    Translation = {
+        Type = "StaticTranslation",
+        Position = { 60.0, 20.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeFormic .. "formic.arc",
+    TrajectoryFile = "",
+    AnimationSpeed = DefaultAnimSpeed,
+    RepType = "SpaceFill"
+  },
+  GUI = {
+    Name = "Formic",
+    Path = "/Microcosmos/Molecules/Rosetta"
+  }
+}
+
+local MoleculeH20 = {
+  Identifier = "MoleculeRosettaH20",
+  Parent = MoleculeRosetta.Identifier,
+  Transform = {
+    Translation = {
+        Type = "StaticTranslation",
+        Position = { 0.0, 40.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeH2O .. "h2o.arc",
+    TrajectoryFile = "",
+    AnimationSpeed = DefaultAnimSpeed,
+    RepType = "SpaceFill"
+  },
+  GUI = {
+    Name = "H20",
+    Path = "/Microcosmos/Molecules/Rosetta"
+  }
+}
+
+local MoleculeMethanol = {
+  Identifier = "MoleculeRosettaMethanol",
+  Parent = MoleculeRosetta.Identifier,
+  Transform = {
+    Translation = {
+        Type = "StaticTranslation",
+        Position = { 20.0, 40.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeMethanol .. "methanol.arc",
+    TrajectoryFile = "",
+    AnimationSpeed = DefaultAnimSpeed,
+    RepType = "SpaceFill"
+  },
+  GUI = {
+    Name = "Methanol",
+    Path = "/Microcosmos/Molecules/Rosetta"
+  }
+}
+
+local MoleculeMethylAcetate = {
+  Identifier = "MoleculeRosettaMethylAcetate",
+  Parent = MoleculeRosetta.Identifier,
+  Transform = {
+    Translation = {
+        Type = "StaticTranslation",
+        Position = { 40.0, 40.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeMethylAcetate .. "methyl-acetate.arc",
+    TrajectoryFile = "",
+    AnimationSpeed = DefaultAnimSpeed,
+    RepType = "SpaceFill"
+  },
+  GUI = {
+    Name = "Methyl Acetate",
+    Path = "/Microcosmos/Molecules/Rosetta"
+  }
+}
+
+local MoleculeN2 = {
+  Identifier = "MoleculeRosettaN2",
+  Parent = MoleculeRosetta.Identifier,
+  Transform = {
+    Translation = {
+        Type = "StaticTranslation",
+        Position = { 60.0, 40.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeN2 .. "n2.arc",
+    TrajectoryFile = "",
+    AnimationSpeed = DefaultAnimSpeed,
+    RepType = "SpaceFill"
+  },
+  GUI = {
+    Name = "N2",
+    Path = "/Microcosmos/Molecules/Rosetta"
+  }
+}
+
+local MoleculeO2 = {
+  Identifier = "MoleculeRosettaO2",
+  Parent = MoleculeRosetta.Identifier,
+  Transform = {
+    Translation = {
+        Type = "StaticTranslation",
+        Position = { 0.0, 60.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeO2 .. "o2.arc",
+    TrajectoryFile = "",
+    AnimationSpeed = DefaultAnimSpeed,
+    RepType = "SpaceFill"
+  },
+  GUI = {
+    Name = "O2",
+    Path = "/Microcosmos/Molecules/Rosetta"
+  }
+}
+
+local MoleculePropanal = {
+  Identifier = "MoleculeRosettaPropanal",
+  Parent = MoleculeRosetta.Identifier,
+  Transform = {
+    Translation = {
+        Type = "StaticTranslation",
+        Position = { 0.0, 80.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculePropanal .. "propanal.arc",
+    TrajectoryFile = "",
+    AnimationSpeed = DefaultAnimSpeed,
+    RepType = "SpaceFill"
+  },
+  GUI = {
+    Name = "Propanal",
+    Path = "/Microcosmos/Molecules/Rosetta"
+  }
+}
+
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(MoleculeRosetta)
+    openspace.addSceneGraphNode(MoleculeAcetaldehyde)
+    openspace.addSceneGraphNode(MoleculeAceticAcid)
+    openspace.addSceneGraphNode(MoleculeButanal)
+    openspace.addSceneGraphNode(MoleculeCo2)
+    openspace.addSceneGraphNode(MoleculeEg)
+    openspace.addSceneGraphNode(MoleculeEthanol)
+    openspace.addSceneGraphNode(MoleculeFormaldehyde)
+    openspace.addSceneGraphNode(MoleculeFormic)
+    openspace.addSceneGraphNode(MoleculeH20)
+    openspace.addSceneGraphNode(MoleculeMethanol)
+    openspace.addSceneGraphNode(MoleculeMethylAcetate)
+    openspace.addSceneGraphNode(MoleculeN2)
+    openspace.addSceneGraphNode(MoleculeO2)
+    openspace.addSceneGraphNode(MoleculePropanal)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(MoleculePropanal)
+    openspace.removeSceneGraphNode(MoleculeO2)
+    openspace.removeSceneGraphNode(MoleculeN2)
+    openspace.removeSceneGraphNode(MoleculeMethylAcetate)
+    openspace.removeSceneGraphNode(MoleculeMethanol)
+    openspace.removeSceneGraphNode(MoleculeH20)
+    openspace.removeSceneGraphNode(MoleculeFormic)
+    openspace.removeSceneGraphNode(MoleculeFormaldehyde)
+    openspace.removeSceneGraphNode(MoleculeEthanol)
+    openspace.removeSceneGraphNode(MoleculeEg)
+    openspace.removeSceneGraphNode(MoleculeCo2)
+    openspace.removeSceneGraphNode(MoleculeButanal)
+    openspace.removeSceneGraphNode(MoleculeAceticAcid)
+    openspace.removeSceneGraphNode(MoleculeAcetaldehyde)
+    openspace.removeSceneGraphNode(MoleculeRosetta)
+end)
+
+asset.export(MoleculeRosetta)
+asset.export(MoleculeAcetaldehyde)
+asset.export(MoleculeAceticAcid)
+asset.export(MoleculeButanal)
+asset.export(MoleculeCo2)
+asset.export(MoleculeEg)
+asset.export(MoleculeEthanol)
+asset.export(MoleculeFormaldehyde)
+asset.export(MoleculeFormic)
+asset.export(MoleculeH20)
+asset.export(MoleculeMethanol)
+asset.export(MoleculeMethylAcetate)
+asset.export(MoleculeN2)
+asset.export(MoleculeO2)
+asset.export(MoleculePropanal)
+
+
+
+asset.meta = {
+  Name = "67P Molecules",
+  Description = [[Visualizes molecules that were found by Rosetta in the tail of comet
+    67P/Churymov-Gerasimenko.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

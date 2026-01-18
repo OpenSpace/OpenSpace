@@ -1,0 +1,120 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+
+
+local moleculeN2 = asset.resource({
+  Name = "Molecule N2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_n2",
+  Version = 1
+})
+
+local moleculeO2 = asset.resource({
+  Name = "Molecule O2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_o2",
+  Version = 1
+})
+
+local moleculeH2O = asset.resource({
+  Name = "Molecule H2O",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_h2o",
+  Version = 1
+})
+
+
+local Latitude = 58.5877
+local Longitude = 16.1924
+
+-- Troposphere
+local EarthMoleculesTroposphere = {
+  Identifier = "EarthMoleculesTroposphere",
+  Parent = earth.Earth.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 10000.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    MoleculeFiles = { moleculeN2 .. "n2.arc", moleculeO2 .. "o2.arc", moleculeH2O .. "h2o.arc" },
+    TrajectoryFiles = { moleculeN2 .. "n2.arc", moleculeO2 .. "o2.arc", "" },
+    -- There are roughly 2700 molecules per 100*100*100 ångström at atmospheric pressure
+    -- see https://en.wikipedia.org/wiki/Density_of_air
+    MoleculeCounts = { 0.78 * 2700, 0.21 * 2700, 0.03 * 2700 },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100,
+    SSAOEnabled = true
+  },
+  GUI = {
+    Name = "Troposphere",
+    Path = "/Microcosmos/Atmosphere"
+  }
+}
+
+-- Thermosphere
+local EarthMoleculesThermosphere = {
+  Identifier = "EarthMoleculesThermosphere",
+  Parent = earth.Earth.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 100000.0
+    },
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    MoleculeFiles = { moleculeN2 .. "n2.arc", moleculeO2 .. "o2.arc" },
+    TrajectoryFiles = { moleculeN2 .. "n2.arc", moleculeO2 .. "o2.arc" },
+    MoleculeCounts = { 5, 5 },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 4.0,
+    AnimationSpeed = 100,
+    SimulationSpeed = 50,
+    SSAOEnabled = true
+  },
+  GUI = {
+    Name = "Thermosphere",
+    Path = "/Microcosmos/Atmosphere"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EarthMoleculesTroposphere)
+  openspace.addSceneGraphNode(EarthMoleculesThermosphere)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EarthMoleculesThermosphere)
+  openspace.removeSceneGraphNode(EarthMoleculesTroposphere)
+end)
+
+asset.export(EarthMoleculesTroposphere)
+asset.export(EarthMoleculesThermosphere)
+
+
+
+asset.meta = {
+  Name = "Earth Atmosphere",
+  Description = [[Visualizes Earth's atmosphere at the molecular scale at the height of
+    the troposphere and the thermosphere. In the troposphere, Nitrogen, Oxygen, and
+    water are shown in correct proportions. In the thermosphere, the proportions are
+    reduced to represent the atmospheric thinning at those altitudes.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

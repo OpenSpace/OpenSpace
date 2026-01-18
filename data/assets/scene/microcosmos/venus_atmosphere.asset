@@ -1,0 +1,163 @@
+local venus = asset.require("scene/solarsystem/planets/venus/venus")
+
+
+
+local moleculeN2 = asset.resource({
+  Name = "Molecule N2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_n2",
+  Version = 1
+})
+
+local moleculeCO2 = asset.resource({
+  Name = "Molecule CO2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_co2",
+  Version = 1
+})
+
+local moleculeH2SO4 = asset.resource({
+  Name = "Molecule H2SO4",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_h2so4",
+  Version = 1
+})
+
+local moleculeH2O = asset.resource({
+  Name = "Molecule H2O",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_h2o",
+  Version = 1
+})
+
+
+local Latitude = 58.5877
+local Longitude = 16.1924
+
+local VenusMolecules = {
+  Identifier = "VenusMolecules",
+  Parent = venus.Venus.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = venus.Venus.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 1000.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    MoleculeFiles = { moleculeCO2 .. "co2.arc", moleculeN2 .. "n2.arc" },
+    TrajectoryFiles = { moleculeCO2 .. "co2.arc", moleculeN2 .. "n2.arc" },
+    MoleculeCounts = { 887, 32 },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100,
+    SSAOEnabled = true
+  },
+  GUI = {
+    Name = "Venus",
+    Path = "/Microcosmos/Atmosphere"
+  }
+}
+
+local VenusMolecules50km = {
+  Identifier = "VenusMolecules50km",
+  Parent = venus.Venus.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = venus.Venus.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 30000.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    MoleculeFiles = { moleculeCO2 .. "co2.arc", moleculeN2 .. "n2.arc" },
+    TrajectoryFiles = { moleculeCO2 .. "co2.arc", moleculeN2 .. "n2.arc" },
+    MoleculeCounts = { 22, 1 },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100,
+    SSAOEnabled = true
+  },
+  GUI = {
+    Name = "Venus 50km",
+    Path = "/Microcosmos/Atmosphere"
+  }
+}
+
+local VenusMolecules50kmCloud = {
+  Identifier = "VenusMolecules50kmCloud",
+  Parent = venus.Venus.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = venus.Venus.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 50000.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    MoleculeFiles = {
+      moleculeCO2 .. "co2.arc",
+      moleculeN2 .. "n2.arc",
+      moleculeH2SO4 .. "h2so4.arc",
+      moleculeH2O .. "h2o.arc"
+    },
+    TrajectoryFiles = {
+      moleculeCO2 .. "co2.arc",
+      moleculeN2 .. "n2.arc",
+      moleculeH2SO4 .. "h2so4.arc",
+      moleculeH2O .. "h2o.arc"
+    },
+    MoleculeCounts = { 22, 1, 300, 200 },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100,
+    SSAOEnabled = true
+  },
+  GUI = {
+    Name = "Venus 50km Cloud",
+    Path = "/Microcosmos/Atmosphere"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(VenusMolecules)
+  openspace.addSceneGraphNode(VenusMolecules50km)
+  openspace.addSceneGraphNode(VenusMolecules50kmCloud)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(VenusMolecules50kmCloud)
+  openspace.removeSceneGraphNode(VenusMolecules50km)
+  openspace.removeSceneGraphNode(VenusMolecules)
+end)
+
+asset.export(VenusMolecules)
+asset.export(VenusMolecules50km)
+asset.export(VenusMolecules50kmCloud)
+
+
+
+asset.meta = {
+  Name = "Venus Atmosphere",
+  Description = [[Visualizes Venus' atmosphere at the molecular scale at the surface
+    level and at 50km altitude. Additional visualizes a cloud of sulfuric acid.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

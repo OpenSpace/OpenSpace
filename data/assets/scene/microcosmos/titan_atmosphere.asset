@@ -1,0 +1,179 @@
+local titan = asset.require("scene/solarsystem/planets/saturn/titan/titan")
+
+
+
+local moleculeN2 = asset.resource({
+  Name = "Molecule N2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_n2",
+  Version = 1
+})
+
+local moleculeCH4 = asset.resource({
+  Name = "Molecule CH4",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_ch4",
+  Version = 1
+})
+
+local moleculeH2 = asset.resource({
+  Name = "Molecule CH2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_h2",
+  Version = 1
+})
+
+local moleculeC2H6 = asset.resource({
+  Name = "Molecule C2H6",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_c2h6",
+  Version = 1
+})
+
+
+local Latitude = 58.5877
+local Longitude = 16.1924
+
+local TitanMolecules = {
+  Identifier = "TitanMolecules",
+  Parent = titan.Titan.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = titan.Titan.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 1000.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    MoleculeFiles = {
+      moleculeN2 .. "n2.arc",
+      moleculeCH4 .. "ch4.arc",
+      moleculeH2 .. "h2.arc"
+    },
+    TrajectoryFiles = {
+      moleculeN2 .. "n2.arc",
+      moleculeCH4 .. "ch4.arc",
+      moleculeH2 .. "h2.arc"
+    },
+    MoleculeCounts = { 108, 6, 1 },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100,
+    SSAOEnabled = true
+  },
+  GUI = {
+    Name = "Titan",
+    Path = "/Microcosmos/Atmosphere"
+  }
+}
+
+local TitanMoleculesMethaneCloud = {
+  Identifier = "TitanMoleculesMethaneCloud",
+  Parent = titan.Titan.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = titan.Titan.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 20000.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    MoleculeFiles = {
+      moleculeN2 .. "n2.arc",
+      moleculeCH4 .. "ch4.arc",
+      moleculeH2 .. "h2.arc"
+    },
+    TrajectoryFiles = {
+      moleculeN2 .. "n2.arc",
+      moleculeCH4 .. "ch4.arc",
+      moleculeH2 .. "h2.arc"
+    },
+    MoleculeCounts = { 40, 300, 1 },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100,
+    SSAOEnabled = true
+  },
+  GUI = {
+    Name = "Titan Methane Cloud",
+    Path = "/Microcosmos/Atmosphere"
+  }
+}
+
+local TitanMoleculesEthaneCloud = {
+  Identifier = "TitanMoleculesEthaneCloud",
+  Parent = titan.Titan.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = titan.Titan.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 45000.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    MoleculeFiles = {
+      moleculeN2 .. "n2.arc",
+      moleculeCH4 .. "ch4.arc",
+      moleculeC2H6 .. "c2h6.arc",
+      moleculeH2 .. "h2.arc"
+    },
+    TrajectoryFiles = {
+      moleculeN2 .. "n2.arc",
+      moleculeCH4 .. "ch4.arc",
+      moleculeC2H6 .. "c2h6.arc",
+      moleculeH2 .. "h2.arc"
+    },
+    MoleculeCounts = { 4, 50, 250, 1 },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100,
+    SSAOEnabled = true
+  },
+  GUI = {
+    Name = "Titan Ethane Cloud",
+    Path = "/Microcosmos/Atmosphere"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(TitanMolecules)
+  openspace.addSceneGraphNode(TitanMoleculesMethaneCloud)
+  openspace.addSceneGraphNode(TitanMoleculesEthaneCloud)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TitanMoleculesEthaneCloud)
+  openspace.removeSceneGraphNode(TitanMoleculesMethaneCloud)
+  openspace.removeSceneGraphNode(TitanMolecules)
+end)
+
+asset.export(TitanMolecules)
+asset.export(TitanMoleculesMethaneCloud)
+asset.export(TitanMoleculesEthaneCloud)
+
+
+
+asset.meta = {
+  Name = "TitanMolecules Atmosphere",
+  Description = [[Visualizes TitanMolecules' atmosphere at the molecular scale as well
+    as showing a methane cloud at 20km altitude and an ethane cloud at 45km altitude.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

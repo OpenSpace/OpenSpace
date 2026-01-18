@@ -1,0 +1,65 @@
+local mars = asset.require("scene/solarsystem/planets/mars/mars")
+
+
+
+local moleculeCO2 = asset.resource({
+  Name = "Molecule CO2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_co2",
+  Version = 1
+})
+
+
+local Latitude = 58.5877
+local Longitude = 16.1924
+
+local MarsMolecules = {
+  Identifier = "MarsMolecules",
+  Parent = mars.Mars.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = mars.Mars.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 1000.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    MoleculeFiles = { moleculeCO2 .. "co2.arc" },
+    TrajectoryFiles = { moleculeCO2 .. "co2.arc" },
+    MoleculeCounts = { 1 },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100,
+    SSAOEnabled = true
+  },
+  GUI = {
+    Name = "Mars",
+    Path = "/Microcosmos/Atmosphere"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MarsMolecules)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MarsMolecules)
+end)
+
+asset.export(MarsMolecules)
+
+
+
+asset.meta = {
+  Name = "Mars Atmosphere",
+  Description = [[Visualizes Mars' atmosphere at the molecular scale.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
