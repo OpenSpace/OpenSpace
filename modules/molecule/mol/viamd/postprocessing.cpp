@@ -30,7 +30,7 @@
 #pragma warning( disable : 4305 )
 #endif
 
-#include "postprocessing.h"
+#include <modules/molecule/mol/viamd/postprocessing.h>
 
 #include <core/md_allocator.h>
 #include <core/md_str.h>
@@ -42,7 +42,7 @@
 #include <string.h>
 #include <float.h>
 
-#include "postprocessing_shaders.inl"
+#include <modules/molecule/mol/viamd/postprocessing_shaders.inl>
 
 #include <ghoul/opengl/ghoul_gl.h>
 
@@ -1480,7 +1480,6 @@ void blit_color(vec4_t color) {
 }
 
 void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
-    ASSERT(p);
     ASSERT(glIsTexture(settings.input_textures.depth));
     ASSERT(glIsTexture(settings.input_textures.color));
     ASSERT(glIsTexture(settings.input_textures.normal));

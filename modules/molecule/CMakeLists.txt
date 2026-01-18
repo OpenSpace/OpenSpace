@@ -25,29 +25,30 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
+  billboard.h
   moleculemodule.h
   renderablemolecule.h
   renderablesimulationbox.h
+  mol/cache.h
   mol/def.h
   mol/util.h
-  mol/cache.h
   mol/viamd/coloring.h
   mol/viamd/loader.h
   mol/viamd/postprocessing.h
+  mol/viamd/postprocessing_shaders.inl
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
+  billboard.cpp
   moleculemodule.cpp
   renderablemolecule.cpp
   renderablesimulationbox.cpp
-  billboard.cpp
-  mol/util.cpp
   mol/cache.cpp
+  mol/util.cpp
   mol/viamd/coloring.cpp
   mol/viamd/loader.cpp
   mol/viamd/postprocessing.cpp
-  mol/viamd/postprocessing_shaders.inl
 )
 
 source_group("Source Files" FILES ${SOURCE_FILES})

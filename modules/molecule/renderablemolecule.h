@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,12 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#pragma once
+#ifndef __OPENSPACE_MODULE_MOLECULE___RENDERABLEMOLECULE___H__
+#define __OPENSPACE_MODULE_MOLECULE___RENDERABLEMOLECULE___H__
 
 #include <openspace/rendering/renderable.h>
 #include <openspace/properties/propertyowner.h>
-#include <openspace/properties/stringproperty.h>
-#include <openspace/properties/optionproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
@@ -35,7 +36,7 @@
 #include <md_gl.h>
 #include <md_molecule.h>
 #include <md_trajectory.h>
-#include "mol/def.h"
+#include <modules/molecule/mol/def.h>
 
 namespace openspace {
 
@@ -102,3 +103,5 @@ private:
 };
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_MOLECULE___RENDERABLEMOLECULE___H__

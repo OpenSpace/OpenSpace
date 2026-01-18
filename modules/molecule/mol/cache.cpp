@@ -1,4 +1,28 @@
-#include "cache.h"
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include <modules/molecule/mol/cache.h>
 
 #include <md_molecule.h>
 #include <md_trajectory.h>
@@ -15,7 +39,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 
-#include "modules/molecule/moleculemodule.h"
+#include <modules/molecule/moleculemodule.h>
 
 #define MD_CACHED_TRAJ_MAGIC    0x234236423674DBA2
 #define MD_MEM_TRAJ_MAGIC       0x1289371265F17256
@@ -246,7 +270,7 @@ bool cached_trajectory_decode_frame(struct md_trajectory_o* inst, const void* da
     md_cached_trajectory_t* cached_traj = (md_cached_trajectory_t*)inst;
 
     int64_t idx = *((int64_t*)data_ptr);
-    ASSERT(0 <= idx && idx < md_trajectory_num_frames(cached_traj->traj));
+    ASSERT(0 <= idx && idx < md_trajectory_num_frames(cached_traj->cache.traj));
 
     md_frame_data_t* frame_data;
     md_frame_cache_lock_t* lock = 0;
@@ -485,7 +509,7 @@ FrameData get_frame_data(const md_trajectory_i* traj, int64_t frame) {
             LERROR("Invalid trajectory");
         }
     } else {
-        LERROR(fmt::format("Invalid trajectory index: {}, valid range: [0,{}]", frame, md_trajectory_num_frames(traj)));
+        LERROR(std::format("Invalid trajectory index: {}, valid range: [0,{}]", frame, md_trajectory_num_frames(traj)));
     }
     return data;
 }

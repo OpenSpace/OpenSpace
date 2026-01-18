@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,19 +22,19 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#pragma once
+#ifndef __OPENSPACE_MODULE_MOLECULE___RENDERABLESIMULATIONBOX___H__
+#define __OPENSPACE_MODULE_MOLECULE___RENDERABLESIMULATIONBOX___H__
 
-#include "openspace/properties/listproperty.h"
-#include "openspace/properties/optionproperty.h"
-#include "openspace/properties/selectionproperty.h"
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/list/stringlistproperty.h>
-#include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/list/doublelistproperty.h>
+#include <openspace/properties/list/intlistproperty.h>
+#include <openspace/properties/list/stringlistproperty.h>
+#include <openspace/properties/misc/listproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/vector/dvec3property.h>
 #include <openspace/properties/vector/vec4property.h>
-
 #include <md_gl.h>
 #include <md_molecule.h>
 #include <md_trajectory.h>
@@ -48,7 +48,6 @@ public:
     explicit RenderableSimulationBox(const ghoul::Dictionary& dictionary);
     virtual ~RenderableSimulationBox();
 
-    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
     bool isReady() const override;
@@ -75,13 +74,12 @@ private:
     
     void updateSimulation(molecule_data_t& mol, double dt);
     
-    void initMolecule(molecule_data_t& mol, std::string_view molFile, std::string_view trajFile = {});
+    void initMolecule(molecule_data_t& mol, std::string_view molFile,
+        std::string_view trajFile = "");
     void freeMolecule(molecule_data_t& mol);
 
-    bool _renderableInView; // indicates whether the molecule is in view in any camera's viewpoint
+    bool _renderableInView = true;
 
-    double _frame;
-    
     std::vector<molecule_data_t> _molecules;
     
     properties::StringListProperty _moleculeFiles;
@@ -110,3 +108,5 @@ private:
 };
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_MOLECULE___RENDERABLESIMULATIONBOX___H__

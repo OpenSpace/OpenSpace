@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,8 +24,8 @@
 
 // The following code was taken from VIAMD (https://github.com/scanberg/viamd), MIT.
 
-#include "coloring.h"
-#include "md_util.h"
+#include <modules/molecule/mol/viamd/coloring.h>
+#include <md_util.h>
 #include <core/md_bitfield.h>
 
 static uint32_t constexpr crc32_tab[] = {

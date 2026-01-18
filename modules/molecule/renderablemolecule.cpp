@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "renderablemolecule.h"
-#include "moleculemodule.h"
+#include <modules/molecule/renderablemolecule.h>
+#include <modules/molecule/moleculemodule.h>
 
-#include "billboard.h"
+#include <modules/molecule/billboard.h>
 
 #include "glbinding/gl/bitfield.h"
 #include "glbinding/gl/enum.h"
@@ -248,7 +248,7 @@ static void compute_mask(md_bitfield_t& mask, std::string_view filter, const md_
         if (md_filter(&mask, str, &mol, NULL, &is_dynamic, err_buf, sizeof(err_buf))) {
             return;
         }
-        LERROR(fmt::format("Invalid filter expression '{}': {}", filter, err_buf));
+        LERROR(std::format("Invalid filter expression '{}': {}", filter, err_buf));
     }
     md_bitfield_clear(&mask);
     md_bitfield_set_range(&mask, 0, mol.atom.count);
@@ -258,7 +258,7 @@ namespace openspace {
 
     void RenderableMolecule::addRepresentation(bool enabled, mol::rep::Type type, mol::rep::Color color, std::string filter, float scale, glm::vec4 uniform_color) {
         properties::BoolProperty* pEnabled = new properties::BoolProperty(EnabledInfo);
-        pEnabled->set(enabled);
+        *pEnabled = enabled;
 
         properties::OptionProperty* pType = new properties::OptionProperty(TypeInfo);
         pType->addOptions({
@@ -295,9 +295,9 @@ namespace openspace {
         size_t i = _repProps.propertySubOwners().size();
 
         PropertyOwnerInfo prop_info {
-            fmt::format("rep{}", i),
-            fmt::format("Representation {}", i),
-            fmt::format("Visual representation of molecule", i),
+            std::format("rep{}", i),
+            std::format("Representation {}", i),
+            std::format("Visual representation of molecule", i),
         };
 
         PropertyOwner* prop = new PropertyOwner(prop_info);
@@ -323,7 +323,7 @@ namespace openspace {
             if (i >= _repData.size()) {
                 return;
             }
-            mol::util::update_rep_type(_repData[i].gl_rep, static_cast<mol::rep::Type>(pType->value()), pScale->value());
+            mol::util::updateRepType(_repData[i].gl_rep, static_cast<mol::rep::Type>(pType->value()), pScale->value());
         };
 
         auto updateCol = [this, i, pColor, pUniformColor]() mutable {
@@ -332,7 +332,7 @@ namespace openspace {
             }
 
             const mol::rep::Color color = static_cast<mol::rep::Color>(pColor->value());
-            mol::util::update_rep_color(_repData[i].gl_rep, _molecule, color, _repData[i].mask, pUniformColor->value());
+            mol::util::updateRepColor(_repData[i].gl_rep, _molecule, color, _repData[i].mask, pUniformColor->value());
         };
 
         auto updateFilt = [this, i, pFilter, updateCol]() mutable {
@@ -362,28 +362,25 @@ namespace openspace {
             auto& rep = _repData[i];
             rep.gl_rep = {0};
             md_gl_representation_init(&rep.gl_rep, &_gl_molecule);
-            
-            auto pRep           = _repProps.propertySubOwners()[i];
-            auto pEnabled       = pRep->property("Enabled");
-            auto pType          = pRep->property("Type");
-            auto pColor         = pRep->property("Color");
-            auto pFilter        = pRep->property("Filter");
-            auto pScale         = pRep->property("Scale");
-            auto pUniformColor  = pRep->property("UniformColor");
+
+            using namespace properties;
+            auto pRep = _repProps.propertySubOwners()[i];
+            auto pEnabled = dynamic_cast<BoolProperty*>(pRep->property("Enabled"));
+            auto pType = dynamic_cast<OptionProperty*>(pRep->property("Type"));
+            auto pColor = dynamic_cast<OptionProperty*>(pRep->property("Color"));
+            auto pFilter = dynamic_cast<StringProperty*>(pRep->property("Filter"));
+            auto pScale = dynamic_cast<FloatProperty*>(pRep->property("Scale"));
+            auto pUniformColor = dynamic_cast<Vec4Property*>(pRep->property("UniformColor"));
 
             if (pEnabled && pType && pColor && pFilter && pScale && pUniformColor) {
-                auto enabled        = std::any_cast<bool>(pEnabled->get());
-                auto type           = static_cast<mol::rep::Type> (std::any_cast<int>(pType->get()));
-                auto color          = static_cast<mol::rep::Color>(std::any_cast<int>(pColor->get()));
-                auto filter         = std::any_cast<std::string>(pFilter->get());
-                auto scale          = std::any_cast<float>(pScale->get());
-                auto uniform_color  = std::any_cast<glm::vec4>(pUniformColor->get());
+                mol::rep::Type type = static_cast<mol::rep::Type>(pType->value());
+                mol::rep::Color color = static_cast<mol::rep::Color>(pColor->value());
 
-                if (enabled) {
-                    compute_mask(rep.mask, filter, _molecule, rep.dynamic);
+                if (*pEnabled) {
+                    compute_mask(rep.mask, *pFilter, _molecule, rep.dynamic);
 
-                    mol::util::update_rep_type(rep.gl_rep, type, scale);
-                    mol::util::update_rep_color(rep.gl_rep, _molecule, color, rep.mask, uniform_color);
+                    mol::util::updateRepType(rep.gl_rep, type, *pScale);
+                    mol::util::updateRepColor(rep.gl_rep, _molecule, color, rep.mask, *pUniformColor);
                 }
             }
         }
@@ -404,6 +401,7 @@ namespace openspace {
             break;
         case AnimationRepeatMode::Clamp:
             frame = std::clamp(time, 0.0, last_frame - 1.0);
+            break;
         default:
             ghoul_assert(false, "Don't end up here!");
         }
@@ -425,7 +423,7 @@ namespace openspace {
             
             if (frame != _frame) {
                 _frame = frame;
-                mol::util::interpolate_frame(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame, _applyPbcPerFrame);
+                mol::util::interpolateFrame(_molecule, _trajectory, mol::util::InterpolationType::Cubic, frame, _applyPbcPerFrame);
 
                 const uint64_t size = _molecule.atom.count * sizeof(vec3_t);
                 md_allocator_i* alloc = default_temp_allocator_max_allocation_size() < size ? default_allocator : default_temp_allocator;
@@ -443,19 +441,19 @@ namespace openspace {
                 
                 for (size_t i = 0; i < _repProps.propertySubOwners().size(); ++i) {
                     if (!_repData[i].enabled) continue;
-                    
-                    auto pColor  = _repProps.propertySubOwners()[i]->property("Color");
-                    auto pFilter = _repProps.propertySubOwners()[i]->property("Filter");
+
+                    using namespace properties;
+                    auto pColor = dynamic_cast<OptionProperty*>(_repProps.propertySubOwners()[i]->property("Color"));
+                    auto pFilter = dynamic_cast<StringProperty*>(_repProps.propertySubOwners()[i]->property("Filter"));
                     if (pColor) {
-                        auto color  = static_cast<mol::rep::Color>(std::any_cast<int>(pColor->get()));
+                        auto color  = static_cast<mol::rep::Color>(pColor->value());
                         if (color == mol::rep::Color::SecondaryStructure) {
                             rep_has_ss_indices.push_back(i);
                         }
                     }
                     if (pFilter) {
-                        auto filter = std::any_cast<std::string>(pFilter->get());
                         if (_repData[i].dynamic) {
-                            compute_mask(_repData[i].mask, filter, _molecule, _repData[i].dynamic);
+                            compute_mask(_repData[i].mask, *pFilter, _molecule, _repData[i].dynamic);
                             rep_update_col_indices.push_back(i);
                         }
                     }
@@ -471,11 +469,12 @@ namespace openspace {
                 }
 
                 for (size_t i : rep_update_col_indices) {
-                    auto pColor = _repProps.propertySubOwners()[i]->property("Color");
-                    auto color = static_cast<mol::rep::Color>(std::any_cast<int>(pColor->get()));
-                    auto pUniformColor = _repProps.propertySubOwners()[i]->property("UniformColor");
-                    auto uniform_color  = std::any_cast<glm::vec4>(pUniformColor->get());
-                    mol::util::update_rep_color(_repData[i].gl_rep, _molecule, color, _repData[i].mask, uniform_color);
+                    using namespace properties;
+                    auto pColor = dynamic_cast<OptionProperty*>(_repProps.propertySubOwners()[i]->property("Color"));
+                    auto color = static_cast<mol::rep::Color>(pColor->value());
+
+                    auto pUniformColor = dynamic_cast<Vec4Property*>(_repProps.propertySubOwners()[i]->property("UniformColor"));
+                    mol::util::updateRepColor(_repData[i].gl_rep, _molecule, color, _repData[i].mask, *pUniformColor);
                 }
             }
 
@@ -722,7 +721,7 @@ namespace openspace {
     }
 
     void RenderableMolecule::initMolecule(std::string_view molFile, std::string_view trajFile) {
-        LDEBUG(fmt::format("Loading molecule file '{}'", molFile));
+        LDEBUG(std::format("Loading molecule file '{}'", molFile));
 
         // free previously loaded molecule
         freeMolecule();
@@ -747,7 +746,7 @@ namespace openspace {
         }
 
         if (!trajFile.empty() && trajFile != "") {
-            LDEBUG(fmt::format("Loading trajectory file '{}'", trajFile));
+            LDEBUG(std::format("Loading trajectory file '{}'", trajFile));
             _trajectory = mol_manager::load_trajectory(trajFile, molecule, _applyPbcOnLoad);
 
             if (!_trajectory) {

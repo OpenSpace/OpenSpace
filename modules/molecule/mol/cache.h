@@ -1,4 +1,29 @@
-#pragma once
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#ifndef __OPENSPACE_MODULE_MOLECULE___CACHE___H__
+#define __OPENSPACE_MODULE_MOLECULE___CACHE___H__
 
 #include <string_view>
 #include <span>
@@ -15,9 +40,9 @@ struct md_frame_cache_lock_t;
 struct FrameData {
     ~FrameData();
     const md_trajectory_frame_header_t* header;
-    std::span<const float> x;
-    std::span<const float> y;
-    std::span<const float> z;
+    std::span<float> x;
+    std::span<float> y;
+    std::span<float> z;
     std::span<const md_secondary_structure_t> ss;
     md_frame_cache_lock_t* lock = nullptr;
 };
@@ -36,3 +61,5 @@ namespace mol_manager {
 
     //std::span<const md_secondary_structure_t> get_frame_secondary_structures(const md_trajectory_i* traj, int64_t frame);
 }
+
+#endif // __OPENSPACE_MODULE_MOLECULE___CACHE___H__

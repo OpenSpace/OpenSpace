@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2022                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef __OPENSPACE_MODULE_MOLECULE___COLORING___H__
+#define __OPENSPACE_MODULE_MOLECULE___COLORING___H__
+
 #include <stdint.h>
 
 struct md_bitfield_t;
@@ -35,3 +38,5 @@ void color_atoms_residue_index(uint32_t* colors, int64_t count, const md_molecul
 void color_atoms_chain_id(uint32_t* colors, int64_t count, const md_molecule_t& mol);
 void color_atoms_chain_index(uint32_t* colors, int64_t count, const md_molecule_t& mol);
 void color_atoms_secondary_structure(uint32_t* colors, int64_t count, const md_molecule_t& mol);
+
+#endif // __OPENSPACE_MODULE_MOLECULE___COLORING___H__
