@@ -94,6 +94,7 @@ public:
     const glm::dmat4& viewRotationMatrix() const;
     const glm::dmat4& viewScaleMatrix() const;
     const glm::dquat& rotationQuaternion() const;
+    const CameraPose& pose() const;
     float maxFov() const;
     float sinMaxFov() const;
     SceneGraphNode* parent() const;

@@ -27,6 +27,7 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/set_openspace_compile_settings.cmake
 set(OPENSPACE_SOURCE
   openspace.cpp
   camera/camera.cpp
+  camera/camerapose.cpp
   data/csvloader.cpp
   data/dataloader.cpp
   data/datamapping.cpp

@@ -852,12 +852,6 @@ void OrbitalNavigator::tickMovementTimer(float deltaTime) {
     _movementTimer -= deltaTime;
 }
 
-glm::dquat OrbitalNavigator::composeCameraRotation(
-                                   const CameraRotationDecomposition& decomposition) const
-{
-    return decomposition.globalRotation * decomposition.localRotation;
-}
-
 Camera* OrbitalNavigator::camera() const {
     return _camera;
 }
@@ -1094,69 +1088,6 @@ double OrbitalNavigator::minAllowedDistance() const {
 
 double OrbitalNavigator::maxAllowedDistance() const {
     return _limitZoom.maximumAllowedDistance;
-}
-
-OrbitalNavigator::CameraRotationDecomposition
-    OrbitalNavigator::decomposeCameraRotationSurface(const CameraPose& cameraPose,
-                                                     const SceneGraphNode& reference)
-{
-    const glm::dvec3 cameraUp = cameraPose.rotation * Camera::UpDirectionCameraSpace;
-    const glm::dvec3 cameraViewDirection = ghoul::viewDirection(cameraPose.rotation);
-
-    glm::dmat4 modelTransform = reference.modelTransform();
-    if (modelTransform[0][0] == 0.0) {
-        modelTransform[0][0] = std::numeric_limits<double>::epsilon();
-    }
-    if (modelTransform[1][1] == 0.0) {
-        modelTransform[1][1] = std::numeric_limits<double>::epsilon();
-    }
-    if (modelTransform[2][2] == 0.0) {
-        modelTransform[2][2] = std::numeric_limits<double>::epsilon();
-    }
-    const glm::dmat4 inverseModelTransform = glm::inverse(modelTransform);
-    const glm::dvec3 cameraPositionModelSpace = glm::dvec3(inverseModelTransform *
-                                                glm::dvec4(cameraPose.position, 1));
-
-    const SurfacePositionHandle posHandle =
-        reference.calculateSurfacePositionHandle(cameraPositionModelSpace);
-
-    const glm::dvec3 directionFromSurfaceToCameraModelSpace =
-        posHandle.referenceSurfaceOutDirection;
-    const glm::dvec3 directionFromSurfaceToCamera = glm::normalize(
-        glm::dmat3(modelTransform) * directionFromSurfaceToCameraModelSpace
-    );
-
-    // To avoid problem with lookup in up direction we adjust is with the view direction
-    const glm::dquat globalCameraRotation = ghoul::lookAtQuaternion(
-        glm::dvec3(0.0),
-        -directionFromSurfaceToCamera,
-        normalize(cameraViewDirection + cameraUp)
-    );
-
-    const glm::dquat localCameraRotation = glm::inverse(globalCameraRotation) *
-        cameraPose.rotation;
-
-    return { localCameraRotation, globalCameraRotation };
-}
-
-OrbitalNavigator::CameraRotationDecomposition
-OrbitalNavigator::decomposeCameraRotation(const CameraPose& cameraPose,
-                                          const glm::dvec3& reference)
-{
-    const glm::dvec3 cameraUp = cameraPose.rotation * glm::dvec3(0.0, 1.0, 0.0);
-    const glm::dvec3 cameraViewDirection = ghoul::viewDirection(cameraPose.rotation);
-
-    // To avoid problem with lookup in up direction we adjust is with the view direction
-    const glm::dquat globalCameraRotation = ghoul::lookAtQuaternion(
-        glm::dvec3(0.0),
-        reference - cameraPose.position,
-        normalize(cameraViewDirection + cameraUp)
-    );
-
-    const glm::dquat localCameraRotation = glm::inverse(globalCameraRotation) *
-        cameraPose.rotation;
-
-    return { localCameraRotation, globalCameraRotation };
 }
 
 CameraPose OrbitalNavigator::followAim(CameraPose pose, const glm::dvec3& cameraToAnchor,

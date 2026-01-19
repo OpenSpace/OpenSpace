@@ -258,68 +258,58 @@ void DirectManipulation::stepDirectTouch(const VelocityStates& velocities) {
         return;
     }
 
-    const glm::dvec3 camPos = camera->positionVec3();
-    const glm::dvec3 centerPos = anchor->worldPosition();
+    const glm::dvec3 anchorPos = anchor->worldPosition();
 
-    const glm::dvec3 directionToCenter = normalize(centerPos - camPos);
-    const glm::dvec3 lookUp = camera->lookUpVectorWorldSpace();
-    const glm::dvec3 camDirection = camera->viewDirectionWorldSpace();
+    CameraPose pose = camera->pose();
 
-    // Make a representation of the rotation quaternion with local and global rotations.
-    // To avoid problem with lookup in up direction we adjust it with the view direction
-    glm::dquat globalCamRot = ghoul::lookAtQuaternion(
-        glm::dvec3(0.0),
-        directionToCenter,
-        glm::normalize(camDirection + lookUp)
-    );
-    glm::dquat localCamRot = inverse(globalCamRot) * camera->rotationQuaternion();
-
-    CameraPose pose = {
-        .position = camPos,
-        .rotation = camera->rotationQuaternion()
-    };
+    // Make a representation of the rotation quaternion with local and global rotations
+    CameraRotationDecomposition rot = decomposeCameraRotation(pose, anchorPos);
 
     {
         // Roll (local rotation)
-        const glm::dquat camRollRot = glm::angleAxis(velocities.roll, glm::dvec3(0.0, 0.0, 1.0));
-        localCamRot = localCamRot * camRollRot;
+        const glm::dvec3 zAxis = glm::dvec3(0.0, 0.0, 1.0);
+        const glm::dquat camRollRot = glm::angleAxis(velocities.roll, zAxis);
+        rot.localRotation = rot.localRotation * camRollRot;
     }
     {
         // Panning (local rotation)
         const glm::dvec3 eulerAngles = glm::dvec3(velocities.pan.y, velocities.pan.x, 0.0);
         const glm::dquat rotationDiff = glm::dquat(eulerAngles);
-        localCamRot = localCamRot * rotationDiff;
-    }
-    {
-        // Zooming
-        pose.position += directionToCenter * velocities.zoom;
+        rot.localRotation = rot.localRotation * rotationDiff;
     }
     {
         // Orbit (global rotation)
+
+        // Rotate position
         const glm::dvec3 eulerAngles = glm::dvec3(velocities.orbit.y, velocities.orbit.x, 0.0);
         const glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
+        const glm::dquat rotationDiffWorldSpace =
+            rot.globalRotation * rotationDiffCamSpace * glm::inverse(rot.globalRotation);
 
-        // Update position
-        const glm::dvec3 centerToCamera = camPos - centerPos;
-        const glm::dquat rotationDiffWorldSpace = globalCamRot * rotationDiffCamSpace *
-            inverse(globalCamRot);
-        const glm::dvec3 rotationDiffVec3 = centerToCamera * rotationDiffWorldSpace -
-            centerToCamera;
+        const glm::dvec3 centerToCamera = pose.position - anchorPos;
+        const glm::dvec3 rotationDiffVec3 =
+            centerToCamera * rotationDiffWorldSpace - centerToCamera;
+
         pose.position += rotationDiffVec3;
 
         // Rotate camera to look at center again
-        const glm::dvec3 newPositionToCenter = centerPos - pose.position;
-        const glm::dvec3 lookUpWhenFacingCenter = globalCamRot *
+        const glm::dvec3 newPositionToCenter = anchorPos - pose.position;
+        const glm::dvec3 lookUpWhenFacingCenter = rot.globalRotation *
             glm::dvec3(camera->lookUpVectorCameraSpace());
 
-        globalCamRot = ghoul::lookAtQuaternion(
+        rot.globalRotation = ghoul::lookAtQuaternion(
             glm::dvec3(0.0),
-            glm::normalize(newPositionToCenter),
+            newPositionToCenter,
             lookUpWhenFacingCenter
         );
     }
+    {
+        // Zooming
+        const glm::dvec3 directionToCenter = normalize(anchorPos - pose.position);
+        pose.position += directionToCenter * velocities.zoom;
+    }
 
-    pose.rotation = globalCamRot * localCamRot;
+    pose.rotation = composeCameraRotation(rot);
 
     // Update the camera state
     camera->setPose(pose);
