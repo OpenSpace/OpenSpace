@@ -66,11 +66,10 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-
     constexpr openspace::properties::Property::PropertyInfo IsActiveInfo = {
         "IsActive",
         "Is active",
-        "True if the direct manipulation scheme is currently being applied.",
+        "True if the direct manipulation interaction scheme is currently being applied.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -86,18 +85,30 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DefaultRenderableTypesInfo = {
         "DefaultRenderableTypes",
         "Default renderable types",
-        "A list of renderable types that will automatically use the \'direct "
-        "manipulation\' scheme when interacted with, keeping the finger on a static "
+        "A list of renderable types that will automatically use the direct "
+        "manipulation scheme when interacted with, keeping the finger on a static "
         "position on the interaction sphere of the object when touching. Good for "
         "relatively spherical objects.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
+    constexpr std::string_view Description =
+        "Direct manipulation is an interaction scheme that allows rotating an object in "
+        "a way so that, while touching, each finger will kept on a static position on "
+        "the interaction sphere of the object. Per default, the scheme is only active "
+        "for touch interaction. Note that the camera has to be within a certain distance "
+        "of the object, and that direct manipulation will only be applied for specified "
+        "renderable types.";
 } // namespace
 
 namespace openspace::interaction {
 
 DirectManipulation::DirectManipulation()
-    : properties::PropertyOwner({ "DirectManipulation", "Direct Manipulation" })
+    : properties::PropertyOwner({
+        "DirectManipulation",
+        "Direct Manipulation",
+        std::string(Description)
+      })
     , _enabled(EnabledInfo, true)
     , _isActive(IsActiveInfo, false)
     , _distanceThreshold(DistanceThresholdInfo, 5.f, 0.f, 10.f)
