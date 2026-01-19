@@ -666,6 +666,15 @@ void OpenSpaceEngine::initializeGL() {
             [](Source source, Type type, Severity severity, unsigned int id,
                 const std::string& message)
             {
+                // We want to blanked-disable PushGroup/PopGroup messages. It doesn't work
+                // to use `setDebugMessageControl` for this unfortunately
+                if ((source == Source::Application || source == Source::ThirdParty) &&
+                    (type == Type::PushGroup || type == Type::PopGroup))
+                {
+                    return;
+                }
+
+
                 const std::string s = ghoul::to_string(source);
                 const std::string t = ghoul::to_string(type);
 
