@@ -200,9 +200,7 @@ void DirectManipulation::updateNodeSurfacePoints(
 {
     _selectedNodeSurfacePoints.clear();
 
-    const SceneGraphNode* anchor =
-        global::navigationHandler->orbitalNavigator().anchorNode();
-
+    const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
     const Camera* camera = global::navigationHandler->camera();
 
     SceneGraphNode* node = sceneGraphNode(anchor->identifier());
@@ -251,9 +249,7 @@ void DirectManipulation::updateNodeSurfacePoints(
 // Main update call, calculates the new orientation and position for the camera depending
 // on _vel and dt. Called every frame
 void DirectManipulation::stepDirectTouch(const VelocityStates& velocities) {
-    const SceneGraphNode* anchor =
-        global::navigationHandler->orbitalNavigator().anchorNode();
-
+    const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
     Camera* camera = global::navigationHandler->camera();
 
     if (!anchor || !camera) {
@@ -270,17 +266,16 @@ void DirectManipulation::stepDirectTouch(const VelocityStates& velocities) {
     const glm::dvec3 camDirection = camera->viewDirectionWorldSpace();
 
     // Make a representation of the rotation quaternion with local and global
-    // rotations. To avoid problem with lookup in up direction
-    const glm::dmat4 lookAtMat = glm::lookAt(
-        glm::dvec3(0.0, 0.0, 0.0),
+    // rotations. To avoid problem with lookup in up direction we adjust it with the view direction
+    glm::dquat globalCamRot = ghoul::lookAtQuaternion(
+        glm::dvec3(0.0),
         directionToCenter,
         glm::normalize(camDirection + lookUp)
     );
-    glm::dquat globalCamRot = glm::normalize(glm::quat_cast(glm::inverse(lookAtMat)));
     glm::dquat localCamRot = inverse(globalCamRot) * camera->rotationQuaternion();
 
     {
-        // Roll
+        // Roll (local rotation)
         const glm::dquat camRollRot = glm::angleAxis(velocities.roll, glm::dvec3(0.0, 0.0, 1.0));
         localCamRot = localCamRot * camRollRot;
     }
@@ -292,7 +287,7 @@ void DirectManipulation::stepDirectTouch(const VelocityStates& velocities) {
     }
     {
         // Orbit (global rotation)
-        const glm::dvec3 eulerAngles(velocities.orbit.y, velocities.orbit.x, 0.0);
+        const glm::dvec3 eulerAngles = glm::dvec3(velocities.orbit.y, velocities.orbit.x, 0.0);
         const glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
 
         const glm::dquat rotationDiffWorldSpace = globalCamRot * rotationDiffCamSpace *
@@ -306,18 +301,16 @@ void DirectManipulation::stepDirectTouch(const VelocityStates& velocities) {
         const glm::dvec3 lookUpWhenFacingCenter = globalCamRot *
             glm::dvec3(camera->lookUpVectorCameraSpace());
 
-        const glm::dmat4 lookAtMatrix = glm::lookAt(
+        globalCamRot = ghoul::lookAtQuaternion(
             glm::dvec3(0.0),
             directionToCenter,
             lookUpWhenFacingCenter
         );
-        globalCamRot = glm::normalize(glm::quat_cast(glm::inverse(lookAtMatrix)));
     }
     {
         // Zooming
         double zoomVelocity = velocities.zoom;
-        const glm::dvec3 zoomDistanceInc = directionToCenter * zoomVelocity;
-        camPos += zoomDistanceInc;
+        camPos += directionToCenter * zoomVelocity;
     }
 
     // Update the camera state
@@ -329,8 +322,7 @@ void DirectManipulation::stepDirectTouch(const VelocityStates& velocities) {
 }
 
 bool DirectManipulation::isValidDirectTouchNode() const {
-    const SceneGraphNode* anchor =
-        global::navigationHandler->orbitalNavigator().anchorNode();
+    const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
 
     if (!anchor || !anchor->renderable()) {
         return false;
@@ -346,10 +338,8 @@ bool DirectManipulation::isValidDirectTouchNode() const {
 }
 
 bool DirectManipulation::isWithinDirectTouchDistance() const {
-    const SceneGraphNode* anchor =
-        global::navigationHandler->orbitalNavigator().anchorNode();
-
-    Camera* camera = global::navigationHandler->camera();
+    const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
+    const Camera* camera = global::navigationHandler->camera();
 
     if (!anchor || !camera) {
         return false;
