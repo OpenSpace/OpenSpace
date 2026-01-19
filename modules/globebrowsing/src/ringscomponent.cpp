@@ -378,7 +378,7 @@ void RingsComponent::deinitializeGL() {
 }
 
 void RingsComponent::draw(const RenderData& data,
-                          const ShadowComponent::ShadowMapData& shadowData)
+                          const ShadowComponent::ShadowMapData&)
 {
     _shader->activate();
 
