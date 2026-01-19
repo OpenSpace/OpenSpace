@@ -62,7 +62,7 @@ public:
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
     void preDraw();
-    void postDraw();
+    void render();
     
     GLuint _fbo = 0;
     GLuint _colorTex  = 0;

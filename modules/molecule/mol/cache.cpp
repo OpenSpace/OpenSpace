@@ -289,7 +289,7 @@ namespace {
 
         int64_t idx = *(reinterpret_cast<const int64_t*>(data));
         ghoul_assert(
-            idx > 0 && idx < md_trajectory_num_frames(cached->cache.traj),
+            idx >= 0 && idx < md_trajectory_num_frames(cached->cache.traj),
             "Invalid index"
         );
 
@@ -498,12 +498,15 @@ const md_molecule_t* loadMolecule(std::string_view file, bool isCoarseGrained) {
     str_t str = { file.data(), static_cast<int64_t>(file.length()) };
     md_molecule_api* api = load::mol::api(str);
     if (!api) {
-        throw ghoul::RuntimeError("Failed to find appropriate molecule loader api");
+        throw ghoul::RuntimeError(
+            "Failed to find appropriate molecule loader api",
+            "MOLD"
+        );
     }
 
     md_molecule_t mol = {};
     if (!api->init_from_file(&mol, str, default_allocator)) {
-        throw ghoul::RuntimeError("Failed to load molecule");
+        throw ghoul::RuntimeError("Failed to load molecule", "MOLD");
     }
 
     const md_util_postprocess_flags_t flags =
@@ -527,17 +530,21 @@ const md_trajectory_i* loadTrajectory(std::string_view file, const md_molecule_t
     str_t str = { file.data(), static_cast<int64_t>(file.length()) };
     md_trajectory_api* api = load::traj::api(str);
     if (!api) {
-        throw ghoul::RuntimeError("Failed to find appropriate trajectory loader api");
+        throw ghoul::RuntimeError(
+            "Failed to find appropriate trajectory loader api",
+            "MOLD"
+        );
     }
 
     md_trajectory_i* traj = api->create(str, default_allocator);
     if (!traj) {
-        throw ghoul::RuntimeError("Failed to load trajectory");
+        throw ghoul::RuntimeError("Failed to load trajectory", "MOLD");
     }
 
     if (deperiodizeOnLoad && !mol) {
         throw ghoul::RuntimeError(
-            "Deperiodize trajectory was set, but no valid was molecule provided"
+            "Deperiodize trajectory was set, but no valid was molecule provided",
+            "MOLD"
         );
     }
 
@@ -607,79 +614,79 @@ FrameData frameData(const md_trajectory_i* traj, int64_t frame) {
         return data;
     }
     
-    if (frame > 0 && frame < md_trajectory_num_frames(traj)) {
-        uint64_t magic = *reinterpret_cast<const uint64_t*>(traj->inst);
-        switch (magic) {
-            case MdMemTrajMagic:
-            {
-                const md_mem_trajectory_t* inst =
-                    reinterpret_cast<const md_mem_trajectory_t*>(traj->inst);
-                const size_t stride = inst->header.num_atoms;
-                data.header = inst->frameHeaders + frame;
-                data.x = { inst->x + frame * stride, stride };
-                data.y = { inst->y + frame * stride, stride };
-                data.z = { inst->z + frame * stride, stride };
-                data.ss = {
-                    inst->secondaryStructures + frame * inst->secondaryStructureStride,
-                    inst->secondaryStructureStride
-                };
-                break;
-            }
-            case MdCachedTrajMagic:
-            {
-                md_cached_trajectory_t* inst =
-                    reinterpret_cast<md_cached_trajectory_t*>(traj->inst);
-                md_frame_data_t* frameData;
-                md_frame_cache_lock_t* lock = nullptr;
-                bool result = true;
-                bool inCache = md_frame_cache_find_or_reserve(
-                    &inst->cache,
-                    frame,
-                    &frameData,
-                    &lock
-                );
-                if (!inCache) {
-                    result = loadCacheFrameData(
-                        frameData,
-                        inst->cache.traj,
-                        frame,
-                        inst->mol,
-                        inst->deperiodizeOnLoad
-                    );
-                }
-                if (result) {
-                    data.header = &frameData->header;
-                    data.x = {
-                        frameData->x,
-                        static_cast<size_t>(frameData->header.num_atoms)
-                    };
-                    data.y = {
-                        frameData->y,
-                        static_cast<size_t>(frameData->header.num_atoms)
-                    };
-                    data.z = {
-                        frameData->z,
-                        static_cast<size_t>(frameData->header.num_atoms)
-                    };
-                    data.ss = {
-                        inst->secondaryStructures + frame *
-                            inst->secondaryStructureStride,
-                        inst->secondaryStructureStride
-                    };
-                    data.lock = lock;
-                }
-                break;
-            }
-            default:
-                LERROR("Invalid trajectory");
-        }
-    }
-    else {
+    if (frame < 0 || frame >= md_trajectory_num_frames(traj)) {
         LERROR(std::format(
             "Invalid trajectory index: {}, valid range: [0,{}]",
             frame, md_trajectory_num_frames(traj)
         ));
+        return data;
     }
+
+    uint64_t magic = *reinterpret_cast<const uint64_t*>(traj->inst);
+    switch (magic) {
+        case MdMemTrajMagic:
+        {
+            const md_mem_trajectory_t* inst =
+                reinterpret_cast<const md_mem_trajectory_t*>(traj->inst);
+            const size_t stride = inst->header.num_atoms;
+            data.header = inst->frameHeaders + frame;
+            data.x = { inst->x + frame * stride, stride };
+            data.y = { inst->y + frame * stride, stride };
+            data.z = { inst->z + frame * stride, stride };
+            data.ss = {
+                inst->secondaryStructures + frame * inst->secondaryStructureStride,
+                inst->secondaryStructureStride
+            };
+            break;
+        }
+        case MdCachedTrajMagic:
+        {
+            md_cached_trajectory_t* inst =
+                reinterpret_cast<md_cached_trajectory_t*>(traj->inst);
+            md_frame_data_t* frameData;
+            md_frame_cache_lock_t* lock = nullptr;
+            bool result = true;
+            bool inCache = md_frame_cache_find_or_reserve(
+                &inst->cache,
+                frame,
+                &frameData,
+                &lock
+            );
+            if (!inCache) {
+                result = loadCacheFrameData(
+                    frameData,
+                    inst->cache.traj,
+                    frame,
+                    inst->mol,
+                    inst->deperiodizeOnLoad
+                );
+            }
+            if (result) {
+                data.header = &frameData->header;
+                data.x = {
+                    frameData->x,
+                    static_cast<size_t>(frameData->header.num_atoms)
+                };
+                data.y = {
+                    frameData->y,
+                    static_cast<size_t>(frameData->header.num_atoms)
+                };
+                data.z = {
+                    frameData->z,
+                    static_cast<size_t>(frameData->header.num_atoms)
+                };
+                data.ss = {
+                    inst->secondaryStructures + frame * inst->secondaryStructureStride,
+                    inst->secondaryStructureStride
+                };
+                data.lock = lock;
+            }
+            break;
+        }
+        default:
+            LERROR("Invalid trajectory");
+    }
+
     return data;
 }
 

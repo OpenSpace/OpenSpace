@@ -45,13 +45,13 @@ layout(location = 0) out vec4 out_color;
 layout(location = 1) out vec4 out_normal;
 
 vec2 encode_normal (vec3 n) {
-float p = sqrt(n.z * 8 + 8);
-return n.xy / p + 0.5;
+  float p = sqrt(n.z * 8 + 8);
+  return n.xy / p + 0.5;
 }
 
 void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color, uint atom_index) {
-out_normal = vec4(encode_normal(view_normal), 0, 0);
-out_color = color;
+  out_normal = vec4(encode_normal(view_normal), 0, 0);
+  out_color = color;
 }
 )";
 
@@ -184,7 +184,7 @@ void MoleculeModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableSimulationBox>("RenderableSimulationBox");
 
     global::callback::postSyncPreDraw->push_back([this]() { preDraw(); });
-    global::callback::render->push_back([this]() { postDraw(); });
+    global::callback::render->push_back([this]() { render(); });
 }
 
 void MoleculeModule::internalInitializeGL() {
@@ -216,7 +216,6 @@ void MoleculeModule::internalInitializeGL() {
         _colorTex,
         0
     );
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenTextures(1, &_normalTex);
     glBindTexture(GL_TEXTURE_2D, _normalTex);
@@ -242,7 +241,6 @@ void MoleculeModule::internalInitializeGL() {
         _normalTex,
         0
     );
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenTextures(1, &_depthTex);
     glBindTexture(GL_TEXTURE_2D, _depthTex);
@@ -374,7 +372,7 @@ void MoleculeModule::preDraw() {
     postprocessing::initialize(size.x, size.y);
 }
 
-void MoleculeModule::postDraw() {
+void MoleculeModule::render() {
     GLint lastFbo;
     GLint lastDrawBufferCount = 0;
     GLenum lastDrawBuffers[8];

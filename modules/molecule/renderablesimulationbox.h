@@ -82,6 +82,12 @@ private:
 
     bool _renderableInView = true;
 
+    struct {
+        GLuint program = 0;
+        GLuint vao = 0;
+        GLuint vbo = 0;
+    } _billboard;
+
     std::vector<molecule_data_t> _molecules;
     
     properties::StringListProperty _moleculeFiles;

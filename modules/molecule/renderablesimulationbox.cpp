@@ -24,7 +24,7 @@
 
 #include <modules/molecule/renderablesimulationbox.h>
 
-#include <modules/molecule/billboard.h>
+#include <modules/molecule/moleculemodule.h>
 #include <modules/molecule/mol/cache.h>
 #include <modules/molecule/mol/util.h>
 #include <modules/molecule/mol/viamd/coloring.h>
@@ -32,6 +32,7 @@
 #include <modules/molecule/mol/viamd/postprocessing.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
@@ -54,27 +55,61 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableSimulationBox";
 
-    constexpr std::string_view shader_output_snippet = R"(
-layout(location = 0) out vec4 out_color;
-layout(location = 1) out vec4 out_normal;
+    constexpr const char* BillboardVertShader = R"(
+#version 330 core
+layout (location = 0) in vec3 aPos;
+uniform mat4 uTransform;
+out vec2 pos;
 
-vec2 encode_normal(vec3 n) {
-   float p = sqrt(n.z * 8 + 8);
-   return n.xy / p + 0.5;
-}
-
-void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color, uint atom_index) {
-    out_normal = vec4(encode_normal(view_normal), 0, 0);
-    out_color = color;
+void main() {
+  gl_Position = uTransform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
+  gl_Position.z = -1.0; // always visible
+  pos = aPos.xy;
 }
 )";
 
-    GLuint fbo = 0;
-    GLuint colorTex = 0;
-    GLuint normalTex = 0;
-    GLuint depthTex = 0;
-    int glUseCount = 0;
-    md_gl_shaders_t shaders;
+    constexpr const char* BillboardFragShader = R"(
+#version 330 core
+out vec4 out_color;
+in vec2 pos;
+
+uniform float uStrokeWidth;
+uniform float uStrokeFalloffExp;
+uniform float uFragDepth;
+uniform vec4 uStrokeColor;
+uniform sampler2D uColorTex;
+uniform sampler2D uDepthTex;
+
+void main() {
+  float len = length(pos) * 2.0;
+
+  if (len > 1) {
+    discard;
+  }
+
+  float depth = texelFetch(uDepthTex, ivec2(gl_FragCoord.xy), 0).r;
+  vec4  tex = texelFetch(uColorTex, ivec2(gl_FragCoord.xy), 0);
+
+  if (depth == 1.0) {
+	tex.a = 0.0;
+  }
+    
+  float falloff = clamp(1.0 - pow(len / (1.0 - uStrokeWidth), uStrokeFalloffExp), 0.0, 1.0);
+    
+  gl_FragDepth = uFragDepth;
+  out_color = mix(uStrokeColor, tex, falloff);
+}
+)";
+
+    const float Vertices[] = {
+         0.5f,  0.5f, 0.f,  // top right
+         0.5f, -0.5f, 0.f,  // bottom right
+        -0.5f,  0.5f, 0.f,  // top left 
+
+         0.5f, -0.5f, 0.f,  // bottom right
+        -0.5f, -0.5f, 0.f,  // bottom left
+        -0.5f,  0.5f, 0.f,  // top left 
+    };
 
     constexpr double normalizeDouble(double input) {
         if (input > 1.0) {
@@ -90,7 +125,6 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
         memcpy(&dst, &src, 4 * 4 * sizeof(float));
         return dst;
     }
-
 
     constexpr openspace::properties::Property::PropertyInfo MoleculeFilesInfo = {
         "MoleculeFiles",
@@ -491,99 +525,32 @@ RenderableSimulationBox::~RenderableSimulationBox() {
 
 void RenderableSimulationBox::initializeGL() {
     ZoneScoped
-    
-    if (!fbo) { // initialize static gl things (common to all renderable instances)
-        glGenFramebuffers(1, &fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glm::ivec2 size = global::windowDelegate->currentWindowSize();
-        
-        glGenTextures(1, &colorTex);
-        glBindTexture(GL_TEXTURE_2D, colorTex);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RGBA8,
-            size.x,
-            size.y,
-            0,
-            GL_RGBA,
-            GL_UNSIGNED_BYTE,
-            nullptr
-        );
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glFramebufferTexture2D(
-            GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT0,
-            GL_TEXTURE_2D,
-            colorTex,
-            0
-        );
-        glBindTexture(GL_TEXTURE_2D, 0);
 
-        glGenTextures(1, &normalTex);
-        glBindTexture(GL_TEXTURE_2D, normalTex);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RG16,
-            size.x,
-            size.y,
-            0,
-            GL_RG,
-            GL_UNSIGNED_SHORT,
-            nullptr
-        );
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glFramebufferTexture2D(
-            GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT1,
-            GL_TEXTURE_2D,
-            normalTex,
-            0
-        );
-        glBindTexture(GL_TEXTURE_2D, 0);
+    // Initialize billboard
+    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
+    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(vs, 1, &BillboardVertShader, nullptr);
+    glCompileShader(vs);
+    glShaderSource(fs, 1, &BillboardFragShader, nullptr);
+    glCompileShader(fs);
 
-        glGenTextures(1, &depthTex);
-        glBindTexture(GL_TEXTURE_2D, depthTex);
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_DEPTH_COMPONENT32F,
-            size.x,
-            size.y,
-            0,
-            GL_DEPTH_COMPONENT,
-            GL_FLOAT,
-            nullptr
-        );
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glFramebufferTexture2D(
-            GL_FRAMEBUFFER,
-            GL_DEPTH_ATTACHMENT,
-            GL_TEXTURE_2D,
-            depthTex,
-            0
-        );
-        glBindTexture(GL_TEXTURE_2D, 0);
+    _billboard.program = glCreateProgram();
+    glAttachShader(_billboard.program, vs);
+    glAttachShader(_billboard.program, fs);
+    glLinkProgram(_billboard.program);
 
-        md_gl_initialize();
-        md_gl_shaders_init(&shaders, shader_output_snippet.data());
-        
-        postprocessing::initialize(size.x, size.y);
+    glDeleteShader(vs);
+    glDeleteShader(fs);
 
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glGenVertexArrays(1, &_billboard.vao);
+    glGenBuffers(1, &_billboard.vbo);
+    glBindVertexArray(_billboard.vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _billboard.vbo);
 
-        billboardGlInit();
-    }
+    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
+    glEnableVertexAttribArray(0);
 
     size_t i = 0;
     for (molecule_data_t& mol : _molecules) {
@@ -620,27 +587,13 @@ void RenderableSimulationBox::initializeGL() {
         mol::util::updateRepColor(mol.drawRep, mol.molecule, c, mask);
         i++;
     }
-    
-    glUseCount++;
 }
 
 void RenderableSimulationBox::deinitializeGL() {
-    glUseCount--;
-    if (glUseCount == 0 && fbo) {
-        glDeleteTextures(1, &depthTex);
-        glDeleteTextures(1, &normalTex);
-        glDeleteTextures(1, &colorTex);
-        glDeleteFramebuffers(1, &fbo);
-        depthTex = 0;
-        colorTex = 0;
-        fbo = 0;
-        billboardGlDeinit();
-        postprocessing::shutdown();
-    }
-
-    billboardGlDeinit();
-    md_gl_shaders_free(&shaders);
-    md_gl_shutdown();
+    // Billboard
+    glDeleteBuffers(1, &_billboard.vao);
+    glDeleteBuffers(1, &_billboard.vbo);
+    glDeleteProgram(_billboard.program);
 }
 
 bool RenderableSimulationBox::isReady() const {
@@ -802,8 +755,10 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         }
     }
 
+    MoleculeModule* mod = global::moduleEngine->module<MoleculeModule>();
+
     md_gl_draw_args_t args = {};
-    args.shaders = &shaders;
+    args.shaders = &mod->shaders();
     args.view_transform = { glm::value_ptr(viewMatrix), glm::value_ptr(projMatrix) };
     args.options = 0;
     args.draw_operations = { static_cast<uint32_t>(drawOps.size()), drawOps.data() };
@@ -812,7 +767,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     {
         GLint defaultFbo;
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+        glBindFramebuffer(GL_FRAMEBUFFER, mod->fbo());
         // shading rendering of mold
         const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
         glDrawBuffers(2, bufs);
@@ -820,7 +775,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         // resize the fbo if needed
         if (global::windowDelegate->windowHasResized()) {
             glm::ivec2 size = global::windowDelegate->currentWindowSize();
-            glBindTexture(GL_TEXTURE_2D, colorTex);
+            glBindTexture(GL_TEXTURE_2D, mod->colorTexture());
             glTexImage2D(
                 GL_TEXTURE_2D,
                 0,
@@ -832,9 +787,8 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
                 GL_UNSIGNED_BYTE,
                 nullptr
             );
-            glBindTexture(GL_TEXTURE_2D, 0);
 
-            glBindTexture(GL_TEXTURE_2D, normalTex);
+            glBindTexture(GL_TEXTURE_2D, mod->normalTexture());
             glTexImage2D(
                 GL_TEXTURE_2D,
                 0,
@@ -846,9 +800,8 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
                 GL_UNSIGNED_SHORT,
                 nullptr
             );
-            glBindTexture(GL_TEXTURE_2D, 0);
 
-            glBindTexture(GL_TEXTURE_2D, depthTex);
+            glBindTexture(GL_TEXTURE_2D, mod->depthTexture());
             glTexImage2D(
                 GL_TEXTURE_2D,
                 0,
@@ -860,7 +813,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
                 GL_FLOAT,
                 nullptr
             );
-            glBindTexture(GL_TEXTURE_2D, 0);
         }
 
         glClearColor(0.f, 0.f, 0.f, 0.f);
@@ -887,9 +839,9 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             settings.tonemapping.enabled = true;
             settings.tonemapping.mode = postprocessing::Tonemapping::ACES;
             settings.tonemapping.exposure = _exposure;
-            settings.inputTextures.depth = depthTex;
-            settings.inputTextures.color = colorTex;
-            settings.inputTextures.normal = normalTex;
+            settings.inputTextures.depth = mod->depthTexture();
+            settings.inputTextures.color = mod->colorTexture();
+            settings.inputTextures.normal = mod->normalTexture();
 
             postprocessing::postprocess(
                 settings,
@@ -924,15 +876,33 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        billboardDraw(
-            transform,
-            colorTex,
-            depthTex,
-            _circleColor,
-            static_cast<float>(width),
-            static_cast<float>(depth),
-            _circleFalloff
+        glUseProgram(_billboard.program);
+        glBindVertexArray(_billboard.vao);
+        glDisable(GL_CULL_FACE);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, mod->colorTexture());
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, mod->depthTexture());
+        glUniform1i(glGetUniformLocation(_billboard.program, "uColorTex"), 0);
+        glUniform1i(glGetUniformLocation(_billboard.program, "uDepthTex"), 1);
+        glUniformMatrix4fv(
+            glGetUniformLocation(_billboard.program, "uTransform"),
+            1,
+            false,
+            glm::value_ptr(transform)
         );
+        glUniform1f(glGetUniformLocation(_billboard.program, "uStrokeWidth"), static_cast<float>(width));
+        glUniform1f(
+            glGetUniformLocation(_billboard.program, "uStrokeFalloffExp"),
+            _circleFalloff == 0.f ? std::numeric_limits<float>::max() : 1.f / _circleFalloff
+        );
+        glUniform1f(glGetUniformLocation(_billboard.program, "uFragDepth"), static_cast<float>(depth));
+        glm::vec4 stroke = _circleColor;
+        glUniform4fv(glGetUniformLocation(_billboard.program, "uStrokeColor"), 1, glm::value_ptr(stroke));
+        glDrawArrays(GL_TRIANGLES, 0, 6);
+        glEnable(GL_CULL_FACE);
+        glBindVertexArray(0);
+        glUseProgram(0);
     }
 
     global::renderEngine->openglStateCache().resetBlendState();

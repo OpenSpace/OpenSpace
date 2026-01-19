@@ -103,11 +103,11 @@ void updateRepColor(md_gl_representation_t& rep, const md_molecule_t& mol,
     uint32_t count = static_cast<uint32_t>(mol.atom.count);
 
     uint32_t* colors = reinterpret_cast<uint32_t*>(
-        md_alloc(default_allocator, sizeof(uint32_t) * count)
+        md_alloc(default_allocator, count * sizeof(uint32_t))
     );
     defer {
         if (colors) {
-            md_free(default_allocator, colors, sizeof(md_flags_t) * count);
+            md_free(default_allocator, colors, count * sizeof(md_flags_t));
         }
     };
 
@@ -137,8 +137,7 @@ void updateRepColor(md_gl_representation_t& rep, const md_molecule_t& mol,
             color_atoms_uniform(colors, count, convertColor(uniformColor), nullptr);
             break;
         default:
-            ghoul_assert(false, "unexpected molecule color");
-            break;
+            throw ghoul::MissingCaseException();
     }
 
     for (uint32_t i = 0; i < count; i++) {
@@ -225,9 +224,8 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
                 }
             }
         
-            // @NOTE(Robin), It is ugly as shit to interpolate a matrix
-            // It works in this case because its the extent of each axis that will change
-            // Not the angles between them.
+            // @NOTE(Robin)  It is ugly to interpolate a matrix. It works in this case
+            // because only the extent of each axis and not the angles between them change
             mol.cell.basis = lerp(
                 frame[0].header->cell.basis,
                 frame[0].header->cell.basis,

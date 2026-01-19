@@ -25,7 +25,6 @@
 #include <modules/molecule/renderablemolecule.h>
 
 #include <modules/molecule/moleculemodule.h>
-#include <modules/molecule/billboard.h>
 #include <modules/molecule/mol/viamd/postprocessing.h>
 #include <modules/molecule/mol/cache.h>
 #include <modules/molecule/mol/util.h>
@@ -400,7 +399,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
     drawOps.reserve((_repData.size()));
 
     if (_molecule.atom.count) {
-        for (const RepData rep : _repData) {
+        for (const RepData& rep : _repData) {
             if (rep.enabled) {
                 drawOps.emplace_back(&rep.gl_rep, &modelMat[0][0]);
             }
