@@ -57,15 +57,17 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    struct molecule_state_t {
+    struct MoleculeState {
         glm::dvec3 position;
         double angle;
-        glm::dvec3 direction;     // moving direction where magnitude is linear velocity
-        glm::dvec3 rotationAxis;  // rotation axis where magnitude is angular velocity
+        // moving direction where magnitude is linear velocity
+        glm::dvec3 direction;
+        // rotation axis where magnitude is angular velocity
+        glm::dvec3 rotationAxis;
     };
 
     struct molecule_data_t {
-        std::vector<molecule_state_t> states;
+        std::vector<MoleculeState> states;
         md_molecule_t molecule;
         const md_trajectory_i* trajectory;
         md_gl_representation_t drawRep;

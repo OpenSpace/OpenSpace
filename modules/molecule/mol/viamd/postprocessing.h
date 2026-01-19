@@ -42,46 +42,46 @@ enum class Tonemapping {
 struct Settings {
     struct {
         bool enabled = true;
-        float r = 20.0f;
-        float g = 20.0f;
-        float b = 20.0f;
+        float r = 20.f;
+        float g = 20.f;
+        float b = 20.f;
     } background;
 
     struct {
         bool enabled = true;
-        float clip_point = 1.0f;
+        float clipPoint = 1.f;
     } bloom;
 
     struct {
         bool enabled = true;
         Tonemapping mode = Tonemapping::Filmic;
-        float exposure = 1.0f;
+        float exposure = 1.f;
         float gamma = 2.2f;
     } tonemapping;
 
     struct {
         bool enabled = true;
-        float radius = 6.0f;
-        float intensity = 3.0f;
-        float horizon_bias = 0.1f;
-        float normal_bias = 1.0f;
-    } ambient_occlusion[2];
+        float radius = 6.f;
+        float intensity = 3.f;
+        float horizonBias = 0.1f;
+        float normalBias = 1.f;
+    } ambientOcclusion[2];
 
     struct {
         bool enabled = true;
-        float focus_depth = 0.5f;
-        float focus_scale = 10.f;
-    } depth_of_field;
+        float focusDepth = 0.5f;
+        float focusScale = 10.f;
+    } depthOfField;
 
     struct {
         bool enabled = true;
-        float feedback_min = 0.88f;
-        float feedback_max = 0.97f;
+        float feedbackMin = 0.88f;
+        float feedbackMax = 0.97f;
         struct {
             bool enabled = true;
-            float motion_scale = 1.f;
-        } motion_blur;
-    } temporal_reprojection;
+            float motionScale = 1.f;
+        } motionBlur;
+    } temporalReprojection;
 
     struct {
         bool enabled = true;
@@ -93,11 +93,11 @@ struct Settings {
         unsigned int normal = 0;
         unsigned int velocity = 0;
         unsigned int emissive = 0;
-        unsigned int post_tonemap = 0;
-    } input_textures;
+        unsigned int postTonemap = 0;
+    } inputTextures;
 };
 
-void postprocess(const Settings& settings, const mat4_t& view_mat, const mat4_t& proj_mat);
+void postprocess(const Settings& settings, const mat4_t& viewMat, const mat4_t& projMat);
 
 }  // namespace postprocessing
 

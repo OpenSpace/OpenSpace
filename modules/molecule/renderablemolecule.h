@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_MOLECULE___RENDERABLEMOLECULE___H__
 
 #include <openspace/rendering/renderable.h>
+
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
@@ -47,7 +48,6 @@ public:
     explicit RenderableMolecule(const ghoul::Dictionary& dictionary);
     virtual ~RenderableMolecule();
 
-    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
     
@@ -58,25 +58,30 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void addRepresentation(bool enabled, mol::rep::Type type = mol::rep::Type::SpaceFill, mol::rep::Color color = mol::rep::Color::Cpk, std::string filter = "all", float scale = 1.0f, glm::vec4 uniform_color = glm::vec4(1.0f));
+    void addRepresentation(bool enabled, mol::rep::Type type = mol::rep::Type::SpaceFill,
+        mol::rep::Color color = mol::rep::Color::Cpk, std::string filter = "all",
+        float scale = 1.f, glm::vec4 uniform_color = glm::vec4(1.f));
     
     void updateTrajectoryFrame(const UpdateData& data);
 
-    void initMolecule(std::string_view mol_file, std::string_view traj_file = {});
+    void initMolecule(std::string_view mol_file, std::string_view traj_file = "");
     void freeMolecule();
     void updateRepresentations();
 
-    bool _renderableInView; // indicates whether the molecule is in view in any camera's viewpoint
+    // indicates whether the molecule is in view in any camera's viewpoint
+    bool _renderableInView = true;
 
-    double _localEpoch; // This represents the epoch which we derive our local frame time from
-    double _frame;      // This is the current frame of the trajectory
+    // This represents the epoch which we derive our local frame time from
+    double _localEpoch;
+    // This is the current frame of the trajectory
+    double _frame;
 
     md_molecule_t _molecule;
     const md_trajectory_i* _trajectory;
     md_gl_molecule_t _gl_molecule;
 
-    glm::dvec3  _center;
-    double      _radius;
+    glm::dvec3 _center;
+    double _radius;
 
     struct RepData {
         RepData();
@@ -84,22 +89,20 @@ private:
         md_gl_representation_t gl_rep;
         md_bitfield_t mask;
         bool dynamic;
-        bool enabled;
+        bool enabled = true;
     };
 
     std::vector<RepData> _repData;
-    //std::vector<md_gl_representation_t> _gl_representations;
-    //std::vector<md_bitfield_t> _representation_mask;
-    properties::PropertyOwner  _repProps;
+    properties::PropertyOwner _repProps;
     
-    properties::StringProperty  _moleculeFile;
-    properties::StringProperty  _trajectoryFile;
-    properties::BoolProperty    _coarseGrained;
-    properties::BoolProperty    _applyPbcOnLoad;
-    properties::BoolProperty    _applyPbcPerFrame;
-    properties::DoubleProperty  _animationBaseScale;
-    properties::DoubleProperty  _animationSpeed;
-    properties::OptionProperty  _animationRepeatMode;
+    properties::StringProperty _moleculeFile;
+    properties::StringProperty _trajectoryFile;
+    properties::BoolProperty _coarseGrained;
+    properties::BoolProperty _applyPbcOnLoad;
+    properties::BoolProperty _applyPbcPerFrame;
+    properties::DoubleProperty _animationBaseScale;
+    properties::DoubleProperty _animationSpeed;
+    properties::OptionProperty _animationRepeatMode;
 };
 
 } // namespace openspace

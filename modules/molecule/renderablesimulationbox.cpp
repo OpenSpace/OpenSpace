@@ -398,7 +398,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
         };
         
         for (int i = 0; i < count; i++) {
-            molecule_state_t demoMolecule {
+            MoleculeState demoMolecule {
                 i == 0 ?
                     _simulationBox.value() / 2.0 :
                     glm::linearRand(glm::dvec3(0.0), _simulationBox.value()), // position
@@ -647,10 +647,10 @@ bool RenderableSimulationBox::isReady() const {
 
 void RenderableSimulationBox::updateSimulation(molecule_data_t& mol, double dt) {
     // update positions / rotations
-    for (molecule_state_t& molecule : mol.states) {
+    for (MoleculeState& molecule : mol.states) {
         molecule.position += molecule.direction * dt;
         molecule.position = mod(molecule.position, _simulationBox.value());
-        molecule.angle += length(molecule.rotationAxis) * dt;
+        molecule.angle += glm::length(molecule.rotationAxis) * dt;
     }
 
     const double collRadiusSquared = _collisionRadius * _collisionRadius;
@@ -661,8 +661,8 @@ void RenderableSimulationBox::updateSimulation(molecule_data_t& mol, double dt) 
     for (auto it1 = mol.states.begin(); it1 != mol.states.end(); ++it1) {
         for (auto it2 = std::next(it1); it2 != mol.states.end(); ++it2) {
 
-            molecule_state_t& m1 = *it1;
-            molecule_state_t& m2 = *it2;
+            MoleculeState& m1 = *it1;
+            MoleculeState& m2 = *it2;
 
             glm::dvec3 distVec = m2.position - m1.position;
             double distSquared = glm::dot(distVec, distVec);
@@ -784,7 +784,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 
     for (const molecule_data_t& mol : _molecules) {
         for (size_t i = 0; i < mol.states.size(); i++) {
-            const molecule_state_t& state = mol.states[i];
+            const MoleculeState& state = mol.states[i];
             glm::dmat4 transform =
                 glm::translate(glm::dmat4(1.0), state.position) *
                 glm::rotate(glm::dmat4(1.0), state.angle, state.rotationAxis) *
