@@ -71,6 +71,7 @@ private:
 
     properties::BoolProperty _enabled;
     properties::BoolProperty _isActive;
+    properties::BoolProperty _allowMouseInput;
     properties::FloatProperty _distanceThreshold;
     properties::StringListProperty _defaultRenderableTypes;
 

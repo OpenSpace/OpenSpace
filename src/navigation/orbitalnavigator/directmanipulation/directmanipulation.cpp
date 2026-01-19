@@ -27,7 +27,7 @@
 #include <openspace/camera/camera.h>
 #include <openspace/camera/camerapose.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
+#include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionhandler.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator/orbitalnavigator.h>
@@ -73,6 +73,14 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo AllowMouseInputInfo = {
+        "AllowMouseInput",
+        "Allow mouse input",
+        "Decides whether direct manipulation should be applied when using mouse input."
+        "Otherwise, it is only applied for touch input.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
         "DistanceThreshold",
         "Distance threshold factor",
@@ -111,6 +119,7 @@ DirectManipulation::DirectManipulation()
       })
     , _enabled(EnabledInfo, true)
     , _isActive(IsActiveInfo, false)
+    , _allowMouseInput(AllowMouseInputInfo, false)
     , _distanceThreshold(DistanceThresholdInfo, 5.f, 0.f, 10.f)
     , _defaultRenderableTypes(DefaultRenderableTypesInfo)
 {
@@ -118,6 +127,8 @@ DirectManipulation::DirectManipulation()
 
     _isActive.setReadOnly(true);
     addProperty(_isActive);
+
+    addProperty(_allowMouseInput);
 
     addProperty(_distanceThreshold);
 
@@ -142,9 +153,42 @@ DirectManipulation::DirectManipulation()
 }
 
 void DirectManipulation::updateStateFromInput() {
-    const std::vector<TouchInputHolder>& touchPoints =
+    std::vector<TouchInputHolder> touchPoints =
         global::interactionHandler->touchInputState().touchPoints();
 
+    if (_allowMouseInput && touchPoints.empty()) {
+        // Translate mouse input to touch input
+        const MouseInputState& mouseState =
+            global::interactionHandler->mouseInputState();
+
+        // @TODO (emmbr, 2026-01-19): Allow inverting this? In that case we should move
+        // the invert setting to the interaction handler? (now it exists in orbital input)
+        const bool isPrimaryPressed =
+            mouseState.isMouseButtonPressed(MouseButton::Button1);
+
+        if (isPrimaryPressed) {
+            glm::dvec2 mousePos = mouseState.mousePosition();
+            // Normalize based on screensize
+            const glm::ivec2 screenSize = global::windowDelegate->currentWindowSize();
+            mousePos.x /= static_cast<double>(screenSize.x);
+            mousePos.y /= static_cast<double>(screenSize.y);
+
+            // @TODO (emmbr, 2026-01-19) This feels a bit "hacky". Should we instead
+            // create a new data structure for the direct manipulation? Seems like we
+            // only need the x and y position
+            touchPoints.push_back(
+                TouchInputHolder(
+                    TouchInput(
+                        0, // Dummy ID
+                        9999, // Dummy finger ID
+                        mousePos.x,
+                        mousePos.y,
+                        0.0 // Dummy timestamp
+                    )
+                )
+            );
+        }
+    }
 
     if (!_enabled || touchPoints.empty()) {
         // No fingers, no input
