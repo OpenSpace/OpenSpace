@@ -250,7 +250,6 @@ void DirectManipulation::applyDirectControl(const std::vector<TouchPoint>& touch
 
     CameraPose pose = cameraPoseFromVelocities(velocities, camera, anchor);
 
-    // Update the camera state
     camera->setPose(pose);
 
     // Mark that a camera interaction happened and then reset velocities
@@ -309,8 +308,6 @@ void DirectManipulation::updateNodeSurfacePoints(
     _selectedNodeSurfacePoints = std::move(surfacePoints);
 }
 
-// Main update call, calculates the new orientation and position for the camera depending
-// on _vel and dt. Called every frame
 CameraPose DirectManipulation::cameraPoseFromVelocities(const VelocityStates& velocities,
                                                         const Camera* camera,
                                                         const SceneGraphNode* anchor)
@@ -413,6 +410,5 @@ bool DirectManipulation::isWithinDirectTouchDistance() const {
 
     return false;
 }
-
 
 } // namespace openspace::interaction
