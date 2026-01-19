@@ -25,6 +25,7 @@
 #include <openspace/navigation/orbitalnavigator/directmanipulation/directmanipulation.h>
 
 #include <openspace/camera/camera.h>
+#include <openspace/camera/camerapose.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/interaction/interactionhandler.h>
@@ -205,8 +206,9 @@ void DirectManipulation::updateNodeSurfacePoints(
 
     SceneGraphNode* node = sceneGraphNode(anchor->identifier());
 
-    glm::dquat camToWorldSpace = camera->rotationQuaternion();
-    glm::dvec3 camPos = camera->positionVec3();
+    const glm::dquat camToWorldSpace = camera->rotationQuaternion();
+    const glm::dvec3 camPos = camera->positionVec3();
+
     std::vector<DirectInputSolver::SelectedBody> surfacePoints;
 
     for (const TouchInputHolder& inputHolder : touchPoints) {
@@ -256,23 +258,26 @@ void DirectManipulation::stepDirectTouch(const VelocityStates& velocities) {
         return;
     }
 
-    // Create variables from current state
-    glm::dvec3 camPos = camera->positionVec3();
+    const glm::dvec3 camPos = camera->positionVec3();
     const glm::dvec3 centerPos = anchor->worldPosition();
 
-    glm::dvec3 directionToCenter = normalize(centerPos - camPos);
-    const glm::dvec3 centerToCamera = camPos - centerPos;
+    const glm::dvec3 directionToCenter = normalize(centerPos - camPos);
     const glm::dvec3 lookUp = camera->lookUpVectorWorldSpace();
     const glm::dvec3 camDirection = camera->viewDirectionWorldSpace();
 
-    // Make a representation of the rotation quaternion with local and global
-    // rotations. To avoid problem with lookup in up direction we adjust it with the view direction
+    // Make a representation of the rotation quaternion with local and global rotations.
+    // To avoid problem with lookup in up direction we adjust it with the view direction
     glm::dquat globalCamRot = ghoul::lookAtQuaternion(
         glm::dvec3(0.0),
         directionToCenter,
         glm::normalize(camDirection + lookUp)
     );
     glm::dquat localCamRot = inverse(globalCamRot) * camera->rotationQuaternion();
+
+    CameraPose pose = {
+        .position = camPos,
+        .rotation = camera->rotationQuaternion()
+    };
 
     {
         // Roll (local rotation)
@@ -286,36 +291,38 @@ void DirectManipulation::stepDirectTouch(const VelocityStates& velocities) {
         localCamRot = localCamRot * rotationDiff;
     }
     {
+        // Zooming
+        pose.position += directionToCenter * velocities.zoom;
+    }
+    {
         // Orbit (global rotation)
         const glm::dvec3 eulerAngles = glm::dvec3(velocities.orbit.y, velocities.orbit.x, 0.0);
         const glm::dquat rotationDiffCamSpace = glm::dquat(eulerAngles);
 
+        // Update position
+        const glm::dvec3 centerToCamera = camPos - centerPos;
         const glm::dquat rotationDiffWorldSpace = globalCamRot * rotationDiffCamSpace *
             inverse(globalCamRot);
         const glm::dvec3 rotationDiffVec3 = centerToCamera * rotationDiffWorldSpace -
             centerToCamera;
-        camPos += rotationDiffVec3;
+        pose.position += rotationDiffVec3;
 
-        const glm::dvec3 centerToCam = camPos - centerPos;
-        directionToCenter = glm::normalize(-centerToCam);
+        // Rotate camera to look at center again
+        const glm::dvec3 newPositionToCenter = centerPos - pose.position;
         const glm::dvec3 lookUpWhenFacingCenter = globalCamRot *
             glm::dvec3(camera->lookUpVectorCameraSpace());
 
         globalCamRot = ghoul::lookAtQuaternion(
             glm::dvec3(0.0),
-            directionToCenter,
+            glm::normalize(newPositionToCenter),
             lookUpWhenFacingCenter
         );
     }
-    {
-        // Zooming
-        double zoomVelocity = velocities.zoom;
-        camPos += directionToCenter * zoomVelocity;
-    }
+
+    pose.rotation = globalCamRot * localCamRot;
 
     // Update the camera state
-    camera->setPositionVec3(camPos);
-    camera->setRotation(globalCamRot * localCamRot);
+    camera->setPose(pose);
 
     // Mark that a camera interaction happened
     global::navigationHandler->orbitalNavigator().markCameraInteraction();
