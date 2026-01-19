@@ -169,13 +169,13 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
         // con: bigger files, longer tracing time(?)
         // pro: easier to run task, guaranties temp will be there if possible.
         std::vector<ccmc::Fieldline> fieldlines =
-            tracer.getLastClosedFieldlines(_numberOfPointsOnBoundary, 1, 5.1, 300);
+            tracer.getLastClosedFieldlines(_numberOfPointsOnBoundary, 1, 5.1f, 300);
 
         for (ccmc::Fieldline line : fieldlines) {
             std::vector<glm::vec3> vertices;
             const std::vector<ccmc::Point3f>& positions = line.getPositions();
-            for (const ccmc::Point3f& p : positions) {
-                vertices.emplace_back(p.component1, p.component2, p.component3);
+            for (const ccmc::Point3f& pt : positions) {
+                vertices.emplace_back(pt.component1, pt.component2, pt.component3);
             }
             state.addLine(vertices);
         }
