@@ -510,8 +510,7 @@ const md_molecule_t* loadMolecule(std::string_view file, bool isCoarseGrained) {
         isCoarseGrained ? MD_UTIL_POSTPROCESS_COARSE_GRAINED : MD_UTIL_POSTPROCESS_ALL;
     md_util_postprocess_molecule(&mol, default_allocator, flags);
 
-    molecules[hash] = mol;
-    return &mol;
+    return &(molecules[hash] = mol);
 }
 
 const md_trajectory_i* loadTrajectory(std::string_view file, const md_molecule_t* mol,
@@ -553,8 +552,9 @@ const md_trajectory_i* loadTrajectory(std::string_view file, const md_molecule_t
             deperiodizeOnLoad,
             mol
         );
+        md_trajectory_i* oldTraj = traj;
         traj = memTraj;
-        api->destroy(traj);
+        api->destroy(oldTraj);
     }
     else {
         md_trajectory_i* cachedTraj = cachedTrajectoryCreate(

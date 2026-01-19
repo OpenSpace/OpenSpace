@@ -575,9 +575,6 @@ void RenderableSimulationBox::initializeGL() {
         );
         glBindTexture(GL_TEXTURE_2D, 0);
 
-        if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            LERROR("Mold Framebuffer is not complete");
-
         md_gl_initialize();
         md_gl_shaders_init(&shaders, shader_output_snippet.data());
         
@@ -904,7 +901,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
             glEnable(GL_DEPTH_TEST);
         }
 
-        glDrawBuffer(GL_FRONT_AND_BACK);
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
     }
 

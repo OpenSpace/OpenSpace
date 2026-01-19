@@ -1287,7 +1287,7 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMa
     uint32_t program =
         ortho ? glObj.ssao.hbao.programOrtho : glObj.ssao.hbao.programPersp;
 
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "HBAO");
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "HBAO");
     glUseProgram(program);
 
     glActiveTexture(GL_TEXTURE0);
@@ -1326,7 +1326,7 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMa
     glActiveTexture(GL_TEXTURE1);
 
     // BLUR FIRST
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "BLUR 1st");
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "BLUR 1st");
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.ssao.blur.fbo);
     glViewport(0, 0, width, height);
     glClearColor(0, 0, 0, 0);
@@ -1336,7 +1336,7 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMa
     glPopDebugGroup();
 
     // BLUR SECOND
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "BLUR 2nd");
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "BLUR 2nd");
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, last_fbo);
     glViewport(last_viewport[0], last_viewport[1], last_viewport[2], last_viewport[3]);
     glActiveTexture(GL_TEXTURE1);
@@ -1393,7 +1393,7 @@ void shadeDeferred(uint32_t depthTex, uint32_t colorTex, uint32_t normalTex,
 void halfResColorCoc(uint32_t linearDepthTex, uint32_t colorTex, float focusPoint,
                      float focusScale)
 {
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "DOF Prepass");
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "DOF Prepass");
     int lastViewport[4];
     glGetIntegerv(GL_VIEWPORT, lastViewport);
     glViewport(0, 0, glObj.texWidth / 2, glObj.texHeight / 2);
@@ -1742,7 +1742,7 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
     glViewport(0, 0, width, height);
     glBindVertexArray(glObj.vao);
 
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Linearize Depth");
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Linearize Depth");
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.linearDepth.fbo);
     glViewport(0, 0, glObj.texWidth, glObj.texHeight);
     glClearColor(nearFar[1], 0, 0, 0);
@@ -1755,7 +1755,7 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
     glEnable(GL_BLEND);
     glPopDebugGroup();
 
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Generate Linear Depth Mipmaps");
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Generate Linear Depth Mipmaps");
     glBindTexture(GL_TEXTURE_2D, glObj.linearDepth.texture);
     glGenerateMipmap(GL_TEXTURE_2D);
     glPopDebugGroup();
@@ -1764,12 +1764,12 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.velocity.fbo);
         glViewport(0, 0, glObj.velocity.texWidth, glObj.velocity.texHeight);
 
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Velocity: Tilemax");
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Velocity: Tilemax");
         glDrawBuffer(GL_COLOR_ATTACHMENT0);
         blitTilemax(settings.inputTextures.velocity, glObj.texWidth, glObj.texHeight);
         glPopDebugGroup();
 
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Velocity: Neighbormax");
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Velocity: Neighbormax");
         glDrawBuffer(GL_COLOR_ATTACHMENT1);
         blitNeighbormax(
             glObj.velocity.texTilemax,
@@ -1797,7 +1797,7 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
     glViewport(0, 0, width, height);
 
     if (settings.background.enabled) {
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Clear HDR");
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Clear HDR");
         glDrawBuffer(dstBuffer);
         glClearColor(
             settings.background.r,
@@ -1816,7 +1816,7 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
         glDrawBuffer(dstBuffer);
     }
 
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Shade");
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Shade");
     shadeDeferred(
         settings.inputTextures.depth,
         settings.inputTextures.color,
@@ -1828,7 +1828,7 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
     );
     glPopDebugGroup();
 
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "SSAO");
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "SSAO");
     if (settings.ambientOcclusion[0].enabled) {
         applySsao(
             glObj.linearDepth.texture,
@@ -1866,12 +1866,12 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
         if (motion_scale != 0.f)
             glPushDebugGroup(
                 GL_DEBUG_SOURCE_APPLICATION,
-                0,
+                1,
                 -1,
                 "Temporal AA + Motion Blur"
             );
         else
-            glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Temporal AA");
+            glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Temporal AA");
             applyTemporalAa(
                 glObj.linearDepth.texture,
                 srcTexture,
@@ -1886,7 +1886,7 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
             );
          glPopDebugGroup();
 
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Sharpen");
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Sharpen");
         swapTarget();
         glDrawBuffer(dstBuffer);
         sharpen::sharpen(srcTexture);
@@ -1894,7 +1894,7 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
     }
 
     if (settings.inputTextures.emissive) {
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Add Emissive");
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Add Emissive");
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
         blitTexture(settings.inputTextures.emissive, 0);
@@ -1905,7 +1905,7 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
     if (settings.depthOfField.enabled) {
         swapTarget();
         glDrawBuffer(dstBuffer);
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "DOF");
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "DOF");
         applyDof(
             glObj.linearDepth.texture,
             srcTexture,
@@ -1916,7 +1916,7 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
         glPopDebugGroup();
     }
 
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Tonemapping");
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Tonemapping");
     swapTarget();
     glDrawBuffer(dstBuffer);
     const Tonemapping tonemapper =
@@ -1932,7 +1932,7 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
     glPopDebugGroup();
 
     if (settings.inputTextures.postTonemap) {
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Add Post Tonemap");
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Add Post Tonemap");
         glEnable(GL_BLEND);
         glColorMask(1, 1, 1, 1);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -1946,14 +1946,14 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
     if (settings.fxaa.enabled) {
         swapTarget();
         glDrawBuffer(dstBuffer);
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "FXAA");
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "FXAA");
         fxaa::applyFxaa(srcTexture, width, height);
         glPopDebugGroup();
     }
 
     // Activate backbuffer or whatever was bound before
     {
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "PostProcess Blit Result");
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "PostProcess Blit Result");
     
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
         glViewport(lastViewport[0], lastViewport[1], lastViewport[2], lastViewport[3]);
