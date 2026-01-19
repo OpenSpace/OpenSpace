@@ -53,6 +53,15 @@ public:
         glm::dvec3 coordinates = glm::dvec3(0.0);
     };
 
+    /**
+     * Represents touched screenspace coordinates (normalized to [0, 1])
+     */
+    struct TouchPoint {
+        size_t id = 0;
+        double x = 0.0; // normalized screenspace
+        double y = 0.0; // normalized screenspace
+    };
+
     DirectInputSolver();
 
     /**
@@ -60,7 +69,7 @@ public:
      * found to be outside the bounds after a certain amount of iterations, this function
      * fails.
      */
-    bool solve(const std::vector<TouchInputHolder>& list,
+    bool solve(const std::vector<TouchPoint>& touchPoints,
         const std::vector<SelectedBody>& selectedBodies,
         std::vector<double>* calculatedValues, const Camera& camera);
 

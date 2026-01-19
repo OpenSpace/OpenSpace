@@ -175,18 +175,18 @@ DirectInputSolver::DirectInputSolver() {
     levmarq_init(&_lmstat);
 }
 
-bool DirectInputSolver::solve(const std::vector<TouchInputHolder>& list,
+bool DirectInputSolver::solve(const std::vector<TouchPoint>& touchPoints,
                               const std::vector<SelectedBody>& selectedBodies,
                               std::vector<double>* parameters, const Camera& camera)
 {
     ZoneScopedN("Direct touch input solver");
 
     ghoul_assert(
-        selectedBodies.size() >= list.size(),
+        selectedBodies.size() >= touchPoints.size(),
         "Number of touch inputs must match the number of 'selected bodies'"
     );
 
-    int nFingers = std::min(static_cast<int>(list.size()), 3);
+    int nFingers = std::min(static_cast<int>(touchPoints.size()), 3);
     _nDof = std::min(nFingers * 2, 6);
 
     // Parse input data to be used in the LM algorithm
@@ -197,8 +197,8 @@ bool DirectInputSolver::solve(const std::vector<TouchInputHolder>& list,
         const SelectedBody& sb = selectedBodies.at(i);
         selectedPoints.push_back(sb.coordinates);
         screenPoints.emplace_back(
-            2.0 * (list[i].latestInput().x - 0.5),
-            -2.0 * (list[i].latestInput().y - 0.5)
+            2.0 * (touchPoints[i].x - 0.5),
+            -2.0 * (touchPoints[i].y - 0.5)
         );
     }
 

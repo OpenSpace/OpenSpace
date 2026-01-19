@@ -153,8 +153,18 @@ DirectManipulation::DirectManipulation()
 }
 
 void DirectManipulation::updateCameraFromInput() {
-    std::vector<TouchInputHolder> touchPoints =
+    std::vector<TouchInputHolder> touchInputs =
         global::interactionHandler->touchInputState().touchPoints();
+
+    std::vector<TouchPoint> touchPoints;
+    touchPoints.reserve(touchInputs.size());
+    for (const TouchInputHolder& input : touchInputs) {
+        touchPoints.push_back({
+            .id = input.latestInput().fingerId,
+            .x = input.latestInput().x,
+            .y = input.latestInput().y
+        });
+    }
 
     if (_allowMouseInput && touchPoints.empty()) {
         // Translate mouse input to touch input
@@ -172,21 +182,7 @@ void DirectManipulation::updateCameraFromInput() {
             const glm::ivec2 screenSize = global::windowDelegate->currentWindowSize();
             mousePos.x /= static_cast<double>(screenSize.x);
             mousePos.y /= static_cast<double>(screenSize.y);
-
-            // @TODO (emmbr, 2026-01-19) This feels a bit "hacky". Should we instead
-            // create a new data structure for the direct manipulation? Seems like we
-            // only need the x and y position
-            touchPoints.push_back(
-                TouchInputHolder(
-                    TouchInput(
-                        0, // Dummy ID
-                        9999, // Dummy finger ID
-                        static_cast<float>(mousePos.x),
-                        static_cast<float>(mousePos.y),
-                        0.0 // Dummy timestamp
-                    )
-                )
-            );
+            touchPoints.push_back({ .x = mousePos.x, .y = mousePos.y });
         }
     }
 
@@ -217,9 +213,7 @@ void DirectManipulation::updateCameraFromInput() {
     }
 }
 
-void DirectManipulation::applyDirectControl(
-                                         const std::vector<TouchInputHolder>& touchPoints)
-{
+void DirectManipulation::applyDirectControl(const std::vector<TouchPoint>& touchPoints) {
     Camera* camera = global::navigationHandler->camera();
     const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
 
@@ -254,8 +248,7 @@ void DirectManipulation::applyDirectControl(
         }
     }
 
-    CameraPose pose =
-        cameraPoseFromVelocities(velocities, camera, anchor);
+    CameraPose pose = cameraPoseFromVelocities(velocities, camera, anchor);
 
     // Update the camera state
     camera->setPose(pose);
@@ -266,7 +259,7 @@ void DirectManipulation::applyDirectControl(
 }
 
 void DirectManipulation::updateNodeSurfacePoints(
-                                         const std::vector<TouchInputHolder>& touchPoints)
+                                               const std::vector<TouchPoint>& touchPoints)
 {
     _selectedNodeSurfacePoints.clear();
 
@@ -278,11 +271,11 @@ void DirectManipulation::updateNodeSurfacePoints(
 
     std::vector<DirectInputSolver::SelectedBody> surfacePoints;
 
-    for (const TouchInputHolder& inputHolder : touchPoints) {
-        const size_t id = inputHolder.fingerId();
+    for (const TouchPoint& touchPoint : touchPoints) {
+        const size_t id = touchPoint.id;
         // Normalized -1 to 1 coordinates on screen
-        const double xCo = 2.0 * (inputHolder.latestInput().x - 0.5);
-        const double yCo = -2.0 * (inputHolder.latestInput().y - 0.5);
+        const double xCo = 2.0 * (touchPoint.x - 0.5);
+        const double yCo = -2.0 * (touchPoint.y - 0.5);
 
         const glm::dvec3 cursorInWorldSpace = camRotation *
             glm::dvec3(glm::inverse(camera->projectionMatrix()) *

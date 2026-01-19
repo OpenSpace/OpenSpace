@@ -52,6 +52,8 @@ public:
         glm::dvec2 pan = glm::dvec2(0.0);
     };
 
+    using TouchPoint = DirectInputSolver::TouchPoint;
+
     DirectManipulation();
 
     void updateCameraFromInput();
@@ -65,14 +67,14 @@ private:
      * Calculates the new camera state such that it minimizes the L2 error in screenspace
      * between contact points and surface coordinates projected to clip space using LMA.
      */
-    void applyDirectControl(const std::vector<TouchInputHolder>& touchPoints);
+    void applyDirectControl(const std::vector<TouchPoint>& touchPoints);
 
     /**
      * Traces each contact point into the scene as a ray and find the intersection points
      * on the surface of the current anchor node, if any. Saves the input id the node and
      * surface coordinates the cursor hit.
      */
-    void updateNodeSurfacePoints(const std::vector<TouchInputHolder>& touchPoints);
+    void updateNodeSurfacePoints(const std::vector<TouchPoint>& touchPoints);
 
     bool isValidDirectTouchNode() const;
     bool isWithinDirectTouchDistance() const;
