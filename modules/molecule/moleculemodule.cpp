@@ -54,7 +54,6 @@ out_normal = vec4(encode_normal(view_normal), 0, 0);
 out_color = color;
 }
 )";
-    constexpr std::string_view _loggerCat = "MoleculeModule";
 
     constexpr openspace::properties::Property::PropertyInfo SSAOEnabledInfo = {
         "SSAOEnabled",

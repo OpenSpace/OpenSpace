@@ -151,7 +151,7 @@ void billboardDraw(const glm::mat4& transform, GLuint colorTex, GLuint depthTex,
     glUniform1f(glGetUniformLocation(prog, "uStrokeWidth"), width);
     glUniform1f(
         glGetUniformLocation(prog, "uStrokeFalloffExp"),
-        falloffExp == 0.f ? std::numeric_limits<float>::max() : 1.0 / falloffExp
+        falloffExp == 0.f ? std::numeric_limits<float>::max() : 1.f / falloffExp
     );
     glUniform1f(glGetUniformLocation(prog, "uFragDepth"), depth);
     glUniform4fv(glGetUniformLocation(prog, "uStrokeColor"), 1, glm::value_ptr(stroke));
