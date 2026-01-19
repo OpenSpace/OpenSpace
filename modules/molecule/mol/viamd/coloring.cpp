@@ -25,6 +25,7 @@
 // The following code was taken from VIAMD (https://github.com/scanberg/viamd), MIT.
 
 #include <modules/molecule/mol/viamd/coloring.h>
+
 #include <md_util.h>
 #include <core/md_bitfield.h>
 

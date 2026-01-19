@@ -191,7 +191,7 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
         {
             const int64_t nearestFrame =
                 std::clamp(static_cast<int64_t>(time + 0.5), 0LL, lastFrame);
-            FrameData frame = mol_manager::get_frame_data(traj, nearestFrame);
+            FrameData frame = mol::frameData(traj, nearestFrame);
         
             mol.cell = frame.header->cell;
             std::memcpy(dst.x, frame.x.data(), frame.x.size_bytes());
@@ -210,8 +210,8 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
         case InterpolationType::Linear:
         {
             FrameData frame[2] = {
-                mol_manager::get_frame_data(traj, fidx[1]),
-                mol_manager::get_frame_data(traj, fidx[2])
+                mol::frameData(traj, fidx[1]),
+                mol::frameData(traj, fidx[2])
             };
 
             if (mol.backbone.count) {
@@ -255,10 +255,10 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
         case InterpolationType::Cubic:
         {
             FrameData frame[4] = {
-                mol_manager::get_frame_data(traj, fidx[0]),
-                mol_manager::get_frame_data(traj, fidx[1]),
-                mol_manager::get_frame_data(traj, fidx[2]),
-                mol_manager::get_frame_data(traj, fidx[3])
+                mol::frameData(traj, fidx[0]),
+                mol::frameData(traj, fidx[1]),
+                mol::frameData(traj, fidx[2]),
+                mol::frameData(traj, fidx[3])
             };
 
             if (mol.backbone.count) {

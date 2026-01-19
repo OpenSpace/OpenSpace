@@ -459,7 +459,7 @@ void RenderableMolecule::initMolecule(std::string_view molFile, std::string_view
     // free previously loaded molecule
     freeMolecule();
 
-    const md_molecule_t* molecule = mol_manager::load_molecule(molFile, _coarseGrained);
+    const md_molecule_t* molecule = mol::loadMolecule(molFile, _coarseGrained);
     if (molecule) {
         // We deep copy the contents, so we can freely modify the fields (coordinates etc)
         md_molecule_copy(&_molecule, molecule, default_allocator);
@@ -488,7 +488,7 @@ void RenderableMolecule::initMolecule(std::string_view molFile, std::string_view
 
     if (!trajFile.empty()) {
         LDEBUG(std::format("Loading trajectory file '{}'", trajFile));
-        _trajectory = mol_manager::load_trajectory(trajFile, molecule, _applyPbcOnLoad);
+        _trajectory = mol::loadTrajectory(trajFile, molecule, _applyPbcOnLoad);
 
         if (!_trajectory) {
             throw ghoul::RuntimeError(
@@ -798,7 +798,7 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
         frames.push_back(i);
     }
 
-    mol_manager::prefetch_frames(_trajectory, frames);
+    mol::prefetchFrames(_trajectory, frames);
 }
 
 RenderableMolecule::RepData::RepData()

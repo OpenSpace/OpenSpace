@@ -38,301 +38,335 @@
 #include <md_trajectory.h>
 #include <md_frame_cache.h>
 #include <md_util.h>
+#include <cstring>
 
-#include <string.h>
+namespace {
+    struct LoadedMolecule {
+        uint64_t key;
+        md_allocator_i* alloc;
+    };
 
-struct LoadedMolecule {
-    uint64_t key;
-    md_allocator_i* alloc;
-};
+    struct LoadedTrajectory {
+        uint64_t key;
+        const md_molecule_t* mol;
+        md_trajectory_api* api;
+        md_trajectory_i* traj;
+        md_frame_cache_t cache;
+        md_allocator_i* alloc;
+        md_bitfield_t recenterTarget;
+        bool deperiodize;
+    };
 
-struct LoadedTrajectory {
-    uint64_t key;
-    const md_molecule_t* mol;
-    md_trajectory_api* api;
-    md_trajectory_i* traj;
-    md_frame_cache_t cache;
-    md_allocator_i* alloc;
-    md_bitfield_t recenter_target;
-    bool deperiodize;
-};
+    LoadedMolecule loadedMolecules[8] = {};
+    int64_t numLoadedMolecules = 0;
 
-static LoadedMolecule loaded_molecules[8] = {};
-static int64_t num_loaded_molecules = 0;
+    LoadedTrajectory loadedTrajectories[8] = {};
+    int64_t numLoadedTrajectories = 0;
 
-static LoadedTrajectory loaded_trajectories[8] = {};
-static int64_t num_loaded_trajectories = 0;
-
-static inline LoadedMolecule* find_loaded_molecule(uint64_t key) {
-    for (int64_t i = 0; i < num_loaded_molecules; ++i) {
-        if (loaded_molecules[i].key == key) return &loaded_molecules[i];
-    }
-    return nullptr;
-}
-
-static inline void add_loaded_molecule(LoadedMolecule obj) {
-    ASSERT(!find_loaded_molecule(obj.key));
-    ASSERT(num_loaded_molecules < (int64_t)ARRAY_SIZE(loaded_molecules));
-    loaded_molecules[num_loaded_molecules++] = obj;
-}
-
-static inline void remove_loaded_molecule(uint64_t key) {
-    for (int64_t i = 0; i < num_loaded_molecules; ++i) {
-        if (loaded_molecules[i].key == key) {
-            loaded_molecules[i] = loaded_molecules[--num_loaded_molecules];
-            return;
+    LoadedTrajectory* findLoadedTrajectory(uint64_t key) {
+        for (int64_t i = 0; i < numLoadedTrajectories; ++i) {
+            if (loadedTrajectories[i].key == key) {
+                return &loadedTrajectories[i];
+            }
         }
+        return nullptr;
     }
-    ASSERT(false);
-}
 
-static inline LoadedTrajectory* find_loaded_trajectory(uint64_t key) {
-    for (int64_t i = 0; i < num_loaded_trajectories; ++i) {
-        if (loaded_trajectories[i].key == key) return &loaded_trajectories[i];
+    LoadedTrajectory* allocLoadedTrajectory(uint64_t key) {
+        ghoul_assert(findLoadedTrajectory(key) != nullptr, "Trajectory loaded");
+        ghoul_assert(
+            numLoadedTrajectories < static_cast<int64_t>(ARRAY_SIZE(loadedTrajectories)),
+            "Loaded too many trajectories"
+        );
+        LoadedTrajectory* traj = &loadedTrajectories[numLoadedTrajectories++];
+        *traj = { 0 }; // Clear
+        traj->key = key;
+        return traj;
     }
-    return nullptr;
-}
 
-static inline LoadedTrajectory* alloc_loaded_trajectory(uint64_t key) {
-    ASSERT(find_loaded_trajectory(key) == NULL);
-    ASSERT(num_loaded_trajectories < (int64_t)ARRAY_SIZE(loaded_trajectories));
-    LoadedTrajectory* traj = &loaded_trajectories[num_loaded_trajectories++];
-    *traj = {0}; // Clear
-    traj->key = key;
-    return traj;
-}
-
-static inline void remove_loaded_trajectory(uint64_t key) {
-    for (int64_t i = 0; i < num_loaded_trajectories; ++i) {
-        if (loaded_trajectories[i].key == key) {
-            md_frame_cache_free(&loaded_trajectories[i].cache);
-            loaded_trajectories[i].api->destroy(loaded_trajectories[i].traj);
-            // Swap back and pop
-            loaded_trajectories[i] = loaded_trajectories[--num_loaded_trajectories];
-            return;
+    void removeLoadedTrajectory(uint64_t key) {
+        for (int64_t i = 0; i < numLoadedTrajectories; ++i) {
+            if (loadedTrajectories[i].key == key) {
+                md_frame_cache_free(&loadedTrajectories[i].cache);
+                loadedTrajectories[i].api->destroy(loadedTrajectories[i].traj);
+                // Swap back and pop
+                loadedTrajectories[i] = loadedTrajectories[--numLoadedTrajectories];
+                return;
+            }
         }
+        ghoul_assert(false, "Did not find trajectory");
     }
-    ASSERT(false);
-}
 
-namespace load {
-
-static const str_t extensions[] = {
-    STR("pdb"),
-    STR("gro"),
-    STR("xtc"),
-    STR("trr"),
-    STR("xyz"),
-    STR("xmol"),
-    STR("arc"),
-};
-
-uint32_t get_supported_extension_count() {
-    return (uint32_t)ARRAY_SIZE(extensions);
-}
-
-const str_t* get_supported_extensions() {
-    return extensions;
-}
-
-namespace mol {
-
-md_molecule_api* get_api(str_t filename) {
-    str_t ext = extract_ext(filename);
-    if (str_equal_cstr(ext, "pdb"))  return md_pdb_molecule_api();
-    if (str_equal_cstr(ext, "gro"))  return md_gro_molecule_api();
-    if (str_equal_cstr(ext, "xyz"))  return md_xyz_molecule_api();
-    if (str_equal_cstr(ext, "xmol")) return md_xyz_molecule_api();
-    if (str_equal_cstr(ext, "arc"))  return md_xyz_molecule_api();
-
-    return NULL;
-}
-
-}  // namespace mol
-
-namespace traj {
-
-md_trajectory_api* get_api(str_t filename) {
-    str_t ext = extract_ext(filename);
-    if (str_equal_cstr(ext, "pdb"))  return md_pdb_trajectory_api();
-    if (str_equal_cstr(ext, "xtc"))  return md_xtc_trajectory_api();
-    if (str_equal_cstr(ext, "trr"))  return md_trr_trajectory_api();
-    if (str_equal_cstr(ext, "xyz"))  return md_xyz_trajectory_api();
-    if (str_equal_cstr(ext, "xmol")) return md_xyz_trajectory_api();
-    if (str_equal_cstr(ext, "arc"))  return md_xyz_trajectory_api();
-
-    return NULL;
-}
-
-bool get_header(struct md_trajectory_o* inst, md_trajectory_header_t* header) {
-    LoadedTrajectory* loaded_traj = (LoadedTrajectory*)inst;
-    return md_trajectory_get_header(loaded_traj->traj, header);
-}
-
-int64_t fetch_frame_data(struct md_trajectory_o*, int64_t idx, void* data_ptr) {
-    if (data_ptr) {
-        *((int64_t*)data_ptr) = idx;
+    bool getHeader(struct md_trajectory_o* inst, md_trajectory_header_t* header) {
+        LoadedTrajectory* loaded_traj = (LoadedTrajectory*)inst;
+        return md_trajectory_get_header(loaded_traj->traj, header);
     }
-    return sizeof(int64_t);
-}
 
-bool decode_frame_data(struct md_trajectory_o* inst, const void* data_ptr, [[maybe_unused]] int64_t data_size, md_trajectory_frame_header_t* header, float* out_x, float* out_y, float* out_z) {
-    LoadedTrajectory* loaded_traj = (LoadedTrajectory*)inst;
-    ASSERT(loaded_traj);
-    ASSERT(data_size == sizeof(int64_t));
+    int64_t fetchFrameData(struct md_trajectory_o*, int64_t idx, void* data) {
+        if (data) {
+            *(reinterpret_cast<int64_t*>(data)) = idx;
+        }
+        return sizeof(int64_t);
+    }
 
-    int64_t idx = *((int64_t*)data_ptr);
-    ASSERT(0 <= idx && idx < md_trajectory_num_frames(loaded_traj->traj));
+    bool decodeFrameData(struct md_trajectory_o* inst, const void* data,
+                         [[maybe_unused]] int64_t dataSize,
+                         md_trajectory_frame_header_t* header, float* outX, float* outY,
+                         float* outZ)
+    {
+        LoadedTrajectory* trajectory = reinterpret_cast<LoadedTrajectory*>(inst);
+        ghoul_assert(trajectory, "Could not find trajectory");
+        ghoul_assert(dataSize == sizeof(int64_t), "Wrong data size");
 
-    md_frame_data_t* frame_data;
-    md_frame_cache_lock_t* lock = 0;
-    bool result = true;
-    bool in_cache = md_frame_cache_find_or_reserve(&loaded_traj->cache, idx, &frame_data, &lock);
-    if (!in_cache) {
-        md_allocator_i* alloc = default_allocator;
-        const int64_t frame_data_size = md_trajectory_fetch_frame_data(loaded_traj->traj, idx, 0);
-        void* frame_data_ptr = md_alloc(alloc, frame_data_size);
-        md_trajectory_fetch_frame_data(loaded_traj->traj, idx, frame_data_ptr);
-        result = md_trajectory_decode_frame_data(loaded_traj->traj, frame_data_ptr, frame_data_size, &frame_data->header, frame_data->x, frame_data->y, frame_data->z);
+        int64_t idx = *(reinterpret_cast<const int64_t*>(data));
+        ghoul_assert(
+            0 <= idx && idx < md_trajectory_num_frames(trajectory->traj),
+            "Invalid index"
+        );
 
-        if (result) {
-            const md_unit_cell_t* cell = &frame_data->header.cell;
-            const bool have_cell = cell->flags != 0;
+        md_frame_data_t* frameData;
+        md_frame_cache_lock_t* lock = 0;
+        bool result = true;
+        bool inCache = md_frame_cache_find_or_reserve(
+            &trajectory->cache,
+            idx,
+            &frameData,
+            &lock
+        );
+        if (!inCache) {
+            const int64_t frameDataSize = md_trajectory_fetch_frame_data(trajectory->traj, idx, 0);
+            void* frameDataPtr = md_alloc(default_allocator, frameDataSize);
+            md_trajectory_fetch_frame_data(trajectory->traj, idx, frameDataPtr);
+            result = md_trajectory_decode_frame_data(trajectory->traj, frameDataPtr, frameDataSize, &frameData->header, frameData->x, frameData->y, frameData->z);
 
-            const md_molecule_t* mol = loaded_traj->mol;
-            float* x = frame_data->x;
-            float* y = frame_data->y;
-            float* z = frame_data->z;
-            const int64_t num_atoms = frame_data->header.num_atoms;
+            if (result) {
+                const md_unit_cell_t* cell = &frameData->header.cell;
+                const bool haveCell = cell->flags != 0;
 
-            // If we have a recenter target, then compute the com and apply that transformation
-            if (!md_bitfield_empty(&loaded_traj->recenter_target)) {
-                const md_bitfield_t* bf = &loaded_traj->recenter_target;
-                const int64_t count = md_bitfield_popcount(bf);
-                
-                if (count > 0) {
-                    int32_t* indices = (int32_t*)md_alloc(alloc, sizeof(int32_t) * count);
-                    defer { md_free(alloc, indices, sizeof(int32_t) * count); };
-                        
-                    md_bitfield_extract_indices(indices, bf);
+                const md_molecule_t* mol = trajectory->mol;
+                float* x = frameData->x;
+                float* y = frameData->y;
+                float* z = frameData->z;
+                const int64_t numAtoms = frameData->header.num_atoms;
 
-                    const vec3_t box_ext = mat3_mul_vec3(header->cell.basis, vec3_set1(1.0f));
+                // If we have a recenter target, then compute the com and apply that transformation
+                if (!md_bitfield_empty(&trajectory->recenterTarget)) {
+                    const md_bitfield_t* bf = &trajectory->recenterTarget;
+                    const int64_t count = md_bitfield_popcount(bf);
 
-                    const vec3_t com = have_cell ?
-                        vec3_deperiodize(md_util_compute_com_indexed_soa_ortho(x, y, z, mol->atom.mass, indices, count, box_ext), box_ext * 0.5f, box_ext) :
-                        md_util_compute_com_indexed_soa(x, y, z, mol->atom.mass, indices, count);
+                    if (count > 0) {
+                        int32_t* indices = reinterpret_cast<int32_t*>(
+                            md_alloc(default_allocator, sizeof(int32_t) * count)
+                        );
+                        defer {
+                            md_free(default_allocator, indices, sizeof(int32_t) * count);
+                        };
 
-                    // Translate all
-                    const vec3_t trans = have_cell ? box_ext * 0.5f - com : -com;
-                    for (int64_t i = 0; i < num_atoms; ++i) {
-                        x[i] += trans.x;
-                        y[i] += trans.y;
-                        z[i] += trans.z;
+                        md_bitfield_extract_indices(indices, bf);
+
+                        const vec3_t boxExt =
+                            mat3_mul_vec3(header->cell.basis, vec3_set1(1.f));
+
+                        const vec3_t com = haveCell ?
+                            vec3_deperiodize(
+                                md_util_compute_com_indexed_soa_ortho(
+                                    x,
+                                    y,
+                                    z,
+                                    mol->atom.mass,
+                                    indices,
+                                    count,
+                                    boxExt
+                                ),
+                                boxExt * 0.5f,
+                                boxExt
+                            ) :
+                            md_util_compute_com_indexed_soa(
+                                x,
+                                y,
+                                z,
+                                mol->atom.mass,
+                                indices,
+                                count
+                            );
+
+                        // Translate all
+                        const vec3_t trans = haveCell ? boxExt * 0.5f - com : -com;
+                        for (int64_t i = 0; i < numAtoms; i++) {
+                            x[i] += trans.x;
+                            y[i] += trans.y;
+                            z[i] += trans.z;
+                        }
                     }
+                }
+
+                if (trajectory->deperiodize && haveCell) {
+                    md_util_deperiodize_system(x, y, z, cell, mol);
                 }
             }
 
-            if (loaded_traj->deperiodize && have_cell) {
-                md_util_deperiodize_system(x, y, z, cell, mol);
+            md_free(default_allocator, frameDataPtr, frameDataSize);
+        }
+
+        if (result) {
+            const int64_t num_atoms = frameData->header.num_atoms;
+            if (header) {
+                *header = frameData->header;
+            }
+            if (outX) {
+                std::memcpy(outX, frameData->x, sizeof(float) * num_atoms);
+            }
+            if (outY) {
+                std::memcpy(outY, frameData->y, sizeof(float) * num_atoms);
+            }
+            if (outZ) {
+                std::memcpy(outZ, frameData->z, sizeof(float) * num_atoms);
             }
         }
 
-        md_free(alloc, frame_data_ptr, frame_data_size);
+        if (lock) {
+            md_frame_cache_frame_lock_release(lock);
+        }
+
+        return result;
     }
 
-    if (result) {
-        const int64_t num_atoms = frame_data->header.num_atoms;
-        if (header) *header = frame_data->header;
-        if (out_x) MEMCPY(out_x, frame_data->x, sizeof(float) * num_atoms);
-        if (out_y) MEMCPY(out_y, frame_data->y, sizeof(float) * num_atoms);
-        if (out_z) MEMCPY(out_z, frame_data->z, sizeof(float) * num_atoms);
+    bool loadFrame(md_trajectory_o* inst, int64_t idx,
+                   md_trajectory_frame_header_t* header, float* x, float* y, float* z)
+    {
+        return decodeFrameData(inst, &idx, sizeof(int64_t), header, x, y, z);
     }
 
-    if (lock) {
-        md_frame_cache_frame_lock_release(lock);
+} // namespace
+
+namespace load::mol {
+
+md_molecule_api* api(str_t filename) {
+    str_t ext = extract_ext(filename);
+    if (str_equal_cstr(ext, "pdb")) {
+        return md_pdb_molecule_api();
+    }
+    if (str_equal_cstr(ext, "gro")) {
+        return md_gro_molecule_api();
+    }
+    if (str_equal_cstr(ext, "xyz")) {
+        return md_xyz_molecule_api();
+    }
+    if (str_equal_cstr(ext, "xmol")) {
+        return md_xyz_molecule_api();
+    }
+    if (str_equal_cstr(ext, "arc")) {
+        return md_xyz_molecule_api();
     }
 
-    return result;
+    return nullptr;
 }
 
-bool load_frame(struct md_trajectory_o* inst, int64_t idx, md_trajectory_frame_header_t* header, float* x, float* y, float* z) {
-    void* frame_data = &idx;
-    return decode_frame_data(inst, frame_data, sizeof(int64_t), header, x, y, z);
+}  // namespace load::mol
+
+namespace load::traj {
+
+md_trajectory_api* api(str_t filename) {
+    str_t ext = extract_ext(filename);
+    if (str_equal_cstr(ext, "pdb")) {
+        return md_pdb_trajectory_api();
+    }
+    if (str_equal_cstr(ext, "xtc")) {
+        return md_xtc_trajectory_api();
+    }
+    if (str_equal_cstr(ext, "trr")) {
+        return md_trr_trajectory_api();
+    }
+    if (str_equal_cstr(ext, "xyz")) {
+        return md_xyz_trajectory_api();
+    }
+    if (str_equal_cstr(ext, "xmol")) {
+        return md_xyz_trajectory_api();
+    }
+    if (str_equal_cstr(ext, "arc")) {
+        return md_xyz_trajectory_api();
+    }
+
+    return nullptr;
 }
 
-md_trajectory_i* open_file(str_t filename, const md_molecule_t* mol, md_allocator_i* alloc, bool deperiodize_on_load) {
-    ASSERT(alloc);
-    ASSERT(mol);
+md_trajectory_i* openFile(str_t filename, const md_molecule_t* mol, md_allocator_i* alloc,
+                          bool deperiodizeOnLoad)
+{
+    ghoul_assert(alloc, "No allocator provided");
+    ghoul_assert(mol, "No molecule provided");
 
-    md_trajectory_api* api = get_api(filename);
+    md_trajectory_api* api = traj::api(filename);
     if (!api) {
         MD_LOG_ERROR("Unsupported file extension: '%.*s'", filename.len, filename.ptr);
         return NULL;
     }
 
-    md_trajectory_i* internal_traj = api->create(filename, alloc);
-    if (!internal_traj) {
-        return NULL;
+    md_trajectory_i* internalTraj = api->create(filename, alloc);
+    if (!internalTraj) {
+        return nullptr;
     }
 
-    md_trajectory_i* traj = (md_trajectory_i*)md_alloc(alloc, sizeof(md_trajectory_i));
-    memset(traj, 0, sizeof(md_trajectory_i));
+    md_trajectory_i* traj = reinterpret_cast<md_trajectory_i*>(
+        md_alloc(alloc, sizeof(md_trajectory_i))
+    );
+    std::memset(traj, 0, sizeof(md_trajectory_i));
 
-    LoadedTrajectory* inst = alloc_loaded_trajectory((uint64_t)traj);
+    LoadedTrajectory* inst = allocLoadedTrajectory((uint64_t)traj);
     inst->mol = mol;
     inst->api = api;
-    inst->traj = internal_traj;
-    inst->cache = {0};
-    inst->recenter_target = {0};
+    inst->traj = internalTraj;
+    inst->cache = { 0 };
+    inst->recenterTarget = { 0 };
     inst->alloc = alloc;
-    inst->deperiodize = deperiodize_on_load;
+    inst->deperiodize = deperiodizeOnLoad;
     
-    const uint64_t num_atoms            = md_trajectory_num_atoms(internal_traj);
-    const uint64_t num_traj_frames      = md_trajectory_num_frames(internal_traj);
-    const uint64_t frame_cache_size     = MEGABYTES(16);
-    const uint64_t approx_frame_size    = num_atoms * 3 * sizeof(float);
-    const uint64_t max_num_cache_frames = MAX(16, frame_cache_size / approx_frame_size);
+    const uint64_t numAtoms = md_trajectory_num_atoms(internalTraj);
+    const uint64_t numTrajFrames = md_trajectory_num_frames(internalTraj);
+    const uint64_t frameCacheSize = MEGABYTES(16);
+    const uint64_t approxFrameSize = numAtoms * 3 * sizeof(float);
+    const uint64_t maxNumCacheFrames = std::max(16ULL, frameCacheSize / approxFrameSize);
 
-    const int64_t num_cache_frames   = MIN(num_traj_frames, max_num_cache_frames);
+    const int64_t numCacheFrames = std::min(numTrajFrames, maxNumCacheFrames);
     
-    MD_LOG_DEBUG("Initializing frame cache with %i frames.", (int)num_cache_frames);
-    md_frame_cache_init(&inst->cache, inst->traj, alloc, num_cache_frames);
-    md_bitfield_init(&inst->recenter_target, alloc);
+    MD_LOG_DEBUG("Initializing frame cache with %i frames.", numCacheFrames);
+    md_frame_cache_init(&inst->cache, inst->traj, alloc, numCacheFrames);
+    md_bitfield_init(&inst->recenterTarget, alloc);
 
     // We only overload load frame and decode frame data to apply PBC upon loading data
-    traj->inst = (struct md_trajectory_o*)inst;
-    traj->get_header = get_header;
-    traj->load_frame = load_frame;
-    traj->fetch_frame_data = fetch_frame_data;
-    traj->decode_frame_data = decode_frame_data;
+    traj->inst = reinterpret_cast<md_trajectory_o*>(inst);
+    traj->get_header = getHeader;
+    traj->load_frame = loadFrame;
+    traj->fetch_frame_data = fetchFrameData;
+    traj->decode_frame_data = decodeFrameData;
     
     return traj;
 }
 
 bool close(md_trajectory_i* traj) {
-    ASSERT(traj);
+    ghoul_assert(traj, "No trajectory provided");
 
-    LoadedTrajectory* loaded_traj = find_loaded_trajectory((uint64_t)traj);
-    if (loaded_traj) {
-        remove_loaded_trajectory(loaded_traj->key);
-        memset(traj, 0, sizeof(md_trajectory_i));
+    LoadedTrajectory* loadedTraj = findLoadedTrajectory(reinterpret_cast<uint64_t>(traj));
+    if (loadedTraj) {
+        removeLoadedTrajectory(loadedTraj->key);
+        std::memset(traj, 0, sizeof(md_trajectory_i));
         return true;
     }
     MD_LOG_ERROR("Attempting to free trajectory which was not loaded with loader");
-    ASSERT(false);
+    ghoul_assert(false, "");
     return false;
 }
 
-bool set_recenter_target(md_trajectory_i* traj, const md_bitfield_t* atom_mask) {
-    ASSERT(traj);
+bool setRecenterTarget(md_trajectory_i* traj, const md_bitfield_t* atomMask) {
+    ghoul_assert(traj, "No trajectory provided");
 
-    LoadedTrajectory* loaded_traj = find_loaded_trajectory((uint64_t)traj);
-    if (loaded_traj) {
-        if (atom_mask) {
-            md_bitfield_copy(&loaded_traj->recenter_target, atom_mask);
+    LoadedTrajectory* loadedTraj = findLoadedTrajectory(reinterpret_cast<uint64_t>(traj));
+    if (loadedTraj) {
+        if (atomMask) {
+            md_bitfield_copy(&loadedTraj->recenterTarget, atomMask);
         }
         else {
-            md_bitfield_clear(&loaded_traj->recenter_target);
+            md_bitfield_clear(&loadedTraj->recenterTarget);
         }
         return true;
     }
@@ -340,29 +374,27 @@ bool set_recenter_target(md_trajectory_i* traj, const md_bitfield_t* atom_mask) 
     return false;
 }
 
-bool clear_cache(md_trajectory_i* traj) {
-    ASSERT(traj);
+bool clearCache(md_trajectory_i* traj) {
+    ghoul_assert(traj, "No trajectory provided");
 
-    LoadedTrajectory* loaded_traj = find_loaded_trajectory((uint64_t)traj);
-    if (loaded_traj) {
-        md_frame_cache_clear(&loaded_traj->cache);
+    LoadedTrajectory* loadedTraj = findLoadedTrajectory(reinterpret_cast<uint64_t>(traj));
+    if (loadedTraj) {
+        md_frame_cache_clear(&loadedTraj->cache);
         return true;
     }
     MD_LOG_ERROR("Supplied trajectory was not loaded with loader");
     return false;
 }
 
-int64_t num_cache_frames(md_trajectory_i* traj) {
-    ASSERT(traj);
+int64_t numCacheFrames(md_trajectory_i* traj) {
+    ghoul_assert(traj, "No trajectory provided");
 
-    LoadedTrajectory* loaded_traj = find_loaded_trajectory((uint64_t)traj);
-    if (loaded_traj) {
-        return md_frame_cache_num_frames(&loaded_traj->cache);
+    LoadedTrajectory* loadedTraj = findLoadedTrajectory(reinterpret_cast<uint64_t>(traj));
+    if (loadedTraj) {
+        return md_frame_cache_num_frames(&loadedTraj->cache);
     }
     MD_LOG_ERROR("Supplied trajectory was not loaded with loader");
     return 0;
 }
 
-}  // namespace traj
-
-}  // namespace load
+}  // namespace load::traj

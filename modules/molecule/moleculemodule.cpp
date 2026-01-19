@@ -26,6 +26,7 @@
 
 #include <modules/molecule/renderablemolecule.h>
 #include <modules/molecule/renderablesimulationbox.h>
+#include <modules/molecule/mol/viamd/postprocessing.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
@@ -35,12 +36,11 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/logging/logmanager.h>
-
 #include <md_gl.h>
-#include <modules/molecule/mol/viamd/postprocessing.h>
+#include <string_view>
 
 namespace {
-constexpr const char* shader_output_snippet = R"(
+    constexpr std::string_view ShaderOutputSnippet = R"(
 layout(location = 0) out vec4 out_color;
 layout(location = 1) out vec4 out_normal;
 
@@ -54,115 +54,114 @@ out_normal = vec4(encode_normal(view_normal), 0, 0);
 out_color = color;
 }
 )";
-constexpr const char* _loggerCat = "MoleculeModule";
+    constexpr std::string_view _loggerCat = "MoleculeModule";
 
-constexpr openspace::properties::Property::PropertyInfo SSAOEnabledInfo = {
-    "SSAOEnabled",
-    "Enable SSAO",
-    "Enable SSAO"
-};
+    constexpr openspace::properties::Property::PropertyInfo SSAOEnabledInfo = {
+        "SSAOEnabled",
+        "Enable SSAO",
+        "Enable SSAO"
+    };
 
-constexpr openspace::properties::Property::PropertyInfo SSAOIntensityInfo = {
-    "SSAOIntensity",
-    "SSAO Intensity",
-    "SSAO Intensity"
-};
+    constexpr openspace::properties::Property::PropertyInfo SSAOIntensityInfo = {
+        "SSAOIntensity",
+        "SSAO Intensity",
+        "SSAO Intensity"
+    };
 
-constexpr openspace::properties::Property::PropertyInfo SSAORadiusInfo = {
-    "SSAORadius",
-    "SSAO Radius",
-    "SSAO Radius"
-};
+    constexpr openspace::properties::Property::PropertyInfo SSAORadiusInfo = {
+        "SSAORadius",
+        "SSAO Radius",
+        "SSAO Radius"
+    };
 
-constexpr openspace::properties::Property::PropertyInfo SSAOBiasInfo = {
-    "SSAOHorizonBias",
-    "SSAO Horizon Bias",
-    "SSAO Horizon Bias"
-};
+    constexpr openspace::properties::Property::PropertyInfo SSAOBiasInfo = {
+        "SSAOHorizonBias",
+        "SSAO Horizon Bias",
+        "SSAO Horizon Bias"
+    };
 
-constexpr openspace::properties::Property::PropertyInfo SSAONormalBiasInfo = {
-    "SSAONormalBias",
-    "SSAO Normal Bias",
-    "SSAO Normal Bias"
-};
+    constexpr openspace::properties::Property::PropertyInfo SSAONormalBiasInfo = {
+        "SSAONormalBias",
+        "SSAO Normal Bias",
+        "SSAO Normal Bias"
+    };
 
-constexpr openspace::properties::Property::PropertyInfo SSAO2EnabledInfo = {
-    "SSAO2Enabled",
-    "Enable SSAO",
-    "Enable SSAO"
-};
+    constexpr openspace::properties::Property::PropertyInfo SSAO2EnabledInfo = {
+        "SSAO2Enabled",
+        "Enable SSAO",
+        "Enable SSAO"
+    };
 
-constexpr openspace::properties::Property::PropertyInfo SSAO2IntensityInfo = {
-    "SSAO2Intensity",
-    "SSAO Intensity",
-    "SSAO Intensity"
-};
+    constexpr openspace::properties::Property::PropertyInfo SSAO2IntensityInfo = {
+        "SSAO2Intensity",
+        "SSAO Intensity",
+        "SSAO Intensity"
+    };
 
-constexpr openspace::properties::Property::PropertyInfo SSAO2RadiusInfo = {
-    "SSAO2Radius",
-    "SSAO Radius",
-    "SSAO Radius"
-};
+    constexpr openspace::properties::Property::PropertyInfo SSAO2RadiusInfo = {
+        "SSAO2Radius",
+        "SSAO Radius",
+        "SSAO Radius"
+    };
 
-constexpr openspace::properties::Property::PropertyInfo SSAO2BiasInfo = {
-    "SSAO2HorizonBias",
-    "SSAO Horizon Bias",
-    "SSAO Horizon Bias"
-};
+    constexpr openspace::properties::Property::PropertyInfo SSAO2BiasInfo = {
+        "SSAO2HorizonBias",
+        "SSAO Horizon Bias",
+        "SSAO Horizon Bias"
+    };
 
-constexpr openspace::properties::Property::PropertyInfo SSAO2NormalBiasInfo = {
-    "SSAO2NormalBias",
-    "SSAO Normal Bias",
-    "SSAO Normal Bias"
-};
+    constexpr openspace::properties::Property::PropertyInfo SSAO2NormalBiasInfo = {
+        "SSAO2NormalBias",
+        "SSAO Normal Bias",
+        "SSAO Normal Bias"
+    };
 
-constexpr openspace::properties::Property::PropertyInfo ExposureInfo = {
-    "Exposure",
-    "Exposure",
-    "Exposure, Controls the Exposure setting for the tonemap"
-};
+    constexpr openspace::properties::Property::PropertyInfo ExposureInfo = {
+        "Exposure",
+        "Exposure",
+        "Exposure, Controls the Exposure setting for the tonemap"
+    };
 
-constexpr openspace::properties::Property::PropertyInfo DOFEnabledInfo = {
-    "DOFEnabled",
-    "Enable DOF",
-    "Enable DOF"
-};
+    constexpr openspace::properties::Property::PropertyInfo DOFEnabledInfo = {
+        "DOFEnabled",
+        "Enable DOF",
+        "Enable DOF"
+    };
 
-constexpr openspace::properties::Property::PropertyInfo DOFFocusDistanceInfo = {
-    "DOFFocusDistance",
-    "DOF Focus Distance",
-    "DOF Focus Distance"
-};
+    constexpr openspace::properties::Property::PropertyInfo DOFFocusDistanceInfo = {
+        "DOFFocusDistance",
+        "DOF Focus Distance",
+        "DOF Focus Distance"
+    };
 
-constexpr openspace::properties::Property::PropertyInfo DOFFocusRangeInfo = {
-    "DOFFocusRange",
-    "DOF Focus Range",
-    "DOF Focus Range"
-};
-
-}
+    constexpr openspace::properties::Property::PropertyInfo DOFFocusRangeInfo = {
+        "DOFFocusRange",
+        "DOF Focus Range",
+        "DOF Focus Range"
+    };
+} // namespace
 
 namespace openspace {
 
-MoleculeModule::MoleculeModule() :
-    OpenSpaceModule(Name),
-    _ssaoEnabled(SSAOEnabledInfo, true),
-    _ssaoIntensity(SSAOIntensityInfo, 4.f, 0.f, 100.f),
-    _ssaoRadius(SSAORadiusInfo, 1.f, 0.1f, 10.f),
-    _ssaoHorizonBias(SSAOBiasInfo, 0.1f, 0.0f, 1.0f),
-    _ssaoNormalBias(SSAONormalBiasInfo, 1.0f, 0.0f, 1.0f),
-    _ssao2Enabled(SSAO2EnabledInfo, true),
-    _ssao2Intensity(SSAO2IntensityInfo, 4.f, 0.f, 100.f),
-    _ssao2Radius(SSAO2RadiusInfo, 10.f, 10.f, 1000.f),
-    _ssao2HorizonBias(SSAO2BiasInfo, 0.0f, 0.0f, 1.0f),
-    _ssao2NormalBias(SSAO2NormalBiasInfo, 1.0f, 0.0f, 0.0f),
-    _exposure(ExposureInfo, 0.3f, 0.1f, 10.f),
-    _dofEnabled(DOFEnabledInfo, false),
-    _dofFocusDistance(DOFFocusDistanceInfo, 0.5f, 0.f, 1.f),
-    _dofFocusRange(DOFFocusRangeInfo, 0.1f, 0.f, 10.f),
-    _threadPool(std::max(1U, std::thread::hardware_concurrency() - 1))
+MoleculeModule::MoleculeModule()
+    : OpenSpaceModule(Name)
+    , _shaders(new md_gl_shaders_t)
+    , _ssaoEnabled(SSAOEnabledInfo, true)
+    , _ssaoIntensity(SSAOIntensityInfo, 4.f, 0.f, 100.f)
+    , _ssaoRadius(SSAORadiusInfo, 1.f, 0.1f, 10.f)
+    , _ssaoHorizonBias(SSAOBiasInfo, 0.1f, 0.f, 1.0f)
+    , _ssaoNormalBias(SSAONormalBiasInfo, 1.f, 0.f, 1.f)
+    , _ssao2Enabled(SSAO2EnabledInfo, true)
+    , _ssao2Intensity(SSAO2IntensityInfo, 4.f, 0.f, 100.f)
+    , _ssao2Radius(SSAO2RadiusInfo, 10.f, 10.f, 1000.f)
+    , _ssao2HorizonBias(SSAO2BiasInfo, 0.f, 0.f, 1.f)
+    , _ssao2NormalBias(SSAO2NormalBiasInfo, 1.f, 0.f, 0.f)
+    , _exposure(ExposureInfo, 0.3f, 0.1f, 10.f)
+    , _dofEnabled(DOFEnabledInfo, false)
+    , _dofFocusDistance(DOFFocusDistanceInfo, 0.5f, 0.f, 1.f)
+    , _dofFocusRange(DOFFocusRangeInfo, 0.1f, 0.f, 10.f)
+    , _threadPool(std::max(1U, std::thread::hardware_concurrency() - 1))
 {
-    _shaders.reset(new md_gl_shaders_t());
     addProperty(_ssaoEnabled);
     addProperty(_ssaoIntensity);
     addProperty(_ssaoRadius);
@@ -179,18 +178,14 @@ MoleculeModule::MoleculeModule() :
     addProperty(_dofFocusRange);
 }
 
-MoleculeModule::~MoleculeModule() {
-}
-
 void MoleculeModule::internalInitialize(const ghoul::Dictionary&) {
     auto fRenderable = FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
     fRenderable->registerClass<RenderableMolecule>("RenderableMolecule");
     fRenderable->registerClass<RenderableSimulationBox>("RenderableSimulationBox");
 
-    // This is ugly, but I don't know if there is a prettier way to pass member functions
-    global::callback::postSyncPreDraw->push_back([this]() { MoleculeModule::preDraw(); });
-    global::callback::render->push_back([this]() { MoleculeModule::postDraw(); });
+    global::callback::postSyncPreDraw->push_back([this]() { preDraw(); });
+    global::callback::render->push_back([this]() { postDraw(); });
 }
 
 void MoleculeModule::internalInitializeGL() {
@@ -200,41 +195,84 @@ void MoleculeModule::internalInitializeGL() {
 
     glGenTextures(1, &_colorTex);
     glBindTexture(GL_TEXTURE_2D, _colorTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA8,
+        size.x,
+        size.y,
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        nullptr
+    );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, _colorTex, 0);
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        _colorTex,
+        0
+    );
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenTextures(1, &_normalTex);
     glBindTexture(GL_TEXTURE_2D, _normalTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16, size.x, size.y, 0, GL_RG, GL_UNSIGNED_SHORT, nullptr);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RG16,
+        size.x,
+        size.y,
+        0,
+        GL_RG,
+        GL_UNSIGNED_SHORT,
+        nullptr
+    );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, _normalTex, 0);
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT1,
+        GL_TEXTURE_2D,
+        _normalTex,
+        0
+    );
     glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenTextures(1, &_depthTex);
     glBindTexture(GL_TEXTURE_2D, _depthTex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_DEPTH_COMPONENT32F,
+        size.x,
+        size.y,
+        0,
+        GL_DEPTH_COMPONENT,
+        GL_FLOAT,
+        nullptr
+    );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, _depthTex, 0);
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_2D,
+        _depthTex,
+        0
+    );
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    if (glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        LERROR("Mold Framebuffer is not complete");
-
-    glGetError();
-
     md_gl_initialize();
-    md_gl_shaders_init(_shaders.get(), shader_output_snippet);
+    md_gl_shaders_init(_shaders.get(), ShaderOutputSnippet.data());
 
     postprocessing::initialize(size.x, size.y);
 
@@ -256,69 +294,130 @@ void MoleculeModule::internalDeinitializeGL() {
     md_gl_shutdown();
 }
 
+GLuint MoleculeModule::fbo() const {
+    return _fbo;
+}
+
+GLuint MoleculeModule::colorTexture() const {
+    return _colorTex;
+}
+
+GLuint MoleculeModule::normalTexture() const {
+    return _normalTex;
+}
+
+GLuint MoleculeModule::depthTexture() const {
+    return _depthTex;
+}
+
+const md_gl_shaders_t& MoleculeModule::shaders() const {
+    return *_shaders;
+}
+
+ThreadPool& MoleculeModule::threadPool() {
+    return _threadPool;
+}
+
+void MoleculeModule::setViewMatrix(glm::mat4 v) {
+    _viewMatrix = std::move(v);
+}
+
+void MoleculeModule::setProjectionMatrix(glm::mat4 p) {
+    _projectionMatrix = std::move(p);
+}
+
 void MoleculeModule::preDraw() {
     // Check if resized
     const glm::ivec2 size = global::windowDelegate->currentWindowSize();
-    if (size.x != _width || size.y != _height) {
-        _width = size.x;
-        _height = size.y;
-        glBindTexture(GL_TEXTURE_2D, _colorTex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.x, size.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-        glBindTexture(GL_TEXTURE_2D, _normalTex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16, size.x, size.y, 0, GL_RG, GL_UNSIGNED_SHORT, nullptr);
-        glBindTexture(GL_TEXTURE_2D, _depthTex);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT32F, size.x, size.y, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        postprocessing::initialize(size.x, size.y);
+    if (size.x == _width && size.y == _height) {
+        return;
     }
+
+    _width = size.x;
+    _height = size.y;
+    glBindTexture(GL_TEXTURE_2D, _colorTex);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA8,
+        size.x,
+        size.y,
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        nullptr
+    );
+    glBindTexture(GL_TEXTURE_2D, _normalTex);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RG16,
+        size.x,
+        size.y,
+        0,
+        GL_RG,
+        GL_UNSIGNED_SHORT,
+        nullptr
+    );
+    glBindTexture(GL_TEXTURE_2D, _depthTex);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_DEPTH_COMPONENT32F,
+        size.x,
+        size.y,
+        0,
+        GL_DEPTH_COMPONENT,
+        GL_FLOAT,
+        nullptr
+    );
+    glBindTexture(GL_TEXTURE_2D, 0);
+    postprocessing::initialize(size.x, size.y);
 }
 
 void MoleculeModule::postDraw() {
-    GLint last_fbo;
-    GLint  last_draw_buffer_count = 0;
-    GLenum last_draw_buffers[8];
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &last_fbo);
-    for (int i = 0; i < ARRAY_SIZE(last_draw_buffers); ++i) {
-        GLint draw_buf;
-        glGetIntegerv(GL_DRAW_BUFFER0+i, &draw_buf);
-        if (!draw_buf) {
+    GLint lastFbo;
+    GLint lastDrawBufferCount = 0;
+    GLenum lastDrawBuffers[8];
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &lastFbo);
+    for (int i = 0; i < ARRAY_SIZE(lastDrawBuffers); ++i) {
+        GLint drawBuf;
+        glGetIntegerv(GL_DRAW_BUFFER0+i, &drawBuf);
+        if (!drawBuf) {
             break;
         }
-        last_draw_buffers[last_draw_buffer_count++] = (GLenum)draw_buf;
+        lastDrawBuffers[lastDrawBufferCount++] = static_cast<GLenum>(drawBuf);
     }
 
-
-
-    
     postprocessing::Settings settings;
     settings.background.enabled = false;
     settings.background = { 0, 0, 0 };    
-    settings.ambient_occlusion[0].enabled = _ssaoEnabled;
-    settings.ambient_occlusion[0].intensity = _ssaoIntensity;
-    settings.ambient_occlusion[0].radius = _ssaoRadius;
-    settings.ambient_occlusion[0].horizon_bias = _ssaoHorizonBias;
-    settings.ambient_occlusion[0].normal_bias = _ssaoNormalBias;
-    settings.ambient_occlusion[1].enabled = _ssao2Enabled;
-    settings.ambient_occlusion[1].intensity = _ssao2Intensity;
-    settings.ambient_occlusion[1].radius = _ssao2Radius;
-    settings.ambient_occlusion[1].horizon_bias = _ssao2HorizonBias;
-    settings.ambient_occlusion[1].normal_bias = _ssao2NormalBias;
+    settings.ambientOcclusion[0].enabled = _ssaoEnabled;
+    settings.ambientOcclusion[0].intensity = _ssaoIntensity;
+    settings.ambientOcclusion[0].radius = _ssaoRadius;
+    settings.ambientOcclusion[0].horizonBias = _ssaoHorizonBias;
+    settings.ambientOcclusion[0].normalBias = _ssaoNormalBias;
+    settings.ambientOcclusion[1].enabled = _ssao2Enabled;
+    settings.ambientOcclusion[1].intensity = _ssao2Intensity;
+    settings.ambientOcclusion[1].radius = _ssao2Radius;
+    settings.ambientOcclusion[1].horizonBias = _ssao2HorizonBias;
+    settings.ambientOcclusion[1].normalBias = _ssao2NormalBias;
     settings.bloom.enabled = false;
-    settings.depth_of_field.enabled = _dofEnabled;
-    settings.depth_of_field.focus_depth = _dofFocusDistance;
-    settings.depth_of_field.focus_scale = _dofFocusRange;
-    settings.temporal_reprojection.enabled = false;
+    settings.depthOfField.enabled = _dofEnabled;
+    settings.depthOfField.focusDepth = _dofFocusDistance;
+    settings.depthOfField.focusScale = _dofFocusRange;
+    settings.temporalReprojection.enabled = false;
     settings.tonemapping.enabled = true;
     settings.tonemapping.mode = postprocessing::Tonemapping::ACES;
     settings.tonemapping.exposure = _exposure;
     settings.fxaa.enabled = true;
-    settings.input_textures.depth = _depthTex;
-    settings.input_textures.color = _colorTex;
-    settings.input_textures.normal = _normalTex;
+    settings.inputTextures.depth = _depthTex;
+    settings.inputTextures.color = _colorTex;
+    settings.inputTextures.normal = _normalTex;
 
     mat4_t V, P;
-    MEMCPY(&V, &_V, sizeof(mat4_t));
-    MEMCPY(&P, &_P, sizeof(mat4_t));
+    std::memcpy(&V, &_viewMatrix, sizeof(mat4_t));
+    std::memcpy(&P, &_projectionMatrix, sizeof(mat4_t));
 
     postprocessing::postprocess(settings, V, P);
     
@@ -330,13 +429,14 @@ void MoleculeModule::postDraw() {
     glClearDepth(1.0);
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, last_fbo);
-    glDrawBuffers(last_draw_buffer_count, last_draw_buffers);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
+    glDrawBuffers(lastDrawBufferCount, lastDrawBuffers);
 }
 
 std::vector<documentation::Documentation> MoleculeModule::documentations() const {
     return {
         RenderableMolecule::Documentation(),
+        RenderableSimulationBox::Documentation()
     };
 }
 

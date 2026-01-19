@@ -69,6 +69,13 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 }
 )";
 
+    GLuint fbo = 0;
+    GLuint colorTex = 0;
+    GLuint normalTex = 0;
+    GLuint depthTex = 0;
+    int glUseCount = 0;
+    md_gl_shaders_t shaders;
+
     constexpr double normalizeDouble(double input) {
         if (input > 1.0) {
             return input / pow(10, 30);
@@ -298,42 +305,40 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 #include "renderablesimulationbox_codegen.cpp"
 } // namespace
 
-static GLuint fbo = 0;
-static GLuint colorTex = 0;
-static GLuint normalTex = 0;
-static GLuint depthTex = 0;
-static int glUseCount = 0;
-static md_gl_shaders_t shaders;
-
 namespace openspace {
 
 documentation::Documentation RenderableSimulationBox::Documentation() {
-    return codegen::doc<Parameters>("molecule_renderablemolecule");
+    return codegen::doc<Parameters>("molecule_renderablesimulationbox");
 }
 
 RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary),
-    _moleculeFiles(MoleculeFilesInfo),
-    _trajectoryFiles(TrajectoryFilesInfo),
-    _repType(RepTypeInfo),
-    _coloring(ColoringInfo),
-    _repScale(RepScaleInfo, 1.f, 0.1f, 10.f),
-    _animationSpeed(AnimationSpeedInfo, 1.f, 0.f, 100.f),
-    _simulationSpeed(SimulationSpeedInfo, 1.f, 0.f, 1000.f),
-    _moleculeCounts(MoleculeCountsInfo),
-    _linearVelocity(LinearVelocityInfo),
-    _angularVelocity(AngularVelocityInfo),
-    _simulationBox(SimulationBoxInfo),
-    _collisionRadius(CollisionRadiusInfo),
-    _viamdFilter(ViamdFilterInfo),
-    _ssaoEnabled(SSAOEnabledInfo),
-    _ssaoIntensity(SSAOIntensityInfo, 12.f, 0.f, 100.f),
-    _ssaoRadius(SSAORadiusInfo, 12.f, 0.1f, 100.f),
-    _ssaoBias(SSAOBiasInfo, 0.1f, 0.0f, 1.0f),
-    _exposure(ExposureInfo, 0.3f, 0.1f, 10.f),
-    _circleColor(CircleColorInfo, glm::vec4(1.f, 1.f, 1.f, 0.25f), glm::vec4(0.f), glm::vec4(1.f)),
-    _circleWidth(CircleWidthInfo, 0.0f, 0.0f, 10.0f),
-    _circleFalloff(CircleFalloffInfo, 0.0f, 0.0f, 1.0f)
+    : Renderable(dictionary)
+    , _moleculeFiles(MoleculeFilesInfo)
+    , _trajectoryFiles(TrajectoryFilesInfo)
+    , _repType(RepTypeInfo)
+    , _coloring(ColoringInfo)
+    , _repScale(RepScaleInfo, 1.f, 0.1f, 10.f)
+    , _animationSpeed(AnimationSpeedInfo, 1.f, 0.f, 100.f)
+    , _simulationSpeed(SimulationSpeedInfo, 1.f, 0.f, 1000.f)
+    , _moleculeCounts(MoleculeCountsInfo)
+    , _linearVelocity(LinearVelocityInfo)
+    , _angularVelocity(AngularVelocityInfo)
+    , _simulationBox(SimulationBoxInfo)
+    , _collisionRadius(CollisionRadiusInfo)
+    , _viamdFilter(ViamdFilterInfo)
+    , _ssaoEnabled(SSAOEnabledInfo)
+    , _ssaoIntensity(SSAOIntensityInfo, 12.f, 0.f, 100.f)
+    , _ssaoRadius(SSAORadiusInfo, 12.f, 0.1f, 100.f)
+    , _ssaoBias(SSAOBiasInfo, 0.1f, 0.f, 1.f)
+    , _exposure(ExposureInfo, 0.3f, 0.1f, 10.f)
+    , _circleColor(
+        CircleColorInfo,
+        glm::vec4(1.f, 1.f, 1.f, 0.25f),
+        glm::vec4(0.f),
+        glm::vec4(1.f)
+    )
+    , _circleWidth(CircleWidthInfo, 0.f, 0.f, 10.f)
+    , _circleFalloff(CircleFalloffInfo, 0.f, 0.f, 1.f)
 {
     _repType.addOptions({
         { static_cast<int>(mol::rep::Type::SpaceFill), "Space Fill" },
@@ -371,7 +376,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     _ssaoBias = p.ssaoBias.value_or(0.1f);
     _exposure = p.exposure.value_or(0.2f);
     _circleColor = p.circleColor.value_or(glm::vec4(1.f));
-    _circleColor.setViewOption(openspace::properties::Property::ViewOptions::Color);
+    _circleColor.setViewOption(properties::Property::ViewOptions::Color);
     _circleWidth = p.circleWidth.value_or(1.f);
     _circleFalloff = p.circleFalloff.value_or(0.f);
 
@@ -874,20 +879,20 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         {
             postprocessing::Settings settings;
             settings.background.enabled = false;
-            settings.ambient_occlusion[0].enabled = _ssaoEnabled;
-            settings.ambient_occlusion[0].intensity = _ssaoIntensity;
-            settings.ambient_occlusion[0].radius = _ssaoRadius;
-            settings.ambient_occlusion[0].horizon_bias = _ssaoBias;
-            settings.ambient_occlusion[1].enabled = false;
+            settings.ambientOcclusion[0].enabled = _ssaoEnabled;
+            settings.ambientOcclusion[0].intensity = _ssaoIntensity;
+            settings.ambientOcclusion[0].radius = _ssaoRadius;
+            settings.ambientOcclusion[0].horizonBias = _ssaoBias;
+            settings.ambientOcclusion[1].enabled = false;
             settings.bloom.enabled = false;
-            settings.depth_of_field.enabled = false;
-            settings.temporal_reprojection.enabled = false;
+            settings.depthOfField.enabled = false;
+            settings.temporalReprojection.enabled = false;
             settings.tonemapping.enabled = true;
             settings.tonemapping.mode = postprocessing::Tonemapping::ACES;
             settings.tonemapping.exposure = _exposure;
-            settings.input_textures.depth = depthTex;
-            settings.input_textures.color = colorTex;
-            settings.input_textures.normal = normalTex;
+            settings.inputTextures.depth = depthTex;
+            settings.inputTextures.color = colorTex;
+            settings.inputTextures.normal = normalTex;
 
             postprocessing::postprocess(
                 settings,
@@ -945,7 +950,7 @@ void RenderableSimulationBox::initMolecule(molecule_data_t& mol, std::string_vie
     // free previously loaded molecule
     freeMolecule(mol);
 
-    const md_molecule_t* molecule = mol_manager::load_molecule(molFile);
+    const md_molecule_t* molecule = mol::loadMolecule(molFile);
     if (!molecule) {
         return;
     }
@@ -954,10 +959,10 @@ void RenderableSimulationBox::initMolecule(molecule_data_t& mol, std::string_vie
 
     if (!trajFile.empty()) {
         LDEBUG(std::format("Loading trajectory file '{}'", trajFile));
-        mol.trajectory = mol_manager::load_trajectory(trajFile);
+        mol.trajectory = mol::loadTrajectory(trajFile);
 
         if (!mol.trajectory) {
-            LERROR("failed to initialize trajectory: failed to load file");
+            LERROR("Failed to initialize trajectory: failed to load file");
             return;
         }
     }

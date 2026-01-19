@@ -25,431 +25,556 @@
 
 // Shaders for HBAO are based on nVidias examples and are copyright protected as stated above
 
-#ifdef _MSC_VER
-// Disable double to float truncation warnings from table
-#pragma warning( disable : 4305 )
-#endif
-
 #include <modules/molecule/mol/viamd/postprocessing.h>
 
+#include <modules/molecule/mol/viamd/postprocessing_shaders.inl>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <core/md_allocator.h>
 #include <core/md_str.h>
 #include <core/md_log.h>
 #include <core/md_str_builder.h>
 #include <core/md_vec_math.h>
+#include <cfloat>
+#include <cstdio>
+#include <cstring>
 
-#include <stdio.h>
-#include <string.h>
-#include <float.h>
-
-#include <modules/molecule/mol/viamd/postprocessing_shaders.inl>
-
-#include <ghoul/opengl/ghoul_gl.h>
-
-#define PUSH_GPU_SECTION(lbl) {if (&glPushDebugGroup) glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, lbl);}
-#define POP_GPU_SECTION()     {if (&glPopDebugGroup) glPopDebugGroup();}
-
-namespace postprocessing {
-
-// @TODO: Use half-res render targets for SSAO
-// @TODO: Use shared textures for all postprocessing operations
-// @TODO: Use some kind of unified pipeline for all post processing operations
-
-static struct {
-    uint32_t vao = 0;
-    uint32_t vShaderFsQuad = 0;
-    uint32_t texWidth = 0;
-    uint32_t texHeight = 0;
+namespace {
+    // @TODO: Use half-res render targets for SSAO
+    // @TODO: Use shared textures for all postprocessing operations
+    // @TODO: Use some kind of unified pipeline for all post processing operations
 
     struct {
-        uint32_t fbo = 0;
-        uint32_t texRgba8 = 0;
-    } tmp;
+        uint32_t vao = 0;
+        uint32_t vShaderFsQuad = 0;
+        uint32_t texWidth = 0;
+        uint32_t texHeight = 0;
 
-    struct {
-        uint32_t fbo = 0;
-        uint32_t texColor[2] = { 0, 0 };
-        // These are dedicated and cannot be use as intermediate buffers by other shaders
-        uint32_t texTemporalBuffer[2] = { 0, 0 }; 
-    } targets;
-
-    struct {
-        uint32_t fbo = 0;
-        uint32_t texTilemax = 0;
-        uint32_t texNeighbormax = 0;
-        int32_t texWidth = 0;
-        int32_t texHeight = 0;
-    } velocity;
-
-    struct {
-        uint32_t fbo = 0;
-        uint32_t texture = 0;
-        uint32_t programPersp = 0;
-        uint32_t programOrtho = 0;
         struct {
-            int clipInfo = -1;
-            int texDepth = -1;
-        } uniformLoc;
-    } linearDepth;
+            uint32_t fbo = 0;
+            uint32_t texRgba8 = 0;
+        } tmp;
 
-    struct {
-        uint32_t texRandom = 0;
-        uint32_t uboHbaoData = 0;
+        struct {
+            uint32_t fbo = 0;
+            uint32_t texColor[2] = { 0, 0 };
+            // These are dedicated and cannot be use as intermediate buffers by other
+            // shaders
+            uint32_t texTemporalBuffer[2] = { 0, 0 };
+        } targets;
+
+        struct {
+            uint32_t fbo = 0;
+            uint32_t texTilemax = 0;
+            uint32_t texNeighbormax = 0;
+            int32_t texWidth = 0;
+            int32_t texHeight = 0;
+        } velocity;
 
         struct {
             uint32_t fbo = 0;
             uint32_t texture = 0;
             uint32_t programPersp = 0;
             uint32_t programOrtho = 0;
-        } hbao;
-
-        struct {
-            uint32_t fbo = 0;
-            uint32_t texture = 0;
-            uint32_t program = 0;
-        } blur;
-    } ssao;
-
-    struct {
-        uint32_t program = 0;
-        struct {
-            int texHalfRes = -1;
-            int texColor = -1;
-            int texDepth = -1;
-            int pixelSize = -1;
-            int focusPoint = -1;
-            int focusScale = -1;
-            int time = -1;
-        } uniformLoc;
-
-        struct {
-            uint32_t fbo = 0;
-            uint32_t program = 0;
             struct {
-                uint32_t colorCoc = 0;
-            } tex;
-            struct {
+                int clipInfo = -1;
                 int texDepth = -1;
+            } uniformLoc;
+        } linearDepth;
+
+        struct {
+            uint32_t texRandom = 0;
+            uint32_t uboHbaoData = 0;
+
+            struct {
+                uint32_t fbo = 0;
+                uint32_t texture = 0;
+                uint32_t programPersp = 0;
+                uint32_t programOrtho = 0;
+            } hbao;
+
+            struct {
+                uint32_t fbo = 0;
+                uint32_t texture = 0;
+                uint32_t program = 0;
+            } blur;
+        } ssao;
+
+        struct {
+            uint32_t program = 0;
+            struct {
+                int textureDepth = -1;
+                int textureColor = -1;
+                int textureNormal = -1;
+                int invProjMat = -1;
+                int lightDir = -1;
+                int lightCol = -1;
+                int time = -1;
+            } uniformLoc;
+        } shading;
+
+        struct {
+            uint32_t program = 0;
+            struct {
+                int texHalfRes = -1;
                 int texColor = -1;
+                int texDepth = -1;
+                int pixelSize = -1;
                 int focusPoint = -1;
                 int focusScale = -1;
+                int time = -1;
             } uniformLoc;
-        } halfRes;
-    } bokehDof;
 
-    struct {
-        uint32_t program = 0;
-        struct {
-            int mode = -1;
-            int texColor = -1;
-        } uniformLoc;
-    } tonemapping;
+            struct {
+                uint32_t fbo = 0;
+                uint32_t program = 0;
+                struct {
+                    uint32_t colorCoc = 0;
+                } tex;
+                struct {
+                    int texDepth = -1;
+                    int texColor = -1;
+                    int focusPoint = -1;
+                    int focusScale = -1;
+                } uniformLoc;
+            } halfRes;
+        } bokehDof;
 
-    struct {
         struct {
             uint32_t program = 0;
             struct {
-                int texLinearDepth = -1;
-                int texMain = -1;
-                int texPrev = -1;
-                int texVel = -1;
-                int texVelNeighbormax = -1;
-                int texelSize = -1;
-                int time = -1;
-                int feedbackMin = -1;
-                int feedbackMax = -1;
-                int motionScale = -1;
-                int jitterUv = -1;
+                int mode = -1;
+                int texColor = -1;
             } uniformLoc;
-        } withMotionBlur;
+
+            struct {
+                uint32_t program = 0;
+                struct {
+                    int texture = -1;
+                } uniformLoc;
+            } passthrough;
+
+            struct {
+                uint32_t program = 0;
+                struct {
+                    int texture = -1;
+                    int exposure = -1;
+                    int gamma = -1;
+                } uniformLoc;
+            } exposureGamma;
+
+            struct {
+                uint32_t program = 0;
+                struct {
+                    int texture = -1;
+                    int exposure = -1;
+                    int gamma = -1;
+                } uniformLoc;
+            } filmic;
+
+            struct {
+                uint32_t program = 0;
+                struct {
+                    int texture = -1;
+                    int exposure = -1;
+                    int gamma = -1;
+                } uniformLoc;
+            } aces;
+
+            struct {
+                uint32_t programForward = 0;
+                uint32_t programInverse = 0;
+                struct {
+                    int texture = -1;
+                } uniformLoc;
+            } fastReversible;
+        } tonemapping;
+
+        struct {
+            struct {
+                uint32_t program = 0;
+                struct {
+                    int texLinearDepth = -1;
+                    int texMain = -1;
+                    int texPrev = -1;
+                    int texVel = -1;
+                    int texVelNeighbormax = -1;
+                    int texelSize = -1;
+                    int time = -1;
+                    int feedbackMin = -1;
+                    int feedbackMax = -1;
+                    int motionScale = -1;
+                    int jitterUv = -1;
+                } uniformLoc;
+            } withMotionBlur;
+            struct {
+                uint32_t program = 0;
+                struct {
+                    int texLinearDepth = -1;
+                    int texMain = -1;
+                    int texPrev = -1;
+                    int texVel = -1;
+                    int texelSize = -1;
+                    int time = -1;
+                    int feedbackMin = -1;
+                    int feedbackMax = -1;
+                    int motionScale = -1;
+                    int jitterUv = -1;
+                } uniformLoc;
+            } noMotionBlur;
+        } temporal;
+
         struct {
             uint32_t program = 0;
             struct {
-                int texLinearDepth = -1;
-                int texMain = -1;
-                int texPrev = -1;
-                int texVel = -1;
-                int texelSize = -1;
-                int time = -1;
-                int feedbackMin = -1;
-                int feedbackMax = -1;
-                int motionScale = -1;
+                int tex = -1;
+                int inverseScreenSize = -1;
+            } uniformLoc;
+        } fxaa;
+
+        struct {
+            uint32_t programTex = 0;
+            uint32_t programTexDepth = 0;
+            uint32_t programCol;
+            struct {
+                int texColor = -1;
+                int texDepth = -1;
+                int texture = -1;
+                int color = -1;
+            } uniformLoc;
+        } blit;
+
+        struct {
+            uint32_t program = 0;
+            struct {
+                int texDepth = -1;
+                int currClipToPrevClipMat = -1;
                 int jitterUv = -1;
             } uniformLoc;
-        } noMotionBlur;
-    } temporal;
+        } blitVelocity;
 
-    struct {
-        uint32_t program = 0;
         struct {
-            int tex = -1;
-            int inverseScreenSize = -1;
-        } uniformLoc;
-    } fxaa;
-} gl;
+            uint32_t program = 0;
+            struct {
+                int texVel = -1;
+                int texVelTexelSize = -1;
+            } uniformLoc;
+        } blitTilemax;
 
-static inline float halton(int index, int base) {
-    float f = 1;
-    float r = 0;
-    const float ifb = 1.f / base;
-    while (index > 0) {
-        f = f * ifb;
-        r = r + f * (float)(index % base);
-        index = (int)(index * ifb);
-    }
-    return r;
-}
+        struct {
+            uint32_t program = 0;
+            struct {
+                int texVel = -1;
+                int texVelTexelSize = -1;
+            } uniformLoc;
+        } blitNeighbormax;
 
-// Projection parameter extraction
-static inline bool is_ortho_proj_matrix(const mat4_t& P) { return P.elem[2][3] == 0.0f; }
+        struct {
+            uint32_t program = 0;
+        } sharpen;
+    } glObj;
 
-static inline vec2_t extract_jitter_uv(const mat4_t& P) {
-    vec2_t jitter;
-    if (is_ortho_proj_matrix(P)) {
-        jitter[0] = -P.elem[3][0] * 0.5f;
-        jitter[1] = -P.elem[3][1] * 0.5f;
-    }
-    else {
-        jitter[0] = P.elem[2][0] * 0.5f;
-        jitter[1] = P.elem[2][1] * 0.5f;
-    }
-    return jitter;
-}
-
-static inline vec2_t extract_near_far(const mat4_t& P) {
-    vec2_t near_far;
-    near_far[0] = P.elem[3][2] / (P[2][2] - 1.0f);
-    near_far[1] = P.elem[3][2] / (P[2][2] + 1.0f);
-    return near_far;
-}
-
-static bool get_shader_compile_error(char* buffer, int max_length, GLuint shader) {
-    GLint success = 0;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (success == 0) {
-        int length;
-        glGetShaderInfoLog(shader, max_length, &length, buffer);
-        return true;
-    } else {
-        return false;
-    }
-}
-
-static bool get_program_link_error(char* buffer, int max_length, GLuint program) {
-    GLint success = 0;
-    glGetProgramiv(program, GL_LINK_STATUS, &success);
-    if (success == 0) {
-        int length;
-        glGetProgramInfoLog(program, max_length, &length, buffer);
-        return true;
-    } else {
-        return false;
-    }
-}
-
-static uint32_t compile_shader_from_source(str_t src, GLenum type, str_t defines = {}) {
-    ASSERT(type == GL_VERTEX_SHADER || type == GL_GEOMETRY_SHADER || type == GL_FRAGMENT_SHADER || type == GL_COMPUTE_SHADER ||
-        type == GL_TESS_CONTROL_SHADER || type == GL_TESS_EVALUATION_SHADER);
-
-    uint32_t shader = glCreateShader(type);
-    md_strb_t builder = {};
-    md_strb_init(&builder, default_temp_allocator);
-
-    // Skip to first # which should contain version
-    while(src.len > 0 && src.ptr[0] != '#') {
-        src.ptr++;
-        src.len--;
+    constexpr float halton(int index, int base) {
+        float f = 1;
+        float r = 0;
+        const float ifb = 1.f / base;
+        while (index > 0) {
+            f = f * ifb;
+            r = r + f * (float)(index % base);
+            index = (int)(index * ifb);
+        }
+        return r;
     }
 
-    str_t final_src = src;
-    if (defines) {
-        str_t version_str = {};
+    // Projection parameter extraction
+    constexpr bool isOrthoProjMatrix(const mat4_t& P) {
+        return P.elem[2][3] == 0.f;
+    }
 
-        if (str_equal_cstr_n(src, "#version ", 9)) {
-            if (!str_extract_line(&version_str, &src)) {
-                MD_LOG_ERROR("Failed to extract version string!");
-                return 0;
-            }
-            md_strb_push_str(&builder, version_str);
-            md_strb_push_char(&builder, '\n');
-            md_strb_push_str(&builder, defines);
-            md_strb_push_char(&builder, '\n');
+    constexpr vec2_t extractJitterUv(const mat4_t& P) {
+        vec2_t jitter;
+        if (isOrthoProjMatrix(P)) {
+            jitter[0] = -P.elem[3][0] * 0.5f;
+            jitter[1] = -P.elem[3][1] * 0.5f;
         }
         else {
-            md_strb_push_str(&builder, defines);
-            md_strb_push_char(&builder, '\n');
+            jitter[0] = P.elem[2][0] * 0.5f;
+            jitter[1] = P.elem[2][1] * 0.5f;
         }
-        md_strb_push_str(&builder, src);
-        final_src = md_strb_to_str(&builder);
+        return jitter;
     }
 
-    glShaderSource(shader, 1, &final_src.ptr, nullptr);
-    md_strb_free(&builder);
-
-    glCompileShader(shader);
-
-    char buffer[1024];
-    if (get_shader_compile_error(buffer, sizeof(buffer), shader)) {
-        MD_LOG_ERROR("%s\n", buffer);
-        return 0;
+    vec2_t extractNearFar(const mat4_t& P) {
+        vec2_t nearFar;
+        nearFar[0] = P.elem[3][2] / (P[2][2] - 1.0f);
+        nearFar[1] = P.elem[3][2] / (P[2][2] + 1.0f);
+        return nearFar;
     }
 
-    return shader;
-}
+    bool getShaderCompileError(char* buffer, int maxLength, GLuint shader) {
+        GLint success = 0;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+        if (success == 0) {
+            int length;
+            glGetShaderInfoLog(shader, maxLength, &length, buffer);
+        }
+        return success == 0;
+    }
 
-static uint32_t setup_program_from_source(str_t name, str_t f_shader_src, str_t defines = {}) {
-    uint32_t f_shader = compile_shader_from_source(f_shader_src, GL_FRAGMENT_SHADER, defines);
-    uint32_t program = 0;
+    bool getProgramLinkError(char* buffer, int maxLength, GLuint program) {
+        GLint success = 0;
+        glGetProgramiv(program, GL_LINK_STATUS, &success);
+        if (success == 0) {
+            int length;
+            glGetProgramInfoLog(program, maxLength, &length, buffer);
+        }
+        return success == 0;
+    }
 
-    if (f_shader) {
+    uint32_t compileShaderFromSource(str_t src, GLenum type, str_t defines = {}) {
+        ghoul_assert(
+            type == GL_VERTEX_SHADER || type == GL_GEOMETRY_SHADER ||
+            type == GL_FRAGMENT_SHADER || type == GL_COMPUTE_SHADER ||
+            type == GL_TESS_CONTROL_SHADER || type == GL_TESS_EVALUATION_SHADER,
+            "Wrong shader type"
+        );
+
+        uint32_t shader = glCreateShader(type);
+        md_strb_t builder = {};
+        md_strb_init(&builder, default_temp_allocator);
+
+        // Skip to first # which should contain version
+        while (src.len > 0 && src.ptr[0] != '#') {
+            src.ptr++;
+            src.len--;
+        }
+
+        str_t final_src = src;
+        if (defines) {
+            str_t version_str = {};
+
+            if (str_equal_cstr_n(src, "#version ", 9)) {
+                if (!str_extract_line(&version_str, &src)) {
+                    MD_LOG_ERROR("Failed to extract version string!");
+                    return 0;
+                }
+                md_strb_push_str(&builder, version_str);
+                md_strb_push_char(&builder, '\n');
+                md_strb_push_str(&builder, defines);
+                md_strb_push_char(&builder, '\n');
+            }
+            else {
+                md_strb_push_str(&builder, defines);
+                md_strb_push_char(&builder, '\n');
+            }
+            md_strb_push_str(&builder, src);
+            final_src = md_strb_to_str(&builder);
+        }
+
+        glShaderSource(shader, 1, &final_src.ptr, nullptr);
+        md_strb_free(&builder);
+
+        glCompileShader(shader);
+
         char buffer[1024];
-        program = glCreateProgram();
+        if (getShaderCompileError(buffer, sizeof(buffer), shader)) {
+            MD_LOG_ERROR("%s\n", buffer);
+            return 0;
+        }
 
-        glAttachShader(program, gl.vShaderFsQuad);
-        glAttachShader(program, f_shader);
+        return shader;
+    }
+
+    uint32_t setupProgramFromSource(str_t name, str_t shaderSrc, str_t defines = {}) {
+        uint32_t shader = compileShaderFromSource(shaderSrc, GL_FRAGMENT_SHADER, defines);
+
+        if (shader == 0) {
+            return 0;
+        }
+
+        char buffer[1024];
+        uint32_t program = glCreateProgram();
+
+        glAttachShader(program, glObj.vShaderFsQuad);
+        glAttachShader(program, shader);
         glLinkProgram(program);
-        if (get_program_link_error(buffer, sizeof(buffer), program)) {
+        if (getProgramLinkError(buffer, sizeof(buffer), program)) {
             MD_LOG_ERROR("Error while linking %.*s program:\n%s", (int)name.len, name.ptr, buffer);
             glDeleteProgram(program);
             return 0;
         }
 
-        glDetachShader(program, gl.vShaderFsQuad);
-        glDetachShader(program, f_shader);
-        glDeleteShader(f_shader);
+        glDetachShader(program, glObj.vShaderFsQuad);
+        glDetachShader(program, shader);
+        glDeleteShader(shader);
+        return program;
     }
+} // namespace
 
-    return program;
-}
-
+namespace postprocessing {
 
 namespace ssao {
-#ifndef AO_RANDOM_TEX_SIZE
-#define AO_RANDOM_TEX_SIZE 4
-#endif
 
 struct HBAOData {
-    float radius_to_screen;
-    float neg_inv_r2;
-    float n_dot_v_bias;
-    float n_influence;
+    float radiusToScreen;
+    float negInvR2;
+    float nDotVBias;
+    float nInfluence;
 
-    float ao_multiplier;
-    float pow_exponent;
-    vec2_t inv_full_res;
+    float aoMultiplier;
+    float powExponent;
+    vec2_t invFullRes;
 
-    vec4_t proj_info;
+    vec4_t projInfo;
 
-    vec4_t sample_pattern[32];
+    vec4_t samplePattern[32];
 };
 
-void setup_ubo_hbao_data(uint32_t ubo, int width, int height, const mat4_t& proj_mat, float intensity, float radius, float n_dot_v_bias, float normal_bias) {
-    ASSERT(ubo);
+void setupUboHbaoData(uint32_t ubo, int width, int height, const mat4_t& projMat,
+                      float intensity, float radius, float nDotVBias, float normalBias)
+{
+    ghoul_assert(ubo, "Missing uniform bufffer object");
 
     // From intel ASSAO
-    static constexpr float SAMPLE_PATTERN[] = {
-        0.78488064,  0.56661671,  1.500000, -0.126083, 0.26022232,  -0.29575172, 1.500000, -1.064030, 0.10459357,  0.08372527,  1.110000, -2.730563, -0.68286800, 0.04963045,  1.090000, -0.498827,
-        -0.13570161, -0.64190155, 1.250000, -0.532765, -0.26193795, -0.08205118, 0.670000, -1.783245, -0.61177456, 0.66664219,  0.710000, -0.044234, 0.43675563,  0.25119025,  0.610000, -1.167283,
-        0.07884444,  0.86618668,  0.640000, -0.459002, -0.12790935, -0.29869005, 0.600000, -1.729424, -0.04031125, 0.02413622,  0.600000, -4.792042, 0.16201244,  -0.52851415, 0.790000, -1.067055,
-        -0.70991218, 0.47301072,  0.640000, -0.335236, 0.03277707,  -0.22349690, 0.600000, -1.982384, 0.68921727,  0.36800742,  0.630000, -0.266718, 0.29251814,  0.37775412,  0.610000, -1.422520,
-        -0.12224089, 0.96582592,  0.600000, -0.426142, 0.11071457,  -0.16131058, 0.600000, -2.165947, 0.46562141,  -0.59747696, 0.600000, -0.189760, -0.51548797, 0.11804193,  0.600000, -1.246800,
-        0.89141309,  -0.42090443, 0.600000, 0.028192,  -0.32402530, -0.01591529, 0.600000, -1.543018, 0.60771245,  0.41635221,  0.600000, -0.605411, 0.02379565,  -0.08239821, 0.600000, -3.809046,
-        0.48951152,  -0.23657045, 0.600000, -1.189011, -0.17611565, -0.81696892, 0.600000, -0.513724, -0.33930185, -0.20732205, 0.600000, -1.698047, -0.91974425, 0.05403209,  0.600000, 0.062246,
-        -0.15064627, -0.14949332, 0.600000, -1.896062, 0.53180975,  -0.35210401, 0.600000, -0.758838, 0.41487166,  0.81442589,  0.600000, -0.505648, -0.24106961, -0.32721516, 0.600000, -1.665244};
+    constexpr float SAMPLE_PATTERN[] = {
+        0.78488064f,  0.56661671f,  1.500000f, -0.126083f, 0.26022232f,  -0.29575172f, 1.500000f, -1.064030f, 0.10459357f,  0.08372527f,  1.110000f, -2.730563f, -0.68286800f, 0.04963045f,  1.090000f, -0.498827f,
+        -0.13570161f, -0.64190155f, 1.250000f, -0.532765f, -0.26193795f, -0.08205118f, 0.670000f, -1.783245f, -0.61177456f, 0.66664219f,  0.710000f, -0.044234f, 0.43675563f,  0.25119025f,  0.610000f, -1.167283f,
+        0.07884444f,  0.86618668f,  0.640000f, -0.459002f, -0.12790935f, -0.29869005f, 0.600000f, -1.729424f, -0.04031125f, 0.02413622f,  0.600000f, -4.792042f, 0.16201244f,  -0.52851415f, 0.790000f, -1.067055f,
+        -0.70991218f, 0.47301072f,  0.640000f, -0.335236f, 0.03277707f,  -0.22349690f, 0.600000f, -1.982384f, 0.68921727f,  0.36800742f,  0.630000f, -0.266718f, 0.29251814f,  0.37775412f,  0.610000f, -1.422520f,
+        -0.12224089f, 0.96582592f,  0.600000f, -0.426142f, 0.11071457f,  -0.16131058f, 0.600000f, -2.165947f, 0.46562141f,  -0.59747696f, 0.600000f, -0.189760f, -0.51548797f, 0.11804193f,  0.600000f, -1.246800f,
+        0.89141309f,  -0.42090443f, 0.600000f, 0.028192f,  -0.32402530f, -0.01591529f, 0.600000f, -1.543018f, 0.60771245f,  0.41635221f,  0.600000f, -0.605411f, 0.02379565f,  -0.08239821f, 0.600000f, -3.809046f,
+        0.48951152f,  -0.23657045f, 0.600000f, -1.189011f, -0.17611565f, -0.81696892f, 0.600000f, -0.513724f, -0.33930185f, -0.20732205f, 0.600000f, -1.698047f, -0.91974425f, 0.05403209f,  0.600000f, 0.062246f,
+        -0.15064627f, -0.14949332f, 0.600000f, -1.896062f, 0.53180975f,  -0.35210401f, 0.600000f, -0.758838f, 0.41487166f,  0.81442589f,  0.600000f, -0.505648f, -0.24106961f, -0.32721516f, 0.600000f, -1.665244f};
     constexpr float METERS_TO_VIEWSPACE = 1.f;
 
-    vec4_t proj_info;
-    float proj_scl;
+    vec4_t projInfo;
+    float projScl;
 
-    const float* proj_data = &proj_mat.elem[0][0];
-    const bool ortho = is_ortho_proj_matrix(proj_mat);
+    const float* projData = &projMat.elem[0][0];
+    const bool ortho = isOrthoProjMatrix(projMat);
     if (!ortho) {
-        proj_info = {
-            2.0f / (proj_data[4 * 0 + 0]),                          // (x) * (R - L)/N
-            2.0f / (proj_data[4 * 1 + 1]),                          // (y) * (T - B)/N
-            -(1.0f - proj_data[4 * 2 + 0]) / proj_data[4 * 0 + 0],  // L/N
-            -(1.0f + proj_data[4 * 2 + 1]) / proj_data[4 * 1 + 1]   // B/N
+        projInfo = {
+            2.f / (projData[4 * 0 + 0]),                          // (x) * (R - L)/N
+            2.f / (projData[4 * 1 + 1]),                          // (y) * (T - B)/N
+            -(1.f - projData[4 * 2 + 0]) / projData[4 * 0 + 0],  // L/N
+            -(1.f + projData[4 * 2 + 1]) / projData[4 * 1 + 1]   // B/N
         };
-        proj_scl = float(height) * proj_data[4 * 1 + 1] * 0.5f;
-    } else {
-        proj_info = {
-            2.0f / (proj_data[4 * 0 + 0]),                          // ((x) * R - L)
-            2.0f / (proj_data[4 * 1 + 1]),                          // ((y) * T - B)
-            -(1.0f + proj_data[4 * 3 + 0]) / proj_data[4 * 0 + 0],  // L
-            -(1.0f - proj_data[4 * 3 + 1]) / proj_data[4 * 1 + 1]   // B
+        projScl = float(height) * projData[4 * 1 + 1] * 0.5f;
+    }
+    else {
+        projInfo = {
+            2.f / (projData[4 * 0 + 0]),                          // ((x) * R - L)
+            2.f / (projData[4 * 1 + 1]),                          // ((y) * T - B)
+            -(1.f + projData[4 * 3 + 0]) / projData[4 * 0 + 0],  // L
+            -(1.f - projData[4 * 3 + 1]) / projData[4 * 1 + 1]   // B
         };
-        proj_scl = float(height) / proj_info.y;
+        projScl = float(height) / projInfo.y;
     }
 
     float r = radius * METERS_TO_VIEWSPACE;
 
-    HBAOData data;
-    data.radius_to_screen = r * 0.5f * proj_scl;
-    data.neg_inv_r2 = -1.f / (r * r);
-    data.n_dot_v_bias = CLAMP(n_dot_v_bias, 0.f, 1.f - FLT_EPSILON);
-    data.n_influence = CLAMP(normal_bias, 0.0f, 1.0f);
-    data.ao_multiplier = 1.f / (1.f - data.n_dot_v_bias);
-    data.pow_exponent = MAX(intensity, 0.f);
-    data.inv_full_res = {1.f / float(width), 1.f / float(height)};
-    data.proj_info = proj_info;
-    memcpy(&data.sample_pattern, SAMPLE_PATTERN, sizeof(SAMPLE_PATTERN));
+    HBAOData data = {
+        .radiusToScreen = r * 0.5f * projScl,
+        .negInvR2 = -1.f / (r * r),
+        .nDotVBias =
+            std::clamp(nDotVBias, 0.f, 1.f - std::numeric_limits<float>::epsilon()),
+        .nInfluence = std::clamp(normalBias, 0.f, 1.0f),
+        .aoMultiplier = 1.f / (1.f - data.nDotVBias),
+        .powExponent = std::max(intensity, 0.f),
+        .invFullRes = {1.f / float(width), 1.f / float(height)},
+        .projInfo = projInfo
+    };
+    memcpy(&data.samplePattern, SAMPLE_PATTERN, sizeof(SAMPLE_PATTERN));
 
     glBindBuffer(GL_UNIFORM_BUFFER, ubo);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(HBAOData), &data, GL_DYNAMIC_DRAW);
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void initialize_rnd_tex(uint32_t rnd_tex) {
-    constexpr int buffer_size = AO_RANDOM_TEX_SIZE * AO_RANDOM_TEX_SIZE;
-    signed short buffer[buffer_size * 4];
+void initializeRndTex(uint32_t rndTex) {
+    constexpr int AORandomTexSize = 4;
+    constexpr int BufferSize = AORandomTexSize * AORandomTexSize;
+    signed short buffer[BufferSize * 4];
 
-    for (int i = 0; i < buffer_size; i++) {
-#define SCALE ((1 << 15))
+    for (int i = 0; i < BufferSize; i++) {
+        constexpr int Scale = 1 << 15;
         float rand1 = halton(i + 1, 2);
         float rand2 = halton(i + 1, 3);
-        float angle = 2.f * 3.1415926535f * rand1;
+        float angle = rand1 * glm::two_pi<float>();
 
-        buffer[i * 4 + 0] = (signed short)(SCALE * cosf(angle));
-        buffer[i * 4 + 1] = (signed short)(SCALE * sinf(angle));
-        buffer[i * 4 + 2] = (signed short)(SCALE * rand2);
-        buffer[i * 4 + 3] = (signed short)(SCALE * 0);
-#undef SCALE
+        buffer[i * 4 + 0] = static_cast<signed short>(Scale * std::cos(angle));
+        buffer[i * 4 + 1] = static_cast<signed short>(Scale * std::sin(angle));
+        buffer[i * 4 + 2] = static_cast<signed short>(Scale * rand2);
+        buffer[i * 4 + 3] = static_cast<signed short>(Scale * 0);
     }
 
-    glBindTexture(GL_TEXTURE_2D, rnd_tex);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16_SNORM, AO_RANDOM_TEX_SIZE, AO_RANDOM_TEX_SIZE, 0, GL_RGBA, GL_SHORT, buffer);
+    glBindTexture(GL_TEXTURE_2D, rndTex);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA16_SNORM,
+        AORandomTexSize,
+        AORandomTexSize,
+        0,
+        GL_RGBA,
+        GL_SHORT,
+        buffer
+    );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-float compute_sharpness(float radius) { return 30.f / sqrtf(radius); }
-
 void initialize(int width, int height) {
-    gl.ssao.hbao.programPersp = setup_program_from_source(STR("ssao persp"), f_shader_src_ssao, STR("#define AO_PERSPECTIVE 1"));
-    gl.ssao.hbao.programOrtho = setup_program_from_source(STR("ssao ortho"), f_shader_src_ssao, STR("#define AO_PERSPECTIVE 0"));
-    gl.ssao.blur.program       = setup_program_from_source(STR("ssao blur"),  f_shader_src_ssao_blur);
+    ghoul_assert(glObj.ssao.hbao.fbo == 0, "Object already created");
+    ghoul_assert(glObj.ssao.blur.fbo == 0, "Object already created");
+    ghoul_assert(glObj.ssao.texRandom == 0, "Object already created");
+    ghoul_assert(glObj.ssao.hbao.texture == 0, "Object already created");
+    ghoul_assert(glObj.ssao.blur.texture == 0, "Object already created");
+    ghoul_assert(glObj.ssao.uboHbaoData == 0, "Object already created");
+
+    glObj.ssao.hbao.programPersp = setupProgramFromSource(STR("ssao persp"), f_shader_src_ssao, STR("#define AO_PERSPECTIVE 1"));
+    glObj.ssao.hbao.programOrtho = setupProgramFromSource(STR("ssao ortho"), f_shader_src_ssao, STR("#define AO_PERSPECTIVE 0"));
+    glObj.ssao.blur.program = setupProgramFromSource(STR("ssao blur"),  f_shader_src_ssao_blur);
     
-    if (!gl.ssao.hbao.fbo) glGenFramebuffers(1, &gl.ssao.hbao.fbo);
-    if (!gl.ssao.blur.fbo) glGenFramebuffers(1, &gl.ssao.blur.fbo);
+    glGenFramebuffers(1, &glObj.ssao.hbao.fbo);
+    glGenFramebuffers(1, &glObj.ssao.blur.fbo);
 
-    if (!gl.ssao.texRandom) glGenTextures(1, &gl.ssao.texRandom);
-    if (!gl.ssao.hbao.texture) glGenTextures(1, &gl.ssao.hbao.texture);
-    if (!gl.ssao.blur.texture) glGenTextures(1, &gl.ssao.blur.texture);
+    glGenTextures(1, &glObj.ssao.texRandom);
+    glGenTextures(1, &glObj.ssao.hbao.texture);
+    glGenTextures(1, &glObj.ssao.blur.texture);
+    glGenBuffers(1, &glObj.ssao.uboHbaoData);
 
-    if (!gl.ssao.uboHbaoData) glGenBuffers(1, &gl.ssao.uboHbaoData);
+    initializeRndTex(glObj.ssao.texRandom);
 
-    initialize_rnd_tex(gl.ssao.texRandom);
-
-    glBindTexture(GL_TEXTURE_2D, gl.ssao.hbao.texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+    glBindTexture(GL_TEXTURE_2D, glObj.ssao.hbao.texture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_R8,
+        width,
+        height,
+        0,
+        GL_RED,
+        GL_UNSIGNED_BYTE,
+        nullptr
+    );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    glBindTexture(GL_TEXTURE_2D, gl.ssao.blur.texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, nullptr);
+    glBindTexture(GL_TEXTURE_2D, glObj.ssao.blur.texture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_R8,
+        width,
+        height,
+        0,
+        GL_RED,
+        GL_UNSIGNED_BYTE,
+        nullptr
+    );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -457,165 +582,114 @@ void initialize(int width, int height) {
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, gl.ssao.hbao.fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gl.ssao.hbao.texture, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, glObj.ssao.hbao.fbo);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        glObj.ssao.hbao.texture,
+        0
+    );
 
-    glBindFramebuffer(GL_FRAMEBUFFER, gl.ssao.blur.fbo);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gl.ssao.blur.texture, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, glObj.ssao.blur.fbo);
+    glFramebufferTexture2D(
+        GL_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        glObj.ssao.blur.texture,0
+    );
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glBindBuffer(GL_UNIFORM_BUFFER, gl.ssao.uboHbaoData);
+    glBindBuffer(GL_UNIFORM_BUFFER, glObj.ssao.uboHbaoData);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(HBAOData), nullptr, GL_DYNAMIC_DRAW);
 }
 
 void shutdown() {
-    if (gl.ssao.hbao.fbo) glDeleteFramebuffers(1, &gl.ssao.hbao.fbo);
-    if (gl.ssao.blur.fbo) glDeleteFramebuffers(1, &gl.ssao.blur.fbo);
+    glDeleteFramebuffers(1, &glObj.ssao.hbao.fbo);
+    glDeleteFramebuffers(1, &glObj.ssao.blur.fbo);
 
-    if (gl.ssao.texRandom) glDeleteTextures(1, &gl.ssao.texRandom);
-    if (gl.ssao.hbao.texture) glDeleteTextures(1, &gl.ssao.hbao.texture);
-    if (gl.ssao.blur.texture) glDeleteTextures(1, &gl.ssao.blur.texture);
+    glDeleteTextures(1, &glObj.ssao.texRandom);
+    glDeleteTextures(1, &glObj.ssao.hbao.texture);
+    glDeleteTextures(1, &glObj.ssao.blur.texture);
 
-    if (gl.ssao.uboHbaoData) glDeleteBuffers(1, &gl.ssao.uboHbaoData);
+    glDeleteBuffers(1, &glObj.ssao.uboHbaoData);
 
-    if (gl.ssao.hbao.programPersp) glDeleteProgram(gl.ssao.hbao.programPersp);
-    if (gl.ssao.hbao.programOrtho) glDeleteProgram(gl.ssao.hbao.programOrtho);
-    if (gl.ssao.blur.program) glDeleteProgram(gl.ssao.blur.program);
+    glDeleteProgram(glObj.ssao.hbao.programPersp);
+    glDeleteProgram(glObj.ssao.hbao.programOrtho);
+    glDeleteProgram(glObj.ssao.blur.program);
 }
 
 }  // namespace ssao
 
 namespace shading {
 
-static struct {
-    uint32_t program = 0;
-    struct {
-        int texture_depth = -1;
-        int texture_color = -1;
-        int texture_normal = -1;
-        int inv_proj_mat = -1;
-        int light_dir = -1;
-        int light_col = -1;
-        int time = -1;
-    } uniform_loc;
-} shading;
-
 void initialize() {
-    shading.program = setup_program_from_source(STR("deferred shading"), f_shader_src_deferred_shading);
-    shading.uniform_loc.texture_depth = glGetUniformLocation(shading.program, "u_texture_depth");
-    shading.uniform_loc.texture_color = glGetUniformLocation(shading.program, "u_texture_color");
-    shading.uniform_loc.texture_normal = glGetUniformLocation(shading.program, "u_texture_normal");
-    shading.uniform_loc.inv_proj_mat = glGetUniformLocation(shading.program, "u_inv_proj_mat");
-    shading.uniform_loc.light_dir   = glGetUniformLocation(shading.program, "u_light_dir");
-    shading.uniform_loc.light_col   = glGetUniformLocation(shading.program, "u_light_col");
-    shading.uniform_loc.time = glGetUniformLocation(shading.program, "u_time");
+    glObj.shading.program = setupProgramFromSource(STR("deferred shading"), f_shader_src_deferred_shading);
+    glObj.shading.uniformLoc.textureDepth = glGetUniformLocation(glObj.shading.program, "u_texture_depth");
+    glObj.shading.uniformLoc.textureColor = glGetUniformLocation(glObj.shading.program, "u_texture_color");
+    glObj.shading.uniformLoc.textureNormal = glGetUniformLocation(glObj.shading.program, "u_texture_normal");
+    glObj.shading.uniformLoc.invProjMat = glGetUniformLocation(glObj.shading.program, "u_inv_proj_mat");
+    glObj.shading.uniformLoc.lightDir = glGetUniformLocation(glObj.shading.program, "u_light_dir");
+    glObj.shading.uniformLoc.lightCol = glGetUniformLocation(glObj.shading.program, "u_light_col");
+    glObj.shading.uniformLoc.time = glGetUniformLocation(glObj.shading.program, "u_time");
 }
 
 void shutdown() {
-    if (shading.program) glDeleteProgram(shading.program);
+    glDeleteProgram(glObj.shading.program);
 }
+
 }  // namespace shading
 
 namespace tonemapping {
 
-static struct {
-    uint32_t program = 0;
-    struct {
-        int texture = -1;
-    } uniform_loc;
-} passthrough;
-
-static struct {
-    uint32_t program = 0;
-    struct {
-        int texture = -1;
-        int exposure = -1;
-        int gamma = -1;
-    } uniform_loc;
-} exposure_gamma;
-
-static struct {
-    uint32_t program = 0;
-    struct {
-        int texture = -1;
-        int exposure = -1;
-        int gamma = -1;
-    } uniform_loc;
-} filmic;
-
-static struct {
-    uint32_t program = 0;
-    struct {
-        int texture = -1;
-        int exposure = -1;
-        int gamma = -1;
-    } uniform_loc;
-} ACES;
-
-static struct {
-    uint32_t program_forward = 0;
-    uint32_t program_inverse = 0;
-    struct {
-        int texture = -1;
-    } uniform_loc;
-} fast_reversible;
-
 void initialize() {
-    {
-        // PASSTHROUGH
-        passthrough.program = setup_program_from_source(STR("Passthrough"), f_shader_src_tonemap_passthrough);
-        passthrough.uniform_loc.texture = glGetUniformLocation(passthrough.program, "u_texture");
-    }
-    {
-        // EXPOSURE GAMMA
-        exposure_gamma.program = setup_program_from_source(STR("Exposure Gamma"), f_shader_src_tonemap_exposure_gamma);
-        exposure_gamma.uniform_loc.texture = glGetUniformLocation(exposure_gamma.program, "u_texture");
-        exposure_gamma.uniform_loc.exposure = glGetUniformLocation(exposure_gamma.program, "u_exposure");
-        exposure_gamma.uniform_loc.gamma = glGetUniformLocation(exposure_gamma.program, "u_gamma");
-    }
-    {
-        // FILMIC (UNCHARTED)
-        filmic.program = setup_program_from_source(STR("Filmic"), f_shader_src_tonemap_filmic);
-        filmic.uniform_loc.texture = glGetUniformLocation(filmic.program, "u_texture");
-        filmic.uniform_loc.exposure = glGetUniformLocation(filmic.program, "u_exposure");
-        filmic.uniform_loc.gamma = glGetUniformLocation(filmic.program, "u_gamma");
-    }
-    {
-        // ACES
-        ACES.program = setup_program_from_source(STR("ACES"), f_shader_src_tonemap_aces);
-        ACES.uniform_loc.texture = glGetUniformLocation(ACES.program, "u_texture");
-        ACES.uniform_loc.exposure = glGetUniformLocation(ACES.program, "u_exposure");
-        ACES.uniform_loc.gamma = glGetUniformLocation(ACES.program, "u_gamma");
-    }
+    // PASSTHROUGH
+    glObj.tonemapping.passthrough.program = setupProgramFromSource(STR("Passthrough"), f_shader_src_tonemap_passthrough);
+    glObj.tonemapping.passthrough.uniformLoc.texture = glGetUniformLocation(glObj.tonemapping.passthrough.program, "u_texture");
 
+    // EXPOSURE GAMMA
+    glObj.tonemapping.exposureGamma.program = setupProgramFromSource(STR("Exposure Gamma"), f_shader_src_tonemap_exposure_gamma);
+    glObj.tonemapping.exposureGamma.uniformLoc.texture = glGetUniformLocation(glObj.tonemapping.exposureGamma.program, "u_texture");
+    glObj.tonemapping.exposureGamma.uniformLoc.exposure = glGetUniformLocation(glObj.tonemapping.exposureGamma.program, "u_exposure");
+    glObj.tonemapping.exposureGamma.uniformLoc.gamma = glGetUniformLocation(glObj.tonemapping.exposureGamma.program, "u_gamma");
+
+    // FILMIC (UNCHARTED)
+    glObj.tonemapping.filmic.program = setupProgramFromSource(STR("Filmic"), f_shader_src_tonemap_filmic);
+    glObj.tonemapping.filmic.uniformLoc.texture = glGetUniformLocation(glObj.tonemapping.filmic.program, "u_texture");
+    glObj.tonemapping.filmic.uniformLoc.exposure = glGetUniformLocation(glObj.tonemapping.filmic.program, "u_exposure");
+    glObj.tonemapping.filmic.uniformLoc.gamma = glGetUniformLocation(glObj.tonemapping.filmic.program, "u_gamma");
+
+    // ACES
+    glObj.tonemapping.aces.program = setupProgramFromSource(STR("ACES"), f_shader_src_tonemap_aces);
+    glObj.tonemapping.aces.uniformLoc.texture = glGetUniformLocation(glObj.tonemapping.aces.program, "u_texture");
+    glObj.tonemapping.aces.uniformLoc.exposure = glGetUniformLocation(glObj.tonemapping.aces.program, "u_exposure");
+    glObj.tonemapping.aces.uniformLoc.gamma = glGetUniformLocation(glObj.tonemapping.aces.program, "u_gamma");
 }
 
 void shutdown() {
-    if (passthrough.program) glDeleteProgram(passthrough.program);
-    if (exposure_gamma.program) glDeleteProgram(exposure_gamma.program);
-    if (filmic.program) glDeleteProgram(filmic.program);
-    if (ACES.program) glDeleteProgram(ACES.program);
+    glDeleteProgram(glObj.tonemapping.passthrough.program);
+    glDeleteProgram(glObj.tonemapping.exposureGamma.program);
+    glDeleteProgram(glObj.tonemapping.filmic.program);
+    glDeleteProgram(glObj.tonemapping.aces.program);
 }
 
 }  // namespace tonemapping
 
 namespace dof {
-void initialize(int32_t width, int32_t height) {
-    {
-        gl.bokehDof.halfRes.program = setup_program_from_source(STR("DOF prepass"), f_shader_src_dof_halfres_prepass);
-        if (gl.bokehDof.halfRes.program) {
-            gl.bokehDof.halfRes.uniformLoc.texDepth = glGetUniformLocation(gl.bokehDof.halfRes.program, "u_tex_depth");
-            gl.bokehDof.halfRes.uniformLoc.texColor = glGetUniformLocation(gl.bokehDof.halfRes.program, "u_tex_color");
-            gl.bokehDof.halfRes.uniformLoc.focusPoint = glGetUniformLocation(gl.bokehDof.halfRes.program, "u_focus_point");
-            gl.bokehDof.halfRes.uniformLoc.focusScale = glGetUniformLocation(gl.bokehDof.halfRes.program, "u_focus_scale");
-        }
-    }
 
-    if (!gl.bokehDof.halfRes.tex.colorCoc) {
-        glGenTextures(1, &gl.bokehDof.halfRes.tex.colorCoc);
-    }
-    glBindTexture(GL_TEXTURE_2D, gl.bokehDof.halfRes.tex.colorCoc);
+void initialize(int32_t width, int32_t height) {
+    ghoul_assert(glObj.bokehDof.halfRes.tex.colorCoc == 0, "Object already created");
+    ghoul_assert(glObj.bokehDof.halfRes.fbo == 0, "Object already created");
+
+    glObj.bokehDof.halfRes.program = setupProgramFromSource(STR("DOF prepass"), f_shader_src_dof_halfres_prepass);
+    glObj.bokehDof.halfRes.uniformLoc.texDepth = glGetUniformLocation(glObj.bokehDof.halfRes.program, "u_tex_depth");
+    glObj.bokehDof.halfRes.uniformLoc.texColor = glGetUniformLocation(glObj.bokehDof.halfRes.program, "u_tex_color");
+    glObj.bokehDof.halfRes.uniformLoc.focusPoint = glGetUniformLocation(glObj.bokehDof.halfRes.program, "u_focus_point");
+    glObj.bokehDof.halfRes.uniformLoc.focusScale = glGetUniformLocation(glObj.bokehDof.halfRes.program, "u_focus_scale");
+
+    glGenTextures(1, &glObj.bokehDof.halfRes.tex.colorCoc);
+    glBindTexture(GL_TEXTURE_2D, glObj.bokehDof.halfRes.tex.colorCoc);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width / 2, height / 2, 0, GL_RGBA, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -623,45 +697,49 @@ void initialize(int32_t width, int32_t height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    if (!gl.bokehDof.halfRes.fbo) {
-        glGenFramebuffers(1, &gl.bokehDof.halfRes.fbo);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.bokehDof.halfRes.fbo);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gl.bokehDof.halfRes.tex.colorCoc, 0);
-        GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-        if (status != GL_FRAMEBUFFER_COMPLETE) {
-            MD_LOG_ERROR("Something went wrong when generating framebuffer for DOF");
-        }
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glGenFramebuffers(1, &glObj.bokehDof.halfRes.fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.bokehDof.halfRes.fbo);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glObj.bokehDof.halfRes.tex.colorCoc, 0);
+    GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        MD_LOG_ERROR("Something went wrong when generating framebuffer for DOF");
     }
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     // DOF
-    {
-        gl.bokehDof.program = setup_program_from_source(STR("Bokeh DOF"), f_shader_src_dof);
-        if (gl.bokehDof.program) {
-            gl.bokehDof.uniformLoc.texHalfRes = glGetUniformLocation(gl.bokehDof.program, "u_half_res");
-            gl.bokehDof.uniformLoc.texColor = glGetUniformLocation(gl.bokehDof.program, "u_tex_color");
-            gl.bokehDof.uniformLoc.texDepth = glGetUniformLocation(gl.bokehDof.program, "u_tex_depth");
-            gl.bokehDof.uniformLoc.pixelSize = glGetUniformLocation(gl.bokehDof.program, "u_texel_size");
-            gl.bokehDof.uniformLoc.focusPoint = glGetUniformLocation(gl.bokehDof.program, "u_focus_depth");
-            gl.bokehDof.uniformLoc.focusScale = glGetUniformLocation(gl.bokehDof.program, "u_focus_scale");
-            gl.bokehDof.uniformLoc.time = glGetUniformLocation(gl.bokehDof.program, "u_time");
-        }
-    }
+    glObj.bokehDof.program = setupProgramFromSource(STR("Bokeh DOF"), f_shader_src_dof);
+    glObj.bokehDof.uniformLoc.texHalfRes = glGetUniformLocation(glObj.bokehDof.program, "u_half_res");
+    glObj.bokehDof.uniformLoc.texColor = glGetUniformLocation(glObj.bokehDof.program, "u_tex_color");
+    glObj.bokehDof.uniformLoc.texDepth = glGetUniformLocation(glObj.bokehDof.program, "u_tex_depth");
+    glObj.bokehDof.uniformLoc.pixelSize = glGetUniformLocation(glObj.bokehDof.program, "u_texel_size");
+    glObj.bokehDof.uniformLoc.focusPoint = glGetUniformLocation(glObj.bokehDof.program, "u_focus_depth");
+    glObj.bokehDof.uniformLoc.focusScale = glGetUniformLocation(glObj.bokehDof.program, "u_focus_scale");
+    glObj.bokehDof.uniformLoc.time = glGetUniformLocation(glObj.bokehDof.program, "u_time");
 }
 
 void shutdown() {}
+
 }  // namespace dof
 
 namespace blit {
-static uint32_t program_tex_depth = 0;
-static uint32_t program_tex = 0;
-static uint32_t program_col = 0;
-static int uniform_loc_tex_color = -1;
-static int uniform_loc_tex_depth = -1;
-static int uniform_loc_texture = -1;
-static int uniform_loc_color = -1;
 
-constexpr str_t f_shader_src_tex_depth = STR(R"(
+void initialize() {
+    constexpr str_t f_shader_src_tex = STR(R"(
+#version 150 core
+
+uniform sampler2D u_texture;
+
+out vec4 out_frag;
+
+void main() {
+  out_frag = texelFetch(u_texture, ivec2(gl_FragCoord.xy), 0);
+}
+)");
+
+    glObj.blit.programTex = setupProgramFromSource(STR("blit texture"), f_shader_src_tex);
+    glObj.blit.uniformLoc.texture = glGetUniformLocation(glObj.blit.programTex, "u_texture");
+
+    constexpr str_t f_shader_src_tex_depth = STR(R"(
 #version 150 core
 
 uniform sampler2D u_tex_color;
@@ -670,192 +748,177 @@ uniform sampler2D u_tex_depth;
 out vec4 out_frag;
 
 void main() {
-    float depth = texelFetch(u_tex_depth, ivec2(gl_FragCoord.xy), 0).x;
-    if (depth == 1.0) {
-        out_frag = vec4(0,0,0,0);
-    } else {
-        out_frag = texelFetch(u_tex_color, ivec2(gl_FragCoord.xy), 0);
-    }
+  float depth = texelFetch(u_tex_depth, ivec2(gl_FragCoord.xy), 0).x;
+  if (depth == 1.0) {
+    out_frag = vec4(0,0,0,0);
+  }
+  else {
+    out_frag = texelFetch(u_tex_color, ivec2(gl_FragCoord.xy), 0);
+  }
 }
 )");
+    glObj.blit.programTexDepth = setupProgramFromSource(STR("blit texture with depth"), f_shader_src_tex_depth);
+    glObj.blit.uniformLoc.texColor = glGetUniformLocation(glObj.blit.programTexDepth, "u_tex_color");
+    glObj.blit.uniformLoc.texDepth = glGetUniformLocation(glObj.blit.programTexDepth, "u_tex_depth");
 
-constexpr str_t f_shader_src_tex = STR(R"(
-#version 150 core
-
-uniform sampler2D u_texture;
-
-out vec4 out_frag;
-
-void main() {
-    out_frag = texelFetch(u_texture, ivec2(gl_FragCoord.xy), 0);
-}
-)");
-
-constexpr str_t f_shader_src_col = STR(R"(
+    constexpr str_t f_shader_src_col = STR(R"(
 #version 150 core
 
 uniform vec4 u_color;
 out vec4 out_frag;
 
 void main() {
-	out_frag = u_color;
+  out_frag = u_color;
 }
 )");
-
-void initialize() {
-    program_tex = setup_program_from_source(STR("blit texture"), f_shader_src_tex);
-    uniform_loc_texture = glGetUniformLocation(program_tex, "u_texture");
-
-    program_tex_depth = setup_program_from_source(STR("blit texture with depth"), f_shader_src_tex_depth);
-    uniform_loc_tex_color = glGetUniformLocation(program_tex_depth, "u_tex_color");
-    uniform_loc_tex_depth = glGetUniformLocation(program_tex_depth, "u_tex_depth");
-
-    program_col = setup_program_from_source(STR("blit color"), f_shader_src_col);
-    uniform_loc_color = glGetUniformLocation(program_col, "u_color");
+    glObj.blit.programCol = setupProgramFromSource(STR("blit color"), f_shader_src_col);
+    glObj.blit.uniformLoc.color = glGetUniformLocation(glObj.blit.programCol, "u_color");
 }
 
 void shutdown() {
-    if (program_tex) glDeleteProgram(program_tex);
-    if (program_col) glDeleteProgram(program_col);
+    glDeleteProgram(glObj.blit.programTex);
+    glDeleteProgram(glObj.blit.programTexDepth);
+    glDeleteProgram(glObj.blit.programCol);
 }
+
 }  // namespace blit
 
 namespace velocity {
-#define VEL_TILE_SIZE 8
-
-struct {
-    uint32_t program = 0;
-    struct {
-		int tex_depth = -1;
-        int curr_clip_to_prev_clip_mat = -1;
-        int jitter_uv = -1;
-    } uniform_loc;
-} blit_velocity;
-
-struct {
-    uint32_t program = 0;
-    struct {
-        int tex_vel = -1;
-        int tex_vel_texel_size = -1;
-    } uniform_loc;
-} blit_tilemax;
-
-struct {
-    uint32_t program = 0;
-    struct {
-        int tex_vel = -1;
-        int tex_vel_texel_size = -1;
-    } uniform_loc;
-} blit_neighbormax;
 
 void initialize(int32_t width, int32_t height) {
-    {
-        blit_velocity.program = setup_program_from_source(STR("screen-space velocity"), f_shader_src_vel_blit);
-		blit_velocity.uniform_loc.tex_depth = glGetUniformLocation(blit_velocity.program, "u_tex_depth");
-        blit_velocity.uniform_loc.curr_clip_to_prev_clip_mat = glGetUniformLocation(blit_velocity.program, "u_curr_clip_to_prev_clip_mat");
-        blit_velocity.uniform_loc.jitter_uv = glGetUniformLocation(blit_velocity.program, "u_jitter_uv");
+    constexpr int VelTileSize = 8;
 
-    }
-    {
+    ghoul_assert(glObj.velocity.texTilemax == 0, "Object already created");
+    ghoul_assert(glObj.velocity.texNeighbormax == 0, "Object already created");
+    ghoul_assert(glObj.velocity.fbo == 0, "Object already created");
+    
+    glObj.blitVelocity.program = setupProgramFromSource(STR("screen-space velocity"), f_shader_src_vel_blit);
+    glObj.blitVelocity.uniformLoc.texDepth = glGetUniformLocation(glObj.blitVelocity.program, "u_tex_depth");
+    glObj.blitVelocity.uniformLoc.currClipToPrevClipMat = glGetUniformLocation(glObj.blitVelocity.program, "u_curr_clip_to_prev_clip_mat");
+    glObj.blitVelocity.uniformLoc.jitterUv = glGetUniformLocation(glObj.blitVelocity.program, "u_jitter_uv");
+
 #define STRINGIFY(x) #x
 #define TOSTRING(x) STRINGIFY(x)
-        str_t defines = STR("#define TILE_SIZE " TOSTRING(VEL_TILE_SIZE));
-        blit_tilemax.program = setup_program_from_source(STR("tilemax"), f_shader_src_vel_tilemax, defines);
-        blit_tilemax.uniform_loc.tex_vel = glGetUniformLocation(blit_tilemax.program, "u_tex_vel");
-        blit_tilemax.uniform_loc.tex_vel_texel_size = glGetUniformLocation(blit_tilemax.program, "u_tex_vel_texel_size");
+    std::string exp = std::format("#define TILE_SIZE {}", VelTileSize);
+    str_t defines = str_from_cstr(exp.c_str());
+    glObj.blitTilemax.program = setupProgramFromSource(STR("tilemax"), f_shader_src_vel_tilemax, defines);
+    glObj.blitTilemax.uniformLoc.texVel = glGetUniformLocation(glObj.blitTilemax.program, "u_tex_vel");
+    glObj.blitTilemax.uniformLoc.texVelTexelSize = glGetUniformLocation(glObj.blitTilemax.program, "u_tex_vel_texel_size");
 #undef STRINGIFY
 #undef TOSTRING
-    }
-    {
-        blit_neighbormax.program = setup_program_from_source(STR("neighbormax"), f_shader_src_vel_neighbormax);
-        blit_neighbormax.uniform_loc.tex_vel = glGetUniformLocation(blit_neighbormax.program, "u_tex_vel");
-        blit_neighbormax.uniform_loc.tex_vel_texel_size = glGetUniformLocation(blit_neighbormax.program, "u_tex_vel_texel_size");
-    }
+    glObj.blitNeighbormax.program = setupProgramFromSource(STR("neighbormax"), f_shader_src_vel_neighbormax);
+    glObj.blitNeighbormax.uniformLoc.texVel = glGetUniformLocation(glObj.blitNeighbormax.program, "u_tex_vel");
+    glObj.blitNeighbormax.uniformLoc.texVelTexelSize = glGetUniformLocation(glObj.blitNeighbormax.program, "u_tex_vel_texel_size");
 
-    if (!gl.velocity.texTilemax) {
-        glGenTextures(1, &gl.velocity.texTilemax);
-    }
+    glObj.velocity.texWidth = width / VelTileSize;
+    glObj.velocity.texHeight = height / VelTileSize;
 
-    if (!gl.velocity.texNeighbormax) {
-        glGenTextures(1, &gl.velocity.texNeighbormax);
-    }
-
-    gl.velocity.texWidth = width / VEL_TILE_SIZE;
-    gl.velocity.texHeight = height / VEL_TILE_SIZE;
-
-    glBindTexture(GL_TEXTURE_2D, gl.velocity.texTilemax);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, gl.velocity.texWidth, gl.velocity.texHeight, 0, GL_RG, GL_FLOAT, nullptr);
+    glGenTextures(1, &glObj.velocity.texTilemax);
+    glBindTexture(GL_TEXTURE_2D, glObj.velocity.texTilemax);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RG16F,
+        glObj.velocity.texWidth,
+        glObj.velocity.texHeight,
+        0,
+        GL_RG,
+        GL_FLOAT,
+        nullptr
+    );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glBindTexture(GL_TEXTURE_2D, gl.velocity.texNeighbormax);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, gl.velocity.texWidth, gl.velocity.texHeight, 0, GL_RG, GL_FLOAT, nullptr);
+    glGenTextures(1, &glObj.velocity.texNeighbormax);
+    glBindTexture(GL_TEXTURE_2D, glObj.velocity.texNeighbormax);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RG16F,
+        glObj.velocity.texWidth,
+        glObj.velocity.texHeight,
+        0,
+        GL_RG,
+        GL_FLOAT,
+        nullptr
+    );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    if (!gl.velocity.fbo) {
-        glGenFramebuffers(1, &gl.velocity.fbo);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.velocity.fbo);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gl.velocity.texTilemax, 0);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gl.velocity.texNeighbormax, 0);
-        GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-        if (status != GL_FRAMEBUFFER_COMPLETE) {
-            MD_LOG_ERROR("Something went wrong in creating framebuffer for velocity");
-        }
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glGenFramebuffers(1, &glObj.velocity.fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.velocity.fbo);
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        glObj.velocity.texTilemax,
+        0
+    );
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT1,
+        GL_TEXTURE_2D,
+        glObj.velocity.texNeighbormax,
+        0
+    );
+    GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        MD_LOG_ERROR("Something went wrong in creating framebuffer for velocity");
     }
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
 void shutdown() {
-    if (blit_velocity.program) glDeleteProgram(blit_velocity.program);
-    if (gl.velocity.texTilemax) glDeleteTextures(1, &gl.velocity.texTilemax);
-    if (gl.velocity.texNeighbormax) glDeleteTextures(1, &gl.velocity.texNeighbormax);
-    if (gl.velocity.fbo) glDeleteFramebuffers(1, &gl.velocity.fbo);
+    glDeleteProgram(glObj.blitVelocity.program);
+    glDeleteTextures(1, &glObj.velocity.texTilemax);
+    glDeleteTextures(1, &glObj.velocity.texNeighbormax);
+    glDeleteFramebuffers(1, &glObj.velocity.fbo);
 }
+
 }  // namespace velocity
 
 namespace temporal {
+
 void initialize() {
-    {
-        gl.temporal.withMotionBlur.program = setup_program_from_source(STR("temporal aa + motion-blur"), f_shader_src_temporal);
-        gl.temporal.noMotionBlur.program   = setup_program_from_source(STR("temporal aa"), f_shader_src_temporal, STR("#define USE_MOTION_BLUR 0\n"));
+    glObj.temporal.withMotionBlur.program = setupProgramFromSource(STR("temporal aa + motion-blur"), f_shader_src_temporal);
 
-        gl.temporal.withMotionBlur.uniformLoc.texLinearDepth = glGetUniformLocation(gl.temporal.withMotionBlur.program, "u_tex_linear_depth");
-        gl.temporal.withMotionBlur.uniformLoc.texMain = glGetUniformLocation(gl.temporal.withMotionBlur.program, "u_tex_main");
-        gl.temporal.withMotionBlur.uniformLoc.texPrev = glGetUniformLocation(gl.temporal.withMotionBlur.program, "u_tex_prev");
-        gl.temporal.withMotionBlur.uniformLoc.texVel = glGetUniformLocation(gl.temporal.withMotionBlur.program, "u_tex_vel");
-        gl.temporal.withMotionBlur.uniformLoc.texVelNeighbormax = glGetUniformLocation(gl.temporal.withMotionBlur.program, "u_tex_vel_neighbormax");
-        gl.temporal.withMotionBlur.uniformLoc.texelSize = glGetUniformLocation(gl.temporal.withMotionBlur.program, "u_texel_size");
-        gl.temporal.withMotionBlur.uniformLoc.jitterUv = glGetUniformLocation(gl.temporal.withMotionBlur.program, "u_jitter_uv");
-        gl.temporal.withMotionBlur.uniformLoc.time = glGetUniformLocation(gl.temporal.withMotionBlur.program, "u_time");
-        gl.temporal.withMotionBlur.uniformLoc.feedbackMin = glGetUniformLocation(gl.temporal.withMotionBlur.program, "u_feedback_min");
-        gl.temporal.withMotionBlur.uniformLoc.feedbackMax = glGetUniformLocation(gl.temporal.withMotionBlur.program, "u_feedback_max");
-        gl.temporal.withMotionBlur.uniformLoc.motionScale = glGetUniformLocation(gl.temporal.withMotionBlur.program, "u_motion_scale");
+    glObj.temporal.withMotionBlur.uniformLoc.texLinearDepth = glGetUniformLocation(glObj.temporal.withMotionBlur.program, "u_tex_linear_depth");
+    glObj.temporal.withMotionBlur.uniformLoc.texMain = glGetUniformLocation(glObj.temporal.withMotionBlur.program, "u_tex_main");
+    glObj.temporal.withMotionBlur.uniformLoc.texPrev = glGetUniformLocation(glObj.temporal.withMotionBlur.program, "u_tex_prev");
+    glObj.temporal.withMotionBlur.uniformLoc.texVel = glGetUniformLocation(glObj.temporal.withMotionBlur.program, "u_tex_vel");
+    glObj.temporal.withMotionBlur.uniformLoc.texVelNeighbormax = glGetUniformLocation(glObj.temporal.withMotionBlur.program, "u_tex_vel_neighbormax");
+    glObj.temporal.withMotionBlur.uniformLoc.texelSize = glGetUniformLocation(glObj.temporal.withMotionBlur.program, "u_texel_size");
+    glObj.temporal.withMotionBlur.uniformLoc.jitterUv = glGetUniformLocation(glObj.temporal.withMotionBlur.program, "u_jitter_uv");
+    glObj.temporal.withMotionBlur.uniformLoc.time = glGetUniformLocation(glObj.temporal.withMotionBlur.program, "u_time");
+    glObj.temporal.withMotionBlur.uniformLoc.feedbackMin = glGetUniformLocation(glObj.temporal.withMotionBlur.program, "u_feedback_min");
+    glObj.temporal.withMotionBlur.uniformLoc.feedbackMax = glGetUniformLocation(glObj.temporal.withMotionBlur.program, "u_feedback_max");
+    glObj.temporal.withMotionBlur.uniformLoc.motionScale = glGetUniformLocation(glObj.temporal.withMotionBlur.program, "u_motion_scale");
 
-        gl.temporal.noMotionBlur.uniformLoc.texLinearDepth = glGetUniformLocation(gl.temporal.noMotionBlur.program, "u_tex_linear_depth");
-        gl.temporal.noMotionBlur.uniformLoc.texMain = glGetUniformLocation(gl.temporal.noMotionBlur.program, "u_tex_main");
-        gl.temporal.noMotionBlur.uniformLoc.texPrev = glGetUniformLocation(gl.temporal.noMotionBlur.program, "u_tex_prev");
-        gl.temporal.noMotionBlur.uniformLoc.texVel = glGetUniformLocation(gl.temporal.noMotionBlur.program, "u_tex_vel");
-        gl.temporal.noMotionBlur.uniformLoc.texelSize = glGetUniformLocation(gl.temporal.noMotionBlur.program, "u_texel_size");
-        gl.temporal.noMotionBlur.uniformLoc.jitterUv = glGetUniformLocation(gl.temporal.noMotionBlur.program, "u_jitter_uv");
-        gl.temporal.noMotionBlur.uniformLoc.time = glGetUniformLocation(gl.temporal.noMotionBlur.program, "u_time");
-        gl.temporal.noMotionBlur.uniformLoc.feedbackMin = glGetUniformLocation(gl.temporal.noMotionBlur.program, "u_feedback_min");
-        gl.temporal.noMotionBlur.uniformLoc.feedbackMax = glGetUniformLocation(gl.temporal.noMotionBlur.program, "u_feedback_max");
-        gl.temporal.noMotionBlur.uniformLoc.motionScale = glGetUniformLocation(gl.temporal.noMotionBlur.program, "u_motion_scale");
-    }
+    glObj.temporal.noMotionBlur.program = setupProgramFromSource(STR("temporal aa"), f_shader_src_temporal, STR("#define USE_MOTION_BLUR 0\n"));
+    glObj.temporal.noMotionBlur.uniformLoc.texLinearDepth = glGetUniformLocation(glObj.temporal.noMotionBlur.program, "u_tex_linear_depth");
+    glObj.temporal.noMotionBlur.uniformLoc.texMain = glGetUniformLocation(glObj.temporal.noMotionBlur.program, "u_tex_main");
+    glObj.temporal.noMotionBlur.uniformLoc.texPrev = glGetUniformLocation(glObj.temporal.noMotionBlur.program, "u_tex_prev");
+    glObj.temporal.noMotionBlur.uniformLoc.texVel = glGetUniformLocation(glObj.temporal.noMotionBlur.program, "u_tex_vel");
+    glObj.temporal.noMotionBlur.uniformLoc.texelSize = glGetUniformLocation(glObj.temporal.noMotionBlur.program, "u_texel_size");
+    glObj.temporal.noMotionBlur.uniformLoc.jitterUv = glGetUniformLocation(glObj.temporal.noMotionBlur.program, "u_jitter_uv");
+    glObj.temporal.noMotionBlur.uniformLoc.time = glGetUniformLocation(glObj.temporal.noMotionBlur.program, "u_time");
+    glObj.temporal.noMotionBlur.uniformLoc.feedbackMin = glGetUniformLocation(glObj.temporal.noMotionBlur.program, "u_feedback_min");
+    glObj.temporal.noMotionBlur.uniformLoc.feedbackMax = glGetUniformLocation(glObj.temporal.noMotionBlur.program, "u_feedback_max");
+    glObj.temporal.noMotionBlur.uniformLoc.motionScale = glGetUniformLocation(glObj.temporal.noMotionBlur.program, "u_motion_scale");
 }
 
 void shutdown() {}
-};  // namespace temporal
+
+} // namespace temporal
 
 namespace sharpen {
-static uint32_t program = 0;
+
 void initialize() {
     constexpr str_t f_shader_src_sharpen = STR(
  R"(
@@ -874,17 +937,17 @@ void main() {
     const float weight[2] = float[2](1.4, -0.1);
     out_frag = vec4(vec3(weight[0] * cc + weight[1] * (cl + ct + cr + cb)), 1.0);
 })");
-    program = setup_program_from_source(STR("sharpen"), f_shader_src_sharpen);
+    glObj.sharpen.program = setupProgramFromSource(STR("sharpen"), f_shader_src_sharpen);
 }
 
-void sharpen(uint32_t in_texture) {
+void sharpen(uint32_t texture) {
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, in_texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
-    glUseProgram(program);
-    glUniform1i(glGetUniformLocation(sharpen::program, "u_tex"), 0);
+    glUseProgram(glObj.sharpen.program);
+    glUniform1i(glGetUniformLocation(glObj.sharpen.program, "u_tex"), 0);
 
-    glBindVertexArray(gl.vao);
+    glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
 
@@ -892,55 +955,74 @@ void sharpen(uint32_t in_texture) {
 }
 
 void shutdown() {
-    if (program) glDeleteProgram(program);
+    glDeleteProgram(glObj.sharpen.program);
 }
+
 }   // namespace sharpen
 
 namespace fxaa {
-    void initialize() {
-        gl.fxaa.program = setup_program_from_source(STR("fxaa"), f_shader_src_fxaa);
 
-        if (gl.fxaa.program) {
-            gl.fxaa.uniformLoc.tex = glGetUniformLocation(gl.fxaa.program, "tex");
-            gl.fxaa.uniformLoc.inverseScreenSize = glGetUniformLocation(gl.fxaa.program, "inverseScreenSize");
-        }
-    }
+void initialize() {
+    ghoul_assert(glObj.fxaa.program == 0, "Object already created");
 
-    void apply_fxaa(uint32_t in_texture, int width, int height) {
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, in_texture);
+    glObj.fxaa.program = setupProgramFromSource(STR("fxaa"), f_shader_src_fxaa);
+    glObj.fxaa.uniformLoc.tex = glGetUniformLocation(glObj.fxaa.program, "tex");
+    glObj.fxaa.uniformLoc.inverseScreenSize = glGetUniformLocation(
+        glObj.fxaa.program,
+        "inverseScreenSize"
+    );
+}
 
-        glUseProgram(gl.fxaa.program);
-        glUniform1i(gl.fxaa.uniformLoc.tex, 0);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, in_texture);
+void applyFxaa(uint32_t texture, int width, int height) {
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
-        vec2_t inv_screen_size = { 1.0f / (float)width, 1.0f / (float)height };
-        glUniform2fv(gl.fxaa.uniformLoc.inverseScreenSize, 1, inv_screen_size.elem);
+    glUseProgram(glObj.fxaa.program);
+    glUniform1i(glObj.fxaa.uniformLoc.tex, 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
-        glBindVertexArray(gl.vao);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindVertexArray(0);
+    vec2_t inv_screen_size = { 1.f / width, 1.f / height };
+    glUniform2fv(glObj.fxaa.uniformLoc.inverseScreenSize, 1, inv_screen_size.elem);
 
-        glUseProgram(0);
-    }
+    glBindVertexArray(glObj.vao);
+    glDrawArrays(GL_TRIANGLES, 0, 3);
+    glBindVertexArray(0);
 
-    void shutdown() {
-        if (gl.fxaa.program) glDeleteProgram(gl.fxaa.program);
-    }
+    glUseProgram(0);
+}
+
+void shutdown() {
+    glDeleteProgram(glObj.fxaa.program);
+}
+
 }   // namespace fxaa
 
 void initialize(int width, int height) {
-    if (!gl.vao) glGenVertexArrays(1, &gl.vao);
+    static bool IsInitialized = false;
 
-    gl.vShaderFsQuad = compile_shader_from_source(v_shader_src_fs_quad, GL_VERTEX_SHADER);
+    if (IsInitialized) {
+        return;
+    }
+
+    glGenVertexArrays(1, &glObj.vao);
+
+    glObj.vShaderFsQuad = compileShaderFromSource(v_shader_src_fs_quad, GL_VERTEX_SHADER);
 
     // LINEARIZE DEPTH
-    gl.linearDepth.programPersp = setup_program_from_source(STR("linearize depth persp"), f_shader_src_linearize_depth, STR("#define PERSPECTIVE 1"));
-    gl.linearDepth.programOrtho = setup_program_from_source(STR("linearize depth ortho"), f_shader_src_linearize_depth, STR("#define PERSPECTIVE 0"));
+    glObj.linearDepth.programPersp = setupProgramFromSource(
+        STR("linearize depth persp"),
+        f_shader_src_linearize_depth,
+        STR("#define PERSPECTIVE 1")
+    );
+    glObj.linearDepth.programOrtho = setupProgramFromSource(
+        STR("linearize depth ortho"),
+        f_shader_src_linearize_depth,
+        STR("#define PERSPECTIVE 0")
+    );
 
-    if (!gl.linearDepth.texture) glGenTextures(1, &gl.linearDepth.texture);
-    glBindTexture(GL_TEXTURE_2D, gl.linearDepth.texture);
+    glGenTextures(1, &glObj.linearDepth.texture);
+    glBindTexture(GL_TEXTURE_2D, glObj.linearDepth.texture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -948,87 +1030,168 @@ void initialize(int width, int height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    if (!gl.linearDepth.fbo) {
-        glGenFramebuffers(1, &gl.linearDepth.fbo);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.linearDepth.fbo);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gl.linearDepth.texture, 0);
-        GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-        if (status != GL_FRAMEBUFFER_COMPLETE) {
-            MD_LOG_ERROR("Something went wrong in creating framebuffer for depth linearization");
-        }
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glGenFramebuffers(1, &glObj.linearDepth.fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.linearDepth.fbo);
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        glObj.linearDepth.texture,
+        0
+    );
+    GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        MD_LOG_ERROR("Something went wrong in creating framebuffer for depth linearization");
     }
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-    gl.linearDepth.uniformLoc.clipInfo = glGetUniformLocation(gl.linearDepth.programPersp, "u_clip_info");
-    gl.linearDepth.uniformLoc.texDepth = glGetUniformLocation(gl.linearDepth.programPersp, "u_tex_depth");
+    glObj.linearDepth.uniformLoc.clipInfo = glGetUniformLocation(
+        glObj.linearDepth.programPersp, "u_clip_info"
+    );
+    glObj.linearDepth.uniformLoc.texDepth = glGetUniformLocation(
+        glObj.linearDepth.programPersp, "u_tex_depth"
+    );
 
     // COLOR
-    if (!gl.targets.texColor[0]) glGenTextures(2, gl.targets.texColor);
-    glBindTexture(GL_TEXTURE_2D, gl.targets.texColor[0]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R11F_G11F_B10F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+    glGenTextures(2, glObj.targets.texColor);
+    glBindTexture(GL_TEXTURE_2D, glObj.targets.texColor[0]);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_R11F_G11F_B10F,
+        width,
+        height,
+        0,
+        GL_RGB,
+        GL_FLOAT,
+        nullptr
+    );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_2D, gl.targets.texColor[1]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R11F_G11F_B10F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+    glBindTexture(GL_TEXTURE_2D, glObj.targets.texColor[1]);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_R11F_G11F_B10F,
+        width,
+        height,
+        0,
+        GL_RGB,
+        GL_FLOAT,
+        nullptr
+    );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    if (!gl.targets.texTemporalBuffer[0]) glGenTextures(2, gl.targets.texTemporalBuffer);
-    glBindTexture(GL_TEXTURE_2D, gl.targets.texTemporalBuffer[0]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R11F_G11F_B10F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+    glGenTextures(2, glObj.targets.texTemporalBuffer);
+    glBindTexture(GL_TEXTURE_2D, glObj.targets.texTemporalBuffer[0]);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_R11F_G11F_B10F,
+        width,
+        height,
+        0,
+        GL_RGB,
+        GL_FLOAT,
+        nullptr
+    );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_2D, gl.targets.texTemporalBuffer[1]);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R11F_G11F_B10F, width, height, 0, GL_RGB, GL_FLOAT, nullptr);
+    glBindTexture(GL_TEXTURE_2D, glObj.targets.texTemporalBuffer[1]);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_R11F_G11F_B10F,
+        width,
+        height,
+        0,
+        GL_RGB,
+        GL_FLOAT,
+        nullptr
+    );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    if (!gl.targets.fbo) {
-        glGenFramebuffers(1, &gl.targets.fbo);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.targets.fbo);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gl.targets.texColor[0], 0);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gl.targets.texColor[1], 0);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gl.targets.texTemporalBuffer[0], 0);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, gl.targets.texTemporalBuffer[1], 0);
+    glGenFramebuffers(1, &glObj.targets.fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.targets.fbo);
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        glObj.targets.texColor[0],
+        0
+    );
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT1,
+        GL_TEXTURE_2D,
+        glObj.targets.texColor[1],
+        0
+    );
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT2,
+        GL_TEXTURE_2D,
+        glObj.targets.texTemporalBuffer[0],
+        0
+    );
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT3,
+        GL_TEXTURE_2D,
+        glObj.targets.texTemporalBuffer[1],
+        0
+    );
 
-        GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-        if (status != GL_FRAMEBUFFER_COMPLETE) {
-            MD_LOG_ERROR("Something went wrong in creating framebuffer for targets");
-        }
-
-        GLenum buffers[] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3};
-        glDrawBuffers(4, buffers);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
+    if (status != GL_FRAMEBUFFER_COMPLETE) {
+        MD_LOG_ERROR("Something went wrong in creating framebuffer for targets");
     }
 
-    if (!gl.tmp.fbo) {
-        glGenFramebuffers(1, &gl.tmp.fbo);
-    }
+    GLenum buffers[] = {
+        GL_COLOR_ATTACHMENT0,
+        GL_COLOR_ATTACHMENT1,
+        GL_COLOR_ATTACHMENT2,
+        GL_COLOR_ATTACHMENT3
+    };
+    glDrawBuffers(4, buffers);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-    if (!gl.tmp.texRgba8) {
-        glGenTextures(1, &gl.tmp.texRgba8);
-        glBindTexture(GL_TEXTURE_2D, gl.tmp.texRgba8);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
+    glGenFramebuffers(1, &glObj.tmp.fbo);
 
-    gl.texWidth = width;
-    gl.texHeight = height;
+    glGenTextures(1, &glObj.tmp.texRgba8);
+    glBindTexture(GL_TEXTURE_2D, glObj.tmp.texRgba8);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA8,
+        width,
+        height,
+        0,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        nullptr
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    glObj.texWidth = width;
+    glObj.texHeight = height;
 
     ssao::initialize(width, height);
     dof::initialize(width, height);
@@ -1039,6 +1202,8 @@ void initialize(int width, int height) {
     blit::initialize();
     sharpen::initialize();
     fxaa::initialize();
+
+    IsInitialized = true;
 }
 
 void shutdown() {
@@ -1052,112 +1217,135 @@ void shutdown() {
     sharpen::shutdown();
     fxaa::shutdown();
 
-    if (gl.vao) glDeleteVertexArrays(1, &gl.vao);
-    if (gl.vShaderFsQuad) glDeleteShader(gl.vShaderFsQuad);
-    if (gl.tmp.fbo) glDeleteFramebuffers(1, &gl.tmp.fbo);
-    if (gl.tmp.texRgba8) glDeleteTextures(1, &gl.tmp.texRgba8);
+    glDeleteVertexArrays(1, &glObj.vao);
+    glDeleteShader(glObj.vShaderFsQuad);
+    glDeleteFramebuffers(1, &glObj.tmp.fbo);
+    glDeleteTextures(1, &glObj.tmp.texRgba8);
 }
 
-void compute_linear_depth(uint32_t depth_tex, float near_plane, float far_plane, bool orthographic = false) {
-    const vec4_t clip_info {near_plane * far_plane, near_plane - far_plane, far_plane, 0};
-
+void computeLinearDepth(uint32_t depthTex, float nearPlane, float farPlane,
+                        bool orthographic = false)
+{
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, depth_tex);
+    glBindTexture(GL_TEXTURE_2D, depthTex);
 
-    if (orthographic)
-        glUseProgram(gl.linearDepth.programOrtho);
-    else
-        glUseProgram(gl.linearDepth.programPersp);
-    glUniform1i(gl.linearDepth.uniformLoc.texDepth, 0);
-    glUniform4fv(gl.linearDepth.uniformLoc.clipInfo, 1, &clip_info.x);
+    if (orthographic) {
+        glUseProgram(glObj.linearDepth.programOrtho);
+    }
+    else {
+        glUseProgram(glObj.linearDepth.programPersp);
+    }
+    glUniform1i(glObj.linearDepth.uniformLoc.texDepth, 0);
+    const vec4_t clip = { nearPlane * farPlane, nearPlane - farPlane, farPlane, 0 };
+    glUniform4fv(glObj.linearDepth.uniformLoc.clipInfo, 1, &clip.x);
 
     // ASSUME THAT THE APPROPRIATE FS_QUAD VAO IS BOUND
-    glBindVertexArray(gl.vao);
+    glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
 }
 
-void apply_ssao(uint32_t linear_depth_tex, uint32_t normal_tex, const mat4_t& proj_matrix, float intensity, float radius, float bias, float normal_bias) {
-    ASSERT(glIsTexture(linear_depth_tex));
-    ASSERT(glIsTexture(normal_tex));
+void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMatrix,
+               float intensity, float radius, float bias, float normalBias)
+{
+    ghoul_assert(glIsTexture(linearDepthTex), "No texture");
+    ghoul_assert(glIsTexture(normalTex), "No texture");
 
-    const bool ortho = is_ortho_proj_matrix(proj_matrix);
-    const float sharpness = ssao::compute_sharpness(radius);
+    const bool ortho = isOrthoProjMatrix(projMatrix);
+    const float sharpness = 3.f / std::sqrt(radius);
 
     int last_fbo;
-    int last_viewport[4];
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &last_fbo);
+    int last_viewport[4];
     glGetIntegerv(GL_VIEWPORT, last_viewport);
 
     int width = last_viewport[2];
     int height = last_viewport[3];
 
-    const vec2_t inv_res = vec2_t{1.f / gl.texWidth, 1.f / gl.texHeight };
+    glBindVertexArray(glObj.vao);
 
-    glBindVertexArray(gl.vao);
+    const vec2_t invRes = vec2_t{ 1.f / glObj.texWidth, 1.f / glObj.texHeight };
+    ssao::setupUboHbaoData(
+        glObj.ssao.uboHbaoData,
+        width,
+        height,
+        projMatrix,
+        intensity,
+        radius,
+        bias,
+        normalBias
+    );
 
-    ssao::setup_ubo_hbao_data(gl.ssao.uboHbaoData, width, height, proj_matrix, intensity, radius, bias, normal_bias);
-
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.ssao.hbao.fbo);
-    glViewport(0, 0, gl.texWidth, gl.texHeight);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.ssao.hbao.fbo);
+    glViewport(0, 0, glObj.texWidth, glObj.texHeight);
     glClearColor(1,1,1,1);
     glClear(GL_COLOR_BUFFER_BIT);
 
     glViewport(0, 0, width, height);
 
     // RENDER HBAO
-    uint32_t program = ortho ? gl.ssao.hbao.programOrtho : gl.ssao.hbao.programPersp;
+    uint32_t program =
+        ortho ? glObj.ssao.hbao.programOrtho : glObj.ssao.hbao.programPersp;
 
-    PUSH_GPU_SECTION("HBAO")
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "HBAO");
     glUseProgram(program);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, linear_depth_tex);
+    glBindTexture(GL_TEXTURE_2D, linearDepthTex);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, normal_tex);
+    glBindTexture(GL_TEXTURE_2D, normalTex);
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, gl.ssao.texRandom);
+    glBindTexture(GL_TEXTURE_2D, glObj.ssao.texRandom);
 
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, gl.ssao.uboHbaoData);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, glObj.ssao.uboHbaoData);
     glUniformBlockBinding(program, glGetUniformBlockIndex(program, "u_control_buffer"), 0);
     glUniform1i(glGetUniformLocation(program, "u_tex_linear_depth"), 0);
     glUniform1i(glGetUniformLocation(program, "u_tex_normal"), 1);
     glUniform1i(glGetUniformLocation(program, "u_tex_random"), 2);
-
-    glUniform2f(glGetUniformLocation(program, "u_tc_scl"), (float)width/(float)gl.texWidth, (float)height/(float)gl.texHeight);
+    glUniform2f(
+        glGetUniformLocation(program, "u_tc_scl"),
+        static_cast<float>(width) / static_cast<float>(glObj.texWidth),
+        static_cast<float>(height) / static_cast<float>(glObj.texHeight)
+    );
 
     glDrawArrays(GL_TRIANGLES, 0, 3);
+    glPopDebugGroup();
 
-    POP_GPU_SECTION()
+    glUseProgram(glObj.ssao.blur.program);
 
-    glUseProgram(gl.ssao.blur.program);
-
-    glUniform1i(glGetUniformLocation(gl.ssao.blur.program, "u_tex_linear_depth"), 0);
-    glUniform1i(glGetUniformLocation(gl.ssao.blur.program, "u_tex_ao"), 1);
-    glUniform1f(glGetUniformLocation(gl.ssao.blur.program, "u_sharpness"), sharpness);
-    glUniform2f(glGetUniformLocation(gl.ssao.blur.program, "u_inv_res_dir"), inv_res.x, 0);
-
-    glUniform2f(glGetUniformLocation(gl.ssao.blur.program, "u_tc_scl"), (float)width/(float)gl.texWidth, (float)height/(float)gl.texHeight);
+    glUniform1i(glGetUniformLocation(glObj.ssao.blur.program, "u_tex_linear_depth"), 0);
+    glUniform1i(glGetUniformLocation(glObj.ssao.blur.program, "u_tex_ao"), 1);
+    glUniform1f(glGetUniformLocation(glObj.ssao.blur.program, "u_sharpness"), sharpness);
+    glUniform2f(glGetUniformLocation(glObj.ssao.blur.program, "u_inv_res_dir"), invRes.x, 0);
+    glUniform2f(
+        glGetUniformLocation(glObj.ssao.blur.program, "u_tc_scl"),
+        static_cast<float>(width) / static_cast<float>(glObj.texWidth),
+        static_cast<float>(height) / static_cast<float>(glObj.texHeight)
+    );
 
     glActiveTexture(GL_TEXTURE1);
 
     // BLUR FIRST
-    PUSH_GPU_SECTION("BLUR 1st")
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.ssao.blur.fbo);
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "BLUR 1st");
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.ssao.blur.fbo);
     glViewport(0, 0, width, height);
-    glClearColor(0,0,0,0);
+    glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
-    glBindTexture(GL_TEXTURE_2D, gl.ssao.hbao.texture);
+    glBindTexture(GL_TEXTURE_2D, glObj.ssao.hbao.texture);
     glDrawArrays(GL_TRIANGLES, 0, 3);
-    POP_GPU_SECTION()
+    glPopDebugGroup();
 
     // BLUR SECOND
-    PUSH_GPU_SECTION("BLUR 2nd")
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "BLUR 2nd");
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, last_fbo);
     glViewport(last_viewport[0], last_viewport[1], last_viewport[2], last_viewport[3]);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, gl.ssao.blur.texture);
-    glUniform2f(glGetUniformLocation(gl.ssao.blur.program, "u_inv_res_dir"), 0, inv_res.y);
+    glBindTexture(GL_TEXTURE_2D, glObj.ssao.blur.texture);
+    glUniform2f(
+        glGetUniformLocation(glObj.ssao.blur.program, "u_inv_res_dir"),
+        0,
+        invRes.y
+    );
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_ZERO, GL_SRC_COLOR);
@@ -1170,546 +1358,629 @@ void apply_ssao(uint32_t linear_depth_tex, uint32_t normal_tex, const mat4_t& pr
     glColorMask(1, 1, 1, 1);
 
     glBindVertexArray(0);
-    POP_GPU_SECTION()
+    glPopDebugGroup();
 }
 
-void shade_deferred(uint32_t depth_tex, uint32_t color_tex, uint32_t normal_tex, const mat4_t& inv_proj_matrix, const vec3_t& light_dir, const vec3_t& light_col, float time) {
-    ASSERT(glIsTexture(depth_tex));
-    ASSERT(glIsTexture(color_tex));
-    ASSERT(glIsTexture(normal_tex));
+void shadeDeferred(uint32_t depthTex, uint32_t colorTex, uint32_t normalTex,
+                   const mat4_t& invProjMatrix, const vec3_t& lightDir,
+                   const vec3_t& lightCol, float time)
+{
+    ghoul_assert(glIsTexture(depthTex), "No texture");
+    ghoul_assert(glIsTexture(colorTex), "No texture");
+    ghoul_assert(glIsTexture(normalTex), "No texture");
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, depth_tex);
+    glBindTexture(GL_TEXTURE_2D, depthTex);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, color_tex);
+    glBindTexture(GL_TEXTURE_2D, colorTex);
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, normal_tex);
+    glBindTexture(GL_TEXTURE_2D, normalTex);
 
-    glUseProgram(shading::shading.program);
-    glUniform1i(shading::shading.uniform_loc.texture_depth, 0);
-    glUniform1i(shading::shading.uniform_loc.texture_color, 1);
-    glUniform1i(shading::shading.uniform_loc.texture_normal, 2);
-    glUniformMatrix4fv(shading::shading.uniform_loc.inv_proj_mat, 1, GL_FALSE, &inv_proj_matrix.elem[0][0]);
-    glUniform3f(shading::shading.uniform_loc.light_dir, light_dir.x, light_dir.y, light_dir.z);
-    glUniform3f(shading::shading.uniform_loc.light_col, light_col.x, light_col.y, light_col.z);
-    glUniform1f(shading::shading.uniform_loc.time, time);
-    glBindVertexArray(gl.vao);
+    glUseProgram(glObj.shading.program);
+    glUniform1i(glObj.shading.uniformLoc.textureDepth, 0);
+    glUniform1i(glObj.shading.uniformLoc.textureColor, 1);
+    glUniform1i(glObj.shading.uniformLoc.textureNormal, 2);
+    glUniformMatrix4fv(glObj.shading.uniformLoc.invProjMat, 1, GL_FALSE, &invProjMatrix.elem[0][0]);
+    glUniform3f(glObj.shading.uniformLoc.lightDir, lightDir.x, lightDir.y, lightDir.z);
+    glUniform3f(glObj.shading.uniformLoc.lightCol, lightCol.x, lightCol.y, lightCol.z);
+    glUniform1f(glObj.shading.uniformLoc.time, time);
+    glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
     glUseProgram(0);
 }
 
-void half_res_color_coc(uint32_t linear_depth_tex, uint32_t color_tex, float focus_point, float focus_scale) {
-    PUSH_GPU_SECTION("DOF Prepass");
-    int last_viewport[4];
-    glGetIntegerv(GL_VIEWPORT, last_viewport);
-    glViewport(0, 0, gl.texWidth / 2, gl.texHeight / 2);
+void halfResColorCoc(uint32_t linearDepthTex, uint32_t colorTex, float focusPoint,
+                     float focusScale)
+{
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "DOF Prepass");
+    int lastViewport[4];
+    glGetIntegerv(GL_VIEWPORT, lastViewport);
+    glViewport(0, 0, glObj.texWidth / 2, glObj.texHeight / 2);
 
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.bokehDof.halfRes.fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.bokehDof.halfRes.fbo);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, linear_depth_tex);
+    glBindTexture(GL_TEXTURE_2D, linearDepthTex);
 
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, color_tex);
+    glBindTexture(GL_TEXTURE_2D, colorTex);
 
-    glUseProgram(gl.bokehDof.halfRes.program);
+    glUseProgram(glObj.bokehDof.halfRes.program);
 
-    glUniform1i(gl.bokehDof.halfRes.uniformLoc.texDepth, 0);
-    glUniform1i(gl.bokehDof.halfRes.uniformLoc.texColor, 1);
-    glUniform1f(gl.bokehDof.halfRes.uniformLoc.focusPoint, focus_point);
-    glUniform1f(gl.bokehDof.halfRes.uniformLoc.focusScale, focus_scale);
+    glUniform1i(glObj.bokehDof.halfRes.uniformLoc.texDepth, 0);
+    glUniform1i(glObj.bokehDof.halfRes.uniformLoc.texColor, 1);
+    glUniform1f(glObj.bokehDof.halfRes.uniformLoc.focusPoint, focusPoint);
+    glUniform1f(glObj.bokehDof.halfRes.uniformLoc.focusScale, focusScale);
 
-    glBindVertexArray(gl.vao);
+    glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
 
-    glViewport(last_viewport[0], last_viewport[1], last_viewport[2], last_viewport[3]);
-    POP_GPU_SECTION();
+    glViewport(lastViewport[0], lastViewport[1], lastViewport[2], lastViewport[3]);
+    glPopDebugGroup();
 }
 
-void apply_dof(uint32_t linear_depth_tex, uint32_t color_tex, float focus_point, float focus_scale, float time) {
-    ASSERT(glIsTexture(linear_depth_tex));
-    ASSERT(glIsTexture(color_tex));
+void applyDof(uint32_t linearDepthTex, uint32_t colorTex, float focusPoint,
+              float focusScale, float time)
+{
+    ghoul_assert(glIsTexture(linearDepthTex), "No texture");
+    ghoul_assert(glIsTexture(colorTex), "No texture");
 
-    const vec2_t pixel_size = vec2_t{1.f / gl.texWidth, 1.f / gl.texHeight };
+    int lastFbo;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &lastFbo);
 
-    int last_fbo;
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &last_fbo);
+    halfResColorCoc(linearDepthTex, colorTex, focusPoint, focusScale);
 
-    half_res_color_coc(linear_depth_tex, color_tex, focus_point, focus_scale);
-
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, last_fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, gl.bokehDof.halfRes.tex.colorCoc);
+    glBindTexture(GL_TEXTURE_2D, glObj.bokehDof.halfRes.tex.colorCoc);
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, linear_depth_tex);
+    glBindTexture(GL_TEXTURE_2D, linearDepthTex);
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, color_tex);
+    glBindTexture(GL_TEXTURE_2D, colorTex);
 
-    glUseProgram(gl.bokehDof.program);
-    glUniform1i(gl.bokehDof.uniformLoc.texHalfRes, 0);
-    glUniform1i(gl.bokehDof.uniformLoc.texDepth, 1);
-    glUniform1i(gl.bokehDof.uniformLoc.texColor, 2);
-    glUniform2f(gl.bokehDof.uniformLoc.pixelSize, pixel_size.x, pixel_size.y);
-    glUniform1f(gl.bokehDof.uniformLoc.focusPoint, focus_point);
-    glUniform1f(gl.bokehDof.uniformLoc.focusScale, focus_scale);
-    glUniform1f(gl.bokehDof.uniformLoc.time, time);
+    glUseProgram(glObj.bokehDof.program);
+    glUniform1i(glObj.bokehDof.uniformLoc.texHalfRes, 0);
+    glUniform1i(glObj.bokehDof.uniformLoc.texDepth, 1);
+    glUniform1i(glObj.bokehDof.uniformLoc.texColor, 2);
+    glUniform2f(
+        glObj.bokehDof.uniformLoc.pixelSize,
+        1.f / glObj.texWidth,
+        1.f / glObj.texHeight
+    );
+    glUniform1f(glObj.bokehDof.uniformLoc.focusPoint, focusPoint);
+    glUniform1f(glObj.bokehDof.uniformLoc.focusScale, focusScale);
+    glUniform1f(glObj.bokehDof.uniformLoc.time, time);
 
-    glBindVertexArray(gl.vao);
+    glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
     glUseProgram(0);
     glActiveTexture(GL_TEXTURE0);
 }
 
-void apply_tonemapping(uint32_t color_tex, Tonemapping tonemapping, float exposure, float gamma) {
-    ASSERT(glIsTexture(color_tex));
+void applyTonemapping(uint32_t colorTex, Tonemapping tonemapping, float exposure,
+                      float gamma)
+{
+    ghoul_assert(glIsTexture(colorTex), "No texture");
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, color_tex);
+    glBindTexture(GL_TEXTURE_2D, colorTex);
 
     switch (tonemapping) {
-    case Tonemapping::ExposureGamma:
-        glUseProgram(tonemapping::exposure_gamma.program);
-        glUniform1i(tonemapping::exposure_gamma.uniform_loc.texture, 0);
-        glUniform1f(tonemapping::exposure_gamma.uniform_loc.exposure, exposure);
-        glUniform1f(tonemapping::exposure_gamma.uniform_loc.gamma, gamma);
-        break;
-    case Tonemapping::Filmic:
-        glUseProgram(tonemapping::filmic.program);
-        glUniform1i(tonemapping::filmic.uniform_loc.texture, 0);
-        glUniform1f(tonemapping::filmic.uniform_loc.exposure, exposure);
-        glUniform1f(tonemapping::filmic.uniform_loc.gamma, gamma);
-        break;
-    case Tonemapping::ACES:
-        glUseProgram(tonemapping::ACES.program);
-        glUniform1i(tonemapping::ACES.uniform_loc.texture, 0);
-        glUniform1f(tonemapping::ACES.uniform_loc.exposure, exposure);
-        glUniform1f(tonemapping::ACES.uniform_loc.gamma, gamma);
-        break;
-    case Tonemapping::Passthrough:
-    default:
-        glUseProgram(tonemapping::passthrough.program);
-        glUniform1i(tonemapping::passthrough.uniform_loc.texture, 0);
-        break;
+        case Tonemapping::Passthrough:
+            glUseProgram(glObj.tonemapping.passthrough.program);
+            glUniform1i(glObj.tonemapping.passthrough.uniformLoc.texture, 0);
+            break;
+        case Tonemapping::ExposureGamma:
+            glUseProgram(glObj.tonemapping.exposureGamma.program);
+            glUniform1i(glObj.tonemapping.exposureGamma.uniformLoc.texture, 0);
+            glUniform1f(glObj.tonemapping.exposureGamma.uniformLoc.exposure, exposure);
+            glUniform1f(glObj.tonemapping.exposureGamma.uniformLoc.gamma, gamma);
+            break;
+        case Tonemapping::Filmic:
+            glUseProgram(glObj.tonemapping.filmic.program);
+            glUniform1i(glObj.tonemapping.filmic.uniformLoc.texture, 0);
+            glUniform1f(glObj.tonemapping.filmic.uniformLoc.exposure, exposure);
+            glUniform1f(glObj.tonemapping.filmic.uniformLoc.gamma, gamma);
+            break;
+        case Tonemapping::ACES:
+            glUseProgram(glObj.tonemapping.aces.program);
+            glUniform1i(glObj.tonemapping.aces.uniformLoc.texture, 0);
+            glUniform1f(glObj.tonemapping.aces.uniformLoc.exposure, exposure);
+            glUniform1f(glObj.tonemapping.aces.uniformLoc.gamma, gamma);
+            break;
     }
 
-    glBindVertexArray(gl.vao);
+    glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
     glUseProgram(0);
 }
 
-void apply_aa_tonemapping(uint32_t color_tex) {
-    ASSERT(glIsTexture(color_tex));
+void applyAaTonemapping(uint32_t colorTex) {
+    ghoul_assert(glIsTexture(colorTex), "No texture");
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, color_tex);
+    glBindTexture(GL_TEXTURE_2D, colorTex);
 
-    glUseProgram(tonemapping::fast_reversible.program_forward);
-    glUniform1i(tonemapping::fast_reversible.uniform_loc.texture, 0);
+    glUseProgram(glObj.tonemapping.fastReversible.programForward);
+    glUniform1i(glObj.tonemapping.fastReversible.uniformLoc.texture, 0);
 
-    glBindVertexArray(gl.vao);
+    glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
     glUseProgram(0);
 }
 
-void apply_inverse_aa_tonemapping(uint32_t color_tex) {
-    ASSERT(glIsTexture(color_tex));
+void applyInverseAaTonemapping(uint32_t colorTex) {
+    ghoul_assert(glIsTexture(colorTex), "No texture");
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, color_tex);
+    glBindTexture(GL_TEXTURE_2D, colorTex);
 
-    glUseProgram(tonemapping::fast_reversible.program_inverse);
-    glUniform1i(tonemapping::fast_reversible.uniform_loc.texture, 0);
+    glUseProgram(glObj.tonemapping.fastReversible.programInverse);
+    glUniform1i(glObj.tonemapping.fastReversible.uniformLoc.texture, 0);
 
-    glBindVertexArray(gl.vao);
+    glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
     glUseProgram(0);
 }
 
-void blit_tilemax(uint32_t velocity_tex, int tex_width, int tex_height) {
-    ASSERT(glIsTexture(velocity_tex));
-    const vec2_t texel_size = {1.f / tex_width, 1.f / tex_height};
+void blitTilemax(uint32_t velocityTex, int texWidth, int texHeight) {
+    ghoul_assert(glIsTexture(velocityTex), "No texture");
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, velocity_tex);
+    glBindTexture(GL_TEXTURE_2D, velocityTex);
 
-    glUseProgram(velocity::blit_tilemax.program);
-    glUniform1i(velocity::blit_tilemax.uniform_loc.tex_vel, 0);
-    glUniform2fv(velocity::blit_tilemax.uniform_loc.tex_vel_texel_size, 1, &texel_size.x);
-    glBindVertexArray(gl.vao);
+    glUseProgram(glObj.blitTilemax.program);
+    glUniform1i(glObj.blitTilemax.uniformLoc.texVel, 0);
+    const vec2_t texelSize = { 1.f / texWidth, 1.f / texHeight };
+    glUniform2fv(glObj.blitTilemax.uniformLoc.texVelTexelSize, 1, &texelSize.x);
+    glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
     glUseProgram(0);
 }
 
-void blit_neighbormax(uint32_t velocity_tex, int tex_width, int tex_height) {
-    ASSERT(glIsTexture(velocity_tex));
-    const vec2_t texel_size = {1.f / tex_width, 1.f / tex_height};
+void blitNeighbormax(uint32_t velocityTex, int texWwidth, int texHeight) {
+    ghoul_assert(glIsTexture(velocityTex), "No texture");
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, velocity_tex);
+    glBindTexture(GL_TEXTURE_2D, velocityTex);
 
-    glUseProgram(velocity::blit_neighbormax.program);
-    glUniform1i(velocity::blit_neighbormax.uniform_loc.tex_vel, 0);
-    glUniform2fv(velocity::blit_neighbormax.uniform_loc.tex_vel_texel_size, 1, &texel_size.x);
-    glBindVertexArray(gl.vao);
+    glUseProgram(glObj.blitNeighbormax.program);
+    glUniform1i(glObj.blitNeighbormax.uniformLoc.texVel, 0);
+    const vec2_t texelSize = { 1.f / texWwidth, 1.f / texHeight };
+    glUniform2fv(glObj.blitNeighbormax.uniformLoc.texVelTexelSize, 1, &texelSize.x);
+    glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
     glUseProgram(0);
 }
 
-void apply_temporal_aa(uint32_t linear_depth_tex, uint32_t color_tex, uint32_t velocity_tex, uint32_t velocity_neighbormax_tex, const vec2_t& curr_jitter, const vec2_t& prev_jitter, float feedback_min,
-                       float feedback_max, float motion_scale, float time) {
-    ASSERT(glIsTexture(linear_depth_tex));
-    ASSERT(glIsTexture(color_tex));
-    ASSERT(glIsTexture(velocity_tex));
-    ASSERT(glIsTexture(velocity_neighbormax_tex));
+void applyTemporalAa(uint32_t linearDepthTex, uint32_t colorTex, uint32_t velocityTex,
+                     uint32_t velocityNeighbormaxTex, const vec2_t& currJitter,
+                     const vec2_t& prevJitter, float feedbackMin, float feedbackMax,
+                     float motionScale, float time)
+{
+    ghoul_assert(glIsTexture(linearDepthTex), "No texture");
+    ghoul_assert(glIsTexture(colorTex), "No texture");
+    ghoul_assert(glIsTexture(velocityTex), "No texture");
+    ghoul_assert(glIsTexture(velocityNeighbormaxTex), "No texture");
 
     static int target = 0;
     target = (target + 1) % 2;
 
-    const int dst_buf = target;
-    const int src_buf = (target + 1) % 2;
+    const int dstBuf = target;
+    const int srcBuf = (target + 1) % 2;
 
-    const vec2_t res = {(float)gl.texWidth, (float)gl.texHeight };
-    const vec2_t inv_res = 1.0f / res;
-    const vec4_t texel_size = vec4_t{inv_res.x, inv_res.y, res.x, res.y};
-    const vec2_t jitter_uv_curr = curr_jitter / res;
-    const vec2_t jitter_uv_prev = prev_jitter / res;
-    const vec4_t jitter_uv = vec4_t{jitter_uv_curr.x, jitter_uv_curr.y, jitter_uv_prev.x, jitter_uv_prev.y};
+    const vec2_t res = {
+        static_cast<float>(glObj.texWidth),
+        static_cast<float>(glObj.texHeight)
+    };
+    const vec2_t invRes = 1.f / res;
+    const vec4_t texelSize = { invRes.x, invRes.y, res.x, res.y };
+    const vec2_t jitterUvCurr = currJitter / res;
+    const vec2_t jitterUvPrev = prevJitter / res;
+    const vec4_t jitterUv = {
+        jitterUvCurr.x,
+        jitterUvCurr.y,
+        jitterUvPrev.x,
+        jitterUvPrev.y
+    };
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, linear_depth_tex);
+    glBindTexture(GL_TEXTURE_2D, linearDepthTex);
 
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, color_tex);
+    glBindTexture(GL_TEXTURE_2D, colorTex);
 
     glActiveTexture(GL_TEXTURE2);
-    glBindTexture(GL_TEXTURE_2D, gl.targets.texTemporalBuffer[src_buf]);
+    glBindTexture(GL_TEXTURE_2D, glObj.targets.texTemporalBuffer[srcBuf]);
 
     glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, velocity_tex);
+    glBindTexture(GL_TEXTURE_2D, velocityTex);
 
     glActiveTexture(GL_TEXTURE4);
-    glBindTexture(GL_TEXTURE_2D, velocity_neighbormax_tex);
+    glBindTexture(GL_TEXTURE_2D, velocityNeighbormaxTex);
 
-    int bound_buffer;
-    glGetIntegerv(GL_DRAW_BUFFER, &bound_buffer);
+    int boundBuffer;
+    glGetIntegerv(GL_DRAW_BUFFER, &boundBuffer);
 
-    GLenum draw_buffers[2];
-    draw_buffers[0] = GL_COLOR_ATTACHMENT2 + dst_buf;  // tex_temporal_buffer[0 or 1]
-    draw_buffers[1] = (GLenum)bound_buffer;                    // assume that this is part of the same gbuffer
+    GLenum drawBuffers[2];
+    // tex_temporal_buffer[0 or 1]
+    drawBuffers[0] = GL_COLOR_ATTACHMENT2 + dstBuf;
+    // assume that this is part of the same gbuffer
+    drawBuffers[1] = static_cast<GLenum>(boundBuffer);
 
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.targets.fbo);
-    glViewport(0, 0, gl.texWidth, gl.texHeight);
-    glDrawBuffers(2, draw_buffers);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.targets.fbo);
+    glViewport(0, 0, glObj.texWidth, glObj.texHeight);
+    glDrawBuffers(2, drawBuffers);
 
-    if (motion_scale != 0.f) {
-        glUseProgram(gl.temporal.withMotionBlur.program);
+    if (motionScale != 0.f) {
+        glUseProgram(glObj.temporal.withMotionBlur.program);
 
-        glUniform1i(gl.temporal.withMotionBlur.uniformLoc.texLinearDepth, 0);
-        glUniform1i(gl.temporal.withMotionBlur.uniformLoc.texMain, 1);
-        glUniform1i(gl.temporal.withMotionBlur.uniformLoc.texPrev, 2);
-        glUniform1i(gl.temporal.withMotionBlur.uniformLoc.texVel, 3);
-        glUniform1i(gl.temporal.withMotionBlur.uniformLoc.texVelNeighbormax, 4);
+        glUniform1i(glObj.temporal.withMotionBlur.uniformLoc.texLinearDepth, 0);
+        glUniform1i(glObj.temporal.withMotionBlur.uniformLoc.texMain, 1);
+        glUniform1i(glObj.temporal.withMotionBlur.uniformLoc.texPrev, 2);
+        glUniform1i(glObj.temporal.withMotionBlur.uniformLoc.texVel, 3);
+        glUniform1i(glObj.temporal.withMotionBlur.uniformLoc.texVelNeighbormax, 4);
 
-        glUniform4fv(gl.temporal.withMotionBlur.uniformLoc.texelSize, 1, &texel_size.x);
-        glUniform4fv(gl.temporal.withMotionBlur.uniformLoc.jitterUv, 1, &jitter_uv.x);
-        glUniform1f(gl.temporal.withMotionBlur.uniformLoc.time, time);
-        glUniform1f(gl.temporal.withMotionBlur.uniformLoc.feedbackMin, feedback_min);
-        glUniform1f(gl.temporal.withMotionBlur.uniformLoc.feedbackMax, feedback_max);
-        glUniform1f(gl.temporal.withMotionBlur.uniformLoc.motionScale, motion_scale);
-    } else {
-        glUseProgram(gl.temporal.noMotionBlur.program);
+        glUniform4fv(glObj.temporal.withMotionBlur.uniformLoc.texelSize, 1, &texelSize.x);
+        glUniform4fv(glObj.temporal.withMotionBlur.uniformLoc.jitterUv, 1, &jitterUv.x);
+        glUniform1f(glObj.temporal.withMotionBlur.uniformLoc.time, time);
+        glUniform1f(glObj.temporal.withMotionBlur.uniformLoc.feedbackMin, feedbackMin);
+        glUniform1f(glObj.temporal.withMotionBlur.uniformLoc.feedbackMax, feedbackMax);
+        glUniform1f(glObj.temporal.withMotionBlur.uniformLoc.motionScale, motionScale);
+    }
+    else {
+        glUseProgram(glObj.temporal.noMotionBlur.program);
 
-        glUniform1i(gl.temporal.noMotionBlur.uniformLoc.texLinearDepth, 0);
-        glUniform1i(gl.temporal.noMotionBlur.uniformLoc.texMain, 1);
-        glUniform1i(gl.temporal.noMotionBlur.uniformLoc.texPrev, 2);
-        glUniform1i(gl.temporal.noMotionBlur.uniformLoc.texVel, 3);
+        glUniform1i(glObj.temporal.noMotionBlur.uniformLoc.texLinearDepth, 0);
+        glUniform1i(glObj.temporal.noMotionBlur.uniformLoc.texMain, 1);
+        glUniform1i(glObj.temporal.noMotionBlur.uniformLoc.texPrev, 2);
+        glUniform1i(glObj.temporal.noMotionBlur.uniformLoc.texVel, 3);
 
-        glUniform4fv(gl.temporal.noMotionBlur.uniformLoc.texelSize, 1, &texel_size.x);
-        glUniform4fv(gl.temporal.noMotionBlur.uniformLoc.jitterUv, 1, &jitter_uv.x);
-        glUniform1f(gl.temporal.noMotionBlur.uniformLoc.time, time);
-        glUniform1f(gl.temporal.noMotionBlur.uniformLoc.feedbackMin, feedback_min);
-        glUniform1f(gl.temporal.noMotionBlur.uniformLoc.feedbackMax, feedback_max);
-        glUniform1f(gl.temporal.noMotionBlur.uniformLoc.motionScale, motion_scale);
+        glUniform4fv(glObj.temporal.noMotionBlur.uniformLoc.texelSize, 1, &texelSize.x);
+        glUniform4fv(glObj.temporal.noMotionBlur.uniformLoc.jitterUv, 1, &jitterUv.x);
+        glUniform1f(glObj.temporal.noMotionBlur.uniformLoc.time, time);
+        glUniform1f(glObj.temporal.noMotionBlur.uniformLoc.feedbackMin, feedbackMin);
+        glUniform1f(glObj.temporal.noMotionBlur.uniformLoc.feedbackMax, feedbackMax);
+        glUniform1f(glObj.temporal.noMotionBlur.uniformLoc.motionScale, motionScale);
     }
 
-    glBindVertexArray(gl.vao);
+    glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
     glUseProgram(0);
 }
 
-void blit_texture(uint32_t tex, uint32_t depth) {
-    ASSERT(glIsTexture(tex));
+void blitTexture(uint32_t tex, uint32_t depth) {
+    ghoul_assert(glIsTexture(tex), "No texture");
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, tex);
 
     if (depth) {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, depth);
-        glUseProgram(blit::program_tex_depth);
-        glUniform1i(blit::uniform_loc_tex_color, 0);
-        glUniform1i(blit::uniform_loc_tex_depth, 1);
+        glUseProgram(glObj.blit.programTexDepth);
+        glUniform1i(glObj.blit.uniformLoc.texColor, 0);
+        glUniform1i(glObj.blit.uniformLoc.texDepth, 1);
     }
     else {
-        glUseProgram(blit::program_tex);
-        glUniform1i(blit::uniform_loc_texture, 0);
+        glUseProgram(glObj.blit.programTex);
+        glUniform1i(glObj.blit.uniformLoc.texture, 0);
     }
 
-    glBindVertexArray(gl.vao);
+    glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
     glUseProgram(0);
     glActiveTexture(GL_TEXTURE0);
 }
 
-void blit_color(vec4_t color) {
-    glUseProgram(blit::program_col);
-    glUniform4fv(blit::uniform_loc_color, 1, &color.x);
-    glBindVertexArray(gl.vao);
+void blitColor(vec4_t color) {
+    glUseProgram(glObj.blit.programCol);
+    glUniform4fv(glObj.blit.uniformLoc.color, 1, &color.x);
+    glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
     glUseProgram(0);
 }
 
 void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
-    ASSERT(glIsTexture(settings.inputTextures.depth));
-    ASSERT(glIsTexture(settings.inputTextures.color));
-    ASSERT(glIsTexture(settings.inputTextures.normal));
+    ghoul_assert(glIsTexture(settings.inputTextures.depth), "No texture");
+    ghoul_assert(glIsTexture(settings.inputTextures.color), "No texture");
+    ghoul_assert(glIsTexture(settings.inputTextures.normal), "No texture");
     if (settings.temporalReprojection.enabled) {
-        ASSERT(glIsTexture(settings.inputTextures.velocity));
+        ghoul_assert(glIsTexture(settings.inputTextures.velocity), "No texture");
     }
 
     // For seeding noise
     static float time = 0.f;
     time = time + 0.016f;
-    if (time > 100.f) time -= 100.f;
+    if (time > 100.f) {
+        time -= 100.f;
+    }
 
-    static vec2_t prev_jitter = {0,0};
-    vec3_t L = mat4_mul_vec3(V, vec3_set(0, 0, 0), 1.0f);
-    vec3_t light_dir = vec3_normalize(L);
-    vec3_t light_col = vec3_set1(5.0f);
-    mat4_t inv_P = mat4_inverse(P);
-    vec2_t near_far = extract_near_far(P);
-    vec2_t jitter = extract_jitter_uv(P);
-    bool ortho = is_ortho_proj_matrix(P);
+    static vec2_t prevJitter = { 0.f, 0.f };
+    vec3_t L = mat4_mul_vec3(V, vec3_set(0.f, 0.f, 0.f), 1.0f);
+    vec3_t lightDir = vec3_normalize(L);
+    vec3_t lightCol = vec3_set1(5.f);
+    mat4_t invP = mat4_inverse(P);
+    vec2_t nearFar = extractNearFar(P);
+    vec2_t jitter = extractJitterUv(P);
+    bool ortho = isOrthoProjMatrix(P);
 
-    int last_fbo;
-    int last_viewport[4];
-    int last_draw_buffer;
-    int last_blend;
-    int last_colormask[4];
-    int last_depthmask;
 
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &last_fbo);
-    glGetIntegerv(GL_VIEWPORT, last_viewport);
-    glGetIntegerv(GL_DRAW_BUFFER, &last_draw_buffer);
-    glGetIntegerv(GL_BLEND, &last_blend);
-    glGetIntegerv(GL_COLOR_WRITEMASK, last_colormask);
-    glGetIntegerv(GL_DEPTH_WRITEMASK, &last_depthmask);
+    int lastFbo;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &lastFbo);
+    int lastViewport[4];
+    glGetIntegerv(GL_VIEWPORT, lastViewport);
+    int lastDrawBuffer;
+    glGetIntegerv(GL_DRAW_BUFFER, &lastDrawBuffer);
+    int lastBlend;
+    glGetIntegerv(GL_BLEND, &lastBlend);
+    int lastColormask[4];
+    glGetIntegerv(GL_COLOR_WRITEMASK, lastColormask);
+    int lastDepthmask;
+    glGetIntegerv(GL_DEPTH_WRITEMASK, &lastDepthmask);
 
-    int width = last_viewport[2];
-    int height = last_viewport[3];
+    int width = lastViewport[2];
+    int height = lastViewport[3];
 
-    if (width > (int)gl.texWidth || height > (int)gl.texHeight) {
+    if (width > static_cast<int>(glObj.texWidth) ||
+        height > static_cast<int>(glObj.texHeight))
+    {
         initialize(width, height);
     }
 
-    // glViewport(0, 0, gl.tex_width, gl.tex_height);
     glViewport(0, 0, width, height);
-    glBindVertexArray(gl.vao);
+    glBindVertexArray(glObj.vao);
 
-    PUSH_GPU_SECTION("Linearize Depth") {
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.linearDepth.fbo);
-        glViewport(0, 0, gl.texWidth, gl.texHeight);
-        glClearColor(near_far[1],0,0,0);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glViewport(0, 0, width, height);
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_BLEND);
-        compute_linear_depth(settings.inputTextures.depth, near_far[0], near_far[1], ortho);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-    }
-    POP_GPU_SECTION()
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Linearize Depth");
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.linearDepth.fbo);
+    glViewport(0, 0, glObj.texWidth, glObj.texHeight);
+    glClearColor(nearFar[1], 0, 0, 0);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glViewport(0, 0, width, height);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+    computeLinearDepth(settings.inputTextures.depth, nearFar[0], nearFar[1], ortho);
+    glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    glPopDebugGroup();
 
-    PUSH_GPU_SECTION("Generate Linear Depth Mipmaps") {
-        glBindTexture(GL_TEXTURE_2D, gl.linearDepth.texture);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    POP_GPU_SECTION()
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Generate Linear Depth Mipmaps");
+    glBindTexture(GL_TEXTURE_2D, glObj.linearDepth.texture);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    glPopDebugGroup();
 
     if (settings.temporalReprojection.enabled) {
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.velocity.fbo);
-        glViewport(0, 0, gl.velocity.texWidth, gl.velocity.texHeight);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.velocity.fbo);
+        glViewport(0, 0, glObj.velocity.texWidth, glObj.velocity.texHeight);
 
-        PUSH_GPU_SECTION("Velocity: Tilemax") {
-            glDrawBuffer(GL_COLOR_ATTACHMENT0);
-            blit_tilemax(settings.inputTextures.velocity, gl.texWidth, gl.texHeight);
-        }
-        POP_GPU_SECTION()
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Velocity: Tilemax");
+        glDrawBuffer(GL_COLOR_ATTACHMENT0);
+        blitTilemax(settings.inputTextures.velocity, glObj.texWidth, glObj.texHeight);
+        glPopDebugGroup();
 
-        PUSH_GPU_SECTION("Velocity: Neighbormax") {
-            glDrawBuffer(GL_COLOR_ATTACHMENT1);
-            blit_neighbormax(gl.velocity.texTilemax, gl.velocity.texWidth, gl.velocity.texHeight);
-        }
-        POP_GPU_SECTION()
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Velocity: Neighbormax");
+        glDrawBuffer(GL_COLOR_ATTACHMENT1);
+        blitNeighbormax(
+            glObj.velocity.texTilemax,
+            glObj.velocity.texWidth,
+            glObj.velocity.texHeight
+        );
+        glPopDebugGroup();
     }
 
-    GLenum dst_buffer = GL_COLOR_ATTACHMENT1;
-    uint32_t src_texture = gl.targets.texColor[0];
+    GLenum dstBuffer = GL_COLOR_ATTACHMENT1;
+    uint32_t srcTexture = glObj.targets.texColor[0];
 
-    auto swap_target = [&dst_buffer, &src_texture]() {
-        dst_buffer = dst_buffer == GL_COLOR_ATTACHMENT0 ? GL_COLOR_ATTACHMENT1 : GL_COLOR_ATTACHMENT0;
-        src_texture = src_texture == gl.targets.texColor[0] ? gl.targets.texColor[1] : gl.targets.texColor[0];
+    auto swapTarget = [&dstBuffer, &srcTexture]() {
+        dstBuffer =
+            dstBuffer == GL_COLOR_ATTACHMENT0 ?
+            GL_COLOR_ATTACHMENT1 :
+            GL_COLOR_ATTACHMENT0;
+        srcTexture =
+            srcTexture == glObj.targets.texColor[0] ?
+            glObj.targets.texColor[1] :
+            glObj.targets.texColor[0];
     };
 
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gl.targets.fbo);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.targets.fbo);
     glViewport(0, 0, width, height);
 
     if (settings.background.enabled) {
-        PUSH_GPU_SECTION("Clear HDR")
-        glDrawBuffer(dst_buffer);
-        glClearColor(settings.background.r, settings.background.g, settings.background.b, 0.f);
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Clear HDR");
+        glDrawBuffer(dstBuffer);
+        glClearColor(
+            settings.background.r,
+            settings.background.g,
+            settings.background.b,
+            0.f
+        );
         glClear(GL_COLOR_BUFFER_BIT);
-        POP_GPU_SECTION()
-    } else {
-        GLenum draw_buffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-        glDrawBuffers(2, draw_buffers);
-        glClearColor(0.0f, 0.0f, 0.0f, 0.f);
+        glPopDebugGroup();
+    }
+    else {
+        GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+        glDrawBuffers(2, drawBuffers);
+        glClearColor(0.f, 0.f, 0.f, 0.f);
         glClear(GL_COLOR_BUFFER_BIT);
-        glDrawBuffer(dst_buffer);
+        glDrawBuffer(dstBuffer);
     }
 
-    PUSH_GPU_SECTION("Shade")
-    shade_deferred(settings.inputTextures.depth, settings.inputTextures.color, settings.inputTextures.normal, inv_P, light_dir, light_col, time);
-    POP_GPU_SECTION()
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Shade");
+    shadeDeferred(
+        settings.inputTextures.depth,
+        settings.inputTextures.color,
+        settings.inputTextures.normal,
+        invP,
+        lightDir,
+        lightCol,
+        time
+    );
+    glPopDebugGroup();
 
-    PUSH_GPU_SECTION("SSAO")
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "SSAO");
     if (settings.ambientOcclusion[0].enabled) {
-        apply_ssao(gl.linearDepth.texture, settings.inputTextures.normal, P, settings.ambientOcclusion[0].intensity, settings.ambientOcclusion[0].radius, settings.ambientOcclusion[0].horizonBias, settings.ambientOcclusion[0].normalBias);
+        applySsao(
+            glObj.linearDepth.texture,
+            settings.inputTextures.normal,
+            P,
+            settings.ambientOcclusion[0].intensity,
+            settings.ambientOcclusion[0].radius,
+            settings.ambientOcclusion[0].horizonBias,
+            settings.ambientOcclusion[0].normalBias
+        );
     }
     if (settings.ambientOcclusion[1].enabled) {
-        apply_ssao(gl.linearDepth.texture, settings.inputTextures.normal, P, settings.ambientOcclusion[1].intensity, settings.ambientOcclusion[1].radius, settings.ambientOcclusion[1].horizonBias, settings.ambientOcclusion[1].normalBias);
+        applySsao(
+            glObj.linearDepth.texture,
+            settings.inputTextures.normal,
+            P,
+            settings.ambientOcclusion[1].intensity,
+            settings.ambientOcclusion[1].radius,
+            settings.ambientOcclusion[1].horizonBias,
+            settings.ambientOcclusion[1].normalBias
+        );
     }
-    POP_GPU_SECTION()
+    glPopDebugGroup();
 
     if (settings.temporalReprojection.enabled) {
-#if 0
-        swap_target();
-        glDrawBuffer(dst_buffer);
-        apply_aa_tonemapping(src_texture);
-#endif
+        swapTarget();
+        glDrawBuffer(dstBuffer);
+        const float feedbackMin = settings.temporalReprojection.feedbackMin;
+        const float feedbackMax = settings.temporalReprojection.feedbackMax;
+        const float motion_scale =
+            settings.temporalReprojection.motionBlur.enabled ?
+            settings.temporalReprojection.motionBlur.motionScale :
+            0.f;
 
-        swap_target();
-        glDrawBuffer(dst_buffer);
-        const float feedback_min = settings.temporalReprojection.feedbackMin;
-        const float feedback_max = settings.temporalReprojection.feedbackMax;
-        const float motion_scale = settings.temporalReprojection.motionBlur.enabled ? settings.temporalReprojection.motionBlur.motionScale : 0.f;
         if (motion_scale != 0.f)
-            PUSH_GPU_SECTION("Temporal AA + Motion Blur")
+            glPushDebugGroup(
+                GL_DEBUG_SOURCE_APPLICATION,
+                0,
+                -1,
+                "Temporal AA + Motion Blur"
+            );
         else
-            PUSH_GPU_SECTION("Temporal AA")
-            apply_temporal_aa(gl.linearDepth.texture, src_texture, settings.inputTextures.velocity, gl.velocity.texNeighbormax, jitter, prev_jitter, feedback_min, feedback_max,
-                motion_scale, time);
-        POP_GPU_SECTION()
+            glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Temporal AA");
+            applyTemporalAa(
+                glObj.linearDepth.texture,
+                srcTexture,
+                settings.inputTextures.velocity,
+                glObj.velocity.texNeighbormax,
+                jitter,
+                prevJitter,
+                feedbackMin,
+                feedbackMax,
+                motion_scale,
+                time
+            );
+         glPopDebugGroup();
 
-#if 0
-        swap_target();
-        glDrawBuffer(dst_buffer);
-        apply_inverse_aa_tonemapping(src_texture);
-#endif
-
-#if 1
-        PUSH_GPU_SECTION("Sharpen")
-        swap_target();
-        glDrawBuffer(dst_buffer);
-        sharpen::sharpen(src_texture);
-        POP_GPU_SECTION()
-#endif
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Sharpen");
+        swapTarget();
+        glDrawBuffer(dstBuffer);
+        sharpen::sharpen(srcTexture);
+        glPopDebugGroup();
     }
 
     if (settings.inputTextures.emissive) {
-        PUSH_GPU_SECTION("Add Emissive")
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Add Emissive");
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
-        blit_texture(settings.inputTextures.emissive, 0);
+        blitTexture(settings.inputTextures.emissive, 0);
         glDisable(GL_BLEND);
-        POP_GPU_SECTION()
+        glPopDebugGroup();
     }
 
     if (settings.depthOfField.enabled) {
-        swap_target();
-        glDrawBuffer(dst_buffer);
-        PUSH_GPU_SECTION("DOF")
-        apply_dof(gl.linearDepth.texture, src_texture, settings.depthOfField.focusDepth, settings.depthOfField.focusScale, time);
-        POP_GPU_SECTION()
+        swapTarget();
+        glDrawBuffer(dstBuffer);
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "DOF");
+        applyDof(
+            glObj.linearDepth.texture,
+            srcTexture,
+            settings.depthOfField.focusDepth,
+            settings.depthOfField.focusScale,
+            time
+        );
+        glPopDebugGroup();
     }
 
-    PUSH_GPU_SECTION("Tonemapping") {
-        swap_target();
-        glDrawBuffer(dst_buffer);
-        const auto tonemapper = settings.tonemapping.enabled ? settings.tonemapping.mode : Tonemapping::Passthrough;
-        apply_tonemapping(src_texture, tonemapper, settings.tonemapping.exposure, settings.tonemapping.gamma);
-    }
-    POP_GPU_SECTION()
+    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Tonemapping");
+    swapTarget();
+    glDrawBuffer(dstBuffer);
+    const Tonemapping tonemapper =
+        settings.tonemapping.enabled ?
+        settings.tonemapping.mode :
+        Tonemapping::Passthrough;
+    applyTonemapping(
+        srcTexture,
+        tonemapper,
+        settings.tonemapping.exposure,
+        settings.tonemapping.gamma
+    );
+    glPopDebugGroup();
 
     if (settings.inputTextures.postTonemap) {
-        PUSH_GPU_SECTION("Add Post Tonemap")
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Add Post Tonemap");
         glEnable(GL_BLEND);
         glColorMask(1, 1, 1, 1);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        blit_texture(settings.inputTextures.postTonemap, 0);
+        blitTexture(settings.inputTextures.postTonemap, 0);
         glDisable(GL_BLEND);
-        POP_GPU_SECTION()
+        glPopDebugGroup();
     }
 
-    prev_jitter = jitter;
+    prevJitter = jitter;
 
     if (settings.fxaa.enabled) {
-        swap_target();
-        glDrawBuffer(dst_buffer);
-        PUSH_GPU_SECTION("FXAA");
-        fxaa::apply_fxaa(src_texture, width, height);
-        POP_GPU_SECTION();
+        swapTarget();
+        glDrawBuffer(dstBuffer);
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "FXAA");
+        fxaa::applyFxaa(srcTexture, width, height);
+        glPopDebugGroup();
     }
 
     // Activate backbuffer or whatever was bound before
     {
-        PUSH_GPU_SECTION("PostProcess Blit Result")
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "PostProcess Blit Result");
     
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, last_fbo);
-        glViewport(last_viewport[0], last_viewport[1], last_viewport[2], last_viewport[3]);
-        glDrawBuffer((GLenum)last_draw_buffer);
+        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
+        glViewport(lastViewport[0], lastViewport[1], lastViewport[2], lastViewport[3]);
+        glDrawBuffer(static_cast<GLenum>(lastDrawBuffer));
 
-        swap_target();
+        swapTarget();
         glDepthMask(0);
         glEnable(GL_BLEND);
         glColorMask(1, 1, 1, 1);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        blit_texture(src_texture, settings.inputTextures.depth);
+        blitTexture(srcTexture, settings.inputTextures.depth);
         glDisable(GL_BLEND);
         
-        POP_GPU_SECTION();
+        glPopDebugGroup();
     }
 
     // Reset rest of state
     glBlendFunc(GL_ONE, GL_ZERO);
-    if (last_blend)
+    if (lastBlend) {
         glEnable(GL_BLEND);
-    else
+    }
+    else {
         glDisable(GL_BLEND);
+    }
 
-    glDepthMask(last_depthmask);
-    glColorMask(last_colormask[0], last_colormask[1], last_colormask[2], last_colormask[3]);
+    glDepthMask(lastDepthmask);
+    glColorMask(lastColormask[0], lastColormask[1], lastColormask[2], lastColormask[3]);
 }
 
 }  // namespace postprocessing

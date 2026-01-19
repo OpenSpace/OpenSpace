@@ -26,10 +26,11 @@
 #define __OPENSPACE_MODULE_MOLECULE___MOLECULEMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/threadpool.h>
-#include <glm/mat4x4.hpp>
+#include <ghoul/glm.h>
 
 struct md_gl_shaders_t;
 
@@ -40,27 +41,21 @@ public:
     constexpr static const char* Name = "Molecule";
 
     MoleculeModule();
-    ~MoleculeModule();
-
-    GLuint fbo() const { return _fbo; }
-    GLuint colorTexture()  const { return _colorTex; }
-    GLuint normalTexture() const { return _normalTex; }
-    GLuint depthTexture()  const { return _depthTex; }
-    
-    const md_gl_shaders_t& shaders() const { return *_shaders; }
-
-    ThreadPool& threadPool() { return _threadPool; }
 
     void internalInitializeGL() final;
     void internalDeinitializeGL() final;
 
-    void setViewMatrix(const glm::mat4& V) {
-        _V = V;
-    }
-    
-    void setProjectionMatrix(const glm::mat4& P) {
-        _P = P;
-    }
+    GLuint fbo() const;
+    GLuint colorTexture() const;
+    GLuint normalTexture() const;
+    GLuint depthTexture() const;
+
+    const md_gl_shaders_t& shaders() const;
+
+    ThreadPool& threadPool();
+
+    void setViewMatrix(glm::mat4 v);
+    void setProjectionMatrix(glm::mat4 p);
 
     std::vector<documentation::Documentation> documentations() const override;
 
@@ -77,26 +72,26 @@ private:
     int _height = 0;
     
     std::unique_ptr<md_gl_shaders_t> _shaders = nullptr;
-    glm::mat4 _V;
-    glm::mat4 _P;
+    glm::mat4 _viewMatrix;
+    glm::mat4 _projectionMatrix;
 
-    properties::BoolProperty    _ssaoEnabled;
-    properties::FloatProperty   _ssaoIntensity;
-    properties::FloatProperty   _ssaoRadius;
-    properties::FloatProperty   _ssaoHorizonBias;
-    properties::FloatProperty   _ssaoNormalBias;
+    properties::BoolProperty _ssaoEnabled;
+    properties::FloatProperty _ssaoIntensity;
+    properties::FloatProperty _ssaoRadius;
+    properties::FloatProperty _ssaoHorizonBias;
+    properties::FloatProperty _ssaoNormalBias;
 
-    properties::BoolProperty    _ssao2Enabled;
-    properties::FloatProperty   _ssao2Intensity;
-    properties::FloatProperty   _ssao2Radius;
-    properties::FloatProperty   _ssao2HorizonBias;
-    properties::FloatProperty   _ssao2NormalBias;
+    properties::BoolProperty _ssao2Enabled;
+    properties::FloatProperty _ssao2Intensity;
+    properties::FloatProperty _ssao2Radius;
+    properties::FloatProperty _ssao2HorizonBias;
+    properties::FloatProperty _ssao2NormalBias;
     
-    properties::FloatProperty   _exposure;
+    properties::FloatProperty _exposure;
 
-    properties::BoolProperty    _dofEnabled;
-    properties::FloatProperty   _dofFocusDistance;
-    properties::FloatProperty   _dofFocusRange;
+    properties::BoolProperty _dofEnabled;
+    properties::FloatProperty _dofFocusDistance;
+    properties::FloatProperty _dofFocusRange;
 
     ThreadPool _threadPool;
 };

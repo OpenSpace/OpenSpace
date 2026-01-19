@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <core/md_str.h>
+
 static constexpr str_t v_shader_src_fs_quad = STR(
 R"(
 #version 150 core
@@ -1437,7 +1439,7 @@ vec4 temporal_reprojection(vec2 ss_txc, vec2 ss_vel, float vs_dist) {
   vec4 cmax = max(ctl, max(ctc, max(ctr, max(cml, max(cmc, max(cmr, max(cbl, max(cbc, cbr))))))));
 
 #if MINMAX_3X3_ROUNDED || USE_YCOCG || USE_CLIPPING
-  ec4 cavg = (ctl + ctc + ctr + cml + cmc + cmr + cbl + cbc + cbr) / 9.0;
+  vec4 cavg = (ctl + ctc + ctr + cml + cmc + cmr + cbl + cbc + cbr) / 9.0;
 #endif
 
 #if MINMAX_3X3_ROUNDED
