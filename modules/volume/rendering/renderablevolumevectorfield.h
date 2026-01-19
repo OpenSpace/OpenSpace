@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,48 +22,61 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/volumemodule.h>
+#ifndef __OPENSPACE_MODULE_VOLUME_RENDERABLEVECTORFIELD___H__
+#define __OPENSPACE_MODULE_VOLUME_RENDERABLEVECTORFIELD___H__
 
-#include <modules/volume/rendering/renderabletimevaryingvolume.h>
-#include <modules/volume/rendering/renderablevolumevectorfield.h>
-#include <modules/volume/rendering/volumeclipplane.h>
-#include <modules/volume/tasks/generaterawvolumetask.h>
-#include <modules/volume/tasks/generaterawvolumefromfiletask.h>
-#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/task.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
 
-namespace openspace {
+#include <modules/volume/rawvolume.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/dvec3property.h>
+#include <ghoul/opengl/uniformcache.h>
 
-using namespace volume;
+namespace openspace::documentation { struct Documentation; }
 
-VolumeModule::VolumeModule() : OpenSpaceModule(Name) {}
+namespace openspace::volume {
 
-void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* rFactory =
-        FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(rFactory, "No renderable factory existed");
-    rFactory->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");
-    rFactory->registerClass<RenderableVectorField>("RenderableVectorField");
+struct VelocityData {
+    float vx;
+    float vy;
+    float vz;
+};
 
-    ghoul::TemplateFactory<Task>* tFactory = FactoryManager::ref().factory<Task>();
-    ghoul_assert(tFactory, "No task factory existed");
-    tFactory->registerClass<GenerateRawVolumeTask>("GenerateRawVolumeTask");
-    tFactory->registerClass<GenerateRawVolumeFromFileTask>(
-        "GenerateRawVolumeFromFileTask"
-    );
-}
+class RenderableVectorField : public Renderable {
+public:
+   explicit RenderableVectorField(const ghoul::Dictionary& dictionary);
 
-std::vector<documentation::Documentation> VolumeModule::documentations() const {
-    return {
-        RenderableTimeVaryingVolume::Documentation(),
-        RenderableVectorField::Documentation(),
-        GenerateRawVolumeTask::Documentation(),
-        VolumeClipPlane::Documentation()
-    };
-}
+   ~RenderableVectorField() override = default;
 
-} // namespace openspace
+   void initializeGL() override;
+   void deinitializeGL() override;
+
+   bool isReady() const override;
+
+
+   void render(const RenderData& data, RendererTasks& renderTask) override;
+   void update(const UpdateData& data) override;
+
+   static documentation::Documentation Documentation();
+
+
+private:
+    UniformCache(uniform1) _uniformCache;
+
+    properties::StringProperty _sourceFile;
+    properties::DVec3Property _minDomain;
+    properties::DVec3Property _maxDomain;
+    properties::DVec3Property _dimensions;
+
+    properties::IntProperty _stride;
+
+    std::shared_ptr<RawVolume<VelocityData>> _volumeData;
+
+    bool _vectorFieldIsDirty = true;
+};
+
+
+} // namespace openspace::volume
+
+#endif // __OPENSPACE_MODULE_VOLUME_RENDERABLEVECTORFIELD___H__
