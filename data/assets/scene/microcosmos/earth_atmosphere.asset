@@ -55,7 +55,7 @@ local EarthMoleculesTroposphere = {
     SSAOEnabled = true
   },
   GUI = {
-    Name = "Troposphere",
+    Name = "Earth Troposphere",
     Path = "/Microcosmos/Atmosphere"
   }
 }
@@ -87,7 +87,7 @@ local EarthMoleculesThermosphere = {
     SSAOEnabled = true
   },
   GUI = {
-    Name = "Thermosphere",
+    Name = "Earth Thermosphere",
     Path = "/Microcosmos/Atmosphere"
   }
 }

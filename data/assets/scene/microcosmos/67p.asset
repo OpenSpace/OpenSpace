@@ -1,4 +1,4 @@
-local 67p = asset.require("scene/solarsystem/missions/rosetta/67p.asset")
+local comet67p = asset.require("scene/solarsystem/missions/rosetta/67p.asset")
 
 
 local moleculeAcetaldehyde = asset.resource({
@@ -18,7 +18,7 @@ local moleculeAceticacid = asset.resource({
 local moleculeButanal = asset.resource({
   Name = "Molecule Butanal",
   Type = "HttpSynchronization",
-  Identifier = "molecule_dynamics_butanal-acid",
+  Identifier = "molecule_dynamics_butanal",
   Version = 1
 })
 
@@ -104,7 +104,7 @@ local DefaultAnimSpeed = 100
 
 local MoleculeRosetta = {
   Identifier = "MoleculeRosetta",
-  Parent = 67p.Barycenter.Identifier,
+  Parent = comet67p.Barycenter.Identifier,
   Transform = {
     Translation = {
       Type = "StaticTranslation",
@@ -217,7 +217,7 @@ local MoleculeEg = {
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeEG .. "eg",
+    MoleculeFile = moleculeEG .. "eg.arc",
     TrajectoryFile = "",
     AnimationSpeed = DefaultAnimSpeed,
     RepType = "SpaceFill"

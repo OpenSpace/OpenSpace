@@ -83,7 +83,7 @@ local MoleculeO2 = {
   Transform = {
     Translation = {
       Type = "StaticTranslation",
-      Position = { xOffset, 0.0, 0.0 }
+      Position = { 0.0, 0.0, 0.0 }
     }
   },
   Renderable = {
@@ -178,7 +178,7 @@ local MoleculeAlanin = {
     Type = "RenderableMolecule",
     MoleculeFile = molecule1ala500 .. "1ALA-500.pdb",
     TrajectoryFile = molecule1ala500 .. "1ALA-500.pdb",
-    AnimationSpeed = info.Speed or DefaultAnimSpeed,
+    AnimationSpeed = DefaultAnimSpeed,
     RepType = "Licorice"
   },
   GUI = {
@@ -221,7 +221,7 @@ local MoleculeIce = {
   Renderable = {
     Type = "RenderableMolecule",
     MoleculeFile = iceMelting .. "ice.gro",
-    TrajectoryFile = iceMelting .. "ice-md-npt-sa.xtc",
+    TrajectoryFile = iceMelting .. "ice.xtc",
     AnimationSpeed = 10.0,
     RepType = "SpaceFill"
   },
