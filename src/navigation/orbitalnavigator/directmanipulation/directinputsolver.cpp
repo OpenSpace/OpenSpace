@@ -25,6 +25,8 @@
 #include <openspace/navigation/orbitalnavigator/directmanipulation/directinputsolver.h>
 
 #include <openspace/camera/camera.h>
+#include <openspace/camera/camerapose.h>
+#include <openspace/navigation/orbitalnavigator/directmanipulation/directmanipulation.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
@@ -39,14 +41,14 @@ namespace {
         std::vector<glm::dvec2> screenPoints;
         int nDOF;
         const openspace::Camera* camera;
-        openspace::SceneGraphNode* node;
+        const openspace::SceneGraphNode* node;
         LMstat stats;
     };
 
-    // project back a 3D point in model view to clip space [-1,1] coordinates on the view
+    // Project back a 3D point in model view to clip space [-1,1] coordinates on the view
     // plane
     glm::dvec2 castToNDC(const glm::dvec3& vec, openspace::Camera& camera,
-                         openspace::SceneGraphNode* node)
+                         const openspace::SceneGraphNode* node)
     {
         glm::dvec3 posInCamSpace = glm::inverse(camera.rotationQuaternion()) *
             (node->worldRotationMatrix() * vec +
@@ -68,70 +70,27 @@ namespace {
             q[i] = par[i];
         }
 
-        using namespace glm;
-        // Create variables from current state
-        dvec3 camPos = ptr->camera->positionVec3();
-        dvec3 centerPos = ptr->node->worldPosition();
+        using DirectManipulation = openspace::interaction::DirectManipulation;
+        DirectManipulation::VelocityStates velocities = {
+            .orbit = glm::dvec2(q[0], q[1]),
+            .zoom = q[2],
+            .roll = q[3],
+            .pan = glm::dvec2(q[4], q[5])
+        };
 
-        dvec3 directionToCenter = normalize(centerPos - camPos);
-        dvec3 lookUp = ptr->camera->lookUpVectorWorldSpace();
-        dvec3 camDirection = ptr->camera->viewDirectionWorldSpace();
-
-        // Make a representation of the rotation quaternion with local and global
-        // rotations
-        dmat4 lookAtMat = lookAt(
-            dvec3(0, 0, 0),
-            directionToCenter,
-            // To avoid problem with lookup in up direction
-            normalize(camDirection + lookUp)
+        // @TODO (emmbr, 2026-01-19): Maybe it would be better to put this function
+        // somewhere else, to avoid the circular dependency
+        openspace::CameraPose pose = DirectManipulation::cameraPoseFromVelocities(
+            velocities,
+            ptr->camera,
+            ptr->node
         );
-        dquat globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
-        dquat localCamRot = inverse(globalCamRot) * ptr->camera->rotationQuaternion();
 
-        {
-            // Roll
-            dquat rollRot = angleAxis(q[3], dvec3(0.0, 0.0, 1.0));
-            localCamRot = localCamRot * rollRot;
-        }
-        {
-            // Panning (local rotation)
-            dvec3 eulerAngles(q[5], q[4], 0);
-            dquat panRot = dquat(eulerAngles);
-            localCamRot = localCamRot * panRot;
-        }
-        {
-            // Orbit (global rotation)
-            dvec3 eulerAngles(q[1], q[0], 0);
-            dquat rotationDiffCamSpace = dquat(eulerAngles);
+        // Update the camera state (for a local copy of the camera)
+        openspace::Camera cam = *ptr->camera;
+        cam.setPose(pose);
 
-            dvec3 centerToCamera = camPos - centerPos;
-
-            dquat rotationDiffWorldSpace =
-                globalCamRot * rotationDiffCamSpace * inverse(globalCamRot);
-            dvec3 rotationDiffVec3 =
-                centerToCamera * rotationDiffWorldSpace - centerToCamera;
-            camPos += rotationDiffVec3;
-
-            centerToCamera = camPos - centerPos;
-            directionToCenter = normalize(-centerToCamera);
-            dvec3 lookUpWhenFacingCenter =
-                globalCamRot * dvec3(ptr->camera->lookUpVectorCameraSpace());
-            lookAtMat = lookAt(
-                dvec3(0, 0, 0),
-                directionToCenter,
-                lookUpWhenFacingCenter
-            );
-            globalCamRot = normalize(quat_cast(inverse(lookAtMat)));
-        }
-        { // Zooming
-            camPos += directionToCenter * q[2];
-        }
-        // Update the camera state
-        openspace::Camera cam = *(ptr->camera);
-        cam.setPositionVec3(camPos);
-        cam.setRotation(globalCamRot * localCamRot);
-
-        // we now have a new position and orientation of camera, project surfacePoint to
+        // We now have a new position and orientation of camera, project surfacePoint to
         // the new screen to get distance to minimize
         glm::dvec2 newScreenPoint = castToNDC(
             ptr->selectedPoints.at(x),

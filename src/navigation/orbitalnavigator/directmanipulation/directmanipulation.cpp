@@ -152,7 +152,7 @@ DirectManipulation::DirectManipulation()
     addProperty(_defaultRenderableTypes);
 }
 
-void DirectManipulation::updateStateFromInput() {
+void DirectManipulation::updateCameraFromInput() {
     std::vector<TouchInputHolder> touchPoints =
         global::interactionHandler->touchInputState().touchPoints();
 
@@ -181,8 +181,8 @@ void DirectManipulation::updateStateFromInput() {
                     TouchInput(
                         0, // Dummy ID
                         9999, // Dummy finger ID
-                        mousePos.x,
-                        mousePos.y,
+                        static_cast<float>(mousePos.x),
+                        static_cast<float>(mousePos.y),
                         0.0 // Dummy timestamp
                     )
                 )
@@ -220,13 +220,20 @@ void DirectManipulation::updateStateFromInput() {
 void DirectManipulation::applyDirectControl(
                                          const std::vector<TouchInputHolder>& touchPoints)
 {
+    Camera* camera = global::navigationHandler->camera();
+    const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
+
+    if (!anchor || !camera) {
+        return;
+    }
+
     // Find best transform values for the new camera state and store them in param
     std::vector<double> param(6, 0.0);
     bool lmSuccess = _directInputSolver.solve(
         touchPoints,
         _selectedNodeSurfacePoints,
         &param,
-        *global::navigationHandler->camera()
+        *camera
     );
 
     if (!lmSuccess) {
@@ -246,8 +253,15 @@ void DirectManipulation::applyDirectControl(
             velocities.pan = glm::dvec2(param[4], param[5]);
         }
     }
-    stepDirectTouch(velocities);
 
+    CameraPose pose =
+        cameraPoseFromVelocities(velocities, camera, anchor);
+
+    // Update the camera state
+    camera->setPose(pose);
+
+    // Mark that a camera interaction happened and then reset velocities
+    global::navigationHandler->orbitalNavigator().markCameraInteraction();
     global::navigationHandler->orbitalNavigator().resetVelocities();
 }
 
@@ -259,44 +273,43 @@ void DirectManipulation::updateNodeSurfacePoints(
     const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
     const Camera* camera = global::navigationHandler->camera();
 
-    SceneGraphNode* node = sceneGraphNode(anchor->identifier());
-
-    const glm::dquat camToWorldSpace = camera->rotationQuaternion();
+    const glm::dquat camRotation = camera->rotationQuaternion();
     const glm::dvec3 camPos = camera->positionVec3();
 
     std::vector<DirectInputSolver::SelectedBody> surfacePoints;
 
     for (const TouchInputHolder& inputHolder : touchPoints) {
+        const size_t id = inputHolder.fingerId();
         // Normalized -1 to 1 coordinates on screen
-        const double xCo = 2 * (inputHolder.latestInput().x - 0.5);
-        const double yCo = -2 * (inputHolder.latestInput().y - 0.5);
+        const double xCo = 2.0 * (inputHolder.latestInput().x - 0.5);
+        const double yCo = -2.0 * (inputHolder.latestInput().y - 0.5);
 
-        const glm::dvec3 cursorInWorldSpace = camToWorldSpace *
+        const glm::dvec3 cursorInWorldSpace = camRotation *
             glm::dvec3(glm::inverse(camera->projectionMatrix()) *
             glm::dvec4(xCo, yCo, -1.0, 1.0));
 
-        const glm::dvec3 raytrace = glm::normalize(cursorInWorldSpace);
-        const size_t id = inputHolder.fingerId();
+        const glm::dvec3 rayDirection = glm::normalize(cursorInWorldSpace);
 
         // Compute positions on anchor node, by checking if touch input
         // intersect interaction sphere
         double intersectionDist = 0.0;
+        const double interactionSphere = anchor->interactionSphere();
         const bool intersected = glm::intersectRaySphere(
             camPos,
-            raytrace,
-            node->worldPosition(),
-            node->interactionSphere() * node->interactionSphere(),
+            rayDirection,
+            anchor->worldPosition(),
+            interactionSphere * interactionSphere,
             intersectionDist
         );
 
         if (intersected) {
-            glm::dvec3 intersectionPos = camPos + raytrace * intersectionDist;
-            glm::dvec3 pointInModelView = glm::inverse(node->worldRotationMatrix()) *
-                                            (intersectionPos - node->worldPosition());
+            glm::dvec3 intersectionPos = camPos + rayDirection * intersectionDist;
+            glm::dvec3 pointInModelView = glm::inverse(anchor->worldRotationMatrix()) *
+                                            (intersectionPos - anchor->worldPosition());
 
             // Note that node is saved as the direct input solver was initially
             // implemented to handle touch contact points on multiple nodes
-            surfacePoints.push_back({ id, node, pointInModelView });
+            surfacePoints.push_back({ id, anchor, pointInModelView });
         }
     }
 
@@ -305,13 +318,12 @@ void DirectManipulation::updateNodeSurfacePoints(
 
 // Main update call, calculates the new orientation and position for the camera depending
 // on _vel and dt. Called every frame
-void DirectManipulation::stepDirectTouch(const VelocityStates& velocities) {
-    const SceneGraphNode* anchor = global::navigationHandler->anchorNode();
-    Camera* camera = global::navigationHandler->camera();
-
-    if (!anchor || !camera) {
-        return;
-    }
+CameraPose DirectManipulation::cameraPoseFromVelocities(const VelocityStates& velocities,
+                                                        const Camera* camera,
+                                                        const SceneGraphNode* anchor)
+{
+    ghoul_assert(camera != nullptr, "Camera must not be null");
+    ghoul_assert(anchor != nullptr, "Anchor node must not be null");
 
     const glm::dvec3 anchorPos = anchor->worldPosition();
 
@@ -366,11 +378,7 @@ void DirectManipulation::stepDirectTouch(const VelocityStates& velocities) {
 
     pose.rotation = composeCameraRotation(rot);
 
-    // Update the camera state
-    camera->setPose(pose);
-
-    // Mark that a camera interaction happened
-    global::navigationHandler->orbitalNavigator().markCameraInteraction();
+    return pose;
 }
 
 bool DirectManipulation::isValidDirectTouchNode() const {

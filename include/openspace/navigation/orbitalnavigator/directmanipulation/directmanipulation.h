@@ -35,6 +35,12 @@
 #include <ghoul/glm.h>
 #include <set>
 
+namespace openspace {
+    class Camera;
+    struct CameraPose;
+    class SceneGraphNode;
+} // namespace openspace
+
 namespace openspace::interaction {
 
 class DirectManipulation : public properties::PropertyOwner {
@@ -48,10 +54,12 @@ public:
 
     DirectManipulation();
 
-    void updateStateFromInput();
+    void updateCameraFromInput();
+
+    static CameraPose cameraPoseFromVelocities(const VelocityStates& velocities,
+        const Camera* camera, const SceneGraphNode* anchor);
 
 private:
-    void stepDirectTouch(const VelocityStates& velocities);
 
     /**
      * Calculates the new camera state such that it minimizes the L2 error in screenspace

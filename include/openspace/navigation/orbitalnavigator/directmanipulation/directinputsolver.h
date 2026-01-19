@@ -49,7 +49,7 @@ public:
      */
     struct SelectedBody {
         size_t id = 0;
-        SceneGraphNode* node = nullptr;
+        const SceneGraphNode* node = nullptr;
         glm::dvec3 coordinates = glm::dvec3(0.0);
     };
 

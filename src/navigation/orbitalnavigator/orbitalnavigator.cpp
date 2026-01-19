@@ -616,7 +616,7 @@ void OrbitalNavigator::updateCamera(double deltaTime) {
 
 
     // TODO: Mkae usre the variables above are also updates for direct manipulation
-    _directManipulation.updateStateFromInput();
+    _directManipulation.updateCameraFromInput();
 
     updateCameraStateFromStates(deltaTime);
 }
