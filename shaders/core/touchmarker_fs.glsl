@@ -28,7 +28,6 @@
 in vec2 out_position;
 
 uniform float opacity;
-uniform float thickness;
 uniform vec3 color;
 
 
@@ -39,10 +38,10 @@ Fragment getFragment() {
   float mag = dot(n.xy, n.xy);
 
   float edgeSmoothing = 1.0;
-  float w = 0.1; // wdith for smoothing
+  float w = 0.1; // width for smoothing
   if (mag > 1.0 - w) {
     // Kill pixels outside circle. Do a smoothstep for soft border
-    float t = (mag - (1.0-w)) / w;
+    float t = (mag - (1.0 - w)) / w;
     edgeSmoothing = smoothstep(1.0, 0.0, t);
     if (edgeSmoothing <= 0.0) {
         discard;
@@ -53,7 +52,7 @@ Fragment getFragment() {
   // Calculate lighting
   vec3 light_dir = vec3(0.0, 0.0, 1.0);
   float diffuse = max(0.0, dot(light_dir, n));
-  float alpha = min(pow(sqrt(mag), thickness), opacity);
+  float alpha = min(mag, opacity);
   alpha *= edgeSmoothing;
 
   Fragment frag;

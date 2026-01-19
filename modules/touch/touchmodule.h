@@ -27,7 +27,6 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <modules/touch/include/touchmarker.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/util/touch.h>
@@ -59,9 +58,6 @@ private:
     void processNewInput();
 
     std::unique_ptr<TuioEar> _ear;
-
-    // TODO: Move to InteractionHandler
-    TouchMarker _markers;
 
     properties::IntProperty _tuioPort;
     properties::BoolProperty _hasActiveTouchEvent;

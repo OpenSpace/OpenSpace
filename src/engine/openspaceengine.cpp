@@ -538,6 +538,8 @@ void OpenSpaceEngine::initialize() {
 
     global::renderEngine->initialize();
 
+    global::interactionHandler->initialize();
+
     for (const std::function<void()>& func : *global::callback::initialize) {
         ZoneScopedN("[Module] initialize");
 

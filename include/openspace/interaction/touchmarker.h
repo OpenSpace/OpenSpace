@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
-#define __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
+#ifndef __OPENSPACE_MODULE_CORE___TOUCH_MARKER___H__
+#define __OPENSPACE_MODULE_CORE___TOUCH_MARKER___H__
 
 #include <openspace/properties/propertyowner.h>
 
@@ -44,22 +44,21 @@ public:
     TouchMarker();
     virtual ~TouchMarker();
 
-    void initialize();
-    void deinitialize();
+    void initializeGL();
+    void deinitializeGL();
 
     void render(const std::vector<TouchInputHolder>& touchPoints);
 
 private:
     void createVertexList(const std::vector<TouchInputHolder>& touchPoints);
 
-    properties::BoolProperty _visible;
+    properties::BoolProperty _enabled;
     properties::FloatProperty _radiusSize;
     properties::FloatProperty _opacity;
-    properties::FloatProperty _thickness;
     properties::Vec3Property _color;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    UniformCache(radius, opacity, thickness, color) _uniformCache;
+    UniformCache(radius, opacity, color) _uniformCache;
 
     std::vector<GLfloat> _vertexData;
     GLuint _quad = 0;
@@ -68,4 +67,4 @@ private:
 
 } // openspace namespace
 
-#endif // __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__
+#endif // __OPENSPACE_MODULE_CORE___TOUCH_MARKER___H__

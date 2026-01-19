@@ -140,17 +140,23 @@ InteractionHandler::InteractionHandler()
     _mouseVisualizer.owner.addProperty(_mouseVisualizer.enable);
     _mouseVisualizer.color.setViewOption(properties::Property::ViewOptions::Color);
     _mouseVisualizer.owner.addProperty(_mouseVisualizer.color);
+
+    addPropertySubOwner(_touchMarkers);
 }
 
 InteractionHandler::~InteractionHandler() {}
 
 void InteractionHandler::initialize() {
-    ZoneScoped;
     _touchInputState.initialize();
-}
 
-void InteractionHandler::deinitialize() {
-    ZoneScoped;
+    // Set up rendering callbacks for touch markers
+    global::callback::initializeGL->push_back([this]() {
+        _touchMarkers.initializeGL();
+    });
+
+    global::callback::deinitializeGL->push_back([this]() {
+        _touchMarkers.deinitializeGL();
+    });
 }
 
 void InteractionHandler::preSynchronization() {
@@ -293,7 +299,7 @@ void InteractionHandler::touchExitCallback(TouchInput i) {
     _touchInputState.touchExitCallback(i);
 }
 
-void InteractionHandler::renderOverlay() const {
+void InteractionHandler::renderOverlay() {
     if (_mouseVisualizer.enable && _mouseVisualizer.isMousePressed) {
         constexpr glm::vec4 StartColor = glm::vec4(0.4f, 0.4f, 0.4f, 0.25f);
         rendering::helper::renderLine(
@@ -303,6 +309,10 @@ void InteractionHandler::renderOverlay() const {
             StartColor,
             _mouseVisualizer.color
         );
+    }
+
+    if (!disabledTouch()) {
+        _touchMarkers.render(_touchInputState.touchPoints());
     }
 }
 

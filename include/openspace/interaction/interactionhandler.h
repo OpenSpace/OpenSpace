@@ -32,6 +32,7 @@
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/touchinputstate.h>
+#include <openspace/interaction/touchmarker.h>
 #include <openspace/interaction/websocketinputstate.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -50,8 +51,6 @@ public:
     virtual ~InteractionHandler() override;
 
     void initialize();
-    void deinitialize();
-
     void preSynchronization();
     void postDraw();
 
@@ -82,7 +81,7 @@ public:
     bool touchUpdatedCallback(TouchInput i);
     void touchExitCallback(TouchInput i);
 
-    void renderOverlay() const;
+    void renderOverlay();
 
     /**
      * Signal to the InteractionMonitor that an interaction happened. Should be called
@@ -108,6 +107,8 @@ private:
     properties::BoolProperty _disableTouchInputs;
 
     properties::IntProperty _maxDoubleTapTime;
+
+    TouchMarker _touchMarkers;
 
     struct {
         properties::PropertyOwner owner;
