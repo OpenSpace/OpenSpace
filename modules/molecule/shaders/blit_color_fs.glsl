@@ -24,9 +24,10 @@
 
 #version __CONTEXT__
 
+out vec4 fragColor;
+
 uniform vec4 u_color;
-out vec4 out_frag;
 
 void main() {
-  out_frag = u_color;
+  fragColor = u_color;
 }

@@ -24,10 +24,10 @@
 
 #version __CONTEXT__
 
+out vec4 fragColor;
+
 uniform sampler2D u_texture;
 
-out vec4 out_frag;
-
 void main() {
-  out_frag = texelFetch(u_texture, ivec2(gl_FragCoord.xy), 0);
+  fragColor = texelFetch(u_texture, ivec2(gl_FragCoord.xy), 0);
 }

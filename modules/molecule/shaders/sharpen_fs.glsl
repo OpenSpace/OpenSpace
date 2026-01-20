@@ -24,8 +24,9 @@
 
 #version __CONTEXT__
 
+out vec4 fragColor;
+
 uniform sampler2D u_tex;
-out vec4 out_frag;
 
 void main() {
   vec3 cc = texelFetch(u_tex, ivec2(gl_FragCoord.xy), 0).rgb;
@@ -34,6 +35,6 @@ void main() {
   vec3 cr = texelFetch(u_tex, ivec2(gl_FragCoord.xy) + ivec2( 1, 0), 0).rgb;
   vec3 cb = texelFetch(u_tex, ivec2(gl_FragCoord.xy) + ivec2( 0,-1), 0).rgb;
 
-  const float weight[2] = float[2](1.4, -0.1);
-  out_frag = vec4(vec3(weight[0] * cc + weight[1] * (cl + ct + cr + cb)), 1.0);
+  const vec2 Weight = vec2(1.4, -0.1);
+  fragColor = vec4(vec3(Weight.x * cc + Weight.y * (cl + ct + cr + cb)), 1.0);
 }

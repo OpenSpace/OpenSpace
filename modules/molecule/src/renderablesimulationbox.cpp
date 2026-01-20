@@ -484,8 +484,8 @@ void RenderableSimulationBox::initializeGL() {
     // Initialize billboard
     _billboard.program = ghoul::opengl::ProgramObject::Build(
         "Simulationbox Billboard",
-        absPath("${MODULE_MOLECULE/shaders/billboard_fs.glsl"),
-        absPath("${MODULE_MOLECULE/shaders/billboard_vs.glsl")
+        absPath("${MODULE_MOLECULE}/shaders/billboard_vs.glsl"),
+        absPath("${MODULE_MOLECULE}/shaders/billboard_fs.glsl")
     );
 
     glGenVertexArrays(1, &_billboard.vao);
@@ -501,10 +501,10 @@ void RenderableSimulationBox::initializeGL() {
     size_t i = 0;
     for (molecule_data_t& mol : _molecules) {
         initMolecule(mol, _moleculeFiles.value().at(i), _trajectoryFiles.value().at(i));
-        const auto& filter = _viamdFilter.value();
+        const std::string& filter = _viamdFilter;
 
         md_bitfield_t mask = md_bitfield_create(default_allocator);
-        if (!filter.empty() && filter != "" && filter != "all") {
+        if (!filter.empty() && filter != "all") {
             str_t str = { filter.data(), static_cast<int64_t>(filter.length()) };
             char errBuf[1024];
 

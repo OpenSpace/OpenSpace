@@ -24,8 +24,8 @@
 
 #version __CONTEXT__
 
-out vec4 out_color;
 in vec2 pos;
+out vec4 fragColor;
 
 uniform float uStrokeWidth;
 uniform float uStrokeFalloffExp;
@@ -42,14 +42,18 @@ void main() {
   }
 
   float depth = texelFetch(uDepthTex, ivec2(gl_FragCoord.xy), 0).r;
-  vec4  tex = texelFetch(uColorTex, ivec2(gl_FragCoord.xy), 0);
+  vec4 tex = texelFetch(uColorTex, ivec2(gl_FragCoord.xy), 0);
 
   if (depth == 1.0) {
 	  tex.a = 0.0;
   }
 
-  float falloff = clamp(1.0 - pow(len / (1.0 - uStrokeWidth), uStrokeFalloffExp), 0.0, 1.0);
+  float falloff = clamp(
+    1.0 - pow(len / (1.0 - uStrokeWidth), uStrokeFalloffExp),
+    0.0,
+    1.0
+  );
 
   gl_FragDepth = uFragDepth;
-  out_color = mix(uStrokeColor, tex, falloff);
+  fragColor = mix(uStrokeColor, tex, falloff);
 }

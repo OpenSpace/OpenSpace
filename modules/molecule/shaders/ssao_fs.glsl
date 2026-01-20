@@ -36,6 +36,9 @@
 #define AO_NUM_SAMPLES 32
 #endif
 
+in vec2 tc;
+out vec4 fragColor;
+
 struct HBAOData {
   float radius_to_screen;
   float neg_inv_r2;
@@ -59,129 +62,88 @@ uniform sampler2D u_tex_linear_depth;
 uniform sampler2D u_tex_normal;
 uniform sampler2D u_tex_random;
 
-in vec2 tc;
-out vec4 out_frag;
 
-
-float rand(vec2 n) {
-  return fract(sin(dot(n.xy, vec2(12.9898, 78.233))) * 43758.5453);
-}
-vec2 rand2(vec2 n) {
-  return fract(sin(dot(n.xy, vec2(12.9898, 78.233))) * vec2(43758.5453, 28001.8384));
-}
-vec3 rand3(vec2 n) {
-  return fract(sin(dot(n.xy, vec2(12.9898, 78.233))) * vec3(43758.5453, 28001.8384, 50849.4141));
-}
-vec4 rand4(vec2 n) {
-  return fract(sin(dot(n.xy, vec2(12.9898, 78.233))) * vec4(43758.5453, 28001.8384, 50849.4141, 12996.89));
-}
-
-float srand(vec2 n) {
-  return rand(n) * 2.0 - 1.0;
-}
-vec2 srand2(vec2 n) {
-  return rand2(n) * 2.0 - 1.0;
-}
-vec3 srand3(vec2 n) {
-  return rand3(n) * 2.0 - 1.0;
-}
-vec4 srand4(vec2 n) {
-  return rand4(n) * 2.0 - 1.0;
-}
-
-vec3 uv_to_view(vec2 uv, float eye_z) {
+vec3 uvToView(vec2 uv, float eyeZ) {
 #if AO_PERSPECTIVE
-  return vec3((uv * control.proj_info.xy + control.proj_info.zw) * eye_z, eye_z);
-#else
-  return vec3((uv * control.proj_info.xy + control.proj_info.zw), eye_z);
-#endif
+  return vec3((uv * control.proj_info.xy + control.proj_info.zw) * eyeZ, eyeZ);
+#else // AO_PERSPECTIVE
+  return vec3((uv * control.proj_info.xy + control.proj_info.zw), eyeZ);
+#endif // AO_PERSPECTIVE
 }
 
-vec3 fetch_view_pos(vec2 uv, float lod) {
+vec3 fetchViewPos(vec2 uv, float lod) {
   float view_depth = textureLod(u_tex_linear_depth, uv, lod).x;
-  return uv_to_view(uv, view_depth);
+  return uvToView(uv, view_depth);
 }
 
-vec3 decode_normal(vec2 enc) {
-  vec2 fenc = enc * 4 - 2;
+vec3 decodeNormal(vec2 enc) {
+  vec2 fenc = enc * 4.0 - 2.0;
   float f = dot(fenc, fenc);
-  float g = sqrt(1 - f / 4.0);
-  vec3 n;
-  n.xy = fenc * g;
-  n.z = 1 - f / 2.0;
-  return n;
+  float g = sqrt(1.0 - f / 4.0);
+  return vec3(fenc * g, 1.0 - f / 2.0);
 }
 
-vec3 fetch_view_normal(vec2 uv) {
+vec3 fetchViewNormal(vec2 uv) {
   vec2 enc = texelFetch(u_tex_normal, ivec2(gl_FragCoord.xy), 0).xy;
-  //vec2 enc = textureLod(u_tex_normal, uv, 0).xy;
-  vec3 n = decode_normal(enc);
-  return n * vec3(1, 1, -1);
+  vec3 n = decodeNormal(enc);
+  return n * vec3(1.0, 1.0, -1.0);
 }
 
-//----------------------------------------------------------------------------------
 float falloff(float dist2) {
   // 1 scalar mad instruction
   return dist2 * control.neg_inv_r2 + 1.0;
 }
 
-//----------------------------------------------------------------------------------
 // P = view-space position at the kernel center
 // N = view-space normal at the kernel center
 // S = view-space position of the current sample
-//----------------------------------------------------------------------------------
-float compute_pixel_obscurance(vec3 P, vec3 N, vec3 S) {
+float computePixelObscurance(vec3 P, vec3 N, vec3 S) {
   vec3 V = S - P;
   float VdotV = dot(V, V);
   float NdotV = dot(N, V) * 1.0 / sqrt(VdotV);
 
-  float falloff_mult = max(0.0, falloff(VdotV));
-  return max(0.0, NdotV - control.n_dot_v_bias) * falloff_mult;
+  float falloffMult = max(0.0, falloff(VdotV));
+  return max(0.0, NdotV - control.n_dot_v_bias) * falloffMult;
 }
 
-//----------------------------------------------------------------------------------
-vec2 rotate_sample(vec2 smpl, vec2 cos_sin) {
+vec2 rotateSample(vec2 smpl, vec2 cosSin) {
   return vec2(
-    smpl.x * cos_sin.x - smpl.y * cos_sin.y,
-    smpl.x * cos_sin.y + smpl.y * cos_sin.x
+    smpl.x * cosSin.x - smpl.y * cosSin.y,
+    smpl.x * cosSin.y + smpl.y * cosSin.x
   );
 }
 
-//----------------------------------------------------------------------------------
-vec4 get_jitter(vec2 uv) {
+vec4 getJitter(vec2 uv) {
   // (cos(Alpha),sin(Alpha),rand1,rand2)
   vec2 coord = gl_FragCoord.xy / AO_RANDOM_TEX_SIZE;
   vec4 jitter = textureLod(u_tex_random, coord, 0);
   return jitter;
 }
 
-//----------------------------------------------------------------------------------
-float compute_ao(vec2 full_res_uv, float radius_pixels, vec4 jitter, vec3 view_position,
-                 vec3 view_normal)
+float computeAo(vec2 fullResUv, float radiusPixels, vec4 jitter, vec3 viewPosition,
+                 vec3 viewNormal)
 {
-  const float global_mip_offset = -4.3; // -4.3 is recomended in the intel ASSAO implementation
-  float mip_offset = log2(radius_pixels) + global_mip_offset;
+  // -4.3 is recomended in the intel ASSAO implementation
+  const float GlobalMipOffset = -4.3;
+  float mipOffset = log2(radiusPixels) + GlobalMipOffset;
 
-  float weight_sum = 0.0;
+  float weightSum = 0.0;
   float ao = 0.0;
 
-  //vec2 noise = srand2(full_res_uv + vec2(control.time) + 0.2765672);
-  //vec2 cos_sin = vec2(cos(noise.x * 3.1415926535), sin(noise.x * 3.1415026535));
-
-  vec3 normal = mix(vec3(0,0,1), view_normal, control.normal_bias);
+  vec3 normal = mix(vec3(0.0, 0.0, 1.0), viewNormal, control.normal_bias);
 
   for (int i = 0; i < AO_NUM_SAMPLES; i++) {
     vec4 smpl = control.sample_pattern[i];
-    vec2 uv = rotate_sample(smpl.xy, jitter.xy) * jitter.z;
-    float weight_scale = smpl.z;
-    float mip_level = mip_offset + smpl.w;
+    vec2 uv = rotateSample(smpl.xy, jitter.xy) * jitter.z;
+    float weightScale = smpl.z;
+    float mipLevel = mipOffset + smpl.w;
 
-    vec2 snapped_uv = round(radius_pixels * uv) * control.inv_full_res + full_res_uv;
-    vec3 view_sample = fetch_view_pos(snapped_uv, mip_level);
-    ao += compute_pixel_obscurance(view_position, view_normal, view_sample) * weight_scale;
-    weight_sum += 1.0;
+    vec2 snappedUv = round(radiusPixels * uv) * control.inv_full_res + fullResUv;
+    vec3 viewSample = fetchViewPos(snappedUv, mipLevel);
+    ao += computePixelObscurance(viewPosition, viewNormal, viewSample) * weightScale;
+    weightSum += 1.0;
   }
-  ao *= control.ao_multiplier / weight_sum;
+  ao *= control.ao_multiplier / weightSum;
 
   return clamp(1.0 - ao, 0.0, 1.0);
 }
@@ -189,18 +151,18 @@ float compute_ao(vec2 full_res_uv, float radius_pixels, vec4 jitter, vec3 view_p
 //----------------------------------------------------------------------------------
 void main() {
   vec2 uv = tc;
-  vec3 view_position = fetch_view_pos(uv, 0);
-  vec3 view_normal = fetch_view_normal(uv);
+  vec3 viewPosition = fetchViewPos(uv, 0);
+  vec3 viewNormal = fetchViewNormal(uv);
 
   // Compute projection of disk of radius control.R into screen space
 #if AO_PERSPECTIVE
-  float radius_pixels = control.radius_to_screen / view_position.z;
-#else
-  float radius_pixels = control.radius_to_screen;
-#endif
+  float radiusPixels = control.radius_to_screen / viewPosition.z;
+#else // AO_PERSPECTIVE
+  float radiusPixels = control.radius_to_screen;
+#endif // AO_PERSPECTIVE
   // Get jitter vector for the current full-res pixel
-  vec4 jitter = get_jitter(uv);
-  float ao = compute_ao(uv, radius_pixels, jitter, view_position, view_normal);
+  vec4 jitter = getJitter(uv);
+  float ao = computeAo(uv, radiusPixels, jitter, viewPosition, viewNormal);
 
-  out_frag = vec4(vec3(pow(ao, control.pow_exponent)), 1);
+  fragColor = vec4(vec3(pow(ao, control.pow_exponent)), 1.0);
 }
