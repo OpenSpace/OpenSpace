@@ -311,40 +311,6 @@ void setupUboHbaoData(uint32_t ubo, int width, int height, const mat4_t& projMat
     glBindBuffer(GL_UNIFORM_BUFFER, 0);
 }
 
-void initializeRndTex(uint32_t rndTex) {
-    constexpr int AORandomTexSize = 4;
-    constexpr int BufferSize = AORandomTexSize * AORandomTexSize;
-    signed short buffer[BufferSize * 4];
-
-    for (int i = 0; i < BufferSize; i++) {
-        constexpr int Scale = 1 << 15;
-        float rand1 = halton(i + 1, 2);
-        float rand2 = halton(i + 1, 3);
-        float angle = rand1 * glm::two_pi<float>();
-
-        buffer[i * 4 + 0] = static_cast<signed short>(Scale * std::cos(angle));
-        buffer[i * 4 + 1] = static_cast<signed short>(Scale * std::sin(angle));
-        buffer[i * 4 + 2] = static_cast<signed short>(Scale * rand2);
-        buffer[i * 4 + 3] = 0;
-    }
-
-    glBindTexture(GL_TEXTURE_2D, rndTex);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA16_SNORM,
-        AORandomTexSize,
-        AORandomTexSize,
-        0,
-        GL_RGBA,
-        GL_SHORT,
-        buffer
-    );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
-
 void initialize(int width, int height) {
     ghoul_assert(glObj.ssao.hbao.fbo == 0, "Object already created");
     ghoul_assert(glObj.ssao.blur.fbo == 0, "Object already created");
@@ -383,7 +349,39 @@ void initialize(int width, int height) {
     glGenTextures(1, &glObj.ssao.blur.texture);
     glGenBuffers(1, &glObj.ssao.uboHbaoData);
 
-    initializeRndTex(glObj.ssao.texRandom);
+
+    // Initialize random textures
+    constexpr int AORandomTexSize = 4;
+    constexpr int BufferSize = AORandomTexSize * AORandomTexSize;
+    std::array<short, BufferSize * 4> buffer;
+
+    for (int i = 0; i < BufferSize; i++) {
+        constexpr int Scale = 1 << 15;
+        float rand1 = halton(i + 1, 2);
+        float rand2 = halton(i + 1, 3);
+        float angle = rand1 * glm::two_pi<float>();
+
+        buffer[i * 4 + 0] = static_cast<signed short>(Scale * std::cos(angle));
+        buffer[i * 4 + 1] = static_cast<signed short>(Scale * std::sin(angle));
+        buffer[i * 4 + 2] = static_cast<signed short>(Scale * rand2);
+        buffer[i * 4 + 3] = 0;
+    }
+
+    glBindTexture(GL_TEXTURE_2D, glObj.ssao.texRandom);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA16_SNORM,
+        AORandomTexSize,
+        AORandomTexSize,
+        0,
+        GL_RGBA,
+        GL_SHORT,
+        buffer.data()
+    );
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
 
     glBindTexture(GL_TEXTURE_2D, glObj.ssao.hbao.texture);
     glTexImage2D(
@@ -418,8 +416,6 @@ void initialize(int width, int height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     glBindFramebuffer(GL_FRAMEBUFFER, glObj.ssao.hbao.fbo);
     glFramebufferTexture2D(
@@ -468,7 +464,6 @@ void initialize() {
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/deferred_shading_fs.glsl")
     );
-
     ghoul::opengl::updateUniformLocations(*glObj.shading.program, glObj.shading.uniforms);
 }
 
@@ -564,7 +559,6 @@ void initialize(int32_t width, int32_t height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenFramebuffers(1, &glObj.bokehDof.halfRes.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.bokehDof.halfRes.fbo);
@@ -575,10 +569,6 @@ void initialize(int32_t width, int32_t height) {
         glObj.bokehDof.halfRes.tex.colorCoc,
         0
     );
-    GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        MD_LOG_ERROR("Something went wrong when generating framebuffer for DOF");
-    }
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     // DOF
@@ -694,7 +684,6 @@ void initialize(int32_t width, int32_t height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenTextures(1, &glObj.velocity.texNeighbormax);
     glBindTexture(GL_TEXTURE_2D, glObj.velocity.texNeighbormax);
@@ -713,7 +702,6 @@ void initialize(int32_t width, int32_t height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenFramebuffers(1, &glObj.velocity.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.velocity.fbo);
@@ -839,7 +827,7 @@ void applyFxaa(uint32_t texture, int width, int height) {
 
     glObj.fxaa.program->setUniform(
         glObj.fxaa.uniforms.inverseScreenSize,
-        glm::vec2(1.f / width, 1.f / height)
+        1.f / glm::vec2(width, height)
     );
 
     glBindVertexArray(glObj.vao);
@@ -877,7 +865,6 @@ void initialize(int width, int height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenFramebuffers(1, &glObj.linearDepth.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.linearDepth.fbo);
@@ -925,7 +912,6 @@ void initialize(int width, int height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenTextures(2, glObj.targets.texTemporalBuffer);
     glBindTexture(GL_TEXTURE_2D, glObj.targets.texTemporalBuffer[0]);
@@ -960,7 +946,6 @@ void initialize(int width, int height) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     glGenFramebuffers(1, &glObj.targets.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.targets.fbo);
