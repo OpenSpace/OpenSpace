@@ -35,6 +35,10 @@ void Topic::initialize(std::shared_ptr<Connection> connection, size_t topicId) {
     _topicId = topicId;
 }
 
+std::string Topic::type() const {
+    return "";
+}
+
 nlohmann::json Topic::wrappedPayload(const nlohmann::json& payload) const {
     ZoneScoped;
 

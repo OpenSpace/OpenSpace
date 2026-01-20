@@ -42,6 +42,7 @@
 #include <openspace/topic/topics/setpropertytopic.h>
 #include <openspace/topic/topics/actionkeybindtopic.h>
 #include <openspace/topic/topics/skybrowsertopic.h>
+#include <openspace/topic/topics/propertytreetopic.h>
 #include <openspace/topic/topics/subscriptiontopic.h>
 #include <openspace/topic/topics/timetopic.h>
 #include <openspace/topic/topics/topic.h>
@@ -109,6 +110,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<TimeTopic>("time");
     _topicFactory.registerClass<TriggerPropertyTopic>("trigger");
     _topicFactory.registerClass<VersionTopic>("version");
+    _topicFactory.registerClass<PropertyTreeTopic>("propertyTree");
 }
 
 void Connection::handleMessage(const std::string& message) {
@@ -244,6 +246,22 @@ ghoul::io::Socket* Connection::socket() {
 
 void Connection::setAuthorized(bool status) {
     _isAuthorized = status;
+}
+
+Topic* Connection::findTopicByType(const std::string& type) {
+    const auto it = std::find_if(
+        _topics.begin(),
+        _topics.end(),
+        [&type](const auto& pair) {
+            //LINFO(pair.second->type());
+            return pair.second->type() == type;
+        });
+
+    if (it == _topics.end()) {
+        return nullptr;
+    }
+
+    return it->second.get();
 }
 
 } // namespace openspace

@@ -256,4 +256,13 @@ void TopicManager::removePreSyncCallback(CallbackHandle handle) {
     _preSyncCallbacks.erase(it);
 }
 
+void TopicManager::passDataToTopic(const std::string& topicType,
+                                   const nlohmann::json& jsonData) {
+    for (const ConnectionData& connectionData : _connections) {
+        if (auto topic = connectionData.connection->findTopicByType(topicType)) {
+            topic->handleJson(jsonData);
+        }
+    }
+}
+
 } // namespace openspace

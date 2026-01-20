@@ -22,32 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___TOPIC___H__
-#define __OPENSPACE_CORE___TOPIC___H__
+#ifndef __OPENSPACE_CORE___PROPERTYTREE_TOPIC___H__
+#define __OPENSPACE_CORE___PROPERTYTREE_TOPIC___H__
 
-#include <openspace/json.h>
+#include <openspace/topic/topics/topic.h>
+
+namespace openspace::properties { class Property; }
 
 namespace openspace {
 
-class Connection;
-
-class Topic {
+class PropertyTreeTopic : public Topic {
 public:
-    virtual ~Topic() = default;
+    PropertyTreeTopic() = default;
+    ~PropertyTreeTopic() override;
 
-    void initialize(std::shared_ptr<Connection> connection, size_t topicId);
-    nlohmann::json wrappedPayload(const nlohmann::json& payload) const;
-    nlohmann::json wrappedError(std::string message = "Could not complete request",
-        int code = 500);
-    virtual void handleJson(const nlohmann::json& json) = 0;
-    virtual bool isDone() const = 0;
-    virtual std::string type() const;
+    void handleJson(const nlohmann::json& json) override;
+    bool isDone() const override;
+    std::string type() const override;
 
-protected:
-    size_t _topicId = 0;
-    std::shared_ptr<Connection> _connection;
+private:
+    void resetCallbacks();
+
+    const int UnsetCallbackHandle = -1;
+
+    bool _requestedResourceIsSubscribable = false;
+    bool _isSubscribedTo = false;
+    int _onChangeHandle = UnsetCallbackHandle;
+    int _onDeleteHandle = UnsetCallbackHandle;
+    int _onMetaDataChangeHandle = UnsetCallbackHandle;
+    properties::Property* _prop = nullptr;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___TOPIC___H__
+#endif // __OPENSPACE_CORE___PROPERTYTREE_TOPIC___H__

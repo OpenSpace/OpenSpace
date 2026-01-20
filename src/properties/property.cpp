@@ -25,6 +25,7 @@
 #include <openspace/properties/property.h>
 
 #include <openspace/engine/globals.h>
+#include <openspace/topic/topicmanager.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/properties/propertyowner.h>
 #include <ghoul/logging/logmanager.h>
@@ -252,6 +253,14 @@ void Property::notifyChangeListeners() {
     for (const std::pair<OnChangeHandle, std::function<void()>>& p : _onChangeCallbacks) {
         p.second();
     }
+    nlohmann::json payload;
+    payload["event"] = "property_changed";
+    payload["payload"] = {
+        { "property", uri() },
+        { "value", nlohmann::json::parse(jsonValue()) }
+    };
+    global::topicManager->passDataToTopic("propertyTree", payload);
+
 }
 
 void Property::notifyMetaDataChangeListeners() {

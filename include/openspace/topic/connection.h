@@ -60,6 +60,7 @@ public:
     void handleJson(const nlohmann::json& json);
     void sendJson(const nlohmann::json& json);
     void setAuthorized(bool status);
+    Topic* findTopicByType(const std::string& type);
 
     bool isAuthorized() const;
 

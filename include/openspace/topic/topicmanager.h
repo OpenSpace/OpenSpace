@@ -66,6 +66,8 @@ public:
     CallbackHandle addPreSyncCallback(CallbackFunction cb);
     void removePreSyncCallback(CallbackHandle handle);
 
+    void passDataToTopic(const std::string& topic, const nlohmann::json& jsonData);
+
     static documentation::Documentation Documentation();
 
 private:

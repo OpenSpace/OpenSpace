@@ -135,6 +135,14 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
+    topicManager = new (currentPos) TopicManager;
+    ghoul_assert(topicManager, "No topicManager");
+    currentPos += sizeof(TopicManager);
+#else // ^^^ WIN32 / !WIN32 vvv
+    topicManager = new TopicManager;
+#endif // WIN32
+
+#ifdef WIN32
     openSpaceEngine = new (currentPos) OpenSpaceEngine;
     ghoul_assert(openSpaceEngine, "No openSpaceEngine");
     currentPos += sizeof(OpenSpaceEngine);
@@ -671,6 +679,13 @@ void destroy() {
     openSpaceEngine->~OpenSpaceEngine();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete openSpaceEngine;
+#endif // WIN32
+
+    LDEBUGC("Globals", "Destroying 'TopicManager'");
+#ifdef WIN32
+    topicManager->~TopicManager();
+#else // ^^^ WIN32 / !WIN32 vvv
+    delete topicManager;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'MemoryManager'");
