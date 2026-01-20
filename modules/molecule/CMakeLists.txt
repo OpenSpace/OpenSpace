@@ -69,7 +69,6 @@ set(SHADER_FILES
   shaders/tonemap_exposure_gamma_fs .glsl
   shaders/tonemap_filmic_fs.glsl
   shaders/tonemap_passthrough_fs.glsl
-  shaders/vel_blit_fs.glsl
   shaders/vel_neighbormax_fs.glsl
   shaders/vel_tilemax_fs.glsl
 )

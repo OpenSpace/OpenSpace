@@ -487,6 +487,7 @@ void RenderableSimulationBox::initializeGL() {
         absPath("${MODULE_MOLECULE}/shaders/billboard_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/billboard_fs.glsl")
     );
+    ghoul::opengl::updateUniformLocations(*_billboard.program, _billboard.uniforms);
 
     glGenVertexArrays(1, &_billboard.vao);
     glGenBuffers(1, &_billboard.vbo);
@@ -829,22 +830,22 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         glBindTexture(GL_TEXTURE_2D, mod->colorTexture());
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, mod->depthTexture());
-        glUniform1i(_billboard.program->uniformLocation("uColorTex"), 0);
-        glUniform1i(_billboard.program->uniformLocation("uDepthTex"), 1);
+        glUniform1i(_billboard.uniforms.uColorTex, 0);
+        glUniform1i(_billboard.uniforms.uDepthTex, 1);
         glUniformMatrix4fv(
-            _billboard.program->uniformLocation("uTransform"),
+            _billboard.uniforms.uTransform,
             1,
             false,
             glm::value_ptr(transform)
         );
-        glUniform1f(_billboard.program->uniformLocation("uStrokeWidth"), static_cast<float>(width));
+        glUniform1f(_billboard.uniforms.uStrokeWidth, static_cast<float>(width));
         glUniform1f(
-            _billboard.program->uniformLocation("uStrokeFalloffExp"),
+            _billboard.uniforms.uStrokeFalloffExp,
             _circleFalloff == 0.f ? std::numeric_limits<float>::max() : 1.f / _circleFalloff
         );
-        glUniform1f(_billboard.program->uniformLocation("uFragDepth"), static_cast<float>(depth));
+        glUniform1f(_billboard.uniforms.uFragDepth, static_cast<float>(depth));
         glm::vec4 stroke = _circleColor;
-        glUniform4fv(_billboard.program->uniformLocation("uStrokeColor"), 1, glm::value_ptr(stroke));
+        glUniform4fv(_billboard.uniforms.uStrokeColor, 1, glm::value_ptr(stroke));
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glEnable(GL_CULL_FACE);
         glBindVertexArray(0);

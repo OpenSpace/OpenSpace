@@ -35,6 +35,7 @@
 #include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/vector/dvec3property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <ghoul/opengl/uniformcache.h>
 #include <md_gl.h>
 #include <md_molecule.h>
 #include <md_trajectory.h>
@@ -84,6 +85,8 @@ private:
 
     struct {
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
+        UniformCache(uColorTex, uDepthTex, uTransform, uStrokeWidth, uStrokeFalloffExp,
+            uFragDepth, uStrokeColor) uniforms;
         GLuint vao = 0;
         GLuint vbo = 0;
     } _billboard;
