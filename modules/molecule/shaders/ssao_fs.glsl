@@ -30,8 +30,6 @@
 #define AO_RANDOM_TEX_SIZE 4
 #endif
 
-#define AO_PERSPECTIVE #{AoPerspective}
-
 #ifndef AO_NUM_SAMPLES
 #define AO_NUM_SAMPLES 32
 #endif
@@ -61,14 +59,16 @@ layout(std140) uniform u_control_buffer {
 uniform sampler2D u_tex_linear_depth;
 uniform sampler2D u_tex_normal;
 uniform sampler2D u_tex_random;
+uniform bool u_perspective;
 
 
 vec3 uvToView(vec2 uv, float eyeZ) {
-#if AO_PERSPECTIVE
-  return vec3((uv * control.proj_info.xy + control.proj_info.zw) * eyeZ, eyeZ);
-#else // AO_PERSPECTIVE
-  return vec3((uv * control.proj_info.xy + control.proj_info.zw), eyeZ);
-#endif // AO_PERSPECTIVE
+  if (u_perspective) {
+    return vec3((uv * control.proj_info.xy + control.proj_info.zw) * eyeZ, eyeZ);
+  }
+  else {
+    return vec3((uv * control.proj_info.xy + control.proj_info.zw), eyeZ);
+  }
 }
 
 vec3 fetchViewPos(vec2 uv, float lod) {
@@ -155,11 +155,11 @@ void main() {
   vec3 viewNormal = fetchViewNormal(uv);
 
   // Compute projection of disk of radius control.R into screen space
-#if AO_PERSPECTIVE
-  float radiusPixels = control.radius_to_screen / viewPosition.z;
-#else // AO_PERSPECTIVE
   float radiusPixels = control.radius_to_screen;
-#endif // AO_PERSPECTIVE
+  if (u_perspective) {
+    radiusPixels /= viewPosition.z;
+  }
+
   // Get jitter vector for the current full-res pixel
   vec4 jitter = getJitter(uv);
   float ao = computeAo(uv, radiusPixels, jitter, viewPosition, viewNormal);

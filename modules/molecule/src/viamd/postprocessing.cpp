@@ -82,14 +82,17 @@ namespace {
             struct {
                 uint32_t fbo = 0;
                 uint32_t texture = 0;
-                std::unique_ptr<ghoul::opengl::ProgramObject> programPersp;
-                std::unique_ptr<ghoul::opengl::ProgramObject> programOrtho;
+                std::unique_ptr<ghoul::opengl::ProgramObject> program;
+                UniformCache(u_tex_linear_depth, u_tex_normal, u_tex_random,
+                    u_tc_scl, u_perspective) uniforms;
             } hbao;
 
             struct {
                 uint32_t fbo = 0;
                 uint32_t texture = 0;
                 std::unique_ptr<ghoul::opengl::ProgramObject> program;
+                UniformCache(u_tex_linear_depth, u_tex_ao, u_sharpness, u_inv_res_dir,
+                    u_tc_scl) uniforms;
             } blur;
         } ssao;
 
@@ -354,28 +357,19 @@ void initialize(int width, int height) {
 
 
     ghoul::Dictionary perspective;
-    perspective.setValue("AoPerspective", 1);
-    glObj.ssao.hbao.programPersp = ghoul::opengl::ProgramObject::Build(
+    glObj.ssao.hbao.program = ghoul::opengl::ProgramObject::Build(
         "SSAO Perspective",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
-        absPath("${MODULE_MOLECULE}/shaders/ssao_fs.glsl"),
-        perspective
+        absPath("${MODULE_MOLECULE}/shaders/ssao_fs.glsl")
     );
-
-    ghoul::Dictionary orthographic;
-    orthographic.setValue("AoPerspective", 0);
-    glObj.ssao.hbao.programOrtho = ghoul::opengl::ProgramObject::Build(
-        "SSAO Orthographic",
-        absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
-        absPath("${MODULE_MOLECULE}/shaders/ssao_fs.glsl"),
-        orthographic
-    );
+    ghoul::opengl::updateUniformLocations(*glObj.ssao.hbao.program, glObj.ssao.hbao.uniforms);
 
     glObj.ssao.blur.program = ghoul::opengl::ProgramObject::Build(
         "SSAO Blur",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/ssao_blur_fs.glsl")
     );
+    ghoul::opengl::updateUniformLocations(*glObj.ssao.blur.program, glObj.ssao.blur.uniforms);
 
     glGenFramebuffers(1, &glObj.ssao.hbao.fbo);
     glGenFramebuffers(1, &glObj.ssao.blur.fbo);
@@ -456,8 +450,7 @@ void shutdown() {
 
     glDeleteBuffers(1, &glObj.ssao.uboHbaoData);
 
-    glObj.ssao.hbao.programPersp = nullptr;
-    glObj.ssao.hbao.programOrtho = nullptr;
+    glObj.ssao.hbao.program = nullptr;
     glObj.ssao.blur.program = nullptr;
 }
 
@@ -1067,11 +1060,8 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMa
     glViewport(0, 0, width, height);
 
     // RENDER HBAO
-    uint32_t program =
-        ortho ? *glObj.ssao.hbao.programOrtho : *glObj.ssao.hbao.programPersp;
-
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "HBAO");
-    glUseProgram(program);
+    glUseProgram(*glObj.ssao.hbao.program);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, linearDepthTex);
@@ -1081,12 +1071,13 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMa
     glBindTexture(GL_TEXTURE_2D, glObj.ssao.texRandom);
 
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, glObj.ssao.uboHbaoData);
-    glUniformBlockBinding(program, glGetUniformBlockIndex(program, "u_control_buffer"), 0);
-    glUniform1i(glGetUniformLocation(program, "u_tex_linear_depth"), 0);
-    glUniform1i(glGetUniformLocation(program, "u_tex_normal"), 1);
-    glUniform1i(glGetUniformLocation(program, "u_tex_random"), 2);
+    glUniformBlockBinding(*glObj.ssao.hbao.program, glGetUniformBlockIndex(*glObj.ssao.hbao.program, "u_control_buffer"), 0);
+    glUniform1i(glObj.ssao.hbao.uniforms.u_tex_linear_depth, 0);
+    glUniform1i(glObj.ssao.hbao.uniforms.u_tex_normal, 1);
+    glUniform1i(glObj.ssao.hbao.uniforms.u_tex_random, 2);
+    glUniform1i(glObj.ssao.hbao.uniforms.u_perspective, ortho ? 0 : 1);
     glUniform2f(
-        glGetUniformLocation(program, "u_tc_scl"),
+        glObj.ssao.hbao.uniforms.u_tc_scl,
         static_cast<float>(width) / static_cast<float>(glObj.texWidth),
         static_cast<float>(height) / static_cast<float>(glObj.texHeight)
     );
@@ -1096,12 +1087,12 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMa
 
     glUseProgram(*glObj.ssao.blur.program);
 
-    glUniform1i(glObj.ssao.blur.program->uniformLocation("u_tex_linear_depth"), 0);
-    glUniform1i(glObj.ssao.blur.program->uniformLocation("u_tex_ao"), 1);
-    glUniform1f(glObj.ssao.blur.program->uniformLocation("u_sharpness"), sharpness);
-    glUniform2f(glObj.ssao.blur.program->uniformLocation("u_inv_res_dir"), invRes.x, 0);
+    glUniform1i(glObj.ssao.blur.uniforms.u_tex_linear_depth, 0);
+    glUniform1i(glObj.ssao.blur.uniforms.u_tex_ao, 1);
+    glUniform1f(glObj.ssao.blur.uniforms.u_sharpness, sharpness);
+    glUniform2f(glObj.ssao.blur.uniforms.u_inv_res_dir, invRes.x, 0);
     glUniform2f(
-        glObj.ssao.blur.program->uniformLocation("u_tc_scl"),
+        glObj.ssao.blur.uniforms.u_tc_scl,
         static_cast<float>(width) / static_cast<float>(glObj.texWidth),
         static_cast<float>(height) / static_cast<float>(glObj.texHeight)
     );
