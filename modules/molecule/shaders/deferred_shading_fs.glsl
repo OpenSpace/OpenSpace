@@ -37,7 +37,6 @@ uniform sampler2D u_texture_normal;
 uniform mat4 u_inv_proj_mat;
 uniform vec3 u_light_dir;
 uniform vec3 u_light_col;
-uniform float u_time;
 
 
 // TODO: Use linear depth instead and use uniform vec4 for unpacking to view coords.

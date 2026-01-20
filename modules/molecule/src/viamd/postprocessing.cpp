@@ -99,7 +99,7 @@ namespace {
         struct {
             std::unique_ptr<ghoul::opengl::ProgramObject> program;
             UniformCache(u_texture_depth, u_texture_color, u_texture_normal,
-                u_inv_proj_mat, u_light_dir, u_light_col, u_time) uniforms;
+                u_inv_proj_mat, u_light_dir, u_light_col) uniforms;
         } shading;
 
         struct {
@@ -362,14 +362,20 @@ void initialize(int width, int height) {
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/ssao_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*glObj.ssao.hbao.program, glObj.ssao.hbao.uniforms);
+    ghoul::opengl::updateUniformLocations(
+        *glObj.ssao.hbao.program,
+        glObj.ssao.hbao.uniforms
+    );
 
     glObj.ssao.blur.program = ghoul::opengl::ProgramObject::Build(
         "SSAO Blur",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/ssao_blur_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*glObj.ssao.blur.program, glObj.ssao.blur.uniforms);
+    ghoul::opengl::updateUniformLocations(
+        *glObj.ssao.blur.program,
+        glObj.ssao.blur.uniforms
+    );
 
     glGenFramebuffers(1, &glObj.ssao.hbao.fbo);
     glGenFramebuffers(1, &glObj.ssao.blur.fbo);
@@ -482,28 +488,40 @@ void initialize() {
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/tonemap_passthrough_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*glObj.tonemapping.passthrough.program, glObj.tonemapping.passthrough.uniforms);
+    ghoul::opengl::updateUniformLocations(
+        *glObj.tonemapping.passthrough.program,
+        glObj.tonemapping.passthrough.uniforms
+    );
 
     glObj.tonemapping.exposureGamma.program = ghoul::opengl::ProgramObject::Build(
         "Tonemap Exposure Gamma",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/tonemap_exposure_gamma_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*glObj.tonemapping.exposureGamma.program, glObj.tonemapping.exposureGamma.uniforms);
+    ghoul::opengl::updateUniformLocations(
+        *glObj.tonemapping.exposureGamma.program,
+        glObj.tonemapping.exposureGamma.uniforms
+    );
 
     glObj.tonemapping.filmic.program = ghoul::opengl::ProgramObject::Build(
         "Tonemap Filmic",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/tonemap_filmic_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*glObj.tonemapping.filmic.program, glObj.tonemapping.filmic.uniforms);
+    ghoul::opengl::updateUniformLocations(
+        *glObj.tonemapping.filmic.program,
+        glObj.tonemapping.filmic.uniforms
+    );
 
     glObj.tonemapping.aces.program = ghoul::opengl::ProgramObject::Build(
         "Tonemap ACES",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/tonemap_aces_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*glObj.tonemapping.aces.program, glObj.tonemapping.aces.uniforms);
+    ghoul::opengl::updateUniformLocations(
+        *glObj.tonemapping.aces.program,
+        glObj.tonemapping.aces.uniforms
+    );
 }
 
 void shutdown() {
@@ -526,11 +544,24 @@ void initialize(int32_t width, int32_t height) {
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/dof_halfres_prepass_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*glObj.bokehDof.halfRes.program, glObj.bokehDof.halfRes.uniforms);
+    ghoul::opengl::updateUniformLocations(
+        *glObj.bokehDof.halfRes.program,
+        glObj.bokehDof.halfRes.uniforms
+    );
 
     glGenTextures(1, &glObj.bokehDof.halfRes.tex.colorCoc);
     glBindTexture(GL_TEXTURE_2D, glObj.bokehDof.halfRes.tex.colorCoc);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width / 2, height / 2, 0, GL_RGBA, GL_FLOAT, nullptr);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA16F,
+        width / 2,
+        height / 2,
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -539,7 +570,13 @@ void initialize(int32_t width, int32_t height) {
 
     glGenFramebuffers(1, &glObj.bokehDof.halfRes.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.bokehDof.halfRes.fbo);
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, glObj.bokehDof.halfRes.tex.colorCoc, 0);
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        glObj.bokehDof.halfRes.tex.colorCoc,
+        0
+    );
     GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         MD_LOG_ERROR("Something went wrong when generating framebuffer for DOF");
@@ -552,7 +589,10 @@ void initialize(int32_t width, int32_t height) {
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/dof_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*glObj.bokehDof.program, glObj.bokehDof.uniforms);
+    ghoul::opengl::updateUniformLocations(
+        *glObj.bokehDof.program,
+        glObj.bokehDof.uniforms
+    );
 }
 
 void shutdown() {
@@ -570,21 +610,30 @@ void initialize() {
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/blit_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*glObj.blit.tex.program, glObj.blit.tex.uniforms);
+    ghoul::opengl::updateUniformLocations(
+        *glObj.blit.tex.program,
+        glObj.blit.tex.uniforms
+    );
 
     glObj.blit.texDepth.program = ghoul::opengl::ProgramObject::Build(
         "Blit Texture with Depth",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/blit_depth_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*glObj.blit.texDepth.program, glObj.blit.texDepth.uniforms);
+    ghoul::opengl::updateUniformLocations(
+        *glObj.blit.texDepth.program,
+        glObj.blit.texDepth.uniforms
+    );
 
     glObj.blit.color.program = ghoul::opengl::ProgramObject::Build(
         "Blit Color",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/blit_color_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*glObj.blit.color.program, glObj.blit.color.uniforms);
+    ghoul::opengl::updateUniformLocations(
+        *glObj.blit.color.program,
+        glObj.blit.color.uniforms
+    );
 }
 
 void shutdown() {
@@ -612,14 +661,20 @@ void initialize(int32_t width, int32_t height) {
         absPath("${MODULE_MOLECULE}/shaders/vel_tilemax_fs.glsl"),
         tileSize
     );
-    ghoul::opengl::updateUniformLocations(*glObj.blitTilemax.program, glObj.blitTilemax.uniforms);
+    ghoul::opengl::updateUniformLocations(
+        *glObj.blitTilemax.program,
+        glObj.blitTilemax.uniforms
+    );
 
     glObj.blitNeighbormax.program = ghoul::opengl::ProgramObject::Build(
         "Tilemax",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
         absPath("${MODULE_MOLECULE}/shaders/vel_neighbormax_fs.glsl")
     );
-    ghoul::opengl::updateUniformLocations(*glObj.blitNeighbormax.program, glObj.blitNeighbormax.uniforms);
+    ghoul::opengl::updateUniformLocations(
+        *glObj.blitNeighbormax.program,
+        glObj.blitNeighbormax.uniforms
+    );
 
     glObj.velocity.texWidth = width / VelTileSize;
     glObj.velocity.texHeight = height / VelTileSize;
@@ -706,7 +761,10 @@ void initialize() {
         absPath("${MODULE_MOLECULE}/shaders/temporal_aa_fs.glsl"),
         blur
     );
-    ghoul::opengl::updateUniformLocations(*glObj.temporal.withMotionBlur.program, glObj.temporal.withMotionBlur.uniforms);
+    ghoul::opengl::updateUniformLocations(
+        *glObj.temporal.withMotionBlur.program,
+        glObj.temporal.withMotionBlur.uniforms
+    );
 
     ghoul::Dictionary noBlur;
     noBlur.setValue("UseMotionBlur", 0);
@@ -716,7 +774,10 @@ void initialize() {
         absPath("${MODULE_MOLECULE}/shaders/temporal_aa_fs.glsl"),
         noBlur
     );
-    ghoul::opengl::updateUniformLocations(*glObj.temporal.noMotionBlur.program, glObj.temporal.noMotionBlur.uniforms);
+    ghoul::opengl::updateUniformLocations(
+        *glObj.temporal.noMotionBlur.program,
+        glObj.temporal.noMotionBlur.uniforms
+    );
 }
 
 void shutdown() {
@@ -738,17 +799,16 @@ void initialize() {
 }
 
 void sharpen(uint32_t texture) {
+    // @TODO ghoul::TextureUnit
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    glUseProgram(*glObj.sharpen.program);
-    glUniform1i(glObj.sharpen.uniforms.u_tex, 0);
+    glObj.sharpen.program->activate();
+    glObj.sharpen.program->setUniform(glObj.sharpen.uniforms.u_tex, 0);
 
     glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
-
-    glUseProgram(0);
 }
 
 void shutdown() {
@@ -774,19 +834,19 @@ void applyFxaa(uint32_t texture, int width, int height) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    glUseProgram(*glObj.fxaa.program);
-    glUniform1i(glObj.fxaa.uniforms.tex, 0);
+    glObj.fxaa.program->activate();
+    glObj.fxaa.program->setUniform(glObj.fxaa.uniforms.tex, 0);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    vec2_t inv_screen_size = { 1.f / width, 1.f / height };
-    glUniform2fv(glObj.fxaa.uniforms.inverseScreenSize, 1, inv_screen_size.elem);
+    glObj.fxaa.program->setUniform(
+        glObj.fxaa.uniforms.inverseScreenSize,
+        glm::vec2(1.f / width, 1.f / height)
+    );
 
     glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
-
-    glUseProgram(0);
 }
 
 void shutdown() {
@@ -841,10 +901,6 @@ void initialize(int width, int height) {
         glObj.linearDepth.texture,
         0
     );
-    GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        MD_LOG_ERROR("Something went wrong in creating framebuffer for depth linearization");
-    }
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     ghoul::opengl::updateUniformLocations(*glObj.linearDepth.programPersp, glObj.linearDepth.uniforms);
@@ -951,11 +1007,6 @@ void initialize(int width, int height) {
         0
     );
 
-    status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        MD_LOG_ERROR("Something went wrong in creating framebuffer for targets");
-    }
-
     GLenum buffers[] = {
         GL_COLOR_ATTACHMENT0,
         GL_COLOR_ATTACHMENT1,
@@ -1000,22 +1051,23 @@ void shutdown() {
 }
 
 void computeLinearDepth(uint32_t depthTex, float nearPlane, float farPlane,
-                        bool orthographic = false)
+                        bool isOrthographic = false)
 {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, depthTex);
 
-    if (orthographic) {
-        glUseProgram(*glObj.linearDepth.programOrtho);
-    }
-    else {
-        glUseProgram(*glObj.linearDepth.programPersp);
-    }
-    glUniform1i(glObj.linearDepth.uniforms.u_tex_depth, 0);
-    const vec4_t clip = { nearPlane * farPlane, nearPlane - farPlane, farPlane, 0 };
-    glUniform4fv(glObj.linearDepth.uniforms.u_clip_info, 1, &clip.x);
+    ghoul::opengl::ProgramObject* program =
+        isOrthographic ?
+        glObj.linearDepth.programOrtho.get() :
+        glObj.linearDepth.programPersp.get();
 
-    // ASSUME THAT THE APPROPRIATE FS_QUAD VAO IS BOUND
+    program->activate();
+    program->setUniform(glObj.linearDepth.uniforms.u_tex_depth, 0);
+    program->setUniform(
+        glObj.linearDepth.uniforms.u_clip_info,
+        glm::vec4(nearPlane * farPlane, nearPlane - farPlane, farPlane, 0)
+    );
+
     glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
@@ -1061,7 +1113,7 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMa
 
     // RENDER HBAO
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "HBAO");
-    glUseProgram(*glObj.ssao.hbao.program);
+    glObj.ssao.hbao.program->activate();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, linearDepthTex);
@@ -1072,11 +1124,11 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMa
 
     glBindBufferBase(GL_UNIFORM_BUFFER, 0, glObj.ssao.uboHbaoData);
     glUniformBlockBinding(*glObj.ssao.hbao.program, glGetUniformBlockIndex(*glObj.ssao.hbao.program, "u_control_buffer"), 0);
-    glUniform1i(glObj.ssao.hbao.uniforms.u_tex_linear_depth, 0);
-    glUniform1i(glObj.ssao.hbao.uniforms.u_tex_normal, 1);
-    glUniform1i(glObj.ssao.hbao.uniforms.u_tex_random, 2);
-    glUniform1i(glObj.ssao.hbao.uniforms.u_perspective, ortho ? 0 : 1);
-    glUniform2f(
+    glObj.ssao.hbao.program->setUniform(glObj.ssao.hbao.uniforms.u_tex_linear_depth, 0);
+    glObj.ssao.hbao.program->setUniform(glObj.ssao.hbao.uniforms.u_tex_normal, 1);
+    glObj.ssao.hbao.program->setUniform(glObj.ssao.hbao.uniforms.u_tex_random, 2);
+    glObj.ssao.hbao.program->setUniform(glObj.ssao.hbao.uniforms.u_perspective, ortho ? 0 : 1);
+    glObj.ssao.hbao.program->setUniform(
         glObj.ssao.hbao.uniforms.u_tc_scl,
         static_cast<float>(width) / static_cast<float>(glObj.texWidth),
         static_cast<float>(height) / static_cast<float>(glObj.texHeight)
@@ -1085,13 +1137,12 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMa
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glPopDebugGroup();
 
-    glUseProgram(*glObj.ssao.blur.program);
-
-    glUniform1i(glObj.ssao.blur.uniforms.u_tex_linear_depth, 0);
-    glUniform1i(glObj.ssao.blur.uniforms.u_tex_ao, 1);
-    glUniform1f(glObj.ssao.blur.uniforms.u_sharpness, sharpness);
-    glUniform2f(glObj.ssao.blur.uniforms.u_inv_res_dir, invRes.x, 0);
-    glUniform2f(
+    glObj.ssao.blur.program->activate();
+    glObj.ssao.blur.program->setUniform(glObj.ssao.blur.uniforms.u_tex_linear_depth, 0);
+    glObj.ssao.blur.program->setUniform(glObj.ssao.blur.uniforms.u_tex_ao, 1);
+    glObj.ssao.blur.program->setUniform(glObj.ssao.blur.uniforms.u_sharpness, sharpness);
+    glObj.ssao.blur.program->setUniform(glObj.ssao.blur.uniforms.u_inv_res_dir, invRes.x, 0.f);
+    glObj.ssao.blur.program->setUniform(
         glObj.ssao.blur.uniforms.u_tc_scl,
         static_cast<float>(width) / static_cast<float>(glObj.texWidth),
         static_cast<float>(height) / static_cast<float>(glObj.texHeight)
@@ -1115,9 +1166,9 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMa
     glViewport(last_viewport[0], last_viewport[1], last_viewport[2], last_viewport[3]);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, glObj.ssao.blur.texture);
-    glUniform2f(
+    glObj.ssao.blur.program->setUniform(
         glObj.ssao.blur.program->uniformLocation("u_inv_res_dir"),
-        0,
+        0.f,
         invRes.y
     );
 
@@ -1137,7 +1188,7 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMa
 
 void shadeDeferred(uint32_t depthTex, uint32_t colorTex, uint32_t normalTex,
                    const mat4_t& invProjMatrix, const vec3_t& lightDir,
-                   const vec3_t& lightCol, float time)
+                   const vec3_t& lightCol, float)
 {
     ghoul_assert(glIsTexture(depthTex), "No texture");
     ghoul_assert(glIsTexture(colorTex), "No texture");
@@ -1150,18 +1201,19 @@ void shadeDeferred(uint32_t depthTex, uint32_t colorTex, uint32_t normalTex,
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, normalTex);
 
-    glUseProgram(*glObj.shading.program);
-    glUniform1i(glObj.shading.uniforms.u_texture_depth, 0);
-    glUniform1i(glObj.shading.uniforms.u_texture_color, 1);
-    glUniform1i(glObj.shading.uniforms.u_texture_normal, 2);
-    glUniformMatrix4fv(glObj.shading.uniforms.u_inv_proj_mat, 1, GL_FALSE, &invProjMatrix.elem[0][0]);
-    glUniform3f(glObj.shading.uniforms.u_light_dir, lightDir.x, lightDir.y, lightDir.z);
-    glUniform3f(glObj.shading.uniforms.u_light_col, lightCol.x, lightCol.y, lightCol.z);
-    glUniform1f(glObj.shading.uniforms.u_time, time);
+    glObj.shading.program->activate();
+    glObj.shading.program->setUniform(glObj.shading.uniforms.u_texture_depth, 0);
+    glObj.shading.program->setUniform(glObj.shading.uniforms.u_texture_color, 1);
+    glObj.shading.program->setUniform(glObj.shading.uniforms.u_texture_normal, 2);
+    glm::mat4 ipm;
+    std::memcpy(glm::value_ptr(ipm), &invProjMatrix, 16 * sizeof(float));
+    glObj.shading.program->setUniform(glObj.shading.uniforms.u_inv_proj_mat, ipm);
+    glObj.shading.program->setUniform(glObj.shading.uniforms.u_light_dir, lightDir.x, lightDir.y, lightDir.z);
+    glObj.shading.program->setUniform(glObj.shading.uniforms.u_light_col, lightCol.x, lightCol.y, lightCol.z);
+
     glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
-    glUseProgram(0);
 }
 
 void halfResColorCoc(uint32_t linearDepthTex, uint32_t colorTex, float focusPoint,
@@ -1180,12 +1232,11 @@ void halfResColorCoc(uint32_t linearDepthTex, uint32_t colorTex, float focusPoin
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, colorTex);
 
-    glUseProgram(*glObj.bokehDof.halfRes.program);
-
-    glUniform1i(glObj.bokehDof.halfRes.uniforms.u_tex_depth, 0);
-    glUniform1i(glObj.bokehDof.halfRes.uniforms.u_tex_color, 1);
-    glUniform1f(glObj.bokehDof.halfRes.uniforms.u_focus_point, focusPoint);
-    glUniform1f(glObj.bokehDof.halfRes.uniforms.u_focus_scale, focusScale);
+    glObj.bokehDof.halfRes.program->activate();
+    glObj.bokehDof.halfRes.program->setUniform(glObj.bokehDof.halfRes.uniforms.u_tex_depth, 0);
+    glObj.bokehDof.halfRes.program->setUniform(glObj.bokehDof.halfRes.uniforms.u_tex_color, 1);
+    glObj.bokehDof.halfRes.program->setUniform(glObj.bokehDof.halfRes.uniforms.u_focus_point, focusPoint);
+    glObj.bokehDof.halfRes.program->setUniform(glObj.bokehDof.halfRes.uniforms.u_focus_scale, focusScale);
 
     glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -1215,24 +1266,22 @@ void applyDof(uint32_t linearDepthTex, uint32_t colorTex, float focusPoint,
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, colorTex);
 
-    glUseProgram(*glObj.bokehDof.program);
-    glUniform1i(glObj.bokehDof.uniforms.u_half_res, 0);
-    glUniform1i(glObj.bokehDof.uniforms.u_tex_depth, 1);
-    glUniform1i(glObj.bokehDof.uniforms.u_tex_color, 2);
-    glUniform2f(
+    glObj.bokehDof.program->activate();
+    glObj.bokehDof.program->setUniform(glObj.bokehDof.uniforms.u_half_res, 0);
+    glObj.bokehDof.program->setUniform(glObj.bokehDof.uniforms.u_tex_depth, 1);
+    glObj.bokehDof.program->setUniform(glObj.bokehDof.uniforms.u_tex_color, 2);
+    glObj.bokehDof.program->setUniform(
         glObj.bokehDof.uniforms.u_texel_size,
         1.f / glObj.texWidth,
         1.f / glObj.texHeight
     );
-    glUniform1f(glObj.bokehDof.uniforms.u_focus_depth, focusPoint);
-    glUniform1f(glObj.bokehDof.uniforms.u_focus_scale, focusScale);
-    glUniform1f(glObj.bokehDof.uniforms.u_time, time);
+    glObj.bokehDof.program->setUniform(glObj.bokehDof.uniforms.u_focus_depth, focusPoint);
+    glObj.bokehDof.program->setUniform(glObj.bokehDof.uniforms.u_focus_scale, focusScale);
+    glObj.bokehDof.program->setUniform(glObj.bokehDof.uniforms.u_time, time);
 
     glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
-    glUseProgram(0);
-    glActiveTexture(GL_TEXTURE0);
 }
 
 void applyTonemapping(uint32_t colorTex, Tonemapping tonemapping, float exposure,
@@ -1245,33 +1294,32 @@ void applyTonemapping(uint32_t colorTex, Tonemapping tonemapping, float exposure
 
     switch (tonemapping) {
         case Tonemapping::Passthrough:
-            glUseProgram(*glObj.tonemapping.passthrough.program);
-            glUniform1i(glObj.tonemapping.passthrough.uniforms.u_texture, 0);
+            glObj.tonemapping.passthrough.program->activate();
+            glObj.tonemapping.passthrough.program->setUniform(glObj.tonemapping.passthrough.uniforms.u_texture, 0);
             break;
         case Tonemapping::ExposureGamma:
-            glUseProgram(*glObj.tonemapping.exposureGamma.program);
-            glUniform1i(glObj.tonemapping.exposureGamma.uniforms.u_texture, 0);
-            glUniform1f(glObj.tonemapping.exposureGamma.uniforms.u_exposure, exposure);
-            glUniform1f(glObj.tonemapping.exposureGamma.uniforms.u_gamma, gamma);
+            glObj.tonemapping.exposureGamma.program->activate();
+            glObj.tonemapping.exposureGamma.program->setUniform(glObj.tonemapping.exposureGamma.uniforms.u_texture, 0);
+            glObj.tonemapping.exposureGamma.program->setUniform(glObj.tonemapping.exposureGamma.uniforms.u_exposure, exposure);
+            glObj.tonemapping.exposureGamma.program->setUniform(glObj.tonemapping.exposureGamma.uniforms.u_gamma, gamma);
             break;
         case Tonemapping::Filmic:
-            glUseProgram(*glObj.tonemapping.filmic.program);
-            glUniform1i(glObj.tonemapping.filmic.uniforms.u_texture, 0);
-            glUniform1f(glObj.tonemapping.filmic.uniforms.u_exposure, exposure);
-            glUniform1f(glObj.tonemapping.filmic.uniforms.u_gamma, gamma);
+            glObj.tonemapping.filmic.program->activate();
+            glObj.tonemapping.filmic.program->setUniform(glObj.tonemapping.filmic.uniforms.u_texture, 0);
+            glObj.tonemapping.filmic.program->setUniform(glObj.tonemapping.filmic.uniforms.u_exposure, exposure);
+            glObj.tonemapping.filmic.program->setUniform(glObj.tonemapping.filmic.uniforms.u_gamma, gamma);
             break;
         case Tonemapping::ACES:
-            glUseProgram(*glObj.tonemapping.aces.program);
-            glUniform1i(glObj.tonemapping.aces.uniforms.u_texture, 0);
-            glUniform1f(glObj.tonemapping.aces.uniforms.u_exposure, exposure);
-            glUniform1f(glObj.tonemapping.aces.uniforms.u_gamma, gamma);
+            glObj.tonemapping.aces.program->activate();
+            glObj.tonemapping.aces.program->setUniform(glObj.tonemapping.aces.uniforms.u_texture, 0);
+            glObj.tonemapping.aces.program->setUniform(glObj.tonemapping.aces.uniforms.u_exposure, exposure);
+            glObj.tonemapping.aces.program->setUniform(glObj.tonemapping.aces.uniforms.u_gamma, gamma);
             break;
     }
 
     glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
-    glUseProgram(0);
 }
 
 void blitTilemax(uint32_t velocityTex, int texWidth, int texHeight) {
@@ -1280,30 +1328,28 @@ void blitTilemax(uint32_t velocityTex, int texWidth, int texHeight) {
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, velocityTex);
 
-    glUseProgram(*glObj.blitTilemax.program);
-    glUniform1i(glObj.blitTilemax.uniforms.u_tex_vel, 0);
-    const vec2_t texelSize = { 1.f / texWidth, 1.f / texHeight };
-    glUniform2fv(glObj.blitTilemax.uniforms.u_tex_vel_texel_size, 1, &texelSize.x);
+    glObj.blitTilemax.program->activate();
+    glObj.blitTilemax.program->setUniform(glObj.blitTilemax.uniforms.u_tex_vel, 0);
+    glObj.blitTilemax.program->setUniform(glObj.blitTilemax.uniforms.u_tex_vel_texel_size, glm::vec2(1.f / texWidth, 1.f / texHeight));
+
     glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
-    glUseProgram(0);
 }
 
-void blitNeighbormax(uint32_t velocityTex, int texWwidth, int texHeight) {
+void blitNeighbormax(uint32_t velocityTex, int texWidth, int texHeight) {
     ghoul_assert(glIsTexture(velocityTex), "No texture");
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, velocityTex);
 
-    glUseProgram(*glObj.blitNeighbormax.program);
-    glUniform1i(glObj.blitNeighbormax.uniforms.u_tex_vel, 0);
-    const vec2_t texelSize = { 1.f / texWwidth, 1.f / texHeight };
-    glUniform2fv(glObj.blitNeighbormax.uniforms.u_tex_vel_texel_size, 1, &texelSize.x);
+    glObj.blitNeighbormax.program->activate();
+    glObj.blitNeighbormax.program->setUniform(glObj.blitNeighbormax.uniforms.u_tex_vel, 0);
+    glObj.blitNeighbormax.program->setUniform(glObj.blitNeighbormax.uniforms.u_tex_vel_texel_size, glm::vec2(1.f / texWidth, 1.f / texHeight));
+
     glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
-    glUseProgram(0);
 }
 
 void applyTemporalAa(uint32_t linearDepthTex, uint32_t colorTex, uint32_t velocityTex,
@@ -1322,20 +1368,22 @@ void applyTemporalAa(uint32_t linearDepthTex, uint32_t colorTex, uint32_t veloci
     const int dstBuf = target;
     const int srcBuf = (target + 1) % 2;
 
-    const vec2_t res = {
+    const glm::vec2 res = glm::vec2(
         static_cast<float>(glObj.texWidth),
         static_cast<float>(glObj.texHeight)
-    };
-    const vec2_t invRes = 1.f / res;
-    const vec4_t texelSize = { invRes.x, invRes.y, res.x, res.y };
-    const vec2_t jitterUvCurr = currJitter / res;
-    const vec2_t jitterUvPrev = prevJitter / res;
-    const vec4_t jitterUv = {
+    );
+    const glm::vec2 invRes = 1.f / res;
+    const glm::vec4 texelSize = glm::vec4(invRes.x, invRes.y, res.x, res.y);
+    const glm::vec2 currJitt = glm::vec2(currJitter.x, currJitter.y);
+    const glm::vec2 jitterUvCurr = currJitt / res;
+    const glm::vec2 prevJitt = glm::vec2(prevJitter.x, prevJitter.y);
+    const glm::vec2 jitterUvPrev = prevJitt / res;
+    const glm::vec4 jitterUv = glm::vec4(
         jitterUvCurr.x,
         jitterUvCurr.y,
         jitterUvPrev.x,
         jitterUvPrev.y
-    };
+    );
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, linearDepthTex);
@@ -1366,41 +1414,40 @@ void applyTemporalAa(uint32_t linearDepthTex, uint32_t colorTex, uint32_t veloci
     glDrawBuffers(2, drawBuffers);
 
     if (motionScale != 0.f) {
-        glUseProgram(*glObj.temporal.withMotionBlur.program);
+        glObj.temporal.withMotionBlur.program->activate();
 
-        glUniform1i(glObj.temporal.withMotionBlur.uniforms.u_tex_linear_depth, 0);
-        glUniform1i(glObj.temporal.withMotionBlur.uniforms.u_tex_main, 1);
-        glUniform1i(glObj.temporal.withMotionBlur.uniforms.u_tex_prev, 2);
-        glUniform1i(glObj.temporal.withMotionBlur.uniforms.u_tex_vel, 3);
-        glUniform1i(glObj.temporal.withMotionBlur.uniforms.u_tex_vel_neighbormax, 4);
+        glObj.temporal.withMotionBlur.program->setUniform(glObj.temporal.withMotionBlur.uniforms.u_tex_linear_depth, 0);
+        glObj.temporal.withMotionBlur.program->setUniform(glObj.temporal.withMotionBlur.uniforms.u_tex_main, 1);
+        glObj.temporal.withMotionBlur.program->setUniform(glObj.temporal.withMotionBlur.uniforms.u_tex_prev, 2);
+        glObj.temporal.withMotionBlur.program->setUniform(glObj.temporal.withMotionBlur.uniforms.u_tex_vel, 3);
+        glObj.temporal.withMotionBlur.program->setUniform(glObj.temporal.withMotionBlur.uniforms.u_tex_vel_neighbormax, 4);
 
-        glUniform4fv(glObj.temporal.withMotionBlur.uniforms.u_texel_size, 1, &texelSize.x);
-        glUniform4fv(glObj.temporal.withMotionBlur.uniforms.u_jitter_uv, 1, &jitterUv.x);
-        glUniform1f(glObj.temporal.withMotionBlur.uniforms.u_time, time);
-        glUniform1f(glObj.temporal.withMotionBlur.uniforms.u_feedback_min, feedbackMin);
-        glUniform1f(glObj.temporal.withMotionBlur.uniforms.u_feedback_max, feedbackMax);
-        glUniform1f(glObj.temporal.withMotionBlur.uniforms.u_motion_scale, motionScale);
+        glObj.temporal.withMotionBlur.program->setUniform(glObj.temporal.withMotionBlur.uniforms.u_texel_size, texelSize);
+        glObj.temporal.withMotionBlur.program->setUniform(glObj.temporal.withMotionBlur.uniforms.u_jitter_uv, jitterUv);
+        glObj.temporal.withMotionBlur.program->setUniform(glObj.temporal.withMotionBlur.uniforms.u_time, time);
+        glObj.temporal.withMotionBlur.program->setUniform(glObj.temporal.withMotionBlur.uniforms.u_feedback_min, feedbackMin);
+        glObj.temporal.withMotionBlur.program->setUniform(glObj.temporal.withMotionBlur.uniforms.u_feedback_max, feedbackMax);
+        glObj.temporal.withMotionBlur.program->setUniform(glObj.temporal.withMotionBlur.uniforms.u_motion_scale, motionScale);
     }
     else {
-        glUseProgram(*glObj.temporal.noMotionBlur.program);
+        glObj.temporal.noMotionBlur.program->activate();
 
-        glUniform1i(glObj.temporal.noMotionBlur.uniforms.u_tex_linear_depth, 0);
-        glUniform1i(glObj.temporal.noMotionBlur.uniforms.u_tex_main, 1);
-        glUniform1i(glObj.temporal.noMotionBlur.uniforms.u_tex_prev, 2);
-        glUniform1i(glObj.temporal.noMotionBlur.uniforms.u_tex_vel, 3);
+        glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.u_tex_linear_depth, 0);
+        glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.u_tex_main, 1);
+        glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.u_tex_prev, 2);
+        glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.u_tex_vel, 3);
 
-        glUniform4fv(glObj.temporal.noMotionBlur.uniforms.u_texel_size, 1, &texelSize.x);
-        glUniform4fv(glObj.temporal.noMotionBlur.uniforms.u_jitter_uv, 1, &jitterUv.x);
-        glUniform1f(glObj.temporal.noMotionBlur.uniforms.u_time, time);
-        glUniform1f(glObj.temporal.noMotionBlur.uniforms.u_feedback_min, feedbackMin);
-        glUniform1f(glObj.temporal.noMotionBlur.uniforms.u_feedback_max, feedbackMax);
-        glUniform1f(glObj.temporal.noMotionBlur.uniforms.u_motion_scale, motionScale);
+        glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.u_texel_size, texelSize);
+        glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.u_jitter_uv, jitterUv);
+        glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.u_time, time);
+        glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.u_feedback_min, feedbackMin);
+        glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.u_feedback_max, feedbackMax);
+        glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.u_motion_scale, motionScale);
     }
 
     glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
-    glUseProgram(0);
 }
 
 void blitTexture(uint32_t tex, uint32_t depth) {
@@ -1411,24 +1458,23 @@ void blitTexture(uint32_t tex, uint32_t depth) {
     if (depth) {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, depth);
-        glUseProgram(*glObj.blit.texDepth.program);
-        glUniform1i(glObj.blit.texDepth.uniforms.u_tex_color, 0);
-        glUniform1i(glObj.blit.texDepth.uniforms.u_tex_depth, 1);
+        glObj.blit.texDepth.program->activate();
+        glObj.blit.texDepth.program->setUniform(glObj.blit.texDepth.uniforms.u_tex_color, 0);
+        glObj.blit.texDepth.program->setUniform(glObj.blit.texDepth.uniforms.u_tex_depth, 1);
     }
     else {
-        glUseProgram(*glObj.blit.tex.program);
-        glUniform1i(glObj.blit.tex.uniforms.u_texture, 0);
+        glObj.blit.tex.program->activate();
+        glObj.blit.tex.program->setUniform(glObj.blit.tex.uniforms.u_texture, 0);
     }
 
     glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
     glBindVertexArray(0);
-    glUseProgram(0);
-    glActiveTexture(GL_TEXTURE0);
 }
 
+// @TODO unused
 void blitColor(vec4_t color) {
-    glUseProgram(*glObj.blit.color.program);
+    glObj.blit.color.program->activate();
     glUniform4fv(glObj.blit.color.uniforms.u_color, 1, &color.x);
     glBindVertexArray(glObj.vao);
     glDrawArrays(GL_TRIANGLES, 0, 3);
