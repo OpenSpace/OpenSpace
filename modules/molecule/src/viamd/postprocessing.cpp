@@ -82,8 +82,8 @@ namespace {
                 uint32_t fbo = 0;
                 uint32_t texture = 0;
                 std::unique_ptr<ghoul::opengl::ProgramObject> program;
-                UniformCache(texLinearDepth, texNormal, texRandom,
-                    tcScale, isPerspective) uniforms;
+                UniformCache(texLinearDepth, texNormal, texRandom, tcScale,
+                    isPerspective) uniforms;
             } hbao;
 
             struct {
@@ -97,8 +97,8 @@ namespace {
 
         struct {
             std::unique_ptr<ghoul::opengl::ProgramObject> program;
-            UniformCache(texDepth, texColor, texNormal,
-                invProjMat, lightDir, lightCol) uniforms;
+            UniformCache(texDepth, texColor, texNormal, invProjMat, lightDir,
+                lightCol) uniforms;
         } shading;
 
         struct {
@@ -108,10 +108,8 @@ namespace {
 
             struct {
                 uint32_t fbo = 0;
+                uint32_t colorCoc = 0;
                 std::unique_ptr<ghoul::opengl::ProgramObject> program;
-                struct {
-                    uint32_t colorCoc = 0;
-                } tex;
                 UniformCache(texDepth, texColor, focusPoint, focusScale) uniforms;
             } halfRes;
         } bokehDof;
@@ -141,14 +139,14 @@ namespace {
         struct {
             struct {
                 std::unique_ptr<ghoul::opengl::ProgramObject> program;
-                UniformCache(texLinearDepth, texMain, texPrev, texVel,
-                    texVelNeighbormax, texelSize, time, feedbackMin,
-                    feedbackMax, motionScale, jitterUv) uniforms;
+                UniformCache(texLinearDepth, texMain, texPrev, texVel, texVelNeighbormax,
+                    texelSize, time, feedbackMin, feedbackMax, motionScale,
+                    jitterUv) uniforms;
             } withMotionBlur;
             struct {
                 std::unique_ptr<ghoul::opengl::ProgramObject> program;
-                UniformCache(texLinearDepth, texMain, texPrev, texVel, texelSize,
-                    time, feedbackMin, feedbackMax, motionScale, jitterUv) uniforms;
+                UniformCache(texLinearDepth, texMain, texPrev, texVel, texelSize, time,
+                    feedbackMin, feedbackMax, motionScale, jitterUv) uniforms;
             } noMotionBlur;
         } temporal;
 
@@ -167,11 +165,6 @@ namespace {
                 std::unique_ptr<ghoul::opengl::ProgramObject> program;
                 UniformCache(texColor, texDepth) uniforms;
             } texDepth;
-
-            struct {
-                std::unique_ptr<ghoul::opengl::ProgramObject> program;
-                UniformCache(color) uniforms;
-            } color;
         } blit;
 
         struct {
@@ -250,8 +243,6 @@ struct HBAOData {
 void setupUboHbaoData(uint32_t ubo, int width, int height, const mat4_t& projMat,
                       float intensity, float radius, float nDotVBias, float normalBias)
 {
-    ghoul_assert(ubo, "Missing uniform bufffer object");
-
     // From Intel ASSAO
     constexpr float SAMPLE_PATTERN[] = {
         0.78488064f,  0.56661671f,  1.500000f, -0.126083f, 0.26022232f,  -0.29575172f, 1.500000f, -1.064030f, 0.10459357f,  0.08372527f,  1.110000f, -2.730563f, -0.68286800f, 0.04963045f,  1.090000f, -0.498827f,
@@ -312,15 +303,6 @@ void setupUboHbaoData(uint32_t ubo, int width, int height, const mat4_t& projMat
 }
 
 void initialize(int width, int height) {
-    ghoul_assert(glObj.ssao.hbao.fbo == 0, "Object already created");
-    ghoul_assert(glObj.ssao.blur.fbo == 0, "Object already created");
-    ghoul_assert(glObj.ssao.texRandom == 0, "Object already created");
-    ghoul_assert(glObj.ssao.hbao.texture == 0, "Object already created");
-    ghoul_assert(glObj.ssao.blur.texture == 0, "Object already created");
-    ghoul_assert(glObj.ssao.uboHbaoData == 0, "Object already created");
-
-
-    ghoul::Dictionary perspective;
     glObj.ssao.hbao.program = ghoul::opengl::ProgramObject::Build(
         "SSAO Perspective",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
@@ -529,9 +511,6 @@ void shutdown() {
 namespace dof {
 
 void initialize(int32_t width, int32_t height) {
-    ghoul_assert(glObj.bokehDof.halfRes.tex.colorCoc == 0, "Object already created");
-    ghoul_assert(glObj.bokehDof.halfRes.fbo == 0, "Object already created");
-
     glObj.bokehDof.halfRes.program = ghoul::opengl::ProgramObject::Build(
         "DOF prepass",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
@@ -542,8 +521,8 @@ void initialize(int32_t width, int32_t height) {
         glObj.bokehDof.halfRes.uniforms
     );
 
-    glGenTextures(1, &glObj.bokehDof.halfRes.tex.colorCoc);
-    glBindTexture(GL_TEXTURE_2D, glObj.bokehDof.halfRes.tex.colorCoc);
+    glGenTextures(1, &glObj.bokehDof.halfRes.colorCoc);
+    glBindTexture(GL_TEXTURE_2D, glObj.bokehDof.halfRes.colorCoc);
     glTexImage2D(
         GL_TEXTURE_2D,
         0,
@@ -566,7 +545,7 @@ void initialize(int32_t width, int32_t height) {
         GL_DRAW_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        glObj.bokehDof.halfRes.tex.colorCoc,
+        glObj.bokehDof.halfRes.colorCoc,
         0
     );
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -612,22 +591,11 @@ void initialize() {
         *glObj.blit.texDepth.program,
         glObj.blit.texDepth.uniforms
     );
-
-    glObj.blit.color.program = ghoul::opengl::ProgramObject::Build(
-        "Blit Color",
-        absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
-        absPath("${MODULE_MOLECULE}/shaders/blit_color_fs.glsl")
-    );
-    ghoul::opengl::updateUniformLocations(
-        *glObj.blit.color.program,
-        glObj.blit.color.uniforms
-    );
 }
 
 void shutdown() {
     glObj.blit.tex.program = nullptr;
     glObj.blit.texDepth.program = nullptr;
-    glObj.blit.color.program = nullptr;
 }
 
 }  // namespace blit
@@ -637,10 +605,6 @@ namespace velocity {
 void initialize(int32_t width, int32_t height) {
     constexpr int VelTileSize = 8;
 
-    ghoul_assert(glObj.velocity.texTilemax == 0, "Object already created");
-    ghoul_assert(glObj.velocity.texNeighbormax == 0, "Object already created");
-    ghoul_assert(glObj.velocity.fbo == 0, "Object already created");
-    
     ghoul::Dictionary tileSize;
     tileSize.setValue("TileSize", VelTileSize);
     glObj.blitTilemax.program = ghoul::opengl::ProgramObject::Build(
@@ -719,10 +683,7 @@ void initialize(int32_t width, int32_t height) {
         glObj.velocity.texNeighbormax,
         0
     );
-    GLenum status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        MD_LOG_ERROR("Something went wrong in creating framebuffer for velocity");
-    }
+
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
 
@@ -806,8 +767,6 @@ void shutdown() {
 namespace fxaa {
 
 void initialize() {
-    ghoul_assert(glObj.fxaa.program == 0, "Object already created");
-
     glObj.fxaa.program = ghoul::opengl::ProgramObject::Build(
         "FXAA",
         absPath("${MODULE_MOLECULE}/shaders/quad_vs.glsl"),
@@ -842,12 +801,6 @@ void shutdown() {
 }   // namespace fxaa
 
 void initialize(int width, int height) {
-    static bool IsInitialized = false;
-
-    if (IsInitialized) {
-        return;
-    }
-
     glGenVertexArrays(1, &glObj.vao);
 
     // LINEARIZE DEPTH
@@ -1000,8 +953,138 @@ void initialize(int width, int height) {
     blit::initialize();
     sharpen::initialize();
     fxaa::initialize();
+}
 
-    IsInitialized = true;
+void resize(int width, int height) {
+    glObj.texWidth = width;
+    glObj.texHeight = height;
+
+    glBindTexture(GL_TEXTURE_2D, glObj.linearDepth.texture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, nullptr);
+
+    glBindTexture(GL_TEXTURE_2D, glObj.targets.texColor[0]);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_R11F_G11F_B10F,
+        width,
+        height,
+        0,
+        GL_RGB,
+        GL_FLOAT,
+        nullptr
+    );
+
+    glBindTexture(GL_TEXTURE_2D, glObj.targets.texColor[1]);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_R11F_G11F_B10F,
+        width,
+        height,
+        0,
+        GL_RGB,
+        GL_FLOAT,
+        nullptr
+    );
+
+    glBindTexture(GL_TEXTURE_2D, glObj.targets.texTemporalBuffer[0]);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_R11F_G11F_B10F,
+        width,
+        height,
+        0,
+        GL_RGB,
+        GL_FLOAT,
+        nullptr
+    );
+
+    glBindTexture(GL_TEXTURE_2D, glObj.targets.texTemporalBuffer[1]);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_R11F_G11F_B10F,
+        width,
+        height,
+        0,
+        GL_RGB,
+        GL_FLOAT,
+        nullptr
+    );
+
+    // ssao
+    glBindTexture(GL_TEXTURE_2D, glObj.ssao.hbao.texture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_R8,
+        width,
+        height,
+        0,
+        GL_RED,
+        GL_UNSIGNED_BYTE,
+        nullptr
+    );
+
+    glBindTexture(GL_TEXTURE_2D, glObj.ssao.blur.texture);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_R8,
+        width,
+        height,
+        0,
+        GL_RED,
+        GL_UNSIGNED_BYTE,
+        nullptr
+    );
+
+    // dof
+    glBindTexture(GL_TEXTURE_2D, glObj.bokehDof.halfRes.colorCoc);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RGBA16F,
+        width / 2,
+        height / 2,
+        0,
+        GL_RGBA,
+        GL_FLOAT,
+        nullptr
+    );
+
+    // velocity
+    constexpr int VelTileSize = 8;
+    glObj.velocity.texWidth = width / VelTileSize;
+    glObj.velocity.texHeight = height / VelTileSize;
+
+    glBindTexture(GL_TEXTURE_2D, glObj.velocity.texTilemax);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RG16F,
+        glObj.velocity.texWidth,
+        glObj.velocity.texHeight,
+        0,
+        GL_RG,
+        GL_FLOAT,
+        nullptr
+    );
+
+    glBindTexture(GL_TEXTURE_2D, glObj.velocity.texNeighbormax);
+    glTexImage2D(
+        GL_TEXTURE_2D,
+        0,
+        GL_RG16F,
+        glObj.velocity.texWidth,
+        glObj.velocity.texHeight,
+        0,
+        GL_RG,
+        GL_FLOAT,
+        nullptr
+    );
 }
 
 void shutdown() {
@@ -1042,9 +1125,6 @@ void computeLinearDepth(uint32_t depthTex, float nearPlane, float farPlane,
 void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMatrix,
                float intensity, float radius, float bias, float normalBias)
 {
-    ghoul_assert(glIsTexture(linearDepthTex), "No texture");
-    ghoul_assert(glIsTexture(normalTex), "No texture");
-
     const bool isOrtho = isOrthoProjMatrix(projMatrix);
     const float sharpness = 3.f / std::sqrt(radius);
 
@@ -1156,10 +1236,6 @@ void shadeDeferred(uint32_t depthTex, uint32_t colorTex, uint32_t normalTex,
                    const mat4_t& invProjMatrix, const vec3_t& lightDir,
                    const vec3_t& lightCol, float)
 {
-    ghoul_assert(glIsTexture(depthTex), "No texture");
-    ghoul_assert(glIsTexture(colorTex), "No texture");
-    ghoul_assert(glIsTexture(normalTex), "No texture");
-
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, depthTex);
     glActiveTexture(GL_TEXTURE1);
@@ -1215,9 +1291,6 @@ void halfResColorCoc(uint32_t linearDepthTex, uint32_t colorTex, float focusPoin
 void applyDof(uint32_t linearDepthTex, uint32_t colorTex, float focusPoint,
               float focusScale, float time)
 {
-    ghoul_assert(glIsTexture(linearDepthTex), "No texture");
-    ghoul_assert(glIsTexture(colorTex), "No texture");
-
     int lastFbo;
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &lastFbo);
 
@@ -1226,7 +1299,7 @@ void applyDof(uint32_t linearDepthTex, uint32_t colorTex, float focusPoint,
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, glObj.bokehDof.halfRes.tex.colorCoc);
+    glBindTexture(GL_TEXTURE_2D, glObj.bokehDof.halfRes.colorCoc);
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, linearDepthTex);
     glActiveTexture(GL_TEXTURE2);
@@ -1253,8 +1326,6 @@ void applyDof(uint32_t linearDepthTex, uint32_t colorTex, float focusPoint,
 void applyTonemapping(uint32_t colorTex, Tonemapping tonemapping, float exposure,
                       float gamma)
 {
-    ghoul_assert(glIsTexture(colorTex), "No texture");
-
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, colorTex);
 
@@ -1289,8 +1360,6 @@ void applyTonemapping(uint32_t colorTex, Tonemapping tonemapping, float exposure
 }
 
 void blitTilemax(uint32_t velocityTex, int texWidth, int texHeight) {
-    ghoul_assert(glIsTexture(velocityTex), "No texture");
-
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, velocityTex);
 
@@ -1304,8 +1373,6 @@ void blitTilemax(uint32_t velocityTex, int texWidth, int texHeight) {
 }
 
 void blitNeighbormax(uint32_t velocityTex, int texWidth, int texHeight) {
-    ghoul_assert(glIsTexture(velocityTex), "No texture");
-
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, velocityTex);
 
@@ -1323,11 +1390,6 @@ void applyTemporalAa(uint32_t linearDepthTex, uint32_t colorTex, uint32_t veloci
                      const vec2_t& prevJitter, float feedbackMin, float feedbackMax,
                      float motionScale, float time)
 {
-    ghoul_assert(glIsTexture(linearDepthTex), "No texture");
-    ghoul_assert(glIsTexture(colorTex), "No texture");
-    ghoul_assert(glIsTexture(velocityTex), "No texture");
-    ghoul_assert(glIsTexture(velocityNeighbormaxTex), "No texture");
-
     static int target = 0;
     target = (target + 1) % 2;
 
@@ -1413,7 +1475,6 @@ void applyTemporalAa(uint32_t linearDepthTex, uint32_t colorTex, uint32_t veloci
 }
 
 void blitTexture(uint32_t tex, uint32_t depth) {
-    ghoul_assert(glIsTexture(tex), "No texture");
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, tex);
 
@@ -1434,24 +1495,7 @@ void blitTexture(uint32_t tex, uint32_t depth) {
     glBindVertexArray(0);
 }
 
-// @TODO unused
-void blitColor(vec4_t color) {
-    glObj.blit.color.program->activate();
-    glUniform4fv(glObj.blit.color.uniforms.color, 1, &color.x);
-    glBindVertexArray(glObj.vao);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glBindVertexArray(0);
-    glUseProgram(0);
-}
-
 void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
-    ghoul_assert(glIsTexture(settings.inputTextures.depth), "No texture");
-    ghoul_assert(glIsTexture(settings.inputTextures.color), "No texture");
-    ghoul_assert(glIsTexture(settings.inputTextures.normal), "No texture");
-    if (settings.temporalReprojection.enabled) {
-        ghoul_assert(glIsTexture(settings.inputTextures.velocity), "No texture");
-    }
-
     // For seeding noise
     static float time = 0.f;
     time = time + 0.016f;
@@ -1460,7 +1504,7 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
     }
 
     static vec2_t prevJitter = { 0.f, 0.f };
-    vec3_t L = mat4_mul_vec3(V, vec3_set(0.f, 0.f, 0.f), 1.0f);
+    vec3_t L = mat4_mul_vec3(V, vec3_set(0.f, 0.f, 0.f), 1.f);
     vec3_t lightDir = vec3_normalize(L);
     vec3_t lightCol = vec3_set1(5.f);
     mat4_t invP = mat4_inverse(P);
@@ -1488,7 +1532,7 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
     if (width > static_cast<int>(glObj.texWidth) ||
         height > static_cast<int>(glObj.texHeight))
     {
-        initialize(width, height);
+        resize(width, height);
     }
 
     glViewport(0, 0, width, height);
@@ -1610,12 +1654,12 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
         glDrawBuffer(dstBuffer);
         const float feedbackMin = settings.temporalReprojection.feedbackMin;
         const float feedbackMax = settings.temporalReprojection.feedbackMax;
-        const float motion_scale =
+        const float motionScale =
             settings.temporalReprojection.motionBlur.enabled ?
             settings.temporalReprojection.motionBlur.motionScale :
             0.f;
 
-        if (motion_scale != 0.f)
+        if (motionScale != 0.f)
             glPushDebugGroup(
                 GL_DEBUG_SOURCE_APPLICATION,
                 1,
@@ -1633,7 +1677,7 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
                 prevJitter,
                 feedbackMin,
                 feedbackMax,
-                motion_scale,
+                motionScale,
                 time
             );
          glPopDebugGroup();

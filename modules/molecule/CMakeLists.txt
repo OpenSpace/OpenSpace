@@ -53,7 +53,6 @@ set(SHADER_FILES
   shaders/billboard_vs.glsl
   shaders/billboard_fs.glsl
   shaders/blit_fs.glsl
-  shaders/blit_color_fs.glsl
   shaders/blit_depth_fs.glsl
   shaders/deferred_shading_fs.glsl
   shaders/dof_fs.glsl

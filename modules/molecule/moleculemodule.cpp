@@ -369,7 +369,7 @@ void MoleculeModule::preDraw() {
         nullptr
     );
     glBindTexture(GL_TEXTURE_2D, 0);
-    postprocessing::initialize(size.x, size.y);
+    postprocessing::resize(size.x, size.y);
 }
 
 void MoleculeModule::render() {

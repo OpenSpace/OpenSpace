@@ -30,6 +30,7 @@ struct mat4_t;
 namespace postprocessing {
 
 void initialize(int width, int height);
+void resize(int width, int height);
 void shutdown();
 
 enum class Tonemapping {
