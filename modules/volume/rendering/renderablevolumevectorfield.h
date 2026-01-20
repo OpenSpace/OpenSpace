@@ -48,6 +48,11 @@ struct VelocityData {
     float vz;
 };
 
+struct Vertex {
+    glm::vec3 position;
+    glm::vec3 direction;
+};
+
 class RenderableVectorField : public Renderable {
 public:
    explicit RenderableVectorField(const ghoul::Dictionary& dictionary);
@@ -83,7 +88,7 @@ private:
 
 
     std::shared_ptr<RawVolume<VelocityData>> _volumeData;
-    std::vector<glm::vec3> _vertices;
+    std::vector<Vertex> _vertices;
 
     bool _vectorFieldIsDirty = true;
 

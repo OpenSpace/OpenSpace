@@ -158,19 +158,33 @@ void RenderableVectorField::initializeGL()
 
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+
+    static_assert(sizeof(Vertex) == 6 * sizeof(float),
+        "Vertex layout is not tightly packed!"
+    );
+
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(
         0,
         3,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(glm::vec3),
-        nullptr
+        sizeof(Vertex),
+        (void*)offsetof(Vertex, position)
+    );
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(
+        1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(Vertex),
+        (void*)offsetof(Vertex, direction)
     );
 
     glBufferData(
         GL_ARRAY_BUFFER,
-        _vertices.size() * sizeof(glm::vec3),
+        _vertices.size() * sizeof(Vertex),
         _vertices.data(),
         GL_STATIC_DRAW
     );
@@ -228,7 +242,7 @@ void RenderableVectorField::update(const UpdateData& data)
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glBufferData(
             GL_ARRAY_BUFFER,
-            _vertices.size() * sizeof(glm::vec3),
+            _vertices.size() * sizeof(Vertex),
             _vertices.data(),
             GL_STATIC_DRAW
         );
@@ -293,10 +307,11 @@ void RenderableVectorField::computeFieldLines() {
                 glm::dvec3 worldPos = minD + glm::dvec3(normalized) * (maxD - minD);
 
                 glm::dvec3 endPos = worldPos + glm::dvec3(avgVelocity * _vectorFieldScale.value());
+                glm::vec3 direction = glm::normalize(avgVelocity);
 
                 if (count > 0 && glm::length(avgVelocity) > 0.f) {
-                    _vertices.push_back(worldPos);
-                    _vertices.push_back(endPos);
+                    _vertices.push_back({ worldPos, direction });
+                    _vertices.push_back({ endPos, direction });
                 }
             }
         }

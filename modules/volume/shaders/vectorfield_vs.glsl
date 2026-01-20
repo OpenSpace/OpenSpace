@@ -26,14 +26,17 @@
 #include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec3 in_direction;
 
 uniform mat4 modelViewProjection;
 
 out float vs_positionDepth;
+flat out vec3 v_dir;
 
 void main() {
     vec4 vsPositionClipSpace = modelViewProjection * vec4(in_position, 1.0);
     vs_positionDepth = vsPositionClipSpace.w;
 
     gl_Position = z_normalization(vsPositionClipSpace);
+    v_dir = in_direction;
 }

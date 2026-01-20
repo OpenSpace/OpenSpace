@@ -26,11 +26,15 @@
 
 out vec4 outColor;
 in float vs_positionDepth;
+flat in vec3 v_dir;
 
 Fragment getFragment() {
     Fragment frag;
 
-    frag.color = vec4(1.0, 0, 0, 1.0);
+    vec3 dir = normalize(v_dir);
+    vec3 color = 0.5 * (dir + vec3(1.0)); // remaps [-1, 1] -> [0, 1]
+    frag.color = vec4(color, 1.0);
+    // frag.color = vec4(abs(normalize(v_dir)), 1.0);
     frag.depth = vs_positionDepth;
     return frag;
 }
