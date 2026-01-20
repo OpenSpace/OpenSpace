@@ -26,27 +26,27 @@ include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(HEADER_FILES
   moleculemodule.h
-  renderablemolecule.h
-  renderablesimulationbox.h
-  mol/cache.h
-  mol/def.h
-  mol/util.h
-  mol/viamd/coloring.h
-  mol/viamd/loader.h
-  mol/viamd/postprocessing.h
-  mol/viamd/postprocessing_shaders.inl
+  src/renderablemolecule.h
+  src/renderablesimulationbox.h
+  src/cache.h
+  src/def.h
+  src/util.h
+  src/viamd/coloring.h
+  src/viamd/loader.h
+  src/viamd/postprocessing.h
+  src/viamd/postprocessing_shaders.inl
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
   moleculemodule.cpp
-  renderablemolecule.cpp
-  renderablesimulationbox.cpp
-  mol/cache.cpp
-  mol/util.cpp
-  mol/viamd/coloring.cpp
-  mol/viamd/loader.cpp
-  mol/viamd/postprocessing.cpp
+  src/renderablemolecule.cpp
+  src/renderablesimulationbox.cpp
+  src/cache.cpp
+  src/util.cpp
+  src/viamd/coloring.cpp
+  src/viamd/loader.cpp
+  src/viamd/postprocessing.cpp
 )
 
 source_group("Source Files" FILES ${SOURCE_FILES})

@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_MOLECULE___UTIL___H__
 #define __OPENSPACE_MODULE_MOLECULE___UTIL___H__
 
-#include <modules/molecule/mol/def.h>
+#include <modules/molecule/src/def.h>
 #include <ghoul/glm.h>
 
 struct md_bitfield_t;

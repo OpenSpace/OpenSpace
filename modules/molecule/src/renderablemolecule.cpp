@@ -22,12 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/molecule/renderablemolecule.h>
+#include <modules/molecule/src/renderablemolecule.h>
 
 #include <modules/molecule/moleculemodule.h>
-#include <modules/molecule/mol/viamd/postprocessing.h>
-#include <modules/molecule/mol/cache.h>
-#include <modules/molecule/mol/util.h>
+#include <modules/molecule/src/cache.h>
+#include <modules/molecule/src/util.h>
+#include <modules/molecule/src/viamd/postprocessing.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>

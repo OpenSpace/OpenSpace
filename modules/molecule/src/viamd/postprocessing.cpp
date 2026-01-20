@@ -25,11 +25,12 @@
 
 // Shaders for HBAO are based on nVidias examples and are copyright protected as stated above
 
-#include <modules/molecule/mol/viamd/postprocessing.h>
+#include <modules/molecule/src/viamd/postprocessing.h>
 
-#include <modules/molecule/mol/viamd/postprocessing_shaders.inl>
+#include <modules/molecule/src/viamd/postprocessing_shaders.inl>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
 #include <core/md_allocator.h>
 #include <core/md_str.h>
 #include <core/md_log.h>
@@ -538,9 +539,9 @@ void initialize(int width, int height) {
     ghoul_assert(glObj.ssao.blur.texture == 0, "Object already created");
     ghoul_assert(glObj.ssao.uboHbaoData == 0, "Object already created");
 
-    glObj.ssao.hbao.programPersp = setupProgramFromSource(STR("ssao persp"), f_shader_src_ssao, STR("#define AO_PERSPECTIVE 1"));
-    glObj.ssao.hbao.programOrtho = setupProgramFromSource(STR("ssao ortho"), f_shader_src_ssao, STR("#define AO_PERSPECTIVE 0"));
-    glObj.ssao.blur.program = setupProgramFromSource(STR("ssao blur"),  f_shader_src_ssao_blur);
+    glObj.ssao.hbao.programPersp = setupProgramFromSource(STR("ssao persp"), mol::internal::fShaderSrcSsao, STR("#define AO_PERSPECTIVE 1"));
+    glObj.ssao.hbao.programOrtho = setupProgramFromSource(STR("ssao ortho"), mol::internal::fShaderSrcSsao, STR("#define AO_PERSPECTIVE 0"));
+    glObj.ssao.blur.program = setupProgramFromSource(STR("ssao blur"), mol::internal::fShaderSrcSsaoBlur);
     
     glGenFramebuffers(1, &glObj.ssao.hbao.fbo);
     glGenFramebuffers(1, &glObj.ssao.blur.fbo);
@@ -631,7 +632,7 @@ void shutdown() {
 namespace shading {
 
 void initialize() {
-    glObj.shading.program = setupProgramFromSource(STR("deferred shading"), f_shader_src_deferred_shading);
+    glObj.shading.program = setupProgramFromSource(STR("deferred shading"), mol::internal::fShaderSrcDeferredShading);
     glObj.shading.uniformLoc.textureDepth = glGetUniformLocation(glObj.shading.program, "u_texture_depth");
     glObj.shading.uniformLoc.textureColor = glGetUniformLocation(glObj.shading.program, "u_texture_color");
     glObj.shading.uniformLoc.textureNormal = glGetUniformLocation(glObj.shading.program, "u_texture_normal");
@@ -651,23 +652,23 @@ namespace tonemapping {
 
 void initialize() {
     // PASSTHROUGH
-    glObj.tonemapping.passthrough.program = setupProgramFromSource(STR("Passthrough"), f_shader_src_tonemap_passthrough);
+    glObj.tonemapping.passthrough.program = setupProgramFromSource(STR("Passthrough"), mol::internal::fShaderSrcTonemapPassthrough);
     glObj.tonemapping.passthrough.uniformLoc.texture = glGetUniformLocation(glObj.tonemapping.passthrough.program, "u_texture");
 
     // EXPOSURE GAMMA
-    glObj.tonemapping.exposureGamma.program = setupProgramFromSource(STR("Exposure Gamma"), f_shader_src_tonemap_exposure_gamma);
+    glObj.tonemapping.exposureGamma.program = setupProgramFromSource(STR("Exposure Gamma"), mol::internal::fShaderSrcTonemapExposureGamma);
     glObj.tonemapping.exposureGamma.uniformLoc.texture = glGetUniformLocation(glObj.tonemapping.exposureGamma.program, "u_texture");
     glObj.tonemapping.exposureGamma.uniformLoc.exposure = glGetUniformLocation(glObj.tonemapping.exposureGamma.program, "u_exposure");
     glObj.tonemapping.exposureGamma.uniformLoc.gamma = glGetUniformLocation(glObj.tonemapping.exposureGamma.program, "u_gamma");
 
     // FILMIC (UNCHARTED)
-    glObj.tonemapping.filmic.program = setupProgramFromSource(STR("Filmic"), f_shader_src_tonemap_filmic);
+    glObj.tonemapping.filmic.program = setupProgramFromSource(STR("Filmic"), mol::internal::fShaderSrcTonemapFilmic);
     glObj.tonemapping.filmic.uniformLoc.texture = glGetUniformLocation(glObj.tonemapping.filmic.program, "u_texture");
     glObj.tonemapping.filmic.uniformLoc.exposure = glGetUniformLocation(glObj.tonemapping.filmic.program, "u_exposure");
     glObj.tonemapping.filmic.uniformLoc.gamma = glGetUniformLocation(glObj.tonemapping.filmic.program, "u_gamma");
 
     // ACES
-    glObj.tonemapping.aces.program = setupProgramFromSource(STR("ACES"), f_shader_src_tonemap_aces);
+    glObj.tonemapping.aces.program = setupProgramFromSource(STR("ACES"), mol::internal::fShaderSrcTonemapAces);
     glObj.tonemapping.aces.uniformLoc.texture = glGetUniformLocation(glObj.tonemapping.aces.program, "u_texture");
     glObj.tonemapping.aces.uniformLoc.exposure = glGetUniformLocation(glObj.tonemapping.aces.program, "u_exposure");
     glObj.tonemapping.aces.uniformLoc.gamma = glGetUniformLocation(glObj.tonemapping.aces.program, "u_gamma");
@@ -688,7 +689,7 @@ void initialize(int32_t width, int32_t height) {
     ghoul_assert(glObj.bokehDof.halfRes.tex.colorCoc == 0, "Object already created");
     ghoul_assert(glObj.bokehDof.halfRes.fbo == 0, "Object already created");
 
-    glObj.bokehDof.halfRes.program = setupProgramFromSource(STR("DOF prepass"), f_shader_src_dof_halfres_prepass);
+    glObj.bokehDof.halfRes.program = setupProgramFromSource(STR("DOF prepass"), mol::internal::fShaderSrcDofHalfresPrepass);
     glObj.bokehDof.halfRes.uniformLoc.texDepth = glGetUniformLocation(glObj.bokehDof.halfRes.program, "u_tex_depth");
     glObj.bokehDof.halfRes.uniformLoc.texColor = glGetUniformLocation(glObj.bokehDof.halfRes.program, "u_tex_color");
     glObj.bokehDof.halfRes.uniformLoc.focusPoint = glGetUniformLocation(glObj.bokehDof.halfRes.program, "u_focus_point");
@@ -713,7 +714,7 @@ void initialize(int32_t width, int32_t height) {
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     // DOF
-    glObj.bokehDof.program = setupProgramFromSource(STR("Bokeh DOF"), f_shader_src_dof);
+    glObj.bokehDof.program = setupProgramFromSource(STR("Bokeh DOF"), mol::internal::fShaderSrcDof);
     glObj.bokehDof.uniformLoc.texHalfRes = glGetUniformLocation(glObj.bokehDof.program, "u_half_res");
     glObj.bokehDof.uniformLoc.texColor = glGetUniformLocation(glObj.bokehDof.program, "u_tex_color");
     glObj.bokehDof.uniformLoc.texDepth = glGetUniformLocation(glObj.bokehDof.program, "u_tex_depth");
@@ -798,7 +799,7 @@ void initialize(int32_t width, int32_t height) {
     ghoul_assert(glObj.velocity.texNeighbormax == 0, "Object already created");
     ghoul_assert(glObj.velocity.fbo == 0, "Object already created");
     
-    glObj.blitVelocity.program = setupProgramFromSource(STR("screen-space velocity"), f_shader_src_vel_blit);
+    glObj.blitVelocity.program = setupProgramFromSource(STR("screen-space velocity"), mol::internal::fShaderSrcVelBlit);
     glObj.blitVelocity.uniformLoc.texDepth = glGetUniformLocation(glObj.blitVelocity.program, "u_tex_depth");
     glObj.blitVelocity.uniformLoc.currClipToPrevClipMat = glGetUniformLocation(glObj.blitVelocity.program, "u_curr_clip_to_prev_clip_mat");
     glObj.blitVelocity.uniformLoc.jitterUv = glGetUniformLocation(glObj.blitVelocity.program, "u_jitter_uv");
@@ -807,12 +808,12 @@ void initialize(int32_t width, int32_t height) {
 #define TOSTRING(x) STRINGIFY(x)
     std::string exp = std::format("#define TILE_SIZE {}", VelTileSize);
     str_t defines = str_from_cstr(exp.c_str());
-    glObj.blitTilemax.program = setupProgramFromSource(STR("tilemax"), f_shader_src_vel_tilemax, defines);
+    glObj.blitTilemax.program = setupProgramFromSource(STR("tilemax"), mol::internal::fShaderSrcVelTilemax, defines);
     glObj.blitTilemax.uniformLoc.texVel = glGetUniformLocation(glObj.blitTilemax.program, "u_tex_vel");
     glObj.blitTilemax.uniformLoc.texVelTexelSize = glGetUniformLocation(glObj.blitTilemax.program, "u_tex_vel_texel_size");
 #undef STRINGIFY
 #undef TOSTRING
-    glObj.blitNeighbormax.program = setupProgramFromSource(STR("neighbormax"), f_shader_src_vel_neighbormax);
+    glObj.blitNeighbormax.program = setupProgramFromSource(STR("neighbormax"), mol::internal::fShaderSrcVelNeighbormax);
     glObj.blitNeighbormax.uniformLoc.texVel = glGetUniformLocation(glObj.blitNeighbormax.program, "u_tex_vel");
     glObj.blitNeighbormax.uniformLoc.texVelTexelSize = glGetUniformLocation(glObj.blitNeighbormax.program, "u_tex_vel_texel_size");
 
@@ -892,7 +893,7 @@ void shutdown() {
 namespace temporal {
 
 void initialize() {
-    glObj.temporal.withMotionBlur.program = setupProgramFromSource(STR("temporal aa + motion-blur"), f_shader_src_temporal);
+    glObj.temporal.withMotionBlur.program = setupProgramFromSource(STR("temporal aa + motion-blur"), mol::internal::fShaderSrcTemporal);
 
     glObj.temporal.withMotionBlur.uniformLoc.texLinearDepth = glGetUniformLocation(glObj.temporal.withMotionBlur.program, "u_tex_linear_depth");
     glObj.temporal.withMotionBlur.uniformLoc.texMain = glGetUniformLocation(glObj.temporal.withMotionBlur.program, "u_tex_main");
@@ -906,7 +907,7 @@ void initialize() {
     glObj.temporal.withMotionBlur.uniformLoc.feedbackMax = glGetUniformLocation(glObj.temporal.withMotionBlur.program, "u_feedback_max");
     glObj.temporal.withMotionBlur.uniformLoc.motionScale = glGetUniformLocation(glObj.temporal.withMotionBlur.program, "u_motion_scale");
 
-    glObj.temporal.noMotionBlur.program = setupProgramFromSource(STR("temporal aa"), f_shader_src_temporal, STR("#define USE_MOTION_BLUR 0\n"));
+    glObj.temporal.noMotionBlur.program = setupProgramFromSource(STR("temporal aa"), mol::internal::fShaderSrcTemporal, STR("#define USE_MOTION_BLUR 0\n"));
     glObj.temporal.noMotionBlur.uniformLoc.texLinearDepth = glGetUniformLocation(glObj.temporal.noMotionBlur.program, "u_tex_linear_depth");
     glObj.temporal.noMotionBlur.uniformLoc.texMain = glGetUniformLocation(glObj.temporal.noMotionBlur.program, "u_tex_main");
     glObj.temporal.noMotionBlur.uniformLoc.texPrev = glGetUniformLocation(glObj.temporal.noMotionBlur.program, "u_tex_prev");
@@ -971,7 +972,7 @@ namespace fxaa {
 void initialize() {
     ghoul_assert(glObj.fxaa.program == 0, "Object already created");
 
-    glObj.fxaa.program = setupProgramFromSource(STR("fxaa"), f_shader_src_fxaa);
+    glObj.fxaa.program = setupProgramFromSource(STR("fxaa"), mol::internal::fShaderSrcFxaa);
     glObj.fxaa.uniformLoc.tex = glGetUniformLocation(glObj.fxaa.program, "tex");
     glObj.fxaa.uniformLoc.inverseScreenSize = glGetUniformLocation(
         glObj.fxaa.program,
@@ -1013,17 +1014,17 @@ void initialize(int width, int height) {
 
     glGenVertexArrays(1, &glObj.vao);
 
-    glObj.vShaderFsQuad = compileShaderFromSource(v_shader_src_fs_quad, GL_VERTEX_SHADER);
+    glObj.vShaderFsQuad = compileShaderFromSource(mol::internal::vShaderSrcFsQuad, GL_VERTEX_SHADER);
 
     // LINEARIZE DEPTH
     glObj.linearDepth.programPersp = setupProgramFromSource(
         STR("linearize depth persp"),
-        f_shader_src_linearize_depth,
+        mol::internal::fShaderSrcLinearizeDepth,
         STR("#define PERSPECTIVE 1")
     );
     glObj.linearDepth.programOrtho = setupProgramFromSource(
         STR("linearize depth ortho"),
-        f_shader_src_linearize_depth,
+        mol::internal::fShaderSrcLinearizeDepth,
         STR("#define PERSPECTIVE 0")
     );
 

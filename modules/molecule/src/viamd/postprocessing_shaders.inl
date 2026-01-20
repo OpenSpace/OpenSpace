@@ -24,7 +24,9 @@
 
 #include <core/md_str.h>
 
-static constexpr str_t v_shader_src_fs_quad = STR(
+namespace mol::internal {
+
+static constexpr str_t vShaderSrcFsQuad = STR(
 R"(
 #version 150 core
 
@@ -46,7 +48,7 @@ void main() {
 
 // From here
 // https://github.com/kosua20/Rendu/blob/master/resources/common/shaders/screens/fxaa.frag
-static constexpr str_t f_shader_src_fxaa = STR(
+static constexpr str_t fShaderSrcFxaa = STR(
 R"(
 #version 330 core
 in vec2 tc;
@@ -283,7 +285,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_linearize_depth = STR(
+static constexpr str_t fShaderSrcLinearizeDepth = STR(
 R"(
 #version 150 core
 
@@ -320,7 +322,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_ssao = STR(
+static constexpr str_t fShaderSrcSsao = STR(
 R"(
 #version 150 core
 
@@ -508,7 +510,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_ssao_blur = STR(
+static constexpr str_t fShaderSrcSsaoBlur = STR(
 R"(
 #version 150 core
 
@@ -560,7 +562,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_deferred_shading = STR(
+constexpr str_t fShaderSrcDeferredShading = STR(
 R"(
 #version 150 core
 
@@ -660,7 +662,7 @@ void main() {
 
 // ------ TONEMAP ------
 
-static constexpr str_t f_shader_src_tonemap_passthrough = STR(
+constexpr str_t fShaderSrcTonemapPassthrough = STR(
 R"(
 #version 150 core
 uniform sampler2D u_texture;
@@ -672,7 +674,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_tonemap_exposure_gamma = STR(
+constexpr str_t fShaderSrcTonemapExposureGamma = STR(
 R"(
 #version 150 core
 
@@ -690,7 +692,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_tonemap_filmic = STR(
+constexpr str_t fShaderSrcTonemapFilmic = STR(
 R"(
 #version 150 core
 
@@ -733,7 +735,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_tonemap_aces = STR(
+constexpr str_t fShaderSrcTonemapAces = STR(
 R"(
 #version 150 core
 
@@ -795,7 +797,7 @@ void main() {
 
 // ------ DOF ------
 
-static constexpr str_t f_shader_src_dof_halfres_prepass = STR(
+constexpr str_t fShaderSrcDofHalfresPrepass = STR(
 R"(
 #version 150 core
 
@@ -822,7 +824,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_dof = STR(
+constexpr str_t fShaderSrcDof = STR(
 R"(
 #version 150 core
 #pragma optionNV(unroll all)
@@ -943,7 +945,7 @@ void main() {
 
 // ------ SCREEN SPACE VELOCITY ------
 
-static constexpr str_t f_shader_src_vel_blit = STR(
+constexpr str_t fShaderSrcVelBlit = STR(
 R"(
 #version 150 core
 
@@ -972,7 +974,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_vel_tilemax = STR(
+constexpr str_t fShaderSrcVelTilemax = STR(
 R"(
 #version 150 core
 
@@ -1010,7 +1012,7 @@ void main() {
 }
 )");
 
-static constexpr str_t f_shader_src_vel_neighbormax = STR(
+constexpr str_t fShaderSrcVelNeighbormax = STR(
 R"(
 #version 150 core
 
@@ -1048,7 +1050,7 @@ void main() {
 
 // ------ Temporal AA and motion blur ------
 
-static constexpr str_t f_shader_src_temporal = STR(
+constexpr str_t fShaderSrcTemporal = STR(
 R"(
 #version 150 core
 
@@ -1583,3 +1585,5 @@ void main() {
   //out_frag = texture(u_tex_prev, uv);
 }
 )");
+
+} // namespace mol::internal

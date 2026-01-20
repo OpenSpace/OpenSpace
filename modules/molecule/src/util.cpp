@@ -22,10 +22,10 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/molecule/mol/util.h>
+#include <modules/molecule/src/util.h>
 
-#include <modules/molecule/mol/cache.h>
-#include <modules/molecule/mol/viamd/coloring.h>
+#include <modules/molecule/src/cache.h>
+#include <modules/molecule/src/viamd/coloring.h>
 #include <ghoul/logging/logmanager.h>
 #include <core/md_allocator.h>
 #include <core/md_bitfield.h>

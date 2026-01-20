@@ -27,17 +27,16 @@
 
 #include <openspace/rendering/renderable.h>
 
+#include <modules/molecule/src/def.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-
 #include <core/md_bitfield.h>
 #include <md_gl.h>
 #include <md_molecule.h>
 #include <md_trajectory.h>
-#include <modules/molecule/mol/def.h>
 
 namespace openspace {
 

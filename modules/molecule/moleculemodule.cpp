@@ -24,9 +24,9 @@
 
 #include <modules/molecule/moleculemodule.h>
 
-#include <modules/molecule/renderablemolecule.h>
-#include <modules/molecule/renderablesimulationbox.h>
-#include <modules/molecule/mol/viamd/postprocessing.h>
+#include <modules/molecule/src/renderablemolecule.h>
+#include <modules/molecule/src/renderablesimulationbox.h>
+#include <modules/molecule/src/viamd/postprocessing.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
