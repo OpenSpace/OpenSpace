@@ -34,7 +34,6 @@ set(HEADER_FILES
   src/viamd/coloring.h
   src/viamd/loader.h
   src/viamd/postprocessing.h
-  src/viamd/postprocessing_shaders.inl
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -48,8 +47,33 @@ set(SOURCE_FILES
   src/viamd/loader.cpp
   src/viamd/postprocessing.cpp
 )
-
 source_group("Source Files" FILES ${SOURCE_FILES})
+
+set(SHADER_FILES
+  shaders/billboard_vs.glsl
+  shaders/billboard_fs.glsl
+  shaders/blit_fs.glsl
+  shaders/blit_color_fs.glsl
+  shaders/blit_depth_fs.glsl
+  shaders/deferred_shading_fs.glsl
+  shaders/dof_fs.glsl
+  shaders/dof_halfres_prepass_fs.glsl
+  shaders/fxaa_fs.glsl
+  shaders/linearize_depth_fs.glsl
+  shaders/quad_vs.glsl
+  shaders/sharpen_fs.glsl
+  shaders/ssao_blur_fs.glsl
+  shaders/ssao_fs.glsl
+  shaders/temporal_aa_fs.glsl
+  shaders/tonemap_aces_fs.glsl
+  shaders/tonemap_exposure_gamma_fs .glsl
+  shaders/tonemap_filmic_fs.glsl
+  shaders/tonemap_passthrough_fs.glsl
+  shaders/vel_blit_fs.glsl
+  shaders/vel_neighbormax_fs.glsl
+  shaders/vel_tilemax_fs.glsl
+)
+source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
   "Molecule"

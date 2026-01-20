@@ -38,6 +38,7 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/httprequest.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
@@ -54,52 +55,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableSimulationBox";
-
-    constexpr const char* BillboardVertShader = R"(
-#version 330 core
-layout (location = 0) in vec3 aPos;
-uniform mat4 uTransform;
-out vec2 pos;
-
-void main() {
-  gl_Position = uTransform * vec4(aPos.x, aPos.y, aPos.z, 1.0);
-  gl_Position.z = -1.0; // always visible
-  pos = aPos.xy;
-}
-)";
-
-    constexpr const char* BillboardFragShader = R"(
-#version 330 core
-out vec4 out_color;
-in vec2 pos;
-
-uniform float uStrokeWidth;
-uniform float uStrokeFalloffExp;
-uniform float uFragDepth;
-uniform vec4 uStrokeColor;
-uniform sampler2D uColorTex;
-uniform sampler2D uDepthTex;
-
-void main() {
-  float len = length(pos) * 2.0;
-
-  if (len > 1) {
-    discard;
-  }
-
-  float depth = texelFetch(uDepthTex, ivec2(gl_FragCoord.xy), 0).r;
-  vec4  tex = texelFetch(uColorTex, ivec2(gl_FragCoord.xy), 0);
-
-  if (depth == 1.0) {
-	tex.a = 0.0;
-  }
-    
-  float falloff = clamp(1.0 - pow(len / (1.0 - uStrokeWidth), uStrokeFalloffExp), 0.0, 1.0);
-    
-  gl_FragDepth = uFragDepth;
-  out_color = mix(uStrokeColor, tex, falloff);
-}
-)";
 
     const float Vertices[] = {
          0.5f,  0.5f, 0.f,  // top right
@@ -122,7 +77,7 @@ void main() {
 
     constexpr mat4_t mat4_from_glm(glm::mat4 const& src) {
         mat4_t dst;
-        memcpy(&dst, &src, 4 * 4 * sizeof(float));
+        memcpy(&dst, &src, 16 * sizeof(float));
         return dst;
     }
 
@@ -527,20 +482,11 @@ void RenderableSimulationBox::initializeGL() {
     ZoneScoped
 
     // Initialize billboard
-    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(vs, 1, &BillboardVertShader, nullptr);
-    glCompileShader(vs);
-    glShaderSource(fs, 1, &BillboardFragShader, nullptr);
-    glCompileShader(fs);
-
-    _billboard.program = glCreateProgram();
-    glAttachShader(_billboard.program, vs);
-    glAttachShader(_billboard.program, fs);
-    glLinkProgram(_billboard.program);
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
+    _billboard.program = ghoul::opengl::ProgramObject::Build(
+        "Simulationbox Billboard",
+        absPath("${MODULE_MOLECULE/shaders/billboard_fs.glsl"),
+        absPath("${MODULE_MOLECULE/shaders/billboard_vs.glsl")
+    );
 
     glGenVertexArrays(1, &_billboard.vao);
     glGenBuffers(1, &_billboard.vbo);
@@ -593,7 +539,7 @@ void RenderableSimulationBox::deinitializeGL() {
     // Billboard
     glDeleteBuffers(1, &_billboard.vao);
     glDeleteBuffers(1, &_billboard.vbo);
-    glDeleteProgram(_billboard.program);
+    _billboard.program = nullptr;
 }
 
 bool RenderableSimulationBox::isReady() const {
@@ -876,29 +822,29 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glUseProgram(_billboard.program);
+        glUseProgram(*_billboard.program);
         glBindVertexArray(_billboard.vao);
         glDisable(GL_CULL_FACE);
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, mod->colorTexture());
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, mod->depthTexture());
-        glUniform1i(glGetUniformLocation(_billboard.program, "uColorTex"), 0);
-        glUniform1i(glGetUniformLocation(_billboard.program, "uDepthTex"), 1);
+        glUniform1i(_billboard.program->uniformLocation("uColorTex"), 0);
+        glUniform1i(_billboard.program->uniformLocation("uDepthTex"), 1);
         glUniformMatrix4fv(
-            glGetUniformLocation(_billboard.program, "uTransform"),
+            _billboard.program->uniformLocation("uTransform"),
             1,
             false,
             glm::value_ptr(transform)
         );
-        glUniform1f(glGetUniformLocation(_billboard.program, "uStrokeWidth"), static_cast<float>(width));
+        glUniform1f(_billboard.program->uniformLocation("uStrokeWidth"), static_cast<float>(width));
         glUniform1f(
-            glGetUniformLocation(_billboard.program, "uStrokeFalloffExp"),
+            _billboard.program->uniformLocation("uStrokeFalloffExp"),
             _circleFalloff == 0.f ? std::numeric_limits<float>::max() : 1.f / _circleFalloff
         );
-        glUniform1f(glGetUniformLocation(_billboard.program, "uFragDepth"), static_cast<float>(depth));
+        glUniform1f(_billboard.program->uniformLocation("uFragDepth"), static_cast<float>(depth));
         glm::vec4 stroke = _circleColor;
-        glUniform4fv(glGetUniformLocation(_billboard.program, "uStrokeColor"), 1, glm::value_ptr(stroke));
+        glUniform4fv(_billboard.program->uniformLocation("uStrokeColor"), 1, glm::value_ptr(stroke));
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glEnable(GL_CULL_FACE);
         glBindVertexArray(0);

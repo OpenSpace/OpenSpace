@@ -83,7 +83,7 @@ private:
     bool _renderableInView = true;
 
     struct {
-        GLuint program = 0;
+        std::unique_ptr<ghoul::opengl::ProgramObject> program;
         GLuint vao = 0;
         GLuint vbo = 0;
     } _billboard;
