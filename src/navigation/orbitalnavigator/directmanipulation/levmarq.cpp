@@ -21,19 +21,20 @@ FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
  */
 
+#include <openspace/navigation/orbitalnavigator/directmanipulation/levmarq.h>
+
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/defer.h>
 #include <cstdio>
 #include <cmath>
 #include <chrono>
-#include <modules/touch/ext/levmarq.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/defer.h>
 
 namespace {
     std::chrono::milliseconds TimeLimit(200);
     double TOL = 1e-30; // smallest value allowed in cholesky_decomp()
 }
 
-// set parameters required by levmarq() to default values 
+// set parameters required by levmarq() to default values
 void levmarq_init(LMstat* lmstat) {
     lmstat->verbose = false;
     lmstat->max_it = 3000;
@@ -44,8 +45,8 @@ void levmarq_init(LMstat* lmstat) {
 }
 
 
-/* 
-perform least-squares minimization using the Levenberg-Marquardt algorithm.  
+/*
+perform least-squares minimization using the Levenberg-Marquardt algorithm.
 The arguments are as follows:
    npar    number of parameters
    par     array of parameters to be varied
@@ -83,7 +84,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
     double* d = new double[npar];
     double* delta = new double[npar];
     double* newpar = new double[npar];
-    
+
     defer {
         // deallocate the arrays
         for (int i = 0; i < npar; i++) {
@@ -188,7 +189,7 @@ bool levmarq(int npar, double *par, int ny, double *dysq,
                 newerr = error_func(newpar, ny, dysq, func, fdata, lmstat);
                 derr = newerr - err;
                 ill = (derr > 0);
-            } 
+            }
             if (verbose) { // store iteration, error, gradient, step
                 /*printf("it = %4d,   lambda = %10g,   err = %10g,   derr = %10g (%d)\n", it, lambda, err, derr, !(newerr > err));
                 for (int i = 0; i < npar; ++i) {
@@ -250,7 +251,7 @@ double error_func(double *par, int ny, double *dysq,
 
     for (x = 0; x < ny; x++) {
         res = func(par, x, fdata, lmstat);
-        if (dysq) { // weighted least-squares 
+        if (dysq) { // weighted least-squares
             e += res * res / dysq[x];
         }
         else {
@@ -271,7 +272,7 @@ void solve_axb_cholesky(int n, double** l, double* x, double* b) { // n = npar, 
         for (j = 0; j < i; j++) {
             sum += l[i][j] * x[j];
         }
-        x[i] = (b[i] - sum) / l[i][i]; 
+        x[i] = (b[i] - sum) / l[i][i];
     }
     // solve L^T*x = y for x (where x[] is used to store both y and x)
     for (i = n-1; i >= 0; i--) {
