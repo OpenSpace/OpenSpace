@@ -30,20 +30,19 @@ const vec3 EnvironmentalRadiance = vec3(5.0);
 in vec2 tc;
 out vec4 fragColor;
 
-uniform sampler2D u_texture_depth;
-uniform sampler2D u_texture_color;
-uniform sampler2D u_texture_normal;
-
-uniform mat4 u_inv_proj_mat;
-uniform vec3 u_light_dir;
-uniform vec3 u_light_col;
+uniform sampler2D texDepth;
+uniform sampler2D texColor;
+uniform sampler2D texNormal;
+uniform mat4 invProjMat;
+uniform vec3 lightDir;
+uniform vec3 lightCol;
 
 
 // TODO: Use linear depth instead and use uniform vec4 for unpacking to view coords.
 
 vec4 depthToViewCoord(vec2 texCoord, float depth) {
   vec4 clipCoord = vec4(vec3(texCoord, depth) * 2.0 - 1.0, 1.0);
-  vec4 viewCoord = u_inv_proj_mat * clipCoord;
+  vec4 viewCoord = invProjMat * clipCoord;
   return viewCoord / viewCoord.w;
 }
 
@@ -68,27 +67,26 @@ vec3 lambert(vec3 radiance) {
 }
 
 vec3 shade(vec3 color, vec3 V, vec3 N) {
-  float NdotL = clamp(dot(N, u_light_dir), 0.0, 1.0);
-  vec3 diffuse = color.rgb * lambert(EnvironmentalRadiance + NdotL * u_light_col);
+  float NdotL = clamp(dot(N, lightDir), 0.0, 1.0);
+  vec3 diffuse = color.rgb * lambert(EnvironmentalRadiance + NdotL * lightCol);
 
-  vec3 H = normalize(u_light_dir + V);
+  vec3 H = normalize(lightDir + V);
   float HdotV = clamp(dot(H, V), 0.0, 1.0);
   float fr = fresnel(HdotV);
   float NdotH = clamp(dot(N, H), 0.0, 1.0);
-  vec3 specular =
-    fr * (EnvironmentalRadiance + u_light_col) * pow(NdotH, SpecularExponent);
+  vec3 specular = fr * (EnvironmentalRadiance + lightCol) * pow(NdotH, SpecularExponent);
 
   return diffuse + specular;
 }
 
 void main() {
-  float depth = texelFetch(u_texture_depth, ivec2(gl_FragCoord.xy), 0).x;
+  float depth = texelFetch(texDepth, ivec2(gl_FragCoord.xy), 0).x;
   if (depth == 1.0) {
     fragColor = vec4(0.0);
     return;
   }
-  vec4 c = texelFetch(u_texture_color, ivec2(gl_FragCoord.xy), 0);
-  vec3 normal = decodeNormal(texelFetch(u_texture_normal, ivec2(gl_FragCoord.xy), 0).xy);
+  vec4 c = texelFetch(texColor, ivec2(gl_FragCoord.xy), 0);
+  vec3 normal = decodeNormal(texelFetch(texNormal, ivec2(gl_FragCoord.xy), 0).xy);
   vec4 viewCoord = depthToViewCoord(tc, depth);
 
   vec3 N = normal;

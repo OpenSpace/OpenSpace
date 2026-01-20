@@ -31,20 +31,20 @@ const float KernelRadius = 3;
 in vec2 tc;
 out vec4 fragColor;
 
-uniform float u_sharpness;
-uniform vec2 u_inv_res_dir; // either set x to 1/width or y to 1/height
-uniform sampler2D u_tex_ao;
-uniform sampler2D u_tex_linear_depth;
+uniform sampler2D texLinearDepth;
+uniform sampler2D texAo;
+uniform float sharpness;
+uniform vec2 invResDir; // either set x to 1/width or y to 1/height
 
 
 float blurFunction(vec2 uv, float r, float centerC, float centerD, inout float wTotal) {
   const float Sigma = KernelRadius * 0.5;
   const float Falloff = 1.0 / (2.0 * Sigma * Sigma);
 
-  float c = texture(u_tex_ao, uv).x;
-  float d = texture(u_tex_linear_depth, uv).x;
+  float c = texture(texAo, uv).x;
+  float d = texture(texLinearDepth, uv).x;
 
-  float ddiff = (d - centerD) * u_sharpness;
+  float ddiff = (d - centerD) * sharpness;
   float w = exp2(-r * r * Falloff - ddiff * ddiff);
   wTotal += w;
 
@@ -52,19 +52,19 @@ float blurFunction(vec2 uv, float r, float centerC, float centerD, inout float w
 }
 
 void main() {
-  float centerC = texture(u_tex_ao, tc).x;
-  float centerD = texture(u_tex_linear_depth, tc).x;
+  float centerC = texture(texAo, tc).x;
+  float centerD = texture(texLinearDepth, tc).x;
 
   float cTotal = centerC;
   float wTotal = 1.0;
 
   for (float r = 1; r <= KernelRadius; r++) {
-    vec2 uv = tc + u_inv_res_dir * r;
+    vec2 uv = tc + invResDir * r;
     cTotal += blurFunction(uv, r, centerC, centerD, wTotal);
   }
 
   for (float r = 1; r <= KernelRadius; r++) {
-    vec2 uv = tc - u_inv_res_dir * r;
+    vec2 uv = tc - invResDir * r;
     cTotal += blurFunction(uv, r, centerC, centerD, wTotal);
   }
 

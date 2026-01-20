@@ -28,12 +28,12 @@ const float ExposureBias = 0.5;
 
 out vec4 fragColor;
 
-uniform sampler2D u_texture;
-uniform float u_exposure = 1.0;
-uniform float u_gamma = 2.2;
+uniform sampler2D texture;
+uniform float exposure = 1.0;
+uniform float gamma = 2.2;
 
 void main() {
-  vec4 color = texelFetch(u_texture, ivec2(gl_FragCoord.xy), 0);
-  color.rgb = ExposureBias * u_exposure * pow(color.rgb, 1.0 / vec3(u_gamma));
+  vec4 color = texelFetch(texture, ivec2(gl_FragCoord.xy), 0);
+  color.rgb = ExposureBias * exposure * pow(color.rgb, 1.0 / vec3(gamma));
   fragColor = color;
 }

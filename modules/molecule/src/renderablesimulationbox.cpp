@@ -830,22 +830,22 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         glBindTexture(GL_TEXTURE_2D, mod->colorTexture());
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, mod->depthTexture());
-        glUniform1i(_billboard.uniforms.uColorTex, 0);
-        glUniform1i(_billboard.uniforms.uDepthTex, 1);
+        glUniform1i(_billboard.uniforms.colorTex, 0);
+        glUniform1i(_billboard.uniforms.depthTex, 1);
         glUniformMatrix4fv(
-            _billboard.uniforms.uTransform,
+            _billboard.uniforms.transform,
             1,
             false,
             glm::value_ptr(transform)
         );
-        glUniform1f(_billboard.uniforms.uStrokeWidth, static_cast<float>(width));
+        glUniform1f(_billboard.uniforms.strokeWidth, static_cast<float>(width));
         glUniform1f(
-            _billboard.uniforms.uStrokeFalloffExp,
+            _billboard.uniforms.strokeFalloffExp,
             _circleFalloff == 0.f ? std::numeric_limits<float>::max() : 1.f / _circleFalloff
         );
-        glUniform1f(_billboard.uniforms.uFragDepth, static_cast<float>(depth));
+        glUniform1f(_billboard.uniforms.fragDepth, static_cast<float>(depth));
         glm::vec4 stroke = _circleColor;
-        glUniform4fv(_billboard.uniforms.uStrokeColor, 1, glm::value_ptr(stroke));
+        glUniform4fv(_billboard.uniforms.strokeColor, 1, glm::value_ptr(stroke));
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glEnable(GL_CULL_FACE);
         glBindVertexArray(0);

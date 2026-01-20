@@ -31,14 +31,14 @@ out vec4 fragColor;
 
 // From http://blog.tuxedolabs.com/2018/05/04/bokeh-depth-of-field-in-single-pass.html
 
-uniform sampler2D u_tex_half_res; // Half res color (rgb) and coc (a)
-uniform sampler2D u_tex_color;    // Image to be processed
-uniform sampler2D u_tex_depth;    // Linear depth
+uniform sampler2D texHalfRes; // Half res color (rgb) and coc (a)
+uniform sampler2D texColor;    // Image to be processed
+uniform sampler2D texDepth;    // Linear depth
 
-uniform vec2 u_texel_size;    // The size of a pixel: vec2(1.0/width, 1.0/height)
-uniform float u_focus_depth;
-uniform float u_focus_scale;
-uniform float u_time;
+uniform vec2 texelSize;    // The size of a pixel: vec2(1.0/width, 1.0/height)
+uniform float focusDepth;
+uniform float focusScale;
+uniform float time;
 
 const float GoldenAngle = 2.39996323;
 const float MaxBlurSize = 15.0;
@@ -60,8 +60,8 @@ float blurSize(float depth, float focusPoint, float focusScale) {
 }
 
 vec3 depthOfField(vec2 texCoord, float focusPoint, float focusScale) {
-  float centerDepth = texture(u_tex_depth, texCoord).r;
-  vec3 centerColor = texture(u_tex_color, texCoord).rgb;
+  float centerDepth = texture(texDepth, texCoord).r;
+  vec3 centerColor = texture(texColor, texCoord).rgb;
   float centerCoc = blurSize(centerDepth, focusPoint, focusScale);
   vec4 colorCocSum = vec4(centerColor, centerCoc);
 
@@ -70,9 +70,9 @@ vec3 depthOfField(vec2 texCoord, float focusPoint, float focusScale) {
   float ang = 0.0;
 
   for (; radius < MaxBlurSize; ang += GoldenAngle) {
-    vec2 tc = texCoord + vec2(cos(ang), sin(ang)) * u_texel_size * radius;
-    float sampleDepth = texture(u_tex_depth, tc).r;
-    vec3 sampleColor = texture(u_tex_color, tc).rgb;
+    vec2 tc = texCoord + vec2(cos(ang), sin(ang)) * texelSize * radius;
+    float sampleDepth = texture(texDepth, tc).r;
+    vec3 sampleColor = texture(texColor, tc).rgb;
     float sampleCoc = blurSize(sampleDepth, focusPoint, focusScale);
     if (sampleDepth > centerDepth) {
       sampleCoc = min(sampleCoc, centerCoc * 2.0);
@@ -98,10 +98,10 @@ vec3 depthOfField(vec2 texCoord, float focusPoint, float focusScale) {
 #ifdef APPROX
   const float HalfResRadScale = 2.0;
   for (; radius < MaxBlurSize; ang += GoldenAngle) {
-    vec2 tc = texCoord + vec2(cos(ang), sin(ang)) * u_texel_size * radius;
-    vec4 sampleColorCoc = texture(u_tex_half_res, tc) * vec4(1.0, 1.0, 1.0, MaxBlurSize);
+    vec2 tc = texCoord + vec2(cos(ang), sin(ang)) * texelSize * radius;
+    vec4 sampleColorCoc = texture(texHalfRes, tc) * vec4(1.0, 1.0, 1.0, MaxBlurSize);
 
-    float sampleDepth = texture(u_tex_depth, tc).r;
+    float sampleDepth = texture(texDepth, tc).r;
     if (sampleDepth > centerDepth) {
       sampleColorCoc.a = min(sampleColorCoc.a, centerCoc * 2.0);
     }
@@ -119,10 +119,10 @@ vec3 depthOfField(vec2 texCoord, float focusPoint, float focusScale) {
 }
 
 void main() {
-  vec3 dof = depthOfField(tc, u_focus_depth, u_focus_scale);
+  vec3 dof = depthOfField(tc, focusDepth, focusScale);
 
   // To hide banding artifacts
-  vec4 noise = srand4(tc + u_time + 0.6959174) / 15.0;
+  vec4 noise = srand4(tc + time + 0.6959174) / 15.0;
   dof += noise.xyz;
   fragColor = vec4(dof, 1.0);
 }

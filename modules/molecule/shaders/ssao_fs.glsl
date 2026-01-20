@@ -56,14 +56,14 @@ layout(std140) uniform u_control_buffer {
   HBAOData control;
 };
 
-uniform sampler2D u_tex_linear_depth;
-uniform sampler2D u_tex_normal;
-uniform sampler2D u_tex_random;
-uniform bool u_perspective;
+uniform sampler2D texLinearDepth;
+uniform sampler2D texNormal;
+uniform sampler2D texRandom;
+uniform bool isPerspective;
 
 
 vec3 uvToView(vec2 uv, float eyeZ) {
-  if (u_perspective) {
+  if (isPerspective) {
     return vec3((uv * control.proj_info.xy + control.proj_info.zw) * eyeZ, eyeZ);
   }
   else {
@@ -72,7 +72,7 @@ vec3 uvToView(vec2 uv, float eyeZ) {
 }
 
 vec3 fetchViewPos(vec2 uv, float lod) {
-  float view_depth = textureLod(u_tex_linear_depth, uv, lod).x;
+  float view_depth = textureLod(texLinearDepth, uv, lod).x;
   return uvToView(uv, view_depth);
 }
 
@@ -84,7 +84,7 @@ vec3 decodeNormal(vec2 enc) {
 }
 
 vec3 fetchViewNormal(vec2 uv) {
-  vec2 enc = texelFetch(u_tex_normal, ivec2(gl_FragCoord.xy), 0).xy;
+  vec2 enc = texelFetch(texNormal, ivec2(gl_FragCoord.xy), 0).xy;
   vec3 n = decodeNormal(enc);
   return n * vec3(1.0, 1.0, -1.0);
 }
@@ -116,7 +116,7 @@ vec2 rotateSample(vec2 smpl, vec2 cosSin) {
 vec4 getJitter(vec2 uv) {
   // (cos(Alpha),sin(Alpha),rand1,rand2)
   vec2 coord = gl_FragCoord.xy / AO_RANDOM_TEX_SIZE;
-  vec4 jitter = textureLod(u_tex_random, coord, 0);
+  vec4 jitter = textureLod(texRandom, coord, 0);
   return jitter;
 }
 
@@ -156,7 +156,7 @@ void main() {
 
   // Compute projection of disk of radius control.R into screen space
   float radiusPixels = control.radius_to_screen;
-  if (u_perspective) {
+  if (isPerspective) {
     radiusPixels /= viewPosition.z;
   }
 

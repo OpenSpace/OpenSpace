@@ -24,22 +24,22 @@
 
 #version __CONTEXT__
 
-#define PERSPECTIVE #{Perspective}
-
 out vec4 fragColor;
 
-uniform vec4 u_clip_info;
-uniform sampler2D u_tex_depth;
+uniform vec4 clipInfo;
+uniform sampler2D texDepth;
+uniform bool isPerspective;
 
 float ReconstructCSZ(float d, vec4 clip) {
-#if PERSPECTIVE
-  return (clip[0] / (d * clip[1] + clip[2]));
-#else // PERSPECTIVE
-  return (clip[1] + clip[2] - d * clip[1]);
-#endif // PERSPECTIVE
+  if (isPerspective) {
+    return (clip[0] / (d * clip[1] + clip[2]));
+  }
+  else {
+    return (clip[1] + clip[2] - d * clip[1]);
+  }
 }
 
 void main() {
-  float d = texelFetch(u_tex_depth, ivec2(gl_FragCoord.xy), 0).x;
-  fragColor = vec4(ReconstructCSZ(d, u_clip_info), 0, 0, 0);
+  float d = texelFetch(texDepth, ivec2(gl_FragCoord.xy), 0).x;
+  fragColor = vec4(ReconstructCSZ(d, clipInfo), 0, 0, 0);
 }

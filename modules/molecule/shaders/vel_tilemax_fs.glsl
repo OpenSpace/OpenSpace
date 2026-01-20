@@ -31,18 +31,18 @@ const int TileSize = #{TileSize};
 in vec2 tc;
 out vec4 fragColor;
 
-uniform sampler2D u_tex_vel;
-uniform vec2 u_tex_vel_texel_size;
+uniform sampler2D texVel;
+uniform vec2 texVelTexelSize;
 
 void main() {
-  vec2 base = tc + (0.5 - 0.5 * TileSize) * u_tex_vel_texel_size;
+  vec2 base = tc + (0.5 - 0.5 * TileSize) * texVelTexelSize;
 
   vec2 mv = vec2(0.0);
   float mv2 = 0.0;
 
   for (int i = 0; i < TileSize; i++) {
     for (int j = 0; j < TileSize; j++) {
-      vec2 v = texture(u_tex_vel, base + vec2(i, j) * u_tex_vel_texel_size).xy;
+      vec2 v = texture(texVel, base + vec2(i, j) * texVelTexelSize).xy;
       float v2 = dot(v, v);
       if (v2 > mv2) {
         mv = v;
@@ -51,5 +51,5 @@ void main() {
     }
   }
 
-  fragColor = vec4(min(mv, length(u_tex_vel_texel_size) * TileSize), 0.0, 0.0);
+  fragColor = vec4(min(mv, length(texVelTexelSize) * TileSize), 0.0, 0.0);
 }

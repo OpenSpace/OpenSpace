@@ -26,15 +26,15 @@
 
 out vec4 fragColor;
 
-uniform sampler2D u_tex_color;
-uniform sampler2D u_tex_depth;
+uniform sampler2D texColor;
+uniform sampler2D texDepth;
 
 void main() {
-  float depth = texelFetch(u_tex_depth, ivec2(gl_FragCoord.xy), 0).x;
+  float depth = texelFetch(texDepth, ivec2(gl_FragCoord.xy), 0).x;
   if (depth == 1.0) {
     fragColor = vec4(0.0, 0.0, 0.0, 0.0);
   }
   else {
-    fragColor = texelFetch(u_tex_color, ivec2(gl_FragCoord.xy), 0);
+    fragColor = texelFetch(texColor, ivec2(gl_FragCoord.xy), 0);
   }
 }

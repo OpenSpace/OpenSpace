@@ -26,7 +26,7 @@
 
 out vec2 tc;
 
-uniform vec2 u_tc_scl = vec2(1.0, 1.0);
+uniform vec2 tcScale = vec2(1.0, 1.0);
 
 void main() {
   uint idx = uint(gl_VertexID) % 3U;
@@ -36,5 +36,5 @@ void main() {
     0,
     1.0
   );
-  tc = (gl_Position.xy * 0.5 + 0.5) * u_tc_scl;
+  tc = (gl_Position.xy * 0.5 + 0.5) * tcScale;
 }

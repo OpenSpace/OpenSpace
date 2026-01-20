@@ -27,10 +27,10 @@
 layout (location = 0) in vec3 aPos;
 out vec2 pos;
 
-uniform mat4 uTransform;
+uniform mat4 transform;
 
 void main() {
-  gl_Position = uTransform * vec4(aPos, 1.0);
+  gl_Position = transform * vec4(aPos, 1.0);
   gl_Position.z = -1.0; // always visible
   pos = aPos.xy;
 }
