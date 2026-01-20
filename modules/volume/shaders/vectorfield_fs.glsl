@@ -25,8 +25,9 @@
 #include "fragment.glsl"
 
 out vec4 outColor;
-in float vs_positionDepth;
+
 flat in vec3 v_dir;
+in float vs_positionDepth;
 
 Fragment getFragment() {
     Fragment frag;

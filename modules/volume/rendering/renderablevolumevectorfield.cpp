@@ -125,14 +125,10 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     _vectorFieldScale = static_cast<float>(p.vectorFieldScale.value_or(1.f));
 
     _stride.onChange([this]() { _vectorFieldIsDirty = true; });
-    _vectorFieldScale.onChange([this]() { _vectorFieldIsDirty = true; });
 
     addProperty(_stride);
     addProperty(_vectorFieldScale);
     addProperty(_lineWidth);
-    addProperty(_minDomain);
-    addProperty(_maxDomain);
-    addProperty(_dimensions);
 }
 
 void RenderableVectorField::initializeGL()
@@ -155,12 +151,17 @@ void RenderableVectorField::initializeGL()
 
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vbo);
+    glGenBuffers(1, &_arrowVbo);
 
     glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 
-    static_assert(sizeof(Vertex) == 6 * sizeof(float),
-        "Vertex layout is not tightly packed!"
+    // Arrow geometry
+    glBindBuffer(GL_ARRAY_BUFFER, _arrowVbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        arrowVertices.size() * sizeof(glm::vec3),
+        arrowVertices.data(),
+        GL_STATIC_DRAW
     );
 
     glEnableVertexAttribArray(0);
@@ -169,25 +170,57 @@ void RenderableVectorField::initializeGL()
         3,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(Vertex),
-        (void*)offsetof(Vertex, position)
+        sizeof(glm::vec3),
+        nullptr
     );
+
+    static_assert(sizeof(ArrowInstance) == 7 * sizeof(float),
+        "Vertex layout is not tightly packed!"
+    );
+
+    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBufferData(
+        GL_ARRAY_BUFFER,
+        _instances.size() * sizeof(ArrowInstance),
+        _instances.data(),
+        GL_DYNAMIC_DRAW
+    );
+
+    // Position
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
         1,
         3,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(Vertex),
-        (void*)offsetof(Vertex, direction)
+        sizeof(ArrowInstance),
+        (void*)offsetof(ArrowInstance, position)
     );
+    glVertexAttribDivisor(1, 1);
 
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _vertices.size() * sizeof(Vertex),
-        _vertices.data(),
-        GL_STATIC_DRAW
+    // Direction
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(
+        2,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(ArrowInstance),
+        (void*)offsetof(ArrowInstance, direction)
     );
+    glVertexAttribDivisor(2, 1);
+
+    // Magnitude
+    glEnableVertexAttribArray(3);
+    glVertexAttribPointer(
+        3,
+        1,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(ArrowInstance),
+        (void*)offsetof(ArrowInstance, magnitude)
+    );
+    glVertexAttribDivisor(3, 1);
 
     glBindVertexArray(0);
 
@@ -201,6 +234,8 @@ void RenderableVectorField::deinitializeGL()
     _vao = 0;
     glDeleteBuffers(1, &_vbo);
     _vbo = 0;
+    glDeleteBuffers(1, &_arrowVbo);
+    _arrowVbo = 0;
 
     if (_program) {
         global::renderEngine->removeRenderProgram(_program.get());
@@ -215,7 +250,7 @@ bool RenderableVectorField::isReady() const
 
 void RenderableVectorField::render(const RenderData& data, RendererTasks& renderTask)
 {
-    if (_vertices.empty()) {
+    if (_instances.empty()) {
         return;
     }
 
@@ -226,9 +261,20 @@ void RenderableVectorField::render(const RenderData& data, RendererTasks& render
         glm::mat4(calcModelViewProjectionTransform(data))
     );
 
+    _program->setUniform(
+        _uniformCache.arrowScale,
+        _vectorFieldScale.value()
+    );
+
     glBindVertexArray(_vao);
     glLineWidth(_lineWidth.value());
-    glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_vertices.size()));
+    glDrawArraysInstanced(
+        GL_LINES,
+        0,
+        static_cast<GLsizei>(arrowVertices.size()),
+        static_cast<GLsizei>(_instances.size())
+    );
+    //glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_instances.size()));
     glBindVertexArray(0);
     _program->deactivate();
 
@@ -242,9 +288,9 @@ void RenderableVectorField::update(const UpdateData& data)
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glBufferData(
             GL_ARRAY_BUFFER,
-            _vertices.size() * sizeof(Vertex),
-            _vertices.data(),
-            GL_STATIC_DRAW
+            _instances.size() * sizeof(ArrowInstance),
+            _instances.data(),
+            GL_DYNAMIC_DRAW
         );
 
         _vectorFieldIsDirty = false;
@@ -260,8 +306,8 @@ void RenderableVectorField::computeFieldLines() {
     const glm::uvec3 dims = _dimensions.value();
     int stride = _stride.value();
 
-    _vertices.clear();
-    _vertices.reserve(2 * dims.x * dims.y * dims.z / (stride * stride * stride));
+    _instances.clear();
+    _instances.reserve(2 * dims.x * dims.y * dims.z / (stride * stride * stride));
 
     for (unsigned int z = 0; z < dims.z; z += stride) {
         for (unsigned int y = 0; y < dims.y; y += stride) {
@@ -290,9 +336,9 @@ void RenderableVectorField::computeFieldLines() {
 
                 avgVelocity /= static_cast<float>(count);
 
-                glm::dvec3 worldSize = _maxDomain.value() - _minDomain.value();
-                glm::dvec3 voxelSize =
-                    worldSize / static_cast<glm::dvec3>(_dimensions.value());
+                //glm::dvec3 worldSize = _maxDomain.value() - _minDomain.value();
+                //glm::dvec3 voxelSize =
+                //    worldSize / static_cast<glm::dvec3>(_dimensions.value());
 
                 glm::vec3 blockCenterVoxel(
                     x + 0.5f * stride,
@@ -304,20 +350,20 @@ void RenderableVectorField::computeFieldLines() {
                 glm::dvec3 minD = _minDomain.value();
                 glm::dvec3 maxD = _maxDomain.value();
 
-                glm::dvec3 worldPos = minD + glm::dvec3(normalized) * (maxD - minD);
+                glm::dvec3 startPos = minD + glm::dvec3(normalized) * (maxD - minD);
 
-                glm::dvec3 endPos = worldPos + glm::dvec3(avgVelocity * _vectorFieldScale.value());
+                //glm::dvec3 endPos = startPos + glm::dvec3(avgVelocity * _vectorFieldScale.value());
                 glm::vec3 direction = glm::normalize(avgVelocity);
+                float magnitude = glm::length(avgVelocity);
 
-                if (count > 0 && glm::length(avgVelocity) > 0.f) {
-                    _vertices.push_back({ worldPos, direction });
-                    _vertices.push_back({ endPos, direction });
+                if (count > 0 && magnitude > 0.f) {
+                    _instances.push_back(ArrowInstance(startPos, direction, magnitude));
                 }
             }
         }
     }
 
-    if (_vertices.empty()) {
+    if (_instances.empty()) {
         throw ghoul::RuntimeError("Couldn't compute line segments");
     }
 

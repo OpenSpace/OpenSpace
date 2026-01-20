@@ -25,16 +25,48 @@
 #version __CONTEXT__
 #include "PowerScaling/powerScaling_vs.hglsl"
 
-layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec3 in_direction;
+layout(location = 0) in vec3 in_arrowVertex;
+layout(location = 1) in vec3 in_position;
+layout(location = 2) in vec3 in_direction;
+layout(location = 3) in float in_magnitude;
 
 uniform mat4 modelViewProjection;
+uniform float arrowScale;
 
-out float vs_positionDepth;
 flat out vec3 v_dir;
+out float vs_positionDepth;
+
+mat3 makeRotation(vec3 dir) {
+    vec3 x = normalize(dir);
+    vec3 up = abs(x.z) < 0.999 ? vec3(0,0,1) : vec3(0,1,0);
+    vec3 y = normalize(cross(up, x));
+    vec3 z = cross(x, y);
+    return mat3(x, y, z);
+}
+
+float exponentialScale(float sliderValue, float minExp, float maxExp)
+{
+    // Clamp input just in case
+    if (sliderValue < 1) sliderValue = 1;
+    if (sliderValue > 100) sliderValue = 100;
+
+    // Normalize slider to 0–1
+    float t = (sliderValue - 1) / 99.0;
+
+    // Interpolate exponent
+    float exponent = minExp + t * (maxExp - minExp);
+
+    // Base-10 exponential
+    return pow(10.0, exponent);
+}
 
 void main() {
-    vec4 vsPositionClipSpace = modelViewProjection * vec4(in_position, 1.0);
+    mat3 R = makeRotation(in_direction);
+
+    vec3 scaledPosition = in_arrowVertex * (in_magnitude * exponentialScale(arrowScale, 2.5, 23.0));
+    vec3 worldPosition = in_position + R * scaledPosition;
+
+    vec4 vsPositionClipSpace = modelViewProjection * vec4(worldPosition, 1.0);
     vs_positionDepth = vsPositionClipSpace.w;
 
     gl_Position = z_normalization(vsPositionClipSpace);

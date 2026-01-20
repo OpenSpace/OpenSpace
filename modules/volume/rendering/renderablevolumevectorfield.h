@@ -48,9 +48,10 @@ struct VelocityData {
     float vz;
 };
 
-struct Vertex {
+struct ArrowInstance {
     glm::vec3 position;
     glm::vec3 direction;
+    float magnitude;
 };
 
 class RenderableVectorField : public Renderable {
@@ -75,7 +76,7 @@ private:
     void computeFieldLines();
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    UniformCache(modelViewProjection) _uniformCache;
+    UniformCache(modelViewProjection, arrowScale) _uniformCache;
 
     properties::StringProperty _sourceFile;
     properties::DVec3Property _minDomain;
@@ -86,14 +87,28 @@ private:
     properties::FloatProperty _vectorFieldScale;
     properties::FloatProperty _lineWidth;
 
-
     std::shared_ptr<RawVolume<VelocityData>> _volumeData;
-    std::vector<Vertex> _vertices;
+    std::vector<ArrowInstance> _instances;
 
     bool _vectorFieldIsDirty = true;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;
+    GLuint _arrowVbo = 0;
+
+    // Arrow pointed along +X direction
+    const std::vector<glm::vec3> arrowVertices = {
+        // shaft
+        {0.0f, 0.0f, 0.0f},
+        {1.0f, 0.0f, 0.0f},
+
+        // head
+        {1.0f, 0.0f, 0.0f},
+        {0.8f, 0.1f, 0.0f},
+
+        {1.0f, 0.0f, 0.0f},
+        {0.8f,-0.1f, 0.0f}
+    };
 };
 
 
