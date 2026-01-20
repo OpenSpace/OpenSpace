@@ -31,9 +31,14 @@
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/dvec3property.h>
+#include <openspace/properties/vector/uvec3property.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace openspace::documentation { struct Documentation; }
+
+namespace ghoul::opengl {
+    class ProgramObject;
+} // namespace ghoul::opengl
 
 namespace openspace::volume {
 
@@ -62,18 +67,28 @@ public:
 
 
 private:
-    UniformCache(uniform1) _uniformCache;
+    void computeFieldLines();
+
+    std::unique_ptr<ghoul::opengl::ProgramObject> _program;
+    UniformCache(modelViewProjection) _uniformCache;
 
     properties::StringProperty _sourceFile;
     properties::DVec3Property _minDomain;
     properties::DVec3Property _maxDomain;
-    properties::DVec3Property _dimensions;
+    properties::UVec3Property _dimensions;
 
     properties::IntProperty _stride;
+    properties::FloatProperty _vectorFieldScale;
+    properties::FloatProperty _lineWidth;
+
 
     std::shared_ptr<RawVolume<VelocityData>> _volumeData;
+    std::vector<glm::vec3> _vertices;
 
     bool _vectorFieldIsDirty = true;
+
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 
