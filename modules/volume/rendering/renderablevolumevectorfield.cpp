@@ -75,8 +75,21 @@ namespace {
         "LineWidth",
         "Line width",
         "Specifies the line width of the trail lines, if the selected rendering method "
-        "includes lines. If the rendering mode is Points, this value is ignored.",
-        openspace::properties::Property::Visibility::User
+        "includes lines. If the rendering mode is Points, this value is ignored."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FilterOutOfRangeInfo = {
+        "FilterOutOfRange",
+        "Filter out of range",
+        "Determines whether other data values outside the value range should be visible "
+        "or filtered away."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DataRangeInfo = {
+        "DataRange",
+        "Data Range",
+        "Specifies the data range to render the vector field in, magnitudes outside this "
+        "range will be filtered away."
     };
 
     struct [[codegen::Dictionary(RenderableVectorField)]] Parameters {
@@ -92,6 +105,10 @@ namespace {
         glm::dvec3 dimensions;
         // [[codegen::verbatim(VectorFieldScaleInfo.description)]]
         std::optional<double> vectorFieldScale;
+        // [[codegen::verbatim(DataRangeInfo.description)]]
+        std::optional<glm::dvec2> dataRange;
+        // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
+        std::optional<bool> filterOutOfRange;
 
     };
 
@@ -111,9 +128,11 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     , _minDomain(MinDomainInfo)
     , _maxDomain(MaxDomainInfo)
     , _dimensions(DimensionsInfo)
-    , _stride(StrideInfo, 0, 0, 16)
+    , _dataRange(DataRangeInfo,glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1000.f), glm::vec2(1.f))
+    , _filterOutOfRange(FilterOutOfRangeInfo, false)
+    , _stride(StrideInfo, 1, 1, 16)
     , _vectorFieldScale(VectorFieldScaleInfo, 1.f, 1.f, 100.f)
-    , _lineWidth(LineWidthInfo, 1.0, 0.5f, 10.f)
+    , _lineWidth(LineWidthInfo, 1.f, 1.f, 10.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -123,12 +142,16 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     _dimensions = p.dimensions;
     _stride = p.stride;
     _vectorFieldScale = static_cast<float>(p.vectorFieldScale.value_or(1.f));
+    _dataRange = p.dataRange.value_or(glm::vec2(0, 1));
+    _filterOutOfRange = p.filterOutOfRange.value_or(false);
 
     _stride.onChange([this]() { _vectorFieldIsDirty = true; });
 
     addProperty(_stride);
     addProperty(_vectorFieldScale);
     addProperty(_lineWidth);
+    addProperty(_filterOutOfRange);
+    addProperty(_dataRange);
 }
 
 void RenderableVectorField::initializeGL()
@@ -264,6 +287,16 @@ void RenderableVectorField::render(const RenderData& data, RendererTasks& render
     _program->setUniform(
         _uniformCache.arrowScale,
         _vectorFieldScale.value()
+    );
+
+    _program->setUniform(
+        _uniformCache.filterOutOfRange,
+        _filterOutOfRange
+    );
+
+    _program->setUniform(
+        _uniformCache.dataRangeFilter,
+        _dataRange
     );
 
     glBindVertexArray(_vao);

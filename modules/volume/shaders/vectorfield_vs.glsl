@@ -35,6 +35,7 @@ uniform float arrowScale;
 
 flat out vec3 v_dir;
 out float vs_positionDepth;
+flat out float mag;
 
 mat3 makeRotation(vec3 dir) {
     vec3 x = normalize(dir);
@@ -71,4 +72,5 @@ void main() {
 
     gl_Position = z_normalization(vsPositionClipSpace);
     v_dir = in_direction;
+    mag = in_magnitude;
 }

@@ -27,10 +27,18 @@
 out vec4 outColor;
 
 flat in vec3 v_dir;
+flat in float mag;
 in float vs_positionDepth;
+
+uniform vec2 dataRangeFilter;
+uniform bool filterOutOfRange;
 
 Fragment getFragment() {
     Fragment frag;
+
+    if(filterOutOfRange && (mag < dataRangeFilter.x || mag > dataRangeFilter.y)) {
+        discard;
+    }
 
     vec3 dir = normalize(v_dir);
     vec3 color = 0.5 * (dir + vec3(1.0)); // remaps [-1, 1] -> [0, 1]
