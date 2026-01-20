@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_MOLECULE___CACHE___H__
 
 #include <md_types.h>
+#include <filesystem>
 #include <span>
 #include <string_view>
 
@@ -52,8 +53,9 @@ struct FrameData {
 
 namespace mol {
 
-const md_molecule_t* loadMolecule(std::string_view file, bool isCoarseGrained = false);
-const md_trajectory_i* loadTrajectory(std::string_view file,
+const md_molecule_t* loadMolecule(std::filesystem::path file,
+    bool isCoarseGrained = false);
+const md_trajectory_i* loadTrajectory(std::filesystem::path file,
     const md_molecule_t* mol = nullptr, bool deperiodizeOnLoad = false);
     
 // This will kick of work into worker threads and thus not stall the calling thread

@@ -24,6 +24,7 @@
 
 #include <modules/molecule/mol/viamd/loader.h>
 
+#include <ghoul/logging/logmanager.h>
 #include <core/md_allocator.h>
 #include <core/md_array.h>
 #include <core/md_log.h>
@@ -39,8 +40,12 @@
 #include <md_frame_cache.h>
 #include <md_util.h>
 #include <cstring>
+#include <string>
+#include <string_view>
 
 namespace {
+    constexpr std::string_view _loggerCat = "MOLD";
+
     struct LoadedMolecule {
         uint64_t key;
         md_allocator_i* alloc;
@@ -133,79 +138,102 @@ namespace {
             &frameData,
             &lock
         );
+        defer {
+            if (lock) {
+                md_frame_cache_frame_lock_release(lock);
+            };
+        };
+
         if (!inCache) {
-            const int64_t frameDataSize = md_trajectory_fetch_frame_data(trajectory->traj, idx, 0);
+            const int64_t frameDataSize = md_trajectory_fetch_frame_data(
+                trajectory->traj,
+                idx,
+                0
+            );
             void* frameDataPtr = md_alloc(default_allocator, frameDataSize);
+            defer {
+                md_free(default_allocator, frameDataPtr, frameDataSize);
+            };
+
             md_trajectory_fetch_frame_data(trajectory->traj, idx, frameDataPtr);
-            result = md_trajectory_decode_frame_data(trajectory->traj, frameDataPtr, frameDataSize, &frameData->header, frameData->x, frameData->y, frameData->z);
+            result = md_trajectory_decode_frame_data(
+                trajectory->traj,
+                frameDataPtr,
+                frameDataSize,
+                &frameData->header,
+                frameData->x,
+                frameData->y,
+                frameData->z
+            );
 
-            if (result) {
-                const md_unit_cell_t* cell = &frameData->header.cell;
-                const bool haveCell = cell->flags != 0;
+            if (!result) {
+                return false;
+            }
 
-                const md_molecule_t* mol = trajectory->mol;
-                float* x = frameData->x;
-                float* y = frameData->y;
-                float* z = frameData->z;
-                const int64_t numAtoms = frameData->header.num_atoms;
+            const md_unit_cell_t* cell = &frameData->header.cell;
+            const bool haveCell = cell->flags != 0;
 
-                // If we have a recenter target, then compute the com and apply that transformation
-                if (!md_bitfield_empty(&trajectory->recenterTarget)) {
-                    const md_bitfield_t* bf = &trajectory->recenterTarget;
-                    const int64_t count = md_bitfield_popcount(bf);
+            const md_molecule_t* mol = trajectory->mol;
+            float* x = frameData->x;
+            float* y = frameData->y;
+            float* z = frameData->z;
+            const int64_t numAtoms = frameData->header.num_atoms;
 
-                    if (count > 0) {
-                        int32_t* indices = reinterpret_cast<int32_t*>(
-                            md_alloc(default_allocator, sizeof(int32_t) * count)
-                        );
-                        defer {
-                            md_free(default_allocator, indices, sizeof(int32_t) * count);
-                        };
+            // If we have a recenter target, then compute the center of mass and
+            // apply that transformation
+            if (!md_bitfield_empty(&trajectory->recenterTarget)) {
+                const md_bitfield_t* bf = &trajectory->recenterTarget;
+                const int64_t count = md_bitfield_popcount(bf);
 
-                        md_bitfield_extract_indices(indices, bf);
+                if (count > 0) {
+                    int32_t* indices = reinterpret_cast<int32_t*>(
+                        md_alloc(default_allocator, sizeof(int32_t) * count)
+                    );
+                    defer {
+                        md_free(default_allocator, indices, sizeof(int32_t) * count);
+                    };
 
-                        const vec3_t boxExt =
-                            mat3_mul_vec3(header->cell.basis, vec3_set1(1.f));
+                    md_bitfield_extract_indices(indices, bf);
 
-                        const vec3_t com = haveCell ?
-                            vec3_deperiodize(
-                                md_util_compute_com_indexed_soa_ortho(
-                                    x,
-                                    y,
-                                    z,
-                                    mol->atom.mass,
-                                    indices,
-                                    count,
-                                    boxExt
-                                ),
-                                boxExt * 0.5f,
-                                boxExt
-                            ) :
-                            md_util_compute_com_indexed_soa(
+                    const vec3_t boxExt =
+                        mat3_mul_vec3(header->cell.basis, vec3_set1(1.f));
+
+                    const vec3_t com = haveCell ?
+                        vec3_deperiodize(
+                            md_util_compute_com_indexed_soa_ortho(
                                 x,
                                 y,
                                 z,
                                 mol->atom.mass,
                                 indices,
-                                count
-                            );
+                                count,
+                                boxExt
+                            ),
+                            boxExt * 0.5f,
+                            boxExt
+                        ) :
+                        md_util_compute_com_indexed_soa(
+                            x,
+                            y,
+                            z,
+                            mol->atom.mass,
+                            indices,
+                            count
+                        );
 
-                        // Translate all
-                        const vec3_t trans = haveCell ? boxExt * 0.5f - com : -com;
-                        for (int64_t i = 0; i < numAtoms; i++) {
-                            x[i] += trans.x;
-                            y[i] += trans.y;
-                            z[i] += trans.z;
-                        }
+                    // Translate all
+                    const vec3_t trans = haveCell ? boxExt * 0.5f - com : -com;
+                    for (int64_t i = 0; i < numAtoms; i++) {
+                        x[i] += trans.x;
+                        y[i] += trans.y;
+                        z[i] += trans.z;
                     }
-                }
-
-                if (trajectory->deperiodize && haveCell) {
-                    md_util_deperiodize_system(x, y, z, cell, mol);
                 }
             }
 
-            md_free(default_allocator, frameDataPtr, frameDataSize);
+            if (trajectory->deperiodize && haveCell) {
+                md_util_deperiodize_system(x, y, z, cell, mol);
+            }
         }
 
         if (result) {
@@ -224,10 +252,6 @@ namespace {
             }
         }
 
-        if (lock) {
-            md_frame_cache_frame_lock_release(lock);
-        }
-
         return result;
     }
 
@@ -236,73 +260,75 @@ namespace {
     {
         return decodeFrameData(inst, &idx, sizeof(int64_t), header, x, y, z);
     }
-
 } // namespace
 
 namespace load::mol {
 
-md_molecule_api* api(str_t filename) {
-    str_t ext = extract_ext(filename);
-    if (str_equal_cstr(ext, "pdb")) {
+md_molecule_api* api(std::filesystem::path filename) {
+    std::filesystem::path ext = filename.extension();
+    if (ext == ".pdb") {
         return md_pdb_molecule_api();
     }
-    if (str_equal_cstr(ext, "gro")) {
+    else if (ext == ".gro") {
         return md_gro_molecule_api();
     }
-    if (str_equal_cstr(ext, "xyz")) {
+    else if (ext == ".xyz") {
         return md_xyz_molecule_api();
     }
-    if (str_equal_cstr(ext, "xmol")) {
+    else if (ext == ".xmol") {
         return md_xyz_molecule_api();
     }
-    if (str_equal_cstr(ext, "arc")) {
+    else if (ext == ".arc") {
         return md_xyz_molecule_api();
     }
-
-    return nullptr;
+    else {
+        return nullptr;
+    }
 }
 
 }  // namespace load::mol
 
 namespace load::traj {
 
-md_trajectory_api* api(str_t filename) {
-    str_t ext = extract_ext(filename);
-    if (str_equal_cstr(ext, "pdb")) {
+md_trajectory_api* api(std::filesystem::path filename) {
+    std::filesystem::path ext = filename.extension();
+    if (ext == ".pdb") {
         return md_pdb_trajectory_api();
     }
-    if (str_equal_cstr(ext, "xtc")) {
+    else if (ext == ".xtc") {
         return md_xtc_trajectory_api();
     }
-    if (str_equal_cstr(ext, "trr")) {
+    else if (ext == ".trr") {
         return md_trr_trajectory_api();
     }
-    if (str_equal_cstr(ext, "xyz")) {
+    else if (ext == ".xyz") {
         return md_xyz_trajectory_api();
     }
-    if (str_equal_cstr(ext, "xmol")) {
+    else if (ext == ".xmol") {
         return md_xyz_trajectory_api();
     }
-    if (str_equal_cstr(ext, "arc")) {
+    else if (ext == ".arc") {
         return md_xyz_trajectory_api();
     }
-
-    return nullptr;
+    else {
+        return nullptr;
+    }
 }
 
-md_trajectory_i* openFile(str_t filename, const md_molecule_t* mol, md_allocator_i* alloc,
-                          bool deperiodizeOnLoad)
+md_trajectory_i* openFile(std::filesystem::path filename, const md_molecule_t* mol,
+                          md_allocator_i* alloc, bool deperiodizeOnLoad)
 {
     ghoul_assert(alloc, "No allocator provided");
     ghoul_assert(mol, "No molecule provided");
 
     md_trajectory_api* api = traj::api(filename);
     if (!api) {
-        MD_LOG_ERROR("Unsupported file extension: '%.*s'", filename.len, filename.ptr);
-        return NULL;
+        LERROR(std::format("Unsupported file extension: '{}'", filename));
+        return nullptr;
     }
 
-    md_trajectory_i* internalTraj = api->create(filename, alloc);
+    std::string f = filename.string();
+    md_trajectory_i* internalTraj = api->create(str_from_cstr(f.c_str()), alloc);
     if (!internalTraj) {
         return nullptr;
     }
@@ -329,7 +355,7 @@ md_trajectory_i* openFile(str_t filename, const md_molecule_t* mol, md_allocator
 
     const int64_t numCacheFrames = std::min(numTrajFrames, maxNumCacheFrames);
     
-    MD_LOG_DEBUG("Initializing frame cache with %i frames.", numCacheFrames);
+    LERROR(std::format("Initializing frame cache with {} frames.", numCacheFrames));
     md_frame_cache_init(&inst->cache, inst->traj, alloc, numCacheFrames);
     md_bitfield_init(&inst->recenterTarget, alloc);
 
@@ -352,9 +378,9 @@ bool close(md_trajectory_i* traj) {
         std::memset(traj, 0, sizeof(md_trajectory_i));
         return true;
     }
-    MD_LOG_ERROR("Attempting to free trajectory which was not loaded with loader");
-    ghoul_assert(false, "");
-    return false;
+    throw ghoul::RuntimeError(
+        "Attempting to free trajectory which was not loaded with loader"
+    );
 }
 
 bool setRecenterTarget(md_trajectory_i* traj, const md_bitfield_t* atomMask) {
@@ -370,7 +396,7 @@ bool setRecenterTarget(md_trajectory_i* traj, const md_bitfield_t* atomMask) {
         }
         return true;
     }
-    MD_LOG_ERROR("Supplied trajectory was not loaded with loader");
+    LERROR("Supplied trajectory was not loaded with loader");
     return false;
 }
 
@@ -382,7 +408,7 @@ bool clearCache(md_trajectory_i* traj) {
         md_frame_cache_clear(&loadedTraj->cache);
         return true;
     }
-    MD_LOG_ERROR("Supplied trajectory was not loaded with loader");
+    LERROR("Supplied trajectory was not loaded with loader");
     return false;
 }
 
@@ -393,7 +419,7 @@ int64_t numCacheFrames(md_trajectory_i* traj) {
     if (loadedTraj) {
         return md_frame_cache_num_frames(&loadedTraj->cache);
     }
-    MD_LOG_ERROR("Supplied trajectory was not loaded with loader");
+    LERROR("Supplied trajectory was not loaded with loader");
     return 0;
 }
 

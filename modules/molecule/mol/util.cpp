@@ -72,7 +72,7 @@ void updateRepType(md_gl_representation_t& rep, mol::rep::Type type, float scale
     md_gl_representation_type_t repType = 0;
 
     switch (type) {
-        case mol::rep::Type::Licorice:
+        case rep::Type::Licorice:
             repArgs.licorice.radius = scale * 0.5f;
             repType = MD_GL_REP_LICORICE;
             break;
@@ -81,13 +81,12 @@ void updateRepType(md_gl_representation_t& rep, mol::rep::Type type, float scale
             repArgs.ribbons.thickness_scale = scale * 5;
             repType = MD_GL_REP_RIBBONS;
             break;
-        case mol::rep::Type::Cartoon:
+        case rep::Type::Cartoon:
             repArgs.cartoon.width_scale = scale * 5;
             repArgs.cartoon.thickness_scale = scale * 5;
             repType = MD_GL_REP_CARTOON;
             break;
-        case mol::rep::Type::SpaceFill:
-        default:
+        case rep::Type::SpaceFill:
             repArgs.space_fill.radius_scale = scale;
             repType = MD_GL_REP_SPACE_FILL;
             break;
@@ -106,9 +105,7 @@ void updateRepColor(md_gl_representation_t& rep, const md_molecule_t& mol,
         md_alloc(default_allocator, count * sizeof(uint32_t))
     );
     defer {
-        if (colors) {
-            md_free(default_allocator, colors, count * sizeof(md_flags_t));
-        }
+        md_free(default_allocator, colors, count * sizeof(md_flags_t));
     };
 
     switch (color) {
@@ -136,8 +133,6 @@ void updateRepColor(md_gl_representation_t& rep, const md_molecule_t& mol,
         case mol::rep::Color::Uniform:
             color_atoms_uniform(colors, count, convertColor(uniformColor), nullptr);
             break;
-        default:
-            throw ghoul::MissingCaseException();
     }
 
     for (uint32_t i = 0; i < count; i++) {
@@ -161,20 +156,20 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
         return;
     }
 
-    int64_t num_frames = md_trajectory_num_frames(traj);
-    if (!num_frames) {
+    int64_t nFrames = md_trajectory_num_frames(traj);
+    if (!nFrames) {
         LERROR("Cannot interpolate coords: Trajectory is empty");
         return;
     }
 
-    const int64_t lastFrame = std::max(0LL, md_trajectory_num_frames(traj) - 1);
+    const int64_t lastFrame = std::max(0LL, nFrames - 1);
     // This is not actually time, but the fractional frame representation
     time = std::clamp(time, 0.0, static_cast<double>(lastFrame));
 
     const float t = static_cast<float>(fract(time));
     const int64_t f = static_cast<int64_t>(time);
 
-    const int64_t fidx[4] = {
+    const int64_t fIdx[4] = {
         std::max(0LL, f - 1),
         std::max(0LL, f),
         std::min(f + 1, lastFrame),
@@ -184,13 +179,13 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
     md_vec3_soa_t dst = { mol.atom.x, mol.atom.y, mol.atom.z };
 
     const InterpolationType mode =
-        (fidx[1] != fidx[2]) ? interp : InterpolationType::Nearest;
+        (fIdx[1] != fIdx[2]) ? interp : InterpolationType::Nearest;
     switch (mode) {
         case InterpolationType::Nearest:
         {
             const int64_t nearestFrame =
                 std::clamp(static_cast<int64_t>(time + 0.5), 0LL, lastFrame);
-            FrameData frame = mol::frameData(traj, nearestFrame);
+            FrameData frame = frameData(traj, nearestFrame);
         
             mol.cell = frame.header->cell;
             std::memcpy(dst.x, frame.x.data(), frame.x.size_bytes());
@@ -209,18 +204,18 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
         case InterpolationType::Linear:
         {
             FrameData frame[2] = {
-                mol::frameData(traj, fidx[1]),
-                mol::frameData(traj, fidx[2])
+                mol::frameData(traj, fIdx[1]),
+                mol::frameData(traj, fIdx[2])
             };
 
             if (mol.backbone.count) {
-                for (int64_t i = 0; i < mol.backbone.count; ++i) {
+                for (int64_t i = 0; i < mol.backbone.count; i++) {
                     const vec4_t ss[2] = {
                         convertColor(frame[0].ss[i]),
                         convertColor(frame[1].ss[i])
                     };
-                    const vec4_t ss_res = vec4_lerp(ss[0], ss[1], t);
-                    mol.backbone.secondary_structure[i] = convertColor(ss_res);
+                    const vec4_t ssr = vec4_lerp(ss[0], ss[1], t);
+                    mol.backbone.secondary_structure[i] = convertColor(ssr);
                 }
             }
         
@@ -253,10 +248,10 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
         case InterpolationType::Cubic:
         {
             FrameData frame[4] = {
-                mol::frameData(traj, fidx[0]),
-                mol::frameData(traj, fidx[1]),
-                mol::frameData(traj, fidx[2]),
-                mol::frameData(traj, fidx[3])
+                mol::frameData(traj, fIdx[0]),
+                mol::frameData(traj, fIdx[1]),
+                mol::frameData(traj, fIdx[2]),
+                mol::frameData(traj, fIdx[3])
             };
 
             if (mol.backbone.count) {
@@ -306,8 +301,6 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
             );
             break;
         }
-        default:
-            throw ghoul::MissingCaseException();
     }
 
     if (ensurePbc) {

@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_MOLECULE___LOADER___H__
 
 #include <core/md_str.h>
+#include <filesystem>
 
 struct md_allocator_i;
 struct md_molecule_t;
@@ -35,13 +36,13 @@ struct md_trajectory_api;
 struct md_bitfield_t;
 
 namespace load::mol {
-    md_molecule_api* api(str_t filename);
+    md_molecule_api* api(std::filesystem::path filename);
 } // namespace load::mol
 
 namespace load::traj {
-    md_trajectory_api* api(str_t filename);
+    md_trajectory_api* api(std::filesystem::path filename);
 
-    md_trajectory_i* openFile(str_t filename, const md_molecule_t* mol,
+    md_trajectory_i* openFile(std::filesystem::path filename, const md_molecule_t* mol,
         md_allocator_i* alloc, bool deperiodize_on_load);
     bool close(md_trajectory_i* traj);
 

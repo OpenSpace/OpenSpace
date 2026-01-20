@@ -77,13 +77,13 @@ namespace {
     std::unordered_map<size_t, md_trajectory_i*> trajectories;
     std::unordered_map<const md_trajectory_i*, SecondaryStructureData> ssTable;
 
-    size_t molHash(std::string_view file, bool isCoarseGrained) {
-        size_t hash = std::hash<std::string_view>{}(file);
+    size_t molHash(std::filesystem::path file, bool isCoarseGrained) {
+        size_t hash = std::hash<std::filesystem::path>{}(file);
         return (hash << 1) | static_cast<size_t>(isCoarseGrained);
     }
 
-    uint64_t trajHash(std::string_view file, bool deperiodize) {
-        size_t hash = std::hash<std::string_view>{}(file);
+    uint64_t trajHash(std::filesystem::path file, bool deperiodize) {
+        size_t hash = std::hash<std::filesystem::path>{}(file);
         return (hash << 1) | static_cast<size_t>(deperiodize);
     }
 
@@ -486,7 +486,7 @@ FrameData::~FrameData() {
 
 namespace mol {
 
-const md_molecule_t* loadMolecule(std::string_view file, bool isCoarseGrained) {
+const md_molecule_t* loadMolecule(std::filesystem::path file, bool isCoarseGrained) {
     ghoul_assert(!file.empty(), "No file provided");
 
     const uint64_t hash = molHash(file, isCoarseGrained);
@@ -495,8 +495,7 @@ const md_molecule_t* loadMolecule(std::string_view file, bool isCoarseGrained) {
         return &entry->second;
     }
 
-    str_t str = { file.data(), static_cast<int64_t>(file.length()) };
-    md_molecule_api* api = load::mol::api(str);
+    md_molecule_api* api = load::mol::api(file);
     if (!api) {
         throw ghoul::RuntimeError(
             "Failed to find appropriate molecule loader api",
@@ -505,6 +504,8 @@ const md_molecule_t* loadMolecule(std::string_view file, bool isCoarseGrained) {
     }
 
     md_molecule_t mol = {};
+    std::string f = file.string();
+    str_t str = { f.data(), static_cast<int64_t>(f.length()) };
     if (!api->init_from_file(&mol, str, default_allocator)) {
         throw ghoul::RuntimeError("Failed to load molecule", "MOLD");
     }
@@ -516,8 +517,8 @@ const md_molecule_t* loadMolecule(std::string_view file, bool isCoarseGrained) {
     return &(molecules[hash] = mol);
 }
 
-const md_trajectory_i* loadTrajectory(std::string_view file, const md_molecule_t* mol,
-                                      bool deperiodizeOnLoad)
+const md_trajectory_i* loadTrajectory(std::filesystem::path file,
+                                      const md_molecule_t* mol, bool deperiodizeOnLoad)
 {
     ghoul_assert(!file.empty(), "No file provided");
 
@@ -527,8 +528,7 @@ const md_trajectory_i* loadTrajectory(std::string_view file, const md_molecule_t
         return entry->second;
     }
 
-    str_t str = { file.data(), static_cast<int64_t>(file.length()) };
-    md_trajectory_api* api = load::traj::api(str);
+    md_trajectory_api* api = load::traj::api(file);
     if (!api) {
         throw ghoul::RuntimeError(
             "Failed to find appropriate trajectory loader api",
@@ -536,6 +536,8 @@ const md_trajectory_i* loadTrajectory(std::string_view file, const md_molecule_t
         );
     }
 
+    std::string f = file.string();
+    str_t str = { f.data(), static_cast<int64_t>(f.length()) };
     md_trajectory_i* traj = api->create(str, default_allocator);
     if (!traj) {
         throw ghoul::RuntimeError("Failed to load trajectory", "MOLD");

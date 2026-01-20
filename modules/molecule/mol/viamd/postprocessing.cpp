@@ -28,6 +28,7 @@
 #include <modules/molecule/mol/viamd/postprocessing.h>
 
 #include <modules/molecule/mol/viamd/postprocessing_shaders.inl>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <core/md_allocator.h>
 #include <core/md_str.h>
@@ -42,6 +43,8 @@ namespace {
     // @TODO: Use half-res render targets for SSAO
     // @TODO: Use shared textures for all postprocessing operations
     // @TODO: Use some kind of unified pipeline for all post processing operations
+
+    constexpr std::string_view _loggerCat = "MOLD";
 
     struct {
         uint32_t vao = 0;
@@ -234,7 +237,7 @@ namespace {
         struct {
             uint32_t programTex = 0;
             uint32_t programTexDepth = 0;
-            uint32_t programCol;
+            uint32_t programCol = 0;
             struct {
                 int texColor = -1;
                 int texDepth = -1;
@@ -434,7 +437,7 @@ void setupUboHbaoData(uint32_t ubo, int width, int height, const mat4_t& projMat
 {
     ghoul_assert(ubo, "Missing uniform bufffer object");
 
-    // From intel ASSAO
+    // From Intel ASSAO
     constexpr float SAMPLE_PATTERN[] = {
         0.78488064f,  0.56661671f,  1.500000f, -0.126083f, 0.26022232f,  -0.29575172f, 1.500000f, -1.064030f, 0.10459357f,  0.08372527f,  1.110000f, -2.730563f, -0.68286800f, 0.04963045f,  1.090000f, -0.498827f,
         -0.13570161f, -0.64190155f, 1.250000f, -0.532765f, -0.26193795f, -0.08205118f, 0.670000f, -1.783245f, -0.61177456f, 0.66664219f,  0.710000f, -0.044234f, 0.43675563f,  0.25119025f,  0.610000f, -1.167283f,
@@ -453,21 +456,21 @@ void setupUboHbaoData(uint32_t ubo, int width, int height, const mat4_t& projMat
     const bool ortho = isOrthoProjMatrix(projMat);
     if (!ortho) {
         projInfo = {
-            2.f / (projData[4 * 0 + 0]),                          // (x) * (R - L)/N
-            2.f / (projData[4 * 1 + 1]),                          // (y) * (T - B)/N
-            -(1.f - projData[4 * 2 + 0]) / projData[4 * 0 + 0],  // L/N
-            -(1.f + projData[4 * 2 + 1]) / projData[4 * 1 + 1]   // B/N
+            2.f / (projData[4 * 0 + 0]),                        // (x) * (R - L)/N
+            2.f / (projData[4 * 1 + 1]),                        // (y) * (T - B)/N
+            -(1.f - projData[4 * 2 + 0]) / projData[4 * 0 + 0], // L/N
+            -(1.f + projData[4 * 2 + 1]) / projData[4 * 1 + 1]  // B/N
         };
-        projScl = float(height) * projData[4 * 1 + 1] * 0.5f;
+        projScl = static_cast<float>(height) * projData[4 * 1 + 1] * 0.5f;
     }
     else {
         projInfo = {
-            2.f / (projData[4 * 0 + 0]),                          // ((x) * R - L)
-            2.f / (projData[4 * 1 + 1]),                          // ((y) * T - B)
-            -(1.f + projData[4 * 3 + 0]) / projData[4 * 0 + 0],  // L
-            -(1.f - projData[4 * 3 + 1]) / projData[4 * 1 + 1]   // B
+            2.f / (projData[4 * 0 + 0]),                        // ((x) * R - L)
+            2.f / (projData[4 * 1 + 1]),                        // ((y) * T - B)
+            -(1.f + projData[4 * 3 + 0]) / projData[4 * 0 + 0], // L
+            -(1.f - projData[4 * 3 + 1]) / projData[4 * 1 + 1]  // B
         };
-        projScl = float(height) / projInfo.y;
+        projScl = static_cast<float>(height) / projInfo.y;
     }
 
     float r = radius * METERS_TO_VIEWSPACE;
@@ -480,7 +483,10 @@ void setupUboHbaoData(uint32_t ubo, int width, int height, const mat4_t& projMat
         .nInfluence = std::clamp(normalBias, 0.f, 1.0f),
         .aoMultiplier = 1.f / (1.f - data.nDotVBias),
         .powExponent = std::max(intensity, 0.f),
-        .invFullRes = {1.f / float(width), 1.f / float(height)},
+        .invFullRes = {
+            1.f / static_cast<float>(width),
+            1.f / static_cast<float>(height)
+        },
         .projInfo = projInfo
     };
     memcpy(&data.samplePattern, SAMPLE_PATTERN, sizeof(SAMPLE_PATTERN));
@@ -504,7 +510,7 @@ void initializeRndTex(uint32_t rndTex) {
         buffer[i * 4 + 0] = static_cast<signed short>(Scale * std::cos(angle));
         buffer[i * 4 + 1] = static_cast<signed short>(Scale * std::sin(angle));
         buffer[i * 4 + 2] = static_cast<signed short>(Scale * rand2);
-        buffer[i * 4 + 3] = static_cast<signed short>(Scale * 0);
+        buffer[i * 4 + 3] = 0;
     }
 
     glBindTexture(GL_TEXTURE_2D, rndTex);

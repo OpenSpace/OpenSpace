@@ -43,7 +43,6 @@ enum class Color {
     ChainIndex,
     SecondaryStructure,
     Uniform
-    // Property
 };
 
 }
