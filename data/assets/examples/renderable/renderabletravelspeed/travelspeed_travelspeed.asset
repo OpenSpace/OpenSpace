@@ -16,7 +16,8 @@ local Node = {
 
     -- Increase line width and indicator length for visibility
     LineWidth = 5.0,
-    IndicatorLength = 60 -- Distance traveled in 60 seconds at the set travel speed
+    -- Distance traveled in 60 seconds at the set travel speed
+    IndicatorLength = 60
   },
    GUI = {
     Name = "RenderableTravelSpeed - Light-hour Speed Indicator",
