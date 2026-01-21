@@ -28,11 +28,8 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <ghoul/logging/logmanager.h>
 
 namespace {
-    //constexpr std::string_view _loggerCat = "IdleBehavior";
-
     constexpr std::string_view IdleKeyOrbit = "Orbit";
     constexpr std::string_view IdleKeyOrbitAtConstantLat = "OrbitAtConstantLatitude";
     constexpr std::string_view IdleKeyOrbitAroundUp = "OrbitAroundUp";
@@ -131,7 +128,20 @@ IdleBehavior::IdleBehavior()
     , _dampenInterpolationTime(IdleBehaviorDampenInterpolationTimeInfo, 0.5f, 0.f, 10.f)
     , _defaultBehavior(IdleBehaviorInfo)
 {
+    _apply.onChange([this]() {
+        if (_apply) {
+            // Reset velocities to ensure that abort on interaction works correctly
+            global::navigationHandler->orbitalNavigator().resetVelocities(); // TODO: Remove this dependency on orbitalnavigator
+            _invertInterpolation = false;
+        }
+        else {
+            _invertInterpolation = true;
+        }
+        _dampenInterpolator.start();
+        _dampenInterpolator.setInterpolationTime(_dampenInterpolationTime);
+    });
     addProperty(_apply);
+
     _defaultBehavior.addOptions({
         {
             static_cast<int>(Behavior::Orbit),
@@ -148,53 +158,30 @@ IdleBehavior::IdleBehavior()
     });
     _defaultBehavior = static_cast<int>(IdleBehavior::Behavior::Orbit);
     addProperty(_defaultBehavior);
-    addProperty(_shouldTriggerWhenIdle);
-    addProperty(_idleWaitTime);
-    _idleWaitTime.setExponent(2.2f);
-    addProperty(_invert);
-    addProperty(_speedScaleFactor);
-    addProperty(_abortOnCameraInteraction);
-    addProperty(_dampenInterpolationTime);
 
     _shouldTriggerWhenIdle.onChange([this]() {
         _triggerTimer = _idleWaitTime;
     });
+    addProperty(_shouldTriggerWhenIdle);
+
     _idleWaitTime.onChange([this]() {
         _triggerTimer = _idleWaitTime;
     });
+    _idleWaitTime.setExponent(2.2f);
+    addProperty(_idleWaitTime);
+
+    addProperty(_invert);
+    addProperty(_speedScaleFactor);
+    addProperty(_abortOnCameraInteraction);
+
+    _dampenInterpolationTime.onChange([this]() {
+        _dampenInterpolator.setInterpolationTime(_dampenInterpolationTime);
+     });
+    addProperty(_dampenInterpolationTime);
 
     _dampenInterpolator.setTransferFunction(
         ghoul::quadraticEaseInOut<double>
     );
-
-    _dampenInterpolationTime.onChange([this]() {
-        _dampenInterpolator.setInterpolationTime(
-            _dampenInterpolationTime
-        );
-    });
-
-    _apply.onChange([this]() {
-        if (_apply) {
-            // Reset velocities to ensure that abort on interaction works correctly
-            global::navigationHandler->orbitalNavigator().resetVelocities(); // TODO: Remove this dependency on orbitalnavigator
-            _invertInterpolation = false;
-        }
-        else {
-            _invertInterpolation = true;
-        }
-        _dampenInterpolator.start();
-        _dampenInterpolator.setInterpolationTime(
-            _dampenInterpolationTime
-        );
-    });
-
-    _shouldTriggerWhenIdle.onChange([this]() {
-        _triggerTimer = _idleWaitTime;
-    });
-
-    _idleWaitTime.onChange([this]() {
-        _triggerTimer = _idleWaitTime;
-    });
 }
 
 void IdleBehavior::resetIdleBehaviorOnCamera() {
@@ -251,26 +238,26 @@ void IdleBehavior::applyIdleBehavior(const SceneGraphNode* anchor, double deltaT
     );
 
     switch (choice) {
-    case IdleBehavior::Behavior::Orbit:
-        orbitAnchor(anchor, angle, position, globalRotation);
-        break;
-    case IdleBehavior::Behavior::OrbitAtConstantLat: {
-        // Assume that "north" coincides with the local z-direction
-        // @TODO (2021-07-09, emmbr) Make each scene graph node aware of its own
-        // north/up, so that we can query this information rather than assuming it.
-        // The we could also combine this idle behavior with the next
-        const glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
-        orbitAroundAxis(anchor, north, angle, position, globalRotation);
-        break;
-    }
-    case IdleBehavior::Behavior::OrbitAroundUp: {
-        // Assume that "up" coincides with the local y-direction
-        const glm::dvec3 up = glm::dvec3(0.0, 1.0, 0.0);
-        orbitAroundAxis(anchor, up, angle, position, globalRotation);
-        break;
-    }
-    default:
-        throw ghoul::MissingCaseException();
+        case IdleBehavior::Behavior::Orbit:
+            orbitAnchor(anchor, angle, position, globalRotation);
+            break;
+        case IdleBehavior::Behavior::OrbitAtConstantLat: {
+            // Assume that "north" coincides with the local z-direction
+            // @TODO (2021-07-09, emmbr) Make each scene graph node aware of its own
+            // north/up, so that we can query this information rather than assuming it.
+            // The we could also combine this idle behavior with the next
+            const glm::dvec3 north = glm::dvec3(0.0, 0.0, 1.0);
+            orbitAroundAxis(anchor, north, angle, position, globalRotation);
+            break;
+        }
+        case IdleBehavior::Behavior::OrbitAroundUp: {
+            // Assume that "up" coincides with the local y-direction
+            const glm::dvec3 up = glm::dvec3(0.0, 1.0, 0.0);
+            orbitAroundAxis(anchor, up, angle, position, globalRotation);
+            break;
+        }
+        default:
+            throw ghoul::MissingCaseException();
     }
 }
 
@@ -302,7 +289,8 @@ void IdleBehavior::triggerIdleBehavior(std::string_view choice) {
 }
 
 void IdleBehavior::orbitAnchor(const SceneGraphNode* anchor, double angle,
-    glm::dvec3& position, glm::dquat& globalRotation)
+                               glm::dvec3& position,
+                               glm::dquat& globalRotation)
 {
     ghoul_assert(anchor != nullptr, "Node to orbit must be set");
 
@@ -325,7 +313,8 @@ void IdleBehavior::orbitAnchor(const SceneGraphNode* anchor, double angle,
 }
 
 void IdleBehavior::orbitAroundAxis(const SceneGraphNode* anchor, const glm::dvec3& axis,
-    double angle, glm::dvec3& position, glm::dquat& globalRotation)
+                                   double angle, glm::dvec3& position,
+                                   glm::dquat& globalRotation)
 {
     ghoul_assert(anchor != nullptr, "Node to orbit must be set");
 
