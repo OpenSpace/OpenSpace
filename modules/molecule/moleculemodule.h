@@ -89,10 +89,6 @@ private:
     
     properties::FloatProperty _exposure;
 
-    properties::BoolProperty _dofEnabled;
-    properties::FloatProperty _dofFocusDistance;
-    properties::FloatProperty _dofFocusRange;
-
     ThreadPool _threadPool;
 };
 

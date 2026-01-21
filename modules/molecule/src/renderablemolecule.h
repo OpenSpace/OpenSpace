@@ -33,6 +33,7 @@
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <core/md_bitfield.h>
 #include <md_gl.h>
 #include <md_molecule.h>
@@ -57,41 +58,43 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void addRepresentation(bool enabled, mol::rep::Type type = mol::rep::Type::SpaceFill,
-        mol::rep::Color color = mol::rep::Color::Cpk, std::string filter = "all",
-        float scale = 1.f, glm::vec4 uniform_color = glm::vec4(1.f));
-    
     void updateTrajectoryFrame(const UpdateData& data);
 
-    void initMolecule(std::string_view mol_file, std::string_view traj_file = "");
-    void freeMolecule();
-    void updateRepresentations();
+    void initMolecule(std::string_view molFile, std::string_view trajFile);
 
     // indicates whether the molecule is in view in any camera's viewpoint
     bool _renderableInView = true;
 
     // This represents the epoch which we derive our local frame time from
-    double _localEpoch;
+    double _localEpoch = 0.0;
     // This is the current frame of the trajectory
-    double _frame;
+    double _frame = 0.0;
 
     md_molecule_t _molecule;
-    const md_trajectory_i* _trajectory;
-    md_gl_molecule_t _gl_molecule;
+    const md_trajectory_i* _trajectory = nullptr;
+    md_gl_molecule_t _glMolecule;
+    double _radius = 0.0;
 
-    glm::dvec3 _center;
-    double _radius;
+    struct Representation : public properties::PropertyOwner {
+        explicit Representation(size_t number, const md_molecule_t& molecule_,
+            bool enabled_, mol::rep::Type type_, mol::rep::Color color_,
+            std::string filter_, float scale_, glm::vec4 uniformColor_);
+        ~Representation();
 
-    struct RepData {
-        RepData();
-        ~RepData();
-        md_gl_representation_t gl_rep;
+        md_gl_representation_t glRep;
         md_bitfield_t mask;
-        bool dynamic;
-        bool enabled = true;
+        const md_molecule_t& molecule;
+        bool isDynamic = false;
+
+        properties::BoolProperty enabled;
+        properties::OptionProperty type;
+        properties::OptionProperty color;
+        properties::StringProperty filter;
+        properties::FloatProperty scale;
+        properties::Vec4Property uniformColor;
     };
 
-    std::vector<RepData> _repData;
+    std::vector<std::unique_ptr<Representation>> _repData;
     properties::PropertyOwner _repProps;
     
     properties::StringProperty _moleculeFile;

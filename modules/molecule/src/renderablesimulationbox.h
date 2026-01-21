@@ -27,9 +27,6 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <openspace/properties/list/doublelistproperty.h>
-#include <openspace/properties/list/intlistproperty.h>
-#include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/misc/listproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/selectionproperty.h>
@@ -69,16 +66,16 @@ private:
 
     struct molecule_data_t {
         std::vector<MoleculeState> states;
-        md_molecule_t molecule;
-        const md_trajectory_i* trajectory;
-        md_gl_representation_t drawRep;
-        md_gl_molecule_t drawMol;
+        md_molecule_t molecule = {};
+        const md_trajectory_i* trajectory = nullptr;
+        md_gl_representation_t drawRep = {};
+        md_gl_molecule_t drawMol = {};
     };
     
     void updateSimulation(molecule_data_t& mol, double dt);
     
-    void initMolecule(molecule_data_t& mol, std::string_view molFile,
-        std::string_view trajFile = "");
+    void initMolecule(molecule_data_t& mol, std::filesystem::path molFile,
+        std::filesystem::path trajFile);
     void freeMolecule(molecule_data_t& mol);
 
     bool _renderableInView = true;
@@ -91,16 +88,20 @@ private:
         GLuint vbo = 0;
     } _billboard;
 
-    std::vector<molecule_data_t> _molecules;
-    
-    properties::StringListProperty _moleculeFiles;
-    properties::StringListProperty _trajectoryFiles;
+    struct Molecules {
+        std::filesystem::path moleculeFile;
+        std::optional<std::filesystem::path> trajectoryFile;
+        std::optional<int> count;
+
+        molecule_data_t data;
+    };
+    std::vector<Molecules> _molecules;
+
     properties::OptionProperty _repType;
     properties::OptionProperty _coloring;
     properties::FloatProperty _repScale;
     properties::FloatProperty _animationSpeed;
     properties::FloatProperty _simulationSpeed;
-    properties::IntListProperty _moleculeCounts;
     properties::FloatProperty _linearVelocity;
     properties::FloatProperty _angularVelocity;
     properties::DVec3Property _simulationBox;

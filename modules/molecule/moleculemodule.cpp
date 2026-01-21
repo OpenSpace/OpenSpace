@@ -120,24 +120,6 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
         "Exposure",
         "Exposure, Controls the Exposure setting for the tonemap"
     };
-
-    constexpr openspace::properties::Property::PropertyInfo DOFEnabledInfo = {
-        "DOFEnabled",
-        "Enable DOF",
-        "Enable DOF"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo DOFFocusDistanceInfo = {
-        "DOFFocusDistance",
-        "DOF Focus Distance",
-        "DOF Focus Distance"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo DOFFocusRangeInfo = {
-        "DOFFocusRange",
-        "DOF Focus Range",
-        "DOF Focus Range"
-    };
 } // namespace
 
 namespace openspace {
@@ -146,19 +128,16 @@ MoleculeModule::MoleculeModule()
     : OpenSpaceModule(Name)
     , _shaders(new md_gl_shaders_t)
     , _ssaoEnabled(SSAOEnabledInfo, true)
-    , _ssaoIntensity(SSAOIntensityInfo, 4.f, 0.f, 100.f)
+    , _ssaoIntensity(SSAOIntensityInfo, 7.5f, 0.f, 100.f)
     , _ssaoRadius(SSAORadiusInfo, 1.f, 0.1f, 10.f)
     , _ssaoHorizonBias(SSAOBiasInfo, 0.1f, 0.f, 1.0f)
     , _ssaoNormalBias(SSAONormalBiasInfo, 1.f, 0.f, 1.f)
     , _ssao2Enabled(SSAO2EnabledInfo, true)
-    , _ssao2Intensity(SSAO2IntensityInfo, 4.f, 0.f, 100.f)
+    , _ssao2Intensity(SSAO2IntensityInfo, 7.5f, 0.f, 100.f)
     , _ssao2Radius(SSAO2RadiusInfo, 10.f, 10.f, 1000.f)
     , _ssao2HorizonBias(SSAO2BiasInfo, 0.f, 0.f, 1.f)
     , _ssao2NormalBias(SSAO2NormalBiasInfo, 1.f, 0.f, 0.f)
-    , _exposure(ExposureInfo, 0.3f, 0.1f, 10.f)
-    , _dofEnabled(DOFEnabledInfo, false)
-    , _dofFocusDistance(DOFFocusDistanceInfo, 0.5f, 0.f, 1.f)
-    , _dofFocusRange(DOFFocusRangeInfo, 0.1f, 0.f, 10.f)
+    , _exposure(ExposureInfo, 1.f, 0.1f, 10.f)
     , _threadPool(std::max(1U, std::thread::hardware_concurrency() - 1))
 {
     addProperty(_ssaoEnabled);
@@ -172,9 +151,6 @@ MoleculeModule::MoleculeModule()
     addProperty(_ssao2HorizonBias);
     addProperty(_ssao2NormalBias);
     addProperty(_exposure);
-    addProperty(_dofEnabled);
-    addProperty(_dofFocusDistance);
-    addProperty(_dofFocusRange);
 }
 
 void MoleculeModule::internalInitialize(const ghoul::Dictionary&) {
@@ -388,7 +364,6 @@ void MoleculeModule::render() {
 
     postprocessing::Settings settings;
     settings.background.enabled = false;
-    settings.background = { 0, 0, 0 };    
     settings.ambientOcclusion[0].enabled = _ssaoEnabled;
     settings.ambientOcclusion[0].intensity = _ssaoIntensity;
     settings.ambientOcclusion[0].radius = _ssaoRadius;
@@ -400,9 +375,7 @@ void MoleculeModule::render() {
     settings.ambientOcclusion[1].horizonBias = _ssao2HorizonBias;
     settings.ambientOcclusion[1].normalBias = _ssao2NormalBias;
     settings.bloom.enabled = false;
-    settings.depthOfField.enabled = _dofEnabled;
-    settings.depthOfField.focusDepth = _dofFocusDistance;
-    settings.depthOfField.focusScale = _dofFocusRange;
+    settings.depthOfField.enabled = false;
     settings.temporalReprojection.enabled = false;
     settings.tonemapping.enabled = true;
     settings.tonemapping.mode = postprocessing::Tonemapping::ACES;
@@ -424,7 +397,7 @@ void MoleculeModule::render() {
 
     glClearColor(0, 0, 0, 1);
     glClearDepth(1.0);
-    glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
     glDrawBuffers(lastDrawBufferCount, lastDrawBuffers);

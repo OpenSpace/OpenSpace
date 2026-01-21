@@ -27,24 +27,15 @@
 #include <modules/molecule/moleculemodule.h>
 #include <modules/molecule/src/cache.h>
 #include <modules/molecule/src/util.h>
-#include <modules/molecule/src/viamd/postprocessing.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/httprequest.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/openglstatecache.h>
-#include <core/md_array.h>
-#include <core/md_allocator.h>
 #include <md_filter.h>
 #include <md_util.h>
 
@@ -60,8 +51,8 @@ namespace {
     void computeMask(md_bitfield_t& mask, std::string_view filter,
                      const md_molecule_t& mol, bool& isDynamic)
     {
-        if (!filter.empty() && filter != "" && filter != "all") {
-            str_t str = { filter.data(), (int64_t)filter.length() };
+        if (!filter.empty() && filter != "all") {
+            str_t str = { filter.data(), static_cast<int64_t>(filter.length()) };
             char errBuf[1024];
 
             const bool success =
@@ -75,9 +66,9 @@ namespace {
         md_bitfield_set_range(&mask, 0, mol.atom.count);
     }
 
-    double timeToFrame(double time, int64_t num_frames, AnimationRepeatMode mode) {
+    double timeToFrame(double time, int64_t numFrames, AnimationRepeatMode mode) {
         double frame = 0;
-        const double lastFrame = num_frames - 1.0;
+        const double lastFrame = numFrames - 1.0;
         switch (mode) {
             case AnimationRepeatMode::PingPong:
                 frame = std::fmod(time, 2.0 * lastFrame);
@@ -86,13 +77,11 @@ namespace {
                 }
                 break;
             case AnimationRepeatMode::Wrap:
-                frame = std::fmod(time, num_frames);
+                frame = std::fmod(time, numFrames);
                 break;
             case AnimationRepeatMode::Clamp:
                 frame = std::clamp(time, 0.0, lastFrame - 1.0);
                 break;
-            default:
-                throw ghoul::MissingCaseException();
         }
         return frame;
     }
@@ -184,6 +173,15 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
+        // [[codegen::verbatim(MoleculeFileInfo.description)]]
+        std::string moleculeFile;
+
+        // [[codegen::verbatim(TrajectoryFileInfo.description)]]
+        std::optional<std::string> trajectoryFile;
+
+        // [[codegen::verbatim(CoarseGrainedInfo.description)]]
+        std::optional<bool> coarseGrained;
+
         struct Representation {
             enum class [[codegen::map(mol::rep::Type)]] Type {
                 SpaceFill,
@@ -212,16 +210,8 @@ namespace {
             std::optional<glm::vec4> uniformColor;
         };
 
+        // Repro
         std::optional<std::vector<Representation>> representations;
-
-        // [[codegen::verbatim(MoleculeFileInfo.description)]]
-        std::string moleculeFile;
-
-        // [[codegen::verbatim(TrajectoryFileInfo.description)]]
-        std::string trajectoryFile;
-
-        // [[codegen::verbatim(CoarseGrainedInfo.description)]]
-        std::optional<bool> coarseGrained;
 
         // [[codegen::verbatim(ApplyPbcOnLoadInfo.description)]]
         std::optional<bool> applyPbcOnLoad;
@@ -266,79 +256,99 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     , _animationSpeed(AnimationSpeedInfo, 1.0, -100.0, 100.0)
     , _animationRepeatMode(AnimationRepeatModeInfo)
 {
-    const Parameters p = codegen::bake<Parameters>(dictionary);
+    Parameters p = codegen::bake<Parameters>(dictionary);
 
     _moleculeFile = p.moleculeFile;
-    _trajectoryFile = p.trajectoryFile;
-    _coarseGrained = p.coarseGrained.value_or(false);
-    _applyPbcOnLoad = p.applyPbcOnLoad.value_or(true);
-    _applyPbcPerFrame = p.applyPbcPerFrame.value_or(false);
+    _moleculeFile.setReadOnly(true);
+    addProperty(_moleculeFile);
 
-    if (p.representations.has_value()) {
-        for (const Parameters::Representation& rep : *p.representations) {
-            bool enabled = rep.enabled.value_or(true);
-            mol::rep::Type type =
-                rep.type.has_value() ?
-                codegen::map<mol::rep::Type>(rep.type.value()) :
-                mol::rep::Type::SpaceFill;
-            mol::rep::Color color =
-                rep.color.has_value() ?
-                codegen::map<mol::rep::Color>(rep.color.value()) :
-                mol::rep::Color::Cpk;
-            std::string filter = rep.filter.value_or("");
-            float scale = rep.scale.value_or(1.f);
-            glm::vec4 uniformColor = rep.uniformColor.value_or(glm::vec4(1.f));
+    _trajectoryFile = p.trajectoryFile.value_or(_trajectoryFile);
+    _trajectoryFile.setReadOnly(true);
+    addProperty(_trajectoryFile);
 
-            addRepresentation(enabled, type, color, filter, scale, uniformColor);
-        }
-    }
-    else {
+    _coarseGrained = p.coarseGrained.value_or(_coarseGrained);
+    _coarseGrained.setReadOnly(true);
+    addProperty(_coarseGrained);
+
+    _applyPbcOnLoad = p.applyPbcOnLoad.value_or(_applyPbcOnLoad);
+    _applyPbcOnLoad.setReadOnly(true);
+    addProperty(_applyPbcOnLoad);
+
+    if (!p.representations.has_value()) {
         // Add a default representation if none were supplied
-        addRepresentation(
-            true,
-            mol::rep::Type::SpaceFill,
-            mol::rep::Color::Cpk,
-            "",
-            1.f,
-            glm::vec4(1.f)
-        );
+        Parameters::Representation rep = {
+            .enabled = true,
+            .type = Parameters::Representation::Type::SpaceFill,
+            .color = Parameters::Representation::Color::Cpk,
+            .filter = "",
+            .scale = 1.f,
+            .uniformColor = glm::vec4(1.f)
+        };
+        p.representations = { rep };
     }
 
-    _animationBaseScale = p.animationBaseScale.value_or(1.0);
-    _animationSpeed = p.animationSpeed.value_or(1.0);
+    for (Parameters::Representation& rep : *p.representations) {
+        rep.type = rep.type.value_or(Parameters::Representation::Type::SpaceFill);
+        rep.color = rep.color.value_or(Parameters::Representation::Color::Cpk);
+
+        auto r = std::make_unique<Representation>(
+            _repProps.propertySubOwners().size(),
+            _molecule,
+            rep.enabled.value_or(true),
+            codegen::map<mol::rep::Type>(*rep.type),
+            codegen::map<mol::rep::Color>(rep.color.value()),
+            rep.filter.value_or(""),
+            rep.scale.value_or(1.f),
+            rep.uniformColor.value_or(glm::vec4(1.f))
+        );
+        _repProps.addPropertySubOwner(r.get());
+        _repData.push_back(std::move(r));
+    }
+
+    _animationBaseScale = p.animationBaseScale.value_or(_animationBaseScale);
+    _animationBaseScale.setReadOnly(true);
+    addProperty(_animationBaseScale);
+
+    addPropertySubOwner(_repProps);
+
+    _applyPbcPerFrame = p.applyPbcPerFrame.value_or(_applyPbcPerFrame);
+    addProperty(_applyPbcPerFrame);
+
+    _animationSpeed = p.animationSpeed.value_or(_animationSpeed);
+    _animationSpeed.setReadOnly(!p.trajectoryFile.has_value());
+    addProperty(_animationSpeed);
+
     _animationRepeatMode.addOptions({
         { static_cast<int>(AnimationRepeatMode::PingPong), "PingPong" },
         { static_cast<int>(AnimationRepeatMode::Wrap), "Wrap" },
         { static_cast<int>(AnimationRepeatMode::Clamp), "Clamp" },
     });
-
     _animationRepeatMode = static_cast<int>(
         codegen::map<AnimationRepeatMode>(
             p.animationRepeatMode.value_or(Parameters::AnimationRepeatMode::PingPong)
         )
     );
-
-    addPropertySubOwner(_repProps);
-    addProperty(_applyPbcPerFrame);
-    _animationSpeed.setReadOnly(true);
-    addProperty(_animationSpeed);
-    _animationRepeatMode.setReadOnly(true);
+    _animationRepeatMode.setReadOnly(!p.trajectoryFile.has_value());
     addProperty(_animationRepeatMode);
 }
 
-RenderableMolecule::~RenderableMolecule() {
-    freeMolecule();
-}
+RenderableMolecule::~RenderableMolecule() {}
 
 void RenderableMolecule::initializeGL() {
-    ZoneScoped
     initMolecule(_moleculeFile, _trajectoryFile);
 }
 
 void RenderableMolecule::deinitializeGL() {
-    for (RepData& rep : _repData) {
-        md_gl_representation_free(&rep.gl_rep);
+    for (const std::unique_ptr<Representation>& rep : _repData) {
+        md_gl_representation_free(&rep->glRep);
     }
+
+    md_gl_molecule_free(&_glMolecule);
+    md_molecule_free(&_molecule, default_allocator);
+
+    _molecule = {};
+    _trajectory = nullptr;
+    _glMolecule = {};
 }
 
 bool RenderableMolecule::isReady() const {
@@ -361,15 +371,15 @@ void RenderableMolecule::update(const UpdateData& data) {
 }
 
 void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
-    GLuint fbo = global::moduleEngine->module<MoleculeModule>()->fbo();
-        
+    ZoneScoped
+
     // compute distance from camera to molecule
     glm::dvec3 forward = data.modelTransform.translation - data.camera.positionVec3();
     glm::dvec3 dir = data.camera.viewDirectionWorldSpace();
-    // "signed" distance from camera to object.
+    // "signed" distance from camera to object
     double distance = glm::length(forward) * sign(glm::dot(dir, forward));
 
-    // distance < 0 means behind the camera, 1E4 is arbitrary.
+    // distance < 0 means behind the camera, 10000 is arbitrary
     if (distance < 0.0 || distance > 10000.0) {
         return;
     }
@@ -379,7 +389,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
 
     // because the molecule is small, a scaling of the view matrix causes the molecule
     // to be moved out of view in clip space. Resetting the scaling for the molecule
-    // is fine for now. This will have an impact on stereoscopic depth though.
+    // is fine for now. This will have an impact on stereoscopic depth though
     Camera camCopy = data.camera;
     camCopy.setScaling(0.1f);
 
@@ -388,7 +398,6 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::scale(glm::dmat4(1.0), data.modelTransform.scale) *
         glm::dmat4(data.modelTransform.rotation);
-
     glm::mat4 projMatrix = glm::dmat4(camCopy.sgctInternal.projectionMatrix());
         
     // Center the molecule with respect to its cell
@@ -399,41 +408,41 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
     drawOps.reserve((_repData.size()));
 
     if (_molecule.atom.count) {
-        for (const RepData& rep : _repData) {
-            if (rep.enabled) {
-                drawOps.emplace_back(&rep.gl_rep, &modelMat[0][0]);
+        for (const std::unique_ptr<Representation>& rep : _repData) {
+            if (rep->enabled) {
+                drawOps.emplace_back(&rep->glRep, &modelMat[0][0]);
             }
         }
     }
 
-    md_gl_draw_args_t args = {};
-    args.shaders = &global::moduleEngine->module<MoleculeModule>()->shaders();
-    args.view_transform = {
-        glm::value_ptr(viewMatrix),
-        glm::value_ptr(projMatrix),
-        nullptr,
-        nullptr
-    };
-    args.options = 0;
-
-    args.draw_operations = {
-        static_cast<uint32_t>(drawOps.size()),
-        drawOps.data(),
+    const md_gl_draw_args_t args = {
+        .shaders = &global::moduleEngine->module<MoleculeModule>()->shaders(),
+        .draw_operations = { static_cast<uint32_t>(drawOps.size()), drawOps.data() },
+        .view_transform = {
+            glm::value_ptr(viewMatrix),
+            glm::value_ptr(projMatrix),
+            nullptr,
+            nullptr
+        },
+        .options = 0
     };
 
     GLint lastFbo;
+    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &lastFbo);
+
     GLint lastDrawBufferCount = 0;
     GLenum lastDrawBuffers[8];
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &lastFbo);
     for (int i = 0; i < ARRAY_SIZE(lastDrawBuffers); i++) {
         GLint drawBuf;
         glGetIntegerv(GL_DRAW_BUFFER0 + i, &drawBuf);
         if (!drawBuf) {
             break;
         }
-        lastDrawBuffers[lastDrawBufferCount++] = static_cast<GLenum>(drawBuf);
+        lastDrawBuffers[lastDrawBufferCount] = static_cast<GLenum>(drawBuf);
+        lastDrawBufferCount++;
     }
             
+    GLuint fbo = global::moduleEngine->module<MoleculeModule>()->fbo();
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(2, bufs);
@@ -453,214 +462,63 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
 
 void RenderableMolecule::initMolecule(std::string_view molFile, std::string_view trajFile)
 {
+    ZoneScoped
+
     LDEBUG(std::format("Loading molecule file '{}'", molFile));
 
-    // free previously loaded molecule
-    freeMolecule();
-
     const md_molecule_t* molecule = mol::loadMolecule(molFile, _coarseGrained);
-    if (molecule) {
-        // We deep copy the contents, so we can freely modify the fields (coordinates etc)
-        md_molecule_copy(&_molecule, molecule, default_allocator);
-
-        md_gl_molecule_init(&_gl_molecule, &_molecule);
-        updateRepresentations();
-
-        vec3_t aabb_min, aabb_max;
-        md_util_compute_aabb_xyzr(
-            &aabb_min,
-            &aabb_max,
-            _molecule.atom.x,
-            _molecule.atom.y,
-            _molecule.atom.z,
-            _molecule.atom.radius,
-            _molecule.atom.count
-        );
-        vec3_t c = (aabb_min + aabb_max) * 0.5f;
-        _center = { c.x, c.y, c.z };
-        _radius = vec3_distance(aabb_min, aabb_max) * 0.5f;
-        setBoundingSphere(_radius * 2.f);
-    }
-    else {
+    if (!molecule) {
         throw ghoul::RuntimeError("Failed to initialize molecule: Failed to load file");
     }
+
+    // We deep copy the contents, so we can freely modify the fields (coordinates etc)
+    md_molecule_copy(&_molecule, molecule, default_allocator);
+    md_gl_molecule_init(&_glMolecule, &_molecule);
+
+    // Update representations
+    for (const std::unique_ptr<Representation>& rep : _repData) {
+        md_gl_representation_free(&rep->glRep);
+
+        rep->glRep = { 0 };
+        md_gl_representation_init(&rep->glRep, &_glMolecule);
+
+        if (rep->enabled) {
+            computeMask(rep->mask, rep->filter, _molecule, rep->isDynamic);
+
+            mol::rep::Type type = static_cast<mol::rep::Type>(rep->type.value());
+            mol::rep::Color color = static_cast<mol::rep::Color>(rep->color.value());
+            mol::util::updateRepType(rep->glRep, type, rep->scale);
+            mol::util::updateRepColor(
+                rep->glRep,
+                _molecule,
+                color,
+                rep->mask,
+                rep->uniformColor
+            );
+        }
+    }
+
+    vec3_t aabbMin;
+    vec3_t aabbMax;
+    md_util_compute_aabb_xyzr(
+        &aabbMin,
+        &aabbMax,
+        _molecule.atom.x,
+        _molecule.atom.y,
+        _molecule.atom.z,
+        _molecule.atom.radius,
+        _molecule.atom.count
+    );
+    _radius = vec3_distance(aabbMin, aabbMax) * 0.5f;
+    setBoundingSphere(_radius * 2.f);
 
     if (!trajFile.empty()) {
         LDEBUG(std::format("Loading trajectory file '{}'", trajFile));
         _trajectory = mol::loadTrajectory(trajFile, molecule, _applyPbcOnLoad);
-
-        if (!_trajectory) {
-            throw ghoul::RuntimeError(
-                "Failed to initialize trajectory: Failed to load file"
-            );
-        }
-            
-        _animationSpeed.setReadOnly(false);
-        _animationRepeatMode.setReadOnly(false);
-    }
-}
-
-void RenderableMolecule::freeMolecule() {
-    _repData.clear();
-
-    md_gl_molecule_free(&_gl_molecule);
-    md_molecule_free(&_molecule, default_allocator);
-
-    _molecule = {};
-    _trajectory = nullptr;
-    _gl_molecule = {};
-}
-
-void RenderableMolecule::addRepresentation(bool enabled, mol::rep::Type type,
-                                           mol::rep::Color color, std::string filter,
-                                           float scale, glm::vec4 uniformColor)
-{
-    using namespace properties;
-
-    size_t i = _repProps.propertySubOwners().size();
-    PropertyOwner* prop = new PropertyOwner({
-        .identifier = std::format("rep{}", i),
-        .guiName = std::format("Representation {}", i),
-        .description = std::format("Visual representation of molecule", i),
-    });
-
-    BoolProperty* pEnabled = new BoolProperty(EnabledInfo, enabled);
-    prop->addProperty(pEnabled);
-
-    OptionProperty* pType = new OptionProperty(TypeInfo);
-    pType->addOptions({
-        { static_cast<int>(mol::rep::Type::SpaceFill), "SpaceFill" },
-        { static_cast<int>(mol::rep::Type::Licorice), "Licorice" },
-        { static_cast<int>(mol::rep::Type::Ribbons), "Ribbons" },
-        { static_cast<int>(mol::rep::Type::Cartoon), "Cartoon" }
-    });
-    pType->setValue(static_cast<int>(type));
-    prop->addProperty(pType);
-
-    OptionProperty* pColor = new OptionProperty(ColorInfo);
-    pColor->addOptions({
-        { static_cast<int>(mol::rep::Color::Cpk), "CPK" },
-        { static_cast<int>(mol::rep::Color::AtomIndex), "Atom Index" },
-        { static_cast<int>(mol::rep::Color::ResId), "Residue ID" },
-        { static_cast<int>(mol::rep::Color::ResIndex), "Residue Index" },
-        { static_cast<int>(mol::rep::Color::ChainId), "Chain ID" },
-        { static_cast<int>(mol::rep::Color::ChainIndex), "Chain Index" },
-        { static_cast<int>(mol::rep::Color::SecondaryStructure), "Secondary Structure" },
-        { static_cast<int>(mol::rep::Color::Uniform), "Uniform" }
-    });
-    pColor->setValue(static_cast<int>(color));
-    prop->addProperty(pColor);
-
-    Vec4Property* pUniformColor = new Vec4Property(
-        UniformColorInfo,
-        uniformColor,
-        glm::vec4(0.f),
-        glm::vec4(1.f)
-    );
-    pUniformColor->setViewOption(Property::ViewOptions::Color);
-    prop->addProperty(pUniformColor);
-
-    StringProperty* pFilter = new StringProperty(FilterInfo, filter);
-    prop->addProperty(pFilter);
-
-    FloatProperty* pScale = new FloatProperty(ScaleInfo, scale, 0.f, 10.f);
-    prop->addProperty(pScale);
-
-    _repProps.addPropertySubOwner(prop);
-
-    _repData.emplace_back();
-
-    auto enableRep = [this, i, pEnabled]() mutable {
-        if (i >= _repData.size()) {
-            return;
-        }
-        _repData[i].enabled = *pEnabled;
-    };
-
-    auto updateRep = [this, i, pType, pScale]() mutable {
-        if (i >= _repData.size()) {
-            return;
-        }
-        mol::util::updateRepType(
-            _repData[i].gl_rep,
-            static_cast<mol::rep::Type>(pType->value()),
-            *pScale
-        );
-    };
-
-    auto updateCol = [this, i, pColor, pUniformColor]() mutable {
-        if (i >= _repData.size()) {
-            return;
-        }
-
-        const mol::rep::Color color = static_cast<mol::rep::Color>(pColor->value());
-        mol::util::updateRepColor(
-            _repData[i].gl_rep,
-            _molecule,
-            color,
-            _repData[i].mask,
-            *pUniformColor
-        );
-    };
-
-    auto updateFilt = [this, i, pFilter, updateCol]() mutable {
-        if (i >= _repData.size()) {
-            return;
-        }
-        computeMask(_repData[i].mask, *pFilter, _molecule, _repData[i].dynamic);
-        updateCol();
-    };
-
-    pEnabled->onChange(enableRep);
-    pType->onChange(updateRep);
-    pScale->onChange(updateRep);
-    pColor->onChange(updateCol);
-    pFilter->onChange(updateFilt);
-    pUniformColor->onChange(updateCol);
-}
-
-void RenderableMolecule::updateRepresentations() {
-    for (RepData& rep : _repData) {
-        md_gl_representation_free(&rep.gl_rep);
-    }
-
-    _repData.resize(_repProps.propertySubOwners().size());
-    for (size_t i = 0; i < _repData.size(); ++i) {
-        auto& rep = _repData[i];
-        rep.gl_rep = { 0 };
-        md_gl_representation_init(&rep.gl_rep, &_gl_molecule);
-
-        using namespace properties;
-        auto pRep = _repProps.propertySubOwners()[i];
-        auto pEnabled = dynamic_cast<BoolProperty*>(pRep->property("Enabled"));
-        auto pType = dynamic_cast<OptionProperty*>(pRep->property("Type"));
-        auto pColor = dynamic_cast<OptionProperty*>(pRep->property("Color"));
-        auto pFilter = dynamic_cast<StringProperty*>(pRep->property("Filter"));
-        auto pScale = dynamic_cast<FloatProperty*>(pRep->property("Scale"));
-        auto pUniformColor = dynamic_cast<Vec4Property*>(pRep->property("UniformColor"));
-
-        if (pEnabled && *pEnabled && pType && pColor && pFilter && pScale && pUniformColor) {
-            computeMask(rep.mask, *pFilter, _molecule, rep.dynamic);
-
-            mol::rep::Type type = static_cast<mol::rep::Type>(pType->value());
-            mol::rep::Color color = static_cast<mol::rep::Color>(pColor->value());
-            mol::util::updateRepType(rep.gl_rep, type, *pScale);
-            mol::util::updateRepColor(
-                rep.gl_rep,
-                _molecule,
-                color,
-                rep.mask,
-                *pUniformColor
-            );
-        }
     }
 }
 
 void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
-    if (!_trajectory) {
-        return;
-    }
-
     double dt = data.time.j2000Seconds() - data.previousFrameTime.j2000Seconds();
     double currT = data.time.j2000Seconds();
 
@@ -669,7 +527,9 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
     double nextTime = (currT + dt - _localEpoch) * scl;
 
     const int64_t numFrames = md_trajectory_num_frames(_trajectory);
-    AnimationRepeatMode mode = static_cast<AnimationRepeatMode>(_animationRepeatMode.value());
+    AnimationRepeatMode mode = static_cast<AnimationRepeatMode>(
+        _animationRepeatMode.value()
+    );
     double frame = timeToFrame(currTime, numFrames, mode);
 
     if (frame != _frame) {
@@ -693,7 +553,7 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
             xyz[i] = { _molecule.atom.x[i], _molecule.atom.y[i], _molecule.atom.z[i] };
         }
         md_gl_molecule_set_atom_position_xyz(
-            &_gl_molecule,
+            &_glMolecule,
             0,
             static_cast<uint32_t>(_molecule.atom.count),
             xyz
@@ -701,110 +561,173 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
 
         md_free(alloc, xyz, size);
 
-        std::vector<size_t> repHasSsIndices;
-        std::vector<size_t> repUpdateColIndices;
+        std::vector<Representation*> repHasSsIndices;
+        std::vector<Representation*> repUpdateColIndices;
 
-        for (size_t i = 0; i < _repProps.propertySubOwners().size(); i++) {
-            if (!_repData[i].enabled) {
+        for (const std::unique_ptr<Representation>& rep : _repData) {
+            if (!rep->enabled) {
                 continue;
             }
 
-            using namespace properties;
-            auto pColor = dynamic_cast<OptionProperty*>(
-                _repProps.propertySubOwners()[i]->property("Color")
-            );
-            auto pFilter = dynamic_cast<StringProperty*>(
-                _repProps.propertySubOwners()[i]->property("Filter")
-            );
-            if (pColor) {
-                mol::rep::Color color = static_cast<mol::rep::Color>(pColor->value());
-                if (color == mol::rep::Color::SecondaryStructure) {
-                    repHasSsIndices.push_back(i);
-                }
+            mol::rep::Color color = static_cast<mol::rep::Color>(rep->color.value());
+            if (color == mol::rep::Color::SecondaryStructure) {
+                repHasSsIndices.push_back(rep.get());
             }
-            if (pFilter && _repData[i].dynamic) {
-                computeMask(_repData[i].mask, *pFilter, _molecule, _repData[i].dynamic);
-                repUpdateColIndices.push_back(i);
+            if (rep->isDynamic) {
+                computeMask(rep->mask, rep->filter, _molecule, rep->isDynamic);
+                repUpdateColIndices.push_back(rep.get());
             }
         }
 
         if (!repHasSsIndices.empty()) {
             md_gl_molecule_set_backbone_secondary_structure(
-                &_gl_molecule,
+                &_glMolecule,
                 0,
                 static_cast<uint32_t>(_molecule.backbone.count),
                 _molecule.backbone.secondary_structure,
                 0
             );
-
-            for (size_t i : repHasSsIndices) {
-                repUpdateColIndices.push_back(i);
-            }
+            repUpdateColIndices.insert(
+                repUpdateColIndices.end(),
+                repHasSsIndices.begin(),
+                repHasSsIndices.end()
+            );
         }
 
-        for (size_t i : repUpdateColIndices) {
-            using namespace properties;
-            auto pColor = dynamic_cast<OptionProperty*>(
-                _repProps.propertySubOwners()[i]->property("Color")
-            );
-            mol::rep::Color color = static_cast<mol::rep::Color>(pColor->value());
-
-            auto pUniformColor = dynamic_cast<Vec4Property*>(
-                _repProps.propertySubOwners()[i]->property("UniformColor")
-            );
+        for (Representation* rep : repUpdateColIndices) {
             mol::util::updateRepColor(
-                _repData[i].gl_rep,
+                rep->glRep,
                 _molecule,
-                color,
-                _repData[i].mask,
-                *pUniformColor
+                static_cast<mol::rep::Color>(rep->color.value()),
+                rep->mask,
+                rep->uniformColor
             );
         }
     }
 
     using FrameSet = std::array<int64_t, 4>;
 
-    auto frameSet = [numFrames, mode](double time) -> FrameSet {
+    auto frameSet = [](double time, int64_t numFrames, AnimationRepeatMode mode) {
         const int64_t frameIdx = static_cast<int64_t>(timeToFrame(time, numFrames, mode));
 
-        auto wrap = [numFrames](int64_t idx) -> int64_t {
+        auto wrap = [](int64_t idx, int64_t numFrames) -> int64_t {
             idx = idx < 0 ? numFrames - 1 : idx;
             idx = idx >= numFrames ? 0 : idx;
             return idx;
         };
 
-        return {
-            wrap(frameIdx - 1),
-            wrap(frameIdx + 0),
-            wrap(frameIdx + 1),
-            wrap(frameIdx + 2)
+        return FrameSet {
+            wrap(frameIdx - 1, numFrames),
+            wrap(frameIdx + 0, numFrames),
+            wrap(frameIdx + 1, numFrames),
+            wrap(frameIdx + 2, numFrames)
         };
     };
 
     // Prefetch next set of frames
-    FrameSet curr = frameSet(currTime);
-    FrameSet nxt1 = frameSet(nextTime);
+    FrameSet curr = frameSet(currTime, numFrames, mode);
+    FrameSet nxt1 = frameSet(nextTime, numFrames, mode);
 
-    std::set<int64_t> unique_frames;
-    unique_frames.insert(nxt1.begin(), nxt1.end());
+    std::set<int64_t> frames;
+    frames.insert(nxt1.begin(), nxt1.end());
     for (int64_t i : curr) {
-        unique_frames.erase(i);
+        frames.erase(i);
     }
 
-    std::vector<int64_t> frames;
-    frames.reserve(unique_frames.size());
-    for (int64_t i : unique_frames) {
-        frames.push_back(i);
-    }
-
-    mol::prefetchFrames(_trajectory, frames);
+    std::vector<int64_t> f =
+        std::vector<int64_t>(frames.begin(), frames.end());
+    mol::prefetchFrames(_trajectory, f);
 }
 
-RenderableMolecule::RepData::RepData()
-    : mask(md_bitfield_create(default_allocator))
-{}
+RenderableMolecule::Representation::Representation(size_t number,
+                                                   const md_molecule_t& molecule_,
+                                                   bool enabled_,
+                                                   mol::rep::Type type_,
+                                                   mol::rep::Color color_,
+                                                   std::string filter_,
+                                                   float scale_,
+                                                   glm::vec4 uniformColor_)
+    : properties::PropertyOwner({
+        .identifier = std::format("rep{}", number),
+        .guiName = std::format("Representation {}", number),
+        .description = std::format("Visual representation of molecule {}", number),
+    })
+    , mask(md_bitfield_create(default_allocator))
+    , molecule(molecule_)
+    , enabled(EnabledInfo, enabled_)
+    , type(TypeInfo)
+    , color(ColorInfo)
+    , filter(FilterInfo, filter_)
+    , scale(ScaleInfo, scale_, 0.f, 10.f)
+    , uniformColor(UniformColorInfo, uniformColor_, glm::vec4(0.f), glm::vec4(1.f))
+{
+    addProperty(enabled);
 
-RenderableMolecule::RepData::~RepData() {
+    type.addOptions({
+        { static_cast<int>(mol::rep::Type::SpaceFill), "SpaceFill" },
+        { static_cast<int>(mol::rep::Type::Licorice), "Licorice" },
+        { static_cast<int>(mol::rep::Type::Ribbons), "Ribbons" },
+        { static_cast<int>(mol::rep::Type::Cartoon), "Cartoon" }
+    });
+    type = static_cast<int>(type_);
+    type.onChange([&]() {
+        mol::util::updateRepType(glRep, static_cast<mol::rep::Type>(type.value()), scale);
+    });
+    addProperty(type);
+
+    color.addOptions({
+        { static_cast<int>(mol::rep::Color::Cpk), "CPK" },
+        { static_cast<int>(mol::rep::Color::AtomIndex), "Atom Index" },
+        { static_cast<int>(mol::rep::Color::ResId), "Residue ID" },
+        { static_cast<int>(mol::rep::Color::ResIndex), "Residue Index" },
+        { static_cast<int>(mol::rep::Color::ChainId), "Chain ID" },
+        { static_cast<int>(mol::rep::Color::ChainIndex), "Chain Index" },
+        { static_cast<int>(mol::rep::Color::SecondaryStructure), "Secondary Structure" },
+        { static_cast<int>(mol::rep::Color::Uniform), "Uniform" }
+    });
+    color = static_cast<int>(color_);
+    color.onChange([&]() {
+        mol::util::updateRepColor(
+            glRep,
+            molecule,
+            static_cast<mol::rep::Color>(color.value()),
+            mask,
+            uniformColor
+        );
+    });
+    addProperty(color);
+
+    filter.onChange([&]() {
+        computeMask(mask, filter, molecule, isDynamic);
+        mol::util::updateRepColor(
+            glRep,
+            molecule,
+            static_cast<mol::rep::Color>(color.value()),
+            mask,
+            uniformColor
+        );
+    });
+    addProperty(filter);
+
+    scale.onChange([&]() {
+        mol::util::updateRepType(glRep, static_cast<mol::rep::Type>(type.value()), scale);
+    });
+    addProperty(scale);
+
+    uniformColor.setViewOption(properties::Property::ViewOptions::Color);
+    uniformColor.onChange([&]() {
+        mol::util::updateRepColor(
+            glRep,
+            molecule,
+            static_cast<mol::rep::Color>(color.value()),
+            mask,
+            uniformColor
+        );
+    });
+    addProperty(uniformColor);
+}
+
+RenderableMolecule::Representation::~Representation() {
     md_bitfield_free(&mask);
 }
 

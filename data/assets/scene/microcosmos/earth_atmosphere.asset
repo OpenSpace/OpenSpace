@@ -42,11 +42,25 @@ local EarthMoleculesTroposphere = {
   },
   Renderable = {
     Type = "RenderableSimulationBox",
-    MoleculeFiles = { moleculeN2 .. "n2.arc", moleculeO2 .. "o2.arc", moleculeH2O .. "h2o.arc" },
-    TrajectoryFiles = { moleculeN2 .. "n2.arc", moleculeO2 .. "o2.arc", "" },
-    -- There are roughly 2700 molecules per 100*100*100 ångström at atmospheric pressure
-    -- see https://en.wikipedia.org/wiki/Density_of_air
-    MoleculeCounts = { 0.78 * 2700, 0.21 * 2700, 0.03 * 2700 },
+    Molecules = {
+      -- There are roughly 2700 molecules per 100*100*100 ångström at atmospheric pressure
+      -- see https://en.wikipedia.org/wiki/Density_of_air
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 0.78 * 2700
+      },
+      {
+        MoleculeFile = moleculeO2 .. "o2.arc",
+        TrajectoryFile = moleculeO2 .. "o2.arc",
+        Count = 0.21 * 2700
+      },
+      {
+        MoleculeFile = moleculeH2O .. "h2o.arc",
+        TrajectoryFile = moleculeH2O .. "h2o.arc",
+        Count = 0.03 * 2700
+      }
+    },
     LinearVelocity = 10.0,
     AngularVelocity = math.rad(60.0),
     SimulationBox = { 100.0, 100.0, 100.0 },
@@ -75,9 +89,18 @@ local EarthMoleculesThermosphere = {
   },
   Renderable = {
     Type = "RenderableSimulationBox",
-    MoleculeFiles = { moleculeN2 .. "n2.arc", moleculeO2 .. "o2.arc" },
-    TrajectoryFiles = { moleculeN2 .. "n2.arc", moleculeO2 .. "o2.arc" },
-    MoleculeCounts = { 5, 5 },
+    Molecules = {
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 5
+      },
+      {
+        MoleculeFile = moleculeO2 .. "o2.arc",
+        TrajectoryFile = moleculeO2 .. "o2.arc",
+        Count = 5
+      }
+    },
     LinearVelocity = 10.0,
     AngularVelocity = math.rad(60.0),
     SimulationBox = { 100.0, 100.0, 100.0 },

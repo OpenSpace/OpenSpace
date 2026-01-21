@@ -48,9 +48,18 @@ local VenusMolecules = {
   },
   Renderable = {
     Type = "RenderableSimulationBox",
-    MoleculeFiles = { moleculeCO2 .. "co2.arc", moleculeN2 .. "n2.arc" },
-    TrajectoryFiles = { moleculeCO2 .. "co2.arc", moleculeN2 .. "n2.arc" },
-    MoleculeCounts = { 887, 32 },
+    Molecules = {
+      {
+        MoleculeFile = moleculeCO2 .. "co2.arc",
+        TrajectoryFile = moleculeCO2 .. "co2.arc",
+        Count = 887
+      },
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 32
+      }
+    },
     LinearVelocity = 10.0,
     AngularVelocity = math.rad(60.0),
     SimulationBox = { 100.0, 100.0, 100.0 },
@@ -78,9 +87,18 @@ local VenusMolecules50km = {
   },
   Renderable = {
     Type = "RenderableSimulationBox",
-    MoleculeFiles = { moleculeCO2 .. "co2.arc", moleculeN2 .. "n2.arc" },
-    TrajectoryFiles = { moleculeCO2 .. "co2.arc", moleculeN2 .. "n2.arc" },
-    MoleculeCounts = { 22, 1 },
+    Molecules = {
+      {
+        MoleculeFile = moleculeCO2 .. "co2.arc",
+        TrajectoryFile = moleculeCO2 .. "co2.arc",
+        Count = 22
+      },
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 1
+      }
+    },
     LinearVelocity = 10.0,
     AngularVelocity = math.rad(60.0),
     SimulationBox = { 100.0, 100.0, 100.0 },
@@ -108,19 +126,28 @@ local VenusMolecules50kmCloud = {
   },
   Renderable = {
     Type = "RenderableSimulationBox",
-    MoleculeFiles = {
-      moleculeCO2 .. "co2.arc",
-      moleculeN2 .. "n2.arc",
-      moleculeH2SO4 .. "h2so4.arc",
-      moleculeH2O .. "h2o.arc"
+    Molecules = {
+      {
+        MoleculeFile = moleculeCO2 .. "co2.arc",
+        TrajectoryFile = moleculeCO2 .. "co2.arc",
+        Count = 22
+      },
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 1
+      },
+      {
+        MoleculeFile = moleculeH2SO4 .. "h2so4.arc",
+        TrajectoryFile = moleculeH2SO4 .. "h2so4.arc",
+        Count = 300
+      },
+      {
+        MoleculeFile = moleculeH2O .. "h2o.arc",
+        TrajectoryFile = moleculeH2O .. "h2o.arc",
+        Count = 200
+      }
     },
-    TrajectoryFiles = {
-      moleculeCO2 .. "co2.arc",
-      moleculeN2 .. "n2.arc",
-      moleculeH2SO4 .. "h2so4.arc",
-      moleculeH2O .. "h2o.arc"
-    },
-    MoleculeCounts = { 22, 1, 300, 200 },
     LinearVelocity = 10.0,
     AngularVelocity = math.rad(60.0),
     SimulationBox = { 100.0, 100.0, 100.0 },

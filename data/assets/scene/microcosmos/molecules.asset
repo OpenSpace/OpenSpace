@@ -90,8 +90,7 @@ local MoleculeO2 = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeO2 .. "o2.arc",
     TrajectoryFile = moleculeO2 .. "o2.arc",
-    AnimationSpeed = DefaultAnimSpeed,
-    RepType = "SpaceFill"
+    AnimationSpeed = DefaultAnimSpeed
   },
   GUI = {
     Name = "Dioxygen (O2)",
@@ -111,9 +110,7 @@ local MoleculeH2O = {
   Renderable = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeH2O .. "h2o.arc",
-    TrajectoryFile = "",
-    AnimationSpeed = DefaultAnimSpeed,
-    RepType = "SpaceFill"
+    AnimationSpeed = DefaultAnimSpeed
   },
   GUI = {
     Name = "Water (H2O)",
@@ -133,9 +130,12 @@ local MoleculeCO2 = {
   Renderable = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeCO2 .. "co2.arc",
-    TrajectoryFile = "",
     AnimationSpeed = DefaultAnimSpeed,
-    RepType = "Licorice"
+    Representations = {
+      {
+        Type = "Licorice"
+      }
+    }
   },
   GUI = {
     Name = "Carbon Dioxyde (CO2)",
@@ -155,9 +155,12 @@ local MoleculeC60 = {
   Renderable = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeC60 .. "c60.arc",
-    TrajectoryFile = "",
     AnimationSpeed = DefaultAnimSpeed,
-    RepType = "Licorice"
+    Representations = {
+      {
+        Type = "Licorice"
+      }
+    }
   },
   GUI = {
     Name = "C60",
@@ -178,8 +181,7 @@ local MoleculeAlanin = {
     Type = "RenderableMolecule",
     MoleculeFile = molecule1ala500 .. "1ALA-500.pdb",
     TrajectoryFile = molecule1ala500 .. "1ALA-500.pdb",
-    AnimationSpeed = DefaultAnimSpeed,
-    RepType = "Licorice"
+    AnimationSpeed = DefaultAnimSpeed
   },
   GUI = {
     Name = "Alanin",
@@ -199,9 +201,12 @@ local MoleculeDNA = {
   Renderable = {
     Type = "RenderableMolecule",
     MoleculeFile = molecule1bna .. "1bna.pdb",
-    TrajectoryFile = "",
     AnimationSpeed = DefaultAnimSpeed,
-    RepType = "Licorice"
+    Representations = {
+      {
+        Type = "Licorice"
+      }
+    }
   },
   GUI = {
     Name = "DNA",
@@ -222,8 +227,7 @@ local MoleculeIce = {
     Type = "RenderableMolecule",
     MoleculeFile = iceMelting .. "ice.gro",
     TrajectoryFile = iceMelting .. "ice.xtc",
-    AnimationSpeed = 10.0,
-    RepType = "SpaceFill"
+    AnimationSpeed = 10.0
   },
   GUI = {
     Name = "Ice Melting",
@@ -245,8 +249,12 @@ local MoleculeAspirin = {
     MoleculeFile = aspirin .. "aspirin.gro",
     TrajectoryFile = aspirin .. "aspirin.xtc",
     AnimationSpeed = 0.1,
-    RepType = "Licorice",
-    ViamdFilter = "not water"
+    Representations = {
+      {
+        Type = "Licorice",
+        Filter = "not water"
+      }
+    }
   },
   GUI = {
     Name = "Aspirin",
@@ -267,8 +275,7 @@ local MoleculeAmyloidMarker = {
     Type = "RenderableMolecule",
     MoleculeFile = amyloid .. "60pft_in_tau.gro",
     TrajectoryFile = amyloid .. "60pft_in_tau-traj-96-106ns.xtc",
-    AnimationSpeed = 0.1,
-    RepType = "SpaceFill"
+    AnimationSpeed = 0.1
   },
   GUI = {
     Name = "Amyloid Marker",

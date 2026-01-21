@@ -81,18 +81,6 @@ namespace {
         return dst;
     }
 
-    constexpr openspace::properties::Property::PropertyInfo MoleculeFilesInfo = {
-        "MoleculeFiles",
-        "Molecule Files",
-        "Molecule file paths"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo TrajectoryFilesInfo = {
-        "TrajectoryFiles",
-        "Trajectory Files",
-        "Trajectory file paths"
-    };
-
     constexpr openspace::properties::Property::PropertyInfo RepTypeInfo = {
         "RepType",
         "Representation Type",
@@ -121,12 +109,6 @@ namespace {
         "SimulationSpeed",
         "Simulation Speed",
         "Adjust the speed of the simulation (seconds per second)"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo MoleculeCountsInfo = {
-        "MoleculeCounts",
-        "Molecule Counts",
-        "Count of molecules to simulate"
     };
 
     constexpr openspace::properties::Property::PropertyInfo LinearVelocityInfo = {
@@ -208,12 +190,22 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
+        struct MoleculeData {
+            std::string moleculeFile;
+            std::optional<std::string> trajectoryFile;
+            int count;
+        };
+        std::vector<MoleculeData> molecules;
+
         enum class [[codegen::map(mol::rep::Type)]] RepresentationType {
             SpaceFill,
             Licorice,
             Ribbons,
-            Cartoon,
+            Cartoon
         };
+
+        // [[codegen::verbatim(RepTypeInfo.description)]]
+        std::optional<RepresentationType> repType;
 
         enum class [[codegen::map(mol::rep::Color)]] Coloring {
             // Uniform,
@@ -223,18 +215,8 @@ namespace {
             ResIndex,
             ChainId,
             ChainIndex,
-            SecondaryStructure,
-            // Property
+            SecondaryStructure
         };
-
-        // [[codegen::verbatim(MoleculeFilesInfo.description)]]
-        std::vector<std::string> moleculeFiles;
-
-        // [[codegen::verbatim(TrajectoryFilesInfo.description)]]
-        std::vector<std::string> trajectoryFiles;
-
-        // [[codegen::verbatim(RepTypeInfo.description)]]
-        std::optional<RepresentationType> repType;
 
         // [[codegen::verbatim(ColoringInfo.description)]]
         std::optional<Coloring> coloring;
@@ -247,9 +229,6 @@ namespace {
 
         // [[codegen::verbatim(SimulationSpeedInfo.description)]]
         std::optional<float> simulationSpeed;
-
-        // [[codegen::verbatim(MoleculeCountsInfo.description)]]
-        std::vector<int> moleculeCounts;
 
         // [[codegen::verbatim(LinearVelocityInfo.description)]]
         float linearVelocity;
@@ -302,20 +281,17 @@ documentation::Documentation RenderableSimulationBox::Documentation() {
 
 RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _moleculeFiles(MoleculeFilesInfo)
-    , _trajectoryFiles(TrajectoryFilesInfo)
     , _repType(RepTypeInfo)
     , _coloring(ColoringInfo)
     , _repScale(RepScaleInfo, 1.f, 0.1f, 10.f)
     , _animationSpeed(AnimationSpeedInfo, 1.f, 0.f, 100.f)
     , _simulationSpeed(SimulationSpeedInfo, 1.f, 0.f, 1000.f)
-    , _moleculeCounts(MoleculeCountsInfo)
     , _linearVelocity(LinearVelocityInfo)
     , _angularVelocity(AngularVelocityInfo)
     , _simulationBox(SimulationBoxInfo)
     , _collisionRadius(CollisionRadiusInfo)
     , _viamdFilter(ViamdFilterInfo)
-    , _ssaoEnabled(SSAOEnabledInfo)
+    , _ssaoEnabled(SSAOEnabledInfo, true)
     , _ssaoIntensity(SSAOIntensityInfo, 12.f, 0.f, 100.f)
     , _ssaoRadius(SSAORadiusInfo, 12.f, 0.1f, 100.f)
     , _ssaoBias(SSAOBiasInfo, 0.1f, 0.f, 1.f)
@@ -326,97 +302,18 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
         glm::vec4(0.f),
         glm::vec4(1.f)
     )
-    , _circleWidth(CircleWidthInfo, 0.f, 0.f, 10.f)
+    , _circleWidth(CircleWidthInfo, 1.f, 0.f, 10.f)
     , _circleFalloff(CircleFalloffInfo, 0.f, 0.f, 1.f)
 {
-    _repType.addOptions({
-        { static_cast<int>(mol::rep::Type::SpaceFill), "Space Fill" },
-        { static_cast<int>(mol::rep::Type::Ribbons), "Ribbons" },
-        { static_cast<int>(mol::rep::Type::Cartoon), "Cartoon" },
-        { static_cast<int>(mol::rep::Type::Licorice), "Licorice" },
-    });
-    
-    _coloring.addOptions({
-        { static_cast<int>(mol::rep::Color::Cpk), "CPK" },
-        { static_cast<int>(mol::rep::Color::AtomIndex), "Atom Index" },
-        { static_cast<int>(mol::rep::Color::ResId), "Residue ID" },
-        { static_cast<int>(mol::rep::Color::ResIndex), "Residue Index" },
-        { static_cast<int>(mol::rep::Color::ChainId), "Chain ID" },
-        { static_cast<int>(mol::rep::Color::ChainIndex), "Chain Index" },
-        { static_cast<int>(mol::rep::Color::SecondaryStructure), "Secondary Structure" },
-    });
-
-    const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    _moleculeFiles = p.moleculeFiles;
-    _trajectoryFiles = p.trajectoryFiles;
-    _repScale = p.repScale.value_or(1.f);
-    _animationSpeed = p.animationSpeed.value_or(1.f);
-    _simulationSpeed = p.simulationSpeed.value_or(1.f);
-    _moleculeCounts = p.moleculeCounts;
-    _linearVelocity = p.linearVelocity;
-    _angularVelocity = p.angularVelocity;
-    _simulationBox = p.simulationBox;
-    _collisionRadius = p.collisionRadius;
-    _viamdFilter = p.viamdFilter.value_or("");
-    _ssaoEnabled = p.ssaoEnabled.value_or(true);
-    _ssaoIntensity = p.ssaoIntensity.value_or(12.f);
-    _ssaoRadius = p.ssaoRadius.value_or(12.f);
-    _ssaoBias = p.ssaoBias.value_or(0.1f);
-    _exposure = p.exposure.value_or(0.2f);
-    _circleColor = p.circleColor.value_or(glm::vec4(1.f));
-    _circleColor.setViewOption(properties::Property::ViewOptions::Color);
-    _circleWidth = p.circleWidth.value_or(1.f);
-    _circleFalloff = p.circleFalloff.value_or(0.f);
-
-
-    if (p.repType.has_value()) {
-        _repType = static_cast<int>(codegen::map<mol::rep::Type>(*p.repType));
-    } else {
-        _repType = static_cast<int>(mol::rep::Type::SpaceFill);
-    }
-    
-    if (p.coloring.has_value()) {
-        _coloring = static_cast<int>(codegen::map<mol::rep::Color>(*p.coloring));
-    } else {
-        _coloring = static_cast<int>(mol::rep::Color::Cpk);
-    }
-    
-    for (int count : _moleculeCounts.value()) {
-        molecule_data_t mol {
-            {},      // states
-            {},      // concatMolecule
-            nullptr, // trajectory
-            {},      // drawRep
-            {},      // drawMol
-        };
-        
-        for (int i = 0; i < count; i++) {
-            MoleculeState demoMolecule {
-                i == 0 ?
-                    _simulationBox.value() / 2.0 :
-                    glm::linearRand(glm::dvec3(0.0), _simulationBox.value()), // position
-                    glm::linearRand(0.0, glm::two_pi<double>()),              // angle
-                    glm::sphericalRand(_linearVelocity.value()),              // direction
-                    glm::sphericalRand(_angularVelocity.value())              // rotation
-            };
-            mol.states.push_back(demoMolecule);
-        }
-        
-        _molecules.push_back(mol);
-    }
-    
     auto onUpdateRep = [this]() {
-        for (molecule_data_t& mol : _molecules) {
+        for (Molecules& mol : _molecules) {
             const mol::rep::Type t = static_cast<mol::rep::Type>(_repType.value());
-            mol::util::updateRepType(mol.drawRep, t, _repScale);
+            mol::util::updateRepType(mol.data.drawRep, t, _repScale);
         }
     };
-    _repType.onChange(onUpdateRep);
-    _repScale.onChange(onUpdateRep);
 
     auto onUpdateCol = [this]() {
-        for (molecule_data_t& mol : _molecules) {
+        for (Molecules& mol : _molecules) {
             const auto& filter = _viamdFilter.value();
 
             md_bitfield_t mask = md_bitfield_create(default_allocator);
@@ -427,7 +324,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
                 const bool success = md_filter(
                     &mask,
                     str,
-                    &mol.molecule,
+                    &mol.data.molecule,
                     nullptr,
                     nullptr,
                     errBuf,
@@ -436,45 +333,123 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
                 if (!success) {
                     LERROR(std::format("Invalid filter expression: {}", errBuf));
                     md_bitfield_clear(&mask);
-                    md_bitfield_set_range(&mask, 0, mol.molecule.atom.count);
+                    md_bitfield_set_range(&mask, 0, mol.data.molecule.atom.count);
                 }
             }
             else {
-                md_bitfield_set_range(&mask, 0, mol.molecule.atom.count);
+                md_bitfield_set_range(&mask, 0, mol.data.molecule.atom.count);
             }
 
             const mol::rep::Type t = static_cast<mol::rep::Type>(_repType.value());
-            mol::util::updateRepType(mol.drawRep, t, _repScale);
+            mol::util::updateRepType(mol.data.drawRep, t, _repScale);
             const mol::rep::Color c = static_cast<mol::rep::Color>(_coloring.value());
-            mol::util::updateRepColor(mol.drawRep, mol.molecule, c, mask);
+            mol::util::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
         }
     };
-    _coloring.onChange(onUpdateCol);
-    _viamdFilter.onChange(onUpdateCol);
-    
+
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    for (const Parameters::MoleculeData& mod : p.molecules) {
+        _molecules.emplace_back(mod.moleculeFile, mod.trajectoryFile, mod.count);
+    }
+
+    _repType.addOptions({
+        { static_cast<int>(mol::rep::Type::SpaceFill), "Space Fill" },
+        { static_cast<int>(mol::rep::Type::Ribbons), "Ribbons" },
+        { static_cast<int>(mol::rep::Type::Cartoon), "Cartoon" },
+        { static_cast<int>(mol::rep::Type::Licorice), "Licorice" }
+    });
+    _repType = static_cast<int>(codegen::map<mol::rep::Type>(
+        p.repType.value_or(Parameters::RepresentationType::SpaceFill)
+    ));
+    _repType.onChange(onUpdateRep);
     addProperty(_repType);
+
+    _coloring.addOptions({
+        { static_cast<int>(mol::rep::Color::Cpk), "CPK" },
+        { static_cast<int>(mol::rep::Color::AtomIndex), "Atom Index" },
+        { static_cast<int>(mol::rep::Color::ResId), "Residue ID" },
+        { static_cast<int>(mol::rep::Color::ResIndex), "Residue Index" },
+        { static_cast<int>(mol::rep::Color::ChainId), "Chain ID" },
+        { static_cast<int>(mol::rep::Color::ChainIndex), "Chain Index" },
+        { static_cast<int>(mol::rep::Color::SecondaryStructure), "Secondary Structure" }
+    });
+    _coloring = static_cast<int>(codegen::map<mol::rep::Color>(
+        p.coloring.value_or(Parameters::Coloring::Cpk)
+    ));
+    _coloring.onChange(onUpdateCol);
     addProperty(_coloring);
+
+    _repScale = p.repScale.value_or(_repScale);
+    _repScale.onChange(onUpdateRep);
     addProperty(_repScale);
+
+    _animationSpeed = p.animationSpeed.value_or(_animationSpeed);
     addProperty(_animationSpeed);
-    addProperty(_simulationBox);
+
+    _simulationSpeed = p.simulationSpeed.value_or(_simulationSpeed);
     addProperty(_simulationSpeed);
+
+    _linearVelocity = p.linearVelocity;
+    _angularVelocity = p.angularVelocity;
+
+    _simulationBox = p.simulationBox;
+    addProperty(_simulationBox);
+
+    _collisionRadius = p.collisionRadius;
+
+    _viamdFilter = p.viamdFilter.value_or(_viamdFilter);
+    _viamdFilter.onChange(onUpdateCol);
     addProperty(_viamdFilter);
+
+    _ssaoEnabled = p.ssaoEnabled.value_or(_ssaoEnabled);
     addProperty(_ssaoEnabled);
+
+    _ssaoIntensity = p.ssaoIntensity.value_or(_ssaoIntensity);
     addProperty(_ssaoIntensity);
+
+    _ssaoRadius = p.ssaoRadius.value_or(_ssaoRadius);
     addProperty(_ssaoRadius);
+
+    _ssaoBias = p.ssaoBias.value_or(_ssaoBias);
     addProperty(_ssaoBias);
+
+    _exposure = p.exposure.value_or(_exposure);
     addProperty(_exposure);
 
+    _circleColor = p.circleColor.value_or(_circleColor);
+    _circleColor.setViewOption(properties::Property::ViewOptions::Color);
     addProperty(_circleColor);
+
+    _circleWidth = p.circleWidth.value_or(_circleWidth);
     addProperty(_circleWidth);
+
+    _circleFalloff = p.circleFalloff.value_or(_circleFalloff);
     addProperty(_circleFalloff);
+
+    for (Molecules& molecule : _molecules) {
+        molecule_data_t mol;
+        for (int i = 0; i < molecule.count; i++) {
+            MoleculeState demoMolecule = {
+                .position = i == 0 ?
+                    _simulationBox.value() / 2.0 :
+                    glm::linearRand(glm::dvec3(0.0), _simulationBox.value()),
+                .angle = glm::linearRand(0.0, glm::two_pi<double>()),
+                .direction = glm::sphericalRand(_linearVelocity.value()),
+                .rotationAxis = glm::sphericalRand(_angularVelocity.value())
+            };
+            mol.states.push_back(std::move(demoMolecule));
+        }
+
+        molecule.data = std::move(mol);
+    }
 
     setRenderBin(RenderBin::Overlay);
 }
 
 RenderableSimulationBox::~RenderableSimulationBox() {
-    for (molecule_data_t& mol : _molecules) {
-        freeMolecule(mol);
+    for (Molecules& mol : _molecules) {
+        freeMolecule(mol.data);
     }
 }
 
@@ -499,9 +474,8 @@ void RenderableSimulationBox::initializeGL() {
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
     glEnableVertexAttribArray(0);
 
-    size_t i = 0;
-    for (molecule_data_t& mol : _molecules) {
-        initMolecule(mol, _moleculeFiles.value().at(i), _trajectoryFiles.value().at(i));
+    for (Molecules& mol : _molecules) {
+        initMolecule(mol.data, mol.moleculeFile, mol.trajectoryFile.value_or(""));
         const std::string& filter = _viamdFilter;
 
         md_bitfield_t mask = md_bitfield_create(default_allocator);
@@ -512,7 +486,7 @@ void RenderableSimulationBox::initializeGL() {
             const bool success = md_filter(
                 &mask,
                 str,
-                &mol.molecule,
+                &mol.data.molecule,
                 nullptr,
                 nullptr,
                 errBuf,
@@ -521,23 +495,21 @@ void RenderableSimulationBox::initializeGL() {
             if (!success) {
                 LERROR(std::format("Invalid filter expression: {}", errBuf));
                 md_bitfield_clear(&mask);
-                md_bitfield_set_range(&mask, 0, mol.molecule.atom.count);
+                md_bitfield_set_range(&mask, 0, mol.data.molecule.atom.count);
             }
         }
         else {
-            md_bitfield_set_range(&mask, 0, mol.molecule.atom.count);
+            md_bitfield_set_range(&mask, 0, mol.data.molecule.atom.count);
         }
 
         const mol::rep::Type t = static_cast<mol::rep::Type>(_repType.value());
-        mol::util::updateRepType(mol.drawRep, t, _repScale);
+        mol::util::updateRepType(mol.data.drawRep, t, _repScale);
         const mol::rep::Color c = static_cast<mol::rep::Color>(_coloring.value());
-        mol::util::updateRepColor(mol.drawRep, mol.molecule, c, mask);
-        i++;
+        mol::util::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
     }
 }
 
 void RenderableSimulationBox::deinitializeGL() {
-    // Billboard
     glDeleteBuffers(1, &_billboard.vao);
     glDeleteBuffers(1, &_billboard.vbo);
     _billboard.program = nullptr;
@@ -551,7 +523,7 @@ void RenderableSimulationBox::updateSimulation(molecule_data_t& mol, double dt) 
     // update positions / rotations
     for (MoleculeState& molecule : mol.states) {
         molecule.position += molecule.direction * dt;
-        molecule.position = mod(molecule.position, _simulationBox.value());
+        molecule.position = glm::mod(molecule.position, _simulationBox.value());
         molecule.angle += glm::length(molecule.rotationAxis) * dt;
     }
 
@@ -560,9 +532,8 @@ void RenderableSimulationBox::updateSimulation(molecule_data_t& mol, double dt) 
     // compute collisions
     // those collisions are really simplistic, they assume spherical boundaries, equal
     // mass, and are order-dependent.
-    for (auto it1 = mol.states.begin(); it1 != mol.states.end(); ++it1) {
-        for (auto it2 = std::next(it1); it2 != mol.states.end(); ++it2) {
-
+    for (auto it1 = mol.states.begin(); it1 != mol.states.end(); it1++) {
+        for (auto it2 = std::next(it1); it2 != mol.states.end(); it2++) {
             MoleculeState& m1 = *it1;
             MoleculeState& m2 = *it2;
 
@@ -603,36 +574,36 @@ void RenderableSimulationBox::update(const UpdateData& data) {
     double tCur = data.time.j2000Seconds();
     double dt = tCur - data.previousFrameTime.j2000Seconds();
     
-    for (molecule_data_t& mol : _molecules) {
+    for (Molecules& mol : _molecules) {
         // update animation
-        if (mol.trajectory) {
+        if (mol.data.trajectory) {
             // Emulate PingPong animation by manipulating the local time t_local per
             // trajectory
-            const int64_t numFrames = md_trajectory_num_frames(mol.trajectory);
+            const int64_t numFrames = md_trajectory_num_frames(mol.data.trajectory);
             double frame = std::fmod(tCur * _animationSpeed, 2.0 * numFrames);
             if (frame > numFrames) {
                 frame = 2.0 * numFrames - frame;
             }
 
             mol::util::interpolateFrame(
-                mol.molecule,
-                mol.trajectory,
+                mol.data.molecule,
+                mol.data.trajectory,
                 mol::util::InterpolationType::Cubic,
                 frame
             );
             md_gl_molecule_set_atom_position(
-                &mol.drawMol,
+                &mol.data.drawMol,
                 0,
-                static_cast<uint32_t>(mol.molecule.atom.count),
-                mol.molecule.atom.x,
-                mol.molecule.atom.y,
-                mol.molecule.atom.z,
+                static_cast<uint32_t>(mol.data.molecule.atom.count),
+                mol.data.molecule.atom.x,
+                mol.data.molecule.atom.y,
+                mol.data.molecule.atom.z,
                 0
             );
         }
     
         // update simulation
-        updateSimulation(mol, dt * _simulationSpeed);
+        updateSimulation(mol.data, dt * _simulationSpeed);
     }
 }
 
@@ -674,8 +645,8 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 
     // We want to preallocate this to avoid reallocations
     size_t count = 0;
-    for (const auto& mol : _molecules) {
-        count += mol.states.size();
+    for (const Molecules& mol : _molecules) {
+        count += mol.data.states.size();
     }
 
     std::vector<md_gl_draw_op_t> drawOps;
@@ -684,179 +655,174 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     std::vector<glm::mat4> transforms;
     transforms.reserve(count);
 
-    for (const molecule_data_t& mol : _molecules) {
-        for (size_t i = 0; i < mol.states.size(); i++) {
-            const MoleculeState& state = mol.states[i];
+    for (const Molecules& mol : _molecules) {
+        for (size_t i = 0; i < mol.data.states.size(); i++) {
+            const MoleculeState& state = mol.data.states[i];
             glm::dmat4 transform =
                 glm::translate(glm::dmat4(1.0), state.position) *
                 glm::rotate(glm::dmat4(1.0), state.angle, state.rotationAxis) *
                 glm::dmat4(1.0);
 
-            transforms.push_back(glm::mat4(transform));
-
-            md_gl_draw_op_t drawOp = {};
-            // This is safe because we store it in a vector and preallocate the memory
-            drawOp.model_matrix = glm::value_ptr(transforms.back());
-            drawOp.rep = &mol.drawRep;
-            drawOps.push_back(drawOp);
+            transforms.emplace_back(transform);
+            drawOps.emplace_back(&mol.data.drawRep, glm::value_ptr(transforms.back()));
         }
     }
 
     MoleculeModule* mod = global::moduleEngine->module<MoleculeModule>();
 
-    md_gl_draw_args_t args = {};
-    args.shaders = &mod->shaders();
-    args.view_transform = { glm::value_ptr(viewMatrix), glm::value_ptr(projMatrix) };
-    args.options = 0;
-    args.draw_operations = { static_cast<uint32_t>(drawOps.size()), drawOps.data() };
+    md_gl_draw_args_t args = {
+        .shaders = &mod->shaders(),
+        .draw_operations = { static_cast<uint32_t>(drawOps.size()), drawOps.data() },
+        .view_transform = { glm::value_ptr(viewMatrix), glm::value_ptr(projMatrix) },
+        .options = 0
+    };
 
     // draw molecule offscreen
-    {
-        GLint defaultFbo;
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, mod->fbo());
-        // shading rendering of mold
-        const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-        glDrawBuffers(2, bufs);
+    GLint defaultFbo;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, mod->fbo());
+    // shading rendering of mold
+    const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+    glDrawBuffers(2, bufs);
 
-        // resize the fbo if needed
-        if (global::windowDelegate->windowHasResized()) {
-            glm::ivec2 size = global::windowDelegate->currentWindowSize();
-            glBindTexture(GL_TEXTURE_2D, mod->colorTexture());
-            glTexImage2D(
-                GL_TEXTURE_2D,
-                0,
-                GL_RGBA8,
-                size.x,
-                size.y,
-                0,
-                GL_RGBA,
-                GL_UNSIGNED_BYTE,
-                nullptr
-            );
+    // resize the fbo if needed
+    if (global::windowDelegate->windowHasResized()) {
+        glm::ivec2 size = global::windowDelegate->currentWindowSize();
+        glBindTexture(GL_TEXTURE_2D, mod->colorTexture());
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RGBA8,
+            size.x,
+            size.y,
+            0,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            nullptr
+        );
 
-            glBindTexture(GL_TEXTURE_2D, mod->normalTexture());
-            glTexImage2D(
-                GL_TEXTURE_2D,
-                0,
-                GL_RG16,
-                size.x,
-                size.y,
-                0,
-                GL_RG,
-                GL_UNSIGNED_SHORT,
-                nullptr
-            );
+        glBindTexture(GL_TEXTURE_2D, mod->normalTexture());
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_RG16,
+            size.x,
+            size.y,
+            0,
+            GL_RG,
+            GL_UNSIGNED_SHORT,
+            nullptr
+        );
 
-            glBindTexture(GL_TEXTURE_2D, mod->depthTexture());
-            glTexImage2D(
-                GL_TEXTURE_2D,
-                0,
-                GL_DEPTH_COMPONENT32F,
-                size.x,
-                size.y,
-                0,
-                GL_DEPTH_COMPONENT,
-                GL_FLOAT,
-                nullptr
-            );
-        }
-
-        glClearColor(0.f, 0.f, 0.f, 0.f);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glEnable(GL_DEPTH_TEST);
-        glDisable(GL_BLEND);
-        
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_BACK);
-        md_gl_draw(&args);
-
-        // postprocessing
-        {
-            postprocessing::Settings settings;
-            settings.background.enabled = false;
-            settings.ambientOcclusion[0].enabled = _ssaoEnabled;
-            settings.ambientOcclusion[0].intensity = _ssaoIntensity;
-            settings.ambientOcclusion[0].radius = _ssaoRadius;
-            settings.ambientOcclusion[0].horizonBias = _ssaoBias;
-            settings.ambientOcclusion[1].enabled = false;
-            settings.bloom.enabled = false;
-            settings.depthOfField.enabled = false;
-            settings.temporalReprojection.enabled = false;
-            settings.tonemapping.enabled = true;
-            settings.tonemapping.mode = postprocessing::Tonemapping::ACES;
-            settings.tonemapping.exposure = _exposure;
-            settings.inputTextures.depth = mod->depthTexture();
-            settings.inputTextures.color = mod->colorTexture();
-            settings.inputTextures.normal = mod->normalTexture();
-
-            postprocessing::postprocess(
-                settings,
-                mat4_from_glm(data.camera.combinedViewMatrix()),
-                mat4_from_glm(projMatrix)
-            );
-
-            // restore state after postprocess
-            glEnable(GL_DEPTH_TEST);
-        }
-
-        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+        glBindTexture(GL_TEXTURE_2D, mod->depthTexture());
+        glTexImage2D(
+            GL_TEXTURE_2D,
+            0,
+            GL_DEPTH_COMPONENT32F,
+            size.x,
+            size.y,
+            0,
+            GL_DEPTH_COMPONENT,
+            GL_FLOAT,
+            nullptr
+        );
     }
+
+    glClearColor(0.f, 0.f, 0.f, 0.f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glEnable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+        
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+    md_gl_draw(&args);
+
+    // @TODO: Needed?
+    // postprocessing
+    {
+        postprocessing::Settings settings;
+        settings.background.enabled = false;
+        settings.ambientOcclusion[0].enabled = _ssaoEnabled;
+        settings.ambientOcclusion[0].intensity = _ssaoIntensity;
+        settings.ambientOcclusion[0].radius = _ssaoRadius;
+        settings.ambientOcclusion[0].horizonBias = _ssaoBias;
+        settings.ambientOcclusion[1].enabled = false;
+        settings.bloom.enabled = false;
+        settings.depthOfField.enabled = false;
+        settings.temporalReprojection.enabled = false;
+        settings.tonemapping.enabled = true;
+        settings.tonemapping.mode = postprocessing::Tonemapping::ACES;
+        settings.tonemapping.exposure = _exposure;
+        settings.inputTextures.depth = mod->depthTexture();
+        settings.inputTextures.color = mod->colorTexture();
+        settings.inputTextures.normal = mod->normalTexture();
+
+        postprocessing::postprocess(
+            settings,
+            mat4_from_glm(data.camera.combinedViewMatrix()),
+            mat4_from_glm(projMatrix)
+        );
+
+        // restore state after postprocess
+        glEnable(GL_DEPTH_TEST);
+    }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
+
 
     // draw billboard pre-rendered with molecule inside
-    {
-        glm::dmat4 billboardModel =
-            camCopy.combinedViewMatrix() *
-            glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-            glm::scale(glm::dmat4(1.0), data.modelTransform.scale) *
-            glm::scale(glm::dmat4(1.0), glm::dvec3(_simulationBox)) *
-            glm::scale(glm::dmat4(1.0), glm::dvec3(fakeScaling));
-        glm::mat4 faceCamera = inverse(camCopy.viewRotationMatrix());
-        glm::mat4 transform = projMatrix * glm::mat4(billboardModel) * faceCamera;
-        double width =
-            distance / glm::compMax(_simulationBox.value() * data.modelTransform.scale) *
-            0.01 * _circleWidth;
+    glm::dmat4 billboardModel =
+        camCopy.combinedViewMatrix() *
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::scale(glm::dmat4(1.0), data.modelTransform.scale) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(_simulationBox)) *
+        glm::scale(glm::dmat4(1.0), glm::dvec3(fakeScaling));
+    glm::mat4 faceCamera = inverse(camCopy.viewRotationMatrix());
+    glm::mat4 transform = projMatrix * glm::mat4(billboardModel) * faceCamera;
+    double width =
+        distance / glm::compMax(_simulationBox.value() * data.modelTransform.scale) *
+        0.01 * _circleWidth;
 
-        glm::dvec4 depth_ = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
-            billboardModel * glm::dvec4(0.0, 0.0, 0.0, 1.0);
-        double depth = normalizeDouble(depth_.w);
+    glm::dvec4 depth_ = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+        billboardModel * glm::dvec4(0.0, 0.0, 0.0, 1.0);
+    double depth = normalizeDouble(depth_.w);
 
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glUseProgram(*_billboard.program);
-        glBindVertexArray(_billboard.vao);
-        glDisable(GL_CULL_FACE);
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, mod->colorTexture());
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, mod->depthTexture());
-        glUniform1i(_billboard.uniforms.colorTex, 0);
-        glUniform1i(_billboard.uniforms.depthTex, 1);
-        glUniformMatrix4fv(
-            _billboard.uniforms.transform,
-            1,
-            false,
-            glm::value_ptr(transform)
-        );
-        glUniform1f(_billboard.uniforms.strokeWidth, static_cast<float>(width));
-        glUniform1f(
-            _billboard.uniforms.strokeFalloffExp,
-            _circleFalloff == 0.f ? std::numeric_limits<float>::max() : 1.f / _circleFalloff
-        );
-        glUniform1f(_billboard.uniforms.fragDepth, static_cast<float>(depth));
-        glm::vec4 stroke = _circleColor;
-        glUniform4fv(_billboard.uniforms.strokeColor, 1, glm::value_ptr(stroke));
-        glDrawArrays(GL_TRIANGLES, 0, 6);
-        glEnable(GL_CULL_FACE);
-        glBindVertexArray(0);
-        glUseProgram(0);
-    }
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glUseProgram(*_billboard.program);
+    glBindVertexArray(_billboard.vao);
+    glDisable(GL_CULL_FACE);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, mod->colorTexture());
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, mod->depthTexture());
+    glUniform1i(_billboard.uniforms.colorTex, 0);
+    glUniform1i(_billboard.uniforms.depthTex, 1);
+    glUniformMatrix4fv(
+        _billboard.uniforms.transform,
+        1,
+        false,
+        glm::value_ptr(transform)
+    );
+    glUniform1f(_billboard.uniforms.strokeWidth, static_cast<float>(width));
+    glUniform1f(
+        _billboard.uniforms.strokeFalloffExp,
+        _circleFalloff == 0.f ? std::numeric_limits<float>::max() : 1.f / _circleFalloff
+    );
+    glUniform1f(_billboard.uniforms.fragDepth, static_cast<float>(depth));
+    glm::vec4 stroke = _circleColor;
+    glUniform4fv(_billboard.uniforms.strokeColor, 1, glm::value_ptr(stroke));
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glEnable(GL_CULL_FACE);
+    glBindVertexArray(0);
+    glUseProgram(0);
 
     global::renderEngine->openglStateCache().resetBlendState();
 }
 
-void RenderableSimulationBox::initMolecule(molecule_data_t& mol, std::string_view molFile,
-                                           std::string_view trajFile)
+void RenderableSimulationBox::initMolecule(molecule_data_t& mol,
+                                           std::filesystem::path molFile,
+                                           std::filesystem::path trajFile)
 {
     LDEBUG(std::format("Loading molecule file '{}'", molFile));
 

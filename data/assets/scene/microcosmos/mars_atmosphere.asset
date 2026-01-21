@@ -27,9 +27,13 @@ local MarsMolecules = {
   },
   Renderable = {
     Type = "RenderableSimulationBox",
-    MoleculeFiles = { moleculeCO2 .. "co2.arc" },
-    TrajectoryFiles = { moleculeCO2 .. "co2.arc" },
-    MoleculeCounts = { 1 },
+    Molecules = {
+      {
+        MoleculeFile = moleculeCO2 .. "co2.arc",
+        TrajectoryFile = moleculeCO2 .. "co2.arc",
+        Count = 1
+      }
+    },
     LinearVelocity = 10.0,
     AngularVelocity = math.rad(60.0),
     SimulationBox = { 100.0, 100.0, 100.0 },

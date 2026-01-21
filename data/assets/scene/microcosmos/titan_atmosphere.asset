@@ -48,17 +48,23 @@ local TitanMolecules = {
   },
   Renderable = {
     Type = "RenderableSimulationBox",
-    MoleculeFiles = {
-      moleculeN2 .. "n2.arc",
-      moleculeCH4 .. "ch4.arc",
-      moleculeH2 .. "h2.arc"
+    Molecules = {
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 108
+      },
+      {
+        MoleculeFile = moleculeCH4 .. "ch4.arc",
+        TrajectoryFile = moleculeCH4 .. "ch4.arc",
+        Count = 6
+      },
+      {
+        MoleculeFile = moleculeH2 .. "h2.arc",
+        TrajectoryFile = moleculeH2 .. "h2.arc",
+        Count = 1
+      }
     },
-    TrajectoryFiles = {
-      moleculeN2 .. "n2.arc",
-      moleculeCH4 .. "ch4.arc",
-      moleculeH2 .. "h2.arc"
-    },
-    MoleculeCounts = { 108, 6, 1 },
     LinearVelocity = 10.0,
     AngularVelocity = math.rad(60.0),
     SimulationBox = { 100.0, 100.0, 100.0 },
@@ -86,17 +92,23 @@ local TitanMoleculesMethaneCloud = {
   },
   Renderable = {
     Type = "RenderableSimulationBox",
-    MoleculeFiles = {
-      moleculeN2 .. "n2.arc",
-      moleculeCH4 .. "ch4.arc",
-      moleculeH2 .. "h2.arc"
+    Molecules = {
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 40
+      },
+      {
+        MoleculeFile = moleculeCH4 .. "ch4.arc",
+        TrajectoryFile = moleculeCH4 .. "ch4.arc",
+        Count = 300
+      },
+      {
+        MoleculeFile = moleculeH2 .. "h2.arc",
+        TrajectoryFile = moleculeH2 .. "h2.arc",
+        Count = 1
+      }
     },
-    TrajectoryFiles = {
-      moleculeN2 .. "n2.arc",
-      moleculeCH4 .. "ch4.arc",
-      moleculeH2 .. "h2.arc"
-    },
-    MoleculeCounts = { 40, 300, 1 },
     LinearVelocity = 10.0,
     AngularVelocity = math.rad(60.0),
     SimulationBox = { 100.0, 100.0, 100.0 },
@@ -124,19 +136,28 @@ local TitanMoleculesEthaneCloud = {
   },
   Renderable = {
     Type = "RenderableSimulationBox",
-    MoleculeFiles = {
-      moleculeN2 .. "n2.arc",
-      moleculeCH4 .. "ch4.arc",
-      moleculeC2H6 .. "c2h6.arc",
-      moleculeH2 .. "h2.arc"
+    Molecules = {
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 4
+      },
+      {
+        MoleculeFile = moleculeCH4 .. "ch4.arc",
+        TrajectoryFile = moleculeCH4 .. "ch4.arc",
+        Count = 50
+      },
+      {
+        MoleculeFile = moleculeC2H6 .. "c2h6.arc",
+        TrajectoryFile = moleculeC2H6 .. "c2h6.arc",
+        Count = 250
+      },
+      {
+        MoleculeFile = moleculeH2 .. "h2.arc",
+        TrajectoryFile = moleculeH2 .. "h2.arc",
+        Count = 1
+      }
     },
-    TrajectoryFiles = {
-      moleculeN2 .. "n2.arc",
-      moleculeCH4 .. "ch4.arc",
-      moleculeC2H6 .. "c2h6.arc",
-      moleculeH2 .. "h2.arc"
-    },
-    MoleculeCounts = { 4, 50, 250, 1 },
     LinearVelocity = 10.0,
     AngularVelocity = math.rad(60.0),
     SimulationBox = { 100.0, 100.0, 100.0 },
