@@ -30,7 +30,8 @@
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-
+#include <execution>
+#include <numeric>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableVectorField";
@@ -164,7 +165,7 @@ void RenderableVectorField::initializeGL()
     RawVolumeReader<VelocityData> reader(dataFile, _dimensions);
     _volumeData = reader.read();
 
-    computeFieldLines();
+    computeFieldLinesParallel();
 
     _program = global::renderEngine->buildRenderProgram(
         "vectorfield",
@@ -316,7 +317,7 @@ void RenderableVectorField::render(const RenderData& data, RendererTasks& render
 void RenderableVectorField::update(const UpdateData& data)
 {
     if (_vectorFieldIsDirty) [[unlikely]] {
-        computeFieldLines();
+        computeFieldLinesParallel();
 
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glBufferData(
@@ -335,73 +336,87 @@ void RenderableVectorField::update(const UpdateData& data)
     }
 }
 
-void RenderableVectorField::computeFieldLines() {
+void RenderableVectorField::computeFieldLinesParallel() {
     const glm::uvec3 dims = _dimensions.value();
     int stride = _stride.value();
 
+    // Divide volume into blocks of stride * stride * stride voxels
+    const unsigned int numBlocksX = (dims.x + stride - 1) / stride;
+    const unsigned int numBlocksY = (dims.y + stride - 1) / stride;
+    const unsigned int numBlocksZ = (dims.z + stride - 1) / stride;
+    const size_t totalBlocks = static_cast<size_t>(numBlocksX) * numBlocksY * numBlocksZ;
+
+    const glm::uvec3 blockDims(numBlocksX, numBlocksY, numBlocksZ);
+
     _instances.clear();
-    _instances.reserve(2 * dims.x * dims.y * dims.z / (stride * stride * stride));
+    _instances.resize(totalBlocks);
 
-    for (unsigned int z = 0; z < dims.z; z += stride) {
-        for (unsigned int y = 0; y < dims.y; y += stride) {
-            for (unsigned int x = 0; x < dims.x; x += stride) {
-                glm::vec3 avgVelocity = glm::vec3(0.f);
-                int count = 0;
+    std::vector<size_t> blockIndices(totalBlocks);
+    std::iota(blockIndices.begin(), blockIndices.end(), 0);
 
-                for (int dz = 0; dz < stride; dz++) {
-                    for (int dy = 0; dy < stride; dy++) {
-                        for (int dx = 0; dx < stride; dx++) {
-                            unsigned int ix = x + dx;
-                            unsigned int iy = y + dy;
-                            unsigned int iz = z + dz;
+    std::for_each(std::execution::par, blockIndices.begin(), blockIndices.end(),
+        [&](size_t blockIdx) {
+            // Convert linear block index to 3D block coordinates
+            glm::uvec3 blockCoords = indexToCoords(blockIdx, blockDims);
 
-                            if (ix >= dims.x || iy >= dims.y || iz >= dims.z) {
-                                continue;
-                            }
+            // Convert block coordinates to starting voxel position
+            const unsigned int x = blockCoords.x * stride;
+            const unsigned int y = blockCoords.y * stride;
+            const unsigned int z = blockCoords.z * stride;
 
-                            const VelocityData& v = _volumeData->get(glm::uvec3(ix, iy, iz));
-                            avgVelocity += glm::vec3(v.vx, v.vy, v.vz);
-                            count++;
+            // Compute average velocity accross all voxels in this block
+            glm::vec3 avgVelocity = glm::vec3(0.f);
+            int count = 0;
 
+            for (int dz = 0; dz < stride; dz++) {
+                for (int dy = 0; dy < stride; dy++) {
+                    for (int dx = 0; dx < stride; dx++) {
+                        unsigned int ix = x + dx;
+                        unsigned int iy = y + dy;
+                        unsigned int iz = z + dz;
+
+                        // Skip indices outside data volume
+                        if (ix >= dims.x || iy >= dims.y || iz >= dims.z) {
+                            continue;
                         }
+
+                        const VelocityData& v = _volumeData->get(glm::uvec3(ix, iy, iz));
+                        avgVelocity += glm::vec3(v.vx, v.vy, v.vz);
+                        count++;
                     }
                 }
-
-                avgVelocity /= static_cast<float>(count);
-
-                //glm::dvec3 worldSize = _maxDomain.value() - _minDomain.value();
-                //glm::dvec3 voxelSize =
-                //    worldSize / static_cast<glm::dvec3>(_dimensions.value());
-
-                glm::vec3 blockCenterVoxel(
-                    x + 0.5f * stride,
-                    y + 0.5f * stride,
-                    z + 0.5f * stride
-                );
-                glm::vec3 normalized = blockCenterVoxel / static_cast<glm::vec3>(dims);
-
-                glm::dvec3 minD = _minDomain.value();
-                glm::dvec3 maxD = _maxDomain.value();
-
-                glm::dvec3 startPos = minD + glm::dvec3(normalized) * (maxD - minD);
-
-                //glm::dvec3 endPos = startPos + glm::dvec3(avgVelocity * _vectorFieldScale.value());
-                glm::vec3 direction = glm::normalize(avgVelocity);
-                float magnitude = glm::length(avgVelocity);
-
-                if (count > 0 && magnitude > 0.f) {
-                    _instances.push_back(ArrowInstance(startPos, direction, magnitude));
-                }
             }
+
+            if (count == 0) {
+                return;
+            }
+
+            avgVelocity /= static_cast<float>(count);
+
+            // Calculate block center in voxel space
+            glm::vec3 blockCenterVoxel(
+                x + 0.5f * stride,
+                y + 0.5f * stride,
+                z + 0.5f * stride
+            );
+
+            // Transform from voxel space [0, dims] to world space [minDomain, maxDomain]
+            glm::vec3 normalized = blockCenterVoxel / static_cast<glm::vec3>(dims);
+            glm::dvec3 minD = _minDomain.value();
+            glm::dvec3 maxD = _maxDomain.value();
+            glm::dvec3 startPos = minD + glm::dvec3(normalized) * (maxD - minD);
+
+            float magnitude = glm::length(avgVelocity);
+            glm::vec3 direction = (magnitude > 0.f) ? glm::normalize(avgVelocity) : glm::vec3(0.f);
+
+            _instances[blockIdx] = ArrowInstance(startPos, direction, magnitude);
         }
-    }
+    );
 
     if (_instances.empty()) {
         throw ghoul::RuntimeError("Couldn't compute line segments");
     }
-
     _vectorFieldIsDirty = false;
-
 }
 
 } // namespace openspace::volume

@@ -74,7 +74,7 @@ public:
 
 
 private:
-    void computeFieldLines();
+    void computeFieldLinesParallel();
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(
