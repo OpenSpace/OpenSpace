@@ -60,15 +60,6 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InvertMouseButtons = {
-        "InvertMouseButtons",
-        "Invert left and right mouse buttons",
-        "If this value is 'false', the left mouse button causes the camera to rotate "
-        "around the object and the right mouse button causes the zooming motion. If this "
-        "value is 'true', these two functionalities are reversed.",
-        openspace::properties::Property::Visibility::NoviceUser
-    };
-
     double velocityScaleFromFriction(double friction) {
         return 1.0 / (friction + 0.0000001);
     }
@@ -82,7 +73,6 @@ OrbitalInputHandler::OrbitalInputHandler(double friction)
     , _joystickSensitivity(JoystickSensitivityInfo, 10.f, 1.f, 50.f)
     , _websocketSensitivity(WebsocketSensitivityInfo, 5.f, 1.f, 50.f)
     , _touchSensitivity(TouchSensitivityInfo, 1.f, 1.f, 50.f)
-    , _invertMouseButtons(InvertMouseButtons, false)
     , _mouseStates(_mouseSensitivity * 0.0001, velocityScaleFromFriction(friction))
     , _joystickStates(_joystickSensitivity * 0.1, velocityScaleFromFriction(friction))
     , _websocketStates(_websocketSensitivity, velocityScaleFromFriction(friction))
@@ -107,11 +97,6 @@ OrbitalInputHandler::OrbitalInputHandler(double friction)
         _touchStates.setSensitivity(_touchSensitivity);
     });
     addProperty(_touchSensitivity);
-
-    _invertMouseButtons.onChange([this]() {
-        _mouseStates.setInvertMouseButton(_invertMouseButtons);
-    });
-    addProperty(_invertMouseButtons);
 }
 
 JoystickCameraStates& OrbitalInputHandler::joystickStates() {

@@ -168,17 +168,11 @@ void DirectManipulation::updateCameraFromInput() {
 
     if (_allowMouseInput && touchPoints.empty()) {
         // Translate mouse input to touch input
-        const MouseInputState& mouseState =
-            global::interactionHandler->mouseInputState();
+        const MouseInputState& mouseState = global::interactionHandler->mouseInputState();
+        MouseButton primaryButton = global::interactionHandler->primaryMouseButton();
 
-        // @TODO (emmbr, 2026-01-19): Allow inverting this? In that case we should move
-        // the invert setting to the interaction handler? (now it exists in orbital input)
-        const bool isPrimaryPressed =
-            mouseState.isMouseButtonPressed(MouseButton::Button1);
-
-        if (isPrimaryPressed) {
+        if (mouseState.isMouseButtonPressed(primaryButton)) {
             glm::dvec2 mousePos = mouseState.mousePosition();
-            // Normalize based on screensize
             const glm::ivec2 screenSize = global::windowDelegate->currentWindowSize();
             mousePos.x /= static_cast<double>(screenSize.x);
             mousePos.y /= static_cast<double>(screenSize.y);

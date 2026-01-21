@@ -39,10 +39,7 @@ public:
     void updateVelocitiesFromInput(const MouseInputState& mouseState,
         const KeyboardInputState& keyboardState, double deltaTime);
 
-    void setInvertMouseButton(bool value);
-
 private:
-    bool _isMouseButtonInverted = false;
     double _currentSensitivityRamp = 1.0;
 
     // Mouse positions before a certain type of interaction is started

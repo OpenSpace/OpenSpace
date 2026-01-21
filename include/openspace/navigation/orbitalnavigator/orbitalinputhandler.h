@@ -32,7 +32,6 @@
 #include <openspace/navigation/orbitalnavigator/scriptcamerastates.h>
 #include <openspace/navigation/orbitalnavigator//touchcamerastates.h>
 #include <openspace/navigation/orbitalnavigator/websocketcamerastates.h>
-#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
 namespace openspace::interaction {
@@ -76,8 +75,6 @@ private:
     properties::FloatProperty _joystickSensitivity;
     properties::FloatProperty _websocketSensitivity;
     properties::FloatProperty _touchSensitivity;
-
-    properties::BoolProperty _invertMouseButtons;
 
     MouseCameraStates _mouseStates;
     JoystickCameraStates _joystickStates;

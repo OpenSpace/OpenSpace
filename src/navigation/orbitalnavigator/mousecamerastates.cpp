@@ -24,6 +24,8 @@
 
 #include <openspace/navigation/orbitalnavigator/mousecamerastates.h>
 
+#include <openspace/engine/globals.h>
+#include <openspace/interaction/interactionhandler.h>
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/util/keys.h>
@@ -46,10 +48,8 @@ void MouseCameraStates::updateVelocitiesFromInput(const MouseInputState& mouseSt
                                              const KeyboardInputState& keyboardState,
                                              double deltaTime)
 {
-    const MouseButton primary =
-        _isMouseButtonInverted ? MouseButton::Button2 : MouseButton::Button1;
-    const MouseButton secondary =
-        _isMouseButtonInverted ? MouseButton::Button1 : MouseButton::Button2;
+    const MouseButton primary = global::interactionHandler->primaryMouseButton();
+    const MouseButton secondary = global::interactionHandler->secondaryMouseButton();
 
     const glm::dvec2 mousePosition = mouseState.mousePosition();
 
@@ -135,10 +135,6 @@ void MouseCameraStates::updateVelocitiesFromInput(const MouseInputState& mouseSt
     }
 
     updateVelocities(updateStates, deltaTime);
-}
-
-void MouseCameraStates::setInvertMouseButton(bool value) {
-    _isMouseButtonInverted = value;
 }
 
 } // namespace openspace::interaction

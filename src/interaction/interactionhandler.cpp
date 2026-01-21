@@ -28,8 +28,18 @@
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/helper.h>
+#include <openspace/util/mouse.h>
 
 namespace {
+    constexpr openspace::properties::Property::PropertyInfo InvertMouseButtons = {
+        "InvertMouseButtons",
+        "Invert left and right mouse buttons",
+        "If this setting is enabled, the right mouse button is considered the primary "
+        "one, rather than the left. This means that behavior usually mapped to the left "
+        "mouse button will be mapped to the right mouse button, and vice versa.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo DisableKeybindingsInfo = {
         "DisableKeybindings",
         "Disable all keybindings",
@@ -92,6 +102,7 @@ namespace openspace::interaction {
 
 InteractionHandler::InteractionHandler()
     : properties::PropertyOwner({ "InteractionHandler", "Interaction Handler" })
+    , _invertMouseButtons(InvertMouseButtons, false)
     , _disableKeybindings(DisableKeybindingsInfo, false)
     , _disableMouseInputs(DisableMouseInputInfo, false)
     , _disableJoystickInputs(DisableJoystickInputInfo, false)
@@ -112,6 +123,8 @@ InteractionHandler::InteractionHandler()
         glm::vec2(0.f)
      })
 {
+    addProperty(_invertMouseButtons);
+
     addProperty(_disableKeybindings);
     addProperty(_disableMouseInputs);
 
@@ -225,6 +238,18 @@ bool InteractionHandler::disabledJoystick() const {
 
 bool InteractionHandler::disabledTouch() const {
     return _disableTouchInputs;
+}
+
+bool InteractionHandler::isPrimaryMouseButtonInverted() const {
+    return _invertMouseButtons;
+}
+
+MouseButton InteractionHandler::primaryMouseButton() const {
+    return _invertMouseButtons ? MouseButton::Button2 : MouseButton::Button1;
+}
+
+MouseButton InteractionHandler::secondaryMouseButton() const {
+    return _invertMouseButtons ? MouseButton::Button1 : MouseButton::Button2;
 }
 
 void InteractionHandler::mouseButtonCallback(MouseButton button, MouseAction action) {

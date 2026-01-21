@@ -71,6 +71,10 @@ public:
     bool disabledJoystick() const;
     bool disabledTouch() const;
 
+    bool isPrimaryMouseButtonInverted() const;
+    MouseButton primaryMouseButton() const;
+    MouseButton secondaryMouseButton() const;
+
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
     void mouseButtonCallback(MouseButton button, MouseAction action);
@@ -100,6 +104,8 @@ private:
 
     // Keeps track of when interaction has happened
     InteractionMonitor _interactionMonitor;
+
+    properties::BoolProperty _invertMouseButtons;
 
     properties::BoolProperty _disableKeybindings;
     properties::BoolProperty _disableMouseInputs;
