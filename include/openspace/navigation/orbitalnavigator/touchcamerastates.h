@@ -44,7 +44,6 @@ public:
         PINCH,
         PAN,
         ROLL,
-        ZOOM_OUT,
         NONE
     };
 
@@ -58,7 +57,7 @@ private:
     /**
      * Compute new velocity according to the interpreted action.
      */
-    UpdateStates computeVelocities(const std::vector<TouchInputHolder>& list,
+    UpdateStates computeVelocities(const std::vector<TouchInputHolder>& touchPoints,
         const std::vector<TouchInput>& lastProcessed);
 
     /**
@@ -72,8 +71,6 @@ private:
 
     std::array<TouchInputHolder, 2> _pinchInputs;
     glm::vec2 _centroid = glm::vec2(0.f);
-
-    bool _zoomOutTap = false;
 };
 
 } // namespace openspace::interaction
