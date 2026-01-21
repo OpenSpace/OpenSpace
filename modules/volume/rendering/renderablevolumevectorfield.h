@@ -78,31 +78,38 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(
-        modelViewProjection, arrowScale, filterOutOfRange, dataRangeFilter
+        modelViewProjection, arrowScale, filterOutOfRange, dataRangeFilter, colorByMag,
+        magDomain
     ) _uniformCache;
 
-    properties::StringProperty _sourceFile;
-    properties::DVec3Property _minDomain;
-    properties::DVec3Property _maxDomain;
-    properties::UVec3Property _dimensions;
     properties::Vec2Property _dataRange;
     properties::BoolProperty _filterOutOfRange;
-
     properties::IntProperty _stride;
     properties::FloatProperty _vectorFieldScale;
     properties::FloatProperty _lineWidth;
+    properties::BoolProperty _colorByMagnitude;
+
 
     std::shared_ptr<RawVolume<VelocityData>> _volumeData;
     std::vector<ArrowInstance> _instances;
 
-    bool _vectorFieldIsDirty = true;
+    std::string _sourceFile;
+    glm::dvec3 _minDomain;
+    glm::dvec3 _maxDomain;
+    glm::uvec3 _dimensions;
+
+    glm::vec2 _magnitudeDomain = glm::vec2(
+        std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest()
+    );
 
     GLuint _vao = 0;
-    GLuint _vbo = 0;
+    GLuint _vectorFieldVbo = 0;
     GLuint _arrowVbo = 0;
 
+    bool _vectorFieldIsDirty = true;
+
     // Arrow pointed along +X direction
-    const std::vector<glm::vec3> arrowVertices = {
+    const std::vector<glm::vec3> _arrowVertices = {
         // shaft
         {0.0f, 0.0f, 0.0f},
         {1.0f, 0.0f, 0.0f},

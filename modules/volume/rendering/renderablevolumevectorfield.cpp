@@ -44,7 +44,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo VectorFieldScaleInfo = {
         "VectorFieldScale",
-        "Vector Field Scale",
+        "Vector field scale",
         "Scales the vector field lines"
     };
 
@@ -56,13 +56,13 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MinDomainInfo = {
         "MinDomain",
-        "Min Domain",
+        "Min domain",
         "The min domain values that the volume should be mapped to"
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxDomainInfo = {
         "MaxDomain",
-        "Max Domain",
+        "Max domain",
         "The max domain values that the volume should be mapped to"
     };
 
@@ -88,9 +88,16 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DataRangeInfo = {
         "DataRange",
-        "Data Range",
+        "Data range",
         "Specifies the data range to render the vector field in, magnitudes outside this "
         "range will be filtered away."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColorByMagnitudeInfo = {
+        "ColorByMagnitude",
+        "Color by magnitude",
+        "If enabled, color the vector field based on the min and max magnitudes defined"
+        "in the volume."
     };
 
     struct [[codegen::Dictionary(RenderableVectorField)]] Parameters {
@@ -106,10 +113,14 @@ namespace {
         glm::dvec3 dimensions;
         // [[codegen::verbatim(VectorFieldScaleInfo.description)]]
         std::optional<double> vectorFieldScale;
+        // [[codegen::verbatim(LineWidthInfo.description)]]
+        std::optional<double> lineWidth;
         // [[codegen::verbatim(DataRangeInfo.description)]]
         std::optional<glm::dvec2> dataRange;
         // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
         std::optional<bool> filterOutOfRange;
+        // [[codgen::verbatim(ColorByMagnitude.description)]]
+        std::optional<bool> colorByMagnitude;
 
     };
 
@@ -125,15 +136,12 @@ documentation::Documentation RenderableVectorField::Documentation() {
 
 RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _sourceFile(VolumeDataInfo)
-    , _minDomain(MinDomainInfo)
-    , _maxDomain(MaxDomainInfo)
-    , _dimensions(DimensionsInfo)
     , _dataRange(DataRangeInfo,glm::vec2(0.f, 1.f), glm::vec2(0.f), glm::vec2(1000.f), glm::vec2(1.f))
     , _filterOutOfRange(FilterOutOfRangeInfo, false)
     , _stride(StrideInfo, 1, 1, 16)
     , _vectorFieldScale(VectorFieldScaleInfo, 1.f, 1.f, 100.f)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 10.f)
+    , _colorByMagnitude(ColorByMagnitudeInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -141,16 +149,20 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     _minDomain = p.minDomain;
     _maxDomain = p.maxDomain;
     _dimensions = p.dimensions;
-    _stride = p.stride;
+
     _vectorFieldScale = static_cast<float>(p.vectorFieldScale.value_or(1.f));
+    _lineWidth = static_cast<float>(p.lineWidth.value_or(1.f));
     _dataRange = p.dataRange.value_or(glm::vec2(0, 1));
     _filterOutOfRange = p.filterOutOfRange.value_or(false);
+    _colorByMagnitude = p.colorByMagnitude.value_or(false);
 
+    _stride = p.stride;
     _stride.onChange([this]() { _vectorFieldIsDirty = true; });
 
     addProperty(_stride);
     addProperty(_vectorFieldScale);
     addProperty(_lineWidth);
+    addProperty(_colorByMagnitude);
     addProperty(_filterOutOfRange);
     addProperty(_dataRange);
 }
@@ -165,7 +177,18 @@ void RenderableVectorField::initializeGL()
     RawVolumeReader<VelocityData> reader(dataFile, _dimensions);
     _volumeData = reader.read();
 
+    _volumeData->forEachVoxel(
+        [this](const glm::uvec3&, const VelocityData& data) {
+            float magnitude = glm::length(glm::vec3(data.vx, data.vy, data.vz));
+            _magnitudeDomain = glm::vec2(
+                std::min(_magnitudeDomain.x, magnitude),
+                std::max(_magnitudeDomain.y, magnitude)
+            );
+        }
+    );
+
     computeFieldLinesParallel();
+    _vectorFieldIsDirty = false;
 
     _program = global::renderEngine->buildRenderProgram(
         "vectorfield",
@@ -174,7 +197,7 @@ void RenderableVectorField::initializeGL()
     );
 
     glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
+    glGenBuffers(1, &_vectorFieldVbo);
     glGenBuffers(1, &_arrowVbo);
 
     glBindVertexArray(_vao);
@@ -183,8 +206,8 @@ void RenderableVectorField::initializeGL()
     glBindBuffer(GL_ARRAY_BUFFER, _arrowVbo);
     glBufferData(
         GL_ARRAY_BUFFER,
-        arrowVertices.size() * sizeof(glm::vec3),
-        arrowVertices.data(),
+        _arrowVertices.size() * sizeof(glm::vec3),
+        _arrowVertices.data(),
         GL_STATIC_DRAW
     );
 
@@ -202,7 +225,7 @@ void RenderableVectorField::initializeGL()
         "Vertex layout is not tightly packed!"
     );
 
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, _vectorFieldVbo);
     glBufferData(
         GL_ARRAY_BUFFER,
         _instances.size() * sizeof(ArrowInstance),
@@ -249,15 +272,14 @@ void RenderableVectorField::initializeGL()
     glBindVertexArray(0);
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
-
 }
 
 void RenderableVectorField::deinitializeGL()
 {
     glDeleteVertexArrays(1, &_vao);
     _vao = 0;
-    glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
+    glDeleteBuffers(1, &_vectorFieldVbo);
+    _vectorFieldVbo = 0;
     glDeleteBuffers(1, &_arrowVbo);
     _arrowVbo = 0;
 
@@ -272,7 +294,7 @@ bool RenderableVectorField::isReady() const
     return _program != nullptr;
 }
 
-void RenderableVectorField::render(const RenderData& data, RendererTasks& renderTask)
+void RenderableVectorField::render(const RenderData& data, RendererTasks&)
 {
     if (_instances.empty()) {
         return;
@@ -300,26 +322,34 @@ void RenderableVectorField::render(const RenderData& data, RendererTasks& render
         _dataRange
     );
 
+    _program->setUniform(
+        _uniformCache.colorByMag,
+        _colorByMagnitude
+    );
+
+    _program->setUniform(
+        _uniformCache.magDomain,
+        _magnitudeDomain
+    );
+
     glBindVertexArray(_vao);
     glLineWidth(_lineWidth.value());
     glDrawArraysInstanced(
         GL_LINES,
         0,
-        static_cast<GLsizei>(arrowVertices.size()),
+        static_cast<GLsizei>(_arrowVertices.size()),
         static_cast<GLsizei>(_instances.size())
     );
-    //glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(_instances.size()));
     glBindVertexArray(0);
     _program->deactivate();
-
 }
 
-void RenderableVectorField::update(const UpdateData& data)
+void RenderableVectorField::update(const UpdateData&)
 {
     if (_vectorFieldIsDirty) [[unlikely]] {
         computeFieldLinesParallel();
 
-        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
+        glBindBuffer(GL_ARRAY_BUFFER, _vectorFieldVbo);
         glBufferData(
             GL_ARRAY_BUFFER,
             _instances.size() * sizeof(ArrowInstance),
@@ -337,7 +367,7 @@ void RenderableVectorField::update(const UpdateData& data)
 }
 
 void RenderableVectorField::computeFieldLinesParallel() {
-    const glm::uvec3 dims = _dimensions.value();
+    const glm::uvec3 dims = _dimensions;
     int stride = _stride.value();
 
     // Divide volume into blocks of stride * stride * stride voxels
@@ -402,8 +432,8 @@ void RenderableVectorField::computeFieldLinesParallel() {
 
             // Transform from voxel space [0, dims] to world space [minDomain, maxDomain]
             glm::vec3 normalized = blockCenterVoxel / static_cast<glm::vec3>(dims);
-            glm::dvec3 minD = _minDomain.value();
-            glm::dvec3 maxD = _maxDomain.value();
+            glm::dvec3 minD = _minDomain;
+            glm::dvec3 maxD = _maxDomain;
             glm::dvec3 startPos = minD + glm::dvec3(normalized) * (maxD - minD);
 
             float magnitude = glm::length(avgVelocity);
@@ -414,9 +444,8 @@ void RenderableVectorField::computeFieldLinesParallel() {
     );
 
     if (_instances.empty()) {
-        throw ghoul::RuntimeError("Couldn't compute line segments");
+        throw ghoul::RuntimeError("Couldn't compute vector field segments");
     }
-    _vectorFieldIsDirty = false;
 }
 
 } // namespace openspace::volume
