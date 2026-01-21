@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,14 +28,11 @@
 #include <ghoul/misc/integration.h>
 #include <ghoul/misc/interpolator.h>
 #include <ghoul/misc/assert.h>
-#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <cstdlib>
 #include <iterator>
 #include <limits>
-#include <string>
 #include <utility>
-#include <vector>
 
 namespace {
     constexpr double LengthEpsilon = 100.0 * std::numeric_limits<double>::epsilon();

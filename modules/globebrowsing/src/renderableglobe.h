@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___RENDERABLEGLOBE___H__
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/shadowmapping.h>
 
 #include <modules/globebrowsing/src/geodeticpatch.h>
 #include <modules/globebrowsing/src/geojson/geojsonmanager.h>
@@ -92,7 +93,7 @@ enum class ShadowCompType {
  * A RenderableGlobe is a globe modeled as an ellipsoid using a chunked LOD algorithm for
  * rendering.
  */
-class RenderableGlobe : public Renderable {
+class RenderableGlobe : public Renderable, public shadowmapping::Shadowee {
 public:
     explicit RenderableGlobe(const ghoul::Dictionary& dictionary);
     ~RenderableGlobe() override = default;
@@ -125,6 +126,14 @@ public:
     static documentation::Documentation Documentation();
 
 private:
+    static constexpr int MinSplitDepth = 2;
+    static constexpr int MaxSplitDepth = 22;
+
+    struct DepthMapData {
+        GLuint depthMap;
+        glm::dmat4 viewProjection;
+    };
+
     /**
      * Test if a specific chunk can safely be culled without affecting the rendered image.
      *
@@ -169,7 +178,7 @@ private:
      * lead to jagging. We only render global chunks for lower chunk levels.
      */
     void renderChunkGlobally(const Chunk& chunk, const RenderData& data,
-        bool renderGeomOnly = false
+        std::vector<DepthMapData>& depthMapData, bool renderGeomOnly = false
     );
 
     /**
@@ -184,7 +193,7 @@ private:
      * higher chunk levels.
      */
     void renderChunkLocally(const Chunk& chunk, const RenderData& data,
-        bool renderGeomOnly = false
+        std::vector<DepthMapData>& depthMapData, bool renderGeomOnly = false
     );
 
     void debugRenderChunk(const Chunk& chunk, const glm::dmat4& mvp,
@@ -216,9 +225,6 @@ private:
     void updateChunk(Chunk& chunk, const RenderData& data, const glm::dmat4& mvp) const;
     void freeChunkNode(Chunk* n);
 
-    static constexpr int MinSplitDepth = 2;
-    static constexpr int MaxSplitDepth = 22;
-
     properties::BoolProperty _performShading;
     properties::BoolProperty _useAccurateNormals;
     properties::FloatProperty _ambientIntensity;
@@ -237,8 +243,9 @@ private:
         properties::BoolProperty levelByProjectedAreaElseDistance;
         properties::TriggerProperty resetTileProviders;
         properties::BoolProperty performFrustumCulling;
-        properties::IntProperty  modelSpaceRenderingCutoffLevel;
-        properties::IntProperty  dynamicLodIterationCount;
+        properties::BoolProperty performHorizonCulling;
+        properties::IntProperty modelSpaceRenderingCutoffLevel;
+        properties::IntProperty dynamicLodIterationCount;
     } _debugProperties;
 
     properties::PropertyOwner _debugPropertyOwner;
@@ -299,6 +306,11 @@ private:
     size_t _iterationsOfAvailableData = 0;
     size_t _iterationsOfUnavailableData = 0;
     Layer* _lastChangedLayer = nullptr;
+
+    bool _shadowersUpdated = false;
+    bool _shadowersOk = false;
+
+    std::map<const SceneGraphNode*, std::vector<std::string>> _shadowSpec;
 
     // Components
     std::unique_ptr<RingsComponent> _ringsComponent;

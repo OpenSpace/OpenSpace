@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -56,6 +56,8 @@ void MouseCameraStates::updateVelocitiesFromInput(const MouseInputState& mouseSt
     const bool primaryPressed = mouseState.isMouseButtonPressed(primary);
     const bool secondaryPressed = mouseState.isMouseButtonPressed(secondary);
     const bool button3Pressed = mouseState.isMouseButtonPressed(MouseButton::Button3);
+    const bool button4Pressed = mouseState.isMouseButtonPressed(MouseButton::Button4);
+    const bool button5Pressed = mouseState.isMouseButtonPressed(MouseButton::Button5);
 
     const bool keyCtrlPressed =
         keyboardState.isKeyPressed(Key::LeftControl) ||
@@ -95,9 +97,9 @@ void MouseCameraStates::updateVelocitiesFromInput(const MouseInputState& mouseSt
     UpdateStates updateStates;
 
     // Update the mouse states
-    if (primaryPressed && !keyShiftPressed && !keyAltPressed) {
+    if ((primaryPressed || button4Pressed) && !keyShiftPressed && !keyAltPressed) {
         const glm::dvec2 mousePosDelta = _prevMousePos.primary - mousePosition;
-        if (keyCtrlPressed) {
+        if (keyCtrlPressed || button4Pressed) {
             updateStates.localRotation = mousePosDelta * _sensitivity;
         }
         else {
@@ -111,16 +113,17 @@ void MouseCameraStates::updateVelocitiesFromInput(const MouseInputState& mouseSt
 
     if (secondaryPressed || (keyAltPressed && primaryPressed)) {
         const glm::dvec2 mousePosDelta = _prevMousePos.secondary - mousePosition;
-        updateStates.zoom = mousePosDelta.y * (_sensitivity + _sensitivity * totalSensitivity);
+        updateStates.zoom = mousePosDelta.y *
+            (_sensitivity + _sensitivity * totalSensitivity);
     }
     else {
         _prevMousePos.secondary = mousePosition;
     }
 
-    if (button3Pressed || (keyShiftPressed && primaryPressed)) {
+    if (button3Pressed || (keyShiftPressed && primaryPressed) || button5Pressed) {
         const glm::dvec2 mousePosDelta = _prevMousePos.button3 - mousePosition;
 
-        if (keyCtrlPressed) {
+        if (keyCtrlPressed || button5Pressed) {
             updateStates.localRoll = mousePosDelta.x * _sensitivity;
         }
         else {

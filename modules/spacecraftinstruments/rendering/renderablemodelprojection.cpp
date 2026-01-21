@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,6 @@
 
 #include <modules/spacecraftinstruments/rendering/renderablemodelprojection.h>
 
-#include <modules/spacecraftinstruments/util/image.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -308,7 +308,9 @@ std::vector<openspace::properties::Property*> findMatchesInAllProperties(
 
     std::mutex mutex;
     std::for_each(
+#ifndef __APPLE__
         std::execution::par_unseq,
+#endif // __APPLE__
         properties.cbegin(),
         properties.cend(),
         [&](Property* prop) {
@@ -356,13 +358,15 @@ std::vector<openspace::properties::PropertyOwner*> findMatchesInAllPropertyOwner
 
     std::mutex mutex;
     std::for_each(
+#ifndef __APPLE__
         std::execution::par_unseq,
+#endif // __APPLE__
         propertyOwners.cbegin(),
         propertyOwners.cend(),
         [&](PropertyOwner* propOwner) {
             if (inputIsOnlyTag) {
                 // If we only got a tag as input, the result is all owners that directly
-                // match the group tag (without looking recusively in parent owners)
+                // match the group tag (without looking recursively in parent owners)
                 if (!ownerMatchesGroupTag(propOwner, groupTag, false)) {
                     return;
                 }
@@ -1031,6 +1035,131 @@ namespace {
         res.push_back(node->identifier());
     }
     return res;
+}
+
+/**
+ * Registers the pair of light source, shadower, shadowee, and shadowGroup to act together
+ * in order to produce a depth image that is used for shadow calculations. The
+ * lightSource, the shadower, and the shadowee must be existing scene graph nodes that are
+ * used to calculate the positions of the light and to determine which object is rendered
+ * to cast a shadow and which object should receive the shadow.
+ * Shadowcasters registered using the same shadow group will have their shadows interact
+ * with each other, whereas objects with different shadowGroups will not cast shadows on
+ * objects other than the shadowee.
+ *
+ * \param lightSource The identifier of the scene graph node that should act as the source
+ *                    of the light for shadowing purposes
+ * \param shadower The identifier of the scene graph node that is the object that casts a
+ *                 shadow on the shadowee and other shadowers in the tsame shadow group
+ * \param shadowee The identifier of the scene graph node that is the object that receives
+ *                 the shadow of the shadower
+ * \param shadowGroup An arbitrary name that identifies a shadow group, meaning multiple
+ *                    shadowcaster registrations that should act in unison. The name must
+ *                    not start with a `_` character. If this parameter is omitted, a
+ *                    suitable unique name will be automatically generated
+ */
+[[codegen::luawrap]] void registerShadowcaster(std::string lightSource,
+                                               std::string shadower, std::string shadowee,
+                                               std::optional<std::string> shadowGroup)
+{
+    using namespace openspace;
+
+    if (shadowGroup.has_value() && !shadowGroup->empty() && shadowGroup->at(0) == '_') {
+        throw ghoul::lua::LuaError(std::format(
+            "The 'shadowGroup' parameter must not start with '_': {}", *shadowGroup
+        ));
+    }
+
+    // Synthesize a unique name for the shadow group if none is provided
+    if (!shadowGroup.has_value()) {
+        static int Count = 0;
+        shadowGroup = std::format("_{}|{}|{}|{}", lightSource, shadower, shadowee, Count);
+        Count++;
+    }
+    ghoul_assert(shadowGroup.has_value(), "No shadowgroup specified");
+
+    const Scene* scene = global::renderEngine->scene();
+
+    const SceneGraphNode* ls = scene->sceneGraphNode(lightSource);
+    if (!ls) {
+        throw ghoul::lua::LuaError(std::format(
+            "Could not find light source '{}'", lightSource
+        ));
+    }
+
+    SceneGraphNode* shdr = scene->sceneGraphNode(shadower);
+    if (!shdr) {
+        throw ghoul::lua::LuaError(std::format("Could not find shadower '{}'", shadower));
+    }
+
+    SceneGraphNode* shdee = scene->sceneGraphNode(shadowee);
+    if (!shdee) {
+        throw ghoul::lua::LuaError(std::format("Could not find shadowee '{}'", shadowee));
+    }
+
+    global::renderEngine->registerShadowCaster(*shadowGroup, ls, shdr, shdee);
+}
+
+/**
+ * Removes an existing pairing of a shadowcaster group, consisting of a light source, a
+ * shadower, a shadowee, and a shadow group. If the pairing exists, it will be removed,
+ * causing the shadow calculations to cease. If the pairing does not exist, an error
+ * message will be raised.
+ *
+ *
+ * \param lightSource The identifier of the scene graph node that should act as the source
+ *                    of the light for shadowing purposes
+ * \param shadower The identifier of the scene graph node that is the object that casts a
+ *                 shadow on the shadowee and other shadowers in the tsame shadow group
+ * \param shadowee The identifier of the scene graph node that is the object that receives
+ *                 the shadow of the shadower
+ * \param shadowGroup An arbitrary name that identifies a shadow group, meaning multiple
+ *                    shadowcaster registrations that should act in unison. The name must
+ *                    not start with a `_` character. If this parameter is omitted, a
+ *                    suitable unique name will be automatically generated. If the same
+ *                    light source, shadower, and shadowee are provided as for a previous
+ *                    register call, the generated name will be identical
+ */
+[[codegen::luawrap]] void removeShadowcaster(std::string lightSource,
+                                             std::string shadower, std::string shadowee,
+                                             std::optional<std::string> shadowGroup)
+{
+    using namespace openspace;
+
+    if (shadowGroup.has_value() && !shadowGroup->empty() && shadowGroup->at(0) == '_') {
+        throw ghoul::lua::LuaError(std::format(
+            "The 'shadowGroup' parameter must not start with '_': {}", *shadowGroup
+        ));
+    }
+
+    // Synthesize a unique name for the shadow group if none is provided
+    if (!shadowGroup.has_value()) {
+        static int Count = 0;
+        shadowGroup = std::format("_{}|{}|{}|{}", lightSource, shadower, shadowee, Count);
+        Count++;
+    }
+    ghoul_assert(shadowGroup.has_value(), "No shadowgroup specified");
+
+    const Scene* scene = global::renderEngine->scene();
+
+    const SceneGraphNode* ls = scene->sceneGraphNode(lightSource);
+    if (!ls) {
+        throw ghoul::lua::LuaError(std::format(
+            "Could not find light source '{}'", lightSource
+        ));
+    }
+
+    SceneGraphNode* shdr = scene->sceneGraphNode(shadower);
+    if (!shdr) {
+        throw ghoul::lua::LuaError(std::format("Could not find shadower '{}'", shadower));
+    }
+
+    SceneGraphNode* shdee = scene->sceneGraphNode(shadowee);
+    if (!shdee) {
+        throw ghoul::lua::LuaError(std::format("Could not find shadowee '{}'", shadowee));
+    }
+
+    global::renderEngine->removeShadowCaster(*shadowGroup, shdr, shdee);
 }
 
 // Returns a list of all scene graph nodes in the scene that have a renderable of the

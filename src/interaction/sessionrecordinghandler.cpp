@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,6 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/interaction/sessionrecording.h>
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/messagestructures.h>
@@ -42,7 +41,6 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
@@ -55,17 +53,9 @@
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
 #include <array>
-#include <chrono>
-#include <filesystem>
-#include <functional>
 #include <iterator>
 #include <memory>
-#include <optional>
-#include <string>
-#include <string_view>
-#include <utility>
 #include <variant>
-#include <vector>
 
 #ifdef WIN32
 #include <Windows.h>
@@ -446,8 +436,7 @@ void SessionRecordingHandler::setupPlayback(double startTime) {
     _playback.saveScreenshots.currentRecordedTime = std::chrono::steady_clock::now();
     _playback.saveScreenshots.currentApplicationTime =
         global::windowDelegate->applicationTime();
-    global::navigationHandler->keyframeNavigator().setTimeReferenceMode(
-        KeyframeTimeRef::Relative_recordedStart, startTime);
+    global::navigationHandler->keyframeNavigator().setReferenceTime(startTime);
 
 
     auto firstCamera = _timeline.entries.begin();
@@ -677,7 +666,10 @@ void SessionRecordingHandler::checkIfScriptUsesScenegraphNode(
         else {
             // There were no closing quotes so we remove as much as possible
             constexpr std::string_view UnwantedChars = " );";
-            s.remove_suffix(s.find_last_not_of(UnwantedChars));
+            size_t i = s.find_last_not_of(UnwantedChars);
+            if (i != std::string_view::npos) {
+                s.remove_suffix(i);
+            }
             return s;
         }
     };

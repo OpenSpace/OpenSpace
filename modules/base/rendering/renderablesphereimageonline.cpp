@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,6 @@
 #include <modules/base/rendering/renderablesphereimageonline.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globals.h>
 #include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>

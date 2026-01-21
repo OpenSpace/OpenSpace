@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -359,8 +359,8 @@ void renderIntProperty(Property* prop, const std::string& ownerName,
     ImGui::PushID((ownerName + '.' + name).c_str());
 
     IntProperty::ValueType value = *p;
-    const int min = std::max(p->minValue(), std::numeric_limits<int>::lowest() + 1);
-    const int max = std::min(p->maxValue(), std::numeric_limits<int>::max() - 1);
+    const int min = std::max(p->minValue(), std::numeric_limits<int>::lowest() / 2);
+    const int max = std::min(p->maxValue(), std::numeric_limits<int>::max() / 2);
 
     const bool changed = ImGui::SliderInt(name.c_str(), &value, min, max);
     if (showTooltip) {

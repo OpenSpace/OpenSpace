@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -414,7 +414,7 @@ void LuaConsole::charCallback(unsigned int codepoint,
     if (modifierControl && (codepoint == codepoint_C || codepoint == codepoint_V)) {
         return;
     }
-#endif
+#endif // WIN32
 
     // Disallow all non ASCII characters for now
     if (codepoint > 0x7f) {
@@ -422,6 +422,25 @@ void LuaConsole::charCallback(unsigned int codepoint,
     }
 
     addToCommand(std::string(1, static_cast<char>(codepoint)));
+}
+
+bool LuaConsole::mouseActivationCallback(glm::vec2, MouseButton button,
+                                         MouseAction action, KeyModifier)
+{
+    const bool isMiddleMouseButton = button == MouseButton::Button3;
+    const bool isPress = action == MouseAction::Press;
+
+    if (_isVisible && isMiddleMouseButton && isPress) {
+        // Using the Primary selection area as that is more akin to the behavior on Linux
+        // where the middle mouse button pastes the currently selected text that comes
+        // from the primary selection area.
+        // On Windows, specifying this selection area doesn't change anything as there is
+        // only a single clipboard
+        addToCommand(sanitizeInput(ghoul::clipboardText(ghoul::SelectionArea::Primary)));
+        return true;
+    }
+
+    return false;
 }
 
 void LuaConsole::update() {

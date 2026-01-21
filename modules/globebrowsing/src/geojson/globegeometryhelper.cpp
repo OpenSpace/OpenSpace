@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -257,7 +257,7 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     vertices.reserve(maxSteps * maxSteps);
 
     // Add points inside the triangle
-    std::vector<Coordinate> pointCoords;
+    std::vector<geos::geom::Coordinate> pointCoords;
     pointCoords.reserve(3 * maxSteps + 1);
 
     const Ellipsoid& ellipsoid = globe.ellipsoid();
@@ -326,7 +326,7 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     // time
     std::vector<std::unique_ptr<Point>> geosPoints;
     geosPoints.reserve(pointCoords.size());
-    for (const Coordinate& c : pointCoords) {
+    for (const geos::geom::Coordinate& c : pointCoords) {
         geosPoints.emplace_back(geometryFactory->createPoint(c));
     }
     std::unique_ptr<MultiPoint> points = geometryFactory->createMultiPoint(
@@ -338,13 +338,13 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
 
     // Returns a list of triangles, as geos polygons
     GeometryCollection* triangleGeoms = builder.getTriangles(*geometryFactory).release();
-    std::vector<Coordinate> triCoords;
+    std::vector<geos::geom::Coordinate> triCoords;
     triangleGeoms->getCoordinates()->toVector(triCoords);
 
     vertices.reserve(vertices.size() + triCoords.size() + 1);
 
     int count = 0;
-    for (const Coordinate& coord : triCoords) {
+    for (const geos::geom::Coordinate& coord : triCoords) {
         count++;
         if (count == 4) {
             // Skip every 4th coord, as polygons have one extra coord per triangle.

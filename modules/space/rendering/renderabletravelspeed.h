@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -53,13 +53,12 @@ public:
 
 private:
     void calculateVerticesPositions();
-    void calculateDirectionVector();
     void updateVertexData();
     void reinitiateTravel();
 
     UniformCache(lineColor, opacity) _uniformCache;
 
-    properties::StringProperty _targetName;
+    properties::StringProperty _targetIdentifier;
     SceneGraphNode* _targetNode = nullptr;
     properties::DoubleProperty _travelSpeed;
     properties::FloatProperty _indicatorLength;
@@ -74,12 +73,10 @@ private:
     };
     VertexPositions _vertexPositions;
 
-    glm::dvec3 _sourcePosition;
-    glm::dvec3 _targetPosition;
     double _travelTime = 0.0;
     glm::dvec3 _directionVector;
     double _initiationTime = -1.0;
-    double _arrivalTime;
+    double _arrivalTime = -1.0;
     double _timeSinceStart = -1.0;
 
     ghoul::opengl::ProgramObject* _shaderProgram = nullptr;

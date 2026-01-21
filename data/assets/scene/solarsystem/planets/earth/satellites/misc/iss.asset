@@ -22,7 +22,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (ISS)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_iss",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=25544&FORMAT=kvn",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=kvn",
   Filename = "ISS.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })
@@ -31,7 +31,7 @@ local tle = asset.resource({
   Name = "Satellite TLE Data (ISS)",
   Type = "UrlSynchronization",
   Identifier = "satellite_tle_data_iss",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?CATNR=25544&FORMAT=tle",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=tle",
   Filename = "ISS.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })

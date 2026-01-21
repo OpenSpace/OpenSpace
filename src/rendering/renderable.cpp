@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,7 +30,6 @@
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
@@ -40,8 +39,6 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 #include <variant>
-#include <vector>
-#include <string>
 #include <utility>
 
 namespace {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,7 +37,9 @@
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/luaconsole.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/rendering/shadowmapping.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
@@ -682,6 +684,58 @@ glm::mat4 RenderEngine::nodeRotation() const {
 
 uint64_t RenderEngine::frameNumber() const {
     return _frameNumber;
+}
+
+void RenderEngine::registerShadowCaster(const std::string& shadowGroup,
+                                        const SceneGraphNode* lightSource,
+                                        SceneGraphNode* shadower,
+                                        SceneGraphNode* shadowee)
+{
+    using namespace shadowmapping;
+
+    ghoul_assert(!shadowGroup.empty(), "No shadowGroup specified");
+    ghoul_assert(lightSource, "No light source specified");
+    ghoul_assert(shadower, "No shadower specified");
+    ghoul_assert(shadowee, "No shadowee specified");
+
+    _renderer.registerShadowCaster(shadowGroup, lightSource, shadower);
+
+    Shadower* sr = dynamic_cast<Shadower*>(shadower->renderable());
+    if (!sr) {
+        throw ghoul::RuntimeError("Provided shadower scene graph node is not a shadower");
+    }
+    sr->setLightSource(lightSource);
+    sr->setShadowGroup(shadowGroup);
+
+    Shadowee* se = dynamic_cast<Shadowee*>(shadowee->renderable());
+    if (!se) {
+        throw ghoul::RuntimeError("Provided shadowee scene graph node is not a shadowee");
+    }
+    se->addShadower(sr);
+}
+
+void RenderEngine::removeShadowCaster(const std::string& shadowGroup,
+                                      SceneGraphNode* shadower,
+                                      SceneGraphNode* shadowee)
+{
+    using namespace shadowmapping;
+
+    ghoul_assert(!shadowGroup.empty(), "No shadowGroup specified");
+    ghoul_assert(shadower, "No shadower specified");
+    ghoul_assert(shadowee, "No shadowee specified");
+
+    _renderer.removeShadowCaster(shadowGroup, shadower);
+
+    Shadower* sr = dynamic_cast<Shadower*>(shadower->renderable());
+    if (!sr) {
+        throw ghoul::RuntimeError("Provided shadower scene graph node is not a shadower");
+    }
+
+    Shadowee* se = dynamic_cast<Shadowee*>(shadowee->renderable());
+    if (!se) {
+        throw ghoul::RuntimeError("Provided shadowee scene graph node is not a shadowee");
+    }
+    se->removeShadower(sr);
 }
 
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,

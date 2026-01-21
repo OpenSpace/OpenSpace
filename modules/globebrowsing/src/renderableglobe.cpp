@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,6 @@
 
 #include <modules/debugging/rendering/debugrenderer.h>
 #include <modules/globebrowsing/src/basictypes.h>
-#include <modules/globebrowsing/src/gpulayergroup.h>
 #include <modules/globebrowsing/src/layer.h>
 #include <modules/globebrowsing/src/layergroup.h>
 #include <modules/globebrowsing/src/layergroupid.h>
@@ -51,10 +50,10 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/memorypool.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
 #include <algorithm>
 #include <cmath>
@@ -69,7 +68,6 @@ namespace {
 
     // Global flags to modify the RenderableGlobe
     constexpr bool LimitLevelByAvailableData = true;
-    constexpr bool PreformHorizonCulling = true;
 
     // Shadow structure
     struct ShadowRenderingStruct {
@@ -130,11 +128,18 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo PerformHorizonCullingInfo = {
+        "PerformHorizonCulling",
+        "Perform horizon culling",
+        "If this value is set to 'true', tiles below the horizon will be culled away.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo ResetTileProviderInfo = {
         "ResetTileProviders",
         "Reset tile providers",
         "Reset all tile provides for the globe and reload the data.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo ModelSpaceRenderingInfo = {
@@ -144,7 +149,7 @@ namespace {
         "globe model rendering vs the flat in-game rendering method. The value is a "
         "trade-off between not having precision errors in the rendering and representing "
         "a tile as flat or curved.",
-        openspace::properties::Property::Visibility::Developer
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DynamicLodIterationCountInfo =
@@ -290,6 +295,9 @@ namespace {
 
         // [[codegen::verbatim(TargetLodScaleFactorInfo.description)]]
         std::optional<float> targetLodScaleFactor;
+
+        // [[codegen::verbatim(ModelSpaceRenderingInfo.description)]]
+        std::optional<int> modelSpaceRenderingCutoffLevel [[codegen::greater(0)]];
 
         // [[codegen::verbatim(OrenNayarRoughnessInfo.description)]]
         std::optional<float> orenNayarRoughness;
@@ -606,6 +614,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         BoolProperty(LevelProjectedAreaInfo, true),
         TriggerProperty(ResetTileProviderInfo),
         BoolProperty(PerformFrustumCullingInfo, true),
+        BoolProperty(PerformHorizonCullingInfo, true),
         IntProperty(ModelSpaceRenderingInfo, 14, 1, 22),
         IntProperty(DynamicLodIterationCountInfo, 16, 4, 128)
     })
@@ -615,7 +624,7 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
         FloatProperty(ZFightingPercentageInfo, 0.995f, 0.000001f, 1.f),
         IntProperty(NumberShadowSamplesInfo, 5, 1, 7)
     })
-    , _shadowMappingPropertyOwner({ "ShadowMapping", "Shadow Mapping"})
+    , _shadowMappingPropertyOwner({ "ShadowMapping", "Shadow Mapping" })
     , _grid(DefaultSkirtedGridSegments, DefaultSkirtedGridSegments)
     , _leftRoot(Chunk(LeftHemisphereIndex))
     , _rightRoot(Chunk(RightHemisphereIndex))
@@ -731,6 +740,11 @@ RenderableGlobe::RenderableGlobe(const ghoul::Dictionary& dictionary)
     _debugProperties.resetTileProviders.onChange([&]() { _resetTileProviders = true; });
     _debugPropertyOwner.addProperty(_debugProperties.resetTileProviders);
     _debugPropertyOwner.addProperty(_debugProperties.performFrustumCulling);
+    _debugPropertyOwner.addProperty(_debugProperties.performHorizonCulling);
+    _debugProperties.modelSpaceRenderingCutoffLevel =
+        p.modelSpaceRenderingCutoffLevel.value_or(
+            _debugProperties.modelSpaceRenderingCutoffLevel
+        );
     _debugPropertyOwner.addProperty(_debugProperties.modelSpaceRenderingCutoffLevel);
     _debugPropertyOwner.addProperty(_debugProperties.dynamicLodIterationCount);
     addPropertySubOwner(_debugPropertyOwner);
@@ -1028,6 +1042,29 @@ void RenderableGlobe::update(const UpdateData& data) {
     _layerManagerDirty = true;
 
     _geoJsonManager.update();
+
+    if (_isShadowersDirty) {
+        _shadowersUpdated = true;
+        _shadowersOk = false;
+
+        _shadowSpec.clear();
+        for (const shadowmapping::Shadower* shadower : _shadowers) {
+            const SceneGraphNode* modelLightSource = shadower->lightSource();
+            if (!_shadowSpec.contains(modelLightSource)) {
+                _shadowSpec.emplace(modelLightSource, std::vector<std::string>{});
+            }
+            _shadowSpec.at(modelLightSource).push_back(shadower->shadowGroup());
+        }
+
+        _isShadowersDirty = false;
+    }
+
+    // Note that recompilation only occurs when all models are loaded and ready for rendering
+    if (_shadowersUpdated) {
+        _shadowersUpdated = false;
+        _shadowersOk = true;
+        _shadersNeedRecompilation = true;
+    }
 }
 
 bool RenderableGlobe::renderedWithDesiredData() const {
@@ -1297,6 +1334,15 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
         _globalRenderer.program->setIgnoreUniformLocationError(IgnoreError::No);
     }
 
+    std::vector<DepthMapData> depthMapData;
+    for (const auto& [node, groups] : _shadowSpec) {
+        for (const std::string& grp : groups) {
+            const shadowmapping::ShadowInfo& sm =
+                global::renderEngine->renderer().shadowInformation(grp);
+            depthMapData.emplace_back(sm.depthMap.texture, sm.viewProjectionMatrix);
+        }
+    }
+
     int globalCount = 0;
     int localCount = 0;
 
@@ -1356,7 +1402,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
     // Render all chunks that want to be rendered globally
     _globalRenderer.program->activate();
     for (int i = 0; i < globalCount; i++) {
-        renderChunkGlobally(*_globalChunkBuffer[i], data, renderGeomOnly);
+        renderChunkGlobally(*_globalChunkBuffer[i], data, depthMapData, renderGeomOnly);
     }
     _globalRenderer.program->deactivate();
 
@@ -1364,7 +1410,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
     // Render all chunks that need to be rendered locally
     _localRenderer.program->activate();
     for (int i = 0; i < localCount; i++) {
-        renderChunkLocally(*_localChunkBuffer[i], data, renderGeomOnly);
+        renderChunkLocally(*_localChunkBuffer[i], data, depthMapData, renderGeomOnly);
     }
     _localRenderer.program->deactivate();
 
@@ -1398,7 +1444,7 @@ void RenderableGlobe::renderChunks(const RenderData& data, bool renderGeomOnly) 
 }
 
 void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& data,
-                                                                      bool renderGeomOnly)
+                                          std::vector<DepthMapData>& depthMapData, bool renderGeomOnly)
 {
     ZoneScoped;
     TracyGpuZone("renderChunkGlobally");
@@ -1410,6 +1456,33 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
         _layerManager.layerGroups();
     for (size_t i = 0; i < layerGroups.size(); i++) {
         _globalRenderer.gpuLayerGroups[i].setValue(program, *layerGroups[i], tileIndex);
+    }
+
+    // Setup shadow mapping uniforms
+    std::vector<glm::dmat4> lightViewProjections;
+    std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTextureUnits;
+    for (const DepthMapData& depthData : depthMapData) {
+        lightViewProjections.push_back(depthData.viewProjection);
+        depthmapTextureUnits.emplace_back(ghoul::opengl::TextureUnit(), depthData.depthMap);
+    }
+
+    std::vector<GLint> boundUnits;
+    for (auto& [unit, depthMap] : depthmapTextureUnits) {
+        unit.activate();
+        glBindTexture(GL_TEXTURE_2D, depthMap);
+        boundUnits.push_back(unit);
+    }
+
+    if (!_shadowers.empty() && _shadowersOk) {
+        program.setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
+        program.setUniform("light_depth_maps", boundUnits);
+        GLint loc = glGetUniformLocation(program, "light_vps");
+        glUniformMatrix4dv(
+            loc,
+            static_cast<GLsizei>(lightViewProjections.size()),
+            GL_FALSE,
+            glm::value_ptr(lightViewProjections.front())
+        );
     }
 
     // The length of the skirts is proportional to its size
@@ -1496,6 +1569,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 }
 
 void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& data,
+                                         std::vector<DepthMapData>& depthMapData,
                                          bool renderGeomOnly)
 {
     ZoneScoped;
@@ -1617,6 +1691,32 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             program.setUniform("textureOffset", _ringsComponent->textureOffset());
             program.setUniform("ringSize", static_cast<float>(_ringsComponent->size()));
         }
+    }
+
+    std::vector<glm::dmat4> lightViewProjections;
+    std::vector<std::pair<ghoul::opengl::TextureUnit, GLuint>> depthmapTextureUnits;
+    for (const DepthMapData& depthData : depthMapData) {
+        lightViewProjections.push_back(depthData.viewProjection);
+        depthmapTextureUnits.emplace_back(ghoul::opengl::TextureUnit(), depthData.depthMap);
+    }
+
+    std::vector<GLint> boundUnits;
+    for (auto& [unit, depthMap] : depthmapTextureUnits) {
+        unit.activate();
+        glBindTexture(GL_TEXTURE_2D, depthMap);
+        boundUnits.push_back(unit);
+    }
+
+    if (!_shadowers.empty() && _shadowersOk) {
+        _localRenderer.program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
+        _localRenderer.program->setUniform("light_depth_maps", boundUnits);
+        GLint loc = glGetUniformLocation(*_localRenderer.program, "light_vps");
+        glUniformMatrix4dv(
+            loc,
+            static_cast<GLsizei>(lightViewProjections.size()),
+            GL_FALSE,
+            glm::value_ptr(lightViewProjections.front())
+        );
     }
 
     glEnable(GL_DEPTH_TEST);
@@ -1902,6 +2002,15 @@ void RenderableGlobe::recompileShaders() {
         _ellipsoid.shadowConfigurationArray().size()
     );
     shaderDictionary.setValue("nEclipseShadows", nEclipseShadows - 1);
+
+    // Both shader programs use depthmap shadows
+    shaderDictionary.setValue("useDepthmapShadows", 1);
+    int nDepthMaps = 0;
+    for (const auto& [src, grps] : _shadowSpec) {
+        nDepthMaps += static_cast<int>(grps.size());
+    }
+
+    shaderDictionary.setValue("nDepthMaps", nDepthMaps);
     //
     // Create local shader
     //
@@ -1990,9 +2099,12 @@ bool RenderableGlobe::testIfCullable(const Chunk& chunk,
 {
     ZoneScoped;
 
-    return (PreformHorizonCulling && isCullableByHorizon(chunk, renderData, heights)) ||
-           (_debugProperties.performFrustumCulling &&
-               isCullableByFrustum(chunk, renderData, mvp));
+    const bool horizon = _debugProperties.performHorizonCulling &&
+        isCullableByHorizon(chunk, renderData, heights);
+    const bool frustum = _debugProperties.performFrustumCulling &&
+        isCullableByFrustum(chunk, renderData, mvp);
+
+    return horizon || frustum;
 }
 
 int RenderableGlobe::desiredLevel(const Chunk& chunk, const RenderData& renderData,

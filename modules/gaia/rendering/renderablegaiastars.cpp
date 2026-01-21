@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,17 +39,15 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
-#include <ghoul/opengl/bufferbinding.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
+#include <algorithm>
 #include <array>
-#include <fstream>
 #include <cstdint>
 #include <cstdlib>
-#include <algorithm>
-#include <optional>
+#include <fstream>
 #include <set>
 #include <utility>
 

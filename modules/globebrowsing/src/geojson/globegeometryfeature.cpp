@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -199,7 +199,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
                 // Note that Constrained Delaunay triangulation supports polygons with
                 // holes :)
                 std::vector<geos::geom::Coordinate> triCoords;
-                TriList<Tri> triangles;
+                geos::triangulate::tri::TriList<geos::triangulate::tri::Tri> triangles;
                 using geos::triangulate::polygon::ConstrainedDelaunayTriangulator;
                 ConstrainedDelaunayTriangulator::triangulatePolygon(p, triangles);
 
@@ -207,7 +207,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
 
                 // Add three coordinates per triangle. Note flipped winding order
                 // (want counter clockwise, but GEOS provides clockwise)
-                for (const Tri* t : triangles) {
+                for (const geos::triangulate::tri::Tri* t : triangles) {
                     triCoords.push_back(t->getCoordinate(0));
                     triCoords.push_back(t->getCoordinate(2));
                     triCoords.push_back(t->getCoordinate(1));
@@ -217,7 +217,7 @@ void GlobeGeometryFeature::createFromSingleGeosGeometry(const geos::geom::Geomet
                 // Boundaries / Lines
 
                 // Normalize to make sure rings have correct orientation
-                std::unique_ptr<Polygon> pNormalized = p->clone();
+                std::unique_ptr<geos::geom::Polygon> pNormalized = p->clone();
                 pNormalized->normalize();
 
                 const geos::geom::LinearRing* outerRing = pNormalized->getExteriorRing();

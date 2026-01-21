@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -136,8 +136,10 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
 
     double seqStartDbl;
     if (seqStartStr.length() == 24) {
-        seqStartDbl = Time::convertTime(
-            seqStartStr.substr(0, seqStartStr.length() - 2)
+        seqStartDbl = Time::convertTime(seqStartStr);
+        ghoul_assert(
+            seqStartDbl != stod(seqStartStr.substr(0,4)),
+            "Somehow the time double got = to the year of your input time string"
         );
     }
     else {
