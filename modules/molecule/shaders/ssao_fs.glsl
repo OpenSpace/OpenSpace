@@ -38,21 +38,21 @@ in vec2 tc;
 out vec4 fragColor;
 
 struct HBAOData {
-  float radius_to_screen;
-  float neg_inv_r2;
-  float n_dot_v_bias;
-  float normal_bias;
+  float radiusToScreen;
+  float negInvR2;
+  float nDotVBias;
+  float normalBias;
 
-  float ao_multiplier;
-  float pow_exponent;
-  vec2 inv_full_res;
+  float aoMultiplier;
+  float powExponent;
+  vec2 invFullRes;
 
-  vec4 proj_info;
+  vec4 projInfo;
 
-  vec4 sample_pattern[32];
+  vec4 samplePattern[32];
 };
 
-layout(std140) uniform u_control_buffer {
+layout(std140) uniform controlBuffer {
   HBAOData control;
 };
 
@@ -64,10 +64,10 @@ uniform bool isPerspective;
 
 vec3 uvToView(vec2 uv, float eyeZ) {
   if (isPerspective) {
-    return vec3((uv * control.proj_info.xy + control.proj_info.zw) * eyeZ, eyeZ);
+    return vec3((uv * control.projInfo.xy + control.projInfo.zw) * eyeZ, eyeZ);
   }
   else {
-    return vec3((uv * control.proj_info.xy + control.proj_info.zw), eyeZ);
+    return vec3((uv * control.projInfo.xy + control.projInfo.zw), eyeZ);
   }
 }
 
@@ -91,7 +91,7 @@ vec3 fetchViewNormal(vec2 uv) {
 
 float falloff(float dist2) {
   // 1 scalar mad instruction
-  return dist2 * control.neg_inv_r2 + 1.0;
+  return dist2 * control.negInvR2 + 1.0;
 }
 
 // P = view-space position at the kernel center
@@ -103,7 +103,7 @@ float computePixelObscurance(vec3 P, vec3 N, vec3 S) {
   float NdotV = dot(N, V) * 1.0 / sqrt(VdotV);
 
   float falloffMult = max(0.0, falloff(VdotV));
-  return max(0.0, NdotV - control.n_dot_v_bias) * falloffMult;
+  return max(0.0, NdotV - control.nDotVBias) * falloffMult;
 }
 
 vec2 rotateSample(vec2 smpl, vec2 cosSin) {
@@ -130,20 +130,20 @@ float computeAo(vec2 fullResUv, float radiusPixels, vec4 jitter, vec3 viewPositi
   float weightSum = 0.0;
   float ao = 0.0;
 
-  vec3 normal = mix(vec3(0.0, 0.0, 1.0), viewNormal, control.normal_bias);
+  vec3 normal = mix(vec3(0.0, 0.0, 1.0), viewNormal, control.normalBias);
 
   for (int i = 0; i < AO_NUM_SAMPLES; i++) {
-    vec4 smpl = control.sample_pattern[i];
+    vec4 smpl = control.samplePattern[i];
     vec2 uv = rotateSample(smpl.xy, jitter.xy) * jitter.z;
     float weightScale = smpl.z;
     float mipLevel = mipOffset + smpl.w;
 
-    vec2 snappedUv = round(radiusPixels * uv) * control.inv_full_res + fullResUv;
+    vec2 snappedUv = round(radiusPixels * uv) * control.invFullRes + fullResUv;
     vec3 viewSample = fetchViewPos(snappedUv, mipLevel);
     ao += computePixelObscurance(viewPosition, viewNormal, viewSample) * weightScale;
     weightSum += 1.0;
   }
-  ao *= control.ao_multiplier / weightSum;
+  ao *= control.aoMultiplier / weightSum;
 
   return clamp(1.0 - ao, 0.0, 1.0);
 }
@@ -155,7 +155,7 @@ void main() {
   vec3 viewNormal = fetchViewNormal(uv);
 
   // Compute projection of disk of radius control.R into screen space
-  float radiusPixels = control.radius_to_screen;
+  float radiusPixels = control.radiusToScreen;
   if (isPerspective) {
     radiusPixels /= viewPosition.z;
   }
@@ -164,5 +164,5 @@ void main() {
   vec4 jitter = getJitter(uv);
   float ao = computeAo(uv, radiusPixels, jitter, viewPosition, viewNormal);
 
-  fragColor = vec4(vec3(pow(ao, control.pow_exponent)), 1.0);
+  fragColor = vec4(vec3(pow(ao, control.powExponent)), 1.0);
 }
