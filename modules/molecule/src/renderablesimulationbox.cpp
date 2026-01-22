@@ -57,16 +57,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableSimulationBox";
 
-    const float Vertices[] = {
-         0.5f,  0.5f, 0.f,  // top right
-         0.5f, -0.5f, 0.f,  // bottom right
-        -0.5f,  0.5f, 0.f,  // top left 
-
-         0.5f, -0.5f, 0.f,  // bottom right
-        -0.5f, -0.5f, 0.f,  // bottom left
-        -0.5f,  0.5f, 0.f,  // top left 
-    };
-
     constexpr double normalizeDouble(double input) {
         if (input > 1.0) {
             return input / pow(10, 30);
@@ -460,14 +450,6 @@ void RenderableSimulationBox::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_billboard.program, _billboard.uniforms);
 
     glGenVertexArrays(1, &_billboard.vao);
-    glGenBuffers(1, &_billboard.vbo);
-    glBindVertexArray(_billboard.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _billboard.vbo);
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(0);
 
     for (Molecules& mol : _molecules) {
         initMolecule(mol.data, mol.moleculeFile, mol.trajectoryFile.value_or(""));
@@ -506,7 +488,6 @@ void RenderableSimulationBox::initializeGL() {
 
 void RenderableSimulationBox::deinitializeGL() {
     glDeleteBuffers(1, &_billboard.vao);
-    glDeleteBuffers(1, &_billboard.vbo);
     _billboard.program = nullptr;
 }
 

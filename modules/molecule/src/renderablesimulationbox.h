@@ -85,7 +85,6 @@ private:
         UniformCache(colorTex, depthTex, transform, strokeWidth, strokeFalloffExp,
             fragDepth, strokeColor) uniforms;
         GLuint vao = 0;
-        GLuint vbo = 0;
     } _billboard;
 
     struct Molecules {

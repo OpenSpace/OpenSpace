@@ -200,6 +200,47 @@ namespace {
         return P.elem[2][3] == 0.f;
     }
 
+    constexpr bool isOrthoProjMatrix(const glm::mat4& P) {
+        return P[2][3] == 0.f;
+    }
+
+    void blitTexture(uint32_t tex) {
+        ghoul::opengl::TextureUnit texUnit;
+        texUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, tex);
+
+        glObj.blit.tex.program->activate();
+        glObj.blit.tex.program->setUniform(glObj.blit.tex.uniforms.tex, 0);
+
+        glBindVertexArray(glObj.vao);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
+    }
+
+    void blitTexture(uint32_t tex, uint32_t depth) {
+        ghoul::opengl::TextureUnit texUnit;
+        texUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, tex);
+
+        ghoul::opengl::TextureUnit depthUnit;
+        depthUnit.activate();
+        glBindTexture(GL_TEXTURE_2D, depth);
+
+        glObj.blit.texDepth.program->activate();
+        glObj.blit.texDepth.program->setUniform(
+            glObj.blit.texDepth.uniforms.texColor,
+            texUnit
+        );
+        glObj.blit.texDepth.program->setUniform(
+            glObj.blit.texDepth.uniforms.texDepth,
+            depthUnit
+        );
+
+        glBindVertexArray(glObj.vao);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
+    }
+
     struct HBAOData {
         float radiusToScreen = 0.f;
         float negInvR2 = 0.f;
@@ -897,7 +938,7 @@ void shutdown() {
     glObj.ssao.blur.program = nullptr;
 }
 
-void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMatrix,
+void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const glm::mat4& projMatrix,
                float intensity, float radius, float bias, float normalBias)
 {
     const bool isOrtho = isOrthoProjMatrix(projMatrix);
@@ -914,7 +955,7 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMa
     vec4_t projInfo;
     float projScl;
 
-    const float* projData = &projMatrix.elem[0][0];
+    const float* projData = glm::value_ptr(projMatrix);
     const bool ortho = isOrthoProjMatrix(projMatrix);
     if (!ortho) {
         projInfo = {
@@ -969,7 +1010,7 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const mat4_t& projMa
     normalUnit.activate();
     glBindTexture(GL_TEXTURE_2D, normalTex);
 
-    // RENDER HBAO
+    // HBAO
     {
         ghoul::opengl::ProgramObject& program = *glObj.ssao.hbao.program;
         auto& uniforms = glObj.ssao.hbao.uniforms;
@@ -1153,44 +1194,7 @@ void applyTemporalAa(uint32_t linearDepthTex, uint32_t colorTex, uint32_t veloci
     }
 }
 
-void blitTexture(uint32_t tex) {
-    ghoul::opengl::TextureUnit texUnit;
-    texUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, tex);
-
-    glObj.blit.tex.program->activate();
-    glObj.blit.tex.program->setUniform(glObj.blit.tex.uniforms.tex, 0);
-
-    glBindVertexArray(glObj.vao);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glBindVertexArray(0);
-}
-
-void blitTexture(uint32_t tex, uint32_t depth) {
-    ghoul::opengl::TextureUnit texUnit;
-    texUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, tex);
-
-    ghoul::opengl::TextureUnit depthUnit;
-    depthUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, depth);
-
-    glObj.blit.texDepth.program->activate();
-    glObj.blit.texDepth.program->setUniform(
-        glObj.blit.texDepth.uniforms.texColor,
-        texUnit
-    );
-    glObj.blit.texDepth.program->setUniform(
-        glObj.blit.texDepth.uniforms.texDepth,
-        depthUnit
-    );
-
-    glBindVertexArray(glObj.vao);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glBindVertexArray(0);
-}
-
-void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
+void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& P) {
     // For seeding noise
     static float time = 0.f;
     time = time + 0.016f;
@@ -1199,20 +1203,20 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
     }
 
     static vec2_t prevJitter = { 0.f, 0.f };
-    vec3_t L = mat4_mul_vec3(V, vec3_set(0.f, 0.f, 0.f), 1.f);
-    vec3_t lightDir = vec3_normalize(L);
-    vec3_t lightCol = vec3_set1(5.f);
-    mat4_t invP = mat4_inverse(P);
-    const float near = P.elem[3][2] / (P[2][2] - 1.f);
-    const float far = P.elem[3][2] / (P[2][2] + 1.f);
+    glm::vec3 L = V * glm::vec4(0.f, 0.f, 0.f, 1.f);
+    glm::vec3 lightDir = glm::normalize(L);
+    glm::vec3 lightColor = glm::vec3(5.f);
+    glm::mat4 invP = glm::inverse(P);
+    const float near = P[3][2] / (P[2][2] - 1.f);
+    const float far = P[3][2] / (P[2][2] + 1.f);
     vec2_t jitter;
     if (isOrthoProjMatrix(P)) {
-        jitter[0] = -P.elem[3][0] * 0.5f;
-        jitter[1] = -P.elem[3][1] * 0.5f;
+        jitter[0] = -P[3][0] * 0.5f;
+        jitter[1] = -P[3][1] * 0.5f;
     }
     else {
-        jitter[0] = P.elem[2][0] * 0.5f;
-        jitter[1] = P.elem[2][1] * 0.5f;
+        jitter[0] = P[2][0] * 0.5f;
+        jitter[1] = P[2][1] * 0.5f;
     }
     bool isOrthographic = isOrthoProjMatrix(P);
 
@@ -1400,11 +1404,9 @@ void postprocess(const Settings& settings, const mat4_t& V, const mat4_t& P) {
         program.setUniform(uniforms.texDepth, depthUnit);
         program.setUniform(uniforms.texColor, colorUnit);
         program.setUniform(uniforms.texNormal, normalUnit);
-        glm::mat4 ipm;
-        std::memcpy(glm::value_ptr(ipm), &invP, 16 * sizeof(float));
-        program.setUniform(uniforms.invProjMat, ipm);
-        program.setUniform(uniforms.lightDir, lightDir.x, lightDir.y, lightDir.z);
-        program.setUniform(uniforms.lightCol, lightCol.x, lightCol.y, lightCol.z);
+        program.setUniform(uniforms.invProjMat, invP);
+        program.setUniform(uniforms.lightDir, lightDir);
+        program.setUniform(uniforms.lightCol, lightColor);
 
         glBindVertexArray(glObj.vao);
         glDrawArrays(GL_TRIANGLES, 0, 3);

@@ -98,7 +98,8 @@ struct Settings {
     } inputTextures;
 };
 
-void postprocess(const Settings& settings, const mat4_t& viewMat, const mat4_t& projMat);
+void postprocess(const Settings& settings, const glm::mat4& viewMat,
+    const glm::mat4& projMat);
 
 }  // namespace postprocessing
 

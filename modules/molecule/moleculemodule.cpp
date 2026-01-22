@@ -385,11 +385,7 @@ void MoleculeModule::render() {
     settings.inputTextures.color = _colorTex;
     settings.inputTextures.normal = _normalTex;
 
-    mat4_t V, P;
-    std::memcpy(&V, &_viewMatrix, sizeof(mat4_t));
-    std::memcpy(&P, &_projectionMatrix, sizeof(mat4_t));
-
-    postprocessing::postprocess(settings, V, P);
+    postprocessing::postprocess(settings, _viewMatrix, _projectionMatrix);
     
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
     const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
