@@ -195,11 +195,21 @@ double OrbitalInputHandler::truckMovementVelocity() const {
 }
 
 void OrbitalInputHandler::updateStatesFromInput(double deltaTime) {
-    _mouseStates.updateVelocitiesFromInput(
-        global::interactionHandler->mouseInputState(),
-        global::interactionHandler->keyboardInputState(),
+    _touchStates.updateVelocitiesFromInput(
+        global::interactionHandler->touchInputState(),
         deltaTime
     );
+
+    // If touch input was detected, do not process mouse input. This avoids conflicts
+    // between touch and mouse input on devices that support both (where a touch is
+    // often also translated into a mouse input)
+    if (global::interactionHandler->touchInputState().touchPoints().empty()) {
+        _mouseStates.updateVelocitiesFromInput(
+            global::interactionHandler->mouseInputState(),
+            global::interactionHandler->keyboardInputState(),
+            deltaTime
+        );
+    }
 
     _joystickStates.updateVelocitiesFromInput(
         global::interactionHandler->joystickInputStates(),
@@ -212,11 +222,6 @@ void OrbitalInputHandler::updateStatesFromInput(double deltaTime) {
     );
 
     _scriptStates.updateVelocitiesFromInput(deltaTime);
-
-    _touchStates.updateVelocitiesFromInput(
-        global::interactionHandler->touchInputState(),
-        deltaTime
-    );
 }
 
 void OrbitalInputHandler::updateFrictionFactor(double friction) {
