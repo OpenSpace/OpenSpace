@@ -28,7 +28,7 @@ const float ExposureBias = 0.5;
 
 out vec4 fragColor;
 
-uniform sampler2D texture;
+uniform sampler2D tex;
 uniform float exposure = 1.0;
 uniform float gamma = 2.2;
 
@@ -56,7 +56,7 @@ vec3 uncharted(vec3 c) {
 }
 
 void main() {
-  vec4 color = texelFetch(texture, ivec2(gl_FragCoord.xy), 0);
+  vec4 color = texelFetch(tex, ivec2(gl_FragCoord.xy), 0);
   color.rgb = uncharted(color.rgb);
   fragColor = color;
 }

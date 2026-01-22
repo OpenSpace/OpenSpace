@@ -26,8 +26,8 @@
 
 out vec4 fragColor;
 
-uniform sampler2D texture;
+uniform sampler2D tex;
 
 void main() {
-  fragColor = texelFetch(texture, ivec2(gl_FragCoord.xy), 0);
+  fragColor = texelFetch(tex, ivec2(gl_FragCoord.xy), 0);
 }

@@ -145,8 +145,8 @@ namespace {
             } withMotionBlur;
             struct {
                 std::unique_ptr<ghoul::opengl::ProgramObject> program;
-                UniformCache(texLinearDepth, texMain, texPrev, texVel, texelSize, time,
-                    feedbackMin, feedbackMax, motionScale, jitterUv) uniforms;
+                UniformCache(texLinearDepth, texMain, texPrev, texVel, texelSize,
+                    feedbackMin, feedbackMax, jitterUv) uniforms;
             } noMotionBlur;
         } temporal;
 
@@ -1463,10 +1463,8 @@ void applyTemporalAa(uint32_t linearDepthTex, uint32_t colorTex, uint32_t veloci
         glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.texVel, 3);
         glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.texelSize, texelSize);
         glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.jitterUv, jitterUv);
-        glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.time, time);
         glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.feedbackMin, feedbackMin);
         glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.feedbackMax, feedbackMax);
-        glObj.temporal.noMotionBlur.program->setUniform(glObj.temporal.noMotionBlur.uniforms.motionScale, motionScale);
     }
 
     glBindVertexArray(glObj.vao);

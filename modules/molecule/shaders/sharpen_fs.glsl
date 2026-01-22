@@ -26,14 +26,14 @@
 
 out vec4 fragColor;
 
-uniform sampler2D texture;
+uniform sampler2D tex;
 
 void main() {
-  vec3 cc = texelFetch(texture, ivec2(gl_FragCoord.xy), 0).rgb;
-  vec3 cl = texelFetch(texture, ivec2(gl_FragCoord.xy) + ivec2(-1, 0), 0).rgb;
-  vec3 ct = texelFetch(texture, ivec2(gl_FragCoord.xy) + ivec2( 0, 1), 0).rgb;
-  vec3 cr = texelFetch(texture, ivec2(gl_FragCoord.xy) + ivec2( 1, 0), 0).rgb;
-  vec3 cb = texelFetch(texture, ivec2(gl_FragCoord.xy) + ivec2( 0,-1), 0).rgb;
+  vec3 cc = texelFetch(tex, ivec2(gl_FragCoord.xy), 0).rgb;
+  vec3 cl = texelFetch(tex, ivec2(gl_FragCoord.xy) + ivec2(-1, 0), 0).rgb;
+  vec3 ct = texelFetch(tex, ivec2(gl_FragCoord.xy) + ivec2( 0, 1), 0).rgb;
+  vec3 cr = texelFetch(tex, ivec2(gl_FragCoord.xy) + ivec2( 1, 0), 0).rgb;
+  vec3 cb = texelFetch(tex, ivec2(gl_FragCoord.xy) + ivec2( 0,-1), 0).rgb;
 
   const vec2 Weight = vec2(1.4, -0.1);
   fragColor = vec4(vec3(Weight.x * cc + Weight.y * (cl + ct + cr + cb)), 1.0);
