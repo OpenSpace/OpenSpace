@@ -75,12 +75,6 @@ namespace {
         }
     }
 
-    constexpr mat4_t mat4_from_glm(glm::mat4 const& src) {
-        mat4_t dst;
-        memcpy(&dst, &src, 16 * sizeof(float));
-        return dst;
-    }
-
     constexpr openspace::properties::Property::PropertyInfo RepTypeInfo = {
         "RepType",
         "Representation Type",
@@ -736,36 +730,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     md_gl_draw(&args);
-
-    // @TODO: Needed?
-    // postprocessing
-    {
-        postprocessing::Settings settings;
-        settings.background.enabled = false;
-        settings.ambientOcclusion[0].enabled = _ssaoEnabled;
-        settings.ambientOcclusion[0].intensity = _ssaoIntensity;
-        settings.ambientOcclusion[0].radius = _ssaoRadius;
-        settings.ambientOcclusion[0].horizonBias = _ssaoBias;
-        settings.ambientOcclusion[1].enabled = false;
-        settings.bloom.enabled = false;
-        settings.depthOfField.enabled = false;
-        settings.temporalReprojection.enabled = false;
-        settings.tonemapping.enabled = true;
-        settings.tonemapping.mode = postprocessing::Tonemapping::ACES;
-        settings.tonemapping.exposure = _exposure;
-        settings.inputTextures.depth = mod->depthTexture();
-        settings.inputTextures.color = mod->colorTexture();
-        settings.inputTextures.normal = mod->normalTexture();
-
-        postprocessing::postprocess(
-            settings,
-            mat4_from_glm(data.camera.combinedViewMatrix()),
-            mat4_from_glm(projMatrix)
-        );
-
-        // restore state after postprocess
-        glEnable(GL_DEPTH_TEST);
-    }
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
 
