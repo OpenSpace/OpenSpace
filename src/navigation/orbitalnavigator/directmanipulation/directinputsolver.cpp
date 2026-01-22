@@ -42,7 +42,7 @@ namespace {
         int nDOF;
         const openspace::Camera* camera;
         const openspace::SceneGraphNode* node;
-        LMstat stats;
+        ghoul::LMstat stats;
     };
 
     // Project back a 3D point in model view to clip space [-1,1] coordinates on the view
@@ -59,7 +59,7 @@ namespace {
     }
 
     // Returns screen point s(xi,par) dependent the transform M(par) and object point xi
-    double distToMinimize(double* par, int x, void* fdata, LMstat* lmstat) {
+    double distToMinimize(double* par, int x, void* fdata, ghoul::LMstat* lmstat) {
         FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
 
         // Apply transform to camera and find the screen point of the updated camera state
@@ -102,7 +102,7 @@ namespace {
     }
 
     // Gradient of distToMinimize w.r.t par (using forward difference)
-    void gradient(double* g, double* par, int x, void* fdata, LMstat* lmstat) {
+    void gradient(double* g, double* par, int x, void* fdata, ghoul::LMstat* lmstat) {
         FunctionData* ptr = reinterpret_cast<FunctionData*>(fdata);
         double f0 = distToMinimize(par, x, fdata, lmstat);
         // scale value to find minimum step size h, dependant on planet size
@@ -172,7 +172,7 @@ namespace {
 namespace openspace::interaction {
 
 DirectInputSolver::DirectInputSolver() {
-    levmarq_init(&_lmstat);
+    ghoul::initializeLevmarqStats(&_lmstat);
 }
 
 bool DirectInputSolver::solve(const std::vector<TouchPoint>& touchPoints,
@@ -212,7 +212,7 @@ bool DirectInputSolver::solve(const std::vector<TouchPoint>& touchPoints,
     };
     void* dataPtr = reinterpret_cast<void*>(&fData);
 
-    bool result = levmarq(
+    bool result = ghoul::levmarq(
         _nDof,
         parameters->data(),
         static_cast<int>(screenPoints.size()),
@@ -228,14 +228,6 @@ bool DirectInputSolver::solve(const std::vector<TouchPoint>& touchPoints,
 
 int DirectInputSolver::nDof() const {
     return _nDof;
-}
-
-const LMstat& DirectInputSolver::levMarqStat() {
-    return _lmstat;
-}
-
-void DirectInputSolver::setLevMarqVerbosity(bool verbose) {
-    _lmstat.verbose = verbose;
 }
 
 } // namespace openspace::interaction

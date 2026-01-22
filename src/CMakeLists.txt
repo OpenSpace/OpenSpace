@@ -79,7 +79,6 @@ set(OPENSPACE_SOURCE
   navigation/navigationstate.cpp
   navigation/orbitalnavigator/directmanipulation/directinputsolver.cpp
   navigation/orbitalnavigator/directmanipulation/directmanipulation.cpp
-  navigation/orbitalnavigator/directmanipulation/levmarq.cpp
   navigation/orbitalnavigator/idlebehavior.cpp
   navigation/orbitalnavigator/joystickcamerastates.cpp
   navigation/orbitalnavigator/mousecamerastates.cpp
@@ -283,7 +282,6 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/navigationstate.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/directmanipulation/directinputsolver.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/directmanipulation/directmanipulation.h
-  ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/directmanipulation/levmarq.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/dampenedvelocity.h
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/dampenedvelocity.inl
   ${PROJECT_SOURCE_DIR}/include/openspace/navigation/orbitalnavigator/idlebehavior.h

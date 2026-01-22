@@ -25,9 +25,9 @@
 #ifndef __OPENSPACE_CORE___DIRECTINPUT_SOLVER___H__
 #define __OPENSPACE_CORE___DIRECTINPUT_SOLVER___H__
 
-#include <openspace/navigation/orbitalnavigator/directmanipulation/levmarq.h> // TODO: Move to ghoul
 #include <openspace/util/touch.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/levmarqsolver.h>
 #include <vector>
 
 namespace openspace {
@@ -75,13 +75,9 @@ public:
 
     int nDof() const;
 
-    const LMstat& levMarqStat();
-
-    void setLevMarqVerbosity(bool verbose);
-
 private:
     int _nDof = 0;
-    LMstat _lmstat;
+    ghoul::LMstat _lmstat;
 };
 
 } // namespace openspace::interaction
