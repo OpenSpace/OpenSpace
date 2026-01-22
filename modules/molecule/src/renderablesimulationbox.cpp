@@ -41,8 +41,9 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/openglstatecache.h>
+#include <ghoul/opengl/textureunit.h>
 #include <glm/gtc/random.hpp>
 #include <core/md_allocator.h>
 #include <core/md_array.h>
@@ -751,35 +752,40 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
         billboardModel * glm::dvec4(0.0, 0.0, 0.0, 1.0);
     double depth = normalizeDouble(depth_.w);
 
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    glUseProgram(*_billboard.program);
-    glBindVertexArray(_billboard.vao);
-    glDisable(GL_CULL_FACE);
-    glActiveTexture(GL_TEXTURE0);
+    _billboard.program->activate();
+    ghoul::opengl::TextureUnit colorTex;
+    colorTex.activate();
     glBindTexture(GL_TEXTURE_2D, mod->colorTexture());
-    glActiveTexture(GL_TEXTURE1);
+
+    ghoul::opengl::TextureUnit depthTex;
+    depthTex.activate();
     glBindTexture(GL_TEXTURE_2D, mod->depthTexture());
-    glUniform1i(_billboard.uniforms.colorTex, 0);
-    glUniform1i(_billboard.uniforms.depthTex, 1);
-    glUniformMatrix4fv(
-        _billboard.uniforms.transform,
-        1,
-        false,
-        glm::value_ptr(transform)
+    _billboard.program->setUniform(_billboard.uniforms.colorTex, colorTex);
+    _billboard.program->setUniform(_billboard.uniforms.depthTex, depthTex);
+    _billboard.program->setUniform(_billboard.uniforms.transform, transform);
+    _billboard.program->setUniform(
+        _billboard.uniforms.strokeWidth,
+        static_cast<float>(width)
     );
-    glUniform1f(_billboard.uniforms.strokeWidth, static_cast<float>(width));
-    glUniform1f(
+    _billboard.program->setUniform(
         _billboard.uniforms.strokeFalloffExp,
         _circleFalloff == 0.f ? std::numeric_limits<float>::max() : 1.f / _circleFalloff
     );
-    glUniform1f(_billboard.uniforms.fragDepth, static_cast<float>(depth));
-    glm::vec4 stroke = _circleColor;
-    glUniform4fv(_billboard.uniforms.strokeColor, 1, glm::value_ptr(stroke));
+    _billboard.program->setUniform(
+        _billboard.uniforms.fragDepth,
+        static_cast<float>(depth)
+    );
+    _billboard.program->setUniform(_billboard.uniforms.strokeColor, _circleColor);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDisable(GL_CULL_FACE);
+
+    glBindVertexArray(_billboard.vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
-    glEnable(GL_CULL_FACE);
     glBindVertexArray(0);
-    glUseProgram(0);
+
+    glEnable(GL_CULL_FACE);
 
     global::renderEngine->openglStateCache().resetBlendState();
 }
