@@ -857,8 +857,12 @@ void setSgctDelegateFunctions() {
         for (size_t i = 0; i < Engine::instance().windows().size(); i++) {
             int x = Engine::instance().windows()[i]->framebufferResolution().x;
             int y = Engine::instance().windows()[i]->framebufferResolution().y;
-            max.x = x > max.x ? x : max.x;
-            max.y = y > max.y ? x : max.y;
+            if (x > max.x) {
+                max.x = x;
+            }
+            if (y > max.y) {
+                max.y = y;
+            }
         }
         return max;
     };
