@@ -8,7 +8,7 @@ asset.require("./colorlayers/themis_ir_night_newyork", false)
 asset.require("./colorlayers/ctx_mosaic_newyork", false)
 
 -- The New York server does not have this map, use the Utah server for now
-asset.require("./heightlayers/mola_utah", false)
+asset.require("./heightlayers/mola_amnh", false)
 
 
 
