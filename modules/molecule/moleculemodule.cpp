@@ -168,81 +168,59 @@ void MoleculeModule::internalInitializeGL() {
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
     const glm::ivec2 size = global::windowDelegate->currentWindowSize();
 
-    glGenTextures(1, &_colorTex);
-    glBindTexture(GL_TEXTURE_2D, _colorTex);
-    glTexImage2D(
+    _colorTex = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(size.x, size.y, 1),
         GL_TEXTURE_2D,
-        0,
+        ghoul::opengl::Texture::Format::RGBA,
         GL_RGBA8,
-        size.x,
-        size.y,
-        0,
-        GL_RGBA,
         GL_UNSIGNED_BYTE,
-        nullptr
+        ghoul::opengl::Texture::FilterMode::Linear,
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    _colorTex->uploadTexture();
     glFramebufferTexture2D(
         GL_DRAW_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        _colorTex,
+        *_colorTex,
         0
     );
 
-    glGenTextures(1, &_normalTex);
-    glBindTexture(GL_TEXTURE_2D, _normalTex);
-    glTexImage2D(
+    _normalTex = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(size.x, size.y, 1),
         GL_TEXTURE_2D,
-        0,
+        ghoul::opengl::Texture::Format::RG,
         GL_RG16,
-        size.x,
-        size.y,
-        0,
-        GL_RG,
         GL_UNSIGNED_SHORT,
-        nullptr
+        ghoul::opengl::Texture::FilterMode::Nearest,
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    _normalTex->uploadTexture();
     glFramebufferTexture2D(
         GL_DRAW_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT1,
         GL_TEXTURE_2D,
-        _normalTex,
+        *_normalTex,
         0
     );
 
-    glGenTextures(1, &_depthTex);
-    glBindTexture(GL_TEXTURE_2D, _depthTex);
-    glTexImage2D(
+    _depthTex = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(size.x, size.y, 1),
         GL_TEXTURE_2D,
-        0,
+        ghoul::opengl::Texture::Format::DepthComponent,
         GL_DEPTH_COMPONENT32F,
-        size.x,
-        size.y,
-        0,
-        GL_DEPTH_COMPONENT,
         GL_FLOAT,
-        nullptr
+        ghoul::opengl::Texture::FilterMode::Linear,
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    _depthTex->uploadTexture();
     glFramebufferTexture2D(
         GL_DRAW_FRAMEBUFFER,
         GL_DEPTH_ATTACHMENT,
         GL_TEXTURE_2D,
-        _depthTex,
+        *_depthTex,
         0
     );
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     md_gl_initialize();
     md_gl_shaders_init(_shaders.get(), ShaderOutputSnippet.data());
@@ -253,14 +231,11 @@ void MoleculeModule::internalInitializeGL() {
 }
 
 void MoleculeModule::internalDeinitializeGL() {
-    glDeleteTextures(1, &_depthTex);
-    glDeleteTextures(1, &_normalTex);
-    glDeleteTextures(1, &_colorTex);
+    _depthTex = nullptr;
+    _normalTex = nullptr;
+    _colorTex = nullptr;
     glDeleteFramebuffers(1, &_fbo);
     _fbo = 0;
-    _colorTex = 0;
-    _normalTex = 0;
-    _depthTex = 0;
     postprocessing::shutdown();
     
     md_gl_shaders_free(_shaders.get());
@@ -269,18 +244,6 @@ void MoleculeModule::internalDeinitializeGL() {
 
 GLuint MoleculeModule::fbo() const {
     return _fbo;
-}
-
-GLuint MoleculeModule::colorTexture() const {
-    return _colorTex;
-}
-
-GLuint MoleculeModule::normalTexture() const {
-    return _normalTex;
-}
-
-GLuint MoleculeModule::depthTexture() const {
-    return _depthTex;
 }
 
 const md_gl_shaders_t& MoleculeModule::shaders() const {
@@ -308,43 +271,10 @@ void MoleculeModule::preDraw() {
 
     _width = size.x;
     _height = size.y;
-    glBindTexture(GL_TEXTURE_2D, _colorTex);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA8,
-        size.x,
-        size.y,
-        0,
-        GL_RGBA,
-        GL_UNSIGNED_BYTE,
-        nullptr
-    );
-    glBindTexture(GL_TEXTURE_2D, _normalTex);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RG16,
-        size.x,
-        size.y,
-        0,
-        GL_RG,
-        GL_UNSIGNED_SHORT,
-        nullptr
-    );
-    glBindTexture(GL_TEXTURE_2D, _depthTex);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_DEPTH_COMPONENT32F,
-        size.x,
-        size.y,
-        0,
-        GL_DEPTH_COMPONENT,
-        GL_FLOAT,
-        nullptr
-    );
-    glBindTexture(GL_TEXTURE_2D, 0);
+    _colorTex->resize(glm::uvec3(size.x, size.y, 1));
+    _normalTex->resize(glm::uvec3(size.x, size.y, 1));
+    _depthTex->resize(glm::uvec3(size.x, size.y, 1));
+
     postprocessing::resize(size.x, size.y);
 }
 
@@ -381,9 +311,9 @@ void MoleculeModule::render() {
     settings.tonemapping.mode = postprocessing::Tonemapping::ACES;
     settings.tonemapping.exposure = _exposure;
     settings.fxaa.enabled = true;
-    settings.inputTextures.depth = _depthTex;
-    settings.inputTextures.color = _colorTex;
-    settings.inputTextures.normal = _normalTex;
+    settings.inputTextures.depth = _depthTex.get();
+    settings.inputTextures.color = _colorTex.get();
+    settings.inputTextures.normal = _normalTex.get();
 
     postprocessing::postprocess(settings, _viewMatrix, _projectionMatrix);
     

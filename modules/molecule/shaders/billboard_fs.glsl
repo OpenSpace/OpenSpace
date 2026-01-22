@@ -31,21 +31,12 @@ uniform float strokeWidth;
 uniform float strokeFalloffExp;
 uniform float fragDepth;
 uniform vec4 strokeColor;
-uniform sampler2D colorTex;
-uniform sampler2D depthTex;
 
 void main() {
   float len = length(pos) * 2.0;
 
   if (len > 1) {
     discard;
-  }
-
-  float depth = texelFetch(depthTex, ivec2(gl_FragCoord.xy), 0).r;
-  vec4 tex = texelFetch(colorTex, ivec2(gl_FragCoord.xy), 0);
-
-  if (depth == 1.0) {
-	  tex.a = 0.0;
   }
 
   float falloff = clamp(
@@ -55,5 +46,5 @@ void main() {
   );
 
   gl_FragDepth = fragDepth;
-  fragColor = mix(strokeColor, tex, falloff);
+  fragColor = mix(strokeColor, vec4(0.0), falloff);
 }

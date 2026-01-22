@@ -661,49 +661,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(2, bufs);
 
-    // resize the fbo if needed
-    if (global::windowDelegate->windowHasResized()) {
-        glm::ivec2 size = global::windowDelegate->currentWindowSize();
-        glBindTexture(GL_TEXTURE_2D, mod->colorTexture());
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RGBA8,
-            size.x,
-            size.y,
-            0,
-            GL_RGBA,
-            GL_UNSIGNED_BYTE,
-            nullptr
-        );
-
-        glBindTexture(GL_TEXTURE_2D, mod->normalTexture());
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_RG16,
-            size.x,
-            size.y,
-            0,
-            GL_RG,
-            GL_UNSIGNED_SHORT,
-            nullptr
-        );
-
-        glBindTexture(GL_TEXTURE_2D, mod->depthTexture());
-        glTexImage2D(
-            GL_TEXTURE_2D,
-            0,
-            GL_DEPTH_COMPONENT32F,
-            size.x,
-            size.y,
-            0,
-            GL_DEPTH_COMPONENT,
-            GL_FLOAT,
-            nullptr
-        );
-    }
-
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
@@ -734,15 +691,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     double depth = normalizeDouble(depth_.w);
 
     _billboard.program->activate();
-    ghoul::opengl::TextureUnit colorTex;
-    colorTex.activate();
-    glBindTexture(GL_TEXTURE_2D, mod->colorTexture());
-
-    ghoul::opengl::TextureUnit depthTex;
-    depthTex.activate();
-    glBindTexture(GL_TEXTURE_2D, mod->depthTexture());
-    _billboard.program->setUniform(_billboard.uniforms.colorTex, colorTex);
-    _billboard.program->setUniform(_billboard.uniforms.depthTex, depthTex);
     _billboard.program->setUniform(_billboard.uniforms.transform, transform);
     _billboard.program->setUniform(
         _billboard.uniforms.strokeWidth,

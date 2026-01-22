@@ -23,7 +23,7 @@
   OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -----------------------------------------------------------------------*/
 
-// Shaders for HBAO are based on nVidias examples and are copyright protected as stated above
+// Shaders for HBAO are based on nVidias examples and are copyrighted as stated above
 
 #include <modules/molecule/src/viamd/postprocessing.h>
 
@@ -31,6 +31,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <core/md_allocator.h>
@@ -56,32 +57,32 @@ namespace {
 
         struct {
             GLuint fbo = 0;
-            GLuint texColor[2] = { 0, 0 };
+            std::unique_ptr<ghoul::opengl::Texture> texColor[2];
             // These are dedicated and cannot be use as intermediate buffers by other
             // shaders
-            GLuint texTemporalBuffer[2] = { 0, 0 };
+            std::unique_ptr<ghoul::opengl::Texture> texTemporalBuffer[2];
         } targets;
 
         struct {
             GLuint fbo = 0;
-            GLuint texTilemax = 0;
-            GLuint texNeighbormax = 0;
+            std::unique_ptr<ghoul::opengl::Texture> texTilemax;
+            std::unique_ptr<ghoul::opengl::Texture> texNeighbormax;
         } velocity;
 
         struct {
             GLuint fbo = 0;
-            GLuint texture = 0;
+            std::unique_ptr<ghoul::opengl::Texture> texture;
             std::unique_ptr<ghoul::opengl::ProgramObject> program;
             UniformCache(clipInfo, texDepth, isPerspective) uniforms;
         } linearDepth;
 
         struct {
-            GLuint texRandom = 0;
+            std::unique_ptr<ghoul::opengl::Texture> texRandom;
             GLuint uboHbaoData = 0;
 
             struct {
                 GLuint fbo = 0;
-                GLuint texture = 0;
+                std::unique_ptr<ghoul::opengl::Texture> texture;
                 std::unique_ptr<ghoul::opengl::ProgramObject> program;
                 UniformCache(texLinearDepth, texNormal, texRandom, tcScale,
                     isPerspective) uniforms;
@@ -89,7 +90,7 @@ namespace {
 
             struct {
                 GLuint fbo = 0;
-                GLuint texture = 0;
+                std::unique_ptr<ghoul::opengl::Texture> texture;
                 std::unique_ptr<ghoul::opengl::ProgramObject> program;
                 UniformCache(texLinearDepth, texAo, sharpness, invResDir,
                     tcScale) uniforms;
@@ -109,7 +110,7 @@ namespace {
 
             struct {
                 GLuint fbo = 0;
-                GLuint colorCoc = 0;
+                std::unique_ptr<ghoul::opengl::Texture> colorCoc;
                 std::unique_ptr<ghoul::opengl::ProgramObject> program;
                 UniformCache(texDepth, texColor, focusPoint, focusScale) uniforms;
             } halfRes;
@@ -204,7 +205,7 @@ namespace {
         return P[2][3] == 0.f;
     }
 
-    void blitTexture(uint32_t tex) {
+    void blitTexture(const ghoul::opengl::Texture& tex) {
         ghoul::opengl::TextureUnit texUnit;
         texUnit.activate();
         glBindTexture(GL_TEXTURE_2D, tex);
@@ -217,7 +218,9 @@ namespace {
         glBindVertexArray(0);
     }
 
-    void blitTexture(uint32_t tex, uint32_t depth) {
+    void blitTexture(const ghoul::opengl::Texture& tex,
+                     const ghoul::opengl::Texture& depth)
+    {
         ghoul::opengl::TextureUnit texUnit;
         texUnit.activate();
         glBindTexture(GL_TEXTURE_2D, tex);
@@ -294,13 +297,16 @@ void initialize(int width, int height) {
         glObj.linearDepth.uniforms
     );
 
-    glGenTextures(1, &glObj.linearDepth.texture);
-    glBindTexture(GL_TEXTURE_2D, glObj.linearDepth.texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, nullptr);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glObj.linearDepth.texture = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(width, height, 1),
+        GL_TEXTURE_2D,
+        ghoul::opengl::Texture::Format::Red,
+        GL_R32F,
+        GL_FLOAT,
+        ghoul::opengl::Texture::FilterMode::LinearMipMap,
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge
+    );
+    glObj.linearDepth.texture->uploadTexture();
 
     glGenFramebuffers(1, &glObj.linearDepth.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.linearDepth.fbo);
@@ -308,79 +314,53 @@ void initialize(int width, int height) {
         GL_DRAW_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        glObj.linearDepth.texture,
+        *glObj.linearDepth.texture,
         0
     );
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
-    glGenTextures(2, glObj.targets.texColor);
-    glBindTexture(GL_TEXTURE_2D, glObj.targets.texColor[0]);
-    glTexImage2D(
+    glObj.targets.texColor[0] = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(width, height, 1),
         GL_TEXTURE_2D,
-        0,
+        ghoul::opengl::Texture::Format::RGB,
         GL_R11F_G11F_B10F,
-        width,
-        height,
-        0,
-        GL_RGB,
         GL_FLOAT,
-        nullptr
+        ghoul::opengl::Texture::FilterMode::Linear,
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindTexture(GL_TEXTURE_2D, glObj.targets.texColor[1]);
-    glTexImage2D(
+    glObj.targets.texColor[0]->uploadTexture();
+    glObj.targets.texColor[1] = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(width, height, 1),
         GL_TEXTURE_2D,
-        0,
+        ghoul::opengl::Texture::Format::RGB,
         GL_R11F_G11F_B10F,
-        width,
-        height,
-        0,
-        GL_RGB,
         GL_FLOAT,
-        nullptr
+        ghoul::opengl::Texture::FilterMode::Linear,
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glObj.targets.texColor[1]->uploadTexture();
 
-    glGenTextures(2, glObj.targets.texTemporalBuffer);
-    glBindTexture(GL_TEXTURE_2D, glObj.targets.texTemporalBuffer[0]);
-    glTexImage2D(
+    glObj.targets.texTemporalBuffer[0] = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(width, height, 1),
         GL_TEXTURE_2D,
-        0,
+        ghoul::opengl::Texture::Format::RGB,
         GL_R11F_G11F_B10F,
-        width,
-        height,
-        0,
-        GL_RGB,
         GL_FLOAT,
-        nullptr
+        ghoul::opengl::Texture::FilterMode::Linear,
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glObj.targets.texTemporalBuffer[0]->uploadTexture();
 
-    glBindTexture(GL_TEXTURE_2D, glObj.targets.texTemporalBuffer[1]);
-    glTexImage2D(
+    glObj.targets.texTemporalBuffer[1] = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(width, height, 1),
         GL_TEXTURE_2D,
-        0,
+        ghoul::opengl::Texture::Format::RGB,
         GL_R11F_G11F_B10F,
-        width,
-        height,
-        0,
-        GL_RGB,
         GL_FLOAT,
-        nullptr
+        ghoul::opengl::Texture::FilterMode::Linear,
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glObj.targets.texTemporalBuffer[1]->uploadTexture();
 
     glGenFramebuffers(1, &glObj.targets.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.targets.fbo);
@@ -388,28 +368,28 @@ void initialize(int width, int height) {
         GL_DRAW_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        glObj.targets.texColor[0],
+        *glObj.targets.texColor[0],
         0
     );
     glFramebufferTexture2D(
         GL_DRAW_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT1,
         GL_TEXTURE_2D,
-        glObj.targets.texColor[1],
+        *glObj.targets.texColor[1],
         0
     );
     glFramebufferTexture2D(
         GL_DRAW_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT2,
         GL_TEXTURE_2D,
-        glObj.targets.texTemporalBuffer[0],
+        *glObj.targets.texTemporalBuffer[0],
         0
     );
     glFramebufferTexture2D(
         GL_DRAW_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT3,
         GL_TEXTURE_2D,
-        glObj.targets.texTemporalBuffer[1],
+        *glObj.targets.texTemporalBuffer[1],
         0
     );
 
@@ -543,31 +523,24 @@ void initialize(int width, int height) {
         glObj.bokehDof.halfRes.uniforms
     );
 
-    glGenTextures(1, &glObj.bokehDof.halfRes.colorCoc);
-    glBindTexture(GL_TEXTURE_2D, glObj.bokehDof.halfRes.colorCoc);
-    glTexImage2D(
+    glObj.bokehDof.halfRes.colorCoc = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(width / 2, height / 2, 1),
         GL_TEXTURE_2D,
-        0,
+        ghoul::opengl::Texture::Format::RGBA,
         GL_RGBA16F,
-        width / 2,
-        height / 2,
-        0,
-        GL_RGBA,
         GL_FLOAT,
-        nullptr
+        ghoul::opengl::Texture::FilterMode::Linear,
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
+    glObj.bokehDof.halfRes.colorCoc->uploadTexture();
+    
     glGenFramebuffers(1, &glObj.bokehDof.halfRes.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.bokehDof.halfRes.fbo);
     glFramebufferTexture2D(
         GL_DRAW_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        glObj.bokehDof.halfRes.colorCoc,
+        *glObj.bokehDof.halfRes.colorCoc,
         0
     );
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
@@ -606,41 +579,35 @@ void initialize(int width, int height) {
         glObj.blitNeighbormax.uniforms
     );
 
-    glGenTextures(1, &glObj.velocity.texTilemax);
-    glBindTexture(GL_TEXTURE_2D, glObj.velocity.texTilemax);
-    glTexImage2D(
+    glObj.velocity.texTilemax = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(
+            glObj.texWidth / VelocityTileSize,
+            glObj.texHeight / VelocityTileSize,
+            1
+        ),
         GL_TEXTURE_2D,
-        0,
+        ghoul::opengl::Texture::Format::RG,
         GL_RG16F,
-        glObj.texWidth / VelocityTileSize,
-        glObj.texHeight / VelocityTileSize,
-        0,
-        GL_RG,
         GL_FLOAT,
-        nullptr
+        ghoul::opengl::Texture::FilterMode::Linear,
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glObj.velocity.texTilemax->uploadTexture();
 
-    glGenTextures(1, &glObj.velocity.texNeighbormax);
-    glBindTexture(GL_TEXTURE_2D, glObj.velocity.texNeighbormax);
-    glTexImage2D(
+    glObj.velocity.texNeighbormax = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(
+            glObj.texWidth / VelocityTileSize,
+            glObj.texHeight / VelocityTileSize,
+            1
+        ),
         GL_TEXTURE_2D,
-        0,
+        ghoul::opengl::Texture::Format::RG,
         GL_RG16F,
-        glObj.texWidth / VelocityTileSize,
-        glObj.texHeight / VelocityTileSize,
-        0,
-        GL_RG,
         GL_FLOAT,
-        nullptr
+        ghoul::opengl::Texture::FilterMode::Linear,
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glObj.velocity.texNeighbormax->uploadTexture();
 
     glGenFramebuffers(1, &glObj.velocity.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.velocity.fbo);
@@ -648,14 +615,14 @@ void initialize(int width, int height) {
         GL_DRAW_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        glObj.velocity.texTilemax,
+        *glObj.velocity.texTilemax,
         0
     );
     glFramebufferTexture2D(
         GL_DRAW_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT1,
         GL_TEXTURE_2D,
-        glObj.velocity.texNeighbormax,
+        *glObj.velocity.texNeighbormax,
         0
     );
 
@@ -698,57 +665,38 @@ void initialize(int width, int height) {
         buffer[i * 4 + 3] = 0;
     }
 
-    glGenTextures(1, &glObj.ssao.texRandom);
-    glBindTexture(GL_TEXTURE_2D, glObj.ssao.texRandom);
-    glTexImage2D(
+    glObj.ssao.texRandom = std::make_unique<ghoul::opengl::Texture>(
+        buffer.data(),
+        glm::uvec3(AORandomTexSize, AORandomTexSize, 1),
         GL_TEXTURE_2D,
-        0,
+        ghoul::opengl::Texture::Format::RGBA,
         GL_RGBA16_SNORM,
-        AORandomTexSize,
-        AORandomTexSize,
-        0,
-        GL_RGBA,
         GL_SHORT,
-        buffer.data()
+        ghoul::opengl::Texture::FilterMode::Nearest
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glObj.ssao.texRandom->uploadTexture();
 
-    glGenTextures(1, &glObj.ssao.hbao.texture);
-    glBindTexture(GL_TEXTURE_2D, glObj.ssao.hbao.texture);
-    glTexImage2D(
+    glObj.ssao.hbao.texture = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(width, height, 1),
         GL_TEXTURE_2D,
-        0,
+        ghoul::opengl::Texture::Format::Red,
         GL_R8,
-        width,
-        height,
-        0,
-        GL_RED,
         GL_UNSIGNED_BYTE,
-        nullptr
+        ghoul::opengl::Texture::FilterMode::Linear,
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glObj.ssao.hbao.texture->uploadTexture();
 
-    glGenTextures(1, &glObj.ssao.blur.texture);
-    glBindTexture(GL_TEXTURE_2D, glObj.ssao.blur.texture);
-    glTexImage2D(
+    glObj.ssao.blur.texture = std::make_unique<ghoul::opengl::Texture>(
+        glm::uvec3(width, height, 1),
         GL_TEXTURE_2D,
-        0,
+        ghoul::opengl::Texture::Format::Red,
         GL_R8,
-        width,
-        height,
-        0,
-        GL_RED,
         GL_UNSIGNED_BYTE,
-        nullptr
+        ghoul::opengl::Texture::FilterMode::Linear,
+        ghoul::opengl::Texture::WrappingMode::ClampToEdge
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glObj.ssao.blur.texture->uploadTexture();
 
     glGenFramebuffers(1, &glObj.ssao.hbao.fbo);
     glBindFramebuffer(GL_FRAMEBUFFER, glObj.ssao.hbao.fbo);
@@ -756,7 +704,7 @@ void initialize(int width, int height) {
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        glObj.ssao.hbao.texture,
+        *glObj.ssao.hbao.texture,
         0
     );
 
@@ -766,179 +714,82 @@ void initialize(int width, int height) {
         GL_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
         GL_TEXTURE_2D,
-        glObj.ssao.blur.texture, 0
+        *glObj.ssao.blur.texture,
+        0
     );
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     glGenBuffers(1, &glObj.ssao.uboHbaoData);
     glBindBuffer(GL_UNIFORM_BUFFER, glObj.ssao.uboHbaoData);
     glBufferData(GL_UNIFORM_BUFFER, sizeof(HBAOData), nullptr, GL_DYNAMIC_DRAW);
-
 }
 
 void resize(int width, int height) {
     glObj.texWidth = width;
     glObj.texHeight = height;
 
-    glBindTexture(GL_TEXTURE_2D, glObj.linearDepth.texture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_R32F, width, height, 0, GL_RED, GL_FLOAT, nullptr);
-
-    glBindTexture(GL_TEXTURE_2D, glObj.targets.texColor[0]);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_R11F_G11F_B10F,
-        width,
-        height,
-        0,
-        GL_RGB,
-        GL_FLOAT,
-        nullptr
-    );
-
-    glBindTexture(GL_TEXTURE_2D, glObj.targets.texColor[1]);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_R11F_G11F_B10F,
-        width,
-        height,
-        0,
-        GL_RGB,
-        GL_FLOAT,
-        nullptr
-    );
-
-    glBindTexture(GL_TEXTURE_2D, glObj.targets.texTemporalBuffer[0]);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_R11F_G11F_B10F,
-        width,
-        height,
-        0,
-        GL_RGB,
-        GL_FLOAT,
-        nullptr
-    );
-
-    glBindTexture(GL_TEXTURE_2D, glObj.targets.texTemporalBuffer[1]);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_R11F_G11F_B10F,
-        width,
-        height,
-        0,
-        GL_RGB,
-        GL_FLOAT,
-        nullptr
-    );
-
-    // ssao
-    glBindTexture(GL_TEXTURE_2D, glObj.ssao.hbao.texture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_R8,
-        width,
-        height,
-        0,
-        GL_RED,
-        GL_UNSIGNED_BYTE,
-        nullptr
-    );
-
-    glBindTexture(GL_TEXTURE_2D, glObj.ssao.blur.texture);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_R8,
-        width,
-        height,
-        0,
-        GL_RED,
-        GL_UNSIGNED_BYTE,
-        nullptr
-    );
-
-    // dof
-    glBindTexture(GL_TEXTURE_2D, glObj.bokehDof.halfRes.colorCoc);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA16F,
-        width / 2,
-        height / 2,
-        0,
-        GL_RGBA,
-        GL_FLOAT,
-        nullptr
-    );
-
-    // velocity
-    glBindTexture(GL_TEXTURE_2D, glObj.velocity.texTilemax);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RG16F,
+    glObj.linearDepth.texture->resize(glm::uvec3(width, height, 1));
+    glObj.targets.texColor[0]->resize(glm::uvec3(width, height, 1));
+    glObj.targets.texColor[1]->resize(glm::uvec3(width, height, 1));
+    glObj.targets.texTemporalBuffer[0]->resize(glm::uvec3(width, height, 1));
+    glObj.targets.texTemporalBuffer[1]->resize(glm::uvec3(width, height, 1));
+    glObj.ssao.hbao.texture->resize(glm::uvec3(width, height, 1));
+    glObj.ssao.blur.texture->resize(glm::uvec3(width, height, 1));
+    glObj.bokehDof.halfRes.colorCoc->resize(glm::uvec3(width / 2, height / 2, 1));
+    glObj.velocity.texTilemax->resize(glm::uvec3(
         glObj.texWidth / VelocityTileSize,
         glObj.texHeight / VelocityTileSize,
-        0,
-        GL_RG,
-        GL_FLOAT,
-        nullptr
-    );
-
-    glBindTexture(GL_TEXTURE_2D, glObj.velocity.texNeighbormax);
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RG16F,
+        1
+    ));
+    glObj.velocity.texNeighbormax->resize(glm::uvec3(
         glObj.texWidth / VelocityTileSize,
         glObj.texHeight / VelocityTileSize,
-        0,
-        GL_RG,
-        GL_FLOAT,
-        nullptr
-    );
+        1
+    ));
 }
 
 void shutdown() {
     glDeleteVertexArrays(1, &glObj.vao);
+    glDeleteFramebuffers(1, &glObj.targets.fbo);
+    glObj.targets.texColor[0] = nullptr;
+    glObj.targets.texColor[1] = nullptr;
+    glObj.targets.texTemporalBuffer[0] = nullptr;
+    glObj.targets.texTemporalBuffer[1] = nullptr;
+    glDeleteFramebuffers(1, &glObj.velocity.fbo);
+    glObj.velocity.texTilemax = nullptr;
+    glObj.velocity.texNeighbormax = nullptr;
+    glDeleteFramebuffers(1, &glObj.linearDepth.fbo);
     glObj.linearDepth.program = nullptr;
-    glObj.sharpen.program = nullptr;
-    glObj.temporal.withMotionBlur.program = nullptr;
-    glObj.temporal.noMotionBlur.program = nullptr;
-    glObj.blit.tex.program = nullptr;
-    glObj.blit.texDepth.program = nullptr;
+    glObj.linearDepth.texture = nullptr;
+    glObj.ssao.texRandom = nullptr;
+    glDeleteBuffers(1, &glObj.ssao.uboHbaoData);
+    glDeleteFramebuffers(1, &glObj.ssao.hbao.fbo);
+    glObj.ssao.hbao.texture = nullptr;
+    glObj.ssao.hbao.program = nullptr;
+    glDeleteFramebuffers(1, &glObj.ssao.blur.fbo);
+    glObj.ssao.blur.texture = nullptr;
+    glObj.ssao.blur.program = nullptr;
     glObj.shading.program = nullptr;
-    glObj.fxaa.program = nullptr;
+    glObj.bokehDof.program = nullptr;
+    glDeleteFramebuffers(1, &glObj.bokehDof.halfRes.fbo);
+    glObj.bokehDof.halfRes.colorCoc = nullptr;
+    glObj.bokehDof.halfRes.program = nullptr;
     glObj.tonemapping.passthrough.program = nullptr;
     glObj.tonemapping.exposureGamma.program = nullptr;
     glObj.tonemapping.filmic.program = nullptr;
     glObj.tonemapping.aces.program = nullptr;
-    glObj.bokehDof.halfRes.program = nullptr;
-    glObj.bokehDof.program = nullptr;
+    glObj.temporal.withMotionBlur.program = nullptr;
+    glObj.temporal.noMotionBlur.program = nullptr;
+    glObj.fxaa.program = nullptr;
+    glObj.blit.tex.program = nullptr;
+    glObj.blit.texDepth.program = nullptr;
     glObj.blitTilemax.program = nullptr;
     glObj.blitNeighbormax.program = nullptr;
-    glDeleteTextures(1, &glObj.velocity.texTilemax);
-    glDeleteTextures(1, &glObj.velocity.texNeighbormax);
-    glDeleteFramebuffers(1, &glObj.velocity.fbo);
-    glDeleteTextures(1, &glObj.ssao.texRandom);
-    glDeleteTextures(1, &glObj.ssao.hbao.texture);
-    glDeleteTextures(1, &glObj.ssao.blur.texture);
-
-    glDeleteFramebuffers(1, &glObj.ssao.hbao.fbo);
-    glDeleteFramebuffers(1, &glObj.ssao.blur.fbo);
-
-    glDeleteBuffers(1, &glObj.ssao.uboHbaoData);
-
-    glObj.ssao.hbao.program = nullptr;
-    glObj.ssao.blur.program = nullptr;
+    glObj.sharpen.program = nullptr;
 }
 
-void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const glm::mat4& projMatrix,
+void applySsao(const ghoul::opengl::Texture& linearDepthTex,
+               const ghoul::opengl::Texture& normalTex, const glm::mat4& projMatrix,
                float intensity, float radius, float bias, float normalBias)
 {
     const bool isOrtho = isOrthoProjMatrix(projMatrix);
@@ -1020,7 +871,7 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const glm::mat4& pro
 
         ghoul::opengl::TextureUnit randomUnit;
         randomUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, glObj.ssao.texRandom);
+        glObj.ssao.texRandom->bind();
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, glObj.ssao.uboHbaoData);
         glUniformBlockBinding(
@@ -1066,7 +917,7 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const glm::mat4& pro
         glClearColor(0, 0, 0, 0);
         glClear(GL_COLOR_BUFFER_BIT);
         normalUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, glObj.ssao.hbao.texture);
+        glObj.ssao.hbao.texture->bind();
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glPopDebugGroup();
 
@@ -1075,7 +926,7 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const glm::mat4& pro
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
         glViewport(lastViewport[0], lastViewport[1], lastViewport[2], lastViewport[3]);
         normalUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, glObj.ssao.blur.texture);
+        glObj.ssao.blur.texture->bind();
         program.setUniform(uniforms.invResDir, 0.f, 1.f / glObj.texHeight);
 
         glEnable(GL_BLEND);
@@ -1093,10 +944,12 @@ void applySsao(uint32_t linearDepthTex, uint32_t normalTex, const glm::mat4& pro
     }
 }
 
-void applyTemporalAa(uint32_t linearDepthTex, uint32_t colorTex, uint32_t velocityTex,
-                     uint32_t velocityNeighbormaxTex, const vec2_t& currJitter,
-                     const vec2_t& prevJitter, float feedbackMin, float feedbackMax,
-                     float motionScale, float time)
+void applyTemporalAa(const ghoul::opengl::Texture& linearDepthTex,
+                     const ghoul::opengl::Texture& colorTex,
+                     const ghoul::opengl::Texture& velocityTex,
+                     const ghoul::opengl::Texture& velocityNeighbormaxTex,
+                     const vec2_t& currJitter, const vec2_t& prevJitter,
+                     float feedbackMin, float feedbackMax, float motionScale, float time)
 {
     static int target = 0;
     target = (target + 1) % 2;
@@ -1127,11 +980,11 @@ void applyTemporalAa(uint32_t linearDepthTex, uint32_t colorTex, uint32_t veloci
 
     ghoul::opengl::TextureUnit colorUnit;
     colorUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, colorTex);
+    colorTex.bind();
 
     ghoul::opengl::TextureUnit tempBufferUnit;
     tempBufferUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, glObj.targets.texTemporalBuffer[srcBuf]);
+    glObj.targets.texTemporalBuffer[srcBuf]->bind();
 
     ghoul::opengl::TextureUnit velocityUnit;
     velocityUnit.activate();
@@ -1155,7 +1008,7 @@ void applyTemporalAa(uint32_t linearDepthTex, uint32_t colorTex, uint32_t veloci
 
         ghoul::opengl::TextureUnit velocityNeighbormaxUnit;
         velocityNeighbormaxUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, velocityNeighbormaxTex);
+        velocityNeighbormaxTex.bind();
 
         program.activate();
         program.setUniform(uniforms.texLinearDepth, linearDepthUnit);
@@ -1195,6 +1048,10 @@ void applyTemporalAa(uint32_t linearDepthTex, uint32_t colorTex, uint32_t veloci
 }
 
 void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& P) {
+    ghoul_assert(settings.inputTextures.color, "No color texture provided");
+    ghoul_assert(settings.inputTextures.depth, "No depth texture provided");
+    ghoul_assert(settings.inputTextures.normal, "No normal texture provided");
+
     // For seeding noise
     static float time = 0.f;
     time = time + 0.016f;
@@ -1261,7 +1118,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
 
         ghoul::opengl::TextureUnit unit;
         unit.activate();
-        glBindTexture(GL_TEXTURE_2D, settings.inputTextures.depth);
+        settings.inputTextures.depth->bind();
 
         program.activate();
         program.setUniform(uniforms.texDepth, unit);
@@ -1278,7 +1135,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     glPopDebugGroup();
 
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Generate Linear Depth Mipmaps");
-    glBindTexture(GL_TEXTURE_2D, glObj.linearDepth.texture);
+    glObj.linearDepth.texture->bind();
     glGenerateMipmap(GL_TEXTURE_2D);
     glPopDebugGroup();
 
@@ -1300,7 +1157,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
 
             ghoul::opengl::TextureUnit velocityUnit;
             velocityUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, settings.inputTextures.velocity);
+            settings.inputTextures.velocity->bind();
 
             program.activate();
             program.setUniform(uniforms.texVel, velocityUnit);
@@ -1326,7 +1183,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
 
             ghoul::opengl::TextureUnit velocityUnit;
             velocityUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, glObj.velocity.texTilemax);
+            glObj.velocity.texTilemax->bind();
 
             program.activate();
             program.setUniform(uniforms.texVel, velocityUnit);
@@ -1346,7 +1203,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     }
 
     GLenum dstBuffer = GL_COLOR_ATTACHMENT1;
-    uint32_t srcTexture = glObj.targets.texColor[0];
+    ghoul::opengl::Texture* srcTexture = glObj.targets.texColor[0].get();
 
     auto swapTarget = [&dstBuffer, &srcTexture]() {
         dstBuffer =
@@ -1354,9 +1211,9 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             GL_COLOR_ATTACHMENT1 :
             GL_COLOR_ATTACHMENT0;
         srcTexture =
-            srcTexture == glObj.targets.texColor[0] ?
-            glObj.targets.texColor[1] :
-            glObj.targets.texColor[0];
+            srcTexture == glObj.targets.texColor[0].get() ?
+            glObj.targets.texColor[1].get() :
+            glObj.targets.texColor[0].get();
     };
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.targets.fbo);
@@ -1390,15 +1247,15 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Shading");
         ghoul::opengl::TextureUnit depthUnit;
         depthUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, settings.inputTextures.depth);
+        settings.inputTextures.depth->bind();
 
         ghoul::opengl::TextureUnit colorUnit;
         colorUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, settings.inputTextures.color);
+        settings.inputTextures.color->bind();
 
         ghoul::opengl::TextureUnit normalUnit;
         normalUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, settings.inputTextures.normal);
+        settings.inputTextures.normal->bind();
 
         program.activate();
         program.setUniform(uniforms.texDepth, depthUnit);
@@ -1417,8 +1274,8 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "SSAO");
     if (settings.ambientOcclusion[0].enabled) {
         applySsao(
-            glObj.linearDepth.texture,
-            settings.inputTextures.normal,
+            *glObj.linearDepth.texture,
+            *settings.inputTextures.normal,
             P,
             settings.ambientOcclusion[0].intensity,
             settings.ambientOcclusion[0].radius,
@@ -1428,8 +1285,8 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     }
     if (settings.ambientOcclusion[1].enabled) {
         applySsao(
-            glObj.linearDepth.texture,
-            settings.inputTextures.normal,
+            *glObj.linearDepth.texture,
+            *settings.inputTextures.normal,
             P,
             settings.ambientOcclusion[1].intensity,
             settings.ambientOcclusion[1].radius,
@@ -1461,10 +1318,10 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Temporal AA");
         }
         applyTemporalAa(
-            glObj.linearDepth.texture,
-            srcTexture,
-            settings.inputTextures.velocity,
-            glObj.velocity.texNeighbormax,
+            *glObj.linearDepth.texture,
+            *srcTexture,
+            *settings.inputTextures.velocity,
+            *glObj.velocity.texNeighbormax,
             jitter,
             prevJitter,
             feedbackMin,
@@ -1480,7 +1337,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             glDrawBuffer(dstBuffer);
             ghoul::opengl::TextureUnit srcUnit;
             srcUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, srcTexture);
+            srcTexture->bind();
 
             glObj.sharpen.program->activate();
             glObj.sharpen.program->setUniform(glObj.sharpen.uniforms.tex, srcUnit);
@@ -1496,7 +1353,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Add Emissive");
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
-        blitTexture(settings.inputTextures.emissive);
+        blitTexture(*settings.inputTextures.emissive);
         glDisable(GL_BLEND);
         glPopDebugGroup();
     }
@@ -1505,27 +1362,27 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         swapTarget();
         glDrawBuffer(dstBuffer);
         glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "DOF");
-        int lastFbo;
-        glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &lastFbo);
+        int prevFbo;
+        glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prevFbo);
 
         ghoul::opengl::TextureUnit linearDepthUnit;
         linearDepthUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, glObj.linearDepth.texture);
+        glObj.linearDepth.texture->bind();
 
         {
             ghoul::opengl::ProgramObject& program = *glObj.bokehDof.halfRes.program;
             auto& uniforms = glObj.bokehDof.halfRes.uniforms;
 
             glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "DOF Prepass");
-            int lastViewport[4];
-            glGetIntegerv(GL_VIEWPORT, lastViewport);
+            int prevViewport[4];
+            glGetIntegerv(GL_VIEWPORT, prevViewport);
             glViewport(0, 0, glObj.texWidth / 2, glObj.texHeight / 2);
 
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.bokehDof.halfRes.fbo);
 
             ghoul::opengl::TextureUnit colorUnit;
             colorUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, srcTexture);
+            srcTexture->bind();
 
             program.activate();
             program.setUniform(uniforms.texDepth, linearDepthUnit);
@@ -1537,23 +1394,22 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             glDrawArrays(GL_TRIANGLES, 0, 3);
             glBindVertexArray(0);
 
-            glViewport(lastViewport[0], lastViewport[1], lastViewport[2], lastViewport[3]);
+            glViewport(prevViewport[0], prevViewport[1], prevViewport[2], prevViewport[3]);
             glPopDebugGroup();
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
         }
 
         {
             ghoul::opengl::ProgramObject& program = *glObj.bokehDof.program;
             auto& uniforms = glObj.bokehDof.uniforms;
 
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
-
             ghoul::opengl::TextureUnit colorCocUnit;
             colorCocUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, glObj.bokehDof.halfRes.colorCoc);
+            glObj.bokehDof.halfRes.colorCoc->bind();
 
             ghoul::opengl::TextureUnit srcUnit;
             srcUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, srcTexture);
+            srcTexture->bind();
 
             program.activate();
             program.setUniform(uniforms.texHalfRes, colorCocUnit);
@@ -1585,7 +1441,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             Tonemapping::Passthrough;
         ghoul::opengl::TextureUnit srcUnit;
         srcUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, srcTexture);
+        srcTexture->bind();
 
         switch (tonemapping) {
             case Tonemapping::Passthrough:
@@ -1653,7 +1509,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         glEnable(GL_BLEND);
         glColorMask(1, 1, 1, 1);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        blitTexture(settings.inputTextures.postTonemap);
+        blitTexture(*settings.inputTextures.postTonemap);
         glDisable(GL_BLEND);
         glPopDebugGroup();
     }
@@ -1669,7 +1525,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "FXAA");
         ghoul::opengl::TextureUnit unit;
         unit.activate();
-        glBindTexture(GL_TEXTURE_2D, srcTexture);
+        srcTexture->bind();
 
         program.activate();
         program.setUniform(uniforms.tex, unit);
@@ -1694,7 +1550,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         glEnable(GL_BLEND);
         glColorMask(1, 1, 1, 1);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        blitTexture(srcTexture, settings.inputTextures.depth);
+        blitTexture(*srcTexture, *settings.inputTextures.depth);
         glDisable(GL_BLEND);
 
         glPopDebugGroup();

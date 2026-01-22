@@ -31,6 +31,7 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/util/threadpool.h>
 #include <ghoul/glm.h>
+#include <ghoul/opengl/texture.h>
 
 struct md_gl_shaders_t;
 
@@ -46,9 +47,6 @@ public:
     void internalDeinitializeGL() final;
 
     GLuint fbo() const;
-    GLuint colorTexture() const;
-    GLuint normalTexture() const;
-    GLuint depthTexture() const;
 
     const md_gl_shaders_t& shaders() const;
 
@@ -65,9 +63,9 @@ private:
     void render();
     
     GLuint _fbo = 0;
-    GLuint _colorTex  = 0;
-    GLuint _normalTex = 0;
-    GLuint _depthTex  = 0;
+    std::unique_ptr<ghoul::opengl::Texture> _colorTex;
+    std::unique_ptr<ghoul::opengl::Texture> _normalTex;
+    std::unique_ptr<ghoul::opengl::Texture> _depthTex;
     int _width = 0;
     int _height = 0;
     

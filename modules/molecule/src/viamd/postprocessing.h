@@ -27,6 +27,8 @@
 
 struct mat4_t;
 
+namespace ghoul::opengl { class Texture; }
+
 namespace postprocessing {
 
 void initialize(int width, int height);
@@ -89,12 +91,12 @@ struct Settings {
     } fxaa;
 
     struct {
-        unsigned int depth = 0;
-        unsigned int color = 0;
-        unsigned int normal = 0;
-        unsigned int velocity = 0;
-        unsigned int emissive = 0;
-        unsigned int postTonemap = 0;
+        ghoul::opengl::Texture* color = nullptr;
+        ghoul::opengl::Texture* depth = nullptr;
+        ghoul::opengl::Texture* normal = nullptr;
+        ghoul::opengl::Texture* velocity = nullptr;
+        ghoul::opengl::Texture* emissive = nullptr;
+        ghoul::opengl::Texture* postTonemap = nullptr;
     } inputTextures;
 };
 
