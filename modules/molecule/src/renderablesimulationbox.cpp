@@ -27,9 +27,9 @@
 #include <modules/molecule/moleculemodule.h>
 #include <modules/molecule/src/cache.h>
 #include <modules/molecule/src/util.h>
-#include <modules/molecule/src/viamd/coloring.h>
-#include <modules/molecule/src/viamd/loader.h>
-#include <modules/molecule/src/viamd/postprocessing.h>
+#include <modules/molecule/src/coloring.h>
+#include <modules/molecule/src/loader.h>
+#include <modules/molecule/src/postprocessing.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>

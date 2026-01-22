@@ -25,7 +25,7 @@
 
 // Shaders for HBAO are based on nVidias examples and are copyrighted as stated above
 
-#include <modules/molecule/src/viamd/postprocessing.h>
+#include <modules/molecule/src/postprocessing.h>
 
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>

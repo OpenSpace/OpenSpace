@@ -25,7 +25,7 @@
 #include <modules/molecule/src/cache.h>
 
 #include <modules/molecule/moleculemodule.h>
-#include <modules/molecule/src/viamd/loader.h>
+#include <modules/molecule/src/loader.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/util/threadpool.h>

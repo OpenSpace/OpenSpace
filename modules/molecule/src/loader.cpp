@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/molecule/src/viamd/loader.h>
+#include <modules/molecule/src/loader.h>
 
 #include <ghoul/logging/logmanager.h>
 #include <core/md_allocator.h>

@@ -29,11 +29,11 @@ set(HEADER_FILES
   src/renderablemolecule.h
   src/renderablesimulationbox.h
   src/cache.h
+  src/coloring.h
   src/def.h
+  src/loader.h
+  src/postprocessing.h
   src/util.h
-  src/viamd/coloring.h
-  src/viamd/loader.h
-  src/viamd/postprocessing.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -42,10 +42,10 @@ set(SOURCE_FILES
   src/renderablemolecule.cpp
   src/renderablesimulationbox.cpp
   src/cache.cpp
+  src/coloring.cpp
+  src/loader.cpp
+  src/postprocessing.cpp
   src/util.cpp
-  src/viamd/coloring.cpp
-  src/viamd/loader.cpp
-  src/viamd/postprocessing.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
