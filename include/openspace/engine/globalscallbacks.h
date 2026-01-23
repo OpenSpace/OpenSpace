@@ -51,7 +51,9 @@ inline std::vector<std::function<void()>>* initializeGL;
 inline std::vector<std::function<void()>>* deinitializeGL;
 inline std::vector<std::function<void()>>* preSync;
 inline std::vector<std::function<void()>>* postSyncPreDraw;
-inline std::vector<std::function<void()>>* render;
+inline std::vector<
+    std::function<void(const glm::mat4&, const glm::mat4&, const glm::mat4&)>
+>* render;
 inline std::vector<std::function<void()>>* draw2D;
 inline std::vector<std::function<void()>>* postDraw;
 inline std::vector<KeyboardCallback>* keyboard;
