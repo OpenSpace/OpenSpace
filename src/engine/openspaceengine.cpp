@@ -1287,14 +1287,15 @@ void OpenSpaceEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& view
 
     global::renderEngine->render(sceneMatrix, viewMatrix, projectionMatrix);
 
-    for (const std::function<void()>& func : *global::callback::render) {
+    using F = std::function<void(const glm::mat4&, const glm::mat4&, const glm::mat4&)>;
+    for (const F& func : *global::callback::render) {
         ZoneScopedN("[Module] render");
 #ifdef TRACY_ENABLE
         TracyPlot("RAM", static_cast<int64_t>(ramInUse()));
         TracyPlot("VRAM", static_cast<int64_t>(vramInUse()));
 #endif // TRACY_ENABLE
 
-        func();
+        func(sceneMatrix, viewMatrix, projectionMatrix);
     }
 
     LTRACE("OpenSpaceEngine::render(end)");
