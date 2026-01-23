@@ -672,7 +672,9 @@ void initialize(int width, int height) {
         ghoul::opengl::Texture::Format::RGBA,
         GL_RGBA16_SNORM,
         GL_SHORT,
-        ghoul::opengl::Texture::FilterMode::Nearest
+        ghoul::opengl::Texture::FilterMode::Nearest,
+        ghoul::opengl::Texture::WrappingMode::Repeat,
+        ghoul::opengl::Texture::TakeOwnership::No
     );
     glObj.ssao.texRandom->uploadTexture();
 

@@ -441,6 +441,8 @@ RenderableSimulationBox::~RenderableSimulationBox() {
 void RenderableSimulationBox::initializeGL() {
     ZoneScoped
 
+    global::moduleEngine->module<MoleculeModule>()->initializeShaders();
+
     // Initialize billboard
     _billboard.program = ghoul::opengl::ProgramObject::Build(
         "Simulationbox Billboard",
@@ -487,6 +489,8 @@ void RenderableSimulationBox::initializeGL() {
 }
 
 void RenderableSimulationBox::deinitializeGL() {
+    global::moduleEngine->module<MoleculeModule>()->deinitializeShaders();
+
     glDeleteBuffers(1, &_billboard.vao);
     _billboard.program = nullptr;
 }

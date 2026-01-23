@@ -43,8 +43,10 @@ public:
 
     MoleculeModule();
 
-    void internalInitializeGL() final;
     void internalDeinitializeGL() final;
+
+    void initializeShaders();
+    void deinitializeShaders();
 
     GLuint fbo() const;
 
@@ -61,6 +63,8 @@ private:
     void internalInitialize(const ghoul::Dictionary&) override;
     void preDraw();
     void render();
+
+    inline static int _initializeCounter = 0;
     
     GLuint _fbo = 0;
     std::unique_ptr<ghoul::opengl::Texture> _colorTex;

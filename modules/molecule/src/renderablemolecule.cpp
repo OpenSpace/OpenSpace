@@ -335,10 +335,14 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
 RenderableMolecule::~RenderableMolecule() {}
 
 void RenderableMolecule::initializeGL() {
+    global::moduleEngine->module<MoleculeModule>()->initializeShaders();
+
     initMolecule(_moleculeFile, _trajectoryFile);
 }
 
 void RenderableMolecule::deinitializeGL() {
+    global::moduleEngine->module<MoleculeModule>()->deinitializeShaders();
+
     for (const std::unique_ptr<Representation>& rep : _repData) {
         md_gl_representation_free(&rep->glRep);
     }

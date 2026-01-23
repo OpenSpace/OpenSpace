@@ -126,7 +126,6 @@ namespace openspace {
 
 MoleculeModule::MoleculeModule()
     : OpenSpaceModule(Name)
-    , _shaders(new md_gl_shaders_t)
     , _ssaoEnabled(SSAOEnabledInfo, true)
     , _ssaoIntensity(SSAOIntensityInfo, 7.5f, 0.f, 100.f)
     , _ssaoRadius(SSAORadiusInfo, 1.f, 0.1f, 10.f)
@@ -163,7 +162,29 @@ void MoleculeModule::internalInitialize(const ghoul::Dictionary&) {
     global::callback::render->push_back([this]() { render(); });
 }
 
-void MoleculeModule::internalInitializeGL() {
+void MoleculeModule::internalDeinitializeGL() {
+    ghoul_assert(_initializeCounter == 0, "Renderable type did not deinitialize shaders");
+
+    _depthTex = nullptr;
+    _normalTex = nullptr;
+    _colorTex = nullptr;
+    glDeleteFramebuffers(1, &_fbo);
+    _fbo = 0;
+    postprocessing::shutdown();
+
+    if (_shaders) {
+        md_gl_shaders_free(_shaders.get());
+        md_gl_shutdown();
+    }
+}
+
+void MoleculeModule::initializeShaders() {
+    _initializeCounter++;
+
+    if (_initializeCounter > 1) {
+        return;
+    }
+
     glGenFramebuffers(1, &_fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
     const glm::ivec2 size = global::windowDelegate->currentWindowSize();
@@ -223,6 +244,7 @@ void MoleculeModule::internalInitializeGL() {
     );
 
     md_gl_initialize();
+    _shaders = std::make_unique<md_gl_shaders_t>();
     md_gl_shaders_init(_shaders.get(), ShaderOutputSnippet.data());
 
     postprocessing::initialize(size.x, size.y);
@@ -230,16 +252,8 @@ void MoleculeModule::internalInitializeGL() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-void MoleculeModule::internalDeinitializeGL() {
-    _depthTex = nullptr;
-    _normalTex = nullptr;
-    _colorTex = nullptr;
-    glDeleteFramebuffers(1, &_fbo);
-    _fbo = 0;
-    postprocessing::shutdown();
-    
-    md_gl_shaders_free(_shaders.get());
-    md_gl_shutdown();
+void MoleculeModule::deinitializeShaders() {
+    _initializeCounter--;
 }
 
 GLuint MoleculeModule::fbo() const {
@@ -263,6 +277,10 @@ void MoleculeModule::setProjectionMatrix(glm::mat4 p) {
 }
 
 void MoleculeModule::preDraw() {
+    if (_initializeCounter == 0) {
+        return;
+    }
+
     // Check if resized
     const glm::ivec2 size = global::windowDelegate->currentWindowSize();
     if (size.x == _width && size.y == _height) {
@@ -279,6 +297,10 @@ void MoleculeModule::preDraw() {
 }
 
 void MoleculeModule::render() {
+    if (_initializeCounter == 0) {
+        return;
+    }
+
     GLint lastFbo;
     GLint lastDrawBufferCount = 0;
     GLenum lastDrawBuffers[8];
