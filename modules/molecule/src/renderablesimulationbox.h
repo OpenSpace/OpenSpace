@@ -96,7 +96,7 @@ private:
     };
     std::vector<Molecules> _molecules;
 
-    properties::OptionProperty _repType;
+    properties::OptionProperty _representation;
     properties::OptionProperty _coloring;
     properties::FloatProperty _repScale;
     properties::FloatProperty _animationSpeed;
@@ -105,14 +105,8 @@ private:
     properties::FloatProperty _angularVelocity;
     properties::DVec3Property _simulationBox;
     properties::FloatProperty _collisionRadius;
-    properties::StringProperty _viamdFilter;
+    properties::StringProperty _filter;
 
-    properties::BoolProperty  _ssaoEnabled;
-    properties::FloatProperty _ssaoIntensity;
-    properties::FloatProperty _ssaoRadius;
-    properties::FloatProperty _ssaoBias;
-    properties::FloatProperty _exposure;
-    
     properties::Vec4Property  _circleColor;
     properties::FloatProperty _circleWidth;
     properties::FloatProperty _circleFalloff;

@@ -65,8 +65,7 @@ local EarthMoleculesTroposphere = {
     AngularVelocity = math.rad(60.0),
     SimulationBox = { 100.0, 100.0, 100.0 },
     CollisionRadius = 2.0,
-    AnimationSpeed = 100,
-    SSAOEnabled = true
+    AnimationSpeed = 100
   },
   GUI = {
     Name = "Earth Troposphere",
@@ -106,8 +105,7 @@ local EarthMoleculesThermosphere = {
     SimulationBox = { 100.0, 100.0, 100.0 },
     CollisionRadius = 4.0,
     AnimationSpeed = 100,
-    SimulationSpeed = 50,
-    SSAOEnabled = true
+    SimulationSpeed = 50
   },
   GUI = {
     Name = "Earth Thermosphere",

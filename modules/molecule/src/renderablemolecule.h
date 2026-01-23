@@ -70,9 +70,9 @@ private:
     // This is the current frame of the trajectory
     double _frame = 0.0;
 
-    md_molecule_t _molecule;
+    md_molecule_t _molecule = {};
     const md_trajectory_i* _trajectory = nullptr;
-    md_gl_molecule_t _glMolecule;
+    md_gl_molecule_t _glMolecule = {};
     double _radius = 0.0;
 
     struct Representation : public properties::PropertyOwner {

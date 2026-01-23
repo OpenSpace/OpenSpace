@@ -336,7 +336,6 @@ RenderableMolecule::~RenderableMolecule() {}
 
 void RenderableMolecule::initializeGL() {
     global::moduleEngine->module<MoleculeModule>()->initializeShaders();
-
     initMolecule(_moleculeFile, _trajectoryFile);
 }
 
@@ -364,9 +363,8 @@ void RenderableMolecule::update(const UpdateData& data) {
     if (!_renderableInView) {
         return;
     }
-    else {
-        _renderableInView = false;
-    }
+
+    _renderableInView = false;
 
     // update animation
     if (_trajectory) {
@@ -378,18 +376,17 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
     ZoneScoped
 
     // compute distance from camera to molecule
-    glm::dvec3 forward = data.modelTransform.translation - data.camera.positionVec3();
-    glm::dvec3 dir = data.camera.viewDirectionWorldSpace();
+    const glm::dvec3 frwd = data.modelTransform.translation - data.camera.positionVec3();
+    const glm::dvec3 dir = data.camera.viewDirectionWorldSpace();
     // "signed" distance from camera to object
-    double distance = glm::length(forward) * sign(glm::dot(dir, forward));
+    const double distance = glm::length(frwd) * sign(glm::dot(dir, frwd));
 
     // distance < 0 means behind the camera, 10000 is arbitrary
     if (distance < 0.0 || distance > 10000.0) {
         return;
     }
-    else {
-        _renderableInView = true;
-    }
+
+    _renderableInView = true;
 
     // because the molecule is small, a scaling of the view matrix causes the molecule
     // to be moved out of view in clip space. Resetting the scaling for the molecule
@@ -397,12 +394,12 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
     Camera camCopy = data.camera;
     camCopy.setScaling(0.1f);
 
-    glm::mat4 viewMatrix =
+    const glm::mat4 viewMatrix =
         camCopy.combinedViewMatrix() *
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
         glm::scale(glm::dmat4(1.0), data.modelTransform.scale) *
         glm::dmat4(data.modelTransform.rotation);
-    glm::mat4 projMatrix = glm::dmat4(camCopy.sgctInternal.projectionMatrix());
+    const glm::mat4 projMatrix = glm::dmat4(camCopy.sgctInternal.projectionMatrix());
         
     // Center the molecule with respect to its cell
     const vec3_t trans = _molecule.cell.basis * vec3_set1(0.5f);
@@ -411,7 +408,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
     std::vector<md_gl_draw_op_t> drawOps;
     drawOps.reserve((_repData.size()));
 
-    if (_molecule.atom.count) {
+    if (_molecule.atom.count > 0) {
         for (const std::unique_ptr<Representation>& rep : _repData) {
             if (rep->enabled) {
                 drawOps.emplace_back(&rep->glRep, &modelMat[0][0]);

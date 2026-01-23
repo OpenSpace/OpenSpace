@@ -66,8 +66,8 @@ namespace {
         }
     }
 
-    constexpr openspace::properties::Property::PropertyInfo RepTypeInfo = {
-        "RepType",
+    constexpr openspace::properties::Property::PropertyInfo RepresentationInfo = {
+        "Representation",
         "Representation Type",
         "How to draw the molecule"
     };
@@ -120,40 +120,10 @@ namespace {
         "Radius of the collision sphere around molecules"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ViamdFilterInfo = {
-        "ViamdFilter",
-        "Viamd Filter",
-        "VIAMD script filter for atom visibility"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SSAOEnabledInfo = {
-        "SSAOEnabled",
-        "Enable SSAO",
-        "Enable SSAO"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SSAOIntensityInfo = {
-        "SSAOIntensity",
-        "SSAO Intensity",
-        "SSAO Intensity"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SSAORadiusInfo = {
-        "SSAORadius",
-        "SSAO Radius",
-        "SSAO Radius"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SSAOBiasInfo = {
-        "SSAOBias",
-        "SSAO Bias",
-        "SSAO Bias"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ExposureInfo = {
-        "Exposure",
-        "Exposure",
-        "Exposure, Controls the Exposure setting for the tonemap"
+    constexpr openspace::properties::Property::PropertyInfo FilterInfo = {
+        "Filter",
+        "Filter",
+        "ViaMD Script filter for atom visibility"
     };
 
     constexpr openspace::properties::Property::PropertyInfo CircleColorInfo = {
@@ -182,7 +152,7 @@ namespace {
         };
         std::vector<MoleculeData> molecules;
 
-        enum class [[codegen::map(mol::rep::Type)]] RepresentationType {
+        enum class [[codegen::map(mol::rep::Type)]] Representation {
             SpaceFill,
             Licorice,
             Ribbons,
@@ -190,7 +160,7 @@ namespace {
         };
 
         // [[codegen::verbatim(RepTypeInfo.description)]]
-        std::optional<RepresentationType> repType;
+        std::optional<Representation> representation;
 
         enum class [[codegen::map(mol::rep::Color)]] Coloring {
             // Uniform,
@@ -227,24 +197,9 @@ namespace {
         // [[codegen::verbatim(CollisionRadiusInfo.description)]]
         float collisionRadius;
 
-        // [[codegen::verbatim(ViamdFilterInfo.description)]]
-        std::optional<std::string> viamdFilter;
+        // [[codegen::verbatim(FilterInfo.description)]]
+        std::optional<std::string> filter;
         
-        // [[codegen::verbatim(SSAOEnabledInfo.description)]]
-        std::optional<bool> ssaoEnabled;
-        
-        // [[codegen::verbatim(SSAOIntensityInfo.description)]]
-        std::optional<float> ssaoIntensity;
-        
-        // [[codegen::verbatim(SSAORadiusInfo.description)]]
-        std::optional<float> ssaoRadius;
-
-        // [[codegen::verbatim(SSAOBiasInfo.description)]]
-        std::optional<float> ssaoBias;
-
-        // [[codegen::verbatim(ExposureInfo.description)]]
-        std::optional<float> exposure;
-
         // [[codegen::verbatim(CircleColorInfo.description)]]
         std::optional<glm::vec4> circleColor;
         
@@ -266,7 +221,7 @@ documentation::Documentation RenderableSimulationBox::Documentation() {
 
 RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _repType(RepTypeInfo)
+    , _representation(RepresentationInfo)
     , _coloring(ColoringInfo)
     , _repScale(RepScaleInfo, 1.f, 0.1f, 10.f)
     , _animationSpeed(AnimationSpeedInfo, 1.f, 0.f, 100.f)
@@ -275,12 +230,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     , _angularVelocity(AngularVelocityInfo)
     , _simulationBox(SimulationBoxInfo)
     , _collisionRadius(CollisionRadiusInfo)
-    , _viamdFilter(ViamdFilterInfo)
-    , _ssaoEnabled(SSAOEnabledInfo, true)
-    , _ssaoIntensity(SSAOIntensityInfo, 12.f, 0.f, 100.f)
-    , _ssaoRadius(SSAORadiusInfo, 12.f, 0.1f, 100.f)
-    , _ssaoBias(SSAOBiasInfo, 0.1f, 0.f, 1.f)
-    , _exposure(ExposureInfo, 0.3f, 0.1f, 10.f)
+    , _filter(FilterInfo)
     , _circleColor(
         CircleColorInfo,
         glm::vec4(1.f, 1.f, 1.f, 0.25f),
@@ -292,16 +242,16 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
 {
     auto onUpdateRep = [this]() {
         for (Molecules& mol : _molecules) {
-            const mol::rep::Type t = static_cast<mol::rep::Type>(_repType.value());
+            const mol::rep::Type t = static_cast<mol::rep::Type>(_representation.value());
             mol::util::updateRepType(mol.data.drawRep, t, _repScale);
         }
     };
 
     auto onUpdateCol = [this]() {
         for (Molecules& mol : _molecules) {
-            const auto& filter = _viamdFilter.value();
-
             md_bitfield_t mask = md_bitfield_create(default_allocator);
+
+            const std::string& filter = _filter;
             if (!filter.empty() && filter != "" && filter != "all") {
                 str_t str = {filter.data(), (int64_t)filter.length()};
                 char errBuf[1024];
@@ -325,7 +275,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
                 md_bitfield_set_range(&mask, 0, mol.data.molecule.atom.count);
             }
 
-            const mol::rep::Type t = static_cast<mol::rep::Type>(_repType.value());
+            const mol::rep::Type t = static_cast<mol::rep::Type>(_representation.value());
             mol::util::updateRepType(mol.data.drawRep, t, _repScale);
             const mol::rep::Color c = static_cast<mol::rep::Color>(_coloring.value());
             mol::util::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
@@ -338,17 +288,17 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
         _molecules.emplace_back(mod.moleculeFile, mod.trajectoryFile, mod.count);
     }
 
-    _repType.addOptions({
+    _representation.addOptions({
         { static_cast<int>(mol::rep::Type::SpaceFill), "Space Fill" },
         { static_cast<int>(mol::rep::Type::Ribbons), "Ribbons" },
         { static_cast<int>(mol::rep::Type::Cartoon), "Cartoon" },
         { static_cast<int>(mol::rep::Type::Licorice), "Licorice" }
     });
-    _repType = static_cast<int>(codegen::map<mol::rep::Type>(
-        p.repType.value_or(Parameters::RepresentationType::SpaceFill)
+    _representation = static_cast<int>(codegen::map<mol::rep::Type>(
+        p.representation.value_or(Parameters::Representation::SpaceFill)
     ));
-    _repType.onChange(onUpdateRep);
-    addProperty(_repType);
+    _representation.onChange(onUpdateRep);
+    addProperty(_representation);
 
     _coloring.addOptions({
         { static_cast<int>(mol::rep::Color::Cpk), "CPK" },
@@ -383,24 +333,9 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
 
     _collisionRadius = p.collisionRadius;
 
-    _viamdFilter = p.viamdFilter.value_or(_viamdFilter);
-    _viamdFilter.onChange(onUpdateCol);
-    addProperty(_viamdFilter);
-
-    _ssaoEnabled = p.ssaoEnabled.value_or(_ssaoEnabled);
-    addProperty(_ssaoEnabled);
-
-    _ssaoIntensity = p.ssaoIntensity.value_or(_ssaoIntensity);
-    addProperty(_ssaoIntensity);
-
-    _ssaoRadius = p.ssaoRadius.value_or(_ssaoRadius);
-    addProperty(_ssaoRadius);
-
-    _ssaoBias = p.ssaoBias.value_or(_ssaoBias);
-    addProperty(_ssaoBias);
-
-    _exposure = p.exposure.value_or(_exposure);
-    addProperty(_exposure);
+    _filter = p.filter.value_or(_filter);
+    _filter.onChange(onUpdateCol);
+    addProperty(_filter);
 
     _circleColor = p.circleColor.value_or(_circleColor);
     _circleColor.setViewOption(properties::Property::ViewOptions::Color);
@@ -455,7 +390,7 @@ void RenderableSimulationBox::initializeGL() {
 
     for (Molecules& mol : _molecules) {
         initMolecule(mol.data, mol.moleculeFile, mol.trajectoryFile.value_or(""));
-        const std::string& filter = _viamdFilter;
+        const std::string& filter = _filter;
 
         md_bitfield_t mask = md_bitfield_create(default_allocator);
         if (!filter.empty() && filter != "all") {
@@ -481,7 +416,7 @@ void RenderableSimulationBox::initializeGL() {
             md_bitfield_set_range(&mask, 0, mol.data.molecule.atom.count);
         }
 
-        const mol::rep::Type t = static_cast<mol::rep::Type>(_repType.value());
+        const mol::rep::Type t = static_cast<mol::rep::Type>(_representation.value());
         mol::util::updateRepType(mol.data.drawRep, t, _repScale);
         const mol::rep::Color c = static_cast<mol::rep::Color>(_coloring.value());
         mol::util::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
