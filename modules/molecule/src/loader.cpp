@@ -103,8 +103,8 @@ namespace {
     }
 
     bool getHeader(struct md_trajectory_o* inst, md_trajectory_header_t* header) {
-        LoadedTrajectory* loaded_traj = (LoadedTrajectory*)inst;
-        return md_trajectory_get_header(loaded_traj->traj, header);
+        LoadedTrajectory* loadedTraj = reinterpret_cast<LoadedTrajectory*>(inst);
+        return md_trajectory_get_header(loadedTraj->traj, header);
     }
 
     int64_t fetchFrameData(struct md_trajectory_o*, int64_t idx, void* data) {
@@ -129,10 +129,9 @@ namespace {
             "Invalid index"
         );
 
-        md_frame_data_t* frameData;
-        md_frame_cache_lock_t* lock = 0;
-        bool result = true;
-        bool inCache = md_frame_cache_find_or_reserve(
+        md_frame_data_t* frameData = nullptr;
+        md_frame_cache_lock_t* lock = nullptr;
+        const bool inCache = md_frame_cache_find_or_reserve(
             &trajectory->cache,
             idx,
             &frameData,
@@ -156,7 +155,7 @@ namespace {
             };
 
             md_trajectory_fetch_frame_data(trajectory->traj, idx, frameDataPtr);
-            result = md_trajectory_decode_frame_data(
+            bool result = md_trajectory_decode_frame_data(
                 trajectory->traj,
                 frameDataPtr,
                 frameDataSize,
@@ -236,23 +235,21 @@ namespace {
             }
         }
 
-        if (result) {
-            const int64_t num_atoms = frameData->header.num_atoms;
-            if (header) {
-                *header = frameData->header;
-            }
-            if (outX) {
-                std::memcpy(outX, frameData->x, sizeof(float) * num_atoms);
-            }
-            if (outY) {
-                std::memcpy(outY, frameData->y, sizeof(float) * num_atoms);
-            }
-            if (outZ) {
-                std::memcpy(outZ, frameData->z, sizeof(float) * num_atoms);
-            }
+        const int64_t num_atoms = frameData->header.num_atoms;
+        if (header) {
+            *header = frameData->header;
+        }
+        if (outX) {
+            std::memcpy(outX, frameData->x, sizeof(float) * num_atoms);
+        }
+        if (outY) {
+            std::memcpy(outY, frameData->y, sizeof(float) * num_atoms);
+        }
+        if (outZ) {
+            std::memcpy(outZ, frameData->z, sizeof(float) * num_atoms);
         }
 
-        return result;
+        return true;
     }
 
     bool loadFrame(md_trajectory_o* inst, int64_t idx,
@@ -338,7 +335,7 @@ md_trajectory_i* openFile(std::filesystem::path filename, const md_molecule_t* m
     );
     std::memset(traj, 0, sizeof(md_trajectory_i));
 
-    LoadedTrajectory* inst = allocLoadedTrajectory((uint64_t)traj);
+    LoadedTrajectory* inst = allocLoadedTrajectory(reinterpret_cast<uint64_t>(traj));
     inst->mol = mol;
     inst->api = api;
     inst->traj = internalTraj;

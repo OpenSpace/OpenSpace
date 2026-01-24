@@ -50,7 +50,7 @@ namespace {
         uint64_t stride = 0;
     };
 
-    struct md_mem_trajectory_t {
+    struct MemTrajectory {
         uint64_t magic;
         md_trajectory_header_t header;
         md_array(float) x;
@@ -62,7 +62,7 @@ namespace {
         md_allocator_i* alloc;
     };
 
-    struct md_cached_trajectory_t {
+    struct CachedTrajectory {
         uint64_t magic;
         md_trajectory_header_t header;
         md_frame_cache_t cache;
@@ -89,7 +89,7 @@ namespace {
 
     bool memTrajectoryGetHeader(md_trajectory_o* inst, md_trajectory_header_t* header) {
         ghoul_assert(inst, "No instance");
-        md_mem_trajectory_t* mem = reinterpret_cast<md_mem_trajectory_t*>(inst);
+        MemTrajectory* mem = reinterpret_cast<MemTrajectory*>(inst);
         *header = mem->header;
         return true;
     }
@@ -99,7 +99,7 @@ namespace {
                                 float* z)
     {
         ghoul_assert(inst, "No instance");
-        md_mem_trajectory_t* mem = reinterpret_cast<md_mem_trajectory_t*>(inst);
+        MemTrajectory* mem = reinterpret_cast<MemTrajectory*>(inst);
         if (idx < 0 || mem->header.num_frames <= idx) {
             return false;
         }
@@ -164,12 +164,12 @@ namespace {
         ghoul_assert(alloc, "No allocator");
 
         void* data = reinterpret_cast<md_trajectory_i*>(
-            md_alloc(alloc, sizeof(md_trajectory_i) + sizeof(md_mem_trajectory_t))
+            md_alloc(alloc, sizeof(md_trajectory_i) + sizeof(MemTrajectory))
         );
-        std::memset(data, 0, sizeof(md_trajectory_i) + sizeof(md_mem_trajectory_t));
+        std::memset(data, 0, sizeof(md_trajectory_i) + sizeof(MemTrajectory));
 
         md_trajectory_i* traj = reinterpret_cast<md_trajectory_i*>(data);
-        md_mem_trajectory_t* mem = reinterpret_cast<md_mem_trajectory_t*>(traj + 1);
+        MemTrajectory* mem = reinterpret_cast<MemTrajectory*>(traj + 1);
 
         traj->inst = reinterpret_cast<md_trajectory_o*>(mem);
         traj->get_header = memTrajectoryGetHeader;
@@ -218,12 +218,12 @@ namespace {
     void memTrajectoryDestroy(md_trajectory_i* traj) {
         ghoul_assert(traj, "No trajectory");
 
-        md_mem_trajectory_t* mem = reinterpret_cast<md_mem_trajectory_t*>(traj->inst);
+        MemTrajectory* mem = reinterpret_cast<MemTrajectory*>(traj->inst);
         md_array_free(mem->x, mem->alloc);
         md_array_free(mem->y, mem->alloc);
         md_array_free(mem->z, mem->alloc);
         md_array_free(mem->frameHeaders, mem->alloc);
-        md_free(mem->alloc, traj, sizeof(md_trajectory_i) + sizeof(md_mem_trajectory_t));
+        md_free(mem->alloc, traj, sizeof(md_trajectory_i) + sizeof(MemTrajectory));
         std::memset(traj, 0, sizeof(md_trajectory_i));
     }
 
@@ -246,15 +246,14 @@ namespace {
 
         if (result) {
             const md_unit_cell_t* cell = &frameData->header.cell;
-            const bool have_cell = cell->flags != 0;
+            const bool haveCell = cell->flags != 0;
 
-            if (deperiodizeOnLoad && have_cell) {
+            if (deperiodizeOnLoad && haveCell) {
                 md_util_deperiodize_system(
                     frameData->x,
                     frameData->y,
                     frameData->z,
-                    cell,
-                    mol
+                    cell, mol
                 );
             }
         }
@@ -265,7 +264,7 @@ namespace {
 
     bool cachedTrajectoryGetHeader(md_trajectory_o* inst, md_trajectory_header_t* header)
     {
-        md_cached_trajectory_t* cached = reinterpret_cast<md_cached_trajectory_t*>(inst);
+        CachedTrajectory* cached = reinterpret_cast<CachedTrajectory*>(inst);
         std::memcpy(header, &cached->header, sizeof(md_trajectory_header_t));
         return true;
     }
@@ -285,7 +284,7 @@ namespace {
         ghoul_assert(inst, "No instance");
         ghoul_assert(dataSize == sizeof(int64_t), "Invalid data size");
 
-        md_cached_trajectory_t* cached = reinterpret_cast<md_cached_trajectory_t*>(inst);
+        CachedTrajectory* cached = reinterpret_cast<CachedTrajectory*>(inst);
 
         int64_t idx = *(reinterpret_cast<const int64_t*>(data));
         ghoul_assert(
@@ -296,7 +295,7 @@ namespace {
         md_frame_data_t* frameData;
         md_frame_cache_lock_t* lock = 0;
         bool result = true;
-        bool inCache = md_frame_cache_find_or_reserve(
+        const bool inCache = md_frame_cache_find_or_reserve(
             &cached->cache,
             idx,
             &frameData,
@@ -349,14 +348,10 @@ namespace {
         ghoul_assert(backingTraj, "No backing trajectory");
         ghoul_assert(alloc, "No allocator");
 
-        void* data = md_alloc(
-            alloc,
-            sizeof(md_trajectory_i) + sizeof(md_cached_trajectory_t)
-        );
-        std::memset(data, 0, sizeof(md_trajectory_i) + sizeof(md_cached_trajectory_t));
+        void* data = md_alloc(alloc, sizeof(md_trajectory_i) + sizeof(CachedTrajectory));
+        std::memset(data, 0, sizeof(md_trajectory_i) + sizeof(CachedTrajectory));
         md_trajectory_i* traj = reinterpret_cast<md_trajectory_i*>(data);
-        md_cached_trajectory_t* cachedTraj =
-            reinterpret_cast<md_cached_trajectory_t*>(traj + 1);
+        CachedTrajectory* cachedTraj = reinterpret_cast<CachedTrajectory*>(traj + 1);
 
         const int64_t numFrames = md_trajectory_num_frames(backingTraj);
         const int64_t numCacheFrames = std::min(32LL, numFrames);
@@ -365,7 +360,11 @@ namespace {
         cachedTraj->deperiodizeOnLoad = deperiodizeOnLoad;
         cachedTraj->mol = mol;
         if (mol && mol->backbone.count) {
-            md_array_resize(cachedTraj->secondaryStructures, numFrames * mol->backbone.count, alloc);
+            md_array_resize(
+                cachedTraj->secondaryStructures,
+                numFrames * mol->backbone.count,
+                alloc
+            );
             cachedTraj->secondaryStructureStride = mol->backbone.count;
             for (int64_t i = 0; i < md_array_size(cachedTraj->secondaryStructures); i++) {
                 cachedTraj->secondaryStructures[i] = MD_SECONDARY_STRUCTURE_COIL;
@@ -390,91 +389,73 @@ namespace {
 
         using namespace openspace;
 
-        if (mol->backbone.range_count) {
-            uint64_t ssStride = mol->backbone.count;
-            md_secondary_structure_t* ssData = nullptr;
+        if (mol->backbone.range_count == 0) {
+            return;
+        }
 
-            const uint64_t magic = *reinterpret_cast<uint64_t*>(traj->inst);
-            switch (magic) {
-                case MdCachedTrajMagic:
-                {
-                    md_cached_trajectory_t* t =
-                        reinterpret_cast<md_cached_trajectory_t*>(traj->inst);
-                    ssData = t->secondaryStructures;
-                    break;
-                }
-                case MdMemTrajMagic:
-                {
-                    md_mem_trajectory_t* t =
-                        reinterpret_cast<md_mem_trajectory_t*>(traj->inst);
-                    ssData = t->secondaryStructures;
-                    break;
-                }
+        uint64_t ssStride = mol->backbone.count;
+        md_secondary_structure_t* ssData = nullptr;
+
+        const uint64_t magic = *reinterpret_cast<uint64_t*>(traj->inst);
+        switch (magic) {
+            case MdCachedTrajMagic:
+            {
+                CachedTrajectory* t = reinterpret_cast<CachedTrajectory*>(traj->inst);
+                ssData = t->secondaryStructures;
+                break;
             }
+            case MdMemTrajMagic:
+            {
+                MemTrajectory* t = reinterpret_cast<MemTrajectory*>(traj->inst);
+                ssData = t->secondaryStructures;
+                break;
+            }
+        }
 
-            ThreadPool& pool =
-                global::moduleEngine->module<MoleculeModule>()->threadPool();
+        ThreadPool& pool = global::moduleEngine->module<MoleculeModule>()->threadPool();
 
-            const int64_t numChunks = 8;
-            const int64_t numFrames = md_trajectory_num_frames(traj);
-            for (int64_t i = 0; i < numChunks; i++) {
-                const int64_t beg = i * numFrames / numChunks;
-                const int64_t end =
-                    (i == numChunks - 1) ? numFrames : (i + 1) * numFrames / numChunks;
-                pool.enqueue([ssData, ssStride, traj, old_mol = mol, beg, end]() {
-                    // @TODO(Robin) This is stupid and the interface to compute secondary
-                    // structure should be changed
-                    md_molecule_t mol = *old_mol;
-                    const int64_t stride = ALIGN_TO(mol.atom.count, 16);
-                    const int64_t bytes = stride * sizeof(float) * 3;
-                    float* coords = reinterpret_cast<float*>(
-                        md_alloc(default_allocator, bytes)
+        const int64_t numChunks = 8;
+        const int64_t numFrames = md_trajectory_num_frames(traj);
+        for (int64_t i = 0; i < numChunks; i++) {
+            const int64_t beg = i * numFrames / numChunks;
+            const int64_t end =
+                (i == numChunks - 1) ? numFrames : (i + 1) * numFrames / numChunks;
+            pool.enqueue([ssData, ssStride, traj, old_mol = mol, beg, end]() {
+                // @TODO(Robin) This is stupid and the interface to compute secondary
+                // structure should be changed
+                md_molecule_t mol = *old_mol;
+                const int64_t stride = ALIGN_TO(mol.atom.count, 16);
+                const int64_t bytes = stride * sizeof(float) * 3;
+                float* coords = reinterpret_cast<float*>(
+                    md_alloc(default_allocator, bytes)
+                );
+                defer {
+                    md_free(default_allocator, coords, bytes);
+                };
+
+                // Overwrite the coordinate section, since we will load trajectory
+                // frame data into these
+                mol.atom.x = coords + stride * 0;
+                mol.atom.y = coords + stride * 1;
+                mol.atom.z = coords + stride * 2;
+
+                for (int64_t i = beg; i < end; i++) {
+                    md_trajectory_load_frame(
+                        traj,
+                        i,
+                        nullptr,
+                        mol.atom.x,
+                        mol.atom.y,
+                        mol.atom.z
                     );
-                    defer {
-                        md_free(default_allocator, coords, bytes);
-                    };
-
-                    // Overwrite the coordinate section, since we will load trajectory
-                    // frame data into these
-                    mol.atom.x = coords + stride * 0;
-                    mol.atom.y = coords + stride * 1;
-                    mol.atom.z = coords + stride * 2;
-
-                    for (int64_t i = beg; i < end; i++) {
-                        md_trajectory_load_frame(
-                            traj,
-                            i,
-                            nullptr,
-                            mol.atom.x,
-                            mol.atom.y,
-                            mol.atom.z
-                        );
-                        md_util_backbone_secondary_structure_compute(
-                            ssData + ssStride * i,
-                            ssStride,
-                            &mol
-                        );
-                    }
-                });
-            }
+                    md_util_backbone_secondary_structure_compute(
+                        ssData + ssStride * i,
+                        ssStride,
+                        &mol
+                    );
+                }
+            });
         }
-    }
-
-    std::span<const md_secondary_structure_t> getSecondaryStructureFrameData(
-                                                              const md_trajectory_i* traj,
-                                                                            int64_t frame)
-    {
-        if (frame >= 0 && frame < md_trajectory_num_frames(traj)) {
-            auto it = ssTable.find(traj);
-            if (it != ssTable.end()) {
-                const SecondaryStructureData& data = it->second;
-                const uint64_t ssStride = data.stride;
-                const md_secondary_structure_t* ssSrc = data.ss + frame * ssStride;
-                return { ssSrc, ssStride };
-            }
-        }
-
-        return {};
     }
 } // namespace
 
@@ -497,10 +478,7 @@ const md_molecule_t* loadMolecule(std::filesystem::path file, bool isCoarseGrain
 
     md_molecule_api* api = load::mol::api(file);
     if (!api) {
-        throw ghoul::RuntimeError(
-            "Failed to find appropriate molecule loader api",
-            "MOLD"
-        );
+        throw ghoul::RuntimeError("Failed to find molecule loader api", "MOLD");
     }
 
     md_molecule_t mol = {};
@@ -530,10 +508,7 @@ const md_trajectory_i* loadTrajectory(std::filesystem::path file,
 
     md_trajectory_api* api = load::traj::api(file);
     if (!api) {
-        throw ghoul::RuntimeError(
-            "Failed to find appropriate trajectory loader api",
-            "MOLD"
-        );
+        throw ghoul::RuntimeError("Failed to find trajectory loader api", "MOLD");
     }
 
     std::string f = file.string();
@@ -545,7 +520,7 @@ const md_trajectory_i* loadTrajectory(std::filesystem::path file,
 
     if (deperiodizeOnLoad && !mol) {
         throw ghoul::RuntimeError(
-            "Deperiodize trajectory was set, but no valid was molecule provided",
+            "Deperiodize trajectory was set, but no valid molecule was provided",
             "MOLD"
         );
     }
@@ -592,8 +567,7 @@ void prefetchFrames(const md_trajectory_i* traj, std::span<int64_t> frames) {
         return;
     }
 
-    md_cached_trajectory_t* cachedTraj =
-        reinterpret_cast<md_cached_trajectory_t*>(traj->inst);
+    CachedTrajectory* cachedTraj = reinterpret_cast<CachedTrajectory*>(traj->inst);
     if (cachedTraj->magic == MdCachedTrajMagic) {
         ThreadPool& pool = global::moduleEngine->module<MoleculeModule>()->threadPool();
             
@@ -628,8 +602,8 @@ FrameData frameData(const md_trajectory_i* traj, int64_t frame) {
     switch (magic) {
         case MdMemTrajMagic:
         {
-            const md_mem_trajectory_t* inst =
-                reinterpret_cast<const md_mem_trajectory_t*>(traj->inst);
+            const MemTrajectory* inst =
+                reinterpret_cast<const MemTrajectory*>(traj->inst);
             const size_t stride = inst->header.num_atoms;
             data.header = inst->frameHeaders + frame;
             data.x = { inst->x + frame * stride, stride };
@@ -643,8 +617,7 @@ FrameData frameData(const md_trajectory_i* traj, int64_t frame) {
         }
         case MdCachedTrajMagic:
         {
-            md_cached_trajectory_t* inst =
-                reinterpret_cast<md_cached_trajectory_t*>(traj->inst);
+            CachedTrajectory* inst = reinterpret_cast<CachedTrajectory*>(traj->inst);
             md_frame_data_t* frameData;
             md_frame_cache_lock_t* lock = nullptr;
             bool result = true;

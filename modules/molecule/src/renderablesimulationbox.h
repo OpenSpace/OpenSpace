@@ -39,8 +39,6 @@
 
 namespace openspace {
 
-struct RenderData;
-
 class RenderableSimulationBox : public Renderable {
 public:
     explicit RenderableSimulationBox(const ghoul::Dictionary& dictionary);
@@ -49,34 +47,41 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
     bool isReady() const override;
-    void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
 
     static documentation::Documentation Documentation();
 
 private:
-    struct MoleculeState {
-        glm::dvec3 position;
-        double angle;
-        // moving direction where magnitude is linear velocity
-        glm::dvec3 direction;
-        // rotation axis where magnitude is angular velocity
-        glm::dvec3 rotationAxis;
+    struct Molecules {
+        std::filesystem::path moleculeFile;
+        std::optional<std::filesystem::path> trajectoryFile;
+        std::optional<int> count;
+
+        struct Data {
+            struct State {
+                glm::dvec3 position;
+                double angle;
+                // moving direction where magnitude is linear velocity
+                glm::dvec3 direction;
+                // rotation axis where magnitude is angular velocity
+                glm::dvec3 rotationAxis;
+            };
+
+            std::vector<State> states;
+            md_molecule_t molecule = {};
+            const md_trajectory_i* trajectory = nullptr;
+            md_gl_representation_t drawRep = {};
+            md_gl_molecule_t drawMol = {};
+        };
+        Data data;
     };
 
-    struct molecule_data_t {
-        std::vector<MoleculeState> states;
-        md_molecule_t molecule = {};
-        const md_trajectory_i* trajectory = nullptr;
-        md_gl_representation_t drawRep = {};
-        md_gl_molecule_t drawMol = {};
-    };
+    void updateSimulation(Molecules::Data& mol, double dt);
     
-    void updateSimulation(molecule_data_t& mol, double dt);
-    
-    void initMolecule(molecule_data_t& mol, std::filesystem::path molFile,
+    void initMolecule(Molecules::Data& mol, std::filesystem::path molFile,
         std::filesystem::path trajFile);
-    void freeMolecule(molecule_data_t& mol);
+    void freeMolecule(Molecules::Data& mol);
 
     bool _renderableInView = true;
 
@@ -87,13 +92,7 @@ private:
         GLuint vao = 0;
     } _billboard;
 
-    struct Molecules {
-        std::filesystem::path moleculeFile;
-        std::optional<std::filesystem::path> trajectoryFile;
-        std::optional<int> count;
 
-        molecule_data_t data;
-    };
     std::vector<Molecules> _molecules;
 
     properties::OptionProperty _representation;

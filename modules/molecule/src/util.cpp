@@ -110,28 +110,28 @@ void updateRepColor(md_gl_representation_t& rep, const md_molecule_t& mol,
 
     switch (color) {
         case mol::rep::Color::Cpk:
-            color_atoms_cpk(colors, count, mol);
+            mol::color::atoms::cpk(colors, count, mol);
             break;
         case mol::rep::Color::AtomIndex:
-            color_atoms_idx(colors, count, mol);
+            mol::color::atoms::idx(colors, count, mol);
             break;
         case mol::rep::Color::ResId:
-            color_atoms_residue_id(colors, count, mol);
+            mol::color::atoms::residueId(colors, count, mol);
             break;
         case mol::rep::Color::ResIndex:
-            color_atoms_residue_index(colors, count, mol);
+            mol::color::atoms::residueIndex(colors, count, mol);
             break;
         case mol::rep::Color::ChainId:
-            color_atoms_chain_id(colors, count, mol);
+            mol::color::atoms::chainId(colors, count, mol);
             break;
         case mol::rep::Color::ChainIndex:
-            color_atoms_chain_index(colors, count, mol);
+            mol::color::atoms::chainIndex(colors, count, mol);
             break;
         case mol::rep::Color::SecondaryStructure:
-            color_atoms_secondary_structure(colors, count, mol);
+            mol::color::atoms::secondaryStructure(colors, count, mol);
             break;
         case mol::rep::Color::Uniform:
-            color_atoms_uniform(colors, count, convertColor(uniformColor), nullptr);
+            mol::color::atoms::uniform(colors, count, convertColor(uniformColor));
             break;
     }
 

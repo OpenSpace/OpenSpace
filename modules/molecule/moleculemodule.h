@@ -54,15 +54,13 @@ public:
 
     ThreadPool& threadPool();
 
-    void setViewMatrix(glm::mat4 v);
-    void setProjectionMatrix(glm::mat4 p);
-
     std::vector<documentation::Documentation> documentations() const override;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
     void preDraw();
-    void render();
+    void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
+        const glm::mat4& projectionMatrix);
 
     inline static int _initializeCounter = 0;
     
@@ -74,8 +72,6 @@ private:
     int _height = 0;
     
     std::unique_ptr<md_gl_shaders_t> _shaders = nullptr;
-    glm::mat4 _viewMatrix;
-    glm::mat4 _projectionMatrix;
 
     properties::BoolProperty _ssaoEnabled;
     properties::FloatProperty _ssaoIntensity;

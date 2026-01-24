@@ -102,8 +102,7 @@ local VenusMolecules50km = {
     AngularVelocity = math.rad(60.0),
     SimulationBox = { 100.0, 100.0, 100.0 },
     CollisionRadius = 2.0,
-    AnimationSpeed = 100,
-    SSAOEnabled = true
+    AnimationSpeed = 100
   },
   GUI = {
     Name = "Venus 50km",
@@ -151,8 +150,7 @@ local VenusMolecules50kmCloud = {
     AngularVelocity = math.rad(60.0),
     SimulationBox = { 100.0, 100.0, 100.0 },
     CollisionRadius = 2.0,
-    AnimationSpeed = 100,
-    SSAOEnabled = true
+    AnimationSpeed = 100
   },
   GUI = {
     Name = "Venus 50km Cloud",

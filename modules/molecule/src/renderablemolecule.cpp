@@ -89,89 +89,106 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo MoleculeFileInfo = {
         "MoleculeFile",
         "Molecule File",
-        "Molecule file path"
+        "The path to the file from which the molecular structure is read."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TrajectoryFileInfo = {
         "TrajectoryFile",
         "Trajectory File",
-        "Trajectory file path"
+        "The path to the file from which the trajectory informatoin is read."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CoarseGrainedInfo = {
         "CoarseGrained",
         "Coarse Grained",
-        "Enable if the dataset should be interpreted as coarse grained"
+        "Enable if the dataset should be interpreted as coarse grained."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyPbcOnLoadInfo = {
         "ApplyPbcOnLoad",
         "Apply PBC On Load",
-        "Applies Periodic Boundary Constraints upon loading trajectory frames"
+        "Applies Periodic Boundary Constraints upon loading trajectory frames."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyPbcPerFrameInfo = {
         "ApplyPbcPerFrame",
         "Apply PBC Per Frame",
-        "Applies Periodic Boundary Constraints for each interpolated frame (Can be "
-        "CPU-intensive!)"
+        "Applies Periodic Boundary Constraints for each interpolated frame (can be "
+        "CPU-intensive)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
-        "Representation Enabled",
-        "Enable the representation"
+        "Enabled",
+        "Enables the representation"
     };
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
-        "Representation Type",
-        "Visual representation type of the molecule"
+        "Type",
+        "Visual representation type of the molecule."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
-        "Representation Color",
-        "Select a color mapping for the atoms"
+        "Color",
+        "Select a color mapping for the atoms."
     };
 
     constexpr openspace::properties::Property::PropertyInfo UniformColorInfo = {
         "UniformColor",
         "Uniform Color",
-        "The uniform color to apply for the representation"
+        "The uniform color to apply for the representation if that color mode is "
+        "selected."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterInfo = {
         "Filter",
-        "Representation Filter",
-        "Filter for atom visibility"
+        "Filter",
+        "The filter used to remove parts of the dataset."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
         "Scale",
-        "Representation Scale",
-        "Scale for the Geometric representation of atoms"
+        "Scale",
+        "Scale for the geometric representation of atoms."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AnimationBaseScaleInfo = {
         "AnimationBaseScale",
         "Animation Base Scale",
-        "Base scale for the animation, tune this from its implicit value of 1.0 to sync "
-        "up its animation with other trajectories"
+        "Base scale for the animation, tune this to sync up its animation with other "
+        "trajectories."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
         "AnimationSpeed",
         "Animation Speed",
-        "Playback speed of the animation (in frames per second)"
+        "Playback speed of the animation (in frames per second)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AnimationRepeatModeInfo = {
         "AnimationRepeatMode",
         "Animation Repeat Mode",
-        "Controls how the animation should be repeated"
+        "Controls how the animation should be repeated when the end of the animation is "
+        "reached."
     };
 
+    /**
+     * This Renderable class is used to render a single molecular system, which can be
+     * either static or dynamic. The rendering is done using the rendering engine of the
+     * [ViaMD](https://github.com/scanberg/viamd) framework. Many of the parameters are
+     * described in greater detail on their [Wiki](https://github.com/scanberg/viamd/wiki)
+     * page. It is possible to assign multiple representations to a molecular structure
+     * and specify individual settings per representation, including the ability to filter
+     * using ViaMD's powerful filtering scripting language.
+     *
+     * The current implementation supports the loading of "PDB", "Gromacs", "XYZ", "XMOL",
+     * and "ARC" files for the molecular structure and "PDB", "XTC", "TRR", "XYZ", "XMOL",
+     * and "ARC" files for the optional trajectories.
+     *
+     * If no trajectory file is provided only the structural information is shown.
+     */
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
         // [[codegen::verbatim(MoleculeFileInfo.description)]]
         std::string moleculeFile;
@@ -406,7 +423,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
     const mat4_t modelMat = mat4_translate(-trans.x, -trans.y, -trans.z);
 
     std::vector<md_gl_draw_op_t> drawOps;
-    drawOps.reserve((_repData.size()));
+    drawOps.reserve(_repData.size());
 
     if (_molecule.atom.count > 0) {
         for (const std::unique_ptr<Representation>& rep : _repData) {
@@ -432,8 +449,8 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &lastFbo);
 
     GLint lastDrawBufferCount = 0;
-    GLenum lastDrawBuffers[8];
-    for (int i = 0; i < ARRAY_SIZE(lastDrawBuffers); i++) {
+    std::array<GLenum, 8> lastDrawBuffers;
+    for (int i = 0; i < lastDrawBuffers.size(); i++) {
         GLint drawBuf;
         glGetIntegerv(GL_DRAW_BUFFER0 + i, &drawBuf);
         if (!drawBuf) {
@@ -453,12 +470,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
     md_gl_draw(&args);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
-    glDrawBuffers(lastDrawBufferCount, lastDrawBuffers);
-        
-    global::moduleEngine->module<MoleculeModule>()->setViewMatrix(
-        data.camera.combinedViewMatrix()
-    );
-    global::moduleEngine->module<MoleculeModule>()->setProjectionMatrix(projMatrix);
+    glDrawBuffers(lastDrawBufferCount, lastDrawBuffers.data());
 }
 
 void RenderableMolecule::initMolecule(std::string_view molFile, std::string_view trajFile)

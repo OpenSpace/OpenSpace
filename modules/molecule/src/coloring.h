@@ -30,13 +30,18 @@
 struct md_bitfield_t;
 struct md_molecule_t;
 
-void color_atoms_uniform(uint32_t* colors, int64_t count, uint32_t rgba, const md_bitfield_t* mask);
-void color_atoms_cpk(uint32_t* colors, int64_t count, const md_molecule_t& mol);
-void color_atoms_idx(uint32_t* colors, int64_t count, const md_molecule_t&);
-void color_atoms_residue_id(uint32_t* colors, int64_t count, const md_molecule_t& mol);
-void color_atoms_residue_index(uint32_t* colors, int64_t count, const md_molecule_t& mol);
-void color_atoms_chain_id(uint32_t* colors, int64_t count, const md_molecule_t& mol);
-void color_atoms_chain_index(uint32_t* colors, int64_t count, const md_molecule_t& mol);
-void color_atoms_secondary_structure(uint32_t* colors, int64_t count, const md_molecule_t& mol);
+namespace mol::color::atoms {
+
+void uniform(uint32_t* colors, int64_t count, uint32_t rgba,
+    const md_bitfield_t* mask = nullptr);
+void cpk(uint32_t* colors, int64_t count, const md_molecule_t& mol);
+void idx(uint32_t* colors, int64_t count, const md_molecule_t&);
+void residueId(uint32_t* colors, int64_t count, const md_molecule_t& mol);
+void residueIndex(uint32_t* colors, int64_t count, const md_molecule_t& mol);
+void chainId(uint32_t* colors, int64_t count, const md_molecule_t& mol);
+void chainIndex(uint32_t* colors, int64_t count, const md_molecule_t& mol);
+void secondaryStructure(uint32_t* colors, int64_t count, const md_molecule_t& mol);
+
+} // namespace mol::color::atoms
 
 #endif // __OPENSPACE_MODULE_MOLECULE___COLORING___H__

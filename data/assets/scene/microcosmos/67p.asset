@@ -129,8 +129,7 @@ local MoleculeAcetaldehyde = {
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeAcetaldehyde .. "acetaldehyde.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    MoleculeFile = moleculeAcetaldehyde .. "acetaldehyde.arc"
   },
   GUI = {
     Name = "Acetaldehyde",
@@ -149,8 +148,7 @@ local MoleculeAceticAcid = {
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeAceticacid .. "acetic-acid.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    MoleculeFile = moleculeAceticacid .. "acetic-acid.arc"
   },
   GUI = {
     Name = "Acetic Acid",
@@ -169,8 +167,7 @@ local MoleculeButanal = {
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeButanal .. "butanal.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    MoleculeFile = moleculeButanal .. "butanal.arc"
   },
   GUI = {
     Name = "Butanal",
@@ -189,8 +186,7 @@ local MoleculeCo2 = {
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeCO2 .. "co2.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    MoleculeFile = moleculeCO2 .. "co2.arc"
   },
   GUI = {
     Name = "Co2",
@@ -209,8 +205,7 @@ local MoleculeEg = {
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeEG .. "eg.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    MoleculeFile = moleculeEG .. "eg.arc"
   },
   GUI = {
     Name = "Eg",
@@ -229,8 +224,7 @@ local MoleculeEthanol = {
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeEthanol .. "ethanol.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    MoleculeFile = moleculeEthanol .. "ethanol.arc"
   },
   GUI = {
     Name = "Ethanol",
@@ -249,8 +243,7 @@ local MoleculeFormaldehyde = {
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeFormaldehyde .. "formaldehyde.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    MoleculeFile = moleculeFormaldehyde .. "formaldehyde.arc"
   },
   GUI = {
     Name = "Formaldehyde",
@@ -269,8 +262,7 @@ local MoleculeFormic = {
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeFormic .. "formic.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    MoleculeFile = moleculeFormic .. "formic.arc"
   },
   GUI = {
     Name = "Formic",
@@ -289,8 +281,7 @@ local MoleculeH20 = {
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeH2O .. "h2o.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    MoleculeFile = moleculeH2O .. "h2o.arc"
   },
   GUI = {
     Name = "H20",
@@ -309,8 +300,7 @@ local MoleculeMethanol = {
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeMethanol .. "methanol.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    MoleculeFile = moleculeMethanol .. "methanol.arc"
   },
   GUI = {
     Name = "Methanol",
@@ -329,8 +319,7 @@ local MoleculeMethylAcetate = {
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeMethylAcetate .. "methyl-acetate.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    MoleculeFile = moleculeMethylAcetate .. "methyl-acetate.arc"
   },
   GUI = {
     Name = "Methyl Acetate",
@@ -349,8 +338,7 @@ local MoleculeN2 = {
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeN2 .. "n2.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    MoleculeFile = moleculeN2 .. "n2.arc"
   },
   GUI = {
     Name = "N2",
@@ -369,8 +357,7 @@ local MoleculeO2 = {
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeO2 .. "o2.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    MoleculeFile = moleculeO2 .. "o2.arc"
   },
   GUI = {
     Name = "O2",
@@ -384,13 +371,12 @@ local MoleculePropanal = {
   Transform = {
     Translation = {
         Type = "StaticTranslation",
-        Position = { 0.0, 80.0, 0.0 }
+        Position = { 20.0, 60.0, 0.0 }
     }
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculePropanal .. "propanal.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    MoleculeFile = moleculePropanal .. "propanal.arc"
   },
   GUI = {
     Name = "Propanal",

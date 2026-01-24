@@ -31,7 +31,7 @@ enum class Type {
     SpaceFill,
     Licorice,
     Ribbons,
-    Cartoon,
+    Cartoon
 };
 
 enum class Color {
@@ -45,6 +45,6 @@ enum class Color {
     Uniform
 };
 
-}
+} // namespace mol::rep
 
 #endif // __OPENSPACE_MODULE_MOLECULE___DEF___H__

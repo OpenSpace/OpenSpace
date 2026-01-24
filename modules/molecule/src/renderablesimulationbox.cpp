@@ -69,81 +69,91 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo RepresentationInfo = {
         "Representation",
         "Representation Type",
-        "How to draw the molecule"
+        "Visual representation type of the molecule."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColoringInfo = {
         "Coloring",
         "Coloring",
-        "Select a color mapping for the atoms"
+        "Select a color mapping for the atoms."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RepScaleInfo = {
         "RepScale",
         "Representation Scale",
-        "Thickness of the atoms in Space Fill or Licorice representation"
+        "Thickness of the atoms when using the Space Fill or Licorice representations."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
         "AnimationSpeed",
         "Animation Speed",
-        "Playback speed of the animation (in frames per second)"
+        "Playback speed of the animation (in frames per second)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SimulationSpeedInfo = {
         "SimulationSpeed",
         "Simulation Speed",
-        "Adjust the speed of the simulation (seconds per second)"
+        "Adjust the speed of the simulation (seconds per second)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LinearVelocityInfo = {
         "LinearVelocity",
         "Linear Velocity",
-        "Average linear velocity at the start of the simulation (m/s)"
+        "Average linear velocity at the start of the simulation (m/s)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AngularVelocityInfo = {
         "AngularVelocity",
         "Angular Velocity",
-        "Average angular velocity at the start of the simulation (radians/s)"
+        "Average angular velocity at the start of the simulation (radians/s)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SimulationBoxInfo = {
         "SimulationBox",
         "Simulation Box",
-        "Size of the periodic simulation box (x/y/z)"
+        "Size of the periodic simulation box."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CollisionRadiusInfo = {
         "CollisionRadius",
         "Collision Radius",
-        "Radius of the collision sphere around molecules"
+        "Radius of the collision sphere around molecules."
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterInfo = {
         "Filter",
         "Filter",
-        "ViaMD Script filter for atom visibility"
+        "The filter used to remove parts of the dataset."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CircleColorInfo = {
         "CircleColor",
         "Circle Color",
-        "Color of the circle outlining the simulation"
+        "Color of the circle outlining the simulation."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CircleWidthInfo = {
         "CircleWidth",
         "Circle Width",
-        "Width of the circle outlining the simulation"
+        "Width of the circle outlining the simulation."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CircleFalloffInfo = {
         "CircleFalloff",
         "Circle Falloff",
-        "Falloff exponent of the circle outlining the simulation"
+        "Falloff exponent of the circle outlining the simulation."
     };
 
+    /**
+     * This Renderable type is capable of rendering a number of different molecules on a
+     * moving path using periodic boundary conditions. This can be used to show, for
+     * example the distribution of different molecules or atoms in a specific spatial
+     * region, such as the atmosphere of a planet.
+     * Multiple molecules can be provided and for each the path containing the structural
+     * data and the count of molecules has to be provided; specifying the trajectory file
+     * that describes the movement of each individual molecule in its on relative frame,
+     * is optional.
+     */
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
         struct MoleculeData {
             std::string moleculeFile;
@@ -159,7 +169,7 @@ namespace {
             Cartoon
         };
 
-        // [[codegen::verbatim(RepTypeInfo.description)]]
+        // [[codegen::verbatim(RepresentationInfo.description)]]
         std::optional<Representation> representation;
 
         enum class [[codegen::map(mol::rep::Color)]] Coloring {
@@ -253,7 +263,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
 
             const std::string& filter = _filter;
             if (!filter.empty() && filter != "" && filter != "all") {
-                str_t str = {filter.data(), (int64_t)filter.length()};
+                str_t str = { filter.data(), static_cast<int64_t>(filter.length()) };
                 char errBuf[1024];
 
                 const bool success = md_filter(
@@ -348,19 +358,16 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     addProperty(_circleFalloff);
 
     for (Molecules& molecule : _molecules) {
-        molecule_data_t mol;
+        Molecules::Data mol;
         for (int i = 0; i < molecule.count; i++) {
-            MoleculeState demoMolecule = {
-                .position = i == 0 ?
-                    _simulationBox.value() / 2.0 :
-                    glm::linearRand(glm::dvec3(0.0), _simulationBox.value()),
-                .angle = glm::linearRand(0.0, glm::two_pi<double>()),
-                .direction = glm::sphericalRand(_linearVelocity.value()),
-                .rotationAxis = glm::sphericalRand(_angularVelocity.value())
-            };
-            mol.states.push_back(std::move(demoMolecule));
+            mol.states.emplace_back(
+                i == 0 ? _simulationBox.value() / 2.0 :
+                glm::linearRand(glm::dvec3(0.0), _simulationBox.value()),
+                glm::linearRand(0.0, glm::two_pi<double>()),
+                glm::sphericalRand(_linearVelocity.value()),
+                glm::sphericalRand(_angularVelocity.value())
+            );
         }
-
         molecule.data = std::move(mol);
     }
 
@@ -434,57 +441,13 @@ bool RenderableSimulationBox::isReady() const {
     return true;
 }
 
-void RenderableSimulationBox::updateSimulation(molecule_data_t& mol, double dt) {
-    // update positions / rotations
-    for (MoleculeState& molecule : mol.states) {
-        molecule.position += molecule.direction * dt;
-        molecule.position = glm::mod(molecule.position, _simulationBox.value());
-        molecule.angle += glm::length(molecule.rotationAxis) * dt;
-    }
-
-    const double collRadiusSquared = _collisionRadius * _collisionRadius;
-
-    // compute collisions
-    // those collisions are really simplistic, they assume spherical boundaries, equal
-    // mass, and are order-dependent.
-    for (auto it1 = mol.states.begin(); it1 != mol.states.end(); it1++) {
-        for (auto it2 = std::next(it1); it2 != mol.states.end(); it2++) {
-            MoleculeState& m1 = *it1;
-            MoleculeState& m2 = *it2;
-
-            glm::dvec3 distVec = m2.position - m1.position;
-            double distSquared = glm::dot(distVec, distVec);
-
-            // collision detected
-            if (distSquared < collRadiusSquared &&
-                glm::dot(m1.direction, m2.direction) < 0.f)
-            {
-                double dist = std::sqrt(distSquared);
-                double intersection = 2.0 * _collisionRadius - dist;
-                // swap the direction components normal to the collision plane from the 2
-                // molecules. (simplistic elastic collision of 2 spheres with same mass)
-                glm::dvec3 dir = distVec / dist;
-                glm::dvec3 compM1 = dir * glm::dot(m1.direction, dir);
-                glm::dvec3 compM2 = -dir * glm::dot(m2.direction, -dir);
-                m1.direction = m1.direction - compM1 + compM2;
-                m2.direction = m2.direction - compM2 + compM1;
-                
-                // move the spheres away from each other (not intersecting)
-                m1.position += -dir * intersection;
-                m2.position += dir * intersection;
-            }
-        }
-    }
-}
-
 void RenderableSimulationBox::update(const UpdateData& data) {
     // avoid updating if not in view, as it can be quite expensive.
     if (!_renderableInView) {
         return;
     }
-    else {
-        _renderableInView = false;
-    }
+
+    _renderableInView = false;
 
     double tCur = data.time.j2000Seconds();
     double dt = tCur - data.previousFrameTime.j2000Seconds();
@@ -530,17 +493,16 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     glm::vec3 dir = data.camera.viewDirectionWorldSpace();
 
     // "signed" distance from camera to object.
-    float distance = length(forward) * sign(dot(dir, forward));
+    const float distance = length(forward) * sign(glm::dot(dir, forward));
     // we apply artificial scaling to everything to cheat a bit with the unit system:
-    float fakeScaling = 100.f / distance;
+    const float fakeScaling = 100.f / distance;
 
     // distance < 0 means behind the camera, 1E4 is arbitrary.
     if (distance < 0.f || distance > 1E4) {
         return;
     }
-    else {
-        _renderableInView = true;
-    }
+
+    _renderableInView = true;
 
     // Because the molecule is small, a scaling of the view matrix causes the molecule to
     // be moved out of view in clip space. Resetting the scaling for the molecule is fine
@@ -548,15 +510,15 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     Camera camCopy = data.camera;
     camCopy.setScaling(0.1f);
 
-    glm::mat4 viewMatrix =
+    const glm::mat4 viewMatrix =
         camCopy.combinedViewMatrix() *
-        translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        scale(glm::dmat4(1.0), data.modelTransform.scale) *
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::scale(glm::dmat4(1.0), data.modelTransform.scale) *
         glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(fakeScaling)) *
-        translate(glm::dmat4(1.0), -_simulationBox.value() / 2.0);
+        glm::translate(glm::dmat4(1.0), -_simulationBox.value() / 2.0);
 
-    glm::mat4 projMatrix = glm::dmat4(camCopy.sgctInternal.projectionMatrix());
+    const glm::mat4 projMatrix = glm::dmat4(camCopy.sgctInternal.projectionMatrix());
 
     // We want to preallocate this to avoid reallocations
     size_t count = 0;
@@ -571,12 +533,10 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     transforms.reserve(count);
 
     for (const Molecules& mol : _molecules) {
-        for (size_t i = 0; i < mol.data.states.size(); i++) {
-            const MoleculeState& state = mol.data.states[i];
+        for (const Molecules::Data::State& state : mol.data.states) {
             glm::dmat4 transform =
                 glm::translate(glm::dmat4(1.0), state.position) *
-                glm::rotate(glm::dmat4(1.0), state.angle, state.rotationAxis) *
-                glm::dmat4(1.0);
+                glm::rotate(glm::dmat4(1.0), state.angle, state.rotationAxis);
 
             transforms.emplace_back(transform);
             drawOps.emplace_back(&mol.data.drawRep, glm::value_ptr(transforms.back()));
@@ -613,21 +573,22 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 
 
     // draw billboard pre-rendered with molecule inside
-    glm::dmat4 billboardModel =
+    const glm::dmat4 billboardModel =
         camCopy.combinedViewMatrix() *
         glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        glm::scale(glm::dmat4(1.0), data.modelTransform.scale) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(_simulationBox)) *
-        glm::scale(glm::dmat4(1.0), glm::dvec3(fakeScaling));
-    glm::mat4 faceCamera = inverse(camCopy.viewRotationMatrix());
-    glm::mat4 transform = projMatrix * glm::mat4(billboardModel) * faceCamera;
-    double width =
+        glm::scale(
+            glm::dmat4(1.0),
+            data.modelTransform.scale * _simulationBox.value() * glm::dvec3(fakeScaling)
+        );
+    const glm::mat4 faceCamera = inverse(camCopy.viewRotationMatrix());
+    const glm::mat4 transform = projMatrix * glm::mat4(billboardModel) * faceCamera;
+    const double width =
         distance / glm::compMax(_simulationBox.value() * data.modelTransform.scale) *
         0.01 * _circleWidth;
 
-    glm::dvec4 depth_ = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
+    const glm::dvec4 depthVec = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
         billboardModel * glm::dvec4(0.0, 0.0, 0.0, 1.0);
-    double depth = normalizeDouble(depth_.w);
+    const double depth = normalizeDouble(depthVec.w);
 
     _billboard.program->activate();
     _billboard.program->setUniform(_billboard.uniforms.transform, transform);
@@ -658,7 +619,50 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     global::renderEngine->openglStateCache().resetBlendState();
 }
 
-void RenderableSimulationBox::initMolecule(molecule_data_t& mol,
+void RenderableSimulationBox::updateSimulation(Molecules::Data& mol, double dt) {
+    // update positions / rotations
+    for (Molecules::Data::State& molecule : mol.states) {
+        molecule.position += molecule.direction * dt;
+        molecule.position = glm::mod(molecule.position, _simulationBox.value());
+        molecule.angle += glm::length(molecule.rotationAxis) * dt;
+    }
+
+    const double collRadiusSquared = _collisionRadius * _collisionRadius;
+
+    // compute collisions
+    // those collisions are really simplistic, they assume spherical boundaries, equal
+    // mass, and are order-dependent.
+    for (auto it1 = mol.states.begin(); it1 != mol.states.end(); it1++) {
+        for (auto it2 = std::next(it1); it2 != mol.states.end(); it2++) {
+            Molecules::Data::State& m1 = *it1;
+            Molecules::Data::State& m2 = *it2;
+
+            glm::dvec3 distVec = m2.position - m1.position;
+            double distSquared = glm::dot(distVec, distVec);
+
+            // collision detected
+            if (distSquared < collRadiusSquared &&
+                glm::dot(m1.direction, m2.direction) < 0.f)
+            {
+                double dist = std::sqrt(distSquared);
+                double intersection = 2.0 * _collisionRadius - dist;
+                // swap the direction components normal to the collision plane from the 2
+                // molecules. (simplistic elastic collision of 2 spheres with same mass)
+                glm::dvec3 dir = distVec / dist;
+                glm::dvec3 compM1 = dir * glm::dot(m1.direction, dir);
+                glm::dvec3 compM2 = -dir * glm::dot(m2.direction, -dir);
+                m1.direction = m1.direction - compM1 + compM2;
+                m2.direction = m2.direction - compM2 + compM1;
+                
+                // move the spheres away from each other (not intersecting)
+                m1.position += -dir * intersection;
+                m2.position += dir * intersection;
+            }
+        }
+    }
+}
+
+void RenderableSimulationBox::initMolecule(Molecules::Data& mol,
                                            std::filesystem::path molFile,
                                            std::filesystem::path trajFile)
 {
@@ -691,7 +695,7 @@ void RenderableSimulationBox::initMolecule(molecule_data_t& mol,
     md_gl_representation_init(&mol.drawRep, &mol.drawMol);
 }
 
-void RenderableSimulationBox::freeMolecule(molecule_data_t& mol) {
+void RenderableSimulationBox::freeMolecule(Molecules::Data& mol) {
     md_gl_representation_free(&mol.drawRep);
     md_gl_molecule_free(&mol.drawMol);
     md_molecule_free(&mol.molecule, default_allocator);

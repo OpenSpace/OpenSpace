@@ -159,7 +159,13 @@ void MoleculeModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableSimulationBox>("RenderableSimulationBox");
 
     global::callback::postSyncPreDraw->push_back([this]() { preDraw(); });
-    global::callback::render->push_back([this]() { render(); });
+    global::callback::render->push_back(
+        [this](const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
+               const glm::mat4& projectionMatrix)
+        {
+            render(sceneMatrix, viewMatrix, projectionMatrix);
+        }
+    );
 }
 
 void MoleculeModule::internalDeinitializeGL() {
@@ -268,14 +274,6 @@ ThreadPool& MoleculeModule::threadPool() {
     return _threadPool;
 }
 
-void MoleculeModule::setViewMatrix(glm::mat4 v) {
-    _viewMatrix = std::move(v);
-}
-
-void MoleculeModule::setProjectionMatrix(glm::mat4 p) {
-    _projectionMatrix = std::move(p);
-}
-
 void MoleculeModule::preDraw() {
     if (_initializeCounter == 0) {
         return;
@@ -296,16 +294,18 @@ void MoleculeModule::preDraw() {
     postprocessing::resize(size.x, size.y);
 }
 
-void MoleculeModule::render() {
+void MoleculeModule::render(const glm::mat4&, const glm::mat4& viewMatrix,
+                            const glm::mat4& projectionMatrix)
+{
     if (_initializeCounter == 0) {
         return;
     }
 
     GLint lastFbo;
     GLint lastDrawBufferCount = 0;
-    GLenum lastDrawBuffers[8];
+    std::array<GLenum, 8> lastDrawBuffers;
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &lastFbo);
-    for (int i = 0; i < ARRAY_SIZE(lastDrawBuffers); ++i) {
+    for (int i = 0; i < lastDrawBuffers.size(); i++) {
         GLint drawBuf;
         glGetIntegerv(GL_DRAW_BUFFER0+i, &drawBuf);
         if (!drawBuf) {
@@ -337,18 +337,18 @@ void MoleculeModule::render() {
     settings.inputTextures.color = _colorTex.get();
     settings.inputTextures.normal = _normalTex.get();
 
-    postprocessing::postprocess(settings, _viewMatrix, _projectionMatrix);
+    postprocessing::postprocess(settings, viewMatrix, projectionMatrix);
     
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
     const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(2, bufs);
 
-    glClearColor(0, 0, 0, 1);
+    glClearColor(0.f, 0.f, 0.f, 1.f);
     glClearDepth(1.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
-    glDrawBuffers(lastDrawBufferCount, lastDrawBuffers);
+    glDrawBuffers(lastDrawBufferCount, lastDrawBuffers.data());
 }
 
 std::vector<documentation::Documentation> MoleculeModule::documentations() const {

@@ -41,8 +41,6 @@
 
 namespace openspace {
 
-struct RenderData;
-
 class RenderableMolecule : public Renderable {
 public:
     explicit RenderableMolecule(const ghoul::Dictionary& dictionary);
@@ -81,7 +79,7 @@ private:
             std::string filter_, float scale_, glm::vec4 uniformColor_);
         ~Representation();
 
-        md_gl_representation_t glRep;
+        md_gl_representation_t glRep = {};
         md_bitfield_t mask;
         const md_molecule_t& molecule;
         bool isDynamic = false;

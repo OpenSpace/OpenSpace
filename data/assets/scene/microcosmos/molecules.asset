@@ -90,7 +90,7 @@ local MoleculeO2 = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeO2 .. "o2.arc",
     TrajectoryFile = moleculeO2 .. "o2.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    AnimationSpeed = 5.0
   },
   GUI = {
     Name = "Dioxygen (O2)",
@@ -109,8 +109,7 @@ local MoleculeH2O = {
   },
   Renderable = {
     Type = "RenderableMolecule",
-    MoleculeFile = moleculeH2O .. "h2o.arc",
-    AnimationSpeed = DefaultAnimSpeed
+    MoleculeFile = moleculeH2O .. "h2o.arc"
   },
   GUI = {
     Name = "Water (H2O)",
@@ -130,7 +129,6 @@ local MoleculeCO2 = {
   Renderable = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeCO2 .. "co2.arc",
-    AnimationSpeed = DefaultAnimSpeed,
     Representations = {
       {
         Type = "Licorice"
@@ -155,7 +153,6 @@ local MoleculeC60 = {
   Renderable = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeC60 .. "c60.arc",
-    AnimationSpeed = DefaultAnimSpeed,
     Representations = {
       {
         Type = "Licorice"
@@ -181,7 +178,7 @@ local MoleculeAlanin = {
     Type = "RenderableMolecule",
     MoleculeFile = molecule1ala500 .. "1ALA-500.pdb",
     TrajectoryFile = molecule1ala500 .. "1ALA-500.pdb",
-    AnimationSpeed = DefaultAnimSpeed
+    AnimationSpeed = 5.0
   },
   GUI = {
     Name = "Alanin",
@@ -201,7 +198,6 @@ local MoleculeDNA = {
   Renderable = {
     Type = "RenderableMolecule",
     MoleculeFile = molecule1bna .. "1bna.pdb",
-    AnimationSpeed = DefaultAnimSpeed,
     Representations = {
       {
         Type = "Licorice"
@@ -248,7 +244,7 @@ local MoleculeAspirin = {
     Type = "RenderableMolecule",
     MoleculeFile = aspirin .. "aspirin.gro",
     TrajectoryFile = aspirin .. "aspirin.xtc",
-    AnimationSpeed = 0.1,
+    AnimationSpeed = 5.0,
     Representations = {
       {
         Type = "Licorice",

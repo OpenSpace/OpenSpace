@@ -252,9 +252,9 @@ namespace {
 
         float aoMultiplier = 0.f;
         float powExponent = 0.f;
-        vec2_t invFullRes = { 0.f, 0.f };
+        glm::vec2 invFullRes = { 0.f, 0.f };
 
-        vec4_t projInfo = { 0.f, 0.f, 0.f, 0.f };
+        glm::vec4 projInfo = { 0.f, 0.f, 0.f, 0.f };
 
         // From Intel SSAO
         const std::array<vec4_t, 32> samplePattern = {
@@ -805,7 +805,7 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
     int width = lastViewport[2];
     int height = lastViewport[3];
 
-    vec4_t projInfo;
+    glm::vec4 projInfo;
     float projScl;
 
     const float* projData = glm::value_ptr(projMatrix);
@@ -950,7 +950,7 @@ void applyTemporalAa(const ghoul::opengl::Texture& linearDepthTex,
                      const ghoul::opengl::Texture& colorTex,
                      const ghoul::opengl::Texture& velocityTex,
                      const ghoul::opengl::Texture& velocityNeighbormaxTex,
-                     const vec2_t& currJitter, const vec2_t& prevJitter,
+                     const glm::vec2& currJitter, const glm::vec2& prevJitter,
                      float feedbackMin, float feedbackMax, float motionScale, float time)
 {
     static int target = 0;
@@ -965,10 +965,8 @@ void applyTemporalAa(const ghoul::opengl::Texture& linearDepthTex,
     );
     const glm::vec2 invRes = 1.f / res;
     const glm::vec4 texelSize = glm::vec4(invRes.x, invRes.y, res.x, res.y);
-    const glm::vec2 currJitt = glm::vec2(currJitter.x, currJitter.y);
-    const glm::vec2 jitterUvCurr = currJitt / res;
-    const glm::vec2 prevJitt = glm::vec2(prevJitter.x, prevJitter.y);
-    const glm::vec2 jitterUvPrev = prevJitt / res;
+    const glm::vec2 jitterUvCurr = currJitter / res;
+    const glm::vec2 jitterUvPrev = prevJitter / res;
     const glm::vec4 jitterUv = glm::vec4(
         jitterUvCurr.x,
         jitterUvCurr.y,
@@ -1061,14 +1059,14 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         time -= 100.f;
     }
 
-    static vec2_t prevJitter = { 0.f, 0.f };
+    static glm::vec2 prevJitter = { 0.f, 0.f };
     glm::vec3 L = V * glm::vec4(0.f, 0.f, 0.f, 1.f);
     glm::vec3 lightDir = glm::normalize(L);
     glm::vec3 lightColor = glm::vec3(5.f);
     glm::mat4 invP = glm::inverse(P);
     const float near = P[3][2] / (P[2][2] - 1.f);
     const float far = P[3][2] / (P[2][2] + 1.f);
-    vec2_t jitter;
+    glm::vec2 jitter;
     if (isOrthoProjMatrix(P)) {
         jitter[0] = -P[3][0] * 0.5f;
         jitter[1] = -P[3][1] * 0.5f;
