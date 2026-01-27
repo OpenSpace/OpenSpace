@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,17 +25,20 @@
 #ifndef __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___IMAGESEQUENCER___H__
 #define __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___IMAGESEQUENCER___H__
 
-#include <modules/spacecraftinstruments/util/sequenceparser.h>
-
+#include <modules/spacecraftinstruments/util/decoder.h>
+#include <modules/spacecraftinstruments/util/image.h>
+#include <openspace/util/timerange.h>
+#include <filesystem>
 #include <map>
+#include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
 namespace openspace {
 
-class Time;
 class SequenceParser;
+class Time;
 
 /**
  * The ImageSequencer singleton function is to manage the timekeeping and distribution of

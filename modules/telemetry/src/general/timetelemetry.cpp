@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,12 @@
 
 #include <modules/telemetry/include/general/timetelemetry.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
+#include <openspace/camera/camera.h>
+#include <cstdlib>
 
 namespace {
     // Indices for data items
@@ -45,7 +48,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TimeUnitOptionInfo = {
         "TimeUnit",
-        "Time Unit",
+        "Time unit",
         "The time unit that the telemetry should use for the time speed. For example, if "
         "the unit is set to 'Hour' then the unit for the time speed is simulation hours "
         "per real life second.",
@@ -60,12 +63,11 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TimePrecisionInfo = {
         "TimePrecision",
-        "TimePrecision",
+        "Time precision",
         "The precision in seconds used to determine when to send updated time data to "
         "the Open Sound Control receiver.",
         openspace::properties::Property::Visibility::User
     };
-
 } // namespace
 
 namespace openspace {
@@ -75,7 +77,7 @@ TimeTelemetry::TimeTelemetry(const std::string& ip, int port)
     , _timeUnitOption(TimeUnitOptionInfo)
     , _precisionProperties(TimeTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    for (size_t i = 0; i < TimeUnitNames.size(); ++i) {
+    for (size_t i = 0; i < TimeUnitNames.size(); i++) {
         _timeUnitOption.addOption(static_cast<int>(i), TimeUnitNames[i].singular.data());
     }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,15 +25,16 @@
 #include <modules/base/rendering/grids/renderablegrid.h>
 
 #include <modules/base/basemodule.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <cmath>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
@@ -45,21 +46,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
         "HighlightColor",
-        "Highlight Color",
+        "Highlight color",
         "The color of the highlighted lines in the grid.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
-        "Number of Segments",
+        "Number of segments",
         "The number of segments to split the grid into, in each direction (x and y).",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightRateInfo = {
         "HighlightRate",
-        "Highlight Rate",
+        "Highlight rate",
         "The rate that the columns and rows are highlighted, counted with respect to the "
         "center of the grid. If the number of segments in the grid is odd, the "
         "highlighting might be offset from the center.",
@@ -68,14 +69,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo HighlightLineWidthInfo = {
         "HighlightLineWidth",
-        "Highlight Line Width",
+        "Highlight line width",
         "The width of the highlighted grid lines. The larger number, the thicker the "
         "lines.",
         openspace::properties::Property::Visibility::User
@@ -83,7 +84,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
-        "Grid Size",
+        "Grid size",
         "The size of the grid (in the x and y direction), given in meters.",
         openspace::properties::Property::Visibility::User
     };

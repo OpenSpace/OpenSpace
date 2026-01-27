@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,42 +24,41 @@
 
 #include <modules/volume/transferfunctionhandler.h>
 
-#include <openspace/rendering/transferfunction.h>
-#include <openspace/util/histogram.h>
 #include <ghoul/opengl/texture.h>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunction",
-        "TransferFunction",
+        "Transfer function",
         "All the envelopes used in the transfer function.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DataUnitInfo = {
         "DataUnit",
-        "DataUnit",
+        "Data unit",
         "Unit of the data.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinValueInfo = {
         "MinValue",
-        "MinValue",
+        "Min value",
         "Minimum value in the data.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MaxValueInfo = {
         "MaxValue",
-        "MaxValue",
+        "Max value",
         "Maximum value in the data.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SaveTransferFunctionInfo = {
         "SaveTransferFunction",
-        "Save Transfer Function",
+        "Save transfer function",
         "Save your transfer function.",
         openspace::properties::Property::Visibility::AdvancedUser
     };

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,8 +28,9 @@
 #include <openspace/util/histogram.h>
 #include <ghoul/glm.h>
 #include <filesystem>
-#include <iosfwd>
+#include <fstream>
 #include <map>
+#include <vector>
 
 namespace openspace {
 
@@ -47,16 +48,6 @@ public:
     bool saveToFile(const std::filesystem::path& filename);
 
 private:
-    TSP* _tsp = nullptr;
-    std::ifstream* _file;
-
-    std::vector<Histogram> _spatialHistograms;
-    std::vector<Histogram> _temporalHistograms;
-    unsigned int _numInnerNodes = 0;
-    float _minBin = 0.f;
-    float _maxBin = 0.f;
-    int _numBins = 0;
-
     std::map<unsigned int, std::vector<float>> _voxelCache;
 
     bool buildFromOctreeChild(unsigned int bstOffset, unsigned int octreeOffset);
@@ -73,6 +64,16 @@ private:
     unsigned int linearCoords(glm::ivec3 coords) const;
 
     float interpolate(glm::vec3 samplePoint, const std::vector<float>& voxels) const;
+
+    TSP* _tsp = nullptr;
+    std::ifstream* _file;
+
+    std::vector<Histogram> _spatialHistograms;
+    std::vector<Histogram> _temporalHistograms;
+    unsigned int _numInnerNodes = 0;
+    float _minBin = 0.f;
+    float _maxBin = 0.f;
+    int _numBins = 0;
 };
 
 } // namespace openspace

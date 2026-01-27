@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,10 +24,13 @@
 
 #include <modules/gaia/tasks/readfilejob.h>
 
-#include <openspace/util/distanceconversion.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <cmath>
+#include <string_view>
+#include <unordered_map>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "ReadFileJob";
@@ -241,7 +244,7 @@ void ReadFileJob::execute() {
         values[idx++] = std::isnan(radial_vel_err[i]) ? 0.f : radial_vel_err[i];
 
         // Read extra columns, if any. This will slow down the sorting tremendously!
-        for (size_t col = _nDefaultCols; col < nColumnsRead; ++col) {
+        for (size_t col = _nDefaultCols; col < nColumnsRead; col++) {
             std::vector<float> vecData = std::move(tableContent[_allColumns[col]]);
             values[idx++] = std::isnan(vecData[col]) ? 0.f : vecData[col];
         }

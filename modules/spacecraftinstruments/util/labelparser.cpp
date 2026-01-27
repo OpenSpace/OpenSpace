@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,16 +24,19 @@
 
 #include <modules/spacecraftinstruments/util/labelparser.h>
 
+#include <modules/spacecraftinstruments/util/decoder.h>
+#include <modules/spacecraftinstruments/util/image.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/file.h>
+#include <openspace/util/timerange.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
-#include <filesystem>
+#include <algorithm>
 #include <fstream>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "LabelParser";
@@ -86,7 +89,7 @@ LabelParser::LabelParser(std::filesystem::path fileName,
             const Dictionary specsOfInterestDict = typeDict.value<Dictionary>(KeySpecs);
 
             _specsOfInterest.resize(specsOfInterestDict.size());
-            for (size_t n = 0; n < _specsOfInterest.size(); ++n) {
+            for (size_t n = 0; n < _specsOfInterest.size(); n++) {
                 const std::string key = std::to_string(n + 1);
                 if (specsOfInterestDict.hasValue<std::string>(key)) {
                     std::string readMe = specsOfInterestDict.value<std::string>(key);

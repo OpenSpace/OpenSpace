@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,6 @@
 
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/propertyowner.h>
 #include <openspace/properties/property.h>
 #include <openspace/properties/scalar/boolproperty.h>
@@ -38,18 +37,23 @@
 #include <openspace/util/touch.h>
 #include <openspace/util/versionchecker.h>
 #include <ghoul/glm.h>
+#include <cstddef>
+#include <cstdint>
+#include <filesystem>
+#include <functional>
 #include <future>
 #include <memory>
+#include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace openspace {
 
+namespace scripting { struct LuaLibrary; }
 class AssetManager;
 class LoadingScreen;
 class Scene;
-
-namespace scripting { struct LuaLibrary; }
 
 /**
  * Structure that is responsible for the delayed shutdown of the application.

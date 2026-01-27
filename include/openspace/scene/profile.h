@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,20 +25,21 @@
 #ifndef __OPENSPACE_CORE___PROFILE___H__
 #define __OPENSPACE_CORE___PROFILE___H__
 
-#include <openspace/engine/globals.h>
-#include <openspace/properties/propertyowner.h>
 #include <openspace/util/keys.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/exception.h>
+#include <map>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <variant>
 #include <vector>
+#include <filesystem>
 
 namespace openspace {
 
 namespace interaction { struct NavigationState; }
-
+namespace properties { class PropertyOwner; }
 namespace scripting { struct LuaLibrary; }
 
 class Profile {
@@ -97,7 +98,7 @@ public:
         bool isLocal = false;
         std::string script;
 
-        bool operator==(const Action&) const = default;
+        bool operator==(const Action&) const noexcept = default;
     };
 
     struct Keybinding {

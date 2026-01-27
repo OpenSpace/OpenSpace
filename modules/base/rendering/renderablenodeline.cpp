@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,25 +25,27 @@
 #include <modules/base/rendering/renderablenodeline.h>
 
 #include <modules/base/basemodule.h>
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scene/translation.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <memory>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableNodeLine";
 
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
-        "Start Node",
+        "Start node",
         "The identifier of the node the line starts from. Defaults to 'Root' if not "
         "specified.",
         openspace::properties::Property::Visibility::User
@@ -51,7 +53,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EndNodeInfo = {
         "EndNode",
-        "End Node",
+        "End node",
         "The identifier of the node the line ends at. Defaults to 'Root' if not "
         "specified.",
         openspace::properties::Property::Visibility::User
@@ -66,14 +68,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "The width of the line. The larger number, the thicker the line.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StartOffsetInfo = {
         "StartOffset",
-        "Offset to Start Node",
+        "Offset to start node",
         "A distance from the start node at which the rendered line should begin. "
         "By default it takes a value in meters, but if 'UseRelativeOffsets' is set "
         "to true it is read as a multiplier times the bounding sphere of the node.",
@@ -82,7 +84,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo EndOffsetInfo = {
         "EndOffset",
-        "Offset to End Node",
+        "Offset to end node",
         "A distance to the end node at which the rendered line should end. "
         "By default it takes a value in meters, but if 'UseRelativeOffsets' is set "
         "to true it is read as a multiplier times the bounding sphere of the node.",
@@ -91,7 +93,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RelativeOffsetsInfo = {
         "UseRelativeOffsets",
-        "Use Relative Offsets",
+        "Use relative offsets",
         "If true, the offset values are interpreted as relative values to be multiplied "
         "with the bounding sphere of the start/end node. If false, the value is "
         "interpreted as a distance in meters.",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,6 @@
 #define __OPENSPACE_MODULE_MULTIRESVOLUME___BRICKMANAGER___H__
 
 #include <modules/multiresvolume/rendering/tsp.h>
-
 #include <vector>
 
 namespace ghoul::opengl { class Texture; }
@@ -35,7 +34,7 @@ namespace openspace {
 
 class BrickManager {
 public:
-    enum BUFFER_INDEX { EVEN = 0, ODD = 1 };
+    enum BufferIndex { EVEN = 0, ODD = 1 };
 
     explicit BrickManager(TSP* tsp);
     ~BrickManager();
@@ -44,16 +43,16 @@ public:
 
     bool initialize();
 
-    bool buildBrickList(BUFFER_INDEX bufferIndex, std::vector<int>& brickRequest);
+    bool buildBrickList(BufferIndex bufferIndex, std::vector<int>& brickRequest);
 
     bool fillVolume(float* in, float* out, unsigned int x, unsigned int y,
         unsigned int z);
-    bool diskToPBO(BUFFER_INDEX pboIndex);
-    bool pboToAtlas(BUFFER_INDEX pboIndex);
+    bool diskToPBO(BufferIndex pboIndex);
+    bool pboToAtlas(BufferIndex pboIndex);
 
     ghoul::opengl::Texture* textureAtlas();
-    unsigned int pbo(BUFFER_INDEX pboIndex) const;
-    const std::vector<int>& brickList(BUFFER_INDEX index) const;
+    unsigned int pbo(BufferIndex pboIndex) const;
+    const std::vector<int>& brickList(BufferIndex index) const;
 
 private:
     void incrementCoordinates();

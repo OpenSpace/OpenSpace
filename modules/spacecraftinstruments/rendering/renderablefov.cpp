@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,15 +27,24 @@
 #include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/opengl/programobject.h>
 #include <glm/gtx/projection.hpp>
 #include <optional>
+#include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <limits>
+#include <memory>
 
 namespace {
     constexpr int InterpolationSteps = 5;
@@ -43,7 +52,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "The width of the lines that connect the instrument to the corners of the field "
         "of view.",
         openspace::properties::Property::Visibility::User
@@ -51,7 +60,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StandoffDistanceInfo = {
         "StandOffDistance",
-        "Standoff Distance Factor",
+        "Standoff distance factor",
         "A standoff distance factor which influences the distance of the plane to the "
         "focus object. If the value is 1, the field of view will be rendered exactly on "
         "the surface of, for example, a planet. With a value of smaller than 1, the "
@@ -61,7 +70,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AlwaysDrawFovInfo = {
         "AlwaysDrawFov",
-        "Always Draw FOV",
+        "Always draw FOV",
         "If enabled, the field of view will always be drawn, regardless of whether image "
         "information is currently available or not.",
         openspace::properties::Property::Visibility::User
@@ -69,7 +78,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DefaultStartColorInfo = {
         "DefaultStart",
-        "Default Start",
+        "Default start",
         "The color that is used for the field of view frustum close to the instrument. "
         "The final colors are interpolated between this value and the end color.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -77,7 +86,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorDefaultEndInfo = {
         "DefaultEnd",
-        "Default End",
+        "Default end",
         "The color that is used for the field of view frustum close to the target. The "
         "final colors are interpolated between this value and the start color.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -92,7 +101,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorTargetInFovInfo = {
         "TargetInFieldOfView",
-        "Target in Field of View",
+        "Target in field of view",
         "The color that is used if the target is inside the field of view of the "
         "instrument but the instrument is not yet active.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -100,7 +109,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorIntersectionStartInfo = {
         "IntersectionStart",
-        "Intersection Start",
+        "Intersection start",
         "The color that is used close to the instrument if one of the field of view "
         "corners are intersecting the target object. The final color is an "
         "interpolation of this color and the intersection end color.",
@@ -109,7 +118,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorIntersectionEndInfo = {
         "IntersectionEnd",
-        "Intersection End",
+        "Intersection end",
         "The color that is used close to the target if one of the field of view corners "
         "is intersecting the target object. The final color is an interpolation of this "
         "color and the intersection begin color.",
@@ -118,7 +127,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SquareColorInfo = {
         "Square",
-        "Orthogonal Square",
+        "Orthogonal square",
         "The color that is used for the field of view square when there is no "
         "intersection and that the instrument is not currently active.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -205,28 +214,48 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     , _alwaysDrawFov(AlwaysDrawFovInfo, false)
     , _colors({
         properties::PropertyOwner({"Colors", "Colors"}),
-        { DefaultStartColorInfo, glm::vec3(0.4f), glm::vec3(0.f), glm::vec3(1.f) },
-        { ColorDefaultEndInfo, glm::vec3(0.85f), glm::vec3(0.f), glm::vec3(1.f) },
-        { ColorActiveInfo, glm::vec3(0.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f) },
-        {
+        properties::Vec3Property(
+            DefaultStartColorInfo,
+            glm::vec3(0.4f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        ),
+        properties::Vec3Property(
+            ColorDefaultEndInfo,
+            glm::vec3(0.85f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        ),
+        properties::Vec3Property(
+            ColorActiveInfo,
+            glm::vec3(0.f, 1.f, 0.f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        ),
+        properties::Vec3Property(
             ColorTargetInFovInfo,
             glm::vec3(0.f, 0.5f, 0.7f),
             glm::vec3(0.f),
             glm::vec3(1.f)
-        },
-        {
+        ),
+        properties::Vec3Property(
             ColorIntersectionStartInfo,
             glm::vec3(1.f, 0.89f, 0.f),
             glm::vec3(0.f),
             glm::vec3(1.f)
-        },
-        {
+        ),
+        properties::Vec3Property(
             ColorIntersectionEndInfo,
             glm::vec3(1.f, 0.29f, 0.f),
             glm::vec3(0.f),
             glm::vec3(1.f)
-        },
-        { SquareColorInfo, glm::vec3(0.85f), glm::vec3(0.f), glm::vec3(1.f) }
+        ),
+        properties::Vec3Property(
+            SquareColorInfo,
+            glm::vec3(0.85f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        )
     })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -652,7 +681,7 @@ void RenderableFov::computeIntercepts(double time, const std::string& target,
                 return r.surfaceVector * 1000.0 * _standOffDistance.value();
             };
 
-            for (size_t m = 0; m < InterpolationSteps; ++m) {
+            for (size_t m = 0; m < InterpolationSteps; m++) {
                 const double t = static_cast<double>(m) / (InterpolationSteps);
                 const glm::dvec3 tBound = glm::mix(iBound, jBound, t);
 

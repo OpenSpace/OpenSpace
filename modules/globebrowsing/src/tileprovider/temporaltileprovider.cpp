@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,22 +26,34 @@
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
 #include <modules/globebrowsing/src/memoryawaretilecache.h>
-#include <modules/globebrowsing/src/tileprovider/defaulttileprovider.h>
+#include <modules/globebrowsing/src/tileindex.h>
+#include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <algorithm>
+#include <array>
+#include <cstring>
 #include <ctime>
 #include <iomanip>
-#include <iostream>
+#include <limits>
+#include <optional>
 #include <sstream>
 
 namespace {
@@ -49,7 +61,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseFixedTimeInfo = {
         "UseFixedTime",
-        "Use Fixed Time",
+        "Use fixed time",
         "If this value is enabled, the time-varying timevarying dataset will always use "
         "the time that is specified in the 'FixedTime' property, rather than using the "
         "actual time from OpenSpace.",
@@ -58,7 +70,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FixedTimeInfo = {
         "FixedTime",
-        "Fixed Time",
+        "Fixed time",
         "If the 'UseFixedTime' is enabled, this time will be used instead of the actual "
         "time taken from OpenSpace for the displayed tiles.",
         openspace::properties::Property::Visibility::AdvancedUser

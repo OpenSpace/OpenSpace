@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,19 +24,22 @@
 
 #include <openspace/data/speckloader.h>
 
-#include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
+#include <openspace/data/dataloader.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
+#include <algorithm>
 #include <cctype>
+#include <cstdlib>
 #include <fstream>
-#include <functional>
+#include <limits>
 #include <sstream>
+#include <string>
 #include <string_view>
-
+#include <utility>
+#include <vector>
 
 namespace {
     bool startsWith(std::string lhs, std::string_view rhs) noexcept {

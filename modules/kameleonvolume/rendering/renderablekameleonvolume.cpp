@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,27 +26,24 @@
 
 #include <modules/volume/rendering/basicvolumeraycaster.h>
 #include <modules/volume/rawvolume.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
-#include <modules/kameleon/include/kameleonwrapper.h>
 #include <modules/kameleonvolume/kameleonvolumereader.h>
 #include <modules/volume/rawvolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
-#include <modules/volume/rendering/basicvolumeraycaster.h>
 #include <modules/volume/rendering/volumeclipplanes.h>
-#include <modules/volume/transferfunctionhandler.h>
 #include <modules/volume/volumegridtype.h>
-#include <openspace/engine/globals.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderengine.h>
+#include <openspace/engine/globals.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
-#include <filesystem>
+#include <array>
+#include <optional>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableKameleonVolume";
@@ -67,14 +64,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LowerDomainBoundInfo = {
         "LowerDomainBound",
-        "Lower Domain Bound",
+        "Lower domain bound",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UpperDomainBoundInfo = {
         "UpperDomainBound",
-        "Upper Domain Bound",
+        "Upper domain bound",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -88,21 +85,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LowerValueBoundInfo = {
         "LowerValueBound",
-        "Lower Value Bound",
+        "Lower value bound",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UpperValueBoundInfo = {
         "UpperValueBound",
-        "Upper Value Bound",
+        "Upper value bound",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
         "GridType",
-        "Grid Type",
+        "Grid type",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
@@ -116,14 +113,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SourcePathInfo = {
         "SourcePath",
-        "Source Path",
+        "Source path",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
-        "Transfer Function Path",
+        "Transfer function path",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };

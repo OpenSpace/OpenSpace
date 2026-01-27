@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___DOWNLOADMANAGER___H__
 
 #include <ghoul/misc/boolean.h>
+#include <chrono>
 #include <filesystem>
 #include <functional>
 #include <future>
@@ -84,7 +85,7 @@ public:
 
     // Just a helper function to check if a future is ready to ".get()". Not specific
     // to DownloadManager but is useful for anyone using the DownloadManager
-    template<typename R>
+    template <typename R>
     static bool futureReady(std::future<R> const& f) {
         return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
     }

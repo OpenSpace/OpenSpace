@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,12 +34,20 @@
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
-#include <optional>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/opengl/programobject.h>
+#include <memory>
 
 namespace {
+    constexpr std::string_view _loggerCat = "RenderableTravelSpeed";
+
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
         "TravelSpeed",
-        "Speed of Travel",
+        "Speed of travel",
         "A value for how fast the speed indicator should travel, in meters per second. "
         "The default value is the speed of light.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -47,7 +55,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
         "TargetNode",
-        "Target Object",
+        "Target object",
         "The identifier of the scene graph node to target with the speed indicator. The "
         "speed indicator will travel from the parent node to this scene graph node.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -62,14 +70,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "This value specifies the line width.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo IndicatorLengthInfo = {
         "IndicatorLength",
-        "Indicator Length",
+        "Indicator length",
         "The length of the speed indicator line, given in seconds. The length will be "
         "computed as the speed times this value. For example, a value of 1 will make it "
         "as long as the distance it would travel over one second with the specified "
@@ -79,7 +87,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeLengthInfo = {
         "FadeLength",
-        "Fade Length",
+        "Fade length",
         "The length of the faded tail of the speed indicator, given in seconds. The "
         "length of the tail will be computed as the speed times this value. For example, "
         "a value of 1 will make it as long as the distance it would travel over one "
@@ -127,7 +135,7 @@ documentation::Documentation RenderableTravelSpeed::Documentation() {
 
 RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _targetName(TargetInfo)
+    , _targetIdentifier(TargetInfo)
     , _travelSpeed(
         SpeedInfo,
         distanceconstants::LightSecond,
@@ -157,15 +165,19 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
     _fadeLength = p.fadeLength.value_or(_fadeLength);
     addProperty(_fadeLength);
 
-    _targetName = p.target;
-    addProperty(_targetName);
-    _targetName.onChange([this]() {
-        if (SceneGraphNode* n = sceneGraphNode(_targetName);  n) {
+    _targetIdentifier = p.target;
+    addProperty(_targetIdentifier);
+    _targetIdentifier.onChange([this]() {
+        if (SceneGraphNode* n = sceneGraphNode(_targetIdentifier);  n) {
             _targetNode = n;
-            _targetPosition = _targetNode->worldPosition();
-            _travelTime = glm::distance(_targetPosition, _sourcePosition) / _travelSpeed;
-            calculateDirectionVector();
             reinitiateTravel();
+        }
+        else {
+            LERROR(std::format(
+                "Could not find target node with identifier '{}'. Resetting to '{}'",
+                _targetIdentifier.value(), _targetNode->identifier()
+            ));
+            _targetIdentifier = _targetNode->identifier();
         }
     });
 
@@ -175,7 +187,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
 }
 
 void RenderableTravelSpeed::initialize() {
-    _targetNode = sceneGraphNode(_targetName);
+    _targetNode = sceneGraphNode(_targetIdentifier);
     if (!_targetNode) {
         throw ghoul::RuntimeError("Could not find Target Node");
     }
@@ -208,10 +220,6 @@ void RenderableTravelSpeed::deinitializeGL() {
     );
     glDeleteVertexArrays(1, &_vaoId);
     glDeleteBuffers(1, &_vBufferId);
-}
-
-void RenderableTravelSpeed::calculateDirectionVector() {
-    _directionVector = glm::normalize(_targetPosition - _sourcePosition);
 }
 
 void RenderableTravelSpeed::calculateVerticesPositions() {
@@ -268,18 +276,22 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
         _arrivalTime = _initiationTime + _travelTime;
     }
 
-    _targetPosition = _targetNode->worldPosition();
-    SceneGraphNode* mySGNPointer = parent();
-    ghoul_assert(mySGNPointer, "Renderable have to be owned by scene graph node");
-    _sourcePosition = mySGNPointer->worldPosition();
+    SceneGraphNode* sourceNode = parent();
+    ghoul_assert(sourceNode, "Renderable have to be owned by scene graph node");
 
-    _travelTime = glm::distance(_targetPosition, _sourcePosition) / _travelSpeed;
+    // Target position, in the reference frame of the source node (to correctly inherit parent transform)
+    glm::dvec3 targetPosition = glm::dvec3(
+        glm::inverse(sourceNode->modelTransform()) * glm::dvec4(_targetNode->worldPosition(), 1.0)
+    );
+
+    // Assumes source position is at origin, i.e. the parent node position
+    _travelTime = glm::length(targetPosition) / _travelSpeed;
+    _directionVector = glm::normalize(targetPosition);
 
     const double currentTime = data.time.j2000Seconds();
     // Unless we've reached the target
     if (_initiationTime < currentTime && _arrivalTime > currentTime) {
         _timeSinceStart = currentTime - _initiationTime;
-        calculateDirectionVector();
         updateVertexData();
     }
     else { // in case we've reached the target

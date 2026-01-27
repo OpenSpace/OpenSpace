@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,17 +26,22 @@
 
 #include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/sphere.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <cmath>
+#include <filesystem>
+#include <limits>
 #include <optional>
 
 namespace {
@@ -62,13 +67,13 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
         "Segments",
-        "Number of Segments",
+        "Number of segments",
         "The number of segments that the sphere is split into.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    enum class Orientation : int {
-        Outside = 0,
+    enum class Orientation {
+        Outside,
         Inside,
         Both
     };
@@ -83,21 +88,35 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {
         "MirrorTexture",
-        "Mirror Texture",
+        "Mirror texture",
         "If true, mirror the texture along the x-axis.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    enum class TextureProjection {
+        Equirectangular,
+        AngularFisheye
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo TextureProjectionInfo = {
+        "TextureProjection",
+        "Texture Projection",
+        "Specifies the projection mapping to use for any texture loaded onto the sphere "
+        "(assumes Equirectangular per default). Note that for \"Angular Fisheye\" only "
+        "half the sphere will be textured - the hemisphere centered around the z-axis.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
         "DisableFadeInOut",
-        "Disable Fade-In/Fade-Out effects",
+        "Disable fade-in/fade-out effects",
         "Enables/Disables the fade in and out effects.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FadeInThresholdInfo = {
         "FadeInThreshold",
-        "Fade-In Threshold",
+        "Fade-in threshold",
         "The distance from the center of the Milky Way at which the sphere should start "
         "to fade in, given as a percentage of the size of the object. A value of zero "
         "means that no fading in will happen.",
@@ -106,7 +125,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeOutThresholdInfo = {
         "FadeOutThreshold",
-        "Fade-Out Threshold",
+        "Fade-out threshold",
         "A threshold for when the sphere should start fading out, given as a percentage "
         "of how much of the sphere that is visible before the fading should start. A "
         "value of zero means that no fading out will happen.",
@@ -115,7 +134,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseColorMapInfo = {
         "UseColorMap",
-        "Use Color Map",
+        "Use color map",
         "Used to toggle color map on or off for the sphere. Mainly used to transform "
         "grayscale textures from data into color images.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -123,14 +142,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
-        "Transfer Function (Color Map) Path",
+        "Transfer function (color map) path",
         "Color map / Transfer function to use if `UseColorMap` is enabled.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
-        "Blending Options",
+        "Blending options",
         "Controls the blending function used to calculate the colors of the sphere with "
         "respect to the opacity.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -138,17 +157,18 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DisableDepthInfo = {
         "DisableDepth",
-        "Disable Depth",
+        "Disable depth",
         "If disabled, no depth values are taken into account for this sphere, meaning "
         "that depth values are neither written or tested against during the rendering. "
         "This can be useful for spheres that represent a background image.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    // This `Renderable` represents a simple sphere with an image. The image that is shown
-    // should be in an equirectangular projection/spherical panoramic image or else
-    // distortions will be introduced. The `Orientation` parameter determines whether the
-    // provided image is shown on the inside, outside, or both sides of the sphere.
+    // This `Renderable` represents a simple sphere with an image. Per default, the
+    // sphere uses an equirectangular projection for the image mapping.
+    //
+    // The `Orientation` parameter determines whether the provided image is shown on
+    // the inside, outside, or both sides of the sphere.
     struct [[codegen::Dictionary(RenderableSphere)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<float> size [[codegen::greater(0.f)]];
@@ -167,6 +187,14 @@ namespace {
 
         // [[codegen::verbatim(MirrorTextureInfo.description)]]
         std::optional<bool> mirrorTexture;
+
+        enum class [[codegen::map(TextureProjection)]] TextureProjection {
+            Equirectangular,
+            AngularFisheye [[codegen::key("Angular Fisheye")]]
+        };
+
+        // [[codegen::verbatim(TextureProjectionInfo.description)]]
+        std::optional<TextureProjection> textureProjection;
 
         // [[codegen::verbatim(DisableFadeInOutInfo.description)]]
         std::optional<bool> disableFadeInOut;
@@ -204,6 +232,7 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
     , _segments(SegmentsInfo, 16, 4, 1000)
     , _orientation(OrientationInfo)
     , _mirrorTexture(MirrorTextureInfo, false)
+    , _textureProjection(TextureProjectionInfo)
     , _disableFadeInDistance(DisableFadeInOutInfo, false)
     , _fadeInThreshold(FadeInThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
     , _fadeOutThreshold(FadeOutThresholdInfo, 0.f, 0.f, 1.f, 0.001f)
@@ -242,6 +271,15 @@ RenderableSphere::RenderableSphere(const ghoul::Dictionary& dictionary)
 
     _mirrorTexture = p.mirrorTexture.value_or(_mirrorTexture);
     addProperty(_mirrorTexture);
+
+    _textureProjection.addOptions({
+        { static_cast<int>(TextureProjection::Equirectangular), "Equirectangular" },
+        { static_cast<int>(TextureProjection::AngularFisheye), "Angular Fisheye" }
+    });
+    _textureProjection = p.textureProjection.has_value() ?
+        static_cast<int>(codegen::map<TextureProjection>(*p.textureProjection)) :
+        static_cast<int>(TextureProjection::Equirectangular);
+    addProperty(_textureProjection);
 
     _disableFadeInDistance = p.disableFadeInOut.value_or(_disableFadeInDistance);
     addProperty(_disableFadeInDistance);
@@ -438,6 +476,8 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     bindTexture();
     defer{ unbindTexture(); };
     _shader->setUniform(_uniformCache.colorTexture, unit);
+
+    _shader->setUniform(_uniformCache.textureProjection, _textureProjection.value());
 
     // Setting these states should not be necessary,
     // since they are the default state in OpenSpace.

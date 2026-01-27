@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,20 +34,21 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec4property.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/glm.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <functional>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
 namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
-    struct RenderData;
-    struct UpdateData;
 
 namespace documentation { struct Documentation; }
+struct RenderData;
+struct UpdateData;
 
 class RingsComponent : public properties::PropertyOwner, public Fadeable {
 public:
@@ -84,6 +85,8 @@ public:
     glm::vec3 sunPositionObj() const;
     glm::vec3 camPositionObj() const;
 
+    void setEllipsoidRadii(glm::vec3 radii);
+
 private:
     void loadTexture();
     void createPlane();
@@ -107,13 +110,13 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
-        sunPosition, ringTexture, shadowMatrix, shadowMapTexture, zFightingPercentage,
-        opacity
+        sunPosition, sunPositionObj, ringTexture,
+        opacity, ellipsoidRadii
     ) _uniformCache;
     UniformCache(modelViewProjectionMatrix, textureOffset, colorFilterValue, nightFactor,
         sunPosition, sunPositionObj, camPositionObj, textureForwards, textureBackwards,
-        textureUnlit, textureColor, textureTransparency, shadowMatrix,
-        shadowMapTexture, zFightingPercentage, opacity
+        textureUnlit, textureColor, textureTransparency,
+        opacity, ellipsoidRadii
     ) _uniformCacheAdvancedRings;
     UniformCache(modelViewProjectionMatrix, textureOffset, ringTexture) _geomUniformCache;
 
@@ -139,6 +142,7 @@ private:
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
     glm::vec3 _camPositionObjectSpace = glm::vec3(0.f);
+    glm::vec3 _ellipsoidRadii = glm::vec3(1.f);
 
     // Callback for readiness state changes
     ReadinessChangeCallback _readinessChangeCallback;

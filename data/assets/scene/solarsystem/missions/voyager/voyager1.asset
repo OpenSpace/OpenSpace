@@ -117,8 +117,7 @@ local VoyagerTrailEncounterJupiter = {
     },
     Color = { 0.70, 0.50, 0.20 },
     EnableFade = false,
-    -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
-    StartTime = "1979 MAR 03 23:24:00",
+    StartTime = "1979 MAR 04",
     EndTime = "1979 MAR 09",
     SampleInterval = 100
   },
@@ -167,8 +166,7 @@ local VoyagerTrailEncounterSaturn = {
     },
     EnableFade = false,
     Color = { 0.70, 0.50, 0.20 },
-    -- @TODO: Probably an off-by-one bug in RenderableTrailTrajectory?
-    StartTime = "1980 NOV 10 23:08:30",
+    StartTime = "1980 NOV 11",
     EndTime = "1980 NOV 16",
     SampleInterval = 100
   },

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,14 +26,19 @@
 #define __OPENSPACE_MODULE_GAIA___OCTREEMANAGER___H__
 
 #include <modules/gaia/rendering/gaiaoptions.h>
+#include <modules/gaia/rendering/octreeculler.h>
 #include <ghoul/glm.h>
-#include <ghoul/opengl/ghoul_gl.h>
 #include <array>
 #include <filesystem>
+#include <fstream>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <queue>
+#include <set>
 #include <stack>
+#include <string>
+#include <utility>
 #include <vector>
 
 namespace openspace {

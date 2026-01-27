@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,13 +32,20 @@
 #include <openspace/navigation/keyframenavigator.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/network/messagestructures.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
-#include <openspace/util/timemanager.h>
+#include <openspace/util/timeline.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/tcpsocket.h>
 #include <ghoul/misc/profiling.h>
+#include <cmath>
+#include <cstdint>
+#include <cstdlib>
+#include <limits>
+#include <utility>
 
 #include "parallelpeer_lua.inl"
 
@@ -56,7 +63,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HostPasswordInfo = {
         "HostPassword",
-        "Host Password",
+        "Host password",
         "The password that is required to take control of the joint session and thus "
         "send all commands to connected clients.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -79,7 +86,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo NameInfo = {
         "Name",
-        "Connection Name",
+        "Connection name",
         "The name of this OpenSpace instance that will be potentially broadcast to other "
         "connected instances.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -87,14 +94,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ServerNameInfo = {
         "ServerName",
-        "Server Name",
+        "Server name",
         "The name of the server instance to join.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo BufferTimeInfo = {
         "BufferTime",
-        "Buffer Time",
+        "Buffer time",
         "This is the number of seconds that received keyframes are buffered before they "
         "get applied to the rendering. A higher value leads to smoother rendering, "
         "particularly when the internet connection is unstable, but also leads to higher "
@@ -113,7 +120,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
         "CameraKeyframeInterval",
-        "Camera Keyframe interval",
+        "Camera keyframe interval",
         "Determines how often the information about the camera position and orientation "
         "is sent (in seconds). Lower values mean more accurate representation of the "
         "time, but also more internet traffic.",
@@ -164,7 +171,7 @@ void ParallelPeer::connect() {
 
     auto socket = std::make_unique<ghoul::io::TcpSocket>(
         _address,
-        atoi(_port.value().c_str())
+        std::atoi(_port.value().c_str())
     );
 
     socket->connect();
@@ -218,7 +225,7 @@ void ParallelPeer::sendAuthentication() {
         passwordSize     + // password
         sizeof(uint16_t) + // host password length
         hostPasswordSize + // host password
-        sizeof(uint8_t) + // server name length
+        sizeof(uint8_t)  + // server name length
         serverNameSize   + // server name
         sizeof(uint8_t)  + // name length
         nameLength;        // name
@@ -308,7 +315,6 @@ double ParallelPeer::convertTimestamp(double messageTimestamp) {
     const std::lock_guard latencyLock(_latencyMutex);
     return messageTimestamp + _initialTimeDiff + _bufferTime;
 }
-
 
 double ParallelPeer::latencyStandardDeviation() const {
     double accumulatedLatencyDiffSquared = 0;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,12 +24,20 @@
 
 #include <modules/volume/transferfunction.h>
 
-#include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <algorithm>
+#include <cstring>
 #include <fstream>
+#include <iterator>
+#include <string_view>
 
-using json = nlohmann::json;
+namespace {
+    constexpr int Width = 1024;
+} // namepsace
 
 namespace openspace::volume {
 
@@ -38,7 +46,7 @@ TransferFunction::TransferFunction(const std::string& string) {
 }
 
 bool TransferFunction::setEnvelopesFromString(const std::string& s) {
-    const json j = json::parse(s);
+    const nlohmann::json j = nlohmann::json::parse(s);
     for (const nlohmann::json& it : j) {
         Envelope env;
         std::vector<EnvelopePoint> tmpVec;
@@ -183,8 +191,8 @@ std::string TransferFunction::serializedToString() const {
     if (_envelopes.empty()) {
         return "";
     }
-    json j;
-    for (auto envIter = _envelopes.begin(); envIter != _envelopes.end(); ++envIter) {
+    nlohmann::json j;
+    for (auto envIter = _envelopes.begin(); envIter != _envelopes.end(); envIter++) {
         j[std::distance(_envelopes.begin(), envIter)] = { envIter->jsonEnvelope() };
     }
     return j.dump();
@@ -195,11 +203,11 @@ bool TransferFunction::createTexture(ghoul::opengl::Texture& ptr) {
         return false;
     }
 
-    float* transferFunction = new float[_width * 4];
-    std::memset(transferFunction, 0, _width * 4 * sizeof(float));
+    float* transferFunction = new float[Width * 4];
+    std::memset(transferFunction, 0, Width * 4 * sizeof(float));
 
-    for (int i = 0; i < _width ; i++) {
-        const float position = static_cast<float>(i) / static_cast<float>(_width);
+    for (int i = 0; i < Width; i++) {
+        const float position = static_cast<float>(i) / static_cast<float>(Width);
         int count = 0;
         glm::vec4 rgbFromEnvelopes(0.f);
         float alpha = 0.f;
@@ -216,7 +224,7 @@ bool TransferFunction::createTexture(ghoul::opengl::Texture& ptr) {
         rgbFromEnvelopes /= (count == 0) ? 1.f : static_cast<float>(count);
         rgbFromEnvelopes.w = alpha;
 
-        for (int channel = 0; channel < 4; ++channel) {
+        for (int channel = 0; channel < 4; channel++) {
             const int p = 4 * i + channel;
             const float value = rgbFromEnvelopes[channel];
             transferFunction[p] = value;

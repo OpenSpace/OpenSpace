@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,20 +25,21 @@
 #include <modules/base/dashboard/dashboarditemsimulationincrement.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
-#include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
-#include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <optional>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
         "Simplification",
-        "Do Time Simplification",
+        "Do time simplification",
         "If this value is enabled, the time is displayed in nuanced units, such as "
         "minutes, hours, days, years, etc. If this value is disabled, it is always "
         "displayed in seconds.",
@@ -47,7 +48,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
-        "Requested Unit",
+        "Requested unit",
         "If the simplification is disabled, this time unit is used as a destination to "
         "convert the seconds into.",
         openspace::properties::Property::Visibility::User
@@ -55,7 +56,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TransitionFormatInfo = {
         "TransitionFormat",
-        "Transition Format",
+        "Transition format",
         "Format string used to format the text used while in a delta time transition, "
         "that is if the current delta time is being interpolated to reach a target "
         "delta time. This format gets five parameters in this order:  The target delta "
@@ -69,7 +70,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RegularFormatInfo = {
         "RegularFormat",
-        "Regular Format",
+        "Regular format",
         "The format string used to format the text if the target delta time is the same "
         "as the current delta time. This format gets three parameters in this order:  "
         "The target delta value, the target delta unit, and the string 'Paused' if the "

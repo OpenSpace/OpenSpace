@@ -2,12 +2,12 @@
 -- Creates a screenspace image plane with controls to for a blackout shape. Can be used
 -- when using a secondary projector to project content on a dome surface.
 
-local inset = {
+local Item = {
   Identifier = "ScreenSpaceInsetBlackout_Example_Points",
   Type = "ScreenSpaceInsetBlackout",
   Name = "ScreenSpaceInsetBlackout Example - Points",
   Blackoutshape = {
-    -- Must always contain four corners in the following order: 
+    -- Must always contain four corners in the following order:
     -- top-left, top-right, bottom-right, bottom-left
     Corners = { {0.0, 0.9}, {1.0, 0.9}, {0.9, 0.1}, {0.1, 0.1} },
 
@@ -27,9 +27,9 @@ local inset = {
 }
 
 asset.onInitialize(function()
-  openspace.addScreenSpaceRenderable(inset)
+  openspace.addScreenSpaceRenderable(Item)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeScreenSpaceRenderable(inset)
+  openspace.removeScreenSpaceRenderable(Item)
 end)

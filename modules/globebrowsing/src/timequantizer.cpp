@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,8 +34,10 @@
 #include <date/date.h>
 #include <algorithm>
 #include <charconv>
-#include <iomanip>
-#include <sstream>
+#include <cmath>
+#include <cstdlib>
+#include <cstring>
+#include <utility>
 
 // @TODO (abock, 2020-08-07) All of the time handling in this class should be cleaned up
 //       a bit. There are lots of conversions between ISO strings for time and Time

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/interaction/joystickcamerastates.h>
+#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/keyboardinputstate.h>
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/websocketcamerastates.h>
@@ -37,23 +38,24 @@
 #include <openspace/navigation/pathnavigator.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/util/mouse.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/util/keys.h>
+#include <openspace/util/mouse.h>
+#include <ghoul/glm.h>
+#include <filesystem>
+#include <functional>
+#include <optional>
+#include <variant>
 
 namespace openspace {
+    namespace scripting { struct LuaLibrary; }
     class Camera;
     class SceneGraphNode;
 } // namespace openspace
 
-namespace openspace::scripting { struct LuaLibrary; }
-
 namespace openspace::interaction {
 
 struct JoystickInputStates;
-class KeyframeNavigator;
-struct NavigationState;
-class OrbitalNavigator;
-class PathNavigator;
 struct NodeCameraStateSpec;
 struct WebsocketInputStates;
 
@@ -98,6 +100,8 @@ public:
     void mouseButtonCallback(MouseButton button, MouseAction action);
     void mousePositionCallback(double x, double y);
     void mouseScrollWheelCallback(double pos);
+
+    void renderOverlay() const;
 
     std::vector<std::string> listAllJoysticks() const;
     void setJoystickAxisMapping(std::string joystickName,
@@ -208,6 +212,17 @@ private:
     properties::BoolProperty _disableJoystickInputs;
     properties::BoolProperty _useKeyFrameInteraction;
     properties::FloatProperty _jumpToFadeDuration;
+
+    struct {
+        properties::PropertyOwner owner;
+        properties::BoolProperty enable;
+        properties::Vec4Property color;
+
+        bool isMouseFirstPress = false;
+        bool isMousePressed = false;
+        glm::vec2 clickPosition;
+        glm::vec2 currentPosition;
+    } _mouseVisualizer;
 };
 
 } // namespace openspace::interaction

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,14 @@
 #include <openspace/scripting/scriptscheduler.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/time.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <algorithm>
+#include <iterator>
+#include <utility>
 
 #include "scriptscheduler_lua.inl"
 
@@ -45,7 +48,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ShouldRunAllTimeJumpInfo = {
         "ShouldRunAllTimeJump",
-        "Should Run All Time Jump",
+        "Should run all time jump",
         "If 'true': In a time jump, all scheduled scripts between the old time and the "
         "new time is executed. If 'false': In a time jump, no scripts scheduled between "
         "the new time and the old time is executed.",

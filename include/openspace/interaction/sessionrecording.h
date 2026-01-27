@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,12 +26,13 @@
 #define __OPENSPACE_CORE___SESSIONRECORDING___H__
 
 #include <openspace/navigation/keyframenavigator.h>
-#include <ghoul/misc/dictionary.h>
 #include <filesystem>
 #include <functional>
 #include <string>
 #include <variant>
 #include <vector>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace::interaction {
 

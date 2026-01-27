@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,13 +24,12 @@
 
 #include <openspace/rendering/dashboard.h>
 
-#include <openspace/engine/globals.h>
-#include <openspace/rendering/dashboarditem.h>
-#include <openspace/scripting/scriptengine.h>
+#include <openspace/scripting/lualibrary.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <utility>
 
 #include "dashboard_lua.inl"
 
@@ -45,7 +44,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo StartPositionOffsetInfo = {
         "StartPositionOffset",
-        "Start Position Offset",
+        "Start position offset",
         "A 2D vector controlling where the dashboard rendering starts. Adding an offset "
         "in x and y-direction on screen.",
         openspace::properties::Property::Visibility::User
@@ -53,7 +52,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RefreshRateInfo = {
         "RefreshRate",
-        "Refresh Rate (in ms)",
+        "Refresh rate (in ms)",
         "The number of milliseconds between refreshes of the dashboard items. If the "
         "value is 0 the dashboard is refreshed at the same rate as the main rendering.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -98,7 +97,7 @@ void Dashboard::addDashboardItem(std::unique_ptr<DashboardItem> item) {
         else {
             item->setIdentifier(originalIdentifier + std::to_string(suffix));
             item->setGuiName(originalIdentifier + " " + std::to_string(suffix));
-            ++suffix;
+            suffix++;
         }
     }
 

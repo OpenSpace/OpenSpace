@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,11 +31,8 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <array>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 /**
  * This concrete implementation of a RenderableTrail renders a fixed trail, regardless of
@@ -62,14 +59,14 @@ public:
 private:
 
     /**
+     * Update vertex buffer when a full sweep is needed.
+     */
+    void updateBuffer();
+
+    /**
      * Reset some variables to default state.
      */
     void reset();
-
-    /// The number of vertices that we calculate during each frame of the full sweep pass
-    properties::IntProperty _sweepChunkSize;
-    /// Enables or disables iterative vertex calculations during a full sweep
-    properties::BoolProperty _enableSweepChunking;
 
     /// The start time of the trail
     properties::StringProperty _startTime;
@@ -82,6 +79,8 @@ private:
     properties::IntProperty _timeStampSubsamplingFactor;
     /// Determines whether the full trail should be rendered or the future trail removed
     properties::BoolProperty _renderFullTrail;
+    /// Determines whether accurate trail points are being calculated or not
+    properties::BoolProperty _useAccurateTrail;
     /// Determines how many vertices around the object that will be
     /// replaced during full trail rendering
     properties::IntProperty _nReplacementPoints;
@@ -89,16 +88,10 @@ private:
     /// Dirty flag that determines whether the full vertex buffer needs to be resampled
     bool _needsFullSweep = true;
 
-    /// Dirty flag to determine whether the stride information needs to be changed
-    bool _subsamplingIsDirty = true;
-
     /// The conversion of the _startTime into the internal time format
     double _start = 0.0;
     /// The conversion of the _endTime into the internal time format
     double _end = 0.0;
-
-    /// Tracks sweep iteration, is used to calculate which vertices to work on per frame
-    int _sweepIteration = 0;
 
     /// How many points do we need to compute given the distance between the
     /// start and end date and the desired sample interval

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,27 +24,34 @@
 
 #include <modules/globebrowsing/src/geojson/geojsoncomponent.h>
 
-#include <modules/globebrowsing/src/geojson/globegeometryhelper.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/json.h>
-#include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/lightsource.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/ellipsoid.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
+#include <geos/geom/CoordinateSequence.h>
+#include <geos/geom/Point.h>
+#include <geos/util/GEOSException.h>
+#include <algorithm>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <functional>
-#include <optional>
+#include <iterator>
+#include <utility>
 
 namespace geos_nlohmann = nlohmann;
 #include <geos/geom/Geometry.h>
@@ -75,7 +82,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HeightOffsetInfo = {
         "HeightOffset",
-        "Height Offset",
+        "Height offset",
         "A height offset value, in meters. Useful for moving a feature closer to or "
         "farther away from the surface.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -83,7 +90,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CoordinateOffsetInfo = {
         "CoordinateOffset",
-        "Geographic Coordinate Offset",
+        "Geographic coordinate offset",
         "A latitude and longitude offset value, in decimal degrees. Can be used to "
         "move the object on the surface and correct potential mismatches with other "
         "renderings. Note that changing it during runtime leads to all positions being "
@@ -101,7 +108,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PreventHeightUpdateInfo = {
         "PreventHeightUpdate",
-        "Prevent Update From Heightmap",
+        "Prevent update from heightmap",
         "If true, the polygon mesh will not be automatically updated based on the "
         "heightmap, even if the 'RelativeToGround' altitude option is set and the "
         "heightmap updates. The data can still be force updated.",
@@ -110,7 +117,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ForceUpdateHeightDataInfo = {
         "ForceUpdateHeightData",
-        "Force Update Height Data",
+        "Force update height data",
         "Triggering this leads to a recomputation of the heights based on the globe "
         "height map value at the geometry's positions.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -118,7 +125,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PointRenderModeInfo = {
         "PointRenderMode",
-        "Points Aligned to",
+        "Points aligned to",
         "Decides how the billboards for the points should be rendered in terms of up "
         "direction and whether the plane should face the camera. See details on the "
         "different options in the wiki.",
@@ -127,7 +134,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FlyToFeatureInfo = {
         "FlyToFeature",
-        "Fly To Feature",
+        "Fly to feature",
         "Triggering this leads to the camera flying to a position that show the GeoJson "
         "feature. The flight will account for any lat, long or height offset.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -135,7 +142,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CentroidCoordinateInfo = {
         "CentroidCoordinate",
-        "Centroid Coordinate",
+        "Centroid coordinate",
         "The lat long coordinate of the centroid position of the read geometry. Note "
         "that this value does not incude the offset.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -143,7 +150,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo BoundingBoxInfo = {
         "BoundingBox",
-        "Bounding Box",
+        "Bounding box",
         "The lat long coordinates of the lower and upper corner of the bounding box of "
         "the read geometry. Note that this value does not incude the offset.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -151,7 +158,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PointSizeScaleInfo = {
         "PointSizeScale",
-        "Point Size Scale",
+        "Point size scale",
         "An extra scale value that can be used to increase or decrease the scale of any "
         "rendered points in the component, even if a value is set from the GeoJson file.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -159,7 +166,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthScaleInfo = {
         "LineWidthScale",
-        "Line Width Scale",
+        "Line width scale",
         "An extra scale value that can be used to increase or decrease the width of any "
         "rendered lines in the component, even if a value is set from the GeoJson file. "
         "Note that there is a max limit for how wide lines can be.",
@@ -532,7 +539,7 @@ void GeoJsonComponent::render(const RenderData& data) {
     };
 
     // Do two render passes, to properly render opacity of overlaying objects
-    for (int renderPass = 0; renderPass < 2; ++renderPass) {
+    for (int renderPass = 0; renderPass < 2; renderPass++) {
         for (size_t i = 0; i < _geometryFeatures.size(); i++) {
             if (_features[i]->enabled && _features[i]->isVisible()) {
                 _geometryFeatures[i].render(

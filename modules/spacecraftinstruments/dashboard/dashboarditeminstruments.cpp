@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,22 +26,24 @@
 
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timeconversion.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/font/font.h>
-#include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
 #include <chrono>
+#include <optional>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo ActiveColorInfo = {
         "ActiveColor",
-        "Active Color",
+        "Active color",
         "This value determines the color that the active instrument is rendered in. "
         "Shortly after activation, the used color is mixture of this and the flash "
         "color. The default value is (0.6, 1.0, 0.0).",
@@ -50,7 +52,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FlashColorInfo = {
         "FlashColor",
-        "Flash Color",
+        "Flash color",
         "This value determines the color that is used shortly after an instrument "
         "activation. The default value is (0.9, 1.0, 0.75).",
         openspace::properties::Property::Visibility::User

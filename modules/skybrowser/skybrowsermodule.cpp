@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,22 +27,35 @@
 #include <modules/skybrowser/include/renderableskytarget.h>
 #include <modules/skybrowser/include/screenspaceskybrowser.h>
 #include <modules/skybrowser/include/targetbrowserpair.h>
-#include <modules/skybrowser/include/wwtdatahandler.h>
 #include <openspace/camera/camera.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/properties/property.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/util/distanceconstants.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/keys.h>
+#include <openspace/util/mouse.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringconversion.h>
+#include <ghoul/misc/templatefactory.h>
+#include <algorithm>
+#include <memory>
+#include <optional>
 
 #include "skybrowsermodule_lua.inl"
 
 namespace {
-
     constexpr openspace::properties::Property::PropertyInfo AllowRotationInfo = {
         "AllowCameraRotation",
-        "Allow Camera Rotation",
+        "Allow camera rotation",
         "Toggles if the camera should rotate to look at the sky target if it is going "
         "outside of the current field of view.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -50,7 +63,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CameraRotSpeedInfo = {
         "CameraRotationSpeed",
-        "Camera Rotation Speed",
+        "Camera rotation speed",
         "The speed of the rotation of the camera when the camera rotates to look at a "
         "coordinate which is outside of the field of view.",
         openspace::properties::Property::Visibility::User
@@ -58,21 +71,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TargetSpeedInfo = {
         "TargetAnimationSpeed",
-        "Target Animation Speed",
+        "Target animation speed",
         "This determines the speed of the animation of the sky target.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo BrowserSpeedInfo = {
         "BrowserAnimationSpeed",
-        "Field of View Animation Speed",
+        "Field of view animation speed",
         "This determines the speed of the animation of the field of view in the browser.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo HideWithGuiInfo = {
         "HideTargetsBrowsersWithGui",
-        "Hide Targets and Browsers with GUI",
+        "Hide targets and browsers with GUI",
         "If checked, the targets and browsers will be disabled when the sky browser "
         "panel is minimized.",
         openspace::properties::Property::Visibility::User
@@ -80,7 +93,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo InverseZoomInfo = {
         "InverseZoomDirection",
-        "Inverse Zoom Direction",
+        "Inverse zoom direction",
         "If checked, the zoom direction of the scroll over the AAS WWT browser will be "
         "inversed.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -88,26 +101,25 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SynchronizeAimInfo = {
         "SynchronizeAim",
-        "Synchronize Aim",
+        "Synchronize aim",
         "If checked, the target and the browser will have synchronized aim.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpaceCraftTimeInfo = {
         "SpaceCraftAnimationTime",
-        "Space Craft Animation Time",
-        "Sets the duration (in seconds) of the animation of the space craft when it is "
+        "Spacecraft animation time",
+        "Sets the duration (in seconds) of the animation of the spacecraft when it is "
         "pointed to where the target is aiming.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ImageCollectionInfo = {
        "WwtImageCollectionUrl",
-       "AAS WorldWide Telescope Image Collection Url",
+       "AAS worldwide telescope image collection URL",
        "The url of the image collection which is loaded into AAS WorldWide Telescope.",
        openspace::properties::Property::Visibility::AdvancedUser
     };
-
 
     struct [[codegen::Dictionary(SkyBrowserModule)]] Parameters {
         // [[codegen::verbatim(AllowRotationInfo.description)]]

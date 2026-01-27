@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,6 +45,9 @@ uniform mat4 normalTransform;
 uniform mat4 meshTransform;
 uniform mat4 meshNormalTransform;
 
+out vec4 lightspace_position;
+uniform dmat4 model;
+uniform dmat4 light_vp;
 
 void main() {
   vs_positionCameraSpace = modelViewTransform * (meshTransform * in_position);
@@ -70,4 +73,6 @@ void main() {
   vec3 B = normalize(cross(N, T));
 
   vs_TBN = mat3(T, B, N);
+
+  lightspace_position = vec4(light_vp * model * meshTransform * in_position);
 }

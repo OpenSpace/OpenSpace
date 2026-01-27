@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -29,11 +29,13 @@ set(WEBBROWSER_MODULE_NAME WebBrowser)
 set(WEBBROWSER_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "WEBBROWSER_MODULE_PATH")
 
 # wanted by CEF
-if (CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+if (CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64" OR CMAKE_SYSTEM_PROCESSOR STREQUAL "ARM64")
   set(PROJECT_ARCH "arm64") # For macOS on ARM64
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "13.3" CACHE STRING "Minimum OS X deployment version" FORCE) # check if this solves no type named 'in_place_t'
-  set(CMAKE_CXX_STANDARD 20)
-  set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "13.3" CACHE STRING "Minimum OS X deployment version" FORCE) # check if this solves no type named 'in_place_t'
+    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_STANDARD_REQUIRED ON)
+  endif ()
 elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
   set(PROJECT_ARCH "armv8-a") # For Ubuntu/Linux on ARM64 - or should it be aarch64? Builds OK on Ubuntu with armv8-a
 else ()
@@ -199,7 +201,7 @@ if (OS_MACOSX)
     set_executable_target_properties(${target})
     # add_cef_logical_target("libcef_lib" "${CEF_LIB_DEBUG}" "${CEF_LIB_RELEASE}")
     add_dependencies(${target} libcef_dll_wrapper)
-    target_link_libraries(${target} libcef_dll_wrapper ${CEF_STANDARD_LIBS})
+    target_link_libraries(${target} PRIVATE libcef_dll_wrapper ${CEF_STANDARD_LIBS})
     set_target_properties(${target} PROPERTIES
       MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/mac/helper-Info.plist
       OUTPUT_NAME "${target}_OUTPUT_NAME"
@@ -210,13 +212,13 @@ if (OS_MACOSX)
 
     if (USE_SANDBOX)
       # Logical target used to link the cef_sandbox library.
-      target_link_libraries(${target} cef_sandbox_lib)
+      target_link_libraries(${target} PRIVATE cef_sandbox_lib)
     endif ()
   endforeach()
 
   set_target_properties(${CEF_HELPER_TARGET_GPU} PROPERTIES FOLDER "Helper")
   set_target_properties(${CEF_HELPER_TARGET_RENDERER} PROPERTIES FOLDER "Helper")
-else()
+else ()
   message(STATUS "Setting up WebBrowser CEF helper executable: ${CEF_HELPER_TARGET}")
   set_openspace_cef_target_out_dir()
   add_executable(${CEF_HELPER_TARGET} ${WEBBROWSER_HELPER_SOURCES})

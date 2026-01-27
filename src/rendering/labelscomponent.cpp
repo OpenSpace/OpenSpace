@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,6 +32,7 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/logging/logmanager.h>
+#include <cmath>
 #include <optional>
 
 namespace {
@@ -71,21 +72,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
         "FontSize",
-        "Font Size",
+        "Font size",
         "Font size for the labels. This is different from the text size.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinMaxInfo = {
         "MinMaxSize",
-        "Min/Max Size",
+        "Min/max size",
         "The minimum and maximum size (in pixels) of the labels.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
         "FaceCamera",
-        "Face Camera",
+        "Face camera",
         "If enabled, the labels will be rotated to face the camera. For non-linear "
         "display rendering (for example fisheye) this should be set to false.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -93,7 +94,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
-        "Transformation Matrix",
+        "Transformation matrix",
         "Transformation matrix to be applied to the labels.",
         openspace::properties::Property::Visibility::Developer
     };

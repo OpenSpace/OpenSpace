@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,9 +27,9 @@
 #include <openspace/openspace.h>
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/core_registration.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/documentationengine.h>
 #include <openspace/engine/configuration.h>
-#include <openspace/engine/downloadmanager.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/logfactory.h>
 #include <openspace/engine/moduleengine.h>
@@ -38,6 +38,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
+#include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/interaction/keybindingmanager.h>
@@ -46,52 +47,62 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/navigation/waypoint.h>
+#include <openspace/network/parallelconnection.h>
 #include <openspace/network/parallelpeer.h>
-#include <openspace/rendering/dashboard.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/loadingscreen.h>
 #include <openspace/rendering/luaconsole.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/asset.h>
 #include <openspace/scene/assetmanager.h>
-#include <openspace/scene/profile.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/sceneinitializer.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptscheduler.h>
 #include <openspace/scripting/scriptengine.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
-#include <openspace/util/screenlog.h>
+#include <openspace/util/openspacemodule.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/task.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/transformationmanager.h>
-#include <ghoul/ghoul.h>
-#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/lua/luastate.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stacktrace.h>
 #include <ghoul/misc/stringconversion.h>
 #include <ghoul/misc/stringhelper.h>
+#include <ghoul/misc/templatefactory.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/debugcontext.h>
 #include <ghoul/opengl/shaderpreprocessor.h>
-#include <ghoul/opengl/texture.h>
 #include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <ghoul/systemcapabilities/systemcapabilities.h>
+#include <ghoul/systemcapabilities/systemcapabilitiescomponent.h>
+#include <ghoul/systemcapabilities/version.h>
 #include <date/date.h>
 #include <glbinding/glbinding.h>
 #include <glbinding-aux/types_to_string.h>
-#include <filesystem>
-#include <future>
+#include <algorithm>
+#include <chrono>
 #include <numeric>
 #include <sstream>
+#include <string_view>
+#include <thread>
+#include <variant>
 
 #ifdef WIN32
 #include <Windows.h>
@@ -130,7 +141,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PrintEventsInfo = {
         "PrintEvents",
-        "Print Events",
+        "Print events",
         "If this is enabled, all events that are propagated through the system are "
         "printed to the log.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -138,7 +149,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
         "PropertyVisibility",
-        "Property Visibility",
+        "Property visibility",
         "Hides or displays different settings in the GUI depending on how advanced they "
         "are.",
         openspace::properties::Property::Visibility::Always
@@ -146,7 +157,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FadeDurationInfo = {
         "FadeDuration",
-        "Fade Duration (seconds)",
+        "Fade duration (seconds)",
         "Controls how long time the fading in/out takes when enabling/disabling an "
         "object through a checkbox in the UI. Holding SHIFT while clicking the "
         "checkbox will enable/disable the renderable without fading, as will setting "
@@ -156,7 +167,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInputs",
-        "Disable All Mouse Inputs",
+        "Disable all mouse inputs",
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
         "double inputs on touch (from both touch input and inserted mouse inputs).",
         openspace::properties::Property::Visibility::User,
@@ -167,7 +178,7 @@ namespace {
         ShowPropertyConfirmationDialogInfo =
     {
         "ShowPropertyConfirmation",
-        "Show Property Confirmation",
+        "Show property confirmation",
         "Controls whether confirmation dialogs are shown when making changes to certain "
         "properties. If checked, the dialogs will be shown for properties that require "
         "it. If unchecked, no dialogs will be shown.",
@@ -655,6 +666,15 @@ void OpenSpaceEngine::initializeGL() {
             [](Source source, Type type, Severity severity, unsigned int id,
                 const std::string& message)
             {
+                // We want to blanked-disable PushGroup/PopGroup messages. It doesn't work
+                // to use `setDebugMessageControl` for this unfortunately
+                if ((source == Source::Application || source == Source::ThirdParty) &&
+                    (type == Type::PushGroup || type == Type::PopGroup))
+                {
+                    return;
+                }
+
+
                 const std::string s = ghoul::to_string(source);
                 const std::string t = ghoul::to_string(type);
 
@@ -1299,6 +1319,7 @@ void OpenSpaceEngine::drawOverlays() {
     if (isGuiWindow) {
         global::renderEngine->renderOverlays(_shutdown);
         global::sessionRecordingHandler->render();
+        global::navigationHandler->renderOverlay();
     }
 
     for (const std::function<void()>& func : *global::callback::draw2D) {
@@ -1467,6 +1488,18 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
     if (action == MouseAction::Press && isGuiWindow) {
         const bool isConsumed =
             global::renderEngine->mouseActivationCallback(_mousePosition);
+        if (isConsumed) {
+            return;
+        }
+    }
+
+    if (action == MouseAction::Press && isGuiWindow) {
+        const bool isConsumed = global::luaConsole->mouseActivationCallback(
+            _mousePosition,
+            button,
+            action,
+            mods
+        );
         if (isConsumed) {
             return;
         }
@@ -1743,6 +1776,7 @@ scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
             codegen::lua::RemoveTag,
             codegen::lua::DownloadFile,
             codegen::lua::CreateSingleColorImage,
+            codegen::lua::ImageSize,
             codegen::lua::SaveBase64File,
             codegen::lua::IsMaster,
             codegen::lua::Version,

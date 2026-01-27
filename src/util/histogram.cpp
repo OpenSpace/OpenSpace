@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,9 @@
 
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <algorithm>
 #include <cmath>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "Histogram";
@@ -203,7 +205,7 @@ const float* Histogram::data() const {
 
 std::vector<std::pair<float,float>> Histogram::getDecimated(int) const {
     // Return a copy of _data decimated as in Ljung 2004
-    return std::vector<std::pair<float,float>>();
+    return std::vector<std::pair<float, float>>();
 }
 
 void Histogram::normalize() {
@@ -316,7 +318,7 @@ float Histogram::highestBinValue(bool equalized, int overBins) {
         }
 
         value += _data[i];
-        value /= static_cast<float>(++num);
+        value /= static_cast<float>(num + 1);
 
         if (value > highestValue) {
             highestBin = i;
@@ -329,7 +331,7 @@ float Histogram::highestBinValue(bool equalized, int overBins) {
         const float low = _minValue + static_cast<float>(highestBin) /
                           _numBins * (_maxValue - _minValue);
         const float high = low + (_maxValue - _minValue) / static_cast<float>(_numBins);
-        return (high+low) / 2.f;
+        return (high + low) / 2.f;
     }
     else {
         return highestBin / static_cast<float>(_numBins);

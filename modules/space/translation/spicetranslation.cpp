@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,16 +25,11 @@
 #include <modules/space/translation/spicetranslation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
+#include <ghoul/misc/dictionary.h>
 #include <filesystem>
-#include <optional>
 #include <variant>
 
 namespace {
@@ -61,7 +56,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FrameInfo = {
         "Frame",
-        "Reference Frame",
+        "Reference frame",
         "This is the SPICE name of the reference frame in which the position should be "
         "calculated. The default value is GALACTIC.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -69,7 +64,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo FixedDateInfo = {
         "FixedDate",
-        "Fixed Date",
+        "Fixed date",
         "If this value is specified, the position will be locked to a specific time "
         "rather than following the in-game in the system. Setting this to an empty "
         "string will unlock the time and return to position based on current simulation "
@@ -79,7 +74,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TimeOffsetInfo = {
         "TimeOffset",
-        "Time Offset",
+        "Time offset",
         "A time offset, in seconds, added to the simulation time (or Fixed Date if any), "
         "at which to compute the rotation.",
         openspace::properties::Property::Visibility::User

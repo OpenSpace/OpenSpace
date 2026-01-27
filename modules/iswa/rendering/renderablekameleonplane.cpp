@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,20 +33,28 @@
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/designpattern/event.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <nlohmann/json.hpp>
+#include <algorithm>
+#include <exception>
 #include <fstream>
+#include <optional>
+#include <set>
 
 namespace {
-    using json = nlohmann::json;
     constexpr std::string_view _loggerCat = "KameleonPlane";
 
     constexpr openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
         "FieldlineSeedsIndexFile",
-        "Fieldline Seedpoints",
+        "Fieldline seedpoints",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
@@ -357,11 +365,14 @@ void RenderableKameleonPlane::readFieldlinePaths(const std::filesystem::path& in
     else {
         try {
             //Parse and add each fieldline as an selection
-            json fieldlines = json::parse(seedFile);
+            nlohmann::json fieldlines = nlohmann::json::parse(seedFile);
             int i = 0;
             const std::string& fullName = identifier();
             std::string partName = fullName.substr(0,fullName.find_last_of("-"));
-            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); it++) {
+            for (nlohmann::json::iterator it = fieldlines.begin();
+                 it != fieldlines.end();
+                 it++)
+            {
                 _fieldlines.addOption(it.key());
                 _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
                     partName + "/" + it.key(),

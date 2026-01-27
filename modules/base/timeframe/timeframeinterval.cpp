@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,15 +25,17 @@
 #include <modules/base/timeframe/timeframeinterval.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
+#include <ghoul/misc/dictionary.h>
 #include <optional>
+#include <string>
+#include <variant>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo HasStartInfo = {
         "HasStart",
-        "Has Start",
+        "Has start",
         "If enabled, this TimeFrame will be inactive before the Start.",
         openspace::properties::Property::Visibility::User
     };
@@ -47,7 +49,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo HasEndInfo = {
         "HasEnd",
-        "Has End",
+        "Has end",
         "If enabled, this TimeFrame will be inactive after the End.",
         openspace::properties::Property::Visibility::User
     };

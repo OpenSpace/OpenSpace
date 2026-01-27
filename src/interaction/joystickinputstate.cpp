@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,7 @@
 
 #include <ghoul/glm.h>
 #include <ghoul/misc/invariants.h>
-#include <ghoul/misc/stringconversion.h>
 #include <algorithm>
-#include <map>
 #include <numeric>
 
 namespace openspace::interaction {

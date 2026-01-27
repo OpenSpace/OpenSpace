@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,12 @@
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/network/messagestructures.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
-#include <openspace/util/time.h>
-#include <openspace/util/timemanager.h>
-#include <ghoul/logging/logmanager.h>
-
-#include <glm/gtx/quaternion.hpp>
+#include <algorithm>
+#include <cmath>
+#include <utility>
 
 namespace openspace::interaction {
 
@@ -159,21 +158,10 @@ void KeyframeNavigator::updateCamera(Camera* camera, const CameraPose& prevPose,
 }
 
 double KeyframeNavigator::currentTime() const {
-    if (_timeframeMode == KeyframeTimeRef::Relative_recordedStart) {
-        return (global::windowDelegate->applicationTime() - _referenceTimestamp);
-    }
-    else if (_timeframeMode == KeyframeTimeRef::Absolute_simTimeJ2000) {
-        return global::timeManager->time().j2000Seconds();
-    }
-    else {
-        return global::windowDelegate->applicationTime();
-    }
+    return (global::windowDelegate->applicationTime() - _referenceTimestamp);
 }
 
-void KeyframeNavigator::setTimeReferenceMode(KeyframeTimeRef refType,
-                                             double referenceTimestamp)
-{
-    _timeframeMode = refType;
+void KeyframeNavigator::setReferenceTime(double referenceTimestamp) {
     _referenceTimestamp = referenceTimestamp;
 }
 

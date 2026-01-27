@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,22 +25,16 @@
 #ifndef __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
 #define __OPENSPACE_MODULE_BASE___SCREENSPACEDASHBOARD___H__
 
-#include <modules/base/rendering/screenspaceframebuffer.h>
+#include <openspace/rendering/screenspacerenderableframebuffer.h>
 
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/rendering/dashboard.h>
 
-namespace ghoul::fontrendering {
-    class Font;
-    class FontRenderer;
-} // namespace ghoul::fontrendering
-
 namespace openspace {
 
-namespace documentation { struct Documentation; }
 namespace scripting { struct LuaLibrary; }
 
-class ScreenSpaceDashboard : public ScreenSpaceFramebuffer {
+class ScreenSpaceDashboard : public ScreenSpaceRenderableFramebuffer {
 public:
     explicit ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
     virtual ~ScreenSpaceDashboard() override = default;

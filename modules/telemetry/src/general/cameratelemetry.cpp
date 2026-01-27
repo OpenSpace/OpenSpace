@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,13 @@
 
 #include <modules/telemetry/include/general/cameratelemetry.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
+#include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/util/distanceconversion.h>
+#include <cstdlib>
+#include <limits>
 
 namespace {
     // Indices for data items
@@ -52,7 +56,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo CameraSpeedDistanceUnitInfo =
     {
         "CameraSpeedDistanceUnit",
-        "Camera Speed Unit (Distance)",
+        "Camera speed unit (distance)",
         "Choose a distance unit that is used for the camera speed. "
         "For example, if the distacne unit 'Kilometer' is chosen, then the unit used for "
         "the camera speed will be kilometers per second.",
@@ -67,7 +71,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo PositionPrecisionInfo = {
         "PositionPrecision",
-        "Position Precision",
+        "Position precision",
         "The precision in meters used to determin when to send updated camera positional "
         "data to the Open Sound Control receiver.",
         openspace::properties::Property::Visibility::User
@@ -75,7 +79,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RotationPrecisionInfo = {
         "RotationPrecision",
-        "Rotation Precision",
+        "Rotation precision",
         "The precision used to determin when to send updated camera rotational "
         "data to the Open Sound Control receiver.",
         openspace::properties::Property::Visibility::User
@@ -83,7 +87,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo SpeedPrecisionInfo = {
         "SpeedPrecision",
-        "Speed Precision",
+        "Speed precision",
         "The precision in meters per second used to determin when to send updated camera "
         "speed data to the Open Sound Control receiver.",
         openspace::properties::Property::Visibility::User
@@ -97,7 +101,7 @@ CameraTelemetry::CameraTelemetry(const std::string& ip, int port)
     , _cameraSpeedDistanceUnitOption(CameraSpeedDistanceUnitInfo)
     , _precisionProperties(CameraTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    for (int i = 0; i < DistanceUnitNames.size(); ++i) {
+    for (int i = 0; i < DistanceUnitNames.size(); i++) {
         _cameraSpeedDistanceUnitOption.addOption(i, DistanceUnitNames[i].singular.data());
     }
 

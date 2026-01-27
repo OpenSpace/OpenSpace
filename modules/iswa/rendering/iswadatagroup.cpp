@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,58 +31,57 @@
 #include <modules/iswa/util/dataprocessortext.h>
 #include <modules/iswa/util/dataprocessorjson.h>
 #include <modules/iswa/util/dataprocessorkameleon.h>
-#include <openspace/json.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
     constexpr std::string_view _loggerCat = "IswaDataGroup";
-    using json = nlohmann::json;
 
     constexpr openspace::properties::Property::PropertyInfo UseLogInfo = {
         "UseLog",
-        "Use Logarithm",
+        "Use logarithm",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseHistogramInfo = {
         "UseHistogram",
-        "Auto Contrast",
+        "Auto contrast",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo AutoFilterInfo = {
         "AutoFilter",
-        "Auto Filter",
+        "Auto filter",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo NormalizeValues = {
         "NormValues",
-        "Normalize Values",
+        "Normalize values",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
         "BackgroundValues",
-        "Background Values",
+        "Background values",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
         "Transferfunctions",
-        "Transfer Functions",
+        "Transfer functions",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::Developer
     };
 
     constexpr openspace::properties::Property::PropertyInfo DataOptionsInfo = {
         "DataOptions",
-        "Data Options",
+        "Data options",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,19 +23,25 @@
  ****************************************************************************************/
 
 #include <modules/base/rendering/screenspaceinsetblackout.h>
-#include <modules/base/basemodule.h>
 
+#include <modules/base/basemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
-#include <openspace/events/event.h>
-#include <openspace/events/eventengine.h>
-#include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderengine.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/clipboard.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/interpolator.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
+#include <array>
+#include <filesystem>
+#include <functional>
+#include <optional>
+#include <utility>
 
 namespace {
     constexpr glm::uvec2 BlackoutTextureSize = glm::uvec2(3840, 2160);
@@ -104,7 +110,7 @@ namespace {
         }
 
         std::string str = std::format("{} = {{ ", id);
-        for (size_t i = 0; i < data.size(); ++i) {
+        for (size_t i = 0; i < data.size(); i++) {
             std::string xVal = std::format("{}", data[i].x);
             std::string yVal = std::format("{}", data[i].y);
             xVal += (xVal.find(".") == std::string::npos) ? ".0" : "";
@@ -143,7 +149,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CalibrationPatternInfo = {
         "EnableCalibrationPattern",
-        "Enable Calibration Pattern",
+        "Enable calibration pattern",
         "Enables the calibration pattern. The calibration can be used to find which "
         "values to use when setting up the blackout shape.",
         openspace::properties::Property::Visibility::User
@@ -151,49 +157,49 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CalibrationColorInfo = {
         "EnableCalibrationColor",
-        "Enable Calibration Color",
+        "Enable calibration color",
         "Set Blackout Shape to a bright color for easier calibration.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AddControlPointInfo = {
         "AddControlPoint",
-        "Add Control Point",
+        "Add control point",
         "Adds a new control point to the spline.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RemoveControlPointInfo = {
         "RemoveControlPoint",
-        "Remove Control Point",
+        "Remove control point",
         "Removes the selected control point from the spline.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo RemoveSelectorInfo = {
         "RemoveSelector",
-        "Select Point To Remove",
+        "Select point to remove",
         "Removes the selected control point.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo AddSelectorInfo = {
         "AddSelector",
-        "Select Where To Add",
+        "Select where to add",
         "Select where to add a new point.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo NewPointPositionInfo = {
         "NewPointPosition",
-        "Point Position",
+        "Point position",
         "X and Y coordinates for where to add the new control point.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo CalibrationTextureInfo = {
         "CalibrationTexture",
-        "Calibration Texture",
+        "Calibration texture",
         "Texture used as calibration pattern.",
         openspace::properties::Property::Visibility::Developer
     };

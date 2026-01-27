@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,8 @@
 #include <QDialog>
 
 #include <openspace/scene/profile.h>
+#include <string>
+#include <vector>
 
 class QCheckBox;
 class QComboBox;
@@ -39,6 +41,7 @@ class QLineEdit;
 class QListWidget;
 class QPushButton;
 class QTextEdit;
+class QWidget;
 
 class ActionDialog final : public QDialog {
 Q_OBJECT
@@ -50,11 +53,11 @@ private:
     void createWidgets();
     void createActionWidgets(QGridLayout* layout);
     void createKeyboardWidgets(QGridLayout* layout);
-    void applyChanges();
 
     openspace::Profile::Action* selectedAction();
     void actionAdd();
     void actionRemove();
+    void actionDuplicate();
     void actionSelected();
     void actionSaved();
     void clearActionFields() const;
@@ -88,6 +91,7 @@ private:
         QTextEdit* script = nullptr;
         QPushButton* addButton = nullptr;
         QPushButton* removeButton = nullptr;
+        QPushButton* duplicateButton = nullptr;
         QDialogButtonBox* saveButtons = nullptr;
     } _actionWidgets;
 

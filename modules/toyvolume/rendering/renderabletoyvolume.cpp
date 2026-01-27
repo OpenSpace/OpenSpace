@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,13 +24,14 @@
 
 #include <modules/toyvolume/rendering/renderabletoyvolume.h>
 
-#include <modules/toyvolume/rendering/toyvolumeraycaster.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/raycastermanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <cmath>
+#include <optional>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
@@ -42,14 +43,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
-        "Scaling Exponent",
+        "Scaling exponent",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
         "StepSize",
-        "Step Size",
+        "Step size",
         "", // @TODO Missing documentation
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -78,7 +79,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo =
     {
         "Downscale",
-        "Downscale Factor Volume Rendering",
+        "Downscale factor volume rendering",
         "The downscaling factor used when rendering the current volume.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -113,6 +114,10 @@ namespace {
 
 namespace openspace {
 
+documentation::Documentation RenderableToyVolume::Documentation() {
+    return codegen::doc<Parameters>("toyvolume_renderabletoyvolume");
+}
+
 RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _size(SizeInfo, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f))
@@ -141,8 +146,6 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     _downScaleVolumeRendering.setVisibility(properties::Property::Visibility::Developer);
     _downScaleVolumeRendering = p.downscale.value_or(_downScaleVolumeRendering);
 }
-
-RenderableToyVolume::~RenderableToyVolume() {}
 
 void RenderableToyVolume::initializeGL() {
     glm::vec4 color = glm::vec4(glm::vec3(_color), opacity());

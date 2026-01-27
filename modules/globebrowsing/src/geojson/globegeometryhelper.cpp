@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,11 +26,23 @@
 
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/rendering/helper.h>
+#include <openspace/util/ellipsoid.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <geos/geom/Coordinate.h>
+#include <geos/geom/Geometry.h>
+#include <geos/geom/GeometryCollection.h>
 #include <geos/geom/GeometryFactory.h>
+#include <geos/geom/MultiPoint.h>
+#include <geos/geom/Point.h>
 #include <geos/triangulate/DelaunayTriangulationBuilder.h>
 #include <geos/triangulate/quadedge/QuadEdgeSubdivision.h>
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <memory>
+#include <utility>
 
 namespace openspace::globebrowsing::geometryhelper {
 
@@ -103,7 +115,7 @@ createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVe
     vertices.reserve(nVerts * 3);
 
     // Extrude polygon
-    for (size_t nBound = 0; nBound < edgeVertices.size(); ++nBound) {
+    for (size_t nBound = 0; nBound < edgeVertices.size(); nBound++) {
         const std::vector<glm::vec3>& boundary = edgeVertices[nBound];
         for (size_t i = 1; i < boundary.size(); i++) {
             const glm::vec3& v0 = boundary[i - 1];
@@ -190,7 +202,7 @@ std::vector<PosHeightPair> subdivideLine(const glm::dvec3& v0, const glm::dvec3&
         positions.push_back({ glm::vec3(v0), h0 });
     }
 
-    for (int seg = 0; seg < nSegments; ++seg) {
+    for (int seg = 0; seg < nSegments; seg++) {
         const double t = static_cast<double>(seg) / static_cast<double>(nSegments);
 
         // Interpolate both position and height value
@@ -245,7 +257,7 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     vertices.reserve(maxSteps * maxSteps);
 
     // Add points inside the triangle
-    std::vector<Coordinate> pointCoords;
+    std::vector<geos::geom::Coordinate> pointCoords;
     pointCoords.reserve(3 * maxSteps + 1);
 
     const Ellipsoid& ellipsoid = globe.ellipsoid();
@@ -314,7 +326,7 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     // time
     std::vector<std::unique_ptr<Point>> geosPoints;
     geosPoints.reserve(pointCoords.size());
-    for (const Coordinate& c : pointCoords) {
+    for (const geos::geom::Coordinate& c : pointCoords) {
         geosPoints.emplace_back(geometryFactory->createPoint(c));
     }
     std::unique_ptr<MultiPoint> points = geometryFactory->createMultiPoint(
@@ -326,13 +338,13 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
 
     // Returns a list of triangles, as geos polygons
     GeometryCollection* triangleGeoms = builder.getTriangles(*geometryFactory).release();
-    std::vector<Coordinate> triCoords;
+    std::vector<geos::geom::Coordinate> triCoords;
     triangleGeoms->getCoordinates()->toVector(triCoords);
 
     vertices.reserve(vertices.size() + triCoords.size() + 1);
 
     int count = 0;
-    for (const Coordinate& coord : triCoords) {
+    for (const geos::geom::Coordinate& coord : triCoords) {
         count++;
         if (count == 4) {
             // Skip every 4th coord, as polygons have one extra coord per triangle.

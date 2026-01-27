@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,10 +25,8 @@
 #include <modules/server/include/topics/flightcontrollertopic.h>
 
 #include <modules/server/include/connection.h>
-#include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
 #include <openspace/interaction/websocketcamerastates.h>
-#include <openspace/interaction/websocketinputstate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/renderable.h>
@@ -36,14 +34,15 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
+#include <ghoul/misc/assert.h>
+#include <algorithm>
 #include <iterator>
+#include <string_view>
 #include <unordered_map>
+#include <vector>
 
 namespace {
     enum class Command {

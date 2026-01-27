@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,8 @@
 
 #include <modules/server/include/connection.h>
 #include <openspace/engine/globals.h>
-#include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "EngineModeTopic";
@@ -49,10 +49,6 @@ EngineModeTopic::~EngineModeTopic() {
     if (_modeCallbackHandle != UnsetOnChangeHandle) {
         global::openSpaceEngine->removeModeChangeCallback(_modeCallbackHandle);
     }
-}
-
-bool EngineModeTopic::isDone() const {
-    return _isDone;
 }
 
 void EngineModeTopic::handleJson(const nlohmann::json& json) {
@@ -83,6 +79,10 @@ void EngineModeTopic::handleJson(const nlohmann::json& json) {
             }
         );
     }
+}
+
+bool EngineModeTopic::isDone() const {
+    return _isDone;
 }
 
 void EngineModeTopic::sendJsonData() {

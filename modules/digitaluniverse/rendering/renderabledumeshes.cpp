@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,28 +26,26 @@
 
 #include <modules/digitaluniverse/digitaluniversemodule.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
-#include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/misc/stringhelper.h>
-#include <ghoul/misc/templatefactory.h>
-#include <ghoul/io/texture/texturereader.h>
+#include <ghoul/format.h>
+#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureunit.h>
-#include <array>
-#include <cstdint>
-#include <filesystem>
+#include <algorithm>
+#include <cmath>
 #include <fstream>
-#include <optional>
+#include <sstream>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableDUMeshes";
@@ -57,14 +55,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextColorInfo = {
         "TextColor",
-        "Text Color",
+        "Text color",
         "The text color for the astronomical object.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo TextOpacityInfo = {
         "TextOpacity",
-        "Text Opacity",
+        "Text opacity",
         "Determines the transparency of the text label, where 1 is completely opaque "
         "and 0 fully transparent.",
         openspace::properties::Property::Visibility::NoviceUser
@@ -72,14 +70,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo TextSizeInfo = {
         "TextSize",
-        "Text Size",
+        "Text size",
         "The text size for the astronomical object labels.",
         openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LabelFileInfo = {
         "LabelFile",
-        "Label File",
+        "Label file",
         "The path to the label file that contains information about the astronomical "
         "objects being rendered.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -87,7 +85,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LabelMinMaxSizeInfo = {
         "TextMinMaxSize",
-        "Text Min/Max Size",
+        "Text min/max size",
         "The minimum and maximum size (in pixels) of the text for the labels for the "
         "astronomical objects being rendered.",
         openspace::properties::Property::Visibility::AdvancedUser
@@ -95,21 +93,21 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
-        "Line Width",
+        "Line width",
         "If the DU mesh is of wire type, this value determines the width of the lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawElementsInfo = {
         "DrawElements",
-        "Draw Elements",
+        "Draw elements",
         "Enables/Disables the drawing of the astronomical objects.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DrawLabelInfo = {
         "DrawLabels",
-        "Draw Labels",
+        "Draw labels",
         "Determines whether labels should be drawn or hidden.",
         openspace::properties::Property::Visibility::NoviceUser
     };
@@ -123,7 +121,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RenderOptionInfo = {
         "RenderOption",
-        "Render Option",
+        "Render option",
         "Debug option for rendering of billboards and texts.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
@@ -543,7 +541,7 @@ bool RenderableDUMeshes::readSpeckFile() {
             dim >> mesh.numU >> mesh.numV;
 
             // We can now read the vertices data:
-            for (int l = 0; l < mesh.numU * mesh.numV; ++l) {
+            for (int l = 0; l < mesh.numU * mesh.numV; l++) {
                 ghoul::getline(file, line);
                 if (line.substr(0, 1) == "}") {
                     break;

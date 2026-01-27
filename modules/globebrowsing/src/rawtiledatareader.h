@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,19 +27,20 @@
 
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/rawtile.h>
-#include <modules/globebrowsing/src/tiletextureinitdata.h>
 #include <modules/globebrowsing/src/tilecacheproperties.h>
+#include <modules/globebrowsing/src/tileindex.h>
+#include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
-#include <string>
-#include <mutex>
 #include <gdal.h>
+#include <array>
+#include <mutex>
+#include <optional>
+#include <string>
 
 class GDALDataset;
-class GDALRasterBand;
 
 namespace openspace::globebrowsing {
-
-class GeodeticPatch;
 
 class RawTileDataReader {
 public:
@@ -49,11 +50,11 @@ public:
      * Opens a GDALDataset in readonly mode and calculates meta data required for
      * reading tile using a TileIndex.
      *
-     * \param filePath the path to a specific file GDAL can read
-     * \param initData information about the textures that will be creatd by this reader
-     * \param cacheProperties contains settings about whether the reader should
+     * \param filePath The path to a specific file GDAL can read
+     * \param initData Information about the textures that will be creatd by this reader
+     * \param cacheProperties Contains settings about whether the reader should
      *        utilize cache
-     * \param preprocess whether the loaded data should be calculate meta data about the
+     * \param preprocess Whether the loaded data should be calculate meta data about the
      *        dataset
      */
     RawTileDataReader(std::string filePath, TileTextureInitData initData,

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,6 +34,7 @@ out vec2 vs_st;
 out float vs_screenSpaceDepth;
 out vec4 shadowCoords;
 out vec3 vs_normal;
+out vec3 posObj;
 
 uniform dmat4 modelViewProjectionMatrix;
 
@@ -46,6 +47,7 @@ uniform dmat4 shadowMatrix;
 void main() {
   vs_st = in_st;
   vs_normal = mat3(modelViewProjectionMatrix) * in_normal;
+  posObj = vec3(in_position, 0.0);
 
   dvec4 positionClipSpace  = modelViewProjectionMatrix * dvec4(in_position, 0.0, 1.0);
   vec4 positionClipSpaceZNorm = z_normalization(vec4(positionClipSpace));
