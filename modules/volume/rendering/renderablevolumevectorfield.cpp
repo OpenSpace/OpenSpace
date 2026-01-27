@@ -28,8 +28,10 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <algorithm>
 #include <execution>
 #include <numeric>
 
@@ -100,6 +102,22 @@ namespace {
         "in the volume."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo FilterByLuaInfo = {
+        "FilterByLua",
+        "Filter by Lua script",
+        "If enabled, the vector field is filtered by the provided custom Lua script."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ScriptInfo = {
+        "Script",
+        "Script",
+        "This value is the path to the Lua script that will be executed to compute the "
+        "filtering. The script needs to define a function 'filter' that takes the "
+        "current voxel position (x, y, z) given in galactic coordinates, and the "
+        "velocity vector (vx, vy, vz). The function should return true / false if "
+        "the voxel should be visualized / discarded."
+    };
+
     struct [[codegen::Dictionary(RenderableVectorField)]] Parameters {
         // [[codegen::verbatim(VolumeDataInfo.description)]]
         std::filesystem::path volumeFile;
@@ -121,6 +139,10 @@ namespace {
         std::optional<bool> filterOutOfRange;
         // [[codgen::verbatim(ColorByMagnitude.description)]]
         std::optional<bool> colorByMagnitude;
+        // [[codegen::verbatim(FilterByLuaInfo.description)]]
+        std::optional<bool> filterByLua;
+        // [[codegen::verbatim(ScriptInfo.description)]]
+        std::optional<std::filesystem::path> script;
 
     };
 
@@ -142,6 +164,8 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     , _vectorFieldScale(VectorFieldScaleInfo, 1.f, 1.f, 100.f)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 10.f)
     , _colorByMagnitude(ColorByMagnitudeInfo, false)
+    , _filterByLua(FilterByLuaInfo, false)
+    , _luaScriptFile(ScriptInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -156,15 +180,44 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     _filterOutOfRange = p.filterOutOfRange.value_or(false);
     _colorByMagnitude = p.colorByMagnitude.value_or(false);
 
+    _filterByLua = p.filterByLua.value_or(false) && p.script.has_value();
+    _filterByLua.onChange([this]() {_vectorFieldIsDirty = true; });
+
+    if (p.script.has_value()) {
+        _luaScriptFile = p.script.value().string();
+    }
+    else {
+        _luaScriptFile = "";
+    }
+
+    // Subscribe to changes in the Lua script file, @TODO can this be combined with the
+    // code below?
+    _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
+    _fileHandle->setCallback([this]() {
+        _vectorFieldIsDirty = true;
+    });
+
+    _luaScriptFile.onChange([this]() {
+        _vectorFieldIsDirty = true;
+        _fileHandle = std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value());
+        _fileHandle->setCallback([this]() {
+            _vectorFieldIsDirty = true;
+        });
+    });
+
     _stride = p.stride;
     _stride.onChange([this]() { _vectorFieldIsDirty = true; });
 
+    addProperty(_luaScriptFile);
     addProperty(_stride);
     addProperty(_vectorFieldScale);
     addProperty(_lineWidth);
     addProperty(_colorByMagnitude);
+    addProperty(_filterByLua);
     addProperty(_filterOutOfRange);
     addProperty(_dataRange);
+
+    global::scriptEngine->initializeLuaState(_state);
 }
 
 void RenderableVectorField::initializeGL()
@@ -367,6 +420,7 @@ void RenderableVectorField::update(const UpdateData&)
 }
 
 void RenderableVectorField::computeFieldLinesParallel() {
+    LINFO("Computing vector field");
     const glm::uvec3 dims = _dimensions;
     int stride = _stride.value();
 
@@ -386,66 +440,125 @@ void RenderableVectorField::computeFieldLinesParallel() {
 
     std::for_each(std::execution::par, blockIndices.begin(), blockIndices.end(),
         [&](size_t blockIdx) {
-            // Convert linear block index to 3D block coordinates
-            glm::uvec3 blockCoords = indexToCoords(blockIdx, blockDims);
+        // Convert linear block index to 3D block coordinates
+        glm::uvec3 blockCoords = indexToCoords(blockIdx, blockDims);
 
-            // Convert block coordinates to starting voxel position
-            const unsigned int x = blockCoords.x * stride;
-            const unsigned int y = blockCoords.y * stride;
-            const unsigned int z = blockCoords.z * stride;
+        // Convert block coordinates to starting voxel position
+        const unsigned int x = blockCoords.x * stride;
+        const unsigned int y = blockCoords.y * stride;
+        const unsigned int z = blockCoords.z * stride;
 
-            // Compute average velocity accross all voxels in this block
-            glm::vec3 avgVelocity = glm::vec3(0.f);
-            int count = 0;
+        // Compute average velocity accross all voxels in this block
+        glm::vec3 avgVelocity = glm::vec3(0.f);
+        int count = 0;
 
-            for (int dz = 0; dz < stride; dz++) {
-                for (int dy = 0; dy < stride; dy++) {
-                    for (int dx = 0; dx < stride; dx++) {
-                        unsigned int ix = x + dx;
-                        unsigned int iy = y + dy;
-                        unsigned int iz = z + dz;
+        for (int dz = 0; dz < stride; dz++) {
+            for (int dy = 0; dy < stride; dy++) {
+                for (int dx = 0; dx < stride; dx++) {
+                    unsigned int ix = x + dx;
+                    unsigned int iy = y + dy;
+                    unsigned int iz = z + dz;
 
-                        // Skip indices outside data volume
-                        if (ix >= dims.x || iy >= dims.y || iz >= dims.z) {
-                            continue;
-                        }
-
-                        const VelocityData& v = _volumeData->get(glm::uvec3(ix, iy, iz));
-                        avgVelocity += glm::vec3(v.vx, v.vy, v.vz);
-                        count++;
+                    // Skip indices outside data volume
+                    if (ix >= dims.x || iy >= dims.y || iz >= dims.z) {
+                        continue;
                     }
+
+                    const VelocityData& v = _volumeData->get(glm::uvec3(ix, iy, iz));
+                    avgVelocity += glm::vec3(v.vx, v.vy, v.vz);
+                    count++;
                 }
             }
+        }
 
-            if (count == 0) {
-                return;
-            }
+        if (count == 0) {
+            return;
+        }
 
-            avgVelocity /= static_cast<float>(count);
+        avgVelocity /= static_cast<float>(count);
 
-            // Calculate block center in voxel space
-            glm::vec3 blockCenterVoxel(
-                x + 0.5f * stride,
-                y + 0.5f * stride,
-                z + 0.5f * stride
-            );
+        // Calculate block center in voxel space
+        glm::vec3 blockCenterVoxel(
+            x + 0.5f * stride,
+            y + 0.5f * stride,
+            z + 0.5f * stride
+        );
 
-            // Transform from voxel space [0, dims] to world space [minDomain, maxDomain]
-            glm::vec3 normalized = blockCenterVoxel / static_cast<glm::vec3>(dims);
-            glm::dvec3 minD = _minDomain;
-            glm::dvec3 maxD = _maxDomain;
-            glm::dvec3 startPos = minD + glm::dvec3(normalized) * (maxD - minD);
+        // Transform from voxel space [0, dims] to world space [minDomain, maxDomain]
+        glm::vec3 normalized = blockCenterVoxel / static_cast<glm::vec3>(dims);
+        glm::dvec3 minD = _minDomain;
+        glm::dvec3 maxD = _maxDomain;
+        glm::dvec3 startPos = minD + glm::dvec3(normalized) * (maxD - minD);
 
-            float magnitude = glm::length(avgVelocity);
-            glm::vec3 direction = (magnitude > 0.f) ? glm::normalize(avgVelocity) : glm::vec3(0.f);
+        float magnitude = glm::length(avgVelocity);
+        glm::vec3 direction = (magnitude > 0.f) ? glm::normalize(avgVelocity) : glm::vec3(0.f);
 
-            _instances[blockIdx] = ArrowInstance(startPos, direction, magnitude);
+        _instances[blockIdx] = ArrowInstance(startPos, direction, magnitude);
         }
     );
 
     if (_instances.empty()) {
         throw ghoul::RuntimeError("Couldn't compute vector field segments");
     }
+
+    if (_filterByLua) {
+        std::string path = _luaScriptFile.value();
+        if (path.empty()) {
+            LERROR(std::format(
+                "Trying to filter data using an empty script file '{}'", path
+            ));
+            return;
+        }
+
+        // Load the Lua script
+        ghoul::lua::runScriptFile(_state, path);
+        // Get the filter function
+        lua_getglobal(_state, "filter");
+        const bool isFunction = lua_isfunction(_state, -1);
+        if (!isFunction) {
+            LERROR(std::format("Script '{}' does not have a function 'filter'", path));
+            return;
+        }
+
+        _instances.erase(
+            std::remove_if(
+                _instances.begin(),
+                _instances.end(),
+                [this, &path](const ArrowInstance& i) {
+                    lua_getglobal(_state, "filter");
+                    // First argument (x,y,z) is the position of the arrow (averaged)
+                    ghoul::lua::push(_state, i.position);
+                    // Second argument (vx, vy, vz) is the direction of the voxel vector (averaged)
+                    ghoul::lua::push(_state, i.direction);
+
+                    const int success = lua_pcall(_state, 2, 1, 0);
+
+                    //    // First argument (x,y,z) is the position of the arrow (averaged)
+                    //    ghoul::lua::push(_state, i.position.x);
+                    //    ghoul::lua::push(_state, i.position.y);
+                    //    ghoul::lua::push(_state, i.position.z);
+                    //    // Second argument (vx, vy, vz) is the direction of the voxel vector (averaged)
+                    //    ghoul::lua::push(_state, i.direction.x);
+                    //    ghoul::lua::push(_state, i.direction.y);
+                    //    ghoul::lua::push(_state, i.direction.z);
+
+                    //    const int success = lua_pcall(_state, 6, 1, 0);
+
+                    if (success != 0) {
+                        LERROR(
+                            std::format(
+                                "Error executing 'filter': {}", lua_tostring(_state, -1))
+                        );
+                    }
+
+                    // The Lua function returns true for the values that should be kept
+                    return !ghoul::lua::value<bool>(_state);
+                }
+            ),
+            _instances.end()
+        );
+    }
+
 }
 
 } // namespace openspace::volume

@@ -33,6 +33,7 @@
 #include <openspace/properties/vector/dvec3property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/uvec3property.h>
+#include <ghoul/lua/luastate.h>
 #include <ghoul/opengl/uniformcache.h>
 
 namespace openspace::documentation { struct Documentation; }
@@ -89,6 +90,9 @@ private:
     properties::FloatProperty _lineWidth;
     properties::BoolProperty _colorByMagnitude;
 
+    properties::BoolProperty _filterByLua;
+    properties::StringProperty _luaScriptFile;
+    std::unique_ptr<ghoul::filesystem::File> _fileHandle;
 
     std::shared_ptr<RawVolume<VelocityData>> _volumeData;
     std::vector<ArrowInstance> _instances;
@@ -101,6 +105,8 @@ private:
     glm::vec2 _magnitudeDomain = glm::vec2(
         std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest()
     );
+
+    ghoul::lua::LuaState _state;
 
     GLuint _vao = 0;
     GLuint _vectorFieldVbo = 0;
