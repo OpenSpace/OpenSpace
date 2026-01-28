@@ -34,6 +34,7 @@ uniform vec2 dataRangeFilter;
 uniform bool filterOutOfRange;
 uniform bool colorByMag;
 uniform vec2 magDomain;
+uniform sampler1D colorTexture;
 
 Fragment getFragment() {
     Fragment frag;
@@ -43,8 +44,9 @@ Fragment getFragment() {
     }
 
     if(colorByMag) {
-        float v = (mag - magDomain.x) / (magDomain.y - magDomain.x);
-        frag.color = vec4(v, 0, 0, 1.0);
+        float t = (mag - magDomain.x) / (magDomain.y - magDomain.x);
+        t = clamp(t, 0.0, 1.0);
+        frag.color = texture(colorTexture, t);
     } else {
         vec3 dir = normalize(v_dir);
         vec3 color = 0.5 * (dir + vec3(1.0)); // remaps [-1, 1] -> [0, 1]

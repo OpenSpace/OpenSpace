@@ -50,9 +50,8 @@ float exponentialScale(float sliderValue, float minExp, float maxExp)
     // Clamp input just in case
     if (sliderValue < 1) sliderValue = 1;
     if (sliderValue > 100) sliderValue = 100;
-
     // Normalize slider to 0–1
-    float t = (sliderValue - 1) / 99.0;
+    float t = (sliderValue - 1) / (100 - 1);
 
     // Interpolate exponent
     float exponent = minExp + t * (maxExp - minExp);

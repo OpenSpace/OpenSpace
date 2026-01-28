@@ -40,6 +40,7 @@ namespace openspace::documentation { struct Documentation; }
 
 namespace ghoul::opengl {
     class ProgramObject;
+    class Texture;
 } // namespace ghoul::opengl
 
 namespace openspace::volume {
@@ -80,19 +81,22 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(
         modelViewProjection, arrowScale, filterOutOfRange, dataRangeFilter, colorByMag,
-        magDomain
+        magDomain, colorTexture
     ) _uniformCache;
 
     properties::Vec2Property _dataRange;
     properties::BoolProperty _filterOutOfRange;
+    properties::Vec2Property _magnitudeDomain;
+
     properties::IntProperty _stride;
     properties::FloatProperty _vectorFieldScale;
     properties::FloatProperty _lineWidth;
     properties::BoolProperty _colorByMagnitude;
+    properties::StringProperty _colorTexturePath;
 
     properties::BoolProperty _filterByLua;
     properties::StringProperty _luaScriptFile;
-    std::unique_ptr<ghoul::filesystem::File> _fileHandle;
+    std::unique_ptr<ghoul::filesystem::File> _luaScriptFileHandle;
 
     std::shared_ptr<RawVolume<VelocityData>> _volumeData;
     std::vector<ArrowInstance> _instances;
@@ -102,17 +106,15 @@ private:
     glm::dvec3 _maxDomain;
     glm::uvec3 _dimensions;
 
-    glm::vec2 _magnitudeDomain = glm::vec2(
-        std::numeric_limits<float>::max(), std::numeric_limits<float>::lowest()
-    );
-
     ghoul::lua::LuaState _state;
 
     GLuint _vao = 0;
     GLuint _vectorFieldVbo = 0;
     GLuint _arrowVbo = 0;
+    std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
 
     bool _vectorFieldIsDirty = true;
+    bool _textureIsDirty = true;
 
     // Arrow pointed along +X direction
     const std::vector<glm::vec3> _arrowVertices = {
