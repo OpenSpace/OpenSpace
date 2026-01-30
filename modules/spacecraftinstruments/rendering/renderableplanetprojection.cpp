@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,13 +30,19 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/sphere.h>
+#include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
+#include <ghoul/opengl/programobject.h>
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <variant>
 
 namespace {
     constexpr std::string_view NoImageText = "No Image";
@@ -295,8 +301,6 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     addProperty(_segments);
 }
 
-RenderablePlanetProjection::~RenderablePlanetProjection() {}
-
 void RenderablePlanetProjection::initializeGL() {
     _programObject = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         "ProjectiveProgram",
@@ -478,7 +482,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
                 const std::shared_ptr<ghoul::opengl::Texture> t =
                     _projectionComponent.loadProjectionTexture(img.path);
                 imageProjectGPU(*t, projMatrix);
-                ++nProjections;
+                nProjections++;
             }
             catch (const SpiceManager::SpiceException& e) {
                 LERRORC(e.component, e.what());

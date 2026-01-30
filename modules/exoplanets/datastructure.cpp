@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,15 @@
 #include <modules/exoplanets/datastructure.h>
 
 #include <modules/exoplanets/exoplanetshelper.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/scene/scene.h>
 #include <openspace/util/distanceconstants.h>
 #include <openspace/util/time.h>
-#include <openspace/util/timeconversion.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <cmath>
+#include <optional>
 #include <string_view>
 
 namespace {

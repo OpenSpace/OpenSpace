@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,24 +25,18 @@
 #ifndef __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
 #define __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__
 
-#include <openspace/network/messagestructures.h>
 #include <openspace/util/timeline.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
-#include <glm/gtx/quaternion.hpp>
+#include <string>
 
 namespace openspace {
+    namespace datamessagestructures { struct CameraKeyframe; }
     class Camera;
     class TimeManager;
 } // namespace openspace
 
 namespace openspace::interaction {
-
-enum class KeyframeTimeRef {
-    Relative_applicationStart,
-    Relative_recordedStart,
-    Absolute_simTimeJ2000
-};
 
 class KeyframeNavigator {
 public:
@@ -79,11 +73,10 @@ public:
     void clearKeyframes();
     size_t nKeyframes() const;
     double currentTime() const;
-    void setTimeReferenceMode(KeyframeTimeRef refType, double referenceTimestamp);
+    void setReferenceTime(double referenceTimestamp);
 
 private:
     Timeline<CameraPose> _cameraPoseTimeline;
-    KeyframeTimeRef _timeframeMode = KeyframeTimeRef::Relative_applicationStart;
     double _referenceTimestamp = 0.0;
 };
 

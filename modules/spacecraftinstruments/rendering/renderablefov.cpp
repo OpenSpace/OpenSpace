@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,15 +27,24 @@
 #include <modules/spacecraftinstruments/spacecraftinstrumentsmodule.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/opengl/programobject.h>
 #include <glm/gtx/projection.hpp>
 #include <optional>
+#include <algorithm>
+#include <cstddef>
+#include <iterator>
+#include <limits>
+#include <memory>
 
 namespace {
     constexpr int InterpolationSteps = 5;
@@ -205,28 +214,48 @@ RenderableFov::RenderableFov(const ghoul::Dictionary& dictionary)
     , _alwaysDrawFov(AlwaysDrawFovInfo, false)
     , _colors({
         properties::PropertyOwner({"Colors", "Colors"}),
-        { DefaultStartColorInfo, glm::vec3(0.4f), glm::vec3(0.f), glm::vec3(1.f) },
-        { ColorDefaultEndInfo, glm::vec3(0.85f), glm::vec3(0.f), glm::vec3(1.f) },
-        { ColorActiveInfo, glm::vec3(0.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f) },
-        {
+        properties::Vec3Property(
+            DefaultStartColorInfo,
+            glm::vec3(0.4f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        ),
+        properties::Vec3Property(
+            ColorDefaultEndInfo,
+            glm::vec3(0.85f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        ),
+        properties::Vec3Property(
+            ColorActiveInfo,
+            glm::vec3(0.f, 1.f, 0.f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        ),
+        properties::Vec3Property(
             ColorTargetInFovInfo,
             glm::vec3(0.f, 0.5f, 0.7f),
             glm::vec3(0.f),
             glm::vec3(1.f)
-        },
-        {
+        ),
+        properties::Vec3Property(
             ColorIntersectionStartInfo,
             glm::vec3(1.f, 0.89f, 0.f),
             glm::vec3(0.f),
             glm::vec3(1.f)
-        },
-        {
+        ),
+        properties::Vec3Property(
             ColorIntersectionEndInfo,
             glm::vec3(1.f, 0.29f, 0.f),
             glm::vec3(0.f),
             glm::vec3(1.f)
-        },
-        { SquareColorInfo, glm::vec3(0.85f), glm::vec3(0.f), glm::vec3(1.f) }
+        ),
+        properties::Vec3Property(
+            SquareColorInfo,
+            glm::vec3(0.85f),
+            glm::vec3(0.f),
+            glm::vec3(1.f)
+        )
     })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

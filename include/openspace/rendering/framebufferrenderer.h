@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,21 +28,21 @@
 #include <openspace/rendering/raycasterlistener.h>
 #include <openspace/rendering/deferredcasterlistener.h>
 
+#include <openspace/rendering/shadowmapping.h>
 #include <ghoul/glm.h>
-#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <map>
-#include <string>
 #include <vector>
 
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul {
+    namespace filesystem { class File; }
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    } // namespace ghoul::opengl
+    class Dictionary;
+} // namespace ghoul
 
 namespace openspace {
 
@@ -52,6 +52,7 @@ struct DeferredcasterTask;
 struct RaycastData;
 struct RaycasterTask;
 class Scene;
+class SceneGraphNode;
 struct UpdateStructures;
 
 class FramebufferRenderer final : public RaycasterListener, public DeferredcasterListener
@@ -178,6 +179,13 @@ public:
     virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
         DeferredcasterListener::IsAttached isAttached) override;
 
+    void registerShadowCaster(const std::string& shadowGroup,
+        const SceneGraphNode* lightSource, const SceneGraphNode* target);
+    void removeShadowCaster(const std::string& shadowGroup, const SceneGraphNode* target);
+
+    shadowmapping::ShadowInfo shadowInformation(const std::string& shadowGroup) const;
+    std::vector<std::string> shadowGroups() const;
+
 private:
     using RaycasterProgObjMap = std::map<
         VolumeRaycaster*,
@@ -188,12 +196,11 @@ private:
         std::unique_ptr<ghoul::opengl::ProgramObject>
     >;
 
-    void resolveMSAA(float blackoutFactor);
     void applyTMO(float blackoutFactor, const glm::ivec4& viewport);
     void applyFXAA(const glm::ivec4& viewport);
     void updateDownscaleTextures() const;
-    void updateExitVolumeTextures();
     void writeDownscaledVolume(const glm::ivec4& viewport);
+    void renderDepthMaps();
 
     std::map<VolumeRaycaster*, RaycastData> _raycastData;
     RaycasterProgObjMap _exitPrograms;
@@ -247,6 +254,8 @@ private:
         float currentDownscaleFactor  = 1.f;
     } _downscaleVolumeRendering;
 
+    std::map<std::string, shadowmapping::ShadowInfo> _shadowMaps;
+
     unsigned int _pingPongIndex = 0u;
 
     bool _dirtyDeferredcastData;
@@ -263,6 +272,8 @@ private:
     float _hue = 1.f;
     float _saturation = 1.f;
     float _value = 1.f;
+
+    bool _renderedDepthMapsThisFrame = false;
 
     ghoul::Dictionary _rendererData;
 };

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,13 +25,17 @@
 #include <modules/fieldlinessequence/fieldlinessequencemodule.h>
 
 #include <modules/fieldlinessequence/rendering/renderablefieldlinessequence.h>
+#include <modules/fieldlinessequence/tasks/findlastclosedfieldlinestask.h>
 #include <modules/fieldlinessequence/tasks/kameleonvolumetofieldlinestask.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/templatefactory.h>
 #include <fstream>
+#include <string_view>
+#include <vector>
 
 namespace {
     constexpr std::string_view DefaultTransferfunctionSource =
@@ -71,13 +75,15 @@ void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
     fTask->registerClass<KameleonVolumeToFieldlinesTask>(
         "KameleonVolumeToFieldlinesTask"
     );
+    fTask->registerClass<FindLastClosedFieldlinesTask>("FindLastClosedFieldlinesTask");
 }
 
 std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const
 {
     return {
-        RenderableFieldlinesSequence::Documentation(),
-        KameleonVolumeToFieldlinesTask::Documentation()
+        FindLastClosedFieldlinesTask::Documentation(),
+        KameleonVolumeToFieldlinesTask::Documentation(),
+        RenderableFieldlinesSequence::Documentation()
     };
 }
 

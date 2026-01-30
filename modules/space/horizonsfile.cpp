@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,14 +27,15 @@
 #include <openspace/util/httprequest.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/stringhelper.h>
-#include <filesystem>
+#include <cmath>
 #include <fstream>
-
-using json = nlohmann::json;
+#include <ios>
+#include <memory>
+#include <sstream>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "HorizonsFile";
@@ -116,7 +117,9 @@ std::string constructHorizonsUrl(HorizonsType type, const std::string& target,
     return url;
 }
 
-json sendHorizonsRequest(const std::string& url, const std::filesystem::path& filePath) {
+nlohmann::json sendHorizonsRequest(const std::string& url,
+                                   const std::filesystem::path& filePath)
+{
     // Set up HTTP request and download result
     const auto download = std::make_unique<HttpFileDownload>(
         url,
@@ -155,10 +158,10 @@ nlohmann::json convertHorizonsDownloadToJson(const std::filesystem::path& filePa
     answer.append(buf, 0, stream.gcount());
 
     // convert to a json object
-    return json::parse(answer);
+    return nlohmann::json::parse(answer);
 }
 
-HorizonsResultCode isValidHorizonsAnswer(const json& answer) {
+HorizonsResultCode isValidHorizonsAnswer(const nlohmann::json& answer) {
     // Signature, source and version
     if (auto signature = answer.find("signature");  signature != answer.end()) {
         if (auto source = signature->find("source");  source != signature->end()) {

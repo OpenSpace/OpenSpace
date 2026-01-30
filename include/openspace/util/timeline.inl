@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,6 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <algorithm>
+
 namespace openspace {
 
 template <typename T>
@@ -32,7 +34,8 @@ Keyframe<T>::Keyframe(size_t i, double t, T d)
 
 template <typename T>
 void Timeline<T>::addKeyframe(double timestamp, T&& data) {
-    Keyframe<T> keyframe(++_nextKeyframeId, timestamp, std::move(data));
+    _nextKeyframeId++;
+    Keyframe<T> keyframe(_nextKeyframeId, timestamp, std::move(data));
     const auto iter = std::upper_bound(
         _keyframes.cbegin(),
         _keyframes.cend(),
@@ -44,7 +47,8 @@ void Timeline<T>::addKeyframe(double timestamp, T&& data) {
 
 template <typename T>
 void Timeline<T>::addKeyframe(double timestamp, const T& data) {
-    Keyframe<T> keyframe(++_nextKeyframeId, timestamp, data);
+    _nextKeyframeId++;
+    Keyframe<T> keyframe(_nextKeyframeId, timestamp, data);
     const auto iter = std::upper_bound(
         _keyframes.cbegin(),
         _keyframes.cend(),

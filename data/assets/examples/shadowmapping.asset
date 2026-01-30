@@ -1,0 +1,283 @@
+local mars = asset.require("scene/solarsystem/planets/mars/mars")
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+local moon = asset.require("scene/solarsystem/planets/earth/moon/moon")
+local sun = asset.require("scene/solarsystem/sun/transforms")
+
+
+-- Model CC0 from https://sketchfab.com/3d-models/celestial-globe-341fa8a777e94883841409438756f747
+local celestial_globe_folder = asset.resource({
+  Name = "Celestial Globe",
+  Type = "HttpSynchronization",
+  Identifier = "celestial_globe",
+  Version = 1
+})
+
+local animated_box = asset.resource({
+  Name = "Animated Box",
+  Type = "HttpSynchronization",
+  Identifier = "animated_box",
+  Version = 1
+})
+
+-- These models are in the same shadow group, so will cast onto and receive shadows from
+-- each other, as well as the Mars surface
+local ModelMarsSmall = {
+  Identifier = "celestial-globe-mars1",
+  Parent = mars.Mars.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.63325,
+      Latitude = 26.13238,
+      UseHeightmap = true,
+      Altitude = 0.0
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.63325,
+      Latitude = 26.13238,
+      Angle = 180.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Enabled = true,
+    GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
+    ModelScale = "Kilometer",
+    LightSources = {
+      sun.LightSource
+    },
+    CastShadow = true
+  },
+  GUI = {
+    Name = "Celestial Globe - Mars Small",
+    Path = "/Shadow Casting Models/Celestial Globe"
+  }
+}
+
+local ModelMarsLarge = {
+  Identifier = "celestial-globe-mars2",
+  Parent = mars.Mars.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.6,
+      Latitude = 26.15239,
+      UseHeightmap = true,
+      Altitude = 0.0
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.6,
+      Latitude = 26.15239,
+      Angle = 180.0
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 5.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Enabled = true,
+    GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
+    ModelScale = "Kilometer",
+    LightSources = {
+      sun.LightSource
+    },
+    CastShadow = true
+  },
+  GUI = {
+    Name = "Celestial Globe - Mars Large",
+    Path = "/Shadow Casting Models/Celestial Globe"
+  }
+}
+
+local AnimatedBox = {
+  Identifier = "animatexbox-mars",
+  Parent = mars.Mars.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.64325,
+      Latitude = 26.16,
+      UseHeightmap = true,
+      Altitude = 300.0
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.64325,
+      Latitude = 26.16
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 250.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = animated_box .. "BoxAnimated.glb",
+    EnableAnimation = true,
+    AnimationStartTime = "2024 07 09 12:00:00",
+    AnimationMode = "LoopInfinitely",
+    RotationVector = { 0.0, 0.0, 90.0 },
+    LightSources = {
+      sun.LightSource
+    },
+    CastShadow = true
+  },
+  GUI = {
+    Name = "Animation Loop Infinitely",
+    Path = "/Shadow Casting Models"
+  }
+}
+
+-- This model is in a different shadow group, so will not receive or cast shadows onto the other Mars models
+local ModelMarsOtherGroup = {
+  Identifier = "celestial-globe-mars3",
+  Parent = mars.Mars.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.62,
+      Latitude = 26.13,
+      UseHeightmap = true,
+      Altitude = 0.0
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = mars.Mars.Identifier,
+      Longitude = 3.62,
+      Latitude = 26.13,
+      Angle = 180.0
+    },
+    Scale = {
+      Type = "StaticScale",
+      Scale = 1.25
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Enabled = true,
+    GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
+    ModelScale = "Kilometer",
+    LightSources = {
+      sun.LightSource
+    },
+    CastShadow = true
+  },
+  GUI = {
+    Name = "Celestial Globe - Mars OtherGroup",
+    Path = "/Shadow Casting Models/Celestial Globe"
+  }
+}
+
+-- Models that are far away MUST have their own shadow groups, otherwise no shadows will be visible
+local ModelEarth = {
+  Identifier = "celestial-globe-earth",
+  Parent = earth.Earth.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Longitude = -74.0060,
+      Latitude = 40.7128,
+      UseHeightmap = true,
+      Altitude = 0.0
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = earth.Earth.Identifier,
+      Longitude = -74.0060,
+      Latitude = 40.7128,
+      Angle = 180.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Enabled = true,
+    GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
+    ModelScale = "Kilometer",
+    LightSources = {
+      sun.LightSource
+    },
+    CastShadow = true
+  },
+  GUI = {
+    Name = "Celestial Globe - Earth",
+    Path = "/Shadow Casting Models/Celestial Globe"
+  }
+}
+
+local ModelMoon = {
+  Identifier = "celestial-globe-moon",
+  Parent = moon.Moon.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = moon.Moon.Identifier,
+      Longitude = -0.1276,
+      Latitude = 51.5074,
+      UseHeightmap = true,
+      Altitude = 0.0
+    },
+    Rotation = {
+      Type = "GlobeRotation",
+      Globe = moon.Moon.Identifier,
+      Longitude = -0.1276,
+      Latitude = 51.5074,
+      Angle = 180.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    Enabled = true,
+    GeometryFile = celestial_globe_folder .. "celestial_globe.glb",
+    ModelScale = "Kilometer",
+    LightSources = {
+      sun.LightSource
+    },
+    CastShadow = true
+  },
+  GUI = {
+    Name = "Celestial Globe - Moon",
+    Path = "/Shadow Casting Models/Celestial Globe"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(ModelMarsSmall)
+  openspace.registerShadowcaster(sun.SunCenter.Identifier, ModelMarsSmall.Identifier, mars.Mars.Identifier, "mars")
+
+  openspace.addSceneGraphNode(ModelMarsLarge)
+  openspace.registerShadowcaster(sun.SunCenter.Identifier, ModelMarsLarge.Identifier, mars.Mars.Identifier, "mars")
+
+  openspace.addSceneGraphNode(AnimatedBox)
+  openspace.registerShadowcaster(sun.SunCenter.Identifier, AnimatedBox.Identifier, mars.Mars.Identifier)
+
+  openspace.addSceneGraphNode(ModelMarsOtherGroup)
+  openspace.registerShadowcaster(sun.SunCenter.Identifier, ModelMarsOtherGroup.Identifier, mars.Mars.Identifier)
+
+  openspace.addSceneGraphNode(ModelEarth)
+  openspace.registerShadowcaster(sun.SunCenter.Identifier, ModelEarth.Identifier, earth.Earth.Identifier, "earth")
+
+  openspace.addSceneGraphNode(ModelMoon)
+  openspace.registerShadowcaster(sun.SunCenter.Identifier, ModelMoon.Identifier, moon.Moon.Identifier, "moon")
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(ModelMoon)
+  openspace.removeSceneGraphNode(ModelEarth)
+  openspace.removeSceneGraphNode(ModelMarsOtherGroup)
+  openspace.removeSceneGraphNode(AnimatedBox)
+  openspace.removeSceneGraphNode(ModelMarsLarge)
+  openspace.removeSceneGraphNode(ModelMarsSmall)
+end)

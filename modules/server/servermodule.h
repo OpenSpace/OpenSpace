@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,10 +28,11 @@
 #include <openspace/util/openspacemodule.h>
 
 #include <modules/server/include/serverinterface.h>
-
 #include <deque>
+#include <functional>
 #include <memory>
 #include <mutex>
+#include <utility>
 
 namespace openspace {
 
@@ -40,11 +41,6 @@ constexpr int SOCKET_API_VERSION_MINOR = 1;
 constexpr int SOCKET_API_VERSION_PATCH = 0;
 
 class Connection;
-
-struct Message {
-    std::weak_ptr<Connection> connection;
-    std::string messageString;
-};
 
 class ServerModule : public OpenSpaceModule {
 public:
@@ -68,6 +64,11 @@ protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
 
 private:
+    struct Message {
+        std::weak_ptr<Connection> connection;
+        std::string messageString;
+    };
+
     struct ConnectionData {
         std::shared_ptr<Connection> connection;
         bool isMarkedForRemoval = false;

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,7 +26,8 @@
 
 #include <modules/multiresvolume/rendering/tsp.h>
 #include <cstring>
-#include <string>
+#include <fstream>
+#include <utility>
 
 namespace openspace {
 
@@ -52,7 +53,7 @@ Histogram* HistogramManager::histogram(unsigned int brickIndex) {
 }
 
 bool HistogramManager::buildHistogram(TSP* tsp, unsigned int brickIndex) {
-    Histogram histogram(_minBin, _maxBin, _numBins);
+    Histogram histogram = Histogram(_minBin, _maxBin, _numBins);
     const bool isBstLeaf = tsp->isBstLeaf(brickIndex);
     const bool isOctreeLeaf = tsp->isOctreeLeaf(brickIndex);
 
@@ -122,7 +123,7 @@ std::vector<float> HistogramManager::readValues(TSP* tsp, unsigned int brickInde
 }
 
 bool HistogramManager::loadFromFile(const std::filesystem::path& filename) {
-    std::ifstream file(filename, std::ios::in | std::ios::binary);
+    std::ifstream file = std::ifstream(filename, std::ios::in | std::ios::binary);
     if (!file.is_open()) {
         return false;
     }
@@ -147,12 +148,11 @@ bool HistogramManager::loadFromFile(const std::filesystem::path& filename) {
         _histograms[i] = Histogram(_minBin, _maxBin, _numBins, data);
     }
 
-    file.close();
     return true;
 }
 
 bool HistogramManager::saveToFile(const std::filesystem::path& filename) {
-    std::ofstream file(filename, std::ios::out | std::ios::binary);
+    std::ofstream file = std::ofstream(filename, std::ios::out | std::ios::binary);
     if (!file.is_open()) {
         return false;
     }
@@ -173,7 +173,6 @@ bool HistogramManager::saveToFile(const std::filesystem::path& filename) {
 
     file.write(reinterpret_cast<char*>(histogramData.data()), sizeof(float) * nFloats);
 
-    file.close();
     return true;
 }
 

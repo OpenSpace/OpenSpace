@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,10 @@
 
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/keyboardinputstate.h>
+#include <openspace/util/keys.h>
+#include <openspace/util/mouse.h>
+#include <algorithm>
+#include <cstdlib>
 
 namespace {
     constexpr double SensitivityAdjustmentIncrease = 8.0;
@@ -52,6 +56,8 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
     const bool primaryPressed = mouseState.isMouseButtonPressed(primary);
     const bool secondaryPressed = mouseState.isMouseButtonPressed(secondary);
     const bool button3Pressed = mouseState.isMouseButtonPressed(MouseButton::Button3);
+    const bool button4Pressed = mouseState.isMouseButtonPressed(MouseButton::Button4);
+    const bool button5Pressed = mouseState.isMouseButtonPressed(MouseButton::Button5);
     const bool keyCtrlPressed =
         keyboardState.isKeyPressed(Key::LeftControl) ||
         keyboardState.isKeyPressed(Key::RightControl);
@@ -90,8 +96,8 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
         _currentSensitivityRamp * SensitivityAdjustmentIncrease;
 
     // Update the mouse states
-    if (primaryPressed && !keyShiftPressed && !keyAltPressed) {
-        if (keyCtrlPressed) {
+    if ((primaryPressed || button4Pressed) && !keyShiftPressed && !keyAltPressed) {
+        if (keyCtrlPressed || button4Pressed) {
             const glm::dvec2 mousePositionDelta =
                 _localRotationState.previousValue - mousePosition;
             _localRotationState.velocity.set(
@@ -133,8 +139,8 @@ void MouseCameraStates::updateStateFromInput(const MouseInputState& mouseState,
         _truckMovementState.previousValue = mousePosition.y;
         _truckMovementState.velocity.decelerate(deltaTime);
     }
-    if (button3Pressed || (keyShiftPressed && primaryPressed)) {
-        if (keyCtrlPressed) {
+    if (button3Pressed || (keyShiftPressed && primaryPressed) || button5Pressed) {
+        if (keyCtrlPressed || button5Pressed) {
             const double mousePosDelta = _localRollState.previousValue - mousePosition.x;
             _localRollState.velocity.set(
                 mousePosDelta * _sensitivity,

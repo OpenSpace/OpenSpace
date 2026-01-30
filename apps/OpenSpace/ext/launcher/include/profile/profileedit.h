@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,15 +26,17 @@
 #define __OPENSPACE_UI_LAUNCHER___PROFILEEDIT___H__
 
 #include <QDialog>
+
+#include <filesystem>
 #include <string>
-#include <vector>
 
 namespace openspace { class Profile; }
 
-class QWidget;
+class QKeyEvent;
 class QLabel;
 class QLineEdit;
 class QTextEdit;
+class QWidget;
 
 class ProfileEdit final : public QDialog {
 Q_OBJECT

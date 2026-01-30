@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,8 +24,14 @@
 
 #include <modules/touch/include/touchinteraction.h>
 
+#include <modules/touch/include/directinputsolver.h>
 #include <openspace/camera/camera.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
 
 namespace {
     // Used in the LM algorithm

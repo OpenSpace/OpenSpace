@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,8 +24,8 @@
 
 #include <modules/space/translation/horizonstranslation.h>
 
+#include <modules/space/horizonsfile.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -33,9 +33,17 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
-#include <filesystem>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <algorithm>
+#include <cfloat>
+#include <cstdint>
+#include <deque>
 #include <fstream>
+#include <iterator>
 #include <type_traits>
+#include <utility>
+#include <variant>
 
 namespace {
     constexpr std::string_view _loggerCat = "HorizonsTranslation";

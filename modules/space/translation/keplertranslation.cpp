@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,18 @@
 
 #include <modules/space/translation/keplertranslation.h>
 
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <glm/gtx/transform.hpp>
+#include <cmath>
+#include <cstdlib>
+#include <variant>
 
 namespace {
     struct RangeError final : public ghoul::RuntimeError {
@@ -217,38 +224,38 @@ KeplerTranslation::KeplerTranslation(const ghoul::Dictionary& dictionary)
     );
 }
 
-double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
+double KeplerTranslation::eccentricAnomaly(double meanAnomaly, double eccentricity) {
     // Compute the eccentric anomaly (the location of the spacecraft taking the
     // eccentricity of the orbit into account) using different solves for the regimes in
     // which they are most efficient
 
-    if (_eccentricity == 0.0) {
+    if (eccentricity == 0.0) {
         // In a circular orbit, the eccentric anomaly = mean anomaly
         return meanAnomaly;
     }
-    else if (_eccentricity < 0.2) {
-        auto solver = [this, &meanAnomaly](double x) -> double {
+    else if (eccentricity < 0.2) {
+        auto solver = [&](double x) -> double {
             // For low eccentricity, using a first order solver sufficient
-            return meanAnomaly + _eccentricity * std::sin(x);
+            return meanAnomaly + eccentricity * std::sin(x);
         };
         return solveIteration(solver, meanAnomaly, 0.0, 5);
     }
-    else if (_eccentricity < 0.9) {
-        auto solver = [this, &meanAnomaly](double x) -> double {
-            const double e = _eccentricity;
+    else if (eccentricity < 0.9) {
+        auto solver = [&](double x) -> double {
+            const double e = eccentricity;
             return x + (meanAnomaly + e * std::sin(x) - x) / (1.0 - e * std::cos(x));
         };
         return solveIteration(solver, meanAnomaly, 0.0, 6);
     }
-    else if (_eccentricity < 1.0) {
+    else if (eccentricity < 1.0) {
         auto sign = [](double val) -> double {
             return val > 0.0 ? 1.0 : ((val < 0.0) ? -1.0 : 0.0);
         };
-        const double e = meanAnomaly + 0.85 * _eccentricity * sign(std::sin(meanAnomaly));
+        const double e = meanAnomaly + 0.85 * eccentricity * sign(std::sin(meanAnomaly));
 
-        auto solver = [this, &meanAnomaly, &sign](double x) -> double {
-            const double s = _eccentricity * std::sin(x);
-            const double c = _eccentricity * std::cos(x);
+        auto solver = [&](double x) -> double {
+            const double s = eccentricity * std::sin(x);
+            const double c = eccentricity * std::cos(x);
             const double f = x - s - meanAnomaly;
             const double f1 = 1 - c;
             const double f2 = s;
@@ -266,14 +273,19 @@ double KeplerTranslation::eccentricAnomaly(double meanAnomaly) const {
 
 glm::dvec3 KeplerTranslation::position(const UpdateData& data) const {
     if (_orbitPlaneDirty) {
-        computeOrbitPlane();
+        _orbitPlaneRotation = computeOrbitPlane(
+            _ascendingNode,
+            _inclination,
+            _argumentOfPeriapsis
+        );
+        notifyObservers();
         _orbitPlaneDirty = false;
     }
 
     const double t = data.time.j2000Seconds() - _epoch;
     const double meanMotion = glm::two_pi<double>() / _period;
     const double meanAnomaly = glm::radians(_meanAnomalyAtEpoch.value()) + t * meanMotion;
-    const double e = eccentricAnomaly(meanAnomaly);
+    const double e = eccentricAnomaly(meanAnomaly, _eccentricity);
 
     // Use the eccentric anomaly to compute the actual location
     const glm::dvec3 p = glm::dvec3(
@@ -284,7 +296,9 @@ glm::dvec3 KeplerTranslation::position(const UpdateData& data) const {
     return _orbitPlaneRotation * p * 1000.0;
 }
 
-void KeplerTranslation::computeOrbitPlane() const {
+glm::dmat3 KeplerTranslation::computeOrbitPlane(double ascendingNode, double inclination,
+                                                double argumentOfPeriapsis)
+{
     // We assume the following coordinate system:
     // z = axis of rotation
     // x = pointing towards the first point of Aries
@@ -300,16 +314,13 @@ void KeplerTranslation::computeOrbitPlane() const {
     const glm::dvec3 inclinationAxisRot = glm::dvec3(1.f, 0.f, 0.f);
     const glm::dvec3 argPeriapsisAxisRot = glm::dvec3(0.f, 0.f, 1.f);
 
-    const double asc = glm::radians(_ascendingNode.value());
-    const double inc = glm::radians(_inclination.value());
-    const double per = glm::radians(_argumentOfPeriapsis.value());
+    const double asc = glm::radians(ascendingNode);
+    const double inc = glm::radians(inclination);
+    const double per = glm::radians(argumentOfPeriapsis);
 
-    _orbitPlaneRotation = glm::rotate(asc, ascendingNodeAxisRot) *
-                          glm::rotate(inc, inclinationAxisRot) *
-                          glm::rotate(per, argPeriapsisAxisRot);
-
-    notifyObservers();
-    _orbitPlaneDirty = false;
+    return glm::rotate(asc, ascendingNodeAxisRot) *
+           glm::rotate(inc, inclinationAxisRot) *
+           glm::rotate(per, argPeriapsisAxisRot);
 }
 
 void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorAxis,
@@ -378,7 +389,47 @@ void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorA
     _period = orbitalPeriod;
     _epoch = epoch;
 
-    computeOrbitPlane();
+    _orbitPlaneRotation = computeOrbitPlane(
+        _ascendingNode,
+        _inclination,
+        _argumentOfPeriapsis
+    );
+    notifyObservers();
+    _orbitPlaneDirty = false;
+}
+
+KeplerCalculator::KeplerCalculator(double eccentricity, double semiMajorAxis,
+                                   double inclination, double ascendingNode,
+                                   double argumentOfPeriapsis, double meanAnomalyAtEpoch,
+                                   double orbitalPeriod, double epoch)
+    : _eccentricity(eccentricity)
+    , _semiMajorAxis(semiMajorAxis)
+    , _inclination(inclination)
+    , _ascendingNode(ascendingNode)
+    , _argumentOfPeriapsis(argumentOfPeriapsis)
+    , _meanAnomalyAtEpoch(meanAnomalyAtEpoch)
+    , _orbitalPeriod(orbitalPeriod)
+    , _epoch(epoch)
+    , _orbitPlaneRotation(KeplerTranslation::computeOrbitPlane(
+        ascendingNode,
+        inclination,
+        argumentOfPeriapsis
+    ))
+{}
+
+glm::dvec3 KeplerCalculator::position(double time) const {
+    const double t = time - _epoch;
+    const double meanMotion = glm::two_pi<double>() / _orbitalPeriod;
+    const double meanAnomaly = glm::radians(_meanAnomalyAtEpoch) + t * meanMotion;
+    const double e = KeplerTranslation::eccentricAnomaly(meanAnomaly, _eccentricity);
+
+    // Use the eccentric anomaly to compute the actual location
+    const glm::dvec3 p = glm::dvec3(
+        _semiMajorAxis * (std::cos(e) - _eccentricity),
+        _semiMajorAxis * std::sin(e) * std::sqrt(1.0 - _eccentricity * _eccentricity),
+        0.0
+    );
+    return _orbitPlaneRotation * p * 1000.0;
 }
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,24 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/navigation/orbitalnavigator.h>
+
+#include <openspace/camera/camera.h>
 #include <openspace/camera/camerapose.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/mouseinputstate.h>
 #include <openspace/interaction/keyboardinputstate.h>
-#include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
+#include <openspace/properties/property.h>
+#include <openspace/properties/propertyowner.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/util/syncable.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/query/query.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/assert.h>
 #include <ghoul/misc/easing.h>
-#include <glm/gtx/rotate_vector.hpp>
+#include <ghoul/misc/exception.h>
 #include <glm/gtx/vector_angle.hpp>
+#include <algorithm>
+#include <cstdlib>
+#include <limits>
 #include <cmath>
 
 #include "orbitalnavigator_lua.inl"

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,13 +28,17 @@
 #include <openspace/json.h>
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
+#include <algorithm>
+#include <exception>
 #include <fstream>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "IswaDataGroup";
-    using json = nlohmann::json;
 
     constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
         "Resolution",
@@ -117,10 +121,13 @@ void IswaKameleonGroup::readFieldlinePaths(const std::filesystem::path& indexFil
 
         try {
             //Parse and add each fieldline as an selection
-            json fieldlines = json::parse(fileContent);
+            nlohmann::json fieldlines = nlohmann::json::parse(fileContent);
             int i = 0;
 
-            for (json::iterator it = fieldlines.begin(); it != fieldlines.end(); it++) {
+            for (nlohmann::json::iterator it = fieldlines.begin();
+                 it != fieldlines.end();
+                 it++)
+            {
                 _fieldlines.addOption(it.key());
                 _fieldlineState[i] = std::make_tuple<std::string, std::string, bool>(
                     identifier() + "/" + it.key(),
@@ -130,7 +137,8 @@ void IswaKameleonGroup::readFieldlinePaths(const std::filesystem::path& indexFil
                 i++;
             }
 
-        } catch (const std::exception& e) {
+        }
+        catch (const std::exception& e) {
             LERROR(
                 "Error when reading json file with paths to seedpoints: " +
                 std::string(e.what())

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,27 +24,28 @@
 
 #include <modules/space/rendering/renderablefluxnodes.h>
 
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/orbitalnavigator.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
-#include <openspace/util/timemanager.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/query/query.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/logging/consolelog.h>
-#include <ghoul/logging/visualstudiooutputlog.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
+#include <algorithm>
+#include <array>
 #include <fstream>
-#include <functional>
-#include <optional>
-#include <sys/stat.h>
-#include <thread>
+#include <iterator>
+#include <limits>
+#include <sstream>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableFluxNodes";
@@ -624,7 +625,7 @@ void RenderableFluxNodes::populateStartTimes() {
     std::string columnName;
     // loops through the names/columns in first line/header
     while (s >> columnName) {
-        ++nColumns;
+        nColumns++;
     }
     while (ghoul::getline(tfs, line)) {   // for each line of data
         std::istringstream iss(line);

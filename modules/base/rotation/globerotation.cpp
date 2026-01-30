@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,16 +25,17 @@
 #include <modules/base/rotation/globerotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/moduleengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <glm/gtx/quaternion.hpp>
+#include <optional>
 
 namespace {
     constexpr std::string_view _loggerCat = "GlobeRotation";

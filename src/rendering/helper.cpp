@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,21 +24,22 @@
 
 #include <openspace/rendering/helper.h>
 
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/scene/lightsource.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/closest_point.hpp>
 #include <algorithm>
+#include <cmath>
+#include <cstddef>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
-#include <string>
-#include <vector>
+#include <limits>
+#include <string_view>
 
 namespace {
 
@@ -614,7 +615,7 @@ std::vector<VertexXYZ> convert(std::vector<Vertex> v) {
     return result;
 }
 
-Vertex computeCircleVertex(int i, int nSegments, float radius,
+static Vertex computeCircleVertex(int i, int nSegments, float radius,
                            const glm::vec4& color = glm::vec4(1.f))
 {
     const float fsegments = static_cast<float>(nSegments);
@@ -713,10 +714,10 @@ VertexIndexListCombo<Vertex> createSphere(int nSegments, glm::vec3 radii,
     return { vertices, indices };
 }
 
-VertexIndexListCombo<VertexXYZNormal> createConicalCylinder(unsigned int nSegments,
-                                                            float bottomRadius,
-                                                            float topRadius,
-                                                            float height)
+static VertexIndexListCombo<VertexXYZNormal> createConicalCylinder(unsigned int nSegments,
+                                                                   float bottomRadius,
+                                                                   float topRadius,
+                                                                   float height)
 {
     // Create a ring for the top and bottom vertices (XY plane)
     std::vector<VertexXYZ> bottomVertices = createRingXYZ(nSegments, bottomRadius);
@@ -880,7 +881,7 @@ void LightSourceRenderData::updateBasedOnLightSources(const RenderData& renderDa
         directionsViewSpaceBuffer[nEnabledLightSources] =
             lightSource->directionViewSpace(renderData);
 
-        ++nEnabledLightSources;
+        nEnabledLightSources++;
     }
     nLightSources = nEnabledLightSources;
 }

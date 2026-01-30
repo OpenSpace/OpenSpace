@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,12 @@
 #include <openspace/util/sphere.h>
 
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/ghoul_gl.h>
+#include <cstddef>
 #include <cstring>
+#include <string_view>
 
 namespace {
-    constexpr std::string_view _loggerCat = "PowerScaledSphere";
+    constexpr std::string_view _loggerCat = "Sphere";
 } // namespace
 
 namespace openspace {
@@ -85,7 +86,7 @@ Sphere::Sphere(glm::vec3 radius, int segments)
 
             _varray[nr].tex[0] = t1;
             _varray[nr].tex[1] = t2;
-            ++nr;
+            nr++;
         }
     }
 
@@ -95,18 +96,18 @@ Sphere::Sphere(glm::vec3 radius, int segments)
         for (int j = 0; j < segments; j++) {
             const int t = segments + 1;
             _iarray[nr] = t * (i - 1) + j + 0; //1
-            ++nr;
+            nr++;
             _iarray[nr] = t * (i + 0) + j + 0; //2
-            ++nr;
+            nr++;
             _iarray[nr] = t * (i + 0) + j + 1; //3
-            ++nr;
+            nr++;
 
             _iarray[nr] = t * (i - 1) + j + 0; //4
-            ++nr;
+            nr++;
             _iarray[nr] = t * (i + 0) + j + 1; //5
-            ++nr;
+            nr++;
             _iarray[nr] = t * (i - 1) + j + 1; //6
-            ++nr;
+            nr++;
         }
     }
 }

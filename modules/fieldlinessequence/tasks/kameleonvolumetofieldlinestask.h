@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,7 +27,7 @@
 
 #include <openspace/util/task.h>
 
-#include <string>
+#include <filesystem>
 
 namespace openspace {
 
@@ -46,17 +46,13 @@ public:
 
 private:
     std::string _tracingVar;
-    std::vector<std::string> _scalarVars;
-    std::vector<std::string> _magnitudeVars;
+    std::vector<std::string> _extraVars;
     std::filesystem::path _inputPath;
-    size_t _nthTimeStep = 1;
     std::vector<std::string> _sourceFiles;
     std::filesystem::path _seedpointsPath;
-    size_t _nthSeedPoint = 1;
     OutputType _outputType;
     std::filesystem::path _outputFolder;
-    // Manual time offset
-    float _manualTimeOffset = 0.f;
+    double _manualTimeOffset = 0.0;
 };
 
 } // namespace openspace

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,9 +26,13 @@
 #define __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__DEFAULTTILEPROVIDER___H__
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
-#include <modules/globebrowsing/src/tilecacheproperties.h>
+
 #include <modules/globebrowsing/src/asynctiledataprovider.h>
-#include <memory>
+#include <modules/globebrowsing/src/layergroupid.h>
+#include <modules/globebrowsing/src/tilecacheproperties.h>
+#include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
 
 namespace openspace::globebrowsing {
 

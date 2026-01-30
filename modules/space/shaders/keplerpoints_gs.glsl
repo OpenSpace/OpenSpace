@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,16 +33,26 @@ flat in float vertexRevolutionFraction[];
 uniform dmat4 modelTransform;
 uniform dmat4 viewTransform;
 uniform mat4 projectionTransform;
-uniform dvec3 cameraPositionWorld;
-uniform vec3 cameraUpWorld;
 uniform float pointSizeExponent;
 uniform bool enableMaxSize;
 uniform float maxSize;
+uniform int renderOption;
+
+// Camera View Direction
+uniform vec3 cameraViewDirectionUp;
+uniform vec3 cameraViewDirectionRight;
+
+// Camera Normal
+uniform dvec3 cameraPositionWorld;
+uniform vec3 cameraUpWorld;
 
 layout(triangle_strip, max_vertices = 4) out;
 out float projectionViewDepth;
 out vec4 viewSpace;
 out vec2 texCoord;
+
+const int RenderOptionCameraViewDirection = 0;
+const int RenderOptionCameraPositionNormal = 1;
 
 void main() {
   // cFrac is how far along the trail orbit the head of the trail is.
@@ -65,12 +75,21 @@ void main() {
 
   // Calculate current vertex position to world space
   dvec4 vertPosWorldSpace = modelTransform * pos;
-
-  // Calculate new axis for plane
   vec3 camPosToVertPos = vec3(cameraPositionWorld - vertPosWorldSpace.xyz);
-  vec3 normal = normalize(camPosToVertPos);
-  vec3 right = normalize(cross(cameraUpWorld, normal));
-  vec3 up = normalize(cross(normal, right));
+
+  vec3 up;
+  vec3 right;
+  // Calculate new axis for plane
+  if (renderOption == RenderOptionCameraViewDirection) {
+    up = cameraViewDirectionUp;
+    right = cameraViewDirectionRight;
+  }
+  else {
+    // Camera Position Normal
+    vec3 normal = normalize(camPosToVertPos);
+    right = normalize(cross(cameraUpWorld, normal));
+    up = normalize(cross(normal, right));
+  }
 
   // Calculate size of points
   float initialSize = pow(10.0, pointSizeExponent);

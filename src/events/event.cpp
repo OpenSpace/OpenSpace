@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,14 +26,16 @@
 
 #include <openspace/properties/property.h>
 #include <openspace/rendering/screenspacerenderable.h>
-#include <openspace/scene/profile.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/tstring.h>
 #include <ghoul/format.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <functional>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/logging/logmanager.h>
+#include <filesystem>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "EventInfo";
@@ -43,7 +45,7 @@ using namespace std::string_literals;
 
 namespace openspace::events {
 
-void log(int i, const EventParallelConnection& e) {
+static void log(int i, const EventParallelConnection& e) {
     ghoul_assert(e.type == EventParallelConnection::Type, "Wrong type");
     std::string_view state = [](EventParallelConnection::State s) {
         switch (s) {
@@ -57,17 +59,26 @@ void log(int i, const EventParallelConnection& e) {
     LINFO(std::format("[{}] ParallelConnection ({})", i, state));
 }
 
-void log(int i, [[maybe_unused]] const EventProfileLoadingFinished& e) {
+static void log(int i, [[maybe_unused]] const EventProfileLoadingFinished& e) {
     ghoul_assert(e.type == EventProfileLoadingFinished::Type, "Wrong type");
     LINFO(std::format("[{}] ProfileLoadingFinished", i));
 }
 
-void log(int i, const EventAssetLoadingFinished& e) {
-    ghoul_assert(e.type == EventAssetLoadingFinished::Type, "Wrong type");
-    LINFO(std::format("[{}] AssetLoadingFinished", i));
+static void log(int i, const EventAssetLoading& e) {
+    ghoul_assert(e.type == EventAssetLoading::Type, "Wrong type");
+    std::string_view state = [](EventAssetLoading::State s) {
+        switch (s) {
+            case EventAssetLoading::State::Loaded:   return "Loaded";
+            case EventAssetLoading::State::Loading:  return "Loading";
+            case EventAssetLoading::State::Unloaded: return "Unloaded";
+            case EventAssetLoading::State::Error:    return "Error";
+            default:                                 throw ghoul::MissingCaseException();
+        }
+    }(e.state);
+    LINFO(std::format("[{}] AssetLoading: '{}': ({})", i, e.assetPath, state));
 }
 
-void log(int i, const EventApplicationShutdown& e) {
+static void log(int i, const EventApplicationShutdown& e) {
     ghoul_assert(e.type == EventApplicationShutdown::Type, "Wrong type");
     const std::string t = [](EventApplicationShutdown::State state) {
         switch (state) {
@@ -80,7 +91,7 @@ void log(int i, const EventApplicationShutdown& e) {
     LINFO(std::format("[{}] ApplicationShutdown", i));
 }
 
-void log(int i, const EventCameraFocusTransition& e) {
+static void log(int i, const EventCameraFocusTransition& e) {
     ghoul_assert(e.type == EventCameraFocusTransition::Type, "Wrong type");
     std::string_view t = [](EventCameraFocusTransition::Transition transition) {
         switch (transition) {
@@ -103,7 +114,7 @@ void log(int i, const EventCameraFocusTransition& e) {
     ));
 }
 
-void log(int i, const EventTimeOfInterestReached& e) {
+static void log(int i, const EventTimeOfInterestReached& e) {
     ghoul_assert(e.type == EventTimeOfInterestReached::Type, "Wrong type");
     LINFO(std::format(
         "[{}] TimeOfInterestReached: {},  {}",
@@ -111,57 +122,57 @@ void log(int i, const EventTimeOfInterestReached& e) {
     ));
 }
 
-void log(int i, const EventMissionAdded& e) {
+static void log(int i, const EventMissionAdded& e) {
     ghoul_assert(e.type == EventMissionAdded::Type, "Wrong type");
     LINFO(std::format("[{}] MissionAdded: {}", i, e.identifier));
 }
 
-void log(int i, const EventMissionRemoved& e) {
+static void log(int i, const EventMissionRemoved& e) {
     ghoul_assert(e.type == EventMissionRemoved::Type, "Wrong type");
     LINFO(std::format("[{}] MissionRemoved: {}", i, e.identifier));
 }
 
-void log(int i, [[maybe_unused]] const EventMissionEventReached& e) {
+static void log(int i, [[maybe_unused]] const EventMissionEventReached& e) {
     ghoul_assert(e.type == EventMissionEventReached::Type, "Wrong type");
     LINFO(std::format("[{}] MissionEventReached", i));
 }
 
-void log(int i, const EventPlanetEclipsed& e) {
+static void log(int i, const EventPlanetEclipsed& e) {
     ghoul_assert(e.type == EventPlanetEclipsed::Type, "Wrong type");
     LINFO(std::format("[{}] PlanetEclipsed: {} -> {}", i, e.eclipsee, e.eclipser));
 }
 
-void log(int i, [[maybe_unused]] const EventInterpolationFinished& e) {
+static void log(int i, [[maybe_unused]] const EventInterpolationFinished& e) {
     ghoul_assert(e.type == EventInterpolationFinished::Type, "Wrong type");
     LINFO(std::format("[{}] InterpolationFinished", i));
 }
 
-void log(int i, const EventFocusNodeChanged& e) {
+static void log(int i, const EventFocusNodeChanged& e) {
     ghoul_assert(e.type == EventFocusNodeChanged::Type, "Wrong type");
     LINFO(std::format("[{}] FocusNodeChanged: {} -> {}", i, e.oldNode, e.newNode));
 }
 
-void log(int i, const EventPropertyTreeUpdated& e) {
+static void log(int i, const EventPropertyTreeUpdated& e) {
     ghoul_assert(e.type == EventPropertyTreeUpdated::Type, "Wrong type");
     LINFO(std::format("[{}] PropertyTreeUpdated: {}", i, e.uri));
 }
 
-void log(int i, const EventPropertyTreePruned& e) {
+static void log(int i, const EventPropertyTreePruned& e) {
     ghoul_assert(e.type == EventPropertyTreePruned::Type, "Wrong type");
     LINFO(std::format("[{}] PropertyTreePruned: {}", i, e.uri));
 }
 
-void log(int i, const EventActionAdded& e) {
+static void log(int i, const EventActionAdded& e) {
     ghoul_assert(e.type == EventActionAdded::Type, "Wrong type");
     LINFO(std::format("[{}] ActionAdded: {}", i, e.uri));
 }
 
-void log(int i, const EventActionRemoved& e) {
+static void log(int i, const EventActionRemoved& e) {
     ghoul_assert(e.type == EventActionRemoved::Type, "Wrong type");
     LINFO(std::format("[{}] ActionRemoved: {}", i, e.uri));
 }
 
-void log(int i, const EventSessionRecordingPlayback& e) {
+static void log(int i, const EventSessionRecordingPlayback& e) {
     ghoul_assert(e.type == EventSessionRecordingPlayback::Type, "Wrong type");
 
     std::string_view state = [](EventSessionRecordingPlayback::State s) {
@@ -177,7 +188,7 @@ void log(int i, const EventSessionRecordingPlayback& e) {
     LINFO(std::format("[{}] SessionRecordingPlayback: {}", i, state));
 }
 
-void log(int i, const EventPointSpacecraft& e) {
+static void log(int i, const EventPointSpacecraft& e) {
     ghoul_assert(e.type == EventPointSpacecraft::Type, "Wrong type");
     LINFO(std::format(
         "[{}] PointSpacecraft: Ra: {}, Dec: {}, Duration: {}", i, e.ra, e.dec,
@@ -185,17 +196,17 @@ void log(int i, const EventPointSpacecraft& e) {
     ));
 }
 
-void log(int i, const EventRenderableEnabled& e) {
+static void log(int i, const EventRenderableEnabled& e) {
     ghoul_assert(e.type == EventRenderableEnabled::Type, "Wrong type");
     LINFO(std::format("[{}] EventRenderableEnabled: {}", i, e.node));
 }
 
-void log(int i, const EventRenderableDisabled& e) {
+static void log(int i, const EventRenderableDisabled& e) {
     ghoul_assert(e.type == EventRenderableDisabled::Type, "Wrong type");
     LINFO(std::format("[{}] EventRenderableDisabled: {}", i, e.node));
 }
 
-void log(int i, const EventCameraPathStarted& e) {
+static void log(int i, const EventCameraPathStarted& e) {
     ghoul_assert(e.type == EventCameraPathStarted::Type, "Wrong type");
     LINFO(std::format(
         "[{}] EventCameraPathStarted:  Origin: '{}'  Destination: '{}'",
@@ -203,7 +214,7 @@ void log(int i, const EventCameraPathStarted& e) {
     ));
 }
 
-void log(int i, const EventCameraPathFinished& e) {
+static void log(int i, const EventCameraPathFinished& e) {
     ghoul_assert(e.type == EventCameraPathFinished::Type, "Wrong type");
     LINFO(std::format(
         "[{}] EventCameraPathFinished:  Origin: '{}'  Destination: '{}'",
@@ -211,22 +222,22 @@ void log(int i, const EventCameraPathFinished& e) {
     ));
 }
 
-void log(int i, const EventCameraMovedPosition& e) {
+static void log(int i, const EventCameraMovedPosition& e) {
     ghoul_assert(e.type == EventCameraMovedPosition::Type, "Wrong type");
     LINFO(std::format("[{}] EventCameraMovedPosition", i));
 }
 
-void log(int i, const EventScheduledScriptExecuted& e) {
+static void log(int i, const EventScheduledScriptExecuted& e) {
     ghoul_assert(e.type == EventScheduledScriptExecuted::Type, "Wrong type");
     LINFO(std::format("[{}] ScheduledScriptExecuted: Script '{}'", i, e.script));
 }
 
-void log(int i, const EventGuiTreeUpdated& e) {
+static void log(int i, const EventGuiTreeUpdated& e) {
     ghoul_assert(e.type == EventGuiTreeUpdated::Type, "Wrong type");
     LINFO(std::format("[{}] EventGuiTreeUpdated", i));
 }
 
-void log(int i, const CustomEvent& e) {
+static void log(int i, const CustomEvent& e) {
     ghoul_assert(e.type == CustomEvent::Type, "Wrong type");
     LINFO(std::format("[{}] CustomEvent: {} ({})", i, e.subtype, e.payload));
 }
@@ -235,7 +246,7 @@ std::string_view toString(Event::Type type) {
     switch (type) {
         case Event::Type::ParallelConnection: return "ParallelConnection";
         case Event::Type::ProfileLoadingFinished: return "ProfileLoadingFinished";
-        case Event::Type::AssetLoadingFinished: return "AssetLoadingFinished";
+        case Event::Type::AssetLoading: return "AssetLoading";
         case Event::Type::ApplicationShutdown: return "ApplicationShutdown";
         case Event::Type::CameraFocusTransition: return "CameraFocusTransition";
         case Event::Type::TimeOfInterestReached: return "TimeOfInterestReached";
@@ -271,8 +282,8 @@ Event::Type fromString(std::string_view str) {
     else if (str == "ProfileLoadingFinished") {
         return Event::Type::ProfileLoadingFinished;
     }
-    else if (str == "AssetLoadingFinished") {
-        return Event::Type::AssetLoadingFinished;
+    else if (str == "AssetLoading") {
+        return Event::Type::AssetLoading;
     }
     else if (str == "ApplicationShutdown") {
         return Event::Type::ApplicationShutdown;
@@ -363,6 +374,26 @@ ghoul::Dictionary toParameter(const Event& e) {
                     break;
                 case EventParallelConnection::State::HostshipLost:
                     d.setValue("State", "HostshipLost"s);
+                    break;
+            }
+            break;
+        case Event::Type::AssetLoading:
+            d.setValue(
+                "AssetPath",
+                static_cast<const EventAssetLoading&>(e).assetPath
+            );
+            switch (static_cast<const EventAssetLoading&>(e).state) {
+                case EventAssetLoading::State::Loaded:
+                    d.setValue("State", "Loaded"s);
+                    break;
+                case EventAssetLoading::State::Loading:
+                    d.setValue("State", "Loading"s);
+                    break;
+                case EventAssetLoading::State::Unloaded:
+                    d.setValue("State", "Unloaded"s);
+                    break;
+                case EventAssetLoading::State::Error:
+                    d.setValue("State", "Error"s);
                     break;
             }
             break;
@@ -544,8 +575,8 @@ void logAllEvents(const Event* e) {
             case Event::Type::ProfileLoadingFinished:
                 log(i, *static_cast<const EventProfileLoadingFinished*>(e));
                 break;
-            case Event::Type::AssetLoadingFinished:
-                log(i, *static_cast<const EventAssetLoadingFinished*>(e));
+            case Event::Type::AssetLoading:
+                log(i, *static_cast<const EventAssetLoading*>(e));
                 break;
             case Event::Type::ApplicationShutdown:
                 log(i, *static_cast<const EventApplicationShutdown*>(e));
@@ -634,8 +665,11 @@ EventProfileLoadingFinished::EventProfileLoadingFinished()
     : Event(Type)
 {}
 
-EventAssetLoadingFinished::EventAssetLoadingFinished()
+EventAssetLoading::EventAssetLoading(const std::filesystem::path& assetPath_,
+                                     State newState)
     : Event(Type)
+    , assetPath(assetPath_)
+    , state(newState)
 {}
 
 EventApplicationShutdown::EventApplicationShutdown(State state_)

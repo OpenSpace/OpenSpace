@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,7 +25,10 @@
 #include <modules/exoplanets/datastructure.h>
 #include <modules/exoplanets/exoplanetshelper.h>
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scripting/scriptengine.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/stringhelper.h>
@@ -130,7 +133,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
     // Read number of lines
     int nExoplanets = 0;
     while (ghoul::getline(lookupTableFile, line)) {
-        ++nExoplanets;
+        nExoplanets++;
     }
     lookupTableFile.clear();
     lookupTableFile.seekg(0);

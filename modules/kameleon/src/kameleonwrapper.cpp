@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,14 +24,18 @@
 
 #include <modules/kameleon/include/kameleonwrapper.h>
 
-#include <ghoul/filesystem/file.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
-#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/stringhelper.h>
-#include <filesystem>
+#include <ghoul/format.h>
+#include <ghoul/misc/exception.h>
+#include <algorithm>
+#include <cctype>
+#include <cmath>
+#include <cstdlib>
+#include <string_view>
+#include <utility>
 
 #ifdef WIN32
 #pragma warning (push)
@@ -837,7 +841,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceCartesianFieldline(
 
         pos = pos + (step / 6.f) * (k1 + 2.f * k2 + 2.f * k3 + k4);
 
-        ++numSteps;
+        numSteps++;
         if (numSteps > MaxSteps) {
             LDEBUG(std::format("Max number of steps taken ({})", MaxSteps));
             break;
@@ -951,7 +955,7 @@ KameleonWrapper::TraceLine KameleonWrapper::traceLorentzTrajectory(
 
         v0 = v0 + step / 6.f * (k1 + 2.f * k2 + 2.f * k3 + k4);
 
-        ++numSteps;
+        numSteps++;
         if (numSteps > MaxSteps) {
             LDEBUG(std::format("Max number of steps taken ({})", MaxSteps));
             break;

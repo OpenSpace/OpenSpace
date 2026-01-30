@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,12 +24,13 @@
 
 #include <modules/gaia/rendering/octreemanager.h>
 
-#include <modules/gaia/rendering/octreeculler.h>
+#include <modules/globebrowsing/src/basictypes.h>
 #include <openspace/util/distanceconstants.h>
 #include <ghoul/format.h>
-#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
-#include <fstream>
+#include <algorithm>
+#include <cstdint>
+#include <string_view>
 #include <thread>
 
 namespace {
@@ -1022,7 +1023,7 @@ bool OctreeManager::insertInNode(OctreeNode& node, const std::vector<float>& sta
         storeStarData(node, starValues);
     }
 
-    return insertInNode(*node.children[index], starValues, ++depth);
+    return insertInNode(*node.children[index], starValues, depth + 1);
 }
 
 void OctreeManager::sliceNodeLodCache(OctreeNode& node) {

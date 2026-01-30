@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,12 +29,20 @@
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
-#include <fstream>
-#include <optional>
 #include "SpiceUsr.h"
+#include <algorithm>
+#include <array>
+#include <filesystem>
+#include <fstream>
+#include <set>
+#include <sstream>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableConstellationBounds";
@@ -340,7 +348,7 @@ bool RenderableConstellationBounds::loadVertexFile() {
             static_cast<float>(rectangularValues[1]),
             static_cast<float>(rectangularValues[2])
         });
-        ++currentLineNumber;
+        currentLineNumber++;
     }
 
     // Due to the way we read the file, the first (empty) constellation bounds will not

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,18 +24,17 @@
 
 #include <modules/globebrowsing/src/layer.h>
 
-#include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/engine/globals.h>
-#include <openspace/scripting/scriptengine.h>
 #include <modules/globebrowsing/src/layergroup.h>
-#include <modules/globebrowsing/src/layermanager.h>
 #include <modules/globebrowsing/src/tileindex.h>
-#include <modules/globebrowsing/src/tiletextureinitdata.h>
+#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
+#include <openspace/documentation/documentation.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
-
-namespace openspace::globebrowsing {
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/stringconversion.h>
+#include <algorithm>
+#include <optional>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "Layer";
@@ -174,6 +173,8 @@ namespace {
     };
 #include "layer_codegen.cpp"
 } // namespace
+
+namespace openspace::globebrowsing {
 
 documentation::Documentation Layer::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_layer");

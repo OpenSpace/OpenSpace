@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,34 +26,25 @@
 #define __OPENSPACE_MODULE_BASE___RENDERABLEMODEL___H__
 
 #include <openspace/rendering/renderable.h>
+#include <openspace/rendering/shadowmapping.h>
+
 #include <openspace/properties/matrix/dmat4property.h>
-#include <openspace/properties/matrix/mat3property.h>
 #include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
-#include <ghoul/io/model/modelreader.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
 
 namespace ghoul::modelgeometry { class ModelGeometry; }
 
 namespace openspace {
 
-struct RenderData;
-struct UpdateData;
 class LightSource;
 
-namespace documentation { struct Documentation; }
-
-class RenderableModel : public Renderable {
+class RenderableModel : public Renderable, public shadowmapping::Shadower {
 public:
     explicit RenderableModel(const ghoul::Dictionary& dictionary);
     ~RenderableModel() override = default;
@@ -61,6 +52,8 @@ public:
     void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
+    void createDepthMapResources();
+    void releaseDepthMapResources();
 
     bool isReady() const override;
 
@@ -78,6 +71,9 @@ private:
         BounceInfinitely
     };
 
+    void renderForDepthMap(const glm::dmat4& vp) const override;
+    glm::dvec3 center() const override;
+
     std::filesystem::path _file;
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
     bool _invertModelScale = false;
@@ -92,6 +88,7 @@ private:
     properties::FloatProperty _ambientIntensity;
     properties::FloatProperty _diffuseIntensity;
     properties::FloatProperty _specularIntensity;
+    properties::FloatProperty _specularPower;
 
     properties::BoolProperty _performShading;
     properties::BoolProperty _enableFaceCulling;
@@ -102,17 +99,22 @@ private:
 
     properties::BoolProperty _enableDepthTest;
     properties::OptionProperty _blendingFuncOption;
+    properties::BoolProperty _renderWireframe;
+
+    properties::BoolProperty _useOverrideColor;
+    properties::Vec4Property _overrideColor;
 
     std::filesystem::path _vertexShaderPath;
     std::filesystem::path _fragmentShaderPath;
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, normalTransform, meshTransform,
-        meshNormalTransform, ambientIntensity, diffuseIntensity,
-        specularIntensity, performShading, use_forced_color, has_texture_diffuse,
-        has_texture_normal, has_texture_specular, has_color_specular,
-        texture_diffuse, texture_normal, texture_specular, color_diffuse,
-        color_specular, opacity, nLightSources, lightDirectionsViewSpace,
-        lightIntensities, performManualDepthTest, gBufferDepthTexture, resolution
+        meshNormalTransform, ambientIntensity, diffuseIntensity, specularIntensity,
+        specularPower, performShading, use_forced_color, has_texture_diffuse,
+        has_texture_normal, has_texture_specular, has_color_specular, texture_diffuse,
+        texture_normal, texture_specular, color_diffuse, color_specular, opacity,
+        nLightSources, lightDirectionsViewSpace, lightIntensities, performManualDepthTest,
+        gBufferDepthTexture, resolution, has_shadow_depth_map, model, light_vp,
+        shadow_depth_map, has_override_color, override_color
     ) _uniformCache;
 
     std::vector<std::unique_ptr<LightSource>> _lightSources;
@@ -136,6 +138,8 @@ private:
 
     // Store the original RenderBin
     Renderable::RenderBin _originalRenderBin;
+
+    ghoul::opengl::ProgramObject* _depthMapProgram = nullptr;
 };
 
 }  // namespace openspace

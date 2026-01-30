@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,17 @@
 #include <modules/base/rendering/screenspacerenderablerenderable.h>
 
 #include <openspace/camera/camera.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/rotation.h>
 #include <openspace/scene/scale.h>
 #include <openspace/scene/translation.h>
+#include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
+#include <ghoul/misc/dictionary.h>
+#include <limits>
+#include <optional>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo TimeInfo = {
@@ -143,13 +149,13 @@ namespace openspace {
 documentation::Documentation ScreenSpaceRenderableRenderable::Documentation() {
     return codegen::doc<Parameters>(
         "base_screenspace_renderable",
-        ScreenSpaceFramebuffer::Documentation()
+        ScreenSpaceRenderableFramebuffer::Documentation()
     );
 }
 
 ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
                                                       const ghoul::Dictionary& dictionary)
-    : ScreenSpaceFramebuffer(dictionary)
+    : ScreenSpaceRenderableFramebuffer(dictionary)
     , _time(
         TimeInfo,
         0.0,
@@ -232,7 +238,7 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
 ScreenSpaceRenderableRenderable::~ScreenSpaceRenderableRenderable() {}
 
 void ScreenSpaceRenderableRenderable::initialize() {
-    ScreenSpaceFramebuffer::initialize();
+    ScreenSpaceRenderableFramebuffer::initialize();
     _transform.translation->initialize();
     _transform.rotation->initialize();
     _transform.scale->initialize();
@@ -240,7 +246,7 @@ void ScreenSpaceRenderableRenderable::initialize() {
 }
 
 void ScreenSpaceRenderableRenderable::initializeGL() {
-    ScreenSpaceFramebuffer::initializeGL();
+    ScreenSpaceRenderableFramebuffer::initializeGL();
 
     _renderable->initializeGL();
 
@@ -288,7 +294,7 @@ void ScreenSpaceRenderableRenderable::deinitializeGL() {
     _renderable->deinitializeGL();
     _renderable->deinitialize();
 
-    ScreenSpaceFramebuffer::deinitializeGL();
+    ScreenSpaceRenderableFramebuffer::deinitializeGL();
 }
 
 void ScreenSpaceRenderableRenderable::update() {

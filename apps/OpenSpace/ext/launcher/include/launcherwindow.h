@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,14 +27,13 @@
 
 #include <QMainWindow>
 
-#include "sgctedit/sgctedit.h"
 #include <openspace/scene/profile.h>
-#include <sgct/config.h>
-#include <sgct/error.h>
-#include <QApplication>
 #include <filesystem>
 #include <optional>
+#include <string>
 
+class QKeyEvent;
+class QPushButton;
 class SplitComboBox;
 
 namespace openspace { struct Configuration; }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,14 +25,16 @@
 #ifndef __OPENSPACE_CORE___PATH___H__
 #define __OPENSPACE_CORE___PATH___H__
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/navigation/pathcurve.h>
 #include <openspace/navigation/waypoint.h>
-#include <ghoul/misc/dictionary.h>
+#include <memory>
 #include <optional>
+#include <string>
 #include <vector>
 
+namespace ghoul { class Dictionary; }
 namespace openspace {
+    namespace documentation { struct Documentation; }
     struct CameraPose;
 } // namespace openspace
 

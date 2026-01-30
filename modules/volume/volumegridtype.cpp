@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,6 +24,9 @@
 
 #include <modules/volume/volumegridtype.h>
 
+#include <ghoul/format.h>
+#include <ghoul/misc/exception.h>
+
 namespace openspace::volume {
 
 VolumeGridType parseGridType(const std::string& gridType) {
@@ -40,8 +43,8 @@ std::string gridTypeToString(VolumeGridType gridType) {
     switch (gridType) {
         case VolumeGridType::Cartesian: return "Cartesian";
         case VolumeGridType::Spherical: return "Spherical";
+        default:                        return "Unknown";
     }
-    return "Unknown";
 }
 
 } // namespace openspace::volume

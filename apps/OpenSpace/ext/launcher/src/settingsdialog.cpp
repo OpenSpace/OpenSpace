@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,15 +25,18 @@
 #include "settingsdialog.h"
 
 #include "profile/line.h"
-
+#include <openspace/engine/configuration.h>
+#include <openspace/properties/property.h>
+#include <ghoul/misc/assert.h>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QLabel>
-#include <QLineEdit>
-#include <QMessageBox>
 #include <QPushButton>
+#include <optional>
+#include <string>
+#include <utility>
 
 SettingsDialog::SettingsDialog(openspace::Settings settings, QWidget* parent)
     : QDialog(parent)
@@ -113,7 +116,7 @@ void SettingsDialog::createWidgets() {
             _rememberLastProfile,
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             &QCheckBox::checkStateChanged,
-#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
+#else // ^^^^ >=6.7.0 // <6.7.0
             &QCheckBox::stateChanged,
 #endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
@@ -173,7 +176,7 @@ void SettingsDialog::createWidgets() {
             _rememberLastConfiguration,
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             &QCheckBox::checkStateChanged,
-#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
+#else // ^^^^ >=6.7.0 // <6.7.0
             &QCheckBox::stateChanged,
 #endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
@@ -252,7 +255,7 @@ void SettingsDialog::createWidgets() {
             _bypassLauncher,
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             &QCheckBox::checkStateChanged,
-#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
+#else // ^^^^ >=6.7.0 // <6.7.0
             &QCheckBox::stateChanged,
 #endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
@@ -328,7 +331,7 @@ void SettingsDialog::createWidgets() {
             _mrf.isEnabled,
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             &QCheckBox::checkStateChanged,
-#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
+#else // ^^^^ >=6.7.0 // <6.7.0
             &QCheckBox::stateChanged,
 #endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {

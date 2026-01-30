@@ -6,7 +6,7 @@ local omm = asset.resource({
   Name = "Satellite OMM Data (Radar Calibration)",
   Type = "UrlSynchronization",
   Identifier = "satellite_omm_data_radar",
-  Url = "https://www.celestrak.com/NORAD/elements/gp.php?GROUP=radar&FORMAT=kvn",
+  Url = "http://www.celestrak.org/NORAD/elements/gp.php?GROUP=radar&FORMAT=kvn",
   Filename = "radar.txt",
   SecondsUntilResync = openspace.time.secondsPerDay()
 })

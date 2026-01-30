@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,13 +27,12 @@
 
 #include <openspace/util/task.h>
 
-#include <modules/gaia/rendering/octreeculler.h>
 #include <modules/gaia/rendering/octreemanager.h>
+#include <ghoul/glm.h>
 #include <filesystem>
+#include <vector>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class ConstructOctreeTask : public Task {
 public:

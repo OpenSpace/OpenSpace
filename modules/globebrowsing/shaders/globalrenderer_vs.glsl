@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,6 +51,11 @@ uniform dmat4 modelTransform;
   out vec3 positionWorldSpace;
 #endif // USE_ECLIPSE_SHADOWS
 
+#if SHADOW_MAPPING_ENABLED
+  out vec4 shadowCoords;
+  uniform dmat4 shadowMatrix;
+#endif // SHADOW_MAPPING_ENABLED
+
 uniform mat4 modelViewProjectionTransform;
 uniform mat4 modelViewTransform;
 uniform vec3 radiiSquared;
@@ -62,6 +67,14 @@ uniform float chunkMinHeight;
 
 uniform float distanceScaleFactor;
 uniform int chunkLevel;
+
+#define nDepthMaps #{nDepthMaps}
+#if nDepthMaps > 0
+  uniform dmat4 inv_vp;
+  uniform dmat4 light_vps[nDepthMaps];
+  uniform sampler2D light_depth_maps[nDepthMaps];
+  out vec4 positions_lightspace[nDepthMaps];
+#endif // nDepthMaps > 0
 
 struct PositionNormalPair {
   vec3 position;
@@ -135,4 +148,14 @@ void main() {
 #if USE_ECLIPSE_SHADOWS
   positionWorldSpace = vec3(modelTransform * dvec4(pair.position, 1.0));
 #endif // USE_ECLIPSE_SHADOWS
+
+#if SHADOW_MAPPING_ENABLED
+  shadowCoords = vec4(shadowMatrix * dvec4(pair.position, 1.0));
+#endif // SHADOW_MAPPING_ENABLED
+
+#if nDepthMaps > 0
+  for (int idx = 0; idx < nDepthMaps; idx++) {
+    positions_lightspace[idx] = vec4(light_vps[idx] * (inv_vp * dvec4(positionCameraSpace, 1.0)));
+  }
+#endif // nDepthMaps > 0
 }
