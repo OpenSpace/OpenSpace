@@ -225,6 +225,7 @@ RenderableKameleonVolume::RenderableKameleonVolume(const ghoul::Dictionary& dict
 
     _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(
         p.clipPlanes.value_or(ghoul::Dictionary())
+    );
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 

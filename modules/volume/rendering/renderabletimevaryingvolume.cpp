@@ -219,7 +219,6 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 
     addProperty(_brightness);
     addProperty(Fadeable::_opacity);
-
 }
 
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
@@ -233,14 +232,6 @@ void RenderableTimeVaryingVolume::initializeGL() {
     }
 
     namespace fs = std::filesystem;
-
-    // TODO refactor into datareader
-    int step = 0;
-    double deltaTimeStep = 0.0;
-    double startTime = 0.0;
-    volume::RawVolumeMetadata metadata;
-
-
     for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
         if (e.is_regular_file() && e.path().extension() == ".dictionary") {
             loadTimestepMetadata(e.path());
@@ -250,8 +241,6 @@ void RenderableTimeVaryingVolume::initializeGL() {
     // TODO: defer loading of data to later (separate thread or at least not when loading)
     for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
         Timestep& t = p.second;
-
-        // Read volume from file if it exists
         const std::string path = std::format(
             "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
         );
@@ -264,81 +253,52 @@ void RenderableTimeVaryingVolume::initializeGL() {
         for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
             data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
 
-            t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
-            for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-                t.histogram->add(data[i]);
-
-                t.texture = std::make_shared<ghoul::opengl::Texture>(
-                    t.metadata.dimensions,
-                    GL_TEXTURE_3D,
-                    ghoul::opengl::Texture::Format::Red,
-                    GL_RED,
-                    GL_FLOAT,
-                    ghoul::opengl::Texture::FilterMode::Linear,
-                    ghoul::opengl::Texture::WrappingMode::Clamp
-                );
-
-                t.texture->setPixelData(
-                    reinterpret_cast<void*>(data),
-                    ghoul::opengl::Texture::TakeOwnership::No
-                );
-                t.texture->uploadTexture();
-            }
-
-
-            _clipPlanes->initialize();
-
-            _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
-                nullptr,
-                _transferFunction,
-                _clipPlanes
-            );
-
-            _raycaster->initialize();
-            global::raycasterManager->attachRaycaster(*_raycaster);
-            onEnabledChange([this](bool enabled) {
-                if (enabled) {
-                    global::raycasterManager->attachRaycaster(*_raycaster);
-                }
-                else {
-                    global::raycasterManager->detachRaycaster(*_raycaster);
-                }
-            });
-
-            _triggerTimeJump.onChange([this]() { jumpToTimestep(_jumpToTimestep); });
-
-            _jumpToTimestep.onChange([this]() { jumpToTimestep(_jumpToTimestep); });
-
-            const int lastTimestep = !_volumeTimesteps.empty() ?
-                static_cast<int>(_volumeTimesteps.size() - 1) :
-                0;
-            _jumpToTimestep.setMaxValue(lastTimestep);
-
-            addProperty(_stepSize);
-            addProperty(_transferFunctionPath);
-            addProperty(_sourceDirectory);
-            addPropertySubOwner(_clipPlanes.get());
-
-            addProperty(_triggerTimeJump);
-            addProperty(_jumpToTimestep);
-            addProperty(_rNormalization);
-            addProperty(_rUpperBound);
-            addProperty(_gridType);
-
-            _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
-            _gridType.onChange([this] {
-                _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
-            });
-
-            _transferFunctionPath.onChange([this] {
-                _transferFunction = std::make_shared<openspace::TransferFunction>(
-                    _transferFunctionPath.value()
-                );
-                _raycaster->setTransferFunction(_transferFunction);
-            });
-
         }
+
+        t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
+        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
+            t.histogram->add(data[i]);
+        }
+        // TODO: handle normalization properly for different timesteps + transfer function
+
+        t.texture = std::make_shared<ghoul::opengl::Texture>(
+            t.metadata.dimensions,
+            GL_TEXTURE_3D,
+            ghoul::opengl::Texture::Format::Red,
+            GL_RED,
+            GL_FLOAT,
+            ghoul::opengl::Texture::FilterMode::Linear,
+            ghoul::opengl::Texture::WrappingMode::Clamp
+        );
+
+        t.texture->setPixelData(
+            reinterpret_cast<void*>(data),
+            ghoul::opengl::Texture::TakeOwnership::No
+        );
+        t.texture->uploadTexture();
     }
+
+    _clipPlanes->initialize();
+
+    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
+        nullptr,
+        _transferFunction,
+        _clipPlanes
+    );
+
+    _raycaster->initialize();
+    global::raycasterManager->attachRaycaster(*_raycaster);
+    onEnabledChange([this](bool enabled) {
+        if (enabled) {
+            global::raycasterManager->attachRaycaster(*_raycaster);
+        }
+        else {
+            global::raycasterManager->detachRaycaster(*_raycaster);
+        }
+    });
+
+    _triggerTimeJump.onChange([this]() { jumpToTimestep(_jumpToTimestep); });
+
 }
 
 void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::filesystem::path& path)
