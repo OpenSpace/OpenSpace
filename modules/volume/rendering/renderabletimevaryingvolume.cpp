@@ -252,7 +252,6 @@ void RenderableTimeVaryingVolume::initializeGL() {
         float* data = t.rawVolume->data();
         for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
             data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
-
         }
 
         t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
@@ -299,6 +298,35 @@ void RenderableTimeVaryingVolume::initializeGL() {
 
     _triggerTimeJump.onChange([this]() { jumpToTimestep(_jumpToTimestep); });
 
+    _jumpToTimestep.onChange([this]() { jumpToTimestep(_jumpToTimestep); });
+
+    const int lastTimestep = !_volumeTimesteps.empty() ?
+        static_cast<int>(_volumeTimesteps.size() - 1) :
+        0;
+    _jumpToTimestep.setMaxValue(lastTimestep);
+
+    addProperty(_stepSize);
+    addProperty(_transferFunctionPath);
+    addProperty(_sourceDirectory);
+    addPropertySubOwner(_clipPlanes.get());
+
+    addProperty(_triggerTimeJump);
+    addProperty(_jumpToTimestep);
+    addProperty(_rNormalization);
+    addProperty(_rUpperBound);
+    addProperty(_gridType);
+
+    _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
+    _gridType.onChange([this] {
+        _raycaster->setGridType(static_cast<VolumeGridType>(_gridType.value()));
+    });
+
+    _transferFunctionPath.onChange([this] {
+        _transferFunction = std::make_shared<openspace::TransferFunction>(
+            _transferFunctionPath.value()
+        );
+        _raycaster->setTransferFunction(_transferFunction);
+    });
 }
 
 void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::filesystem::path& path)

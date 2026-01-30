@@ -30,10 +30,8 @@
 
 namespace openspace::volume {
 
-
-
 VolumeClipPlanes::VolumeClipPlanes(const ghoul::Dictionary& dictionary)
-        : properties::PropertyOwner({ "" }) // @TODO Missing name
+    : properties::PropertyOwner({ "" }) // @TODO Missing name
     // @TODO Missing documentation
     , _nClipPlanes({ "nClipPlanes", "Number of clip planes", "" }, 0, 0, 10)
 {
