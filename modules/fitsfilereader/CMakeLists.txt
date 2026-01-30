@@ -48,11 +48,11 @@ create_new_module(
 )
 
 # CCfits is dependent on cfitsio, let it handle the internal linking
-add_subdirectory(ext/cfitsio SYSTEM)
+add_subdirectory(ext/cfitsio SYSTEM EXCLUDE_FROM_ALL)
 set_target_properties(cfitsio PROPERTIES FOLDER "External")
 set(cfitsio_BUILD_SHARED_LIBS OFF)
 
-add_subdirectory(ext/CCfits SYSTEM)
+add_subdirectory(ext/CCfits SYSTEM EXCLUDE_FROM_ALL)
 set_target_properties(CCfits PROPERTIES FOLDER "External")
 set(CCfits_BUILD_SHARED_LIBS OFF)
 
