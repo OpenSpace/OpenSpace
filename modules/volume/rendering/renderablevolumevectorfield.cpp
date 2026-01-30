@@ -41,22 +41,16 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableVectorField";
 
-    constexpr openspace::properties::Property::PropertyInfo StrideInfo = {
-        "Stride",
-        "Stride",
-        "The stride to use when downsampling the volume data."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo VectorFieldScaleInfo = {
-        "VectorFieldScale",
-        "Vector field scale",
-        "Scales the vector field lines using an exponetial scale between [10^2.5, 10^23]."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo VolumeDataInfo = {
         "VolumeFile",
         "Volume file",
         "The path to the file containing the volume data."
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo StrideInfo = {
+        "Stride",
+        "Stride",
+        "The stride to use when downsampling the volume data."
     };
 
     constexpr openspace::properties::Property::PropertyInfo MinDomainInfo = {
@@ -77,18 +71,17 @@ namespace {
         "The dimensions of the volume data."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo VectorFieldScaleInfo = {
+        "VectorFieldScale",
+        "Vector field scale",
+        "Scales the vector field lines using an exponetial scale between [10^2.5, 10^23]."
+    };
+
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "Specifies the line width of the trail lines, if the selected rendering method "
         "includes lines. If the rendering mode is Points, this value is ignored."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FilterOutOfRangeInfo = {
-        "FilterOutOfRange",
-        "Filter out of range",
-        "Determines whether other data values outside the value range should be visible "
-        "or filtered away."
     };
 
     constexpr openspace::properties::Property::PropertyInfo DataRangeInfo = {
@@ -98,11 +91,11 @@ namespace {
         "range will be filtered away."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MagnitudeDataRangeInfo = {
-        "MagnitudeDataRange",
-        "Magnitude data range",
-        "The computed magnitude data range used to normalize the magnitude value for "
-        "color lookup."
+    constexpr openspace::properties::Property::PropertyInfo FilterOutOfRangeInfo = {
+        "FilterOutOfRange",
+        "Filter out of range",
+        "Determines whether other data values outside the value range should be visible "
+        "or filtered away."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorByMagnitudeInfo = {
@@ -134,6 +127,13 @@ namespace {
         "the voxel should be visualized / discarded."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo MagnitudeDataRangeInfo = {
+        "MagnitudeDataRange",
+        "Magnitude data range",
+        "The computed magnitude data range used to normalize the magnitude value for "
+        "color lookup."
+    };
+
     struct [[codegen::Dictionary(RenderableVectorField)]] Parameters {
         // [[codegen::verbatim(VolumeDataInfo.description)]]
         std::filesystem::path volumeFile;
@@ -153,7 +153,7 @@ namespace {
         std::optional<glm::dvec2> dataRange;
         // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
         std::optional<bool> filterOutOfRange;
-        // [[codgen::verbatim(ColorByMagnitude.description)]]
+        // [[codgen::verbatim(ColorByMagnitudeInfo.description)]]
         std::optional<bool> colorByMagnitude;
         // [[codgen::verbatim(ColorTextureInfo.description)]]
         std::optional<std::filesystem::path> colorMapFile;
@@ -161,7 +161,6 @@ namespace {
         std::optional<bool> filterByLua;
         // [[codegen::verbatim(ScriptInfo.description)]]
         std::optional<std::filesystem::path> script;
-
     };
 
 #include "renderablevolumevectorfield_codegen.cpp"
@@ -602,11 +601,11 @@ void RenderableVectorField::computeFieldLinesParallel() {
                 _instances.begin(),
                 _instances.end(),
                 [this](const ArrowInstance& i) {
+                    // Get the filter function
                     lua_getglobal(_state, "filter");
-                    // First argument (x,y,z) is the position of the arrow (averaged)
+                    // First argument (x,y,z) is the averaged position of the arrow
                     ghoul::lua::push(_state, i.position);
-                    // Second argument (vx, vy, vz) is the direction of the voxel vector
-                    // (averaged)
+                    // Second argument (vx, vy, vz) is the averaged direction vector
                     ghoul::lua::push(_state, i.direction);
 
                     const int success = lua_pcall(_state, 2, 1, 0);
