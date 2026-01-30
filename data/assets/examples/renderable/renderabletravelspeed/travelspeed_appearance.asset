@@ -1,0 +1,36 @@
+-- Indicator Length and Width
+-- This example creates a light speed indicator where the length and width of the line
+-- have been adjusted for the indicator to be more visible across the large distance from
+-- Earth to Mars. The line will move according to the speed of light.
+
+local earthAsset = asset.require("scene/solarsystem/planets/earth/earth")
+local marsAsset = asset.require("scene/solarsystem/planets/mars/mars")
+
+local Node = {
+  Identifier = "RenderableTravelSpeed_Example_LengthAndWidth",
+  Parent = earthAsset.Earth.Identifier,
+  Renderable = {
+    Type = "RenderableTravelSpeed",
+    Target = marsAsset.Mars.Identifier,
+    -- Length in seconds, where 1 second = distance light travels in 1 second
+    IndicatorLength = 60.0,
+    -- Increase line width for visibility
+    LineWidth = 5.0,
+  },
+   GUI = {
+    Name = "RenderableTravelSpeed - Indicator Length and Width",
+    Path = "/Examples",
+    Description = [[
+      A light speed indicator from Earth to Mars. The indicator's length corresponds to
+      60 seconds of travel at the speed of light.
+    ]]
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
