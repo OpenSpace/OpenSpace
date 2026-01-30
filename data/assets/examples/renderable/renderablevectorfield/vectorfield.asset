@@ -1,0 +1,49 @@
+-- Basic
+-- This example creates a basic vector field visualization from a volumetric data file.
+--
+-- The vector field is defined on a regular 3D grid specified by `Dimensions`, and
+-- occupies the spatial domain defined by `MinDomain` and `MaxDomain`. The `Stride`
+-- parameter controls how densely vectors are sampled from the volume (a stride of 1
+-- renders every vector).
+--
+-- By default, vectors are colored according to their direction, similar to a 3D
+-- normal map:
+--  +X → Red,    -X → Cyan
+--  +Y → Green,  -Y → Magenta
+--  +Z → Blue,   -Z → Yellow
+
+-- Load the volume data from OpenSpace servers
+-- If you want to use your own volume, this block of code can be safely deleted
+local volume = asset.resource({
+  Name = "Vector Field - Basic",
+  Type = "HttpSynchronization",
+  Identifier = "vectorfield_volume",
+  Version = 1
+})
+
+local Node = {
+    Identifier = "RenderableVectorField_Example",
+    Renderable = {
+        Type = "RenderableVectorField",
+        VolumeFile = volume .. "vectorfield_16x16x16.bin",
+        -- Use the line below insted of the one above if you want to use your own volume
+        -- VolumeFile = "C:/path/to/volume.bin",
+
+        Stride = 1,
+        MinDomain = { -5000, -5000, -5000 },
+        MaxDomain = { 5000, 5000, 5000 },
+        Dimensions = { 16, 16, 16 }
+    },
+    GUI = {
+        Name = "RenderableVectorField - Basic",
+        Path = "/Examples"
+    }
+}
+
+asset.onInitialize(function()
+    openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+    openspace.removeSceneGraphNode(Node)
+end)
