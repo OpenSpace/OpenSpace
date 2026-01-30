@@ -63,17 +63,16 @@ public:
 
    ~RenderableVectorField() override = default;
 
+   void initialize() override;
    void initializeGL() override;
    void deinitializeGL() override;
 
    bool isReady() const override;
 
-
    void render(const RenderData& data, RendererTasks& renderTask) override;
    void update(const UpdateData& data) override;
 
    static documentation::Documentation Documentation();
-
 
 private:
     void computeFieldLinesParallel();
@@ -130,7 +129,6 @@ private:
         {0.8f,-0.1f, 0.0f}
     };
 };
-
 
 } // namespace openspace::volume
 

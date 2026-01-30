@@ -222,8 +222,8 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
 
     if (p.script.has_value()) {
         _luaScriptFile = p.script.value().string();
-        // Subscribe to changes in the Lua script file, @TODO can this be combined with the
-        // code below?
+        // Subscribe to changes in the Lua script file, @TODO can this be combined with
+        // the duplicate code below?
         _luaScriptFileHandle =
             std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value()
         );
@@ -262,8 +262,7 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     global::scriptEngine->initializeLuaState(_state);
 }
 
-void RenderableVectorField::initializeGL()
-{
+void RenderableVectorField::initialize() {
     std::filesystem::path dataFile = absPath(_sourceFile);
     if (!std::filesystem::is_regular_file(dataFile)) {
         throw ghoul::RuntimeError(std::format("Could not load data file '{}'", dataFile));
@@ -285,7 +284,10 @@ void RenderableVectorField::initializeGL()
 
     computeFieldLinesParallel();
     _vectorFieldIsDirty = false;
+}
 
+void RenderableVectorField::initializeGL()
+{
     _program = global::renderEngine->buildRenderProgram(
         "vectorfield",
         absPath("${MODULE_VOLUME}/shaders/vectorfield_vs.glsl"),
@@ -603,21 +605,11 @@ void RenderableVectorField::computeFieldLinesParallel() {
                     lua_getglobal(_state, "filter");
                     // First argument (x,y,z) is the position of the arrow (averaged)
                     ghoul::lua::push(_state, i.position);
-                    // Second argument (vx, vy, vz) is the direction of the voxel vector (averaged)
+                    // Second argument (vx, vy, vz) is the direction of the voxel vector
+                    // (averaged)
                     ghoul::lua::push(_state, i.direction);
 
                     const int success = lua_pcall(_state, 2, 1, 0);
-
-                    //    // First argument (x,y,z) is the position of the arrow (averaged)
-                    //    ghoul::lua::push(_state, i.position.x);
-                    //    ghoul::lua::push(_state, i.position.y);
-                    //    ghoul::lua::push(_state, i.position.z);
-                    //    // Second argument (vx, vy, vz) is the direction of the voxel vector (averaged)
-                    //    ghoul::lua::push(_state, i.direction.x);
-                    //    ghoul::lua::push(_state, i.direction.y);
-                    //    ghoul::lua::push(_state, i.direction.z);
-
-                    //    const int success = lua_pcall(_state, 6, 1, 0);
 
                     if (success != 0) {
                         LERROR(
