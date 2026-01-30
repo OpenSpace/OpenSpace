@@ -51,7 +51,6 @@ set(HEADER_FILES
   rendering/volumeclipplanes.h
   tasks/generaterawvolumetask.h
   tasks/generaterawvolumefromfiletask.h
-  xmlreader.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -75,7 +74,6 @@ set(SOURCE_FILES
   rendering/volumeclipplanes.cpp
   tasks/generaterawvolumetask.cpp
   tasks/generaterawvolumefromfiletask.cpp
-  xmlreader.cpp
 )
 
 source_group("Source Files" FILES ${SOURCE_FILES})
@@ -87,7 +85,3 @@ create_new_module(
   ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-# This introduces a dependency into SGCT, but the way it is handled is not great right now
-# This will break when we remove tinyxml2 from SGCT and then we can move the submodule
-# over into this ext folder and fix it well
-target_link_libraries(${volume_module} PRIVATE tinyxml2)

@@ -141,8 +141,6 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
     program.setUniform("brightness_" + id, brightness());
     program.setUniform("rNormalization_" + id, _rNormalization);
     program.setUniform("rUpperBound_" + id, _rUpperBound);
-    program.setUniform("valueRange_" + id, _valueRange);
-    program.setUniform("hideOutsideRange_" + id, _hideOutsideRange);
 }
 
 void BasicVolumeRaycaster::postRaycast(const RaycastData&, ghoul::opengl::ProgramObject&)
@@ -234,14 +232,6 @@ void BasicVolumeRaycaster::setGridType(VolumeGridType gridType) {
 
 void BasicVolumeRaycaster::setModelTransform(glm::mat4 transform) {
     _modelTransform = std::move(transform);
-}
-
-void BasicVolumeRaycaster::setValueRange(glm::vec2 range) {
-    _valueRange = range;
-}
-
-void BasicVolumeRaycaster::setHideOutsideRange(bool value) {
-    _hideOutsideRange = value;
 }
 
 } // namespace openspace::volume

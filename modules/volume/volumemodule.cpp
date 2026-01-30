@@ -26,7 +26,6 @@
 
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
 #include <modules/volume/rendering/renderablevolumevectorfield.h>
-#include <modules/volume/rendering/volumeclipplane.h>
 #include <modules/volume/tasks/generaterawvolumetask.h>
 #include <modules/volume/tasks/generaterawvolumefromfiletask.h>
 #include <openspace/documentation/documentation.h>
@@ -63,7 +62,6 @@ std::vector<documentation::Documentation> VolumeModule::documentations() const {
         RenderableTimeVaryingVolume::Documentation(),
         RenderableVectorField::Documentation(),
         GenerateRawVolumeTask::Documentation(),
-        VolumeClipPlane::Documentation()
     };
 }
 

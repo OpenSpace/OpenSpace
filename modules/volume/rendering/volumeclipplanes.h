@@ -32,13 +32,12 @@
 #include <ghoul/glm.h>
 
 namespace ghoul { class Dictionary; }
-namespace documentation { struct Documentation; }
 
 namespace openspace::volume {
 
 class VolumeClipPlanes : public properties::PropertyOwner {
 public:
-    explicit VolumeClipPlanes(const std::vector<ghoul::Dictionary>& planes);
+    explicit VolumeClipPlanes(const ghoul::Dictionary& dictionary);
     ~VolumeClipPlanes() override = default;
 
     void initialize();
@@ -48,7 +47,7 @@ public:
 
 private:
     properties::IntProperty _nClipPlanes;
-    std::vector<std::unique_ptr<VolumeClipPlane>> _clipPlanes;
+    std::vector<VolumeClipPlane> _clipPlanes;
 };
 
 } // namespace openspace::volume

@@ -55,12 +55,9 @@ namespace {
 
 namespace openspace::volume {
 
-documentation::Documentation VolumeClipPlane::Documentation() {
-    return codegen::doc<Parameters>("volume_volumeclipplane");
-}
 
 VolumeClipPlane::VolumeClipPlane(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "" }) // Name set from parent
+    : properties::PropertyOwner({ "" }) // @TODO Missing name
     , _normal(
         NormalInfo,
         glm::vec3(1.f, 0.f, 0.f),

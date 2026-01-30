@@ -33,17 +33,9 @@
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec3property.h>
 #include <openspace/rendering/transferfunction.h>
-#include <ghoul/opengl/uniformcache.h>
 #include <filesystem>
 #include <memory>
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class TextureUnit;
-} // namespace ghoul::opengl
 
 namespace openspace { class Histogram; }
 
@@ -75,7 +67,6 @@ private:
         std::shared_ptr<RawVolume<float>> rawVolume;
         std::shared_ptr<ghoul::opengl::Texture> texture;
         std::shared_ptr<Histogram> histogram;
-        std::vector<float> rawData;
     };
 
     Timestep* currentTimestep();
@@ -83,23 +74,10 @@ private:
     Timestep* timestepFromIndex(int target);
     void jumpToTimestep(int target);
 
-    void loadTimestepMetadata(const std::filesystem::path& path, float& globalMin,
-        float& globalMax);
-
-    glm::mat4 calculateModelTransform();
-    void createPlane() const;
-    void renderVolumeSlice(const RenderData& data);
-
-    void loadVtiFromCache(const std::filesystem::path& cached, double timestep,
-        RawVolumeMetadata& metadata, Timestep& t, float& globalMin, float& globalMax);
-    void loadVti(const std::filesystem::path& path, double timestep, Timestep& t,
-        float& globalMin, float& globalMax, const RawVolumeMetadata& metadata);
-    void saveVtiCache(const std::filesystem::path& cached,
-        const std::vector<float>& scalars);
+    void loadTimestepMetadata(const std::filesystem::path& path);
 
     properties::OptionProperty _gridType;
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
-
 
     properties::FloatProperty _stepSize;
     properties::FloatProperty _brightness;
@@ -112,33 +90,10 @@ private:
 
     properties::TriggerProperty _triggerTimeJump;
     properties::IntProperty _jumpToTimestep;
-    properties::Vec2Property _valueRange;
-    properties::BoolProperty _hideOutsideRange;
 
     std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
     bool _invertDataAtZ;
-    bool _useCaching = true;
-
-    struct VolumeSliceSettings : properties::PropertyOwner {
-        VolumeSliceSettings();
-
-        properties::Vec3Property normal;
-        properties::FloatProperty offset;
-        properties::BoolProperty shouldRenderSlice;
-    };
-
-    VolumeSliceSettings _volumeSlice;
-
-    bool _slicePlaneIsDirty = true;
-    glm::mat3 _basisTransform = glm::mat3(1.0f);
-
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
-    ghoul::opengl::ProgramObject* _shader = nullptr;
-    UniformCache(normal, offset, basis, volumeTexture, transferFunction, modelTransform,
-        modelViewTransform, modelViewProjection, volumeResolution, valueRange)
-        _uniformCache;
 
     std::shared_ptr<openspace::TransferFunction> _transferFunction;
 };

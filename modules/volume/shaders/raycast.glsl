@@ -31,9 +31,6 @@ uniform int nClips_#{id};
 uniform vec3 clipNormals_#{id}[8];
 uniform vec2 clipOffsets_#{id}[8];
 
-uniform vec2 valueRange_#{id};
-uniform bool hideOutsideRange_#{id};
-
 uniform float brightness_#{id} = 1.0;
 // unitless factor that multiplies with the brightness [0,1] to achieve desired visuals.
 const float SamplingIntervalReferenceFactor = 500.0;
@@ -73,31 +70,11 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
   if (clipAlpha > 0) {
     float val = texture(volumeTexture_#{id}, transformedPos).r;
 
-    float minVal = valueRange_#{id}.x;
-    float diff = valueRange_#{id}.y - valueRange_#{id}.x;
-
-    val = (val - minVal) / diff;
-
     if (rNormalization_#{id} > 0 && gridType_#{id} == 1) {
       val *= pow(transformedPos.x, rNormalization_#{id});
     }
 
     vec4 color = texture(transferFunction_#{id}, val);
-
-    // Apply an alpha falloff using eq: e^(-((x*2-1)^(p)+(y*2-1)^(p)) * p), a large value
-    // of p results in a square shape, a value of 2 resulsts in a circle
-    if(hideOutsideRange_#{id}) {
-      const float e = 2.71828;
-      float p = 400;
-      float scale = 1.05; // Scaling the cube further to reduce the impact on the edges
-      float x  = (transformedPos.x * 2 - 1) * scale;
-      float y = (transformedPos.y * 2 - 1) * scale;
-      float z = (transformedPos.z * 2 -1) * scale;
-
-      float v = pow(e, -(pow(abs(x), p) + pow(abs(y), p) + pow(abs(z), p)) * p);
-      color.a *= v;
-      // color = vec4(v, 0, 0, 0.5);
-    }
 
     vec3 backColor = color.rgb;
     vec3 backAlpha = color.aaa;

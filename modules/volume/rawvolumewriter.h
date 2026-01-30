@@ -43,7 +43,6 @@ public:
     void write(const std::function<VoxelType(const glm::uvec3&)>& fn,
         const std::function<void(float)>& onProgress = [](float) {});
     void write(const RawVolume<VoxelType>& volume);
-    void write(const std::vector<VoxelType>& data) const;
 
     size_t coordsToIndex(const glm::uvec3& coords) const;
     glm::ivec3 indexToCoords(size_t linear) const;
