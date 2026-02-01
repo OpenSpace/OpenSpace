@@ -31,12 +31,12 @@ flat in vec3 ge_velocity;
 flat in float ge_speed;
 flat in float gs_screenSpaceDepth;
 
-uniform sampler1D colorTexture;
+layout(bindless_sampler) uniform sampler1D colorTexture;
 layout(bindless_sampler) uniform sampler2D glareTexture;
 uniform float opacity;
 uniform vec3 fixedColor;
 uniform int colorOption;
-uniform sampler1D otherDataTexture;
+layout(bindless_sampler) uniform sampler1D otherDataTexture;
 uniform vec2 otherDataRange;
 uniform bool filterOutOfRange;
 

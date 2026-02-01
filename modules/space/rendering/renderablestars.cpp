@@ -736,8 +736,6 @@ void RenderableStars::deinitializeGL() {
 void RenderableStars::loadPSFTexture() {
     auto markPsfTextureAsDirty = [this]() { _pointSpreadFunctionTextureIsDirty = true; };
     auto loadTexture = [markPsfTextureAsDirty](TextureComponent& component) {
-        using Texture = ghoul::opengl::Texture;
-
         component.texture = nullptr;
         const std::string path = component.texturePath;
         if (path.empty() || !std::filesystem::exists(path)) {
@@ -746,9 +744,9 @@ void RenderableStars::loadPSFTexture() {
 
         std::unique_ptr<ghoul::opengl::Texture> t =
             ghoul::io::TextureReader::ref().loadTexture(absPath(path), 2);
-        t->setWrapping(Texture::WrappingMode::ClampToBorder);
+        t->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
         t->setBorderColor(glm::vec4(0.f));
-        t->setFilter(Texture::FilterMode::AnisotropicMipMap);
+        t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
 
         component.texture = std::make_unique<ghoul::opengl::NewTexture>(*t);
 
@@ -759,13 +757,6 @@ void RenderableStars::loadPSFTexture() {
         }
 
         LDEBUG(std::format("Loaded texture from '{}'", absPath(component.texturePath)));
-        //component.texture->uploadTexture();
-        //component.texture->setWrapping(Texture::WrappingMode::ClampToBorder);
-
-        //constexpr std::array<float, 4> border = { 0.f, 0.f, 0.f, 0.f };
-        //glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border.data());
-        //component.texture->setFilter(Texture::FilterMode::AnisotropicMipMap);
-
         component.texture->makeResident();
 
         component.file = std::make_unique<ghoul::filesystem::File>(path);
@@ -852,22 +843,16 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     }
     _program->setUniform(_uniformCache.hasCore, _core.texture != nullptr);
 
-    ghoul::opengl::TextureUnit colorUnit;
     if (_colorTexture) {
-        colorUnit.activate();
-        _colorTexture->bind();
-        _program->setUniform(_uniformCache.colorTexture, colorUnit);
+        _program->setUniform(_uniformCache.colorTexture, *_colorTexture);
     }
 
-    ghoul::opengl::TextureUnit otherDataUnit;
     if (_colorOption == ColorOption::OtherData && _otherDataColorMapTexture) {
-        otherDataUnit.activate();
-        _otherDataColorMapTexture->bind();
-        _program->setUniform(_uniformCache.otherDataTexture, otherDataUnit);
+        _program->setUniform(_uniformCache.otherDataTexture, *_otherDataColorMapTexture);
     }
     else {
         // We need to set the uniform to something, or the shader doesn't work
-        _program->setUniform(_uniformCache.otherDataTexture, colorUnit);
+        _program->setUniform(_uniformCache.otherDataTexture, *_colorTexture);
     }
     // Same here, if we don't set this value, the rendering disappears even if we don't
     // use this color mode --- abock 2018-11-19
@@ -1040,14 +1025,17 @@ void RenderableStars::update(const UpdateData&) {
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
-            _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath),
-                1
-            );
-            if (_colorTexture) {
-                LDEBUG(std::format("Loaded texture '{}'", _colorTexturePath.value()));
-                _colorTexture->uploadTexture();
-            }
+            std::unique_ptr<ghoul::opengl::Texture> t =
+                ghoul::io::TextureReader::ref().loadTexture(
+                    absPath(_colorTexturePath),
+                    1
+                );
+
+            _colorTexture = std::make_unique<ghoul::opengl::NewTexture>(*t);
+            t = nullptr;
+
+            LDEBUG(std::format("Loaded texture '{}'", _colorTexturePath.value()));
+            _colorTexture->makeResident();
 
             _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
                 _colorTexturePath.value()
@@ -1061,16 +1049,17 @@ void RenderableStars::update(const UpdateData&) {
         LDEBUG("Reloading Color Texture");
         _otherDataColorMapTexture = nullptr;
         if (!_otherDataColorMapPath.value().empty()) {
-            _otherDataColorMapTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_otherDataColorMapPath),
-                1
-            );
-            if (_otherDataColorMapTexture) {
-                LDEBUG(std::format(
-                    "Loaded texture '{}'", _otherDataColorMapPath.value()
-                ));
-                _otherDataColorMapTexture->uploadTexture();
-            }
+            std::unique_ptr<ghoul::opengl::Texture> t =
+                ghoul::io::TextureReader::ref().loadTexture(
+                    absPath(_otherDataColorMapPath),
+                    1
+                );
+
+            _otherDataColorMapTexture = std::make_unique<ghoul::opengl::NewTexture>(*t);
+            LDEBUG(std::format(
+                "Loaded texture '{}'", _otherDataColorMapPath.value()
+            ));
+            _otherDataColorMapTexture->makeResident();
         }
         _otherDataColorMapIsDirty = false;
 
