@@ -1999,7 +1999,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         // Generate Framebuffer Object and Texture.
         if (_fbo == 0) {
-            glGenFramebuffers(1, &_fbo);
+            glCreateFramebuffers(1, &_fbo);
             LDEBUG(std::format("Generating Framebuffer Object id '{}'", _fbo));
         }
         if (!_fboTexture) {
@@ -2018,22 +2018,16 @@ void RenderableGaiaStars::update(const UpdateData&) {
             LDEBUG("Generating Framebuffer Texture");
         }
         // Bind render texture to FBO.
-        glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
         glBindTexture(GL_TEXTURE_2D, *_fboTexture);
-        glFramebufferTexture(
-            GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT0,
-            *_fboTexture,
-            0
-        );
+        glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_fboTexture, 0);
         const GLenum textureBuffer = GL_COLOR_ATTACHMENT0;
-        glDrawBuffers(1, &textureBuffer);
+        glNamedFramebufferDrawBuffers(_fbo, 1, &textureBuffer);
 
         // Check that our framebuffer is ok.
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        const GLenum status = glCheckNamedFramebufferStatus(_fbo, GL_FRAMEBUFFER);
+        if (status != GL_FRAMEBUFFER_COMPLETE) {
             LERROR("Error when generating GaiaStar Framebuffer");
         }
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         _buffersAreDirty = false;
     }
@@ -2110,22 +2104,16 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _fboTexture->uploadTexture();
             LDEBUG("Re-Generating Gaia Framebuffer Texture");
 
-            glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
             glBindTexture(GL_TEXTURE_2D, *_fboTexture);
-            glFramebufferTexture(
-                GL_FRAMEBUFFER,
-                GL_COLOR_ATTACHMENT0,
-                *_fboTexture,
-                0
-            );
+            glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_fboTexture, 0);
             const GLenum textureBuffer = GL_COLOR_ATTACHMENT0;
-            glDrawBuffers(1, &textureBuffer);
+            glNamedFramebufferDrawBuffers(_fbo, 1, &textureBuffer);
 
             // Check that our framebuffer is ok.
-            if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+            const GLenum status = glCheckNamedFramebufferStatus(_fbo, GL_FRAMEBUFFER);
+            if (status != GL_FRAMEBUFFER_COMPLETE) {
                 LERROR("Error when re-generating GaiaStar Framebuffer");
             }
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
         }
     }
 }

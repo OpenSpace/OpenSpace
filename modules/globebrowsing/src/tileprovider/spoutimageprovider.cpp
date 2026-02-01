@@ -68,7 +68,7 @@ SpoutImageProvider::SpoutImageProvider(
     spoutReceiver->onUpdateTexture([this](int width, int height) {
         for (int i = 0; i < 2; i++) {
             if (!fbo[i]) {
-                glGenFramebuffers(1, &fbo[i]);
+                glCreateFramebuffers(1, &fbo[i]);
             }
             tileTexture[i].release();
             tileTexture[i] = std::make_unique<ghoul::opengl::Texture>(
@@ -105,27 +105,26 @@ SpoutImageProvider::SpoutImageProvider(
 
 
     spoutReceiver->onUpdateReceiver([this](int width, int height, unsigned int texture) {
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo[0]);
-        glFramebufferTexture2D(
-            GL_READ_FRAMEBUFFER,
+        glNamedFramebufferTexture(
+            fbo[0],
             GL_COLOR_ATTACHMENT0,
-            GL_TEXTURE_2D,
             static_cast<GLuint>(texture),
             0
         );
-        glReadBuffer(GL_COLOR_ATTACHMENT0);
+        glNamedFramebufferReadBuffer(fbo[0], GL_COLOR_ATTACHMENT0);
 
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo[1]);
-        glFramebufferTexture2D(
-            GL_DRAW_FRAMEBUFFER,
+        glNamedFramebufferTexture(
+            fbo[1],
             GL_COLOR_ATTACHMENT1,
-            GL_TEXTURE_2D,
             static_cast<GLuint>(*tileTexture[0]),
             0
         );
-        glDrawBuffer(GL_COLOR_ATTACHMENT1);
+        glNamedFramebufferDrawBuffer(fbo[1], GL_COLOR_ATTACHMENT1);
 
-        glBlitFramebuffer(
+        glBlitNamedFramebuffer(
+            fbo[0],
+            fbo[1],
             width / 2,
             0,
             width,
@@ -137,14 +136,15 @@ SpoutImageProvider::SpoutImageProvider(
             GL_COLOR_BUFFER_BIT,
             GL_NEAREST
         );
-        glFramebufferTexture2D(
-            GL_DRAW_FRAMEBUFFER,
+        glNamedFramebufferTexture(
+            fbo[1],
             GL_COLOR_ATTACHMENT1,
-            GL_TEXTURE_2D,
             static_cast<GLuint>(*tileTexture[1]),
             0
         );
-        glBlitFramebuffer(
+        glBlitNamedFramebuffer(
+            fbo[0],
+            fbo[1],
             0,
             0,
             width / 2,

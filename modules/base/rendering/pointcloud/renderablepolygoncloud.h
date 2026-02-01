@@ -46,7 +46,6 @@ private:
     void initializeCustomTexture() override;
     void renderToTexture(GLuint textureToRenderTo, GLuint textureWidth,
         GLuint textureHeight);
-    void renderPolygonGeometry(GLuint vao) const;
 
     int _nPolygonSides = 3;
 

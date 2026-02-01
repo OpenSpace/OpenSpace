@@ -560,8 +560,7 @@ void ScreenSpaceInsetBlackout::initializeGL() {
     );
 
     // Setup FBO & Texture (UHD resolution)
-    glGenFramebuffers(1, &_fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    glCreateFramebuffers(1, &_fbo);
 
     _blackoutTexture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(BlackoutTextureSize, 1),
@@ -585,18 +584,11 @@ void ScreenSpaceInsetBlackout::initializeGL() {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D,
-        *_blackoutTexture,
-        0
-    );
+    glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_blackoutTexture, 0);
 
     _blackoutTexture->purgeFromRAM();
 
     glBindTexture(GL_TEXTURE_2D, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     _uniformCache.color = _fboProgram->uniformLocation("color");
 
