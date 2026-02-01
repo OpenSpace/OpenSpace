@@ -762,9 +762,7 @@ void RenderableModel::initializeGL() {
         0
     );
 
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_FRAMEBUFFER, _framebuffer, -1, "RenderableModel Framebuffer");
-    }
+    glObjectLabel(GL_FRAMEBUFFER, _framebuffer, -1, "RenderableModel Framebuffer");
 
     // Check status
     const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);

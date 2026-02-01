@@ -195,9 +195,7 @@ namespace {
             GL_FLOAT,
             nullptr
         );
-        if (glbinding::Binding::ObjectLabel.isResolved()) {
-            glObjectLabel(GL_TEXTURE, t, static_cast<GLsizei>(name.size()), name.data());
-        }
+        glObjectLabel(GL_TEXTURE, t, static_cast<GLsizei>(name.size()), name.data());
         return t;
     }
 
@@ -226,9 +224,7 @@ namespace {
             GL_FLOAT,
             nullptr
         );
-        if (glbinding::Binding::ObjectLabel.isResolved()) {
-            glObjectLabel(GL_TEXTURE, t, static_cast<GLsizei>(name.size()), name.data());
-        }
+        glObjectLabel(GL_TEXTURE, t, static_cast<GLsizei>(name.size()), name.data());
         return t;
     }
 } // namespace
