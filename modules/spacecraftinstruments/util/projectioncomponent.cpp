@@ -450,26 +450,30 @@ void ProjectionComponent::imageProjectBegin() {
             generateDepthTexture(_textureSize);
         }
 
-        auto copyFramebuffers = [](Texture* src, Texture* dst, const std::string& msg) {
-            glFramebufferTexture(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, *src, 0);
+        auto copyFramebuffers = [](GLuint srcFbo, Texture* src, GLuint dstFbo,
+                                   Texture* dst, const std::string& msg)
+        {
+            glNamedFramebufferTexture(srcFbo, GL_COLOR_ATTACHMENT0, *src, 0);
 
-            GLenum status = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
-            if (!FramebufferObject::errorChecking(status).empty()) {
+            GLenum status = glCheckNamedFramebufferStatus(srcFbo, GL_FRAMEBUFFER);
+            if (status != GL_FRAMEBUFFER_COMPLETE) {
                 LERROR(std::format(
                     "Read Buffer ({}): {}", msg, FramebufferObject::errorChecking(status)
                 ));
             }
 
-            glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, *dst, 0);
+            glNamedFramebufferTexture(dstFbo, GL_COLOR_ATTACHMENT0, *dst, 0);
 
-            status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-            if (!FramebufferObject::errorChecking(status).empty()) {
+            status = glCheckNamedFramebufferStatus(dstFbo, GL_FRAMEBUFFER);
+            if (status != GL_FRAMEBUFFER_COMPLETE) {
                 LERROR(std::format(
                     "Draw Buffer ({}): {}", msg, FramebufferObject::errorChecking(status)
                 ));
             }
 
-            glBlitFramebuffer(
+            glBlitNamedFramebuffer(
+                srcFbo,
+                dstFbo,
                 0, 0,
                 src->dimensions().x, src->dimensions().y,
                 0, 0,
@@ -479,26 +483,30 @@ void ProjectionComponent::imageProjectBegin() {
             );
         };
 
-        auto copyDepthBuffer = [](Texture* src, Texture* dst, const std::string& msg) {
-            glFramebufferTexture(GL_READ_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, *src, 0);
+        auto copyDepthBuffer = [](GLuint srcFbo, Texture* src, GLuint dstFbo,
+                                  Texture* dst, const std::string& msg)
+        {
+            glNamedFramebufferTexture(srcFbo, GL_DEPTH_ATTACHMENT, *src, 0);
 
-            GLenum status = glCheckFramebufferStatus(GL_READ_FRAMEBUFFER);
-            if (!FramebufferObject::errorChecking(status).empty()) {
+            GLenum status = glCheckNamedFramebufferStatus(srcFbo, GL_FRAMEBUFFER);
+            if (status != GL_FRAMEBUFFER_COMPLETE) {
                 LERROR(std::format(
                     "Read Buffer ({}): {}", msg, FramebufferObject::errorChecking(status)
                 ));
             }
 
-            glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, *dst, 0);
+            glNamedFramebufferTexture(dstFbo, GL_DEPTH_ATTACHMENT, *dst, 0);
 
-            status = glCheckFramebufferStatus(GL_DRAW_FRAMEBUFFER);
-            if (!FramebufferObject::errorChecking(status).empty()) {
+            status = glCheckNamedFramebufferStatus(dstFbo, GL_FRAMEBUFFER);
+            if (status != GL_FRAMEBUFFER_COMPLETE) {
                 LERROR(std::format(
                     "Draw Buffer ({}): {}", msg, FramebufferObject::errorChecking(status)
                 ));
             }
 
-            glBlitFramebuffer(
+            glBlitNamedFramebuffer(
+                srcFbo,
+                dstFbo,
                 0, 0,
                 src->dimensions().x, src->dimensions().y,
                 0, 0,
@@ -508,74 +516,70 @@ void ProjectionComponent::imageProjectBegin() {
             );
         };
 
-        std::array<GLuint, 3> fbos;
-        glGenFramebuffers(2, fbos.data());
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbos[0]);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbos[1]);
+        std::array<GLuint, 2> fbos;
+        glCreateFramebuffers(2, fbos.data());
 
         copyFramebuffers(
+            fbos[0],
             oldProjectionTexture.get(),
+            fbos[1],
             _projectionTexture.get(),
             "Projection"
         );
 
         if (_dilation.isEnabled) {
             copyFramebuffers(
+                fbos[0],
                 oldDilationStencil.get(),
+                fbos[1],
                 _dilation.stencilTexture.get(),
                 "Dilation Stencil"
             );
 
             copyFramebuffers(
+                fbos[0],
                 oldDilationTexture.get(),
+                fbos[1],
                 _dilation.texture.get(),
                 "Dilation Texture"
             );
         }
 
         if (_shadowing.isEnabled) {
-            copyDepthBuffer(oldDepthTexture.get(), _shadowing.texture.get(), "Shadowing");
+            copyDepthBuffer(
+                fbos[0],
+                oldDepthTexture.get(),
+                fbos[1],
+                _shadowing.texture.get(),
+                "Shadowing"
+            );
         }
 
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
         glDeleteFramebuffers(2, fbos.data());
 
-        glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-        glFramebufferTexture2D(
-            GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT0,
-            GL_TEXTURE_2D,
-            *_projectionTexture,
-            0
-        );
+        glNamedFramebufferTexture(_fboID, GL_COLOR_ATTACHMENT0, *_projectionTexture, 0);
 
         if (_dilation.isEnabled) {
             // We only need the stencil texture if we need to dilate
-            glFramebufferTexture2D(
-                GL_FRAMEBUFFER,
+            glNamedFramebufferTexture(
+                _fboID,
                 GL_COLOR_ATTACHMENT1,
-                GL_TEXTURE_2D,
                 *_dilation.stencilTexture,
                 0
             );
 
-            glBindFramebuffer(GL_FRAMEBUFFER, _dilation.fbo);
-            glFramebufferTexture2D(
-                GL_FRAMEBUFFER,
+            glNamedFramebufferTexture(
+                _dilation.fbo,
                 GL_COLOR_ATTACHMENT0,
-                GL_TEXTURE_2D,
                 *_dilation.texture,
                 0
             );
         }
 
         if (_shadowing.isEnabled) {
-            glBindFramebuffer(GL_FRAMEBUFFER, _depthFboID);
-            glFramebufferTexture2D(
-                GL_FRAMEBUFFER,
+            glNamedFramebufferTexture(
+                _depthFboID,
                 GL_DEPTH_ATTACHMENT,
-                GL_TEXTURE_2D,
                 *_shadowing.texture,
                 0
             );
@@ -670,48 +674,20 @@ void ProjectionComponent::update() const {
 }
 
 bool ProjectionComponent::depthRendertarget() {
-    GLint defaultFBO = 0;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-    // setup FBO
-    glGenFramebuffers(1, &_depthFboID);
-    glBindFramebuffer(GL_FRAMEBUFFER, _depthFboID);
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER,
-        GL_DEPTH_ATTACHMENT,
-        GL_TEXTURE_2D,
-        *_shadowing.texture,
-        0
-    );
+    glCreateFramebuffers(1, &_depthFboID);
+    glNamedFramebufferTexture(_depthFboID, GL_DEPTH_ATTACHMENT, *_shadowing.texture, 0);
+    glNamedFramebufferDrawBuffer(_depthFboID, GL_NONE);
 
-    glDrawBuffer(GL_NONE);
-
-    const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
-    if (status != GL_FRAMEBUFFER_COMPLETE) {
-        return false;
-    }
-
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    return true;
+    const GLenum status = glCheckNamedFramebufferStatus(_depthFboID, GL_FRAMEBUFFER);
+    return status == GL_FRAMEBUFFER_COMPLETE;
 }
 
 bool ProjectionComponent::auxiliaryRendertarget() {
     bool completeSuccess = true;
 
-    GLint defaultFBO = 0;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
-
-    // setup FBO
-    glGenFramebuffers(1, &_fboID);
-    glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D,
-        *_projectionTexture,
-        0
-    );
-    // check FBO status
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    glCreateFramebuffers(1, &_fboID);
+    glNamedFramebufferTexture(_fboID, GL_COLOR_ATTACHMENT0, *_projectionTexture, 0);
+    GLenum status = glCheckNamedFramebufferStatus(_fboID, GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Main Framebuffer incomplete");
         completeSuccess &= false;
@@ -720,41 +696,35 @@ bool ProjectionComponent::auxiliaryRendertarget() {
 
     if (_dilation.isEnabled) {
         // We only need the stencil texture if we need to dilate
-        glFramebufferTexture2D(
-            GL_FRAMEBUFFER,
+        glNamedFramebufferTexture(
+            _fboID,
             GL_COLOR_ATTACHMENT1,
-            GL_TEXTURE_2D,
             *_dilation.stencilTexture,
             0
         );
 
         // check FBO status
-        status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        status = glCheckNamedFramebufferStatus(_fboID, GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             LERROR("Main Framebuffer incomplete");
             completeSuccess &= false;
         }
 
-        glGenFramebuffers(1, &_dilation.fbo);
-        glBindFramebuffer(GL_FRAMEBUFFER, _dilation.fbo);
-        glFramebufferTexture2D(
-            GL_FRAMEBUFFER,
+        glCreateFramebuffers(1, &_dilation.fbo);
+        glNamedFramebufferTexture(
+            _dilation.fbo,
             GL_COLOR_ATTACHMENT0,
-            GL_TEXTURE_2D,
             *_dilation.texture,
             0
         );
 
         // check FBO status
-        status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        status = glCheckNamedFramebufferStatus(_dilation.fbo, GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             LERROR("Dilation Framebuffer incomplete");
             completeSuccess &= false;
         }
     }
-
-    // switch back to window-system-provided framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 
     return completeSuccess;
 }

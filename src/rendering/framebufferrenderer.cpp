@@ -158,28 +158,38 @@ void FramebufferRenderer::initialize() {
     glGenTextures(1, &_gBuffers.depthTexture);
     glGenTextures(1, &_gBuffers.positionTexture);
     glGenTextures(1, &_gBuffers.normalTexture);
-    glGenFramebuffers(1, &_gBuffers.framebuffer);
+    glCreateFramebuffers(1, &_gBuffers.framebuffer);
+    glObjectLabel(GL_FRAMEBUFFER, _gBuffers.framebuffer, -1, "G-Buffer Main");
 
 
     // PingPong Buffers
     // The first pingpong buffer shares the color texture with the renderbuffer:
     _pingPongBuffers.colorTexture[0] = _gBuffers.colorTexture;
     glGenTextures(1, &_pingPongBuffers.colorTexture[1]);
-    glGenFramebuffers(1, &_pingPongBuffers.framebuffer);
+    glCreateFramebuffers(1, &_pingPongBuffers.framebuffer);
+    glObjectLabel(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer, -1, "G-Buffer Ping-Pong");
 
     // Exit framebuffer
     glGenTextures(1, &_exitColorTexture);
     glGenTextures(1, &_exitDepthTexture);
-    glGenFramebuffers(1, &_exitFramebuffer);
+    glCreateFramebuffers(1, &_exitFramebuffer);
+    glObjectLabel(GL_FRAMEBUFFER, _exitFramebuffer, -1, "Exit");
 
     // FXAA Buffers
-    glGenFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
+    glCreateFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
     glGenTextures(1, &_fxaaBuffers.fxaaTexture);
+    glObjectLabel(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer, -1, "FXAA");
 
     // DownscaleVolumeRendering
-    glGenFramebuffers(1, &_downscaleVolumeRendering.framebuffer);
+    glCreateFramebuffers(1, &_downscaleVolumeRendering.framebuffer);
     glGenTextures(1, &_downscaleVolumeRendering.colorTexture);
     glGenTextures(1, &_downscaleVolumeRendering.depthbuffer);
+    glObjectLabel(
+        GL_FRAMEBUFFER,
+        _downscaleVolumeRendering.framebuffer,
+        -1,
+        "Downscaled Volume"
+    );
 
     // Allocate Textures/Buffers Memory
     updateResolution();
@@ -190,34 +200,32 @@ void FramebufferRenderer::initialize() {
     //==============================//
     //=====  GBuffers Buffers  =====//
     //==============================//
-    glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _gBuffers.framebuffer,
         GL_COLOR_ATTACHMENT0,
         _gBuffers.colorTexture,
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _gBuffers.framebuffer,
         GL_COLOR_ATTACHMENT1,
         _gBuffers.positionTexture,
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _gBuffers.framebuffer,
         GL_COLOR_ATTACHMENT2,
         _gBuffers.normalTexture,
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _gBuffers.framebuffer,
         GL_DEPTH_ATTACHMENT,
         _gBuffers.depthTexture,
         0
     );
-    glObjectLabel(GL_FRAMEBUFFER, _gBuffers.framebuffer, -1, "G-Buffer Main");
 
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    GLenum status = glCheckNamedFramebufferStatus(_gBuffers.framebuffer, GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Main framebuffer is not complete");
     }
@@ -225,28 +233,26 @@ void FramebufferRenderer::initialize() {
     //==============================//
     //=====  PingPong Buffers  =====//
     //==============================//
-    glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _pingPongBuffers.framebuffer,
         GL_COLOR_ATTACHMENT0,
         _pingPongBuffers.colorTexture[0],
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _pingPongBuffers.framebuffer,
         GL_COLOR_ATTACHMENT1,
         _pingPongBuffers.colorTexture[1],
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _pingPongBuffers.framebuffer,
         GL_DEPTH_ATTACHMENT,
         _gBuffers.depthTexture,
         0
     );
-    glObjectLabel(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer, -1, "G-Buffer Ping-Pong");
 
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    status = glCheckNamedFramebufferStatus(_pingPongBuffers.framebuffer, GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Ping pong buffer is not complete");
     }
@@ -255,22 +261,20 @@ void FramebufferRenderer::initialize() {
     //=====  Volume Rendering Buffers  =====//
     //======================================//
     // Builds Exit Framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _exitFramebuffer,
         GL_COLOR_ATTACHMENT0,
         _exitColorTexture,
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _exitFramebuffer,
         GL_DEPTH_ATTACHMENT,
         _exitDepthTexture,
         0
     );
-    glObjectLabel(GL_FRAMEBUFFER, _exitFramebuffer, -1, "Exit");
 
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    status = glCheckNamedFramebufferStatus(_exitFramebuffer, GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Exit framebuffer is not complete");
     }
@@ -278,16 +282,14 @@ void FramebufferRenderer::initialize() {
     //===================================//
     //==========  FXAA Buffers  =========//
     //===================================//
-    glBindFramebuffer(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _fxaaBuffers.fxaaFramebuffer,
         GL_COLOR_ATTACHMENT0,
         _fxaaBuffers.fxaaTexture,
         0
     );
-    glObjectLabel(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer, -1, "FXAA");
 
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    status = glCheckNamedFramebufferStatus(_fxaaBuffers.fxaaFramebuffer, GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("FXAA framebuffer is not complete");
     }
@@ -295,27 +297,24 @@ void FramebufferRenderer::initialize() {
     //================================================//
     //=====  Downscale Volume Rendering Buffers  =====//
     //================================================//
-    glBindFramebuffer(GL_FRAMEBUFFER, _downscaleVolumeRendering.framebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _downscaleVolumeRendering.framebuffer,
         GL_COLOR_ATTACHMENT0,
         _downscaleVolumeRendering.colorTexture,
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _downscaleVolumeRendering.framebuffer,
         GL_DEPTH_ATTACHMENT,
         _downscaleVolumeRendering.depthbuffer,
         0
     );
-    glObjectLabel(
-        GL_FRAMEBUFFER,
-        _downscaleVolumeRendering.framebuffer,
-        -1,
-        "Downscaled Volume"
-    );
 
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+    status = glCheckNamedFramebufferStatus(
+        _downscaleVolumeRendering.framebuffer,
+        GL_FRAMEBUFFER
+    );
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Downscale Volume Rendering framebuffer is not complete");
     }
@@ -342,7 +341,6 @@ void FramebufferRenderer::initialize() {
     global::deferredcasterManager->addListener(*this);
 
     // Set Default Rendering OpenGL State
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
     glEnablei(GL_BLEND, 0);
     glDisablei(GL_BLEND, 1);
     glDisablei(GL_BLEND, 2);
@@ -428,9 +426,6 @@ void FramebufferRenderer::registerShadowCaster(const std::string& shadowGroup,
             glm::ivec2(OpenGLCap.max2DTextureSize())
         );
 
-        GLint prevFbo;
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
-
         glGenTextures(1, &info.depthMap.texture);
         glBindTexture(GL_TEXTURE_2D, info.depthMap.texture);
         glTexImage2D(
@@ -455,18 +450,16 @@ void FramebufferRenderer::registerShadowCaster(const std::string& shadowGroup,
             glm::value_ptr(borderColor)
         );
 
-        glGenFramebuffers(1, &info.fbo);
+        glCreateFramebuffers(1, &info.fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, info.fbo);
-        glFramebufferTexture(
-            GL_FRAMEBUFFER,
+        glNamedFramebufferTexture(
+            info.fbo,
             GL_DEPTH_ATTACHMENT,
             info.depthMap.texture,
             0
         );
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
+        glNamedFramebufferDrawBuffer(info.fbo, GL_NONE);
+        glNamedFramebufferDrawBuffer(info.fbo, GL_NONE);
 
         _shadowMaps.emplace(shadowGroup, info);
     }
@@ -1118,7 +1111,6 @@ void FramebufferRenderer::updateDeferredcastData() {
     }
     _dirtyDeferredcastData = false;
 }
-
 
 void FramebufferRenderer::updateHDRAndFiltering() {
     ZoneScoped;

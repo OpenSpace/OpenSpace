@@ -54,7 +54,7 @@ void TextTileProvider::internalInitialize() {
     font = global::fontManager->font("Mono", static_cast<float>(fontSize));
     fontRenderer = ghoul::fontrendering::FontRenderer::createDefault();
     fontRenderer->setFramebufferSize(glm::vec2(initData.dimensions));
-    glGenFramebuffers(1, &fbo);
+    glCreateFramebuffers(1, &fbo);
 }
 
 void TextTileProvider::internalDeinitialize() {
@@ -80,13 +80,7 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
 
         // Render to texture
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glFramebufferTexture2D(
-            GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT0,
-            GL_TEXTURE_2D,
-            *texture,
-            0
-        );
+        glNamedFramebufferTexture(fbo, GL_COLOR_ATTACHMENT0, *texture, 0);
 
         const GLsizei w = static_cast<GLsizei>(texture->width());
         const GLsizei h = static_cast<GLsizei>(texture->height());

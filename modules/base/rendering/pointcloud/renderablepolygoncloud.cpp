@@ -162,12 +162,10 @@ void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
     glGetIntegerv(GL_VIEWPORT, viewport.data());
 
     GLuint textureFBO;
-    glGenFramebuffers(1, &textureFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
+    glCreateFramebuffers(1, &textureFBO);
     const GLenum drawBuffers = GL_COLOR_ATTACHMENT0;
-    glDrawBuffers(1, &drawBuffers);
-
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureToRenderTo, 0);
+    glNamedFramebufferDrawBuffers(textureFBO, 1, &drawBuffers);
+    glNamedFramebufferTexture(textureFBO, GL_COLOR_ATTACHMENT0, textureToRenderTo, 0);
 
     glViewport(viewport[0], viewport[1], textureWidth, textureHeight);
 
@@ -191,18 +189,6 @@ void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);
 
-    renderPolygonGeometry(_polygonVao);
-
-    // Restores Applications' OpenGL State
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-
-    glDeleteBuffers(1, &_polygonVbo);
-    glDeleteVertexArrays(1, &_polygonVao);
-    glDeleteFramebuffers(1, &textureFBO);
-}
-
-void RenderablePolygonCloud::renderPolygonGeometry(GLuint vao) const {
     std::unique_ptr<ghoul::opengl::ProgramObject> program =
         ghoul::opengl::ProgramObject::Build(
             "RenderablePointCloud_Polygon",
@@ -213,15 +199,23 @@ void RenderablePolygonCloud::renderPolygonGeometry(GLuint vao) const {
 
     program->activate();
     constexpr glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
-    glClearBufferfv(GL_COLOR, 0, glm::value_ptr(Black));
+    glClearNamedFramebufferfv(textureFBO, GL_COLOR, 0, glm::value_ptr(Black));
 
     program->setUniform("sides", _nPolygonSides);
 
-    glBindVertexArray(vao);
+    glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
+    glBindVertexArray(_polygonVao);
     glDrawArrays(GL_POINTS, 0, 1);
     glBindVertexArray(0);
 
     program->deactivate();
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+
+    glDeleteBuffers(1, &_polygonVbo);
+    glDeleteVertexArrays(1, &_polygonVao);
+    glDeleteFramebuffers(1, &textureFBO);
 }
 
 } // namespace openspace

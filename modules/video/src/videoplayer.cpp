@@ -451,7 +451,7 @@ void VideoPlayer::initializeMpv() {
         return;
     }
 
-    glGenFramebuffers(1, &_fbo);
+    glCreateFramebuffers(1, &_fbo);
     // Create FBO to render video into
     createTexture(_videoResolution);
 
@@ -866,8 +866,6 @@ void VideoPlayer::createTexture(glm::ivec2 size) {
     // Update resolution of video
     _videoResolution = size;
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-
     _frameTexture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(size, 1),
         GL_TEXTURE_2D
@@ -879,16 +877,7 @@ void VideoPlayer::createTexture(glm::ivec2 size) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
 
     // Bind texture to framebuffer
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D,
-        *_frameTexture,
-        0
-    );
-
-    // Unbind FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_frameTexture, 0);
 }
 
 void VideoPlayer::resizeTexture(glm::ivec2 size) {

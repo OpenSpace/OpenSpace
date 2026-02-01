@@ -733,43 +733,38 @@ void RenderableModel::initializeGL() {
     );
 
     // Generate textures and the frame buffer
-    glGenFramebuffers(1, &_framebuffer);
+    glCreateFramebuffers(1, &_framebuffer);
+    glObjectLabel(GL_FRAMEBUFFER, _framebuffer, -1, "RenderableModel Framebuffer");
 
-    // Bind textures to the framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _framebuffer,
         GL_COLOR_ATTACHMENT0,
         global::renderEngine->renderer().additionalColorTexture1(),
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _framebuffer,
         GL_COLOR_ATTACHMENT1,
         global::renderEngine->renderer().additionalColorTexture2(),
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _framebuffer,
         GL_COLOR_ATTACHMENT2,
         global::renderEngine->renderer().additionalColorTexture3(),
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _framebuffer,
         GL_DEPTH_ATTACHMENT,
         global::renderEngine->renderer().additionalDepthTexture(),
         0
     );
 
-    glObjectLabel(GL_FRAMEBUFFER, _framebuffer, -1, "RenderableModel Framebuffer");
-
-    // Check status
-    const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    const GLenum status = glCheckNamedFramebufferStatus(_framebuffer, GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Framebuffer is not complete");
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Initialize geometry
     _geometry->initialize();
@@ -1019,18 +1014,17 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     else {
         // Prepare framebuffer
         const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
-        glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
 
         // Re-bind first texture to use the currently not used Ping-Pong texture in the
         // FramebufferRenderer
-        glFramebufferTexture(
-            GL_FRAMEBUFFER,
+        glNamedFramebufferTexture(
+            _framebuffer,
             GL_COLOR_ATTACHMENT0,
             global::renderEngine->renderer().additionalColorTexture1(),
             0
         );
         // Check status
-        const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        const GLenum status = glCheckNamedFramebufferStatus(_framebuffer, GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             LERROR("Framebuffer is not complete");
         }
@@ -1040,10 +1034,18 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
            GL_COLOR_ATTACHMENT1,
            GL_COLOR_ATTACHMENT2,
         };
-        glDrawBuffers(3, ColorAttachmentArray.data());
+        glNamedFramebufferDrawBuffers(_framebuffer, 3, ColorAttachmentArray.data());
+
+        glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+
         glClearColor(0.f, 0.f, 0.f, 0.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
+        glClearNamedFramebufferfv(
+            _framebuffer,
+            GL_COLOR,
+            1,
+            glm::value_ptr(PosBufferClearVal)
+        );
 
         // Use a manuel depth test to make the models aware of the rest of the scene
         _program->setUniform(_uniformCache.performManualDepthTest, _enableDepthTest);

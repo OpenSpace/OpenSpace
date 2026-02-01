@@ -682,7 +682,7 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
 {
     ZoneScoped;
 
-    glGenFramebuffers(1, &fbo);
+    glCreateFramebuffers(1, &fbo);
     glGenVertexArrays(1, &vaoQuad);
     glGenBuffers(1, &vboQuad);
     glBindVertexArray(vaoQuad);
@@ -779,11 +779,12 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFBO);
     global::renderEngine->openglStateCache().viewport(viewport.data());
     // Bind render texture to FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, *writeTexture, 0);
+    glNamedFramebufferTexture(fbo, GL_COLOR_ATTACHMENT0, *writeTexture, 0);
     glDisable(GL_BLEND);
     const GLenum textureBuffers = GL_COLOR_ATTACHMENT0;
-    glDrawBuffers(1, &textureBuffers);
+    glNamedFramebufferDrawBuffers(fbo, 1, &textureBuffers);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     // Setup our own viewport settings
     const GLsizei w = static_cast<GLsizei>(writeTexture->width());
