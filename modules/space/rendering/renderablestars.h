@@ -75,7 +75,7 @@ private:
     properties::StringProperty _speckFile;
 
     properties::StringProperty _colorTexturePath;
-    std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
+    std::unique_ptr<ghoul::opengl::NewTexture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
 
     struct {
@@ -94,7 +94,7 @@ private:
     properties::OptionProperty _otherDataOption;
     properties::StringProperty _otherDataColorMapPath;
     properties::Vec2Property _otherDataRange;
-    std::unique_ptr<ghoul::opengl::Texture> _otherDataColorMapTexture;
+    std::unique_ptr<ghoul::opengl::NewTexture> _otherDataColorMapTexture;
     properties::Vec3Property _fixedColor;
     properties::BoolProperty _filterOutOfRange;
 
