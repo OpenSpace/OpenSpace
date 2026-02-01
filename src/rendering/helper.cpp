@@ -219,8 +219,8 @@ void initialize() {
     //
     // Square vertex objects
     //
-    glGenVertexArrays(1, &vertexObjects.square.vao);
-    glGenBuffers(1, &vertexObjects.square.vbo);
+    glCreateVertexArrays(1, &vertexObjects.square.vao);
+    glCreateBuffers(1, &vertexObjects.square.vbo);
 
     glBindVertexArray(vertexObjects.square.vao);
     glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.square.vbo);
@@ -235,7 +235,12 @@ void initialize() {
         VertexXYUVRGBA{ {  1.f,  1.f }, { 1.f, 1.f }, { 1.f, 1.f, 1.f, 1.f } },
         VertexXYUVRGBA{ {  1.f, -1.f }, { 1.f, 0.f }, { 1.f, 1.f, 1.f, 1.f } }
     };
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(VertexXYUVRGBA), Vtx.data(), GL_STATIC_DRAW);
+    glNamedBufferData(
+        vertexObjects.square.vbo,
+        6 * sizeof(VertexXYUVRGBA),
+        Vtx.data(),
+        GL_STATIC_DRAW
+    );
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA), nullptr);
@@ -267,22 +272,22 @@ void initialize() {
         64, glm::vec3(1.f, 1.f, 1.f), glm::vec4(1.f, 1.f, 1.f, 1.f)
     );
 
-    glGenVertexArrays(1, &vertexObjects.sphere.vao);
-    glGenBuffers(1, &vertexObjects.sphere.vbo);
-    glGenBuffers(1, &vertexObjects.sphere.ibo);
+    glCreateVertexArrays(1, &vertexObjects.sphere.vao);
+    glCreateBuffers(1, &vertexObjects.sphere.vbo);
+    glCreateBuffers(1, &vertexObjects.sphere.ibo);
 
     glBindVertexArray(vertexObjects.sphere.vao);
     glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.sphere.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        vertexObjects.sphere.vbo,
         sphereData.vertices.size() * sizeof(Vertex),
         sphereData.vertices.data(),
         GL_STATIC_DRAW
     );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexObjects.sphere.ibo);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
+    glNamedBufferData(
+        vertexObjects.sphere.ibo,
         sphereData.indices.size() * sizeof(GLushort),
         sphereData.indices.data(),
         GL_STATIC_DRAW
@@ -316,22 +321,22 @@ void initialize() {
     //
     VertexIndexListCombo<VertexXYZNormal> cylinderData = createCylinder(64, 1.f, 1.f);
 
-    glGenVertexArrays(1, &vertexObjects.cylinder.vao);
-    glGenBuffers(1, &vertexObjects.cylinder.vbo);
-    glGenBuffers(1, &vertexObjects.cylinder.ibo);
+    glCreateVertexArrays(1, &vertexObjects.cylinder.vao);
+    glCreateBuffers(1, &vertexObjects.cylinder.vbo);
+    glCreateBuffers(1, &vertexObjects.cylinder.ibo);
 
     glBindVertexArray(vertexObjects.cylinder.vao);
     glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.cylinder.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        vertexObjects.cylinder.vbo,
         cylinderData.vertices.size() * sizeof(VertexXYZNormal),
         cylinderData.vertices.data(),
         GL_STATIC_DRAW
     );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexObjects.cylinder.ibo);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
+    glNamedBufferData(
+        vertexObjects.cylinder.ibo,
         cylinderData.indices.size() * sizeof(GLushort),
         cylinderData.indices.data(),
         GL_STATIC_DRAW
@@ -356,22 +361,22 @@ void initialize() {
     //
     VertexIndexListCombo<VertexXYZNormal> coneData = createCone(64, 1.f, 1.f);
 
-    glGenVertexArrays(1, &vertexObjects.cone.vao);
-    glGenBuffers(1, &vertexObjects.cone.vbo);
-    glGenBuffers(1, &vertexObjects.cone.ibo);
+    glCreateVertexArrays(1, &vertexObjects.cone.vao);
+    glCreateBuffers(1, &vertexObjects.cone.vbo);
+    glCreateBuffers(1, &vertexObjects.cone.ibo);
 
     glBindVertexArray(vertexObjects.cone.vao);
     glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.cone.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        vertexObjects.cone.vbo,
         coneData.vertices.size() * sizeof(VertexXYZNormal),
         coneData.vertices.data(),
         GL_STATIC_DRAW
     );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexObjects.cone.ibo);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
+    glNamedBufferData(
+        vertexObjects.cone.ibo,
         coneData.indices.size() * sizeof(GLushort),
         coneData.indices.data(),
         GL_STATIC_DRAW
@@ -394,13 +399,13 @@ void initialize() {
     //
     // Line vertex array object
     //
-    glGenVertexArrays(1, &vertexObjects.line.vao);
-    glGenBuffers(1, &vertexObjects.line.vbo);
+    glCreateVertexArrays(1, &vertexObjects.line.vao);
+    glCreateBuffers(1, &vertexObjects.line.vbo);
 
     glBindVertexArray(vertexObjects.line.vao);
     glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.line.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        vertexObjects.line.vbo,
         2 * sizeof(VertexXYUVRGBA),
         nullptr,
         GL_STATIC_DRAW
@@ -430,7 +435,7 @@ void initialize() {
     //
     // Empty vertex array objects
     //
-    glGenVertexArrays(1, &vertexObjects.empty.vao);
+    glCreateVertexArrays(1, &vertexObjects.empty.vao);
 
     isInitialized = true;
 }
@@ -590,8 +595,8 @@ void renderLine(const glm::vec2& startPosition, const glm::vec2& endPosition,
         }
     };
     glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.line.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        vertexObjects.line.vbo,
         2 * sizeof(VertexXYUVRGBA),
         vertexData.data(),
         GL_STATIC_DRAW

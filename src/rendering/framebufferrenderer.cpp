@@ -141,23 +141,28 @@ void FramebufferRenderer::initialize() {
          1.f,  1.f,
     };
 
-    glGenVertexArrays(1, &_screenQuad);
+    glCreateVertexArrays(1, &_screenQuad);
     glBindVertexArray(_screenQuad);
 
-    glGenBuffers(1, &_vertexPositionBuffer);
+    glCreateBuffers(1, &_vertexPositionBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
+    glNamedBufferData(
+        _vertexPositionBuffer,
+        sizeof(VertexData),
+        VertexData.data(),
+        GL_STATIC_DRAW
+    );
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
     // GBuffers
-    glGenTextures(1, &_gBuffers.colorTexture);
-    glGenTextures(1, &_gBuffers.depthTexture);
-    glGenTextures(1, &_gBuffers.positionTexture);
-    glGenTextures(1, &_gBuffers.normalTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_gBuffers.colorTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_gBuffers.depthTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_gBuffers.positionTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_gBuffers.normalTexture);
     glCreateFramebuffers(1, &_gBuffers.framebuffer);
     glObjectLabel(GL_FRAMEBUFFER, _gBuffers.framebuffer, -1, "G-Buffer Main");
 
@@ -165,25 +170,25 @@ void FramebufferRenderer::initialize() {
     // PingPong Buffers
     // The first pingpong buffer shares the color texture with the renderbuffer:
     _pingPongBuffers.colorTexture[0] = _gBuffers.colorTexture;
-    glGenTextures(1, &_pingPongBuffers.colorTexture[1]);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_pingPongBuffers.colorTexture[1]);
     glCreateFramebuffers(1, &_pingPongBuffers.framebuffer);
     glObjectLabel(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer, -1, "G-Buffer Ping-Pong");
 
     // Exit framebuffer
-    glGenTextures(1, &_exitColorTexture);
-    glGenTextures(1, &_exitDepthTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_exitColorTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_exitDepthTexture);
     glCreateFramebuffers(1, &_exitFramebuffer);
     glObjectLabel(GL_FRAMEBUFFER, _exitFramebuffer, -1, "Exit");
 
     // FXAA Buffers
     glCreateFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
-    glGenTextures(1, &_fxaaBuffers.fxaaTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_fxaaBuffers.fxaaTexture);
     glObjectLabel(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer, -1, "FXAA");
 
     // DownscaleVolumeRendering
     glCreateFramebuffers(1, &_downscaleVolumeRendering.framebuffer);
-    glGenTextures(1, &_downscaleVolumeRendering.colorTexture);
-    glGenTextures(1, &_downscaleVolumeRendering.depthbuffer);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_downscaleVolumeRendering.colorTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_downscaleVolumeRendering.depthbuffer);
     glObjectLabel(
         GL_FRAMEBUFFER,
         _downscaleVolumeRendering.framebuffer,
@@ -426,7 +431,7 @@ void FramebufferRenderer::registerShadowCaster(const std::string& shadowGroup,
             glm::ivec2(OpenGLCap.max2DTextureSize())
         );
 
-        glGenTextures(1, &info.depthMap.texture);
+        glCreateTextures(GL_TEXTURE_2D, 1, &info.depthMap.texture);
         glBindTexture(GL_TEXTURE_2D, info.depthMap.texture);
         glTexImage2D(
             GL_TEXTURE_2D,

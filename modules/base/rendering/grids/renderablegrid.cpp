@@ -209,10 +209,10 @@ void RenderableGrid::initializeGL() {
         }
     );
 
-    glGenVertexArrays(1, &_vaoID);
-    glGenBuffers(1, &_vBufferID);
-    glGenVertexArrays(1, &_highlightVaoID);
-    glGenBuffers(1, &_highlightVBufferID);
+    glCreateVertexArrays(1, &_vaoID);
+    glCreateBuffers(1, &_vBufferID);
+    glCreateVertexArrays(1, &_highlightVaoID);
+    glCreateBuffers(1, &_highlightVBufferID);
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
@@ -434,8 +434,8 @@ void RenderableGrid::update(const UpdateData&) {
     // Minor grid
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vBufferID,
         _varray.size() * sizeof(Vertex),
         _varray.data(),
         GL_STATIC_DRAW
@@ -446,8 +446,8 @@ void RenderableGrid::update(const UpdateData&) {
     // Major grid
     glBindVertexArray(_highlightVaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _highlightVBufferID);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _highlightVBufferID,
         _highlightArray.size() * sizeof(Vertex),
         _highlightArray.data(),
         GL_STATIC_DRAW

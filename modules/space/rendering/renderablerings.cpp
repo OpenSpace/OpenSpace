@@ -159,8 +159,8 @@ void RenderableRings::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
-    glGenVertexArrays(1, &_quad);
-    glGenBuffers(1, &_vertexPositionBuffer);
+    glCreateVertexArrays(1, &_quad);
+    glCreateBuffers(1, &_vertexPositionBuffer);
 
     createPlane();
     loadTexture();
@@ -277,7 +277,7 @@ void RenderableRings::createPlane() {
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, Data.size(), Data.data(), GL_STATIC_DRAW);
+    glNamedBufferData(_vertexPositionBuffer, Data.size(), Data.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(
         0,

@@ -87,8 +87,8 @@ TouchMarker::TouchMarker()
 TouchMarker::~TouchMarker() {}
 
 void TouchMarker::initialize() {
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    glCreateVertexArrays(1, &_quad); // generate array
+    glCreateBuffers(1, &_vertexPositionBuffer); // generate buffer
 
     _shader = global::renderEngine->buildRenderProgram(
         "MarkerProgram",
@@ -145,8 +145,8 @@ void TouchMarker::createVertexList(const std::vector<openspace::TouchInputHolder
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vertexPositionBuffer,
         _vertexData.size() * sizeof(GLfloat),
         _vertexData.data(),
         GL_STATIC_DRAW

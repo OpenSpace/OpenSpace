@@ -131,17 +131,17 @@ void SkirtedGrid::initializeGL() {
         vertexData[i].texture[1] = textures[i][1];
     }
 
-
-    glGenVertexArrays(1, &_vaoID);
-    glGenBuffers(1, &_vertexBufferID);
-    glGenBuffers(1, &_elementBufferID);
+    glCreateVertexArrays(1, &_vaoID);
+    glCreateBuffers(1, &_vertexBufferID);
+    glCreateBuffers(1, &_elementBufferID);
 
     // First VAO setup
     glBindVertexArray(_vaoID);
 
     // Vertex buffer
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
-    glBufferData(GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vertexBufferID,
         vertexData.size() * sizeof(Vertex),
         vertexData.data(),
         GL_STATIC_DRAW
@@ -153,8 +153,8 @@ void SkirtedGrid::initializeGL() {
 
     // Element buffer
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _elementBufferID);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
+    glNamedBufferData(
+        _elementBufferID,
         elementData.size() * sizeof(GLushort),
         elementData.data(),
         GL_STATIC_DRAW

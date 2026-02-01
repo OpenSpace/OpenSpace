@@ -87,17 +87,17 @@ bool BoxGeometry::initialize() {
     };
 
     if (_vaoId == 0) {
-        glGenVertexArrays(1, &_vaoId);
+        glCreateVertexArrays(1, &_vaoId);
     }
 
     if (_vBufferId == 0) {
-        glGenBuffers(1, &_vBufferId);
+        glCreateBuffers(1, &_vBufferId);
     }
 
     glBindVertexArray(_vaoId);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
+    glNamedBufferData(_vBufferId, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, nullptr);

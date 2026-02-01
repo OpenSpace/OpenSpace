@@ -151,8 +151,8 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     glBindVertexArray(_vaoId);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vBufferId,
         _vertices.size() * sizeof(GLfloat),
         _vertices.data(),
         GL_STATIC_DRAW
@@ -166,11 +166,11 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
 
 bool BlockPlaneIntersectionGeometry::initialize() {
     if (_vaoId == 0) {
-        glGenVertexArrays(1, &_vaoId);
+        glCreateVertexArrays(1, &_vaoId);
     }
 
     if (_vBufferId == 0) {
-        glGenBuffers(1, &_vBufferId);
+        glCreateBuffers(1, &_vBufferId);
 
         if (_vBufferId == 0) {
             LERROR("Could not create vertex buffer");

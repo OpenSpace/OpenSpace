@@ -209,8 +209,8 @@ void RenderableTravelSpeed::initializeGL() {
         }
     );
 
-    glGenVertexArrays(1, &_vaoId);
-    glGenBuffers(1, &_vBufferId);
+    glCreateVertexArrays(1, &_vaoId);
+    glCreateBuffers(1, &_vBufferId);
 
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
 }
@@ -254,8 +254,8 @@ void RenderableTravelSpeed::updateVertexData() {
 
     glBindVertexArray(_vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vBufferId,
         sizeof(VertexPositions),
         &_vertexPositions,
         GL_DYNAMIC_DRAW

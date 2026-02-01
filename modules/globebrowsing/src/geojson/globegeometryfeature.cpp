@@ -68,10 +68,10 @@ namespace openspace::globebrowsing {
 
 void GlobeGeometryFeature::RenderFeature::initializeBuffers() {
     if (vaoId == 0) {
-        glGenVertexArrays(1, &vaoId);
+        glCreateVertexArrays(1, &vaoId);
     }
     if (vboId == 0) {
-        glGenBuffers(1, &vboId);
+        glCreateBuffers(1, &vboId);
     }
 }
 
@@ -833,7 +833,7 @@ void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
 
     glBindVertexArray(feature.vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, feature.vboId);
-    glBufferData(GL_ARRAY_BUFFER, fullBufferSize, nullptr, GL_STATIC_DRAW);
+    glNamedBufferData(feature.vboId, fullBufferSize, nullptr, GL_STATIC_DRAW);
 
     glBufferSubData(
         GL_ARRAY_BUFFER,

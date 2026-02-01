@@ -297,7 +297,7 @@ void ShadowComponent::update(const UpdateData&) {
 }
 
 void ShadowComponent::createDepthTexture() {
-    glGenTextures(1, &_shadowDepthTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_shadowDepthTexture);
     updateDepthTexture();
 
     _shadowData.shadowDepthTexture = _shadowDepthTexture;
@@ -343,7 +343,7 @@ void ShadowComponent::updateDepthTexture() const {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 
-    //glGenTextures(1, &_positionInLightSpaceTexture);
+    //glCreateTextures(GL_TEXTURE_2D, 1, &_positionInLightSpaceTexture);
     //glBindTexture(GL_TEXTURE_2D, _positionInLightSpaceTexture);
     //glTexImage2D(
     //    GL_TEXTURE_2D,
@@ -365,7 +365,7 @@ void ShadowComponent::updateDepthTexture() const {
 }
 
 void ShadowComponent::buildDDepthTexture() {
-    glGenTextures(1, &_dDepthTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_dDepthTexture);
     glBindTexture(GL_TEXTURE_2D, _dDepthTexture);
     glTexImage2D(
         GL_TEXTURE_2D,

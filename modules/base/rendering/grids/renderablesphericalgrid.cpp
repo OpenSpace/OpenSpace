@@ -188,13 +188,13 @@ void RenderableSphericalGrid::initializeGL() {
         }
     );
 
-    glGenVertexArrays(1, &_vaoID);
-    glGenBuffers(1, &_vBufferID);
+    glCreateVertexArrays(1, &_vaoID);
+    glCreateBuffers(1, &_vBufferID);
 
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
+    glVertexArrayVertexBuffer(_vaoID, 0, _vBufferID, 0, sizeof(Vertex));
+    glEnableVertexArrayAttrib(_vaoID, 0);
+    glVertexArrayAttribFormat(_vaoID, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vaoID, 0, 0);
 }
 
 void RenderableSphericalGrid::deinitializeGL() {
@@ -358,11 +358,7 @@ void RenderableSphericalGrid::update(const UpdateData&) {
         _longitudeRenderInfo.count.push_back(_latSegments);
     }
 
-
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBufferData(GL_ARRAY_BUFFER, vertSize * sizeof(Vertex), vert.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+    glNamedBufferData(_vBufferID, vertSize * sizeof(Vertex), vert.data(), GL_STATIC_DRAW);
 
     _gridIsDirty = false;
 }

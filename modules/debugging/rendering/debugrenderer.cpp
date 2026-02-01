@@ -79,12 +79,12 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
 
     // Generate a vao, vertex array object (keeping track of pointers to vbo)
     GLuint _vaoID = 0;
-    glGenVertexArrays(1, &_vaoID);
+    glCreateVertexArrays(1, &_vaoID);
     ghoul_assert(_vaoID != 0, "Could not generate vertex arrays");
 
     // Generate a vbo, vertex buffer object (storeing actual data)
     GLuint _vertexBufferID = 0;
-    glGenBuffers(1, &_vertexBufferID);
+    glCreateBuffers(1, &_vertexBufferID);
     ghoul_assert(_vertexBufferID != 0, "Could not create vertex buffer");
 
     // Activate the shader program and set the uniform color within the shader
@@ -93,8 +93,8 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vertexBufferID,
         clippingSpacePoints.size() * sizeof(clippingSpacePoints[0]),
         clippingSpacePoints.data(),
         GL_STATIC_DRAW);

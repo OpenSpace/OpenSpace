@@ -344,8 +344,8 @@ void RingsComponent::initializeGL() {
         LERROR(e.message);
     }
 
-    glGenVertexArrays(1, &_quad);
-    glGenBuffers(1, &_vertexPositionBuffer);
+    glCreateVertexArrays(1, &_quad);
+    glCreateBuffers(1, &_vertexPositionBuffer);
 
     createPlane();
 
@@ -717,7 +717,12 @@ void RingsComponent::createPlane() {
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
+    glNamedBufferData(
+        _vertexPositionBuffer,
+        sizeof(vertices),
+        vertices.data(),
+        GL_STATIC_DRAW
+    );
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(
         0,

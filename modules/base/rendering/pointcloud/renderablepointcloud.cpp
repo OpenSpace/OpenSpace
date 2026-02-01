@@ -1105,7 +1105,7 @@ void RenderablePointCloud::generateArrayTextures() {
 
         // Generate an array texture storage
         unsigned int id = 0;
-        glGenTextures(1, &id);
+        glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
         glBindTexture(GL_TEXTURE_2D_ARRAY, id);
 
         initAndAllocateTextureArray(id, res, nLayers, useAlpha);
@@ -1487,17 +1487,17 @@ void RenderablePointCloud::updateBufferData() {
     int size = static_cast<int>(slice.size());
 
     if (_vao == 0) {
-        glGenVertexArrays(1, &_vao);
+        glCreateVertexArrays(1, &_vao);
         LDEBUG(std::format("Generating Vertex Array id '{}'", _vao));
     }
     if (_vbo == 0) {
-        glGenBuffers(1, &_vbo);
+        glCreateBuffers(1, &_vbo);
         LDEBUG(std::format("Generating Vertex Buffer Object id '{}'", _vbo));
     }
 
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
+    glNamedBufferData(_vbo, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
 
     const int attibsPerPoint = nAttributesPerPoint();
     int offset = 0;

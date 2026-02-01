@@ -342,8 +342,8 @@ bool RenderablePlane::isReady() const {
 void RenderablePlane::initializeGL() {
     ZoneScoped;
 
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    glCreateVertexArrays(1, &_quad); // generate array
+    glCreateBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
 
     _shader = BaseModule::ProgramObjectManager.request(
@@ -495,7 +495,12 @@ void RenderablePlane::createPlane() {
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData.data(), GL_STATIC_DRAW);
+    glNamedBufferData(
+        _vertexPositionBuffer,
+        sizeof(vertexData),
+        vertexData.data(),
+        GL_STATIC_DRAW
+    );
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
 

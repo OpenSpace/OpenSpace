@@ -480,11 +480,11 @@ void RenderableInterpolatedPoints::addOrientationDataForPoint(unsigned int index
 
 void RenderableInterpolatedPoints::initializeBufferData() {
     if (_vao == 0) {
-        glGenVertexArrays(1, &_vao);
+        glCreateVertexArrays(1, &_vao);
         LDEBUG(std::format("Generating Vertex Array id '{}'", _vao));
     }
     if (_vbo == 0) {
-        glGenBuffers(1, &_vbo);
+        glCreateBuffers(1, &_vbo);
         LDEBUG(std::format("Generating Vertex Buffer Object id '{}'", _vbo));
     }
 
@@ -494,7 +494,7 @@ void RenderableInterpolatedPoints::initializeBufferData() {
     // Allocate the memory for the buffer (we will want to upload the data quite often)
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
+    glNamedBufferData(_vbo, bufferSize, nullptr, GL_DYNAMIC_DRAW);
 
     int offset = 0;
 

@@ -433,8 +433,8 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
 void RenderableOrbitalKepler::initializeGL() {
     ghoul_assert(_vertexArray == 0, "Vertex array object already existed");
     ghoul_assert(_vertexBuffer == 0, "Vertex buffer object already existed");
-    glGenVertexArrays(1, &_vertexArray);
-    glGenBuffers(1, &_vertexBuffer);
+    glCreateVertexArrays(1, &_vertexArray);
+    glCreateBuffers(1, &_vertexBuffer);
 
     // Program for line rendering
     _trailProgram = SpaceModule::ProgramObjectManager.request(
@@ -827,8 +827,8 @@ void RenderableOrbitalKepler::updateBuffers() {
     glBindVertexArray(_vertexArray);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vertexBuffer,
         _vertexBufferData.size() * sizeof(TrailVBOLayout),
         _vertexBufferData.data(),
         GL_STATIC_DRAW
