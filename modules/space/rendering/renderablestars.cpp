@@ -744,19 +744,29 @@ void RenderableStars::loadPSFTexture() {
             return;
         }
 
-        component.texture = ghoul::io::TextureReader::ref().loadTexture(absPath(path), 2);
+        std::unique_ptr<ghoul::opengl::Texture> t =
+            ghoul::io::TextureReader::ref().loadTexture(absPath(path), 2);
+        t->setWrapping(Texture::WrappingMode::ClampToBorder);
+        t->setBorderColor(glm::vec4(0.f));
+        t->setFilter(Texture::FilterMode::AnisotropicMipMap);
+
+        component.texture = std::make_unique<ghoul::opengl::NewTexture>(*t);
+
+        t = nullptr;
 
         if (!component.texture) {
             return;
         }
 
         LDEBUG(std::format("Loaded texture from '{}'", absPath(component.texturePath)));
-        component.texture->uploadTexture();
-        component.texture->setWrapping(Texture::WrappingMode::ClampToBorder);
+        //component.texture->uploadTexture();
+        //component.texture->setWrapping(Texture::WrappingMode::ClampToBorder);
 
-        constexpr std::array<float, 4> border = { 0.f, 0.f, 0.f, 0.f };
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border.data());
-        component.texture->setFilter(Texture::FilterMode::AnisotropicMipMap);
+        //constexpr std::array<float, 4> border = { 0.f, 0.f, 0.f, 0.f };
+        //glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border.data());
+        //component.texture->setFilter(Texture::FilterMode::AnisotropicMipMap);
+
+        component.texture->makeResident();
 
         component.file = std::make_unique<ghoul::filesystem::File>(path);
         component.file->setCallback(markPsfTextureAsDirty);
@@ -829,19 +839,13 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.opacity, opacity());
     }
 
-    ghoul::opengl::TextureUnit glareUnit;
-    glareUnit.activate();
-    _glare.texture->bind();
-    _program->setUniform(_uniformCache.glareTexture, glareUnit);
+    glProgramUniformHandleui64ARB(*_program, _uniformCache.glareTexture, *_glare.texture);
     _program->setUniform(_uniformCache.glareMultiplier, _glare.multiplier);
     _program->setUniform(_uniformCache.glareGamma, _glare.gamma);
     _program->setUniform(_uniformCache.glareScale, _glare.scale);
 
-    ghoul::opengl::TextureUnit coreUnit;
     if (_core.texture) {
-        coreUnit.activate();
-        _core.texture->bind();
-        _program->setUniform(_uniformCache.coreTexture, coreUnit);
+        glProgramUniformHandleui64ARB(*_program, _uniformCache.coreTexture, *_core.texture);
         _program->setUniform(_uniformCache.coreMultiplier, _core.multiplier);
         _program->setUniform(_uniformCache.coreGamma, _core.gamma);
         _program->setUniform(_uniformCache.coreScale, _core.scale);

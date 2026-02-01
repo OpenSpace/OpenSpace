@@ -106,7 +106,7 @@ private:
         properties::FloatProperty gamma;
         properties::FloatProperty scale;
 
-        std::unique_ptr<ghoul::opengl::Texture> texture;
+        std::unique_ptr<ghoul::opengl::NewTexture> texture;
         std::unique_ptr<ghoul::filesystem::File> file;
     };
 
