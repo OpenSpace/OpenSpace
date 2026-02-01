@@ -102,8 +102,8 @@ bool RenderablePlaneProjection::isReady() const {
 }
 
 void RenderablePlaneProjection::initializeGL() {
-    glGenVertexArrays(1, &_quad);
-    glGenBuffers(1, &_vertexPositionBuffer);
+    glCreateVertexArrays(1, &_quad);
+    glCreateBuffers(1, &_vertexPositionBuffer);
 
     _shader = global::renderEngine->buildRenderProgram(
         "Image Plane",
@@ -290,7 +290,12 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
 
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
+    glNamedBufferData(
+        _vertexPositionBuffer,
+        sizeof(VertexData),
+        VertexData.data(),
+        GL_STATIC_DRAW
+    );
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
     glEnableVertexAttribArray(1);

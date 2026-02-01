@@ -415,10 +415,10 @@ void RenderableFluxNodes::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
 
-    glGenVertexArrays(1, &_vertexArrayObject);
-    glGenBuffers(1, &_vertexPositionBuffer);
-    glGenBuffers(1, &_vertexColorBuffer);
-    glGenBuffers(1, &_vertexFilteringBuffer);
+    glCreateVertexArrays(1, &_vertexArrayObject);
+    glCreateBuffers(1, &_vertexPositionBuffer);
+    glCreateBuffers(1, &_vertexColorBuffer);
+    glCreateBuffers(1, &_vertexFilteringBuffer);
 
     // Needed for alpha transparency
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
@@ -843,8 +843,8 @@ void RenderableFluxNodes::updatePositionBuffer() {
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vertexPositionBuffer,
         _vertexPositions.size() * sizeof(glm::vec3),
         _vertexPositions.data(),
         GL_STATIC_DRAW
@@ -862,8 +862,8 @@ void RenderableFluxNodes::updateVertexColorBuffer() {
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
 
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vertexColorBuffer,
         _vertexColor.size() * sizeof(float),
         _vertexColor.data(),
         GL_STATIC_DRAW
@@ -880,8 +880,8 @@ void RenderableFluxNodes::updateVertexFilteringBuffer() {
     glBindVertexArray(_vertexArrayObject);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexFilteringBuffer);
 
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vertexFilteringBuffer,
         _vertexRadius.size() * sizeof(float),
         _vertexRadius.data(),
         GL_STATIC_DRAW

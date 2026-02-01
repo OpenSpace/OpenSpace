@@ -577,7 +577,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _maxGpuMemoryPercent.onChange([this]() {
         if (_ssboData != 0) {
             glDeleteBuffers(1, &_ssboData);
-            glGenBuffers(1, &_ssboData);
+            glCreateBuffers(1, &_ssboData);
             LDEBUG(std::format(
                 "Re-generating Data Shader Storage Buffer Object id '{}'", _ssboData
             ));
@@ -1031,8 +1031,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         const size_t indexBufferSize = _accumulatedIndices.size() * sizeof(GLint);
 
         // Update SSBO Index (stars per chunk).
-        glBufferData(
-            GL_SHADER_STORAGE_BUFFER,
+        glNamedBufferData(
+            _ssboIdx,
             indexBufferSize,
             _accumulatedIndices.data(),
             GL_STREAM_DRAW
@@ -1040,13 +1040,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
         // Use orphaning strategy for data SSBO.
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
-
-        glBufferData(
-            GL_SHADER_STORAGE_BUFFER,
-            _maxStreamingBudgetInBytes,
-            nullptr,
-            GL_STREAM_DRAW
-        );
+        glNamedBufferData(_ssboData, _maxStreamingBudgetInBytes, nullptr, GL_STREAM_DRAW);
 
         // Update SSBO with one insert per chunk/node.
         // The key in map holds the offset index.
@@ -1054,8 +1048,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             // We don't need to fill chunk with zeros for SSBOs!
             // Just check if we have any values to update.
             if (!subData.empty()) {
-                glBufferSubData(
-                    GL_SHADER_STORAGE_BUFFER,
+                glNamedBufferSubData(
+                    _ssboData,
                     offset * _chunkSize * sizeof(GLfloat),
                     subData.size() * sizeof(GLfloat),
                     subData.data()
@@ -1082,12 +1076,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         );
 
         // Use buffer orphaning to update a subset of total data.
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            posStreamingBudget,
-            nullptr,
-            GL_STREAM_DRAW
-        );
+        glNamedBufferData(_vboPos, posStreamingBudget, nullptr, GL_STREAM_DRAW);
 
         // Update buffer with one insert per chunk/node.
         //The key in map holds the offset index.
@@ -1097,8 +1086,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             // fetch on add.
             std::vector<float> vectorData(subData.begin(), subData.end());
             vectorData.resize(posChunkSize, 0.f);
-            glBufferSubData(
-                GL_ARRAY_BUFFER,
+            glNamedBufferSubData(
+                _vboPos,
                 offset * posChunkSize * sizeof(GLfloat),
                 posChunkSize * sizeof(GLfloat),
                 vectorData.data()
@@ -1116,12 +1105,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             );
 
             // Use buffer orphaning to update a subset of total data.
-            glBufferData(
-                GL_ARRAY_BUFFER,
-                colStreamingBudget,
-                nullptr,
-                GL_STREAM_DRAW
-            );
+            glNamedBufferData(_vboCol, colStreamingBudget, nullptr, GL_STREAM_DRAW);
 
             // Update buffer with one insert per chunk/node.
             //The key in map holds the offset index.
@@ -1129,8 +1113,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
                 // Fill chunk by appending zeroes so we overwrite possible earlier values.
                 std::vector<float> vectorData(subData.begin(), subData.end());
                 vectorData.resize(posChunkSize + colChunkSize, 0.f);
-                glBufferSubData(
-                    GL_ARRAY_BUFFER,
+                glNamedBufferSubData(
+                    _vboCol,
                     offset * colChunkSize * sizeof(GLfloat),
                     colChunkSize * sizeof(GLfloat),
                     vectorData.data() + posChunkSize
@@ -1148,12 +1132,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
                 );
 
                 // Use buffer orphaning to update a subset of total data.
-                glBufferData(
-                    GL_ARRAY_BUFFER,
-                    velStreamingBudget,
-                    nullptr,
-                    GL_STREAM_DRAW
-                );
+                glNamedBufferData(_vboVel, velStreamingBudget, nullptr, GL_STREAM_DRAW);
 
                 // Update buffer with one insert per chunk/node.
                 //The key in map holds the offset index.
@@ -1161,8 +1140,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
                     // Fill chunk by appending zeroes.
                     std::vector<float> vectorData(subData.begin(), subData.end());
                     vectorData.resize(_chunkSize, 0.f);
-                    glBufferSubData(
-                        GL_ARRAY_BUFFER,
+                    glNamedBufferSubData(
+                        _vboVel,
                         offset * velChunkSize * sizeof(GLfloat),
                         velChunkSize * sizeof(GLfloat),
                         vectorData.data() + posChunkSize + colChunkSize
@@ -1721,17 +1700,17 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
             // Generate SSBO Buffers and bind them.
             if (_vaoEmpty == 0) {
-                glGenVertexArrays(1, &_vaoEmpty);
+                glCreateVertexArrays(1, &_vaoEmpty);
                 LDEBUG(std::format("Generating Empty Vertex Array id '{}'", _vaoEmpty));
             }
             if (_ssboIdx == 0) {
-                glGenBuffers(1, &_ssboIdx);
+                glCreateBuffers(1, &_ssboIdx);
                 LDEBUG(std::format(
                     "Generating Index Shader Storage Buffer Object id '{}'", _ssboIdx
                 ));
             }
             if (_ssboData == 0) {
-                glGenBuffers(1, &_ssboData);
+                glCreateBuffers(1, &_ssboData);
                 LDEBUG(std::format(
                     "Generating Data Shader Storage Buffer Object id '{}'", _ssboData
                 ));
@@ -1769,30 +1748,15 @@ void RenderableGaiaStars::update(const UpdateData&) {
             // Deallocate VBO Buffers if any existed.
             if (_vboPos != 0) {
                 glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
-                glBufferData(
-                    GL_ARRAY_BUFFER,
-                    0,
-                    nullptr,
-                    GL_STREAM_DRAW
-                );
+                glNamedBufferData(_vboPos, 0, nullptr, GL_STREAM_DRAW);
             }
             if (_vboCol != 0) {
                 glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
-                glBufferData(
-                    GL_ARRAY_BUFFER,
-                    0,
-                    nullptr,
-                    GL_STREAM_DRAW
-                );
+                glNamedBufferData(_vboCol, 0, nullptr, GL_STREAM_DRAW);
             }
             if (_vboVel != 0) {
                 glBindBuffer(GL_ARRAY_BUFFER, _vboVel);
-                glBufferData(
-                    GL_ARRAY_BUFFER,
-                    0,
-                    nullptr,
-                    GL_STREAM_DRAW
-                );
+                glNamedBufferData(_vboVel, 0, nullptr, GL_STREAM_DRAW);
             }
             glBindBuffer(GL_ARRAY_BUFFER, 0);
 #endif // !__APPLE__
@@ -1811,23 +1775,23 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
             // Generate VAO and VBOs
             if (_vao == 0) {
-                glGenVertexArrays(1, &_vao);
+                glCreateVertexArrays(1, &_vao);
                 LDEBUG(std::format("Generating Vertex Array id '{}'", _vao));
             }
             if (_vboPos == 0) {
-                glGenBuffers(1, &_vboPos);
+                glCreateBuffers(1, &_vboPos);
                 LDEBUG(std::format(
                     "Generating Position Vertex Buffer Object id '{}'", _vboPos
                 ));
             }
             if (_vboCol == 0) {
-                glGenBuffers(1, &_vboCol);
+                glCreateBuffers(1, &_vboCol);
                 LDEBUG(std::format(
                     "Generating Color Vertex Buffer Object id '{}'", _vboCol
                 ));
             }
             if (_vboVel == 0) {
-                glGenBuffers(1, &_vboVel);
+                glCreateBuffers(1, &_vboVel);
                 LDEBUG(std::format(
                     "Generating Velocity Vertex Buffer Object id '{}'", _vboVel
                 ));
@@ -1931,21 +1895,11 @@ void RenderableGaiaStars::update(const UpdateData&) {
             // Deallocate SSBO buffers if they existed.
             if (_ssboIdx != 0) {
                 glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboIdx);
-                glBufferData(
-                    GL_SHADER_STORAGE_BUFFER,
-                    0,
-                    nullptr,
-                    GL_STREAM_DRAW
-                );
+                glNamedBufferData(_ssboIdx, 0, nullptr, GL_STREAM_DRAW);
             }
             if (_ssboData != 0) {
                 glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboData);
-                glBufferData(
-                    GL_SHADER_STORAGE_BUFFER,
-                    0,
-                    nullptr,
-                    GL_STREAM_DRAW
-                );
+                glNamedBufferData(_ssboData, 0, nullptr, GL_STREAM_DRAW);
             }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 #endif //!__APPLE__
@@ -1953,11 +1907,11 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         // Generate VAO and VBO for Quad.
         if (_vaoQuad == 0) {
-            glGenVertexArrays(1, &_vaoQuad);
+            glCreateVertexArrays(1, &_vaoQuad);
             LDEBUG(std::format("Generating Quad Vertex Array id '{}'", _vaoQuad));
         }
         if (_vboQuad == 0) {
-            glGenBuffers(1, &_vboQuad);
+            glCreateBuffers(1, &_vboQuad);
             LDEBUG(std::format("Generating Quad Vertex Buffer Object id '{}'", _vboQuad));
         }
 
@@ -1975,8 +1929,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
              1.f,  1.f, 0.f,
         };
 
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glNamedBufferData(
+            _vboQuad,
             sizeof(VboQuadData),
             VboQuadData.data(),
             GL_STATIC_DRAW

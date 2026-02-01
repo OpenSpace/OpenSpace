@@ -35,8 +35,8 @@ PlaneGeometry::PlaneGeometry(glm::vec2 size) : _size(std::move(size)) {}
 PlaneGeometry::PlaneGeometry(float size) : PlaneGeometry(glm::vec2(size, size)) {}
 
 void PlaneGeometry::initialize() {
-    glGenVertexArrays(1, &_vaoId);
-    glGenBuffers(1, &_vBufferId);
+    glCreateVertexArrays(1, &_vaoId);
+    glCreateBuffers(1, &_vBufferId);
     updateGeometry();
 }
 
@@ -83,7 +83,7 @@ void PlaneGeometry::updateGeometry() const {
 
     glBindVertexArray(_vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
+    glNamedBufferData(_vBufferId, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), nullptr);
     glEnableVertexAttribArray(1);

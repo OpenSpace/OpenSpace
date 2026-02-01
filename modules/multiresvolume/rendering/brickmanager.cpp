@@ -155,7 +155,7 @@ bool BrickManager::initialize() {
 
     _atlasInitialized = true;
 
-    glGenBuffers(2, _pboHandle);
+    glCreateBuffers(2, _pboHandle);
 
     return true;
 }
@@ -286,7 +286,7 @@ void BrickManager::coordinatesFromLinear(int idx, int& x, int& y, int& z) {
 bool BrickManager::diskToPBO(BufferIndex pboIndex) {
     // Map PBO
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[pboIndex]);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, _volumeSize, nullptr, GL_STREAM_DRAW);
+    glNamedBufferData(_pboHandle[pboIndex], _volumeSize, nullptr, GL_STREAM_DRAW);
     float* mappedBuffer = reinterpret_cast<float*>(
         glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY)
     );

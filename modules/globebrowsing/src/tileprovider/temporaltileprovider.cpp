@@ -683,8 +683,8 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
     ZoneScoped;
 
     glCreateFramebuffers(1, &fbo);
-    glGenVertexArrays(1, &vaoQuad);
-    glGenBuffers(1, &vboQuad);
+    glCreateVertexArrays(1, &vaoQuad);
+    glCreateBuffers(1, &vboQuad);
     glBindVertexArray(vaoQuad);
     glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
     // Quad for fullscreen with vertex (xy) and texture coordinates (uv)
@@ -697,7 +697,7 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
          1.f, -1.f, 1.f, 0.f,
          1.f,  1.f, 1.f, 1.f
     };
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
+    glNamedBufferData(vboQuad, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
     // vertex coordinates at location 0
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);

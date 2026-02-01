@@ -713,13 +713,13 @@ void RenderableModel::initializeGL() {
          1.f,  1.f,  1.f,  1.f
     };
 
-    glGenVertexArrays(1, &_quadVao);
+    glCreateVertexArrays(1, &_quadVao);
     glBindVertexArray(_quadVao);
 
-    glGenBuffers(1, &_quadVbo);
+    glCreateBuffers(1, &_quadVbo);
     glBindBuffer(GL_ARRAY_BUFFER, _quadVbo);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(QuadVtx), QuadVtx.data(), GL_STATIC_DRAW);
+    glNamedBufferData(_quadVbo, sizeof(QuadVtx), QuadVtx.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(1);

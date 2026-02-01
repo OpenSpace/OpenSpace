@@ -544,8 +544,8 @@ void ScreenSpaceInsetBlackout::initializeGL() {
     ScreenSpaceRenderable::initializeGL();
 
     // Setup vertex buffer
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glCreateBuffers(1, &_vbo);
 
     // Setup program object and shaders
     _fboProgram = BaseModule::ProgramObjectManager.request(
@@ -722,11 +722,10 @@ void ScreenSpaceInsetBlackout::generateVertexArrayData() {
 }
 
 void ScreenSpaceInsetBlackout::generateTexture() {
-    // OpenGL stuff
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vbo,
         _vboData.size() * sizeof(glm::vec2),
         _vboData.data(),
         GL_STATIC_DRAW

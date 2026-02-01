@@ -221,8 +221,8 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
 }
 
 void RenderableShadowCylinder::initializeGL() {
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glCreateBuffers(1, &_vbo);
 
     _shader = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         "ShadowCylinderProgram",
@@ -351,8 +351,8 @@ void RenderableShadowCylinder::createCylinder(double time) {
 
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vbo,
         _vertices.size() * sizeof(CylinderVBOLayout),
         nullptr,
         GL_DYNAMIC_DRAW

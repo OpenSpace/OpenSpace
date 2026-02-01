@@ -782,10 +782,10 @@ void RenderableFieldlinesSequence::initializeGL() {
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
     );
 
-    glGenVertexArrays(1, &_vertexArrayObject);
-    glGenBuffers(1, &_vertexPositionBuffer);
-    glGenBuffers(1, &_vertexColorBuffer);
-    glGenBuffers(1, &_vertexMaskingBuffer);
+    glCreateVertexArrays(1, &_vertexArrayObject);
+    glCreateBuffers(1, &_vertexPositionBuffer);
+    glCreateBuffers(1, &_vertexColorBuffer);
+    glCreateBuffers(1, &_vertexMaskingBuffer);
 
     // Needed for additive blending
     setRenderBin(Renderable::RenderBin::Overlay);
@@ -1283,8 +1283,8 @@ void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
     const FieldlinesState& state = _files[_activeIndex].state;
     const std::vector<glm::vec3>& vertPos = state.vertexPositions();
 
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vertexPositionBuffer,
         vertPos.size() * sizeof(glm::vec3),
         vertPos.data(),
         GL_STATIC_DRAW
@@ -1305,8 +1305,8 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
     const std::vector<float>& quantities = state.extraQuantity(_colorQuantity, success);
 
     if (success) {
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glNamedBufferData(
+            _vertexColorBuffer,
             quantities.size() * sizeof(float),
             quantities.data(),
             GL_STATIC_DRAW
@@ -1329,8 +1329,8 @@ void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
     const std::vector<float>& quantities = state.extraQuantity(_maskingQuantity, success);
 
     if (success) {
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glNamedBufferData(
+            _vertexMaskingBuffer,
             quantities.size() * sizeof(float),
             quantities.data(),
             GL_STATIC_DRAW

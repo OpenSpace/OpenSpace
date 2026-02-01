@@ -34,12 +34,7 @@ namespace openspace {
 WebRenderHandler::WebRenderHandler()
     : _acceleratedRendering(WebBrowserModule::canUseAcceleratedRendering())
 {
-    if (_acceleratedRendering) {
-        glCreateTextures(GL_TEXTURE_2D, 1, &_texture);
-    }
-    else {
-        glGenTextures(1, &_texture);
-    }
+    glCreateTextures(GL_TEXTURE_2D, 1, &_texture);
 }
 
 void WebRenderHandler::reshape(int w, int h) {
@@ -246,12 +241,12 @@ bool WebRenderHandler::hasContent(int x, int y) {
         // GPU. Use a PBO for better performance
         bool hasContent = false;
         GLuint pbo = 0;
-        glGenBuffers(1, &pbo);
+        glCreateBuffers(1, &pbo);
         glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
 
         // Allocate memory for the PBO (width * height * 4 bytes for RGBA)
-        glBufferData(
-            GL_PIXEL_PACK_BUFFER,
+        glNamedBufferData(
+            pbo,
             _windowSize.x * _windowSize.y * 4,
             nullptr,
             GL_STREAM_READ

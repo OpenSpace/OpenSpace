@@ -142,11 +142,11 @@ Sphere::~Sphere() {
 bool Sphere::initialize() {
     // Initialize and upload to graphics card
     if (_vaoID == 0) {
-        glGenVertexArrays(1, &_vaoID);
+        glCreateVertexArrays(1, &_vaoID);
     }
 
     if (_vBufferID == 0) {
-        glGenBuffers(1, &_vBufferID);
+        glCreateBuffers(1, &_vBufferID);
 
         if (_vBufferID == 0) {
             LERROR("Could not create vertex buffer");
@@ -155,7 +155,7 @@ bool Sphere::initialize() {
     }
 
     if (_iBufferID == 0) {
-        glGenBuffers(1, &_iBufferID);
+        glCreateBuffers(1, &_iBufferID);
 
         if (_iBufferID == 0) {
             LERROR("Could not create index buffer");
@@ -167,7 +167,7 @@ bool Sphere::initialize() {
     glBindVertexArray(_vaoID);
 
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBufferData(GL_ARRAY_BUFFER, _vsize * sizeof(Vertex), _varray, GL_STATIC_DRAW);
+    glNamedBufferData(_vBufferID, _vsize * sizeof(Vertex), _varray, GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
@@ -193,7 +193,7 @@ bool Sphere::initialize() {
     );
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
+    glNamedBufferData(_iBufferID, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
 
     glBindVertexArray(0);
     return true;

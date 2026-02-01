@@ -355,11 +355,16 @@ void RenderablePlanetProjection::initializeGL() {
          1.f,  1.f,
     };
 
-    glGenVertexArrays(1, &_quad);
+    glCreateVertexArrays(1, &_quad);
     glBindVertexArray(_quad);
-    glGenBuffers(1, &_vertexPositionBuffer);
+    glCreateBuffers(1, &_vertexPositionBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
+    glNamedBufferData(
+        _vertexPositionBuffer,
+        sizeof(VertexData),
+        VertexData.data(),
+        GL_STATIC_DRAW
+    );
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
     glBindVertexArray(0);

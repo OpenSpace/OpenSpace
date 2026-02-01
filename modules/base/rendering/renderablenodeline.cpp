@@ -278,8 +278,8 @@ void RenderableNodeLine::initializeGL() {
     );
 
     // Generate
-    glGenVertexArrays(1, &_vaoId);
-    glGenBuffers(1, &_vBufferId);
+    glCreateVertexArrays(1, &_vaoId);
+    glCreateBuffers(1, &_vBufferId);
 
     glBindVertexArray(_vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
@@ -356,8 +356,8 @@ void RenderableNodeLine::updateVertexData() {
 
     glBindVertexArray(_vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vBufferId,
         _vertexArray.size() * sizeof(float),
         _vertexArray.data(),
         GL_DYNAMIC_DRAW

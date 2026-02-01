@@ -108,7 +108,7 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     gl::GLenum format = gl::GLenum(glFormat(useAlpha));
     gl::GLenum internalFormat = GL_RGBA8;
 
-    glGenTextures(1, &_pTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_pTexture);
     glBindTexture(GL_TEXTURE_2D, _pTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -141,7 +141,7 @@ void RenderablePolygonCloud::initializeCustomTexture() {
 
     // Create array from data, size and format
     unsigned int id = 0;
-    glGenTextures(1, &id);
+    glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
     glBindTexture(GL_TEXTURE_2D_ARRAY, id);
     initAndAllocateTextureArray(id, glm::uvec2(TexSize), 1, useAlpha);
     fillAndUploadTextureLayer(0, 0, 0, glm::uvec2(TexSize), useAlpha, pixelData.data());
@@ -170,10 +170,10 @@ void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
     glViewport(viewport[0], viewport[1], textureWidth, textureHeight);
 
     if (_polygonVao == 0) {
-        glGenVertexArrays(1, &_polygonVao);
+        glCreateVertexArrays(1, &_polygonVao);
     }
     if (_polygonVbo == 0) {
-        glGenBuffers(1, &_polygonVbo);
+        glCreateBuffers(1, &_polygonVbo);
     }
 
     glBindVertexArray(_polygonVao);
@@ -184,7 +184,7 @@ void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
         0.f, 0.f, 0.f, 1.f,
     };
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
+    glNamedBufferData(_polygonVbo, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
     glEnableVertexAttribArray(0);
     glBindVertexArray(0);

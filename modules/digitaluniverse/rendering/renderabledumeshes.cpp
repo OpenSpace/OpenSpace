@@ -617,18 +617,18 @@ void RenderableDUMeshes::createMeshes() {
     for (std::pair<const int, RenderingMesh>& p : _renderingMeshesMap) {
         for (int i = 0; i < p.second.numU; i++) {
             GLuint vao = 0;
-            glGenVertexArrays(1, &vao);
+            glCreateVertexArrays(1, &vao);
             p.second.vaoArray.push_back(vao);
 
             GLuint vbo = 0;
-            glGenBuffers(1, &vbo);
+            glCreateBuffers(1, &vbo);
             p.second.vboArray.push_back(vbo);
 
             glBindVertexArray(vao);
             glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            //glBufferData(GL_ARRAY_BUFFER, it->second.numV * sizeof(GLfloat),
-            glBufferData(
-                GL_ARRAY_BUFFER,
+            //glNamedBufferData(vbo, it->second.numV * sizeof(GLfloat),
+            glNamedBufferData(
+                vbo,
                 p.second.vertices.size() * sizeof(GLfloat),
                 p.second.vertices.data(),
                 GL_STATIC_DRAW
@@ -676,17 +676,17 @@ void RenderableDUMeshes::createMeshes() {
         if (p.second.numU > 1) {
             for (int i = 0; i < p.second.numV; i++) {
                 GLuint cvao = 0;
-                glGenVertexArrays(1, &cvao);
+                glCreateVertexArrays(1, &cvao);
                 p.second.vaoArray.push_back(cvao);
 
                 GLuint cvbo = 0;
-                glGenBuffers(1, &cvbo);
+                glCreateBuffers(1, &cvbo);
                 p.second.vboArray.push_back(cvbo);
 
                 glBindVertexArray(cvao);
                 glBindBuffer(GL_ARRAY_BUFFER, cvbo);
-                glBufferData(
-                    GL_ARRAY_BUFFER,
+                glNamedBufferData(
+                    cvbo,
                     p.second.vertices.size() * sizeof(GLfloat),
                     p.second.vertices.data(),
                     GL_STATIC_DRAW

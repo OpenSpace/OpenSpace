@@ -211,13 +211,13 @@ void RenderableTrailTrajectory::initializeGL() {
     RenderableTrail::initializeGL();
 
     // We don't need an index buffer, so we keep it at the default value of 0
-    glGenVertexArrays(1, &_primaryRenderInformation._vaoID);
-    glGenBuffers(1, &_primaryRenderInformation._vBufferID);
+    glCreateVertexArrays(1, &_primaryRenderInformation._vaoID);
+    glCreateBuffers(1, &_primaryRenderInformation._vBufferID);
 
     // We do need an additional render information bucket for the additional line from the
     // last shown permanent line to the current position of the object
-    glGenVertexArrays(1, &_floatingRenderInformation._vaoID);
-    glGenBuffers(1, &_floatingRenderInformation._vBufferID);
+    glCreateVertexArrays(1, &_floatingRenderInformation._vaoID);
+    glCreateBuffers(1, &_floatingRenderInformation._vBufferID);
     _floatingRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
 
     _secondaryRenderInformation._vaoID = _primaryRenderInformation._vaoID;
@@ -286,8 +286,8 @@ void RenderableTrailTrajectory::updateBuffer() {
     // Upload vertices to the GPU
     glBindVertexArray(_primaryRenderInformation._vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _primaryRenderInformation._vBufferID,
         _vertexArray.size() * sizeof(TrailVBOLayout<float>),
         _vertexArray.data(),
         GL_STATIC_DRAW
@@ -468,8 +468,8 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
 
         glBindVertexArray(_floatingRenderInformation._vaoID);
         glBindBuffer(GL_ARRAY_BUFFER, _floatingRenderInformation._vBufferID);
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glNamedBufferData(
+            _floatingRenderInformation._vBufferID,
             _replacementPoints.size() * sizeof(TrailVBOLayout<float>),
             _replacementPoints.data(),
             GL_DYNAMIC_DRAW

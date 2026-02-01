@@ -332,8 +332,8 @@ void RenderableRadialGrid::update(const UpdateData&) {
 RenderableRadialGrid::GeometryData::GeometryData(GLenum renderMode)
     : mode(renderMode)
 {
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
+    glCreateVertexArrays(1, &vao);
+    glCreateBuffers(1, &vbo);
 
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -381,8 +381,8 @@ RenderableRadialGrid::GeometryData::~GeometryData() {
 void RenderableRadialGrid::GeometryData::update() const {
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        vbo,
         varray.size() * sizeof(rendering::helper::VertexXYZ),
         varray.data(),
         GL_STATIC_DRAW

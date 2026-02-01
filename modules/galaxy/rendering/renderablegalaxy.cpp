@@ -462,14 +462,14 @@ void RenderableGalaxy::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_pointsProgram, _uniformCachePoints);
     ghoul::opengl::updateUniformLocations(*_billboardsProgram, _uniformCacheBillboards);
 
-    glGenVertexArrays(1, &_pointsVao);
-    glGenBuffers(1, &_positionVbo);
-    glGenBuffers(1, &_colorVbo);
+    glCreateVertexArrays(1, &_pointsVao);
+    glCreateBuffers(1, &_positionVbo);
+    glCreateBuffers(1, &_colorVbo);
 
     glBindVertexArray(_pointsVao);
     glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _positionVbo,
         _pointPositionsCache.size() * sizeof(glm::vec3),
         _pointPositionsCache.data(),
         GL_STATIC_DRAW
@@ -479,8 +479,8 @@ void RenderableGalaxy::initializeGL() {
     _pointPositionsCache.clear();
 
     glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _colorVbo,
         _pointColorsCache.size() * sizeof(glm::vec3),
         _pointColorsCache.data(),
         GL_STATIC_DRAW

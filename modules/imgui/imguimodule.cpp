@@ -438,13 +438,12 @@ void ImGUIModule::internalInitializeGL() {
         ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(texture);
     }
 
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
+    glCreateBuffers(1, &vbo);
+    glNamedBufferData(vbo, 0, nullptr, GL_DYNAMIC_DRAW);
 
-    glGenBuffers(1, &vboElements);
+    glCreateBuffers(1, &vboElements);
 
-    glGenVertexArrays(1, &vao);
+    glCreateVertexArrays(1, &vao);
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
@@ -618,16 +617,16 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
         const ImDrawIdx* indexBufferOffset = nullptr;
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glNamedBufferData(
+            vbo,
             cmdList->VtxBuffer.size() * sizeof(ImDrawVert),
             reinterpret_cast<const GLvoid*>(&cmdList->VtxBuffer.front()),
             GL_STREAM_DRAW
         );
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboElements);
-        glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER,
+        glNamedBufferData(
+            vboElements,
             cmdList->IdxBuffer.size() * sizeof(ImDrawIdx),
             reinterpret_cast<const GLvoid*>(&cmdList->IdxBuffer.front()),
             GL_STREAM_DRAW

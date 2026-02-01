@@ -308,17 +308,17 @@ void RenderableFieldlines::update(const UpdateData&) {
         LDEBUG(std::format("Number of vertices: {}", vertexData.size()));
 
         if (_fieldlineVAO == 0) {
-            glGenVertexArrays(1, &_fieldlineVAO);
+            glCreateVertexArrays(1, &_fieldlineVAO);
         }
         glBindVertexArray(_fieldlineVAO);
 
         if (_vertexPositionBuffer == 0) {
-            glGenBuffers(1, &_vertexPositionBuffer);
+            glCreateBuffers(1, &_vertexPositionBuffer);
         }
         glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
 
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glNamedBufferData(
+            _vertexPositionBuffer,
             vertexData.size() * sizeof(LinePoint),
             &vertexData.front(),
             GL_STATIC_DRAW

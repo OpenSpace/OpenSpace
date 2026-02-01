@@ -89,8 +89,8 @@ void RenderableDataPlane::deinitializeGL() {
 }
 
 bool RenderableDataPlane::createGeometry() {
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    glCreateVertexArrays(1, &_quad); // generate array
+    glCreateBuffers(1, &_vertexPositionBuffer); // generate buffer
 
     // ============================
     //         GEOMETRY (quad)
@@ -114,7 +114,12 @@ bool RenderableDataPlane::createGeometry() {
 
     glBindVertexArray(_quad); // bind array
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
+    glNamedBufferData(
+        _vertexPositionBuffer,
+        sizeof(vertex_data),
+        vertex_data,
+        GL_STATIC_DRAW
+    );
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(
         0,

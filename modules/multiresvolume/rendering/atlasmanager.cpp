@@ -67,12 +67,12 @@ bool AtlasManager::initialize() {
     );
     _textureAtlas->uploadTexture();
 
-    glGenBuffers(2, _pboHandle);
+    glCreateBuffers(2, _pboHandle);
 
-    glGenBuffers(1, &_atlasMapBuffer);
+    glCreateBuffers(1, &_atlasMapBuffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, _atlasMapBuffer);
-    glBufferData(
-        GL_SHADER_STORAGE_BUFFER,
+    glNamedBufferData(
+        _atlasMapBuffer,
         sizeof(GLint) * _nBricksInMap,
         nullptr,
         GL_DYNAMIC_READ
@@ -110,7 +110,7 @@ void AtlasManager::updateAtlas(BufferIndex bufferIndex, std::vector<int>& brickI
     _nDiskReads = 0;
 
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[bufferIndex]);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, _volumeSize, nullptr, GL_STREAM_DRAW);
+    glNamedBufferData(_pboHandle[bufferIndex], _volumeSize, nullptr, GL_STREAM_DRAW);
     float* mappedBuffer = reinterpret_cast<float*>(
         glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY)
     );

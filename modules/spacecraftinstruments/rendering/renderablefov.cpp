@@ -405,12 +405,12 @@ void RenderableFov::initializeGL() {
     _fieldOfViewBounds.data.resize(2 * _instrument.bounds.size());
 
     // Field of view boundaries
-    glGenVertexArrays(1, &_fieldOfViewBounds.vao);
+    glCreateVertexArrays(1, &_fieldOfViewBounds.vao);
     glBindVertexArray(_fieldOfViewBounds.vao);
-    glGenBuffers(1, &_fieldOfViewBounds.vbo);
+    glCreateBuffers(1, &_fieldOfViewBounds.vbo);
     glBindBuffer(GL_ARRAY_BUFFER, _fieldOfViewBounds.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _fieldOfViewBounds.vbo,
         _fieldOfViewBounds.data.size() * sizeof(RenderInformation::VBOData),
         nullptr,
         GL_STREAM_DRAW
@@ -434,12 +434,12 @@ void RenderableFov::initializeGL() {
     );
 
     // Orthogonal Plane
-    glGenVertexArrays(1, &_orthogonalPlane.vao);
-    glGenBuffers(1, &_orthogonalPlane.vbo);
+    glCreateVertexArrays(1, &_orthogonalPlane.vao);
+    glCreateBuffers(1, &_orthogonalPlane.vbo);
     glBindVertexArray(_orthogonalPlane.vao);
     glBindBuffer(GL_ARRAY_BUFFER, _orthogonalPlane.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _orthogonalPlane.vbo,
         _orthogonalPlane.data.size() * sizeof(RenderInformation::VBOData),
         nullptr,
         GL_STREAM_DRAW
@@ -938,17 +938,15 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
 
 void RenderableFov::updateGPU() {
     // @SPEEDUP:  Only upload the part of the data that has changed ---abock
-    glBindBuffer(GL_ARRAY_BUFFER, _fieldOfViewBounds.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _fieldOfViewBounds.vbo,
         _fieldOfViewBounds.data.size() * sizeof(RenderInformation::VBOData),
         _fieldOfViewBounds.data.data(),
         GL_STREAM_DRAW
     );
 
-    glBindBuffer(GL_ARRAY_BUFFER, _orthogonalPlane.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _orthogonalPlane.vbo,
         _orthogonalPlane.data.size() * sizeof(RenderInformation::VBOData),
         _orthogonalPlane.data.data(),
         GL_STREAM_DRAW

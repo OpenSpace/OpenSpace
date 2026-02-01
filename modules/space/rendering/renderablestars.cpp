@@ -689,8 +689,8 @@ void RenderableStars::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
     );
 
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glCreateBuffers(1, &_vbo);
 
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
@@ -889,8 +889,8 @@ void RenderableStars::update(const UpdateData&) {
 
         glBindVertexArray(_vao);
         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glNamedBufferData(
+            _vbo,
             slice.size() * sizeof(GLfloat),
             slice.data(),
             GL_STATIC_DRAW

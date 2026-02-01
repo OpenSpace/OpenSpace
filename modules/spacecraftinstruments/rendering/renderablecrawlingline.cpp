@@ -100,12 +100,12 @@ void RenderableCrawlingLine::initializeGL() {
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_fs.glsl")
     );
 
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glCreateBuffers(1, &_vbo);
 
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(VBOData), nullptr, GL_DYNAMIC_DRAW);
+    glNamedBufferData(_vbo, 2 * sizeof(VBOData), nullptr, GL_DYNAMIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(VBOData), nullptr);

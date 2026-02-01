@@ -176,7 +176,7 @@ namespace {
 
     GLuint createTexture(const glm::ivec2& size, std::string_view name) {
         GLuint t = 0;
-        glGenTextures(1, &t);
+        glCreateTextures(GL_TEXTURE_2D, 1, &t);
         glBindTexture(GL_TEXTURE_2D, t);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -203,7 +203,7 @@ namespace {
         ghoul_assert(components == 3 || components == 4, "Only 3-4 components supported");
 
         GLuint t = 0;
-        glGenTextures(1, &t);
+        glCreateTextures(GL_TEXTURE_3D, 1, &t);
         glBindTexture(GL_TEXTURE_3D, t);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -1106,10 +1106,10 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
 
     // Prepare for rendering/calculations
     GLuint quadVao = 0;
-    glGenVertexArrays(1, &quadVao);
+    glCreateVertexArrays(1, &quadVao);
     glBindVertexArray(quadVao);
     GLuint quadVbo = 0;
-    glGenBuffers(1, &quadVbo);
+    glCreateBuffers(1, &quadVbo);
     glBindBuffer(GL_ARRAY_BUFFER, quadVbo);
 
     constexpr std::array<GLfloat, 12> VertexData = {
@@ -1122,7 +1122,7 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
          1.f,  1.f,
     };
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
+    glNamedBufferData(quadVbo, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
 

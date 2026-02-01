@@ -142,8 +142,8 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
 void RenderableSkyTarget::bindTexture() {}
 
 void RenderableSkyTarget::initializeGL() {
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    glCreateVertexArrays(1, &_quad); // generate array
+    glCreateBuffers(1, &_vertexPositionBuffer); // generate buffer
     createPlane();
 
     std::string ProgramName = identifier() + "Shader";
