@@ -32,7 +32,7 @@ flat in float ge_speed;
 flat in float gs_screenSpaceDepth;
 
 uniform sampler1D colorTexture;
-uniform sampler2D glareTexture;
+layout(bindless_sampler) uniform sampler2D glareTexture;
 uniform float opacity;
 uniform vec3 fixedColor;
 uniform int colorOption;
@@ -45,7 +45,7 @@ uniform float glareGamma;
 uniform float glareScale;
 
 uniform bool hasCore;
-uniform sampler2D coreTexture;
+layout(bindless_sampler) uniform sampler2D coreTexture;
 uniform float coreMultiplier;
 uniform float coreGamma;
 uniform float coreScale;
