@@ -581,14 +581,12 @@ void ScreenSpaceInsetBlackout::initializeGL() {
         nullptr
     );
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(*_blackoutTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(*_blackoutTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_blackoutTexture, 0);
 
     _blackoutTexture->purgeFromRAM();
-
-    glBindTexture(GL_TEXTURE_2D, 0);
 
     _uniformCache.color = _fboProgram->uniformLocation("color");
 

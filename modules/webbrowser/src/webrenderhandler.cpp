@@ -194,11 +194,10 @@ void WebRenderHandler::updateTexture() {
             GL_UNSIGNED_BYTE,
             reinterpret_cast<char*>(_browserBuffer.data())
         );
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glTextureParameteri(_texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTextureParameteri(_texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(_texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(_texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
     else if (_textureIsDirty) {
         glBindTexture(GL_TEXTURE_2D, _texture);
@@ -221,7 +220,6 @@ void WebRenderHandler::updateTexture() {
         );
 
         glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     _upperDirtyRectBound = glm::ivec2(0, 0);
