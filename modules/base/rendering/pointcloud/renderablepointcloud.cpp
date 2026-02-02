@@ -925,6 +925,9 @@ void RenderablePointCloud::initializeShadersAndGlExtras() {
             );
         }
     );
+
+    glCreateVertexArrays(1, &_vao);
+    glCreateBuffers(1, &_vbo);
 }
 
 void RenderablePointCloud::deinitializeShaders() {
@@ -1485,15 +1488,6 @@ void RenderablePointCloud::updateBufferData() {
     std::vector<float> slice = createDataSlice();
 
     int size = static_cast<int>(slice.size());
-
-    if (_vao == 0) {
-        glCreateVertexArrays(1, &_vao);
-        LDEBUG(std::format("Generating Vertex Array id '{}'", _vao));
-    }
-    if (_vbo == 0) {
-        glCreateBuffers(1, &_vbo);
-        LDEBUG(std::format("Generating Vertex Buffer Object id '{}'", _vbo));
-    }
 
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);

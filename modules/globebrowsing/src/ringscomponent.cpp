@@ -50,6 +50,16 @@
 namespace {
     constexpr std::string_view _loggerCat = "RingsComponent";
 
+    struct VertexData {
+        GLfloat x;
+        GLfloat y;
+        GLfloat s;
+        GLfloat t;
+        GLfloat nx;
+        GLfloat ny;
+        GLfloat nz;
+    };
+
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
@@ -344,8 +354,21 @@ void RingsComponent::initializeGL() {
         LERROR(e.message);
     }
 
-    glCreateVertexArrays(1, &_quad);
     glCreateBuffers(1, &_vertexPositionBuffer);
+    glCreateVertexArrays(1, &_quad);
+    glVertexArrayVertexBuffer(_quad, 0, _vertexPositionBuffer, 0, sizeof(VertexData));
+
+    glEnableVertexArrayAttrib(_quad, 0);
+    glVertexArrayAttribFormat(_quad, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_quad, 0, 0);
+
+    glEnableVertexArrayAttrib(_quad, 1);
+    glVertexArrayAttribFormat(_quad, 1, 2, GL_FLOAT, GL_FALSE, offsetof(VertexData, s));
+    glVertexArrayAttribBinding(_quad, 1, 0);
+
+    glEnableVertexArrayAttrib(_quad, 2);
+    glVertexArrayAttribFormat(_quad, 2, 3, GL_FLOAT, GL_FALSE, offsetof(VertexData, nx));
+    glVertexArrayAttribBinding(_quad, 2, 0);
 
     createPlane();
 
@@ -696,16 +719,6 @@ void RingsComponent::loadTexture() {
 void RingsComponent::createPlane() {
     const GLfloat size = _size;
 
-    struct VertexData {
-        GLfloat x;
-        GLfloat y;
-        GLfloat s;
-        GLfloat t;
-        GLfloat nx;
-        GLfloat ny;
-        GLfloat nz;
-    };
-
     const std::array<VertexData, 6> vertices = {
         VertexData{ -size, -size, 0.f, 0.f, 0.f, 0.f, 1.f },
         VertexData{  size,  size, 1.f, 1.f, 0.f, 0.f, 1.f },
@@ -715,40 +728,11 @@ void RingsComponent::createPlane() {
         VertexData{  size,  size, 1.f, 1.f, 0.f, 0.f, 1.f },
     };
 
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
     glNamedBufferData(
         _vertexPositionBuffer,
         sizeof(vertices),
         vertices.data(),
         GL_STATIC_DRAW
-    );
-    glEnableVertexArrayAttrib(_quad, 0);
-    glVertexAttribPointer(
-        0,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(VertexData),
-        nullptr
-    );
-    glEnableVertexArrayAttrib(_quad, 1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(VertexData),
-        reinterpret_cast<void*>(offsetof(VertexData, s))
-    );
-    glEnableVertexArrayAttrib(_quad, 2);
-    glVertexAttribPointer(
-        2,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(VertexData),
-        reinterpret_cast<void*>(offsetof(VertexData, nx))
     );
 }
 

@@ -123,7 +123,6 @@ void SkirtedGrid::initializeGL() {
         std::array<GLfloat, 2> texture;
     };
 
-
     std::vector<glm::vec2> textures = createTextureCoordinates(xSegments, ySegments);
     std::vector<Vertex> vertexData(textures.size());
     for (size_t i = 0; i < textures.size(); i++) {
@@ -131,15 +130,7 @@ void SkirtedGrid::initializeGL() {
         vertexData[i].texture[1] = textures[i][1];
     }
 
-    glCreateVertexArrays(1, &_vaoID);
     glCreateBuffers(1, &_vertexBufferID);
-    glCreateBuffers(1, &_elementBufferID);
-
-    // First VAO setup
-    glBindVertexArray(_vaoID);
-
-    // Vertex buffer
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
     glNamedBufferData(
         _vertexBufferID,
         vertexData.size() * sizeof(Vertex),
@@ -147,12 +138,7 @@ void SkirtedGrid::initializeGL() {
         GL_STATIC_DRAW
     );
 
-    // Textures at location 1
-    glEnableVertexArrayAttrib(_vaoID, 1);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-
-    // Element buffer
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _elementBufferID);
+    glCreateBuffers(1, &_elementBufferID);
     glNamedBufferData(
         _elementBufferID,
         elementData.size() * sizeof(GLushort),
@@ -160,7 +146,13 @@ void SkirtedGrid::initializeGL() {
         GL_STATIC_DRAW
     );
 
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_vaoID);
+    glVertexArrayVertexBuffer(_vaoID, 0, _vertexBufferID, 0, sizeof(Vertex));
+    glVertexArrayElementBuffer(_vaoID, _elementBufferID);
+
+    glEnableVertexArrayAttrib(_vaoID, 1);
+    glVertexArrayAttribFormat(_vaoID, 1, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vaoID, 1, 0);
 
     ghoul_assert(
         static_cast<int>(elementData.size()) == _elementSize,

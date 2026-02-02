@@ -169,25 +169,19 @@ void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
 
     glViewport(viewport[0], viewport[1], textureWidth, textureHeight);
 
-    if (_polygonVao == 0) {
-        glCreateVertexArrays(1, &_polygonVao);
-    }
-    if (_polygonVbo == 0) {
-        glCreateBuffers(1, &_polygonVbo);
-    }
-
-    glBindVertexArray(_polygonVao);
-    glBindBuffer(GL_ARRAY_BUFFER, _polygonVbo);
-
+    glCreateBuffers(1, &_polygonVbo);
     constexpr std::array<GLfloat, 4> VertexData = {
         // x  y  z  w
         0.f, 0.f, 0.f, 1.f,
     };
-
     glNamedBufferData(_polygonVbo, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
+
+    glCreateVertexArrays(1, &_polygonVao);
+    glVertexArrayVertexBuffer(_polygonVao, 0, _polygonVbo, 0, sizeof(VertexData));
+
     glEnableVertexArrayAttrib(_polygonVao, 0);
-    glBindVertexArray(0);
+    glVertexArrayAttribFormat(_polygonVao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_polygonVao, 0, 0);
 
     std::unique_ptr<ghoul::opengl::ProgramObject> program =
         ghoul::opengl::ProgramObject::Build(

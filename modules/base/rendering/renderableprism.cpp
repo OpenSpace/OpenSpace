@@ -183,19 +183,17 @@ void RenderablePrism::initializeGL() {
     );
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
-    glCreateVertexArrays(1, &_vaoId);
     glCreateBuffers(1, &_vboId);
     glCreateBuffers(1, &_iboId);
-
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vboId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
-
-    updateBufferData();
+    glCreateVertexArrays(1, &_vaoId);
+    glVertexArrayVertexBuffer(_vaoId, 0, _vboId, 0, 3 * sizeof(float));
+    glVertexArrayElementBuffer(_vaoId, _iboId);
 
     glEnableVertexArrayAttrib(_vaoId, 0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glBindVertexArray(0);
+    glVertexArrayAttribFormat(_vaoId, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vaoId, 0, 0);
+
+    updateBufferData();
 }
 
 void RenderablePrism::deinitializeGL() {

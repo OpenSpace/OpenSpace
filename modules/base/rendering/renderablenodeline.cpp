@@ -277,18 +277,13 @@ void RenderableNodeLine::initializeGL() {
         }
     );
 
-    // Generate
-    glCreateVertexArrays(1, &_vaoId);
     glCreateBuffers(1, &_vBufferId);
+    glCreateVertexArrays(1, &_vaoId);
+    glVertexArrayVertexBuffer(_vaoId, 0, _vBufferId, 0, 3 * sizeof(float));
 
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-
-    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
     glEnableVertexArrayAttrib(_vaoId, _locVertex);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    glVertexArrayAttribFormat(_vaoId, _locVertex, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vaoId, _locVertex, 0);
 }
 
 void RenderableNodeLine::deinitializeGL() {
@@ -354,20 +349,12 @@ void RenderableNodeLine::updateVertexData() {
     _vertexArray.push_back(static_cast<float>(endPos.y));
     _vertexArray.push_back(static_cast<float>(endPos.z));
 
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
     glNamedBufferData(
         _vBufferId,
         _vertexArray.size() * sizeof(float),
         _vertexArray.data(),
         GL_DYNAMIC_DRAW
     );
-
-    // update vertex attributes
-    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }
 
 void RenderableNodeLine::update(const UpdateData&) {

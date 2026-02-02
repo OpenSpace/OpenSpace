@@ -55,14 +55,16 @@ GUIRenderHandler::GUIRenderHandler() {
          1.f,  1.f,  1.f
     };
 
-    glCreateVertexArrays(1, &_vao);
-    glBindVertexArray(_vao);
     glCreateBuffers(1, &_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glNamedBufferData(_vbo, Vtx.size() * sizeof(float), Vtx.data(), GL_STATIC_DRAW);
+
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 2 * sizeof(float));
+
     glEnableVertexArrayAttrib(_vao, 0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
-    glBindVertexArray(0);
+    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+
     LDEBUG("Initializing CEF GL environment... done");
 }
 

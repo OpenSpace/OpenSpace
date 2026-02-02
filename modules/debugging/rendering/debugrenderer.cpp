@@ -77,46 +77,34 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
         return;
     }
 
-    // Generate a vao, vertex array object (keeping track of pointers to vbo)
-    GLuint _vaoID = 0;
-    glCreateVertexArrays(1, &_vaoID);
-    ghoul_assert(_vaoID != 0, "Could not generate vertex arrays");
+    GLuint vbo = 0;
+    glCreateBuffers(1, &vbo);
+    glNamedBufferData(
+        vbo,
+        clippingSpacePoints.size() * sizeof(clippingSpacePoints[0]),
+        clippingSpacePoints.data(),
+        GL_STATIC_DRAW
+    );
 
-    // Generate a vbo, vertex buffer object (storeing actual data)
-    GLuint _vertexBufferID = 0;
-    glCreateBuffers(1, &_vertexBufferID);
-    ghoul_assert(_vertexBufferID != 0, "Could not create vertex buffer");
+    GLuint vao = 0;
+    glCreateVertexArrays(1, &vao);
+    glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(glm::vec4));
+
+    glEnableVertexArrayAttrib(vao, 0);
+    glVertexArrayAttribFormat(vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vao, 0, 0);
 
     // Activate the shader program and set the uniform color within the shader
     _programObject->activate();
     _programObject->setUniform("color", color);
 
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
-    glNamedBufferData(
-        _vertexBufferID,
-        clippingSpacePoints.size() * sizeof(clippingSpacePoints[0]),
-        clippingSpacePoints.data(),
-        GL_STATIC_DRAW);
-
-
-    glEnableVertexArrayAttrib(_vaoID, 0);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(clippingSpacePoints[0]),
-        nullptr
-    );
-
     // Draw the vertices
+    glBindVertexArray(vao);
     glDrawArrays(mode, 0, static_cast<GLsizei>(clippingSpacePoints.size()));
-
-    // Clean up after the draw call was made
     glBindVertexArray(0);
-    glDeleteVertexArrays(1, &_vaoID);
-    glDeleteBuffers(1, &_vertexBufferID);
+
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
     _programObject->deactivate();
 }
 

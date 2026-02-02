@@ -543,9 +543,13 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
 void ScreenSpaceInsetBlackout::initializeGL() {
     ScreenSpaceRenderable::initializeGL();
 
-    // Setup vertex buffer
-    glCreateVertexArrays(1, &_vao);
     glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(glm::vec2));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     // Setup program object and shaders
     _fboProgram = BaseModule::ProgramObjectManager.request(
@@ -720,17 +724,12 @@ void ScreenSpaceInsetBlackout::generateVertexArrayData() {
 }
 
 void ScreenSpaceInsetBlackout::generateTexture() {
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glNamedBufferData(
         _vbo,
         _vboData.size() * sizeof(glm::vec2),
         _vboData.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexArrayAttrib(_vao, 0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), nullptr);
-    glBindVertexArray(0);
 
     _fboProgram->activate();
     _fboProgram->setUniform(

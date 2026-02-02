@@ -882,32 +882,20 @@ void RenderableGaiaStars::initializeGL() {
 }
 
 void RenderableGaiaStars::deinitializeGL() {
-    if (_vboPos != 0) {
-        glDeleteBuffers(1, &_vboPos);
-        _vboPos = 0;
-    }
-    if (_vboCol != 0) {
-        glDeleteBuffers(1, &_vboCol);
-        _vboCol = 0;
-    }
-    if (_vboVel != 0) {
-        glDeleteBuffers(1, &_vboVel);
-        _vboVel = 0;
-    }
-    if (_ssboIdx != 0) {
-        glDeleteBuffers(1, &_ssboIdx);
-        _ssboIdx = 0;
-        glDeleteBuffers(1, &_ssboData);
-        _ssboData = 0;
-    }
-    if (_vao != 0) {
-        glDeleteVertexArrays(1, &_vao);
-        _vao = 0;
-    }
-    if (_vaoEmpty != 0) {
-        glDeleteVertexArrays(1, &_vaoEmpty);
-        _vaoEmpty = 0;
-    }
+    glDeleteBuffers(1, &_vboPos);
+    _vboPos = 0;
+    glDeleteBuffers(1, &_vboCol);
+    _vboCol = 0;
+    glDeleteBuffers(1, &_vboVel);
+    _vboVel = 0;
+    glDeleteBuffers(1, &_ssboIdx);
+    _ssboIdx = 0;
+    glDeleteBuffers(1, &_ssboData);
+    _ssboData = 0;
+    glDeleteVertexArrays(1, &_vao);
+    _vao = 0;
+    glDeleteVertexArrays(1, &_vaoEmpty);
+    _vaoEmpty = 0;
 
     glDeleteBuffers(1, &_vboQuad);
     _vboQuad = 0;

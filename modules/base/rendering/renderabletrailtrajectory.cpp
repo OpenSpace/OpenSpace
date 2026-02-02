@@ -211,13 +211,50 @@ void RenderableTrailTrajectory::initializeGL() {
     RenderableTrail::initializeGL();
 
     // We don't need an index buffer, so we keep it at the default value of 0
-    glCreateVertexArrays(1, &_primaryRenderInformation._vaoID);
     glCreateBuffers(1, &_primaryRenderInformation._vBufferID);
+    glCreateVertexArrays(1, &_primaryRenderInformation._vaoID);
+    glVertexArrayVertexBuffer(
+        _primaryRenderInformation._vaoID,
+        0,
+        _primaryRenderInformation._vBufferID,
+        0,
+        sizeof(TrailVBOLayout<float>)
+    );
+
+    glEnableVertexArrayAttrib(_primaryRenderInformation._vaoID, 0);
+    glVertexArrayAttribFormat(
+        _primaryRenderInformation._vaoID,
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        0
+    );
+    glVertexArrayAttribBinding(_primaryRenderInformation._vaoID, 0, 0);
 
     // We do need an additional render information bucket for the additional line from the
     // last shown permanent line to the current position of the object
-    glCreateVertexArrays(1, &_floatingRenderInformation._vaoID);
     glCreateBuffers(1, &_floatingRenderInformation._vBufferID);
+    glCreateVertexArrays(1, &_floatingRenderInformation._vaoID);
+    glVertexArrayVertexBuffer(
+        _floatingRenderInformation._vaoID,
+        0,
+        _floatingRenderInformation._vBufferID,
+        0,
+        sizeof(TrailVBOLayout<float>)
+    );
+
+    glEnableVertexArrayAttrib(_floatingRenderInformation._vaoID, 0);
+    glVertexArrayAttribFormat(
+        _floatingRenderInformation._vaoID,
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        0
+    );
+    glVertexArrayAttribBinding(_floatingRenderInformation._vaoID, 0, 0);
+
     _floatingRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
 
     _secondaryRenderInformation._vaoID = _primaryRenderInformation._vaoID;
@@ -284,17 +321,12 @@ void RenderableTrailTrajectory::updateBuffer() {
     setBoundingSphere(glm::distance(_maxVertex, _minVertex) / 2.0);
 
     // Upload vertices to the GPU
-    glBindVertexArray(_primaryRenderInformation._vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
     glNamedBufferData(
         _primaryRenderInformation._vBufferID,
         _vertexArray.size() * sizeof(TrailVBOLayout<float>),
         _vertexArray.data(),
         GL_STATIC_DRAW
     );
-
-    glEnableVertexArrayAttrib(_primaryRenderInformation._vaoID, 0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     // We clear the indexArray just in case. The base class will take care not to use
     // it if it is empty
@@ -466,16 +498,12 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             _primaryRenderInformation.count += 1;
         }
 
-        glBindVertexArray(_floatingRenderInformation._vaoID);
-        glBindBuffer(GL_ARRAY_BUFFER, _floatingRenderInformation._vBufferID);
         glNamedBufferData(
             _floatingRenderInformation._vBufferID,
             _replacementPoints.size() * sizeof(TrailVBOLayout<float>),
             _replacementPoints.data(),
             GL_DYNAMIC_DRAW
         );
-        glEnableVertexArrayAttrib(_floatingRenderInformation._vaoID, 0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     }
     else {
         _primaryRenderInformation.first = 0;
