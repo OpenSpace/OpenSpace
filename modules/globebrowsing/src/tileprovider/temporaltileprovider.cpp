@@ -683,10 +683,8 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
     ZoneScoped;
 
     glCreateFramebuffers(1, &fbo);
-    glCreateVertexArrays(1, &vaoQuad);
+
     glCreateBuffers(1, &vboQuad);
-    glBindVertexArray(vaoQuad);
-    glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
     // Quad for fullscreen with vertex (xy) and texture coordinates (uv)
     constexpr std::array<GLfloat, 24> VertexData = {
         // x    y    u    v
@@ -698,21 +696,18 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
          1.f,  1.f, 1.f, 1.f
     };
     glNamedBufferData(vboQuad, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
-    // vertex coordinates at location 0
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
+
+    glCreateVertexArrays(1, &vaoQuad);
+    glVertexArrayVertexBuffer(vaoQuad, 0, vboQuad, 0, 4 * sizeof(GLfloat));
+
     glEnableVertexArrayAttrib(vaoQuad, 0);
-    // texture coords at location 1
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        4 * sizeof(GLfloat),
-        reinterpret_cast<void*>(2 * sizeof(GLfloat))
-    );
+    glVertexArrayAttribFormat(vaoQuad, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vaoQuad, 0, 0);
+
     glEnableVertexArrayAttrib(vaoQuad, 1);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    glVertexArrayAttribFormat(vaoQuad, 1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat));
+    glVertexArrayAttribBinding(vaoQuad, 1, 0);
+
     shaderProgram = global::renderEngine->buildRenderProgram(
         "InterpolatingProgram",
         absPath("${MODULE_GLOBEBROWSING}/shaders/interpolate_vs.glsl"),

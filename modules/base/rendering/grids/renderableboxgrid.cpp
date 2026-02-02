@@ -119,13 +119,13 @@ void RenderableBoxGrid::initializeGL() {
         }
     );
 
-    glCreateVertexArrays(1, &_vaoID);
     glCreateBuffers(1, &_vBufferID);
+    glCreateVertexArrays(1, &_vaoID);
+    glVertexArrayVertexBuffer(_vaoID, 0, _vBufferID, 0, sizeof(Vertex));
 
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
     glEnableVertexArrayAttrib(_vaoID, 0);
-    glBindVertexArray(0);
+    glVertexArrayAttribFormat(_vaoID, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vaoID, 0, 0);
 }
 
 void RenderableBoxGrid::deinitializeGL() {
@@ -235,17 +235,12 @@ void RenderableBoxGrid::update(const UpdateData&) {
 
         setBoundingSphere(glm::length(glm::dvec3(urb)));
 
-        glBindVertexArray(_vaoID);
-        glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
         glNamedBufferData(
             _vBufferID,
             _varray.size() * sizeof(Vertex),
             _varray.data(),
             GL_STATIC_DRAW
         );
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-        glBindVertexArray(0);
 
         _gridIsDirty = false;
     }

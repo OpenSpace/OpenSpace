@@ -1099,13 +1099,8 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
     global::renderEngine->openglStateCache().viewport(viewport.data());
 
     // Prepare for rendering/calculations
-    GLuint quadVao = 0;
-    glCreateVertexArrays(1, &quadVao);
-    glBindVertexArray(quadVao);
     GLuint quadVbo = 0;
     glCreateBuffers(1, &quadVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, quadVbo);
-
     constexpr std::array<GLfloat, 12> VertexData = {
         // x     y
         -1.f, -1.f,
@@ -1115,10 +1110,17 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
          1.f, -1.f,
          1.f,  1.f,
     };
-
     glNamedBufferData(quadVbo, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
+
+    GLuint quadVao = 0;
+    glCreateVertexArrays(1, &quadVao);
+    glVertexArrayVertexBuffer(quadVao, 0, quadVbo, 0, 2 * sizeof(GLfloat));
+
     glEnableVertexArrayAttrib(quadVao, 0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
+    glVertexArrayAttribFormat(quadVao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(quadVao, 0, 0);
+
+    glBindVertexArray(quadVao);
 
     // Execute Calculations
     LDEBUG("Starting precalculations for scattering effects");

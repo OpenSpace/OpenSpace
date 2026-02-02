@@ -444,43 +444,38 @@ void ImGUIModule::internalInitializeGL() {
     glCreateBuffers(1, &vboElements);
 
     glCreateVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(ImDrawVert));
+    glVertexArrayElementBuffer(vao, vboElements);
+
 
     const GLuint positionAttrib = _program->attributeLocation("in_position");
-    const GLuint uvAttrib = _program->attributeLocation("in_uv");
-    const GLuint colorAttrib = _program->attributeLocation("in_color");
-
     glEnableVertexArrayAttrib(vao, positionAttrib);
-    glVertexAttribPointer(
-        positionAttrib,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(ImDrawVert),
-        nullptr
-    );
+    glVertexArrayAttribFormat(vao, positionAttrib, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vao, positionAttrib, 0);
 
+    const GLuint uvAttrib = _program->attributeLocation("in_uv");
     glEnableVertexArrayAttrib(vao, uvAttrib);
-    glVertexAttribPointer(
+    glVertexArrayAttribFormat(
+        vao,
         uvAttrib,
         2,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(ImDrawVert),
-        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, uv))
+        offsetof(ImDrawVert, uv)
     );
+    glVertexArrayAttribBinding(vao, uvAttrib, 0);
 
+    const GLuint colorAttrib = _program->attributeLocation("in_color");
     glEnableVertexArrayAttrib(vao, colorAttrib);
-    glVertexAttribPointer(
+    glVertexArrayAttribFormat(
+        vao,
         colorAttrib,
         4,
         GL_UNSIGNED_BYTE,
         GL_TRUE,
-        sizeof(ImDrawVert),
-        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, col))
+        offsetof(ImDrawVert, col)
     );
-    glBindVertexArray(0);
+    glVertexArrayAttribBinding(vao, colorAttrib, 0);
 
     for (gui::GuiComponent* comp : _components) {
         comp->initializeGL();

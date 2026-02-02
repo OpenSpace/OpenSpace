@@ -703,6 +703,7 @@ void RenderableModel::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
 
     // Screen quad VAO
+    glCreateBuffers(1, &_quadVbo);
     constexpr std::array<GLfloat, 24> QuadVtx = {
         // x     y     s     t
         -1.f, -1.f,  0.f,  0.f,
@@ -712,25 +713,18 @@ void RenderableModel::initializeGL() {
          1.f, -1.f,  1.f,  0.f,
          1.f,  1.f,  1.f,  1.f
     };
+    glNamedBufferData(_quadVbo, sizeof(QuadVtx), QuadVtx.data(), GL_STATIC_DRAW);
 
     glCreateVertexArrays(1, &_quadVao);
-    glBindVertexArray(_quadVao);
+    glVertexArrayVertexBuffer(_quadVao, 0, _quadVbo, 0, 4 * sizeof(GLfloat));
 
-    glCreateBuffers(1, &_quadVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _quadVbo);
-
-    glNamedBufferData(_quadVbo, sizeof(QuadVtx), QuadVtx.data(), GL_STATIC_DRAW);
     glEnableVertexArrayAttrib(_quadVao, 0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
+    glVertexArrayAttribFormat(_quadVao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_quadVao, 0, 0);
+
     glEnableVertexArrayAttrib(_quadVao, 1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        4 * sizeof(GLfloat),
-        reinterpret_cast<void*>(2 * sizeof(GLfloat))
-    );
+    glVertexArrayAttribFormat(_quadVao, 1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat));
+    glVertexArrayAttribBinding(_quadVao, 1, 0);
 
     // Generate textures and the frame buffer
     glCreateFramebuffers(1, &_framebuffer);

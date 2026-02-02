@@ -141,20 +141,20 @@ void FramebufferRenderer::initialize() {
          1.f,  1.f,
     };
 
-    glCreateVertexArrays(1, &_screenQuad);
-    glBindVertexArray(_screenQuad);
-
-    glCreateBuffers(1, &_vertexPositionBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-
+    glCreateBuffers(1, &_screenQuadVbo);
     glNamedBufferData(
-        _vertexPositionBuffer,
+        _screenQuadVbo,
         sizeof(VertexData),
         VertexData.data(),
         GL_STATIC_DRAW
     );
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
-    glEnableVertexArrayAttrib(_screenQuad, 0);
+
+    glCreateVertexArrays(1, &_screenQuadVao);
+    glVertexArrayVertexBuffer(_screenQuadVao, 0, _screenQuadVbo, 0, 2 * sizeof(GLfloat));
+
+    glEnableVertexArrayAttrib(_screenQuadVao, 0);
+    glVertexArrayAttribFormat(_screenQuadVao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_screenQuadVao, 0, 0);
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
@@ -397,8 +397,8 @@ void FramebufferRenderer::deinitialize() {
     glDeleteTextures(1, &_exitColorTexture);
     glDeleteTextures(1, &_exitDepthTexture);
 
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    glDeleteVertexArrays(1, &_screenQuad);
+    glDeleteBuffers(1, &_screenQuadVbo);
+    glDeleteVertexArrays(1, &_screenQuadVao);
 
     global::raycasterManager->removeListener(*this);
     global::deferredcasterManager->removeListener(*this);
@@ -557,7 +557,7 @@ void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewp
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
 
-    glBindVertexArray(_screenQuad);
+    glBindVertexArray(_screenQuadVao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
@@ -590,7 +590,7 @@ void FramebufferRenderer::applyFXAA(const glm::ivec4& viewport) {
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
 
-    glBindVertexArray(_screenQuad);
+    glBindVertexArray(_screenQuadVao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
@@ -701,7 +701,7 @@ void FramebufferRenderer::writeDownscaledVolume(const glm::ivec4& viewport) {
 
     glDisable(GL_DEPTH_TEST);
 
-    glBindVertexArray(_screenQuad);
+    glBindVertexArray(_screenQuadVao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
@@ -1531,7 +1531,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             glDisable(GL_DEPTH_TEST);
             glDepthMask(false);
             if (isCameraInside) {
-                glBindVertexArray(_screenQuad);
+                glBindVertexArray(_screenQuadVao);
                 glDrawArrays(GL_TRIANGLES, 0, 6);
                 glBindVertexArray(0);
             }
@@ -1628,7 +1628,7 @@ void FramebufferRenderer::performDeferredTasks(
             glDisable(GL_DEPTH_TEST);
             glDepthMask(false);
 
-            glBindVertexArray(_screenQuad);
+            glBindVertexArray(_screenQuadVao);
             glDrawArrays(GL_TRIANGLES, 0, 6);
             glBindVertexArray(0);
 

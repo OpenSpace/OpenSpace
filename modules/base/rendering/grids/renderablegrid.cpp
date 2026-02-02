@@ -209,18 +209,22 @@ void RenderableGrid::initializeGL() {
         }
     );
 
-    glCreateVertexArrays(1, &_vaoID);
     glCreateBuffers(1, &_vBufferID);
-    glCreateVertexArrays(1, &_highlightVaoID);
-    glCreateBuffers(1, &_highlightVBufferID);
-
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBindVertexArray(_highlightVaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _highlightVBufferID);
+    glCreateVertexArrays(1, &_vaoID);
+    glVertexArrayVertexBuffer(_vaoID, 0, _vBufferID, 0, sizeof(Vertex));
 
     glEnableVertexArrayAttrib(_vaoID, 0);
-    glBindVertexArray(0);
+    glVertexArrayAttribFormat(_vaoID, 0, 3, GL_DOUBLE, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vaoID, 0, 0);
+
+
+    glCreateBuffers(1, &_highlightVBufferID);
+    glCreateVertexArrays(1, &_highlightVaoID);
+    glVertexArrayVertexBuffer(_highlightVaoID, 0, _highlightVBufferID, 0, sizeof(Vertex));
+
+    glEnableVertexArrayAttrib(_highlightVaoID, 0);
+    glVertexArrayAttribFormat(_highlightVaoID, 0, 3, GL_DOUBLE, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_highlightVaoID, 0, 0);
 }
 
 void RenderableGrid::deinitializeGL() {
@@ -432,29 +436,20 @@ void RenderableGrid::update(const UpdateData&) {
     setBoundingSphere(glm::length(glm::dvec2(halfSize)));
 
     // Minor grid
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
     glNamedBufferData(
         _vBufferID,
         _varray.size() * sizeof(Vertex),
         _varray.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexArrayAttrib(_vaoID, 0);
-    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, sizeof(Vertex), nullptr);
 
     // Major grid
-    glBindVertexArray(_highlightVaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _highlightVBufferID);
     glNamedBufferData(
         _highlightVBufferID,
         _highlightArray.size() * sizeof(Vertex),
         _highlightArray.data(),
         GL_STATIC_DRAW
     );
-    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, sizeof(Vertex), nullptr);
-
-    glBindVertexArray(0);
 
     _gridIsDirty = false;
 }

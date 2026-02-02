@@ -342,8 +342,18 @@ bool RenderablePlane::isReady() const {
 void RenderablePlane::initializeGL() {
     ZoneScoped;
 
-    glCreateVertexArrays(1, &_quad); // generate array
-    glCreateBuffers(1, &_vertexPositionBuffer); // generate buffer
+    glCreateBuffers(1, &_vertexPositionBuffer);
+    glCreateVertexArrays(1, &_quad);
+    glVertexArrayVertexBuffer(_quad, 0, _vertexPositionBuffer, 0, 6 * sizeof(GLfloat));
+
+    glEnableVertexArrayAttrib(_quad, 0);
+    glVertexArrayAttribFormat(_quad, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_quad, 0, 0);
+
+    glEnableVertexArrayAttrib(_quad, 1);
+    glVertexArrayAttribFormat(_quad, 1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat));
+    glVertexArrayAttribBinding(_quad, 1, 0);
+
     createPlane();
 
     _shader = BaseModule::ProgramObjectManager.request(
@@ -493,27 +503,12 @@ void RenderablePlane::createPlane() {
          sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f
     };
 
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
     glNamedBufferData(
         _vertexPositionBuffer,
         sizeof(vertexData),
         vertexData.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexArrayAttrib(_quad, 0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
-
-    glEnableVertexArrayAttrib(_quad, 1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
-    );
-    glBindVertexArray(0);
 }
 
 glm::dmat4 RenderablePlane::rotationMatrix(const RenderData& data) const {
