@@ -46,6 +46,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/misc/stringhelper.h>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -514,7 +515,7 @@ void DataViewer::render() {
     if (ImGui::BeginMainMenuBar()) {
         ImGui::PopStyleVar(); // We don't want the padding to affect the other menus below, so pop here
 
-        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 0.8 * offset);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 0.8f * offset);
         ImGui::TextDisabled("ExoplanetExplorer:");
 
         renderFileMenu();
