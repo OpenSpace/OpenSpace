@@ -574,6 +574,14 @@ void RenderableVectorField::computeFieldLinesParallel() {
         }
     );
 
+    // The bounding sphere radius is the distance to the furthest corner of the domain
+    double boundingSphereRadius = glm::length(glm::max(
+        glm::abs(_minDomain),
+        glm::abs(_maxDomain))
+    );
+
+    setBoundingSphere(boundingSphereRadius);
+
     if (_instances.empty()) {
         throw ghoul::RuntimeError("Couldn't compute vector field segments");
     }
