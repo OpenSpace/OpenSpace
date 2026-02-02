@@ -873,8 +873,8 @@ void VideoPlayer::createTexture(glm::ivec2 size) {
     _frameTexture->uploadTexture();
 
     // Disable mipmaps
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+    glTextureParameteri(*_frameTexture, GL_TEXTURE_BASE_LEVEL, 0);
+    glTextureParameteri(*_frameTexture, GL_TEXTURE_MAX_LEVEL, 0);
 
     // Bind texture to framebuffer
     glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_frameTexture, 0);

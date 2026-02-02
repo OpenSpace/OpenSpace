@@ -335,33 +335,21 @@ void ShadowComponent::updateDepthTexture() const {
         nullptr
     );
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, ShadowBorder.data());
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-
-    //glCreateTextures(GL_TEXTURE_2D, 1, &_positionInLightSpaceTexture);
-    //glBindTexture(GL_TEXTURE_2D, _positionInLightSpaceTexture);
-    //glTexImage2D(
-    //    GL_TEXTURE_2D,
-    //    0,
-    //    GL_RGB32F,
-    //    _shadowDepthTextureWidth,
-    //    _shadowDepthTextureHeight,
-    //    0,
-    //    GL_RGBA,
-    //    GL_FLOAT,
-    //    nullptr
-    //);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glTextureParameteri(_shadowDepthTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_shadowDepthTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(_shadowDepthTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTextureParameteri(_shadowDepthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTextureParameterfv(
+        _shadowDepthTexture,
+        GL_TEXTURE_BORDER_COLOR,
+        ShadowBorder.data()
+    );
+    glTextureParameteri(
+        _shadowDepthTexture,
+        GL_TEXTURE_COMPARE_MODE,
+        GL_COMPARE_REF_TO_TEXTURE
+    );
+    glTextureParameteri(_shadowDepthTexture, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 }
 
 void ShadowComponent::buildDDepthTexture() {
@@ -379,14 +367,16 @@ void ShadowComponent::buildDDepthTexture() {
         nullptr
     );
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_REF_TO_TEXTURE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glTextureParameteri(_dDepthTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_dDepthTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(_dDepthTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTextureParameteri(_dDepthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTextureParameteri(
+        _dDepthTexture,
+        GL_TEXTURE_COMPARE_MODE,
+        GL_COMPARE_REF_TO_TEXTURE
+    );
+    glTextureParameteri(_dDepthTexture, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 }
 
 void ShadowComponent::saveDepthBuffer() const {

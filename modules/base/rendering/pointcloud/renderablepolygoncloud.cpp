@@ -110,10 +110,10 @@ void RenderablePolygonCloud::initializeCustomTexture() {
 
     glCreateTextures(GL_TEXTURE_2D, 1, &_pTexture);
     glBindTexture(GL_TEXTURE_2D, _pTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_pTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(_pTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_pTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_pTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     glTexImage2D(

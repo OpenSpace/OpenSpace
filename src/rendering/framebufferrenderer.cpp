@@ -444,13 +444,13 @@ void FramebufferRenderer::registerShadowCaster(const std::string& shadowGroup,
             GL_FLOAT,
             nullptr
         );
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTextureParameteri(info.depthMap.texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(info.depthMap.texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTextureParameteri(info.depthMap.texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTextureParameteri(info.depthMap.texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         constexpr glm::vec4 borderColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
-        glTexParameterfv(
-            GL_TEXTURE_2D,
+        glTextureParameterfv(
+            info.depthMap.texture,
             GL_TEXTURE_BORDER_COLOR,
             glm::value_ptr(borderColor)
         );
@@ -615,10 +615,19 @@ void FramebufferRenderer::updateDownscaleTextures() const {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_MAG_FILTER, GL_LINEAR
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_MIN_FILTER, GL_LINEAR
+    );
     constexpr float VolumeBorderColor[] = { 0.f, 0.f, 0.f, 1.f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, VolumeBorderColor);
+    glTextureParameterfv(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_BORDER_COLOR, VolumeBorderColor
+    );
 
     glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);
     glTexImage2D(
@@ -632,8 +641,14 @@ void FramebufferRenderer::updateDownscaleTextures() const {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(
+        _downscaleVolumeRendering.depthbuffer,
+        GL_TEXTURE_MAG_FILTER, GL_LINEAR
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.depthbuffer,
+        GL_TEXTURE_MIN_FILTER, GL_LINEAR
+    );
 }
 
 void FramebufferRenderer::writeDownscaledVolume(const glm::ivec4& viewport) {
@@ -802,10 +817,10 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(_gBuffers.colorTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.colorTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.colorTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_gBuffers.colorTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glObjectLabel(GL_TEXTURE, _gBuffers.colorTexture, -1, "G-Buffer Color");
 
     glBindTexture(GL_TEXTURE_2D, _gBuffers.positionTexture);
@@ -820,10 +835,10 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(_gBuffers.positionTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.positionTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.positionTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_gBuffers.positionTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glObjectLabel(GL_TEXTURE, _gBuffers.positionTexture, -1, "G-Buffer Position");
 
     glBindTexture(GL_TEXTURE_2D, _gBuffers.normalTexture);
@@ -838,10 +853,10 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(_gBuffers.normalTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.normalTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.normalTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_gBuffers.normalTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glObjectLabel(GL_TEXTURE, _gBuffers.normalTexture, -1, "G-Buffer Normal");
 
     glBindTexture(GL_TEXTURE_2D, _gBuffers.depthTexture);
@@ -856,10 +871,10 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(_gBuffers.depthTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.depthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.depthTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_gBuffers.depthTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glObjectLabel(GL_TEXTURE, _gBuffers.depthTexture, -1, "G-Buffer Depth");
 
     glBindTexture(GL_TEXTURE_2D, _pingPongBuffers.colorTexture[1]);
@@ -874,10 +889,22 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(
+        _pingPongBuffers.colorTexture[1],
+        GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
+    );
+    glTextureParameteri(
+        _pingPongBuffers.colorTexture[1],
+        GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
+    );
+    glTextureParameteri(
+        _pingPongBuffers.colorTexture[1],
+        GL_TEXTURE_MAG_FILTER, GL_LINEAR
+    );
+    glTextureParameteri(
+        _pingPongBuffers.colorTexture[1],
+        GL_TEXTURE_MIN_FILTER, GL_LINEAR
+    );
     glObjectLabel(
         GL_TEXTURE,
         _pingPongBuffers.colorTexture[1],
@@ -898,10 +925,10 @@ void FramebufferRenderer::updateResolution() {
         GL_UNSIGNED_BYTE,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(_fxaaBuffers.fxaaTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_fxaaBuffers.fxaaTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_fxaaBuffers.fxaaTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_fxaaBuffers.fxaaTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glObjectLabel(GL_TEXTURE, _fxaaBuffers.fxaaTexture, -1, "FXAA");
 
     const float cdf = _downscaleVolumeRendering.currentDownscaleFactor;
@@ -919,10 +946,22 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_MAG_FILTER, GL_LINEAR
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_MIN_FILTER, GL_LINEAR
+    );
 
     constexpr std::array<float, 4> VolumeBorderColor = { 0.f, 0.f, 0.f, 1.f };
     glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, VolumeBorderColor.data());
@@ -945,10 +984,22 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(
+        _downscaleVolumeRendering.depthbuffer,
+        GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.depthbuffer,
+        GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.depthbuffer,
+        GL_TEXTURE_MAG_FILTER, GL_LINEAR
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.depthbuffer,
+        GL_TEXTURE_MIN_FILTER, GL_LINEAR
+    );
     glObjectLabel(
         GL_TEXTURE,
         _downscaleVolumeRendering.depthbuffer,
@@ -969,10 +1020,10 @@ void FramebufferRenderer::updateResolution() {
         GL_UNSIGNED_SHORT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(_exitColorTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_exitColorTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_exitColorTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_exitColorTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glObjectLabel(GL_TEXTURE, _exitColorTexture, -1, "Exit color");
 
     glBindTexture(GL_TEXTURE_2D, _exitDepthTexture);
@@ -987,10 +1038,10 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(_exitDepthTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_exitDepthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_exitDepthTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_exitDepthTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glObjectLabel(GL_TEXTURE, _exitDepthTexture, -1, "Exit depth");
 
     _dirtyResolution = false;
