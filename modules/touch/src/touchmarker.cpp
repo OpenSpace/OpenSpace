@@ -151,7 +151,7 @@ void TouchMarker::createVertexList(const std::vector<openspace::TouchInputHolder
         _vertexData.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_quad, 0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 

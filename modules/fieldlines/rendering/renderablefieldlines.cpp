@@ -325,7 +325,7 @@ void RenderableFieldlines::update(const UpdateData&) {
         );
 
         GLuint vertexLocation = 0;
-        glEnableVertexAttribArray(vertexLocation);
+        glEnableVertexArrayAttrib(_fieldlineVAO, vertexLocation);
         glVertexAttribPointer(
             vertexLocation,
             3,
@@ -336,7 +336,7 @@ void RenderableFieldlines::update(const UpdateData&) {
         );
 
         GLuint colorLocation = 1;
-        glEnableVertexAttribArray(colorLocation);
+        glEnableVertexArrayAttrib(_fieldlineVAO, colorLocation);
         glVertexAttribPointer(
             colorLocation,
             4,

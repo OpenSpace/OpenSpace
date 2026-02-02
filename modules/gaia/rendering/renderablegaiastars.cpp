@@ -1803,7 +1803,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 case gaia::RenderMode::Static: {
                     glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
                     const GLint position = _program->attributeLocation("in_position");
-                    glEnableVertexAttribArray(position);
+                    glEnableVertexArrayAttrib(_vao, position);
 
                     glVertexAttribPointer(
                         position,
@@ -1819,7 +1819,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 case gaia::RenderMode::Color: {
                     glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
                     const GLint position = _program->attributeLocation("in_position");
-                    glEnableVertexAttribArray(position);
+                    glEnableVertexArrayAttrib(_vao, position);
 
                     glVertexAttribPointer(
                         position,
@@ -1832,7 +1832,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
                     glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
                     const GLint brightness = _program->attributeLocation("in_brightness");
-                    glEnableVertexAttribArray(brightness);
+                    glEnableVertexArrayAttrib(_vao, brightness);
 
                     glVertexAttribPointer(
                         brightness,
@@ -1847,7 +1847,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 case gaia::RenderMode::Motion: {
                     glBindBuffer(GL_ARRAY_BUFFER, _vboPos);
                     const GLint position = _program->attributeLocation("in_position");
-                    glEnableVertexAttribArray(position);
+                    glEnableVertexArrayAttrib(_vao, position);
 
                     glVertexAttribPointer(
                         position,
@@ -1860,7 +1860,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
                     glBindBuffer(GL_ARRAY_BUFFER, _vboCol);
                     const GLint brightness = _program->attributeLocation("in_brightness");
-                    glEnableVertexAttribArray(brightness);
+                    glEnableVertexArrayAttrib(_vao, brightness);
 
                     glVertexAttribPointer(
                         brightness,
@@ -1873,7 +1873,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
                     glBindBuffer(GL_ARRAY_BUFFER, _vboVel);
                     const GLint velocity = _program->attributeLocation("in_velocity");
-                    glEnableVertexAttribArray(velocity);
+                    glEnableVertexArrayAttrib(_vao, velocity);
 
                     glVertexAttribPointer(
                         velocity,
@@ -1936,7 +1936,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         );
 
         const GLint tmPositionAttrib = _programTM->attributeLocation("in_position");
-        glEnableVertexAttribArray(tmPositionAttrib);
+        glEnableVertexArrayAttrib(_vaoQuad, tmPositionAttrib);
         glVertexAttribPointer(
             tmPositionAttrib,
             3,
@@ -1946,7 +1946,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             nullptr
         );
 
-        glEnableVertexAttribArray(0);
+        glEnableVertexArrayAttrib(_vaoQuad, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 

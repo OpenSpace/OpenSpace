@@ -148,7 +148,7 @@ void SkirtedGrid::initializeGL() {
     );
 
     // Textures at location 1
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(_vaoID, 1);
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 
     // Element buffer

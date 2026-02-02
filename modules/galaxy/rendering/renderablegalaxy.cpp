@@ -474,7 +474,7 @@ void RenderableGalaxy::initializeGL() {
         _pointPositionsCache.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_pointsVao, 0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     _pointPositionsCache.clear();
 
@@ -485,7 +485,7 @@ void RenderableGalaxy::initializeGL() {
         _pointColorsCache.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(_pointsVao, 1);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     _pointColorsCache.clear();
 

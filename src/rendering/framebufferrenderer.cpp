@@ -154,7 +154,7 @@ void FramebufferRenderer::initialize() {
         GL_STATIC_DRAW
     );
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_screenQuad, 0);
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 

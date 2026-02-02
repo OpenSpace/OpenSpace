@@ -365,7 +365,7 @@ void RenderablePlanetProjection::initializeGL() {
         VertexData.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_quad, 0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
     glBindVertexArray(0);
 }

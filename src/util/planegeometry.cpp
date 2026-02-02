@@ -84,9 +84,9 @@ void PlaneGeometry::updateGeometry() const {
     glBindVertexArray(_vaoId);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
     glNamedBufferData(_vBufferId, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vaoId, 0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), nullptr);
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(_vaoId, 1);
     glVertexAttribPointer(
         1,
         2,

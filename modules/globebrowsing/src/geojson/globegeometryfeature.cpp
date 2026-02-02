@@ -843,7 +843,7 @@ void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
     );
 
     const GLint positionAttrib = program->attributeLocation("in_position");
-    glEnableVertexAttribArray(positionAttrib);
+    glEnableVertexArrayAttrib(feature.vaoId, positionAttrib);
     glVertexAttribPointer(
         positionAttrib,
         3,
@@ -854,7 +854,7 @@ void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
     );
 
     const GLint normalAttrib = program->attributeLocation("in_normal");
-    glEnableVertexAttribArray(normalAttrib);
+    glEnableVertexArrayAttrib(feature.vaoId, normalAttrib);
     glVertexAttribPointer(
         normalAttrib,
         3,
@@ -876,7 +876,7 @@ void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
     );
 
     const GLint heightAttrib = program->attributeLocation("in_height");
-    glEnableVertexAttribArray(heightAttrib);
+    glEnableVertexArrayAttrib(feature.vaoId, heightAttrib);
     glVertexAttribPointer(
         heightAttrib,
         1,
@@ -911,7 +911,7 @@ void GlobeGeometryFeature::bufferDynamicHeightData(const RenderFeature& feature)
     );
 
     const GLint heightAttrib = program->attributeLocation("in_height");
-    glEnableVertexAttribArray(heightAttrib);
+    glEnableVertexArrayAttrib(feature.vaoId, heightAttrib);
     glVertexAttribPointer(
         heightAttrib,
         1,

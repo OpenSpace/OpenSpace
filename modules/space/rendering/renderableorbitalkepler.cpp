@@ -834,10 +834,10 @@ void RenderableOrbitalKepler::updateBuffers() {
         GL_STATIC_DRAW
     );
 
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vertexArray, 0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), nullptr);
 
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(_vertexArray, 1);
     glVertexAttribLPointer(
         1,
         3,

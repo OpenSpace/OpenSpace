@@ -285,7 +285,7 @@ void RenderableNodeLine::initializeGL() {
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
 
     glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(_locVertex);
+    glEnableVertexArrayAttrib(_vaoId, _locVertex);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);

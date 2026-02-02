@@ -219,7 +219,7 @@ void RenderableGrid::initializeGL() {
     glBindVertexArray(_highlightVaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _highlightVBufferID);
 
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vaoID, 0);
     glBindVertexArray(0);
 }
 
@@ -440,7 +440,7 @@ void RenderableGrid::update(const UpdateData&) {
         _varray.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vaoID, 0);
     glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, sizeof(Vertex), nullptr);
 
     // Major grid

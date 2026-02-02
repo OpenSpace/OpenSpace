@@ -1460,7 +1460,7 @@ int RenderablePointCloud::bufferVertexAttribute(const std::string& name, GLint n
                                                 int nAttributesPerPoint, int offset) const
 {
     GLint attrib = _program->attributeLocation(name);
-    glEnableVertexAttribArray(attrib);
+    glEnableVertexArrayAttrib(_vao, attrib);
     glVertexAttribPointer(
         attrib,
         nValues,

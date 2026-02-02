@@ -723,7 +723,7 @@ void RingsComponent::createPlane() {
         vertices.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_quad, 0);
     glVertexAttribPointer(
         0,
         2,
@@ -732,7 +732,7 @@ void RingsComponent::createPlane() {
         sizeof(VertexData),
         nullptr
     );
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(_quad, 1);
     glVertexAttribPointer(
         1,
         2,
@@ -741,7 +741,7 @@ void RingsComponent::createPlane() {
         sizeof(VertexData),
         reinterpret_cast<void*>(offsetof(VertexData, s))
     );
-    glEnableVertexAttribArray(2);
+    glEnableVertexArrayAttrib(_quad, 2);
     glVertexAttribPointer(
         2,
         3,

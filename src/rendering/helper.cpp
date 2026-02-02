@@ -242,9 +242,9 @@ void initialize() {
         GL_STATIC_DRAW
     );
 
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(vertexObjects.square.vao, 0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA), nullptr);
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(vertexObjects.square.vao, 1);
     glVertexAttribPointer(
         1,
         2,
@@ -253,7 +253,7 @@ void initialize() {
         sizeof(VertexXYUVRGBA),
         reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, uv))
     );
-    glEnableVertexAttribArray(2);
+    glEnableVertexArrayAttrib(vertexObjects.square.vao, 2);
     glVertexAttribPointer(
         2,
         4,
@@ -292,9 +292,9 @@ void initialize() {
         sphereData.indices.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(vertexObjects.sphere.vao, 0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(vertexObjects.sphere.vao, 1);
     glVertexAttribPointer(
         1,
         2,
@@ -303,7 +303,7 @@ void initialize() {
         sizeof(Vertex),
         reinterpret_cast<GLvoid*>(offsetof(Vertex, uv))
     );
-    glEnableVertexAttribArray(2);
+    glEnableVertexArrayAttrib(vertexObjects.sphere.vao, 2);
     glVertexAttribPointer(
         2,
         4,
@@ -341,9 +341,9 @@ void initialize() {
         cylinderData.indices.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(vertexObjects.cylinder.vao, 0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexXYZNormal), nullptr);
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(vertexObjects.cylinder.vao, 1);
     glVertexAttribPointer(
         1,
         3,
@@ -381,9 +381,9 @@ void initialize() {
         coneData.indices.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(vertexObjects.cone.vao, 0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexXYZNormal), nullptr);
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(vertexObjects.cone.vao, 1);
     glVertexAttribPointer(
         1,
         3,
@@ -410,9 +410,9 @@ void initialize() {
         nullptr,
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(vertexObjects.line.vao, 0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA), nullptr);
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(vertexObjects.line.vao, 1);
     glVertexAttribPointer(1,
         2,
         GL_FLOAT,
@@ -420,7 +420,7 @@ void initialize() {
         sizeof(VertexXYUVRGBA),
         reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, uv))
     );
-    glEnableVertexAttribArray(2);
+    glEnableVertexArrayAttrib(vertexObjects.line.vao, 2);
     glVertexAttribPointer(2,
         4,
         GL_FLOAT,

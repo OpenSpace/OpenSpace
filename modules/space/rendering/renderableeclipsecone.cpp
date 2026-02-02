@@ -520,7 +520,7 @@ void RenderableEclipseCone::createCone(double et) {
         GL_DYNAMIC_DRAW
     );
 
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vao, 0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     glBindVertexArray(0);
 }

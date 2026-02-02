@@ -451,7 +451,7 @@ void ImGUIModule::internalInitializeGL() {
     const GLuint uvAttrib = _program->attributeLocation("in_uv");
     const GLuint colorAttrib = _program->attributeLocation("in_color");
 
-    glEnableVertexAttribArray(positionAttrib);
+    glEnableVertexArrayAttrib(vao, positionAttrib);
     glVertexAttribPointer(
         positionAttrib,
         2,
@@ -461,7 +461,7 @@ void ImGUIModule::internalInitializeGL() {
         nullptr
     );
 
-    glEnableVertexAttribArray(uvAttrib);
+    glEnableVertexArrayAttrib(vao, uvAttrib);
     glVertexAttribPointer(
         uvAttrib,
         2,
@@ -471,7 +471,7 @@ void ImGUIModule::internalInitializeGL() {
         reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, uv))
     );
 
-    glEnableVertexAttribArray(colorAttrib);
+    glEnableVertexArrayAttrib(vao, colorAttrib);
     glVertexAttribPointer(
         colorAttrib,
         4,

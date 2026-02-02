@@ -905,7 +905,7 @@ void RenderableStars::update(const UpdateData&) {
 
         const GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
 
-        glEnableVertexAttribArray(positionAttrib);
+        glEnableVertexArrayAttrib(_vao, positionAttrib);
         glVertexAttribPointer(
             positionAttrib,
             3,
@@ -915,7 +915,7 @@ void RenderableStars::update(const UpdateData&) {
             nullptr
         );
 
-        glEnableVertexAttribArray(bvLumAbsMagAttrib);
+        glEnableVertexArrayAttrib(_vao, bvLumAbsMagAttrib);
         const int colorOption = _colorOption;
         switch (colorOption) {
             case ColorOption::Color:
@@ -931,7 +931,7 @@ void RenderableStars::update(const UpdateData&) {
                     );
 
                     const GLint velocity = _program->attributeLocation("in_velocity");
-                    glEnableVertexAttribArray(velocity);
+                    glEnableVertexArrayAttrib(_vao, velocity);
                     glVertexAttribPointer(
                         velocity,
                         3,
@@ -964,7 +964,7 @@ void RenderableStars::update(const UpdateData&) {
                 );
 
                 const GLint velocityAttrib = _program->attributeLocation("in_velocity");
-                glEnableVertexAttribArray(velocityAttrib);
+                glEnableVertexArrayAttrib(_vao, velocityAttrib);
                 glVertexAttribPointer(
                     velocityAttrib,
                     3,
@@ -988,7 +988,7 @@ void RenderableStars::update(const UpdateData&) {
                 );
 
                 const GLint speedAttrib = _program->attributeLocation("in_speed");
-                glEnableVertexAttribArray(speedAttrib);
+                glEnableVertexArrayAttrib(_vao, speedAttrib);
                 glVertexAttribPointer(
                     speedAttrib,
                     1,

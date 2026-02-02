@@ -189,7 +189,7 @@ void RenderableConstellationBounds::initializeGL() {
     );
 
     const GLint positionAttrib = _program->attributeLocation("in_position");
-    glEnableVertexAttribArray(positionAttrib);
+    glEnableVertexArrayAttrib(_vao, positionAttrib);
     glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindVertexArray(0);
