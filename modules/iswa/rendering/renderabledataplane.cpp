@@ -120,7 +120,7 @@ bool RenderableDataPlane::createGeometry() {
         vertex_data,
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_quad, 0);
     glVertexAttribPointer(
         0,
         4,
@@ -129,7 +129,7 @@ bool RenderableDataPlane::createGeometry() {
         sizeof(GLfloat) * 6,
         nullptr
     );
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(_quad, 1);
     glVertexAttribPointer(
         1,
         2,

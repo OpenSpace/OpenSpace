@@ -337,7 +337,7 @@ RenderableRadialGrid::GeometryData::GeometryData(GLenum renderMode)
 
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(vao, 0);
     glBindVertexArray(0);
 }
 

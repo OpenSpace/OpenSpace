@@ -100,7 +100,7 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
         GL_STATIC_DRAW);
 
 
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vaoID, 0);
     glVertexAttribPointer(
         0,
         4,

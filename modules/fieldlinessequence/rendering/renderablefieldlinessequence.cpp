@@ -1290,7 +1290,7 @@ void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
         GL_STATIC_DRAW
     );
 
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vertexArrayObject, 0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     unbindGL();
@@ -1312,7 +1312,7 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
             GL_STATIC_DRAW
         );
 
-        glEnableVertexAttribArray(1);
+        glEnableVertexArrayAttrib(_vertexArrayObject, 1);
         glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         _shouldUpdateColorBuffer = false;
@@ -1336,7 +1336,7 @@ void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
             GL_STATIC_DRAW
         );
 
-        glEnableVertexAttribArray(2);
+        glEnableVertexArrayAttrib(_vertexArrayObject, 2);
         glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         unbindGL();

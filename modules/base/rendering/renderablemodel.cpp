@@ -720,9 +720,9 @@ void RenderableModel::initializeGL() {
     glBindBuffer(GL_ARRAY_BUFFER, _quadVbo);
 
     glNamedBufferData(_quadVbo, sizeof(QuadVtx), QuadVtx.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_quadVao, 0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(_quadVao, 1);
     glVertexAttribPointer(
         1,
         2,

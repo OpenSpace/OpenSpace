@@ -99,7 +99,7 @@ bool BoxGeometry::initialize() {
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
     glNamedBufferData(_vBufferId, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vaoId, 0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, nullptr);
 
     glBindVertexArray(0);

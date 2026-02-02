@@ -169,10 +169,10 @@ bool Sphere::initialize() {
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
     glNamedBufferData(_vBufferID, _vsize * sizeof(Vertex), _varray, GL_STATIC_DRAW);
 
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vaoID, 0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(_vaoID, 1);
     glVertexAttribPointer(
         1,
         2,
@@ -182,7 +182,7 @@ bool Sphere::initialize() {
         reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex))
     );
 
-    glEnableVertexAttribArray(2);
+    glEnableVertexArrayAttrib(_vaoID, 2);
     glVertexAttribPointer(
         2,
         3,

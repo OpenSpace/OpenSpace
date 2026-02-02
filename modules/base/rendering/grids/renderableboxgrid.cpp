@@ -124,7 +124,7 @@ void RenderableBoxGrid::initializeGL() {
 
     glBindVertexArray(_vaoID);
     glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vaoID, 0);
     glBindVertexArray(0);
 }
 

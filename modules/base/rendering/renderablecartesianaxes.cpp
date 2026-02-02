@@ -155,7 +155,7 @@ void RenderableCartesianAxes::initializeGL() {
         GL_STATIC_DRAW
     );
 
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vaoId, 0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
 
     glCreateBuffers(1, &_iBufferId);

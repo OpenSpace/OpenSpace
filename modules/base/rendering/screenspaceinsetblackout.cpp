@@ -728,7 +728,7 @@ void ScreenSpaceInsetBlackout::generateTexture() {
         _vboData.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vao, 0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), nullptr);
     glBindVertexArray(0);
 

@@ -634,7 +634,7 @@ void RenderableDUMeshes::createMeshes() {
                 GL_STATIC_DRAW
             );
             // in_position
-            glEnableVertexAttribArray(0);
+            glEnableVertexArrayAttrib(vao, 0);
             // (2022-03-23, emmbr) This code was actually never used. We only read three
             // values per line and did not handle any texture cooridnates, even if there
             // would have been some in the file
@@ -650,7 +650,7 @@ void RenderableDUMeshes::createMeshes() {
             //    );
 
             //    // texture coords
-            //    glEnableVertexAttribArray(1);
+            //    glEnableVertexArrayAttrib(vao, 1);
             //    glVertexAttribPointer(
             //        1,
             //        2,
@@ -692,7 +692,7 @@ void RenderableDUMeshes::createMeshes() {
                     GL_STATIC_DRAW
                 );
                 // in_position
-                glEnableVertexAttribArray(0);
+                glEnableVertexArrayAttrib(cvao, 0);
                 // U and V may not be given by the user
                 if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {
                     glVertexAttribPointer(
@@ -705,7 +705,7 @@ void RenderableDUMeshes::createMeshes() {
                     );
 
                     // texture coords
-                    glEnableVertexAttribArray(1);
+                    glEnableVertexArrayAttrib(cvao, 1);
                     glVertexAttribPointer(
                         1,
                         2,

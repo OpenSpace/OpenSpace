@@ -700,7 +700,7 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
     glNamedBufferData(vboQuad, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
     // vertex coordinates at location 0
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(vaoQuad, 0);
     // texture coords at location 1
     glVertexAttribPointer(
         1,
@@ -710,7 +710,7 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
         4 * sizeof(GLfloat),
         reinterpret_cast<void*>(2 * sizeof(GLfloat))
     );
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(vaoQuad, 1);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     shaderProgram = global::renderEngine->buildRenderProgram(

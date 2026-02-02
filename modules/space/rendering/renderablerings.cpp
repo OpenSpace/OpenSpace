@@ -278,7 +278,7 @@ void RenderableRings::createPlane() {
     glBindVertexArray(_quad);
     glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
     glNamedBufferData(_vertexPositionBuffer, Data.size(), Data.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_quad, 0);
     glVertexAttribPointer(
         0,
         2,
@@ -287,7 +287,7 @@ void RenderableRings::createPlane() {
         sizeof(VertexData),
         nullptr
     );
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(_quad, 1);
     glVertexAttribPointer(
         1,
         2,

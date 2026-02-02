@@ -482,7 +482,7 @@ void RenderableConstellationLines::createConstellations() {
             GL_STATIC_DRAW
         );
         // in_position
-        glEnableVertexAttribArray(0);
+        glEnableVertexArrayAttrib(vao, 0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     }
 

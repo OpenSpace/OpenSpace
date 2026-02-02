@@ -296,9 +296,9 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
         VertexData.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_quad, 0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(_quad, 1);
     glVertexAttribPointer(
         1,
         2,

@@ -364,7 +364,7 @@ void RenderableShadowCylinder::createCylinder(double time) {
         _vertices.data()
     );
 
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vao, 0);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
     glBindVertexArray(0);
 }

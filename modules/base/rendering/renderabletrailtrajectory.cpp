@@ -293,7 +293,7 @@ void RenderableTrailTrajectory::updateBuffer() {
         GL_STATIC_DRAW
     );
 
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_primaryRenderInformation._vaoID, 0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     // We clear the indexArray just in case. The base class will take care not to use
@@ -474,7 +474,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
             _replacementPoints.data(),
             GL_DYNAMIC_DRAW
         );
-        glEnableVertexAttribArray(0);
+        glEnableVertexArrayAttrib(_floatingRenderInformation._vaoID, 0);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
     }
     else {

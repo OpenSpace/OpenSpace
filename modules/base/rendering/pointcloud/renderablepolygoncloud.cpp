@@ -186,7 +186,7 @@ void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
 
     glNamedBufferData(_polygonVbo, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
     glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_polygonVao, 0);
     glBindVertexArray(0);
 
     std::unique_ptr<ghoul::opengl::ProgramObject> program =

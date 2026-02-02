@@ -850,7 +850,7 @@ void RenderableFluxNodes::updatePositionBuffer() {
         GL_STATIC_DRAW
     );
 
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vertexArrayObject, 0);
     glEnable(GL_PROGRAM_POINT_SIZE);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
@@ -869,7 +869,7 @@ void RenderableFluxNodes::updateVertexColorBuffer() {
         GL_STATIC_DRAW
     );
 
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(_vertexArrayObject, 1);
     glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -887,7 +887,7 @@ void RenderableFluxNodes::updateVertexFilteringBuffer() {
         GL_STATIC_DRAW
     );
 
-    glEnableVertexAttribArray(2);
+    glEnableVertexArrayAttrib(_vertexArrayObject, 2);
     glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);

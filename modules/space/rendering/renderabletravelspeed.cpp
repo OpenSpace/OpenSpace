@@ -260,7 +260,7 @@ void RenderableTravelSpeed::updateVertexData() {
         &_vertexPositions,
         GL_DYNAMIC_DRAW
     );
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vaoId, 0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
     glBindVertexArray(0);
 }

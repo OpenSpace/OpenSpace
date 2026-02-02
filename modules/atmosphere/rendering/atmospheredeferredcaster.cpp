@@ -1117,7 +1117,7 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
     };
 
     glNamedBufferData(quadVbo, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(quadVao, 0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
 
     // Execute Calculations
