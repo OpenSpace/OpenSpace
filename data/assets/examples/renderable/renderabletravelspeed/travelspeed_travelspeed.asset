@@ -14,10 +14,12 @@ local Node = {
     Target = jupiterAsset.Jupiter.Identifier,
     TravelSpeed = 1.07925285e9, -- 1 light-hour in meters
 
-    -- Increase line width and indicator length for visibility. Length is set to 
-    -- the distance traveled in 60 seconds at the set travel speed
-    LineWidth = 5.0,
-    IndicatorLength = 60
+    -- Length in seconds, where 1 second = distance traveled in 1 second at the set
+    -- travel speed
+    IndicatorLength = 60,
+    -- Increase line width for visibility
+    LineWidth = 5.0
+
   },
    GUI = {
     Name = "RenderableTravelSpeed - Light-hour Speed Indicator",
