@@ -784,12 +784,12 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     const GLenum textureBuffers = GL_COLOR_ATTACHMENT0;
     glNamedFramebufferDrawBuffers(fbo, 1, &textureBuffers);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
     // Setup our own viewport settings
     const GLsizei w = static_cast<GLsizei>(writeTexture->width());
     const GLsizei h = static_cast<GLsizei>(writeTexture->height());
     glViewport(0, 0, w, h);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
     GLint id = 0;

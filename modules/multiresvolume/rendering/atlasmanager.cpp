@@ -109,10 +109,9 @@ void AtlasManager::updateAtlas(BufferIndex bufferIndex, std::vector<int>& brickI
     _nStreamedBricks = 0;
     _nDiskReads = 0;
 
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[bufferIndex]);
     glNamedBufferData(_pboHandle[bufferIndex], _volumeSize, nullptr, GL_STREAM_DRAW);
     float* mappedBuffer = reinterpret_cast<float*>(
-        glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY)
+        glMapNamedBuffer(_pboHandle[bufferIndex], GL_WRITE_ONLY)
     );
 
     if (!mappedBuffer) {
@@ -138,8 +137,7 @@ void AtlasManager::updateAtlas(BufferIndex bufferIndex, std::vector<int>& brickI
         itStart = itEnd;
     }
 
-    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+    glUnmapNamedBuffer(_pboHandle[bufferIndex]);
 
     for (size_t i = 0; i < nBrickIndices; i++) {
         _atlasMap[i] = _brickMap[brickIndices[i]];
@@ -149,13 +147,9 @@ void AtlasManager::updateAtlas(BufferIndex bufferIndex, std::vector<int>& brickI
 
     pboToAtlas(bufferIndex);
 
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _atlasMapBuffer);
-    GLint* to = reinterpret_cast<GLint*>(
-        glMapBuffer(GL_SHADER_STORAGE_BUFFER, GL_WRITE_ONLY)
-    );
-    memcpy(to, _atlasMap.data(), sizeof(GLint)*_atlasMap.size());
-    glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    void* to = glMapNamedBuffer(_atlasMapBuffer, GL_WRITE_ONLY);
+    std::memcpy(to, _atlasMap.data(), sizeof(GLint)*_atlasMap.size());
+    glUnmapNamedBuffer(_atlasMapBuffer);
 }
 
 void AtlasManager::addToAtlas(int firstBrickIndex, int lastBrickIndex,

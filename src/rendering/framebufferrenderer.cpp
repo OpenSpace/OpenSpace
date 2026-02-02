@@ -1219,16 +1219,10 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         return;
     }
 
-    {
-        // deferred g-buffer
-        ZoneScopedN("Deferred G-Buffer");
-        TracyGpuZone("Deferred G-Buffer");
-
-        glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
-        glDrawBuffers(3, ColorAttachmentArray.data());
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
-    }
+    glNamedFramebufferDrawBuffers(_gBuffers.framebuffer, 3, ColorAttachmentArray.data());
+    glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
 
     RenderData data = {
         .camera = *camera,
@@ -1283,9 +1277,13 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         // We use ping pong rendering in order to be able to render multiple deferred
         // tasks at same time (e.g. more than 1 ATM being seen at once) to the same final
         // buffer
-        glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
-        glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
+        glNamedFramebufferDrawBuffers(
+            _pingPongBuffers.framebuffer,
+            1,
+            &ColorAttachmentArray[_pingPongIndex]
+        );
 
+        glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
         performDeferredTasks(tasks.deferredcasterTasks, viewport);
     }
 

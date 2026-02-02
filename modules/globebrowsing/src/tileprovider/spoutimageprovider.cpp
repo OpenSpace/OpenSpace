@@ -104,24 +104,11 @@ SpoutImageProvider::SpoutImageProvider(
     });
 
 
-    spoutReceiver->onUpdateReceiver([this](int width, int height, unsigned int texture) {
-        glNamedFramebufferTexture(
-            fbo[0],
-            GL_COLOR_ATTACHMENT0,
-            static_cast<GLuint>(texture),
-            0
-        );
+    spoutReceiver->onUpdateReceiver([this](int width, int height, GLuint texture) {
+        glNamedFramebufferTexture(fbo[0], GL_COLOR_ATTACHMENT0, texture, 0);
         glNamedFramebufferReadBuffer(fbo[0], GL_COLOR_ATTACHMENT0);
-
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo[1]);
-        glNamedFramebufferTexture(
-            fbo[1],
-            GL_COLOR_ATTACHMENT1,
-            static_cast<GLuint>(*tileTexture[0]),
-            0
-        );
+        glNamedFramebufferTexture(fbo[1], GL_COLOR_ATTACHMENT1, *tileTexture[0], 0);
         glNamedFramebufferDrawBuffer(fbo[1], GL_COLOR_ATTACHMENT1);
-
         glBlitNamedFramebuffer(
             fbo[0],
             fbo[1],
@@ -136,12 +123,8 @@ SpoutImageProvider::SpoutImageProvider(
             GL_COLOR_BUFFER_BIT,
             GL_NEAREST
         );
-        glNamedFramebufferTexture(
-            fbo[1],
-            GL_COLOR_ATTACHMENT1,
-            static_cast<GLuint>(*tileTexture[1]),
-            0
-        );
+
+        glNamedFramebufferTexture(fbo[1], GL_COLOR_ATTACHMENT1, *tileTexture[1], 0);
         glBlitNamedFramebuffer(
             fbo[0],
             fbo[1],

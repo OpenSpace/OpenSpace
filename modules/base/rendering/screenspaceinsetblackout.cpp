@@ -740,12 +740,13 @@ void ScreenSpaceInsetBlackout::generateTexture() {
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
 
     bindTexture();
 
     // Clear current buffer
     glViewport(0, 0, BlackoutTextureSize.x, BlackoutTextureSize.y);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 

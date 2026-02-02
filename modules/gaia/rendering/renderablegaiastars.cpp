@@ -1274,8 +1274,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         // Use ToneMapping shaders and render to default FBO again!
         _programTM->activate();
 
-        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
-
         ghoul::opengl::TextureUnit fboTexUnit;
         if (_fboTexture) {
             fboTexUnit.activate();
@@ -1296,6 +1294,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             );
         }
 
+        glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
         glBindVertexArray(_vaoQuad);
         glDrawArrays(GL_TRIANGLES, 0, 6); // 2 triangles
         glBindVertexArray(0);

@@ -637,8 +637,6 @@ void ProjectionComponent::depthMapRenderEnd() {
 
 void ProjectionComponent::imageProjectEnd() {
     if (_dilation.isEnabled) {
-        glBindFramebuffer(GL_FRAMEBUFFER, _dilation.fbo);
-
         glDisable(GL_BLEND);
 
         ghoul::opengl::TextureUnit projUnit;
@@ -653,6 +651,7 @@ void ProjectionComponent::imageProjectEnd() {
         _dilation.program->setUniform("tex", projUnit);
         _dilation.program->setUniform("stencil", stencilUnit);
 
+        glBindFramebuffer(GL_FRAMEBUFFER, _dilation.fbo);
         glBindVertexArray(_dilation.vao);
         glDrawArrays(GL_TRIANGLES, 0, 6);
 
@@ -822,7 +821,6 @@ void ProjectionComponent::clearAllProjections() {
     );
 
     glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
-
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 

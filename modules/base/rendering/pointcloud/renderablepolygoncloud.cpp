@@ -206,11 +206,10 @@ void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
     glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
     glBindVertexArray(_polygonVao);
     glDrawArrays(GL_POINTS, 0, 1);
-    glBindVertexArray(0);
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 
     program->deactivate();
 
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 
     glDeleteBuffers(1, &_polygonVbo);

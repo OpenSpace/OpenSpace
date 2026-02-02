@@ -233,24 +233,16 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_currentFBO);
     global::renderEngine->openglStateCache().viewport(_viewport.data());
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
     std::array<GLenum, 3> drawBuffers = { GL_COLOR_ATTACHMENT0, GL_NONE, GL_NONE };
-    glDrawBuffers(3, drawBuffers.data());
+    glNamedFramebufferDrawBuffers(_shadowFBO, 3, drawBuffers.data());
     glViewport(0, 0, _shadowDepthTextureWidth, _shadowDepthTextureHeight);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _shadowFBO);
     glClearDepth(1.f);
     glDepthFunc(GL_LEQUAL);
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    //glEnable(GL_CULL_FACE);
-    //checkGLError("begin() -- enabled cull face");
-    //glCullFace(GL_FRONT);
-    //checkGLError("begin() -- set cullface to front");
-    //glEnable(GL_POLYGON_OFFSET_FILL);
-    //checkGLError("begin() -- enabled polygon offset fill");
-    //glPolygonOffset(2.5f, 10.f);
-    //checkGLError("begin() -- set values for polygon offset");
 
     RenderData lightRenderData {
         *_lightCamera,
@@ -269,14 +261,15 @@ void ShadowComponent::end() {
     }
 
     // Restores system state
-    glBindFramebuffer(GL_FRAMEBUFFER, _currentFBO);
     std::array<GLenum, 3> drawBuffers = {
         GL_COLOR_ATTACHMENT0,
         GL_COLOR_ATTACHMENT1,
         GL_COLOR_ATTACHMENT2
     };
-    glDrawBuffers(3, drawBuffers.data());
+    glNamedFramebufferDrawBuffers(_currentFBO, 3, drawBuffers.data());
     glViewport(_viewport[0], _viewport[1], _viewport[2], _viewport[3]);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _currentFBO);
 
     // Restores OpenGL Rendering State
     global::renderEngine->openglStateCache().resetColorState();
