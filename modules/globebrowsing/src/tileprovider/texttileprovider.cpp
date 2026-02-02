@@ -79,13 +79,13 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFBO);
 
         // Render to texture
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
         glNamedFramebufferTexture(fbo, GL_COLOR_ATTACHMENT0, *texture, 0);
 
         const GLsizei w = static_cast<GLsizei>(texture->width());
         const GLsizei h = static_cast<GLsizei>(texture->height());
         global::renderEngine->openglStateCache().loadCurrentGLState();
         glViewport(0, 0, w, h);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
         glClearColor(
             backgroundColor.r,
             backgroundColor.g,

@@ -229,6 +229,9 @@ void WebRenderHandler::updateTexture() {
 }
 
 bool WebRenderHandler::hasContent(int x, int y) {
+    ZoneScoped;
+    TracyGpuZone("WebRenderHandler::hasContent");
+
     // We don't have any content if we are querying outside the window size
     if (x < 0 || x > _windowSize.x || y < 0 || y > _windowSize.y) {
         return false;
@@ -253,12 +256,17 @@ bool WebRenderHandler::hasContent(int x, int y) {
         glBindTexture(GL_TEXTURE_2D, _texture);
 
         // Read the texture data into the PBO
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glGetTextureImage(
+            _texture,
+            0,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            _windowSize.x * _windowSize.y * 4,
+            nullptr
+        );
 
         // Map the PBO to the CPU memory space
-        GLubyte* pixels = reinterpret_cast<GLubyte*>(
-            glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY)
-        );
+        GLubyte* pixels = reinterpret_cast<GLubyte*>(glMapNamedBuffer(pbo, GL_READ_ONLY));
 
         ghoul_assert(pixels, "Could not read pixels from the GPU for the cef gui.");
         if (pixels) {
@@ -271,10 +279,9 @@ bool WebRenderHandler::hasContent(int x, int y) {
             }
         }
         // Unmap the buffer
-        glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+        glUnmapNamedBuffer(pbo);
 
         // Unbind and delete the PBO
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
         glDeleteBuffers(1, &pbo);
         return hasContent;
     }

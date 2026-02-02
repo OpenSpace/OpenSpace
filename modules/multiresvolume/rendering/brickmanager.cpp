@@ -285,10 +285,9 @@ void BrickManager::coordinatesFromLinear(int idx, int& x, int& y, int& z) {
 
 bool BrickManager::diskToPBO(BufferIndex pboIndex) {
     // Map PBO
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[pboIndex]);
     glNamedBufferData(_pboHandle[pboIndex], _volumeSize, nullptr, GL_STREAM_DRAW);
     float* mappedBuffer = reinterpret_cast<float*>(
-        glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY)
+        glMapNamedBuffer(_pboHandle[pboIndex], GL_WRITE_ONLY)
     );
 
     if (!mappedBuffer) {
@@ -402,9 +401,7 @@ bool BrickManager::diskToPBO(BufferIndex pboIndex) {
         delete[] seqBuffer;
     }
 
-    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
+    glUnmapNamedBuffer(_pboHandle[pboIndex]);
     return true;
 }
 

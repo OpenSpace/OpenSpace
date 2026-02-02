@@ -121,12 +121,10 @@ void SpoutMain::saveGLState() {
 void SpoutMain::restoreGLState() {
     glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(_defaultFBO));
     if (_defaultFBO) {
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, static_cast<GLuint>(_defaultReadFBO));
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, static_cast<GLuint>(_defaultDrawFBO));
-        glReadBuffer(static_cast<GLenum>(_defaultReadBuffer));
+        glNamedFramebufferReadBuffer(_defaultReadFBO, static_cast<GLenum>(_defaultReadBuffer));
         GLenum buf[1];
         buf[0] = static_cast<GLenum>(_defaultDrawBuffer[0]);
-        glDrawBuffers(1, buf);
+        glNamedFramebufferDrawBuffers(_defaultDrawFBO, 1, buf);
     }
     restoreGLTextureState();
 }
