@@ -45,52 +45,60 @@ namespace {
         "Stride",
         "Stride",
         "Controls how densely vectors are sampled from the volume, a stride of 1 renders "
-        "every vector."
+        "every vector.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo VectorFieldScaleInfo = {
         "VectorFieldScale",
         "Vector field scale",
-        "Scales the vector field lines using an exponential scale."
+        "Scales the vector field lines using an exponential scale.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
-        "Specifies the line width of the vector lines."
+        "Specifies the line width of the vector lines.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo DataRangeInfo = {
         "DataRange",
         "Data range",
         "Specifies the data range to render the vector field in, magnitudes outside this "
-        "range will be filtered away."
+        "range will be filtered away.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterOutOfRangeInfo = {
         "FilterOutOfRange",
         "Filter out of range",
         "Determines whether other data values outside the value range should be visible "
-        "or filtered away."
+        "or filtered away.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorByMagnitudeInfo = {
         "ColorByMagnitude",
         "Color by magnitude",
         "If enabled, color the vector field based on the min and max magnitudes defined"
-        "in the volume."
+        "in the volume.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "Color texture",
-        "The path to the texture used to color the vector field."
+        "The path to the texture used to color the vector field.",
+        openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterByLuaInfo = {
         "FilterByLua",
         "Filter by Lua script",
-        "If enabled, the vector field is filtered by the provided custom Lua script."
+        "If enabled, the vector field is filtered by the provided custom Lua script.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterScriptInfo = {
@@ -100,16 +108,31 @@ namespace {
         "filtering. The script needs to define a function 'filter' that takes the "
         "current voxel position (x, y, z) given in galactic coordinates, and the "
         "velocity vector (vx, vy, vz). The function should return true/false if "
-        "the voxel should be visualized or discarded, respectively."
+        "the voxel should be visualized or discarded, respectively.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo MagnitudeDataRangeInfo = {
         "MagnitudeDataRange",
         "Magnitude data range",
         "The computed magnitude data range used to normalize the magnitude value for "
-        "color lookup."
+        "color lookup.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    // A RenderableVectorField can be used to render vectors from a given 3D volumetric
+    // dataset, optionally including color mapping and custom filtering via Lua script.
+    //
+    // The vector field is defined on a regular 3D grid specified by `Dimensions`, and
+    // occupies the spatial domain defined by `MinDomain` and `MaxDomain`. The `Stride`
+    // parameter controls how densely vectors are sampled from the volume (a stride of 1
+    // renders every vector).
+    //
+    // By default, the vectors are colored according to their direction, similar to a 3D
+    // model normal map as follows:
+    // +X → Red, -X → Cyan
+    // +Y → Green, -Y → Magenta
+    // +Z → Blue, -Z → Yellow
     struct [[codegen::Dictionary(RenderableVectorField)]] Parameters {
         // The path to the file containing the volume data.
         std::filesystem::path volumeFile;
@@ -150,7 +173,6 @@ namespace {
         // [[codegen::verbatim(FilterScriptInfo.description)]]
         std::optional<std::filesystem::path> script;
     };
-
 #include "renderablevolumevectorfield_codegen.cpp"
 } // namespace
 

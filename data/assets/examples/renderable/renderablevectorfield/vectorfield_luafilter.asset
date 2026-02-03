@@ -3,21 +3,14 @@
 -- is controlled using a Lua filter.
 --
 -- The Lua filter allows custom logic to determine whether a vector should be
--- rendered or hidden based on its position and direction.
---
--- This makes it possible to selectively visualize regions or directional subsets
--- of the vector field, such as hiding vectors below a magnitude threshold or
--- excluding vectors outside a specific spatial region.
+-- rendered or hidden based on its position and direction. This makes it possible to
+-- selectively visualize regions or directional subsets of the vector field, such as
+-- hiding vectors below a magnitude threshold or excluding vectors outside a specific
+-- spatial region.
 --
 -- The filter is provided as a separate Lua script asset. The script is executed
 -- at runtime, and changes to the filter logic are applied by updating that asset.
 --
--- By default, vectors are colored according to their direction, similar to a 3D
--- normal map:
---  +X → Red,    -X → Cyan
---  +Y → Green,  -Y → Magenta
---  +Z → Blue,   -Z → Yellow
-
 -- Load the volume data from OpenSpace servers
 -- If you want to use your own volume, this block of code can be safely deleted
 local volume = asset.resource({

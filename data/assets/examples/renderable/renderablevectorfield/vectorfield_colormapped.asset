@@ -8,7 +8,6 @@
 --
 -- Note that the color map is loaded from another asset. This is a utility asset that
 -- includes some common color maps for general usage.
-
 local colormaps = asset.require("util/default_colormaps")
 
 -- Load the volume data from OpenSpace servers
