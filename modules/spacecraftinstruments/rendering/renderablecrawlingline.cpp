@@ -101,7 +101,7 @@ void RenderableCrawlingLine::initializeGL() {
     );
 
     glCreateBuffers(1, &_vbo);
-    glNamedBufferData(_vbo, 2 * sizeof(VBOData), nullptr, GL_DYNAMIC_DRAW);
+    glNamedBufferStorage(_vbo, 2 * sizeof(VBOData), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
     glCreateVertexArrays(1, &_vao);
     glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(VBOData));

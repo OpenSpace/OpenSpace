@@ -84,8 +84,8 @@ protected:
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
 
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 
 private:
     bool _planeIsDirty = false;

@@ -388,7 +388,7 @@ bool ProjectionComponent::initializeGL() {
              1.0, -1.0,
              1.0,  1.0,
         };
-        glNamedBufferData(_dilation.vbo, sizeof(Plane), Plane.data(), GL_STATIC_DRAW);
+        glNamedBufferStorage(_dilation.vbo, sizeof(Plane), Plane.data(), GL_NONE_BIT);
 
         glCreateVertexArrays(1, &_dilation.vao);
         glVertexArrayVertexBuffer(_dilation.vao, 0, _dilation.vbo, 0, 2 * sizeof(float));

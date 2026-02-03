@@ -322,8 +322,6 @@ void RenderableNodeLine::updateVertexData() {
         return;
     }
 
-    _vertexArray.clear();
-
     // Update the positions of the nodes
     _startPos = coordinatePosFromAnchorNode(startNode->worldPosition());
     _endPos = coordinatePosFromAnchorNode(endNode->worldPosition());
@@ -341,19 +339,20 @@ void RenderableNodeLine::updateVertexData() {
     const glm::dvec3 startPos = _startPos + startOffset * dir;
     const glm::dvec3 endPos = _endPos - endOffset * dir;
 
-    _vertexArray.push_back(static_cast<float>(startPos.x));
-    _vertexArray.push_back(static_cast<float>(startPos.y));
-    _vertexArray.push_back(static_cast<float>(startPos.z));
+    std::array<float, 6> Vertices = {
+        static_cast<float>(startPos.x),
+        static_cast<float>(startPos.y),
+        static_cast<float>(startPos.z),
+        static_cast<float>(endPos.x),
+        static_cast<float>(endPos.y),
+        static_cast<float>(endPos.z)
+    };
 
-    _vertexArray.push_back(static_cast<float>(endPos.x));
-    _vertexArray.push_back(static_cast<float>(endPos.y));
-    _vertexArray.push_back(static_cast<float>(endPos.z));
-
-    glNamedBufferData(
+    glNamedBufferStorage(
         _vBufferId,
-        _vertexArray.size() * sizeof(float),
-        _vertexArray.data(),
-        GL_DYNAMIC_DRAW
+        Vertices.size() * sizeof(float),
+        Vertices.data(),
+        GL_NONE_BIT
     );
 }
 

@@ -342,17 +342,17 @@ bool RenderablePlane::isReady() const {
 void RenderablePlane::initializeGL() {
     ZoneScoped;
 
-    glCreateBuffers(1, &_vertexPositionBuffer);
-    glCreateVertexArrays(1, &_quad);
-    glVertexArrayVertexBuffer(_quad, 0, _vertexPositionBuffer, 0, 6 * sizeof(GLfloat));
+    glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 6 * sizeof(GLfloat));
 
-    glEnableVertexArrayAttrib(_quad, 0);
-    glVertexArrayAttribFormat(_quad, 0, 4, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_quad, 0, 0);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
-    glEnableVertexArrayAttrib(_quad, 1);
-    glVertexArrayAttribFormat(_quad, 1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat));
-    glVertexArrayAttribBinding(_quad, 1, 0);
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat));
+    glVertexArrayAttribBinding(_vao, 1, 0);
 
     createPlane();
 
@@ -373,11 +373,11 @@ void RenderablePlane::initializeGL() {
 void RenderablePlane::deinitializeGL() {
     ZoneScoped;
 
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
+    glDeleteVertexArrays(1, &_vao);
+    _vao = 0;
 
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
+    glDeleteBuffers(1, &_vbo);
+    _vbo = 0;
 
     BaseModule::ProgramObjectManager.release(
         "Plane",
@@ -461,7 +461,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     }
     glDisable(GL_CULL_FACE);
 
-    glBindVertexArray(_quad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
@@ -503,12 +503,7 @@ void RenderablePlane::createPlane() {
          sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f
     };
 
-    glNamedBufferData(
-        _vertexPositionBuffer,
-        sizeof(vertexData),
-        vertexData.data(),
-        GL_STATIC_DRAW
-    );
+    glNamedBufferStorage(_vbo, sizeof(vertexData), vertexData.data(), GL_NONE_BIT);
 }
 
 glm::dmat4 RenderablePlane::rotationMatrix(const RenderData& data) const {

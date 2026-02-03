@@ -79,11 +79,11 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
 
     GLuint vbo = 0;
     glCreateBuffers(1, &vbo);
-    glNamedBufferData(
+    glNamedBufferStorage(
         vbo,
-        clippingSpacePoints.size() * sizeof(clippingSpacePoints[0]),
+        clippingSpacePoints.size() * sizeof(Vertices::value_type),
         clippingSpacePoints.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
 
     GLuint vao = 0;

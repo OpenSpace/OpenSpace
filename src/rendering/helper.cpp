@@ -230,11 +230,11 @@ void initialize() {
         VertexXYUVRGBA{ {  1.f,  1.f }, { 1.f, 1.f }, { 1.f, 1.f, 1.f, 1.f } },
         VertexXYUVRGBA{ {  1.f, -1.f }, { 1.f, 0.f }, { 1.f, 1.f, 1.f, 1.f } }
     };
-    glNamedBufferData(
+    glNamedBufferStorage(
         vertexObjects.square.vbo,
         6 * sizeof(VertexXYUVRGBA),
         Vtx.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
 
     glCreateVertexArrays(1, &vertexObjects.square.vao);
@@ -280,18 +280,18 @@ void initialize() {
         64, glm::vec3(1.f, 1.f, 1.f), glm::vec4(1.f, 1.f, 1.f, 1.f)
     );
     glCreateBuffers(1, &vertexObjects.sphere.vbo);
-    glNamedBufferData(
+    glNamedBufferStorage(
         vertexObjects.sphere.vbo,
         sphereData.vertices.size() * sizeof(Vertex),
         sphereData.vertices.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
     glCreateBuffers(1, &vertexObjects.sphere.ibo);
-    glNamedBufferData(
+    glNamedBufferStorage(
         vertexObjects.sphere.ibo,
         sphereData.indices.size() * sizeof(GLushort),
         sphereData.indices.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
 
     glCreateVertexArrays(1, &vertexObjects.sphere.vao);
@@ -338,18 +338,18 @@ void initialize() {
     //
     VertexIndexListCombo<VertexXYZNormal> cylinderData = createCylinder(64, 1.f, 1.f);
     glCreateBuffers(1, &vertexObjects.cylinder.vbo);
-    glNamedBufferData(
+    glNamedBufferStorage(
         vertexObjects.cylinder.vbo,
         cylinderData.vertices.size() * sizeof(VertexXYZNormal),
         cylinderData.vertices.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
     glCreateBuffers(1, &vertexObjects.cylinder.ibo);
-    glNamedBufferData(
+    glNamedBufferStorage(
         vertexObjects.cylinder.ibo,
         cylinderData.indices.size() * sizeof(GLushort),
         cylinderData.indices.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
 
     glCreateVertexArrays(1, &vertexObjects.cylinder.vao);
@@ -384,18 +384,18 @@ void initialize() {
     //
     VertexIndexListCombo<VertexXYZNormal> coneData = createCone(64, 1.f, 1.f);
     glCreateBuffers(1, &vertexObjects.cone.vbo);
-    glNamedBufferData(
+    glNamedBufferStorage(
         vertexObjects.cone.vbo,
         coneData.vertices.size() * sizeof(VertexXYZNormal),
         coneData.vertices.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
     glCreateBuffers(1, &vertexObjects.cone.ibo);
-    glNamedBufferData(
+    glNamedBufferStorage(
         vertexObjects.cone.ibo,
         coneData.indices.size() * sizeof(GLushort),
         coneData.indices.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
 
     glCreateVertexArrays(1, &vertexObjects.cone.vao);
@@ -421,11 +421,11 @@ void initialize() {
     // Line vertex array object
     //
     glCreateBuffers(1, &vertexObjects.line.vbo);
-    glNamedBufferData(
+    glNamedBufferStorage(
         vertexObjects.line.vbo,
         2 * sizeof(VertexXYUVRGBA),
         nullptr,
-        GL_STATIC_DRAW
+        GL_DYNAMIC_STORAGE_BIT
     );
 
     glCreateVertexArrays(1, &vertexObjects.line.vao);
@@ -625,11 +625,11 @@ void renderLine(const glm::vec2& startPosition, const glm::vec2& endPosition,
             { endColor.r, endColor.g, endColor.b, endColor.a }
         }
     };
-    glNamedBufferData(
+    glNamedBufferSubData(
         vertexObjects.line.vbo,
+        0,
         2 * sizeof(VertexXYUVRGBA),
-        vertexData.data(),
-        GL_STATIC_DRAW
+        vertexData.data()
     );
 
     glBindVertexArray(vertexObjects.line.vao);

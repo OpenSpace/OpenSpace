@@ -142,11 +142,11 @@ void FramebufferRenderer::initialize() {
     };
 
     glCreateBuffers(1, &_screenQuadVbo);
-    glNamedBufferData(
+    glNamedBufferStorage(
         _screenQuadVbo,
         sizeof(VertexData),
         VertexData.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
 
     glCreateVertexArrays(1, &_screenQuadVao);

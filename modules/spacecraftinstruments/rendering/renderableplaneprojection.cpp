@@ -103,6 +103,8 @@ bool RenderablePlaneProjection::isReady() const {
 
 void RenderablePlaneProjection::initializeGL() {
     glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, 36 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
     glCreateVertexArrays(1, &_vao);
     glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 6 * sizeof(float));
 
@@ -297,13 +299,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
         projection[3].x, projection[3].y, projection[3].z, 0.f, 1.f, 1.f,
     };
 
-    glNamedBufferData(
-        _vbo,
-        sizeof(VertexData),
-        VertexData.data(),
-        GL_STATIC_DRAW
-    );
-    
+    glNamedBufferSubData(_vbo, 0, sizeof(VertexData), VertexData.data());
 
     if (!img.path.empty()) {
         _texturePath = img.path;

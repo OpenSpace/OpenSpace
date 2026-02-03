@@ -695,7 +695,7 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
          1.f, -1.f, 1.f, 0.f,
          1.f,  1.f, 1.f, 1.f
     };
-    glNamedBufferData(vboQuad, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
+    glNamedBufferStorage(vboQuad, sizeof(VertexData), VertexData.data(), GL_NONE_BIT);
 
     glCreateVertexArrays(1, &vaoQuad);
     glVertexArrayVertexBuffer(vaoQuad, 0, vboQuad, 0, 4 * sizeof(GLfloat));

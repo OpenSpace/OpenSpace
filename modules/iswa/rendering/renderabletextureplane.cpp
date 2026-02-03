@@ -95,7 +95,7 @@ bool RenderableTexturePlane::createGeometry() {
         { x,  ((x > 0) ? -y : y),  -z,  w, 1, 1, },
         { x,  y,              z,  w, 1, 0 }
     };
-    glNamedBufferData(_vbo, sizeof(VertexData), VertexData, GL_STATIC_DRAW);
+    glNamedBufferStorage(_vbo, sizeof(VertexData), VertexData, GL_NONE_BIT);
 
     glCreateVertexArrays(1, &_vao);
     glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
@@ -105,7 +105,7 @@ bool RenderableTexturePlane::createGeometry() {
     glVertexArrayAttribBinding(_vao, 0, 0);
 
     glEnableVertexArrayAttrib(_vao, 1);
-    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4);
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, s));
     glVertexArrayAttribBinding(_vao, 1, 0);
 
     return true;
