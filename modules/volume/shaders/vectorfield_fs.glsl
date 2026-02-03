@@ -30,6 +30,7 @@ flat in vec3 vs_direction;
 flat in float vs_magnitude;
 in float vs_positionDepth;
 
+uniform float opacity;
 uniform vec2 dataRangeFilter;
 uniform bool filterOutOfRange;
 uniform bool colorByMag;
@@ -38,6 +39,10 @@ uniform sampler1D colorTexture;
 
 Fragment getFragment() {
     Fragment frag;
+
+    if(opacity == 0.0) {
+        discard;
+    }
 
     bool magnitudeOutOfRange =
         vs_magnitude < dataRangeFilter.x || vs_magnitude > dataRangeFilter.y;
@@ -55,6 +60,7 @@ Fragment getFragment() {
         vec3 color = 0.5 * (dir + vec3(1.0)); // remaps [-1, 1] -> [0, 1]
         frag.color = vec4(color, 1.0);
     }
+    frag.color.a *= opacity;
     frag.depth = vs_positionDepth;
     return frag;
 }

@@ -186,45 +186,14 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    addProperty(Fadeable::_opacity);
+
     _sourceFile = p.volumeFile.string();
     _minDomain = p.minDomain;
     _maxDomain = p.maxDomain;
     _dimensions = p.dimensions;
 
-    _vectorFieldScale = static_cast<float>(p.vectorFieldScale.value_or(1.f));
-    _lineWidth = static_cast<float>(p.lineWidth.value_or(1.f));
-    _dataRange = p.dataRange.value_or(glm::vec2(0, 1));
-    _filterOutOfRange = p.filterOutOfRange.value_or(false);
-    _colorByMagnitude = p.colorByMagnitude.value_or(false);
-
-    if (p.colorMapFile.has_value()) {
-        _colorTexturePath = p.colorMapFile.value().string();
-    }
-
-    _colorTexturePath.onChange([this]() {
-        if (std::filesystem::exists(_colorTexturePath.value())) {
-            _textureIsDirty = true;
-        }
-        else {
-            LWARNING(std::format("File not found: '{}'", _colorTexturePath.value()));
-        }
-    });
-
-    _filterByLua = p.filterByLua.value_or(false) && p.script.has_value();
-    _filterByLua.onChange([this]() {_vectorFieldIsDirty = true; });
-
-    if (p.script.has_value()) {
-        _luaScriptFile = p.script.value().string();
-        // Subscribe to changes in the Lua script file, @TODO can this be combined with
-        // the duplicate code below?
-        _luaScriptFileHandle =
-            std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value()
-        );
-        _luaScriptFileHandle->setCallback([this]() {
-            _vectorFieldIsDirty = true;
-        });
-    }
-
+    // Subscribe to changes in the Lua script file
     _luaScriptFile.onChange([this]() {
         _vectorFieldIsDirty = true;
         _luaScriptFileHandle =
@@ -235,18 +204,48 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
         });
     });
 
+    if (p.script.has_value()) {
+        _luaScriptFile = p.script.value().string();
+    }
+    addProperty(_luaScriptFile);
+
     _stride = p.stride;
     _stride.onChange([this]() { _vectorFieldIsDirty = true; });
-
-    addProperty(_luaScriptFile);
     addProperty(_stride);
+
+    _vectorFieldScale = static_cast<float>(p.vectorFieldScale.value_or(1.f));
     addProperty(_vectorFieldScale);
+
+    _lineWidth = static_cast<float>(p.lineWidth.value_or(1.f));
     addProperty(_lineWidth);
+
+    _colorTexturePath.onChange([this]() {
+        if (std::filesystem::exists(_colorTexturePath.value())) {
+            _textureIsDirty = true;
+        }
+        else {
+            LWARNING(std::format("File not found: '{}'", _colorTexturePath.value()));
+        }
+    });
+
+    if (p.colorMapFile.has_value()) {
+        _colorTexturePath = p.colorMapFile.value().string();
+    }
     addProperty(_colorTexturePath);
+
+    _colorByMagnitude = p.colorByMagnitude.value_or(false);
     addProperty(_colorByMagnitude);
+
     addProperty(_magnitudeDomain);
+
+    _filterByLua = p.filterByLua.value_or(false) && p.script.has_value();
+    _filterByLua.onChange([this]() {_vectorFieldIsDirty = true; });
     addProperty(_filterByLua);
+
+    _filterOutOfRange = p.filterOutOfRange.value_or(false);
     addProperty(_filterOutOfRange);
+
+    _dataRange = p.dataRange.value_or(glm::vec2(0, 1));
     addProperty(_dataRange);
 
     global::scriptEngine->initializeLuaState(_state);
@@ -393,6 +392,7 @@ void RenderableVectorField::render(const RenderData& data, RendererTasks&) {
         glm::mat4(calcModelViewProjectionTransform(data))
     );
 
+    _program->setUniform(_uniformCache.opacity, opacity());
     _program->setUniform(_uniformCache.arrowScale, _vectorFieldScale);
     _program->setUniform(_uniformCache.filterOutOfRange, _filterOutOfRange);
     _program->setUniform(_uniformCache.dataRangeFilter, _dataRange);

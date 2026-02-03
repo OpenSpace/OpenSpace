@@ -82,7 +82,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(
         modelViewProjection, arrowScale, filterOutOfRange, dataRangeFilter, colorByMag,
-        magDomain, colorTexture
+        magDomain, colorTexture, opacity
     ) _uniformCache;
 
     properties::Vec2Property _dataRange;
