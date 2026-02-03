@@ -447,7 +447,6 @@ void ImGUIModule::internalInitializeGL() {
     glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(ImDrawVert));
     glVertexArrayElementBuffer(vao, vboElements);
 
-
     const GLuint positionAttrib = _program->attributeLocation("in_position");
     glEnableVertexArrayAttrib(vao, positionAttrib);
     glVertexArrayAttribFormat(vao, positionAttrib, 2, GL_FLOAT, GL_FALSE, 0);
@@ -611,7 +610,6 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
         const ImDrawList* cmdList = drawData->CmdLists[i];
         const ImDrawIdx* indexBufferOffset = nullptr;
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glNamedBufferData(
             vbo,
             cmdList->VtxBuffer.size() * sizeof(ImDrawVert),
@@ -619,7 +617,6 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
             GL_STREAM_DRAW
         );
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboElements);
         glNamedBufferData(
             vboElements,
             cmdList->IdxBuffer.size() * sizeof(ImDrawIdx),

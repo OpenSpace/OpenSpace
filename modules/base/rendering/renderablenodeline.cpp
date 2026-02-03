@@ -380,20 +380,15 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     _program->setUniform("projectionTransform", data.camera.projectionMatrix());
     _program->setUniform("color", glm::vec4(_lineColor.value(), opacity()));
 
-    // Change GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(_lineWidth);
 
-    // Bind and draw
     glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
     glDrawArrays(GL_LINES, 0, 2);
-
-    // Restore GL State
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
     _program->deactivate();
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
