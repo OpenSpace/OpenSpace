@@ -26,8 +26,8 @@
 
 out vec4 outColor;
 
-flat in vec3 v_dir;
-flat in float mag;
+flat in vec3 vs_direction;
+flat in float vs_magnitude;
 in float vs_positionDepth;
 
 uniform vec2 dataRangeFilter;
@@ -39,19 +39,21 @@ uniform sampler1D colorTexture;
 Fragment getFragment() {
     Fragment frag;
 
-    if(filterOutOfRange && (mag < dataRangeFilter.x || mag > dataRangeFilter.y)) {
+    bool magnitudeOutOfRange =
+        vs_magnitude < dataRangeFilter.x || vs_magnitude > dataRangeFilter.y;
+    if (filterOutOfRange && magnitudeOutOfRange) {
         discard;
     }
 
-    if(colorByMag) {
-        float t = (mag - magDomain.x) / (magDomain.y - magDomain.x);
+    if (colorByMag) {
+        float t = (vs_magnitude - magDomain.x) / (magDomain.y - magDomain.x);
         t = clamp(t, 0.0, 1.0);
         frag.color = texture(colorTexture, t);
-    } else {
-        vec3 dir = normalize(v_dir);
+    }
+    else {
+        vec3 dir = normalize(vs_direction);
         vec3 color = 0.5 * (dir + vec3(1.0)); // remaps [-1, 1] -> [0, 1]
         frag.color = vec4(color, 1.0);
-        // frag.color = vec4(abs(normalize(v_dir)), 1.0);
     }
     frag.depth = vs_positionDepth;
     return frag;

@@ -78,6 +78,17 @@ set(SOURCE_FILES
 
 source_group("Source Files" FILES ${SOURCE_FILES})
 
+set(SHADER_FILES
+  shaders/bounds_fs.glsl
+  shaders/bounds_vs.glsl
+  shaders/helper.glsl
+  shaders/raycast.glsl
+  shaders/vectorfield_fs.glsl
+  shaders/vectorfield_vs.glsl
+)
+
+source_group("Shader Files" FILES ${SHADER_FILES})
+
 create_new_module(
   "Volume"
   volume_module

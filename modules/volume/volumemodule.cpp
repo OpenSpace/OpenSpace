@@ -61,7 +61,7 @@ std::vector<documentation::Documentation> VolumeModule::documentations() const {
     return {
         RenderableTimeVaryingVolume::Documentation(),
         RenderableVectorField::Documentation(),
-        GenerateRawVolumeTask::Documentation(),
+        GenerateRawVolumeTask::Documentation()
     };
 }
 

@@ -31,16 +31,16 @@ local Node = {
     Identifier = "RenderableVectorField_Example_LuaFilter",
     Renderable = {
         Type = "RenderableVectorField",
-        VolumeFile = volume .. "vectorfield_16x16x16_smooth.bin",
-        -- Use the line below insted of the one above if you want to use your own volume
+        VolumeFile = volume .. "vectorfield_16x16x16.bin",
+        -- Use the line below instead of the one above if using your own volume
         -- VolumeFile = "C:/path/to/volume.bin",
 
         Stride = 1,
-        MinDomain = { -5000, -5000, -5000 },
-        MaxDomain = { 5000, 5000, 5000 },
+        MinDomain = { -5000.0, -5000.0, -5000.0 },
+        MaxDomain = { 5000.0, 5000.0, 5000.0 },
         Dimensions = { 16, 16, 16 },
         FilterByLua = true,
-        Script = asset.resource("script/filter.lua"),
+        Script = asset.resource("script/filter.lua")
     },
     GUI = {
         Name = "RenderableVectorField - Lua Filter",

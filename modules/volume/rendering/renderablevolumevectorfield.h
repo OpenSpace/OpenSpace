@@ -45,20 +45,22 @@ namespace ghoul::opengl {
 
 namespace openspace::volume {
 
-struct VelocityData {
-    float vx;
-    float vy;
-    float vz;
-};
 
-struct ArrowInstance {
-    glm::vec3 position;
-    glm::vec3 direction;
-    float magnitude;
-};
 
 class RenderableVectorField : public Renderable {
 public:
+    struct VelocityData {
+        float vx;
+        float vy;
+        float vz;
+    };
+
+    struct ArrowInstance {
+        glm::vec3 position;
+        glm::vec3 direction;
+        float magnitude;
+    };
+
    explicit RenderableVectorField(const ghoul::Dictionary& dictionary);
 
    ~RenderableVectorField() override = default;

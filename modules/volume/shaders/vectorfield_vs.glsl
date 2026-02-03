@@ -33,9 +33,9 @@ layout(location = 3) in float in_magnitude;
 uniform mat4 modelViewProjection;
 uniform float arrowScale;
 
-flat out vec3 v_dir;
+flat out vec3 vs_direction;
+flat out float vs_magnitude;
 out float vs_positionDepth;
-flat out float mag;
 
 mat3 makeRotation(vec3 dir) {
     vec3 x = normalize(dir);
@@ -45,8 +45,7 @@ mat3 makeRotation(vec3 dir) {
     return mat3(x, y, z);
 }
 
-float exponentialScale(float sliderValue, float minExp, float maxExp)
-{
+float exponentialScale(float sliderValue, float minExp, float maxExp) {
     // Clamp input just in case
     if (sliderValue < 1) sliderValue = 1;
     if (sliderValue > 100) sliderValue = 100;
@@ -61,15 +60,17 @@ float exponentialScale(float sliderValue, float minExp, float maxExp)
 }
 
 void main() {
-    mat3 R = makeRotation(in_direction);
+    mat3 rotationMatrix = makeRotation(in_direction);
 
-    vec3 scaledPosition = in_arrowVertex * (in_magnitude * exponentialScale(arrowScale, 2.5, 23.0));
-    vec3 worldPosition = in_position + R * scaledPosition;
+    vec3 scaledPosition = in_arrowVertex * (in_magnitude *
+        exponentialScale(arrowScale, 2.5, 23.0)
+    );
+    vec3 worldPosition = in_position + rotationMatrix * scaledPosition;
 
-    vec4 vsPositionClipSpace = modelViewProjection * vec4(worldPosition, 1.0);
-    vs_positionDepth = vsPositionClipSpace.w;
+    vec4 positionClipSpace = modelViewProjection * vec4(worldPosition, 1.0);
+    vs_positionDepth = positionClipSpace.w;
 
-    gl_Position = z_normalization(vsPositionClipSpace);
-    v_dir = in_direction;
-    mag = in_magnitude;
+    gl_Position = z_normalization(positionClipSpace);
+    vs_direction = in_direction;
+    vs_magnitude = in_magnitude;
 }
