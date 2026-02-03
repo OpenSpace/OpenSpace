@@ -415,10 +415,25 @@ void RenderableFluxNodes::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
 
-    glCreateVertexArrays(1, &_vertexArrayObject);
-    glCreateBuffers(1, &_vertexPositionBuffer);
-    glCreateBuffers(1, &_vertexColorBuffer);
-    glCreateBuffers(1, &_vertexFilteringBuffer);
+    glCreateBuffers(1, &_vboPosition);
+    glCreateBuffers(1, &_vboColor);
+    glCreateBuffers(1, &_vboFilter);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vboPosition, 0, sizeof(glm::vec3));
+    glVertexArrayVertexBuffer(_vao, 1, _vboColor, 0, sizeof(float));
+    glVertexArrayVertexBuffer(_vao, 2, _vboFilter, 0, sizeof(float));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 1, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 1, 1);
+
+    glEnableVertexArrayAttrib(_vao, 2);
+    glVertexArrayAttribFormat(_vao, 2, 1, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 2, 2);
 
     // Needed for alpha transparency
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
@@ -562,17 +577,17 @@ void RenderableFluxNodes::setupProperties() {
 }
 
 void RenderableFluxNodes::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vertexArrayObject);
-    _vertexArrayObject = 0;
+    glDeleteVertexArrays(1, &_vao);
+    _vao = 0;
 
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
+    glDeleteBuffers(1, &_vboPosition);
+    _vboPosition = 0;
 
-    glDeleteBuffers(1, &_vertexColorBuffer);
-    _vertexColorBuffer = 0;
+    glDeleteBuffers(1, &_vboColor);
+    _vboColor = 0;
 
-    glDeleteBuffers(1, &_vertexFilteringBuffer);
-    _vertexFilteringBuffer = 0;
+    glDeleteBuffers(1, &_vboFilter);
+    _vboFilter = 0;
 
     if (_shaderProgram) {
         global::renderEngine->removeRenderProgram(_shaderProgram.get());
@@ -760,14 +775,10 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         _shaderProgram->setUniform("colorTable", textureUnit);
     }
 
-    glBindVertexArray(_vertexArrayObject);
+    glEnable(GL_PROGRAM_POINT_SIZE);
 
-    glDrawArrays(
-        GL_POINTS,
-        0,
-        static_cast<GLsizei>(_vertexPositions.size())
-    );
-
+    glBindVertexArray(_vao);
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_vertexPositions.size()));
     glBindVertexArray(0);
     _shaderProgram->deactivate();
 }
@@ -840,57 +851,30 @@ void RenderableFluxNodes::update(const UpdateData& data) {
 }
 
 void RenderableFluxNodes::updatePositionBuffer() {
-    glBindVertexArray(_vertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-
     glNamedBufferData(
-        _vertexPositionBuffer,
+        _vboPosition,
         _vertexPositions.size() * sizeof(glm::vec3),
         _vertexPositions.data(),
         GL_STATIC_DRAW
     );
-
-    glEnableVertexArrayAttrib(_vertexArrayObject, 0);
-    glEnable(GL_PROGRAM_POINT_SIZE);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }
 
 void RenderableFluxNodes::updateVertexColorBuffer() {
-    glBindVertexArray(_vertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
-
     glNamedBufferData(
-        _vertexColorBuffer,
+        _vboColor,
         _vertexColor.size() * sizeof(float),
         _vertexColor.data(),
         GL_STATIC_DRAW
     );
-
-    glEnableVertexArrayAttrib(_vertexArrayObject, 1);
-    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }
 
 void RenderableFluxNodes::updateVertexFilteringBuffer() {
-    glBindVertexArray(_vertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexFilteringBuffer);
-
     glNamedBufferData(
-        _vertexFilteringBuffer,
+        _vboFilter,
         _vertexRadius.size() * sizeof(float),
         _vertexRadius.data(),
         GL_STATIC_DRAW
     );
-
-    glEnableVertexArrayAttrib(_vertexArrayObject, 2);
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }
+
 } // namespace openspace

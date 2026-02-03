@@ -147,36 +147,22 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
         //_vertices.push_back(_w);
     }
 
-    // First VAO setup
-    glBindVertexArray(_vaoId);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
     glNamedBufferData(
         _vBufferId,
         _vertices.size() * sizeof(GLfloat),
         _vertices.data(),
         GL_STATIC_DRAW
     );
-
-    glEnableVertexArrayAttrib(_vaoId, 0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), nullptr);
-
-    glBindVertexArray(0);
 }
 
 bool BlockPlaneIntersectionGeometry::initialize() {
-    if (_vaoId == 0) {
-        glCreateVertexArrays(1, &_vaoId);
-    }
+    glCreateBuffers(1, &_vBufferId);
+    glCreateVertexArrays(1, &_vaoId);
+    glVertexArrayVertexBuffer(_vaoId, 0, _vBufferId, 0, 3 * sizeof(float));
 
-    if (_vBufferId == 0) {
-        glCreateBuffers(1, &_vBufferId);
-
-        if (_vBufferId == 0) {
-            LERROR("Could not create vertex buffer");
-            return false;
-        }
-    }
+    glEnableVertexArrayAttrib(_vaoId, 0);
+    glVertexArrayAttribFormat(_vaoId, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vaoId, 0, 0);
 
     updateVertices();
     return true;

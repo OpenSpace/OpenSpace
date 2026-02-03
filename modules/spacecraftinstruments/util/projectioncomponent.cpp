@@ -379,6 +379,7 @@ bool ProjectionComponent::initializeGL() {
             absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/dilation_fs.glsl")
         );
 
+        glCreateBuffers(1, &_dilation.vbo);
         constexpr std::array<GLfloat, 12> Plane = {
             -1.0, -1.0,
              1.0,  1.0,
@@ -387,16 +388,14 @@ bool ProjectionComponent::initializeGL() {
              1.0, -1.0,
              1.0,  1.0,
         };
+        glNamedBufferData(_dilation.vbo, sizeof(Plane), Plane.data(), GL_STATIC_DRAW);
 
         glCreateVertexArrays(1, &_dilation.vao);
-        glCreateBuffers(1, &_dilation.vbo);
+        glVertexArrayVertexBuffer(_dilation.vao, 0, _dilation.vbo, 0, 2 * sizeof(float));
 
-        glBindVertexArray(_dilation.vao);
-        glBindBuffer(GL_ARRAY_BUFFER, _dilation.vbo);
-        glNamedBufferData(_dilation.vbo, sizeof(Plane), Plane.data(), GL_STATIC_DRAW);
         glEnableVertexArrayAttrib(_dilation.vao, 0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
-        glBindVertexArray(0);
+        glVertexArrayAttribFormat(_dilation.vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribBinding(_dilation.vao, 0, 0);
     }
 
     return success;

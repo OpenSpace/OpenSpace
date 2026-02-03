@@ -96,11 +96,10 @@ public:
      * Each geometry feature might translate into several render features.
      */
     struct RenderFeature {
-        void initializeBuffers();
-
         RenderType type = RenderType::Uninitialized;
         GLuint vaoId = 0;
-        GLuint vboId = 0;
+        GLuint vertexVboId = 0;
+        GLuint heightVboId = 0;
         size_t nVertices = 0;
         bool isExtrusionFeature = false;
 
@@ -192,12 +191,6 @@ private:
      * Compute the heights to the surface at the reference points.
      */
     std::vector<double> getCurrentReferencePointsHeights() const;
-
-    /**
-     * Buffer the static data for the vertices.
-     */
-    void bufferVertexData(const RenderFeature& feature,
-        const std::vector<Vertex>& vertexData);
 
     /**
      * Buffer the dynamic height data for the vertices, based on the height map.

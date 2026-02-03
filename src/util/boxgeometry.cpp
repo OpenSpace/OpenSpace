@@ -86,23 +86,16 @@ bool BoxGeometry::initialize() {
          x, -y,  z // magenta
     };
 
-    if (_vaoId == 0) {
-        glCreateVertexArrays(1, &_vaoId);
-    }
-
-    if (_vBufferId == 0) {
-        glCreateBuffers(1, &_vBufferId);
-    }
-
-    glBindVertexArray(_vaoId);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
+    glCreateBuffers(1, &_vBufferId);
     glNamedBufferData(_vBufferId, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
 
-    glEnableVertexArrayAttrib(_vaoId, 0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, nullptr);
+    glCreateVertexArrays(1, &_vaoId);
+    glVertexArrayVertexBuffer(_vaoId, 0, _vBufferId, 0, 3 * sizeof(float));
 
-    glBindVertexArray(0);
+    glEnableVertexArrayAttrib(_vaoId, 0);
+    glVertexArrayAttribFormat(_vaoId, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vaoId, 0, 0);
+
     return true;
 }
 

@@ -28,6 +28,15 @@
 #include <cstddef>
 #include <utility>
 
+namespace {
+    struct VertexData {
+        GLfloat x;
+        GLfloat y;
+        GLfloat s;
+        GLfloat t;
+    };
+} // namespace
+
 namespace openspace {
 
 PlaneGeometry::PlaneGeometry(glm::vec2 size) : _size(std::move(size)) {}
@@ -35,8 +44,18 @@ PlaneGeometry::PlaneGeometry(glm::vec2 size) : _size(std::move(size)) {}
 PlaneGeometry::PlaneGeometry(float size) : PlaneGeometry(glm::vec2(size, size)) {}
 
 void PlaneGeometry::initialize() {
-    glCreateVertexArrays(1, &_vaoId);
     glCreateBuffers(1, &_vBufferId);
+    glCreateVertexArrays(1, &_vaoId);
+    glVertexArrayVertexBuffer(_vaoId, 0, _vBufferId, 0, 4 * sizeof(float));
+
+    glEnableVertexArrayAttrib(_vaoId, 0);
+    glVertexArrayAttribFormat(_vaoId, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vaoId, 0, 0);
+
+    glEnableVertexArrayAttrib(_vaoId, 1);
+    glVertexArrayAttribFormat(_vaoId, 1, 2, GL_FLOAT, GL_FALSE, offsetof(VertexData, s));
+    glVertexArrayAttribBinding(_vaoId, 1, 0);
+
     updateGeometry();
 }
 
@@ -65,13 +84,6 @@ void PlaneGeometry::updateSize(float size) {
 
 void PlaneGeometry::updateGeometry() const {
     const glm::vec2 size = _size;
-    struct VertexData {
-        GLfloat x;
-        GLfloat y;
-        GLfloat s;
-        GLfloat t;
-    };
-
     const std::array<VertexData, 6> vertices = {
         VertexData{ -size.x, -size.y, 0.f, 0.f },
         VertexData{  size.x,  size.y, 1.f, 1.f },
@@ -81,20 +93,7 @@ void PlaneGeometry::updateGeometry() const {
         VertexData{  size.x,  size.y, 1.f, 1.f }
     };
 
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
     glNamedBufferData(_vBufferId, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
-    glEnableVertexArrayAttrib(_vaoId, 0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), nullptr);
-    glEnableVertexArrayAttrib(_vaoId, 1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(VertexData),
-        reinterpret_cast<void*>(offsetof(VertexData, s))
-    );
 }
 
 } // namespace openspace

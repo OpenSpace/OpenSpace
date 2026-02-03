@@ -140,68 +140,34 @@ Sphere::~Sphere() {
 }
 
 bool Sphere::initialize() {
-    // Initialize and upload to graphics card
-    if (_vaoID == 0) {
-        glCreateVertexArrays(1, &_vaoID);
-    }
-
-    if (_vBufferID == 0) {
-        glCreateBuffers(1, &_vBufferID);
-
-        if (_vBufferID == 0) {
-            LERROR("Could not create vertex buffer");
-            return false;
-        }
-    }
-
-    if (_iBufferID == 0) {
-        glCreateBuffers(1, &_iBufferID);
-
-        if (_iBufferID == 0) {
-            LERROR("Could not create index buffer");
-            return false;
-        }
-    }
-
-    // First VAO setup
-    glBindVertexArray(_vaoID);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
+    glCreateBuffers(1, &_vBufferID);
     glNamedBufferData(_vBufferID, _vsize * sizeof(Vertex), _varray, GL_STATIC_DRAW);
 
-    glEnableVertexArrayAttrib(_vaoID, 0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-
-    glEnableVertexArrayAttrib(_vaoID, 1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex))
-    );
-
-    glEnableVertexArrayAttrib(_vaoID, 2);
-    glVertexAttribPointer(
-        2,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal))
-    );
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
+    glCreateBuffers(1, &_iBufferID);
     glNamedBufferData(_iBufferID, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
 
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_vaoID);
+    glVertexArrayVertexBuffer(_vaoID, 0, _vBufferID, 0, 3 * sizeof(Vertex));
+    glVertexArrayElementBuffer(_vaoID, _iBufferID);
+
+    glEnableVertexArrayAttrib(_vaoID, 0);
+    glVertexArrayAttribFormat(_vaoID, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vaoID, 0, 0);
+    glVertexArrayAttribBinding(_vaoID, 0, 0);
+
+    glEnableVertexArrayAttrib(_vaoID, 1);
+    glVertexArrayAttribFormat(_vaoID, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, tex));
+    glVertexArrayAttribBinding(_vaoID, 1, 0);
+
+    glEnableVertexArrayAttrib(_vaoID, 2);
+    glVertexArrayAttribFormat(_vaoID, 2, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, normal));
+    glVertexArrayAttribBinding(_vaoID, 2, 0);
+
     return true;
 }
 
 void Sphere::render() const {
     glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
     glDrawElements(GL_TRIANGLES, _isize, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 }

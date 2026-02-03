@@ -346,6 +346,7 @@ void RenderablePlanetProjection::initializeGL() {
     setBoundingSphere(std::max(std::max(radius[0], radius[1]), radius[2]));
 
     // SCREEN-QUAD
+    glCreateBuffers(1, &_vbo);
     constexpr std::array<GLfloat, 12> VertexData = {
         -1.f, -1.f,
          1.f,  1.f,
@@ -354,20 +355,14 @@ void RenderablePlanetProjection::initializeGL() {
          1.f, -1.f,
          1.f,  1.f,
     };
+    glNamedBufferData(_vbo, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
 
-    glCreateVertexArrays(1, &_quad);
-    glBindVertexArray(_quad);
-    glCreateBuffers(1, &_vertexPositionBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glNamedBufferData(
-        _vertexPositionBuffer,
-        sizeof(VertexData),
-        VertexData.data(),
-        GL_STATIC_DRAW
-    );
-    glEnableVertexArrayAttrib(_quad, 0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 }
 
 void RenderablePlanetProjection::deinitializeGL() {
@@ -376,8 +371,8 @@ void RenderablePlanetProjection::deinitializeGL() {
     _projectionComponent.deinitialize();
     _baseTexture = nullptr;
 
-    glDeleteVertexArrays(1, &_quad);
-    glDeleteBuffers(1, &_vertexPositionBuffer);
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
         "ProjectiveProgram",
@@ -414,7 +409,7 @@ void RenderablePlanetProjection::imageProjectGPU(
     _fboProgramObject->setUniform(_fboUniformCache.radius, _radius);
     _fboProgramObject->setUniform(_fboUniformCache.segments, _segments);
 
-    glBindVertexArray(_quad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     _fboProgramObject->deactivate();
 
