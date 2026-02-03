@@ -130,29 +130,29 @@ void SkirtedGrid::initializeGL() {
         vertexData[i].texture[1] = textures[i][1];
     }
 
-    glCreateBuffers(1, &_vertexBufferID);
-    glNamedBufferData(
-        _vertexBufferID,
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(
+        _vbo,
         vertexData.size() * sizeof(Vertex),
         vertexData.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
 
-    glCreateBuffers(1, &_elementBufferID);
-    glNamedBufferData(
-        _elementBufferID,
+    glCreateBuffers(1, &_ibo);
+    glNamedBufferStorage(
+        _ibo,
         elementData.size() * sizeof(GLushort),
         elementData.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
 
-    glCreateVertexArrays(1, &_vaoID);
-    glVertexArrayVertexBuffer(_vaoID, 0, _vertexBufferID, 0, sizeof(Vertex));
-    glVertexArrayElementBuffer(_vaoID, _elementBufferID);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+    glVertexArrayElementBuffer(_vao, _ibo);
 
-    glEnableVertexArrayAttrib(_vaoID, 1);
-    glVertexArrayAttribFormat(_vaoID, 1, 2, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_vaoID, 1, 0);
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 1, 0);
 
     ghoul_assert(
         static_cast<int>(elementData.size()) == _elementSize,
@@ -161,14 +161,13 @@ void SkirtedGrid::initializeGL() {
 }
 
 void SkirtedGrid::deinitializeGL() {
-    glDeleteBuffers(1, &_vertexBufferID);
-    glDeleteBuffers(1, &_elementBufferID);
-    glDeleteVertexArrays(1, &_vaoID);
+    glDeleteBuffers(1, &_vbo);
+    glDeleteBuffers(1, &_ibo);
+    glDeleteVertexArrays(1, &_vao);
 }
 
 void SkirtedGrid::drawUsingActiveProgram() const {
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _elementBufferID);
+    glBindVertexArray(_vao);
     glDrawElements(GL_TRIANGLES, _elementSize, GL_UNSIGNED_SHORT, nullptr);
     glBindVertexArray(0);
 }

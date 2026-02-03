@@ -42,7 +42,7 @@ bool BoxGeometry::initialize() {
     const float y = _size.y * 0.5f;
     const float z = _size.z * 0.5f;
 
-    const std::array<GLfloat, 108> vertices = {
+    const std::array<GLfloat, 108> Vertices = {
         -x, -y,  z, // blue corner
          x,  y,  z,  // white corner
         -x,  y,  z, // cyan corner
@@ -87,7 +87,7 @@ bool BoxGeometry::initialize() {
     };
 
     glCreateBuffers(1, &_vBufferId);
-    glNamedBufferData(_vBufferId, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
+    glNamedBufferStorage(_vBufferId, sizeof(Vertices), Vertices.data(), GL_NONE_BIT);
 
     glCreateVertexArrays(1, &_vaoId);
     glVertexArrayVertexBuffer(_vaoId, 0, _vBufferId, 0, 3 * sizeof(float));

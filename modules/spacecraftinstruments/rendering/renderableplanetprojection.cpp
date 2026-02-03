@@ -355,10 +355,10 @@ void RenderablePlanetProjection::initializeGL() {
          1.f, -1.f,
          1.f,  1.f,
     };
-    glNamedBufferData(_vbo, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
+    glNamedBufferStorage(_vbo, sizeof(VertexData), VertexData.data(), GL_NONE_BIT);
 
     glCreateVertexArrays(1, &_vao);
-    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 2 * sizeof(float));
 
     glEnableVertexArrayAttrib(_vao, 0);
     glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);

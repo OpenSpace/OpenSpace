@@ -141,10 +141,10 @@ Sphere::~Sphere() {
 
 bool Sphere::initialize() {
     glCreateBuffers(1, &_vBufferID);
-    glNamedBufferData(_vBufferID, _vsize * sizeof(Vertex), _varray, GL_STATIC_DRAW);
+    glNamedBufferStorage(_vBufferID, _vsize * sizeof(Vertex), _varray, GL_NONE_BIT);
 
     glCreateBuffers(1, &_iBufferID);
-    glNamedBufferData(_iBufferID, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
+    glNamedBufferStorage(_iBufferID, _isize * sizeof(int), _iarray, GL_NONE_BIT);
 
     glCreateVertexArrays(1, &_vaoID);
     glVertexArrayVertexBuffer(_vaoID, 0, _vBufferID, 0, 3 * sizeof(Vertex));

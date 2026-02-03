@@ -210,6 +210,8 @@ void RenderableTravelSpeed::initializeGL() {
     );
 
     glCreateBuffers(1, &_vBufferId);
+    glNamedBufferStorage(_vBufferId, sizeof(VertexPositions), nullptr, GL_DYNAMIC_DRAW);
+
     glCreateVertexArrays(1, &_vaoId);
     glVertexArrayVertexBuffer(_vaoId, 0, _vBufferId, 0, 3 * sizeof(float));
 
@@ -256,13 +258,7 @@ void RenderableTravelSpeed::calculateVerticesPositions() {
 
 void RenderableTravelSpeed::updateVertexData() {
     calculateVerticesPositions();
-
-    glNamedBufferData(
-        _vBufferId,
-        sizeof(VertexPositions),
-        &_vertexPositions,
-        GL_DYNAMIC_DRAW
-    );
+    glNamedBufferSubData(_vBufferId, 0, sizeof(VertexPositions), &_vertexPositions);
 }
 
 void RenderableTravelSpeed::reinitiateTravel() {
@@ -324,7 +320,6 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {
     glLineWidth(1.f);
 #endif // __APPLE__
     glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
     glDrawArrays(GL_LINE_STRIP, 0, 3);
     glBindVertexArray(0);
 

@@ -463,19 +463,19 @@ void RenderableGalaxy::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_billboardsProgram, _uniformCacheBillboards);
 
     glCreateBuffers(1, &_positionVbo);
-    glNamedBufferData(
+    glNamedBufferStorage(
         _positionVbo,
         _pointPositionsCache.size() * sizeof(glm::vec3),
         _pointPositionsCache.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
 
     glCreateBuffers(1, &_colorVbo);
-    glNamedBufferData(
+    glNamedBufferStorage(
         _colorVbo,
         _pointColorsCache.size() * sizeof(glm::vec3),
         _pointColorsCache.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
 
     glCreateVertexArrays(1, &_pointsVao);

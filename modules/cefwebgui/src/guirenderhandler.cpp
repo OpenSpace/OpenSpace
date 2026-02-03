@@ -56,7 +56,7 @@ GUIRenderHandler::GUIRenderHandler() {
     };
 
     glCreateBuffers(1, &_vbo);
-    glNamedBufferData(_vbo, Vtx.size() * sizeof(float), Vtx.data(), GL_STATIC_DRAW);
+    glNamedBufferStorage(_vbo, Vtx.size() * sizeof(float), Vtx.data(), GL_NONE_BIT);
 
     glCreateVertexArrays(1, &_vao);
     glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 2 * sizeof(float));

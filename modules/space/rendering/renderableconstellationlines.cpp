@@ -467,11 +467,11 @@ void RenderableConstellationLines::createConstellations() {
     for (std::pair<const int, ConstellationLine>& p : _renderingConstellationsMap) {
         GLuint vbo = 0;
         glCreateBuffers(1, &vbo);
-        glNamedBufferData(
+        glNamedBufferStorage(
             vbo,
             p.second.vertices.size() * sizeof(GLfloat),
             p.second.vertices.data(),
-            GL_STATIC_DRAW
+            GL_NONE_BIT
         );
         p.second.vboArray = vbo;
 

@@ -249,7 +249,7 @@ bool RenderableKameleonPlane::createGeometry() {
         { x,  ((x > 0) ? -y : y),  -z,  w, 1, 1, },
         { x,  y,              z,  w, 1, 0 }
     };
-    glNamedBufferData(_vbo, sizeof(VertexData), VertexData, GL_STATIC_DRAW);
+    glNamedBufferStorage(_vbo, sizeof(VertexData), VertexData, GL_NONE_BIT);
 
     glCreateVertexArrays(1, &_vao);
     glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
