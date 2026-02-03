@@ -66,15 +66,6 @@ namespace {
 
 namespace openspace::globebrowsing {
 
-void GlobeGeometryFeature::RenderFeature::initializeBuffers() {
-    if (vaoId == 0) {
-        glCreateVertexArrays(1, &vaoId);
-    }
-    if (vboId == 0) {
-        glCreateBuffers(1, &vboId);
-    }
-}
-
 GlobeGeometryFeature::GlobeGeometryFeature(const RenderableGlobe& globe,
                                            GeoJsonProperties& defaultProperties,
                                            GeoJsonOverrideProperties& overrideProperties)
@@ -105,7 +96,8 @@ void GlobeGeometryFeature::initializeGL(ghoul::opengl::ProgramObject* pointsProg
 void GlobeGeometryFeature::deinitializeGL() {
     for (const RenderFeature& r : _renderFeatures) {
         glDeleteVertexArrays(1, &r.vaoId);
-        glDeleteBuffers(1, &r.vboId);
+        glDeleteBuffers(1, &r.vertexVboId);
+        glDeleteBuffers(1, &r.heightVboId);
     }
 
     _pointTexture = nullptr;
@@ -784,9 +776,55 @@ void GlobeGeometryFeature::initializeRenderFeature(RenderFeature& feature,
         feature.vertices
     );
 
+    ghoul_assert(_pointsProgram, "Shader program must be initialized");
+    ghoul_assert(_linesAndPolygonsProgram, "Shader program must be initialized");
+
+    ghoul::opengl::ProgramObject* program = _linesAndPolygonsProgram;
+    if (feature.type == RenderType::Points) {
+        program = _pointsProgram;
+    }
+
     // Generate buffers and buffer data
-    feature.initializeBuffers();
-    bufferVertexData(feature, vertices);
+    glCreateBuffers(1, &feature.vertexVboId);
+    glNamedBufferData(
+        feature.vertexVboId,
+        vertices.size() * sizeof(Vertex),
+        vertices.data(),
+        GL_STATIC_DRAW
+    );
+
+    glCreateBuffers(1, &feature.heightVboId);
+    glNamedBufferData(
+        feature.heightVboId,
+        feature.heights.size() * sizeof(float),
+        feature.heights.data()
+    );
+
+    glCreateVertexArrays(1, &feature.vaoId);
+    glVertexArrayVertexBuffer(feature.vaoId, 0, feature.vertexVboId, 0, sizeof(Vertex));
+    glVertexArrayVertexBuffer(feature.vaoId, 1, feature.heightVboId, 0, sizeof(float));
+
+    const GLint positionAttrib = program->attributeLocation("in_position");
+    glEnableVertexArrayAttrib(feature.vaoId, positionAttrib);
+    glVertexArrayAttribFormat(feature.vaoId, positionAttrib, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(feature.vaoId, positionAttrib, 0);
+
+    const GLint normalAttrib = program->attributeLocation("in_normal");
+    glEnableVertexArrayAttrib(feature.vaoId, normalAttrib);
+    glVertexArrayAttribFormat(
+        feature.vaoId,
+        normalAttrib,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        3 * sizeof(float)
+    );
+    glVertexArrayAttribBinding(feature.vaoId, normalAttrib, 0);
+
+    const GLint heightAttrib = program->attributeLocation("in_height");
+    glEnableVertexArrayAttrib(feature.vaoId, heightAttrib);
+    glVertexArrayAttribFormat(feature.vaoId, heightAttrib, 1, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(feature.vaoId, heightAttrib, 1);
 }
 
 float GlobeGeometryFeature::tessellationStepSize() const {
@@ -817,112 +855,15 @@ std::vector<double> GlobeGeometryFeature::getCurrentReferencePointsHeights() con
     return newHeights;
 }
 
-void GlobeGeometryFeature::bufferVertexData(const RenderFeature& feature,
-                                            const std::vector<Vertex>& vertexData)
-{
-    ghoul_assert(_pointsProgram, "Shader program must be initialized");
-    ghoul_assert(_linesAndPolygonsProgram, "Shader program must be initialized");
-
-    ghoul::opengl::ProgramObject* program = _linesAndPolygonsProgram;
-    if (feature.type == RenderType::Points) {
-        program = _pointsProgram;
-    }
-
-    // Reserve space for both vertex and dynamic height information
-    auto fullBufferSize = vertexData.size() * (sizeof(Vertex) + sizeof(float));
-
-    glBindVertexArray(feature.vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, feature.vboId);
-    glNamedBufferData(feature.vboId, fullBufferSize, nullptr, GL_STATIC_DRAW);
-
-    glBufferSubData(
-        GL_ARRAY_BUFFER,
-        0, // offset
-        vertexData.size() * sizeof(Vertex), // size
-        vertexData.data()
-    );
-
-    const GLint positionAttrib = program->attributeLocation("in_position");
-    glEnableVertexArrayAttrib(feature.vaoId, positionAttrib);
-    glVertexAttribPointer(
-        positionAttrib,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(Vertex),
-        nullptr
-    );
-
-    const GLint normalAttrib = program->attributeLocation("in_normal");
-    glEnableVertexArrayAttrib(feature.vaoId, normalAttrib);
-    glVertexAttribPointer(
-        normalAttrib,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(Vertex),
-        reinterpret_cast<void*>(3 * sizeof(float))
-    );
-
-    // Put height data after all vertex data in buffer
-    const unsigned long long endOfVertexData = vertexData.size() * sizeof(Vertex);
-    glBindVertexArray(feature.vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, feature.vboId);
-    glBufferSubData(
-        GL_ARRAY_BUFFER,
-        endOfVertexData, // offset
-        feature.heights.size() * sizeof(float), // size of all height values
-        feature.heights.data()
-    );
-
-    const GLint heightAttrib = program->attributeLocation("in_height");
-    glEnableVertexArrayAttrib(feature.vaoId, heightAttrib);
-    glVertexAttribPointer(
-        heightAttrib,
-        1,
-        GL_FLOAT,
-        GL_FALSE,
-        1 * sizeof(float), // stride (one height value)
-        reinterpret_cast<void*>(endOfVertexData) // start position
-    );
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
 void GlobeGeometryFeature::bufferDynamicHeightData(const RenderFeature& feature) {
     ghoul_assert(_pointsProgram, "Shader program must be initialized");
     ghoul_assert(_linesAndPolygonsProgram, "Shader program must be initialized");
 
-    ghoul::opengl::ProgramObject* program = _linesAndPolygonsProgram;
-    if (feature.type == RenderType::Points) {
-        program = _pointsProgram;
-    }
-
-    // Just update the height data
-
-    glBindVertexArray(feature.vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, feature.vboId);
-    glBufferSubData(
-        GL_ARRAY_BUFFER,
-        feature.nVertices * sizeof(Vertex), // offset
-        feature.heights.size() * sizeof(float), // size
+    glNamedBufferData(
+        feature.heightVboId,
+        feature.heights.size() * sizeof(float),
         feature.heights.data()
     );
-
-    const GLint heightAttrib = program->attributeLocation("in_height");
-    glEnableVertexArrayAttrib(feature.vaoId, heightAttrib);
-    glVertexAttribPointer(
-        heightAttrib,
-        1,
-        GL_FLOAT,
-        GL_FALSE,
-        1 * sizeof(float), // stride
-        reinterpret_cast<void*>(feature.nVertices * sizeof(Vertex)) // start position
-    );
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }
 
 } // namespace openspace::globebrowsing

@@ -539,12 +539,7 @@ void RenderableInterpolatedPoints::updateBufferData() {
 
     // Regenerate data and update buffer
     std::vector<float> slice = createDataSlice();
-
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, slice.size() * sizeof(float), slice.data());
-
-    glBindVertexArray(0);
+    glNamedBufferSubData(_vbo, 0, slice.size() * sizeof(float), slice.data());
 
     _dataIsDirty = false;
 }

@@ -221,8 +221,13 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
 }
 
 void RenderableShadowCylinder::initializeGL() {
-    glCreateVertexArrays(1, &_vao);
     glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(CylinderVBOLayout));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     _shader = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         "ShadowCylinderProgram",
@@ -349,24 +354,12 @@ void RenderableShadowCylinder::createCylinder(double time) {
     _vertices.push_back(_vertices[0]);
     _vertices.push_back(_vertices[1]);
 
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
     glNamedBufferData(
         _vbo,
         _vertices.size() * sizeof(CylinderVBOLayout),
-        nullptr,
+        _vertices.data(),
         GL_DYNAMIC_DRAW
     );
-    glBufferSubData(
-        GL_ARRAY_BUFFER,
-        0,
-        _vertices.size() * sizeof(CylinderVBOLayout),
-        _vertices.data()
-    );
-
-    glEnableVertexArrayAttrib(_vao, 0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
-    glBindVertexArray(0);
 }
 
 } // namespace openspace

@@ -405,39 +405,39 @@ void RenderableFov::initializeGL() {
     _fieldOfViewBounds.data.resize(2 * _instrument.bounds.size());
 
     // Field of view boundaries
-    glCreateVertexArrays(1, &_fieldOfViewBounds.vao);
-    glBindVertexArray(_fieldOfViewBounds.vao);
     glCreateBuffers(1, &_fieldOfViewBounds.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _fieldOfViewBounds.vbo);
     glNamedBufferData(
         _fieldOfViewBounds.vbo,
         _fieldOfViewBounds.data.size() * sizeof(RenderInformation::VBOData),
         nullptr,
         GL_STREAM_DRAW
     );
-    glEnableVertexArrayAttrib(_fieldOfViewBounds.vao, 0);
-    glVertexAttribPointer(
+
+    glCreateVertexArrays(1, &_fieldOfViewBounds.vao);
+    glVertexArrayVertexBuffer(
+        _fieldOfViewBounds.vao,
         0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(RenderInformation::VBOData),
-        nullptr
+        _fieldOfViewBounds.vbo,
+        0,
+        sizeof(RenderInformation::VBOData)
     );
+
+    glEnableVertexArrayAttrib(_fieldOfViewBounds.vao, 0);
+    glVertexArrayAttribFormat(_fieldOfViewBounds.vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_fieldOfViewBounds.vao, 0, 0);
+
     glEnableVertexArrayAttrib(_fieldOfViewBounds.vao, 1);
-    glVertexAttribIPointer(
+    glVertexArrayAttribIFormat(
+        _fieldOfViewBounds.vao,
         1,
         1,
         GL_INT,
-        sizeof(RenderInformation::VBOData),
-        reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, color))
+        offsetof(RenderInformation::VBOData, color)
     );
+    glVertexArrayAttribBinding(_fieldOfViewBounds.vao, 1, 0);
 
     // Orthogonal Plane
-    glCreateVertexArrays(1, &_orthogonalPlane.vao);
     glCreateBuffers(1, &_orthogonalPlane.vbo);
-    glBindVertexArray(_orthogonalPlane.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _orthogonalPlane.vbo);
     glNamedBufferData(
         _orthogonalPlane.vbo,
         _orthogonalPlane.data.size() * sizeof(RenderInformation::VBOData),
@@ -445,25 +445,28 @@ void RenderableFov::initializeGL() {
         GL_STREAM_DRAW
     );
 
-    glEnableVertexArrayAttrib(_orthogonalPlane.vao, 0);
-    glVertexAttribPointer(
+    glCreateVertexArrays(1, &_orthogonalPlane.vao);
+    glVertexArrayVertexBuffer(
+        _orthogonalPlane.vao,
         0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(RenderInformation::VBOData),
-        nullptr
+        _orthogonalPlane.vbo,
+        0,
+        sizeof(RenderInformation::VBOData)
     );
+
+    glEnableVertexArrayAttrib(_orthogonalPlane.vao, 0);
+    glVertexArrayAttribFormat(_orthogonalPlane.vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_orthogonalPlane.vao, 0, 0);
+
     glEnableVertexArrayAttrib(_orthogonalPlane.vao, 1);
-    glVertexAttribIPointer(
+    glVertexArrayAttribIFormat(
+        _orthogonalPlane.vao,
         1,
         1,
         GL_INT,
-        sizeof(RenderInformation::VBOData),
-        reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, color))
+        offsetof(RenderInformation::VBOData, color)
     );
-
-    glBindVertexArray(0);
+    glVertexArrayAttribBinding(_orthogonalPlane.vao, 1, 0);
 }
 
 void RenderableFov::deinitializeGL() {

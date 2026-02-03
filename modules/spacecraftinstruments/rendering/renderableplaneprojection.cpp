@@ -102,8 +102,17 @@ bool RenderablePlaneProjection::isReady() const {
 }
 
 void RenderablePlaneProjection::initializeGL() {
-    glCreateVertexArrays(1, &_quad);
-    glCreateBuffers(1, &_vertexPositionBuffer);
+    glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 6 * sizeof(float));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat));
+    glVertexArrayAttribBinding(_vao, 1, 0);
 
     _shader = global::renderEngine->buildRenderProgram(
         "Image Plane",
@@ -121,10 +130,10 @@ void RenderablePlaneProjection::deinitializeGL() {
         _shader = nullptr;
     }
 
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
+    glDeleteVertexArrays(1, &_vao);
+    _vao = 0;
+    glDeleteBuffers(1, &_vbo);
+    _vbo = 0;
     _texture = nullptr;
 }
 
@@ -152,7 +161,7 @@ void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
     _texture->bind();
     _shader->setUniform("texture1", unit);
 
-    glBindVertexArray(_quad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     _shader->deactivate();
@@ -288,25 +297,13 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
         projection[3].x, projection[3].y, projection[3].z, 0.f, 1.f, 1.f,
     };
 
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
     glNamedBufferData(
-        _vertexPositionBuffer,
+        _vbo,
         sizeof(VertexData),
         VertexData.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexArrayAttrib(_quad, 0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
-    glEnableVertexArrayAttrib(_quad, 1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        6 * sizeof(GLfloat),
-        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
-    );
+    
 
     if (!img.path.empty()) {
         _texturePath = img.path;

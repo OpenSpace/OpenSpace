@@ -226,64 +226,57 @@ void RenderableKameleonPlane::initializeGL() {
 }
 
 bool RenderableKameleonPlane::createGeometry() {
-    glCreateVertexArrays(1, &_quad); // generate array
-    glCreateBuffers(1, &_vertexPositionBuffer); // generate buffer
+    struct Vertex {
+        GLfloat x;
+        GLfloat y;
+        GLfloat z;
+        GLfloat w;
+        GLfloat s;
+        GLfloat t;
+    };
 
-    // ============================
-    //         GEOMETRY (quad)
-    // ============================
-    // GLfloat x,y, z;
+    glCreateBuffers(1, &_vbo);
     float s = _data.spatialScale.x;
     const GLfloat x = s * _data.scale.x / 2.f;
     const GLfloat y = s * _data.scale.y / 2.f;
     const GLfloat z = s * _data.scale.z / 2.f;
     const GLfloat w = _data.spatialScale.w;
-
-    const GLfloat vertex_data[] = { // square of two triangles (sigh)
-        //      x      y     z     w     s     t
-        -x, -y,             -z,  w, 0, 1,
-         x,  y,              z,  w, 1, 0,
-        -x,  ((x>0)?y:-y),   z,  w, 0, 0,
-        -x, -y,             -z,  w, 0, 1,
-         x,  ((x>0)?-y:y),  -z,  w, 1, 1,
-         x,  y,              z,  w, 1, 0,
+    const Vertex VertexData[] = {
+        { -x, -y,             -z,  w, 0, 1, },
+        {  x,  y,              z,  w, 1, 0, },
+        { -x, ((x > 0) ? y : -y),   z,  w, 0, 0, },
+        { -x, -y,             -z,  w, 0, 1, },
+        { x,  ((x > 0) ? -y : y),  -z,  w, 1, 1, },
+        { x,  y,              z,  w, 1, 0 }
     };
+    glNamedBufferData(_vbo, sizeof(VertexData), VertexData, GL_STATIC_DRAW);
 
-    glBindVertexArray(_quad); // bind array
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-    glNamedBufferData(
-        _vertexPositionBuffer,
-        sizeof(vertex_data),
-        vertex_data,
-        GL_STATIC_DRAW
-    );
-    glEnableVertexArrayAttrib(_quad, 0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
-    glEnableVertexArrayAttrib(_quad, 1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
-    );
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4);
+    glVertexArrayAttribBinding(_vao, 1, 0);
 
     return true;
 }
 
 bool RenderableKameleonPlane::destroyGeometry() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
+    glDeleteVertexArrays(1, &_vao);
+    _vao = 0;
 
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
+    glDeleteBuffers(1, &_vbo);
+    _vbo = 0;
 
     return true;
 }
 
 void RenderableKameleonPlane::renderGeometry() const {
-    glBindVertexArray(_quad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
