@@ -71,13 +71,6 @@
     "url": "https://www.openspaceproject.com",
     "version": "1.0"
   },
-  "properties": [
-    {
-      "name": "Modules.SkyBrowser.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    }
-  ],
   "time": {
     "is_paused": false,
     "type": "relative",
