@@ -40,7 +40,7 @@ uniform sampler1D colorTexture;
 Fragment getFragment() {
     Fragment frag;
 
-    if(opacity == 0.0) {
+    if (opacity == 0.0) {
         discard;
     }
 

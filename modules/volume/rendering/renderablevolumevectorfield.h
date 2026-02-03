@@ -29,6 +29,7 @@
 
 #include <modules/volume/rawvolume.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/dvec3property.h>
 #include <openspace/properties/vector/vec2property.h>
@@ -44,8 +45,6 @@ namespace ghoul::opengl {
 } // namespace ghoul::opengl
 
 namespace openspace::volume {
-
-
 
 class RenderableVectorField : public Renderable {
 public:
@@ -94,6 +93,7 @@ private:
     properties::FloatProperty _lineWidth;
     properties::BoolProperty _colorByMagnitude;
     properties::StringProperty _colorTexturePath;
+    bool _computeMagnitudeRange = true;
 
     properties::BoolProperty _filterByLua;
     properties::StringProperty _luaScriptFile;

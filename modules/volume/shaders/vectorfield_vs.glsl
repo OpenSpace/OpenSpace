@@ -39,7 +39,8 @@ out float vs_positionDepth;
 
 mat3 makeRotation(vec3 dir) {
     vec3 x = normalize(dir);
-    vec3 up = abs(x.z) < 0.999 ? vec3(0,0,1) : vec3(0,1,0);
+    // Pick an up vector that is not parallel to x. Avoids numerical instability issues
+    vec3 up = abs(x.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(0.0, 1.0, 0.0);
     vec3 y = normalize(cross(up, x));
     vec3 z = cross(x, y);
     return mat3(x, y, z);
@@ -47,10 +48,9 @@ mat3 makeRotation(vec3 dir) {
 
 float exponentialScale(float sliderValue, float minExp, float maxExp) {
     // Clamp input just in case
-    if (sliderValue < 1) sliderValue = 1;
-    if (sliderValue > 100) sliderValue = 100;
+    sliderValue = clamp(sliderValue, 1.0, 100.0);
     // Normalize slider to 0–1
-    float t = (sliderValue - 1) / (100 - 1);
+    float t = (sliderValue - 1.0) / (100.0 - 1.0);
 
     // Interpolate exponent
     float exponent = minExp + t * (maxExp - minExp);
@@ -62,9 +62,8 @@ float exponentialScale(float sliderValue, float minExp, float maxExp) {
 void main() {
     mat3 rotationMatrix = makeRotation(in_direction);
 
-    vec3 scaledPosition = in_arrowVertex * (in_magnitude *
-        exponentialScale(arrowScale, 2.5, 23.0)
-    );
+    float scale = exponentialScale(arrowScale, 2.5, 23.0);
+    vec3 scaledPosition = in_arrowVertex * in_magnitude * scale;
     vec3 worldPosition = in_position + rotationMatrix * scaledPosition;
 
     vec4 positionClipSpace = modelViewProjection * vec4(worldPosition, 1.0);

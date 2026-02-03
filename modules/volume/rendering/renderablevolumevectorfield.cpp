@@ -44,7 +44,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo StrideInfo = {
         "Stride",
         "Stride",
-        "Controls how densely vectors are sampled from the volume, a stride of 1 renders "
+        "Controls how densely vectors are sampled from the volume. A stride of 1 renders "
         "every vector.",
         openspace::properties::Property::Visibility::NoviceUser
     };
@@ -59,23 +59,23 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
-        "Specifies the line width of the vector lines.",
-        openspace::properties::Property::Visibility::NoviceUser
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo DataRangeInfo = {
-        "DataRange",
-        "Data range",
-        "Specifies the data range to render the vector field in, magnitudes outside this "
-        "range will be filtered away.",
+        "The width of the vector lines.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterOutOfRangeInfo = {
         "FilterOutOfRange",
         "Filter out of range",
-        "Determines whether other data values outside the value range should be visible "
-        "or filtered away.",
+        "Determines whether data values outside the value range should be visible or "
+        "filtered out.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FilterDataRangeInfo = {
+        "FilterDataRange",
+        "Filter data range",
+        "The data range to use when filtering by data value. Magnitudes outside this "
+        "range will be filtered out.",
         openspace::properties::Property::Visibility::NoviceUser
     };
 
@@ -92,6 +92,14 @@ namespace {
         "Color texture",
         "The path to the texture used to color the vector field.",
         openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColorMappingDataRangeInfo = {
+        "ColorMappingDataRange",
+        "Color mapping data range",
+        "The magnitude data range used to normalize the magnitude value for color "
+        "lookup. Computed from the volume data if unspecified.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterByLuaInfo = {
@@ -112,13 +120,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MagnitudeDataRangeInfo = {
-        "MagnitudeDataRange",
-        "Magnitude data range",
-        "The computed magnitude data range used to normalize the magnitude value for "
-        "color lookup.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
 
     // A RenderableVectorField can be used to render vectors from a given 3D volumetric
     // dataset, optionally including color mapping and custom filtering via Lua script.
@@ -155,17 +156,20 @@ namespace {
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<double> lineWidth;
 
-        // [[codegen::verbatim(DataRangeInfo.description)]]
-        std::optional<glm::dvec2> dataRange;
-
         // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
         std::optional<bool> filterOutOfRange;
+
+        // [[codegen::verbatim(FilterDataRangeInfo.description)]]
+        std::optional<glm::dvec2> dataRange;
 
         // [[codgen::verbatim(ColorByMagnitudeInfo.description)]]
         std::optional<bool> colorByMagnitude;
 
         // [[codgen::verbatim(ColorTextureInfo.description)]]
         std::optional<std::filesystem::path> colorMapFile;
+
+        // [[codegen::verbatim(ColorMappingDataRangeInfo.description)]]
+        std::optional<glm::dvec2> colorMappingRange;
 
         // [[codegen::verbatim(FilterByLuaInfo.description)]]
         std::optional<bool> filterByLua;
@@ -185,7 +189,7 @@ documentation::Documentation RenderableVectorField::Documentation() {
 RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _dataRange(
-        DataRangeInfo,
+        FilterDataRangeInfo,
         glm::vec2(0.f, 1.f),
         glm::vec2(0.f),
         glm::vec2(1500.f),
@@ -193,7 +197,7 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     )
     , _filterOutOfRange(FilterOutOfRangeInfo, false)
     , _magnitudeDomain(
-        MagnitudeDataRangeInfo,
+        ColorMappingDataRangeInfo,
         glm::vec2(std::numeric_limits<float>::max(),
         std::numeric_limits<float>::lowest()), glm::vec2(0.f), glm::vec2(1500.f),
         glm::vec2(1.f)
@@ -215,30 +219,14 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     _maxDomain = p.maxDomain;
     _dimensions = p.dimensions;
 
-    // Subscribe to changes in the Lua script file
-    _luaScriptFile.onChange([this]() {
-        _vectorFieldIsDirty = true;
-        _luaScriptFileHandle =
-            std::make_unique<ghoul::filesystem::File>(_luaScriptFile.value()
-        );
-        _luaScriptFileHandle->setCallback([this]() {
-            _vectorFieldIsDirty = true;
-        });
-    });
-
-    if (p.script.has_value()) {
-        _luaScriptFile = p.script.value().string();
-    }
-    addProperty(_luaScriptFile);
-
     _stride = p.stride;
     _stride.onChange([this]() { _vectorFieldIsDirty = true; });
     addProperty(_stride);
 
-    _vectorFieldScale = static_cast<float>(p.vectorFieldScale.value_or(1.f));
+    _vectorFieldScale = static_cast<float>(p.vectorFieldScale.value_or(_vectorFieldScale));
     addProperty(_vectorFieldScale);
 
-    _lineWidth = static_cast<float>(p.lineWidth.value_or(1.f));
+    _lineWidth = static_cast<float>(p.lineWidth.value_or(_lineWidth));
     addProperty(_lineWidth);
 
     _colorTexturePath.onChange([this]() {
@@ -255,19 +243,46 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     }
     addProperty(_colorTexturePath);
 
-    _colorByMagnitude = p.colorByMagnitude.value_or(false);
+    _colorByMagnitude = p.colorByMagnitude.value_or(_colorByMagnitude);
     addProperty(_colorByMagnitude);
 
+    _magnitudeDomain = p.colorMappingRange.value_or(_magnitudeDomain.value());
+    _computeMagnitudeRange = !p.colorMappingRange.has_value();
     addProperty(_magnitudeDomain);
 
-    _filterByLua = p.filterByLua.value_or(false) && p.script.has_value();
-    _filterByLua.onChange([this]() {_vectorFieldIsDirty = true; });
+    _filterByLua = p.filterByLua.value_or(_filterByLua) && p.script.has_value();
+    _filterByLua.onChange([this]() {
+        if (std::filesystem::exists(_luaScriptFile.value())) {
+            _vectorFieldIsDirty = true;
+        }
+        else {
+            LWARNING(std::format(
+                "No filter function file found: '{}'", _luaScriptFile.value())
+            );
+        }
+    });
     addProperty(_filterByLua);
 
-    _filterOutOfRange = p.filterOutOfRange.value_or(false);
+    // Subscribe to changes in the Lua script file
+    _luaScriptFile.onChange([this]() {
+        _vectorFieldIsDirty = true;
+        _luaScriptFileHandle = std::make_unique<ghoul::filesystem::File>(
+            _luaScriptFile.value()
+        );
+        _luaScriptFileHandle->setCallback([this]() {
+            _vectorFieldIsDirty = true;
+        });
+    });
+
+    if (p.script.has_value()) {
+        _luaScriptFile = p.script.value().string();
+    }
+    addProperty(_luaScriptFile);
+
+    _filterOutOfRange = p.filterOutOfRange.value_or(_filterOutOfRange);
     addProperty(_filterOutOfRange);
 
-    _dataRange = p.dataRange.value_or(glm::vec2(0, 1));
+    _dataRange = p.dataRange.value_or(_dataRange.value());
     addProperty(_dataRange);
 
     global::scriptEngine->initializeLuaState(_state);
@@ -282,16 +297,18 @@ void RenderableVectorField::initialize() {
     RawVolumeReader<VelocityData> reader(dataFile, _dimensions);
     _volumeData = reader.read();
 
-    _volumeData->forEachVoxel(
-        [this](const glm::uvec3&, const VelocityData& data) {
-            float magnitude = glm::length(glm::vec3(data.vx, data.vy, data.vz));
-            const glm::vec2& mag = _magnitudeDomain.value();
-            _magnitudeDomain = glm::vec2(
-                std::min(mag.x, magnitude),
-                std::max(mag.y, magnitude)
-            );
-        }
-    );
+    if (_computeMagnitudeRange) {
+        _volumeData->forEachVoxel(
+            [this](const glm::uvec3&, const VelocityData& data) {
+                float magnitude = glm::length(glm::vec3(data.vx, data.vy, data.vz));
+                const glm::vec2& mag = _magnitudeDomain.value();
+                _magnitudeDomain = glm::vec2(
+                    std::min(mag.x, magnitude),
+                    std::max(mag.y, magnitude)
+                );
+            }
+        );
+    }
 
     computeFieldLinesParallel();
     _vectorFieldIsDirty = false;
@@ -452,12 +469,12 @@ void RenderableVectorField::update(const UpdateData&) {
             GL_DYNAMIC_DRAW
         );
 
-        _vectorFieldIsDirty = false;
-
         if (_program->isDirty()) [[unlikely]] {
             _program->rebuildFromFile();
             ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
         }
+
+        _vectorFieldIsDirty = false;
     }
 
     if (_textureIsDirty) [[unlikely]] {
@@ -480,6 +497,7 @@ void RenderableVectorField::update(const UpdateData&) {
                 _colorTexture->uploadTexture();
             }
         }
+
         _textureIsDirty = false;
     }
 }
