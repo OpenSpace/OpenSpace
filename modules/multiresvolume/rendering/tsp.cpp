@@ -208,10 +208,7 @@ bool TSP::initalizeSSO() {
     }
 
     const size_t size = sizeof(GLint)*_data.size();
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _dataSSBO);
     glNamedBufferData(_dataSSBO, size, _data.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-    glFinish();
     return true;
 }
 

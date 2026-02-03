@@ -70,14 +70,12 @@ bool AtlasManager::initialize() {
     glCreateBuffers(2, _pboHandle);
 
     glCreateBuffers(1, &_atlasMapBuffer);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _atlasMapBuffer);
     glNamedBufferData(
         _atlasMapBuffer,
         sizeof(GLint) * _nBricksInMap,
         nullptr,
         GL_DYNAMIC_READ
     );
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
     return true;
 }
