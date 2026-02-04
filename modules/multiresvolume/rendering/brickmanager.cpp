@@ -408,9 +408,8 @@ bool BrickManager::diskToPBO(BufferIndex pboIndex) {
 bool BrickManager::pboToAtlas(BufferIndex pboIndex) {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[pboIndex]);
     glm::size3_t dim = _textureAtlas->dimensions();
-    glBindTexture(GL_TEXTURE_3D, *_textureAtlas);
-    glTexSubImage3D(
-        GL_TEXTURE_3D,
+    glTextureSubImage3D(
+        *_textureAtlas,
         0,
         0,
         0,
@@ -422,7 +421,6 @@ bool BrickManager::pboToAtlas(BufferIndex pboIndex) {
         GL_FLOAT,
         nullptr
     );
-    glBindTexture(GL_TEXTURE_3D, 0);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     return true;
