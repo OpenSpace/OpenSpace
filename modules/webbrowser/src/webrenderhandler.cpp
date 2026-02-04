@@ -201,11 +201,10 @@ void WebRenderHandler::updateTexture() {
         glTextureParameteri(_texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
     else if (_textureIsDirty) {
-        glBindTexture(GL_TEXTURE_2D, _texture);
         glPixelStorei(GL_UNPACK_ROW_LENGTH, _browserBufferSize.x);
 
-        glTexSubImage2D(
-            GL_TEXTURE_2D,
+        glTextureSubImage2D(
+            _texture,
             0,
             _lowerDirtyRectBound.x,
             _browserBufferSize.y - _upperDirtyRectBound.y,

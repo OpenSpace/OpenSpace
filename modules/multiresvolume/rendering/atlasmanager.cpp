@@ -231,9 +231,8 @@ void AtlasManager::fillVolume(float* in, float* out, unsigned int linearAtlasCoo
 void AtlasManager::pboToAtlas(BufferIndex bufferIndex) {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[bufferIndex]);
     glm::size3_t dim = _textureAtlas->dimensions();
-    glBindTexture(GL_TEXTURE_3D, *_textureAtlas);
-    glTexSubImage3D(
-        GL_TEXTURE_3D,
+    glTextureSubImage3D(
+        *_textureAtlas,
         0,
         0,
         0,
@@ -245,7 +244,6 @@ void AtlasManager::pboToAtlas(BufferIndex bufferIndex) {
         GL_FLOAT,
         nullptr
     );
-    glBindTexture(GL_TEXTURE_3D, 0);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 }
 
