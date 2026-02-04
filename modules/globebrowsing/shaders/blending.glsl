@@ -37,6 +37,10 @@ vec4 blendMultiply(vec4 oldColor, vec4 newColor) {
   return oldColor * newColor;
 }
 
+vec4 blendMultiplyMix(vec4 oldColor, vec4 newColor, float blendFactor) {
+  return blendNormal(oldColor, blendMultiply(oldColor, newColor * blendFactor));
+}
+
 vec4 blendAdd(vec4 oldColor, vec4 newColor) {
   return oldColor + newColor;
 }

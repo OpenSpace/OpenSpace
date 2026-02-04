@@ -177,9 +177,10 @@ vec4 getSample#{layerGroup}#{i}(vec2 uv, vec3 levelWeights,
 
 #define BlendModeDefault 0
 #define BlendModeMultiply 1
-#define BlendModeAdd 2
-#define BlendModeSubtract 3
-#define BlendModeColor 4
+#define BlendModeMultiplyMix 2
+#define BlendModeAdd 3
+#define BlendModeSubtract 4
+#define BlendModeColor 5
 
 #for id, layerGroup in layerGroups
 #for i in 0..#{lastLayerIndex#{layerGroup}}
@@ -189,6 +190,8 @@ vec4 blend#{layerGroup}#{i}(vec4 currentColor, vec4 newColor, float blendFactor)
   return blendNormal(currentColor, vec4(newColor.rgb, newColor.a * blendFactor));
 #elif (#{#{layerGroup}#{i}BlendMode} == BlendModeMultiply)
   return blendMultiply(currentColor, newColor * blendFactor);
+#elif (#{#{layerGroup}#{i}BlendMode} == BlendModeMultiplyMix)
+  return blendMultiplyMix(currentColor, newColor, blendFactor);
 #elif (#{#{layerGroup}#{i}BlendMode} == BlendModeAdd)
   return blendAdd(currentColor, newColor * blendFactor);
 #elif (#{#{layerGroup}#{i}BlendMode} == BlendModeSubtract)
