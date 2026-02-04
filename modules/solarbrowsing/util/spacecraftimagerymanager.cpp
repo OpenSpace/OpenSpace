@@ -40,7 +40,6 @@
 #include <future>
 #include <string>
 #include <iostream>
-#include <optional>
 
 namespace {
     constexpr const char* _loggerCat = "SpacecraftImageryManager";
@@ -73,7 +72,7 @@ std::string SpacecraftImageryManager::ISO8601(std::string& datetime) {
 }
 
 void SpacecraftImageryManager::loadTransferFunctions(const std::filesystem::path& dir,
-    std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap)
+    std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& tfMap)
 {
 
     if (!std::filesystem::is_directory(dir)) {
@@ -89,13 +88,13 @@ void SpacecraftImageryManager::loadTransferFunctions(const std::filesystem::path
     for (const std::filesystem::path& seqPath : sequencePaths) {
         if (seqPath.extension() == ".txt") {
             std::string key = seqPath.stem().string();
-            _tfMap[key] = std::make_shared<TransferFunction>(seqPath);
+            tfMap[key] = std::make_shared<TransferFunction>(seqPath);
         }
     }
 }
 
 bool SpacecraftImageryManager::loadMetadataFromDisk(const std::filesystem::path& rootDir,
-           std::unordered_map<std::string, Timeline<ImageMetadata>>& imageMetadataMap)
+                                                       ImageMetadataMap& imageMetadataMap)
 {
     if (!std::filesystem::is_directory(rootDir)) {
         throw ghoul::RuntimeError(std::format(
@@ -200,13 +199,11 @@ bool SpacecraftImageryManager::loadMetadataFromDisk(const std::filesystem::path&
 }
 
 void SpacecraftImageryManager::saveMetadataToDisk(const std::filesystem::path& rootPath,
-           std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap)
+                                                 const ImageMetadataMap& imageMetadataMap)
 {
-    using K = std::string;
-    using V = Timeline<ImageMetadata>;
-    for (const std::pair<K, V>& instrument : _imageMetadataMap) {
+    for (const auto& [instrument, sequence] : imageMetadataMap) {
         const std::filesystem::path cacheFile =
-            rootPath / std::format("{}_cached.txt", instrument.first);
+            rootPath / std::format("{}_cached.txt", instrument);
 
         std::ofstream ofs(cacheFile);
         if (!ofs.is_open()) {
@@ -214,7 +211,6 @@ void SpacecraftImageryManager::saveMetadataToDisk(const std::filesystem::path& r
             continue;
         }
 
-        const Timeline<ImageMetadata>& sequence = instrument.second;
         ofs << sequence.nKeyframes() << '\n';
 
         for (const Keyframe<ImageMetadata>& metadata : sequence.keyframes()) {
@@ -246,7 +242,7 @@ void SpacecraftImageryManager::saveMetadataToDisk(const std::filesystem::path& r
 // this implementation should be improved in order not to search the entire buffer for
 // XML data. There is an issue here:
 // (https://github.com/uclouvain/openjpeg/issues/929)
-ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
+std::optional<ImageMetadata> SpacecraftImageryManager::parseJ2kMetadata(
                                                     const std::filesystem::path& filePath)
 {
     ImageMetadata im;
@@ -265,86 +261,106 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
     auto extractInnerXml = [](std::string_view view, const std::string& elementName) ->
         std::optional<std::string_view>
         {
-            const std::string startTag =
-                std::string("<") + elementName + std::string(">");
-            const std::string endTag = std::string("</") + elementName + std::string(">");
+            const std::string startTag = std::format("<{}>", elementName);
+            const std::string endTag = std::format("</{}>", elementName);
 
-            const auto begin =
-                std::search(view.begin(), view.end(), startTag.begin(), startTag.end());
+            const auto begin = std::search(
+                view.begin(),
+                view.end(),
+                startTag.begin(),
+                startTag.end()
+            );
+
             if (begin == view.end()) {
                 return std::nullopt;
 ;           }
+
             const auto afterBeginTag = begin + startTag.size();
 
-            const auto end =
-                std::search(afterBeginTag, view.end(), endTag.begin(), endTag.end());
+            const auto end = std::search(
+                afterBeginTag,
+                view.end(),
+                endTag.begin(),
+                endTag.end()
+            );
+
             if (end == view.end()) {
                 return std::nullopt;
             }
+
             return std::string_view(&*afterBeginTag, end - afterBeginTag);
         };
 
     std::optional<std::string_view> metaData = extractInnerXml(bufferView, "meta");
+
     if (!metaData.has_value()) {
         LERROR(std::format("Could not find metadata in {}", filePath));
-        return im;
+        return std::nullopt;
     }
 
-    std::optional<std::string_view> telescop =
-        extractInnerXml(metaData.value(), "TELESCOP");
+    std::optional<std::string_view> telescop = extractInnerXml(
+        metaData.value(),
+        "TELESCOP"
+    );
+
     if (!telescop.has_value()) {
         LERROR(std::format("Could not find TELESCOP tag {}", filePath));
-        return im;
+        return std::nullopt;
     }
 
-    if (std::optional<std::string_view> naxis =
-        extractInnerXml(metaData.value(), "NAXIS1"))
-    {
-        im.fullResolution = std::stoi(std::string(naxis.value()));
-    }
-    else {
+    std::optional<std::string_view> naxis = extractInnerXml(
+        metaData.value(),
+        "NAXIS1"
+    );
+
+    if (!naxis.has_value()) {
         LERROR(std::format("Could not find NAXIS1 tag {}", filePath));
-        return im;
+        return std::nullopt;
     }
 
+    std::optional<std::string_view> centerPixelX = extractInnerXml(
+        bufferView,
+        "CRPIX1"
+    );
+
+    if (!centerPixelX.has_value()) {
+        LERROR(std::format("Could not find CRPIX1 tag {}", filePath));
+        return std::nullopt;
+    }
+
+    std::optional<std::string_view> centerPixelY = extractInnerXml(
+        bufferView,
+        "CRPIX2"
+    );
+
+    if (!centerPixelY.has_value()) {
+        LERROR(std::format("Could not find CRPIX2 tag {}", filePath));
+        return std::nullopt;
+    }
+
+    im.fullResolution = std::stoi(std::string(naxis.value()));
     const float halfRes = im.fullResolution / 2.f;
 
     glm::vec2 centerPixel;
-    if (std::optional<std::string_view> centerPixelX =
-        extractInnerXml(bufferView, "CRPIX1"))
-    {
-        centerPixel.x = std::stof(std::string(centerPixelX.value()));
-    }
-    else {
-        LERROR(std::format("Could not find CRPIX1 tag {}", filePath));
-        return im;
-    }
-
-    if (std::optional<std::string_view> centerPixelY =
-        extractInnerXml(bufferView, "CRPIX2"))
-    {
-        centerPixel.y = std::stof(std::string(centerPixelY.value()));
-    }
-    else {
-        LERROR(std::format("Could not find CRPIX2 tag {}", filePath));
-        return im;
-    }
-
+    centerPixel.x = std::stof(std::string(centerPixelX.value()));
+    centerPixel.y = std::stof(std::string(centerPixelY.value()));
     const glm::vec2 offset = ((halfRes - centerPixel) / halfRes) * glm::vec2(SUN_RADIUS);
     im.centerPixel = offset;
 
     if (telescop.value() == "SOHO") {
-        if (std::optional<std::string_view> plateScl =
-            extractInnerXml(metaData.value(), "PLATESCL"))
-        {
-            const float plateScale = std::stof(std::string(plateScl.value()));
-            im.scale = 1.f / (plateScale / 2.f);
-            im.isCoronaGraph = true;
-        }
-        else {
+        std::optional<std::string_view> plateScl = extractInnerXml(
+            metaData.value(),
+            "PLATESCL"
+        );
+
+        if (!plateScl.has_value()) {
             LERROR(std::format("Could not find NAXIS1 tag {}", filePath));
-            return im;
+            return std::nullopt;
         }
+
+        const float plateScale = std::stof(std::string(plateScl.value()));
+        im.scale = 1.f / (plateScale / 2.f);
+        im.isCoronaGraph = true;
     }
     else if (telescop.value() == "SDO") {
         std::optional<std::string_view> rsunObs = extractInnerXml(bufferView, "RSUN_OBS");
@@ -352,38 +368,39 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
 
         if (!rsunObs.has_value()) {
             LERROR(std::format("Could not find RSUN_OBS tag {}", filePath));
-            return im;
+            return std::nullopt;
         }
         if (!cDelt1.has_value()) {
             LERROR(std::format("Could not find CDELT1 tag {}", filePath));
-            return im;
+            return std::nullopt;
         }
 
-        im.scale = (std::stof(std::string(rsunObs.value())) /
-            std::stof(std::string(cDelt1.value()))) /
-            (im.fullResolution / 2.f);
+        const float rSunObsValue = std::stof(std::string(rsunObs.value()));
+        const float cDelt1Value = std::stof(std::string(cDelt1.value()));
+        im.scale = (rSunObsValue / cDelt1Value) / (im.fullResolution / 2.f);
         im.isCoronaGraph = false;
     }
     else { // Telescope is assumed to be STEREO
         std::optional<std::string_view> rsun = extractInnerXml(bufferView, "RSUN");
         std::optional<std::string_view> cDelt1 = extractInnerXml(bufferView, "CDELT1");
+
         if (!rsun.has_value()) {
             LERROR(std::format("Could not find RSUN_OBS tag {}", filePath));
-            return im;
+            return std::nullopt;
         }
         if (!cDelt1.has_value()) {
             LERROR(std::format("Could not find CDELT1 tag {}", filePath));
-            return im;
+            return std::nullopt;
         }
 
-        im.scale = (std::stof(std::string(rsun.value())) /
-            std::stof(std::string(cDelt1.value()))) /
-            (im.fullResolution / 2.f);
+        const float rSunvalue = std::stof(std::string(rsun.value()));
+        const float cDelt1Value = std::stof(std::string(cDelt1.value()));
+        im.scale = (rSunvalue / cDelt1Value) / (im.fullResolution / 2.f);
         im.isCoronaGraph = false;
 
-        if (std::optional<std::string_view> detector =
-            extractInnerXml(bufferView, "DETECTOR"))
-        {
+        std::optional<std::string_view> detector = extractInnerXml(bufferView, "DETECTOR");
+
+        if (detector.has_value()) {
             im.isCoronaGraph =
                 detector.value() == "COR1" || detector.value() == "COR2";
         }
@@ -401,10 +418,10 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
 // buffer for metadata, avoiding pre-processing steps.
 // If you want to use this, you need to extract metadata to json first,
 // for example using: https://github.com/novalain/j2kcodec
-ImageMetadata SpacecraftImageryManager::parseJsonMetadata(
-                                                      const ghoul::filesystem::File& file)
-{
-    ImageMetadata im;
+//ImageMetadata SpacecraftImageryManager::parseJsonMetadata(
+//                                                      const ghoul::filesystem::File& file)
+//{
+//    ImageMetadata im;
     //im.filename = file.path().string();
     //const std::string filename = std::string(file.path().string() + ".json");
 
@@ -506,11 +523,11 @@ ImageMetadata SpacecraftImageryManager::parseJsonMetadata(
 
     //im.centerPixel = glm::vec2(offsetX, offsetY);
 
-    return im;
-}
+//    return im;
+//}
 
 void SpacecraftImageryManager::loadImageMetadata(const std::filesystem::path& rootDir,
-      std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap)
+                                                      ImageMetadataMap& imageMetadataMap)
 {
     if (!std::filesystem::is_directory(rootDir)) {
         throw ghoul::RuntimeError(std::format(
@@ -519,10 +536,10 @@ void SpacecraftImageryManager::loadImageMetadata(const std::filesystem::path& ro
     }
 
     LDEBUG("Begin loading spacecraft imagery metadata");
-    std::unordered_map<std::string, Timeline<ImageMetadata>> result;
+    ImageMetadataMap result;
     // Pre-processed data
     if (loadMetadataFromDisk(rootDir, result)) {
-        _imageMetadataMap.insert(result.begin(), result.end());
+        imageMetadataMap.insert(result.begin(), result.end());
         return;
     }
 
@@ -601,13 +618,21 @@ void SpacecraftImageryManager::loadImageMetadata(const std::filesystem::path& ro
                 hour, minute, second, millisecond
             );
 
-            ImageMetadata im = parseJ2kMetadata(seqPath);
-            spiceAndPushMutex.lock();
-            result[instrumentName].addKeyframe(
-                global::timeManager->time().convertTime(dateTime),
-                std::move(im)
-            );
-            spiceAndPushMutex.unlock();
+            std::optional<ImageMetadata> im = parseJ2kMetadata(seqPath);
+            if (im.has_value()) {
+                spiceAndPushMutex.lock();
+                result[instrumentName].addKeyframe(
+                    global::timeManager->time().convertTime(dateTime),
+                    std::move(im.value())
+                );
+                spiceAndPushMutex.unlock();
+            }
+            else {
+                LERROR(std::format(
+                    "Failed to parse J2K metadata from file '{}'",
+                    seqPath
+                ));
+            }
         }
         else {
             LERROR(std::format("Failed to parse date '{}' from file '{}'",
@@ -631,9 +656,9 @@ void SpacecraftImageryManager::loadImageMetadata(const std::filesystem::path& ro
     LDEBUG("Saving imagery metadata");
     saveMetadataToDisk(rootDir, result);
 
-    _imageMetadataMap.insert(result.begin(), result.end());
+    imageMetadataMap.insert(result.begin(), result.end());
     LDEBUG(std::format("{} images loaded", count));
-    LDEBUG(std::format("{} values in metamap", _imageMetadataMap.size()));
+    LDEBUG(std::format("{} values in metamap", imageMetadataMap.size()));
 }
 
 } //namespace openspace

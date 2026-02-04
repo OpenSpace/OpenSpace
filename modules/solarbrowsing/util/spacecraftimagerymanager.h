@@ -29,9 +29,10 @@
 #include <openspace/util/timeline.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <memory>
-#include <vector>
-#include <valarray>
 #include <unordered_map>
+#include <optional>
+#include <valarray>
+#include <vector>
 
 #define IMG_PRECISION unsigned char
 
@@ -44,27 +45,29 @@ namespace openspace {
 
 class TransferFunction;
 
+using ImageMetadataMap = std::unordered_map<std::string, Timeline<ImageMetadata>>;
+
 // @TODO anden88 2025-12-05: Move these functions to a utility file instead. Unlees there
 // is a need for a manager (currently not since it has no member variables or keep tracks of
 // anything particular)
 class SpacecraftImageryManager {
 public:
     void loadTransferFunctions(const std::filesystem::path& dir,
-          std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap);
+        std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap);
     void loadImageMetadata(const std::filesystem::path& rootDir,
-      std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap);
+        ImageMetadataMap& _imageMetadataMap);
 
 private:
-    ImageMetadata parseJ2kMetadata(const std::filesystem::path& filePath);
-    ImageMetadata parseJsonMetadata(const ghoul::filesystem::File& file);
+    std::optional<ImageMetadata> parseJ2kMetadata(const std::filesystem::path& filePath);
+    //ImageMetadata parseJsonMetadata(const ghoul::filesystem::File& file);
 
     std::string ISO8601(std::string& datetime);
 
     bool loadMetadataFromDisk(const std::filesystem::path& rootDir,
-        std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap);
+       ImageMetadataMap& _imageMetadataMap);
 
     void saveMetadataToDisk(const std::filesystem::path& rootPath,
-        std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap);
+        const ImageMetadataMap& _imageMetadataMap);
 };
 
 } //namespace openspace
