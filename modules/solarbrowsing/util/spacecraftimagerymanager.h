@@ -25,13 +25,13 @@
 #ifndef __OPENSPACE_MODULE_SOLARBROWSING___SPACECRAFTIMAGERYMANAGER___H__
 #define __OPENSPACE_MODULE_SOLARBROWSING___SPACECRAFTIMAGERYMANAGER___H__
 
+#include <modules/solarbrowsing/util/structs.h>
+#include <openspace/util/timeline.h>
+#include <ghoul/filesystem/filesystem.h>
 #include <memory>
 #include <vector>
 #include <valarray>
 #include <unordered_map>
-#include <openspace/util/timeline.h>
-#include <modules/solarbrowsing/util/structs.h>
-#include <nlohmann/json.hpp>
 
 #define IMG_PRECISION unsigned char
 
@@ -49,21 +49,21 @@ class TransferFunction;
 // anything particular)
 class SpacecraftImageryManager {
 public:
-    void loadTransferFunctions(const std::string& path,
+    void loadTransferFunctions(const std::filesystem::path& dir,
           std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap);
-    void loadImageMetadata(const std::string& path,
+    void loadImageMetadata(const std::filesystem::path& path,
       std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap);
 
 private:
-    ImageMetadata parseJ2kMetadata(const ghoul::filesystem::File& file);
+    ImageMetadata parseJ2kMetadata(const std::filesystem::path& filePath);
     ImageMetadata parseJsonMetadata(const ghoul::filesystem::File& file);
 
     std::string ISO8601(std::string& datetime);
 
-    bool loadMetadataFromDisk(const std::string& rootPath,
+    bool loadMetadataFromDisk(const std::filesystem::path& rootDir,
         std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap);
 
-    void saveMetadataToDisk(const std::string& rootPath,
+    void saveMetadataToDisk(const std::filesystem::path& rootPath,
         std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap);
 };
 

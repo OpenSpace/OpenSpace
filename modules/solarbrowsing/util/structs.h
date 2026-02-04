@@ -25,6 +25,7 @@
 #ifndef __OPENSPACE_MODULE_SOLARBROWSING___STRUCTS___H__
 #define __OPENSPACE_MODULE_SOLARBROWSING___STRUCTS___H__
 
+#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/glm.h>
 #include <memory>
 #include <string>
@@ -34,7 +35,7 @@ namespace openspace {
 
  // Assume everything in arcsec to minimize metadata
 struct ImageMetadata {
-    std::string filename;
+    std::filesystem::path filePath;
     int fullResolution;
     float scale;
     glm::vec2 centerPixel;
@@ -54,6 +55,6 @@ struct DecodeData {
     bool verboseMode;
 };
 
-}
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SOLARBROWSING___STRUCTS___H__

@@ -95,9 +95,9 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableSolarImagery)]] Parameters {
-        std::string rootPath;
+        std::filesystem::path rootDir [[codegen::directory()]];
 
-        std::string transferfunctionPath;
+        std::filesystem::path transferfunctionDir [[codegen::directory()]];
 
         std::optional<std::string> startInstrument;
 
@@ -130,19 +130,16 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    std::string rootPath = p.rootPath;
-
     SolarBrowsingModule* solarbrowsingModule =
         global::moduleEngine->module<SolarBrowsingModule>();
 
     SpacecraftImageryManager& spacecraftImageryManager =
         solarbrowsingModule->spacecraftImageryManager();
 
-    std::string transferfunctionPath = p.transferfunctionPath;
 
-    spacecraftImageryManager.loadTransferFunctions(transferfunctionPath, _tfMap);
+    spacecraftImageryManager.loadTransferFunctions(p.transferfunctionDir, _tfMap);
 
-    spacecraftImageryManager.loadImageMetadata(rootPath, _imageMetadataMap);
+    spacecraftImageryManager.loadImageMetadata(p.rootDir, _imageMetadataMap);
 
     // Add GUI names
     unsigned int guiNameCount = 0;
@@ -287,7 +284,7 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
         _currentImage = &(keyframe->data);
 
         _decodeBuffer.resize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
-        decode(_decodeBuffer.data(), keyframe->data.filename);
+        decode(_decodeBuffer.data(), keyframe->data.filePath.string());
     }
     else {
         if (_currentImage == nullptr) {

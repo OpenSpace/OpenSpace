@@ -74,8 +74,8 @@ local StereoImagery = {
     Renderable = {
         -- Resolution of imagery, will be moved to metadata later
         Type = "RenderableSolarImagery",
-        RootPath = asset.resource("solarbrowsing/imagedata/stereo-a_euvi-171"),
-        TransferfunctionPath = asset.resource("solarbrowsing/colortables")
+        RootDir = asset.resource("solarbrowsing/imagedata/stereo"),
+        TransferfunctionDir = asset.resource("solarbrowsing/colortables")
     },
     GUI = {
         Name = "EUV-I-A Imagery",
@@ -89,8 +89,8 @@ local SdoImagery = {
     Renderable = {
         -- Resolution of imagery, will be moved to metadata later
         Type = "RenderableSolarImagery",
-        RootPath = asset.resource("solarbrowsing/imagedata/sdo_aia-171"),
-        TransferfunctionPath = asset.resource("solarbrowsing/colortables")
+        RootDir = asset.resource("solarbrowsing/imagedata/sdo"),
+        TransferfunctionDir = asset.resource("solarbrowsing/colortables")
     },
     GUI = {
         Name = "SDO Imagery",

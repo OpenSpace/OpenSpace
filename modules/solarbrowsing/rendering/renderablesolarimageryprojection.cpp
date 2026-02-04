@@ -121,13 +121,13 @@ bool RenderableSolarImageryProjection::isReady() const {
     return _shader != nullptr;
 }
 
-void RenderableSolarImageryProjection::update(const UpdateData& data) {
+void RenderableSolarImageryProjection::update(const UpdateData&) {
     if (_shader->isDirty()) {
         _shader->rebuildFromFile();
     }
 }
 
-void RenderableSolarImageryProjection::render(const RenderData& data, RendererTasks& rendererTask) {
+void RenderableSolarImageryProjection::render(const RenderData& data, RendererTasks&) {
     glm::dmat4 modelTransform = calcModelTransform(data);
     glm::dmat4 modelViewTransform = data.camera.combinedViewMatrix() * modelTransform;
 

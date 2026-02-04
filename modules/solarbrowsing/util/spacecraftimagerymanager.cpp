@@ -26,6 +26,7 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
+#include <openspace/json.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
@@ -33,8 +34,6 @@
 #include <ghoul/misc/threadpool.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/file.h>
-#include <nlohmann/json.hpp>
 #include <chrono>
 #include <format>
 #include <fstream>
@@ -73,17 +72,16 @@ std::string SpacecraftImageryManager::ISO8601(std::string& datetime) {
     return datetime;
 }
 
-void SpacecraftImageryManager::loadTransferFunctions(const std::string& path,
+void SpacecraftImageryManager::loadTransferFunctions(const std::filesystem::path& dir,
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap)
 {
-    std::filesystem::path sequenceDir(path);
 
-    if (!std::filesystem::is_directory(sequenceDir)) {
-        LERROR(std::format("Could not load directory '{}'", sequenceDir.string()));
+    if (!std::filesystem::is_directory(dir)) {
+        LERROR(std::format("Could not load directory '{}'", dir.string()));
     }
 
     std::vector<std::filesystem::path> sequencePaths = ghoul::filesystem::walkDirectory(
-        sequenceDir,
+        dir,
         ghoul::filesystem::Recursive::Yes,
         ghoul::filesystem::Sorted::Yes
     );
@@ -96,21 +94,19 @@ void SpacecraftImageryManager::loadTransferFunctions(const std::string& path,
     }
 }
 
-bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
+bool SpacecraftImageryManager::loadMetadataFromDisk(const std::filesystem::path& rootDir,
            std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap)
 {
-
-    std::filesystem::path sequenceDir(rootPath);
-
-    if (!std::filesystem::is_directory(sequenceDir)) {
-        LERROR(std::format("Could not load directory '{}'", sequenceDir.string()));
+    if (!std::filesystem::is_directory(rootDir)) {
+        throw ghoul::RuntimeError(std::format(
+            "Could not load directory '{}'", rootDir.string()
+        ));
     }
 
     bool metadataLoaded = false;
 
-
     std::vector<std::filesystem::path> sequencePaths = ghoul::filesystem::walkDirectory(
-        sequenceDir,
+        rootDir,
         ghoul::filesystem::Recursive::No,
         ghoul::filesystem::Sorted::No
     );
@@ -118,19 +114,19 @@ bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
     for (const std::filesystem::path& seqPath : sequencePaths) {
         const std::string extension = seqPath.extension().string();
         const std::string base = seqPath.filename().string();
-        const std::size_t foundCachedImageData = base.find("_cached");
+        const size_t foundCachedImageData = base.find("_cached");
         if (extension != ".txt" || foundCachedImageData == std::string::npos) {
             continue;
         }
 
-        const std::string::size_type separator = base.rfind("_");
+        const size_t separator = base.rfind("_");
         const std::string instrument = base.substr(0, separator);
         LDEBUG(std::format("Loading instrument: {}", instrument));
 
         metadataLoaded = true;
         std::ifstream myfile(seqPath);
         if (!myfile.is_open()) {
-            LERROR("Failed to open metadata file");
+            LERROR(std::format("Failed to open metadata file '{}'", seqPath));
             return false;
         }
 
@@ -145,7 +141,9 @@ bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
             std::getline(myfile, date);
 
             if (date.empty()) {
-                LERROR("Failed to open state metadata: date");
+                LERROR(std::format(
+                    "Failed to read metadata state: date, file: '{}'", seqPath
+                ));
                 return false;
             }
 
@@ -156,23 +154,29 @@ bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
             myfile >> relPath;
 
             if (myfile.bad()) {
-                LERROR("Failed to open state metadata: relPath");
+                LERROR(std::format(
+                    "Failed to read metadata state: relPath, file: '{}'", seqPath
+                ));
                 return false;
             }
 
-            im.filename = rootPath + "/" + relPath;
+            im.filePath = rootDir / relPath;
 
             myfile >> im.fullResolution;
 
             if (myfile.bad()) {
-                LERROR("Failed to open state metadata: fullResolution");
+                LERROR(std::format(
+                    "Failed to read metadata state: fullResolution, file: '{}'", seqPath
+                ));
                 return false;
             }
 
             myfile >> im.scale;
 
             if (myfile.bad()) {
-                LERROR("Failed to open state metadata: scale");
+                LERROR(std::format(
+                    "Failed to read metadata state: scale, file: '{}'", seqPath
+                ));
                 return false;
             }
 
@@ -182,7 +186,9 @@ bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
             myfile >> im.isCoronaGraph;
 
             if (myfile.bad()) {
-                LERROR("Failed to open state metadata: isCoronaGraph");
+                LERROR(std::format(
+                    "Failed to read metadata state : isCoronaGraph, file : '{}'", seqPath
+                ));
                 return false;
             }
 
@@ -193,33 +199,44 @@ bool SpacecraftImageryManager::loadMetadataFromDisk(const std::string& rootPath,
     return metadataLoaded;
 }
 
-void SpacecraftImageryManager::saveMetadataToDisk(const std::string& rootPath,
+void SpacecraftImageryManager::saveMetadataToDisk(const std::filesystem::path& rootPath,
            std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap)
 {
     using K = std::string;
     using V = Timeline<ImageMetadata>;
     for (const std::pair<K, V>& instrument : _imageMetadataMap) {
-        std::ofstream ofs(rootPath + "/" + instrument.first + "_cached" + ".txt");
+        const std::filesystem::path cacheFile =
+            rootPath / std::format("{}_cached.txt", instrument.first);
+
+        std::ofstream ofs(cacheFile);
         if (!ofs.is_open()) {
-            LERROR("Failed to open file");
+            LERROR(std::format("Failed to open file '{}'", cacheFile));
+            continue;
         }
+
         const Timeline<ImageMetadata>& sequence = instrument.second;
-        ofs << sequence.nKeyframes() << "\n";
+        ofs << sequence.nKeyframes() << '\n';
+
         for (const Keyframe<ImageMetadata>& metadata : sequence.keyframes()) {
-                ofs << SpiceManager::ref().dateFromEphemerisTime(
-                    metadata.timestamp
-                ) << "\n";
-                const ImageMetadata& im = metadata.data;
+            const std::string date = SpiceManager::ref().dateFromEphemerisTime(
+                metadata.timestamp
+            );
 
-                std::filesystem::path filePath(im.filename);
-                std::filesystem::path fileName = filePath.filename();
+            const ImageMetadata& im = metadata.data;
+            const std::filesystem::path relativePath = std::filesystem::relative(
+                im.filePath,
+                rootPath
+            );
 
-                ofs << fileName.string() << "\n";
-                ofs << im.fullResolution << "\n";
-                ofs << im.scale << "\n";
-                ofs << im.centerPixel.x << "\n";
-                ofs << im.centerPixel.y << "\n";
-                ofs << im.isCoronaGraph << "\n";
+            ofs << std::format("{}\n{}\n{}\n{}\n{}\n{}\n{}\n",
+                date,
+                relativePath.generic_string(),
+                im.fullResolution,
+                im.scale,
+                im.centerPixel.x,
+                im.centerPixel.y,
+                static_cast<int>(im.isCoronaGraph) // Output bool as 0/1
+            );
         }
         ofs.close();
     }
@@ -230,17 +247,17 @@ void SpacecraftImageryManager::saveMetadataToDisk(const std::string& rootPath,
 // XML data. There is an issue here:
 // (https://github.com/uclouvain/openjpeg/issues/929)
 ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
-                                                      const ghoul::filesystem::File& file)
+                                                    const std::filesystem::path& filePath)
 {
     ImageMetadata im;
-    im.filename = file.path().string();
+    im.filePath = filePath;
 
-    std::ifstream stream(file.path(), std::ios::binary | std::ios::ate);
+    std::ifstream stream(filePath, std::ios::binary | std::ios::ate);
     std::streamsize size = stream.tellg();
     stream.seekg(0, std::ios::beg);
     std::vector<char> buffer(size);
     if (!stream.read(buffer.data(), size)) {
-        LERROR(std::format("Failed to read data from '{}' ", file.path()));
+        LERROR(std::format("Failed to read data from '{}' ", filePath));
         return im;
     }
     std::string_view bufferView(buffer.data(), size);
@@ -269,14 +286,14 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
 
     std::optional<std::string_view> metaData = extractInnerXml(bufferView, "meta");
     if (!metaData.has_value()) {
-        LERROR(std::format("Could not find metadata in {}", file.path()));
+        LERROR(std::format("Could not find metadata in {}", filePath));
         return im;
     }
 
     std::optional<std::string_view> telescop =
         extractInnerXml(metaData.value(), "TELESCOP");
     if (!telescop.has_value()) {
-        LERROR(std::format("Could not find TELESCOP tag {}", file.path()));
+        LERROR(std::format("Could not find TELESCOP tag {}", filePath));
         return im;
     }
 
@@ -286,7 +303,7 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
         im.fullResolution = std::stoi(std::string(naxis.value()));
     }
     else {
-        LERROR(std::format("Could not find NAXIS1 tag {}", file.path()));
+        LERROR(std::format("Could not find NAXIS1 tag {}", filePath));
         return im;
     }
 
@@ -299,7 +316,7 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
         centerPixel.x = std::stof(std::string(centerPixelX.value()));
     }
     else {
-        LERROR(std::format("Could not find CRPIX1 tag {}", file.path()));
+        LERROR(std::format("Could not find CRPIX1 tag {}", filePath));
         return im;
     }
 
@@ -309,7 +326,7 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
         centerPixel.y = std::stof(std::string(centerPixelY.value()));
     }
     else {
-        LERROR(std::format("Could not find CRPIX2 tag {}", file.path()));
+        LERROR(std::format("Could not find CRPIX2 tag {}", filePath));
         return im;
     }
 
@@ -325,7 +342,7 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
             im.isCoronaGraph = true;
         }
         else {
-            LERROR(std::format("Could not find NAXIS1 tag {}", file.path()));
+            LERROR(std::format("Could not find NAXIS1 tag {}", filePath));
             return im;
         }
     }
@@ -334,11 +351,11 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
         std::optional<std::string_view> cDelt1 = extractInnerXml(bufferView, "CDELT1");
 
         if (!rsunObs.has_value()) {
-            LERROR(std::format("Could not find RSUN_OBS tag {}", file.path()));
+            LERROR(std::format("Could not find RSUN_OBS tag {}", filePath));
             return im;
         }
         if (!cDelt1.has_value()) {
-            LERROR(std::format("Could not find CDELT1 tag {}", file.path()));
+            LERROR(std::format("Could not find CDELT1 tag {}", filePath));
             return im;
         }
 
@@ -351,11 +368,11 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
         std::optional<std::string_view> rsun = extractInnerXml(bufferView, "RSUN");
         std::optional<std::string_view> cDelt1 = extractInnerXml(bufferView, "CDELT1");
         if (!rsun.has_value()) {
-            LERROR(std::format("Could not find RSUN_OBS tag {}", file.path()));
+            LERROR(std::format("Could not find RSUN_OBS tag {}", filePath));
             return im;
         }
         if (!cDelt1.has_value()) {
-            LERROR(std::format("Could not find CDELT1 tag {}", file.path()));
+            LERROR(std::format("Could not find CDELT1 tag {}", filePath));
             return im;
         }
 
@@ -372,7 +389,7 @@ ImageMetadata SpacecraftImageryManager::parseJ2kMetadata(
         }
         else {
             LWARNING(std::format(
-                "Could not find DETECTOR tag {}", file.path()
+                "Could not find DETECTOR tag {}", filePath
             ));
         }
     }
@@ -388,111 +405,111 @@ ImageMetadata SpacecraftImageryManager::parseJsonMetadata(
                                                       const ghoul::filesystem::File& file)
 {
     ImageMetadata im;
-    im.filename = file.path().string();
-    const std::string filename = std::string(file.path().string() + ".json");
+    //im.filename = file.path().string();
+    //const std::string filename = std::string(file.path().string() + ".json");
 
-    if (!std::filesystem::exists(filename)) {
-        LERROR(std::format("'{}' has no specified json metadata", file.path()));
-        // TODO: Hardcoded values, when there are no json files.
-        return im;
-    }
+    //if (!std::filesystem::exists(filename)) {
+    //    LERROR(std::format("'{}' has no specified json metadata", file.path()));
+    //    // TODO: Hardcoded values, when there are no json files.
+    //    return im;
+    //}
 
-    // Parse JSON metadata
-    using json = nlohmann::json;
+    //// Parse JSON metadata
+    //using json = nlohmann::json;
 
-    std::ifstream i(filename);
-    if (i.fail()) {
-        LERROR(std::format("Error opening file '{}'", filename));
-    }
+    //std::ifstream i(filename);
+    //if (i.fail()) {
+    //    LERROR(std::format("Error opening file '{}'", filename));
+    //}
 
-    json j;
-    i >> j;
-    const json data = j["meta"]["fits"];
+    //json j;
+    //i >> j;
+    //const json data = j["meta"]["fits"];
 
-    if (data.is_null()) {
-        LERROR(std::format("Error in metadata '{}'", filename));
-    }
+    //if (data.is_null()) {
+    //    LERROR(std::format("Error in metadata '{}'", filename));
+    //}
 
-    json value = data["TELESCOP"];
-    if (value.is_null() && !value.is_string()) {
-        LERROR("Metadata did contain information about type of spacecraft");
-        return im;
-    }
-    // TODO: value might not exist
-    std::string spacecraftType = value;
+    //json value = data["TELESCOP"];
+    //if (value.is_null() && !value.is_string()) {
+    //    LERROR("Metadata did contain information about type of spacecraft");
+    //    return im;
+    //}
+    //// TODO: value might not exist
+    //std::string spacecraftType = value;
 
-    value = data["NAXIS1"];
-    if (value.is_null()) {
-        LERROR("Metadata did not contain information about resolution");
-    }
+    //value = data["NAXIS1"];
+    //if (value.is_null()) {
+    //    LERROR("Metadata did not contain information about resolution");
+    //}
 
-    const std::string sFullResolution = value;
-    im.fullResolution = std::stoi(sFullResolution);
-    // Special case of sdo - RSUN is given in pixels
-    // For SOHO the radius of the sun is not specified - we instead use platescl
-    if (spacecraftType == "SOHO") {
-        const std::string sScale = data["PLATESCL"];
-        const float plateScale = stof(sScale);
-        im.scale = 1.f / (plateScale / 2.f);
-        im.isCoronaGraph = true;
-    } else {
-        float sunRadiusPixels = 0.f;
-        // SDO has RSUN specified in pixels
-        if (spacecraftType == "SDO") {
-            value = data["RSUN_OBS"];
-            if (value.is_null()) {
-                LERROR("SDO Metadata: RSUN_OBS missing!");
-            }
-            std::string sSunRadiusArcsec = value;
-            value = data["CDELT1"];
-            if (value.is_null()) {
-                LERROR("SDO Metadata: CDELT1 missing!");
-            }
-            std::string sCdelt1 = value;
-            const float cdelt1 = stof(sCdelt1);
-            const float sunRadiusArcsec = stof(sSunRadiusArcsec);
-            sunRadiusPixels = sunRadiusArcsec / cdelt1;
-            im.isCoronaGraph = false;
-        } else {
-            // STEREO has RSUN specified in arcsecs - need to divide by factor
-            std::string sCdelt1 = data["CDELT1"];
-            const float cdelt1 = stof(sCdelt1);
-            std::string sSunRadiusArcsec = data["RSUN"];
-            const float sunRadiusArcsec = stof(sSunRadiusArcsec);
-            sunRadiusPixels = sunRadiusArcsec / cdelt1;
+    //const std::string sFullResolution = value;
+    //im.fullResolution = std::stoi(sFullResolution);
+    //// Special case of sdo - RSUN is given in pixels
+    //// For SOHO the radius of the sun is not specified - we instead use platescl
+    //if (spacecraftType == "SOHO") {
+    //    const std::string sScale = data["PLATESCL"];
+    //    const float plateScale = stof(sScale);
+    //    im.scale = 1.f / (plateScale / 2.f);
+    //    im.isCoronaGraph = true;
+    //} else {
+    //    float sunRadiusPixels = 0.f;
+    //    // SDO has RSUN specified in pixels
+    //    if (spacecraftType == "SDO") {
+    //        value = data["RSUN_OBS"];
+    //        if (value.is_null()) {
+    //            LERROR("SDO Metadata: RSUN_OBS missing!");
+    //        }
+    //        std::string sSunRadiusArcsec = value;
+    //        value = data["CDELT1"];
+    //        if (value.is_null()) {
+    //            LERROR("SDO Metadata: CDELT1 missing!");
+    //        }
+    //        std::string sCdelt1 = value;
+    //        const float cdelt1 = stof(sCdelt1);
+    //        const float sunRadiusArcsec = stof(sSunRadiusArcsec);
+    //        sunRadiusPixels = sunRadiusArcsec / cdelt1;
+    //        im.isCoronaGraph = false;
+    //    } else {
+    //        // STEREO has RSUN specified in arcsecs - need to divide by factor
+    //        std::string sCdelt1 = data["CDELT1"];
+    //        const float cdelt1 = stof(sCdelt1);
+    //        std::string sSunRadiusArcsec = data["RSUN"];
+    //        const float sunRadiusArcsec = stof(sSunRadiusArcsec);
+    //        sunRadiusPixels = sunRadiusArcsec / cdelt1;
 
-            value = data["DETECTOR"];
-            if (value.is_null()) {
-                LERROR("No observer specified in Stereo");
-            }
+    //        value = data["DETECTOR"];
+    //        if (value.is_null()) {
+    //            LERROR("No observer specified in Stereo");
+    //        }
 
-            std::string sObserver = value;
-            if (sObserver == "COR1" || sObserver == "COR2") {
-                im.isCoronaGraph = true;
-            } else {
-                im.isCoronaGraph = false;
-            }
-        }
-        float scale = sunRadiusPixels / (im.fullResolution / 2.f);
-        im.scale = scale;
-    }
+    //        std::string sObserver = value;
+    //        if (sObserver == "COR1" || sObserver == "COR2") {
+    //            im.isCoronaGraph = true;
+    //        } else {
+    //            im.isCoronaGraph = false;
+    //        }
+    //    }
+    //    float scale = sunRadiusPixels / (im.fullResolution / 2.f);
+    //    im.scale = scale;
+    //}
 
-    const std::string sCenterPixelX = data["CRPIX1"];
-    const std::string sCenterPixelY = data["CRPIX2"];
+    //const std::string sCenterPixelX = data["CRPIX1"];
+    //const std::string sCenterPixelY = data["CRPIX2"];
 
-    const float centerPixelX = stof(sCenterPixelX);
-    const float centerPixelY = stof(sCenterPixelY);
-    const float halfRes = im.fullResolution / 2.f;
+    //const float centerPixelX = stof(sCenterPixelX);
+    //const float centerPixelY = stof(sCenterPixelY);
+    //const float halfRes = im.fullResolution / 2.f;
 
-    const float offsetX = ((halfRes - centerPixelX) / halfRes) * SUN_RADIUS;
-    const float offsetY = ((halfRes - centerPixelY) / halfRes) * SUN_RADIUS;
+    //const float offsetX = ((halfRes - centerPixelX) / halfRes) * SUN_RADIUS;
+    //const float offsetY = ((halfRes - centerPixelY) / halfRes) * SUN_RADIUS;
 
-    im.centerPixel = glm::vec2(offsetX, offsetY);
+    //im.centerPixel = glm::vec2(offsetX, offsetY);
 
     return im;
 }
 
-void SpacecraftImageryManager::loadImageMetadata(const std::string& path,
+void SpacecraftImageryManager::loadImageMetadata(const std::filesystem::path& path,
       std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap)
 {
     std::unordered_map<std::string, Timeline<ImageMetadata>> result;
@@ -543,7 +560,6 @@ void SpacecraftImageryManager::loadImageMetadata(const std::string& path,
 
     std::cout << '\n';
     auto exec = [&](const std::filesystem::path& seqPath) {
-        ghoul::filesystem::File currentFile(seqPath);
         std::string fileName = seqPath.filename().string();
         size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
         std::string satelliteInfo = fileName.substr(posSatelliteInfoStart);
@@ -572,7 +588,7 @@ void SpacecraftImageryManager::loadImageMetadata(const std::string& path,
                 tokens[2] + "T" + tokens[4] + ":" +
                 tokens[5] + ":" + tokens[6] + "." + tokens[7];
 
-            ImageMetadata im = parseJ2kMetadata(currentFile);
+            ImageMetadata im = parseJ2kMetadata(seqPath);
             spiceAndPushMutex.lock();
             result[instrumentName].addKeyframe(
                 global::timeManager->time().convertTime(time),
