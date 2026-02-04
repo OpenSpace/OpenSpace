@@ -95,11 +95,11 @@ void SpacecraftImageryManager::loadTransferFunctions(const std::filesystem::path
 }
 
 bool SpacecraftImageryManager::loadMetadataFromDisk(const std::filesystem::path& rootDir,
-           std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap)
+           std::unordered_map<std::string, Timeline<ImageMetadata>>& imageMetadataMap)
 {
     if (!std::filesystem::is_directory(rootDir)) {
         throw ghoul::RuntimeError(std::format(
-            "Could not load directory '{}'", rootDir.string()
+            "Could not load directory '{}'", rootDir
         ));
     }
 
@@ -192,7 +192,7 @@ bool SpacecraftImageryManager::loadMetadataFromDisk(const std::filesystem::path&
                 return false;
             }
 
-            _imageMetadataMap[instrument].addKeyframe(timeObserved, std::move(im));
+            imageMetadataMap[instrument].addKeyframe(timeObserved, std::move(im));
         }
         myfile.close();
     }
@@ -509,29 +509,26 @@ ImageMetadata SpacecraftImageryManager::parseJsonMetadata(
     return im;
 }
 
-void SpacecraftImageryManager::loadImageMetadata(const std::filesystem::path& path,
+void SpacecraftImageryManager::loadImageMetadata(const std::filesystem::path& rootDir,
       std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap)
 {
-    std::unordered_map<std::string, Timeline<ImageMetadata>> result;
+    if (!std::filesystem::is_directory(rootDir)) {
+        throw ghoul::RuntimeError(std::format(
+            "Could not load directory '{}'", rootDir
+        ));
+    }
 
     LDEBUG("Begin loading spacecraft imagery metadata");
-
+    std::unordered_map<std::string, Timeline<ImageMetadata>> result;
     // Pre-processed data
-    if (loadMetadataFromDisk(path, result)) {
+    if (loadMetadataFromDisk(rootDir, result)) {
         _imageMetadataMap.insert(result.begin(), result.end());
         return;
     }
 
-    std::filesystem::path sequenceDir(path);
-
-    if (!std::filesystem::is_directory(sequenceDir)) {
-        LERROR(std::format("Could not load directory '{}'", sequenceDir.string()));
-    }
-
-
     LDEBUG("Loading sequence directory");
     std::vector<std::filesystem::path> sequencePaths = ghoul::filesystem::walkDirectory(
-        sequenceDir,
+        rootDir,
         ghoul::filesystem::Recursive::Yes,
         ghoul::filesystem::Sorted::Yes
     );
@@ -549,8 +546,25 @@ void SpacecraftImageryManager::loadImageMetadata(const std::filesystem::path& pa
         sequencePaths.end()
     );
 
+    // TODO anden 2026-02-04
+    // Steps to validate cache:
+    // 1. Check that all files in the cache still exists
+    // 2. Remove any entry from cache that doesn't have a valid path
+    // 3. Read new files:
+    // 3.5 Filter away any file already in the cache
+    // 4. Add new files to cache
 
-    LDEBUG("Reading meta data");
+
+    // TODO anden 2026-02-04
+    // Steps for streaming new image data
+    // 1. Check if image exists in cache
+    // 2. If not -> spawn a thread to download it
+    // 3. once downloaded put it through the normal pipeline of storing the file in
+    // correct folder.
+    // 4. Add the image data to the cache (file and in memory)
+
+
+    LDEBUG("Reading metadata");
     size_t count = 0;
 
     std::mutex spiceAndPushMutex;
@@ -560,45 +574,49 @@ void SpacecraftImageryManager::loadImageMetadata(const std::filesystem::path& pa
 
     std::cout << '\n';
     auto exec = [&](const std::filesystem::path& seqPath) {
-        std::string fileName = seqPath.filename().string();
+        // An example image has the following naming scheme:
+        // 2024_05_08__00_58_23_814__SDO_AIA-211.jp2
+        std::string fileName = seqPath.stem().string();
         size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
-        std::string satelliteInfo = fileName.substr(posSatelliteInfoStart);
+        std::string satelliteInfo = fileName.substr(posSatelliteInfoStart); // e.g., SDO_AIA-211
 
         // Name
         size_t posSatelliteNameEnd = satelliteInfo.find_first_of("_");
-        std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd);
+        //std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd); // e.g., SDO
 
         // Instrument
         size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
-        std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart);
-        size_t dot = instrumentName.rfind(".");
-        instrumentName = instrumentName.substr(0, dot);
+        std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart); // e.g., AIA-211
 
-        // Time @TODO (anden88 2025-12-02): Parse the time string from file in a more
-        // robust way?
-        std::vector<std::string> tokens;
-        std::stringstream ss;
-        ss.str(seqPath.filename().string());
-        std::string item;
-        while (std::getline(ss, item, '_')) {
-            tokens.push_back(item);
-        }
-        if (tokens.size() >= 8) {
-            std::string time = tokens[0] + "-" + tokens[1] + "-" +
-                tokens[2] + "T" + tokens[4] + ":" +
-                tokens[5] + ":" + tokens[6] + "." + tokens[7];
+        int year, month, day, hour, minute, second, millisecond;
+
+        int scanned = std::sscanf(fileName.c_str(), "%d_%d_%d__%d_%d_%d_%d",
+            &year, &month, &day, &hour, &minute, &second, &millisecond
+        );
+
+        if (scanned == 7) {
+            std::string dateTime = std::format(
+                "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}.{:03}",
+                year, month, day,
+                hour, minute, second, millisecond
+            );
 
             ImageMetadata im = parseJ2kMetadata(seqPath);
             spiceAndPushMutex.lock();
             result[instrumentName].addKeyframe(
-                global::timeManager->time().convertTime(time),
+                global::timeManager->time().convertTime(dateTime),
                 std::move(im)
             );
             spiceAndPushMutex.unlock();
         }
+        else {
+            LERROR(std::format("Failed to parse date '{}' from file '{}'",
+                fileName, seqPath
+            ));
+        }
         ++count;
 
-        if (count % 10000 == 0) {
+        if (count % 250 == 0) {
             LINFO(std::format(
                 "Processing image {} out of {} ", count, sequencePaths.size()
             ));
@@ -609,12 +627,11 @@ void SpacecraftImageryManager::loadImageMetadata(const std::filesystem::path& pa
         exec(seqPath);
     }
 
-    saveMetadataToDisk(path, result);
-    _imageMetadataMap.insert(result.begin(), result.end());
-
     LDEBUG("Finish loading imagery metadata");
     LDEBUG("Saving imagery metadata");
+    saveMetadataToDisk(rootDir, result);
 
+    _imageMetadataMap.insert(result.begin(), result.end());
     LDEBUG(std::format("{} images loaded", count));
     LDEBUG(std::format("{} values in metamap", _imageMetadataMap.size()));
 }

@@ -136,7 +136,6 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     SpacecraftImageryManager& spacecraftImageryManager =
         solarbrowsingModule->spacecraftImageryManager();
 
-
     spacecraftImageryManager.loadTransferFunctions(p.transferfunctionDir, _tfMap);
 
     spacecraftImageryManager.loadImageMetadata(p.rootDir, _imageMetadataMap);

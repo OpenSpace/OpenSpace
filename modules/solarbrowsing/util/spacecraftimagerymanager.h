@@ -51,7 +51,7 @@ class SpacecraftImageryManager {
 public:
     void loadTransferFunctions(const std::filesystem::path& dir,
           std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& _tfMap);
-    void loadImageMetadata(const std::filesystem::path& path,
+    void loadImageMetadata(const std::filesystem::path& rootDir,
       std::unordered_map<std::string, Timeline<ImageMetadata>>& _imageMetadataMap);
 
 private:
