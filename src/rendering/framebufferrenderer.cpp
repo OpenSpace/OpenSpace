@@ -951,7 +951,11 @@ void FramebufferRenderer::updateResolution() {
     );
 
     constexpr std::array<float, 4> VolumeBorderColor = { 0.f, 0.f, 0.f, 1.f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, VolumeBorderColor.data());
+    glTextureParameterfv(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_BORDER_COLOR,
+        VolumeBorderColor.data()
+    );
     glObjectLabel(
         GL_TEXTURE,
         _downscaleVolumeRendering.colorTexture,
