@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,7 @@ struct ImageData {
     uint32_t w;
     uint32_t h;
 };
-    
+
 class J2kCodec {
 public:
     static constexpr const int ALL_THREADS = 0;
@@ -59,7 +59,7 @@ public:
     ~J2kCodec();
 
     // Decode into a client allocated buffer
-    void decodeIntoBuffer(const std::string& path, unsigned char* buffer, 
+    void decodeIntoBuffer(const std::string& path, unsigned char* buffer,
         int resolutionLevel, int numQualityLayers = 1, int x0 = -1, int y0 = -1,
         int x1 = -1, int y1 = -1, int numThreads = ALL_THREADS);
 

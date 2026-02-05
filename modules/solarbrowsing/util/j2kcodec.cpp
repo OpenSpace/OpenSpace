@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -44,8 +44,8 @@ namespace {
         const auto get_file_format = [](const char* filename) {
             unsigned int i;
             static const char* extension[] = {
-                "pgx", "pnm", "pgm", "ppm", "bmp", "tif", "raw", "tga", "png", "j2k", "jp2",
-                "jpt", "j2c", "jpc"
+                "pgx", "pnm", "pgm", "ppm", "bmp", "tif", "raw",
+                "tga", "png", "j2k", "jp2", "jpt", "j2c", "jpc"
             };
             static const int format[] = {
                 PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT, TIF_DFMT, RAW_DFMT,

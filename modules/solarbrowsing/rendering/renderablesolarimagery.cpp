@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2018                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,7 +23,6 @@
  ****************************************************************************************/
 
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
-
 
 #include <modules/solarbrowsing/solarbrowsingmodule.h>
 #include <modules/solarbrowsing/util/j2kcodec.h>
@@ -108,7 +107,7 @@ namespace {
         std::optional<bool> enableFrustum;
     };
 #include "renderablesolarimagery_codegen.cpp"
-}
+} // namespace
 
 namespace openspace {
 
@@ -137,7 +136,6 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         solarbrowsingModule->spacecraftImageryManager();
 
     spacecraftImageryManager.loadTransferFunctions(p.transferfunctionDir, _tfMap);
-
     spacecraftImageryManager.loadImageMetadata(p.rootDir, _imageMetadataMap);
 
     // Add GUI names
@@ -193,8 +191,6 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         _spacecraftCameraPlane->createPlaneAndFrustum(_moveFactor);
     });
 }
-
-
 
 void RenderableSolarImagery::initializeGL() {
     _spacecraftCameraPlane = std::make_unique<SpacecraftCameraPlane>(_moveFactor);
