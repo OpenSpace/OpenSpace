@@ -209,15 +209,15 @@ void RenderableTravelSpeed::initializeGL() {
         }
     );
 
-    glCreateBuffers(1, &_vBufferId);
-    glNamedBufferStorage(_vBufferId, sizeof(VertexPositions), nullptr, GL_DYNAMIC_DRAW);
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, sizeof(VertexPositions), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
-    glCreateVertexArrays(1, &_vaoId);
-    glVertexArrayVertexBuffer(_vaoId, 0, _vBufferId, 0, 3 * sizeof(float));
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
 
-    glEnableVertexArrayAttrib(_vaoId, 0);
-    glVertexArrayAttribFormat(_vaoId, 0, 3, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_vaoId, 0, 0);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
 }
@@ -229,8 +229,8 @@ void RenderableTravelSpeed::deinitializeGL() {
             global::renderEngine->removeRenderProgram(p);
         }
     );
-    glDeleteVertexArrays(1, &_vaoId);
-    glDeleteBuffers(1, &_vBufferId);
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 }
 
 void RenderableTravelSpeed::calculateVerticesPositions() {
@@ -258,7 +258,7 @@ void RenderableTravelSpeed::calculateVerticesPositions() {
 
 void RenderableTravelSpeed::updateVertexData() {
     calculateVerticesPositions();
-    glNamedBufferSubData(_vBufferId, 0, sizeof(VertexPositions), &_vertexPositions);
+    glNamedBufferSubData(_vbo, 0, sizeof(VertexPositions), &_vertexPositions);
 }
 
 void RenderableTravelSpeed::reinitiateTravel() {
@@ -319,7 +319,7 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {
 #else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     glLineWidth(1.f);
 #endif // __APPLE__
-    glBindVertexArray(_vaoId);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_LINE_STRIP, 0, 3);
     glBindVertexArray(0);
 
