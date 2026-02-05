@@ -178,13 +178,11 @@ namespace {
         GLuint t = 0;
         glCreateTextures(GL_TEXTURE_2D, 1, &t);
         glObjectLabel(GL_TEXTURE, t, static_cast<GLsizei>(name.size()), name.data());
-        glBindTexture(GL_TEXTURE_2D, t);
         glTextureParameteri(t, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTextureParameteri(t, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTextureParameteri(t, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTextureParameteri(t, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glBindTexture(GL_TEXTURE_2D, t);
         glTexImage2D(
             GL_TEXTURE_2D,
             0,
@@ -205,14 +203,12 @@ namespace {
         GLuint t = 0;
         glCreateTextures(GL_TEXTURE_3D, 1, &t);
         glObjectLabel(GL_TEXTURE, t, static_cast<GLsizei>(name.size()), name.data());
-        glBindTexture(GL_TEXTURE_3D, t);
         glTextureParameteri(t, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTextureParameteri(t, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTextureParameteri(t, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTextureParameteri(t, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTextureParameteri(t, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
-        glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+        glBindTexture(GL_TEXTURE_3D, t);
         glTexImage3D(
             GL_TEXTURE_3D,
             0,
