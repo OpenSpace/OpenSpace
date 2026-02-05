@@ -797,7 +797,8 @@ void GlobeGeometryFeature::initializeRenderFeature(RenderFeature& feature,
     glNamedBufferData(
         feature.heightVboId,
         feature.heights.size() * sizeof(float),
-        feature.heights.data()
+        feature.heights.data(),
+        GL_STATIC_DRAW
     );
 
     glCreateVertexArrays(1, &feature.vaoId);
@@ -862,7 +863,8 @@ void GlobeGeometryFeature::bufferDynamicHeightData(const RenderFeature& feature)
     glNamedBufferData(
         feature.heightVboId,
         feature.heights.size() * sizeof(float),
-        feature.heights.data()
+        feature.heights.data(),
+        GL_DYNAMIC_DRAW
     );
 }
 

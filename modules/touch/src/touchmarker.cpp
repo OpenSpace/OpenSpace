@@ -131,7 +131,7 @@ void TouchMarker::render(const std::vector<openspace::TouchInputHolder>& list) {
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
-        glBindVertexArray(_quad);
+        glBindVertexArray(_vao);
         glDrawArrays(GL_POINTS, 0, static_cast<int>(_vertexData.size() / 2));
 
         _shader->deactivate();

@@ -82,8 +82,8 @@ private:
     ghoul::opengl::ProgramObject* _shaderProgram = nullptr;
     // The vertex attribute location for position must correlate to layout location in
     // vertex shader
-    GLuint _vaoId = 0;
-    GLuint _vBufferId = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 } // namespace openspace

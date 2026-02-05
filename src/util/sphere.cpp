@@ -147,7 +147,7 @@ bool Sphere::initialize() {
     glNamedBufferStorage(_iBufferID, _isize * sizeof(int), _iarray, GL_NONE_BIT);
 
     glCreateVertexArrays(1, &_vaoID);
-    glVertexArrayVertexBuffer(_vaoID, 0, _vBufferID, 0, 3 * sizeof(Vertex));
+    glVertexArrayVertexBuffer(_vaoID, 0, _vBufferID, 0, sizeof(Vertex));
     glVertexArrayElementBuffer(_vaoID, _iBufferID);
 
     glEnableVertexArrayAttrib(_vaoID, 0);

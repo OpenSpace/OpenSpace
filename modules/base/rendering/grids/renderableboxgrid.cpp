@@ -216,24 +216,23 @@ void RenderableBoxGrid::update(const UpdateData&) {
         const glm::vec3 v7 = glm::vec3(llf.x, urb.y, urb.z);
 
         std::array<Vertex, 16> arr = {
-            { v0.x, v0.y, v0.z },
-            { v1.x, v1.y, v1.z },
-            { v2.x, v2.y, v2.z },
-            { v3.x, v3.y, v3.z },
-            { v0.x, v0.y, v0.z },
-            { v4.x, v4.y, v4.z },
-            { v5.x, v5.y, v5.z },
-            { v6.x, v6.y, v6.z },
-            { v7.x, v7.y, v7.z },
-            { v4.x, v4.y, v4.z },
-            { v5.x, v5.y, v5.z },
-            { v1.x, v1.y, v1.z },
-            { v2.x, v2.y, v2.z },
-            { v6.x, v6.y, v6.z },
-            { v7.x, v7.y, v7.z },
-            { v3.x, v3.y, v3.z }
+            Vertex{ v0.x, v0.y, v0.z },
+            Vertex{ v1.x, v1.y, v1.z },
+            Vertex{ v2.x, v2.y, v2.z },
+            Vertex{ v3.x, v3.y, v3.z },
+            Vertex{ v0.x, v0.y, v0.z },
+            Vertex{ v4.x, v4.y, v4.z },
+            Vertex{ v5.x, v5.y, v5.z },
+            Vertex{ v6.x, v6.y, v6.z },
+            Vertex{ v7.x, v7.y, v7.z },
+            Vertex{ v4.x, v4.y, v4.z },
+            Vertex{ v5.x, v5.y, v5.z },
+            Vertex{ v1.x, v1.y, v1.z },
+            Vertex{ v2.x, v2.y, v2.z },
+            Vertex{ v6.x, v6.y, v6.z },
+            Vertex{ v7.x, v7.y, v7.z },
+            Vertex{ v3.x, v3.y, v3.z }
         };
-
         glNamedBufferSubData(_vBufferID, 0, arr.size() * sizeof(Vertex), arr.data());
 
         _gridIsDirty = false;
