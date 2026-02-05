@@ -70,7 +70,7 @@ private:
 
     void loadPSFTexture();
     void loadData();
-    std::vector<float> createDataSlice(ColorOption option);
+    void updateData(ColorOption option);
 
     properties::StringProperty _speckFile;
 
@@ -149,7 +149,10 @@ private:
     float _staticFilterReplacementValue = 0.f;
 
     GLuint _vao = 0;
-    GLuint _vbo = 0;
+    GLuint _baseVbo = 0;
+    GLuint _velocityVbo = 0;
+    GLuint _speedVbo = 0;
+    GLuint _otherDataVbo = 0;
 };
 
 } // namespace openspace

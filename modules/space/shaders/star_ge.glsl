@@ -30,6 +30,7 @@ layout(points) in;
 in vec3 vs_bvLumAbsMag[];
 in vec3 vs_velocity[];
 in float vs_speed[];
+in float vs_otherData[];
 
 layout(triangle_strip, max_vertices = 4) out;
 out vec3 vs_position;
@@ -37,6 +38,7 @@ out vec2 texCoords;
 flat out float ge_bv;
 flat out vec3 ge_velocity;
 flat out float ge_speed;
+flat out float ge_otherData;
 flat out float gs_screenSpaceDepth;
 
 uniform float magnitudeExponent;
@@ -110,6 +112,7 @@ void main() {
   ge_bv = vs_bvLumAbsMag[0].x;
   ge_velocity = vs_velocity[0];
   ge_speed = vs_speed[0];
+  ge_otherData = vs_otherData[0];
 
   double scaleMultiply = 1.0;
 
