@@ -573,21 +573,16 @@ void ScreenSpaceInsetBlackout::initializeGL() {
         ghoul::opengl::Texture::Format::RGBA
     );
 
-    _blackoutTexture->bind();
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA,
-        BlackoutTextureSize.x,
-        BlackoutTextureSize.y,
-        0,
-        GL_RGBA,
-        GL_UNSIGNED_BYTE,
-        nullptr
-    );
-
     glTextureParameteri(*_blackoutTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(*_blackoutTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    glTextureStorage2D(
+        *_blackoutTexture,
+        1,
+        GL_RGBA8,
+        BlackoutTextureSize.x,
+        BlackoutTextureSize.y
+    );
 
     glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_blackoutTexture, 0);
 
