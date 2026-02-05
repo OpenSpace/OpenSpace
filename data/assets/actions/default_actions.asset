@@ -42,6 +42,17 @@ local ToggleRollFriction = {
 }
 
 
+-- Idle behavior actions
+local ToggleIdleBehavior = {
+  Identifier = "os.ToggleIdleBehavior",
+  Name = "Toggle idle behavior",
+  Command = [[openspace.invertBooleanProperty("NavigationHandler.OrbitalNavigator.IdleBehavior.ApplyIdleBehavior")]],
+  Documentation = [[Toggles the idle behavior of the orbital navigator. If enabled, the camera will automatically rotate around the focus until the next navigation happens]],
+  GuiPath = "/Navigation",
+  IsLocal = true
+}
+
+
 -- UI actions
 
 local ToggleMainGui = {
@@ -224,6 +235,9 @@ asset.onInitialize(function()
   openspace.action.registerAction(ToggleZoomFriction)
   openspace.action.registerAction(ToggleRollFriction)
 
+  -- Idle behavior
+  openspace.action.registerAction(ToggleIdleBehavior)
+
   -- UI
   openspace.action.registerAction(ToggleMainGui)
   openspace.action.registerAction(ToggleNativeUi)
@@ -268,6 +282,9 @@ asset.onDeinitialize(function()
   openspace.action.removeAction(ToggleNativeUi)
   openspace.action.removeAction(ToggleMainGui)
 
+  -- Idle behavior
+  openspace.action.removeAction(ToggleIdleBehavior)
+
   -- Friction
   openspace.action.removeAction(ToggleRollFriction)
   openspace.action.removeAction(ToggleZoomFriction)
@@ -282,6 +299,8 @@ asset.export("ToggleShutdown", ToggleShutdown.Identifier)
 asset.export("ToggleRotationFriction", ToggleRotationFriction.Identifier)
 asset.export("ToggleZoomFriction", ToggleZoomFriction.Identifier)
 asset.export("ToggleRollFriction", ToggleRollFriction.Identifier)
+
+asset.export("ToggleIdleBehavior", ToggleIdleBehavior.Identifier)
 
 asset.export("ToggleMainGui", ToggleMainGui.Identifier)
 asset.export("ToggleNativeUi", ToggleNativeUi.Identifier)
