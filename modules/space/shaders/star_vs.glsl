@@ -28,18 +28,21 @@ in vec3 in_position;
 in vec3 in_bvLumAbsMag;
 in vec3 in_velocity;
 in float in_speed;
+in float in_otherData;
 
 out vec3 vs_bvLumAbsMag;
 out vec3 vs_velocity;
 out float vs_speed;
+out float vs_otherData;
 
 uniform int useProperMotion;
 uniform float diffTime;
 
 void main() {
   vs_bvLumAbsMag = in_bvLumAbsMag;
-  vs_velocity = in_velocity;
-  vs_speed = in_speed;
+    vs_velocity = in_velocity;
+    vs_speed = in_speed;
+    vs_otherData = in_otherData;
 
   if (useProperMotion == 1) {
     // 1000 to get from km/s to m/s
