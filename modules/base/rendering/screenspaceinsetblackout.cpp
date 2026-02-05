@@ -748,7 +748,6 @@ void ScreenSpaceInsetBlackout::generateTexture() {
     glDrawArrays(GL_TRIANGLE_FAN, 0, static_cast<gl::GLsizei>(_vboData.size()));
     glBindVertexArray(0);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
     _fboProgram->deactivate();

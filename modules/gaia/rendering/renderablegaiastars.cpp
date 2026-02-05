@@ -1954,8 +1954,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _fboTexture->uploadTexture();
             LDEBUG("Generating Framebuffer Texture");
         }
-        // Bind render texture to FBO.
-        glBindTexture(GL_TEXTURE_2D, *_fboTexture);
+        // Bind render texture to FBO
         glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_fboTexture, 0);
         const GLenum textureBuffer = GL_COLOR_ATTACHMENT0;
         glNamedFramebufferDrawBuffers(_fbo, 1, &textureBuffer);
@@ -2041,7 +2040,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _fboTexture->uploadTexture();
             LDEBUG("Re-Generating Gaia Framebuffer Texture");
 
-            glBindTexture(GL_TEXTURE_2D, *_fboTexture);
             glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_fboTexture, 0);
             const GLenum textureBuffer = GL_COLOR_ATTACHMENT0;
             glNamedFramebufferDrawBuffers(_fbo, 1, &textureBuffer);

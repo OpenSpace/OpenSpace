@@ -102,42 +102,10 @@ void SpoutMain::saveGLState() {
     GLint buf;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &buf);
     _defaultFBO = static_cast<unsigned int>(buf);
-
-    glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &buf);
-    _defaultReadFBO = static_cast<unsigned int>(buf);
-
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &buf);
-    _defaultDrawFBO = static_cast<unsigned int>(buf);
-
-    glGetIntegerv(GL_READ_BUFFER, &buf);
-    _defaultReadBuffer = static_cast<unsigned int>(buf);
-
-    glGetIntegerv(GL_DRAW_BUFFER0, &buf);
-    _defaultDrawBuffer[0] = static_cast<unsigned int>(buf);
-
-    saveGLTextureState();
 }
 
 void SpoutMain::restoreGLState() {
     glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(_defaultFBO));
-    if (_defaultFBO) {
-        glNamedFramebufferReadBuffer(_defaultReadFBO, static_cast<GLenum>(_defaultReadBuffer));
-        GLenum buf[1];
-        buf[0] = static_cast<GLenum>(_defaultDrawBuffer[0]);
-        glNamedFramebufferDrawBuffers(_defaultDrawFBO, 1, buf);
-    }
-    restoreGLTextureState();
-}
-
-void SpoutMain::saveGLTextureState() {
-    // @TODO (abock, 2026-02-04) Not sure if this is still needed with the DSA functions
-    GLint buf;
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, &buf);
-    _defaultTexture = static_cast<unsigned int>(buf);
-}
-
-void SpoutMain::restoreGLTextureState() {
-    glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(_defaultTexture));
 }
 
 SpoutReceiver::SpoutReceiver() {}

@@ -86,12 +86,7 @@ void ScreenSpaceSpout::update() {
 }
 
 void ScreenSpaceSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
-    _spoutReceiver.saveGLTextureState();
     unit.bind(_spoutReceiver.spoutTexture());
-}
-
-void ScreenSpaceSpout::unbindTexture() {
-    _spoutReceiver.restoreGLTextureState();
 }
 
 } // namespace openspace

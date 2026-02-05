@@ -88,14 +88,7 @@ void RenderableSphereSpout::update(const UpdateData& data) {
 
 void RenderableSphereSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_spoutReceiver.isReceiving()) {
-        _spoutReceiver.saveGLTextureState();
         unit.bind(_spoutReceiver.spoutTexture());
-    }
-}
-
-void RenderableSphereSpout::unbindTexture() {
-    if (_spoutReceiver.isReceiving()) {
-        _spoutReceiver.restoreGLTextureState();
     }
 }
 
