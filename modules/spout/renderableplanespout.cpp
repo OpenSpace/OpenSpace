@@ -89,14 +89,7 @@ void RenderablePlaneSpout::update(const UpdateData& data) {
 
 void RenderablePlaneSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_spoutReceiver.isReceiving()) {
-        _spoutReceiver.saveGLTextureState();
         unit.bind(_spoutReceiver.spoutTexture());
-    }
-}
-
-void RenderablePlaneSpout::unbindTexture() {
-    if (_spoutReceiver.isReceiving()) {
-        _spoutReceiver.restoreGLTextureState();
     }
 }
 

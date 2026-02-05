@@ -109,12 +109,12 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     gl::GLenum internalFormat = GL_RGBA8;
 
     glCreateTextures(GL_TEXTURE_2D, 1, &_pTexture);
-    glBindTexture(GL_TEXTURE_2D, _pTexture);
     glTextureParameteri(_pTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(_pTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTextureParameteri(_pTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTextureParameteri(_pTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
+
+    glBindTexture(GL_TEXTURE_2D, _pTexture);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     glTexImage2D(
         GL_TEXTURE_2D,
@@ -134,17 +134,16 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     // Allocate memory: N channels, with one byte each
     constexpr unsigned int nChannels = 4;
     unsigned int arraySize = TexSize * TexSize * nChannels;
-    std::vector<GLubyte> pixelData;
-    pixelData.resize(arraySize);
-    glBindTexture(GL_TEXTURE_2D, _pTexture);
-    glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, pixelData.data());
+    std::vector<GLubyte> pixels;
+    pixels.resize(arraySize);
+    glGetTextureImage(_pTexture, 0, format, GL_UNSIGNED_BYTE, arraySize, pixels.data());
 
     // Create array from data, size and format
     unsigned int id = 0;
     glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
     glBindTexture(GL_TEXTURE_2D_ARRAY, id);
     initAndAllocateTextureArray(id, glm::uvec2(TexSize), 1, useAlpha);
-    fillAndUploadTextureLayer(0, 0, 0, glm::uvec2(TexSize), useAlpha, pixelData.data());
+    fillAndUploadTextureLayer(0, 0, 0, glm::uvec2(TexSize), useAlpha, pixels.data());
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
     _textureIsInitialized = true;

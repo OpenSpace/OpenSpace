@@ -47,7 +47,6 @@ public:
 
 private:
     void bindTexture(ghoul::opengl::TextureUnit& unit) override;
-    void unbindTexture() override;
 
     spout::SpoutReceiverPropertyProxy _spoutReceiver;
 };

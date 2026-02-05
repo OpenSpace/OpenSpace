@@ -888,7 +888,6 @@ void RenderableStars::update(const UpdateData&) {
         std::vector<float> slice = createDataSlice(ColorOption(value));
 
         glBindVertexArray(_vao);
-        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
         glNamedBufferData(
             _vbo,
             slice.size() * sizeof(GLfloat),
