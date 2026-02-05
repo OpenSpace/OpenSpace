@@ -64,9 +64,7 @@ void RenderableTexturePlane::deinitializeGL() {
 
 void RenderableTexturePlane::setUniforms() {
     ghoul::opengl::TextureUnit unit;
-
-    unit.activate();
-    _textures[0]->bind();
+    unit.bind(*_textures[0]);
     _shader->setUniform("texture1", unit);
     _shader->setUniform("transparency", _alpha.value());
 }

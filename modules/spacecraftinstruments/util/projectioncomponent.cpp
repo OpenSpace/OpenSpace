@@ -639,12 +639,10 @@ void ProjectionComponent::imageProjectEnd() {
         glDisable(GL_BLEND);
 
         ghoul::opengl::TextureUnit projUnit;
-        projUnit.activate();
-        _projectionTexture->bind();
+        projUnit.bind(*_projectionTexture);
 
         ghoul::opengl::TextureUnit stencilUnit;
-        stencilUnit.activate();
-        _dilation.stencilTexture->bind();
+        stencilUnit.bind(*_dilation.stencilTexture);
 
         _dilation.program->activate();
         _dilation.program->setUniform("tex", projUnit);

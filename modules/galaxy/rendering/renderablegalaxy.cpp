@@ -692,8 +692,7 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
     _billboardsProgram->setUniform(_uniformCacheBillboards.cameraUp, cameraUp);
 
     ghoul::opengl::TextureUnit psfUnit;
-    psfUnit.activate();
-    _pointSpreadFunctionTexture->bind();
+    psfUnit.bind(*_pointSpreadFunctionTexture);
     _billboardsProgram->setUniform(_uniformCacheBillboards.psfTexture, psfUnit);
 
     glBindVertexArray(_pointsVao);

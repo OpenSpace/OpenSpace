@@ -46,7 +46,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
     void unbindTexture() override;
 
     spout::SpoutReceiverPropertyProxy _spoutReceiver;

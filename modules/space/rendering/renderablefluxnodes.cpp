@@ -39,6 +39,7 @@
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <array>
@@ -769,9 +770,9 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("cameraPos", cameraPos);
 
     if (_colorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
+        _transferFunction->update();
         ghoul::opengl::TextureUnit textureUnit;
-        textureUnit.activate();
-        _transferFunction->bind(); // Calls update internally
+        textureUnit.bind(_transferFunction->texture());
         _shaderProgram->setUniform("colorTable", textureUnit);
     }
 

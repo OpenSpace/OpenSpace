@@ -159,8 +159,7 @@ void RenderablePlaneProjection::render(const RenderData& data, RendererTasks&) {
     );
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    _texture->bind();
+    unit.bind(*_texture);
     _shader->setUniform("texture1", unit);
 
     glBindVertexArray(_vao);

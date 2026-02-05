@@ -536,15 +536,13 @@ void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewp
 
     _hdrFilteringProgram->activate();
 
-    ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
-    hdrFeedingTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, _pingPongBuffers.colorTexture[_pingPongIndex]);
+    ghoul::opengl::TextureUnit hdrFeedingTexUnit;
+    glBindTextureUnit(hdrFeedingTexUnit, _pingPongBuffers.colorTexture[_pingPongIndex]);
 
     _hdrFilteringProgram->setUniform(
         _hdrUniformCache.hdrFeedingTexture,
-        hdrFeedingTextureUnit
+        hdrFeedingTexUnit
     );
-
     _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrExposure, _hdrExposure);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.gamma, _gamma);
@@ -571,11 +569,7 @@ void FramebufferRenderer::applyFXAA(const glm::ivec4& viewport) {
     _fxaaProgram->activate();
 
     ghoul::opengl::TextureUnit renderedTextureUnit;
-    renderedTextureUnit.activate();
-    glBindTexture(
-        GL_TEXTURE_2D,
-        _fxaaBuffers.fxaaTexture
-    );
+    glBindTextureUnit(renderedTextureUnit, _fxaaBuffers.fxaaTexture);
 
     _fxaaProgram->setUniform(
         _fxaaUniformCache.renderedTexture,
@@ -655,24 +649,17 @@ void FramebufferRenderer::writeDownscaledVolume(const glm::ivec4& viewport) {
     _downscaledVolumeProgram->activate();
 
     ghoul::opengl::TextureUnit downscaledTextureUnit;
-    downscaledTextureUnit.activate();
-    glBindTexture(
-        GL_TEXTURE_2D,
-        _downscaleVolumeRendering.colorTexture
-    );
-
+    glBindTextureUnit(downscaledTextureUnit, _downscaleVolumeRendering.colorTexture);
     _downscaledVolumeProgram->setUniform(
         _writeDownscaledVolumeUniformCache.downscaledRenderedVolume,
         downscaledTextureUnit
     );
 
     ghoul::opengl::TextureUnit downscaledDepthUnit;
-    downscaledDepthUnit.activate();
-    glBindTexture(
-        GL_TEXTURE_2D,
+    glBindTextureUnit(
+        downscaledDepthUnit,
         _downscaleVolumeRendering.depthbuffer
     );
-
     _downscaledVolumeProgram->setUniform(
         _writeDownscaledVolumeUniformCache.downscaledRenderedVolumeDepth,
         downscaledDepthUnit
@@ -1500,18 +1487,15 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             raycaster->preRaycast(_raycastData[raycaster], *raycastProgram);
 
             ghoul::opengl::TextureUnit exitColorTextureUnit;
-            exitColorTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, _exitColorTexture);
+            glBindTextureUnit(exitColorTextureUnit, _exitColorTexture);
             raycastProgram->setUniform("exitColorTexture", exitColorTextureUnit);
 
             ghoul::opengl::TextureUnit exitDepthTextureUnit;
-            exitDepthTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, _exitDepthTexture);
+            glBindTextureUnit(exitDepthTextureUnit, _exitDepthTexture);
             raycastProgram->setUniform("exitDepthTexture", exitDepthTextureUnit);
 
             ghoul::opengl::TextureUnit mainDepthTextureUnit;
-            mainDepthTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, _gBuffers.depthTexture);
+            glBindTextureUnit(mainDepthTextureUnit, _gBuffers.depthTexture);
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
             if (raycaster->downscaleRender() < 1.f) {
@@ -1583,9 +1567,8 @@ void FramebufferRenderer::performDeferredTasks(
 
             // adding G-Buffer
             ghoul::opengl::TextureUnit mainDColorTextureUnit;
-            mainDColorTextureUnit.activate();
-            glBindTexture(
-                GL_TEXTURE_2D,
+            glBindTextureUnit(
+                mainDColorTextureUnit,
                 _pingPongBuffers.colorTexture[fromIndex]
             );
             deferredcastProgram->setUniform(
@@ -1604,16 +1587,14 @@ void FramebufferRenderer::performDeferredTasks(
 
 
             ghoul::opengl::TextureUnit mainPositionTextureUnit;
-            mainPositionTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, _gBuffers.positionTexture);
+            glBindTextureUnit(mainPositionTextureUnit, _gBuffers.positionTexture);
             deferredcastProgram->setUniform(
                 "mainPositionTexture",
                 mainPositionTextureUnit
             );
 
             ghoul::opengl::TextureUnit mainNormalTextureUnit;
-            mainNormalTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, _gBuffers.normalTexture);
+            glBindTextureUnit(mainNormalTextureUnit, _gBuffers.normalTexture);
             deferredcastProgram->setUniform(
                 "mainNormalTexture",
                 mainNormalTextureUnit

@@ -423,8 +423,7 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
 
     if (_pointTexture && _hasTexture) {
         ghoul::opengl::TextureUnit unit;
-        unit.activate();
-        _pointTexture->bind();
+        unit.bind(*_pointTexture->texture());
         _pointsProgram->setUniform("pointTexture", unit);
         _pointsProgram->setUniform("hasTexture", true);
 
@@ -434,7 +433,6 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
         _pointsProgram->setUniform("textureWidthFactor", widthHeightRatio);
     }
     else {
-        glBindTexture(GL_TEXTURE_2D, 0);
         _pointsProgram->setUniform("hasTexture", false);
     }
 

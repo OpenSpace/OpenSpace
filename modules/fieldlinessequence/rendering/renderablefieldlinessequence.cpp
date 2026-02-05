@@ -41,6 +41,7 @@
 #include <ghoul/misc/exception.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <filesystem>
@@ -1197,9 +1198,9 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     _shaderProgram->setUniform("usingMasking", _maskingEnabled);
 
     if (_colorMethod == static_cast<int>(ColorMethod::ByQuantity)) {
+        _transferFunction->update();
         ghoul::opengl::TextureUnit textureUnit;
-        textureUnit.activate();
-        _transferFunction->bind();
+        textureUnit.bind(_transferFunction->texture());
         _shaderProgram->setUniform("transferFunction", textureUnit);
         _shaderProgram->setUniform("selectedColorRange", _selectedColorRange);
     }

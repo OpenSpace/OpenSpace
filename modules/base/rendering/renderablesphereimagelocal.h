@@ -47,7 +47,7 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
 private:
     properties::StringProperty _texturePath;

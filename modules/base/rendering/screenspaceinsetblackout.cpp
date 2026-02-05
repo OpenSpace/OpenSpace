@@ -37,6 +37,7 @@
 #include <ghoul/misc/interpolator.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <array>
 #include <filesystem>
 #include <functional>
@@ -740,8 +741,6 @@ void ScreenSpaceInsetBlackout::generateTexture() {
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
 
-    bindTexture();
-
     // Clear current buffer
     glViewport(0, 0, BlackoutTextureSize.x, BlackoutTextureSize.y);
 
@@ -760,13 +759,13 @@ void ScreenSpaceInsetBlackout::generateTexture() {
     _fboProgram->deactivate();
 }
 
-void ScreenSpaceInsetBlackout::bindTexture() {
+void ScreenSpaceInsetBlackout::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_blackoutShape.enableCalibrationPattern && _calibrationTexture.get()) {
-        _calibrationTexture->bind();
+        unit.bind(*_calibrationTexture);
         _objectSize = _calibrationTexture->dimensions();
     }
     else {
-        _blackoutTexture->bind();
+        unit.bind(*_blackoutTexture);
         _objectSize = _blackoutTexture->dimensions();
     }
 }

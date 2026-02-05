@@ -53,7 +53,7 @@ protected:
     properties::StringProperty _texturePath;
 
 private:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(
         const std::string& url);

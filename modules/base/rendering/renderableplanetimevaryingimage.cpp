@@ -34,6 +34,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <iterator>
 
@@ -162,9 +163,9 @@ void RenderablePlaneTimeVaryingImage::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-void RenderablePlaneTimeVaryingImage::bindTexture() {
+void RenderablePlaneTimeVaryingImage::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture && !_textureIsDirty) {
-        _texture->bind();
+        unit.bind(*_texture);
     }
 }
 

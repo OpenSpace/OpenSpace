@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <iterator>
 #include <utility>
@@ -178,12 +179,9 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     }
 }
 
-void RenderableTimeVaryingSphere::bindTexture() {
+void RenderableTimeVaryingSphere::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture) {
-        _texture->bind();
-    }
-    else {
-        unbindTexture();
+        unit.bind(*_texture);
     }
 }
 

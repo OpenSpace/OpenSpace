@@ -1169,8 +1169,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit colorUnit;
     if (_colorTexture) {
-        colorUnit.activate();
-        _colorTexture->bind();
+        colorUnit.bind(*_colorTexture);
         _program->setUniform(_uniformCache.colorTexture, colorUnit);
     }
 
@@ -1209,8 +1208,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             _program->setUniform(_uniformCache.magnitudeBoost, _magnitudeBoost);
             _program->setUniform(_uniformCache.sharpness, _sharpness);
 
-            psfUnit.activate();
-            _pointSpreadFunctionTexture->bind();
+            psfUnit.bind(*_pointSpreadFunctionTexture);
             _program->setUniform(_uniformCache.psfTexture, psfUnit);
             break;
         case gaia::ShaderOption::BillboardVBO:
@@ -1229,8 +1227,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
             _program->setUniform(_uniformCache.magnitudeBoost, _magnitudeBoost);
             _program->setUniform(_uniformCache.sharpness, _sharpness);
 
-            psfUnit.activate();
-            _pointSpreadFunctionTexture->bind();
+            psfUnit.bind(*_pointSpreadFunctionTexture);
             _program->setUniform(_uniformCache.psfTexture, psfUnit);
 
             // Specify how many potential stars we have to render.
@@ -1264,8 +1261,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
         ghoul::opengl::TextureUnit fboTexUnit;
         if (_fboTexture) {
-            fboTexUnit.activate();
-            _fboTexture->bind();
+            fboTexUnit.bind(*_fboTexture);
             _programTM->setUniform(_uniformCacheTM.renderedTexture, fboTexUnit);
         }
 

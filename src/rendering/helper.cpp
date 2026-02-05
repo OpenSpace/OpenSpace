@@ -585,8 +585,7 @@ void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4
     shdr.program->setUniform(shdr.cache.hasTexture, 1);
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    texture.bind();
+    unit.bind(texture);
     shdr.program->setUniform(shdr.cache.tex, unit);
     renderBox(
         *shdr.program,

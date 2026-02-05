@@ -399,8 +399,7 @@ void RenderablePlanetProjection::imageProjectGPU(
     _fboProgramObject->activate();
 
     ghoul::opengl::TextureUnit unitFbo;
-    unitFbo.activate();
-    projectionTexture.bind();
+    unitFbo.bind(projectionTexture);
     _fboProgramObject->setUniform(_fboUniformCache.projectionTexture, unitFbo);
 
     _fboProgramObject->setUniform(_fboUniformCache.ProjectorMatrix, projectorMatrix);
@@ -539,20 +538,17 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
 
     ghoul::opengl::TextureUnit baseUnit;
     if (_baseTexture) {
-        baseUnit.activate();
-        _baseTexture->bind();
+        baseUnit.bind(*_baseTexture);
         _programObject->setUniform(_mainUniformCache.baseTexture, baseUnit);
     }
 
     ghoul::opengl::TextureUnit projectionUnit;
-    projectionUnit.activate();
-    _projectionComponent.projectionTexture().bind();
+    projectionUnit.bind(_projectionComponent.projectionTexture());
     _programObject->setUniform(_mainUniformCache.projectionTexture, projectionUnit);
 
     ghoul::opengl::TextureUnit heightUnit;
     if (_heightMapTexture) {
-        heightUnit.activate();
-        _heightMapTexture->bind();
+        heightUnit.bind(*_heightMapTexture);
         _programObject->setUniform(_mainUniformCache.heightTexture, heightUnit);
     }
 

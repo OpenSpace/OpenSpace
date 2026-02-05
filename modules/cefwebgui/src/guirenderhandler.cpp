@@ -99,8 +99,7 @@ void GUIRenderHandler::draw() {
     _programObject->activate();
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    glBindTexture(GL_TEXTURE_2D, _texture);
+    unit.bind(_texture);
     _programObject->setUniform("tex", unit);
 
     glBindVertexArray(_vao);

@@ -280,12 +280,10 @@ void RenderableModelProjection::render(const RenderData& data, RendererTasks&) {
     );
 
     ghoul::opengl::TextureUnit baseUnit;
-    baseUnit.activate();
     _programObject->setUniform(_mainUniformCache.baseTexture, baseUnit);
 
     ghoul::opengl::TextureUnit projectionUnit;
-    projectionUnit.activate();
-    _projectionComponent.projectionTexture().bind();
+    projectionUnit.bind(_projectionComponent.projectionTexture());
     _programObject->setUniform(_mainUniformCache.projectionTexture, projectionUnit);
 
     _geometry->render(*_programObject, false);
@@ -376,8 +374,7 @@ void RenderableModelProjection::imageProjectGPU(
     _fboProgramObject->activate();
 
     ghoul::opengl::TextureUnit unitFbo;
-    unitFbo.activate();
-    projectionTexture.bind();
+    unitFbo.bind(projectionTexture);
     _fboProgramObject->setUniform(_fboUniformCache.projectionTexture, unitFbo);
 
     _fboProgramObject->setUniform(
@@ -387,8 +384,7 @@ void RenderableModelProjection::imageProjectGPU(
 
     ghoul::opengl::TextureUnit unitDepthFbo;
     if (_projectionComponent.needsShadowMap()) {
-        unitDepthFbo.activate();
-        _projectionComponent.depthTexture().bind();
+        unitDepthFbo.bind(_projectionComponent.depthTexture());
         _fboProgramObject->setUniform(_fboUniformCache.depthTexture, unitDepthFbo);
     }
 

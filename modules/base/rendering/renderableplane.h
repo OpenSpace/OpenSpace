@@ -34,7 +34,10 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::filesystem { class File; }
+namespace ghoul {
+    namespace filesystem { class File; }
+    namespace opengl { class TextureUnit; }
+} // namespace ghoul
 
 namespace openspace {
 
@@ -59,7 +62,7 @@ protected:
         FixedRotation
     };
 
-    virtual void bindTexture();
+    virtual void bindTexture(ghoul::opengl::TextureUnit& unit);
     virtual void unbindTexture();
     void createPlane();
     glm::dmat4 rotationMatrix(const RenderData& data) const;

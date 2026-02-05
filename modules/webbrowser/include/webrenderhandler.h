@@ -45,6 +45,8 @@
 //#pragma clang diagnostic pop
 #endif // _MSC_VER
 
+namespace ghoul::opengl { class TextureUnit; }
+
 namespace openspace {
 
 class WebRenderHandler : public CefRenderHandler {
@@ -78,7 +80,7 @@ public:
 
     bool isTextureReady() const;
     void updateTexture();
-    void bindTexture();
+    void bindTexture(ghoul::opengl::TextureUnit& unit);
 
 protected:
     GLuint _texture = 0;

@@ -130,6 +130,7 @@ void SpoutMain::restoreGLState() {
 }
 
 void SpoutMain::saveGLTextureState() {
+    // @TODO (abock, 2026-02-04) Not sure if this is still needed with the DSA functions
     GLint buf;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &buf);
     _defaultTexture = static_cast<unsigned int>(buf);
