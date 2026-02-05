@@ -586,8 +586,7 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
     glEnable(GL_SCISSOR_TEST);
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    _fontTexture->bind();
+    unit.bind(*_fontTexture);
 
     // Setup orthographic projection matrix
     const float width = ImGui::GetIO().DisplaySize.x;

@@ -138,7 +138,7 @@ private:
         properties::TriggerProperty copyToClipboardTrigger;
     };
 
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
     void generateTexture();
     void generateVertexArrayData();

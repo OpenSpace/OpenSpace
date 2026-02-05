@@ -795,18 +795,15 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
 
     // The texture that will give the color for the interpolated texture
     ghoul::opengl::TextureUnit colormapUnit;
-    colormapUnit.activate();
-    colormap->bind();
+    colormapUnit.bind(*colormap);
     shaderProgram->setUniform("colormapTexture", colormapUnit);
 
     ghoul::opengl::TextureUnit prevUnit;
-    prevUnit.activate();
-    prev.texture->bind();
+    prevUnit.bind(*prev.texture);
     shaderProgram->setUniform("prevTexture", prevUnit);
 
     ghoul::opengl::TextureUnit nextUnit;
-    nextUnit.activate();
-    next.texture->bind();
+    nextUnit.bind(*next.texture);
     shaderProgram->setUniform("nextTexture", nextUnit);
 
     // Render to the texture

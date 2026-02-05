@@ -106,14 +106,12 @@ void MultiresVolumeRaycaster::preRaycast(const RaycastData& data,
     program.setUniform("stepSizeCoefficient_" + id, _stepSizeCoefficient);
 
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _tfUnit->activate();
-    _transferFunction->texture().bind();
-    program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
+    _tfUnit->bind(_transferFunction->texture());
+    program.setUniform("transferFunction_" + id, *_tfUnit);
 
     _atlasUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _atlasUnit->activate();
-    _atlasManager->textureAtlas().bind();
-    program.setUniform("textureAtlas_" + id, _atlasUnit->unitNumber());
+    _atlasUnit->bind(_atlasManager->textureAtlas());
+    program.setUniform("textureAtlas_" + id, *_atlasUnit);
 
     _atlasMapBinding = std::make_unique<ghoul::opengl::BufferBinding<
         ghoul::opengl::bufferbinding::Buffer::ShaderStorage

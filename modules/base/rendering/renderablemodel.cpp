@@ -972,8 +972,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.model, modelTransform);
         _program->setUniform(_uniformCache.light_vp, sm.viewProjectionMatrix);
 
-        shadowUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, sm.depthMap.texture);
+        shadowUnit.bind(sm.depthMap.texture);
         _program->setUniform(_uniformCache.shadow_depth_map, shadowUnit);
     }
 
@@ -1047,9 +1046,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Bind the G-buffer depth texture for a manual depth test towards the rest
         // of the scene
         ghoul::opengl::TextureUnit gBufferDepthTextureUnit;
-        gBufferDepthTextureUnit.activate();
-        glBindTexture(
-            GL_TEXTURE_2D,
+        gBufferDepthTextureUnit.bind(
             global::renderEngine->renderer().gBufferDepthTexture()
         );
         _program->setUniform(_uniformCache.gBufferDepthTexture, gBufferDepthTextureUnit);
@@ -1092,19 +1089,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         // Bind textures
         ghoul::opengl::TextureUnit colorTextureUnit;
-        colorTextureUnit.activate();
-        glBindTexture(
-            GL_TEXTURE_2D,
-            global::renderEngine->renderer().additionalColorTexture1()
-        );
+        colorTextureUnit.bind(global::renderEngine->renderer().additionalColorTexture1());
         _quadProgram->setUniform(_uniformOpacityCache.colorTexture, colorTextureUnit);
 
         ghoul::opengl::TextureUnit depthTextureUnit;
-        depthTextureUnit.activate();
-        glBindTexture(
-            GL_TEXTURE_2D,
-            global::renderEngine->renderer().additionalDepthTexture()
-        );
+        depthTextureUnit.bind(global::renderEngine->renderer().additionalDepthTexture());
         _quadProgram->setUniform(_uniformOpacityCache.depthTexture, depthTextureUnit);
 
         // Will also need the resolution and viewport to get a texture coordinate

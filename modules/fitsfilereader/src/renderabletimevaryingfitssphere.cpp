@@ -36,6 +36,7 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <cctype>
 #include <iterator>
@@ -581,9 +582,9 @@ void RenderableTimeVaryingFitsSphere::render(const RenderData& data, RendererTas
     RenderableSphere::render(data, task);
 }
 
-void RenderableTimeVaryingFitsSphere::bindTexture() {
+void RenderableTimeVaryingFitsSphere::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture) {
-        _texture->bind();
+        unit.bind(*_texture);
     }
 }
 

@@ -29,10 +29,7 @@
 #include <filesystem>
 #include <memory>
 
-namespace ghoul {
-    namespace filesystem { class File; }
-    namespace opengl { class Texture; }
-} // namespace ghoul
+namespace ghoul::filesystem { class File; }
 
 namespace openspace {
 
@@ -49,7 +46,6 @@ public:
     void setShouldWatchFileForChanges(bool value);
     void setShouldPurgeFromRAM(bool value);
 
-    void bind();
     void uploadToGpu();
 
     // Loads a texture from a file on disk

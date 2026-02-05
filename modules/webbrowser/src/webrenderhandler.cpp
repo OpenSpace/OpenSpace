@@ -27,6 +27,7 @@
 #include <modules/webbrowser/webbrowsermodule.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 
 namespace openspace {
@@ -299,8 +300,8 @@ bool WebRenderHandler::isTextureReady() const {
     return !_needsRepaint;
 }
 
-void WebRenderHandler::bindTexture() {
-    glBindTexture(GL_TEXTURE_2D, _texture);
+void WebRenderHandler::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(_texture);
 }
 
 } // namespace openspace

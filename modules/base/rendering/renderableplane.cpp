@@ -446,8 +446,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    bindTexture();
+    bindTexture(unit);
     defer { unbindTexture(); };
 
     _shader->setUniform(_uniformCache.colorTexture, unit);
@@ -473,7 +472,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->deactivate();
 }
 
-void RenderablePlane::bindTexture() {}
+void RenderablePlane::bindTexture(ghoul::opengl::TextureUnit&) {}
 
 void RenderablePlane::unbindTexture() {}
 

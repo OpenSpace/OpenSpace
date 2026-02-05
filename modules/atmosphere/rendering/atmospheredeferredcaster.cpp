@@ -513,19 +513,16 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
         }
         program.setUniform(_uniformCache.hardShadows, _hardShadowsEnabled);
     }
-    _transmittanceTableTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
+    _transmittanceTableTextureUnit.bind(_transmittanceTableTexture);
     program.setUniform(
         _uniformCache.transmittanceTexture,
         _transmittanceTableTextureUnit
     );
 
-    _irradianceTableTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, _irradianceTableTexture);
+    _irradianceTableTextureUnit.bind(_irradianceTableTexture);
     program.setUniform(_uniformCache.irradianceTexture, _irradianceTableTextureUnit);
 
-    _inScatteringTableTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_3D, _inScatteringTableTexture);
+    _inScatteringTableTextureUnit.bind(_inScatteringTableTexture);
     program.setUniform(_uniformCache.inscatterTexture, _inScatteringTableTextureUnit);
 }
 
@@ -537,9 +534,9 @@ void AtmosphereDeferredcaster::postRaycast(const RenderData&, const Deferredcast
     TracyGpuZone("Atmosphere postRaycast");
 
     // Deactivate the texture units
-    _transmittanceTableTextureUnit.deactivate();
-    _irradianceTableTextureUnit.deactivate();
-    _inScatteringTableTextureUnit.deactivate();
+    _transmittanceTableTextureUnit.unassign();
+    _irradianceTableTextureUnit.unassign();
+    _inScatteringTableTextureUnit.unassign();
 }
 
 std::filesystem::path AtmosphereDeferredcaster::deferredcastFSPath() const {
@@ -665,8 +662,7 @@ GLuint AtmosphereDeferredcaster::calculateDeltaE() {
     );
     program->activate();
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
+    unit.bind(_transmittanceTableTexture);
     program->setUniform("transmittanceTexture", unit);
     program->setUniform("Rg", _atmospherePlanetRadius);
     program->setUniform("Rt", _atmosphereRadius);
@@ -708,8 +704,7 @@ std::pair<GLuint, GLuint> AtmosphereDeferredcaster::calculateDeltaS() {
     );
     program->activate();
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
+    unit.bind(_transmittanceTableTexture);
     program->setUniform("transmittanceTexture", unit);
     program->setUniform("Rg", _atmospherePlanetRadius);
     program->setUniform("Rt", _atmosphereRadius);
@@ -795,13 +790,11 @@ void AtmosphereDeferredcaster::calculateInscattering(GLuint deltaSRayleigh,
     program->activate();
 
     ghoul::opengl::TextureUnit deltaSRayleighUnit;
-    deltaSRayleighUnit.activate();
-    glBindTexture(GL_TEXTURE_3D, deltaSRayleigh);
+    deltaSRayleighUnit.bind(deltaSRayleigh);
     program->setUniform("deltaSRTexture", deltaSRayleighUnit);
 
     ghoul::opengl::TextureUnit deltaSMieUnit;
-    deltaSMieUnit.activate();
-    glBindTexture(GL_TEXTURE_3D, deltaSMie);
+    deltaSMieUnit.bind(deltaSMie);
     program->setUniform("deltaSMTexture", deltaSMieUnit);
 
     program->setUniform("SAMPLES_MU_S", _muSSamples);
@@ -839,23 +832,19 @@ void AtmosphereDeferredcaster::calculateDeltaJ(int scatteringOrder,
     program.activate();
 
     ghoul::opengl::TextureUnit transmittanceUnit;
-    transmittanceUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
+    transmittanceUnit.bind(_transmittanceTableTexture);
     program.setUniform("transmittanceTexture", transmittanceUnit);
 
     ghoul::opengl::TextureUnit deltaEUnit;
-    deltaEUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, deltaE);
+    deltaEUnit.bind(deltaE);
     program.setUniform("deltaETexture", deltaEUnit);
 
     ghoul::opengl::TextureUnit deltaSRayleighUnit;
-    deltaSRayleighUnit.activate();
-    glBindTexture(GL_TEXTURE_3D, deltaSRayleigh);
+    deltaSRayleighUnit.bind(deltaSRayleigh);
     program.setUniform("deltaSRTexture", deltaSRayleighUnit);
 
     ghoul::opengl::TextureUnit deltaSMieUnit;
-    deltaSMieUnit.activate();
-    glBindTexture(GL_TEXTURE_3D, deltaSMie);
+    deltaSMieUnit.bind(deltaSMie);
     program.setUniform("deltaSMTexture", deltaSMieUnit);
 
     program.setUniform("firstIteration", (scatteringOrder == 2) ? 1 : 0);
@@ -905,13 +894,11 @@ void AtmosphereDeferredcaster::calculateDeltaE(int scatteringOrder,
     program.activate();
 
     ghoul::opengl::TextureUnit deltaSRayleighUnit;
-    deltaSRayleighUnit.activate();
-    glBindTexture(GL_TEXTURE_3D, deltaSRayleigh);
+    deltaSRayleighUnit.bind(deltaSRayleigh);
     program.setUniform("deltaSRTexture", deltaSRayleighUnit);
 
     ghoul::opengl::TextureUnit deltaSMieUnit;
-    deltaSMieUnit.activate();
-    glBindTexture(GL_TEXTURE_3D, deltaSMie);
+    deltaSMieUnit.bind(deltaSMie);
     program.setUniform("deltaSMTexture", deltaSMieUnit);
 
     program.setUniform("firstIteration", (scatteringOrder == 2) ? 1 : 0);
@@ -952,13 +939,11 @@ void AtmosphereDeferredcaster::calculateDeltaS(int scatteringOrder,
     program.activate();
 
     ghoul::opengl::TextureUnit transmittanceUnit;
-    transmittanceUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, _transmittanceTableTexture);
+    transmittanceUnit.bind(_transmittanceTableTexture);
     program.setUniform("transmittanceTexture", transmittanceUnit);
 
     ghoul::opengl::TextureUnit deltaJUnit;
-    deltaJUnit.activate();
-    glBindTexture(GL_TEXTURE_3D, deltaJ);
+    deltaJUnit.bind(deltaJ);
     program.setUniform("deltaJTexture", deltaJUnit);
 
     program.setUniform("Rg", _atmospherePlanetRadius);
@@ -1000,8 +985,7 @@ void AtmosphereDeferredcaster::calculateIrradiance(int scatteringOrder,
     program.activate();
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    glBindTexture(GL_TEXTURE_2D, deltaE);
+    unit.bind(deltaE);
     program.setUniform("deltaETexture", unit);
     program.setUniform("OTHER_TEXTURES", _deltaETableSize);
 
@@ -1034,8 +1018,7 @@ void AtmosphereDeferredcaster::calculateInscattering(int scatteringOrder,
     program.activate();
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    glBindTexture(GL_TEXTURE_3D, deltaSRayleigh);
+    unit.bind(deltaSRayleigh);
     program.setUniform("deltaSTexture", unit);
     program.setUniform("SAMPLES_MU_S", _muSSamples);
     program.setUniform("SAMPLES_NU", _nuSamples);

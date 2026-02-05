@@ -31,6 +31,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <utility>
 
 namespace {
@@ -164,12 +165,9 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
     }
 }
 
-void RenderableSphereImageOnline::bindTexture() {
+void RenderableSphereImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture) {
-        _texture->bind();
-    }
-    else {
-        unbindTexture();
+        unit.bind(*_texture);
     }
 }
 

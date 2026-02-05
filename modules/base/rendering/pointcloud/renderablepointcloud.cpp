@@ -1266,8 +1266,7 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
     _program->setUniform(_uniformCache.colorMapTexture, colorMapTextureUnit);
 
     if (useColorMap) {
-        colorMapTextureUnit.activate();
-        _colorSettings.colorMapping->texture()->bind();
+        colorMapTextureUnit.bind(*_colorSettings.colorMapping->texture());
 
         const glm::vec2 range = _colorSettings.colorMapping->valueRange;
         _program->setUniform(_uniformCache.cmapRangeMin, range.x);
@@ -1318,20 +1317,18 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
     glBindVertexArray(_vao);
 
     if (useTexture && !_textureArrays.empty()) {
-        spriteTextureUnit.activate();
         for (const TextureArrayInfo& arrayInfo : _textureArrays) {
+            spriteTextureUnit.bind(arrayInfo.renderId);
             _program->setUniform(
                 _uniformCache.aspectRatioScale,
                 arrayInfo.aspectRatioScale
             );
-            glBindTexture(GL_TEXTURE_2D_ARRAY, arrayInfo.renderId);
             glDrawArrays(
                 GL_POINTS,
                 arrayInfo.startOffset,
                 static_cast<GLsizei>(arrayInfo.nPoints)
             );
         }
-        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     }
     else {
         _program->setUniform(_uniformCache.aspectRatioScale, glm::vec2(1.f));

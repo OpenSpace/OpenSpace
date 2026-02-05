@@ -444,36 +444,31 @@ void RingsComponent::draw(const RenderData& data,
             modelViewProjectionTransform
         );
 
-        ringTextureFwrdUnit.activate();
-        _textureForwards->bind();
+        ringTextureFwrdUnit.bind(*_textureForwards);
         _shader->setUniform(
             _uniformCacheAdvancedRings.textureForwards,
             ringTextureFwrdUnit
         );
 
-        ringTextureBckwrdUnit.activate();
-        _textureBackwards->bind();
+        ringTextureBckwrdUnit.bind(*_textureBackwards);
         _shader->setUniform(
             _uniformCacheAdvancedRings.textureBackwards,
             ringTextureBckwrdUnit
         );
 
-        ringTextureUnlitUnit.activate();
-        _textureUnlit->bind();
+        ringTextureUnlitUnit.bind(*_textureUnlit);
         _shader->setUniform(
             _uniformCacheAdvancedRings.textureUnlit,
             ringTextureUnlitUnit
         );
 
-        ringTextureColorUnit.activate();
-        _textureColor->bind();
+        ringTextureColorUnit.bind(*_textureColor);
         _shader->setUniform(
             _uniformCacheAdvancedRings.textureColor,
             ringTextureColorUnit
         );
 
-        ringTextureTransparencyUnit.activate();
-        _textureTransparency->bind();
+        ringTextureTransparencyUnit.bind(*_textureTransparency);
         _shader->setUniform(
             _uniformCacheAdvancedRings.textureTransparency,
             ringTextureTransparencyUnit
@@ -517,8 +512,7 @@ void RingsComponent::draw(const RenderData& data,
         _shader->setUniform(_uniformCache.opacity, opacity());
         _shader->setUniform(_uniformCache.ellipsoidRadii, _ellipsoidRadii);
 
-        ringTextureUnit.activate();
-        _texture->bind();
+        ringTextureUnit.bind(*_texture);
         _shader->setUniform(_uniformCache.ringTexture, ringTextureUnit);
     }
 

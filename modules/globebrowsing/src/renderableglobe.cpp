@@ -1468,8 +1468,7 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
     std::vector<GLint> boundUnits;
     for (auto& [unit, depthMap] : depthmapTextureUnits) {
-        unit.activate();
-        glBindTexture(GL_TEXTURE_2D, depthMap);
+        unit.bind(depthMap);
         boundUnits.push_back(unit);
     }
 
@@ -1535,14 +1534,12 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
             ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
 
             if (_ringsComponent->textureColor()) {
-                ringTextureColorUnit.activate();
-                _ringsComponent->textureColor()->bind();
+                ringTextureColorUnit.bind(*_ringsComponent->textureColor());
                 program.setUniform("ringTextureColor", ringTextureColorUnit);
             }
 
             if (_ringsComponent->textureTransparency()) {
-                ringTextureTransparencyUnit.activate();
-                _ringsComponent->textureTransparency()->bind();
+                ringTextureTransparencyUnit.bind(*_ringsComponent->textureTransparency());
                 program.setUniform(
                     "ringTextureTransparency",
                     ringTextureTransparencyUnit
@@ -1674,14 +1671,12 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
 
             if (_ringsComponent->textureColor()) {
-                ringTextureColorUnit.activate();
-                _ringsComponent->textureColor()->bind();
+                ringTextureColorUnit.bind(*_ringsComponent->textureColor());
                 program.setUniform("ringTextureColor", ringTextureColorUnit);
             }
 
             if (_ringsComponent->textureTransparency()) {
-                ringTextureTransparencyUnit.activate();
-                _ringsComponent->textureTransparency()->bind();
+                ringTextureTransparencyUnit.bind(*_ringsComponent->textureTransparency());
                 program.setUniform(
                     "ringTextureTransparency",
                     ringTextureTransparencyUnit
@@ -1702,8 +1697,7 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     std::vector<GLint> boundUnits;
     for (auto& [unit, depthMap] : depthmapTextureUnits) {
-        unit.activate();
-        glBindTexture(GL_TEXTURE_2D, depthMap);
+        unit.bind(depthMap);
         boundUnits.push_back(unit);
     }
 

@@ -39,6 +39,7 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <cmath>
@@ -692,8 +693,7 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     );
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    bindTexture();
+    bindTexture(unit);
     _shader->setUniform(_uniformCache.tex, unit);
 
     glBindVertexArray(rendering::helper::vertexObjects.square.vao);
@@ -702,12 +702,9 @@ void ScreenSpaceRenderable::draw(const glm::mat4& modelTransform,
     glEnable(GL_CULL_FACE);
 
     _shader->deactivate();
-    unbindTexture();
 }
 
-void ScreenSpaceRenderable::unbindTexture() {
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
+void ScreenSpaceRenderable::unbindTexture() {}
 
 glm::vec3 ScreenSpaceRenderable::sanitizeSphericalCoordinates(glm::vec3 spherical) const {
     const float r = spherical.x;

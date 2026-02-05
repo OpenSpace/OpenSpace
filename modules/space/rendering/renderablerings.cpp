@@ -210,8 +210,7 @@ void RenderableRings::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.sunPosition, _sunPosition);
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    _texture->bind();
+    unit.bind(*_texture);
     _shader->setUniform(_uniformCache.texture, unit);
 
     glDisable(GL_CULL_FACE);
