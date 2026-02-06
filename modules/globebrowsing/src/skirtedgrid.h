@@ -59,9 +59,9 @@ public:
     const int ySegments;
 
 private:
-    GLuint _vaoID = 0;
-    GLuint _vertexBufferID = 0;
-    GLuint _elementBufferID = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
+    GLuint _ibo = 0;
     const GLsizei _elementSize;
 };
 

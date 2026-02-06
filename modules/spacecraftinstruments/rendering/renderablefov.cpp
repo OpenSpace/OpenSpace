@@ -405,65 +405,68 @@ void RenderableFov::initializeGL() {
     _fieldOfViewBounds.data.resize(2 * _instrument.bounds.size());
 
     // Field of view boundaries
-    glGenVertexArrays(1, &_fieldOfViewBounds.vao);
-    glBindVertexArray(_fieldOfViewBounds.vao);
-    glGenBuffers(1, &_fieldOfViewBounds.vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _fieldOfViewBounds.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glCreateBuffers(1, &_fieldOfViewBounds.vbo);
+    glNamedBufferData(
+        _fieldOfViewBounds.vbo,
         _fieldOfViewBounds.data.size() * sizeof(RenderInformation::VBOData),
         nullptr,
         GL_STREAM_DRAW
     );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
+
+    glCreateVertexArrays(1, &_fieldOfViewBounds.vao);
+    glVertexArrayVertexBuffer(
+        _fieldOfViewBounds.vao,
         0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(RenderInformation::VBOData),
-        nullptr
+        _fieldOfViewBounds.vbo,
+        0,
+        sizeof(RenderInformation::VBOData)
     );
-    glEnableVertexAttribArray(1);
-    glVertexAttribIPointer(
+
+    glEnableVertexArrayAttrib(_fieldOfViewBounds.vao, 0);
+    glVertexArrayAttribFormat(_fieldOfViewBounds.vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_fieldOfViewBounds.vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_fieldOfViewBounds.vao, 1);
+    glVertexArrayAttribIFormat(
+        _fieldOfViewBounds.vao,
         1,
         1,
         GL_INT,
-        sizeof(RenderInformation::VBOData),
-        reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, color))
+        offsetof(RenderInformation::VBOData, color)
     );
+    glVertexArrayAttribBinding(_fieldOfViewBounds.vao, 1, 0);
 
     // Orthogonal Plane
-    glGenVertexArrays(1, &_orthogonalPlane.vao);
-    glGenBuffers(1, &_orthogonalPlane.vbo);
-    glBindVertexArray(_orthogonalPlane.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _orthogonalPlane.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glCreateBuffers(1, &_orthogonalPlane.vbo);
+    glNamedBufferData(
+        _orthogonalPlane.vbo,
         _orthogonalPlane.data.size() * sizeof(RenderInformation::VBOData),
         nullptr,
         GL_STREAM_DRAW
     );
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
+    glCreateVertexArrays(1, &_orthogonalPlane.vao);
+    glVertexArrayVertexBuffer(
+        _orthogonalPlane.vao,
         0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(RenderInformation::VBOData),
-        nullptr
+        _orthogonalPlane.vbo,
+        0,
+        sizeof(RenderInformation::VBOData)
     );
-    glEnableVertexAttribArray(1);
-    glVertexAttribIPointer(
+
+    glEnableVertexArrayAttrib(_orthogonalPlane.vao, 0);
+    glVertexArrayAttribFormat(_orthogonalPlane.vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_orthogonalPlane.vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_orthogonalPlane.vao, 1);
+    glVertexArrayAttribIFormat(
+        _orthogonalPlane.vao,
         1,
         1,
         GL_INT,
-        sizeof(RenderInformation::VBOData),
-        reinterpret_cast<void*>(offsetof(RenderInformation::VBOData, color))
+        offsetof(RenderInformation::VBOData, color)
     );
-
-    glBindVertexArray(0);
+    glVertexArrayAttribBinding(_orthogonalPlane.vao, 1, 0);
 }
 
 void RenderableFov::deinitializeGL() {
@@ -938,17 +941,15 @@ std::pair<std::string, bool> RenderableFov::determineTarget(double time) {
 
 void RenderableFov::updateGPU() {
     // @SPEEDUP:  Only upload the part of the data that has changed ---abock
-    glBindBuffer(GL_ARRAY_BUFFER, _fieldOfViewBounds.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _fieldOfViewBounds.vbo,
         _fieldOfViewBounds.data.size() * sizeof(RenderInformation::VBOData),
         _fieldOfViewBounds.data.data(),
         GL_STREAM_DRAW
     );
 
-    glBindBuffer(GL_ARRAY_BUFFER, _orthogonalPlane.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _orthogonalPlane.vbo,
         _orthogonalPlane.data.size() * sizeof(RenderInformation::VBOData),
         _orthogonalPlane.data.data(),
         GL_STREAM_DRAW

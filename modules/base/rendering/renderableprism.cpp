@@ -183,17 +183,17 @@ void RenderablePrism::initializeGL() {
     );
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
-    glGenVertexArrays(1, &_vaoId);
-    glGenBuffers(1, &_vboId);
-    glGenBuffers(1, &_iboId);
+    glCreateBuffers(1, &_vboId);
+    glCreateBuffers(1, &_iboId);
+    glCreateVertexArrays(1, &_vaoId);
+    glVertexArrayVertexBuffer(_vaoId, 0, _vboId, 0, 3 * sizeof(float));
+    glVertexArrayElementBuffer(_vaoId, _iboId);
 
-    glBindVertexArray(_vaoId);
+    glEnableVertexArrayAttrib(_vaoId, 0);
+    glVertexArrayAttribFormat(_vaoId, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vaoId, 0, 0);
 
     updateBufferData();
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glBindVertexArray(0);
 }
 
 void RenderablePrism::deinitializeGL() {
@@ -298,17 +298,15 @@ void RenderablePrism::updateVertexData() {
 }
 
 void RenderablePrism::updateBufferData() {
-    glBindBuffer(GL_ARRAY_BUFFER, _vboId);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vboId,
         _vertexArray.size() * sizeof(float),
         _vertexArray.data(),
         GL_STREAM_DRAW
     );
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
+    glNamedBufferData(
+        _iboId,
         _indexArray.size() * sizeof(uint8_t),
         _indexArray.data(),
         GL_STREAM_DRAW

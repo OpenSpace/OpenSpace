@@ -462,35 +462,35 @@ void RenderableGalaxy::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_pointsProgram, _uniformCachePoints);
     ghoul::opengl::updateUniformLocations(*_billboardsProgram, _uniformCacheBillboards);
 
-    glGenVertexArrays(1, &_pointsVao);
-    glGenBuffers(1, &_positionVbo);
-    glGenBuffers(1, &_colorVbo);
-
-    glBindVertexArray(_pointsVao);
-    glBindBuffer(GL_ARRAY_BUFFER, _positionVbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glCreateBuffers(1, &_positionVbo);
+    glNamedBufferStorage(
+        _positionVbo,
         _pointPositionsCache.size() * sizeof(glm::vec3),
         _pointPositionsCache.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    _pointPositionsCache.clear();
 
-    glBindBuffer(GL_ARRAY_BUFFER, _colorVbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glCreateBuffers(1, &_colorVbo);
+    glNamedBufferStorage(
+        _colorVbo,
         _pointColorsCache.size() * sizeof(glm::vec3),
         _pointColorsCache.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    _pointColorsCache.clear();
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_pointsVao);
+    glVertexArrayVertexBuffer(_pointsVao, 0, _positionVbo, 0, sizeof(glm::vec3));
+    glVertexArrayVertexBuffer(_pointsVao, 1, _colorVbo, 0, sizeof(glm::vec3));
+
+    glEnableVertexArrayAttrib(_pointsVao, 0);
+    glVertexArrayAttribFormat(_pointsVao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_pointsVao, 0, 0);
+    _pointPositionsCache.clear();
+
+    glEnableVertexArrayAttrib(_pointsVao, 1);
+    glVertexArrayAttribFormat(_pointsVao, 1, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_pointsVao, 1, 1);
+    _pointColorsCache.clear();
 }
 
 void RenderableGalaxy::deinitializeGL() {
@@ -692,8 +692,7 @@ void RenderableGalaxy::renderBillboards(const RenderData& data) {
     _billboardsProgram->setUniform(_uniformCacheBillboards.cameraUp, cameraUp);
 
     ghoul::opengl::TextureUnit psfUnit;
-    psfUnit.activate();
-    _pointSpreadFunctionTexture->bind();
+    psfUnit.bind(*_pointSpreadFunctionTexture);
     _billboardsProgram->setUniform(_uniformCacheBillboards.psfTexture, psfUnit);
 
     glBindVertexArray(_pointsVao);

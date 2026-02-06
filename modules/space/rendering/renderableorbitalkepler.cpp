@@ -431,10 +431,23 @@ RenderableOrbitalKepler::RenderableOrbitalKepler(const ghoul::Dictionary& dict)
 }
 
 void RenderableOrbitalKepler::initializeGL() {
-    ghoul_assert(_vertexArray == 0, "Vertex array object already existed");
-    ghoul_assert(_vertexBuffer == 0, "Vertex buffer object already existed");
-    glGenVertexArrays(1, &_vertexArray);
-    glGenBuffers(1, &_vertexBuffer);
+    glCreateBuffers(1, &_vertexBuffer);
+    glCreateVertexArrays(1, &_vertexArray);
+    glVertexArrayVertexBuffer(_vertexArray, 0, _vertexBuffer, 0, sizeof(TrailVBOLayout));
+
+    glEnableVertexArrayAttrib(_vertexArray, 0);
+    glVertexArrayAttribFormat(_vertexArray, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vertexArray, 0, 0);
+
+    glEnableVertexArrayAttrib(_vertexArray, 1);
+    glVertexArrayAttribLFormat(
+        _vertexArray,
+        1,
+        3,
+        GL_DOUBLE,
+        offsetof(TrailVBOLayout, time)
+    );
+    glVertexArrayAttribBinding(_vertexArray, 1, 0);
 
     // Program for line rendering
     _trailProgram = SpaceModule::ProgramObjectManager.request(
@@ -824,29 +837,12 @@ void RenderableOrbitalKepler::updateBuffers() {
         _orbitsPerThread.push_back(remainingOrbits);
     }
 
-    glBindVertexArray(_vertexArray);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBuffer);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vertexBuffer,
         _vertexBufferData.size() * sizeof(TrailVBOLayout),
         _vertexBufferData.data(),
         GL_STATIC_DRAW
     );
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(TrailVBOLayout), nullptr);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribLPointer(
-        1,
-        3,
-        GL_DOUBLE,
-        sizeof(TrailVBOLayout),
-        reinterpret_cast<GLvoid*>(offsetof(TrailVBOLayout, time))
-    );
-
-    glBindVertexArray(0);
 }
 
 void RenderableOrbitalKepler::threadedSegmentCalculations(int threadId,

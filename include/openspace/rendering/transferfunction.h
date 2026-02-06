@@ -49,7 +49,6 @@ public:
 
     void setPath(const std::filesystem::path& filepath);
     ghoul::opengl::Texture& texture();
-    void bind();
     void update();
     glm::vec4 sample(size_t offset);
     size_t width();

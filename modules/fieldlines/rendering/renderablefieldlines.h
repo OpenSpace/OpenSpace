@@ -80,8 +80,8 @@ private:
 
     std::vector<glm::vec3> _seedPoints;
 
-    GLuint _fieldlineVAO = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 
     std::vector<GLint> _lineStart;
     std::vector<GLsizei> _lineCount;

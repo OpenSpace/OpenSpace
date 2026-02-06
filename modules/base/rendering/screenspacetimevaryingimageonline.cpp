@@ -35,6 +35,7 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <fstream>
 #include <iterator>
@@ -240,9 +241,9 @@ void ScreenSpaceTimeVaryingImageOnline::loadImage(const std::string& imageUrl) {
     );
 }
 
-void ScreenSpaceTimeVaryingImageOnline::bindTexture() {
+void ScreenSpaceTimeVaryingImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture) [[likely]] {
-        _texture->bind();
+        unit.bind(*_texture);
     }
 }
 

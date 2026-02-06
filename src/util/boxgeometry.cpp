@@ -42,7 +42,7 @@ bool BoxGeometry::initialize() {
     const float y = _size.y * 0.5f;
     const float z = _size.z * 0.5f;
 
-    const std::array<GLfloat, 108> vertices = {
+    const std::array<GLfloat, 108> Vertices = {
         -x, -y,  z, // blue corner
          x,  y,  z,  // white corner
         -x,  y,  z, // cyan corner
@@ -86,23 +86,16 @@ bool BoxGeometry::initialize() {
          x, -y,  z // magenta
     };
 
-    if (_vaoId == 0) {
-        glGenVertexArrays(1, &_vaoId);
-    }
+    glCreateBuffers(1, &_vBufferId);
+    glNamedBufferStorage(_vBufferId, sizeof(Vertices), Vertices.data(), GL_NONE_BIT);
 
-    if (_vBufferId == 0) {
-        glGenBuffers(1, &_vBufferId);
-    }
+    glCreateVertexArrays(1, &_vaoId);
+    glVertexArrayVertexBuffer(_vaoId, 0, _vBufferId, 0, 3 * sizeof(float));
 
-    glBindVertexArray(_vaoId);
+    glEnableVertexArrayAttrib(_vaoId, 0);
+    glVertexArrayAttribFormat(_vaoId, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vaoId, 0, 0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 3, nullptr);
-
-    glBindVertexArray(0);
     return true;
 }
 

@@ -26,6 +26,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 #include <optional>
 
 namespace {
@@ -63,8 +64,8 @@ ScreenSpaceDebugPlane::ScreenSpaceDebugPlane(const ghoul::Dictionary& dictionary
     _objectSize = glm::ivec2(256);
 }
 
-void ScreenSpaceDebugPlane::bindTexture() {
-    glBindTexture(GL_TEXTURE_2D, _texture);
+void ScreenSpaceDebugPlane::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(_texture);
 }
 
 } // namespace openspace

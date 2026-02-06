@@ -41,6 +41,7 @@
 #include <ghoul/misc/exception.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <filesystem>
@@ -782,10 +783,10 @@ void RenderableFieldlinesSequence::initializeGL() {
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
     );
 
-    glGenVertexArrays(1, &_vertexArrayObject);
-    glGenBuffers(1, &_vertexPositionBuffer);
-    glGenBuffers(1, &_vertexColorBuffer);
-    glGenBuffers(1, &_vertexMaskingBuffer);
+    glCreateVertexArrays(1, &_vao);
+    glCreateBuffers(1, &_vboPosition);
+    glCreateBuffers(1, &_vboColor);
+    glCreateBuffers(1, &_vboMasking);
 
     // Needed for additive blending
     setRenderBin(Renderable::RenderBin::Overlay);
@@ -872,17 +873,17 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
 }
 
 void RenderableFieldlinesSequence::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vertexArrayObject);
-    _vertexArrayObject = 0;
+    glDeleteVertexArrays(1, &_vao);
+    _vao = 0;
 
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
+    glDeleteBuffers(1, &_vboPosition);
+    _vboPosition = 0;
 
-    glDeleteBuffers(1, &_vertexColorBuffer);
-    _vertexColorBuffer = 0;
+    glDeleteBuffers(1, &_vboColor);
+    _vboColor = 0;
 
-    glDeleteBuffers(1, &_vertexMaskingBuffer);
-    _vertexMaskingBuffer = 0;
+    glDeleteBuffers(1, &_vboMasking);
+    _vboMasking = 0;
 
     if (_shaderProgram) {
         global::renderEngine->removeRenderProgram(_shaderProgram.get());
@@ -1197,9 +1198,9 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     _shaderProgram->setUniform("usingMasking", _maskingEnabled);
 
     if (_colorMethod == static_cast<int>(ColorMethod::ByQuantity)) {
+        _transferFunction->update();
         ghoul::opengl::TextureUnit textureUnit;
-        textureUnit.activate();
-        _transferFunction->bind();
+        textureUnit.bind(_transferFunction->texture());
         _shaderProgram->setUniform("transferFunction", textureUnit);
         _shaderProgram->setUniform("selectedColorRange", _selectedColorRange);
     }
@@ -1233,7 +1234,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
 
-    glBindVertexArray(_vertexArrayObject);
+    glBindVertexArray(_vao);
 #ifndef __APPLE__
     glLineWidth(_lineWidth);
 #else
@@ -1277,42 +1278,42 @@ void unbindGL() {
 }
 
 void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
-    glBindVertexArray(_vertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+    glBindVertexArray(_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _vboPosition);
 
     const FieldlinesState& state = _files[_activeIndex].state;
     const std::vector<glm::vec3>& vertPos = state.vertexPositions();
 
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vboPosition,
         vertPos.size() * sizeof(glm::vec3),
         vertPos.data(),
         GL_STATIC_DRAW
     );
 
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vao, 0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
     unbindGL();
 }
 
 void RenderableFieldlinesSequence::updateVertexColorBuffer() {
-    glBindVertexArray(_vertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
+    glBindVertexArray(_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _vboColor);
 
     const FieldlinesState& state = _files[_activeIndex].state;
     bool success = false;
     const std::vector<float>& quantities = state.extraQuantity(_colorQuantity, success);
 
     if (success) {
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glNamedBufferData(
+            _vboColor,
             quantities.size() * sizeof(float),
             quantities.data(),
             GL_STATIC_DRAW
         );
 
-        glEnableVertexAttribArray(1);
+        glEnableVertexArrayAttrib(_vao, 1);
         glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         _shouldUpdateColorBuffer = false;
@@ -1321,22 +1322,22 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
 }
 
 void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
-    glBindVertexArray(_vertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexMaskingBuffer);
+    glBindVertexArray(_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, _vboMasking);
 
     const FieldlinesState& state = _files[_activeIndex].state;
     bool success = false;
     const std::vector<float>& quantities = state.extraQuantity(_maskingQuantity, success);
 
     if (success) {
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glNamedBufferData(
+            _vboMasking,
             quantities.size() * sizeof(float),
             quantities.data(),
             GL_STATIC_DRAW
         );
 
-        glEnableVertexAttribArray(2);
+        glEnableVertexArrayAttrib(_vao, 2);
         glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
         unbindGL();

@@ -47,7 +47,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
     void loadJsonData(const std::filesystem::path& path);
     void computeSequenceEndTime();
     void loadImage(const std::string& imageUrl);

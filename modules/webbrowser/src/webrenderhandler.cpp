@@ -27,6 +27,7 @@
 #include <modules/webbrowser/webbrowsermodule.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 
 namespace openspace {
@@ -34,12 +35,7 @@ namespace openspace {
 WebRenderHandler::WebRenderHandler()
     : _acceleratedRendering(WebBrowserModule::canUseAcceleratedRendering())
 {
-    if (_acceleratedRendering) {
-        glCreateTextures(GL_TEXTURE_2D, 1, &_texture);
-    }
-    else {
-        glGenTextures(1, &_texture);
-    }
+    glCreateTextures(GL_TEXTURE_2D, 1, &_texture);
 }
 
 void WebRenderHandler::reshape(int w, int h) {
@@ -199,18 +195,16 @@ void WebRenderHandler::updateTexture() {
             GL_UNSIGNED_BYTE,
             reinterpret_cast<char*>(_browserBuffer.data())
         );
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        glBindTexture(GL_TEXTURE_2D, 0);
+        glTextureParameteri(_texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTextureParameteri(_texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(_texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        glTextureParameteri(_texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     }
     else if (_textureIsDirty) {
-        glBindTexture(GL_TEXTURE_2D, _texture);
         glPixelStorei(GL_UNPACK_ROW_LENGTH, _browserBufferSize.x);
 
-        glTexSubImage2D(
-            GL_TEXTURE_2D,
+        glTextureSubImage2D(
+            _texture,
             0,
             _lowerDirtyRectBound.x,
             _browserBufferSize.y - _upperDirtyRectBound.y,
@@ -226,7 +220,6 @@ void WebRenderHandler::updateTexture() {
         );
 
         glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-        glBindTexture(GL_TEXTURE_2D, 0);
     }
 
     _upperDirtyRectBound = glm::ivec2(0, 0);
@@ -236,6 +229,9 @@ void WebRenderHandler::updateTexture() {
 }
 
 bool WebRenderHandler::hasContent(int x, int y) {
+    ZoneScoped;
+    TracyGpuZone("WebRenderHandler::hasContent");
+
     // We don't have any content if we are querying outside the window size
     if (x < 0 || x > _windowSize.x || y < 0 || y > _windowSize.y) {
         return false;
@@ -246,12 +242,12 @@ bool WebRenderHandler::hasContent(int x, int y) {
         // GPU. Use a PBO for better performance
         bool hasContent = false;
         GLuint pbo = 0;
-        glGenBuffers(1, &pbo);
+        glCreateBuffers(1, &pbo);
         glBindBuffer(GL_PIXEL_PACK_BUFFER, pbo);
 
         // Allocate memory for the PBO (width * height * 4 bytes for RGBA)
-        glBufferData(
-            GL_PIXEL_PACK_BUFFER,
+        glNamedBufferData(
+            pbo,
             _windowSize.x * _windowSize.y * 4,
             nullptr,
             GL_STREAM_READ
@@ -260,12 +256,17 @@ bool WebRenderHandler::hasContent(int x, int y) {
         glBindTexture(GL_TEXTURE_2D, _texture);
 
         // Read the texture data into the PBO
-        glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+        glGetTextureImage(
+            _texture,
+            0,
+            GL_RGBA,
+            GL_UNSIGNED_BYTE,
+            _windowSize.x * _windowSize.y * 4,
+            nullptr
+        );
 
         // Map the PBO to the CPU memory space
-        GLubyte* pixels = reinterpret_cast<GLubyte*>(
-            glMapBuffer(GL_PIXEL_PACK_BUFFER, GL_READ_ONLY)
-        );
+        GLubyte* pixels = reinterpret_cast<GLubyte*>(glMapNamedBuffer(pbo, GL_READ_ONLY));
 
         ghoul_assert(pixels, "Could not read pixels from the GPU for the cef gui.");
         if (pixels) {
@@ -278,10 +279,9 @@ bool WebRenderHandler::hasContent(int x, int y) {
             }
         }
         // Unmap the buffer
-        glUnmapBuffer(GL_PIXEL_PACK_BUFFER);
+        glUnmapNamedBuffer(pbo);
 
         // Unbind and delete the PBO
-        glBindBuffer(GL_PIXEL_PACK_BUFFER, 0);
         glDeleteBuffers(1, &pbo);
         return hasContent;
     }
@@ -299,8 +299,8 @@ bool WebRenderHandler::isTextureReady() const {
     return !_needsRepaint;
 }
 
-void WebRenderHandler::bindTexture() {
-    glBindTexture(GL_TEXTURE_2D, _texture);
+void WebRenderHandler::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(_texture);
 }
 
 } // namespace openspace

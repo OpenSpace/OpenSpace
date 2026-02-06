@@ -59,38 +59,27 @@ namespace {
 
     constexpr double PARSEC = 0.308567756E17;
 
-    struct ColorVBOLayout {
-        std::array<float, 3> position;
+    struct BaseVBOLayout {
+        float x;
+        float y;
+        float z;
         float value;
         float luminance;
         float absoluteMagnitude;
     };
 
     struct VelocityVBOLayout {
-        std::array<float, 3> position;
-        float value;
-        float luminance;
-        float absoluteMagnitude;
-
-        float vx; // v_x
-        float vy; // v_y
-        float vz; // v_z
+        float vx;
+        float vy;
+        float vz;
     };
 
     struct SpeedVBOLayout {
-        std::array<float, 3> position;
-        float value;
-        float luminance;
-        float absoluteMagnitude;
-
         float speed;
     };
 
-    struct OtherDataLayout {
-        std::array<float, 3> position;
+    struct OtherDataVBOLayout {
         float value;
-        float luminance;
-        float absoluteMagnitude;
     };
 
     constexpr openspace::properties::Property::PropertyInfo SpeckFileInfo = {
@@ -689,12 +678,48 @@ void RenderableStars::initializeGL() {
         absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
     );
 
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
+    glCreateBuffers(1, &_baseVbo);
+    glCreateBuffers(1, &_velocityVbo);
+    glCreateBuffers(1, &_speedVbo);
+    glCreateBuffers(1, &_otherDataVbo);
 
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _baseVbo, 0, sizeof(BaseVBOLayout));
+    glVertexArrayVertexBuffer(_vao, 1, _velocityVbo, 0, sizeof(VelocityVBOLayout));
+    glVertexArrayVertexBuffer(_vao, 2, _speedVbo, 0, sizeof(SpeedVBOLayout));
+    glVertexArrayVertexBuffer(_vao, 3, _otherDataVbo, 0, sizeof(OtherDataVBOLayout));
+
+    const GLint positionAttrib = _program->attributeLocation("in_position");
+    glEnableVertexArrayAttrib(_vao, positionAttrib);
+    glVertexArrayAttribFormat(_vao, positionAttrib, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, positionAttrib, 0);
+
+    const GLint bvLumAbsMagAttrib = _program->attributeLocation("in_bvLumAbsMag");
+    glEnableVertexArrayAttrib(_vao, bvLumAbsMagAttrib);
+    glVertexArrayAttribFormat(
+        _vao,
+        bvLumAbsMagAttrib,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        offsetof(BaseVBOLayout, value)
+    );
+    glVertexArrayAttribBinding(_vao, bvLumAbsMagAttrib, 0);
+
+    const GLint velocityAttrib = _program->attributeLocation("in_velocity");
+    glEnableVertexArrayAttrib(_vao, velocityAttrib);
+    glVertexArrayAttribFormat( _vao, velocityAttrib, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, velocityAttrib, 1);
+
+    const GLint speedAttrib = _program->attributeLocation("in_speed");
+    glEnableVertexArrayAttrib(_vao, speedAttrib);
+    glVertexArrayAttribFormat(_vao, speedAttrib, 1, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, speedAttrib, 2);
+
+    const GLint otherDataAttrib = _program->attributeLocation("in_otherData");
+    glEnableVertexArrayAttrib(_vao, otherDataAttrib);
+    glVertexArrayAttribFormat(_vao, otherDataAttrib, 1, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, otherDataAttrib, 3);
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
@@ -720,10 +745,10 @@ void RenderableStars::initializeGL() {
 
 void RenderableStars::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
-
-    glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
+    glDeleteBuffers(1, &_baseVbo);
+    glDeleteBuffers(1, &_velocityVbo);
+    glDeleteBuffers(1, &_speedVbo);
+    glDeleteBuffers(1, &_otherDataVbo);
 
     _colorTexture = nullptr;
 
@@ -736,6 +761,29 @@ void RenderableStars::deinitializeGL() {
 void RenderableStars::loadPSFTexture() {
     auto markPsfTextureAsDirty = [this]() { _pointSpreadFunctionTextureIsDirty = true; };
     auto loadTexture = [markPsfTextureAsDirty](TextureComponent& component) {
+        //component.texture = nullptr;
+        //const std::string path = component.texturePath;
+        //if (path.empty() || !std::filesystem::exists(path)) {
+        //    return;
+        //}
+
+        //std::unique_ptr<ghoul::opengl::Texture> t =
+        //    ghoul::io::TextureReader::ref().loadTexture(absPath(path), 2);
+        //t->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
+        //t->setBorderColor(glm::vec4(0.f));
+        //t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
+
+        //component.texture = std::make_unique<ghoul::opengl::NewTexture>(*t);
+
+        //t = nullptr;
+
+        //if (!component.texture) {
+        //    return;
+        //}
+
+        //LDEBUG(std::format("Loaded texture from '{}'", absPath(component.texturePath)));
+        //component.texture->makeResident();
+
         using Texture = ghoul::opengl::Texture;
 
         component.texture = nullptr;
@@ -829,9 +877,9 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.opacity, opacity());
     }
 
+    //glProgramUniformHandleui64ARB(*_program, _uniformCache.glareTexture, *_glare.texture);
     ghoul::opengl::TextureUnit glareUnit;
-    glareUnit.activate();
-    _glare.texture->bind();
+    glareUnit.bind(*_glare.texture);
     _program->setUniform(_uniformCache.glareTexture, glareUnit);
     _program->setUniform(_uniformCache.glareMultiplier, _glare.multiplier);
     _program->setUniform(_uniformCache.glareGamma, _glare.gamma);
@@ -839,8 +887,8 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit coreUnit;
     if (_core.texture) {
-        coreUnit.activate();
-        _core.texture->bind();
+        //glProgramUniformHandleui64ARB(*_program, _uniformCache.coreTexture, *_core.texture);
+        coreUnit.bind(*_core.texture);
         _program->setUniform(_uniformCache.coreTexture, coreUnit);
         _program->setUniform(_uniformCache.coreMultiplier, _core.multiplier);
         _program->setUniform(_uniformCache.coreGamma, _core.gamma);
@@ -850,19 +898,20 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit colorUnit;
     if (_colorTexture) {
-        colorUnit.activate();
-        _colorTexture->bind();
+        //glProgramUniformHandleui64ARB(_program, _uniformCache.colorTexture, *_colorTexture);
+        colorUnit.bind(*_colorTexture);
         _program->setUniform(_uniformCache.colorTexture, colorUnit);
     }
 
     ghoul::opengl::TextureUnit otherDataUnit;
     if (_colorOption == ColorOption::OtherData && _otherDataColorMapTexture) {
-        otherDataUnit.activate();
-        _otherDataColorMapTexture->bind();
+        // glProgramUniformHandleui64ARB(_program, _uniformCache.otherDataTexture, *_otherDataColorMapTexture);
+        otherDataUnit.bind(*_otherDataColorMapTexture);
         _program->setUniform(_uniformCache.otherDataTexture, otherDataUnit);
     }
     else {
         // We need to set the uniform to something, or the shader doesn't work
+        // glProgramUniformHandleui64ARB(_program, _uniformCache.otherDataTexture, *_colorTexture);
         _program->setUniform(_uniformCache.otherDataTexture, colorUnit);
     }
     // Same here, if we don't set this value, the rendering disappears even if we don't
@@ -896,134 +945,7 @@ void RenderableStars::update(const UpdateData&) {
         const int value = _colorOption;
         LDEBUG("Regenerating data");
 
-        std::vector<float> slice = createDataSlice(ColorOption(value));
-
-        glBindVertexArray(_vao);
-        glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            slice.size() * sizeof(GLfloat),
-            slice.data(),
-            GL_STATIC_DRAW
-        );
-
-        const GLint positionAttrib = _program->attributeLocation("in_position");
-        // in_bvLumAbsMag = bv color, luminosity, abs magnitude
-        const GLint bvLumAbsMagAttrib = _program->attributeLocation("in_bvLumAbsMag");
-
-        const size_t nStars = _dataset.entries.size();
-        const size_t nValues = slice.size() / nStars;
-
-        const GLsizei stride = static_cast<GLsizei>(sizeof(GLfloat) * nValues);
-
-        glEnableVertexAttribArray(positionAttrib);
-        glVertexAttribPointer(
-            positionAttrib,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            stride,
-            nullptr
-        );
-
-        glEnableVertexAttribArray(bvLumAbsMagAttrib);
-        const int colorOption = _colorOption;
-        switch (colorOption) {
-            case ColorOption::Color:
-            case ColorOption::FixedColor:
-                if (_useProperMotion) {
-                    glVertexAttribPointer(
-                        bvLumAbsMagAttrib,
-                        3,
-                        GL_FLOAT,
-                        GL_FALSE,
-                        stride,
-                        reinterpret_cast<void*>(offsetof(VelocityVBOLayout, value))
-                    );
-
-                    const GLint velocity = _program->attributeLocation("in_velocity");
-                    glEnableVertexAttribArray(velocity);
-                    glVertexAttribPointer(
-                        velocity,
-                        3,
-                        GL_FLOAT,
-                        GL_TRUE,
-                        stride,
-                        reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx))
-                    );
-                }
-                else {
-                    glVertexAttribPointer(
-                        bvLumAbsMagAttrib,
-                        3,
-                        GL_FLOAT,
-                        GL_FALSE,
-                        stride,
-                        reinterpret_cast<void*>(offsetof(ColorVBOLayout, value))
-                    );
-                }
-                break;
-            case ColorOption::Velocity:
-            {
-                glVertexAttribPointer(
-                    bvLumAbsMagAttrib,
-                    3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, value))
-                );
-
-                const GLint velocityAttrib = _program->attributeLocation("in_velocity");
-                glEnableVertexAttribArray(velocityAttrib);
-                glVertexAttribPointer(
-                    velocityAttrib,
-                    3,
-                    GL_FLOAT,
-                    GL_TRUE,
-                    stride,
-                    reinterpret_cast<void*>(offsetof(VelocityVBOLayout, vx))
-                );
-
-                break;
-            }
-            case ColorOption::Speed:
-            {
-                glVertexAttribPointer(
-                    bvLumAbsMagAttrib,
-                    3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, value))
-                );
-
-                const GLint speedAttrib = _program->attributeLocation("in_speed");
-                glEnableVertexAttribArray(speedAttrib);
-                glVertexAttribPointer(
-                    speedAttrib,
-                    1,
-                    GL_FLOAT,
-                    GL_TRUE,
-                    stride,
-                    reinterpret_cast<void*>(offsetof(SpeedVBOLayout, speed))
-                );
-                break;
-            }
-            case ColorOption::OtherData:
-                glVertexAttribPointer(
-                    bvLumAbsMagAttrib,
-                    3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    stride,
-                    reinterpret_cast<void*>(offsetof(OtherDataLayout, value))
-                );
-                break;
-        }
-
-        glBindVertexArray(0);
-
+        updateData(ColorOption(value));
         _dataIsDirty = false;
     }
 
@@ -1033,6 +955,28 @@ void RenderableStars::update(const UpdateData&) {
     }
 
     if (_colorTextureIsDirty) [[unlikely]] {
+        //LDEBUG("Reloading Color Texture");
+        //_colorTexture = nullptr;
+        //if (!_colorTexturePath.value().empty()) {
+        //    std::unique_ptr<ghoul::opengl::Texture> t =
+        //        ghoul::io::TextureReader::ref().loadTexture(
+        //            absPath(_colorTexturePath),
+        //            1
+        //        );
+
+        //    _colorTexture = std::make_unique<ghoul::opengl::NewTexture>(*t);
+        //    t = nullptr;
+
+        //    LDEBUG(std::format("Loaded texture '{}'", _colorTexturePath.value()));
+        //    _colorTexture->makeResident();
+
+        //    _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
+        //        _colorTexturePath.value()
+        //    );
+        //    _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
+        //}
+        //_colorTextureIsDirty = false;
+
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
@@ -1069,7 +1013,6 @@ void RenderableStars::update(const UpdateData&) {
             }
         }
         _otherDataColorMapIsDirty = false;
-
     }
 
     if (_program->isDirty()) [[unlikely]] {
@@ -1102,7 +1045,7 @@ void RenderableStars::loadData() {
     }
 }
 
-std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
+void RenderableStars::updateData(ColorOption option) {
     const int bvIdx = std::max(_dataset.index(_dataMapping.bvColor), 0);
     const int lumIdx = std::max(_dataset.index(_dataMapping.luminance), 0);
     const int absMagIdx = std::max(_dataset.index(_dataMapping.absoluteMagnitude), 0);
@@ -1118,122 +1061,113 @@ std::vector<float> RenderableStars::createDataSlice(ColorOption option) {
 
     double maxRadius = 0.0;
 
-    std::vector<float> result;
-    // 6 for the default Color option of 3 positions + bv + lum + abs
-    result.reserve(_dataset.entries.size() * 6);
+    std::vector<BaseVBOLayout> baseResult;
+    baseResult.reserve(_dataset.entries.size());
+
+    std::vector<VelocityVBOLayout> velocityResult;
+    const bool needsVelocity = (option == ColorOption::Velocity || _useProperMotion);
+    if (needsVelocity) {
+        velocityResult.reserve(_dataset.entries.size());
+    }
+
+    std::vector<SpeedVBOLayout> speedResult;
+    const bool needsSpeed = (option == ColorOption::Speed);
+    if (needsSpeed) {
+        speedResult.reserve(_dataset.entries.size());
+    }
+
+    std::vector<OtherDataVBOLayout> otherDataResult;
+    const bool needsOtherData = (option == ColorOption::OtherData);
+    if (needsOtherData) {
+        otherDataResult.reserve(_dataset.entries.size());
+    }
+
     for (const dataloader::Dataset::Entry& e : _dataset.entries) {
         glm::dvec3 position = glm::dvec3(e.position) * distanceconstants::Parsec;
         glm::vec3 pos = position;
         maxRadius = std::max(maxRadius, glm::length(position));
 
-        switch (option) {
-            case ColorOption::Color:
-            case ColorOption::FixedColor:
-            {
-                if (_useProperMotion) {
-                    union {
-                        VelocityVBOLayout value;
-                        std::array<float, sizeof(VelocityVBOLayout) / sizeof(float)> data;
-                    } layout;
+        const float bv = e.data[bvIdx];
+        const float lum = e.data[lumIdx];
+        const float absMag = e.data[absMagIdx];
+        baseResult.emplace_back(pos.x, pos.y, pos.z, bv, lum, absMag);
 
-                    layout.value.position = { pos.x, pos.y, pos.z };
-                    layout.value.value = e.data[bvIdx];
-                    layout.value.luminance = e.data[lumIdx];
-                    layout.value.absoluteMagnitude = e.data[absMagIdx];
+        if (needsVelocity) {
+            velocityResult.emplace_back(e.data[vxIdx], e.data[vyIdx], e.data[vzIdx]);
+        }
 
-                    layout.value.vx = e.data[vxIdx];
-                    layout.value.vy = e.data[vyIdx];
-                    layout.value.vz = e.data[vzIdx];
+        if (needsSpeed) {
+            speedResult.emplace_back(e.data[speedIdx]);
+        }
 
-                    result.insert(result.end(), layout.data.begin(), layout.data.end());
-                    break;
-                }
-                else {
-                    union {
-                        ColorVBOLayout value;
-                        std::array<float, sizeof(ColorVBOLayout) / sizeof(float)> data;
-                    } layout;
+        if (needsOtherData) {
+            const int index = _otherDataOption.value();
+            float value = e.data[index];
 
-                    layout.value.position = { pos.x, pos.y, pos.z };
-                    layout.value.value = e.data[bvIdx];
-                    layout.value.luminance = e.data[lumIdx];
-                    layout.value.absoluteMagnitude = e.data[absMagIdx];
-
-                    result.insert(result.end(), layout.data.begin(), layout.data.end());
-                    break;
-                }
+            if (_staticFilterValue.has_value() && value == _staticFilterValue) {
+                value = _staticFilterReplacementValue;
             }
-            case ColorOption::Velocity:
-            {
-                union {
-                    VelocityVBOLayout value;
-                    std::array<float, sizeof(VelocityVBOLayout) / sizeof(float)> data;
-                } layout;
+            otherDataResult.emplace_back(value);
 
-                layout.value.position = { pos.x, pos.y, pos.z };
-                layout.value.value = e.data[bvIdx];
-                layout.value.luminance = e.data[lumIdx];
-                layout.value.absoluteMagnitude = e.data[absMagIdx];
-
-                layout.value.vx = e.data[vxIdx];
-                layout.value.vy = e.data[vyIdx];
-                layout.value.vz = e.data[vzIdx];
-
-                result.insert(result.end(), layout.data.begin(), layout.data.end());
-                break;
-            }
-            case ColorOption::Speed:
-            {
-                union {
-                    SpeedVBOLayout value;
-                    std::array<float, sizeof(SpeedVBOLayout) / sizeof(float)> data;
-                } layout;
-
-                layout.value.position = { pos.x, pos.y, pos.z };
-                layout.value.value = e.data[bvIdx];
-                layout.value.luminance = e.data[lumIdx];
-                layout.value.absoluteMagnitude = e.data[absMagIdx];
-                layout.value.speed = e.data[speedIdx];
-
-                result.insert(result.end(), layout.data.begin(), layout.data.end());
-                break;
-            }
-            case ColorOption::OtherData:
-            {
-                union {
-                    OtherDataLayout value;
-                    std::array<float, sizeof(OtherDataLayout)> data;
-                } layout = {};
-
-                layout.value.position = { pos.x, pos.y, pos.z };
-
-                const int index = _otherDataOption.value();
-                // plus 3 because of the position
-                layout.value.value = e.data[index];
-
-                if (_staticFilterValue.has_value() && e.data[index] == _staticFilterValue)
-                {
-                    layout.value.value = _staticFilterReplacementValue;
-                }
-
-                glm::vec2 range = _otherDataRange;
-                range.x = std::min(range.x, layout.value.value);
-                range.y = std::max(range.y, layout.value.value);
-                _otherDataRange = range;
-                _otherDataRange.setMinValue(glm::vec2(range.x));
-                _otherDataRange.setMaxValue(glm::vec2(range.y));
-
-                layout.value.luminance = e.data[lumIdx];
-                layout.value.absoluteMagnitude = e.data[absMagIdx];
-
-                result.insert(result.end(), layout.data.begin(), layout.data.end());
-                break;
-            }
+            glm::vec2 range = _otherDataRange;
+            range.x = std::min(range.x, value);
+            range.y = std::max(range.y, value);
+            _otherDataRange = range;
+            _otherDataRange.setMinValue(glm::vec2(range.x));
+            _otherDataRange.setMaxValue(glm::vec2(range.y));
         }
     }
 
     setBoundingSphere(maxRadius);
-    return result;
+
+    glNamedBufferData(
+        _baseVbo,
+        baseResult.size() * sizeof(BaseVBOLayout),
+        baseResult.data(),
+        GL_STATIC_DRAW
+    );
+
+    const GLint velocityAttrib = _program->attributeLocation("in_velocity");
+    if (needsVelocity) {
+        glEnableVertexArrayAttrib(_vao, velocityAttrib);
+        glNamedBufferData(
+            _velocityVbo,
+            velocityResult.size() * sizeof(VelocityVBOLayout),
+            velocityResult.data(),
+            GL_STATIC_DRAW
+        );
+    }
+    else {
+        glDisableVertexArrayAttrib(_vao, velocityAttrib);
+    }
+
+    const GLint speedAttrib = _program->attributeLocation("in_speed");
+    if (needsSpeed) {
+        glEnableVertexArrayAttrib(_vao, speedAttrib);
+        glNamedBufferData(
+            _speedVbo,
+            speedResult.size() * sizeof(SpeedVBOLayout),
+            speedResult.data(),
+            GL_STATIC_DRAW
+        );
+    }
+    else {
+        glDisableVertexArrayAttrib(_vao, speedAttrib);
+    }
+
+    const GLint otherDataAttrib = _program->attributeLocation("in_otherData");
+    if (needsOtherData) {
+        glEnableVertexArrayAttrib(_vao, otherDataAttrib);
+        glNamedBufferData(
+            _otherDataVbo,
+            otherDataResult.size() * sizeof(OtherDataVBOLayout),
+            otherDataResult.data(),
+            GL_STATIC_DRAW
+        );
+    }
+    else {
+        glDisableVertexArrayAttrib(_vao, otherDataAttrib);
+    }
 }
 
 } // namespace openspace

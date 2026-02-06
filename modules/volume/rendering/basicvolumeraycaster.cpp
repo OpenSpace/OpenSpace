@@ -120,14 +120,12 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
 
     _transferFunction->update();
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _tfUnit->activate();
-    _transferFunction->texture().bind();
-    program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
+    _tfUnit->bind(_transferFunction->texture());
+    program.setUniform("transferFunction_" + id, *_tfUnit);
 
     _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _textureUnit->activate();
-    _volumeTexture->bind();
-    program.setUniform("volumeTexture_" + id, _textureUnit->unitNumber());
+    _textureUnit->bind(*_volumeTexture);
+    program.setUniform("volumeTexture_" + id, *_textureUnit);
 
     program.setUniform("gridType_" + id, static_cast<int>(_gridType));
 

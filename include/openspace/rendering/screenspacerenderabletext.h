@@ -54,7 +54,7 @@ protected:
 
 private:
     void updateFramebuffer();
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
     properties::StringProperty _fontName;
     properties::FloatProperty _fontSize;

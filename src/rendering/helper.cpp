@@ -219,12 +219,7 @@ void initialize() {
     //
     // Square vertex objects
     //
-    glGenVertexArrays(1, &vertexObjects.square.vao);
-    glGenBuffers(1, &vertexObjects.square.vbo);
-
-    glBindVertexArray(vertexObjects.square.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.square.vbo);
-
+    glCreateBuffers(1, &vertexObjects.square.vbo);
     constexpr std::array<VertexXYUVRGBA, 6> Vtx = {
         // X     Y    U    V    R    G    B    A
         VertexXYUVRGBA{ { -1.f, -1.f }, { 0.f, 0.f }, { 1.f, 1.f, 1.f, 1.f } },
@@ -235,29 +230,47 @@ void initialize() {
         VertexXYUVRGBA{ {  1.f,  1.f }, { 1.f, 1.f }, { 1.f, 1.f, 1.f, 1.f } },
         VertexXYUVRGBA{ {  1.f, -1.f }, { 1.f, 0.f }, { 1.f, 1.f, 1.f, 1.f } }
     };
-    glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(VertexXYUVRGBA), Vtx.data(), GL_STATIC_DRAW);
+    glNamedBufferStorage(
+        vertexObjects.square.vbo,
+        6 * sizeof(VertexXYUVRGBA),
+        Vtx.data(),
+        GL_NONE_BIT
+    );
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA), nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
+    glCreateVertexArrays(1, &vertexObjects.square.vao);
+    glVertexArrayVertexBuffer(
+        vertexObjects.square.vao,
+        0,
+        vertexObjects.square.vbo,
+        0,
+        sizeof(VertexXYUVRGBA)
+    );
+
+    glEnableVertexArrayAttrib(vertexObjects.square.vao, 0);
+    glVertexArrayAttribFormat(vertexObjects.square.vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vertexObjects.square.vao, 0, 0);
+
+    glEnableVertexArrayAttrib(vertexObjects.square.vao, 1);
+    glVertexArrayAttribFormat(
+        vertexObjects.square.vao,
         1,
         2,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(VertexXYUVRGBA),
-        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, uv))
+        offsetof(VertexXYUVRGBA, uv)
     );
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(
+    glVertexArrayAttribBinding(vertexObjects.square.vao, 1, 0);
+
+    glEnableVertexArrayAttrib(vertexObjects.square.vao, 2);
+    glVertexArrayAttribFormat(
+        vertexObjects.square.vao,
         2,
         4,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(VertexXYUVRGBA),
-        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, rgba))
+        offsetof(VertexXYUVRGBA, rgba)
     );
-    glBindVertexArray(0);
+    glVertexArrayAttribBinding(vertexObjects.square.vao, 2, 0);
 
 
     //
@@ -266,48 +279,57 @@ void initialize() {
     VertexIndexListCombo<Vertex> sphereData = createSphere(
         64, glm::vec3(1.f, 1.f, 1.f), glm::vec4(1.f, 1.f, 1.f, 1.f)
     );
-
-    glGenVertexArrays(1, &vertexObjects.sphere.vao);
-    glGenBuffers(1, &vertexObjects.sphere.vbo);
-    glGenBuffers(1, &vertexObjects.sphere.ibo);
-
-    glBindVertexArray(vertexObjects.sphere.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.sphere.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glCreateBuffers(1, &vertexObjects.sphere.vbo);
+    glNamedBufferStorage(
+        vertexObjects.sphere.vbo,
         sphereData.vertices.size() * sizeof(Vertex),
         sphereData.vertices.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexObjects.sphere.ibo);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
+    glCreateBuffers(1, &vertexObjects.sphere.ibo);
+    glNamedBufferStorage(
+        vertexObjects.sphere.ibo,
         sphereData.indices.size() * sizeof(GLushort),
         sphereData.indices.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
+
+    glCreateVertexArrays(1, &vertexObjects.sphere.vao);
+    glVertexArrayVertexBuffer(
+        vertexObjects.sphere.vao,
+        0,
+        vertexObjects.sphere.vbo,
+        0,
+        sizeof(Vertex)
+    );
+    glVertexArrayElementBuffer(vertexObjects.sphere.vao, vertexObjects.sphere.ibo);
+
+    glEnableVertexArrayAttrib(vertexObjects.sphere.vao, 0);
+    glVertexArrayAttribFormat(vertexObjects.sphere.vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vertexObjects.sphere.vao, 0, 0);
+
+    glEnableVertexArrayAttrib(vertexObjects.sphere.vao, 1);
+    glVertexArrayAttribFormat(
+        vertexObjects.sphere.vao,
         1,
         2,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(Vertex),
-        reinterpret_cast<GLvoid*>(offsetof(Vertex, uv))
+        offsetof(Vertex, uv)
     );
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(
+    glVertexArrayAttribBinding(vertexObjects.sphere.vao, 1, 0);
+
+    glEnableVertexArrayAttrib(vertexObjects.sphere.vao, 2);
+    glVertexArrayAttribFormat(
+        vertexObjects.sphere.vao,
         2,
         4,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(Vertex),
-        reinterpret_cast<GLvoid*>(offsetof(Vertex, rgba))
+        offsetof(Vertex, rgba)
     );
-    glBindVertexArray(0);
+    glVertexArrayAttribBinding(vertexObjects.sphere.vao, 2, 0);
+
     vertexObjects.sphere.nElements = static_cast<int>(sphereData.indices.size());
 
 
@@ -315,39 +337,45 @@ void initialize() {
     // Cylinder vertex array object
     //
     VertexIndexListCombo<VertexXYZNormal> cylinderData = createCylinder(64, 1.f, 1.f);
-
-    glGenVertexArrays(1, &vertexObjects.cylinder.vao);
-    glGenBuffers(1, &vertexObjects.cylinder.vbo);
-    glGenBuffers(1, &vertexObjects.cylinder.ibo);
-
-    glBindVertexArray(vertexObjects.cylinder.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.cylinder.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glCreateBuffers(1, &vertexObjects.cylinder.vbo);
+    glNamedBufferStorage(
+        vertexObjects.cylinder.vbo,
         cylinderData.vertices.size() * sizeof(VertexXYZNormal),
         cylinderData.vertices.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexObjects.cylinder.ibo);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
+    glCreateBuffers(1, &vertexObjects.cylinder.ibo);
+    glNamedBufferStorage(
+        vertexObjects.cylinder.ibo,
         cylinderData.indices.size() * sizeof(GLushort),
         cylinderData.indices.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexXYZNormal), nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
+
+    glCreateVertexArrays(1, &vertexObjects.cylinder.vao);
+    glVertexArrayVertexBuffer(
+        vertexObjects.cylinder.vao,
+        0,
+        vertexObjects.cylinder.vbo,
+        0,
+        sizeof(VertexXYZNormal)
+    );
+    glVertexArrayElementBuffer(vertexObjects.cylinder.vao, vertexObjects.cylinder.ibo);
+
+    glEnableVertexArrayAttrib(vertexObjects.cylinder.vao, 0);
+    glVertexArrayAttribFormat(vertexObjects.cylinder.vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vertexObjects.cylinder.vao, 0, 0);
+
+    glEnableVertexArrayAttrib(vertexObjects.cylinder.vao, 1);
+    glVertexArrayAttribFormat(
+        vertexObjects.cylinder.vao,
         1,
         3,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(VertexXYZNormal),
-        reinterpret_cast<GLvoid*>(offsetof(VertexXYZNormal, normal))
+        offsetof(VertexXYZNormal, normal)
     );
-    glBindVertexArray(0);
+    glVertexArrayAttribBinding(vertexObjects.cylinder.vao, 1, 0);
     vertexObjects.cylinder.nElements = static_cast<int>(cylinderData.indices.size());
 
 
@@ -355,82 +383,91 @@ void initialize() {
     // Cone vertex array object
     //
     VertexIndexListCombo<VertexXYZNormal> coneData = createCone(64, 1.f, 1.f);
-
-    glGenVertexArrays(1, &vertexObjects.cone.vao);
-    glGenBuffers(1, &vertexObjects.cone.vbo);
-    glGenBuffers(1, &vertexObjects.cone.ibo);
-
-    glBindVertexArray(vertexObjects.cone.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.cone.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glCreateBuffers(1, &vertexObjects.cone.vbo);
+    glNamedBufferStorage(
+        vertexObjects.cone.vbo,
         coneData.vertices.size() * sizeof(VertexXYZNormal),
         coneData.vertices.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexObjects.cone.ibo);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
+    glCreateBuffers(1, &vertexObjects.cone.ibo);
+    glNamedBufferStorage(
+        vertexObjects.cone.ibo,
         coneData.indices.size() * sizeof(GLushort),
         coneData.indices.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexXYZNormal), nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
+
+    glCreateVertexArrays(1, &vertexObjects.cone.vao);
+
+    glEnableVertexArrayAttrib(vertexObjects.cone.vao, 0);
+    glVertexArrayAttribFormat(vertexObjects.cone.vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vertexObjects.cone.vao, 0, 0);
+
+    glEnableVertexArrayAttrib(vertexObjects.cone.vao, 1);
+    glVertexArrayAttribFormat(
+        vertexObjects.cone.vao,
         1,
         3,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(VertexXYZNormal),
-        reinterpret_cast<GLvoid*>(offsetof(VertexXYZNormal, normal))
+        offsetof(VertexXYZNormal, normal)
     );
-    glBindVertexArray(0);
+    glVertexArrayAttribBinding(vertexObjects.cone.vao, 1, 0);
     vertexObjects.cone.nElements = static_cast<int>(coneData.indices.size());
 
 
     //
     // Line vertex array object
     //
-    glGenVertexArrays(1, &vertexObjects.line.vao);
-    glGenBuffers(1, &vertexObjects.line.vbo);
-
-    glBindVertexArray(vertexObjects.line.vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.line.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glCreateBuffers(1, &vertexObjects.line.vbo);
+    glNamedBufferStorage(
+        vertexObjects.line.vbo,
         2 * sizeof(VertexXYUVRGBA),
         nullptr,
-        GL_STATIC_DRAW
+        GL_DYNAMIC_STORAGE_BIT
     );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexXYUVRGBA), nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1,
+
+    glCreateVertexArrays(1, &vertexObjects.line.vao);
+    glVertexArrayVertexBuffer(
+        vertexObjects.line.vao,
+        0,
+        vertexObjects.line.vbo,
+        0,
+        sizeof(VertexXYUVRGBA)
+    );
+
+    glEnableVertexArrayAttrib(vertexObjects.line.vao, 0);
+    glVertexArrayAttribFormat(vertexObjects.line.vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vertexObjects.line.vao, 0, 0);
+
+    glEnableVertexArrayAttrib(vertexObjects.line.vao, 1);
+    glVertexArrayAttribFormat(
+        vertexObjects.line.vao,
+        1,
         2,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(VertexXYUVRGBA),
-        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, uv))
+        offsetof(VertexXYUVRGBA, uv)
     );
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2,
+    glVertexArrayAttribBinding(vertexObjects.line.vao, 1, 0);
+
+    glEnableVertexArrayAttrib(vertexObjects.line.vao, 2);
+    glVertexArrayAttribFormat(
+        vertexObjects.line.vao,
+        2,
         4,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(VertexXYUVRGBA),
-        reinterpret_cast<GLvoid*>(offsetof(VertexXYUVRGBA, rgba))
+        offsetof(VertexXYUVRGBA, rgba)
     );
-
-    glBindVertexArray(0);
+    glVertexArrayAttribBinding(vertexObjects.line.vao, 2, 0);
 
 
     //
     // Empty vertex array objects
     //
-    glGenVertexArrays(1, &vertexObjects.empty.vao);
+    glCreateVertexArrays(1, &vertexObjects.empty.vao);
 
     isInitialized = true;
 }
@@ -548,8 +585,7 @@ void renderBox(const glm::vec2& position, const glm::vec2& size, const glm::vec4
     shdr.program->setUniform(shdr.cache.hasTexture, 1);
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    texture.bind();
+    unit.bind(texture);
     shdr.program->setUniform(shdr.cache.tex, unit);
     renderBox(
         *shdr.program,
@@ -572,7 +608,6 @@ void renderLine(const glm::vec2& startPosition, const glm::vec2& endPosition,
     shdr.program->setUniform(shdr.cache.proj, ortho(glm::vec2(0.f), glm::vec2(1.f)));
     shdr.program->setUniform(shdr.cache.hasTexture, 0);
 
-    glBindVertexArray(vertexObjects.line.vao);
 
     // Move the start and end position from a [0,res] range to a [-1, 1] range
     const glm::vec2 start = (startPosition / size) * 2.f - glm::vec2(1.f);
@@ -589,14 +624,14 @@ void renderLine(const glm::vec2& startPosition, const glm::vec2& endPosition,
             { endColor.r, endColor.g, endColor.b, endColor.a }
         }
     };
-    glBindBuffer(GL_ARRAY_BUFFER, vertexObjects.line.vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferSubData(
+        vertexObjects.line.vbo,
+        0,
         2 * sizeof(VertexXYUVRGBA),
-        vertexData.data(),
-        GL_STATIC_DRAW
+        vertexData.data()
     );
 
+    glBindVertexArray(vertexObjects.line.vao);
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(6.f);
     glDrawArrays(GL_LINES, 0, 2);

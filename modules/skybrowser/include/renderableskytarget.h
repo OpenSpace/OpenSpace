@@ -40,7 +40,6 @@ public:
 
     void initializeGL() override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void bindTexture() override;
 
     glm::ivec3 borderColor() const;
 

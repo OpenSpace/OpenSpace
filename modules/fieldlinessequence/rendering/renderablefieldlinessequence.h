@@ -161,15 +161,15 @@ private:
     std::unique_ptr<TransferFunction> _transferFunction;
 
     // OpenGL Vertex Array Object
-    GLuint _vertexArrayObject = 0;
+    GLuint _vao = 0;
     // OpenGL Vertex Buffer Object containing the extraQuantity values used for coloring
     // the lines
-    GLuint _vertexColorBuffer = 0;
+    GLuint _vboColor = 0;
     // OpenGL Vertex Buffer Object containing the extraQuantity values used for masking
     // out segments of the lines
-    GLuint _vertexMaskingBuffer = 0;
+    GLuint _vboMasking = 0;
     // OpenGL Vertex Buffer Object containing the vertex positions
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vboPosition = 0;
 
     // Group to hold the color properties
     properties::PropertyOwner _colorGroup;

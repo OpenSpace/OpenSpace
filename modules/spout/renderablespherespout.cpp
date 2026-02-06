@@ -30,6 +30,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace {
     // This `Renderable` type can be used to render a sphere with a texture that is
@@ -85,22 +86,9 @@ void RenderableSphereSpout::update(const UpdateData& data) {
     _spoutReceiver.updateReceiver();
 }
 
-void RenderableSphereSpout::bindTexture() {
+void RenderableSphereSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_spoutReceiver.isReceiving()) {
-        _spoutReceiver.saveGLTextureState();
-        glBindTexture(GL_TEXTURE_2D, _spoutReceiver.spoutTexture());
-    }
-    else {
-        RenderableSphere::unbindTexture();
-    }
-}
-
-void RenderableSphereSpout::unbindTexture() {
-    if (_spoutReceiver.isReceiving()) {
-        _spoutReceiver.restoreGLTextureState();
-    }
-    else {
-        RenderableSphere::unbindTexture();
+        unit.bind(_spoutReceiver.spoutTexture());
     }
 }
 

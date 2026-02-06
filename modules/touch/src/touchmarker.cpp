@@ -87,8 +87,13 @@ TouchMarker::TouchMarker()
 TouchMarker::~TouchMarker() {}
 
 void TouchMarker::initialize() {
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 2 * sizeof(float));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     _shader = global::renderEngine->buildRenderProgram(
         "MarkerProgram",
@@ -100,11 +105,11 @@ void TouchMarker::initialize() {
 }
 
 void TouchMarker::deinitialize() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
+    glDeleteVertexArrays(1, &_vao);
+    _vao = 0;
 
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
+    glDeleteBuffers(1, &_vbo);
+    _vbo = 0;
 
     if (_shader) {
         global::renderEngine->removeRenderProgram(_shader.get());
@@ -126,7 +131,7 @@ void TouchMarker::render(const std::vector<openspace::TouchInputHolder>& list) {
         glBlendEquation(GL_FUNC_ADD);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
-        glBindVertexArray(_quad);
+        glBindVertexArray(_vao);
         glDrawArrays(GL_POINTS, 0, static_cast<int>(_vertexData.size() / 2));
 
         _shader->deactivate();
@@ -143,16 +148,12 @@ void TouchMarker::createVertexList(const std::vector<openspace::TouchInputHolder
         i += 2;
     }
 
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vbo,
         _vertexData.size() * sizeof(GLfloat),
         _vertexData.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
 }
 
 } // openspace namespace

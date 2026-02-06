@@ -62,7 +62,7 @@ protected:
     properties::Vec2Property _size;
 
 private:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
     static int id();
 

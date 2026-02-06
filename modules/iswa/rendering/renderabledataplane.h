@@ -54,8 +54,8 @@ private:
     void setUniforms() override;
     std::vector<float*> textureData() override;
 
-    GLuint _quad;
-    GLuint _vertexPositionBuffer;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 } // namespace openspace

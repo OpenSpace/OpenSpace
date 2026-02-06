@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 #include <cstdlib>
 #include <limits>
 
@@ -113,8 +114,8 @@ void RenderableVideoPlane::update(const UpdateData& data) {
     RenderablePlane::update(data);
 }
 
-void RenderableVideoPlane::bindTexture() {
-    _videoPlayer.frameTexture()->bind();
+void RenderableVideoPlane::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_videoPlayer.frameTexture());
 }
 
 } // namespace openspace

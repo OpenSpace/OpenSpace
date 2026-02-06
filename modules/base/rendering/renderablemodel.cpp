@@ -703,6 +703,7 @@ void RenderableModel::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
 
     // Screen quad VAO
+    glCreateBuffers(1, &_quadVbo);
     constexpr std::array<GLfloat, 24> QuadVtx = {
         // x     y     s     t
         -1.f, -1.f,  0.f,  0.f,
@@ -712,66 +713,52 @@ void RenderableModel::initializeGL() {
          1.f, -1.f,  1.f,  0.f,
          1.f,  1.f,  1.f,  1.f
     };
+    glNamedBufferStorage(_quadVbo, sizeof(QuadVtx), QuadVtx.data(), GL_NONE_BIT);
 
-    glGenVertexArrays(1, &_quadVao);
-    glBindVertexArray(_quadVao);
+    glCreateVertexArrays(1, &_quadVao);
+    glVertexArrayVertexBuffer(_quadVao, 0, _quadVbo, 0, 4 * sizeof(GLfloat));
 
-    glGenBuffers(1, &_quadVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _quadVbo);
+    glEnableVertexArrayAttrib(_quadVao, 0);
+    glVertexArrayAttribFormat(_quadVao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_quadVao, 0, 0);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(QuadVtx), QuadVtx.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        4 * sizeof(GLfloat),
-        reinterpret_cast<void*>(2 * sizeof(GLfloat))
-    );
+    glEnableVertexArrayAttrib(_quadVao, 1);
+    glVertexArrayAttribFormat(_quadVao, 1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat));
+    glVertexArrayAttribBinding(_quadVao, 1, 0);
 
     // Generate textures and the frame buffer
-    glGenFramebuffers(1, &_framebuffer);
+    glCreateFramebuffers(1, &_framebuffer);
+    glObjectLabel(GL_FRAMEBUFFER, _framebuffer, -1, "RenderableModel Framebuffer");
 
-    // Bind textures to the framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _framebuffer,
         GL_COLOR_ATTACHMENT0,
         global::renderEngine->renderer().additionalColorTexture1(),
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _framebuffer,
         GL_COLOR_ATTACHMENT1,
         global::renderEngine->renderer().additionalColorTexture2(),
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _framebuffer,
         GL_COLOR_ATTACHMENT2,
         global::renderEngine->renderer().additionalColorTexture3(),
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _framebuffer,
         GL_DEPTH_ATTACHMENT,
         global::renderEngine->renderer().additionalDepthTexture(),
         0
     );
 
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_FRAMEBUFFER, _framebuffer, -1, "RenderableModel Framebuffer");
-    }
-
-    // Check status
-    const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    const GLenum status = glCheckNamedFramebufferStatus(_framebuffer, GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Framebuffer is not complete");
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Initialize geometry
     _geometry->initialize();
@@ -985,8 +972,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.model, modelTransform);
         _program->setUniform(_uniformCache.light_vp, sm.viewProjectionMatrix);
 
-        shadowUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, sm.depthMap.texture);
+        shadowUnit.bind(sm.depthMap.texture);
         _program->setUniform(_uniformCache.shadow_depth_map, shadowUnit);
     }
 
@@ -1021,18 +1007,17 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     else {
         // Prepare framebuffer
         const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
-        glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
 
         // Re-bind first texture to use the currently not used Ping-Pong texture in the
         // FramebufferRenderer
-        glFramebufferTexture(
-            GL_FRAMEBUFFER,
+        glNamedFramebufferTexture(
+            _framebuffer,
             GL_COLOR_ATTACHMENT0,
             global::renderEngine->renderer().additionalColorTexture1(),
             0
         );
         // Check status
-        const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        const GLenum status = glCheckNamedFramebufferStatus(_framebuffer, GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             LERROR("Framebuffer is not complete");
         }
@@ -1042,10 +1027,18 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
            GL_COLOR_ATTACHMENT1,
            GL_COLOR_ATTACHMENT2,
         };
-        glDrawBuffers(3, ColorAttachmentArray.data());
+        glNamedFramebufferDrawBuffers(_framebuffer, 3, ColorAttachmentArray.data());
+
+        glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+
         glClearColor(0.f, 0.f, 0.f, 0.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
+        glClearNamedFramebufferfv(
+            _framebuffer,
+            GL_COLOR,
+            1,
+            glm::value_ptr(PosBufferClearVal)
+        );
 
         // Use a manuel depth test to make the models aware of the rest of the scene
         _program->setUniform(_uniformCache.performManualDepthTest, _enableDepthTest);
@@ -1053,9 +1046,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Bind the G-buffer depth texture for a manual depth test towards the rest
         // of the scene
         ghoul::opengl::TextureUnit gBufferDepthTextureUnit;
-        gBufferDepthTextureUnit.activate();
-        glBindTexture(
-            GL_TEXTURE_2D,
+        gBufferDepthTextureUnit.bind(
             global::renderEngine->renderer().gBufferDepthTexture()
         );
         _program->setUniform(_uniformCache.gBufferDepthTexture, gBufferDepthTextureUnit);
@@ -1098,19 +1089,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         // Bind textures
         ghoul::opengl::TextureUnit colorTextureUnit;
-        colorTextureUnit.activate();
-        glBindTexture(
-            GL_TEXTURE_2D,
-            global::renderEngine->renderer().additionalColorTexture1()
-        );
+        colorTextureUnit.bind(global::renderEngine->renderer().additionalColorTexture1());
         _quadProgram->setUniform(_uniformOpacityCache.colorTexture, colorTextureUnit);
 
         ghoul::opengl::TextureUnit depthTextureUnit;
-        depthTextureUnit.activate();
-        glBindTexture(
-            GL_TEXTURE_2D,
-            global::renderEngine->renderer().additionalDepthTexture()
-        );
+        depthTextureUnit.bind(global::renderEngine->renderer().additionalDepthTexture());
         _quadProgram->setUniform(_uniformOpacityCache.depthTexture, depthTextureUnit);
 
         // Will also need the resolution and viewport to get a texture coordinate

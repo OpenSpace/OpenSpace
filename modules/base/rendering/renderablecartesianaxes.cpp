@@ -130,43 +130,41 @@ void RenderableCartesianAxes::initializeGL() {
         }
     );
 
-    glGenVertexArrays(1, &_vaoId);
-    glBindVertexArray(_vaoId);
-
-    constexpr std::array<Vertex, 4> vertices = {
+    glCreateBuffers(1, &_vBufferId);
+    constexpr std::array<Vertex, 4> Vertices = {
         Vertex{0.f, 0.f, 0.f},
         Vertex{1.f, 0.f, 0.f},
         Vertex{0.f, 1.f, 0.f},
         Vertex{0.f, 0.f, 1.f}
     };
+    glNamedBufferStorage(
+        _vBufferId,
+        Vertices.size() * sizeof(Vertex),
+        Vertices.data(),
+        GL_NONE_BIT
+    );
 
+    glCreateBuffers(1, &_iBufferId);
     constexpr std::array<int, 6> indices = {
         0, 1,
         0, 2,
         0, 3
     };
-
-    glGenBuffers(1, &_vBufferId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        vertices.size() * sizeof(Vertex),
-        vertices.data(),
-        GL_STATIC_DRAW
-    );
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-
-    glGenBuffers(1, &_iBufferId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferId);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
+    glNamedBufferStorage(
+        _iBufferId,
         indices.size() * sizeof(int),
         indices.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
-    glBindVertexArray(0);
+
+    glCreateVertexArrays(1, &_vaoId);
+    glBindVertexArray(_vaoId);
+    glVertexArrayVertexBuffer(_vaoId, 0, _vBufferId, 0, sizeof(Vertex));
+    glVertexArrayElementBuffer(_vaoId, _iBufferId);
+
+    glEnableVertexArrayAttrib(_vaoId, 0);
+    glVertexArrayAttribFormat(_vaoId, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vaoId, 0, 0);
 }
 
 void RenderableCartesianAxes::deinitializeGL() {

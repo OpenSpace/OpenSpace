@@ -241,8 +241,7 @@ void RenderableDataCygnet::setTextureUniforms() {
     int j = 0;
     for (int option : selectedOptionsIndices) {
         if (_textures[option]) {
-            txUnits[j].activate();
-            _textures[option]->bind();
+            txUnits[j].bind(*_textures[option]);
             _shader->setUniform("textures[" + std::to_string(j) + "]", txUnits[j]);
 
             j++;
@@ -263,15 +262,13 @@ void RenderableDataCygnet::setTextureUniforms() {
     j = 0;
 
     if (activeTransferfunctions == 1) {
-        tfUnits[0].activate();
-        _transferFunctions[0].bind();
+        tfUnits[0].bind(_transferFunctions[0].texture());
         _shader->setUniform("transferFunctions[0]", tfUnits[0]);
     }
     else {
         for (int option : selectedOptionsIndices) {
             if (static_cast<int>(_transferFunctions.size()) >= option) {
-                tfUnits[j].activate();
-                _transferFunctions[option].bind();
+                tfUnits[j].bind(_transferFunctions[option].texture());
                 _shader->setUniform(
                     "transferFunctions[" + std::to_string(j) + "]",
                     tfUnits[j]

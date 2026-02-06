@@ -176,23 +176,21 @@ void RenderableConstellationBounds::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
-    glGenVertexArrays(1, &_vao);
-    glBindVertexArray(_vao);
-
-    glGenBuffers(1, &_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferData(
+        _vbo,
         _vertexValues.size() * 3 * sizeof(float),
         _vertexValues.data(),
         GL_STATIC_DRAW
     );
 
-    const GLint positionAttrib = _program->attributeLocation("in_position");
-    glEnableVertexAttribArray(positionAttrib);
-    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
 
-    glBindVertexArray(0);
+    const GLint positionAttrib = _program->attributeLocation("in_position");
+    glEnableVertexArrayAttrib(_vao, positionAttrib);
+    glVertexArrayAttribFormat(_vao, positionAttrib, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 }
 
 void RenderableConstellationBounds::deinitializeGL() {

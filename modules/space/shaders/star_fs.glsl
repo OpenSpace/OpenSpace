@@ -29,13 +29,17 @@ in vec2 texCoords;
 flat in float ge_bv;
 flat in vec3 ge_velocity;
 flat in float ge_speed;
+flat in float ge_otherData;
 flat in float gs_screenSpaceDepth;
 
+// layout(bindless_sampler) uniform sampler1D colorTexture;
 uniform sampler1D colorTexture;
+// layout(bindless_sampler) uniform sampler2D glareTexture;
 uniform sampler2D glareTexture;
 uniform float opacity;
 uniform vec3 fixedColor;
 uniform int colorOption;
+// layout(bindless_sampler) uniform sampler1D otherDataTexture;
 uniform sampler1D otherDataTexture;
 uniform vec2 otherDataRange;
 uniform bool filterOutOfRange;
@@ -45,6 +49,7 @@ uniform float glareGamma;
 uniform float glareScale;
 
 uniform bool hasCore;
+// layout(bindless_sampler) uniform sampler2D coreTexture;
 uniform sampler2D coreTexture;
 uniform float coreMultiplier;
 uniform float coreGamma;
@@ -66,12 +71,12 @@ vec4 bv2rgb(float bv) {
 }
 
 bool isOtherDataValueInRange() {
-  float t = (ge_bv - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
+  float t = (ge_otherData - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
   return t >= 0.0 && t <= 1.0;
 }
 
 vec4 otherDataValue() {
-  float t = (ge_bv - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
+  float t = (ge_otherData - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
   t = clamp(t, 0.0, 1.0);
   return texture(otherDataTexture, t);
 }

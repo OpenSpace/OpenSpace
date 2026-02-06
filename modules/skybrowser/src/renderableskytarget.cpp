@@ -139,11 +139,9 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     addProperty(_applyRoll);
 }
 
-void RenderableSkyTarget::bindTexture() {}
-
 void RenderableSkyTarget::initializeGL() {
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    glCreateVertexArrays(1, &_vao);
+    glCreateBuffers(1, &_vbo);
     createPlane();
 
     std::string ProgramName = identifier() + "Shader";
@@ -256,7 +254,7 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
 
-    glBindVertexArray(_quad);
+    glBindVertexArray(_vao);
     glEnable(GL_LINE_SMOOTH);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glDisable(GL_LINE_SMOOTH);

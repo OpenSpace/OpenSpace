@@ -28,6 +28,7 @@
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 #include <optional>
 #include <utility>
 
@@ -84,13 +85,8 @@ void ScreenSpaceSpout::update() {
     _spoutReceiver.updateReceiver();
 }
 
-void ScreenSpaceSpout::bindTexture() {
-    _spoutReceiver.saveGLTextureState();
-    glBindTexture(GL_TEXTURE_2D, _spoutReceiver.spoutTexture());
-}
-
-void ScreenSpaceSpout::unbindTexture() {
-    _spoutReceiver.restoreGLTextureState();
+void ScreenSpaceSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(_spoutReceiver.spoutTexture());
 }
 
 } // namespace openspace

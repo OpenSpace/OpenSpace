@@ -114,8 +114,7 @@ void GalaxyRaycaster::preRaycast(const RaycastData& data,
     program.setUniform(std::format("emissionMultiply{}", data.id), _emissionMultiply);
 
     _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _textureUnit->activate();
-    _texture.bind();
+    _textureUnit->bind(_texture);
     program.setUniform(std::format("galaxyTexture{}", data.id), *_textureUnit);
 }
 

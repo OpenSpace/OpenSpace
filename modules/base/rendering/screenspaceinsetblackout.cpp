@@ -37,6 +37,7 @@
 #include <ghoul/misc/interpolator.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <array>
 #include <filesystem>
 #include <functional>
@@ -543,9 +544,13 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
 void ScreenSpaceInsetBlackout::initializeGL() {
     ScreenSpaceRenderable::initializeGL();
 
-    // Setup vertex buffer
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
+    glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(glm::vec2));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     // Setup program object and shaders
     _fboProgram = BaseModule::ProgramObjectManager.request(
@@ -560,8 +565,7 @@ void ScreenSpaceInsetBlackout::initializeGL() {
     );
 
     // Setup FBO & Texture (UHD resolution)
-    glGenFramebuffers(1, &_fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
+    glCreateFramebuffers(1, &_fbo);
 
     _blackoutTexture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(BlackoutTextureSize, 1),
@@ -569,34 +573,20 @@ void ScreenSpaceInsetBlackout::initializeGL() {
         ghoul::opengl::Texture::Format::RGBA
     );
 
-    _blackoutTexture->bind();
-    glTexImage2D(
-        GL_TEXTURE_2D,
-        0,
-        GL_RGBA,
-        BlackoutTextureSize.x,
-        BlackoutTextureSize.y,
-        0,
-        GL_RGBA,
-        GL_UNSIGNED_BYTE,
-        nullptr
-    );
+    glTextureParameteri(*_blackoutTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(*_blackoutTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D,
+    glTextureStorage2D(
         *_blackoutTexture,
-        0
+        1,
+        GL_RGBA8,
+        BlackoutTextureSize.x,
+        BlackoutTextureSize.y
     );
+
+    glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_blackoutTexture, 0);
 
     _blackoutTexture->purgeFromRAM();
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     _uniformCache.color = _fboProgram->uniformLocation("color");
 
@@ -730,18 +720,12 @@ void ScreenSpaceInsetBlackout::generateVertexArrayData() {
 }
 
 void ScreenSpaceInsetBlackout::generateTexture() {
-    // OpenGL stuff
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vbo,
         _vboData.size() * sizeof(glm::vec2),
         _vboData.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(glm::vec2), nullptr);
-    glBindVertexArray(0);
 
     _fboProgram->activate();
     _fboProgram->setUniform(
@@ -751,12 +735,11 @@ void ScreenSpaceInsetBlackout::generateTexture() {
 
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-
-    bindTexture();
 
     // Clear current buffer
     glViewport(0, 0, BlackoutTextureSize.x, BlackoutTextureSize.y);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -765,19 +748,18 @@ void ScreenSpaceInsetBlackout::generateTexture() {
     glDrawArrays(GL_TRIANGLE_FAN, 0, static_cast<gl::GLsizei>(_vboData.size()));
     glBindVertexArray(0);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
     _fboProgram->deactivate();
 }
 
-void ScreenSpaceInsetBlackout::bindTexture() {
+void ScreenSpaceInsetBlackout::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_blackoutShape.enableCalibrationPattern && _calibrationTexture.get()) {
-        _calibrationTexture->bind();
+        unit.bind(*_calibrationTexture);
         _objectSize = _calibrationTexture->dimensions();
     }
     else {
-        _blackoutTexture->bind();
+        unit.bind(*_blackoutTexture);
         _objectSize = _blackoutTexture->dimensions();
     }
 }

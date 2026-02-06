@@ -682,11 +682,9 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
 {
     ZoneScoped;
 
-    glGenFramebuffers(1, &fbo);
-    glGenVertexArrays(1, &vaoQuad);
-    glGenBuffers(1, &vboQuad);
-    glBindVertexArray(vaoQuad);
-    glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
+    glCreateFramebuffers(1, &fbo);
+
+    glCreateBuffers(1, &vboQuad);
     // Quad for fullscreen with vertex (xy) and texture coordinates (uv)
     constexpr std::array<GLfloat, 24> VertexData = {
         // x    y    u    v
@@ -697,22 +695,19 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
          1.f, -1.f, 1.f, 0.f,
          1.f,  1.f, 1.f, 1.f
     };
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
-    // vertex coordinates at location 0
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(0);
-    // texture coords at location 1
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        4 * sizeof(GLfloat),
-        reinterpret_cast<void*>(2 * sizeof(GLfloat))
-    );
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    glNamedBufferStorage(vboQuad, sizeof(VertexData), VertexData.data(), GL_NONE_BIT);
+
+    glCreateVertexArrays(1, &vaoQuad);
+    glVertexArrayVertexBuffer(vaoQuad, 0, vboQuad, 0, 4 * sizeof(GLfloat));
+
+    glEnableVertexArrayAttrib(vaoQuad, 0);
+    glVertexArrayAttribFormat(vaoQuad, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vaoQuad, 0, 0);
+
+    glEnableVertexArrayAttrib(vaoQuad, 1);
+    glVertexArrayAttribFormat(vaoQuad, 1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat));
+    glVertexArrayAttribBinding(vaoQuad, 1, 0);
+
     shaderProgram = global::renderEngine->buildRenderProgram(
         "InterpolatingProgram",
         absPath("${MODULE_GLOBEBROWSING}/shaders/interpolate_vs.glsl"),
@@ -779,16 +774,17 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFBO);
     global::renderEngine->openglStateCache().viewport(viewport.data());
     // Bind render texture to FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, *writeTexture, 0);
+    glNamedFramebufferTexture(fbo, GL_COLOR_ATTACHMENT0, *writeTexture, 0);
     glDisable(GL_BLEND);
     const GLenum textureBuffers = GL_COLOR_ATTACHMENT0;
-    glDrawBuffers(1, &textureBuffers);
+    glNamedFramebufferDrawBuffers(fbo, 1, &textureBuffers);
+
 
     // Setup our own viewport settings
     const GLsizei w = static_cast<GLsizei>(writeTexture->width());
     const GLsizei h = static_cast<GLsizei>(writeTexture->height());
     glViewport(0, 0, w, h);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
     GLint id = 0;
@@ -799,18 +795,15 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
 
     // The texture that will give the color for the interpolated texture
     ghoul::opengl::TextureUnit colormapUnit;
-    colormapUnit.activate();
-    colormap->bind();
+    colormapUnit.bind(*colormap);
     shaderProgram->setUniform("colormapTexture", colormapUnit);
 
     ghoul::opengl::TextureUnit prevUnit;
-    prevUnit.activate();
-    prev.texture->bind();
+    prevUnit.bind(*prev.texture);
     shaderProgram->setUniform("prevTexture", prevUnit);
 
     ghoul::opengl::TextureUnit nextUnit;
-    nextUnit.activate();
-    next.texture->bind();
+    nextUnit.bind(*next.texture);
     shaderProgram->setUniform("nextTexture", nextUnit);
 
     // Render to the texture
