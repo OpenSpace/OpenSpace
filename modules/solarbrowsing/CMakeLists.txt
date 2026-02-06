@@ -30,40 +30,51 @@ set(OPENJPEG_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/openjpeg/")
 #add_subdirectory(${H264_ROOT_DIR})
 
 set(HEADER_FILES
-    # Other
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/j2kcodec.h
-
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/structs.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimagery.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimageryprojection.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/spacecraftcameraplane.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/helioviewerdownloadtask.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/pixelbufferobject.h
+  # Other
+  rendering/renderablesolarimagery.h
+  rendering/renderablesolarimageryprojection.h
+  rendering/spacecraftcameraplane.h
+  tasks/helioviewerdownloadtask.h
+  util/j2kcodec.h
+  util/spacecraftimagerymanager.h
+  util/structs.h
+  util/pixelbufferobject.h
 )
 
 source_group("Header Files" FILES ${HEADER_FILES})
 
 set(SOURCE_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/spacecraftimagerymanager.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/j2kcodec.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimagery.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablesolarimageryprojection.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/rendering/spacecraftcameraplane.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/tasks/helioviewerdownloadtask.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/util/pixelbufferobject.cpp
+  rendering/renderablesolarimagery.cpp
+  rendering/renderablesolarimageryprojection.cpp
+  rendering/spacecraftcameraplane.cpp
+  tasks/helioviewerdownloadtask.cpp
+  util/j2kcodec.cpp
+  util/spacecraftimagerymanager.cpp
+  util/pixelbufferobject.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
-create_new_module("SolarBrowsing" solarbrowsing_module ${HEADER_FILES} ${SOURCE_FILES})
+set(SHADER_FILES
+  shaders/spacecraftimagefrustum_fs.glsl
+  shaders/spacecraftimagefrustum_vs.glsl
+  shaders/spacecraftimageplane_fs.glsl
+  shaders/spacecraftimageplane_vs.glsl
+  shaders/spacecraftimageprojection_fs.glsl
+  shaders/spacecraftimageprojection_vs.glsl
+)
+source_group("Shader Files" FILES ${SHADER_FILES})
+
+create_new_module(
+    "SolarBrowsing"
+    solarbrowsing_module
+    ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
+)
 
 # include_external_library(openspace-module-solarbrowsing PRIVATE openjp2 ${OPENJPEG_ROOT_DIR})
 add_subdirectory(${OPENJPEG_ROOT_DIR} SYSTEM)
 set_target_properties(openjp2 PROPERTIES FOLDER "External")
 target_link_libraries(openspace-module-solarbrowsing PRIVATE openjp2)
 # target_include
-
-
 
 target_include_directories(openspace-module-solarbrowsing SYSTEM PUBLIC ${HEADER_FILES})
 
