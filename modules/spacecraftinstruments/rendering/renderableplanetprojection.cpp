@@ -347,15 +347,19 @@ void RenderablePlanetProjection::initializeGL() {
 
     // SCREEN-QUAD
     glCreateBuffers(1, &_vbo);
-    constexpr std::array<GLfloat, 12> VertexData = {
-        -1.f, -1.f,
-         1.f,  1.f,
-        -1.f,  1.f,
-        -1.f, -1.f,
-         1.f, -1.f,
-         1.f,  1.f,
+    struct Vertex {
+        float x;
+        float y;
     };
-    glNamedBufferStorage(_vbo, sizeof(VertexData), VertexData.data(), GL_NONE_BIT);
+    constexpr std::array<Vertex, 6> VertexData = {
+        Vertex { -1.f, -1.f },
+        Vertex {  1.f,  1.f },
+        Vertex { -1.f,  1.f },
+        Vertex { -1.f, -1.f },
+        Vertex {  1.f, -1.f },
+        Vertex {  1.f,  1.f }
+    };
+    glNamedBufferStorage(_vbo, 6 * sizeof(Vertex), VertexData.data(), GL_NONE_BIT);
 
     glCreateVertexArrays(1, &_vao);
     glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 2 * sizeof(float));

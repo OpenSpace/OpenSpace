@@ -52,7 +52,6 @@ public:
     void update(const UpdateData& data) override;
 
 private:
-    void calculateVerticesPositions();
     void updateVertexData();
     void reinitiateTravel();
 
@@ -65,13 +64,6 @@ private:
     properties::FloatProperty _fadeLength;
     properties::FloatProperty _lineWidth;
     properties::Vec3Property _lineColor;
-
-    struct VertexPositions {
-        glm::vec3 endOfFade;
-        glm::vec3 betweenLightAndFade;
-        glm::vec3 headOfLight;
-    };
-    VertexPositions _vertexPositions;
 
     double _travelTime = 0.0;
     glm::dvec3 _directionVector;

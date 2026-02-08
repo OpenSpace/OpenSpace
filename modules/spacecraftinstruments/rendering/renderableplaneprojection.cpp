@@ -51,6 +51,14 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderablePlaneProjection";
 
+    struct Vertex {
+        float x;
+        float y;
+        float z;
+        float s;
+        float t;
+    };
+
     // This specialized Renderable type is used as a target for projections from a
     // spacecraft instrument. Similarly to the
     // [RenderablePlanetProject](spacecraftinstruments_renderableplanetprojection) it
@@ -103,17 +111,17 @@ bool RenderablePlaneProjection::isReady() const {
 
 void RenderablePlaneProjection::initializeGL() {
     glCreateBuffers(1, &_vbo);
-    glNamedBufferStorage(_vbo, 36 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
+    glNamedBufferStorage(_vbo, 6 * sizeof(Vertex), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
     glCreateVertexArrays(1, &_vao);
-    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 6 * sizeof(float));
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
     glEnableVertexArrayAttrib(_vao, 0);
     glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_vao, 0, 0);
 
     glEnableVertexArrayAttrib(_vao, 1);
-    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat));
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, s));
     glVertexArrayAttribBinding(_vao, 1, 0);
 
     _shader = global::renderEngine->buildRenderProgram(
@@ -280,24 +288,23 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
         projection[j] = glm::vec3(cornerPosition * 1000.0);
     }
 
-    const std::array<GLfloat, 36> VertexData = {
+    const std::array<Vertex, 6> VertexData = {
         // square of two triangles drawn within fov in target coordinates
-        //      x      y     z     w     s     t
         // Lower left 1
-        projection[1].x, projection[1].y, projection[1].z, 0.f, 0.f, 0.f,
+        Vertex { projection[1].x, projection[1].y, projection[1].z, 0.f, 0.f },
         // Upper right 2
-        projection[3].x, projection[3].y, projection[3].z, 0.f, 1.f, 1.f,
+        Vertex { projection[3].x, projection[3].y, projection[3].z, 1.f, 1.f },
         // Upper left 3
-        projection[2].x, projection[2].y, projection[2].z, 0.f, 0.f, 1.f,
+        Vertex { projection[2].x, projection[2].y, projection[2].z, 0.f, 1.f },
         // Lower left 4 = 1
-        projection[1].x, projection[1].y, projection[1].z, 0.f, 0.f, 0.f,
+        Vertex { projection[1].x, projection[1].y, projection[1].z, 0.f, 0.f },
         // Lower right 5
-        projection[0].x, projection[0].y, projection[0].z, 0.f, 1.f, 0.f,
+        Vertex { projection[0].x, projection[0].y, projection[0].z, 1.f, 0.f },
         // Upper left 6 = 2
-        projection[3].x, projection[3].y, projection[3].z, 0.f, 1.f, 1.f,
+        Vertex { projection[3].x, projection[3].y, projection[3].z, 1.f, 1.f }
     };
 
-    glNamedBufferSubData(_vbo, 0, sizeof(VertexData), VertexData.data());
+    glNamedBufferSubData(_vbo, 0, VertexData.size() * sizeof(Vertex), VertexData.data());
 
     if (!img.path.empty()) {
         _texturePath = img.path;

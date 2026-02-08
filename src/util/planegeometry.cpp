@@ -29,7 +29,7 @@
 #include <utility>
 
 namespace {
-    struct VertexData {
+    struct Vertex {
         GLfloat x;
         GLfloat y;
         GLfloat s;
@@ -46,14 +46,14 @@ PlaneGeometry::PlaneGeometry(float size) : PlaneGeometry(glm::vec2(size, size)) 
 void PlaneGeometry::initialize() {
     glCreateBuffers(1, &_vbo);
     glCreateVertexArrays(1, &_vao);
-    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 4 * sizeof(float));
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
     glEnableVertexArrayAttrib(_vao, 0);
     glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_vao, 0, 0);
 
     glEnableVertexArrayAttrib(_vao, 1);
-    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(VertexData, s));
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, s));
     glVertexArrayAttribBinding(_vao, 1, 0);
 
     updateGeometry();
@@ -81,13 +81,13 @@ void PlaneGeometry::updateSize(float size) {
 
 void PlaneGeometry::updateGeometry() const {
     const glm::vec2 size = _size;
-    const std::array<VertexData, 6> vertices = {
-        VertexData{ -size.x, -size.y, 0.f, 0.f },
-        VertexData{  size.x,  size.y, 1.f, 1.f },
-        VertexData{ -size.x,  size.y, 0.f, 1.f },
-        VertexData{ -size.x, -size.y, 0.f, 0.f },
-        VertexData{  size.x, -size.y, 1.f, 0.f },
-        VertexData{  size.x,  size.y, 1.f, 1.f }
+    const std::array<Vertex, 6> vertices = {
+        Vertex { -size.x, -size.y, 0.f, 0.f },
+        Vertex {  size.x,  size.y, 1.f, 1.f },
+        Vertex { -size.x,  size.y, 0.f, 1.f },
+        Vertex { -size.x, -size.y, 0.f, 0.f },
+        Vertex {  size.x, -size.y, 1.f, 0.f },
+        Vertex {  size.x,  size.y, 1.f, 1.f }
     };
 
     glNamedBufferData(_vbo, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);

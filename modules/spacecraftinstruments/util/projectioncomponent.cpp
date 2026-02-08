@@ -380,15 +380,24 @@ bool ProjectionComponent::initializeGL() {
         );
 
         glCreateBuffers(1, &_dilation.vbo);
-        constexpr std::array<GLfloat, 12> Plane = {
-            -1.0, -1.0,
-             1.0,  1.0,
-            -1.0,  1.0,
-            -1.0, -1.0,
-             1.0, -1.0,
-             1.0,  1.0,
+        struct Vertex {
+            float x;
+            float y;
         };
-        glNamedBufferStorage(_dilation.vbo, sizeof(Plane), Plane.data(), GL_NONE_BIT);
+        constexpr std::array<Vertex, 6> Plane = {
+            Vertex { -1.0, -1.0 },
+            Vertex {  1.0,  1.0 },
+            Vertex { -1.0,  1.0 },
+            Vertex { -1.0, -1.0 },
+            Vertex {  1.0, -1.0 },
+            Vertex {  1.0,  1.0 }
+        };
+        glNamedBufferStorage(
+            _dilation.vbo,
+            6 * sizeof(Vertex),
+            Plane.data(),
+            GL_NONE_BIT
+        );
 
         glCreateVertexArrays(1, &_dilation.vao);
         glVertexArrayVertexBuffer(_dilation.vao, 0, _dilation.vbo, 0, 2 * sizeof(float));

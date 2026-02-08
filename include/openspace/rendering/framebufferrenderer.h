@@ -223,8 +223,8 @@ private:
         resolution) _writeDownscaledVolumeUniformCache;
 
     GLint _defaultFBO = 0;
-    GLuint _screenQuadVao = 0;
-    GLuint _screenQuadVbo = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
     GLuint _exitColorTexture = 0;
     GLuint _exitDepthTexture = 0;
     GLuint _exitFramebuffer = 0;

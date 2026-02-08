@@ -32,8 +32,8 @@ namespace openspace {
 BoxGeometry::BoxGeometry(glm::vec3 size) : _size(std::move(size)) {}
 
 BoxGeometry::~BoxGeometry() {
-    glDeleteBuffers(1, &_vbo);
     glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 }
 
 bool BoxGeometry::initialize() {
@@ -42,55 +42,60 @@ bool BoxGeometry::initialize() {
     const float y = _size.y * 0.5f;
     const float z = _size.z * 0.5f;
 
-    const std::array<GLfloat, 108> Vertices = {
-        -x, -y,  z, // blue corner
-         x,  y,  z,  // white corner
-        -x,  y,  z, // cyan corner
-        -x, -y,  z, // blue corner
-         x, -y,  z,  // magenta corner
-         x,  y,  z,  // white corner
+    struct Vertex {
+        float r;
+        float g;
+        float b;
+    };
+    const std::array<Vertex, 36> Vertices = {
+        Vertex { -x, -y,  z}, // blue corner
+        Vertex {  x,  y,  z}, // white corner
+        Vertex { -x,  y,  z}, // cyan corner
+        Vertex { -x, -y,  z}, // blue corner
+        Vertex {  x, -y,  z}, // magenta corner
+        Vertex {  x,  y,  z}, // white corner
 
-        -x, -y, -z, // black corner
-        -x,  y, -z, // green
-         x,  y, -z,  // yellow corner
-        -x, -y, -z, // black
-         x,  y, -z, // yellow
-         x, -y, -z, // red
+        Vertex { -x, -y, -z}, // black corner
+        Vertex { -x,  y, -z}, // green
+        Vertex {  x,  y, -z}, // yellow corner
+        Vertex { -x, -y, -z}, // black
+        Vertex {  x,  y, -z}, // yellow
+        Vertex {  x, -y, -z}, // red
 
-         x, -y, -z, // red
-         x,  y,  z, // yellow
-         x, -y,  z, // magenta
-         x, -y, -z, // red
-         x,  y, -z, // yellow
-         x,  y,  z, // white
+        Vertex {  x, -y, -z}, // red
+        Vertex {  x,  y,  z}, // yellow
+        Vertex {  x, -y,  z}, // magenta
+        Vertex {  x, -y, -z}, // red
+        Vertex {  x,  y, -z}, // yellow
+        Vertex {  x,  y,  z}, // white
 
-        -x, -y, -z, // black
-        -x, -y,  z, // blue
-        -x,  y,  z, // cyan
-        -x, -y, -z, // black
-        -x,  y,  z, // cyan
-        -x,  y, -z, // green
+        Vertex { -x, -y, -z}, // black
+        Vertex { -x, -y,  z}, // blue
+        Vertex { -x,  y,  z}, // cyan
+        Vertex { -x, -y, -z}, // black
+        Vertex { -x,  y,  z}, // cyan
+        Vertex { -x,  y, -z}, // green
 
-         x,  y,  z, // white
-        -x,  y, -z, // green
-        -x,  y,  z, // cyan
-        -x,  y, -z, // green
-         x,  y,  z, // white
-         x,  y, -z, // yellow
+        Vertex {  x,  y,  z}, // white
+        Vertex { -x,  y, -z}, // green
+        Vertex { -x,  y,  z}, // cyan
+        Vertex { -x,  y, -z}, // green
+        Vertex {  x,  y,  z}, // white
+        Vertex {  x,  y, -z}, // yellow
 
-        -x, -y, -z, // black
-         x, -y,  z, // magenta
-        -x, -y,  z, // blue
-        -x, -y, -z, // black
-         x, -y, -z, // red
-         x, -y,  z // magenta
+        Vertex { -x, -y, -z}, // black
+        Vertex {  x, -y,  z}, // magenta
+        Vertex { -x, -y,  z}, // blue
+        Vertex { -x, -y, -z}, // black
+        Vertex {  x, -y, -z}, // red
+        Vertex {  x, -y,  z}  // magenta
     };
 
     glCreateBuffers(1, &_vbo);
-    glNamedBufferStorage(_vbo, sizeof(Vertices), Vertices.data(), GL_NONE_BIT);
+    glNamedBufferStorage(_vbo, 36 * sizeof(Vertex), Vertices.data(), GL_NONE_BIT);
 
     glCreateVertexArrays(1, &_vao);
-    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
     glEnableVertexArrayAttrib(_vao, 0);
     glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);

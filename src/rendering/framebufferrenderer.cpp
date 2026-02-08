@@ -141,20 +141,15 @@ void FramebufferRenderer::initialize() {
          1.f,  1.f,
     };
 
-    glCreateBuffers(1, &_screenQuadVbo);
-    glNamedBufferStorage(
-        _screenQuadVbo,
-        sizeof(VertexData),
-        VertexData.data(),
-        GL_NONE_BIT
-    );
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, sizeof(VertexData), VertexData.data(), GL_NONE_BIT);
 
-    glCreateVertexArrays(1, &_screenQuadVao);
-    glVertexArrayVertexBuffer(_screenQuadVao, 0, _screenQuadVbo, 0, 2 * sizeof(GLfloat));
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 2 * sizeof(GLfloat));
 
-    glEnableVertexArrayAttrib(_screenQuadVao, 0);
-    glVertexArrayAttribFormat(_screenQuadVao, 0, 2, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_screenQuadVao, 0, 0);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
@@ -397,8 +392,8 @@ void FramebufferRenderer::deinitialize() {
     glDeleteTextures(1, &_exitColorTexture);
     glDeleteTextures(1, &_exitDepthTexture);
 
-    glDeleteBuffers(1, &_screenQuadVbo);
-    glDeleteVertexArrays(1, &_screenQuadVao);
+    glDeleteBuffers(1, &_vbo);
+    glDeleteVertexArrays(1, &_vao);
 
     global::raycasterManager->removeListener(*this);
     global::deferredcasterManager->removeListener(*this);
@@ -463,7 +458,6 @@ void FramebufferRenderer::registerShadowCaster(const std::string& shadowGroup,
             info.depthMap.texture,
             0
         );
-        glNamedFramebufferDrawBuffer(info.fbo, GL_NONE);
         glNamedFramebufferDrawBuffer(info.fbo, GL_NONE);
 
         _shadowMaps.emplace(shadowGroup, info);
@@ -536,13 +530,10 @@ void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewp
 
     _hdrFilteringProgram->activate();
 
-    ghoul::opengl::TextureUnit hdrFeedingTexUnit;
-    glBindTextureUnit(hdrFeedingTexUnit, _pingPongBuffers.colorTexture[_pingPongIndex]);
+    ghoul::opengl::TextureUnit hdrFeedingUnit;
+    hdrFeedingUnit.bind(_pingPongBuffers.colorTexture[_pingPongIndex]);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrFeedingTexture, hdrFeedingUnit);
 
-    _hdrFilteringProgram->setUniform(
-        _hdrUniformCache.hdrFeedingTexture,
-        hdrFeedingTexUnit
-    );
     _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrExposure, _hdrExposure);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.gamma, _gamma);
@@ -555,7 +546,7 @@ void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewp
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
 
-    glBindVertexArray(_screenQuadVao);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
@@ -569,12 +560,8 @@ void FramebufferRenderer::applyFXAA(const glm::ivec4& viewport) {
     _fxaaProgram->activate();
 
     ghoul::opengl::TextureUnit renderedTextureUnit;
-    glBindTextureUnit(renderedTextureUnit, _fxaaBuffers.fxaaTexture);
-
-    _fxaaProgram->setUniform(
-        _fxaaUniformCache.renderedTexture,
-        renderedTextureUnit
-    );
+    renderedTextureUnit.bind(_fxaaBuffers.fxaaTexture);
+    _fxaaProgram->setUniform(_fxaaUniformCache.renderedTexture, renderedTextureUnit);
 
     const glm::vec2 invScreenSize = glm::vec2(1.f / _resolution.x, 1.f / _resolution.y);
     _fxaaProgram->setUniform(_fxaaUniformCache.inverseScreenSize, invScreenSize);
@@ -584,7 +571,7 @@ void FramebufferRenderer::applyFXAA(const glm::ivec4& viewport) {
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
 
-    glBindVertexArray(_screenQuadVao);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
@@ -611,16 +598,19 @@ void FramebufferRenderer::updateDownscaleTextures() const {
     );
     glTextureParameteri(
         _downscaleVolumeRendering.colorTexture,
-        GL_TEXTURE_MAG_FILTER, GL_LINEAR
+        GL_TEXTURE_MAG_FILTER,
+        GL_LINEAR
     );
     glTextureParameteri(
         _downscaleVolumeRendering.colorTexture,
-        GL_TEXTURE_MIN_FILTER, GL_LINEAR
+        GL_TEXTURE_MIN_FILTER,
+        GL_LINEAR
     );
-    constexpr float VolumeBorderColor[] = { 0.f, 0.f, 0.f, 1.f };
+    constexpr glm::vec4 VolumeBorderColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
     glTextureParameterfv(
         _downscaleVolumeRendering.colorTexture,
-        GL_TEXTURE_BORDER_COLOR, VolumeBorderColor
+        GL_TEXTURE_BORDER_COLOR,
+        glm::value_ptr(VolumeBorderColor)
     );
 
     glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);
@@ -649,17 +639,14 @@ void FramebufferRenderer::writeDownscaledVolume(const glm::ivec4& viewport) {
     _downscaledVolumeProgram->activate();
 
     ghoul::opengl::TextureUnit downscaledTextureUnit;
-    glBindTextureUnit(downscaledTextureUnit, _downscaleVolumeRendering.colorTexture);
+    downscaledTextureUnit.bind(_downscaleVolumeRendering.colorTexture);
     _downscaledVolumeProgram->setUniform(
         _writeDownscaledVolumeUniformCache.downscaledRenderedVolume,
         downscaledTextureUnit
     );
 
     ghoul::opengl::TextureUnit downscaledDepthUnit;
-    glBindTextureUnit(
-        downscaledDepthUnit,
-        _downscaleVolumeRendering.depthbuffer
-    );
+    downscaledDepthUnit.bind(_downscaleVolumeRendering.depthbuffer);
     _downscaledVolumeProgram->setUniform(
         _writeDownscaledVolumeUniformCache.downscaledRenderedVolumeDepth,
         downscaledDepthUnit
@@ -688,7 +675,7 @@ void FramebufferRenderer::writeDownscaledVolume(const glm::ivec4& viewport) {
 
     glDisable(GL_DEPTH_TEST);
 
-    glBindVertexArray(_screenQuadVao);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
@@ -878,19 +865,23 @@ void FramebufferRenderer::updateResolution() {
     );
     glTextureParameteri(
         _pingPongBuffers.colorTexture[1],
-        GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
+        GL_TEXTURE_WRAP_S,
+        GL_CLAMP_TO_EDGE
     );
     glTextureParameteri(
         _pingPongBuffers.colorTexture[1],
-        GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
+        GL_TEXTURE_WRAP_T,
+        GL_CLAMP_TO_EDGE
     );
     glTextureParameteri(
         _pingPongBuffers.colorTexture[1],
-        GL_TEXTURE_MAG_FILTER, GL_LINEAR
+        GL_TEXTURE_MAG_FILTER,
+        GL_LINEAR
     );
     glTextureParameteri(
         _pingPongBuffers.colorTexture[1],
-        GL_TEXTURE_MIN_FILTER, GL_LINEAR
+        GL_TEXTURE_MIN_FILTER,
+        GL_LINEAR
     );
     glObjectLabel(
         GL_TEXTURE,
@@ -935,26 +926,30 @@ void FramebufferRenderer::updateResolution() {
     );
     glTextureParameteri(
         _downscaleVolumeRendering.colorTexture,
-        GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
+        GL_TEXTURE_WRAP_S,
+        GL_CLAMP_TO_EDGE
     );
     glTextureParameteri(
         _downscaleVolumeRendering.colorTexture,
-        GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
+        GL_TEXTURE_WRAP_T,
+        GL_CLAMP_TO_EDGE
     );
     glTextureParameteri(
         _downscaleVolumeRendering.colorTexture,
-        GL_TEXTURE_MAG_FILTER, GL_LINEAR
+        GL_TEXTURE_MAG_FILTER,
+        GL_LINEAR
     );
     glTextureParameteri(
         _downscaleVolumeRendering.colorTexture,
-        GL_TEXTURE_MIN_FILTER, GL_LINEAR
+        GL_TEXTURE_MIN_FILTER,
+        GL_LINEAR
     );
 
-    constexpr std::array<float, 4> VolumeBorderColor = { 0.f, 0.f, 0.f, 1.f };
+    constexpr glm::vec4 VolumeBorderColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
     glTextureParameterfv(
         _downscaleVolumeRendering.colorTexture,
         GL_TEXTURE_BORDER_COLOR,
-        VolumeBorderColor.data()
+        glm::value_ptr(VolumeBorderColor)
     );
     glObjectLabel(
         GL_TEXTURE,
@@ -977,19 +972,23 @@ void FramebufferRenderer::updateResolution() {
     );
     glTextureParameteri(
         _downscaleVolumeRendering.depthbuffer,
-        GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE
+        GL_TEXTURE_WRAP_S,
+        GL_CLAMP_TO_EDGE
     );
     glTextureParameteri(
         _downscaleVolumeRendering.depthbuffer,
-        GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE
+        GL_TEXTURE_WRAP_T,
+        GL_CLAMP_TO_EDGE
     );
     glTextureParameteri(
         _downscaleVolumeRendering.depthbuffer,
-        GL_TEXTURE_MAG_FILTER, GL_LINEAR
+        GL_TEXTURE_MAG_FILTER,
+        GL_LINEAR
     );
     glTextureParameteri(
         _downscaleVolumeRendering.depthbuffer,
-        GL_TEXTURE_MIN_FILTER, GL_LINEAR
+        GL_TEXTURE_MIN_FILTER,
+        GL_LINEAR
     );
     glObjectLabel(
         GL_TEXTURE,
@@ -1491,15 +1490,15 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             raycaster->preRaycast(_raycastData[raycaster], *raycastProgram);
 
             ghoul::opengl::TextureUnit exitColorTextureUnit;
-            glBindTextureUnit(exitColorTextureUnit, _exitColorTexture);
+            exitColorTextureUnit.bind(_exitColorTexture);
             raycastProgram->setUniform("exitColorTexture", exitColorTextureUnit);
 
             ghoul::opengl::TextureUnit exitDepthTextureUnit;
-            glBindTextureUnit(exitDepthTextureUnit, _exitDepthTexture);
+            exitDepthTextureUnit.bind(_exitDepthTexture);
             raycastProgram->setUniform("exitDepthTexture", exitDepthTextureUnit);
 
             ghoul::opengl::TextureUnit mainDepthTextureUnit;
-            glBindTextureUnit(mainDepthTextureUnit, _gBuffers.depthTexture);
+            mainDepthTextureUnit.bind(_gBuffers.depthTexture);
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
             if (raycaster->downscaleRender() < 1.f) {
@@ -1519,7 +1518,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             glDisable(GL_DEPTH_TEST);
             glDepthMask(false);
             if (isCameraInside) {
-                glBindVertexArray(_screenQuadVao);
+                glBindVertexArray(_vao);
                 glDrawArrays(GL_TRIANGLES, 0, 6);
                 glBindVertexArray(0);
             }
@@ -1571,14 +1570,8 @@ void FramebufferRenderer::performDeferredTasks(
 
             // adding G-Buffer
             ghoul::opengl::TextureUnit mainDColorTextureUnit;
-            glBindTextureUnit(
-                mainDColorTextureUnit,
-                _pingPongBuffers.colorTexture[fromIndex]
-            );
-            deferredcastProgram->setUniform(
-                "mainColorTexture",
-                mainDColorTextureUnit
-            );
+            mainDColorTextureUnit.bind(_pingPongBuffers.colorTexture[fromIndex]);
+            deferredcastProgram->setUniform("mainColorTexture", mainDColorTextureUnit);
 
             deferredcastProgram->setUniform(
                 "viewport",
@@ -1591,18 +1584,15 @@ void FramebufferRenderer::performDeferredTasks(
 
 
             ghoul::opengl::TextureUnit mainPositionTextureUnit;
-            glBindTextureUnit(mainPositionTextureUnit, _gBuffers.positionTexture);
+            mainPositionTextureUnit.bind(_gBuffers.positionTexture);
             deferredcastProgram->setUniform(
                 "mainPositionTexture",
                 mainPositionTextureUnit
             );
 
             ghoul::opengl::TextureUnit mainNormalTextureUnit;
-            glBindTextureUnit(mainNormalTextureUnit, _gBuffers.normalTexture);
-            deferredcastProgram->setUniform(
-                "mainNormalTexture",
-                mainNormalTextureUnit
-            );
+            mainNormalTextureUnit.bind(_gBuffers.normalTexture);
+            deferredcastProgram->setUniform("mainNormalTexture", mainNormalTextureUnit);
 
             deferredcaster->preRaycast(
                 deferredcasterTask.renderData,
@@ -1613,7 +1603,7 @@ void FramebufferRenderer::performDeferredTasks(
             glDisable(GL_DEPTH_TEST);
             glDepthMask(false);
 
-            glBindVertexArray(_screenQuadVao);
+            glBindVertexArray(_vao);
             glDrawArrays(GL_TRIANGLES, 0, 6);
             glBindVertexArray(0);
 

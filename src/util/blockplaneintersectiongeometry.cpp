@@ -41,8 +41,8 @@ BlockPlaneIntersectionGeometry::BlockPlaneIntersectionGeometry(glm::vec3 blockSi
 {}
 
 BlockPlaneIntersectionGeometry::~BlockPlaneIntersectionGeometry() {
-    glDeleteBuffers(1, &_vbo);
     glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 }
 
 void BlockPlaneIntersectionGeometry::setBlockSize(glm::vec3 size) {
@@ -130,10 +130,10 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     );
 
     std::vector<glm::vec3> vertices;
-    vertices.emplace_back(intersections[0].x, intersections[0].y, intersections[0].z);
+    vertices.push_back(intersections[0]);
     for (int i = 0; i < nIntersections - 1; i++) {
         const int j = angles[i].first;
-        vertices.emplace_back(intersections[j].x, intersections[j].y, intersections[j].z);
+        vertices.push_back(intersections[j]);
     }
 
     _nVertices = static_cast<GLsizei>(vertices.size());

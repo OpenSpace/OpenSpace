@@ -45,6 +45,12 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableTravelSpeed";
 
+    struct VertexPositions {
+        glm::vec3 endOfFade;
+        glm::vec3 betweenLightAndFade;
+        glm::vec3 headOfLight;
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
         "TravelSpeed",
         "Speed of travel",
@@ -213,7 +219,7 @@ void RenderableTravelSpeed::initializeGL() {
     glNamedBufferStorage(_vbo, sizeof(VertexPositions), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
     glCreateVertexArrays(1, &_vao);
-    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(glm::vec3));
 
     glEnableVertexArrayAttrib(_vao, 0);
     glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
@@ -233,32 +239,31 @@ void RenderableTravelSpeed::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
 }
 
-void RenderableTravelSpeed::calculateVerticesPositions() {
+void RenderableTravelSpeed::updateVertexData() {
+    VertexPositions positions;
+
     // 3: start of light, 2: start of fade, 1: end of fade
-    _vertexPositions.headOfLight = _travelSpeed * _timeSinceStart * _directionVector;
+    positions.headOfLight = _travelSpeed * _timeSinceStart * _directionVector;
 
     // This if statment is there to not start the line from behind the source node
     if (_timeSinceStart < _indicatorLength) {
-        _vertexPositions.betweenLightAndFade = glm::vec3(0.0, 0.0, 0.0); // = source node
+        positions.betweenLightAndFade = glm::vec3(0.0, 0.0, 0.0); // = source node
     }
     else {
-        _vertexPositions.betweenLightAndFade =
+        positions.betweenLightAndFade =
             _travelSpeed * (_timeSinceStart - _indicatorLength) * _directionVector;
     }
 
     // This if statment is there to not start the line from behind the source node
     if (_timeSinceStart < (_indicatorLength + _fadeLength)) {
-        _vertexPositions.endOfFade = glm::vec3(0.0, 0.0, 0.0); // = source node
+        positions.endOfFade = glm::vec3(0.0, 0.0, 0.0); // = source node
     }
     else {
-        _vertexPositions.endOfFade = _travelSpeed *
+        positions.endOfFade = _travelSpeed *
             (_timeSinceStart - _indicatorLength - _fadeLength) * _directionVector;
     }
-}
 
-void RenderableTravelSpeed::updateVertexData() {
-    calculateVerticesPositions();
-    glNamedBufferSubData(_vbo, 0, sizeof(VertexPositions), &_vertexPositions);
+    glNamedBufferSubData(_vbo, 0, sizeof(positions), &positions);
 }
 
 void RenderableTravelSpeed::reinitiateTravel() {
