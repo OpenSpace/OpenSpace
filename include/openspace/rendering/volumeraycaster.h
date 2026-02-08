@@ -40,7 +40,7 @@ struct RenderData;
 
 class VolumeRaycaster {
 public:
-    ~VolumeRaycaster() = default;
+    virtual ~VolumeRaycaster() = default;
 
     /**
      * Render the volume's entry points (front face of the bounding geometry).

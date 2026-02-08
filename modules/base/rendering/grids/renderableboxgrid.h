@@ -64,7 +64,6 @@ protected:
     GLuint _vbo = 0;
 
     GLenum _mode = GL_LINE_STRIP;
-    std::vector<Vertex> _varray;
 };
 
 }// namespace openspace
