@@ -70,6 +70,8 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
   shaders/crawlingline_fs.glsl
   shaders/crawlingline_vs.glsl
+  shaders/dilation_fs.glsl
+  shaders/dilation_vs.glsl
   shaders/fov_fs.glsl
   shaders/fov_vs.glsl
   shaders/imageplane_fs.glsl

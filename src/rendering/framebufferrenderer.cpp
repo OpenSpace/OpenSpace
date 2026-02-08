@@ -62,9 +62,9 @@ namespace {
         "${SHADERS}/framebuffer/exitframebuffer_fs.glsl";
     constexpr std::string_view RaycastFragmentShaderPath =
         "${SHADERS}/framebuffer/raycastframebuffer_fs.glsl";
-    constexpr std::string_view GetEntryInsidePath = "${SHADERS}/framebuffer/inside.hglsl";
+    constexpr std::string_view GetEntryInsidePath = "${SHADERS}/framebuffer/inside.glsl";
     constexpr std::string_view GetEntryOutsidePath =
-        "${SHADERS}/framebuffer/outside.hglsl";
+        "${SHADERS}/framebuffer/outside.glsl";
     constexpr std::string_view RenderFragmentShaderPath =
         "${SHADERS}/framebuffer/renderframebuffer_fs.glsl";
 

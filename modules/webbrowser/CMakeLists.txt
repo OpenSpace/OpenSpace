@@ -273,13 +273,19 @@ set(SOURCE_FILES
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
+set(SHADER_FILES
+  shaders/screenspace_fs.glsl
+  shaders/screenspace_vs.glsl
+)
+source_group("Shader Files" FILES ${SHADER_FILES})
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 create_new_module(
   ${WEBBROWSER_MODULE_NAME}
   webbrowser_module
   STATIC
-  ${HEADER_FILES} ${SOURCE_FILES}
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
 target_precompile_headers(${webbrowser_module} PRIVATE

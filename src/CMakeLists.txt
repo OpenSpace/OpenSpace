@@ -222,6 +222,7 @@ if (APPLE)
     PROPERTIES SKIP_PRECOMPILE_HEADERS ON
   )
 endif ()
+
 set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/json.h
   ${PROJECT_SOURCE_DIR}/include/openspace/camera/camera.h
@@ -429,6 +430,34 @@ if (APPLE)
   )
 endif ()
 
+set(OPENSPACE_SHADERS
+${PROJECT_SOURCE_DIR}/shaders/blending.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/core/xyzuvrgba_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/core/xyzuvrgba_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/exitframebuffer_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/fxaa_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/fxaa_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/hdr_and_filtering_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/hdr_and_filtering_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/inside.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/mergedownscaledvolume_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/mergedownscaledvolume_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/outside.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/raycastframebuffer_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/renderframebuffer_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/framebuffer/resolveframebuffer_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/powerscaling/powerscaling_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/powerscaling/powerscaling_vs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/powerscaling/powerscalingmath.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/floatoperations.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/fragment.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/hdr.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/rand.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/render_fs.glsl
+)
+source_group("Shader Files" FILES ${OPENSPACE_SHADERS})
+
+
 # Place files into source groups
 foreach (file ${OPENSPACE_SOURCE} ${OPENSPACE_HEADER})
   # Remove prefixes from the files
@@ -455,7 +484,11 @@ endforeach ()
 ##########################################################################################
 # Create OpenSpace target
 ##########################################################################################
-add_library(openspace-core STATIC ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE})
+add_library(
+  openspace-core
+  STATIC
+  ${OPENSPACE_HEADER} ${OPENSPACE_SOURCE} ${OPENSPACE_SHADERS}
+)
 target_include_directories(openspace-core SYSTEM
   PUBLIC
     # In order to use the date library

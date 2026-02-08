@@ -44,10 +44,10 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-  shaders/galaxyraycast.glsl
-  shaders/billboard_vs.glsl
   shaders/billboard_fs.glsl
   shaders/billboard_ge.glsl
+  shaders/billboard_vs.glsl
+  shaders/galaxyraycast.glsl
   shaders/points_fs.glsl
   shaders/points_vs.glsl
   shaders/raycasterbounds_fs.glsl
