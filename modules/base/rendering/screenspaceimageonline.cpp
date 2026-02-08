@@ -163,7 +163,9 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
 }
 
 void ScreenSpaceImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
-    unit.bind(*_texture);
+    if (_texture) [[likely]] {
+        unit.bind(*_texture);
+    }
 }
 
 } // namespace openspace

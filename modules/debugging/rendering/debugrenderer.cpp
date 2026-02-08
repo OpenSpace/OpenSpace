@@ -88,7 +88,7 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
 
     GLuint vao = 0;
     glCreateVertexArrays(1, &vao);
-    glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(glm::vec4));
+    glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(Vertices::value_type));
 
     glEnableVertexArrayAttrib(vao, 0);
     glVertexArrayAttribFormat(vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
