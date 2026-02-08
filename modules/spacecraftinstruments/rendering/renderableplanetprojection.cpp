@@ -308,10 +308,10 @@ void RenderablePlanetProjection::initializeGL() {
             return global::renderEngine->buildRenderProgram(
                 "ProjectiveProgram",
                 absPath(
-                    "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_vs.glsl"
+                    "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableplanet_vs.glsl"
                 ),
                 absPath(
-                    "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_fs.glsl"
+                    "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableplanet_fs.glsl"
                 )
             );
         }
@@ -326,11 +326,11 @@ void RenderablePlanetProjection::initializeGL() {
                 "FBOPassProgram",
                     absPath(
                         "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
-                        "renderablePlanetProjection_vs.glsl"
+                        "renderableplanetprojection_vs.glsl"
                     ),
                     absPath(
                         "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
-                        "renderablePlanetProjection_fs.glsl"
+                        "renderableplanetprojection_fs.glsl"
                     )
             );
         }

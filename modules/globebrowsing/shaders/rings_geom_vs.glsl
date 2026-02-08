@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "powerscaling/powerscalingmath.hglsl"
 
 layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_st;

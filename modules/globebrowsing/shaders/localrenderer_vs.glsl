@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.hglsl"
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.glsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.glsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/tileheight.glsl>

@@ -22,13 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#version __CONTEXT__
+#ifndef POWERSCALING_FS_H_HGLSL
+#define POWERSCALING_FS_H_HGLSL
 
-layout(location = 0) in vec4 position;
-layout(location = 1) in vec2 texCoord;
-out vec2 vTexCoord;
+#include "floatoperations.glsl"
 
-void main() {
-  vTexCoord = texCoord;
-  gl_Position = position;
+// Observable universe is 10^27m, setting the far value to extremely high, aka 30!! ERMAHGERD!
+
+#include "powerscalingmath.hglsl"
+
+float pscDepth(vec4 position) {
+  // For now: simply convert power scaled coordinates to a linear scale.
+  // TODO: get rid of power scaled coordinates and use scale graph instead.
+  //        return (position.w + log(abs(position.z) + 1/pow(k, position.w))/log(k)) / 27.0;
+  return safeLength(pscToLinear(position));
 }
+
+#endif

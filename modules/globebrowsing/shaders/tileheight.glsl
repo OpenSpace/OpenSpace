@@ -25,7 +25,7 @@
 #ifndef TILE_HEIGHT_HGLSL
 #define TILE_HEIGHT_HGLSL
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.hglsl"
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.glsl>
 
 #ifndef USE_HEIGHTMAP

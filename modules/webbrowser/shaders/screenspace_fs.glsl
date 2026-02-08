@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+#include "powerscaling/powerscaling_fs.hglsl"
 
 in vec2 vs_st;
 in vec4 vs_position;

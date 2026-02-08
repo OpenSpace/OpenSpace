@@ -24,27 +24,35 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.hglsl"
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
-out vec4 vs_ndc;
-out vec4 vs_normal;
+out vec2 vs_st;
+out vec3 vs_normalViewSpace;
+out float vs_depth;
+out vec4 vs_positionCameraSpace;
 
-uniform mat4 ProjectorMatrix;
-uniform mat4 ModelTransform;
+uniform mat4 modelViewTransform;
+uniform mat4 projectionTransform;
 uniform mat4 meshTransform;
 uniform mat4 meshNormalTransform;
 
 
 void main() {
-  vec4 raw_pos = psc_to_meter(meshTransform * in_position, vec2(1.0, 0.0));
-  vec4 position = ProjectorMatrix * ModelTransform * raw_pos;
-  vs_normal = normalize(ModelTransform * meshNormalTransform * vec4(in_normal, 0.0));
-  vs_ndc = position / position.w;
+  vec4 position = meshTransform * in_position;
+  vs_positionCameraSpace = modelViewTransform * position;
+  vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
 
-  vec2 texco = (in_st * 2.0) - 1.0;
-  gl_Position = vec4(texco, 0.0, 1.0);
+  vs_st = in_st;
+  vec4 p = z_normalization(positionClipSpace);
+  vs_depth = p.w;
+  gl_Position = p;
+
+  // The normal transform should be the transposed inverse of the model transform?
+  vs_normalViewSpace = normalize(
+    mat3(modelViewTransform) * (mat3(meshNormalTransform) * in_normal)
+  );
 }

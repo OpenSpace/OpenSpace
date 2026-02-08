@@ -695,7 +695,7 @@ std::pair<GLuint, GLuint> AtmosphereDeferredcaster::calculateDeltaS() {
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
         "InScattering Program",
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
-        absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_calc_fs.glsl"),
+        absPath("${MODULE_ATMOSPHERE}/shaders/inscattering_calc_fs.glsl"),
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
     );
     program->activate();
@@ -750,7 +750,7 @@ void AtmosphereDeferredcaster::calculateIrradiance() {
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
         "DeltaE Program",
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
-        absPath("${MODULE_ATMOSPHERE}/shaders/deltaE_calc_fs.glsl")
+        absPath("${MODULE_ATMOSPHERE}/shaders/delta_e_calc_fs.glsl")
     );
     program->activate();
 
@@ -780,7 +780,7 @@ void AtmosphereDeferredcaster::calculateInscattering(GLuint deltaSRayleigh,
     std::unique_ptr<ProgramObject> program = ProgramObject::Build(
         "deltaSCalcProgram",
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
-        absPath("${MODULE_ATMOSPHERE}/shaders/deltaS_calc_fs.glsl"),
+        absPath("${MODULE_ATMOSPHERE}/shaders/delta_s_calc_fs.glsl"),
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
     );
     program->activate();
@@ -1043,7 +1043,7 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
     std::unique_ptr<ProgramObject> deltaJProgram = ProgramObject::Build(
         "DeltaJ Program",
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
-        absPath("${MODULE_ATMOSPHERE}/shaders/deltaJ_calc_fs.glsl"),
+        absPath("${MODULE_ATMOSPHERE}/shaders/delta_j_calc_fs.glsl"),
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
     );
     std::unique_ptr<ProgramObject> irradianceSupTermsProgram = ProgramObject::Build(
@@ -1054,7 +1054,7 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
     std::unique_ptr<ProgramObject> inScatteringSupTermsProgram = ProgramObject::Build(
         "InScatteringSupTerms Program",
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
-        absPath("${MODULE_ATMOSPHERE}/shaders/inScattering_sup_calc_fs.glsl"),
+        absPath("${MODULE_ATMOSPHERE}/shaders/inscattering_sup_calc_fs.glsl"),
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
     );
     std::unique_ptr<ProgramObject> irradianceFinalProgram = ProgramObject::Build(
@@ -1065,7 +1065,7 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
     std::unique_ptr<ProgramObject> deltaSSupTermsProgram = ProgramObject::Build(
         "DeltaSSUPTerms Program",
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_vs.glsl"),
-        absPath("${MODULE_ATMOSPHERE}/shaders/deltaS_sup_calc_fs.glsl"),
+        absPath("${MODULE_ATMOSPHERE}/shaders/delta_s_sup_calc_fs.glsl"),
         absPath("${MODULE_ATMOSPHERE}/shaders/calculation_gs.glsl")
     );
 

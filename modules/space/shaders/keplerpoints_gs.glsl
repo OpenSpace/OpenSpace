@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "powerscaling/powerscalingmath.hglsl"
 
 layout(lines) in;
 flat in float currentRevolutionFraction[];

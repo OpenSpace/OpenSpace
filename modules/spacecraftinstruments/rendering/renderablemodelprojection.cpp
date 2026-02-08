@@ -161,8 +161,8 @@ bool RenderableModelProjection::isReady() const {
 void RenderableModelProjection::initializeGL() {
     _programObject = global::renderEngine->buildRenderProgram(
         "ModelShader",
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_vs.glsl"),
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModel_fs.glsl")
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodel_vs.glsl"),
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodel_fs.glsl")
     );
 
     ghoul::opengl::updateUniformLocations(*_programObject, _mainUniformCache);
@@ -170,10 +170,10 @@ void RenderableModelProjection::initializeGL() {
     _fboProgramObject = ghoul::opengl::ProgramObject::Build(
         "ProjectionPass",
         absPath(
-            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelProjection_vs.glsl"
+            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodelprojection_vs.glsl"
         ),
         absPath(
-            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelProjection_fs.glsl"
+            "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodelprojection_fs.glsl"
         )
     );
 
@@ -181,8 +181,8 @@ void RenderableModelProjection::initializeGL() {
 
     _depthFboProgramObject = ghoul::opengl::ProgramObject::Build(
         "DepthPass",
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelDepth_vs.glsl"),
-        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableModelDepth_fs.glsl")
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodeldepth_vs.glsl"),
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablemodeldepth_fs.glsl")
     );
 
     ghoul::opengl::updateUniformLocations(*_depthFboProgramObject, _depthFboUniformCache);

@@ -1163,8 +1163,8 @@ void FramebufferRenderer::updateHDRAndFiltering() {
 
     _hdrFilteringProgram = ghoul::opengl::ProgramObject::Build(
         "HDR and Filtering Program",
-        absPath("${SHADERS}/framebuffer/hdrAndFiltering.vert"),
-        absPath("${SHADERS}/framebuffer/hdrAndFiltering.frag")
+        absPath("${SHADERS}/framebuffer/hdr_and_filtering.vert"),
+        absPath("${SHADERS}/framebuffer/hdr_and_filtering.frag")
     );
 }
 
@@ -1183,8 +1183,8 @@ void FramebufferRenderer::updateDownscaledVolume() {
 
     _downscaledVolumeProgram = ghoul::opengl::ProgramObject::Build(
         "Write Downscaled Volume Program",
-        absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.vert"),
-        absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.frag")
+        absPath("${SHADERS}/framebuffer/mergedownscaledvolume.vert"),
+        absPath("${SHADERS}/framebuffer/mergedownscaledvolume.frag")
     );
 }
 

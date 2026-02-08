@@ -689,9 +689,9 @@ void RenderableModel::initializeGL() {
         "ModelOpacityProgram",
         [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             const std::filesystem::path vs =
-                absPath("${MODULE_BASE}/shaders/modelOpacity_vs.glsl");
+                absPath("${MODULE_BASE}/shaders/modelopacity_vs.glsl");
             const std::filesystem::path fs =
-                absPath("${MODULE_BASE}/shaders/modelOpacity_fs.glsl");
+                absPath("${MODULE_BASE}/shaders/modelopacity_fs.glsl");
 
             return global::renderEngine->buildRenderProgram(
                 "ModelOpacityProgram",

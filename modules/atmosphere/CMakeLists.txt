@@ -42,12 +42,12 @@ set(SHADER_FILES
   shaders/atmosphere_deferred_fs.glsl
   shaders/calculation_gs.glsl
   shaders/calculation_vs.glsl
-  shaders/deltaE_calc_fs.glsl
-  shaders/deltaJ_calc_fs.glsl
-  shaders/deltaS_calc_fs.glsl
-  shaders/deltaS_sup_calc_fs.glsl
-  shaders/inScattering_calc_fs.glsl
-  shaders/inScattering_sup_calc_fs.glsl
+  shaders/delta_e_calc_fs.glsl
+  shaders/delta_j_calc_fs.glsl
+  shaders/delta_s_calc_fs.glsl
+  shaders/delta_s_sup_calc_fs.glsl
+  shaders/inscattering_calc_fs.glsl
+  shaders/inscattering_sup_calc_fs.glsl
   shaders/irradiance_calc_fs.glsl
   shaders/irradiance_final_fs.glsl
   shaders/irradiance_sup_calc_fs.glsl

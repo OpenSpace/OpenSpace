@@ -22,20 +22,69 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef POWERSCALING_FS_H_HGLSL
-#define POWERSCALING_FS_H_HGLSL
+#version __CONTEXT__
 
-#include "floatoperations.glsl"
+#include "powerscaling/powerscaling_vs.hglsl"
 
-// Observable universe is 10^27m, setting the far value to extremely high, aka 30!! ERMAHGERD!
+in vec2 vs_position;
 
-#include "powerScalingMath.hglsl"
+layout (location = 0) out vec4 color;
+layout (location = 1) out vec4 stencil;
 
-float pscDepth(vec4 position) {
-  // For now: simply convert power scaled coordinates to a linear scale.
-  // TODO: get rid of power scaled coordinates and use scale graph instead.
-  //        return (position.w + log(abs(position.z) + 1/pow(k, position.w))/log(k)) / 27.0;
-  return safeLength(pscToLinear(position));
+uniform sampler2D projectionTexture;
+uniform mat4 ProjectorMatrix;
+uniform mat4 ModelTransform;
+uniform vec3 radius;
+uniform int segments;
+uniform vec3 boresight;
+
+const float M_PI = 3.14159265358979323846;
+
+
+vec4 uvToModel(vec2 uv, vec3 radius, float segments) {
+  float fj = uv.x * segments;
+  float fi = (1.0 - uv.y) * segments;
+
+  float theta = fi * M_PI / segments;  // 0 -> PI
+  float phi   = fj * M_PI * 2.0 / segments;
+
+  float x = radius.x * sin(theta) * cos(phi);
+  float y = radius.y * sin(theta) * sin(phi);
+  float z = radius.z * cos(theta);
+
+  return vec4(x, y, z, 0.0);
 }
 
-#endif
+bool inRange(float x, float a, float b) {
+  return (x >= a && x <= b);
+}
+
+
+void main() {
+  vec2 uv = (vs_position + vec2(1.0)) / vec2(2.0);
+
+  vec4 vertex = uvToModel(uv, radius, segments);
+
+  vec4 raw_pos = psc_to_meter(vertex, vec2(1.0, 0.0));
+  vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;
+
+  projected.x /= projected.w;
+  projected.y /= projected.w;
+
+  projected = projected * 0.5 + vec4(0.5);
+
+  vec3 normal = normalize((ModelTransform * vec4(vertex.xyz, 0.0)).xyz);
+
+  vec3 v_b = normalize(boresight);
+
+  if ((inRange(projected.x, 0.0, 1.0) && inRange(projected.y, 0.0, 1.0)) &&
+      dot(v_b, normal) < 0.0)
+  {
+    color = texture(projectionTexture, vec2(projected.x, projected.y));
+    stencil = vec4(1.0);
+  }
+  else {
+    color = vec4(0.0);
+    stencil = vec4(0.0);
+  }
+}

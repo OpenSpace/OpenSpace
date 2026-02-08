@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 #include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+#include "powerscaling/powerscaling_fs.hglsl"
 
 in vec4 gs_color;
 in vec4 gs_position;

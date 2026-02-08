@@ -24,49 +24,27 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.hglsl"
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
-out vec3 vs_normal;
-out vec2 vs_st;
-out float vs_depth;
+out vec4 vs_ndc;
+out vec4 vs_normal;
 
-uniform mat4 modelTransform;
-uniform mat4 modelViewProjectionTransform;
-uniform bool hasHeightMap;
-uniform float heightExaggeration;
-uniform sampler2D heightTexture;
-uniform bool meridianShift;
+uniform mat4 ProjectorMatrix;
+uniform mat4 ModelTransform;
+uniform mat4 meshTransform;
+uniform mat4 meshNormalTransform;
 
 
 void main() {
-  vs_st = in_st;
+  vec4 raw_pos = psc_to_meter(meshTransform * in_position, vec2(1.0, 0.0));
+  vec4 position = ProjectorMatrix * ModelTransform * raw_pos;
+  vs_normal = normalize(ModelTransform * meshNormalTransform * vec4(in_normal, 0.0));
+  vs_ndc = position / position.w;
 
-  vec3 tmp = in_position.xyz;
-
-  // This is wrong for the normal.
-  // The normal transform is the transposed inverse of the model transform
-  vs_normal = normalize(modelTransform * vec4(in_normal, 0.0)).xyz;
-
-  if (hasHeightMap) {
-    vec2 st = vs_st;
-    if (meridianShift) {
-      st += vec2(0.5, 0.0);
-    }
-    float height = texture(heightTexture, st).s;
-    vec3 displacementDirection = normalize(tmp);
-    float displacementFactor = height * heightExaggeration;
-    tmp += displacementDirection * displacementFactor;
-  }
-
-  // convert from psc to homogeneous coordinates
-  vec4 position = vec4(tmp, 1.0);
-  vec4 positionClipSpace = modelViewProjectionTransform * position;
-  vec4 p = z_normalization(positionClipSpace);
-
-  vs_depth = p.w;
-  gl_Position = p;
+  vec2 texco = (in_st * 2.0) - 1.0;
+  gl_Position = vec4(texco, 0.0, 1.0);
 }

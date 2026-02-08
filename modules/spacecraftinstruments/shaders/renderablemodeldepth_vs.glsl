@@ -24,15 +24,15 @@
 
 #version __CONTEXT__
 
-in vec2 vTexCoord;
-layout (location = 0) out vec4 finalColor;
+#include "powerscaling/powerscaling_vs.hglsl"
 
-uniform int currentSample;
-uniform sampler2DMS pixelSizeTexture;
+layout(location = 0) in vec4 in_position;
+
+uniform mat4 ProjectorMatrix;
+uniform mat4 ModelTransform;
+
 
 void main() {
-  finalColor = vec4(
-    texelFetch(pixelSizeTexture, ivec2(vTexCoord), currentSample).rgb,
-    1.0
-  );
+  gl_Position =
+    ProjectorMatrix * ModelTransform * psc_to_meter(in_position, vec2(1.0, 0.0));
 }

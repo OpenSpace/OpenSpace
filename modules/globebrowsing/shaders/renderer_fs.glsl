@@ -27,7 +27,7 @@
 #include <${MODULE_GLOBEBROWSING}/shaders/tile.glsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.glsl>
 #include <${MODULE_GLOBEBROWSING}/shaders/tileheight.glsl>
-#include "PowerScaling/powerScaling_fs.hglsl"
+#include "powerscaling/powerscaling_fs.hglsl"
 
 // Below are all the tiles that are used for contributing the actual fragment color
 

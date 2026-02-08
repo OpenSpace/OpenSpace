@@ -22,48 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef POWERSCALING_VS_H_HGLSL
-#define POWERSCALING_VS_H_HGLSL
+#include "powerscaling/powerscaling_fs.hglsl"
+#include "fragment.glsl"
 
-uniform vec4 campos;
-uniform mat4 camrot;
-uniform vec2 scaling;
+in vec3 vs_normal;
+in vec2 vs_st;
+in float vs_depth;
+
+uniform sampler2D baseTexture;
+uniform sampler2D projectionTexture;
+uniform bool meridianShift;
+uniform float ambientBrightness;
+uniform float projectionFading;
+uniform bool hasBaseMap;
 uniform vec4 objpos;
+uniform vec3 sun_pos;
 
-#include "powerScalingMath.hglsl"
 
-vec4 psc_to_meter(vec4 v1, vec2 v2) {
-  float factor = v2.x * pow(k,v2.y + v1.w);
-  return vec4(v1.xyz * factor, 1.0);
-}
-
-// vertexPosition is returned as the transformed vertex in OS Camera Rig Space in PSC
-vec4 pscTransform(inout vec4 vertexPosition, mat4 modelTransform) {
-  vec3 local_vertex_pos = mat3(modelTransform) * vertexPosition.xyz;
-
-  // PSC addition; local vertex position and the object power scaled world position
-  vertexPosition = psc_addition(vec4(local_vertex_pos,vertexPosition.w),objpos);
-
-  // PSC addition; rotated and viewscaled vertex and the cameras negative position
-  vertexPosition = psc_addition(vertexPosition,vec4(-campos.xyz,campos.w));
-
-  // rotate the camera
-  vertexPosition.xyz =  mat3(camrot) * vertexPosition.xyz;
-  vec4 tmp = vertexPosition;
-
-  float ds = scaling.y - vertexPosition.w;
-  if (ds >= 0) {
-    vertexPosition = vec4(vertexPosition.xyz * scaling.x * pow(k, vertexPosition.w), scaling.y);
-  }
-  else {
-    vertexPosition = vec4(vertexPosition.xyz * scaling.x * pow(k, scaling.y), vertexPosition.w);
+Fragment getFragment() {
+  vec2 st = vs_st;
+  if (meridianShift) {
+    st.s += 0.5;
   }
 
-  // project using the rescaled coordinates,
-  tmp = psc_to_meter(tmp, scaling);
+  vec3 n = normalize(vs_normal);
+  vec3 l_dir = normalize(sun_pos - objpos.xyz);
+  float intensity = min(max(5.0 * dot(n, l_dir), ambientBrightness), 1.0);
 
-  // Return the vertex tranformed to OS Camera Rig Space in meters
-  return tmp;
+  vec4 textureColor = vec4(0.2, 0.2, 0.2, 1.0);
+  if (hasBaseMap) {
+    textureColor = texture(baseTexture, st);
+  }
+  vec4 projectionColor = texture(projectionTexture, vs_st);
+  if (projectionColor.a != 0.0) {
+    textureColor.rgb = mix(
+      textureColor.rgb,
+      projectionColor.rgb,
+      min(projectionFading, projectionColor.a)
+    );
+  }
+
+  Fragment frag;
+  frag.color = max(intensity * textureColor, vec4(0.0, 0.0, 0.0, 1.0));
+  frag.depth = vs_depth;
+
+  return frag;
 }
-
-#endif
