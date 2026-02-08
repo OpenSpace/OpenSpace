@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-#include "powerscaling/powerscalingmath.hglsl"
+#include "powerscaling/powerscalingmath.glsl"
 
 layout(points) in;
 in vec3 vs_bvLumAbsMag[];

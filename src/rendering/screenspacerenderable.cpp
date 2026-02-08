@@ -522,7 +522,7 @@ void ScreenSpaceRenderable::createShaders(ghoul::Dictionary dict) {
     ghoul::Dictionary rendererData;
     rendererData.setValue(
         "fragmentRendererPath",
-        std::string("${SHADERS}/framebuffer/renderframebuffer.frag")
+        std::string("${SHADERS}/framebuffer/renderframebuffer_fs.glsl")
     );
     rendererData.setValue("windowWidth", res.x);
     rendererData.setValue("windowHeight", res.y);
@@ -540,7 +540,7 @@ void ScreenSpaceRenderable::createShaders(ghoul::Dictionary dict) {
     _shader = ghoul::opengl::ProgramObject::Build(
         "ScreenSpaceProgram",
         absPath("${MODULE_BASE}/shaders/screenspace_vs.glsl"),
-        absPath("${SHADERS}/render.frag"),
+        absPath("${SHADERS}/render_fs.glsl"),
         dict
     );
 

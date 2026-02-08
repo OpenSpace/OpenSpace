@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-#include "powerscaling/powerscalingmath.hglsl"
+#include "powerscaling/powerscalingmath.glsl"
 
 layout(points) in;
 flat in vec3 normal[]; // Point normals correspond to globe out direction, model space

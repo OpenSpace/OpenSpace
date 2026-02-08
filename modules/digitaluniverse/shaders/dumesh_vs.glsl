@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-#include "powerscaling/powerscaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 in vec3 in_position;
 

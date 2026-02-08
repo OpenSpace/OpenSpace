@@ -22,48 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef POWERSCALING_VS_H_HGLSL
-#define POWERSCALING_VS_H_HGLSL
+#ifndef POWERSCALING_FS_H_HGLSL
+#define POWERSCALING_FS_H_HGLSL
 
-uniform vec4 campos;
-uniform mat4 camrot;
-uniform vec2 scaling;
-uniform vec4 objpos;
+#include "floatoperations.glsl"
 
-#include "powerscalingmath.hglsl"
+// Observable universe is 10^27m, setting the far value to extremely high, aka 30!! ERMAHGERD!
 
-vec4 psc_to_meter(vec4 v1, vec2 v2) {
-  float factor = v2.x * pow(k,v2.y + v1.w);
-  return vec4(v1.xyz * factor, 1.0);
-}
+#include "powerscalingmath.glsl"
 
-// vertexPosition is returned as the transformed vertex in OS Camera Rig Space in PSC
-vec4 pscTransform(inout vec4 vertexPosition, mat4 modelTransform) {
-  vec3 local_vertex_pos = mat3(modelTransform) * vertexPosition.xyz;
-
-  // PSC addition; local vertex position and the object power scaled world position
-  vertexPosition = psc_addition(vec4(local_vertex_pos,vertexPosition.w),objpos);
-
-  // PSC addition; rotated and viewscaled vertex and the cameras negative position
-  vertexPosition = psc_addition(vertexPosition,vec4(-campos.xyz,campos.w));
-
-  // rotate the camera
-  vertexPosition.xyz =  mat3(camrot) * vertexPosition.xyz;
-  vec4 tmp = vertexPosition;
-
-  float ds = scaling.y - vertexPosition.w;
-  if (ds >= 0) {
-    vertexPosition = vec4(vertexPosition.xyz * scaling.x * pow(k, vertexPosition.w), scaling.y);
-  }
-  else {
-    vertexPosition = vec4(vertexPosition.xyz * scaling.x * pow(k, scaling.y), vertexPosition.w);
-  }
-
-  // project using the rescaled coordinates,
-  tmp = psc_to_meter(tmp, scaling);
-
-  // Return the vertex tranformed to OS Camera Rig Space in meters
-  return tmp;
+float pscDepth(vec4 position) {
+  // For now: simply convert power scaled coordinates to a linear scale.
+  // TODO: get rid of power scaled coordinates and use scale graph instead.
+  //        return (position.w + log(abs(position.z) + 1/pow(k, position.w))/log(k)) / 27.0;
+  return safeLength(pscToLinear(position));
 }
 
 #endif

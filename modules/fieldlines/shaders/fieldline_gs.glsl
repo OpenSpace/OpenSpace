@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-#include "powerscaling/powerscaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 layout(lines_adjacency) in;
 in vec4 vs_color[];

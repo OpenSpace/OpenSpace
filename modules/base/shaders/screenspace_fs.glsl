@@ -24,7 +24,7 @@
 
 #include "fragment.glsl"
 #include "hdr.glsl"
-#include "powerscaling/powerscaling_fs.hglsl"
+#include "powerscaling/powerscaling_fs.glsl"
 
 in vec2 vs_st;
 in float vs_depth;

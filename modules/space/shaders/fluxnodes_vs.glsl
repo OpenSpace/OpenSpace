@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-#include "powerscaling/powerscalingmath.hglsl"
+#include "powerscaling/powerscalingmath.glsl"
 
 layout(location = 0) in vec3 in_position; // in meters
 layout(location = 1) in float fluxValue; // the extra value used to color lines

@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-#include "powerscaling/powerscalingmath.hglsl"
+#include "powerscaling/powerscalingmath.glsl"
 
 layout(location = 0) in vec4 vertPosition;
 

@@ -25,7 +25,7 @@
 #ifndef TILE_VERTEX_SKIRT_HGLSL
 #define TILE_VERTEX_SKIRT_HGLSL
 
-#include "powerscaling/powerscaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 uniform int xSegments;
 uniform float skirtLength;

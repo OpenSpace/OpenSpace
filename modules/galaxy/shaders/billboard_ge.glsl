@@ -25,7 +25,7 @@
 #version __CONTEXT__
 
 #include "floatoperations.glsl"
-#include "powerscaling/powerscalingmath.hglsl"
+#include "powerscaling/powerscalingmath.glsl"
 
 layout(points) in;
 in vec4 vs_gPosition[];

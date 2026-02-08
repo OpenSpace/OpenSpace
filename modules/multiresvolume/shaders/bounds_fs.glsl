@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "powerscaling/powerscaling_fs.hglsl"
+#include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
 
 in vec3 vPosition;

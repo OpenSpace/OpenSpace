@@ -59,14 +59,14 @@ namespace {
     constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
     constexpr std::string_view ExitFragmentShaderPath =
-        "${SHADERS}/framebuffer/exitframebuffer.frag";
+        "${SHADERS}/framebuffer/exitframebuffer_fs.glsl";
     constexpr std::string_view RaycastFragmentShaderPath =
-        "${SHADERS}/framebuffer/raycastframebuffer.frag";
-    constexpr std::string_view GetEntryInsidePath = "${SHADERS}/framebuffer/inside.glsl";
+        "${SHADERS}/framebuffer/raycastframebuffer_fs.glsl";
+    constexpr std::string_view GetEntryInsidePath = "${SHADERS}/framebuffer/inside.hglsl";
     constexpr std::string_view GetEntryOutsidePath =
-        "${SHADERS}/framebuffer/outside.glsl";
+        "${SHADERS}/framebuffer/outside.hglsl";
     constexpr std::string_view RenderFragmentShaderPath =
-        "${SHADERS}/framebuffer/renderframebuffer.frag";
+        "${SHADERS}/framebuffer/renderframebuffer_fs.glsl";
 
     constexpr std::array<GLenum, 4> ColorAttachmentArray = {
        GL_COLOR_ATTACHMENT0,
@@ -1103,7 +1103,7 @@ void FramebufferRenderer::updateRaycastData() {
             insideDict.setValue("getEntryPath", std::string(GetEntryInsidePath));
             _insideRaycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
                 std::format("Volume {} inside raycast", data.id),
-                absPath("${SHADERS}/framebuffer/resolveframebuffer.vert"),
+                absPath("${SHADERS}/framebuffer/resolveframebuffer_vs.glsl"),
                 absPath(RaycastFragmentShaderPath),
                 insideDict
             );
@@ -1163,8 +1163,8 @@ void FramebufferRenderer::updateHDRAndFiltering() {
 
     _hdrFilteringProgram = ghoul::opengl::ProgramObject::Build(
         "HDR and Filtering Program",
-        absPath("${SHADERS}/framebuffer/hdr_and_filtering.vert"),
-        absPath("${SHADERS}/framebuffer/hdr_and_filtering.frag")
+        absPath("${SHADERS}/framebuffer/hdr_and_filtering_vs.glsl"),
+        absPath("${SHADERS}/framebuffer/hdr_and_filtering_fs.glsl")
     );
 }
 
@@ -1173,8 +1173,8 @@ void FramebufferRenderer::updateFXAA() {
 
     _fxaaProgram = ghoul::opengl::ProgramObject::Build(
         "FXAA Program",
-        absPath("${SHADERS}/framebuffer/fxaa.vert"),
-        absPath("${SHADERS}/framebuffer/fxaa.frag")
+        absPath("${SHADERS}/framebuffer/fxaa_vs.glsl"),
+        absPath("${SHADERS}/framebuffer/fxaa_fs.glsl")
     );
 }
 
@@ -1183,8 +1183,8 @@ void FramebufferRenderer::updateDownscaledVolume() {
 
     _downscaledVolumeProgram = ghoul::opengl::ProgramObject::Build(
         "Write Downscaled Volume Program",
-        absPath("${SHADERS}/framebuffer/mergedownscaledvolume.vert"),
-        absPath("${SHADERS}/framebuffer/mergedownscaledvolume.frag")
+        absPath("${SHADERS}/framebuffer/mergedownscaledvolume_vs.glsl"),
+        absPath("${SHADERS}/framebuffer/mergedownscaledvolume_fs.glsl")
     );
 }
 
