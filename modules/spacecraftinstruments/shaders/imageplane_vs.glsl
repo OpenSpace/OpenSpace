@@ -22,8 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// @TODO (abock, 2019-12-27) Move this file to the spacecraftinstruments module
-
 #version __CONTEXT__
 
 #include "PowerScaling/powerScaling_vs.hglsl"

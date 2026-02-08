@@ -126,8 +126,8 @@ void RenderablePlaneProjection::initializeGL() {
 
     _shader = global::renderEngine->buildRenderProgram(
         "Image Plane",
-        absPath("${MODULE_BASE}/shaders/imageplane_vs.glsl"),
-        absPath("${MODULE_BASE}/shaders/imageplane_fs.glsl")
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/imageplane_vs.glsl"),
+        absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/imageplane_fs.glsl")
     );
 
     setTarget(_defaultTarget);

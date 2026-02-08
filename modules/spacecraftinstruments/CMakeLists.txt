@@ -72,6 +72,8 @@ set(SHADER_FILES
   shaders/crawlingline_vs.glsl
   shaders/fov_fs.glsl
   shaders/fov_vs.glsl
+  shaders/imageplane_fs.glsl
+  shaders/imageplane_vs.glsl
   shaders/renderableModel_fs.glsl
   shaders/renderableModel_vs.glsl
   shaders/renderableModelProjection_fs.glsl

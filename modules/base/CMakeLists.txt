@@ -190,8 +190,6 @@ set(SHADER_FILES
   shaders/disc_vs.glsl
   shaders/grid_vs.glsl
   shaders/grid_fs.glsl
-  shaders/imageplane_fs.glsl
-  shaders/imageplane_vs.glsl
   shaders/line_fs.glsl
   shaders/line_vs.glsl
   shaders/model_fs.glsl
