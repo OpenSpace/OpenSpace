@@ -188,21 +188,18 @@ void RenderableSphericalGrid::initializeGL() {
         }
     );
 
-    glCreateVertexArrays(1, &_vaoID);
-    glCreateBuffers(1, &_vBufferID);
+    glCreateVertexArrays(1, &_vao);
+    glCreateBuffers(1, &_vbo);
 
-    glVertexArrayVertexBuffer(_vaoID, 0, _vBufferID, 0, sizeof(Vertex));
-    glEnableVertexArrayAttrib(_vaoID, 0);
-    glVertexArrayAttribFormat(_vaoID, 0, 3, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_vaoID, 0, 0);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 }
 
 void RenderableSphericalGrid::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vaoID);
-    _vaoID = 0;
-
-    glDeleteBuffers(1, &_vBufferID);
-    _vBufferID = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
@@ -235,7 +232,7 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
 
-    glBindVertexArray(_vaoID);
+    glBindVertexArray(_vao);
 
     // Render latitude rings
     glMultiDrawArrays(
@@ -358,7 +355,7 @@ void RenderableSphericalGrid::update(const UpdateData&) {
         _longitudeRenderInfo.count.push_back(_latSegments);
     }
 
-    glNamedBufferData(_vBufferID, vertSize * sizeof(Vertex), vert.data(), GL_STATIC_DRAW);
+    glNamedBufferData(_vbo, vertSize * sizeof(Vertex), vert.data(), GL_STATIC_DRAW);
 
     _gridIsDirty = false;
 }

@@ -62,11 +62,8 @@ private:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
     ghoul::opengl::ProgramObject* _program = nullptr;
-    /// The vertex attribute location for position
-    /// must correlate to layout location in vertex shader
-    const GLuint _locVertex = 0;
-    GLuint _vaoId = 0;
-    GLuint _vBufferId = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 
     glm::dvec3 _startPos = glm::dvec3(0.0);
     glm::dvec3 _endPos = glm::dvec3(0.0);

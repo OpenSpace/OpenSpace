@@ -47,8 +47,8 @@ public:
 private:
     void updateGeometry() const;
 
-    GLuint _vaoId = 0;
-    GLuint _vBufferId = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
     glm::vec2 _size = glm::vec2(0.f);
 };
 

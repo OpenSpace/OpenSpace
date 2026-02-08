@@ -382,13 +382,13 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         RenderPhasePoints
     };
 
-    glBindVertexArray(info._vaoID);
+    glBindVertexArray(info._vao);
     if (renderLines) {
         _programObject->setUniform(_uniformCache.renderPhase, RenderPhaseLines);
         // Subclasses of this renderer might be using the index array or might now be
         // so we check if there is data available and if there isn't, we use the
         // glDrawArrays draw call; otherwise the glDrawElements
-        if (info._iBufferID == 0) {
+        if (info._ibo == 0) {
             glDrawArrays(
                 GL_LINE_STRIP,
                 info.first,
@@ -409,7 +409,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         // so we check if there is data available and if there isn't, we use the
         // glDrawArrays draw call; otherwise the glDrawElements
         _programObject->setUniform(_uniformCache.renderPhase, RenderPhasePoints);
-        if (info._iBufferID == 0) {
+        if (info._ibo == 0) {
             glDrawArrays(GL_POINTS, info.first, info.count);
         }
         else {
@@ -476,7 +476,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     // The primary information might use an index buffer, so we might need to start at an
     // offset
-    const int primaryOffset = (_primaryRenderInformation._iBufferID == 0) ?
+    const int primaryOffset = (_primaryRenderInformation._ibo == 0) ?
         0 :
         _primaryRenderInformation.first;
 
@@ -552,8 +552,8 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         );
 
         // The secondary batch is optional. We need to check whether we have any data
-        if (_floatingRenderInformation._vaoID != 0 &&
-            _floatingRenderInformation.count != 0) {
+        if (_floatingRenderInformation._vao != 0 && _floatingRenderInformation.count != 0)
+        {
             internalRender(
                 renderLines,
                 renderPoints,

@@ -67,9 +67,9 @@ private:
     UniformCache(modelViewProjectionTransform, color) _uniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    GLuint _vaoId = 0;
-    GLuint _vboId = 0;
-    GLuint _iboId = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
+    GLuint _ibo = 0;
     std::vector<float> _vertexArray;
     std::vector<uint8_t> _indexArray;
 

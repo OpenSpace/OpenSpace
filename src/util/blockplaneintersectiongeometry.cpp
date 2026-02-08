@@ -30,10 +30,6 @@
 #include <string_view>
 #include <utility>
 
-namespace {
-    constexpr std::string_view _loggerCat = "BlockPlaneIntersectionGeometry";
-} // namespace
-
 namespace openspace {
 
 BlockPlaneIntersectionGeometry::BlockPlaneIntersectionGeometry(glm::vec3 blockSize,
@@ -45,8 +41,8 @@ BlockPlaneIntersectionGeometry::BlockPlaneIntersectionGeometry(glm::vec3 blockSi
 {}
 
 BlockPlaneIntersectionGeometry::~BlockPlaneIntersectionGeometry() {
-    glDeleteBuffers(1, &_vBufferId);
-    glDeleteVertexArrays(1, &_vaoId);
+    glDeleteBuffers(1, &_vbo);
+    glDeleteVertexArrays(1, &_vao);
 }
 
 void BlockPlaneIntersectionGeometry::setBlockSize(glm::vec3 size) {
@@ -61,8 +57,6 @@ void BlockPlaneIntersectionGeometry::setPlane(const glm::vec3& normal, float dis
 }
 
 void BlockPlaneIntersectionGeometry::updateVertices() {
-    _vertices.clear();
-
     constexpr std::array<int, 24> CornersInLines = {
         0, 1,
         1, 5,
@@ -110,7 +104,7 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
     }
 
     // Gotta love intersections
-    if (nIntersections <3) {
+    if (nIntersections < 3) {
         return;
     }
 
@@ -135,44 +129,38 @@ void BlockPlaneIntersectionGeometry::updateVertices() {
         }
     );
 
-    _vertices.push_back(intersections[0].x);
-    _vertices.push_back(intersections[0].y);
-    _vertices.push_back(intersections[0].z);
-    //_vertices.push_back(_w);
+    std::vector<glm::vec3> vertices;
+    vertices.emplace_back(intersections[0].x, intersections[0].y, intersections[0].z);
     for (int i = 0; i < nIntersections - 1; i++) {
         const int j = angles[i].first;
-        _vertices.push_back(intersections[j].x);
-        _vertices.push_back(intersections[j].y);
-        _vertices.push_back(intersections[j].z);
-        //_vertices.push_back(_w);
+        vertices.emplace_back(intersections[j].x, intersections[j].y, intersections[j].z);
     }
 
+    _nVertices = static_cast<GLsizei>(vertices.size());
     glNamedBufferData(
-        _vBufferId,
-        _vertices.size() * sizeof(GLfloat),
-        _vertices.data(),
+        _vbo,
+        vertices.size() * sizeof(glm::vec3),
+        vertices.data(),
         GL_STATIC_DRAW
     );
 }
 
 bool BlockPlaneIntersectionGeometry::initialize() {
-    glCreateBuffers(1, &_vBufferId);
-    glCreateVertexArrays(1, &_vaoId);
-    glVertexArrayVertexBuffer(_vaoId, 0, _vBufferId, 0, 3 * sizeof(float));
+    glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
 
-    glEnableVertexArrayAttrib(_vaoId, 0);
-    glVertexArrayAttribFormat(_vaoId, 0, 3, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_vaoId, 0, 0);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     updateVertices();
     return true;
 }
 
 void BlockPlaneIntersectionGeometry::render() {
-    glBindVertexArray(_vaoId);
-    //glDisable(GL_CULL_FACE);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, static_cast<GLsizei>(_vertices.size() / 3));
-    //glEnable(GL_CULL_FACE);
+    glBindVertexArray(_vao);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, _nVertices);
 }
 
 } // namespace openspace

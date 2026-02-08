@@ -183,15 +183,15 @@ void RenderablePrism::initializeGL() {
     );
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
-    glCreateBuffers(1, &_vboId);
-    glCreateBuffers(1, &_iboId);
-    glCreateVertexArrays(1, &_vaoId);
-    glVertexArrayVertexBuffer(_vaoId, 0, _vboId, 0, 3 * sizeof(float));
-    glVertexArrayElementBuffer(_vaoId, _iboId);
+    glCreateBuffers(1, &_vbo);
+    glCreateBuffers(1, &_ibo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
+    glVertexArrayElementBuffer(_vao, _ibo);
 
-    glEnableVertexArrayAttrib(_vaoId, 0);
-    glVertexArrayAttribFormat(_vaoId, 0, 3, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_vaoId, 0, 0);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     updateBufferData();
 }
@@ -200,14 +200,9 @@ void RenderablePrism::deinitializeGL() {
     global::renderEngine->removeRenderProgram(_shader.get());
     _shader = nullptr;
 
-    glDeleteVertexArrays(1, &_vaoId);
-    _vaoId = 0;
-
-    glDeleteBuffers(1, &_vboId);
-    _vboId = 0;
-
-    glDeleteBuffers(1, &_iboId);
-    _iboId = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
+    glDeleteBuffers(1, &_ibo);
 }
 
 void RenderablePrism::updateVertexData() {
@@ -299,14 +294,14 @@ void RenderablePrism::updateVertexData() {
 
 void RenderablePrism::updateBufferData() {
     glNamedBufferData(
-        _vboId,
+        _vbo,
         _vertexArray.size() * sizeof(float),
         _vertexArray.data(),
         GL_STREAM_DRAW
     );
 
     glNamedBufferData(
-        _iboId,
+        _ibo,
         _indexArray.size() * sizeof(uint8_t),
         _indexArray.data(),
         GL_STREAM_DRAW
@@ -331,7 +326,7 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(255);
     glLineWidth(_lineWidth);
-    glBindVertexArray(_vaoId);
+    glBindVertexArray(_vao);
 
     glDrawElements(
         GL_LINE_LOOP,

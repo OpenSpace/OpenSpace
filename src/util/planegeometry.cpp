@@ -44,31 +44,28 @@ PlaneGeometry::PlaneGeometry(glm::vec2 size) : _size(std::move(size)) {}
 PlaneGeometry::PlaneGeometry(float size) : PlaneGeometry(glm::vec2(size, size)) {}
 
 void PlaneGeometry::initialize() {
-    glCreateBuffers(1, &_vBufferId);
-    glCreateVertexArrays(1, &_vaoId);
-    glVertexArrayVertexBuffer(_vaoId, 0, _vBufferId, 0, 4 * sizeof(float));
+    glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 4 * sizeof(float));
 
-    glEnableVertexArrayAttrib(_vaoId, 0);
-    glVertexArrayAttribFormat(_vaoId, 0, 2, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_vaoId, 0, 0);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
-    glEnableVertexArrayAttrib(_vaoId, 1);
-    glVertexArrayAttribFormat(_vaoId, 1, 2, GL_FLOAT, GL_FALSE, offsetof(VertexData, s));
-    glVertexArrayAttribBinding(_vaoId, 1, 0);
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(VertexData, s));
+    glVertexArrayAttribBinding(_vao, 1, 0);
 
     updateGeometry();
 }
 
 void PlaneGeometry::deinitialize() {
-    glDeleteVertexArrays(1, &_vaoId);
-    _vaoId = 0;
-
-    glDeleteBuffers(1, &_vBufferId);
-    _vBufferId = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 }
 
 void PlaneGeometry::render() const {
-    glBindVertexArray(_vaoId);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 }
@@ -93,7 +90,7 @@ void PlaneGeometry::updateGeometry() const {
         VertexData{  size.x,  size.y, 1.f, 1.f }
     };
 
-    glNamedBufferData(_vBufferId, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
+    glNamedBufferData(_vbo, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
 }
 
 } // namespace openspace

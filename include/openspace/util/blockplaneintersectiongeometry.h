@@ -46,9 +46,9 @@ public:
 
 private:
     void updateVertices();
-    std::vector<float> _vertices;
-    GLuint _vaoId = 0;
-    GLuint _vBufferId = 0;
+    GLsizei _nVertices = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
     glm::vec3 _size = glm::vec3(0.f);
     glm::vec3 _normal = glm::vec3(0.f);
     float _planeDistance = 0.f;

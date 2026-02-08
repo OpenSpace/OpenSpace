@@ -277,21 +277,18 @@ void RenderableNodeLine::initializeGL() {
         }
     );
 
-    glCreateBuffers(1, &_vBufferId);
-    glCreateVertexArrays(1, &_vaoId);
-    glVertexArrayVertexBuffer(_vaoId, 0, _vBufferId, 0, 3 * sizeof(float));
+    glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
 
-    glEnableVertexArrayAttrib(_vaoId, _locVertex);
-    glVertexArrayAttribFormat(_vaoId, _locVertex, 3, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_vaoId, _locVertex, 0);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 }
 
 void RenderableNodeLine::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vaoId);
-    _vaoId = 0;
-
-    glDeleteBuffers(1, &_vBufferId);
-    _vBufferId = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     BaseModule::ProgramObjectManager.release(
         "NodeLineProgram",
@@ -349,7 +346,7 @@ void RenderableNodeLine::updateVertexData() {
     };
 
     glNamedBufferStorage(
-        _vBufferId,
+        _vbo,
         Vertices.size() * sizeof(float),
         Vertices.data(),
         GL_NONE_BIT
@@ -385,7 +382,7 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(_lineWidth);
 
-    glBindVertexArray(_vaoId);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_LINES, 0, 2);
     glBindVertexArray(0);
 

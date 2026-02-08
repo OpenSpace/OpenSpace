@@ -119,24 +119,21 @@ void RenderableBoxGrid::initializeGL() {
         }
     );
 
-    glCreateBuffers(1, &_vBufferID);
-    glNamedBufferStorage(_vBufferID, 16 * sizeof(Vertex), nullptr, GL_NONE_BIT);
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, 16 * sizeof(Vertex), nullptr, GL_NONE_BIT);
 
-    glCreateVertexArrays(1, &_vaoID);
-    glVertexArrayVertexBuffer(_vaoID, 0, _vBufferID, 0, sizeof(Vertex));
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
-    glEnableVertexArrayAttrib(_vaoID, 0);
-    glVertexArrayAttribFormat(_vaoID, 0, 3, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_vaoID, 0, 0);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 }
 
 void RenderableBoxGrid::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vaoID);
-    _vaoID = 0;
-
-    glDeleteBuffers(1, &_vBufferID);
-    _vBufferID = 0;
-
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
+    
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
         [](ghoul::opengl::ProgramObject* p) {
@@ -168,7 +165,7 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_LINE_SMOOTH);
     glDepthMask(false);
 
-    glBindVertexArray(_vaoID);
+    glBindVertexArray(_vao);
     glDrawArrays(_mode, 0, 16);
     glBindVertexArray(0);
 
@@ -233,7 +230,7 @@ void RenderableBoxGrid::update(const UpdateData&) {
             Vertex{ v7.x, v7.y, v7.z },
             Vertex{ v3.x, v3.y, v3.z }
         };
-        glNamedBufferSubData(_vBufferID, 0, arr.size() * sizeof(Vertex), arr.data());
+        glNamedBufferSubData(_vbo, 0, arr.size() * sizeof(Vertex), arr.data());
 
         _gridIsDirty = false;
     }

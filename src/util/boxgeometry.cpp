@@ -32,8 +32,8 @@ namespace openspace {
 BoxGeometry::BoxGeometry(glm::vec3 size) : _size(std::move(size)) {}
 
 BoxGeometry::~BoxGeometry() {
-    glDeleteBuffers(1, &_vBufferId);
-    glDeleteVertexArrays(1, &_vaoId);
+    glDeleteBuffers(1, &_vbo);
+    glDeleteVertexArrays(1, &_vao);
 }
 
 bool BoxGeometry::initialize() {
@@ -86,21 +86,21 @@ bool BoxGeometry::initialize() {
          x, -y,  z // magenta
     };
 
-    glCreateBuffers(1, &_vBufferId);
-    glNamedBufferStorage(_vBufferId, sizeof(Vertices), Vertices.data(), GL_NONE_BIT);
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, sizeof(Vertices), Vertices.data(), GL_NONE_BIT);
 
-    glCreateVertexArrays(1, &_vaoId);
-    glVertexArrayVertexBuffer(_vaoId, 0, _vBufferId, 0, 3 * sizeof(float));
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
 
-    glEnableVertexArrayAttrib(_vaoId, 0);
-    glVertexArrayAttribFormat(_vaoId, 0, 3, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_vaoId, 0, 0);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     return true;
 }
 
 void BoxGeometry::render() const {
-    glBindVertexArray(_vaoId);  // select first VAO
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6*6);
     glBindVertexArray(0);
 }

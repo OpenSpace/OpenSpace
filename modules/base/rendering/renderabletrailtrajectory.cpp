@@ -211,62 +211,62 @@ void RenderableTrailTrajectory::initializeGL() {
     RenderableTrail::initializeGL();
 
     // We don't need an index buffer, so we keep it at the default value of 0
-    glCreateBuffers(1, &_primaryRenderInformation._vBufferID);
-    glCreateVertexArrays(1, &_primaryRenderInformation._vaoID);
+    glCreateBuffers(1, &_primaryRenderInformation._vbo);
+    glCreateVertexArrays(1, &_primaryRenderInformation._vao);
     glVertexArrayVertexBuffer(
-        _primaryRenderInformation._vaoID,
+        _primaryRenderInformation._vao,
         0,
-        _primaryRenderInformation._vBufferID,
+        _primaryRenderInformation._vbo,
         0,
         sizeof(TrailVBOLayout<float>)
     );
 
-    glEnableVertexArrayAttrib(_primaryRenderInformation._vaoID, 0);
+    glEnableVertexArrayAttrib(_primaryRenderInformation._vao, 0);
     glVertexArrayAttribFormat(
-        _primaryRenderInformation._vaoID,
+        _primaryRenderInformation._vao,
         0,
         3,
         GL_FLOAT,
         GL_FALSE,
         0
     );
-    glVertexArrayAttribBinding(_primaryRenderInformation._vaoID, 0, 0);
+    glVertexArrayAttribBinding(_primaryRenderInformation._vao, 0, 0);
 
     // We do need an additional render information bucket for the additional line from the
     // last shown permanent line to the current position of the object
-    glCreateBuffers(1, &_floatingRenderInformation._vBufferID);
-    glCreateVertexArrays(1, &_floatingRenderInformation._vaoID);
+    glCreateBuffers(1, &_floatingRenderInformation._vbo);
+    glCreateVertexArrays(1, &_floatingRenderInformation._vao);
     glVertexArrayVertexBuffer(
-        _floatingRenderInformation._vaoID,
+        _floatingRenderInformation._vao,
         0,
-        _floatingRenderInformation._vBufferID,
+        _floatingRenderInformation._vbo,
         0,
         sizeof(TrailVBOLayout<float>)
     );
 
-    glEnableVertexArrayAttrib(_floatingRenderInformation._vaoID, 0);
+    glEnableVertexArrayAttrib(_floatingRenderInformation._vao, 0);
     glVertexArrayAttribFormat(
-        _floatingRenderInformation._vaoID,
+        _floatingRenderInformation._vao,
         0,
         3,
         GL_FLOAT,
         GL_FALSE,
         0
     );
-    glVertexArrayAttribBinding(_floatingRenderInformation._vaoID, 0, 0);
+    glVertexArrayAttribBinding(_floatingRenderInformation._vao, 0, 0);
 
     _floatingRenderInformation.sorting = RenderInformation::VertexSorting::OldestFirst;
 
-    _secondaryRenderInformation._vaoID = _primaryRenderInformation._vaoID;
-    _secondaryRenderInformation._vBufferID = _primaryRenderInformation._vBufferID;
+    _secondaryRenderInformation._vao = _primaryRenderInformation._vao;
+    _secondaryRenderInformation._vbo = _primaryRenderInformation._vbo;
 }
 
 void RenderableTrailTrajectory::deinitializeGL() {
-    glDeleteVertexArrays(1, &_primaryRenderInformation._vaoID);
-    glDeleteBuffers(1, &_primaryRenderInformation._vBufferID);
+    glDeleteVertexArrays(1, &_primaryRenderInformation._vao);
+    glDeleteBuffers(1, &_primaryRenderInformation._vbo);
 
-    glDeleteVertexArrays(1, &_floatingRenderInformation._vaoID);
-    glDeleteBuffers(1, &_floatingRenderInformation._vBufferID);
+    glDeleteVertexArrays(1, &_floatingRenderInformation._vao);
+    glDeleteBuffers(1, &_floatingRenderInformation._vbo);
 
     RenderableTrail::deinitializeGL();
 }
@@ -322,7 +322,7 @@ void RenderableTrailTrajectory::updateBuffer() {
 
     // Upload vertices to the GPU
     glNamedBufferData(
-        _primaryRenderInformation._vBufferID,
+        _primaryRenderInformation._vbo,
         _vertexArray.size() * sizeof(TrailVBOLayout<float>),
         _vertexArray.data(),
         GL_STATIC_DRAW
@@ -499,7 +499,7 @@ void RenderableTrailTrajectory::update(const UpdateData& data) {
         }
 
         glNamedBufferData(
-            _floatingRenderInformation._vBufferID,
+            _floatingRenderInformation._vbo,
             _replacementPoints.size() * sizeof(TrailVBOLayout<float>),
             _replacementPoints.data(),
             GL_DYNAMIC_DRAW

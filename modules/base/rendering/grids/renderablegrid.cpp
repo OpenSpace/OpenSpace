@@ -209,34 +209,30 @@ void RenderableGrid::initializeGL() {
         }
     );
 
-    glCreateBuffers(1, &_vBufferID);
-    glCreateVertexArrays(1, &_vaoID);
-    glVertexArrayVertexBuffer(_vaoID, 0, _vBufferID, 0, sizeof(Vertex));
+    glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
-    glEnableVertexArrayAttrib(_vaoID, 0);
-    glVertexArrayAttribFormat(_vaoID, 0, 3, GL_DOUBLE, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_vaoID, 0, 0);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_DOUBLE, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
 
-    glCreateBuffers(1, &_highlightVBufferID);
-    glCreateVertexArrays(1, &_highlightVaoID);
-    glVertexArrayVertexBuffer(_highlightVaoID, 0, _highlightVBufferID, 0, sizeof(Vertex));
+    glCreateBuffers(1, &_highlightVbo);
+    glCreateVertexArrays(1, &_highlightVao);
+    glVertexArrayVertexBuffer(_highlightVao, 0, _highlightVbo, 0, sizeof(Vertex));
 
-    glEnableVertexArrayAttrib(_highlightVaoID, 0);
-    glVertexArrayAttribFormat(_highlightVaoID, 0, 3, GL_DOUBLE, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_highlightVaoID, 0, 0);
+    glEnableVertexArrayAttrib(_highlightVao, 0);
+    glVertexArrayAttribFormat(_highlightVao, 0, 3, GL_DOUBLE, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_highlightVao, 0, 0);
 }
 
 void RenderableGrid::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vaoID);
-    _vaoID = 0;
-    glDeleteVertexArrays(1, &_highlightVaoID);
-    _highlightVaoID = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteVertexArrays(1, &_highlightVao);
 
-    glDeleteBuffers(1, &_vBufferID);
-    _vBufferID = 0;
-    glDeleteBuffers(1, &_highlightVBufferID);
-    _highlightVBufferID = 0;
+    glDeleteBuffers(1, &_vbo);
+    glDeleteBuffers(1, &_highlightVbo);
 
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
@@ -292,7 +288,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_DEPTH_TEST);
 
     // Render minor grid
-    glBindVertexArray(_vaoID);
+    glBindVertexArray(_vao);
     glDrawArrays(_mode, 0, static_cast<GLsizei>(_varray.size()));
 
     // Render major grid
@@ -303,7 +299,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&) {
 #endif // __APPLE__
     _gridProgram->setUniform("gridColor", _highlightColor);
 
-    glBindVertexArray(_highlightVaoID);
+    glBindVertexArray(_highlightVao);
     glDrawArrays(_mode, 0, static_cast<GLsizei>(_highlightArray.size()));
 
     // Restore GL State
@@ -437,7 +433,7 @@ void RenderableGrid::update(const UpdateData&) {
 
     // Minor grid
     glNamedBufferData(
-        _vBufferID,
+        _vbo,
         _varray.size() * sizeof(Vertex),
         _varray.data(),
         GL_STATIC_DRAW
@@ -445,7 +441,7 @@ void RenderableGrid::update(const UpdateData&) {
 
     // Major grid
     glNamedBufferData(
-        _highlightVBufferID,
+        _highlightVbo,
         _highlightArray.size() * sizeof(Vertex),
         _highlightArray.data(),
         GL_STATIC_DRAW
