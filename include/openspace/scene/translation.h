@@ -46,7 +46,7 @@ public:
         const ghoul::Dictionary& dictionary);
 
     explicit Translation(const ghoul::Dictionary& dictionary);
-    virtual ~Translation() override = default;
+    ~Translation() override = default;
 
     virtual void initialize();
 

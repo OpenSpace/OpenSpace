@@ -55,7 +55,7 @@ public:
     explicit OpenSpaceModule(std::string name);
 
     /// Default destructor
-    virtual ~OpenSpaceModule() override = default;
+    ~OpenSpaceModule() override = default;
 
     /**
      * Initialization method that will register a token of the form

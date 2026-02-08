@@ -42,7 +42,7 @@ class Translation;
 class ScreenSpaceRenderableRenderable : public ScreenSpaceRenderableFramebuffer {
 public:
     explicit ScreenSpaceRenderableRenderable(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceRenderableRenderable() override;
+    ~ScreenSpaceRenderableRenderable() override;
 
     void initialize() override;
     void initializeGL() override;

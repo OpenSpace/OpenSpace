@@ -63,7 +63,7 @@ public:
     static constexpr std::string_view KeyIdentifier = "Identifier";
 
     explicit ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceRenderable() override;
+    ~ScreenSpaceRenderable() override;
 
     struct RenderData {
         float blackoutFactor;

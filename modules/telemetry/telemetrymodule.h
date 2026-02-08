@@ -80,8 +80,8 @@ public:
      */
     std::vector<scripting::LuaLibrary> luaLibraries() const override;
 
-    virtual void internalInitialize(const ghoul::Dictionary& dictionary) override;
-    virtual void internalDeinitialize() override;
+    void internalInitialize(const ghoul::Dictionary& dictionary) override;
+    void internalDeinitialize() override;
 
     /**
      * Get the list of telemetries that are currently registered in the module.

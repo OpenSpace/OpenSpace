@@ -85,7 +85,7 @@ public:
         properties::FloatProperty lineFadeAmount;
     };
 
-    virtual ~RenderableTrail() override = default;
+    ~RenderableTrail() override = default;
 
     void initialize() override;
     void initializeGL() override;

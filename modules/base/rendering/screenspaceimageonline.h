@@ -38,7 +38,7 @@ namespace openspace {
 class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceImageOnline() override;
+    ~ScreenSpaceImageOnline() override;
 
     void deinitializeGL() override;
 

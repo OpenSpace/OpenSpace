@@ -42,13 +42,13 @@ class RenderableConstellationsBase : public Renderable {
 public:
     virtual ~RenderableConstellationsBase() override = default;
 
-    virtual void initialize() override;
-    virtual void initializeGL() override = 0;
-    virtual void deinitializeGL() override = 0;
+    void initialize() override;
+    void initializeGL() override = 0;
+    void deinitializeGL() override = 0;
 
-    virtual bool isReady() const override;
+    bool isReady() const override;
 
-    virtual void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
 
     static documentation::Documentation Documentation();
 

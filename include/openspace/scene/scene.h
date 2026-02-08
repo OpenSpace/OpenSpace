@@ -84,7 +84,7 @@ public:
     };
 
     explicit Scene(std::unique_ptr<SceneInitializer> initializer);
-    virtual ~Scene() override;
+    ~Scene() override;
 
     /**
      * Attach node to the root.

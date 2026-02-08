@@ -47,7 +47,7 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
-    virtual void update(const UpdateData& data) final override;
+    void update(const UpdateData& data) final override;
 
     ghoul::opengl::Texture& baseTexture() const;
 

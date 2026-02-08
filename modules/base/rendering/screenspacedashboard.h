@@ -37,7 +37,7 @@ namespace scripting { struct LuaLibrary; }
 class ScreenSpaceDashboard : public ScreenSpaceRenderableFramebuffer {
 public:
     explicit ScreenSpaceDashboard(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceDashboard() override = default;
+    ~ScreenSpaceDashboard() override = default;
 
     void initializeGL() override;
 

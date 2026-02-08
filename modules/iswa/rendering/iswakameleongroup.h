@@ -39,7 +39,7 @@ public:
     IswaKameleonGroup(std::string name, std::string type);
     virtual ~IswaKameleonGroup();
 
-    virtual void clearGroup() override;
+    void clearGroup() override;
 
     std::set<std::string> fieldlineValue() const;
     void setFieldlineInfo(std::filesystem::path fieldlineIndexFile,

@@ -174,9 +174,9 @@ public:
      */
     virtual void updateRendererData();
 
-    virtual void raycastersChanged(VolumeRaycaster& raycaster,
+    void raycastersChanged(VolumeRaycaster& raycaster,
         RaycasterListener::IsAttached attached) override;
-    virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
+    void deferredcastersChanged(Deferredcaster& deferredcaster,
         DeferredcasterListener::IsAttached isAttached) override;
 
     void registerShadowCaster(const std::string& shadowGroup,

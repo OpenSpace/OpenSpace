@@ -80,7 +80,7 @@ protected:
      * Optional interface method. this has an implementation in datacygnet.cpp, but needs
      * to be overriden for KameleonPlane.
      */
-    virtual bool updateTextureResource() override;
+    bool updateTextureResource() override;
 
     virtual std::vector<float*> textureData() = 0;
 
