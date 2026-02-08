@@ -262,8 +262,7 @@ void RenderableConstellationLines::initializeGL() {
 
 void RenderableConstellationLines::deinitializeGL() {
     using ConstellationKeyValuePair = std::pair<const int, ConstellationLine>;
-    for (const ConstellationKeyValuePair& pair : _renderingConstellationsMap)
-    {
+    for (const ConstellationKeyValuePair& pair : _renderingConstellationsMap) {
         glDeleteVertexArrays(1, &pair.second.vaoArray);
         glDeleteBuffers(1, &pair.second.vboArray);
     }
