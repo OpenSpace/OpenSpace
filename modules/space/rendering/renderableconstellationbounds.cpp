@@ -195,9 +195,7 @@ void RenderableConstellationBounds::initializeGL() {
 
 void RenderableConstellationBounds::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
 
     if (_program) {
         global::renderEngine->removeRenderProgram(_program.get());

@@ -372,10 +372,7 @@ RenderableRadialGrid::GeometryData::operator=(GeometryData&& other) noexcept
 
 RenderableRadialGrid::GeometryData::~GeometryData() {
     glDeleteVertexArrays(1, &vao);
-    vao = 0;
-
     glDeleteBuffers(1, &vbo);
-    vbo = 0;
 }
 
 void RenderableRadialGrid::GeometryData::update() const {

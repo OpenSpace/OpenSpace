@@ -81,9 +81,7 @@ RenderablePolygonCloud::RenderablePolygonCloud(const ghoul::Dictionary& dictiona
 
 void RenderablePolygonCloud::deinitializeGL() {
     glDeleteBuffers(1, &_polygonVbo);
-    _polygonVbo = 0;
     glDeleteVertexArrays(1, &_polygonVao);
-    _polygonVao = 0;
 
     glDeleteTextures(1, &_pTexture);
 

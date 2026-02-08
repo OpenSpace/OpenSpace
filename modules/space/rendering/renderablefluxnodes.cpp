@@ -579,16 +579,9 @@ void RenderableFluxNodes::setupProperties() {
 
 void RenderableFluxNodes::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
-
     glDeleteBuffers(1, &_vboPosition);
-    _vboPosition = 0;
-
     glDeleteBuffers(1, &_vboColor);
-    _vboColor = 0;
-
     glDeleteBuffers(1, &_vboFilter);
-    _vboFilter = 0;
 
     if (_shaderProgram) {
         global::renderEngine->removeRenderProgram(_shaderProgram.get());

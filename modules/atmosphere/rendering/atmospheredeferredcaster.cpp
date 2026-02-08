@@ -1078,8 +1078,8 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
     global::renderEngine->openglStateCache().viewport(viewport.data());
 
     // Prepare for rendering/calculations
-    GLuint quadVbo = 0;
-    glCreateBuffers(1, &quadVbo);
+    GLuint vbo = 0;
+    glCreateBuffers(1, &vbo);
     constexpr std::array<GLfloat, 12> VertexData = {
         // x     y
         -1.f, -1.f,
@@ -1089,17 +1089,17 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
          1.f, -1.f,
          1.f,  1.f,
     };
-    glNamedBufferStorage(quadVbo, sizeof(VertexData), VertexData.data(), GL_NONE_BIT);
+    glNamedBufferStorage(vbo, sizeof(VertexData), VertexData.data(), GL_NONE_BIT);
 
-    GLuint quadVao = 0;
-    glCreateVertexArrays(1, &quadVao);
-    glVertexArrayVertexBuffer(quadVao, 0, quadVbo, 0, 2 * sizeof(GLfloat));
+    GLuint vao = 0;
+    glCreateVertexArrays(1, &vao);
+    glVertexArrayVertexBuffer(vao, 0, vbo, 0, 2 * sizeof(GLfloat));
 
-    glEnableVertexArrayAttrib(quadVao, 0);
-    glVertexArrayAttribFormat(quadVao, 0, 2, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(quadVao, 0, 0);
+    glEnableVertexArrayAttrib(vao, 0);
+    glVertexArrayAttribFormat(vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vao, 0, 0);
 
-    glBindVertexArray(quadVao);
+    glBindVertexArray(vao);
 
     // Execute Calculations
     LDEBUG("Starting precalculations for scattering effects");
@@ -1183,8 +1183,8 @@ void AtmosphereDeferredcaster::calculateAtmosphereParameters() {
     // Restores system state
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
     global::renderEngine->openglStateCache().setViewportState(viewport.data());
-    glDeleteBuffers(1, &quadVbo);
-    glDeleteVertexArrays(1, &quadVao);
+    glDeleteBuffers(1, &vbo);
+    glDeleteVertexArrays(1, &vao);
     glBindVertexArray(0);
 
     LDEBUG("Ended precalculations for Atmosphere effects");

@@ -117,9 +117,7 @@ void RenderableCrawlingLine::initializeGL() {
 
 void RenderableCrawlingLine::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
     glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
 
     if (_program) {
         global::renderEngine->removeRenderProgram(_program.get());

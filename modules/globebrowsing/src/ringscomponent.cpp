@@ -378,10 +378,7 @@ void RingsComponent::initializeGL() {
 
 void RingsComponent::deinitializeGL() {
     glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
     glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
 
     _textureFile = nullptr;
     _texture = nullptr;

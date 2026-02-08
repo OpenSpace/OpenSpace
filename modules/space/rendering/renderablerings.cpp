@@ -184,10 +184,7 @@ void RenderableRings::initializeGL() {
 
 void RenderableRings::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
-
     glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
 
     _textureFile = nullptr;
     _texture = nullptr;

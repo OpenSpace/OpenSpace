@@ -883,26 +883,16 @@ void RenderableGaiaStars::initializeGL() {
 
 void RenderableGaiaStars::deinitializeGL() {
     glDeleteBuffers(1, &_vboPos);
-    _vboPos = 0;
     glDeleteBuffers(1, &_vboCol);
-    _vboCol = 0;
     glDeleteBuffers(1, &_vboVel);
-    _vboVel = 0;
     glDeleteBuffers(1, &_ssboIdx);
-    _ssboIdx = 0;
     glDeleteBuffers(1, &_ssboData);
-    _ssboData = 0;
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
     glDeleteVertexArrays(1, &_vaoEmpty);
-    _vaoEmpty = 0;
 
     glDeleteBuffers(1, &_vboQuad);
-    _vboQuad = 0;
     glDeleteVertexArrays(1, &_vaoQuad);
-    _vaoQuad = 0;
     glDeleteFramebuffers(1, &_fbo);
-    _fbo = 0;
 
     _dataFile = nullptr;
     _pointSpreadFunctionTexture = nullptr;

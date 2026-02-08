@@ -703,7 +703,7 @@ void RenderableModel::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
 
     // Screen quad VAO
-    glCreateBuffers(1, &_quadVbo);
+    glCreateBuffers(1, &_vbo);
     struct Vertex {
         float x;
         float y;
@@ -718,18 +718,18 @@ void RenderableModel::initializeGL() {
         Vertex {  1.f, -1.f,  1.f,  0.f },
         Vertex {  1.f,  1.f,  1.f,  1.f }
     };
-    glNamedBufferStorage(_quadVbo, sizeof(QuadVtx), QuadVtx.data(), GL_NONE_BIT);
+    glNamedBufferStorage(_vbo, sizeof(QuadVtx), QuadVtx.data(), GL_NONE_BIT);
 
-    glCreateVertexArrays(1, &_quadVao);
-    glVertexArrayVertexBuffer(_quadVao, 0, _quadVbo, 0, sizeof(Vertex));
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
-    glEnableVertexArrayAttrib(_quadVao, 0);
-    glVertexArrayAttribFormat(_quadVao, 0, 2, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_quadVao, 0, 0);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
-    glEnableVertexArrayAttrib(_quadVao, 1);
-    glVertexArrayAttribFormat(_quadVao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, s));
-    glVertexArrayAttribBinding(_quadVao, 1, 0);
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, s));
+    glVertexArrayAttribBinding(_vao, 1, 0);
 
     // Generate textures and the frame buffer
     glCreateFramebuffers(1, &_framebuffer);
@@ -794,8 +794,8 @@ void RenderableModel::deinitializeGL() {
 
     glDeleteFramebuffers(1, &_framebuffer);
 
-    glDeleteBuffers(1, &_quadVbo);
-    glDeleteVertexArrays(1, &_quadVao);
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
@@ -1119,7 +1119,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         );
 
         // Draw
-        glBindVertexArray(_quadVao);
+        glBindVertexArray(_vao);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         _quadProgram->deactivate();
     }
