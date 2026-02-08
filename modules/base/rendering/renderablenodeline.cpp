@@ -305,7 +305,7 @@ bool RenderableNodeLine::isReady() const {
     return ready;
 }
 
-void RenderableNodeLine::updateVertexData() {
+void RenderableNodeLine::update(const UpdateData&) {
     SceneGraphNode* startNode = global::renderEngine->scene()->sceneGraphNode(_start);
     SceneGraphNode* endNode = global::renderEngine->scene()->sceneGraphNode(_end);
 
@@ -333,28 +333,20 @@ void RenderableNodeLine::updateVertexData() {
 
     // Compute line positions
     const glm::dvec3 dir = glm::normalize(_endPos - _startPos);
-    const glm::dvec3 startPos = _startPos + startOffset * dir;
-    const glm::dvec3 endPos = _endPos - endOffset * dir;
+    const glm::vec3 startPos = _startPos + startOffset * dir;
+    const glm::vec3 endPos = _endPos - endOffset * dir;
 
-    std::array<float, 6> Vertices = {
-        static_cast<float>(startPos.x),
-        static_cast<float>(startPos.y),
-        static_cast<float>(startPos.z),
-        static_cast<float>(endPos.x),
-        static_cast<float>(endPos.y),
-        static_cast<float>(endPos.z)
+    struct Vertex {
+        glm::vec3 position;
     };
+    std::array<Vertex, 2> Vertices = { startPos, endPos };
 
     glNamedBufferStorage(
         _vbo,
-        Vertices.size() * sizeof(float),
+        Vertices.size() * sizeof(Vertex),
         Vertices.data(),
         GL_NONE_BIT
     );
-}
-
-void RenderableNodeLine::update(const UpdateData&) {
-    updateVertexData();
 }
 
 void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {

@@ -704,26 +704,31 @@ void RenderableModel::initializeGL() {
 
     // Screen quad VAO
     glCreateBuffers(1, &_quadVbo);
-    constexpr std::array<GLfloat, 24> QuadVtx = {
-        // x     y     s     t
-        -1.f, -1.f,  0.f,  0.f,
-         1.f,  1.f,  1.f,  1.f,
-        -1.f,  1.f,  0.f,  1.f,
-        -1.f, -1.f,  0.f,  0.f,
-         1.f, -1.f,  1.f,  0.f,
-         1.f,  1.f,  1.f,  1.f
+    struct Vertex {
+        float x;
+        float y;
+        float s;
+        float t;
+    };
+    constexpr std::array<Vertex, 6> QuadVtx = {
+        Vertex { -1.f, -1.f,  0.f,  0.f },
+        Vertex {  1.f,  1.f,  1.f,  1.f },
+        Vertex { -1.f,  1.f,  0.f,  1.f },
+        Vertex { -1.f, -1.f,  0.f,  0.f },
+        Vertex {  1.f, -1.f,  1.f,  0.f },
+        Vertex {  1.f,  1.f,  1.f,  1.f }
     };
     glNamedBufferStorage(_quadVbo, sizeof(QuadVtx), QuadVtx.data(), GL_NONE_BIT);
 
     glCreateVertexArrays(1, &_quadVao);
-    glVertexArrayVertexBuffer(_quadVao, 0, _quadVbo, 0, 4 * sizeof(GLfloat));
+    glVertexArrayVertexBuffer(_quadVao, 0, _quadVbo, 0, sizeof(Vertex));
 
     glEnableVertexArrayAttrib(_quadVao, 0);
     glVertexArrayAttribFormat(_quadVao, 0, 2, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_quadVao, 0, 0);
 
     glEnableVertexArrayAttrib(_quadVao, 1);
-    glVertexArrayAttribFormat(_quadVao, 1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat));
+    glVertexArrayAttribFormat(_quadVao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, s));
     glVertexArrayAttribBinding(_quadVao, 1, 0);
 
     // Generate textures and the frame buffer

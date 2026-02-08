@@ -132,10 +132,10 @@ void RenderableCartesianAxes::initializeGL() {
 
     glCreateBuffers(1, &_vbo);
     constexpr std::array<Vertex, 4> Vertices = {
-        Vertex{0.f, 0.f, 0.f},
-        Vertex{1.f, 0.f, 0.f},
-        Vertex{0.f, 1.f, 0.f},
-        Vertex{0.f, 0.f, 1.f}
+        Vertex{ 0.f, 0.f, 0.f },
+        Vertex{ 1.f, 0.f, 0.f },
+        Vertex{ 0.f, 1.f, 0.f },
+        Vertex{ 0.f, 0.f, 1.f }
     };
     glNamedBufferStorage(
         _vbo,
@@ -145,11 +145,7 @@ void RenderableCartesianAxes::initializeGL() {
     );
 
     glCreateBuffers(1, &_ibo);
-    constexpr std::array<int, 6> indices = {
-        0, 1,
-        0, 2,
-        0, 3
-    };
+    constexpr std::array<int, 6> indices = { 0, 1, 0, 2, 0, 3 };
     glNamedBufferStorage(_ibo, indices.size() * sizeof(int), indices.data(), GL_NONE_BIT);
 
     glCreateVertexArrays(1, &_vao);
