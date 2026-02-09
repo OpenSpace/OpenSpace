@@ -65,7 +65,7 @@ set(SHADER_FILES
   shaders/ssao_fs.glsl
   shaders/temporal_aa_fs.glsl
   shaders/tonemap_aces_fs.glsl
-  shaders/tonemap_exposure_gamma_fs .glsl
+  shaders/tonemap_exposure_gamma_fs.glsl
   shaders/tonemap_filmic_fs.glsl
   shaders/tonemap_passthrough_fs.glsl
   shaders/vel_neighbormax_fs.glsl
@@ -77,7 +77,7 @@ create_new_module(
   "Molecule"
   molecule_module
   STATIC
-  ${HEADER_FILES} ${SOURCE_FILES}
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
 option(MD_USE_RELATIVE_RESOURCE_PATH OFF)
