@@ -209,10 +209,10 @@ namespace {
 
         // [[codegen::verbatim(FilterInfo.description)]]
         std::optional<std::string> filter;
-        
+
         // [[codegen::verbatim(CircleColorInfo.description)]]
         std::optional<glm::vec4> circleColor;
-        
+
         // [[codegen::verbatim(CircleWidthInfo.description)]]
         std::optional<float> circleWidth;
 
@@ -451,7 +451,7 @@ void RenderableSimulationBox::update(const UpdateData& data) {
 
     double tCur = data.time.j2000Seconds();
     double dt = tCur - data.previousFrameTime.j2000Seconds();
-    
+
     for (Molecules& mol : _molecules) {
         // update animation
         if (mol.data.trajectory) {
@@ -479,7 +479,7 @@ void RenderableSimulationBox::update(const UpdateData& data) {
                 0
             );
         }
-    
+
         // update simulation
         updateSimulation(mol.data, dt * _simulationSpeed);
     }
@@ -564,7 +564,7 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_BLEND);
-        
+
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     md_gl_draw(&args);
@@ -653,7 +653,7 @@ void RenderableSimulationBox::updateSimulation(Molecules::Data& mol, double dt) 
                 glm::dvec3 compM2 = -dir * glm::dot(m2.direction, -dir);
                 m1.direction = m1.direction - compM1 + compM2;
                 m2.direction = m2.direction - compM2 + compM1;
-                
+
                 // move the spheres away from each other (not intersecting)
                 m1.position += -dir * intersection;
                 m2.position += dir * intersection;
@@ -687,7 +687,7 @@ void RenderableSimulationBox::initMolecule(Molecules::Data& mol,
             return;
         }
     }
-    
+
     double sphere = glm::compMax(_simulationBox.value()) / 2.0;
     setBoundingSphere(sphere);
 

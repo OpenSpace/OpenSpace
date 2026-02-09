@@ -343,7 +343,7 @@ md_trajectory_i* openFile(std::filesystem::path filename, const md_molecule_t* m
     inst->recenterTarget = { 0 };
     inst->alloc = alloc;
     inst->deperiodize = deperiodizeOnLoad;
-    
+
     const uint64_t numAtoms = md_trajectory_num_atoms(internalTraj);
     const uint64_t numTrajFrames = md_trajectory_num_frames(internalTraj);
     const uint64_t frameCacheSize = MEGABYTES(16);
@@ -351,7 +351,7 @@ md_trajectory_i* openFile(std::filesystem::path filename, const md_molecule_t* m
     const uint64_t maxNumCacheFrames = std::max(16ULL, frameCacheSize / approxFrameSize);
 
     const int64_t numCacheFrames = std::min(numTrajFrames, maxNumCacheFrames);
-    
+
     LERROR(std::format("Initializing frame cache with {} frames.", numCacheFrames));
     md_frame_cache_init(&inst->cache, inst->traj, alloc, numCacheFrames);
     md_bitfield_init(&inst->recenterTarget, alloc);
@@ -362,7 +362,7 @@ md_trajectory_i* openFile(std::filesystem::path filename, const md_molecule_t* m
     traj->load_frame = loadFrame;
     traj->fetch_frame_data = fetchFrameData;
     traj->decode_frame_data = decodeFrameData;
-    
+
     return traj;
 }
 

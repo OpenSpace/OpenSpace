@@ -417,7 +417,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
         glm::scale(glm::dmat4(1.0), data.modelTransform.scale) *
         glm::dmat4(data.modelTransform.rotation);
     const glm::mat4 projMatrix = glm::dmat4(camCopy.sgctInternal.projectionMatrix());
-        
+
     // Center the molecule with respect to its cell
     const vec3_t trans = _molecule.cell.basis * vec3_set1(0.5f);
     const mat4_t modelMat = mat4_translate(-trans.x, -trans.y, -trans.z);
@@ -459,7 +459,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
         lastDrawBuffers[lastDrawBufferCount] = static_cast<GLenum>(drawBuf);
         lastDrawBufferCount++;
     }
-            
+
     GLuint fbo = global::moduleEngine->module<MoleculeModule>()->fbo();
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };

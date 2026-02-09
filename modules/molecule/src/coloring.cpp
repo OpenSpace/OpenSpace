@@ -198,17 +198,17 @@ void cpk(uint32_t* colors, int64_t count, const md_molecule_t& mol) {
 
     md_element_t* elements = 0;
     const md_element_t* elem = mol.atom.element;
-    
+
     if (!elem) {
         elements = md_array_create(md_element_t, count, default_temp_allocator);
         md_util_element_guess(elements, md_array_size(elements), &mol);
         elem = elements;
     }
-    
+
     for (int64_t i = 0; i < count; i++) {
         colors[i] = md_util_element_cpk_color(elem[i]);
     }
-    
+
     md_array_free(elements, default_temp_allocator);
 }
 

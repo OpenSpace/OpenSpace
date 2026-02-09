@@ -338,7 +338,7 @@ void MoleculeModule::render(const glm::mat4&, const glm::mat4& viewMatrix,
     settings.inputTextures.normal = _normalTex.get();
 
     postprocessing::postprocess(settings, viewMatrix, projectionMatrix);
-    
+
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
     const GLenum bufs[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
     glDrawBuffers(2, bufs);

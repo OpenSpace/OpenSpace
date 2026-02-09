@@ -78,7 +78,7 @@ private:
     };
 
     void updateSimulation(Molecules::Data& mol, double dt);
-    
+
     void initMolecule(Molecules::Data& mol, std::filesystem::path molFile,
         std::filesystem::path trajFile);
     void freeMolecule(Molecules::Data& mol);

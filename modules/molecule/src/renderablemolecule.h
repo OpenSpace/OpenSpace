@@ -48,7 +48,7 @@ public:
 
     void initializeGL() override;
     void deinitializeGL() override;
-    
+
     bool isReady() const override;
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
@@ -94,7 +94,7 @@ private:
 
     std::vector<std::unique_ptr<Representation>> _repData;
     properties::PropertyOwner _repProps;
-    
+
     properties::StringProperty _moleculeFile;
     properties::StringProperty _trajectoryFile;
     properties::BoolProperty _coarseGrained;

@@ -63,14 +63,14 @@ private:
         const glm::mat4& projectionMatrix);
 
     inline static int _initializeCounter = 0;
-    
+
     GLuint _fbo = 0;
     std::unique_ptr<ghoul::opengl::Texture> _colorTex;
     std::unique_ptr<ghoul::opengl::Texture> _normalTex;
     std::unique_ptr<ghoul::opengl::Texture> _depthTex;
     int _width = 0;
     int _height = 0;
-    
+
     std::unique_ptr<md_gl_shaders_t> _shaders = nullptr;
 
     properties::BoolProperty _ssaoEnabled;
@@ -84,7 +84,7 @@ private:
     properties::FloatProperty _ssao2Radius;
     properties::FloatProperty _ssao2HorizonBias;
     properties::FloatProperty _ssao2NormalBias;
-    
+
     properties::FloatProperty _exposure;
 
     ThreadPool _threadPool;

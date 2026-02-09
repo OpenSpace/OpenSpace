@@ -57,10 +57,10 @@ const md_molecule_t* loadMolecule(std::filesystem::path file,
     bool isCoarseGrained = false);
 const md_trajectory_i* loadTrajectory(std::filesystem::path file,
     const md_molecule_t* mol = nullptr, bool deperiodizeOnLoad = false);
-    
+
 // This will kick of work into worker threads and thus not stall the calling thread
 void prefetchFrames(const md_trajectory_i* traj, std::span<int64_t> frames);
-    
+
 // FrameCoords also holds an optional lock for the frame if it is a cached trajectory.
 // This is released upon destruction of the object. So don't attempt to store and
 // access its x,y,z data after the object has been destroyed

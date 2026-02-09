@@ -562,7 +562,7 @@ void prefetchFrames(const md_trajectory_i* traj, std::span<int64_t> frames) {
     ghoul_assert(traj, "No trajectory provided");
 
     using namespace openspace;
-    
+
     if (!traj->inst) {
         return;
     }
@@ -570,7 +570,7 @@ void prefetchFrames(const md_trajectory_i* traj, std::span<int64_t> frames) {
     CachedTrajectory* cachedTraj = reinterpret_cast<CachedTrajectory*>(traj->inst);
     if (cachedTraj->magic == MdCachedTrajMagic) {
         ThreadPool& pool = global::moduleEngine->module<MoleculeModule>()->threadPool();
-            
+
         const int64_t numFrames = md_trajectory_num_frames(traj);
         for (int64_t i : frames) {
             if (i < 0 || numFrames <= i) {
@@ -589,7 +589,7 @@ FrameData frameData(const md_trajectory_i* traj, int64_t frame) {
         LERROR("Invalid trajectory");
         return data;
     }
-    
+
     if (frame < 0 || frame >= md_trajectory_num_frames(traj)) {
         LERROR(std::format(
             "Invalid trajectory index: {}, valid range: [0,{}]",

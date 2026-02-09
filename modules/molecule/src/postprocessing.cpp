@@ -533,7 +533,7 @@ void initialize(int width, int height) {
         ghoul::opengl::Texture::WrappingMode::ClampToEdge
     );
     glObj.bokehDof.halfRes.colorCoc->uploadTexture();
-    
+
     glGenFramebuffers(1, &glObj.bokehDof.halfRes.fbo);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.bokehDof.halfRes.fbo);
     glFramebufferTexture2D(

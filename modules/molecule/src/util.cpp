@@ -186,7 +186,7 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
             const int64_t nearestFrame =
                 std::clamp(static_cast<int64_t>(time + 0.5), 0LL, lastFrame);
             FrameData frame = frameData(traj, nearestFrame);
-        
+
             mol.cell = frame.header->cell;
             std::memcpy(dst.x, frame.x.data(), frame.x.size_bytes());
             std::memcpy(dst.y, frame.y.data(), frame.y.size_bytes());
@@ -218,7 +218,7 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
                     mol.backbone.secondary_structure[i] = convertColor(ssr);
                 }
             }
-        
+
             // @NOTE(Robin)  It is ugly to interpolate a matrix. It works in this case
             // because only the extent of each axis and not the angles between them change
             mol.cell.basis = lerp(
@@ -231,7 +231,7 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
                 frame[1].header->cell.inv_basis,
                 t
             );
-        
+
             md_vec3_soa_t src[2] = {
                 { frame[0].x.data(), frame[0].y.data(), frame[0].z.data() },
                 { frame[1].x.data(), frame[1].y.data(), frame[1].z.data() }
