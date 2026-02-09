@@ -168,34 +168,6 @@ size_t Timeline<T>::nKeyframes() const {
     return _keyframes.size();
 }
 
-
-template <typename T>
-Keyframe<T>* Timeline<T>::firstKeyframeAfter(double timestamp, bool inclusive)
-{
-    typename std::deque<Keyframe<T>>::iterator it;
-    if (inclusive) {
-        it = std::lower_bound(
-            _keyframes.begin(),
-            _keyframes.end(),
-            timestamp,
-            &compareKeyframeTimeWithTime
-        );
-    }
-    else {
-        it = std::upper_bound(
-            _keyframes.begin(),
-            _keyframes.end(),
-            timestamp,
-            &compareTimeWithKeyframeTime
-        );
-    }
-
-    if (it == _keyframes.end()) {
-        return nullptr;
-    }
-    return &(*it);
-}
-
 template <typename T>
 const Keyframe<T>* Timeline<T>::firstKeyframeAfter(double timestamp, bool inclusive) const
 {
@@ -220,34 +192,6 @@ const Keyframe<T>* Timeline<T>::firstKeyframeAfter(double timestamp, bool inclus
     if (it == _keyframes.end()) {
         return nullptr;
     }
-    return &(*it);
-}
-
-template <typename T>
-Keyframe<T>* Timeline<T>::lastKeyframeBefore(double timestamp, bool inclusive)
-{
-    typename std::deque<Keyframe<T>>::iterator it;
-    if (inclusive) {
-        it = std::upper_bound(
-            _keyframes.begin(),
-            _keyframes.end(),
-            timestamp,
-            &compareTimeWithKeyframeTime
-        );
-    }
-    else {
-        it = std::lower_bound(
-            _keyframes.begin(),
-            _keyframes.end(),
-            timestamp,
-            &compareKeyframeTimeWithTime
-        );
-    }
-
-    if (it == _keyframes.begin()) {
-        return nullptr;
-    }
-    it--;
     return &(*it);
 }
 
@@ -277,6 +221,43 @@ const Keyframe<T>* Timeline<T>::lastKeyframeBefore(double timestamp, bool inclus
     }
     it--;
     return &(*it);
+}
+
+template <typename T>
+std::vector<const Keyframe<T>*> Timeline<T>::lastNKeyframesBefore(double timestamp,
+                                                           size_t n, bool inclusive) const
+{
+    typename std::deque<Keyframe<T>>::const_iterator it;
+    if (inclusive) {
+        it = std::upper_bound(
+            _keyframes.begin(),
+            _keyframes.end(),
+            timestamp,
+            &compareTimeWithKeyframeTime
+        );
+    }
+    else {
+        it = std::lower_bound(
+            _keyframes.begin(),
+            _keyframes.end(),
+            timestamp,
+            &compareKeyframeTimeWithTime
+        );
+    }
+
+    if (it == _keyframes.begin()) {
+        return {};
+    }
+    it--;
+
+    std::vector<const Keyframe<T>*> result;
+    result.reserve(n);
+
+    for (size_t i = 0; i < n && it != _keyframes.end(); i++, it++) {
+        result.push_back(&(*it));
+    }
+
+    return result;
 }
 
 template <typename T>

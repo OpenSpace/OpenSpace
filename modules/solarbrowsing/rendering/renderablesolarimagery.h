@@ -38,6 +38,7 @@
 #include <optional>
 #include <chrono>
 #include <unordered_set>
+#include <mutex>
 
 namespace ghoul::opengl { class Texture; }
 
@@ -48,6 +49,11 @@ namespace documentation { struct Documentation; }
 class PixelBufferObject;
 class SpacecraftCameraPlane;
 class TransferFunction;
+
+namespace solarbrowsing {
+    class AsyncImageDecoder;
+    struct DecodedImageData;
+}
 
 class RenderableSolarImagery : public Renderable {
 public:
@@ -74,6 +80,7 @@ public:
     bool isCoronaGraph();
 
 private:
+    void uploadDecodedDataToGPU(const solarbrowsing::DecodedImageData& data);
     properties::OptionProperty _activeInstruments;
     properties::FloatProperty _contrastValue;
     properties::BoolProperty _enableBorder;
@@ -104,10 +111,13 @@ private:
 
     std::unordered_map<std::string, std::shared_ptr<TransferFunction>> _tfMap;
     std::string _currentActiveInstrument;
-    ImageMetadata* _currentImage = nullptr;
+    const ImageMetadata* _currentImage = nullptr;
     std::unordered_map<std::string, Timeline<ImageMetadata>> _imageMetadataMap;
     std::unique_ptr<SpacecraftCameraPlane> _spacecraftCameraPlane;
     std::vector<unsigned char> _decodeBuffer;
+    std::unique_ptr<solarbrowsing::AsyncImageDecoder> _asyncDecoder;
+    std::mutex _cacheMutex;
+    std::unordered_map<size_t, solarbrowsing::DecodedImageData> _decodedImageCache;
 
     void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
     //void listen();

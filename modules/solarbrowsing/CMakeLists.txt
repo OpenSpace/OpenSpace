@@ -35,6 +35,7 @@ set(HEADER_FILES
   rendering/renderablesolarimageryprojection.h
   rendering/spacecraftcameraplane.h
   tasks/helioviewerdownloadtask.h
+  util/asyncimagedecoder.h
   util/j2kcodec.h
   util/spacecraftimagerymanager.h
   util/structs.h
@@ -48,6 +49,7 @@ set(SOURCE_FILES
   rendering/renderablesolarimageryprojection.cpp
   rendering/spacecraftcameraplane.cpp
   tasks/helioviewerdownloadtask.cpp
+  util/asyncimagedecoder.cpp
   util/j2kcodec.cpp
   util/spacecraftimagerymanager.cpp
   util/pixelbufferobject.cpp

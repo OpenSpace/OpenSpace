@@ -28,6 +28,7 @@
 #include <modules/solarbrowsing/util/j2kcodec.h>
 #include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
 #include <modules/solarbrowsing/util/pixelbufferobject.h>
+#include <modules/solarbrowsing/util/asyncimagedecoder.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
@@ -190,6 +191,10 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     _moveFactor.onChange([this]() {
         _spacecraftCameraPlane->createPlaneAndFrustum(_moveFactor);
     });
+
+    _asyncDecoder = std::make_unique<solarbrowsing::AsyncImageDecoder>(
+        std::thread::hardware_concurrency() / 2
+    );
 }
 
 void RenderableSolarImagery::initializeGL() {
@@ -258,7 +263,7 @@ bool RenderableSolarImagery::isReady() const {
 }
 
 void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged) {
-    Keyframe<ImageMetadata>* keyframe =
+    const Keyframe<ImageMetadata>* keyframe =
         _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
             global::timeManager->time().j2000Seconds(),
             true
@@ -269,6 +274,56 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
             // This keyframe is already uploaded to the GPU.
             return;
         }
+
+        {
+            std::lock_guard lock(_cacheMutex);
+            // Check if the keyframe exists in cache
+            auto it = _decodedImageCache.find(keyframe->id);
+            if (it != _decodedImageCache.end()) {
+                uploadDecodedDataToGPU(it->second);
+                return;
+            }
+        }
+
+
+        // Load and decode the next 10 frames
+        std::vector<const Keyframe<ImageMetadata>*> keyframes =
+            _imageMetadataMap[_currentActiveInstrument].lastNKeyframesBefore(
+                global::timeManager->time().j2000Seconds(),
+                10,
+                true
+        );
+
+        bool skipFirstItem = true;
+        for (const Keyframe<ImageMetadata>* kf : keyframes) {
+            // Decode first image from mainthread so that we can
+            // immediately upload the image data to GPU
+            if (!skipFirstItem) {
+                // Check if the keyframe has already been decoded and exists in cache
+                {
+                    std::lock_guard lock(_cacheMutex);
+                    auto it = _decodedImageCache.find(kf->id);
+                    if (it != _decodedImageCache.end()) {
+                        continue;
+                    }
+                }
+
+                solarbrowsing::DecodeRequest request(
+                    &kf->data,
+                    _downsamplingLevel,
+                    [this, id = kf->id](solarbrowsing::DecodedImageData&& decodedData) {
+                        LINFO(std::format("Recieved decoded data for '{}'",
+                            decodedData.metadata->filePath
+                        ));
+                        std::lock_guard lock(_cacheMutex);
+                        _decodedImageCache[id] = std::move(decodedData);
+                    }
+                );
+                _asyncDecoder->requestDecode(std::move(request));
+            }
+            skipFirstItem = false;
+        }
+
         _imageSize = static_cast<unsigned int>(
             keyframe->data.fullResolution /
             std::pow(2, static_cast<int>(_downsamplingLevel))
@@ -280,6 +335,13 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
 
         _decodeBuffer.resize(_imageSize * _imageSize * sizeof(IMG_PRECISION));
         decode(_decodeBuffer.data(), keyframe->data.filePath.string());
+
+        solarbrowsing::DecodedImageData decodedData = solarbrowsing::DecodedImageData(
+            _decodeBuffer,
+            &keyframe->data,
+            _imageSize
+        );
+        _decodedImageCache[keyframe->id] = std::move(decodedData);
     }
     else {
         if (_currentImage == nullptr) {
@@ -299,6 +361,27 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
         ghoul::opengl::Texture::TakeOwnership::No
     );
     _texture->uploadTexture();
+}
+
+void RenderableSolarImagery::uploadDecodedDataToGPU(
+                                              const solarbrowsing::DecodedImageData& data)
+{
+
+    _imageSize = data.imageSize;
+
+    _isCoronaGraph = data.metadata->isCoronaGraph;
+    _currentScale = data.metadata->scale;
+    _currentCenterPixel = data.metadata->centerPixel;
+    _currentImage = data.metadata;
+    _decodeBuffer = data.buffer; // TODO unnecessary copy of the buffered data
+
+    _texture->setDimensions(glm::uvec3(_imageSize, _imageSize, 1));
+    _texture->setPixelData(
+        _decodeBuffer.data(),
+        ghoul::opengl::Texture::TakeOwnership::No
+    );
+    _texture->uploadTexture();
+
 }
 
 void RenderableSolarImagery::decode(unsigned char* buffer, const std::string& filename) {
