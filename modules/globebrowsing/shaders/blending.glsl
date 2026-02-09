@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef BLENDING_HGLSL
-#define BLENDING_HGLSL
+#ifndef _GLOBEBROWSING___BLENDING___GLSL_
+#define _GLOBEBROWSING___BLENDING___GLSL_
 
 vec4 blendNormal(vec4 oldColor, vec4 newColor) {
   vec4 toReturn;
@@ -114,4 +114,4 @@ vec3 hsv2rgb(vec3 c) {
   return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
-#endif // BLENDING_HGLSL
+#endif // _GLOBEBROWSING___BLENDING___GLSL_

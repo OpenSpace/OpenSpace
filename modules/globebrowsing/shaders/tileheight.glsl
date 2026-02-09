@@ -22,11 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef TILE_HEIGHT_HGLSL
-#define TILE_HEIGHT_HGLSL
+#ifndef _GLOBEBROWSING___TILEHEIGHT___GLSL_
+#define _GLOBEBROWSING___TILEHEIGHT___GLSL_
 
 #include "powerscaling/powerscaling_vs.glsl"
-#include <${MODULE_GLOBEBROWSING}/shaders/tile.glsl>
+#include "tile.glsl"
 
 #ifndef USE_HEIGHTMAP
 #define USE_HEIGHTMAP #{useAccurateNormals}
@@ -112,4 +112,4 @@ vec3 getTileNormal(vec2 uv, vec3 levelWeights, vec3 ellipsoidNormalCameraSpace,
   return normal;
 }
 
-#endif // TILE_HEIGHT_HGLSL
+#endif // _GLOBEBROWSING___TILEHEIGHT___GLSL_

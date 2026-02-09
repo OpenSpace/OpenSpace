@@ -34,10 +34,10 @@ uniform mat4 modelViewTransform;
 
 
 void main() {
-    modelPosition = vertPosition.xyz;
-    viewPosition = modelViewTransform*vertPosition;
+  modelPosition = vertPosition.xyz;
+  viewPosition = modelViewTransform*vertPosition;
 
-    // project the position to view space
-    gl_Position = projectionTransform * viewPosition;
-    gl_Position.z = 1.0;
+  // project the position to view space
+  gl_Position = projectionTransform * viewPosition;
+  gl_Position.z = 1.0;
 }

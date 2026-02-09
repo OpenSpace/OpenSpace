@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef TILE_VERTEX_SKIRT_HGLSL
-#define TILE_VERTEX_SKIRT_HGLSL
+#ifndef _GLOBEBROWSING___TILEVERTEXSKIRT___GLSL_
+#define _GLOBEBROWSING___TILEVERTEXSKIRT___GLSL_
 
 #include "powerscaling/powerscaling_vs.glsl"
 
@@ -41,4 +41,4 @@ float getTileVertexSkirtLength() {
   return tileVertexIsSkirtVertex() ? skirtLength : 0.0;
 }
 
-#endif // TILE_VERTEX_SKIRT_HGLSL
+#endif // _GLOBEBROWSING___TILEVERTEXSKIRT___GLSL_

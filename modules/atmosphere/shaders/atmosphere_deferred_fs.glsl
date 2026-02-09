@@ -123,7 +123,7 @@ uniform bool hardShadows;
 // Returns whether there is an eclipse in the x component and the strength of the
 // shadowing in the y component
 vec2 calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], dvec3 position,
-                 bool ground)
+                bool ground)
 {
   if (!shadowInfoArray[0].isShadowing) {
     return vec2(0.0, 1.0);
@@ -137,8 +137,12 @@ vec2 calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], dvec3 po
   float length_d = float(length(d));
   double lengthPcProj = length(pcProj);
 
-  float r_p_pi = float(shadowInfoArray[0].rc * (lengthPcProj + shadowInfoArray[0].xp) / shadowInfoArray[0].xp);
-  float r_u_pi = float(shadowInfoArray[0].rc * (shadowInfoArray[0].xu - lengthPcProj) / shadowInfoArray[0].xu);
+  float r_p_pi = float(
+    shadowInfoArray[0].rc * (lengthPcProj + shadowInfoArray[0].xp) / shadowInfoArray[0].xp
+  );
+  float r_u_pi = float(
+    shadowInfoArray[0].rc * (shadowInfoArray[0].xu - lengthPcProj) / shadowInfoArray[0].xu
+  );
 
   if (length_d < r_u_pi) {
     // umbra
@@ -168,7 +172,8 @@ float opticalDepth(float localH, float r, float mu, float d, float Rg) {
   float x = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
   vec2 y = a01s / (2.3193 * abs(a01) + sqrt(1.52 * a01sq + 4.0)) *
     vec2(1.0, exp(-d * invH * (d / (2.0 * r) + mu)));
-  return sqrt(2.0 * M_PI * sqrt(Rt*Rt - Rg*Rg) * r) * exp((Rg-r)*invH) * (x + dot(y, vec2(1.0, -1.0)));
+  return sqrt(2.0 * M_PI * sqrt(Rt*Rt - Rg*Rg) * r) * exp((Rg-r)*invH) *
+    (x + dot(y, vec2(1.0, -1.0)));
 }
 
 vec3 analyticTransmittance(float r, float mu, float d) {
@@ -288,9 +293,9 @@ Ray calculateRayRenderableGlobe(vec2 st) {
  * attenuation := out of transmittance T(x,x0). This will be used later when calculating
  *                the reflectance R[L]
  */
-vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3 v, vec3 s,
-                       float r, vec3 fragPosObj, double maxLength, double pixelDepth,
-                       vec3 spaceColor, float sunIntensity,
+vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3 v,
+                       vec3 s, float r, vec3 fragPosObj, double maxLength,
+                       double pixelDepth, vec3 spaceColor, float sunIntensity,
                        out float mu, out vec3 attenuation, out bool groundHit)
 {
   const float INTERPOLATION_EPS = 0.004; // precision const from Brunetton
@@ -339,7 +344,10 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     // the unsused contribution to the final radiance.
     vec4 inscatterFromSurface = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg,
       SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
-    inscatterRadiance = max(inscatterRadiance - attenuation.rgbr * inscatterFromSurface, 0.0);
+    inscatterRadiance = max(
+      inscatterRadiance - attenuation.rgbr * inscatterFromSurface,
+      0.0
+    );
 
     // We set the irradianceFactor to 1.0 so the reflected irradiance will be considered
     // when calculating the reflected light on the ground.
@@ -360,7 +368,8 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
   if (abs(mu - muHorizon) < INTERPOLATION_EPS) {
     // We want an interpolation value close to 1/2, so the contribution of each radiance
     // value is almost the same or it has a heavy weight if from above or below horizon
-    float interpolationValue = (mu - muHorizon + INTERPOLATION_EPS) / (2.0 * INTERPOLATION_EPS);
+    float interpolationValue =
+      (mu - muHorizon + INTERPOLATION_EPS) / (2.0 * INTERPOLATION_EPS);
 
     // Above Horizon
     mu = muHorizon - INTERPOLATION_EPS;
@@ -455,9 +464,11 @@ vec3 groundColor(vec3 x, float t, vec3 v, vec3 s, vec3 attenuationXtoX0, vec3 gr
   float dotNS = dot(normal, s);
   float muSun = max(dotNS, 0.0);
 
-  // Is direct Sun light arriving at x0? If not, there is no direct light from Sun (shadowed)
+  // Is direct Sun light arriving at x0? If not, there is no direct light from the Sun
   vec3 transmittanceL0 =
-    muSun < -sqrt(1.0 - (Rg*Rg / (r0 * r0)))  ?  vec3(0.0)  :  transmittance(transmittanceTexture, r0, muSun, Rg, Rt);
+    muSun < -sqrt(1.0 - (Rg*Rg / (r0 * r0))) ?
+    vec3(0.0) :
+    transmittance(transmittanceTexture, r0, muSun, Rg, Rt);
 
   // E[L*] at x0
   vec3 irradianceReflected = irradiance(irradianceTexture, r0, muSun) * irradianceFactor;
@@ -514,7 +525,8 @@ vec3 sunColor(vec3 v, vec3 s, float r, float mu, float irradianceFactor) {
 
   float t = (angle - p1) / (p2 - p1);
   float scale = clamp(t, 0.0, 1.0);
-  return scale * transmittance(transmittanceTexture, r, mu, Rg, Rt) * sunRadiance * (1.0 - irradianceFactor);
+  return scale * transmittance(transmittanceTexture, r, mu, Rg, Rt) *
+    sunRadiance * (1.0 - irradianceFactor);
 }
 
 
@@ -542,7 +554,12 @@ void main() {
 
   double offset = 0.0;   // in KM
   double maxLength = 0.0;   // in KM
-  bool intersect = atmosphereIntersection(ray, Rt - (ATM_EPSILON * 0.001), offset, maxLength);
+  bool intersect = atmosphereIntersection(
+    ray,
+    Rt - (ATM_EPSILON * 0.001),
+    offset,
+    maxLength
+  );
   if (!intersect) {
     renderTarget = color;
     return;
@@ -629,15 +646,38 @@ void main() {
   bool groundHit = false;
   vec3 attenuation;
 
-  vec3 inscatterColor = inscatterRadiance(x, tF, irradianceFactor, v, s, r,
-    vec3(positionObjectsCoords), maxLength, pixelDepth, color.rgb, sunIntensityInscatter, mu,
-    attenuation, groundHit);
+  vec3 inscatterColor = inscatterRadiance(
+    x,
+    tF,
+    irradianceFactor,
+    v,
+    s,
+    r,
+    vec3(positionObjectsCoords),
+    maxLength,
+    pixelDepth,
+    color.rgb,
+    sunIntensityInscatter,
+    mu,
+    attenuation,
+    groundHit
+  );
   vec3 atmColor = vec3(0.0);
   if (groundHit) {
     vec2 eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true);
     float sunIntensityGround = sunRadiance * eclipseShadowPlanet.y;
-    atmColor = groundColor(x, tF, v, s, attenuation, color.rgb, normal.xyz, irradianceFactor,
-      normal.w, sunIntensityGround);
+    atmColor = groundColor(
+      x,
+      tF,
+      v,
+      s,
+      attenuation,
+      color.rgb,
+      normal.xyz,
+      irradianceFactor,
+      normal.w,
+      sunIntensityGround
+    );
   }
   else {
     // In order to get better performance, we are not tracing multiple rays per pixel

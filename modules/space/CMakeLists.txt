@@ -74,8 +74,6 @@ set(SHADER_FILES
   shaders/constellationbounds_vs.glsl
   shaders/constellationlines_fs.glsl
   shaders/constellationlines_vs.glsl
-  shaders/convolution_fs.glsl
-  shaders/convolution_vs.glsl
   shaders/eclipsecone_fs.glsl
   shaders/eclipsecone_vs.glsl
   shaders/fluxnodes_fs.glsl

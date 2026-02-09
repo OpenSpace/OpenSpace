@@ -30,8 +30,8 @@ in vec4 viewPosition;
 
 
 Fragment getFragment() {
-    Fragment frag;
-    frag.color = vec4(modelPosition + 0.5, 1.0);
-    frag.depth = safeLength(viewPosition);
-    return frag;
+  Fragment frag;
+  frag.color = vec4(modelPosition + 0.5, 1.0);
+  frag.depth = safeLength(viewPosition);
+  return frag;
 }

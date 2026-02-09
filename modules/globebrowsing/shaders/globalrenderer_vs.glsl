@@ -25,10 +25,10 @@
 #version __CONTEXT__
 
 #include "powerscaling/powerscaling_vs.glsl"
-#include <${MODULE_GLOBEBROWSING}/shaders/tile.glsl>
-#include <${MODULE_GLOBEBROWSING}/shaders/texturetilemapping.glsl>
-#include <${MODULE_GLOBEBROWSING}/shaders/tileheight.glsl>
-#include <${MODULE_GLOBEBROWSING}/shaders/tilevertexskirt.glsl>
+#include "tile.glsl"
+#include "texturetilemapping.glsl"
+#include "tileheight.glsl"
+#include "tilevertexskirt.glsl"
 
 layout(location = 1) in vec2 in_uv;
 

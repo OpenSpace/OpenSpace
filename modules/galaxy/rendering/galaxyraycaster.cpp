@@ -39,11 +39,11 @@
 
 namespace {
     constexpr std::string_view GlslRaycastPath =
-        "${MODULES}/galaxy/shaders/galaxyraycast.glsl";
+        "${MODULE_GALAXY}/shaders/galaxyraycast.glsl";
     constexpr std::string_view GlslBoundsVsPath =
-        "${MODULES}/galaxy/shaders/raycasterbounds_vs.glsl";
+        "${MODULE_GALAXY}/shaders/raycasterbounds_vs.glsl";
     constexpr std::string_view GlslBoundsFsPath =
-        "${MODULES}/galaxy/shaders/raycasterbounds_fs.glsl";
+        "${MODULE_GALAXY}/shaders/raycasterbounds_fs.glsl";
 } // namespace
 
 namespace openspace {

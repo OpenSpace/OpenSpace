@@ -22,11 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef TEXTURETILEMAPPING_HGLSL
-#define TEXTURETILEMAPPING_HGLSL
+#ifndef _GLOBEBROWSING___TEXTURETILEMAPPING___GLSL_
+#define _GLOBEBROWSING___TEXTURETILEMAPPING___GLSL_
 
-#include <${MODULE_GLOBEBROWSING}/shaders/tile.glsl>
-#include <${MODULE_GLOBEBROWSING}/shaders/blending.glsl>
+#include "tile.glsl"
+#include "blending.glsl"
 
 // First layer type from LayerShaderManager is height map
 #define NUMLAYERS_HEIGHTMAP #{lastLayerIndexHeightLayers} + 1
@@ -459,4 +459,4 @@ vec4 calculateWater(vec4 currentColor, vec2 uv, vec3 levelWeights,
   return currentColor;
 }
 
-#endif // TEXTURETILEMAPPING_HGLSL
+#endif // _GLOBEBROWSING___TEXTURETILEMAPPING___GLSL_

@@ -273,12 +273,6 @@ set(SOURCE_FILES
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
-set(SHADER_FILES
-  shaders/screenspace_fs.glsl
-  shaders/screenspace_vs.glsl
-)
-source_group("Shader Files" FILES ${SHADER_FILES})
-
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 create_new_module(
