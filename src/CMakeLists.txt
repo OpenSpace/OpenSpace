@@ -431,7 +431,9 @@ if (APPLE)
 endif ()
 
 set(OPENSPACE_SHADERS
-${PROJECT_SOURCE_DIR}/shaders/blending.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/blending.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/core/screenspace_fs.glsl
+  ${PROJECT_SOURCE_DIR}/shaders/core/screenspace_vs.glsl
   ${PROJECT_SOURCE_DIR}/shaders/core/xyzuvrgba_fs.glsl
   ${PROJECT_SOURCE_DIR}/shaders/core/xyzuvrgba_vs.glsl
   ${PROJECT_SOURCE_DIR}/shaders/framebuffer/exitframebuffer_fs.glsl

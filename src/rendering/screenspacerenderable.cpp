@@ -535,11 +535,11 @@ void ScreenSpaceRenderable::createShaders(ghoul::Dictionary dict) {
     dict.setValue("rendererData", rendererData);
     dict.setValue(
         "fragmentPath",
-        std::string("${MODULE_BASE}/shaders/screenspace_fs.glsl")
+        std::string("${SHADERS}/core/screenspace_fs.glsl")
     );
     _shader = ghoul::opengl::ProgramObject::Build(
         "ScreenSpaceProgram",
-        absPath("${MODULE_BASE}/shaders/screenspace_vs.glsl"),
+        absPath("${SHADERS}/core/screenspace_vs.glsl"),
         absPath("${SHADERS}/render_fs.glsl"),
         dict
     );

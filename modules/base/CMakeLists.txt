@@ -211,8 +211,6 @@ set(SHADER_FILES
   shaders/prism_vs.glsl
   shaders/renderabletrail_fs.glsl
   shaders/renderabletrail_vs.glsl
-  shaders/screenspace_fs.glsl
-  shaders/screenspace_vs.glsl
   shaders/screenspaceinsetblackout_vs.glsl
   shaders/screenspaceinsetblackout_fs.glsl
   shaders/sphere_fs.glsl
