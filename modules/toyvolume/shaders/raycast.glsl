@@ -26,6 +26,9 @@ uniform vec4 color#{id};
 uniform float time#{id};
 uniform float maxStepSize#{id} = 0.02;
 
+const float M_PI = 3.14159265358979323846;
+
+
 void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
                  inout vec3 accumulatedAlpha, inout float stepSize)
 {
@@ -33,14 +36,13 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
   // In real situations, the sample function would sample a
   // 3D texture to retrieve the color contribution of a given point.
 
-  vec3 fromCenter = vec3(0.5, 0.5, 0.5) - samplePos;
+  vec3 fromCenter = vec3(0.5) - samplePos;
 
   float theta = atan(fromCenter.x, fromCenter.z);
-  float angularRatio = (theta + 3.1415) / 6.283;
-  angularRatio = mod(angularRatio + time#{id}*0.01, 1.0);
+  float angularRatio = (theta + M_PI) / (2.0 * M_PI);
+  angularRatio = mod(angularRatio + time#{id} * 0.01, 1.0);
 
-
-  float timeWave = sin(mod(time#{id}*0.05, 2.0 * 3.1415));
+  float timeWave = sin(mod(time#{id} * 0.05, 2.0 * M_PI));
   float rDisplacement = 0.1 * timeWave;
 
   vec4 c = color#{id};

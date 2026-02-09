@@ -40,7 +40,7 @@ void main() {
   vec4 positionScreenSpace = positionClipSpace;
   positionScreenSpace.z = 0.0;
   vs_positionModelSpace = in_position;
-  vs_screenSpaceDepth  = positionScreenSpace.w;
+  vs_screenSpaceDepth = positionScreenSpace.w;
   vs_positionViewSpace = positionViewSpace;
 
   gl_Position = positionScreenSpace;

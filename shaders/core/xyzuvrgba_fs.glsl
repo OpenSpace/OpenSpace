@@ -24,14 +24,15 @@
 
 #include "fragment.glsl"
 
-uniform bool hasTexture = false;
-uniform bvec2 shouldFlipTexture = bvec2(false, false);
-uniform sampler2D tex;
-uniform vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
-
 in float depth;
 in vec2 out_uv;
 in vec4 out_color;
+
+uniform bool hasTexture = false;
+uniform bvec2 shouldFlipTexture = bvec2(false, false);
+uniform sampler2D tex;
+uniform vec4 color = vec4(1.0);
+
 
 Fragment getFragment() {
   Fragment frag;

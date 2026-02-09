@@ -76,6 +76,7 @@ uniform int chunkLevel;
   out vec4 positions_lightspace[nDepthMaps];
 #endif // nDepthMaps > 0
 
+
 struct PositionNormalPair {
   vec3 position;
   vec3 normal;
@@ -96,28 +97,24 @@ PositionNormalPair globalInterpolation(vec2 uv) {
   return result;
 }
 
-vec3 getLevelWeights(float distToVertexOnEllipsoid) {
+
+void main() {
+  PositionNormalPair pair = globalInterpolation(in_uv);
+  float distToVertexOnEllipsoid =
+    length((pair.normal * chunkMinHeight + pair.position) - cameraPosition);
+
+  // use level weight for height sampling, and output to fragment shader
   float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
   float desiredLevel = log2(projectedScaleFactor);
   float levelInterp = chunkLevel - desiredLevel;
-
-  return vec3(
+  levelWeights = vec3(
     clamp(1.0 - levelInterp, 0.0, 1.0),
     clamp(levelInterp, 0.0, 1.0) - clamp(levelInterp - 1.0, 0.0, 1.0),
     clamp(levelInterp - 1.0, 0.0, 1.0)
   );
-}
-
-
-void main() {
-  PositionNormalPair pair = globalInterpolation(in_uv);
-  float distToVertexOnEllipsoid = length((pair.normal * chunkMinHeight + pair.position) - cameraPosition);
-
-  // use level weight for height sampling, and output to fragment shader
-  levelWeights = getLevelWeights(distToVertexOnEllipsoid);
 
   // Get the height value and apply skirts
-  float height = getTileHeight(in_uv, levelWeights) - getTileVertexSkirtLength();
+  float height = tileHeight(in_uv, levelWeights) - tileVertexSkirtLength();
 
 #if USE_ACCURATE_NORMALS
   // Calculate tangents
@@ -155,7 +152,8 @@ void main() {
 
 #if nDepthMaps > 0
   for (int idx = 0; idx < nDepthMaps; idx++) {
-    positions_lightspace[idx] = vec4(light_vps[idx] * (inv_vp * dvec4(positionCameraSpace, 1.0)));
+    positions_lightspace[idx] =
+      vec4(light_vps[idx] * (inv_vp * dvec4(positionCameraSpace, 1.0)));
   }
 #endif // nDepthMaps > 0
 }

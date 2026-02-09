@@ -49,7 +49,7 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
 {
   vec3 transformedPos = samplePos;
   if (gridType_#{id} == 1) {
-    transformedPos = volume_cartesianToSpherical(samplePos);
+    transformedPos = cartesianToSpherical(samplePos);
     if (abs(transformedPos.r) > 1.0) {
       return;
     }

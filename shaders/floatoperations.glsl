@@ -61,7 +61,7 @@ float safeLength(vec4 v) {
     return length(v / m) * m;
   }
   else {
-    return 0.f;
+    return 0.0;
   }
 }
 

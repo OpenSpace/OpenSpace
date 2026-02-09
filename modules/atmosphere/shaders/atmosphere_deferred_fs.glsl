@@ -103,7 +103,6 @@ uniform dvec3 sunDirectionObj;
 // JCC: Remove and use dictionary to decide the number of shadows
 const uint numberOfShadows = 1;
 
-
 struct ShadowRenderingStruct {
   double xu;
   double xp;
@@ -119,6 +118,7 @@ struct ShadowRenderingStruct {
 uniform ShadowRenderingStruct shadowDataArray[numberOfShadows];
 uniform int shadows;
 uniform bool hardShadows;
+
 
 // Returns whether there is an eclipse in the x component and the strength of the
 // shadowing in the y component
@@ -169,7 +169,7 @@ float opticalDepth(float localH, float r, float mu, float d, float Rg) {
   vec2 a01 = a * vec2(mu, mu + d / r);
   vec2 a01s = sign(a01);
   vec2 a01sq = a01 * a01;
-  float x = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
+  float x = a01s.y > a01s.x  ?  exp(a01sq.x)  :  0.0;
   vec2 y = a01s / (2.3193 * abs(a01) + sqrt(1.52 * a01sq + 4.0)) *
     vec2(1.0, exp(-d * invH * (d / (2.0 * r) + mu)));
   return sqrt(2.0 * M_PI * sqrt(Rt*Rt - Rg*Rg) * r) * exp((Rg-r)*invH) *
@@ -373,10 +373,10 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
 
     // Above Horizon
     mu = muHorizon - INTERPOLATION_EPS;
-    // r0  = sqrt(r * r + t * t + 2.0 * r * t * mu);
+    // r0 = sqrt(r * r + t * t + 2.0 * r * t * mu);
     // From cosine law where t = distance between x and x0
     // r0^2 = r^2 + t^2 - 2 * r * t * cos(PI-theta)
-    // r0  = sqrt(r2 + t2 + 2.0 * r * t * mu);
+    // r0 = sqrt(r2 + t2 + 2.0 * r * t * mu);
     float halfCosineLaw1 = r2 + (t * t);
     float halfCosineLaw2 = 2.0 * r * t;
     r0 = sqrt(halfCosineLaw1 + halfCosineLaw2 * mu);
@@ -396,7 +396,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
 
     // Below Horizon
     mu = muHorizon + INTERPOLATION_EPS;
-    //r0  = sqrt(r2 + t2 + 2.0 * r * t * mu);
+    //r0 = sqrt(r2 + t2 + 2.0 * r * t * mu);
     r0 = sqrt(halfCosineLaw1 + halfCosineLaw2 * mu);
 
     mu0 = (r * mu + t) * (1.0 / r0);
@@ -429,7 +429,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
   // Finally we add the Lsun (all calculations are done with no Lsun so we can change it
   // on the fly with no precomputations)
   vec3 finalScatteringRadiance = radiance * sunIntensity;
-  return groundHit ?  finalScatteringRadiance  :  spaceColor + finalScatteringRadiance;
+  return groundHit  ?   finalScatteringRadiance  :  spaceColor + finalScatteringRadiance;
 }
 
 /*
@@ -556,7 +556,7 @@ void main() {
   double maxLength = 0.0;   // in KM
   bool intersect = atmosphereIntersection(
     ray,
-    Rt - (ATM_EPSILON * 0.001),
+    Rt - (AtmEpsilon * 0.001),
     offset,
     maxLength
   );

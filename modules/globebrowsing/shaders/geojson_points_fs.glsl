@@ -35,14 +35,15 @@ uniform vec3 color;
 uniform float opacity;
 
 // Can be used to preserve the whites in a point texture
-bool preserveWhite = true;
+const bool PreserveWhite = true;
+
 
 Fragment getFragment() {
   Fragment frag;
 
   if (hasTexture) {
     frag.color = texture(pointTexture, texCoord);
-    if (!preserveWhite || frag.color.r * frag.color.g * frag.color.b < 0.95) {
+    if (!PreserveWhite || frag.color.r * frag.color.g * frag.color.b < 0.95) {
       frag.color.rgb *= color;
     }
     frag.color.a *= opacity;

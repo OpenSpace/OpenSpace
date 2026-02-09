@@ -49,6 +49,7 @@ out vec4 lightspace_position;
 uniform dmat4 model;
 uniform dmat4 light_vp;
 
+
 void main() {
   vs_positionCameraSpace = modelViewTransform * (meshTransform * in_position);
   vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;

@@ -32,6 +32,7 @@ uniform sampler2D downscaledRenderedVolumeDepth;
 uniform vec4 viewport;
 uniform vec2 resolution;
 
+
 void main() {
   // Modify the texCoord based on the Viewport and Resolution. This modification is
   // necessary in case of side-by-side stereo as we only want to access the part of the

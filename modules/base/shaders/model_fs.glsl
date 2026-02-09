@@ -69,6 +69,7 @@ in vec4 lightspace_position;
 uniform bool has_override_color;
 uniform vec4 override_color;
 
+
 Fragment getFragment() {
   Fragment frag;
   frag.depth = vs_screenSpaceDepth;
@@ -96,9 +97,9 @@ Fragment getFragment() {
   // Render invisible mesh with flashy procedural material
   if (use_forced_color) {
     vec3 adjustedPos = floor(vs_positionCameraSpace.xyz / 500.0);
-    float chessboard  = adjustedPos.x + adjustedPos.y + adjustedPos.z;
+    float chessboard = adjustedPos.x + adjustedPos.y + adjustedPos.z;
     chessboard = fract(chessboard * 0.5);
-    chessboard *= 2;
+    chessboard *= 2.0;
 
     // Pink and complementary green in a chessboard pattern
     frag.color.rgb = mix(vec3(1.0, 0.0, 0.8), vec3(0.0, 1.0, 0.2), chessboard);
@@ -163,7 +164,7 @@ Fragment getFragment() {
     for (int i = 0; i < nLightSources; i++) {
       // Diffuse light
       vec3 lightDirection = lightDirectionsViewSpace[i];
-      float diffuseFactor =  max(dot(normal, lightDirection), 0.0);
+      float diffuseFactor = max(dot(normal, lightDirection), 0.0);
       vec3 diffuseColor =
         diffuseIntensity * lightColor * diffuseFactor * diffuseAlbedo.rgb;
 
@@ -187,7 +188,7 @@ Fragment getFragment() {
       // smoother shadows
       const int ShadowFilterSize = 3;
       int accum = 0;
-      vec2 stepSize = 1.f / textureSize(shadow_depth_map, 0);
+      vec2 stepSize = 1.0 / textureSize(shadow_depth_map, 0);
       for (int x = -ShadowFilterSize; x <= ShadowFilterSize; x++) {
         for (int y = -ShadowFilterSize; y <= ShadowFilterSize; y++) {
           float depth = texture(
@@ -201,7 +202,7 @@ Fragment getFragment() {
       }
 
       // Scale the accumulated shadow factor to [0, 1]
-      const float Norm = pow(2.f * ShadowFilterSize + 1, 2.f);
+      const float Norm = pow(2.0 * ShadowFilterSize + 1, 2.0);
       float shadowFactor = float(accum) / Norm;
       // Apply shadow to diffuse lighting (with ambient contribution)
       vec3 ambientLightColor = ambientIntensity * lightColor * diffuseAlbedo.rgb;

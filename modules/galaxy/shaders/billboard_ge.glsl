@@ -42,7 +42,7 @@ uniform dvec3 cameraUp;
 uniform dmat4 viewProjectionMatrix;
 uniform dmat4 modelMatrix;
 
-const double PARSEC = 3.08567756E16;
+const double Parsec = 3.08567756E16;
 
 
 void main() {
@@ -54,9 +54,9 @@ void main() {
   dvec4 dpos = dvec4(vs_position);
   dpos.xyz *= scaleMultiply;
   dpos = modelMatrix * dpos;
-  dpos /= PARSEC;
+  dpos /= Parsec;
   // It lies about 8 kpc from the center on the Orion Arm of the Milky Way
-  dpos.x += 8000;
+  dpos.x += 8000.0;
 
   scaleMultiply *= 4.0;
 
@@ -70,7 +70,7 @@ void main() {
     vec4(viewProjectionMatrix * dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w))
   );
 
-  ge_screenSpaceDepth  = bottomLeftVertex.w;
+  ge_screenSpaceDepth = bottomLeftVertex.w;
 
   vec4 topRightVertex = z_normalization(
     vec4(viewProjectionMatrix * dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w))

@@ -49,7 +49,7 @@ float semiMinorAxis(float a, float e) {
 float ellipseTest(vec2 point, float a, float b, float cx) {
   float x = point.x;
   float y = point.y;
-  return (pow(x - cx, 2.0) / (a*a)) + ((y*y) / (b*b));
+  return (pow(x - cx, 2.0) / (a * a)) + ((y * y) / (b * b));
 }
 
 
@@ -62,12 +62,12 @@ Fragment getFragment() {
 
   float AUpper = semiMajorAxis + offsetUpper;
   float BUpper = semiMinorAxis(AUpper, eccentricity);
-  float CUpper = sqrt(AUpper*AUpper - BUpper*BUpper);
+  float CUpper = sqrt(AUpper * AUpper - BUpper * BUpper);
   float outerApoapsisDistance = AUpper * (1.0 + eccentricity);
 
   float ALower = semiMajorAxis - offsetLower;
   float BLower = semiMinorAxis(ALower, eccentricity);
-  float CLower = sqrt(ALower*ALower - BLower*BLower);
+  float CLower = sqrt(ALower * ALower - BLower * BLower);
   float innerApoapsisDistance = ALower * (1.0 + eccentricity);
 
   // Normalize based on outer apoapsis distance (size of plane)

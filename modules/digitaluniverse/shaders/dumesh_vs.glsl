@@ -36,11 +36,11 @@ uniform dmat4 projectionTransform;
 
 
 void main() {
-  dvec4 positionViewSpace  = modelViewTransform * dvec4(in_position, 1.0);
-  vec4 positionClipSpace   = vec4(projectionTransform * positionViewSpace);
+  dvec4 positionViewSpace = modelViewTransform * dvec4(in_position, 1.0);
+  vec4 positionClipSpace = vec4(projectionTransform * positionViewSpace);
   vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));
 
-  vs_screenSpaceDepth  = positionScreenSpace.w;
+  vs_screenSpaceDepth = positionScreenSpace.w;
   vs_positionViewSpace = vec4(positionViewSpace);
 
   gl_Position = positionScreenSpace;

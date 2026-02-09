@@ -32,6 +32,7 @@ uniform vec4 objpos;
 
 #include "powerscalingmath.glsl"
 
+
 vec4 psc_to_meter(vec4 v1, vec2 v2) {
   float factor = v2.x * pow(k,v2.y + v1.w);
   return vec4(v1.xyz * factor, 1.0);
@@ -48,15 +49,21 @@ vec4 pscTransform(inout vec4 vertexPosition, mat4 modelTransform) {
   vertexPosition = psc_addition(vertexPosition,vec4(-campos.xyz,campos.w));
 
   // rotate the camera
-  vertexPosition.xyz =  mat3(camrot) * vertexPosition.xyz;
+  vertexPosition.xyz = mat3(camrot) * vertexPosition.xyz;
   vec4 tmp = vertexPosition;
 
   float ds = scaling.y - vertexPosition.w;
   if (ds >= 0) {
-    vertexPosition = vec4(vertexPosition.xyz * scaling.x * pow(k, vertexPosition.w), scaling.y);
+    vertexPosition = vec4(
+      vertexPosition.xyz * scaling.x * pow(k, vertexPosition.w),
+      scaling.y
+    );
   }
   else {
-    vertexPosition = vec4(vertexPosition.xyz * scaling.x * pow(k, scaling.y), vertexPosition.w);
+    vertexPosition = vec4(
+      vertexPosition.xyz * scaling.x * pow(k, scaling.y),
+      vertexPosition.w
+    );
   }
 
   // project using the rescaled coordinates,

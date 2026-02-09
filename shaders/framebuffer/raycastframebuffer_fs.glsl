@@ -49,6 +49,7 @@ const float AlphaLimit = 0.99;
 
 #include <#{getEntryPath}>
 
+
 void main() {
   vec2 texCoord = vec2(gl_FragCoord.xy / windowSize);
 
@@ -62,7 +63,7 @@ void main() {
 
   // Fetch exit point from texture
   vec3 exitPos = exitColorTexture.rgb;
-  float exitDepth =  denormalizeFloat(texture(exitDepthTexture, texCoord).x);
+  float exitDepth = denormalizeFloat(texture(exitDepthTexture, texCoord).x);
 
   float jitterFactor = 0.5 + 0.5 * rand(gl_FragCoord.xy); // should be between 0.5 and 1.0
 

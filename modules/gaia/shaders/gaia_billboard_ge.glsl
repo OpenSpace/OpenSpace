@@ -52,13 +52,12 @@ uniform int renderOption;
 uniform float magnitudeBoost;
 
 // Keep in sync with gaiaoptions.h:RenderOption enum
-const int RENDEROPTION_STATIC = 0;
-const int RENDEROPTION_COLOR = 1;
-const int RENDEROPTION_MOTION = 2;
-const float EPS = 1e-5;
+const int RenderOptionStatic = 0;
+const int RenderOptionColor = 1;
+const int RenderOptionMotion = 2;
+const float Eps = 1e-5;
 
-
-const vec2 corners[4] = vec2[4](
+const vec2 Corners[4] = vec2[4](
   vec2(0.0, 1.0),
   vec2(0.0, 0.0),
   vec2(1.0, 1.0),
@@ -79,16 +78,16 @@ void main() {
   float initStarSize = billboardSize;
 
   // Use magnitude for size boost as well.
-  if (renderOption != RENDEROPTION_STATIC) {
+  if (renderOption != RenderOptionStatic) {
     // DR1 magnitudes are [4, 20], but could be [-15, 20] according to this chart:
     // https://qph.fs.quoracdn.net/main-qimg-317a18e3b228efc7d7f67a1632a55961
     // Negative magnitude => Giants
     // Big positive magnitude => Dwarfs
     float absoluteMagnitude = vs_brightness[0].x;
-    float normalizedMagnitude = (absoluteMagnitude - 20) / -1; // (-15 - 20);
+    float normalizedMagnitude = (absoluteMagnitude - 20.0) / -1.0; // (-15 - 20);
 
     // TODO: A linear scale is prabably not the best!
-    initStarSize += normalizedMagnitude * (magnitudeBoost / 50);
+    initStarSize += normalizedMagnitude * (magnitudeBoost / 50.0);
   }
 
   vec4 position = gl_in[0].gl_Position;
@@ -99,7 +98,7 @@ void main() {
   // Discard geometry if star has no position (but wasn't a nullArray).
   // Or if observed distance is above threshold set by cutOffThreshold.
   // By discarding in gs instead of fs we save computations for when nothing is visible.
-  if (length(position) < EPS || distThreshold <= 0) {
+  if (length(position) < Eps || distThreshold <= 0) {
     return;
   }
 
@@ -112,16 +111,16 @@ void main() {
   vec4 wCameraUp = vec4(newUp, 0.0);
 
   float multiplier = float(length(cameraPos));
-  starSize *= float(multiplier/1E1);
+  starSize *= float(multiplier / 10.0);
 
   for (int i = 0; i < 4; i++) {
     // Always turn the billboard towards the camera (needed for warped screen).
-    vec4 cornerPoint = centerWorldPos + wCameraRight * starSize.x * (corners[i].x - 0.5) +
-      wCameraUp * starSize.y * (corners[i].y - 0.5);
+    vec4 cornerPoint = centerWorldPos + wCameraRight * starSize.x * (Corners[i].x - 0.5) +
+      wCameraUp * starSize.y * (Corners[i].y - 0.5);
     gl_Position = vec4(projection * view * cornerPoint);
     gl_Position.z = 0.0;
-    texCoord = corners[i];
-    ge_gPosition  = viewPosition;
+    texCoord = Corners[i];
+    ge_gPosition = viewPosition;
 
     EmitVertex();
   }

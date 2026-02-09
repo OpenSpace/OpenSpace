@@ -70,12 +70,7 @@ vec3 gatherNeighboringColors() {
 
   // GLSL normally doesn't have a problem taking vec3(0.0)/0.0 but we don't want to tempt
   // the compiler gods
-  if (nContributions > 0) {
-    return totalColor / nContributions;
-  }
-  else {
-    return vec3(0.0);
-  }
+  return nContributions > 0  ?  totalColor / nContributions  :  vec3(0.0);
 }
 
 

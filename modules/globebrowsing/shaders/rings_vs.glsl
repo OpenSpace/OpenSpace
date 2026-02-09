@@ -49,10 +49,10 @@ void main() {
   vs_normal = mat3(modelViewProjectionMatrix) * in_normal;
   posObj = vec3(in_position, 0.0);
 
-  dvec4 positionClipSpace  = modelViewProjectionMatrix * dvec4(in_position, 0.0, 1.0);
+  dvec4 positionClipSpace = modelViewProjectionMatrix * dvec4(in_position, 0.0, 1.0);
   vec4 positionClipSpaceZNorm = z_normalization(vec4(positionClipSpace));
 
   shadowCoords = vec4(shadowMatrix * dvec4(in_position, 0.0, 1.0));
-  vs_screenSpaceDepth  = positionClipSpaceZNorm.w;
+  vs_screenSpaceDepth = positionClipSpaceZNorm.w;
   gl_Position = positionClipSpaceZNorm;
 }

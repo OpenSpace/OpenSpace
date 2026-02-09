@@ -36,11 +36,11 @@ uniform mat4 modelTransform;
 
 
 void main() {
-    vPosition = vertPosition.xyz;
+  vPosition = vertPosition.xyz;
 
-    worldPosition = vec4(vertPosition.xyz, 0.0);
-    vec4 position = pscTransform(worldPosition, modelTransform);
+  worldPosition = vec4(vertPosition.xyz, 0.0);
+  vec4 position = pscTransform(worldPosition, modelTransform);
 
-    // project the position to view space
-    gl_Position =  z_normalization(viewProjection * position);
+  // project the position to view space
+  gl_Position = z_normalization(viewProjection * position);
 }

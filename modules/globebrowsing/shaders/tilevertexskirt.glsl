@@ -30,6 +30,7 @@
 uniform int xSegments;
 uniform float skirtLength;
 
+
 bool tileVertexIsSkirtVertex() {
   int vertexIDx = gl_VertexID % (xSegments + 3);
   int vertexIDy = gl_VertexID / (xSegments + 3);
@@ -37,8 +38,8 @@ bool tileVertexIsSkirtVertex() {
          vertexIDx == (xSegments + 2) || vertexIDy == (xSegments + 2);
 }
 
-float getTileVertexSkirtLength() {
-  return tileVertexIsSkirtVertex() ? skirtLength : 0.0;
+float tileVertexSkirtLength() {
+  return tileVertexIsSkirtVertex()  ?  skirtLength  :  0.0;
 }
 
 #endif // _GLOBEBROWSING___TILEVERTEXSKIRT___GLSL_

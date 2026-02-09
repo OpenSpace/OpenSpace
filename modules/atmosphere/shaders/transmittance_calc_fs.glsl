@@ -82,7 +82,7 @@ float opticalDepth(float r, float mu, float H) {
 
 
 void main() {
-  float u_mu  = gl_FragCoord.x / float(TRANSMITTANCE.x);
+  float u_mu = gl_FragCoord.x / float(TRANSMITTANCE.x);
   float u_r = gl_FragCoord.y / float(TRANSMITTANCE.y);
 
   // In the paper u_r^2 = (r^2-Rg^2)/(Rt^2-Rg^2)

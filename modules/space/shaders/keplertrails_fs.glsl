@@ -34,8 +34,8 @@ uniform float opacity = 1.0;
 uniform float trailFadeExponent;
 uniform float colorFadeCutoffValue;
 
+
 Fragment getFragment() {
-  Fragment frag;
   // float offsetPeriods = offset / period;
   // This is now done in the fragment shader instead to make smooth movement between
   // vertices. We want vertexDistance to be double up to this point, I think, (hence the
@@ -61,6 +61,7 @@ Fragment getFragment() {
   }
 
   // Use additive blending for some values to make the discarding less abrupt
+  Fragment frag;
   if (fade < 0.15) {
     frag.blend = BlendModeAdditive;
   }

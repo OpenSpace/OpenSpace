@@ -28,7 +28,7 @@ in vec2 uv;
 
 uniform sampler2D renderedTexture;
 
-const float DEFAULT_DEPTH = 3.08567758e19; // 1000 Pc
+const float DefaultDepth = 3.08567758e19; // 1000 Pc
 
 
 Fragment getFragment() {
@@ -39,12 +39,12 @@ Fragment getFragment() {
   vec4 textureColor = texture(renderedTexture, uv);
 
   // Use the following to check for any intensity at all.
-  //color = (length(intensity.rgb) > 0.001) ? vec4(1.0) : vec4(0.0);
+  //color = (length(intensity.rgb) > 0.001)  ?  vec4(1.0)  :  vec4(0.0);
 
   Fragment frag;
   frag.color = textureColor;
   // Place stars at back to begin with.
-  frag.depth = DEFAULT_DEPTH;
+  frag.depth = DefaultDepth;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   frag.blend = BlendModeNormal;
 

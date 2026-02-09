@@ -25,9 +25,12 @@
 #version __CONTEXT__
 
 // Inputs
-layout(location = 0) in vec3 in_position;        // Should be provided in meters
-layout(location = 1) in float in_color_scalar;   // The extra value used to color lines.
-layout(location = 2) in float in_masking_scalar; // The extra value used to mask out parts of lines.
+// Should be provided in meters
+layout(location = 0) in vec3 in_position;
+// The extra value used to color lines
+layout(location = 1) in float in_color_scalar;
+// The extra value used to mask out parts of lines
+layout(location = 2) in float in_masking_scalar;
 
 out vec4 vs_color;
 out float vs_depth;
@@ -62,14 +65,14 @@ uniform vec2 domainLimZ;
 uniform vec2 domainLimR;
 
 // These should correspond to the enum 'ColorMethod' in renderablefieldlinesequence.cpp
-const int uniformColor = 0;
-const int colorByQuantity = 1;
+const int ColorMethodUniformColor = 0;
+const int ColorMethodColorByQuantity = 1;
 
 
-vec4 getTransferFunctionColor() {
+vec4 transferFunctionColor() {
   // Remap the color scalar to a [0,1] range
-  float lookUpVal =
-    (in_color_scalar - selectedColorRange.x) / (selectedColorRange.y - selectedColorRange.x);
+  float lookUpVal = (in_color_scalar - selectedColorRange.x) /
+                    (selectedColorRange.y - selectedColorRange.x);
   return texture(transferFunction, lookUpVal);
 }
 
@@ -113,16 +116,16 @@ void main() {
       vs_color = lineColor;
     }
 
-    if (colorMethod == colorByQuantity) {
-      vec4 quantityColor = getTransferFunctionColor();
+    if (colorMethod == ColorMethodColorByQuantity) {
+      vec4 quantityColor = transferFunctionColor();
       vs_color = vec4(quantityColor.xyz, vs_color.a * quantityColor.a);
     }
   }
   else {
-    vs_color = vec4(0);
+    vs_color = vec4(0.0);
   }
 
-  vec4 position_in_meters = vec4(in_position, 1);
+  vec4 position_in_meters = vec4(in_position, 1.0);
   vec4 positionClipSpace = modelViewProjection * position_in_meters;
   //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
   gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);

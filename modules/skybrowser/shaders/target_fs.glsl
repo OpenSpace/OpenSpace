@@ -46,6 +46,7 @@ uniform vec3 multiplyColor;
 // This compensates for the optical illusion that vertical lines appear thinner
 const float VerticalThickness = 1.1;
 
+
 float createLine(float lineCenter, float lineWidth, float coord) {
   // Calculate edges of line
   float startEdge = lineCenter - (lineWidth * 0.5);
@@ -58,7 +59,7 @@ float createFilledRectangle(float width, float height, vec2 coord) {
   return createLine(0.5, width, coord.x) * createLine(0.5, height, coord.y);
 }
 
-float createCrosshair(in float linewidth, in float ratio, in vec2 coord) {
+float createCrosshair(float linewidth, float ratio, vec2 coord) {
   const float Center = 0.5;
   float crosshairVertical = createLine(Center, linewidth * VerticalThickness, coord.x);
   float crosshairHorizontal = createLine(Center, linewidth, coord.y);
@@ -69,29 +70,33 @@ float createCrosshair(in float linewidth, in float ratio, in vec2 coord) {
 // Creates a rounded rectangle where radius is [0, 1] from completely square
 // to completely round
 float roundedRectangle(vec2 coord, vec2 size, float radius) {
-    vec2 q = abs(coord) - size + vec2(radius);
-    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - radius;
+  vec2 q = abs(coord) - size + vec2(radius);
+  return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - radius;
 }
 
 Fragment getFragment() {
   float rectangle = 0.0;
-  float maxWwtFov = 70;
+  const float MaxWwtFov = 70;
 
   float crosshair = createCrosshair(lineWidth, ratio, vs_st);
-  float crossHairHeight = crossHairSize/maxWwtFov;
+  float crossHairHeight = crossHairSize / MaxWwtFov;
   float crossHairWidth = crossHairHeight * ratio;
   float crossHairBox = createFilledRectangle(crossHairWidth, crossHairHeight, vs_st);
   crosshair *= crossHairBox;
 
   if (showRectangle) {
-    float lineWidthY = lineWidth * 2;
-    float lineWidthX = lineWidth * 2 * VerticalThickness;
-    float height = ((fov * 0.5) / maxWwtFov) - lineWidth;
+    float lineWidthY = lineWidth * 2.0;
+    float lineWidthX = lineWidth * 2.0 * VerticalThickness;
+    float height = ((fov * 0.5) / MaxWwtFov) - lineWidth;
     float width = (height * ratio) - lineWidthY;
     vec2 size = vec2(width, height);
 
     // The radius of the corners (in pixels) clockwise starting in the top left
-    float radius = clamp(borderRadius * 0.5 * min(height, width), 0.0, 0.5 * min(height, width));
+    float radius = clamp(
+      borderRadius * 0.5 * min(height, width),
+      0.0,
+      0.5 * min(height, width)
+    );
 
     // Calculate distance to edge
     float distance = roundedRectangle(vs_st.xy - vec2(0.5), size * 0.5, radius);
@@ -100,29 +105,26 @@ Fragment getFragment() {
     // Higher values could be used to simulate a drop shadow
     float edgeSoftness = 2.0;
     // Smooth the result (free antialiasing)
-    float smoothedAlpha =  1.0 - smoothstep(0.0, edgeSoftness, distance);
+    float smoothedAlpha = 1.0 - smoothstep(0.0, edgeSoftness, distance);
 
     // Border
     float borderThickness = lineWidth * 0.5;
-    float borderSoftness  = 0.0;
-    float borderAlpha     = 1.0-smoothstep(borderThickness - borderSoftness, borderThickness, abs(distance));
+    float borderSoftness = 0.0;
+    float borderAlpha =
+      1.0 - smoothstep(borderThickness - borderSoftness, borderThickness, abs(distance));
 
     // Colors
-    float borderColor = 1.0;
-    float bgColor = 0.0;
+    const float BorderColor = 1.0;
+    const float BgColor = 0.0;
 
-    rectangle = mix(bgColor, mix(bgColor, borderColor, borderAlpha), smoothedAlpha);
+    rectangle = mix(BgColor, mix(BgColor, BorderColor, borderAlpha), smoothedAlpha);
   }
 
   float result = clamp(crosshair + rectangle, 0.0, 1.0);
 
   Fragment frag;
-  frag.color = lineColor;
-  frag.color.a *= result;
+  frag.color = lineColor * vec4(multiplyColor, result * opacity);
 
-  frag.color.rgb *= multiplyColor;
-
-  frag.color.a *= opacity;
   if (frag.color.a == 0.0) {
     discard;
   }

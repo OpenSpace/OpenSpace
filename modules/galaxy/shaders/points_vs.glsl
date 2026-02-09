@@ -38,7 +38,7 @@ uniform dmat4 viewProjectionMatrix;
 uniform dmat4 modelMatrix;
 uniform dvec3 eyePosition;
 
-const double PARSEC = 3.08567756E16;
+const double Parsec = 3.08567756E16;
 
 
 void main() {
@@ -46,11 +46,11 @@ void main() {
   dvec4 dpos = dvec4(vs_position);
 
   double distanceToStar = length(dpos.xyz - eyePosition);
-  vs_starBrightness = clamp(float(8000.0 * PARSEC / distanceToStar), 0.0, 1.0);
+  vs_starBrightness = clamp(float(8000.0 * Parsec / distanceToStar), 0.0, 1.0);
 
   dpos.xyz *= 8.0;
   dpos = modelMatrix * dpos;
-  dpos /= PARSEC;
+  dpos /= Parsec;
 
   vec4 positionScreenSpace = z_normalization(vec4(viewProjectionMatrix * dpos));
   vs_color = in_color;

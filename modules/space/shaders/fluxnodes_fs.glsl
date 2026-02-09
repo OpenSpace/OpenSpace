@@ -49,8 +49,7 @@ Fragment getFragment() {
   float a = atan(pos.y, pos.x);
   float f = cos(a * 3.0);
 
-  vec3 color = vec3(0.0);
-  color = vec3(1.0 - smoothstep(f, f, r));
+  vec3 color = vec3(1.0 - smoothstep(f, f, r));
 
   Fragment frag;
   frag.depth = vs_depth;
@@ -89,6 +88,6 @@ Fragment getFragment() {
     frag.color.a = y;
   }
 
-  frag.gPosition  = vec4(1e27, 1e27, 1e27, 1.0);
+  frag.gPosition = vec4(1e27, 1e27, 1e27, 1.0);
   return frag;
 }

@@ -35,7 +35,7 @@ uniform sampler2D psfTexture;
 Fragment getFragment() {
   vec4 textureColor = texture(psfTexture, 0.5 * psfCoords + 0.5);
   vec4 fullColor = vec4(ge_color * textureColor.a, textureColor.a);
-  if (fullColor.a == 0) {
+  if (fullColor.a == 0.0) {
     discard;
   }
 

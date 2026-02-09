@@ -34,9 +34,8 @@ uniform float outlineWeight;
 uniform vec3 color;
 uniform float opacity;
 
+
 Fragment getFragment() {
-  Fragment frag;
-  
   // Only draw circle instead of entire quad
   vec2 st = (texCoord - vec2(0.5)) * 2.0;
   if (length(st) > 1.0) {
@@ -44,12 +43,13 @@ Fragment getFragment() {
   }
 
   // Creates outline for circle
-  vec3 _color = color;
+  vec3 c = color;
   if (enableOutline && (length(st) > (1.0 - outlineWeight) && length(st) < 1.0)) {
-    _color = outlineColor;
+    c = outlineColor;
   }
 
-  frag.color = vec4(_color, opacity);
+  Fragment frag;
+  frag.color = vec4(c, opacity);
   frag.depth = projectionViewDepth;
   frag.gPosition = viewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);

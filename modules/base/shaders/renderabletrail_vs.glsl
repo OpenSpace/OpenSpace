@@ -51,15 +51,15 @@ uniform int numberOfUniqueVertices;
 uniform int floatingOffset;
 
 // Fragile! Keep in sync with RenderableTrail::render
-#define VERTEX_SORTING_NEWESTFIRST 0
-#define VERTEX_SORTING_OLDESTFIRST 1
-#define VERTEX_SORTING_NOSORTING 2
+const int VertexSortingNewestFirst = 0;
+const int VertexSortingOldestFirst = 1;
+const int VertexSortingNoSorting = 2;
 
 
 void main() {
   int modId = gl_VertexID;
 
-  if ((vertexSortingMethod != VERTEX_SORTING_NOSORTING) && useLineFade) {
+  if ((vertexSortingMethod != VertexSortingNoSorting) && useLineFade) {
     float id = 0;
 
     if (useSplitRenderMode) {
@@ -72,12 +72,12 @@ void main() {
         if (modId < 0) {
           modId += nVertices;
         }
-        
+
         // Convert the index to a [0,1] range
         id = float(modId) / float(nVertices);
     }
 
-    if (vertexSortingMethod == VERTEX_SORTING_NEWESTFIRST) {
+    if (vertexSortingMethod == VertexSortingNewestFirst) {
       id = 1.0 - id;
     }
 
@@ -108,8 +108,8 @@ void main() {
   vs_positionDepth = vs_positionClipSpace.w;
 
   gl_PointSize = (stride == 1 || int(modId) % stride == 0) ?
-                  float(pointSize) : float(pointSize) / 2;
-  gl_Position  = z_normalization(vs_positionClipSpace);
+                  float(pointSize) : float(pointSize) / 2.0;
+  gl_Position = z_normalization(vs_positionClipSpace);
 
   mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0)) * viewport.zw;
 }

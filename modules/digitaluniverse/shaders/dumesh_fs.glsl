@@ -32,12 +32,11 @@ uniform float alphaValue;
 
 
 Fragment getFragment() {
-  Fragment frag;
-
   if (alphaValue == 0.0) {
     discard;
   }
 
+  Fragment frag;
   frag.color = vec4(color, alphaValue);
   frag.depth = vs_screenSpaceDepth;
 

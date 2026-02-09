@@ -39,7 +39,7 @@ uniform mat4 modelViewTransform;
 
 
 void main() {
-  vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
+  vec4 position = vec4(in_position.xyz * pow(10.0, in_position.w), 1.0);
   vec4 positionClipSpace = modelViewProjection * position;
   vec4 positionScreenSpace = z_normalization(positionClipSpace);
 

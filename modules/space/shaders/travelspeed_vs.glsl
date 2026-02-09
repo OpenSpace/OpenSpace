@@ -58,5 +58,5 @@ void main() {
     finalColor = vec4(1.0, 1.0, 0.0, 1.0);
   }
 
-  gl_Position.z = 0.f;
+  gl_Position.z = 0.0;
 }

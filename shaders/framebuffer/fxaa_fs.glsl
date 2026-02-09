@@ -24,13 +24,6 @@
 
 #version __CONTEXT__
 
-const float EdgeThresholdMin = 0.0312;
-const float EdgeThresholdMax = 0.125;
-const int Iterations = 12;
-const float SubpixelQuality = 0.75;
-
-const float[12] Quality = float[](1.f, 1.f, 1.f, 1.f, 1.f, 1.5f, 2.f, 2.f, 2.f, 2.f, 4.f, 8.f);
-
 in vec2 texCoord;
 layout (location = 0) out vec4 aaFinalColor;
 
@@ -39,10 +32,21 @@ uniform sampler2D renderedTexture;
 uniform vec4 Viewport;
 uniform vec2 Resolution;
 
+const float EdgeThresholdMin = 0.0312;
+const float EdgeThresholdMax = 0.125;
+const int Iterations = 12;
+const float SubpixelQuality = 0.75;
+
+const float[12] Quality = float[](
+  1.0, 1.0, 1.0, 1.0, 1.0, 1.5, 2.0, 2.0, 2.0, 2.0, 4.0, 8.0
+);
+
+
 // Relative luminance
 float luminance(vec3 rgb) {
   return dot(vec3(0.2126, 0.7152, 0.0722), rgb);
 }
+
 
 void main() {
   // Modify the texCoord based on the Viewport and Resolution. This modification is
@@ -113,8 +117,8 @@ void main() {
 
   // Choosing Edge Orientation
   bool isHorizontal = (edgeHorizontal >= edgeVertical);
-  float pixelLum1 = isHorizontal ? pixelLumDown : pixelLumLeft;
-  float pixelLum2 = isHorizontal ? pixelLumUp : pixelLumRight;
+  float pixelLum1 = isHorizontal  ?  pixelLumDown  :  pixelLumLeft;
+  float pixelLum2 = isHorizontal  ?  pixelLumUp  :  pixelLumRight;
 
   // Gradients
   float gradient1 = pixelLum1 - pixelLumCenter;
@@ -124,7 +128,7 @@ void main() {
   float gradientScaled = 0.25 * max(abs(gradient1), abs(gradient2));
 
   // Step size (one pixel) according to the edge direction.
-  float stepLength = isHorizontal ? inverseScreenSize.y : inverseScreenSize.x;
+  float stepLength = isHorizontal  ?  inverseScreenSize.y  :  inverseScreenSize.x;
 
   float pixelLumLocalAverage = 0.0;
 
@@ -205,8 +209,8 @@ void main() {
   }
 
   // Estimating the offset
-  float distance1 = isHorizontal ? (st.x - uv1.x) : (st.y - uv1.y);
-  float distance2 = isHorizontal ? (uv2.x - st.x) : (uv2.y - st.y);
+  float distance1 = isHorizontal  ?  (st.x - uv1.x)  :  (st.y - uv1.y);
+  float distance2 = isHorizontal  ?  (uv2.x - st.x)  :  (uv2.y - st.y);
 
   bool isDirection1 = distance1 < distance2;
   float distanceFinal = min(distance1, distance2);
@@ -214,17 +218,17 @@ void main() {
   float edgeThickness = (distance1 + distance2);
 
   // Read in the direction of the closest side of the edge
-  float pixelOffset = - distanceFinal / edgeThickness + 0.5;
+  float pixelOffset = -distanceFinal / edgeThickness + 0.5;
 
   bool isPixelLumCenterSmaller = pixelLumCenter < pixelLumLocalAverage;
 
   // If the pixelLum at center is smaller than at its neighbour, the delta pixelLum at
   // each end should be positive (same variation).
   bool correctVariation =
-    ((isDirection1 ? pixelLumEnd1 : pixelLumEnd2) < 0.0) != isPixelLumCenterSmaller;
+    ((isDirection1  ?  pixelLumEnd1  :  pixelLumEnd2) < 0.0) != isPixelLumCenterSmaller;
 
   // If the pixelLum variation is incorrect, do not offset.
-  float finalOffset = correctVariation ? pixelOffset : 0.0;
+  float finalOffset = correctVariation  ?  pixelOffset  :  0.0;
 
   // Subpixel antialiasing
   float pixelLumAverage = (1.0 / 12.0) * (2.0 * (pixelLumDownUp + pixelLumLeftRight) +

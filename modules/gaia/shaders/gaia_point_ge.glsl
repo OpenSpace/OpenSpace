@@ -43,7 +43,7 @@ uniform dmat4 view;
 uniform float viewScaling;
 uniform float cutOffThreshold;
 
-const float EPS = 1e-5;
+const float Eps = 1e-5;
 
 
 void main() {
@@ -61,7 +61,7 @@ void main() {
   // Discard geometry if star has no position (but wasn't a nullArray).
   // Or if observed distance is above threshold set by cutOffThreshold.
   // By discarding in gs instead of fs we save computations for when nothing is visible.
-  if (length(position) < EPS || distThreshold <= 0) {
+  if (length(position) < Eps || distThreshold <= 0.0) {
     return;
   }
 
@@ -71,6 +71,5 @@ void main() {
   ge_gPosition = viewPosition;
 
   EmitVertex();
-
   EndPrimitive();
 }

@@ -38,23 +38,23 @@ uniform bool showOptimistic;
 // is treated as a linear scale where the color represent too cold to too hot. Account
 // for the conservative bounds my mapping one third of the texture ouside each boundary.
 // All parameters \in [0,1], where 1.0 corresponds to the max radius.
-float computeTextureCoord(float radius, float innerRadius,
-                          float conservativeInner, float conservativeOuter)
+float computeTextureCoord(float radius, float innerRadius, float conservativeInner,
+                          float conservativeOuter)
 {
-  const float t1 = 1.0 / 3.0;
-  const float t2 = 2.0 / 3.0;
+  const float T1 = 1.0 / 3.0;
+  const float T2 = 2.0 / 3.0;
 
   if (radius < conservativeInner) {
     float t = (radius - innerRadius) / (conservativeInner - innerRadius);
-    return mix(0.0, t1, t);
+    return mix(0.0, T1, t);
   }
   else if (radius > conservativeOuter) {
     float t = (radius - conservativeOuter) / (1.0 - conservativeOuter);
-    return mix(t2, 1.0, t);
+    return mix(T2, 1.0, t);
   }
   else {
     float t = (radius - conservativeInner) / (conservativeOuter - conservativeInner);
-    return mix(t1, t2, t);
+    return mix(T1, T2, t);
   }
 }
 

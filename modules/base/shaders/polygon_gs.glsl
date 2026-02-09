@@ -29,7 +29,7 @@ layout(triangle_strip, max_vertices = 63) out;
 
 uniform int sides;
 
-const float PI = 3.1415926;
+const float PI = 3.14159265358979323846;
 
 
 void main() {

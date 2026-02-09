@@ -38,11 +38,12 @@ out float vs_otherData;
 uniform int useProperMotion;
 uniform float diffTime;
 
+
 void main() {
   vs_bvLumAbsMag = in_bvLumAbsMag;
-    vs_velocity = in_velocity;
-    vs_speed = in_speed;
-    vs_otherData = in_otherData;
+  vs_velocity = in_velocity;
+  vs_speed = in_speed;
+  vs_otherData = in_otherData;
 
   if (useProperMotion == 1) {
     // 1000 to get from km/s to m/s
@@ -53,5 +54,4 @@ void main() {
   else {
     gl_Position = vec4(in_position, 1.0);
   }
-
 }

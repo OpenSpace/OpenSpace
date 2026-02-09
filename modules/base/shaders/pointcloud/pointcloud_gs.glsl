@@ -76,9 +76,9 @@ const int RenderOptionCameraViewDirection = 0;
 const int RenderOptionCameraPositionNormal = 1;
 const int RenderOptionFixedRotation = 2;
 
+
 // Quaternion math code from:
 // https://gist.github.com/mattatz/40a91588d5fb38240403f198a938a593
-
 vec4 quatMult(vec4 q1, vec4 q2) {
   return vec4(
     q2.xyz * q1.w + q1.xyz * q2.w + cross(q1.xyz, q2.xyz),
@@ -92,6 +92,7 @@ vec3 rotate_vector(vec3 v, vec4 q) {
   vec4 q_conjugate = q * vec4(-1.0, -1.0, -1.0, 1.0);
   return quatMult(q, quatMult(vec4(v, 0.0), q_conjugate)).xyz;
 }
+
 
 void main() {
   vec4 pos = gl_in[0].gl_Position;
@@ -122,9 +123,9 @@ void main() {
   }
   else if (renderOption == RenderOptionFixedRotation) {
     if (useOrientationData) {
-        vec4 quat = orientation[0];
-        scaledRight = normalize(rotate_vector(scaledRight, quat));
-        scaledUp =  normalize(rotate_vector(scaledUp, quat));
+      vec4 quat = orientation[0];
+      scaledRight = normalize(rotate_vector(scaledRight, quat));
+      scaledUp = normalize(rotate_vector(scaledUp, quat));
     }
     // Else use default
   }
@@ -144,7 +145,8 @@ void main() {
     float angle = atan(float(pointSize / distanceToCamera));
 
     if ((angle > desiredAngleRadians) && (distanceToCamera > 0.0)) {
-      float correctionScaleFactor = float(distanceToCamera) * tan(desiredAngleRadians) / float(pointSize);
+      float correctionScaleFactor =
+        float(distanceToCamera) * tan(desiredAngleRadians) / float(pointSize);
       scaledRight *= correctionScaleFactor;
       scaledUp *= correctionScaleFactor;
     }

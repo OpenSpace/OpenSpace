@@ -40,11 +40,11 @@ uniform int renderOption;
 uniform float viewScaling;
 
 // Keep in sync with gaiaoptions.h:RenderOption enum
-const int RENDEROPTION_STATIC = 0;
-const int RENDEROPTION_COLOR = 1;
-const int RENDEROPTION_MOTION = 2;
-const float ONE_PARSEC = 3.08567758e16; // 1 Parsec
-const float LUM_LOWER_CAP = 0.01;
+const int RenderOptionStatic = 0;
+const int RenderOptionColor = 1;
+const int RenderOptionMotion = 2;
+const float Parsec = 3.08567758e16; // 1 Parsec
+const float LumLowerCap = 0.01;
 
 
 vec3 color2rgb(float color) {
@@ -65,7 +65,7 @@ void main() {
   float ratioMultiplier = 1.0;
 
   // Calculate the color and luminosity if we have the magnitude and B-V color.
-  if (renderOption != RENDEROPTION_STATIC) {
+  if (renderOption != RenderOptionStatic) {
     color = color2rgb(ge_brightness.y);
     ratioMultiplier = 0.01;
 
@@ -77,13 +77,13 @@ void main() {
     luminosity = pow(10.0, 1.89 - 0.4 * absoluteMagnitude);
 
     // If luminosity is really really small then set it to a static low number.
-    if (luminosity < LUM_LOWER_CAP) {
-      luminosity = LUM_LOWER_CAP;
+    if (luminosity < LumLowerCap) {
+      luminosity = LumLowerCap;
     }
   }
 
   // Luminosity decrease by {squared} distance [measured in Pc].
-  float observedDistance = ge_observedDist / ONE_PARSEC;
+  float observedDistance = ge_observedDist / Parsec;
   luminosity /= pow(observedDistance, 2.0);
 
   // Multiply our color with the luminosity as well as a user-controlled property.

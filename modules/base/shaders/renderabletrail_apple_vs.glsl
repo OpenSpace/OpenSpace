@@ -71,7 +71,7 @@ void main() {
         if (modId < 0) {
           modId += nVertices;
         }
-        
+
         // Convert the index to a [0,1] range
         id = float(modId) / float(nVertices);
     }
@@ -106,6 +106,6 @@ void main() {
   vs_positionDepth = vs_positionClipSpace.w;
 
   gl_PointSize = (stride == 1 || int(modId) % stride == 0) ?
-                  float(pointSize) : float(pointSize) / 2;
-  gl_Position  = z_normalization(vs_positionClipSpace);
+                  float(pointSize) : float(pointSize) / 2.0;
+  gl_Position = z_normalization(vs_positionClipSpace);
 }

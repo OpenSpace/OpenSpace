@@ -35,7 +35,6 @@ uniform float blendFactor;
 Fragment getFragment() {
   vec4 texel0 = texture(prevTexture, texCoord);
   vec4 texel1 = texture(nextTexture, texCoord);
-
   vec4 mixedTexture = mix(texel0, texel1, blendFactor);
 
   Fragment frag;

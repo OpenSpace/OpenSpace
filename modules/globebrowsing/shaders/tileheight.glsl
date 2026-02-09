@@ -49,9 +49,10 @@ uniform float deltaPhi1;
 uniform float tileDelta;
 #endif // USE_ACCURATE_NORMALS && USE_HEIGHTMAP
 
+
 // levelWeights := Variable to determine which texture to sample from
 // HeightLayers := Three textures to sample from
-float getUntransformedTileHeight(vec2 uv, vec3 levelWeights) {
+float untransformedTileHeight(vec2 uv, vec3 levelWeights) {
   float height = CHUNK_DEFAULT_HEIGHT;
 
 #if USE_HEIGHTMAP
@@ -65,7 +66,7 @@ float getUntransformedTileHeight(vec2 uv, vec3 levelWeights) {
 
 // levelWeights := Variable to determine which texture to sample from
 // HeightLayers := Three textures to sample from
-float getTileHeight(vec2 uv, vec3 levelWeights) {
+float tileHeight(vec2 uv, vec3 levelWeights) {
   float height = CHUNK_DEFAULT_HEIGHT;
 
 #if USE_HEIGHTMAP
@@ -77,8 +78,8 @@ float getTileHeight(vec2 uv, vec3 levelWeights) {
     return height;
 }
 
-float getTileHeightScaled(vec2 uv, vec3 levelWeights) {
-  float height = getTileHeight(uv, levelWeights);
+float tileHeightScaled(vec2 uv, vec3 levelWeights) {
+  float height = tileHeight(uv, levelWeights);
 
 #if USE_HEIGHTMAP
     height *= heightScale;
@@ -100,9 +101,9 @@ vec3 getTileNormal(vec2 uv, vec3 levelWeights, vec3 ellipsoidNormalCameraSpace,
   vec3 deltaPhiVec = ellipsoidTangentPhiCameraSpace * deltaPhi;
   vec3 deltaThetaVec = ellipsoidTangentThetaCameraSpace * deltaTheta;
 
-  float height00 = getTileHeightScaled(uv, levelWeights);
-  float height10 = getTileHeightScaled(uv + vec2(tileDelta, 0.0), levelWeights);
-  float height01 = getTileHeightScaled(uv + vec2(0.0, tileDelta), levelWeights);
+  float height00 = tileHeightScaled(uv, levelWeights);
+  float height10 = tileHeightScaled(uv + vec2(tileDelta, 0.0), levelWeights);
+  float height01 = tileHeightScaled(uv + vec2(0.0, tileDelta), levelWeights);
 
   vec3 diffTheta = deltaThetaVec + ellipsoidNormalCameraSpace * (height10 - height00);
   vec3 diffPhi = deltaPhiVec + ellipsoidNormalCameraSpace * (height01 - height00);

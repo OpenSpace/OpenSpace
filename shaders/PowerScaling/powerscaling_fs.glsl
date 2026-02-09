@@ -31,6 +31,7 @@
 
 #include "powerscalingmath.glsl"
 
+
 float pscDepth(vec4 position) {
   // For now: simply convert power scaled coordinates to a linear scale.
   // TODO: get rid of power scaled coordinates and use scale graph instead.

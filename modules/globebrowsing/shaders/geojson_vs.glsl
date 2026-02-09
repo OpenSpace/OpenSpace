@@ -40,25 +40,26 @@ uniform mat3 normalTransform;
 uniform float heightOffset;
 uniform bool useHeightMapData;
 
+
 void main() {
-    dvec4 modelPos = dvec4(in_position, 1.0);
+  dvec4 modelPos = dvec4(in_position, 1.0);
 
-    // Offset model pos based on height info
-    if (length(in_position) > 0) {
-        dvec3 outDirection = normalize(dvec3(in_position));
-        float height = heightOffset;
-        if (useHeightMapData) {
-          height += in_height;
-        }
-        modelPos += dvec4(outDirection * double(height), 0.0);
+  // Offset model pos based on height info
+  if (length(in_position) > 0.0) {
+    dvec3 outDirection = normalize(dvec3(in_position));
+    float height = heightOffset;
+    if (useHeightMapData) {
+      height += in_height;
     }
+    modelPos += dvec4(outDirection * double(height), 0.0);
+  }
 
-    vs_positionViewSpace = vec4(viewTransform * modelTransform * modelPos);
-    vec4 positionScreenSpace = vec4(projectionTransform * vs_positionViewSpace);
-    vs_depth = positionScreenSpace.w;
-    vs_normal = normalize(normalTransform * in_normal);
-    gl_Position = positionScreenSpace;
+  vs_positionViewSpace = vec4(viewTransform * modelTransform * modelPos);
+  vec4 positionScreenSpace = vec4(projectionTransform * vs_positionViewSpace);
+  vs_depth = positionScreenSpace.w;
+  vs_normal = normalize(normalTransform * in_normal);
+  gl_Position = positionScreenSpace;
 
-    // Set z to 0 to disable near and far plane, unique handling for perspective in space
-    gl_Position.z = 0.0;
+  // Set z to 0 to disable near and far plane, unique handling for perspective in space
+  gl_Position.z = 0.0;
 }

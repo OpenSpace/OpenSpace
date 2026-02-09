@@ -48,10 +48,10 @@ uniform vec2 bpRpThreshold;
 uniform vec2 distThreshold;
 
 // Keep in sync with gaiaoptions.h:RenderOption enum
-const int RENDEROPTION_STATIC = 0;
-const int RENDEROPTION_COLOR = 1;
-const int RENDEROPTION_MOTION = 2;
-const float EPS = 1e-5;
+const int RenderOptionStatic = 0;
+const int RenderOptionColor = 1;
+const int RenderOptionMotion = 2;
+const float Eps = 1e-5;
 const float Parsec = 3.0856776e16;
 
 
@@ -59,21 +59,21 @@ void main() {
   vs_brightness = in_brightness;
 
   // Check if we should filter this star by position. Thres depending on original values.
-  if ((abs(posXThreshold.x) > EPS && in_position.x < posXThreshold.x) ||
-      (abs(posXThreshold.y) > EPS && in_position.x > posXThreshold.y) ||
-      (abs(posYThreshold.x) > EPS && in_position.y < posYThreshold.x) ||
-      (abs(posYThreshold.y) > EPS && in_position.y > posYThreshold.y) ||
-      (abs(posZThreshold.x) > EPS && in_position.z < posZThreshold.x) ||
-      (abs(posZThreshold.y) > EPS && in_position.z > posZThreshold.y) ||
-      (abs(distThreshold.x - distThreshold.y) < EPS
-      && abs(length(in_position) - distThreshold.y) < EPS) ||
-      (renderOption != RENDEROPTION_STATIC && (
-      (abs(gMagThreshold.x - gMagThreshold.y) < EPS && abs(gMagThreshold.x - in_brightness.x) < EPS) ||
-      (abs(gMagThreshold.x - 20.0) > EPS && in_brightness.x < gMagThreshold.x) ||
-      (abs(gMagThreshold.y - 20.0) > EPS && in_brightness.x > gMagThreshold.y) ||
-      (abs(bpRpThreshold.x - bpRpThreshold.y) < EPS && abs(bpRpThreshold.x - in_brightness.y) < EPS) ||
-      (abs(bpRpThreshold.x) > EPS && in_brightness.y < bpRpThreshold.x) ||
-      (abs(bpRpThreshold.y) > EPS && in_brightness.y > bpRpThreshold.y))))
+  if ((abs(posXThreshold.x) > Eps && in_position.x < posXThreshold.x) ||
+      (abs(posXThreshold.y) > Eps && in_position.x > posXThreshold.y) ||
+      (abs(posYThreshold.x) > Eps && in_position.y < posYThreshold.x) ||
+      (abs(posYThreshold.y) > Eps && in_position.y > posYThreshold.y) ||
+      (abs(posZThreshold.x) > Eps && in_position.z < posZThreshold.x) ||
+      (abs(posZThreshold.y) > Eps && in_position.z > posZThreshold.y) ||
+      (abs(distThreshold.x - distThreshold.y) < Eps
+      && abs(length(in_position) - distThreshold.y) < Eps) ||
+      (renderOption != RenderOptionStatic && (
+      (abs(gMagThreshold.x - gMagThreshold.y) < Eps && abs(gMagThreshold.x - in_brightness.x) < Eps) ||
+      (abs(gMagThreshold.x - 20.0) > Eps && in_brightness.x < gMagThreshold.x) ||
+      (abs(gMagThreshold.y - 20.0) > Eps && in_brightness.x > gMagThreshold.y) ||
+      (abs(bpRpThreshold.x - bpRpThreshold.y) < Eps && abs(bpRpThreshold.x - in_brightness.y) < Eps) ||
+      (abs(bpRpThreshold.x) > Eps && in_brightness.y < bpRpThreshold.x) ||
+      (abs(bpRpThreshold.y) > Eps && in_brightness.y > bpRpThreshold.y))))
   {
     // Discard star in geometry shader.
     vs_gPosition = vec4(0.0);
@@ -85,16 +85,16 @@ void main() {
   vec4 objectPosition = vec4(in_position * 1000 * Parsec, 1.0);
 
   // Add velocity if we've read any.
-  if (renderOption == RENDEROPTION_MOTION) {
+  if (renderOption == RenderOptionMotion) {
     // Velocity is already in [m/s].
     objectPosition.xyz += time * in_velocity;
   }
 
   // Thres moving stars by their new position.
   float distPosition = length(objectPosition.xyz / (1000.0 * Parsec));
-  if ((abs(distThreshold.x - distThreshold.y) > EPS &&
-      ((abs(distThreshold.x) > EPS && distPosition< distThreshold.x) ||
-      (abs(distThreshold.y) > EPS && distPosition > distThreshold.y))))
+  if ((abs(distThreshold.x - distThreshold.y) > Eps &&
+      ((abs(distThreshold.x) > Eps && distPosition< distThreshold.x) ||
+      (abs(distThreshold.y) > Eps && distPosition > distThreshold.y))))
   {
     // Discard star in geometry shader.
     vs_gPosition = vec4(0.0);
@@ -111,7 +111,7 @@ void main() {
 
   // Remove stars without position, happens when VBO chunk is stuffed with zeros.
   // Has to be done in Geometry shader because Vertices cannot be discarded here.
-  if (length(in_position) > EPS) {
+  if (length(in_position) > Eps) {
     vs_gPosition = vec4(model * objectPosition);
     gl_Position = vec4(projection * viewPosition);
   }

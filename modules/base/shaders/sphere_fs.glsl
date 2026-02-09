@@ -44,6 +44,7 @@ uniform int textureProjection;
 
 const float M_PI = 3.14159265358979323846;
 
+
 // Remap equirectangular texture coordinates into angular fisheye
 vec2 equiToAngularFisheye(vec2 textureCoords) {
   vec2 pos2 = textureCoords * 2.0 - 1.0; // Map [0,1] tex coords to [-1,1]

@@ -34,12 +34,10 @@ uniform float sigma;
 uniform float pixelWeightThreshold;
 
 const float M_PI = 3.141592653589793238462;
-const float DEFAULT_DEPTH = 3.08567758e19; // 1000 Pc
+const float DefaultDepth = 3.08567758e19; // 1000 Pc
 
 
 Fragment getFragment() {
-  vec4 color = vec4(0.0);
-
   // GL_POINTS
 
   // Use frustum params to be able to compensate for a skewed frustum (in a dome).
@@ -95,30 +93,29 @@ Fragment getFragment() {
   //    pow(screenPos.y, 2.0)
   //);
 
-  // Make use of the following flag this to toggle betweeen circular and elliptic distribution.
+  // Make use of the following flag this to toggle betweeen circular and elliptic
+  // distribution.
   bool useCircleDist = false;
 
   // Apply scaling on bloom filter.
   vec2 newFilterSize = vec2(filterSize) * (1.0 + length(filterScaleFactor)) * scaling;
 
   // Calculate params for a rotated Elliptic Gaussian distribution.
-  float sigmaMajor;
-  float sigmaMinor;
-  float a;
-  float b;
-  float c;
+  float a = 0.0;
+  float b = 0.0;
+  float c = 0.0;
   if (!useCircleDist) {
     float alpha = atan(screenPos.y, screenPos.x);
     // Apply scaling on sigma.
-    sigmaMajor = sigma * sigmaScaleFactor.y * scaling;
-    sigmaMinor = sigma * sigmaScaleFactor.x * scaling;
+    float sigmaMajor = sigma * sigmaScaleFactor.y * scaling;
+    float sigmaMinor = sigma * sigmaScaleFactor.x * scaling;
 
-    a = pow(cos(alpha), 2.0) / (2 * pow(sigmaMajor, 2.0)) +
-        pow(sin(alpha), 2.0) / (2 * pow(sigmaMinor, 2.0)) ;
-    b = sin(2 * alpha) / (4 * pow(sigmaMajor, 2.0)) -
-        sin(2 * alpha) / (4 * pow(sigmaMinor, 2.0)) ;
-    c = pow(sin(alpha), 2.0) / (2 * pow(sigmaMajor, 2.0)) +
-        pow(cos(alpha), 2.0) / (2 * pow(sigmaMinor, 2.0)) ;
+    a = pow(cos(alpha), 2.0) / (2.0 * pow(sigmaMajor, 2.0)) +
+        pow(sin(alpha), 2.0) / (2.0 * pow(sigmaMinor, 2.0));
+    b = sin(2.0 * alpha) / (4.0 * pow(sigmaMajor, 2.0)) -
+        sin(2.0 * alpha) / (4.0 * pow(sigmaMinor, 2.0));
+    c = pow(sin(alpha), 2.0) / (2.0 * pow(sigmaMajor, 2.0)) +
+        pow(cos(alpha), 2.0) / (2.0 * pow(sigmaMinor, 2.0));
   }
 
   // Get a [newFilterSize x newFilterSize] filter around our pixel. UV is [0, 1]
@@ -130,9 +127,9 @@ Fragment getFragment() {
       vec2 sPoint = uv + (pixelSize * ivec2(x, y));
 
       // Calculate the contribution of this pixel (elliptic gaussian distribution).
-      float pixelWeight = exp(-(
-          a * pow(x * fullAspect, 2.0) + 2 * b * x * y * fullAspect + c * pow(y, 2.0)
-      ));
+      float pixelWeight = exp(
+        -(a * pow(x * fullAspect, 2.0) + 2.0 * b * x * y * fullAspect + c * pow(y, 2.0))
+      );
 
       // Only sample inside FBO texture and if the pixel will contribute to final color.
       if (all(greaterThan(sPoint, vec2(0.0))) && all(lessThan(sPoint, vec2(1.0))) &&
@@ -142,8 +139,8 @@ Fragment getFragment() {
 
         // Use normal distribution function for halo/bloom effect.
         if (useCircleDist) {
-          float circleDist = sqrt(pow(x / (1 + length(filterScaleFactor)), 2.0) +
-            pow(y / (1 + length(filterScaleFactor)), 2.0));
+          float circleDist = sqrt(pow(x / (1.0 + length(filterScaleFactor)), 2.0) +
+            pow(y / (1.0 + length(filterScaleFactor)), 2.0));
           intensity += sIntensity.rgb * (1.0 / (sigma * sqrt(2.0 * M_PI))) *
             exp(-(pow(circleDist, 2.0) / (2.0 * pow(sigma, 2.0)))) / filterSize;
         }
@@ -162,15 +159,13 @@ Fragment getFragment() {
     discard;
   }
 
-  color = vec4(intensity, 1.0);
-
   // Use the following to check for any intensity at all.
-  //color = (length(intensity.rgb) > 0.001) ? vec4(1.0) : vec4(0.0);
+  //color = (length(intensity.rgb) > 0.001)  ?  vec4(1.0)  :  vec4(0.0);
 
   Fragment frag;
-  frag.color = color;
+  frag.color = vec4(intensity, 1.0);
   // Place stars at back to begin with.
-  frag.depth = DEFAULT_DEPTH;
+  frag.depth = DefaultDepth;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   frag.blend = BlendModeNormal;
 

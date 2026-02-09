@@ -63,28 +63,30 @@ const int OutlineStyleRound = 0;
 const int OutlineStyleSquare = 1;
 const int OutlineStyleBottom = 2;
 
+
 vec4 sampleColorMap(float dataValue) {
-    if (useNanColor && isnan(dataValue)) {
-        return nanColor;
-    }
+  if (useNanColor && isnan(dataValue)) {
+    return nanColor;
+  }
 
-    bool isOutside = dataValue < cmapRangeMin || dataValue > cmapRangeMax;
-    if (isnan(dataValue) || (hideOutsideRange && isOutside)) {
-        discard;
-    }
+  bool isOutside = dataValue < cmapRangeMin || dataValue > cmapRangeMax;
+  if (isnan(dataValue) || (hideOutsideRange && isOutside)) {
+    discard;
+  }
 
-    if (useBelowRangeColor && dataValue < cmapRangeMin) {
-        return belowRangeColor;
-    }
+  if (useBelowRangeColor && dataValue < cmapRangeMin) {
+    return belowRangeColor;
+  }
 
-    if (useAboveRangeColor && dataValue > cmapRangeMax) {
-        return aboveRangeColor;
-    }
+  if (useAboveRangeColor && dataValue > cmapRangeMax) {
+    return aboveRangeColor;
+  }
 
-    float t = (dataValue - cmapRangeMin) / (cmapRangeMax - cmapRangeMin);
-    t = clamp(t, 0.0, 1.0);
-    return texture(colorMapTexture, t);
+  float t = (dataValue - cmapRangeMin) / (cmapRangeMax - cmapRangeMin);
+  t = clamp(t, 0.0, 1.0);
+  return texture(colorMapTexture, t);
 }
+
 
 Fragment getFragment() {
   if (fadeInValue == 0.0 || opacity == 0.0) {

@@ -36,6 +36,7 @@ uniform mat4 modelViewProjection;
 uniform mat4 modelViewTransform;
 uniform mat3 modelViewRotation;
 
+
 void main() {
   vs_textureCoords = in_textureCoords;
 

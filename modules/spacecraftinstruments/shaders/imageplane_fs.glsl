@@ -32,15 +32,12 @@ uniform sampler2D texture1;
 
 Fragment getFragment() {
   Fragment frag;
-
   if (gl_FrontFacing) {
     frag.color = texture(texture1, vs_st);
   }
   else {
     frag.color = vec4(0.1, 0.1, 0.1, 1.0);
   }
-
   frag.depth = vs_screenSpaceDepth;
-
   return frag;
 }

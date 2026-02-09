@@ -57,9 +57,10 @@
 #ifndef _ATMOSPHERE___ATMOSPHERE_COMMON___GLSL_
 #define _ATMOSPHERE___ATMOSPHERE_COMMON___GLSL_
 
-const int INSCATTER_INTEGRAL_SAMPLES = 50;
-const float M_PI = 3.141592657;
-const float ATM_EPSILON = 1.0;
+const int InscatterIntegralScamples = 50;
+const float M_PI = 3.14159265358979323846;
+const float AtmEpsilon = 1.0;
+
 
 // In the following shaders r (altitude) is the length of vector/position x in the
 // atmosphere (or on the top of it when considering an observer in space), where the light
@@ -76,7 +77,7 @@ float rayDistance(float r, float mu, float Rt, float Rg) {
   // one we are looking for, otherwise we may be passing through the ground
 
   // cosine law
-  float atmRadiusEps2 = (Rt + ATM_EPSILON) * (Rt + ATM_EPSILON);
+  float atmRadiusEps2 = (Rt + AtmEpsilon) * (Rt + AtmEpsilon);
   float mu2 = mu * mu;
   float r2 = r * r;
   float rayDistanceAtmosphere = -r * mu + sqrt(r2 * (mu2 - 1.0) + atmRadiusEps2);
@@ -100,18 +101,18 @@ float rayDistance(float r, float mu, float Rt, float Rg) {
 // nu := cosone of the angle between vec(s) and vec(v)
 // dhdH := it is a vec4. dhdH.x stores the dminT := Rt - r, dhdH.y stores the dH value
 //         (see paper), dhdH.z stores dminG := r - Rg and dhdH.w stores dh (see paper)
-void unmappingMuMuSunNu(float r, vec4 dhdH, int SAMPLES_MU, float Rg, float Rt,
-                        int SAMPLES_MU_S, int SAMPLES_NU,
-                        out float mu, out float muSun, out float nu)
+void unmappingMuMuSunNu(float r, vec4 dhdH, int samplesMu, float Rg, float Rt,
+                        int samplesMuS, int samplesNu, out float mu, out float muSun,
+                        out float nu)
 {
   // Window coordinates of pixel (uncentering also)
   vec2 fragment = gl_FragCoord.xy - vec2(0.5);
 
   // Pre-calculations
-  float r2  = r * r;
+  float r2 = r * r;
   float Rg2 = Rg * Rg;
 
-  float halfSAMPLE_MU = float(SAMPLES_MU) / 2.0;
+  float halfSAMPLE_MU = float(samplesMu) / 2.0;
   // If the (vec(x) dot vec(v))/r is negative, i.e., the light ray has great probability
   // to touch the ground, we obtain mu considering the geometry of the ground
   if (fragment.y < halfSAMPLE_MU) {
@@ -133,10 +134,10 @@ void unmappingMuMuSunNu(float r, vec4 dhdH, int SAMPLES_MU, float Rg, float Rt,
     mu = (Rt*Rt - r2 - d * d) / (2.0 * r * d);
   }
 
-  float modValueMuSun = mod(fragment.x, float(SAMPLES_MU_S)) / (float(SAMPLES_MU_S) - 1.0);
+  float modValueMuSun = mod(fragment.x, float(samplesMuS)) / (float(samplesMuS) - 1.0);
   // The following mapping is different from the paper. See Collienne for an details.
   muSun = tan((2.0 * modValueMuSun - 1.0 + 0.26) * 1.1) / tan(1.26 * 1.1);
-  nu = -1.0 + floor(fragment.x / float(SAMPLES_MU_S)) / (float(SAMPLES_NU) - 1.0) * 2.0;
+  nu = -1.0 + floor(fragment.x / float(samplesMuS)) / (float(samplesNu) - 1.0) * 2.0;
 }
 
 // Function to access the transmittance texture. Given r and mu, returns the transmittance

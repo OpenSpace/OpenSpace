@@ -37,6 +37,7 @@ flat out float colorParameter;
 flat out float scalingParameter;
 flat out vec4 orientation; // quaternion
 
+
 void main() {
   textureLayer = in_textureLayer;
   colorParameter = in_colorParameter;

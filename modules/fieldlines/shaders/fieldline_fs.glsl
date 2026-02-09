@@ -34,7 +34,7 @@ uniform vec4 fieldLineColor;
 
 
 Fragment getFragment() {
-  float alpha = 1 - length(gs_normal) * length(gs_normal);
+  float alpha = 1.0 - length(gs_normal) * length(gs_normal);
 
   Fragment frag;
   if (classification) {
@@ -47,7 +47,7 @@ Fragment getFragment() {
   frag.depth = pscDepth(gs_position);
 
   // G-Buffer
-  frag.gPosition  = vec4(0.0);//vs_gPosition;
+  frag.gPosition = vec4(0.0);//vs_gPosition;
   // There is no normal here
   // TODO: Add the correct normal if necessary (JCC)
   frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);

@@ -65,6 +65,5 @@ Fragment getFragment() {
   Fragment frag;
   frag.color = max(intensity * textureColor, vec4(0.0, 0.0, 0.0, 1.0));
   frag.depth = vs_depth;
-
   return frag;
 }

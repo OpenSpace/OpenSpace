@@ -26,9 +26,6 @@
 
 #include "hdr.glsl"
 
-#define HSV_COLOR 0u
-#define HSL_COLOR 1u
-
 in vec2 texCoord;
 layout (location = 0) out vec4 finalColor;
 
@@ -43,6 +40,7 @@ uniform vec4 Viewport;
 uniform vec2 Resolution;
 
 uniform sampler2D hdrFeedingTexture;
+
 
 void main() {
   // Modify the texCoord based on the Viewport and Resolution. This modification is

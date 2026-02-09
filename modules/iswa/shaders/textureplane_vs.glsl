@@ -44,5 +44,5 @@ void main() {
   vs_st = in_st;
 
   position = ViewProjection * position;
-  gl_Position =  z_normalization(position);
+  gl_Position = z_normalization(position);
 }

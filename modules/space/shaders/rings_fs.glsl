@@ -27,8 +27,6 @@
 
 in vec2 vs_st;
 in vec4 vs_position;
-//in vec4 vs_gPosition;
-//in vec3 vs_gNormal;
 
 uniform sampler1D texture1;
 uniform vec2 textureOffset;
@@ -91,9 +89,5 @@ Fragment getFragment() {
   Fragment frag;
   frag.color = diffuse;
   frag.depth = vs_position.w;
-
-  //frag.gPosition  = vs_gPosition;
-  //frag.gNormal    = vs_gNormal;
-
   return frag;
 }

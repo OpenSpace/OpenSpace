@@ -31,12 +31,13 @@ out vec4 outputColor;
 uniform sampler2D tex;
 #define USE_ACCELERATED_RENDERING #{useAcceleratedRendering}
 
+
 void main() {
-  #if USE_ACCELERATED_RENDERING
-    vec2 flippedTexCoords = vec2(vs_st.x, 1.0 - vs_st.y);
-    vec4 texColor = texture(tex, flippedTexCoords);
-    outputColor = texColor.bgra;  // Correcting both orientation and color channels
-  #else
-    outputColor = texture(tex, vs_st);
-  #endif
+#if USE_ACCELERATED_RENDERING
+  vec2 flippedTexCoords = vec2(vs_st.x, 1.0 - vs_st.y);
+  vec4 texColor = texture(tex, flippedTexCoords);
+  outputColor = texColor.bgra;  // Correcting both orientation and color channels
+#else // USE_ACCELERATED_RENDERING
+  outputColor = texture(tex, vs_st);
+#endif // USE_ACCELERATED_RENDERING
 }

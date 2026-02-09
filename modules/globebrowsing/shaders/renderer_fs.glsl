@@ -29,8 +29,6 @@
 #include "tileheight.glsl"
 #include "powerscaling/powerscaling_fs.glsl"
 
-// Below are all the tiles that are used for contributing the actual fragment color
-
 #if USE_COLORTEXTURE
 uniform Layer ColorLayers[NUMLAYERS_COLORTEXTURE];
 #endif // USE_COLORTEXTURE
@@ -85,8 +83,10 @@ uniform vec2 textureOffset;
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
  *******************************************************************************/
 struct ShadowRenderingStruct {
-  double xu, xp;
-  double rs, rc;
+  double xu;
+  double xp;
+  double rs;
+  double rc;
   dvec3 sourceCasterVec;
   dvec3 casterPositionVec;
   bool isShadowing;
@@ -99,45 +99,54 @@ uniform ShadowRenderingStruct shadowDataArray[NSEclipseShadows];
 uniform int shadows;
 uniform bool hardShadows;
 
-vec4 calcShadow(const ShadowRenderingStruct shadowInfoArray[NSEclipseShadows],
-                const dvec3 position, const bool ground)
+
+vec4 calcShadow(ShadowRenderingStruct shadowInfoArray[NSEclipseShadows], dvec3 position,
+                bool ground)
 {
   #for i in 0..#{nEclipseShadows}
     if (shadowInfoArray[#{i}].isShadowing) {
       dvec3 pc = shadowInfoArray[#{i}].casterPositionVec - position;
-      dvec3 sc_norm = shadowInfoArray[#{i}].sourceCasterVec;
-      dvec3 pc_proj = dot(pc, sc_norm) * sc_norm;
-      dvec3 d = pc - pc_proj;
+      dvec3 scNorm = shadowInfoArray[#{i}].sourceCasterVec;
+      dvec3 pcProj = dot(pc, scNorm) * scNorm;
+      dvec3 d = pc - pcProj;
 
-      float length_d = float(length(d));
-      double length_pc_proj = length(pc_proj);
+      float lengthD = float(length(d));
+      double lengthPcProj = length(pcProj);
 
-      float r_p_pi = float(shadowInfoArray[#{i}].rc * (length_pc_proj + shadowInfoArray[#{i}].xp) / shadowInfoArray[#{i}].xp);
-      float r_u_pi = float(shadowInfoArray[#{i}].rc * (shadowInfoArray[#{i}].xu - length_pc_proj) / shadowInfoArray[#{i}].xu);
+      float rPenumbra = float(
+        shadowInfoArray[#{i}].rc *
+        (lengthPcProj + shadowInfoArray[#{i}].xp) / shadowInfoArray[#{i}].xp
+      );
+      float rUmbra = float(
+        shadowInfoArray[#{i}].rc *
+        (shadowInfoArray[#{i}].xu - lengthPcProj) / shadowInfoArray[#{i}].xu
+      );
 
-      if (length_d < r_u_pi) { // umbra
+      if (lengthD < rUmbra) {
+        // umbra
         if (ground) {
 #if USE_ECLIPSE_HARD_SHADOWS
           return vec4(0.2, 0.2, 0.2, 1.0);
-#else
+#else // USE_ECLIPSE_HARD_SHADOWS
           // butterworthFunc
-          return vec4(vec3(sqrt(r_u_pi / (r_u_pi + pow(length_d, 2.0)))), 1.0);
-#endif
+          return vec4(vec3(sqrt(rUmbra / (rUmbra + pow(lengthD, 2.0)))), 1.0);
+#endif // USE_ECLIPSE_HARD_SHADOWS
         }
         else {
 #if USE_ECLIPSE_HARD_SHADOWS
           return vec4(0.5, 0.5, 0.5, 1.0);
-#else
-          return vec4(vec3(length_d / r_p_pi), 1.0);
-#endif
+#else // USE_ECLIPSE_HARD_SHADOWS
+          return vec4(vec3(lengthD / rPenumbra), 1.0);
+#endif // USE_ECLIPSE_HARD_SHADOWS
         }
       }
-      else if (length_d < r_p_pi) {// penumbra
+      else if (lengthD < rPenumbra) {
+        // penumbra
 #if USE_ECLIPSE_HARD_SHADOWS
         return vec4(0.5, 0.5, 0.5, 1.0);
-#else
-        return vec4(vec3(length_d / r_p_pi), 1.0);
-#endif
+#else // USE_ECLIPSE_HARD_SHADOWS
+        return vec4(vec3(lengthD / rPenumbra), 1.0);
+#endif // USE_ECLIPSE_HARD_SHADOWS
       }
     }
   #endfor
@@ -149,17 +158,17 @@ float rayPlaneIntersection(vec3 rayOrigin, vec3 rayDirection, vec3 planePoint,
                            vec3 planeNormal)
 {
   float denom = dot(planeNormal, rayDirection);
-  
+
   // Check if ray is parallel to plane (or nearly parallel)
   if (abs(denom) < 1e-6) {
       return -1.0; // No intersection or ray lies in plane
   }
-  
+
   vec3 p0l0 = planePoint - rayOrigin;
   float t = dot(p0l0, planeNormal) / denom;
-  
+
   // Return negative if intersection is behind ray origin
-  return t >= 0.0 ? t : -1.0;
+  return t >= 0.0  ?  t  :  -1.0;
 }
 
 in vec4 fs_position;
@@ -187,6 +196,7 @@ uniform float opacity;
   uniform sampler2D light_depth_maps[nDepthMaps];
 #endif // nDepthMaps > 0
 #endif // USE_DEPTHMAP_SHADOWS
+
 
 Fragment getFragment() {
   Fragment frag;
@@ -257,7 +267,7 @@ Fragment getFragment() {
   frag.color.rgb *= vec3(0.1);
 
   float untransformedHeight = getUntransformedTileVertexHeight(fs_uv, levelWeights);
-  float contourLine = fract(10.0 * untransformedHeight) > 0.98 ? 1.0 : 0.0;
+  float contourLine = fract(10.0 * untransformedHeight) > 0.98  ?  1.0  :  0.0;
   frag.color.r += untransformedHeight;
   frag.color.b = contourLine;
 #endif // SHOW_HEIGHT_INTENSITIES
@@ -266,7 +276,8 @@ Fragment getFragment() {
   frag.color += 0.0001 * calculateDebugColor(fs_uv, fs_position, vertexResolution);
   #if USE_HEIGHTMAP
     frag.color.r = min(frag.color.r, 0.8);
-    frag.color.r += tileResolution(fs_uv, HeightLayers[0].pile.chunkTile0) > 0.9 ? 1 : 0;
+    frag.color.r +=
+      tileResolution(fs_uv, HeightLayers[0].pile.chunkTile0) > 0.9  ?  1.0  :  0.0;
   #endif // USE_HEIGHTMAP
 #endif // SHOW_HEIGHT_RESOLUTION
 
@@ -310,13 +321,13 @@ Fragment getFragment() {
   // Assume ring lies in the XZ plane (Y=0) in object space
   vec3 surfaceToSun = -normalize(lightDirectionObjSpace); // Use world coordinates
   vec3 p = posObjSpace;
-  vec3 ringPlaneNormal = vec3(0.0, 0.0, 1.0);
-  
+  const vec3 RingPlaneNormal = vec3(0.0, 0.0, 1.0);
+
   if (abs(surfaceToSun.y) > 1e-8 && dot(normalObjSpace, lightDirectionObjSpace) < 0.0) {
-    float t = rayPlaneIntersection(p, surfaceToSun, vec3(0.0), ringPlaneNormal);
-    
+    float t = rayPlaneIntersection(p, surfaceToSun, vec3(0.0), RingPlaneNormal);
+
     vec3 ringIntersection = p + t * surfaceToSun;
-      
+
     // Calculate distance from ring center
     float tx = length(ringIntersection.xy) / ringSize;
     // See advanced_rings_fs.glsl for explanation of textureOffset
@@ -328,7 +339,7 @@ Fragment getFragment() {
 
       // Increase the shadow darkness factor with low angle to simulate the light having
       // to pass through more material
-      float angleFactor = clamp(abs(-dot(ringPlaneNormal, surfaceToSun)) / 2.0, 0.0, 0.3);
+      float angleFactor = clamp(abs(-dot(RingPlaneNormal, surfaceToSun)) / 2.0, 0.0, 0.3);
       // Calculate shadow factor based on ring opacity
       shadow = clamp(ringOpacity + angleFactor, 0.05, 1.0);
       lightColor = texture(ringTextureColor, texCoord).rgb;
@@ -336,26 +347,26 @@ Fragment getFragment() {
   }
 
   // Blend the light color passing through the rings with the pre-shaded color
-  frag.color.rgb = mix(preShadedColor * lightColor * ambientIntensity, frag.color.rgb, shadow);
-
+  frag.color.rgb = mix(
+    preShadedColor * lightColor * ambientIntensity,
+    frag.color.rgb,
+    shadow
+  );
 #endif // (SHADOW_MAPPING_ENABLED && PERFORM_SHADING && USE_RING_SHADOWS)
 
 #if USE_DEPTHMAP_SHADOWS && nDepthMaps > 0
   const float Bias = 0.005;
   const int Size = 3;
-  const float Norm = pow(2.0 * Size + 1, 2.0);
+  const float Norm = pow(2.0 * Size + 1.0, 2.0);
   float accum = 1.0;
   for (int idx = 0; idx < nDepthMaps; idx++) {
-    vec2 ssz = 1.f / textureSize(light_depth_maps[idx], 0);
+    vec2 ssz = 1.0 / textureSize(light_depth_maps[idx], 0);
     vec3 coords = 0.5 + 0.5 * positions_lightspace[idx].xyz / positions_lightspace[idx].w;
     for (int x = -Size; x <= Size; x++) {
       for (int y = -Size; y <= Size; y++) {
-        float depth = texture(
-          light_depth_maps[idx],
-          coords.xy + vec2(x * ssz.x, y * ssz.y)
-        ).r;
+        float depth = texture(light_depth_maps[idx], coords.xy + vec2(x, y) * ssz).r;
         // inside of the far plane of the frustum
-        if (coords.z < 1) {
+        if (coords.z < 1.0) {
           accum -= float(depth < coords.z - Bias) / Norm;
         }
         else {

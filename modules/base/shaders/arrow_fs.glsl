@@ -37,6 +37,7 @@ uniform bool performShading = true;
 
 const vec3 LightColor = vec3(1.0);
 
+
 Fragment getFragment() {
   Fragment frag;
 
@@ -54,13 +55,13 @@ Fragment getFragment() {
     // Diffuse
     vec3 n = normalize(vs_normal);
     vec3 l = lightDirectionViewSpace;
-    shadedColor += diffuseIntensity * max(dot(n,l), 0.0) * color;
+    shadedColor += diffuseIntensity * max(dot(n, l), 0.0) * color;
 
     // Specular
     vec3 viewDir = normalize(vs_positionViewSpace.xyz);
     vec3 reflectDir = reflect(l, n);
     shadedColor +=
-        specularIntensity * pow(max(dot(viewDir,reflectDir), 0), specularPower) * color;
+        specularIntensity * pow(max(dot(viewDir,reflectDir), 0.0), specularPower) * color;
 
     // Light contribution (one light soruce)
     shadedColor *= lightIntensity * LightColor;

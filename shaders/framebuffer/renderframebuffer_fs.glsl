@@ -25,14 +25,15 @@
 #include "floatoperations.glsl"
 #include <#{fragmentPath}>
 
+layout(location = 0) out vec4 _out_color_;
+layout(location = 1) out vec4 gPosition;
+layout(location = 2) out vec4 gNormal;
+
 #define exposure #{rendererData.hdrExposure}
 #define disableHDRPipeline #{rendererData.disableHDR}
 const float DeltaError = 0.013;
 const float MaxValueColorBuffer = 1E10;
 
-layout(location = 0) out vec4 _out_color_;
-layout(location = 1) out vec4 gPosition;
-layout(location = 2) out vec4 gNormal;
 
 void main() {
   Fragment f = getFragment();
@@ -48,12 +49,12 @@ void main() {
     );
   }
 
-  _out_color_.x = isnan(_out_color_.x) ? MaxValueColorBuffer : _out_color_.x;
-  _out_color_.y = isnan(_out_color_.y) ? MaxValueColorBuffer : _out_color_.y;
-  _out_color_.z = isnan(_out_color_.z) ? MaxValueColorBuffer : _out_color_.z;
+  _out_color_.x = isnan(_out_color_.x)  ?  MaxValueColorBuffer  :  _out_color_.x;
+  _out_color_.y = isnan(_out_color_.y)  ?  MaxValueColorBuffer  :  _out_color_.y;
+  _out_color_.z = isnan(_out_color_.z)  ?  MaxValueColorBuffer  :  _out_color_.z;
 
   gPosition = f.gPosition;
   gNormal = f.gNormal;
 
-  gl_FragDepth = f.disableDepthNormalization ? f.depth : normalizeFloat(f.depth);
+  gl_FragDepth = f.disableDepthNormalization  ?  f.depth  :  normalizeFloat(f.depth);
 }

@@ -46,7 +46,7 @@ vec4 uvToModel(vec2 uv, vec3 radius, float segments) {
   float fi = (1.0 - uv.y) * segments;
 
   float theta = fi * M_PI / segments;  // 0 -> PI
-  float phi   = fj * M_PI * 2.0 / segments;
+  float phi = fj * M_PI * 2.0 / segments;
 
   float x = radius.x * sin(theta) * cos(phi);
   float y = radius.y * sin(theta) * sin(phi);

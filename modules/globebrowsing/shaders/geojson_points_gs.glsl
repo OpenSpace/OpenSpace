@@ -50,6 +50,12 @@ uniform vec3 cameraRight;
 uniform dvec3 cameraPosition; // world coordinates
 uniform vec3 cameraLookUp;
 
+uniform float pointSize;
+uniform float textureWidthFactor;
+
+// If false, use the center
+uniform bool useBottomAnchorPoint = true;
+
 // Render mode
 uniform int renderMode;
 // OBS! Keep in sync with option property options
@@ -58,18 +64,13 @@ const int RenderOptionCameraPos = 1;
 const int RenderOptionGlobeNormal = 2;
 const int RenderOptionGlobeSurface = 3;
 
-uniform float pointSize;
-uniform float textureWidthFactor;
-
-// If false, use the center
-uniform bool useBottomAnchorPoint = true;
-
-const vec2 corners[4] = vec2[4](
+const vec2 Corners[4] = vec2[4](
   vec2(0.0, 0.0),
   vec2(1.0, 0.0),
   vec2(1.0, 1.0),
   vec2(0.0, 1.0)
 );
+
 
 void main() {
   vec4 pos = gl_in[0].gl_Position;
@@ -78,12 +79,12 @@ void main() {
 
   // Offset position based on height information
   if (length(pos.xyz) > 0) {
-      dvec3 outDirection = normalize(dvec3(dpos));
-      float height = heightOffset;
-      if (useHeightMapData) {
-        height += dynamicHeight[0];
-      }
-      dpos += dvec4(outDirection * double(height), 0.0);
+    dvec3 outDirection = normalize(dvec3(dpos));
+    float height = heightOffset;
+    if (useHeightMapData) {
+      height += dynamicHeight[0];
+    }
+    dpos += dvec4(outDirection * double(height), 0.0);
   }
   // World coordinates
   dpos = modelTransform * dpos;
@@ -114,11 +115,11 @@ void main() {
   dvec4 scaledRight = pointSize * dvec4(right, 0.0) * 0.5;
   dvec4 scaledUp = pointSize * dvec4(up, 0.0) * 0.5;
 
-  dmat4 cameraViewProjectionMatrix = projectionTransform * viewTransform;
+  dmat4 cameraViewProjection = projectionTransform * viewTransform;
 
-  vec4 dposClip = vec4(cameraViewProjectionMatrix * dpos);
-  vec4 scaledRightClip = textureWidthFactor * vec4(cameraViewProjectionMatrix * scaledRight);
-  vec4 scaledUpClip = vec4(cameraViewProjectionMatrix * scaledUp);
+  vec4 dposClip = vec4(cameraViewProjection * dpos);
+  vec4 scaledRightClip = textureWidthFactor * vec4(cameraViewProjection * scaledRight);
+  vec4 scaledUpClip = vec4(cameraViewProjection * scaledUp);
 
   // Place anchor point at the bottom
   vec4 bottomLeft = z_normalization(dposClip - scaledRightClip);
@@ -138,19 +139,19 @@ void main() {
   vs_positionViewSpace = vec4(viewTransform * dpos);
 
   // Build primitive
-  texCoord = corners[0];
+  texCoord = Corners[0];
   gl_Position = bottomLeft;
   EmitVertex();
 
-  texCoord = corners[1];
+  texCoord = Corners[1];
   gl_Position = bottomRight;
   EmitVertex();
 
-  texCoord = corners[3];
+  texCoord = Corners[3];
   gl_Position = topLeft;
   EmitVertex();
 
-  texCoord = corners[2];
+  texCoord = Corners[2];
   gl_Position = topRight;
   EmitVertex();
 

@@ -33,6 +33,7 @@ uniform vec3 yColor;
 uniform vec3 zColor;
 uniform float opacity;
 
+
 Fragment getFragment() {
   Fragment frag;
 

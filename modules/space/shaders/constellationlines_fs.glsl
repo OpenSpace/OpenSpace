@@ -32,16 +32,14 @@ uniform float opacity;
 
 
 Fragment getFragment() {
-  Fragment frag;
   if (opacity == 0.0) {
     discard;
   }
 
+  Fragment frag;
   frag.color = vec4(color, opacity);
   frag.depth = vs_screenSpaceDepth;
-
   frag.gPosition = vs_positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-
   return frag;
 }

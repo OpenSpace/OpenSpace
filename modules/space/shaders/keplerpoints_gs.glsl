@@ -30,6 +30,11 @@ layout(lines) in;
 flat in float currentRevolutionFraction[];
 flat in float vertexRevolutionFraction[];
 
+layout(triangle_strip, max_vertices = 4) out;
+out float projectionViewDepth;
+out vec4 viewSpace;
+out vec2 texCoord;
+
 uniform dmat4 modelTransform;
 uniform dmat4 viewTransform;
 uniform mat4 projectionTransform;
@@ -46,13 +51,9 @@ uniform vec3 cameraViewDirectionRight;
 uniform dvec3 cameraPositionWorld;
 uniform vec3 cameraUpWorld;
 
-layout(triangle_strip, max_vertices = 4) out;
-out float projectionViewDepth;
-out vec4 viewSpace;
-out vec2 texCoord;
-
 const int RenderOptionCameraViewDirection = 0;
 const int RenderOptionCameraPositionNormal = 1;
+
 
 void main() {
   // cFrac is how far along the trail orbit the head of the trail is.
@@ -71,7 +72,6 @@ void main() {
   vec4 v0Weighted = (1.0 - percentage) * gl_in[0].gl_Position;
   vec4 v1Weighted = percentage * gl_in[1].gl_Position;
   vec4 pos = v0Weighted + v1Weighted;
-  // ==========================
 
   // Calculate current vertex position to world space
   dvec4 vertPosWorldSpace = modelTransform * pos;
@@ -109,10 +109,10 @@ void main() {
   }
 
   // Calculate and set corners of the new quad
-  dvec4 p0World = vertPosWorldSpace + vec4(up-right, 0.0);
-  dvec4 p1World = vertPosWorldSpace + vec4(-right-up,0.0);
-  dvec4 p2World = vertPosWorldSpace + vec4(right+up, 0.0);
-  dvec4 p3World = vertPosWorldSpace + vec4(right-up, 0.0);
+  dvec4 p0World = vertPosWorldSpace + vec4(up - right, 0.0);
+  dvec4 p1World = vertPosWorldSpace + vec4(-right - up,0.0);
+  dvec4 p2World = vertPosWorldSpace + vec4(right + up, 0.0);
+  dvec4 p3World = vertPosWorldSpace + vec4(right - up, 0.0);
 
   // Set some additional out parameters
   viewSpace = z_normalization(

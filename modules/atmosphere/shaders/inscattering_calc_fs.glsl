@@ -99,11 +99,11 @@ void inscatter(float r, float mu, float muSun, float nu, out vec3 S_R, out vec3 
   S_M = vec3(0.0);
 
   float rayDist = rayDistance(r, mu, Rt, Rg);
-  float dy = rayDist / float(INSCATTER_INTEGRAL_SAMPLES);
+  float dy = rayDist / float(InscatterIntegralScamples);
   vec3 S_Ri;
   vec3 S_Mi;
   integrand(r, mu, muSun, nu, 0.0, S_Ri, S_Mi);
-  for (int i = 1; i <= INSCATTER_INTEGRAL_SAMPLES; i++) {
+  for (int i = 1; i <= InscatterIntegralScamples; i++) {
     float yj = float(i) * dy;
     vec3 S_Rj;
     vec3 S_Mj;
@@ -113,8 +113,8 @@ void inscatter(float r, float mu, float muSun, float nu, out vec3 S_R, out vec3 
     S_Ri = S_Rj;
     S_Mi = S_Mj;
   }
-  S_R *= betaRayleigh * (rayDist / (2.0 * float(INSCATTER_INTEGRAL_SAMPLES)));
-  S_M *= betaMieScattering * (rayDist / (2.0 * float(INSCATTER_INTEGRAL_SAMPLES)));
+  S_R *= betaRayleigh * (rayDist / (2.0 * float(InscatterIntegralScamples)));
+  S_M *= betaMieScattering * (rayDist / (2.0 * float(InscatterIntegralScamples)));
 }
 
 

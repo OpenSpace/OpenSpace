@@ -30,8 +30,9 @@ in float vs_depth;
 uniform bool usingAdditiveBlending;
 uniform float opacity;
 
+
 Fragment getFragment() {
-  if (vs_color.a == 0) {
+  if (vs_color.a == 0.0) {
     discard;
   }
 
@@ -43,7 +44,7 @@ Fragment getFragment() {
   frag.color.a *= opacity;
 
   // G-Buffer
-  frag.gPosition  = vec4(0.0);//vs_gPosition;
+  frag.gPosition = vec4(0.0);//vs_gPosition;
   // There is no normal here
   // TODO: Add the correct normal if necessary (JCC)
   frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
