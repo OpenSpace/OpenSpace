@@ -40,7 +40,7 @@ namespace {
     constexpr std::string_view _loggerCat = "FindImpactsTask";
     constexpr int MaxEarthRadius = 6378;
     constexpr unsigned int WindowSize = 200;
-    constexpr std::string_view TimeStringFormat = "YYYY MON DD HR:MN:SC.###";
+    constexpr std::string_view TimeStringFormat = "YYYY MM DD HR:MN:SC.###";
     constexpr unsigned int TimeStringLength = 41;
     constexpr double ToDegrees = 180.0 / std::numbers::pi;
 

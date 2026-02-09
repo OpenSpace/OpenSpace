@@ -45,6 +45,7 @@
 #include <glm/gtx/projection.hpp>
 #include <fstream>
 #include <optional>
+#include <stdexcept>
 
 using json = nlohmann::json;
 
@@ -1263,8 +1264,21 @@ void RenderableTube::loadSelectedSample() {
         return;
     }
 
+    // Check that the given value is valid first
+    if (_selectedSample.value().empty()) {
+        LERROR("Selected sample cannot be empty");
+        return;
+    }
+
     // Find information for the scen graph nodes.
-    int sample = std::stoi(_selectedSample.value());
+    int sample;
+    try {
+        sample = std::stoi(_selectedSample.value());
+    }
+    catch (std::invalid_argument const& ex) {
+        LERROR(std::format("Invalid sample: {}", _selectedSample.value()));
+        return;
+    }
 
     // Filenames start from 000001
     // Identifier starts at 1000000
@@ -1359,6 +1373,17 @@ void RenderableTube::initializeTextures() {
     ghoul_assert(!_data.empty(), "Cannot load empty list of textures");
     _textures.reserve(_data.size());
 
+    GLint maxTextures;
+    glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &maxTextures);
+
+    if (_data.size() > maxTextures) {
+        LERROR(std::format(
+            "Too many textures for a texture array, maximum is {}", maxTextures
+        ));
+        _hasTextures = false;
+        return;
+    }
+
     for (size_t i = 0; i < _data.size(); ++i) {
         std::unique_ptr<ghoul::opengl::Texture> t =
             ghoul::io::TextureReader::ref().loadTexture(_data[i].texturePath.string(), 2);
@@ -1400,10 +1425,12 @@ void RenderableTube::initializeTextures() {
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    if (_textures.size() > GL_MAX_ARRAY_TEXTURE_LAYERS) {
+    if (_textures.size() > maxTextures) {
         LERROR("Too many textures for one texture array");
-        // We will need to split the textures over several texture arrays if there are
-        // too many
+        // TODO: We will need to split the textures over several texture arrays if there
+        // are too many
+        _hasTextures = false;
+        return;
     }
 
     // Fill that storage with the data from each textures
@@ -1923,18 +1950,19 @@ void RenderableTube::jumpToPrevPolygon() const {
 
     // Find the polygons that are closest to the current time
     FindTimeStruct result = findTime(now);
+
+    // Before beginning
+    if (!result.foundPrev) {
+        LWARNING("Current time is before the start time for the tube");
+        return;
+    }
+
     double prevTime = _data[result.lastPolygonBeforeTime].timestamp;
 
     // If we are exactly on a polygon, take the previous one instead of the current one
     if (std::abs(now - prevTime) < std::numeric_limits<double>::epsilon()) {
         result = findTime(now - 1);
         prevTime = _data[result.lastPolygonBeforeTime].timestamp;
-    }
-
-    // Before beginning
-    if (!result.foundPrev) {
-        LWARNING("Current time is before the start time for the tube");
-        return;
     }
 
     global::timeManager->setTimeNextFrame(Time(prevTime));
@@ -1945,18 +1973,19 @@ void RenderableTube::jumpToNextPolygon() const {
 
     // Find the polygons that are closest to the current time
     FindTimeStruct result = findTime(now);
+
+    // After end
+    if (result.firstPolygonAfterTime == std::numeric_limits<size_t>::max()) {
+        LWARNING("Current time is after the end time for the tube");
+        return;
+    }
+
     double nextTime = _data[result.firstPolygonAfterTime].timestamp;
 
     // If we are exactly on a polygon, take the next one instead of the current one
     if (std::abs(now - nextTime) < std::numeric_limits<double>::epsilon()) {
         result = findTime(now + 1);
         nextTime = _data[result.firstPolygonAfterTime].timestamp;
-    }
-
-    // After end
-    if (result.firstPolygonAfterTime == std::numeric_limits<size_t>::max()) {
-        LWARNING("Current time is after the end time for the tube");
-        return;
     }
 
     global::timeManager->setTimeNextFrame(Time(nextTime));
