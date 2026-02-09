@@ -54,6 +54,8 @@
  * THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef _ATMOSPHERE___ATMOSPHERE_COMMON___GLSL_
+#define _ATMOSPHERE___ATMOSPHERE_COMMON___GLSL_
 
 const int INSCATTER_INTEGRAL_SAMPLES = 50;
 const float M_PI = 3.141592657;
@@ -235,3 +237,5 @@ vec4 texture4D(sampler3D table, float r, float mu, float muSun, float nu, float 
   vec4 v2 = texture(table, vec3((u_nu + u_mu_s + 1.0) / float(samplesNu), u_mu, u_r));
   return mix(v1, v2, t);
 }
+
+#endif // _ATMOSPHERE___ATMOSPHERE_COMMON___GLSL_

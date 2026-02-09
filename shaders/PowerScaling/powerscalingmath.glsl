@@ -22,9 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef POWERSCALING_MATH_HGLSL
-#define POWERSCALING_MATH_HGLSL
-
+#ifndef _POWERSCALING_MATH___GLSL_
+#define _POWERSCALING_MATH___GLSL_
 
 const float k = 10.0;
 const float FLT_MAX = 1e38; // Not max but large enough for the purpose
@@ -93,4 +92,4 @@ float pscToLinear(vec2 position) {
   return pow(k, position.y) * position.x;
 }
 
-#endif
+#endif // _POWERSCALING_MATH___GLSL_

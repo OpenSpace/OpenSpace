@@ -49,7 +49,7 @@ Fragment getFragment() {
   frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 
   if (usingAdditiveBlending) {
-    frag.blend = BLEND_MODE_ADDITIVE;
+    frag.blend = BlendModeAdditive;
   }
 
   return frag;

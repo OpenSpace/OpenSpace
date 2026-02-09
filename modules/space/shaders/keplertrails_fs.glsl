@@ -51,7 +51,7 @@ Fragment getFragment() {
     vertexDistance += 1.0;
   }
 
-  float invert = pow(1.0 - vertexDistance, trailFadeExponent);  
+  float invert = pow(1.0 - vertexDistance, trailFadeExponent);
   float fade = clamp(invert, 0.0, 1.0);
 
   // Currently even fully transparent lines can occlude other lines, thus we discard these
@@ -62,7 +62,7 @@ Fragment getFragment() {
 
   // Use additive blending for some values to make the discarding less abrupt
   if (fade < 0.15) {
-    frag.blend = BLEND_MODE_ADDITIVE;
+    frag.blend = BlendModeAdditive;
   }
   frag.color = vec4(color, fade * opacity);
   frag.depth = viewSpaceDepth;

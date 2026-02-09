@@ -130,7 +130,7 @@ Fragment getFragment() {
   frag.depth = vs_screenSpaceDepth;
 
   if (additiveBlending) {
-    frag.blend = BLEND_MODE_ADDITIVE;
+    frag.blend = BlendModeAdditive;
   }
 
   // G-Buffer

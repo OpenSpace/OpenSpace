@@ -46,7 +46,7 @@ Fragment getFragment() {
   // Place stars at back to begin with.
   frag.depth = DEFAULT_DEPTH;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-  frag.blend = BLEND_MODE_NORMAL;
+  frag.blend = BlendModeNormal;
 
   return frag;
 }

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef POWERSCALING_FS_H_HGLSL
-#define POWERSCALING_FS_H_HGLSL
+#ifndef _POWERSCALING_FS___GLSL_
+#define _POWERSCALING_FS___GLSL_
 
 #include "floatoperations.glsl"
 
@@ -38,4 +38,4 @@ float pscDepth(vec4 position) {
   return safeLength(pscToLinear(position));
 }
 
-#endif
+#endif // _POWERSCALING_FS___GLSL_

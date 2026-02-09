@@ -43,7 +43,7 @@ Fragment getFragment() {
   Fragment frag;
   frag.color = vec4(color * fade, fade * opacity);
   frag.depth = vs_positionDepth;
-  frag.blend = BLEND_MODE_ADDITIVE;
+  frag.blend = BlendModeAdditive;
 
   if (renderPhase == RenderPhasePoints) {
     // Use the length of the vector (dot(circCoord, circCoord)) as factor in the

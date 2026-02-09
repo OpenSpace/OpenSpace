@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef _BLENDING_GLSL_
-#define _BLENDING_GLSL_
+#ifndef _BLENDING___GLSL_
+#define _BLENDING___GLSL_
 
 /**
  * Blend in src behind dst using normal blending
@@ -91,4 +91,4 @@ void blendStep(inout vec4 dst, vec4 src, float stepSize) {
   blend(dst, src);
 }
 
-#endif // _BLENDING_GLSL_
+#endif // _BLENDING___GLSL_

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef _FLOATOPERATIONS_GLSL_
-#define _FLOATOPERATIONS_GLSL_
+#ifndef _FLOATOPERATIONS___GLSL_
+#define _FLOATOPERATIONS___GLSL_
 
 /**
  * Convert a positive floating point distance [0, 10^27]
@@ -68,8 +68,9 @@ float safeLength(vec4 v) {
 float safeLength(vec3 v) {
   return safeLength(vec4(v, 0.0));
 }
+
 float safeLength(vec2 v) {
   return safeLength(vec4(v, 0.0, 0.0));
 }
 
-#endif // _FLOATOPERATIONS_GLSL_
+#endif // _FLOATOPERATIONS___GLSL_

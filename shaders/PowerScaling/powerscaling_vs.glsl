@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef POWERSCALING_VS_H_HGLSL
-#define POWERSCALING_VS_H_HGLSL
+#ifndef _POWERSCALING_VS___GLSL_
+#define _POWERSCALING_VS___GLSL_
 
 uniform vec4 campos;
 uniform mat4 camrot;
@@ -66,4 +66,4 @@ vec4 pscTransform(inout vec4 vertexPosition, mat4 modelTransform) {
   return tmp;
 }
 
-#endif
+#endif // _POWERSCALING_VS___GLSL_

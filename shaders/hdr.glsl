@@ -22,6 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#ifndef _HDR___GLSL_
+#define _HDR___GLSL_
+
 const float HCY_EPSILON = 1e-7;
 
 // White given by D65
@@ -163,3 +166,5 @@ vec3 toneMappingOperator(vec3 color, float exposure) {
 vec3 gammaCorrection(vec3 color, float gamma) {
   return pow(color, vec3(1.0 / gamma));
 }
+
+#endif // _HDR___GLSL_
