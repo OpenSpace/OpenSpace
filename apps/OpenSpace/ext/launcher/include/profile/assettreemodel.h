@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,8 +28,14 @@
 #include <QAbstractItemModel>
 
 #include "assettreeitem.h"
-#include "openspace/scene/profile.h"
+#include <openspace/scene/profile.h>
+#include <QString>
+#include <QVariant>
 #include <memory>
+#include <string>
+#include <vector>
+
+class QObject;
 
 class AssetTreeModel final : public QAbstractItemModel {
 Q_OBJECT

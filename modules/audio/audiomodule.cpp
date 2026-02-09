@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,19 @@
 
 #include <modules/audio/audiomodule.h>
 
-#include <openspace/engine/globals.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/scripting/lualibrary.h>
+#include <openspace/util/openspacemodule.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <soloud.h>
 #include <soloud_wav.h>
+#include <string_view>
+#include <utility>
 
 #include "audiomodule_lua.inl"
 

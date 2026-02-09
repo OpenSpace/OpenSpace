@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,19 +26,35 @@
 
 #include <modules/touch/include/tuioear.h>
 #include <modules/touch/include/win32_touch.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/interaction/interactionmonitor.h>
 #include <openspace/navigation/navigationhandler.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/util/factorymanager.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/templatefactory.h>
+#include <algorithm>
+#include <functional>
+#include <optional>
+#include <utility>
 
 using namespace TUIO;
 
 namespace {
     constexpr std::string_view _loggerCat = "TouchModule";
+
+    constexpr openspace::properties::Property::PropertyInfo TuioPortInfo = {
+        "TuioPort",
+        "TUIO Port",
+        "TUIO UDP port, by default 3333. The port cannot be changed after startup.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
 
     constexpr openspace::properties::Property::PropertyInfo EnableTouchInfo = {
         "EnableTouchInteraction",
@@ -66,18 +82,28 @@ namespace {
         "relatively spherical objects.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
+
+    struct [[codegen::Dictionary(TouchModule)]] Parameters {
+        // [[codegen::verbatim(TuioPortInfo.description)]]
+        std::optional<int> tuioPort [[codegen::inrange(1, 65535)]];
+    };
+
+    #include "touchmodule_codegen.cpp"
 } // namespace
 
 namespace openspace {
 
 TouchModule::TouchModule()
     : OpenSpaceModule("Touch")
+    , _tuioPort(TuioPortInfo, 3333, 1, 65535)
     , _touchIsEnabled(EnableTouchInfo, true)
     , _hasActiveTouchEvent(EventsInfo, false)
     , _defaultDirectTouchRenderableTypes(DefaultDirectTouchRenderableTypesInfo)
 {
     addPropertySubOwner(_touch);
     addPropertySubOwner(_markers);
+    _tuioPort.setReadOnly(true);
+    addProperty(_tuioPort);
     addProperty(_touchIsEnabled);
     _touchIsEnabled.onChange([this]() {
         _touch.resetAfterInput();
@@ -116,8 +142,11 @@ bool TouchModule::isDefaultDirectTouchType(std::string_view renderableType) cons
         _sortedDefaultRenderableTypes.end();
 }
 
-void TouchModule::internalInitialize(const ghoul::Dictionary&) {
-    _ear.reset(new TuioEar());
+void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {
+    const Parameters p = codegen::bake<Parameters>(dict);
+
+    _tuioPort = p.tuioPort.value_or(_tuioPort);
+    _ear = std::make_unique<TuioEar>(_tuioPort);
 
     global::callback::initializeGL->push_back([this]() {
         LDEBUG("Initializing TouchMarker OpenGL");
@@ -194,9 +223,12 @@ void TouchModule::internalInitialize(const ghoul::Dictionary&) {
         clearInputs();
     });
 
-    global::callback::render->push_back([this]() {
-        _markers.render(_touchPoints);
-    });
+    global::callback::render->push_back(
+        [this](const glm::mat4&, const glm::mat4&, const glm::mat4&) {
+            _markers.render(_touchPoints);
+
+        }
+    );
 }
 
 bool TouchModule::processNewInput() {

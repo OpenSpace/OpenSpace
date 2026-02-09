@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,9 +22,18 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/util/time.h>
 #include <openspace/util/timeconstants.h>
-#include <openspace/util/timeconversion.h>
-#include <ghoul/lua/lua_helper.h>
+#include <openspace/util/timemanager.h>
+#include <ghoul/format.h>
+#include <optional>
+#include <utility>
+#include <variant>
+#include <vector>
 
 namespace {
 

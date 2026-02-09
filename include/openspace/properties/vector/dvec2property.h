@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +34,8 @@ namespace openspace::properties {
 
 class DVec2Property : public NumericalProperty<glm::dvec2> {
 public:
-    DVec2Property(Property::PropertyInfo info, glm::dvec2 value = glm::dvec2(0.0),
+    explicit DVec2Property(Property::PropertyInfo info,
+        glm::dvec2 value = glm::dvec2(0.0),
         glm::dvec2 minValue = glm::dvec2(std::numeric_limits<double>::lowest()),
         glm::dvec2 maxValue = glm::dvec2(std::numeric_limits<double>::max()),
         glm::dvec2 stepValue = glm::dvec2(0.01));

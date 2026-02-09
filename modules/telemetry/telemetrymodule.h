@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,16 +25,16 @@
 #ifndef __OPENSPACE_MODULE_TELEMETRY___TELEMETRYMODULE___H__
 #define __OPENSPACE_MODULE_TELEMETRY___TELEMETRYMODULE___H__
 
-#include "openspace/util/openspacemodule.h"
+#include <openspace/util/openspacemodule.h>
 
-#include <modules/telemetry/include/telemetrybase.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
-#include <ghoul/misc/boolean.h>
 #include <atomic>
 #include <condition_variable>
+#include <mutex>
+#include <thread>
 
 namespace openspace {
 
@@ -80,8 +80,8 @@ public:
      */
     std::vector<scripting::LuaLibrary> luaLibraries() const override;
 
-    virtual void internalInitialize(const ghoul::Dictionary& dictionary) override;
-    virtual void internalDeinitialize() override;
+    void internalInitialize(const ghoul::Dictionary& dictionary) override;
+    void internalDeinitialize() override;
 
     /**
      * Get the list of telemetries that are currently registered in the module.

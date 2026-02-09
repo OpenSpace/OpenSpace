@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -45,7 +45,7 @@ uniform int rayCastSteps;
 
 out vec4 finalColor;
 
-#define ALPHA_LIMIT 0.99
+const float AlphaLimit = 0.99;
 
 #include <#{getEntryPath}>
 
@@ -56,7 +56,7 @@ void main() {
   vec4 exitColorTexture = texture(exitColorTexture, texCoord);
 
   // If we don't have an exit, discard the ray
-  if (exitColorTexture.a < 1.f || exitColorTexture.rgb == vec3(0.f)) {
+  if (exitColorTexture.a < 1.0 || exitColorTexture.rgb == vec3(0.0)) {
     discard;
   }
 
@@ -64,13 +64,13 @@ void main() {
   vec3 exitPos = exitColorTexture.rgb;
   float exitDepth =  denormalizeFloat(texture(exitDepthTexture, texCoord).x);
 
-  float jitterFactor = 0.5f + 0.5f * rand(gl_FragCoord.xy); // should be between 0.5 and 1.0
+  float jitterFactor = 0.5 + 0.5 * rand(gl_FragCoord.xy); // should be between 0.5 and 1.0
 
-  vec3 entryPos;
-  float entryDepth;
+  vec3 entryPos = vec3(0.0);
+  float entryDepth = 0.0;
   getEntry(entryPos, entryDepth);
   // If we don't have an entry, discard the ray
-  if (entryPos == vec3(0.f)) {
+  if (entryPos == vec3(0.0)) {
     discard;
   }
 
@@ -81,29 +81,29 @@ void main() {
   float raycastDepth = length(diff);
 
   float geoDepth = denormalizeFloat((texture(mainDepthTexture, texCoord).x));
-  float geoRatio = clamp((geoDepth - entryDepth) / (exitDepth - entryDepth), 0.f, 1.f);
+  float geoRatio = clamp((geoDepth - entryDepth) / (exitDepth - entryDepth), 0.0, 1.0);
   raycastDepth = geoRatio * raycastDepth;
 
-  float currentDepth = 0.f;
+  float currentDepth = 0.0;
   float nextStepSize = stepSize#{id}(position, direction);
   float currentStepSize;
-  float previousJitterDistance = 0.f;
+  float previousJitterDistance = 0.0;
 
   int nSteps = 0;
 
   int sampleIndex = 0;
-  float opacityDecay = 1.f;
+  float opacityDecay = 1.0;
 
-  vec3 accumulatedColor = vec3(0.f);
-  vec3 accumulatedAlpha = vec3(0.f);
+  vec3 accumulatedColor = vec3(0.0);
+  vec3 accumulatedAlpha = vec3(0.0);
 
 
   for (nSteps = 0;
-      (accumulatedAlpha.r < ALPHA_LIMIT || accumulatedAlpha.g < ALPHA_LIMIT ||
-       accumulatedAlpha.b < ALPHA_LIMIT) && nSteps < rayCastSteps;
-       ++nSteps)
+      (accumulatedAlpha.r < AlphaLimit || accumulatedAlpha.g < AlphaLimit ||
+       accumulatedAlpha.b < AlphaLimit) && nSteps < rayCastSteps;
+       nSteps++)
   {
-    if (nextStepSize < raycastDepth / 10000000000.f) {
+    if (nextStepSize < raycastDepth / 10000000000.0) {
       break;
     }
 
@@ -114,7 +114,13 @@ void main() {
     vec3 jitteredPosition = position + direction * jitteredStepSize;
     position += direction * currentStepSize;
 
-    sample#{id}(jitteredPosition, direction, accumulatedColor, accumulatedAlpha, nextStepSize);
+    sample#{id}(
+      jitteredPosition,
+      direction,
+      accumulatedColor,
+      accumulatedAlpha,
+      nextStepSize
+    );
     float sampleDistance = jitteredStepSize + previousJitterDistance;
 
     previousJitterDistance = currentStepSize - jitteredStepSize;
@@ -123,7 +129,10 @@ void main() {
     nextStepSize = min(nextStepSize, maxStepSize);
   }
 
-  finalColor = vec4(accumulatedColor, (accumulatedAlpha.r + accumulatedAlpha.g + accumulatedAlpha.b) / 3.f);
+  finalColor = vec4(
+    accumulatedColor,
+    (accumulatedAlpha.r + accumulatedAlpha.g + accumulatedAlpha.b) / 3.0
+  );
 
   finalColor.rgb /= finalColor.a;
 

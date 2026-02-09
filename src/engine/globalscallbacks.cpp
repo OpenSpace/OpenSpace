@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/profiling.h>
 #include <array>
+#include <cstddef>
 
 namespace openspace::global::callback {
 
@@ -114,11 +115,17 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    render = new (currentPos) std::vector<std::function<void()>>();
+    render = new (currentPos) std::vector<
+        std::function<void(const glm::mat4&, const glm::mat4&, const glm::mat4&)>
+    >();
     ghoul_assert(render, "No render");
-    currentPos += sizeof(std::vector<std::function<void()>>);
+    currentPos += sizeof(std::vector<
+        std::function<void(const glm::mat4&, const glm::mat4&, const glm::mat4&)>
+    >);
 #else // ^^^ WIN32 / !WIN32 vvv
-    render = new std::vector<std::function<void()>>();
+    render = new std::vector<
+        std::function<void(const glm::mat4&, const glm::mat4&, const glm::mat4&)>
+    >();
 #endif // WIN32
 
 #ifdef WIN32

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,16 +26,15 @@
 #define __OPENSPACE_CORE___LISTPROPERTY___H__
 
 #include <openspace/properties/templateproperty.h>
-#include <vector>
 
 namespace openspace::properties {
 
 template <typename T>
 class ListProperty : public TemplateProperty<std::vector<T>> {
 public:
-    ListProperty(Property::PropertyInfo info, std::vector<T> values);
+    explicit ListProperty(Property::PropertyInfo info, std::vector<T> values);
 
-    virtual ~ListProperty() override = 0;
+    ~ListProperty() override = 0;
 };
 
 } // namespace openspace::properties

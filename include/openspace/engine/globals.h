@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,24 +32,6 @@ namespace ghoul::fontrendering { class FontManager; }
 
 namespace openspace {
 
-struct Configuration;
-class Dashboard;
-class DeferredcasterManager;
-class DownloadManager;
-class EventEngine;
-class LuaConsole;
-class MemoryManager;
-class MissionManager;
-class ModuleEngine;
-class OpenSpaceEngine;
-class ParallelPeer;
-class RaycasterManager;
-class RenderEngine;
-class ScreenSpaceRenderable;
-class SyncEngine;
-class TimeManager;
-class VersionChecker;
-struct WindowDelegate;
 namespace interaction {
     struct JoystickInputStates;
     struct WebsocketInputStates;
@@ -65,13 +47,33 @@ namespace scripting {
     class ScriptEngine;
     class ScriptScheduler;
 } // namespace scripting
+struct Configuration;
+class Dashboard;
+class DeferredcasterManager;
+class DownloadEventEngine;
+class DownloadManager;
+class EventEngine;
+class LuaConsole;
+class MemoryManager;
+class MissionManager;
+class ModuleEngine;
+class OpenSpaceEngine;
+class ParallelPeer;
 class Profile;
+class RaycasterManager;
+class RenderEngine;
+class ScreenSpaceRenderable;
+class SyncEngine;
+class TimeManager;
+class VersionChecker;
+struct WindowDelegate;
 
 namespace global {
 
 inline ghoul::fontrendering::FontManager* fontManager;
 inline Dashboard* dashboard;
 inline DeferredcasterManager* deferredcasterManager;
+inline DownloadEventEngine* downloadEventEngine;
 inline DownloadManager* downloadManager;
 inline EventEngine* eventEngine;
 inline LuaConsole* luaConsole;

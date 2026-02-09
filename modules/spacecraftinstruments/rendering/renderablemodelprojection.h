@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,24 +29,12 @@
 
 #include <modules/spacecraftinstruments/util/image.h>
 #include <modules/spacecraftinstruments/util/projectioncomponent.h>
-#include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/vector/vec3property.h>
-#include <ghoul/misc/managedmemoryuniqueptr.h>
 #include <ghoul/opengl/uniformcache.h>
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <memory>
 
 namespace ghoul::modelgeometry { class ModelGeometry; }
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
-
-struct RenderData;
-struct UpdateData;
 
 class RenderableModelProjection : public Renderable {
 public:
@@ -59,7 +47,7 @@ public:
     bool isReady() const override;
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
-    virtual void update(const UpdateData& data) final override;
+    void update(const UpdateData& data) final override;
 
     ghoul::opengl::Texture& baseTexture() const;
 

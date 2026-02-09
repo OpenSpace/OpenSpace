@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,17 +26,22 @@
 
 #include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
-#include "sgctedit/displaywindowunion.h"
+#include <sgct/config.h>
+#include <sgct/math.h>
 #include "windowcolors.h"
 #include <QCheckBox>
 #include <QComboBox>
 #include <QGridLayout>
 #include <QLabel>
-#include <QLayout>
-#include <QLineEdit>
 #include <QPushButton>
 #include <QSpinBox>
+#include <algorithm>
 #include <numbers>
+#include <optional>
+#include <array>
+#include <cmath>
+#include <iterator>
+#include <utility>
 
 namespace {
     std::array<std::pair<int, std::string>, 10> Quality = {

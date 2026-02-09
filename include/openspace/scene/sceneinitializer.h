@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___SCENEINITIALIZER___H__
 
 #include <openspace/util/threadpool.h>
+#include <mutex>
 #include <unordered_set>
 #include <vector>
 
@@ -41,7 +42,7 @@ class SceneGraphNode;
  */
 class SceneInitializer {
 public:
-    SceneInitializer(unsigned int nThreads = 0);
+    explicit SceneInitializer(unsigned int nThreads = 0);
 
     void initializeNode(SceneGraphNode* node);
     std::vector<SceneGraphNode*> takeInitializedNodes();

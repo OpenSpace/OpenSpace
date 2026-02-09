@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,8 @@
 
 #define exposure #{rendererData.hdrExposure}
 #define disableHDRPipeline #{rendererData.disableHDR}
-#define DeltaError 0.013f
-#define MaxValueColorBuffer 1E10
+const float DeltaError = 0.013;
+const float MaxValueColorBuffer = 1E10;
 
 layout(location = 0) out vec4 _out_color_;
 layout(location = 1) out vec4 gPosition;
@@ -42,7 +42,10 @@ void main() {
     _out_color_ = f.color;
   }
   else {
-    _out_color_ = vec4((log2(vec3(1.0) - (f.color.rgb - vec3(DeltaError)))/(-exposure)), f.color.a);
+    _out_color_ = vec4(
+      log2(vec3(1.0) - (f.color.rgb - vec3(DeltaError))) / -exposure,
+      f.color.a
+    );
   }
 
   _out_color_.x = isnan(_out_color_.x) ? MaxValueColorBuffer : _out_color_.x;
@@ -52,5 +55,5 @@ void main() {
   gPosition = f.gPosition;
   gNormal = f.gNormal;
 
-  gl_FragDepth = normalizeFloat(f.depth);
+  gl_FragDepth = f.disableDepthNormalization ? f.depth : normalizeFloat(f.depth);
 }

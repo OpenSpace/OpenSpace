@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,25 +28,37 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/scene/scenegraphnode.h>
+#include <ghoul/misc/boolean.h>
 #include <ghoul/misc/easing.h>
-#include <ghoul/misc/memorypool.h>
+#include <ghoul/misc/managedmemoryuniqueptr.h>
+#include <ghoul/misc/map.h>
+#include <chrono>
+#include <functional>
+#include <memory>
 #include <mutex>
 #include <set>
+#include <string>
+#include <string_view>
 #include <unordered_map>
 #include <vector>
 
 namespace ghoul {
-
-class Dictionary;
-namespace lua { class LuaState; }
-namespace opengl { class ProgramObject; }
-
+    namespace lua { class LuaState; }
+    namespace opengl { class ProgramObject; }
+    class Dictionary;
 } // namespace ghoul
 
 namespace openspace {
 
 namespace documentation { struct Documentation; }
+namespace properties { class Property; }
 namespace scripting { struct LuaLibrary; }
+class Camera;
+class Profile;
+struct RenderData;
+struct RendererTasks;
+class SceneInitializer;
+struct UpdateData;
 
 enum class PropertyValueType {
     Boolean = 0,
@@ -55,9 +67,6 @@ enum class PropertyValueType {
     Table,
     Nil
 };
-
-class Profile;
-class SceneInitializer;
 
 // Notifications:
 // SceneGraphFinishedLoading
@@ -75,7 +84,7 @@ public:
     };
 
     explicit Scene(std::unique_ptr<SceneInitializer> initializer);
-    virtual ~Scene() override;
+    ~Scene() override;
 
     /**
      * Attach node to the root.
@@ -116,7 +125,7 @@ public:
      * Return the scenegraph node with the specified name or `nullptr` if that name does
      * not exist.
      */
-    SceneGraphNode* sceneGraphNode(const std::string& name) const;
+    SceneGraphNode* sceneGraphNode(std::string_view name) const;
 
     /**
      * Add a node and all its children to the scene.
@@ -137,11 +146,6 @@ public:
      * Return a vector of all scene graph nodes in the scene.
      */
     const std::vector<SceneGraphNode*>& allSceneGraphNodes() const;
-
-    /**
-     * Returns a map from identifier to scene graph node.
-     */
-    const std::unordered_map<std::string, SceneGraphNode*>& nodesByIdentifier() const;
 
     /**
      * Load a scene graph node from a dictionary and return it.
@@ -269,7 +273,6 @@ private:
      */
     void propertyPushProfileValueToLua(ghoul::lua::LuaState& L, const std::string& value);
 
-
     /**
      * Update dependencies.
      */
@@ -279,7 +282,11 @@ private:
     std::unique_ptr<Camera> _camera;
     std::vector<SceneGraphNode*> _topologicallySortedNodes;
     std::vector<SceneGraphNode*> _circularNodes;
-    std::unordered_map<std::string, SceneGraphNode*> _nodesByIdentifier;
+    std::unordered_map<
+        std::string, SceneGraphNode*,
+        transparent_string_hash,
+        std::equal_to<>
+    > _nodesByIdentifier;
     bool _dirtyNodeRegistry = false;
     SceneGraphNode _rootNode;
     std::unique_ptr<SceneInitializer> _initializer;

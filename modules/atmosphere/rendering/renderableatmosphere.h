@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,26 +28,15 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/misc/stringproperty.h>
-#include <openspace/properties/scalar/boolproperty.h>
-#include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec3property.h>
-#include <openspace/util/updatestructures.h>
-#include <ghoul/opengl/textureunit.h>
 #include <memory>
-#include <string>
-#include <vector>
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <utility>
 
 namespace openspace {
 
 class AtmosphereDeferredcaster;
-
 struct TransformData;
 
 // Shadow structure
@@ -59,9 +48,6 @@ struct ShadowConfiguration {
     bool printedSourceError = false;
     bool printedCasterError = false;
 };
-
-namespace documentation { struct Documentation; }
-namespace planetgeometry { class PlanetGeometry; }
 
 class RenderableAtmosphere : public Renderable {
 public:
@@ -77,7 +63,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    glm::dmat4 computeModelTransformMatrix(const openspace::TransformData& data);
+    glm::dmat4 computeModelTransformMatrix(const TransformData& data);
     void updateAtmosphereParameters();
     void setDimmingCoefficient(const glm::dmat4& modelTransform);
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,15 @@
 #include <modules/base/rendering/renderabletrailtrajectory.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
 #include <openspace/scene/translation.h>
 #include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
 #include <openspace/util/timeconstants.h>
 #include <openspace/util/updatestructures.h>
+#include <algorithm>
+#include <cmath>
+#include <iterator>
+#include <limits>
 #include <optional>
 
 // This class creates the entire trajectory at once and keeps it in memory the entire
@@ -76,8 +80,8 @@ namespace {
         "The factor that is used to create subsamples along the trajectory. This value "
         "(together with 'SampleInterval') determines how far apart (in seconds) the "
         "samples are spaced along the trajectory. Subsamples are rendered as smaller "
-		"points compared to normal samples (from 'SampleInterval') when rendering the "
-		"trail as points.",
+        "points compared to normal samples (from 'SampleInterval') when rendering the "
+        "trail as points.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -115,8 +119,8 @@ namespace {
 
         // [[codegen::verbatim(SampleIntervalInfo.description)]]
         // The final interval is calculated as SampleInterval/TimeStampSubsampleFactor.
-        // If SampleInterval is not specified, it will be automatically calculated to produce
-        // two samples per day between the 'StartTime' and 'EndTime'.
+        // If SampleInterval is not specified, it will be automatically calculated to
+        // produce two samples per day between the 'StartTime' and 'EndTime'.
         std::optional<double> sampleInterval;
 
         // [[codegen::verbatim(TimeSubSampleInfo.description)]]
@@ -192,7 +196,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
 
     _timeStampSubsamplingFactor =
         p.timeStampSubsampleFactor.value_or(_timeStampSubsamplingFactor);
-	_timeStampSubsamplingFactor.onChange([this]() { reset(); });
+    _timeStampSubsamplingFactor.onChange([this]() { reset(); });
     addProperty(_timeStampSubsamplingFactor);
 
     // We store the vertices with ascending temporal order

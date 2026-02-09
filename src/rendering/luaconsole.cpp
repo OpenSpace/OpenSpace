@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,13 +35,17 @@
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
 #include <ghoul/misc/clipboard.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
 #include <filesystem>
 #include <fstream>
+#include <utility>
 
 namespace {
     constexpr std::string_view HistoryFile = "ConsoleHistory";
@@ -322,8 +326,8 @@ bool LuaConsole::keyboardCallback(Key key, KeyModifier modifier, KeyAction actio
         return false;
     }
 
-    const bool modifierShift = (modifier == KeyModifier::Shift);
-    const bool modifierControl = (modifier == KeyModifier::Control);
+    const bool modifierShift = hasKeyModifier(modifier, KeyModifier::Shift);
+    const bool modifierControl = hasKeyModifier(modifier, KeyModifier::Control);
 
     // Button left of 1 and above TAB (default)
     // Can be changed to any other key with the setCommandInputButton funciton
@@ -410,7 +414,7 @@ void LuaConsole::charCallback(unsigned int codepoint,
     if (modifierControl && (codepoint == codepoint_C || codepoint == codepoint_V)) {
         return;
     }
-#endif
+#endif // WIN32
 
     // Disallow all non ASCII characters for now
     if (codepoint > 0x7f) {
@@ -418,6 +422,25 @@ void LuaConsole::charCallback(unsigned int codepoint,
     }
 
     addToCommand(std::string(1, static_cast<char>(codepoint)));
+}
+
+bool LuaConsole::mouseActivationCallback(glm::vec2, MouseButton button,
+                                         MouseAction action, KeyModifier)
+{
+    const bool isMiddleMouseButton = button == MouseButton::Button3;
+    const bool isPress = action == MouseAction::Press;
+
+    if (_isVisible && isMiddleMouseButton && isPress) {
+        // Using the Primary selection area as that is more akin to the behavior on Linux
+        // where the middle mouse button pastes the currently selected text that comes
+        // from the primary selection area.
+        // On Windows, specifying this selection area doesn't change anything as there is
+        // only a single clipboard
+        addToCommand(sanitizeInput(ghoul::clipboardText(ghoul::SelectionArea::Primary)));
+        return true;
+    }
+
+    return false;
 }
 
 void LuaConsole::update() {
@@ -939,7 +962,8 @@ void LuaConsole::registerKeyHandlers() {
                 return;
             }
 
-            // If the next character after _inputPosition is a JumpCharacter, delete just that
+            // If the next character after _inputPosition is a JumpCharacter, delete just
+            // that
             if (JumpCharacters.find(command[_inputPosition]) != std::string::npos) {
                 command.erase(_inputPosition, 1);
                 return;
@@ -1129,20 +1153,10 @@ bool LuaConsole::gatherPathSuggestions(size_t contextStart) {
             ghoul::filesystem::Sorted::Yes
         );
 
-    auto containsNonAscii = [](const std::filesystem::path& p) {
-        const std::u8string s = p.generic_u8string();
-        for (auto it = s.rbegin(); it != s.rend(); it++) {
-            if (static_cast<unsigned char>(*it) > 0x7F) {
-                return true;
-            }
-        }
-        return false;
-    };
-
     std::vector<std::string> entries;
     for (const std::filesystem::path& entry : suggestions) {
         // Filter paths that contain non-ASCII characters
-        if (containsNonAscii(entry)) {
+        if (ghoul::containsNonAscii(entry)) {
             continue;
         }
 

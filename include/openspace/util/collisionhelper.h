@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,7 +50,7 @@ bool lineSphereIntersection(const glm::dvec3& p1, const glm::dvec3& p2,
 
 /**
  * Check if the point \p p is inside of the sphere defined by radius \p r and center
- * point \p c
+ * point \p c.
  */
 bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r);
 

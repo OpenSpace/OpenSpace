@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,8 +27,6 @@
 
 #include <ghoul/glm.h>
 #include <filesystem>
-#include <string>
-#include <vector>
 
 namespace ghoul::opengl {
     class Texture;
@@ -37,27 +35,24 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-struct RenderData;
 struct RaycastData;
+struct RenderData;
 
 class VolumeRaycaster {
 public:
-    /**
-     * Destructor.
-     */
     virtual ~VolumeRaycaster() = default;
 
     /**
      * Render the volume's entry points (front face of the bounding geometry).
      */
-    virtual void renderEntryPoints(const RenderData& /*data*/,
-        ghoul::opengl::ProgramObject& /*program*/) = 0;
+    virtual void renderEntryPoints(const RenderData& data,
+        ghoul::opengl::ProgramObject& program) = 0;
 
     /**
      * Render the volume's exit points (back face of the bounding geometry).
      */
-    virtual void renderExitPoints(const RenderData& /*data*/,
-        ghoul::opengl::ProgramObject& /*program*/) = 0;
+    virtual void renderExitPoints(const RenderData& data,
+        ghoul::opengl::ProgramObject& program) = 0;
 
     /**
      * Prepare the volume for the ABuffer's resolve step. Make sure textures are up to

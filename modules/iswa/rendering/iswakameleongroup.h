@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,11 @@
 
 #include <modules/iswa/rendering/iswadatagroup.h>
 
+#include <openspace/properties/misc/selectionproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <filesystem>
+#include <tuple>
+
 namespace openspace {
 
 class IswaKameleonGroup : public IswaDataGroup {
@@ -34,7 +39,7 @@ public:
     IswaKameleonGroup(std::string name, std::string type);
     virtual ~IswaKameleonGroup();
 
-    virtual void clearGroup() override;
+    void clearGroup() override;
 
     std::set<std::string> fieldlineValue() const;
     void setFieldlineInfo(std::filesystem::path fieldlineIndexFile,

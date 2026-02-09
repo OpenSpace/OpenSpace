@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,9 +25,11 @@
 #ifndef __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 #define __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUPID___H__
 
-#include <ghoul/misc/stringconversion.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/exception.h>
+#include <algorithm>
 #include <array>
-#include <string>
+#include <string_view>
 
 namespace openspace::globebrowsing::layers {
 
@@ -179,18 +181,20 @@ struct Blend {
     enum class ID {
         Normal = 0,
         Multiply = 1,
-        Add = 2,
-        Subtract = 3,
-        Color = 4,
+        MultiplyMix = 2,
+        Add = 3,
+        Subtract = 4,
+        Color = 5,
     };
 
     ID id;
     std::string_view identifier;
 };
 
-constexpr std::array<Blend, 5> Blends = {
+constexpr std::array<Blend, 6> Blends = {
     Blend { .id = Blend::ID::Normal, .identifier = "Normal" },
     Blend { .id = Blend::ID::Multiply, .identifier = "Multiply" },
+    Blend { .id = Blend::ID::MultiplyMix, .identifier = "Multiply and Mix" },
     Blend { .id = Blend::ID::Add, .identifier = "Add" },
     Blend { .id = Blend::ID::Subtract, .identifier = "Subtract" },
     Blend { .id = Blend::ID::Color, .identifier = "Color" }

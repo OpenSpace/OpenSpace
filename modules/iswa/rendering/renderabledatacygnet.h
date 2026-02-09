@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,13 +29,13 @@
 
 #include <openspace/properties/misc/selectionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <glm/gtx/std_based_type.hpp>
 
 namespace openspace {
 
 class DataProcessor;
-namespace documentation { struct Documentation; }
 
 /**
  * This class abstracts away the the loading of data and creation of textures for all data
@@ -80,7 +80,7 @@ protected:
      * Optional interface method. this has an implementation in datacygnet.cpp, but needs
      * to be overriden for KameleonPlane.
      */
-    virtual bool updateTextureResource() override;
+    bool updateTextureResource() override;
 
     virtual std::vector<float*> textureData() = 0;
 

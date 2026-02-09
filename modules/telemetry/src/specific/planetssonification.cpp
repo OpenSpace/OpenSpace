@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,7 +24,9 @@
 
 #include <modules/telemetry/include/specific/planetssonification.h>
 
+#include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 #include <modules/telemetry/include/util.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 #include <openspace/navigation/navigationhandler.h>
@@ -33,6 +35,16 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/distanceconversion.h>
 #include <openspace/util/memorymanager.h>
+#include <ghoul/format.h>
+#include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <osc/OscTypes.h>
+#include <cstdint>
+#include <cstdlib>
+#include <limits>
+#include <optional>
+#include <utility>
 
 #include "planetssonification_lua.inl"
 

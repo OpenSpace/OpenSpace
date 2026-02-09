@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,11 +22,15 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
+#include <openspace/navigation/navigationhandler.h>
+#include <ghoul/lua/lua_helper.h>
+
 namespace {
 
 /**
-* Set minimum allowed distance to a multiplier of the interaction sphere of the focus node
-*/
+ * Set minimum allowed distance to a multiplier of the interaction sphere of the focus
+ * node.
+ */
 [[codegen::luawrap]] void setRelativeMinDistance(float multiplier) {
     using namespace openspace;
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
@@ -41,8 +45,9 @@ namespace {
 }
 
 /**
-* Set maximum allowed distance to a multiplier of the interaction sphere of the focus node
-*/
+ * Set maximum allowed distance to a multiplier of the interaction sphere of the focus
+ * node.
+ */
 [[codegen::luawrap]] void setRelativeMaxDistance(float multiplier) {
     using namespace openspace;
     const SceneGraphNode* node = global::navigationHandler->anchorNode();

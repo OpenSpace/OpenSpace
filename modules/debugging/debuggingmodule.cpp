@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,21 +30,16 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/navigation/navigationhandler.h>
-#include <openspace/navigation/path.h>
-#include <openspace/navigation/pathnavigator.h>
-#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scripting/scriptengine.h>
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/factorymanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/logging/logmanager.h>
+#include <ghoul/format.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
 #include <ghoul/misc/templatefactory.h>
 
 #include "debuggingmodule_lua.inl"
@@ -120,40 +115,43 @@ DebuggingModule::DebuggingModule()
 
     addProperty(_showFrameInformation);
 
-    global::callback::render->push_back([this]() {
-        if (_showFrameInformation) {
-            ZoneScopedN("Show Frame Information");
-            WindowDelegate* del = global::windowDelegate;
+    global::callback::render->push_back(
+        [this](const glm::mat4&, const glm::mat4&, const glm::mat4&)
+        {
+            if (_showFrameInformation) {
+                ZoneScopedN("Show Frame Information");
+                WindowDelegate* del = global::windowDelegate;
 
-            glm::vec2 penPosition = glm::vec2(
-                global::renderEngine->fontResolution().x / 2 - 70,
-                global::renderEngine->fontResolution().y / 3
-            );
+                glm::vec2 penPosition = glm::vec2(
+                    global::renderEngine->fontResolution().x / 2 - 70,
+                    global::renderEngine->fontResolution().y / 3
+                );
 
-            std::string fn = std::to_string(global::renderEngine->frameNumber());
-            const WindowDelegate::Frustum frustum = del->frustumMode();
-            std::string fr = [](WindowDelegate::Frustum f) -> std::string {
-                switch (f) {
-                    case WindowDelegate::Frustum::Mono:     return "";
-                    case WindowDelegate::Frustum::LeftEye:  return "(left)";
-                    case WindowDelegate::Frustum::RightEye: return "(right)";
-                    default:                          throw ghoul::MissingCaseException();
+                std::string fn = std::to_string(global::renderEngine->frameNumber());
+                const WindowDelegate::Frustum frustum = del->frustumMode();
+                std::string fr = [](WindowDelegate::Frustum f) -> std::string {
+                    switch (f) {
+                        case WindowDelegate::Frustum::Mono:     return "";
+                        case WindowDelegate::Frustum::LeftEye:  return "(left)";
+                        case WindowDelegate::Frustum::RightEye: return "(right)";
+                        default:                      throw ghoul::MissingCaseException();
 
-                }
-            }(frustum);
+                    }
+                }(frustum);
 
-            std::string node = std::to_string(del->currentNode());
-            std::string sgFn = std::to_string(del->swapGroupFrameNumber());
-            std::string dt = std::to_string(del->deltaTime());
-            std::string avgDt = std::to_string(del->averageDeltaTime());
+                std::string node = std::to_string(del->currentNode());
+                std::string sgFn = std::to_string(del->swapGroupFrameNumber());
+                std::string dt = std::to_string(del->deltaTime());
+                std::string avgDt = std::to_string(del->averageDeltaTime());
 
-            const std::string res = std::format(
-                "Node: {}\n\nFrame: {} {}\nSwap group frame: {}\nDt: {}\nAvg Dt: {}",
-                node, fn, fr, sgFn, dt, avgDt
-            );
-            RenderFont(*_fontFrameInfo, penPosition, res);
+                const std::string res = std::format(
+                    "Node: {}\n\nFrame: {} {}\nSwap group frame: {}\nDt: {}\nAvg Dt: {}",
+                    node, fn, fr, sgFn, dt, avgDt
+                );
+                RenderFont(*_fontFrameInfo, penPosition, res);
+            }
         }
-    });
+    );
 }
 
 void DebuggingModule::internalInitialize(const ghoul::Dictionary&) {

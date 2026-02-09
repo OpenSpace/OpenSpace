@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,22 +27,14 @@
 
 #include <openspace/rendering/deferredcaster.h>
 
-#include <modules/atmosphere/rendering/renderableatmosphere.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/uniformcache.h>
-#include <string>
 #include <vector>
-
-namespace ghoul::opengl {
-    class Texture;
-    class ProgramObject;
-} // namespace ghoul::opengl
 
 namespace openspace {
 
-struct RenderData;
-struct DeferredcastData;
+class SceneGraphNode;
 struct ShadowConfiguration;
 
 struct ShadowRenderingStruct {
@@ -112,7 +104,6 @@ private:
         ghoul::opengl::ProgramObject& program, GLuint deltaE);
     void calculateInscattering(int scatteringOrder,
         ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh);
-
 
     UniformCache(cullAtmosphere, opacity, Rg, Rt, groundRadianceEmission, HR,
         betaRayleigh, HM, betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO,

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,14 +25,17 @@
 #include <modules/base/rendering/grids/renderablesphericalgrid.h>
 
 #include <modules/base/basemodule.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/documentation/verifier.h>
 #include <ghoul/glm.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <algorithm>
+#include <cmath>
 #include <optional>
 
 namespace {
@@ -124,7 +127,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     , _gridProgram(nullptr)
     , _color(ColorInfo, glm::vec3(0.5f), glm::vec3(0.f), glm::vec3(1.f))
     , _longSegments(LongSegmentsInfo, 36, 4, 200)
-    , _latSegments(LatSegmentsInfo, 18, 4, 200)
+    , _latSegments(LatSegmentsInfo, 19, 4, 200)
     , _lineWidth(LineWidthInfo, 0.5f, 1.f, 20.f)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

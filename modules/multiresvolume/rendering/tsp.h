@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,8 +28,8 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <filesystem>
 #include <fstream>
+#include <ios>
 #include <list>
-#include <string>
 #include <vector>
 
 namespace openspace {
@@ -108,11 +108,6 @@ private:
      * spatial subdivision level).
      */
     std::list<unsigned int> coveredBSTLeafBricks(unsigned int brickIndex) const;
-
-    /**
-     * Return a list of eight children brick incices given a brick index.
-     */
-    std::list<unsigned int> childBricks(unsigned int brickIndex);
 
     std::filesystem::path _filename;
     std::ifstream _file;

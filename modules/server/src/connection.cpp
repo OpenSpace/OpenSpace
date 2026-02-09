@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,13 @@
 
 #include <modules/server/include/connection.h>
 
+#include <modules/server/include/topics/actionkeybindtopic.h>
 #include <modules/server/include/topics/authorizationtopic.h>
 #include <modules/server/include/topics/bouncetopic.h>
 #include <modules/server/include/topics/camerapathtopic.h>
 #include <modules/server/include/topics/cameratopic.h>
 #include <modules/server/include/topics/documentationtopic.h>
+#include <modules/server/include/topics/downloadeventtopic.h>
 #include <modules/server/include/topics/enginemodetopic.h>
 #include <modules/server/include/topics/errorlogtopic.h>
 #include <modules/server/include/topics/eventtopic.h>
@@ -36,24 +38,28 @@
 #include <modules/server/include/topics/getpropertytopic.h>
 #include <modules/server/include/topics/luascripttopic.h>
 #include <modules/server/include/topics/missiontopic.h>
+#include <modules/server/include/topics/profiletopic.h>
 #include <modules/server/include/topics/sessionrecordingtopic.h>
 #include <modules/server/include/topics/setpropertytopic.h>
-#include <modules/server/include/topics/actionkeybindtopic.h>
 #include <modules/server/include/topics/skybrowsertopic.h>
 #include <modules/server/include/topics/subscriptiontopic.h>
 #include <modules/server/include/topics/timetopic.h>
 #include <modules/server/include/topics/topic.h>
 #include <modules/server/include/topics/triggerpropertytopic.h>
 #include <modules/server/include/topics/versiontopic.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/socket.h>
-#include <ghoul/io/socket/tcpsocketserver.h>
-#include <ghoul/io/socket/websocketserver.h>
 #include <ghoul/misc/profiling.h>
-#include <include/topics/profiletopic.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <algorithm>
+#include <exception>
+#include <locale>
+#include <memory_resource>
+#include <stdexcept>
+#include <string_view>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "ServerModule: Connection";
@@ -61,7 +67,6 @@ namespace {
     constexpr std::string_view MessageKeyType = "type";
     constexpr std::string_view MessageKeyPayload = "payload";
     constexpr std::string_view MessageKeyTopic = "topic";
-
 } // namespace
 
 namespace openspace {
@@ -91,6 +96,7 @@ Connection::Connection(std::unique_ptr<ghoul::io::Socket> s, std::string address
     _topicFactory.registerClass<CameraTopic>("camera");
     _topicFactory.registerClass<CameraPathTopic>("cameraPath");
     _topicFactory.registerClass<DocumentationTopic>("documentation");
+    _topicFactory.registerClass<DownloadEventTopic>("downloadEvent");
     _topicFactory.registerClass<EngineModeTopic>("engineMode");
     _topicFactory.registerClass<ErrorLogTopic>("errorLog");
     _topicFactory.registerClass<EventTopic>("event");
@@ -214,6 +220,7 @@ void Connection::handleJson(const nlohmann::json& json) {
 void Connection::sendMessage(const std::string& message) {
     ZoneScoped;
 
+    std::lock_guard lock(_mutex);
     _socket->putMessage(message);
 }
 

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,12 +24,9 @@
 
 #include <modules/touch/include/tuioear.h>
 
-#include <openspace/engine/globals.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/rendering/screenspacerenderable.h>
-#include <ghoul/logging/logmanager.h>
-#include <mutex>
+#include <TuioBlob.h>
+#include <TuioCursor.h>
+#include <TuioObject.h>
 
 using namespace TUIO;
 
@@ -96,8 +93,8 @@ std::vector<TouchInput> TuioEar::takeRemovals() {
 }
 
 // Standard UDP IP connection to port 3333
-TuioEar::TuioEar()
-    : _tuioClient(3333)
+TuioEar::TuioEar(int port)
+    : _tuioClient(port)
 {
     _tuioClient.addTuioListener(this);
     _tuioClient.connect();

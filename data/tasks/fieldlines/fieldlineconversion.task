@@ -1,0 +1,14 @@
+local inputFolder = "C:/Users/eolsson/Documents/openspace/data/2012"
+
+return {
+  {
+    Type = "KameleonVolumeToFieldlinesTask",
+
+    Input = inputFolder,
+    Seedpoints = "C:/Users/eolsson/Documents/openspace/data/2012/seeds",
+    TracingVar = "b",
+    OutputFolder = "C:/Users/eolsson/Documents/openspace/data/2012/test1Output",
+    OutputType = "Osfls",
+    ExtraVars = { "rho", "p" }
+  }
+}

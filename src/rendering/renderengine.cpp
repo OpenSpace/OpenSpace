@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,28 +25,27 @@
 #include <openspace/rendering/renderengine.h>
 
 #include <openspace/openspace.h>
+#include <openspace/camera/camera.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
-#include <openspace/events/event.h>
-#include <openspace/events/eventengine.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/orbitalnavigator.h>
-#include <openspace/mission/missionmanager.h>
 #include <openspace/rendering/dashboard.h>
-#include <openspace/rendering/deferredcastermanager.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/framebufferrenderer.h>
 #include <openspace/rendering/luaconsole.h>
-#include <openspace/rendering/raycastermanager.h>
+#include <openspace/rendering/renderable.h>
 #include <openspace/rendering/screenspacerenderable.h>
+#include <openspace/rendering/shadowmapping.h>
 #include <openspace/scene/scene.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/memorymanager.h>
-#include <openspace/util/timemanager.h>
 #include <openspace/util/screenlog.h>
+#include <openspace/util/timemanager.h>
+#include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
 #include <openspace/util/versionchecker.h>
 #include <ghoul/filesystem/filesystem.h>
@@ -62,16 +61,24 @@
 #include <ghoul/io/texture/texturereaderstb.h>
 #include <ghoul/io/texture/texturewriter.h>
 #include <ghoul/io/texture/texturewriterstb.h>
+#include <ghoul/logging/loglevel.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/easing.h>
 #include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringconversion.h>
 #include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
+#include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/shaderobject.h>
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <ctime>
+#include <utility>
 
 #include "renderengine_lua.inl"
+#include <thread>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderEngine";
@@ -682,6 +689,58 @@ glm::mat4 RenderEngine::nodeRotation() const {
 
 uint64_t RenderEngine::frameNumber() const {
     return _frameNumber;
+}
+
+void RenderEngine::registerShadowCaster(const std::string& shadowGroup,
+                                        const SceneGraphNode* lightSource,
+                                        SceneGraphNode* shadower,
+                                        SceneGraphNode* shadowee)
+{
+    using namespace shadowmapping;
+
+    ghoul_assert(!shadowGroup.empty(), "No shadowGroup specified");
+    ghoul_assert(lightSource, "No light source specified");
+    ghoul_assert(shadower, "No shadower specified");
+    ghoul_assert(shadowee, "No shadowee specified");
+
+    _renderer.registerShadowCaster(shadowGroup, lightSource, shadower);
+
+    Shadower* sr = dynamic_cast<Shadower*>(shadower->renderable());
+    if (!sr) {
+        throw ghoul::RuntimeError("Provided shadower scene graph node is not a shadower");
+    }
+    sr->setLightSource(lightSource);
+    sr->setShadowGroup(shadowGroup);
+
+    Shadowee* se = dynamic_cast<Shadowee*>(shadowee->renderable());
+    if (!se) {
+        throw ghoul::RuntimeError("Provided shadowee scene graph node is not a shadowee");
+    }
+    se->addShadower(sr);
+}
+
+void RenderEngine::removeShadowCaster(const std::string& shadowGroup,
+                                      SceneGraphNode* shadower,
+                                      SceneGraphNode* shadowee)
+{
+    using namespace shadowmapping;
+
+    ghoul_assert(!shadowGroup.empty(), "No shadowGroup specified");
+    ghoul_assert(shadower, "No shadower specified");
+    ghoul_assert(shadowee, "No shadowee specified");
+
+    _renderer.removeShadowCaster(shadowGroup, shadower);
+
+    Shadower* sr = dynamic_cast<Shadower*>(shadower->renderable());
+    if (!sr) {
+        throw ghoul::RuntimeError("Provided shadower scene graph node is not a shadower");
+    }
+
+    Shadowee* se = dynamic_cast<Shadowee*>(shadowee->renderable());
+    if (!se) {
+        throw ghoul::RuntimeError("Provided shadowee scene graph node is not a shadowee");
+    }
+    se->removeShadower(sr);
 }
 
 void RenderEngine::render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,

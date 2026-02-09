@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,8 @@
 
 #include <openspace/util/boxgeometry.h>
 
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <string>
+#include <array>
+#include <utility>
 
 namespace openspace {
 

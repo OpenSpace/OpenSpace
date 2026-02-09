@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,9 +36,9 @@
 
 namespace openspace::globebrowsing {
 
-template<typename KeyType> class LRUThreadPool;
+template <typename KeyType> class LRUThreadPool;
 
-template<typename KeyType>
+template <typename KeyType>
 class LRUThreadPoolWorker {
 public:
     explicit LRUThreadPoolWorker(LRUThreadPool<KeyType>& pool);
@@ -58,7 +58,7 @@ private:
  * same key will simply be bumped and prioritised before other enqueued tasks. The given
  * task will be ignored.
  */
-template<typename KeyType>
+template <typename KeyType>
 class LRUThreadPool {
 public:
     LRUThreadPool(size_t numThreads, size_t queueSize);
