@@ -43,6 +43,10 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableNodeLine";
 
+    struct Vertex {
+        glm::vec3 position;
+    };
+
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
         "Start node",
@@ -278,6 +282,8 @@ void RenderableNodeLine::initializeGL() {
     );
 
     glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, 2 * sizeof(Vertex), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
     glCreateVertexArrays(1, &_vao);
     glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
 
@@ -336,16 +342,13 @@ void RenderableNodeLine::update(const UpdateData&) {
     const glm::vec3 startPos = _startPos + startOffset * dir;
     const glm::vec3 endPos = _endPos - endOffset * dir;
 
-    struct Vertex {
-        glm::vec3 position;
-    };
     std::array<Vertex, 2> Vertices = { startPos, endPos };
 
-    glNamedBufferStorage(
+    glNamedBufferSubData(
         _vbo,
+        0,
         Vertices.size() * sizeof(Vertex),
-        Vertices.data(),
-        GL_NONE_BIT
+        Vertices.data()
     );
 }
 

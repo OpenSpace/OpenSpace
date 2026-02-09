@@ -120,7 +120,7 @@ void RenderableBoxGrid::initializeGL() {
     );
 
     glCreateBuffers(1, &_vbo);
-    glNamedBufferStorage(_vbo, 16 * sizeof(Vertex), nullptr, GL_NONE_BIT);
+    glNamedBufferStorage(_vbo, 16 * sizeof(Vertex), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
     glCreateVertexArrays(1, &_vao);
     glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));

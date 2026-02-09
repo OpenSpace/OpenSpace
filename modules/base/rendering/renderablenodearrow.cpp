@@ -519,7 +519,6 @@ void RenderableNodeArrow::render(const RenderData& data, RendererTasks&) {
         nullptr
     );
 
-    // Restore GL State
     glBindVertexArray(0);
     global::renderEngine->openglStateCache().resetBlendState();
 

@@ -399,6 +399,14 @@ void initialize() {
     );
 
     glCreateVertexArrays(1, &vertexObjects.cone.vao);
+    glVertexArrayVertexBuffer(
+        vertexObjects.cone.vao,
+        0,
+        vertexObjects.cone.vbo,
+        0,
+        sizeof(VertexXYZNormal)
+    );
+    glVertexArrayElementBuffer(vertexObjects.cone.vao, vertexObjects.cone.ibo);
 
     glEnableVertexArrayAttrib(vertexObjects.cone.vao, 0);
     glVertexArrayAttribFormat(vertexObjects.cone.vao, 0, 3, GL_FLOAT, GL_FALSE, 0);

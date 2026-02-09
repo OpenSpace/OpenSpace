@@ -47,6 +47,15 @@
 #include <variant>
 
 namespace {
+    struct Vertex {
+        float x;
+        float y;
+        float z;
+        float w;
+        float s;
+        float t;
+    };
+
     enum RenderOption {
         ViewDirection = 0,
         PositionNormal,
@@ -343,15 +352,17 @@ void RenderablePlane::initializeGL() {
     ZoneScoped;
 
     glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, 6 * sizeof(Vertex), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
     glCreateVertexArrays(1, &_vao);
-    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 6 * sizeof(GLfloat));
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
     glEnableVertexArrayAttrib(_vao, 0);
     glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_vao, 0, 0);
 
     glEnableVertexArrayAttrib(_vao, 1);
-    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat));
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, s));
     glVertexArrayAttribBinding(_vao, 1, 0);
 
     createPlane();
@@ -489,17 +500,18 @@ void RenderablePlane::update(const UpdateData&) {
 void RenderablePlane::createPlane() {
     const GLfloat sizeX = _size.value().x;
     const GLfloat sizeY = _size.value().y;
-    const std::array<GLfloat, 36> vertexData = {
+
+    const std::array<Vertex, 6> vertexData = {
         //   x       y    z    w    s    t
-        -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
-         sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f,
-        -sizeX,  sizeY, 0.f, 0.f, 0.f, 1.f,
-        -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
-         sizeX, -sizeY, 0.f, 0.f, 1.f, 0.f,
-         sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f
+        Vertex { -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f },
+        Vertex {  sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f },
+        Vertex { -sizeX,  sizeY, 0.f, 0.f, 0.f, 1.f },
+        Vertex { -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f },
+        Vertex {  sizeX, -sizeY, 0.f, 0.f, 1.f, 0.f },
+        Vertex {  sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f }
     };
 
-    glNamedBufferStorage(_vbo, sizeof(vertexData), vertexData.data(), GL_NONE_BIT);
+    glNamedBufferSubData(_vbo, 0, sizeof(vertexData), vertexData.data());
 }
 
 glm::dmat4 RenderablePlane::rotationMatrix(const RenderData& data) const {
