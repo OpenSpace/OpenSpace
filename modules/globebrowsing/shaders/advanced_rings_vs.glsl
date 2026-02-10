@@ -30,11 +30,13 @@ layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
-out vec2 vs_st;
-out float vs_screenSpaceDepth;
-out vec4 shadowCoords;
-out vec3 vs_normal;
-out vec3 posObj;
+out Data {
+  vec4 shadowCoords;
+  vec3 normal;
+  vec3 posObj;
+  vec2 st;
+  float screenSpaceDepth;
+} out_data;
 
 uniform dmat4 modelViewProjectionMatrix;
 
@@ -45,14 +47,14 @@ uniform dmat4 shadowMatrix;
 
 
 void main() {
-  vs_st = in_st;
-  vs_normal = mat3(modelViewProjectionMatrix) * in_normal;
-  posObj = vec3(in_position, 0.0);
+  out_data.st = in_st;
+  out_data.normal = mat3(modelViewProjectionMatrix) * in_normal;
+  out_data.posObj = vec3(in_position, 0.0);
 
   dvec4 positionClipSpace = modelViewProjectionMatrix * dvec4(in_position, 0.0, 1.0);
   vec4 positionClipSpaceZNorm = z_normalization(vec4(positionClipSpace));
 
-  shadowCoords = vec4(shadowMatrix * dvec4(in_position, 0.0, 1.0));
-  vs_screenSpaceDepth = positionClipSpaceZNorm.w;
+  out_data.shadowCoords = vec4(shadowMatrix * dvec4(in_position, 0.0, 1.0));
+  out_data.screenSpaceDepth = positionClipSpaceZNorm.w;
   gl_Position = positionClipSpaceZNorm;
 }

@@ -24,9 +24,11 @@
 
 #include "fragment.glsl"
 
-in float projectionViewDepth;
-in vec4 viewSpace;
-in vec2 texCoord;
+in Data {
+  vec4 viewSpace;
+  vec2 texCoord;
+  float projectionViewDepth;
+} in_data;
 
 uniform bool enableOutline;
 uniform vec3 outlineColor;
@@ -37,7 +39,7 @@ uniform float opacity;
 
 Fragment getFragment() {
   // Only draw circle instead of entire quad
-  vec2 st = (texCoord - vec2(0.5)) * 2.0;
+  vec2 st = (in_data.texCoord - vec2(0.5)) * 2.0;
   if (length(st) > 1.0) {
     discard;
   }
@@ -50,8 +52,8 @@ Fragment getFragment() {
 
   Fragment frag;
   frag.color = vec4(c, opacity);
-  frag.depth = projectionViewDepth;
-  frag.gPosition = viewSpace;
+  frag.depth = in_data.projectionViewDepth;
+  frag.gPosition = in_data.viewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
   return frag;

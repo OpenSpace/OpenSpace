@@ -24,9 +24,11 @@
 
 #include "fragment.glsl"
 
-in float depth;
-in vec2 out_uv;
-in vec4 out_color;
+in Data {
+  vec4 color;
+  vec2 uv;
+  float depth;
+} in_data;
 
 uniform bool hasTexture = false;
 uniform bvec2 shouldFlipTexture = bvec2(false, false);
@@ -38,18 +40,18 @@ Fragment getFragment() {
   Fragment frag;
 
   if (hasTexture) {
-    vec2 uv = out_uv;
+    vec2 uv = in_data.uv;
     if (shouldFlipTexture.x) {
       uv.x = 1.0 - uv.x;
     }
     if (shouldFlipTexture.y) {
       uv.y = 1.0 - uv.y;
     }
-    frag.color = out_color * color * texture(tex, uv);
+    frag.color = in_data.color * color * texture(tex, uv);
   }
   else {
-    frag.color = out_color * color;
+    frag.color = in_data.color * color;
   }
-  frag.depth = depth;
+  frag.depth = in_data.depth;
   return frag;
 }

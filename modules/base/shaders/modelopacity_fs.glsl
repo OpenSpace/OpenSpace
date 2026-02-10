@@ -25,7 +25,9 @@
 #include "fragment.glsl"
 #include "floatoperations.glsl"
 
-in vec2 vs_st;
+in Data {
+  vec2 st;
+} in_data;
 
 uniform float opacity = 1.0;
 
@@ -37,8 +39,6 @@ uniform vec2 resolution;
 
 
 Fragment getFragment() {
-  Fragment frag;
-
   // Modify the texCoord based on the Viewport and Resolution. This modification is
   // necessary in case of side-by-side stereo as we only want to access the part of the
   // feeding texture that we are currently responsible for.  Otherwise we would map the
@@ -46,7 +46,7 @@ Fragment getFragment() {
   // the "missing" half.  If you don't believe me, load a configuration file with the
   // side_by_side stereo mode enabled, disable FXAA, and remove this modification.
   // The same calculation is done in the HDR resolving shader
-  vec2 st = vs_st;
+  vec2 st = in_data.st;
   st.x = st.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
   st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
 
@@ -55,11 +55,10 @@ Fragment getFragment() {
     discard;
   }
 
+  Fragment frag;
   frag.color.rgb = textureColor.rgb;
   frag.color.a = opacity * textureColor.a;
-
-  frag.depth = denormalizeFloat(texture(depthTexture, vs_st).x);
+  frag.depth = denormalizeFloat(texture(depthTexture, in_data.st).x);
   frag.disableLDR2HDR = true;
-
   return frag;
 }

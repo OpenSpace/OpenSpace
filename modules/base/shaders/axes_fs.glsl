@@ -24,9 +24,11 @@
 
 #include "fragment.glsl"
 
-in float vs_screenSpaceDepth;
-in vec4 vs_positionViewSpace;
-in vec3 vs_positionModelSpace;
+in Data {
+  vec4 positionViewSpace;
+  vec3 positionModelSpace;
+  float screenSpaceDepth;
+} in_data;
 
 uniform vec3 xColor;
 uniform vec3 yColor;
@@ -35,20 +37,19 @@ uniform float opacity;
 
 
 Fragment getFragment() {
-  Fragment frag;
 
   // We compare against a small value as the first vertex doesn't have a positional
   // information (or rather it is 0) and we don't want to miss out on the color close to
   // the origin
-  vec3 colorComponents = step(2e-32, vs_positionModelSpace);
+  vec3 colorComponents = step(2e-32, in_data.positionModelSpace);
 
+  Fragment frag;
   frag.color.rgb = colorComponents.x * xColor +
     colorComponents.y * yColor +
     colorComponents.z * zColor;
   frag.color.a = opacity;
-
-  frag.depth = vs_screenSpaceDepth;
-  frag.gPosition = vs_positionViewSpace;
+  frag.depth = in_data.screenSpaceDepth;
+  frag.gPosition = in_data.positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   return frag;
 }

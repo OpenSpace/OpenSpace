@@ -29,8 +29,10 @@
 layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_st;
 
-out vec2 vs_st;
-out float vs_screenSpaceDepth;
+out Data {
+  vec2 st;
+  float screenSpaceDepth;
+} out_data;
 
 uniform mat4 modelViewProjectionTransform;
 
@@ -40,9 +42,8 @@ void main() {
   vec4 positionScreenSpace = z_normalization(modelViewProjectionTransform * position);
 
   // Moving the origin to the center
-  vs_st = (in_st - vec2(0.5)) * 2.0;
-
-  vs_screenSpaceDepth = positionScreenSpace.w;
+  out_data.st = (in_st - vec2(0.5)) * 2.0;
+  out_data.screenSpaceDepth = positionScreenSpace.w;
 
   gl_Position = positionScreenSpace;
 }

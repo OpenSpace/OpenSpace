@@ -27,14 +27,18 @@
 #include "powerscaling/powerscalingmath.glsl"
 
 layout(points) in;
-flat in vec3 normal[]; // Point normals correspond to globe out direction, model space
-flat in float dynamicHeight[];
+in Data {
+  flat vec3 normal; // Point normals correspond to globe out direction, model space
+  flat float dynamicHeight;
+} in_data[];
 
 layout(triangle_strip, max_vertices = 4) out;
-out vec2 texCoord;
-flat out float vs_screenSpaceDepth;
-out vec4 vs_positionViewSpace;
-flat out vec3 vs_normal;
+out Data {
+  vec4 positionViewSpace;
+  flat vec3 normal;
+  vec2 texCoord;
+  flat float screenSpaceDepth;
+} out_data;
 
 // General settings
 uniform dmat4 modelTransform;
@@ -74,7 +78,7 @@ const vec2 Corners[4] = vec2[4](
 
 void main() {
   vec4 pos = gl_in[0].gl_Position;
-  vs_normal = normal[0];
+  out_data.normal = in_data[0].normal;
   dvec4 dpos = dvec4(dvec3(pos.xyz), 1.0);
 
   // Offset position based on height information
@@ -82,13 +86,13 @@ void main() {
     dvec3 outDirection = normalize(dvec3(dpos));
     float height = heightOffset;
     if (useHeightMapData) {
-      height += dynamicHeight[0];
+      height += in_data[0].dynamicHeight;
     }
     dpos += dvec4(outDirection * double(height), 0.0);
   }
   // World coordinates
   dpos = modelTransform * dpos;
-  vec3 worldNormal = normalize(mat3(modelTransform) * vs_normal);
+  vec3 worldNormal = normalize(mat3(modelTransform) * out_data.normal);
 
   // Set up and right directions based on render mode.
   // renderMode 0 is default
@@ -135,23 +139,23 @@ void main() {
     topLeft = z_normalization(dposClip + scaledUpClip - scaledRightClip);
   }
 
-  vs_screenSpaceDepth = bottomLeft.w;
-  vs_positionViewSpace = vec4(viewTransform * dpos);
+  out_data.screenSpaceDepth = bottomLeft.w;
+  out_data.positionViewSpace = vec4(viewTransform * dpos);
 
   // Build primitive
-  texCoord = Corners[0];
+  out_data.texCoord = Corners[0];
   gl_Position = bottomLeft;
   EmitVertex();
 
-  texCoord = Corners[1];
+  out_data.texCoord = Corners[1];
   gl_Position = bottomRight;
   EmitVertex();
 
-  texCoord = Corners[3];
+  out_data.texCoord = Corners[3];
   gl_Position = topLeft;
   EmitVertex();
 
-  texCoord = Corners[2];
+  out_data.texCoord = Corners[2];
   gl_Position = topRight;
   EmitVertex();
 

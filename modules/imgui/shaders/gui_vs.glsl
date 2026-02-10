@@ -28,14 +28,16 @@ in vec2 in_position;
 in vec2 in_uv;
 in vec4 in_color;
 
-out vec2 out_uv;
-out vec4 out_color;
+out Data {
+  vec4 color;
+  vec2 uv;
+} out_data;
 
 uniform mat4 ortho;
 
 
 void main() {
-  out_uv = in_uv;
-  out_color = in_color;
+  out_data.color = in_color;
+  out_data.uv = in_uv;
   gl_Position = ortho * vec4(in_position.xy, 0.0, 1.0);
 }

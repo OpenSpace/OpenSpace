@@ -25,10 +25,13 @@
 #version __CONTEXT__
 
 layout(location = 0) in vec4 position;
-out vec2 texCoord;
+
+out Data {
+  vec2 texCoord;
+} out_data;
 
 
 void main() {
-  texCoord = 0.5 + position.xy * 0.5;
+  out_data.texCoord = 0.5 + position.xy * 0.5;
   gl_Position = position;
 }

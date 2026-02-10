@@ -24,8 +24,10 @@
 
 #include "fragment.glsl"
 
-in vec2 vs_st;
-in float vs_screenSpaceDepth;
+in Data {
+  vec2 st;
+  float screenSpaceDepth;
+} in_data;
 
 uniform sampler1D colorTexture;
 uniform float width;
@@ -34,7 +36,7 @@ uniform float opacity;
 
 Fragment getFragment() {
   // The length of the texture coordinates vector is our distance from the center
-  float radius = length(vs_st);
+  float radius = length(in_data.st);
 
   // We only want to consider ring-like objects so we need to discard everything else
   if (radius > 1.0) {
@@ -54,6 +56,6 @@ Fragment getFragment() {
 
   Fragment frag;
   frag.color = diffuse;
-  frag.depth = vs_screenSpaceDepth;
+  frag.depth = in_data.screenSpaceDepth;
   return frag;
 }

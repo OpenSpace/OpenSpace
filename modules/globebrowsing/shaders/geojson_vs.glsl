@@ -28,9 +28,11 @@ layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_normal;
 layout(location = 2) in float in_height;
 
-out float vs_depth;
-out vec3 vs_normal;
-out vec4 vs_positionViewSpace;
+out Data {
+  vec4 positionViewSpace;
+  vec3 normal;
+  float depth;
+} out_data;
 
 uniform dmat4 modelTransform;
 uniform dmat4 viewTransform;
@@ -54,10 +56,10 @@ void main() {
     modelPos += dvec4(outDirection * double(height), 0.0);
   }
 
-  vs_positionViewSpace = vec4(viewTransform * modelTransform * modelPos);
-  vec4 positionScreenSpace = vec4(projectionTransform * vs_positionViewSpace);
-  vs_depth = positionScreenSpace.w;
-  vs_normal = normalize(normalTransform * in_normal);
+  out_data.positionViewSpace = vec4(viewTransform * modelTransform * modelPos);
+  vec4 positionScreenSpace = vec4(projectionTransform * out_data.positionViewSpace);
+  out_data.depth = positionScreenSpace.w;
+  out_data.normal = normalize(normalTransform * in_normal);
   gl_Position = positionScreenSpace;
 
   // Set z to 0 to disable near and far plane, unique handling for perspective in space

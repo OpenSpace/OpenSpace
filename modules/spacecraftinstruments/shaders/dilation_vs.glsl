@@ -26,10 +26,12 @@
 
 layout(location = 0) in vec2 in_position;
 
-out vec2 vs_uv;
+out Data {
+  vec2 uv;
+} out_data;
 
 
 void main() {
-  vs_uv = (in_position + vec2(1.0)) / vec2(2.0);
+  out_data.uv = (in_position + vec2(1.0)) / vec2(2.0);
   gl_Position = vec4(in_position, 0.0, 1.0);
 }

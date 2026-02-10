@@ -24,8 +24,10 @@
 
 #version __CONTEXT__
 
-in vec4 vs_ndc;
-in vec4 vs_normal;
+in Data {
+  vec4 ndc;
+  vec4 normal;
+} in_data;
 
 layout (location = 0) out vec4 color;
 // Even though the stencil texture is only a single channel, we still need to
@@ -44,11 +46,11 @@ bool inRange(float x, float a, float b) {
 
 
 void main() {
-  vec3 n = normalize(vs_normal.xyz);
-  vec2 uv = vec2(0.5) * vs_ndc.xy + vec2(0.5);
+  vec3 n = normalize(in_data.normal.xyz);
+  vec2 uv = vec2(0.5) * in_data.ndc.xy + vec2(0.5);
 
   if (needShadowMap) {
-    float thisDepth = vs_ndc.z * 0.5 + 0.5;
+    float thisDepth = in_data.ndc.z * 0.5 + 0.5;
     float closestDepth = texture(depthTexture, uv).r;
     const float epsilon = 0.001;
 

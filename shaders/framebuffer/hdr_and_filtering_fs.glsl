@@ -26,7 +26,10 @@
 
 #include "hdr.glsl"
 
-in vec2 texCoord;
+in Data {
+  vec2 texCoord;
+} in_data;
+
 layout (location = 0) out vec4 finalColor;
 
 uniform float hdrExposure;
@@ -50,7 +53,7 @@ void main() {
   // of the "missing" half.  If you don't believe me, load a configuration file with the
   // side_by_side stereo mode enabled, disable FXAA, and remove this modification.
   // The same calculation is done in the FXAA shader
-  vec2 st = texCoord;
+  vec2 st = in_data.texCoord;
   st.x = st.x / (Resolution.x / Viewport[2]) + (Viewport[0] / Resolution.x);
   st.y = st.y / (Resolution.y / Viewport[3]) + (Viewport[1] / Resolution.y);
 

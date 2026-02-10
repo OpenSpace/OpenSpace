@@ -32,12 +32,14 @@ layout(location = 2) in vec3 in_normal;
 layout(location = 3) in vec3 in_tangent;
 layout(location = 4) in vec3 in_color;
 
-out vec2 vs_st;
-out vec3 vs_normalViewSpace;
-out float vs_screenSpaceDepth;
-out vec4 vs_positionCameraSpace;
-out mat3 vs_TBN;
-out vec3 vs_color;
+out Data {
+  mat3 tbn;
+  vec4 positionCameraSpace;
+  vec3 normalViewSpace;
+  vec3 color;
+  vec2 st;
+  float screenSpaceDepth;
+} out_data;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
@@ -51,16 +53,16 @@ uniform dmat4 light_vp;
 
 
 void main() {
-  vs_positionCameraSpace = modelViewTransform * (meshTransform * in_position);
-  vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
+  out_data.positionCameraSpace = modelViewTransform * (meshTransform * in_position);
+  vec4 positionClipSpace = projectionTransform * out_data.positionCameraSpace;
   vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
   gl_Position = positionScreenSpace;
-  vs_st = in_st;
-  vs_color = in_color;
-  vs_screenSpaceDepth = positionScreenSpace.w;
+  out_data.st = in_st;
+  out_data.color = in_color;
+  out_data.screenSpaceDepth = positionScreenSpace.w;
 
-  vs_normalViewSpace =
+  out_data.normalViewSpace =
     normalize(mat3(normalTransform) * (mat3(meshNormalTransform) * in_normal));
 
   // TBN matrix for normal mapping
@@ -73,7 +75,7 @@ void main() {
   // Retrieve perpendicular vector B with cross product of T and N
   vec3 B = normalize(cross(N, T));
 
-  vs_TBN = mat3(T, B, N);
+  out_data.tbn = mat3(T, B, N);
 
   lightspace_position = vec4(light_vp * model * meshTransform * in_position);
 }

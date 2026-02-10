@@ -27,12 +27,16 @@
 #include "powerscaling/powerscaling_vs.glsl"
 
 layout(lines_adjacency) in;
-in vec4 vs_color[];
+in Data {
+  vec4 color;
+} in_data[];
 
 layout(triangle_strip, max_vertices = 4) out;
-out vec4 gs_color;
-out vec4 gs_position;
-out vec3 gs_normal;
+out Data {
+  vec4 color;
+  vec4 position;
+  vec3 normal;
+} out_data;
 
 uniform mat4 modelViewProjection;
 uniform mat4 modelTransform;
@@ -44,7 +48,7 @@ void ABufferEmitVertex(vec4 pos) {
   // calculate psc position
   vec4 tmp = pos;
   vec4 position = pscTransform(tmp, modelTransform);
-  gs_position = tmp;
+  out_data.position = tmp;
 
   // project the position to view space
   position = modelViewProjection*position;
@@ -55,7 +59,7 @@ void ABufferEmitVertex(vec4 pos) {
 
 // Original code from http://prideout.net/blog/?p=61
 void main() {
-  gs_color = vs_color[0];
+  out_data.color = in_data[0].color;
 
   // Get the current and adjacent vertex positions and calculate help vectors u and v
   vec3 p0 = gl_in[0].gl_Position.xyz;
@@ -84,16 +88,16 @@ void main() {
   vec4 prismoid3 = vec4(p2 + normals3 * width, 0.0);
 
   // Send normals and verticies to fragment shader
-  gs_normal = normals0;
+  out_data.normal = normals0;
   ABufferEmitVertex(prismoid0);
 
-  gs_normal = normals1;
+  out_data.normal = normals1;
   ABufferEmitVertex(prismoid1);
 
-  gs_normal = normals3;
+  out_data.normal = normals3;
   ABufferEmitVertex(prismoid3);
 
-  gs_normal = normals2;
+  out_data.normal = normals2;
   ABufferEmitVertex(prismoid2);
   EndPrimitive();
 }

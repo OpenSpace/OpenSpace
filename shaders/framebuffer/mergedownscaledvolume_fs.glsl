@@ -24,7 +24,10 @@
 
 #version __CONTEXT__
 
-in vec2 texCoord;
+in Data {
+  vec2 texCoord;
+} in_data;
+
 layout (location = 0) out vec4 finalColor;
 
 uniform sampler2D downscaledRenderedVolume;
@@ -41,7 +44,7 @@ void main() {
   // the "missing" half.  If you don't believe me, load a configuration file with the
   // side_by_side stereo mode enabled, disable FXAA, and remove this modification.
   // The same calculation is done in the HDR resolving shader
-  vec2 st = texCoord;
+  vec2 st = in_data.texCoord;
   st.x = st.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
   st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
 

@@ -25,16 +25,18 @@
 #include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
 
-in vec3 vPosition;
-in vec4 worldPosition;
+in Data {
+  vec4 worldPosition;
+  vec3 vPosition;
+} in_data;
 
 
 Fragment getFragment() {
-  vec4 position = worldPosition;
+  vec4 position = in_data.worldPosition;
   float depth = pscDepth(position);
 
   Fragment frag;
-  frag.color = vec4(vPosition + 0.5, 1.0);
+  frag.color = vec4(in_data.vPosition + 0.5, 1.0);
   frag.depth = depth;
   return frag;
 }

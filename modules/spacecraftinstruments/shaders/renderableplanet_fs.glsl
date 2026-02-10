@@ -25,9 +25,11 @@
 #include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
 
-in vec3 vs_normal;
-in vec2 vs_st;
-in float vs_depth;
+in Data {
+  vec3 normal;
+  vec2 st;
+  float depth;
+} in_data;
 
 uniform sampler2D baseTexture;
 uniform sampler2D projectionTexture;
@@ -40,12 +42,12 @@ uniform vec3 sun_pos;
 
 
 Fragment getFragment() {
-  vec2 st = vs_st;
+  vec2 st = in_data.st;
   if (meridianShift) {
     st.s += 0.5;
   }
 
-  vec3 n = normalize(vs_normal);
+  vec3 n = normalize(in_data.normal);
   vec3 l_dir = normalize(sun_pos - objpos.xyz);
   float intensity = min(max(5.0 * dot(n, l_dir), ambientBrightness), 1.0);
 
@@ -53,7 +55,7 @@ Fragment getFragment() {
   if (hasBaseMap) {
     textureColor = texture(baseTexture, st);
   }
-  vec4 projectionColor = texture(projectionTexture, vs_st);
+  vec4 projectionColor = texture(projectionTexture, in_data.st);
   if (projectionColor.a != 0.0) {
     textureColor.rgb = mix(
       textureColor.rgb,
@@ -64,6 +66,6 @@ Fragment getFragment() {
 
   Fragment frag;
   frag.color = max(intensity * textureColor, vec4(0.0, 0.0, 0.0, 1.0));
-  frag.depth = vs_depth;
+  frag.depth = in_data.depth;
   return frag;
 }

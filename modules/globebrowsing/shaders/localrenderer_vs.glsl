@@ -30,31 +30,37 @@
 #include "tileheight.glsl"
 #include "tilevertexskirt.glsl"
 
+#define nDepthMaps #{nDepthMaps}
+
 layout(location = 1) in vec2 in_uv;
 
-out vec2 fs_uv;
-out vec4 fs_position;
-out vec3 ellipsoidNormalCameraSpace;
-out vec3 levelWeights;
-out vec3 positionCameraSpace;
-out vec3 posObjSpace;
-out vec3 normalObjSpace;
-
+out Data {
+  vec4 position;
+  vec3 ellipsoidNormalCameraSpace;
+  vec3 levelWeights;
+  vec3 positionCameraSpace;
+  vec3 posObjSpace;
+  vec3 normalObjSpace;
+  vec2 uv;
 #if USE_ACCURATE_NORMALS
-  out vec3 ellipsoidTangentThetaCameraSpace;
-  out vec3 ellipsoidTangentPhiCameraSpace;
+  vec3 ellipsoidTangentThetaCameraSpace;
+  vec3 ellipsoidTangentPhiCameraSpace;
 #endif // USE_ACCURATE_NORMALS
+#if USE_ECLIPSE_SHADOWS
+  vec3 positionWorldSpace;
+#endif // USE_ECLIPSE_SHADOWS
+#if SHADOW_MAPPING_ENABLED
+  vec4 shadowCoords;
+#endif // SHADOW_MAPPING_ENABLED
+#if nDepthMaps > 0
+  vec4 positionsLightspace[nDepthMaps];
+#endif // nDepthMaps > 0
+} out_data;
 
 uniform dmat4 inverseViewTransform;
 uniform dmat4 modelTransform;
 
-#if USE_ECLIPSE_SHADOWS
-  // Position in world space
-  out vec3 positionWorldSpace;
-#endif // USE_ECLIPSE_SHADOWS
-
 #if SHADOW_MAPPING_ENABLED
-  out vec4 shadowCoords;
   uniform dmat4 shadowMatrix;
 #endif // SHADOW_MAPPING_ENABLED
 
@@ -69,11 +75,9 @@ uniform float chunkMinHeight;
 uniform float distanceScaleFactor;
 uniform int chunkLevel;
 
-#define nDepthMaps #{nDepthMaps}
 #if nDepthMaps > 0
   uniform dmat4 inv_vp;
   uniform dmat4 light_vps[nDepthMaps];
-  out vec4 positions_lightspace[nDepthMaps];
 #endif // nDepthMaps > 0
 
 
@@ -96,14 +100,17 @@ void main() {
   float projectedScaleFactor = distanceScaleFactor / distToVertexOnEllipsoid;
   float desiredLevel = log2(projectedScaleFactor);
   float levelInterp = chunkLevel - desiredLevel;
-  levelWeights = vec3(
+  out_data.levelWeights = vec3(
     clamp(1.0 - levelInterp, 0.0, 1.0),
     clamp(levelInterp, 0.0, 1.0) - clamp(levelInterp - 1.0, 0.0, 1.0),
     clamp(levelInterp - 1.0, 0.0, 1.0)
   );
 
   // Get the height value and apply skirts
-  float height = tileHeightScaled(in_uv, levelWeights) - tileVertexSkirtLength() * 100.0;
+  float height = tileHeightScaled(
+    in_uv,
+    out_data.levelWeights
+  ) - tileVertexSkirtLength() * 100.0;
 
   // Translate the point along normal
   p += patchNormalCameraSpace * height;
@@ -112,29 +119,29 @@ void main() {
 
 #if USE_ACCURATE_NORMALS
   // Calculate tangents
-  ellipsoidTangentThetaCameraSpace = normalize(p10 - p00);
-  ellipsoidTangentPhiCameraSpace = normalize(p01 - p00);
+  out_data.ellipsoidTangentThetaCameraSpace = normalize(p10 - p00);
+  out_data.ellipsoidTangentPhiCameraSpace = normalize(p01 - p00);
 #endif // USE_ACCURATE_NORMALS
 
   // Write output
-  fs_uv = in_uv;
-  fs_position = z_normalization(positionClippingSpace);
-  gl_Position = fs_position;
-  ellipsoidNormalCameraSpace = patchNormalCameraSpace;
-  positionCameraSpace = p;
-  posObjSpace = vec3(inverseViewTransform * dvec4(p, 1.0));
+  out_data.uv = in_uv;
+  out_data.position = z_normalization(positionClippingSpace);
+  gl_Position = out_data.position;
+  out_data.ellipsoidNormalCameraSpace = patchNormalCameraSpace;
+  out_data.positionCameraSpace = p;
+  out_data.posObjSpace = vec3(inverseViewTransform * dvec4(p, 1.0));
 
 #if USE_ECLIPSE_SHADOWS
-  positionWorldSpace = vec3(modelTransform * dvec4(p, 1.0));
+  out_data.positionWorldSpace = vec3(modelTransform * dvec4(p, 1.0));
 #endif // USE_ECLIPSE_SHADOWS
 
 #if SHADOW_MAPPING_ENABLED
-  shadowCoords = vec4(shadowMatrix * dvec4(p, 1.0));
+  out_data.shadowCoords = vec4(shadowMatrix * dvec4(p, 1.0));
 #endif // SHADOW_MAPPING_ENABLED
 
 #if nDepthMaps > 0
   for (int idx = 0; idx < nDepthMaps; idx++) {
-    positions_lightspace[idx] = vec4(light_vps[idx] * (inv_vp * dvec4(p, 1.0)));
+    out_data.positions_lightspace[idx] = vec4(light_vps[idx] * (inv_vp * dvec4(p, 1.0)));
   }
 #endif // nDepthMaps > 0
 }

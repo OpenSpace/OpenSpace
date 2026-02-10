@@ -27,7 +27,7 @@
  * following code.                                                                       *
  ****************************************************************************************/
 
- /**
+/**
  * Precomputed Atmospheric Scattering
  * Copyright (c) 2008 INRIA
  * All rights reserved.

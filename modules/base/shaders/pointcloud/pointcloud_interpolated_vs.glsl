@@ -43,14 +43,15 @@ in float in_textureLayer;
 in vec4 in_orientation0; // quaternion
 in vec4 in_orientation1; // quaternion
 
+out Data {
+  flat vec4 orientation; // quaternion
+  flat float textureLayer;
+  flat float colorParameter;
+  flat float scalingParameter;
+} out_data;
+
 uniform bool useSpline;
 uniform float interpolationValue;
-
-flat out float textureLayer;
-flat out float colorParameter;
-flat out float scalingParameter;
-
-flat out vec4 orientation; // quaternion
 
 
 float interpolateDataValue(float v0, float v1, float t) {
@@ -132,8 +133,16 @@ vec4 quaternionSlerp(vec4 a, vec4 b, float t) {
 void main() {
   float t = interpolationValue;
 
-  colorParameter = interpolateDataValue(in_colorParameter0, in_colorParameter1, t);
-  scalingParameter = interpolateDataValue(in_scalingParameter0, in_scalingParameter1, t);
+  out_data.colorParameter = interpolateDataValue(
+    in_colorParameter0,
+    in_colorParameter1,
+    t
+  );
+  out_data.scalingParameter = interpolateDataValue(
+    in_scalingParameter0,
+    in_scalingParameter1,
+    t
+  );
 
   vec3 position = mix(in_position0, in_position1, t);
   if (useSpline) {
@@ -146,9 +155,9 @@ void main() {
     );
   }
 
-  orientation = quaternionSlerp(in_orientation0, in_orientation1, t);
+  out_data.orientation = quaternionSlerp(in_orientation0, in_orientation1, t);
 
-  textureLayer = in_textureLayer;
+  out_data.textureLayer = in_textureLayer;
 
   gl_Position = vec4(position, 1.0);
 }

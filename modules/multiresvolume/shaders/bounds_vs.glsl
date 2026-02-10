@@ -28,18 +28,20 @@
 
 layout(location = 0) in vec4 vertPosition;
 
-out vec3 vPosition;
-out vec4 worldPosition;
+out Data {
+  vec4 worldPosition;
+  vec3 vPosition;
+} out_data;
 
 uniform mat4 viewProjection;
 uniform mat4 modelTransform;
 
 
 void main() {
-  vPosition = vertPosition.xyz;
+  out_data.vPosition = vertPosition.xyz;
 
-  worldPosition = vec4(vertPosition.xyz, 0.0);
-  vec4 position = pscTransform(worldPosition, modelTransform);
+  out_data.worldPosition = vec4(vertPosition.xyz, 0.0);
+  vec4 position = pscTransform(out_data.worldPosition, modelTransform);
 
   // project the position to view space
   gl_Position = z_normalization(viewProjection * position);

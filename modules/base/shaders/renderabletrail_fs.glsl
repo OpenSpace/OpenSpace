@@ -24,10 +24,12 @@
 
 #include "fragment.glsl"
 
-in float vs_positionDepth;
-in vec4 vs_gPosition;
-in float fade;
-noperspective in vec2 mathLine;
+in Data {
+  vec4 gPosition;
+  noperspective vec2 mathLine;
+  float positionDepth;
+  float fade;
+} in_data;
 
 uniform vec3 color;
 uniform int renderPhase;
@@ -44,8 +46,8 @@ const float Delta = 0.25;
 
 Fragment getFragment() {
   Fragment frag;
-  frag.color = vec4(color * fade, fade * opacity);
-  frag.depth = vs_positionDepth;
+  frag.color = vec4(color * in_data.fade, in_data.fade * opacity);
+  frag.depth = in_data.positionDepth;
   frag.blend = BlendModeAdditive;
 
   if (renderPhase == RenderPhasePoints) {
@@ -63,7 +65,7 @@ Fragment getFragment() {
     vec2 xy = vec2(gl_FragCoord.xy);
     xy -= viewport.xy;
 
-    double distanceCenter = length(mathLine - xy);
+    double distanceCenter = length(in_data.mathLine - xy);
     double dLW = double(lineWidth);
     const float blendFactor = 20.0;
 
@@ -75,7 +77,7 @@ Fragment getFragment() {
     }
   }
 
-  frag.gPosition = vs_gPosition;
+  frag.gPosition = in_data.gPosition;
 
   // There is no normal here
   frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);

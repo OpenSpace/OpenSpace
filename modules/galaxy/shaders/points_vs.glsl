@@ -29,10 +29,12 @@
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_color;
 
-out vec4 vs_position;
-out vec3 vs_color;
-out float vs_screenSpaceDepth;
-out float vs_starBrightness;
+out Data {
+  vec4 position;
+  vec3 color;
+  float screenSpaceDepth;
+  float starBrightness;
+} out_data;
 
 uniform dmat4 viewProjectionMatrix;
 uniform dmat4 modelMatrix;
@@ -42,18 +44,18 @@ const double Parsec = 3.08567756E16;
 
 
 void main() {
-  vs_position = vec4(in_position, 1.0);
-  dvec4 dpos = dvec4(vs_position);
+  out_data.position = vec4(in_position, 1.0);
+  dvec4 dpos = dvec4(out_data.position);
 
   double distanceToStar = length(dpos.xyz - eyePosition);
-  vs_starBrightness = clamp(float(8000.0 * Parsec / distanceToStar), 0.0, 1.0);
+  out_data.starBrightness = clamp(float(8000.0 * Parsec / distanceToStar), 0.0, 1.0);
 
   dpos.xyz *= 8.0;
   dpos = modelMatrix * dpos;
   dpos /= Parsec;
 
   vec4 positionScreenSpace = z_normalization(vec4(viewProjectionMatrix * dpos));
-  vs_color = in_color;
-  vs_screenSpaceDepth = positionScreenSpace.w;
+  out_data.color = in_color;
+  out_data.screenSpaceDepth = positionScreenSpace.w;
   gl_Position = positionScreenSpace;
 }

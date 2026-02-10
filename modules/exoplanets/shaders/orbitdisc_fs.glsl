@@ -24,8 +24,10 @@
 
 #include "fragment.glsl"
 
-in vec2 vs_st;
-in float vs_depth;
+in Data {
+  vec2 st;
+  float depth;
+} in_data;
 
 uniform sampler1D discTexture;
 uniform vec2 offset; // relative to semi major axis
@@ -55,7 +57,7 @@ float ellipseTest(vec2 point, float a, float b, float cx) {
 
 Fragment getFragment() {
   // Moving the origin to the center
-  vec2 st = (vs_st - vec2(0.5)) * 2.0;
+  vec2 st = (in_data.st - vec2(0.5)) * 2.0;
 
   float offsetLower = offset.x * semiMajorAxis;
   float offsetUpper = offset.y * semiMajorAxis;
@@ -127,6 +129,6 @@ Fragment getFragment() {
 
   Fragment frag;
   frag.color = diffuse;
-  frag.depth = vs_depth;
+  frag.depth = in_data.depth;
   return frag;
 }

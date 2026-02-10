@@ -30,8 +30,10 @@ layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
-out vec4 vs_ndc;
-out vec4 vs_normal;
+out Data {
+  vec4 ndc;
+  vec4 normal;
+} out_data;
 
 uniform mat4 ProjectorMatrix;
 uniform mat4 ModelTransform;
@@ -42,8 +44,10 @@ uniform mat4 meshNormalTransform;
 void main() {
   vec4 raw_pos = psc_to_meter(meshTransform * in_position, vec2(1.0, 0.0));
   vec4 position = ProjectorMatrix * ModelTransform * raw_pos;
-  vs_normal = normalize(ModelTransform * meshNormalTransform * vec4(in_normal, 0.0));
-  vs_ndc = position / position.w;
+  out_data.normal = normalize(
+    ModelTransform * meshNormalTransform * vec4(in_normal, 0.0)
+  );
+  out_data.ndc = position / position.w;
 
   vec2 texco = (in_st * 2.0) - 1.0;
   gl_Position = vec4(texco, 0.0, 1.0);

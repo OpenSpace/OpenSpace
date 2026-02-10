@@ -24,8 +24,10 @@
 
 #version __CONTEXT__
 
-in vec2 out_uv;
-in vec4 out_color;
+in Data {
+  vec4 color;
+  vec2 uv;
+} in_data;
 
 out vec4 FragColor;
 
@@ -33,5 +35,5 @@ uniform sampler2D tex;
 
 
 void main() {
-  FragColor = out_color * texture(tex, out_uv);
+  FragColor = in_data.color * texture(tex, in_data.uv);
 }

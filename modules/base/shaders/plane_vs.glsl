@@ -29,10 +29,12 @@
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 
-out vec4 vs_gPosition;
-out vec3 vs_gNormal;
-out float vs_screenSpaceDepth;
-out vec2 vs_st;
+out Data {
+  vec4 gPosition;
+  vec3 gNormal;
+  vec2 st;
+  float screenSpaceDepth;
+} out_data;
 
 uniform mat4 modelViewProjection;
 uniform mat4 modelViewTransform;
@@ -46,9 +48,9 @@ void main() {
   gl_Position = positionScreenSpace;
 
   // G-Buffer
-  vs_gNormal = vec3(0.0);
-  vs_gPosition = modelViewTransform * position; // Must be in SGCT eye space;
+  out_data.gNormal = vec3(0.0);
+  out_data.gPosition = modelViewTransform * position; // Must be in SGCT eye space;
 
-  vs_st = in_st;
-  vs_screenSpaceDepth = positionScreenSpace.w;
+  out_data.st = in_st;
+  out_data.screenSpaceDepth = positionScreenSpace.w;
 }

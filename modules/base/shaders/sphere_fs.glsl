@@ -24,10 +24,12 @@
 
 #include "fragment.glsl"
 
-in vec4 vs_position;
-in vec2 vs_textureCoords;
-in vec3 vs_normal;
-in float vs_screenSpaceDepth;
+in Data {
+  vec4 position;
+  vec3 normal;
+  vec2 textureCoords;
+  float screenSpaceDepth;
+} in_data;
 
 uniform sampler2D colorTexture;
 
@@ -76,10 +78,10 @@ vec2 equiToAngularFisheye(vec2 textureCoords) {
 }
 
 Fragment getFragment() {
-  vec2 texCoord = vs_textureCoords; // Equirectangular
+  vec2 texCoord = in_data.textureCoords; // Equirectangular
 
   if (textureProjection == AngularFisheye) {
-    texCoord = equiToAngularFisheye(vs_textureCoords);
+    texCoord = equiToAngularFisheye(in_data.textureCoords);
   }
 
   Fragment frag;
@@ -101,11 +103,11 @@ Fragment getFragment() {
     frag.color = texture(colorTexture, texCoord);
   }
   frag.color.a *= opacity;
-  frag.depth = vs_screenSpaceDepth;
+  frag.depth = in_data.screenSpaceDepth;
 
   // G-Buffer
-  frag.gPosition = vs_position;
-  frag.gNormal = vec4(vs_normal, 1.0);
+  frag.gPosition = in_data.position;
+  frag.gNormal = vec4(in_data.normal, 1.0);
 
   return frag;
 }

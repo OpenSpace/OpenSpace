@@ -27,13 +27,17 @@
 #include "powerscaling/powerscalingmath.glsl"
 
 layout(lines) in;
-flat in float currentRevolutionFraction[];
-flat in float vertexRevolutionFraction[];
+in Data {
+  flat float currentRevolutionFraction;
+  flat float vertexRevolutionFraction;
+} in_data[];
 
 layout(triangle_strip, max_vertices = 4) out;
-out float projectionViewDepth;
-out vec4 viewSpace;
-out vec2 texCoord;
+out Data {
+  vec4 viewSpace;
+  vec2 texCoord;
+  float projectionViewDepth;
+} out_data;
 
 uniform dmat4 modelTransform;
 uniform dmat4 viewTransform;
@@ -60,9 +64,9 @@ void main() {
   // v0Frac and v1Frac are how far the two vertices that creates the current line strip
   // are along the trail orbit. The variables span between 0 and 1, where 0 is the
   // beginning of the trail and 1 is the end of the trail (a full orbit).
-  float cFrac = currentRevolutionFraction[0];
-  float v0Frac = vertexRevolutionFraction[0];
-  float v1Frac = vertexRevolutionFraction[1];
+  float cFrac = in_data[0].currentRevolutionFraction;
+  float v0Frac = in_data[0].vertexRevolutionFraction;
+  float v1Frac = in_data[1].vertexRevolutionFraction;
 
   // Interpolate position of current position of the trail head
   float dFrac = cFrac - v0Frac;
@@ -115,35 +119,35 @@ void main() {
   dvec4 p3World = vertPosWorldSpace + vec4(right - up, 0.0);
 
   // Set some additional out parameters
-  viewSpace = z_normalization(
+  out_data.viewSpace = z_normalization(
     vec4(projectionTransform * viewTransform * modelTransform * pos)
   );
-  projectionViewDepth = viewSpace.w;
+  out_data.projectionViewDepth = out_data.viewSpace.w;
 
   dmat4 ViewProjectionTransform = projectionTransform * viewTransform;
 
   // left-top
   vec4 p0Screen = z_normalization(vec4(ViewProjectionTransform * p0World));
   gl_Position = p0Screen;
-  texCoord = vec2(0.0, 0.0);
+  out_data.texCoord = vec2(0.0, 0.0);
   EmitVertex();
 
   // left-bot
   vec4 p1Screen = z_normalization(vec4(ViewProjectionTransform * p1World));
   gl_Position = p1Screen;
-  texCoord = vec2(1.0, 0.0);
+  out_data.texCoord = vec2(1.0, 0.0);
   EmitVertex();
 
   // right-top
   vec4 p2Screen = z_normalization(vec4(ViewProjectionTransform * p2World));
   gl_Position = p2Screen;
-  texCoord = vec2(0.0, 1.0);
+  out_data.texCoord = vec2(0.0, 1.0);
   EmitVertex();
 
   // right-bot
   vec4 p3Screen = z_normalization(vec4(ViewProjectionTransform * p3World));
   gl_Position = p3Screen;
-  texCoord = vec2(1.0, 1.0);
+  out_data.texCoord = vec2(1.0, 1.0);
   EmitVertex();
 
   EndPrimitive();

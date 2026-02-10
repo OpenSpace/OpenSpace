@@ -26,10 +26,12 @@
 
 layout(location = 0) in vec2 in_position;
 
-out vec2 vs_position;
+out Data {
+  vec2 position;
+} out_data;
 
 
 void main() {
-  vs_position = in_position;
+  out_data.position = in_position;
   gl_Position = vec4(in_position, 0.0, 1.0);
 }

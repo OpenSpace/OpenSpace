@@ -28,8 +28,10 @@
 
 in vec3 in_position;
 
-out float vs_screenSpaceDepth;
-out vec4 vs_positionViewSpace;
+out Data {
+  vec4 positionViewSpace;
+  float screenSpaceDepth;
+} out_data;
 
 uniform dmat4 modelViewTransform;
 uniform dmat4 projectionTransform;
@@ -40,8 +42,8 @@ void main() {
   vec4 positionClipSpace = vec4(projectionTransform * positionViewSpace);
   vec4 positionScreenSpace = vec4(z_normalization(positionClipSpace));
 
-  vs_screenSpaceDepth = positionScreenSpace.w;
-  vs_positionViewSpace = vec4(positionViewSpace);
+  out_data.screenSpaceDepth = positionScreenSpace.w;
+  out_data.positionViewSpace = vec4(positionViewSpace);
 
   gl_Position = positionScreenSpace;
 }

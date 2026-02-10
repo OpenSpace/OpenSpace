@@ -28,10 +28,12 @@
 
 layout(location = 0) in vec3 in_point_position;
 
-out float vs_positionDepth;
-out vec4 vs_gPosition;
-out float fade;
-noperspective out vec2 mathLine;
+out Data {
+  vec4 gPosition;
+  noperspective vec2 mathLine;
+  float positionDepth;
+  float fade;
+} out_data;
 
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
@@ -96,20 +98,20 @@ void main() {
         fadeValue = 1.0;
     }
 
-    fade = clamp(fadeValue, 0.0, 1.0);
+    out_data.fade = clamp(fadeValue, 0.0, 1.0);
   }
   else {
-    fade = 1.0;
+    out_data.fade = 1.0;
   }
 
-  vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
-  vec4 vs_positionClipSpace = projectionTransform * vs_gPosition;
+  out_data.gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
+  vec4 vs_positionClipSpace = projectionTransform * out_data.gPosition;
   vec4 vs_positionNDC = vs_positionClipSpace / vs_positionClipSpace.w;
-  vs_positionDepth = vs_positionClipSpace.w;
+  out_data.positionDepth = vs_positionClipSpace.w;
 
   gl_PointSize = (stride == 1 || int(modId) % stride == 0) ?
                   float(pointSize) : float(pointSize) / 2.0;
   gl_Position = z_normalization(vs_positionClipSpace);
 
-  mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0)) * viewport.zw;
+  out_data.mathLine = 0.5 * (vs_positionNDC.xy + vec2(1.0)) * viewport.zw;
 }

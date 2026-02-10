@@ -30,9 +30,11 @@ layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
-out vec3 vs_normal;
-out vec2 vs_st;
-out float vs_depth;
+out Data {
+  vec3 normal;
+  vec2 st;
+  float depth;
+} out_data;
 
 uniform mat4 modelTransform;
 uniform mat4 modelViewProjectionTransform;
@@ -43,16 +45,16 @@ uniform bool meridianShift;
 
 
 void main() {
-  vs_st = in_st;
+  out_data.st = in_st;
 
   vec3 tmp = in_position.xyz;
 
   // This is wrong for the normal.
   // The normal transform is the transposed inverse of the model transform
-  vs_normal = normalize(modelTransform * vec4(in_normal, 0.0)).xyz;
+  out_data.normal = normalize(modelTransform * vec4(in_normal, 0.0)).xyz;
 
   if (hasHeightMap) {
-    vec2 st = vs_st;
+    vec2 st = out_data.st;
     if (meridianShift) {
       st += vec2(0.5, 0.0);
     }
@@ -67,6 +69,6 @@ void main() {
   vec4 positionClipSpace = modelViewProjectionTransform * position;
   vec4 p = z_normalization(positionClipSpace);
 
-  vs_depth = p.w;
+  out_data.depth = p.w;
   gl_Position = p;
 }

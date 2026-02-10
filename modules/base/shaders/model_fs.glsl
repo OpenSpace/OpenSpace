@@ -24,12 +24,14 @@
 
 #include "fragment.glsl"
 
-in vec2 vs_st;
-in vec3 vs_normalViewSpace;
-in vec4 vs_positionCameraSpace;
-in float vs_screenSpaceDepth;
-in mat3 vs_TBN;
-in vec3 vs_color;
+in Data {
+  mat3 tbn;
+  vec4 positionCameraSpace;
+  vec3 normalViewSpace;
+  vec3 color;
+  vec2 st;
+  float screenSpaceDepth;
+} in_data;
 
 uniform float ambientIntensity = 0.2;
 uniform float diffuseIntensity = 1.0;
@@ -72,9 +74,9 @@ uniform vec4 override_color;
 
 Fragment getFragment() {
   Fragment frag;
-  frag.depth = vs_screenSpaceDepth;
-  frag.gPosition = vs_positionCameraSpace;
-  frag.gNormal = vec4(vs_normalViewSpace, 0.0);
+  frag.depth = in_data.screenSpaceDepth;
+  frag.gPosition = in_data.positionCameraSpace;
+  frag.gNormal = vec4(in_data.normalViewSpace, 0.0);
   frag.disableLDR2HDR = true;
   frag.color.a = opacity;
 
@@ -87,7 +89,7 @@ Fragment getFragment() {
 
     // Manual depth test
     float gBufferDepth = denormalizeFloat(texture(gBufferDepthTexture, texCoord).x);
-    if (vs_screenSpaceDepth > gBufferDepth) {
+    if (in_data.screenSpaceDepth > gBufferDepth) {
       frag.color = vec4(0.0);
       frag.depth = gBufferDepth;
       return frag;
@@ -96,7 +98,7 @@ Fragment getFragment() {
 
   // Render invisible mesh with flashy procedural material
   if (use_forced_color) {
-    vec3 adjustedPos = floor(vs_positionCameraSpace.xyz / 500.0);
+    vec3 adjustedPos = floor(in_data.positionCameraSpace.xyz / 500.0);
     float chessboard = adjustedPos.x + adjustedPos.y + adjustedPos.z;
     chessboard = fract(chessboard * 0.5);
     chessboard *= 2.0;
@@ -109,7 +111,7 @@ Fragment getFragment() {
   // Base color
   vec4 diffuseAlbedo = vec4(0.0);
   if (has_texture_diffuse) {
-    diffuseAlbedo = texture(texture_diffuse, vs_st);
+    diffuseAlbedo = texture(texture_diffuse, in_data.st);
   }
   else {
     diffuseAlbedo = color_diffuse;
@@ -117,7 +119,7 @@ Fragment getFragment() {
 
   // Multiply with vertex color if specified
   if (use_vertex_colors) {
-    diffuseAlbedo.rgb *= vs_color;
+    diffuseAlbedo.rgb *= in_data.color;
 
     // Make sure to not go beyond color range
     diffuseAlbedo.r = clamp(diffuseAlbedo.r, 0.0, 1.0);
@@ -129,7 +131,7 @@ Fragment getFragment() {
     // Specular color
     vec3 specularAlbedo;
     if (has_texture_specular) {
-      specularAlbedo = texture(texture_specular, vs_st).rgb;
+      specularAlbedo = texture(texture_specular, in_data.st).rgb;
     }
     else {
       if (has_color_specular) {
@@ -143,12 +145,12 @@ Fragment getFragment() {
     // Bump mapping
     vec3 normal;
     if (has_texture_normal) {
-      vec3 normalAlbedo = texture(texture_normal, vs_st).rgb;
+      vec3 normalAlbedo = texture(texture_normal, in_data.st).rgb;
       normalAlbedo = normalize(normalAlbedo * 2.0 - 1.0);
-      normal = normalize(vs_TBN * normalAlbedo);
+      normal = normalize(in_data.tbn * normalAlbedo);
     }
     else {
-      normal = normalize(vs_normalViewSpace);
+      normal = normalize(in_data.normalViewSpace);
     }
     frag.gNormal = vec4(normal, 0.0);
 
@@ -158,7 +160,7 @@ Fragment getFragment() {
     // Ambient light
     vec3 totalLightColor = ambientIntensity * lightColor * diffuseAlbedo.rgb;
 
-    vec3 viewDirection = normalize(vs_positionCameraSpace.xyz);
+    vec3 viewDirection = normalize(in_data.positionCameraSpace.xyz);
     vec3 totalSpecularColor = vec3(0.0);
 
     for (int i = 0; i < nLightSources; i++) {

@@ -26,7 +26,9 @@
 
 #include "powerscaling/powerscaling_vs.glsl"
 
-in vec2 vs_position;
+in Data {
+  vec2 position;
+} in_data;
 
 layout (location = 0) out vec4 color;
 layout (location = 1) out vec4 stencil;
@@ -61,7 +63,7 @@ bool inRange(float x, float a, float b) {
 
 
 void main() {
-  vec2 uv = (vs_position + vec2(1.0)) / vec2(2.0);
+  vec2 uv = (in_data.position + vec2(1.0)) / vec2(2.0);
 
   vec4 vertex = uvToModel(uv, radius, segments);
 

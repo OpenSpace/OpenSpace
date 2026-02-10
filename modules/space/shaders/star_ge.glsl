@@ -27,19 +27,23 @@
 #include "powerscaling/powerscalingmath.glsl"
 
 layout(points) in;
-in vec3 vs_bvLumAbsMag[];
-in vec3 vs_velocity[];
-in float vs_speed[];
-in float vs_otherData[];
+in Data {
+  vec3 bvLumAbsMag;
+  vec3 velocity;
+  float speed;
+  float otherData;
+} in_data[];
 
 layout(triangle_strip, max_vertices = 4) out;
-out vec3 vs_position;
-out vec2 texCoords;
-flat out float ge_bv;
-flat out vec3 ge_velocity;
-flat out float ge_speed;
-flat out float ge_otherData;
-flat out float gs_screenSpaceDepth;
+out Data {
+  vec3 position;
+  flat vec3 velocity;
+  vec2 texCoords;
+  flat float bv;
+  flat float speed;
+  flat float otherData;
+  flat float screenSpaceDepth;
+} out_data;
 
 uniform float magnitudeExponent;
 uniform dvec3 eyePosition;
@@ -106,40 +110,40 @@ double scaleForDistanceModulus(float absMag) {
 
 void main() {
   vec3 pos = gl_in[0].gl_Position.xyz;
-  vs_position = pos; // in object space
+  out_data.position = pos; // in object space
   dvec4 dpos = modelMatrix * dvec4(pos, 1.0);
 
-  ge_bv = vs_bvLumAbsMag[0].x;
-  ge_velocity = vs_velocity[0];
-  ge_speed = vs_speed[0];
-  ge_otherData = vs_otherData[0];
+  out_data.bv = in_data[0].bvLumAbsMag.x;
+  out_data.velocity = in_data[0].velocity;
+  out_data.speed = in_data[0].speed;
+  out_data.otherData = in_data[0].otherData;
 
   double scaleMultiply = 1.0;
 
   if (sizeComposition == SizeCompositionOptionLumSizeDistanceModulus) {
-    float absMagnitude = vs_bvLumAbsMag[0].z;
+    float absMagnitude = in_data[0].bvLumAbsMag.z;
 
     scaleMultiply = scaleForDistanceModulus(absMagnitude);
   }
   else if (sizeComposition == SizeCompositionOptionAppBrightness) {
-    float luminance = vs_bvLumAbsMag[0].y;
+    float luminance = in_data[0].bvLumAbsMag.y;
 
     scaleMultiply = scaleForApparentBrightness(dpos.xyz, luminance);
   }
   else if (sizeComposition == SizeCompositionOptionLumSize) {
-    float bv = vs_bvLumAbsMag[0].x;
-    float luminance = vs_bvLumAbsMag[0].y;
-    float absMagnitude = vs_bvLumAbsMag[0].z;
+    float bv = in_data[0].bvLumAbsMag.x;
+    float luminance = in_data[0].bvLumAbsMag.y;
+    float absMagnitude = in_data[0].bvLumAbsMag.z;
 
     scaleMultiply = scaleForLuminositySize(bv, luminance, absMagnitude);
   }
   else if (sizeComposition == SizeCompositionOptionLumSizeAbsMagnitude) {
-    float absMagnitude = vs_bvLumAbsMag[0].z;
+    float absMagnitude = in_data[0].bvLumAbsMag.z;
 
     scaleMultiply = scaleForAbsoluteMagnitude(absMagnitude);
   }
   else if (sizeComposition == SizeCompositionOptionLumSizeAppMagnitude) {
-    float absMagnitude = vs_bvLumAbsMag[0].z;
+    float absMagnitude = in_data[0].bvLumAbsMag.z;
 
     scaleMultiply = scaleForApparentMagnitude(dpos.xyz, absMagnitude);
   }
@@ -166,23 +170,23 @@ void main() {
     vec4(cameraViewProjectionMatrix * dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w))
   );
 
-  gs_screenSpaceDepth = lowerLeft.w;
+  out_data.screenSpaceDepth = lowerLeft.w;
 
   // Build primitive
   gl_Position = lowerLeft;
-  texCoords = vec2(0.0, 0.0);
+  out_data.texCoords = vec2(0.0, 0.0);
   EmitVertex();
 
   gl_Position = lowerRight;
-  texCoords = vec2(1.0, 0.0);
+  out_data.texCoords = vec2(1.0, 0.0);
   EmitVertex();
 
   gl_Position = upperLeft;
-  texCoords = vec2(0.0, 1.0);
+  out_data.texCoords = vec2(0.0, 1.0);
   EmitVertex();
 
   gl_Position = upperRight;
-  texCoords = vec2(1.0, 1.0);
+  out_data.texCoords = vec2(1.0, 1.0);
   EmitVertex();
 
   EndPrimitive();

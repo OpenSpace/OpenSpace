@@ -26,8 +26,10 @@
 #include "hdr.glsl"
 #include "powerscaling/powerscaling_fs.glsl"
 
-in vec2 vs_st;
-in float vs_depth;
+in Data {
+  vec2 st;
+  float depth;
+} in_data;
 
 uniform sampler2D tex;
 uniform vec3 color = vec3(1.0);
@@ -49,11 +51,11 @@ Fragment getFragment() {
   Fragment frag;
   vec4 originalColor;
   if (useAcceleratedRendering) {
-    vec2 flippedTexCoords = vec2(vs_st.x, 1.0 - vs_st.y);
+    vec2 flippedTexCoords = vec2(in_data.st.x, 1.0 - in_data.st.y);
     // Correcting both orientation and color channels
     originalColor = texture(tex, flippedTexCoords).bgra;
   } else {
-    originalColor = texture(tex, vs_st);
+    originalColor = texture(tex, in_data.st);
   }
 
   vec4 texColor = originalColor * vec4(color, opacity);
@@ -61,14 +63,14 @@ Fragment getFragment() {
   frag.color = texColor.a * texColor + (1.0 - texColor.a) * backgroundColor;
 
   // Set border color
-  if (vs_st.x < borderWidth.x || vs_st.x > 1 - borderWidth.x ||
-      vs_st.y < borderWidth.y || vs_st.y > 1 - borderWidth.y)
+  if (in_data.st.x < borderWidth.x || in_data.st.x > 1 - borderWidth.x ||
+      in_data.st.y < borderWidth.y || in_data.st.y > 1 - borderWidth.y)
   {
     frag.color = vec4(borderColor, opacity);
     if (borderFeather == 1) {
-      vec2 f1 = vs_st / borderWidth;
+      vec2 f1 = in_data.st / borderWidth;
       float g1 = min(f1.x, f1.y);
-      vec2 f2 = (vec2(1) - vs_st) / borderWidth;
+      vec2 f2 = (vec2(1) - in_data.st) / borderWidth;
       float g2 = min(f2.x, f2.y);
       frag.color *= min(g1, g2);
     }
@@ -78,7 +80,7 @@ Fragment getFragment() {
     discard;
   }
 
-  frag.depth = vs_depth;
+  frag.depth = in_data.depth;
 
   vec3 hsvColor = rgb2hsv(frag.color.rgb);
   hsvColor.x = (hsvColor.x + hue);

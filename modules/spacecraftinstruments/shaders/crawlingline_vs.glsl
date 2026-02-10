@@ -29,8 +29,10 @@
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec4 in_color;
 
-out vec4 vs_color;
-out float vs_depth;
+out Data {
+  vec4 color;
+  float depth;
+} out_data;
 
 uniform mat4 modelViewProjection;
 
@@ -38,8 +40,8 @@ uniform mat4 modelViewProjection;
 void main() {
   vec4 positionClipSpace = modelViewProjection * vec4(in_position, 1.0);
   vec4 p = z_normalization(positionClipSpace);
-  vs_depth = p.w;
+  out_data.depth = p.w;
   gl_Position = p;
 
-  vs_color = in_color;
+  out_data.color = in_color;
 }

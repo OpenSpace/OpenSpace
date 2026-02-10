@@ -30,10 +30,12 @@ layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 layout(location = 2) in vec3 in_normal;
 
-out vec2 vs_st;
-out vec3 vs_normalViewSpace;
-out float vs_depth;
-out vec4 vs_positionCameraSpace;
+out Data {
+  vec4 positionCameraSpace;
+  vec3 normalViewSpace;
+  vec2 st;
+  float depth;
+} out_data;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
@@ -43,16 +45,16 @@ uniform mat4 meshNormalTransform;
 
 void main() {
   vec4 position = meshTransform * in_position;
-  vs_positionCameraSpace = modelViewTransform * position;
-  vec4 positionClipSpace = projectionTransform * vs_positionCameraSpace;
+  out_data.positionCameraSpace = modelViewTransform * position;
+  vec4 positionClipSpace = projectionTransform * out_data.positionCameraSpace;
 
-  vs_st = in_st;
+  out_data.st = in_st;
   vec4 p = z_normalization(positionClipSpace);
-  vs_depth = p.w;
+  out_data.depth = p.w;
   gl_Position = p;
 
   // The normal transform should be the transposed inverse of the model transform?
-  vs_normalViewSpace = normalize(
+  out_data.normalViewSpace = normalize(
     mat3(modelViewTransform) * (mat3(meshNormalTransform) * in_normal)
   );
 }

@@ -27,15 +27,17 @@
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec2 in_st;
 
-out vec2 vs_st;
-out float vs_depth;
+out Data {
+  vec2 st;
+  float depth;
+} out_data;
 
 uniform mat4 mvpMatrix;
 
 
 void main() {
-  vs_st = in_st;
+  out_data.st = in_st;
   vec4 p = mvpMatrix * vec4(in_position, 1.0);
-  vs_depth = p.z;
+  out_data.depth = p.z;
   gl_Position = vec4(p);
 }

@@ -26,9 +26,11 @@
 
 layout(location = 0) in vec3 in_position;
 
-out float vs_depth;
-out vec4 vs_positionViewSpace;
-out vec4 finalColor;
+out Data {
+  vec4 positionViewSpace;
+  vec4 finalColor;
+  float depth;
+} out_data;
 
 uniform vec3 lineColor;
 uniform float opacity;
@@ -37,25 +39,25 @@ uniform mat4 projectionTransform;
 
 
 void main() {
-  vs_positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1.0));
-  vec4 positionScreenSpace = projectionTransform * vs_positionViewSpace;
-  vs_depth = positionScreenSpace.w;
+  out_data.positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1.0));
+  vec4 positionScreenSpace = projectionTransform * out_data.positionViewSpace;
+  out_data.depth = positionScreenSpace.w;
   gl_Position = positionScreenSpace;
 
   // Makes it liniarly fade betweet vertex 0 and 1
   if (gl_VertexID == 0) {
-    finalColor = vec4(0.0, 0.0, 0.0, 0.0);
+    out_data.finalColor = vec4(0.0, 0.0, 0.0, 0.0);
   }
   // Makes sure the line between index 1 and 2 is uniformly colored
   else if (gl_VertexID == 1) {
-    finalColor = vec4(lineColor, opacity);
+    out_data.finalColor = vec4(lineColor, opacity);
   }
   else if (gl_VertexID == 2) {
-    finalColor = vec4(lineColor, opacity);
+    out_data.finalColor = vec4(lineColor, opacity);
   }
   // should never hit else
   else {
-    finalColor = vec4(1.0, 1.0, 0.0, 1.0);
+    out_data.finalColor = vec4(1.0, 1.0, 0.0, 1.0);
   }
 
   gl_Position.z = 0.0;

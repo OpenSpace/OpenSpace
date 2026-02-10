@@ -24,13 +24,15 @@
 
 #include "fragment.glsl"
 
-in vec3 vs_position;
-in vec2 texCoords;
-flat in float ge_bv;
-flat in vec3 ge_velocity;
-flat in float ge_speed;
-flat in float ge_otherData;
-flat in float gs_screenSpaceDepth;
+in Data {
+  vec3 position;
+  flat vec3 velocity;
+  vec2 texCoords;
+  flat float bv;
+  flat float speed;
+  flat float otherData;
+  flat float screenSpaceDepth;
+} in_data;
 
 // layout(bindless_sampler) uniform sampler1D colorTexture;
 uniform sampler1D colorTexture;
@@ -71,12 +73,14 @@ vec4 bv2rgb(float bv) {
 }
 
 bool isOtherDataValueInRange() {
-  float t = (ge_otherData - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
+  float t =
+    (in_data.otherData - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
   return t >= 0.0 && t <= 1.0;
 }
 
 vec4 otherDataValue() {
-  float t = (ge_otherData - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
+  float t =
+    (in_data.otherData - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
   t = clamp(t, 0.0, 1.0);
   return texture(otherDataTexture, t);
 }
@@ -87,14 +91,14 @@ Fragment getFragment() {
 
   switch (colorOption) {
     case ColorOptionColor:
-      color = bv2rgb(ge_bv);
+      color = bv2rgb(in_data.bv);
       break;
     case ColorOptionVelocity:
-      color = vec4(abs(ge_velocity), 0.5);
+      color = vec4(abs(in_data.velocity), 0.5);
       break;
     case ColorOptionSpeed:
       // @TODO Include a transfer function here ---abock
-      color = vec4(vec3(ge_speed), 0.5);
+      color = vec4(vec3(in_data.speed), 0.5);
       break;
     case ColorOptionOtherData:
       if (filterOutOfRange && !isOtherDataValueInRange()) {
@@ -109,7 +113,7 @@ Fragment getFragment() {
       break;
   }
 
-  vec2 shiftedCoords = (texCoords - 0.5) * 2;
+  vec2 shiftedCoords = (in_data.texCoords - 0.5) * 2;
 
   vec2 scaledCoordsGlare = shiftedCoords / glareScale;
   vec2 unshiftedCoordsGlare = (scaledCoordsGlare + 1.0) / 2.0;
@@ -131,8 +135,8 @@ Fragment getFragment() {
 
   Fragment frag;
   frag.color = fullColor;
-  frag.depth = gs_screenSpaceDepth;
-  frag.gPosition = vec4(vs_position, 1.0);
+  frag.depth = in_data.screenSpaceDepth;
+  frag.gPosition = vec4(in_data.position, 1.0);
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   frag.disableLDR2HDR = true;
 

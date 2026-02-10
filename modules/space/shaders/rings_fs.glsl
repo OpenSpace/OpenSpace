@@ -25,8 +25,10 @@
 #include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
 
-in vec2 vs_st;
-in vec4 vs_position;
+in Data {
+  vec4 position;
+  vec2 st;
+} in_data;
 
 uniform sampler1D texture1;
 uniform vec2 textureOffset;
@@ -38,7 +40,7 @@ uniform float _nightFactor;
 
 Fragment getFragment() {
   // Moving the origin to the center
-  vec2 st = (vs_st - vec2(0.5)) * 2.0;
+  vec2 st = (in_data.st - vec2(0.5)) * 2.0;
 
   // The length of the texture coordinates vector is our distance from the center
   float radius = length(st);
@@ -88,6 +90,6 @@ Fragment getFragment() {
 
   Fragment frag;
   frag.color = diffuse;
-  frag.depth = vs_position.w;
+  frag.depth = in_data.position.w;
   return frag;
 }

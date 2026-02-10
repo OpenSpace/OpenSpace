@@ -30,10 +30,12 @@ layout(location = 0) in vec3 in_position; // in meters
 layout(location = 1) in float fluxValue; // the extra value used to color lines
 layout(location = 2) in float rValue; // the extra value used to mask out parts of lines
 
-out vec4 vs_color;
-out float vs_depth;
-out vec2 vs_st;
-out float vs_closeToEarth;
+out Data {
+  vec4 color;
+  vec2 vs_st;
+  float vs_depth;
+  float vs_closeToEarth;
+} out_data;
 
 // General Uniforms that's always needed
 uniform mat4 modelViewProjection;
@@ -144,25 +146,25 @@ bool checkIfSkipVertex() {
 
 void setEarthProximitySettings() {
   float distancevec = distance(earthPos, in_position.xyz);
-  vs_closeToEarth = 0.0;
+  out_data.closeToEarth = 0.0;
 
   if (distancevec < AUtoMeter * distanceThreshold) {
     if (usingPulse) {
       const int Speed = 2;
       int modulusResult = int(Speed * time) % 2;
       if (fluxValue > thresholdFlux) {
-        vs_color.a = modulusResult == 1  ?  0.01  :  1.0;
+        out_data.color.a = modulusResult == 1  ?  0.01  :  1.0;
       }
       else {
-        vs_color.a = 0.0;
+        out_data.color.a = 0.0;
       }
     }
-    vs_closeToEarth = 1.0;
+    out_data.closeToEarth = 1.0;
     if (mod(gl_VertexID, nodeSkipEarth) == 0) {
       gl_PointSize = proximityNodesSize;
     }
     else {
-      vs_color = vec4(0.0);
+      out_data.color = vec4(0.0);
     }
   }
 }
@@ -180,24 +182,24 @@ void main() {
       in_position.z > (domainLimZ.x * AUtoMeter) &&
       in_position.z < (domainLimZ.y * AUtoMeter))
   {
-    vs_color = transferFunctionColor(colorTable);
+    out_data.color = transferFunctionColor(colorTable);
     if (colorMode == ColorModeColorByFluxValue) {
       if (fluxValue > thresholdFlux) {
-        vs_color = transferFunctionColor(colorTable);
-        vs_color.a = fluxColorAlpha;
+        out_data.color = transferFunctionColor(colorTable);
+        out_data.color.a = fluxColorAlpha;
         gl_PointSize = nodeSize;
       }
       else {
-        vs_color.a = 0.0;
+        out_data.color.a = 0.0;
       }
     }
     else if (colorMode == ColorModeUniformColor) {
-      vs_color = streamColor;
+      out_data.color = streamColor;
     }
     setEarthProximitySettings();
   }
   else {
-    vs_color = vec4(0.0);
+    out_data.color = vec4(0.0);
   }
 
   if (usingCameraPerspective) {
@@ -230,5 +232,5 @@ void main() {
   vec4 positionClipSpace = modelViewProjection * positionInMeters;
 
   gl_Position = vec4(positionClipSpace.xy, 0.0, positionClipSpace.w);
-  vs_depth = gl_Position.w;
+  out_data.depth = gl_Position.w;
 }

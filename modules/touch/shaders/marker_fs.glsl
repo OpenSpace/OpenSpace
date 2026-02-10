@@ -25,8 +25,6 @@
 #include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
 
-in vec2 out_position;
-
 uniform float opacity;
 uniform float thickness;
 uniform vec3 color;

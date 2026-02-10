@@ -29,6 +29,31 @@
 #include "tileheight.glsl"
 #include "powerscaling/powerscaling_fs.glsl"
 
+#define nDepthMaps #{nDepthMaps}
+
+in Data {
+  vec4 position;
+  vec3 ellipsoidNormalCameraSpace;
+  vec3 levelWeights;
+  vec3 positionCameraSpace;
+  vec3 posObjSpace;
+  vec3 normalObjSpace;
+  vec2 uv;
+#if USE_ACCURATE_NORMALS
+  vec3 ellipsoidTangentThetaCameraSpace;
+  vec3 ellipsoidTangentPhiCameraSpace;
+#endif // USE_ACCURATE_NORMALS
+#if USE_ECLIPSE_SHADOWS
+  vec3 positionWorldSpace;
+#endif // USE_ECLIPSE_SHADOWS
+#if SHADOW_MAPPING_ENABLED
+  vec4 shadowCoords;
+#endif // SHADOW_MAPPING_ENABLED
+#if nDepthMaps > 0
+  vec4 positionsLightspace[nDepthMaps];
+#endif // nDepthMaps > 0
+} in_data;
+
 #if USE_COLORTEXTURE
 uniform Layer ColorLayers[NUMLAYERS_COLORTEXTURE];
 #endif // USE_COLORTEXTURE
@@ -61,9 +86,6 @@ uniform float ambientIntensity;
 
 #if SHADOW_MAPPING_ENABLED
 #if USE_RING_SHADOWS
-// Fragment position in object space
-in vec3 posObjSpace;
-
 // Color of the rings
 uniform sampler1D ringTextureColor;
 // Transparency of the rings
@@ -171,28 +193,10 @@ float rayPlaneIntersection(vec3 rayOrigin, vec3 rayDirection, vec3 planePoint,
   return t >= 0.0  ?  t  :  -1.0;
 }
 
-in vec4 fs_position;
-in vec2 fs_uv;
-in vec3 ellipsoidNormalCameraSpace;
-in vec3 levelWeights;
-in vec3 positionCameraSpace;
-in vec3 normalObjSpace;
-
-#if USE_ACCURATE_NORMALS
-  in vec3 ellipsoidTangentThetaCameraSpace;
-  in vec3 ellipsoidTangentPhiCameraSpace;
-#endif // USE_ACCURATE_NORMALS
-
-#if USE_ECLIPSE_SHADOWS
-  in vec3 positionWorldSpace;
-#endif // USE_ECLIPSE_SHADOWS
-
 uniform float opacity;
 
 #if USE_DEPTHMAP_SHADOWS
-#define nDepthMaps #{nDepthMaps}
 #if nDepthMaps > 0
-  in vec4 positions_lightspace[nDepthMaps];
   uniform sampler2D light_depth_maps[nDepthMaps];
 #endif // nDepthMaps > 0
 #endif // USE_DEPTHMAP_SHADOWS
@@ -202,32 +206,32 @@ Fragment getFragment() {
   Fragment frag;
   frag.color = vec4(0.3, 0.3, 0.3, 1.0);
 
-  vec3 normal = normalize(ellipsoidNormalCameraSpace);
+  vec3 normal = normalize(in_data.ellipsoidNormalCameraSpace);
 
 #if USE_ACCURATE_NORMALS
   normal = getTileNormal(
-    fs_uv,
-    levelWeights,
-    normalize(ellipsoidNormalCameraSpace),
-    normalize(ellipsoidTangentThetaCameraSpace),
-    normalize(ellipsoidTangentPhiCameraSpace)
+    in_data.uv,
+    in_data.levelWeights,
+    normalize(in_data.ellipsoidNormalCameraSpace),
+    normalize(in_data.ellipsoidTangentThetaCameraSpace),
+    normalize(in_data.ellipsoidTangentPhiCameraSpace)
   );
 #endif /// USE_ACCURATE_NORMALS
 
 #if USE_COLORTEXTURE
-  frag.color = calculateColor(frag.color, fs_uv, levelWeights, ColorLayers);
+  frag.color = calculateColor(frag.color, in_data.uv, in_data.levelWeights, ColorLayers);
 #endif // USE_COLORTEXTURE
 
 #if USE_WATERMASK
   float waterReflectance = 0.0;
   frag.color = calculateWater(
     frag.color,
-    fs_uv,
-    levelWeights,
+    in_data.uv,
+    in_data.levelWeights,
     WaterMasks,
     normal,
     lightDirectionCameraSpace, // Should already be normalized
-    positionCameraSpace,
+    in_data.positionCameraSpace,
     waterReflectance
   );
 #endif // USE_WATERMASK
@@ -235,10 +239,10 @@ Fragment getFragment() {
 #if USE_NIGHTTEXTURE
   frag.color = calculateNight(
     frag.color,
-    fs_uv,
-    levelWeights,
+    in_data.uv,
+    in_data.levelWeights,
     NightLayers,
-    normalize(ellipsoidNormalCameraSpace),
+    normalize(in_data.ellipsoidNormalCameraSpace),
     lightDirectionCameraSpace // Should already be normalized
   );
 #endif // USE_NIGHTTEXTURE
@@ -249,35 +253,39 @@ Fragment getFragment() {
     frag.color,
     normal,
     lightDirectionCameraSpace,
-    normalize(positionCameraSpace),
+    normalize(in_data.positionCameraSpace),
     orenNayarRoughness,
     ambientIntensity
   );
 #endif // PERFORM_SHADING
 
 #if USE_ECLIPSE_SHADOWS
-  frag.color *= calcShadow(shadowDataArray, dvec3(positionWorldSpace), true);
+  frag.color *= calcShadow(shadowDataArray, dvec3(in_data.positionWorldSpace), true);
 #endif // USE_ECLIPSE_SHADOWS
 
 #if USE_OVERLAY
-  frag.color = calculateOverlay(frag.color, fs_uv, levelWeights, Overlays);
+  frag.color = calculateOverlay(frag.color, in_data.uv, in_data.levelWeights, Overlays);
 #endif // USE_OVERLAY
 
 #if SHOW_HEIGHT_INTENSITIES
   frag.color.rgb *= vec3(0.1);
 
-  float untransformedHeight = getUntransformedTileVertexHeight(fs_uv, levelWeights);
+  float untransformedHeight = getUntransformedTileVertexHeight(
+    in_data.uv,
+    in_data.levelWeights
+  );
   float contourLine = fract(10.0 * untransformedHeight) > 0.98  ?  1.0  :  0.0;
   frag.color.r += untransformedHeight;
   frag.color.b = contourLine;
 #endif // SHOW_HEIGHT_INTENSITIES
 
 #if SHOW_HEIGHT_RESOLUTION
-  frag.color += 0.0001 * calculateDebugColor(fs_uv, fs_position, vertexResolution);
+  frag.color +=
+    0.0001 * calculateDebugColor(in_data.uv, in_data.position, vertexResolution);
   #if USE_HEIGHTMAP
     frag.color.r = min(frag.color.r, 0.8);
     frag.color.r +=
-      tileResolution(fs_uv, HeightLayers[0].pile.chunkTile0) > 0.9  ?  1.0  :  0.0;
+      tileResolution(in_data.uv, HeightLayers[0].pile.chunkTile0) > 0.9  ?  1.0  :  0.0;
   #endif // USE_HEIGHTMAP
 #endif // SHOW_HEIGHT_RESOLUTION
 
@@ -291,20 +299,20 @@ Fragment getFragment() {
   // Normal is written View Space (Including SGCT View Matrix).
   frag.gNormal.xyz = normal;
 
-  if (dot(positionCameraSpace, vec3(1.0)) != 0.0) {
-    frag.gPosition = vec4(positionCameraSpace, 1.0); // in Camera Rig Space
+  if (dot(in_data.positionCameraSpace, vec3(1.0)) != 0.0) {
+    frag.gPosition = vec4(in_data.positionCameraSpace, 1.0); // in Camera Rig Space
   }
   else {
     frag.gPosition = vec4(1.0); // in Camera Rig Space
   }
 
-  frag.depth = fs_position.w;
+  frag.depth = in_data.position.w;
 
 #if SHOW_CHUNK_EDGES
   const float BorderSize = 0.005;
   const vec3 BorderColor = vec3(1.0, 0.0, 0.0);
 
-  vec2 uvOffset = fs_uv - vec2(0.5);
+  vec2 uvOffset = in_data.uv - vec2(0.5);
   float thres = 0.5 - BorderSize * 0.5;
   bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
   if (isBorder) {
@@ -320,10 +328,12 @@ Fragment getFragment() {
   // Calculate ring shadow by projecting ring texture directly onto surface
   // Assume ring lies in the XZ plane (Y=0) in object space
   vec3 surfaceToSun = -normalize(lightDirectionObjSpace); // Use world coordinates
-  vec3 p = posObjSpace;
+  vec3 p = in_data.posObjSpace;
   const vec3 RingPlaneNormal = vec3(0.0, 0.0, 1.0);
 
-  if (abs(surfaceToSun.y) > 1e-8 && dot(normalObjSpace, lightDirectionObjSpace) < 0.0) {
+  if (abs(surfaceToSun.y) > 1e-8 &&
+      dot(in_data.normalObjSpace, lightDirectionObjSpace) < 0.0)
+  {
     float t = rayPlaneIntersection(p, surfaceToSun, vec3(0.0), RingPlaneNormal);
 
     vec3 ringIntersection = p + t * surfaceToSun;
@@ -361,7 +371,8 @@ Fragment getFragment() {
   float accum = 1.0;
   for (int idx = 0; idx < nDepthMaps; idx++) {
     vec2 ssz = 1.0 / textureSize(light_depth_maps[idx], 0);
-    vec3 coords = 0.5 + 0.5 * positions_lightspace[idx].xyz / positions_lightspace[idx].w;
+    vec4 pls = in_data.positions_lightspace[idx];
+    vec3 coords = 0.5 + 0.5 * pls.xyz / pls.w;
     for (int x = -Size; x <= Size; x++) {
       for (int y = -Size; y <= Size; y++) {
         float depth = texture(light_depth_maps[idx], coords.xy + vec2(x, y) * ssz).r;

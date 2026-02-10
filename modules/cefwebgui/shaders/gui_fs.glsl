@@ -24,7 +24,9 @@
 
 #version __CONTEXT__
 
-in vec2 vs_st;
+in Data {
+  vec2 st;
+} in_data;
 
 out vec4 outputColor;
 
@@ -34,10 +36,10 @@ uniform sampler2D tex;
 
 void main() {
 #if USE_ACCELERATED_RENDERING
-  vec2 flippedTexCoords = vec2(vs_st.x, 1.0 - vs_st.y);
+  vec2 flippedTexCoords = vec2(in_data.st.x, 1.0 - in_data.st.y);
   vec4 texColor = texture(tex, flippedTexCoords);
   outputColor = texColor.bgra;  // Correcting both orientation and color channels
 #else // USE_ACCELERATED_RENDERING
-  outputColor = texture(tex, vs_st);
+  outputColor = texture(tex, in_data.st);
 #endif // USE_ACCELERATED_RENDERING
 }

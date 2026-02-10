@@ -25,7 +25,9 @@
 #include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
 
-in vec4 vs_position;
+in Data {
+  vec4 position;
+} in_data;
 
 uniform vec3 color;
 uniform float opacity;
@@ -36,7 +38,7 @@ Fragment getFragment() {
     discard;
   }
 
-  vec4 position = vs_position;
+  vec4 position = in_data.position;
 
   Fragment frag;
   frag.color = vec4(color, opacity);

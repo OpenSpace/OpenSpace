@@ -24,10 +24,12 @@
 
 #include "fragment.glsl"
 
-in vec4 viewSpacePosition;
-in float viewSpaceDepth;
-in float periodFraction;
-in float offsetPeriods;
+in Data {
+  vec4 viewSpacePosition;
+  float viewSpaceDepth;
+  float periodFraction;
+  float offsetPeriods;
+} in_data;
 
 uniform vec3 color;
 uniform float opacity = 1.0;
@@ -40,13 +42,13 @@ Fragment getFragment() {
   // This is now done in the fragment shader instead to make smooth movement between
   // vertices. We want vertexDistance to be double up to this point, I think, (hence the
   // unnessesary float to float conversion)
-  float vertexDistance = periodFraction - offsetPeriods;
+  float vertexDistance = in_data.periodFraction - in_data.offsetPeriods;
 
   // This is the alternative way of calculating
   // the offsetPeriods: (vertexID_perOrbit/nrOfSegments_f)
   // float vertexID_perOrbit = mod(vertexID_f, numberOfSegments);
   // float nrOfSegments_f = float(numberOfSegments);
-  // float vertexDistance = periodFraction - (vertexID_perOrbit/nrOfSegments_f);
+  // float vertexDistance = in_data.periodFraction - (vertexID_perOrbit/nrOfSegments_f);
   if (vertexDistance < 0.0) {
     vertexDistance += 1.0;
   }
@@ -66,8 +68,8 @@ Fragment getFragment() {
     frag.blend = BlendModeAdditive;
   }
   frag.color = vec4(color, fade * opacity);
-  frag.depth = viewSpaceDepth;
-  frag.gPosition = viewSpacePosition;
+  frag.depth = in_data.viewSpaceDepth;
+  frag.gPosition = in_data.viewSpacePosition;
   frag.gNormal = vec4(1.0, 1.0, 1.0, 0.0);
 
   return frag;

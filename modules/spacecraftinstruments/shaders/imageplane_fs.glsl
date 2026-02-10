@@ -24,8 +24,10 @@
 
 #include "fragment.glsl"
 
-in vec2 vs_st;
-in float vs_screenSpaceDepth;
+in Data {
+  vec2 st;
+  float screenSpaceDepth;
+} in_data;
 
 uniform sampler2D texture1;
 
@@ -33,11 +35,11 @@ uniform sampler2D texture1;
 Fragment getFragment() {
   Fragment frag;
   if (gl_FrontFacing) {
-    frag.color = texture(texture1, vs_st);
+    frag.color = texture(texture1, in_data.st);
   }
   else {
     frag.color = vec4(0.1, 0.1, 0.1, 1.0);
   }
-  frag.depth = vs_screenSpaceDepth;
+  frag.depth = in_data.screenSpaceDepth;
   return frag;
 }

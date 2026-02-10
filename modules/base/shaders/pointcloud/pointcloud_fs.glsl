@@ -24,11 +24,13 @@
 
 #include "fragment.glsl"
 
-flat in float gs_colorParameter;
-flat in float vs_screenSpaceDepth;
-flat in vec4 vs_positionViewSpace;
-in vec2 texCoord;
-flat in int layer;
+in Data {
+  flat vec4 positionViewSpace;
+  vec2 texCoord;
+  flat float colorParameter;
+  flat float screenSpaceDepth;
+  flat int layer;
+} in_data;
 
 uniform float opacity;
 uniform vec3 color;
@@ -94,7 +96,7 @@ Fragment getFragment() {
   }
 
   // Moving the origin to the center and calculating the length
-  vec2 centeredTexCoords = (texCoord - vec2(0.5)) * 2.0;
+  vec2 centeredTexCoords = (in_data.texCoord - vec2(0.5)) * 2.0;
   float lengthFromCenter = length(centeredTexCoords);
 
   bool shouldBeRound = (!hasSpriteTexture && !enableOutline) ||
@@ -107,7 +109,7 @@ Fragment getFragment() {
   vec4 fullColor = vec4(color, 1.0);
   vec4 cmapColor = vec4(1.0);
   if (useColorMap) {
-    cmapColor = sampleColorMap(gs_colorParameter);
+    cmapColor = sampleColorMap(in_data.colorParameter);
     if (!useCmapOutline) {
       fullColor = cmapColor;
     }
@@ -115,7 +117,7 @@ Fragment getFragment() {
 
   vec4 textureColor = vec4(1.0);
   if (hasSpriteTexture) {
-    fullColor *= texture(spriteTexture, vec3(texCoord, layer));
+    fullColor *= texture(spriteTexture, vec3(in_data.texCoord, in_data.layer));
   }
 
   // Border
@@ -130,7 +132,7 @@ Fragment getFragment() {
       pixelIsOutline = isOutsideY || isOutsideX;
     }
     else if (outlineStyle == OutlineStyleBottom) {
-      pixelIsOutline = texCoord.y < 0.5 * outlineWeight;
+      pixelIsOutline = in_data.texCoord.y < 0.5 * outlineWeight;
     }
 
     if (pixelIsOutline) {
@@ -146,8 +148,8 @@ Fragment getFragment() {
 
   Fragment frag;
   frag.color = fullColor;
-  frag.depth = vs_screenSpaceDepth;
-  frag.gPosition = vs_positionViewSpace;
+  frag.depth = in_data.screenSpaceDepth;
+  frag.gPosition = in_data.positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
 
   return frag;

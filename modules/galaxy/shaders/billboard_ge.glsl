@@ -28,14 +28,17 @@
 #include "powerscaling/powerscalingmath.glsl"
 
 layout(points) in;
-in vec4 vs_gPosition[];
-in vec3 vs_color[];
+in Data {
+  vec3 color;
+} in_data[];
 
 layout(triangle_strip, max_vertices = 4) out;
-out vec4 vs_position;
-out vec2 psfCoords;
-flat out vec3 ge_color;
-flat out float ge_screenSpaceDepth;
+out Data {
+  vec4 position;
+  flat vec3 color;
+  vec2 psfCoords;
+  flat float screenSpaceDepth;
+} out_data;
 
 uniform dvec3 eyePosition;
 uniform dvec3 cameraUp;
@@ -46,12 +49,12 @@ const double Parsec = 3.08567756E16;
 
 
 void main() {
-  vs_position = gl_in[0].gl_Position;
-  ge_color = vs_color[0];
+  out_data.position = gl_in[0].gl_Position;
+  out_data.color = in_data[0].color;
 
   double scaleMultiply = 8.0;
 
-  dvec4 dpos = dvec4(vs_position);
+  dvec4 dpos = dvec4(out_data.position);
   dpos.xyz *= scaleMultiply;
   dpos = modelMatrix * dpos;
   dpos /= Parsec;
@@ -70,7 +73,7 @@ void main() {
     vec4(viewProjectionMatrix * dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w))
   );
 
-  ge_screenSpaceDepth = bottomLeftVertex.w;
+  out_data.screenSpaceDepth = bottomLeftVertex.w;
 
   vec4 topRightVertex = z_normalization(
     vec4(viewProjectionMatrix * dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w))
@@ -85,16 +88,16 @@ void main() {
 
   // Build primitive
   gl_Position = topLeftVertex;
-  psfCoords = vec2(-1.0, 1.0);
+  out_data.psfCoords = vec2(-1.0, 1.0);
   EmitVertex();
   gl_Position = bottomLeftVertex;
-  psfCoords = vec2(-1.0, -1.0);
+  out_data.psfCoords = vec2(-1.0, -1.0);
   EmitVertex();
   gl_Position = topRightVertex;
-  psfCoords = vec2(1.0, 1.0);
+  out_data.psfCoords = vec2(1.0, 1.0);
   EmitVertex();
   gl_Position = bottomRightVertex;
-  psfCoords = vec2(1.0, -1.0);
+  out_data.psfCoords = vec2(1.0, -1.0);
   EmitVertex();
   EndPrimitive();
 }

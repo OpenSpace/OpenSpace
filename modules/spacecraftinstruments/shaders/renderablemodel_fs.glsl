@@ -25,10 +25,12 @@
 #include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
 
-in vec2 vs_st;
-in vec3 vs_normalViewSpace;
-in float vs_depth;
-in vec4 vs_positionCameraSpace;
+in Data {
+  vec4 positionCameraSpace;
+  vec3 normalViewSpace;
+  vec2 st;
+  float depth;
+} in_data;
 
 uniform bool has_texture_diffuse;
 uniform sampler2D baseTexture;
@@ -48,23 +50,23 @@ const float SpecularPower = 100.0;
 
 Fragment getFragment() {
   Fragment frag;
-  frag.depth = vs_depth;
-  frag.gPosition = vs_positionCameraSpace;
-  frag.gNormal = vec4(vs_normalViewSpace, 0.0);
+  frag.depth = in_data.depth;
+  frag.gPosition = in_data.positionCameraSpace;
+  frag.gNormal = vec4(in_data.normalViewSpace, 0.0);
   frag.disableLDR2HDR = true;
   frag.color.a = 1.0;
 
   // Base color
   vec4 textureColor;
   if (has_texture_diffuse) {
-    textureColor = texture(baseTexture, vs_st);
+    textureColor = texture(baseTexture, in_data.st);
   }
   else {
     textureColor = vec4(baseColor.rgb, 1.0);
   }
 
   // Mix base color with the projection images
-  vec4 projectionColor = texture(projectionTexture, vs_st);
+  vec4 projectionColor = texture(projectionTexture, in_data.st);
   if (projectionColor.a > 0.0) {
     textureColor.rgb = mix(
       textureColor.rgb,
@@ -83,13 +85,13 @@ Fragment getFragment() {
     vec3 ambientColor = AmbientIntensity * lightColor * diffuseAlbedo;
 
     // Diffuse light
-    vec3 normal = normalize(vs_normalViewSpace);
+    vec3 normal = normalize(in_data.normalViewSpace);
     vec3 lightDirection = directionToSunViewSpace;
     float diffuseFactor = max(dot(normal, lightDirection), 0.0);
     vec3 diffuseColor = DiffuseIntensity * lightColor * diffuseFactor * diffuseAlbedo;
 
     // Specular light
-    vec3 viewDirection = normalize(vs_positionCameraSpace.xyz);
+    vec3 viewDirection = normalize(in_data.positionCameraSpace.xyz);
     vec3 reflectDirection = reflect(lightDirection, normal);
     float specularFactor =
       pow(max(dot(viewDirection, reflectDirection), 0.0), SpecularPower);

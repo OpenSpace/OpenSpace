@@ -24,9 +24,11 @@
 
 #include "fragment.glsl"
 
-in float vs_depth;
-flat in vec3 vs_normal;
-in vec4 vs_positionViewSpace;
+in Data {
+  vec4 positionViewSpace;
+  flat vec3 normal;
+  float depth;
+} in_data;
 
 uniform vec3 color;
 uniform float opacity;
@@ -53,7 +55,7 @@ Fragment getFragment() {
   // Simple diffuse phong shading based on light sources
   if (performShading && nLightSources > 0) {
     // @TODO: Fix faulty triangle normals. This should not have to be inverted
-    vec3 n = -normalize(vs_normal);
+    vec3 n = -normalize(in_data.normal);
 
     // Ambient color
     vec3 shadedColor = ambientIntensity * color;
@@ -70,8 +72,8 @@ Fragment getFragment() {
     frag.color.xyz = shadedColor;
   }
 
-  frag.depth = vs_depth;
-  frag.gPosition = vs_positionViewSpace;
+  frag.depth = in_data.depth;
+  frag.gPosition = in_data.positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   return frag;
 }

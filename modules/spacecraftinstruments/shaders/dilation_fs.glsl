@@ -24,7 +24,10 @@
 
 #version __CONTEXT__
 
-in vec2 vs_uv;
+in Data {
+  vec2 uv;
+} in_data;
+
 out vec4 color;
 
 uniform sampler2D tex;
@@ -75,7 +78,7 @@ vec3 gatherNeighboringColors() {
 
 
 void main() {
-  if (texture(stencil, vs_uv).r == 0.0) {
+  if (texture(stencil, in_data.uv).r == 0.0) {
     // This means that the current fragment/texel we are looking at has not been projected
     // on and we only want to do the dilation into these texels
     color = vec4(gatherNeighboringColors(), 1.0);
@@ -83,6 +86,6 @@ void main() {
   else {
     // We are in a region where an image has been projected, so we can reuse the already
     // sampled version
-    color = texture(tex, vs_uv);
+    color = texture(tex, in_data.uv);
   }
 }

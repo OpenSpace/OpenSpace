@@ -24,7 +24,9 @@
 
 #include "fragment.glsl"
 
-in vec2 texCoord;
+in Data {
+  vec2 texCoord;
+} in_data;
 
 uniform sampler2D prevTexture;
 uniform sampler2D nextTexture;
@@ -33,8 +35,8 @@ uniform float blendFactor;
 
 
 Fragment getFragment() {
-  vec4 texel0 = texture(prevTexture, texCoord);
-  vec4 texel1 = texture(nextTexture, texCoord);
+  vec4 texel0 = texture(prevTexture, in_data.texCoord);
+  vec4 texel1 = texture(nextTexture, in_data.texCoord);
   vec4 mixedTexture = mix(texel0, texel1, blendFactor);
 
   Fragment frag;

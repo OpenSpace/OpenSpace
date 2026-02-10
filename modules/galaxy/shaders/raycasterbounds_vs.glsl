@@ -28,17 +28,19 @@
 
 layout(location = 0) in vec4 vertPosition;
 
-out vec3 modelPosition;
-out vec4 viewPosition;
+out Data {
+  vec4 viewPosition;
+  vec3 modelPosition;
+} out_data;
 
 uniform mat4 projectionTransform;
 uniform dmat4 modelViewTransform;
 
 
 void main() {
-  modelPosition = vertPosition.xyz;
+  out_data.modelPosition = vertPosition.xyz;
   dvec4 vp = modelViewTransform * vertPosition;
-  viewPosition = vec4(vp);
+  out_data.viewPosition = vec4(vp);
 
-  gl_Position = z_normalization(vec4(projectionTransform * viewPosition));
+  gl_Position = z_normalization(vec4(projectionTransform * out_data.viewPosition));
 }

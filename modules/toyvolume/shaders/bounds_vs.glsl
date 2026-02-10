@@ -26,18 +26,20 @@
 
 layout(location = 0) in vec4 vertPosition;
 
-out vec3 modelPosition;
-out vec4 viewPosition;
+out Data {
+  vec4 viewPosition;
+  vec3 modelPosition;
+} out_data;
 
 uniform mat4 projectionTransform;
 uniform mat4 modelViewTransform;
 
 
 void main() {
-  modelPosition = vertPosition.xyz;
-  viewPosition = modelViewTransform*vertPosition;
+  out_data.modelPosition = vertPosition.xyz;
+  out_data.viewPosition = modelViewTransform*vertPosition;
 
   // project the position to view space
-  gl_Position = projectionTransform * viewPosition;
+  gl_Position = projectionTransform * out_data.viewPosition;
   gl_Position.z = 1.0;
 }

@@ -29,18 +29,17 @@
 layout(location = 0) in vec2 in_position;
 layout(location = 1) in vec2 in_st;
 
-out vec2 vs_st;
-out float vs_depth;
+out Data {
+  vec2 st;
+  float depth;
+} out_data;
 
 uniform mat4 modelViewProjectionTransform;
 
 
 void main() {
-  vs_st = in_st;
-  vec4 pos = z_normalization(
-    modelViewProjectionTransform * vec4(in_position, 0.0, 1.0)
-  );
-
-  vs_depth = pos.w;
+  out_data.st = in_st;
+  vec4 pos = z_normalization(modelViewProjectionTransform * vec4(in_position, 0.0, 1.0));
+  out_data.depth = pos.w;
   gl_Position = pos;
 }

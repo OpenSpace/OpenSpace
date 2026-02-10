@@ -24,22 +24,24 @@
 
 #include "fragment.glsl"
 
-in vec4 vs_color;
-in float vs_depth;
+in Data {
+  vec4 color;
+  float depth;
+} in_data;
 
 uniform bool usingAdditiveBlending;
 uniform float opacity;
 
 
 Fragment getFragment() {
-  if (vs_color.a == 0.0) {
+  if (in_data.color.a == 0.0) {
     discard;
   }
 
-  vec4 fragColor = vs_color;
+  vec4 fragColor = in_data.color;
 
   Fragment frag;
-  frag.depth = vs_depth;
+  frag.depth = in_data.depth;
   frag.color = fragColor;
   frag.color.a *= opacity;
 

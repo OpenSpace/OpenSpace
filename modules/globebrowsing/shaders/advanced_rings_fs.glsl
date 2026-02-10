@@ -29,12 +29,13 @@
 #define NSSamplesMinusOne #{nShadowSamples}
 #define NSSamples (NSSamplesMinusOne + 1)
 
-in vec2 vs_st;
-in float vs_screenSpaceDepth;
-in vec4 shadowCoords;
-in vec3 vs_normal;
-// Fragment position in object space
-in vec3 posObj;
+in Data {
+  vec4 shadowCoords;
+  vec3 normal;
+  vec3 posObj;
+  vec2 st;
+  float screenSpaceDepth;
+} in_data;
 
 uniform sampler1D textureForwards;
 uniform sampler1D textureBackwards;
@@ -54,7 +55,7 @@ uniform vec3 ellipsoidRadii;
 
 Fragment getFragment() {
   // Moving the origin to the center
-  vec2 st = (vs_st - vec2(0.5)) * 2.0;
+  vec2 st = (in_data.st - vec2(0.5)) * 2.0;
 
   // The length of the texture coordinates vector is our distance from the center
   float radius = length(st);
@@ -96,7 +97,7 @@ Fragment getFragment() {
   // Check if ray from fragment to sun intersects the ellipsoid (globe)
   // This creates more accurate shadowing for rings
   bool intersectsGlobe = rayIntersectsEllipsoid(
-    posObj,
+    in_data.posObj,
     sunPositionObj,
     vec3(0.0),
     ellipsoidRadii
@@ -122,7 +123,7 @@ Fragment getFragment() {
 
   frag.color = diffuse * shadow;
   frag.color.a = frag.color.a * opacity + (1.0 - shadow) * 0.5;
-  frag.depth = vs_screenSpaceDepth;
+  frag.depth = in_data.screenSpaceDepth;
   frag.gPosition = vec4(1e30, 1e30, 1e30, 1.0);
   frag.gNormal = vec4(normal, 1.0);
 
