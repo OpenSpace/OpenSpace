@@ -32,10 +32,10 @@ uniform float Rg;
 uniform float Rt;
 uniform float mieG;
 uniform ivec2 SKY;
-uniform int SAMPLES_R;
-uniform int SAMPLES_MU;
-uniform int SAMPLES_MU_S;
-uniform int SAMPLES_NU;
+uniform int rSamples;
+uniform int muSamples;
+uniform int muSSamples;
+uniform int nuSamples;
 uniform int firstIteration;
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
@@ -79,10 +79,32 @@ void main() {
       if (firstIteration == 1) {
         float phaseRay = rayleighPhaseFunction(nu);
         float phaseMie = miePhaseFunction(nu, mieG);
-        vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nu, Rg, SAMPLES_MU, Rt,
-          SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU).rgb;
-        vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nu, Rg, SAMPLES_MU, Rt,
-          SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU).rgb;
+        vec3 singleRay = texture4D(
+          deltaSRTexture,
+          r,
+          w.z,
+          muSun,
+          nu,
+          Rg,
+          muSamples,
+          Rt,
+          rSamples,
+          muSSamples,
+          nuSamples
+        ).rgb;
+        vec3 singleMie = texture4D(
+          deltaSMTexture,
+          r,
+          w.z,
+          muSun,
+          nu,
+          Rg,
+          muSamples,
+          Rt,
+          rSamples,
+          muSSamples,
+          nuSamples
+        ).rgb;
         // w.z is the cosine(theta) = mu for vec(w) and also vec(w) dot vec(n(xo))
         irradianceE += (singleRay * phaseRay + singleMie * phaseMie) * w.z * dw;
       }
@@ -98,11 +120,11 @@ void main() {
           muSun,
           nu,
           Rg,
-          SAMPLES_MU,
+          muSamples,
           Rt,
-          SAMPLES_R,
-          SAMPLES_MU_S,
-          SAMPLES_NU
+          rSamples,
+          muSSamples,
+          nuSamples
         ).rgb * w.z * dw;
       }
     }

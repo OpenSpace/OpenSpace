@@ -349,10 +349,10 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
         program.setUniform(_uniformCache.ozoneLayerEnabled, _ozoneEnabled);
         program.setUniform(_uniformCache.HO, _ozoneHeightScale);
         program.setUniform(_uniformCache.betaOzoneExtinction, _ozoneExtinctionCoeff);
-        program.setUniform(_uniformCache.SAMPLES_R, _rSamples);
-        program.setUniform(_uniformCache.SAMPLES_MU, _muSamples);
-        program.setUniform(_uniformCache.SAMPLES_MU_S, _muSSamples);
-        program.setUniform(_uniformCache.SAMPLES_NU, _nuSamples);
+        program.setUniform(_uniformCache.rSamples, _rSamples);
+        program.setUniform(_uniformCache.muSamples, _muSamples);
+        program.setUniform(_uniformCache.muSSamples, _muSSamples);
+        program.setUniform(_uniformCache.nuSamples, _nuSamples);
         // We expose the value as degrees, but the shader wants radians
         program.setUniform(_uniformCache.sunAngularSize, glm::radians(_sunAngularSize));
 
@@ -708,9 +708,9 @@ std::pair<GLuint, GLuint> AtmosphereDeferredcaster::calculateDeltaS() {
     program->setUniform("betaRayleigh", _rayleighScatteringCoeff);
     program->setUniform("HM", _mieHeightScale);
     program->setUniform("betaMieScattering", _mieScatteringCoeff);
-    program->setUniform("SAMPLES_MU_S", _muSSamples);
-    program->setUniform("SAMPLES_NU", _nuSamples);
-    program->setUniform("SAMPLES_MU", _muSamples);
+    program->setUniform("muSSamples", _muSSamples);
+    program->setUniform("nuSamples", _nuSamples);
+    program->setUniform("muSamples", _muSamples);
     program->setUniform("ozoneLayerEnabled", _ozoneEnabled);
     program->setUniform("HO", _ozoneHeightScale);
 
@@ -793,10 +793,10 @@ void AtmosphereDeferredcaster::calculateInscattering(GLuint deltaSRayleigh,
     deltaSMieUnit.bind(deltaSMie);
     program->setUniform("deltaSMTexture", deltaSMieUnit);
 
-    program->setUniform("SAMPLES_MU_S", _muSSamples);
-    program->setUniform("SAMPLES_NU", _nuSamples);
-    program->setUniform("SAMPLES_MU", _muSamples);
-    program->setUniform("SAMPLES_R", _rSamples);
+    program->setUniform("muSSamples", _muSSamples);
+    program->setUniform("nuSamples", _nuSamples);
+    program->setUniform("muSamples", _muSamples);
+    program->setUniform("rSamples", _rSamples);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -852,10 +852,10 @@ void AtmosphereDeferredcaster::calculateDeltaJ(int scatteringOrder,
     program.setUniform("HM", _mieHeightScale);
     program.setUniform("betaMieScattering", _mieScatteringCoeff);
     program.setUniform("mieG", _miePhaseConstant);
-    program.setUniform("SAMPLES_MU_S", _muSSamples);
-    program.setUniform("SAMPLES_NU", _nuSamples);
-    program.setUniform("SAMPLES_MU", _muSamples);
-    program.setUniform("SAMPLES_R", _rSamples);
+    program.setUniform("muSSamples", _muSSamples);
+    program.setUniform("nuSamples", _nuSamples);
+    program.setUniform("muSamples", _muSamples);
+    program.setUniform("rSamples", _rSamples);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     for (int layer = 0; layer < _rSamples; layer++) {
@@ -902,10 +902,10 @@ void AtmosphereDeferredcaster::calculateDeltaE(int scatteringOrder,
     program.setUniform("Rt", _atmosphereRadius);
     program.setUniform("mieG", _miePhaseConstant);
     program.setUniform("SKY", _irradianceTableSize);
-    program.setUniform("SAMPLES_MU_S", _muSSamples);
-    program.setUniform("SAMPLES_NU", _nuSamples);
-    program.setUniform("SAMPLES_MU", _muSamples);
-    program.setUniform("SAMPLES_R", _rSamples);
+    program.setUniform("muSSamples", _muSSamples);
+    program.setUniform("nuSamples", _nuSamples);
+    program.setUniform("muSamples", _muSamples);
+    program.setUniform("rSamples", _rSamples);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -944,10 +944,10 @@ void AtmosphereDeferredcaster::calculateDeltaS(int scatteringOrder,
 
     program.setUniform("Rg", _atmospherePlanetRadius);
     program.setUniform("Rt", _atmosphereRadius);
-    program.setUniform("SAMPLES_MU_S", _muSSamples);
-    program.setUniform("SAMPLES_NU", _nuSamples);
-    program.setUniform("SAMPLES_MU", _muSamples);
-    program.setUniform("SAMPLES_R", _rSamples);
+    program.setUniform("muSSamples", _muSSamples);
+    program.setUniform("nuSamples", _nuSamples);
+    program.setUniform("muSamples", _muSamples);
+    program.setUniform("rSamples", _rSamples);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     for (int layer = 0; layer < _rSamples; layer++) {
@@ -1016,10 +1016,10 @@ void AtmosphereDeferredcaster::calculateInscattering(int scatteringOrder,
     ghoul::opengl::TextureUnit unit;
     unit.bind(deltaSRayleigh);
     program.setUniform("deltaSTexture", unit);
-    program.setUniform("SAMPLES_MU_S", _muSSamples);
-    program.setUniform("SAMPLES_NU", _nuSamples);
-    program.setUniform("SAMPLES_MU", _muSamples);
-    program.setUniform("SAMPLES_R", _rSamples);
+    program.setUniform("muSSamples", _muSSamples);
+    program.setUniform("nuSamples", _nuSamples);
+    program.setUniform("muSamples", _muSamples);
+    program.setUniform("rSamples", _rSamples);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     for (int layer = 0; layer < _rSamples; layer++) {

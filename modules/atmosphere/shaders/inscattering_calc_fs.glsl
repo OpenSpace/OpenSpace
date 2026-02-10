@@ -37,9 +37,9 @@ uniform float HO;
 uniform float HM;
 uniform vec3 betaMieScattering;
 uniform bool ozoneLayerEnabled;
-uniform int SAMPLES_MU;
-uniform int SAMPLES_MU_S;
-uniform int SAMPLES_NU;
+uniform int muSamples;
+uniform int muSSamples;
+uniform int nuSamples;
 uniform sampler2D transmittanceTexture;
 uniform float r;
 uniform vec4 dhdH;
@@ -124,7 +124,7 @@ void main() {
   float mu;
   float muSun;
   float nu;
-  unmappingMuMuSunNu(r, dhdH, SAMPLES_MU, Rg, Rt, SAMPLES_MU_S, SAMPLES_NU, mu, muSun, nu);
+  unmappingMuMuSunNu(r, dhdH, muSamples, Rg, Rt, muSSamples, nuSamples, mu, muSun, nu);
 
   // Here we calculate the single inScattered light. Because this is a single
   // inscattering, the light that arrives at a point y in the path from the eye to the

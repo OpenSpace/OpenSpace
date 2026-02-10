@@ -36,10 +36,10 @@ uniform vec3 betaRayleigh;
 uniform float HM;
 uniform vec3 betaMieScattering;
 uniform float mieG;
-uniform int SAMPLES_R;
-uniform int SAMPLES_MU;
-uniform int SAMPLES_MU_S;
-uniform int SAMPLES_NU;
+uniform int rSamples;
+uniform int muSamples;
+uniform int muSSamples;
+uniform int nuSamples;
 uniform sampler2D transmittanceTexture;
 uniform float r;
 uniform vec4 dhdH;
@@ -216,11 +216,11 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
           muSun,
           nuSW,
           Rg,
-          SAMPLES_MU,
+          muSamples,
           Rt,
-          SAMPLES_R,
-          SAMPLES_MU_S,
-          SAMPLES_NU
+          rSamples,
+          muSSamples,
+          nuSamples
         );
         vec4 singleMie = texture4D(
           deltaSMTexture,
@@ -229,11 +229,11 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
           muSun,
           nuSW,
           Rg,
-          SAMPLES_MU,
+          muSamples,
           Rt,
-          SAMPLES_R,
-          SAMPLES_MU_S,
-          SAMPLES_NU
+          rSamples,
+          muSSamples,
+          nuSamples
         );
 
         // Initial InScattering including the phase functions
@@ -252,11 +252,11 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
           muSun,
           nuSW,
           Rg,
-          SAMPLES_MU,
+          muSamples,
           Rt,
-          SAMPLES_R,
-          SAMPLES_MU_S,
-          SAMPLES_NU
+          rSamples,
+          muSSamples,
+          nuSamples
         ).rgb;
       }
 
@@ -275,7 +275,7 @@ void main() {
   // InScattering Radiance to be calculated at different points in the ray path
   // Unmapping the variables from texture texels coordinates to mapped coordinates
   float mu, muSun, nu;
-  unmappingMuMuSunNu(r, dhdH, SAMPLES_MU, Rg, Rt, SAMPLES_MU_S, SAMPLES_NU, mu, muSun, nu);
+  unmappingMuMuSunNu(r, dhdH, muSamples, Rg, Rt, muSSamples, nuSamples, mu, muSun, nu);
 
   // Calculate the the light inScattered in direction
   // -vec(v) for the point at height r (vec(y) following Bruneton and Neyret's paper

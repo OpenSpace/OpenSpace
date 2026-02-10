@@ -30,10 +30,10 @@ out vec4 out_color;
 
 uniform float Rg;
 uniform float Rt;
-uniform int SAMPLES_R;
-uniform int SAMPLES_MU;
-uniform int SAMPLES_MU_S;
-uniform int SAMPLES_NU;
+uniform int rSamples;
+uniform int muSamples;
+uniform int muSSamples;
+uniform int nuSamples;
 uniform sampler2D transmittanceTexture;
 uniform float r;
 uniform vec4 dhdH;
@@ -57,8 +57,8 @@ vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
 
   return
     transmittance(transmittanceTexture, r, mu, dist, Rg, Rt) *
-    texture4D(deltaJTexture, r_i, mu_i, muSun_i, nu, Rg, SAMPLES_MU, Rt, SAMPLES_R,
-      SAMPLES_MU_S, SAMPLES_NU).rgb;
+    texture4D(deltaJTexture, r_i, mu_i, muSun_i, nu, Rg, muSamples, Rt, rSamples,
+      muSSamples, nuSamples).rgb;
 }
 
 vec3 inscatter(float r, float mu, float muSun, float nu) {
@@ -84,7 +84,7 @@ void main() {
   float muSun = 0.0;
   float nu = 0.0;
   // Unmapping the variables from texture texels coordinates to mapped coordinates
-  unmappingMuMuSunNu(r, dhdH, SAMPLES_MU, Rg, Rt, SAMPLES_MU_S, SAMPLES_NU, mu, muSun, nu);
+  unmappingMuMuSunNu(r, dhdH, muSamples, Rg, Rt, muSSamples, nuSamples, mu, muSun, nu);
 
   // Write to texture deltaSR
   out_color = vec4(inscatter(r, mu, muSun, nu), 1.0);

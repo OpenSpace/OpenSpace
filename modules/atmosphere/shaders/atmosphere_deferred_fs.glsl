@@ -80,10 +80,10 @@ uniform float mieG;
 uniform float sunRadiance;
 uniform bool ozoneLayerEnabled;
 uniform float sunAngularSize;
-uniform int SAMPLES_R;
-uniform int SAMPLES_MU;
-uniform int SAMPLES_MU_S;
-uniform int SAMPLES_NU;
+uniform int rSamples;
+uniform int muSamples;
+uniform int muSSamples;
+uniform int nuSamples;
 uniform sampler2D transmittanceTexture;
 uniform sampler2D irradianceTexture;
 uniform sampler3D inscatterTexture;
@@ -316,8 +316,8 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
   // the atmosphere. If this ray hits something inside the atmosphere, we will subtract
   // the attenuated scattering light from that path in the current path
   vec4 inscatterRadiance = max(
-    texture4D(inscatterTexture, r, mu, muSun, nu, Rg, SAMPLES_MU, Rt, SAMPLES_R,
-      SAMPLES_MU_S, SAMPLES_NU),
+    texture4D(inscatterTexture, r, mu, muSun, nu, Rg, muSamples, Rt, rSamples,
+      muSSamples, nuSamples),
     0.0
   );
 
@@ -344,7 +344,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     // The "infinite" ray hist something inside the atmosphere, so we need to remove
     // the unsused contribution to the final radiance.
     vec4 inscatterFromSurface = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg,
-      SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
+      muSamples, Rt, rSamples, muSSamples, nuSamples);
     inscatterRadiance = max(
       inscatterRadiance - attenuation.rgbr * inscatterFromSurface,
       0.0
@@ -389,9 +389,9 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     mu0 = (r * mu + t) * (1.0 / r0);
 
     vec4 inScatterAboveX = texture4D(inscatterTexture, r, mu, muSun, nu, Rg,
-      SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
+      muSamples, Rt, rSamples, muSSamples, nuSamples);
     vec4 inScatterAboveXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg,
-      SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
+      muSamples, Rt, rSamples, muSSamples, nuSamples);
     // Attention for the attenuation.r value applied to the S_Mie
     vec4 inScatterAbove = max(inScatterAboveX - attenuation.rgbr * inScatterAboveXs, 0.0);
 
@@ -403,9 +403,9 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     mu0 = (r * mu + t) * (1.0 / r0);
 
     vec4 inScatterBelowX = texture4D(inscatterTexture, r, mu, muSun, nu, Rg,
-      SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
+      muSamples, Rt, rSamples, muSSamples, nuSamples);
     vec4 inScatterBelowXs = texture4D(inscatterTexture, r0, mu0, muSun0, nu, Rg,
-      SAMPLES_MU, Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU);
+      muSamples, Rt, rSamples, muSSamples, nuSamples);
     // Attention for the attenuation.r value applied to the S_Mie
     vec4 inScatterBelow = max(inScatterBelowX - attenuation.rgbr * inScatterBelowXs, 0.0);
 

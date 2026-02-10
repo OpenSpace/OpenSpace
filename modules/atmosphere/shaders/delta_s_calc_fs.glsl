@@ -28,10 +28,10 @@
 
 out vec4 out_color;
 
-uniform int SAMPLES_R;
-uniform int SAMPLES_MU;
-uniform int SAMPLES_MU_S;
-uniform int SAMPLES_NU;
+uniform int rSamples;
+uniform int muSamples;
+uniform int muSSamples;
+uniform int nuSamples;
 uniform int layer;
 uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
@@ -40,7 +40,7 @@ uniform sampler3D deltaSMTexture;
 void main() {
   // First we convert the window's fragment coordinate to texel coordinates
   vec3 rst = vec3(gl_FragCoord.xy, float(layer) + 0.5) /
-    vec3(ivec3(SAMPLES_MU_S * SAMPLES_NU, SAMPLES_MU, SAMPLES_R));
+    vec3(ivec3(muSSamples * nuSamples, muSamples, rSamples));
 
   vec3 rayleighInscattering = texture(deltaSRTexture, rst).rgb;
   float mieInscattering = texture(deltaSMTexture, rst).r;
