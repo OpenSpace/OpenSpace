@@ -73,9 +73,7 @@ void main() {
   float vFrac = v1Frac - v0Frac;
   float percentage = dFrac / vFrac;
 
-  vec4 v0Weighted = (1.0 - percentage) * gl_in[0].gl_Position;
-  vec4 v1Weighted = percentage * gl_in[1].gl_Position;
-  vec4 pos = v0Weighted + v1Weighted;
+  vec4 pos = mix(gl_in[0].gl_Position, gl_in[1].gl_Position, percentage);
 
   // Calculate current vertex position to world space
   dvec4 vertPosWorldSpace = modelTransform * pos;
@@ -102,7 +100,7 @@ void main() {
 
   float opp = length(right);
   float adj = length(camPosToVertPos);
-  float angle = atan(opp/adj);
+  float angle = atan(opp / adj);
   float maxAngle = radians(maxSize * 0.5);
 
   // Controls the point size
@@ -114,7 +112,7 @@ void main() {
 
   // Calculate and set corners of the new quad
   dvec4 p0World = vertPosWorldSpace + vec4(up - right, 0.0);
-  dvec4 p1World = vertPosWorldSpace + vec4(-right - up,0.0);
+  dvec4 p1World = vertPosWorldSpace + vec4(-right - up, 0.0);
   dvec4 p2World = vertPosWorldSpace + vec4(right + up, 0.0);
   dvec4 p3World = vertPosWorldSpace + vec4(right - up, 0.0);
 
@@ -124,29 +122,25 @@ void main() {
   );
   out_data.projectionViewDepth = out_data.viewSpace.w;
 
-  dmat4 ViewProjectionTransform = projectionTransform * viewTransform;
+  dmat4 viewProjectionTransform = projectionTransform * viewTransform;
 
   // left-top
-  vec4 p0Screen = z_normalization(vec4(ViewProjectionTransform * p0World));
-  gl_Position = p0Screen;
+  gl_Position = z_normalization(vec4(viewProjectionTransform * p0World));
   out_data.texCoord = vec2(0.0, 0.0);
   EmitVertex();
 
   // left-bot
-  vec4 p1Screen = z_normalization(vec4(ViewProjectionTransform * p1World));
-  gl_Position = p1Screen;
+  gl_Position = z_normalization(vec4(viewProjectionTransform * p1World));
   out_data.texCoord = vec2(1.0, 0.0);
   EmitVertex();
 
   // right-top
-  vec4 p2Screen = z_normalization(vec4(ViewProjectionTransform * p2World));
-  gl_Position = p2Screen;
+  gl_Position = z_normalization(vec4(viewProjectionTransform * p2World));
   out_data.texCoord = vec2(0.0, 1.0);
   EmitVertex();
 
   // right-bot
-  vec4 p3Screen = z_normalization(vec4(ViewProjectionTransform * p3World));
-  gl_Position = p3Screen;
+  gl_Position = z_normalization(vec4(viewProjectionTransform * p3World));
   out_data.texCoord = vec2(1.0, 1.0);
   EmitVertex();
 

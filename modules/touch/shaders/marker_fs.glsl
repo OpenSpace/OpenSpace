@@ -40,7 +40,7 @@ Fragment getFragment() {
   float w = 0.1; // wdith for smoothing
   if (mag > 1.0 - w) {
     // Kill pixels outside circle. Do a smoothstep for soft border
-    float t = (mag - (1.0-w)) / w;
+    float t = (mag - (1.0 - w)) / w;
     edgeSmoothing = smoothstep(1.0, 0.0, t);
     if (edgeSmoothing <= 0.0) {
         discard;

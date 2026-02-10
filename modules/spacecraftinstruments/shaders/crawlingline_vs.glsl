@@ -39,9 +39,7 @@ uniform mat4 modelViewProjection;
 
 void main() {
   vec4 positionClipSpace = modelViewProjection * vec4(in_position, 1.0);
-  vec4 p = z_normalization(positionClipSpace);
-  out_data.depth = p.w;
-  gl_Position = p;
-
+  gl_Position = z_normalization(positionClipSpace);
   out_data.color = in_color;
+  out_data.depth = gl_Position.w;
 }

@@ -29,7 +29,7 @@ const float OpacityThreshold = 0.01;
 
 vec3 cartesianToSpherical(vec3 _cartesian) {
   // Put cartesian in [-1..1] range first
-  vec3 cartesian = vec3(-1.0) + _cartesian * 2.0f;
+  vec3 cartesian = vec3(-1.0) + _cartesian * 2.0;
 
   float r = length(cartesian);
   float theta = 0.0;
@@ -43,16 +43,10 @@ vec3 cartesianToSpherical(vec3 _cartesian) {
   return vec3(r, theta, phi);
 }
 
-int intCoord(ivec3 vec3Coords, ivec3 spaceDim) {
-  return vec3Coords.x +
-         spaceDim.x * vec3Coords.y +
-         spaceDim.x * spaceDim.y * vec3Coords.z;
+int intCoord(ivec3 coords, ivec3 dim) {
+  return coords.x + dim.x * coords.y + dim.x * dim.y * coords.z;
 }
 
-vec3 vec3Coords(uint intCoord, ivec3 spaceDim) {
-  return vec3(
-    mod(intCoord, spaceDim.x),
-    mod(intCoord / spaceDim.x, spaceDim.y),
-    intCoord / spaceDim.x / spaceDim.y
-  );
+vec3 vec3Coords(uint coords, ivec3 dim) {
+  return vec3(mod(coords, dim.x), mod(coords / dim.x, dim.y), coords / dim.x / dim.y);
 }

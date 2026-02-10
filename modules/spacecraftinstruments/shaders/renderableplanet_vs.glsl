@@ -45,13 +45,7 @@ uniform bool meridianShift;
 
 
 void main() {
-  out_data.st = in_st;
-
   vec3 tmp = in_position.xyz;
-
-  // This is wrong for the normal.
-  // The normal transform is the transposed inverse of the model transform
-  out_data.normal = normalize(modelTransform * vec4(in_normal, 0.0)).xyz;
 
   if (hasHeightMap) {
     vec2 st = out_data.st;
@@ -69,6 +63,10 @@ void main() {
   vec4 positionClipSpace = modelViewProjectionTransform * position;
   vec4 p = z_normalization(positionClipSpace);
 
+  // This is wrong for the normal.
+  // The normal transform is the transposed inverse of the model transform
+  out_data.normal = normalize(modelTransform * vec4(in_normal, 0.0)).xyz;
+  out_data.st = in_st;
   out_data.depth = p.w;
   gl_Position = p;
 }

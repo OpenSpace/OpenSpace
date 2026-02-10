@@ -101,7 +101,7 @@ Fragment getFragment() {
   // Reduce the color of the fragment by the user factor
   // if we are facing away from the Sun
   if (dot(sunPosition, normal) < 0.0) {
-    diffuse.xyz *= _nightFactor;
+    diffuse.xyz *= nightFactor;
   }
 
   Fragment frag;

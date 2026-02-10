@@ -49,6 +49,5 @@ void main() {
   );
   out_data.ndc = position / position.w;
 
-  vec2 texco = (in_st * 2.0) - 1.0;
-  gl_Position = vec4(texco, 0.0, 1.0);
+  gl_Position = vec4((in_st * 2.0) - 1.0, 0.0, 1.0);
 }

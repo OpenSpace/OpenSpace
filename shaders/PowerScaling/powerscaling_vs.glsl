@@ -34,7 +34,7 @@ uniform vec4 objpos;
 
 
 vec4 psc_to_meter(vec4 v1, vec2 v2) {
-  float factor = v2.x * pow(k,v2.y + v1.w);
+  float factor = v2.x * pow(k, v2.y + v1.w);
   return vec4(v1.xyz * factor, 1.0);
 }
 
@@ -43,10 +43,10 @@ vec4 pscTransform(inout vec4 vertexPosition, mat4 modelTransform) {
   vec3 local_vertex_pos = mat3(modelTransform) * vertexPosition.xyz;
 
   // PSC addition; local vertex position and the object power scaled world position
-  vertexPosition = psc_addition(vec4(local_vertex_pos,vertexPosition.w),objpos);
+  vertexPosition = psc_addition(vec4(local_vertex_pos, vertexPosition.w), objpos);
 
   // PSC addition; rotated and viewscaled vertex and the cameras negative position
-  vertexPosition = psc_addition(vertexPosition,vec4(-campos.xyz,campos.w));
+  vertexPosition = psc_addition(vertexPosition, vec4(-campos.xyz, campos.w));
 
   // rotate the camera
   vertexPosition.xyz = mat3(camrot) * vertexPosition.xyz;

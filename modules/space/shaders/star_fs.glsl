@@ -66,9 +66,8 @@ const int ColorOptionFixedColor = 4;
 
 
 vec4 bv2rgb(float bv) {
-  // BV is [-0.4,2.0]
-  float t = (bv + 0.4) / (2.0 + 0.4);
-  t = clamp(t, 0.0, 1.0);
+  // BV is [-0.4, 2.0]
+  float t = clamp((bv + 0.4) / (2.0 + 0.4), 0.0, 1.0);
   return texture(colorTexture, t);
 }
 
@@ -139,6 +138,5 @@ Fragment getFragment() {
   frag.gPosition = vec4(in_data.position, 1.0);
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   frag.disableLDR2HDR = true;
-
   return frag;
 }

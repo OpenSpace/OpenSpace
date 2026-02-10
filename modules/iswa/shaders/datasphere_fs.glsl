@@ -43,8 +43,6 @@ const vec4 Transparent = vec4(0.0);
 
 
 Fragment getFragment() {
-  vec4 position = in_data.position;
-  float depth = pscDepth(position);
   vec4 diffuse = Transparent;
 
   float x = backgroundValues.x;
@@ -66,7 +64,7 @@ Fragment getFragment() {
   }
   else {
     for (int i = 0; i < numTextures; i++) {
-      float v = texture(textures[i], vec2(in_data.st.t, in_data.st.s)).r;
+      float v = texture(textures[i], in_data.st.ts).r;
       vec4 color = texture(transferFunctions[i], vec2(v, 0.0));
       if ((v < (x + y)) && v > (x - y)) {
           color = mix(Transparent, color, clamp(1.0, 0.0, abs(v - x)));
@@ -79,8 +77,10 @@ Fragment getFragment() {
     discard;
   }
 
+  diffuse.a *= transparency;
+
   Fragment frag;
-  frag.color = diffuse * vec4(1.0, 1.0, 1.0, transparency);
-  frag.depth = depth;
+  frag.color = diffuse;
+  frag.depth = pscDepth(in_data.position);
   return frag;
 }

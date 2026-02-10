@@ -81,7 +81,7 @@ void main() {
   vec3 direction = normalize(diff);
   float raycastDepth = length(diff);
 
-  float geoDepth = denormalizeFloat((texture(mainDepthTexture, texCoord).x));
+  float geoDepth = denormalizeFloat(texture(mainDepthTexture, texCoord).x);
   float geoRatio = clamp((geoDepth - entryDepth) / (exitDepth - entryDepth), 0.0, 1.0);
   raycastDepth = geoRatio * raycastDepth;
 

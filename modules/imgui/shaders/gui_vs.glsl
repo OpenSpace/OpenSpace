@@ -39,5 +39,5 @@ uniform mat4 ortho;
 void main() {
   out_data.color = in_color;
   out_data.uv = in_uv;
-  gl_Position = ortho * vec4(in_position.xy, 0.0, 1.0);
+  gl_Position = ortho * vec4(in_position, 0.0, 1.0);
 }

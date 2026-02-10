@@ -78,7 +78,7 @@ Fragment getFragment() {
   vec3 diffuseAlbedo = textureColor.rgb;
 
   if (performShading) {
-    // Could be seperated into ambinet, diffuse and specular and passed in as uniforms
+    // Could be seperated into ambient, diffuse, and specular and passed in as uniforms
     const vec3 lightColor = vec3(1.0);
 
     // Ambient light

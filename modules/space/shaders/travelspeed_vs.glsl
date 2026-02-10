@@ -40,19 +40,15 @@ uniform mat4 projectionTransform;
 
 void main() {
   out_data.positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1.0));
-  vec4 positionScreenSpace = projectionTransform * out_data.positionViewSpace;
-  out_data.depth = positionScreenSpace.w;
-  gl_Position = positionScreenSpace;
+  gl_Position = projectionTransform * out_data.positionViewSpace;
+  out_data.depth = gl_Position.w;
 
-  // Makes it liniarly fade betweet vertex 0 and 1
+  // Makes it linearly fade between vertex 0 and 1
   if (gl_VertexID == 0) {
     out_data.finalColor = vec4(0.0, 0.0, 0.0, 0.0);
   }
   // Makes sure the line between index 1 and 2 is uniformly colored
-  else if (gl_VertexID == 1) {
-    out_data.finalColor = vec4(lineColor, opacity);
-  }
-  else if (gl_VertexID == 2) {
+  else if (gl_VertexID == 1 || gl_VertexID == 2) {
     out_data.finalColor = vec4(lineColor, opacity);
   }
   // should never hit else

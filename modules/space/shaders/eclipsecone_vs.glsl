@@ -26,7 +26,7 @@
 
 #include "powerscaling/powerscaling_vs.glsl"
 
-layout(location = 0) in vec3 in_point_position;
+layout(location = 0) in vec3 in_pointPosition;
 
 out Data {
   float depth;
@@ -36,8 +36,7 @@ uniform mat4 modelViewProjectionTransform;
 
 
 void main() {
-  vec4 positionClipSpace = modelViewProjectionTransform * vec4(in_point_position, 1.0);
-  vec4 p = z_normalization(positionClipSpace);
-  out_data.depth = p.w;
-  gl_Position = p;
+  gl_Position =
+    z_normalization(modelViewProjectionTransform * vec4(in_pointPosition, 1.0));
+  out_data.depth = gl_Position.w;
 }

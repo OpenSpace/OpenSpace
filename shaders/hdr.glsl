@@ -41,23 +41,14 @@ const mat3 XYZ2RGB = mat3(
 );
 
 // Gamma correction for linear RGB to sRGB
-// See wiki: https://en.wikipedia.org/wiki/SRGB#The_sRGB_transfer_function_.28.22gamma.22.29
+// See wiki:
+// https://en.wikipedia.org/wiki/SRGB#The_sRGB_transfer_function_.28.22gamma.22.29
 float gammaF(float u) {
-  if (u < 0.0031308) {
-    return 12.92 * u;
-  }
-  else {
-    return 1.055 * pow(u, 1.0 / 2.4) - 0.055;
-  }
+  return u < 0.0031308  ?  12.92 * u  :  1.055 * pow(u, 1.0 / 2.4) - 0.055;
 }
 
 float invgammaF(float u) {
-  if (u < 0.04045) {
-    return u / 12.92;
-  }
-  else {
-    return pow((u + 0.055) / 1.055, 2.4);
-  }
+  return u < 0.04045  ?  u / 12.92  :  pow((u + 0.055) / 1.055, 2.4);
 }
 
 vec3 rgbToSRGB(vec3 rgb) {

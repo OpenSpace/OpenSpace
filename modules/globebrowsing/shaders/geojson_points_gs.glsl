@@ -77,18 +77,15 @@ const vec2 Corners[4] = vec2[4](
 
 
 void main() {
-  vec4 pos = gl_in[0].gl_Position;
   out_data.normal = in_data[0].normal;
-  dvec4 dpos = dvec4(dvec3(pos.xyz), 1.0);
+  dvec4 dpos = dvec4(dvec3(gl_in[0].gl_Position.xyz), 1.0);
 
   // Offset position based on height information
-  if (length(pos.xyz) > 0) {
+  if (length(dpos.xyz) > 0) {
     dvec3 outDirection = normalize(dvec3(dpos));
-    float height = heightOffset;
-    if (useHeightMapData) {
-      height += in_data[0].dynamicHeight;
-    }
-    dpos += dvec4(outDirection * double(height), 0.0);
+    double height =
+      useHeightMapData  ?  in_data[0].dynamicHeight + heightOffset  :  heightOffset;
+    dpos += dvec4(outDirection * height, 0.0);
   }
   // World coordinates
   dpos = modelTransform * dpos;

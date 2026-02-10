@@ -40,11 +40,9 @@ uniform dmat4 modelViewProjectionMatrix;
 
 
 void main() {
-  out_data.st = in_st;
-  out_data.normal = mat3(modelViewProjectionMatrix) * in_normal;
-
   dvec4 positionClipSpace = modelViewProjectionMatrix * dvec4(in_position, 0.0, 1.0);
-  vec4 positionClipSpaceZNorm = z_normalization(vec4(positionClipSpace));
-  out_data.screenSpaceDepth = positionClipSpaceZNorm.w;
-  gl_Position = positionClipSpaceZNorm;
+  gl_Position = z_normalization(vec4(positionClipSpace));
+  out_data.normal = mat3(modelViewProjectionMatrix) * in_normal;
+  out_data.st = in_st;
+  out_data.screenSpaceDepth = gl_Position.w;
 }

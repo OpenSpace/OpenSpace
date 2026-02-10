@@ -61,7 +61,7 @@ float untransformedTileHeight(vec2 uv, vec3 levelWeights) {
   height = calculateUntransformedHeight(uv, levelWeights, HeightLayers);
 #endif // USE_HEIGHTMAP
 
-    return height;
+  return height;
 }
 
 // levelWeights := Variable to determine which texture to sample from
@@ -75,7 +75,7 @@ float tileHeight(vec2 uv, vec3 levelWeights) {
   height = calculateHeight(uv, levelWeights, HeightLayers);
 #endif // USE_HEIGHTMAP
 
-    return height;
+  return height;
 }
 
 float tileHeightScaled(vec2 uv, vec3 levelWeights) {
@@ -85,7 +85,7 @@ float tileHeightScaled(vec2 uv, vec3 levelWeights) {
     height *= heightScale;
 #endif // USE_HEIGHTMAP
 
-    return height;
+  return height;
 }
 
 vec3 getTileNormal(vec2 uv, vec3 levelWeights, vec3 ellipsoidNormalCameraSpace,
@@ -110,6 +110,7 @@ vec3 getTileNormal(vec2 uv, vec3 levelWeights, vec3 ellipsoidNormalCameraSpace,
 
   normal = normalize(cross(diffTheta, diffPhi));
 #endif // USE_ACCURATE_NORMALS
+
   return normal;
 }
 

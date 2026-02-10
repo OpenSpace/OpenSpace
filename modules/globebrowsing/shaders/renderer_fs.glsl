@@ -118,7 +118,7 @@ uniform int shadows;
 uniform bool hardShadows;
 
 
-vec4 calcShadow(ShadowRenderingStruct shadowInfoArray[NSEclipseShadows], dvec3 position,
+vec3 calcShadow(ShadowRenderingStruct shadowInfoArray[NSEclipseShadows], dvec3 position,
                 bool ground)
 {
   #for i in 0..#{nEclipseShadows}
@@ -144,31 +144,31 @@ vec4 calcShadow(ShadowRenderingStruct shadowInfoArray[NSEclipseShadows], dvec3 p
         // umbra
         if (ground) {
 #if USE_ECLIPSE_HARD_SHADOWS
-          return vec4(0.2, 0.2, 0.2, 1.0);
+          return vec3(0.2);
 #else // USE_ECLIPSE_HARD_SHADOWS
           // butterworthFunc
-          return vec4(vec3(sqrt(rUmbra / (rUmbra + pow(lengthD, 2.0)))), 1.0);
+          return vec3(sqrt(rUmbra / (rUmbra + pow(lengthD, 2.0))));
 #endif // USE_ECLIPSE_HARD_SHADOWS
         }
         else {
 #if USE_ECLIPSE_HARD_SHADOWS
-          return vec4(0.5, 0.5, 0.5, 1.0);
+          return vec3(0.5);
 #else // USE_ECLIPSE_HARD_SHADOWS
-          return vec4(vec3(lengthD / rPenumbra), 1.0);
+          return vec3(lengthD / rPenumbra);
 #endif // USE_ECLIPSE_HARD_SHADOWS
         }
       }
       else if (lengthD < rPenumbra) {
         // penumbra
 #if USE_ECLIPSE_HARD_SHADOWS
-        return vec4(0.5, 0.5, 0.5, 1.0);
+        return vec3(0.5);
 #else // USE_ECLIPSE_HARD_SHADOWS
-        return vec4(vec3(lengthD / rPenumbra), 1.0);
+        return vec3(lengthD / rPenumbra);
 #endif // USE_ECLIPSE_HARD_SHADOWS
       }
     }
   #endfor
-  return vec4(1.0);
+  return vec3(1.0);
 }
 #endif
 
@@ -256,7 +256,7 @@ Fragment getFragment() {
 #endif // PERFORM_SHADING
 
 #if USE_ECLIPSE_SHADOWS
-  frag.color *= calcShadow(shadowDataArray, dvec3(in_data.positionWorldSpace), true);
+  frag.color.rgb *= calcShadow(shadowDataArray, dvec3(in_data.positionWorldSpace), true);
 #endif // USE_ECLIPSE_SHADOWS
 
 #if USE_OVERLAY
@@ -286,20 +286,20 @@ Fragment getFragment() {
 #endif // SHOW_HEIGHT_RESOLUTION
 
   // Other data
+  frag.gNormal.xyz = normal;
 #if USE_WATERMASK
   // Water reflectance is added to the G-Buffer.
   frag.gNormal.w = waterReflectance;
-#else
+#else // USE_WATERMASK
   frag.gNormal.w = 0.0;
-#endif
+#endif // USE_WATERMASK
   // Normal is written View Space (Including SGCT View Matrix).
-  frag.gNormal.xyz = normal;
 
   if (dot(in_data.positionCameraSpace, vec3(1.0)) != 0.0) {
-    frag.gPosition = vec4(in_data.positionCameraSpace, 1.0); // in Camera Rig Space
+    frag.gPosition = vec4(in_data.positionCameraSpace, 1.0);
   }
   else {
-    frag.gPosition = vec4(1.0); // in Camera Rig Space
+    frag.gPosition = vec4(1.0);
   }
 
   frag.depth = in_data.position.w;
@@ -364,6 +364,7 @@ Fragment getFragment() {
   const float Bias = 0.005;
   const int Size = 3;
   const float Norm = pow(2.0 * Size + 1.0, 2.0);
+
   float accum = 1.0;
   for (int idx = 0; idx < nDepthMaps; idx++) {
     vec2 ssz = 1.0 / textureSize(light_depth_maps[idx], 0);

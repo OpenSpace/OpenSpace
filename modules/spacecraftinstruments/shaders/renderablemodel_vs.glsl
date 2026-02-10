@@ -49,9 +49,8 @@ void main() {
   vec4 positionClipSpace = projectionTransform * out_data.positionCameraSpace;
 
   out_data.st = in_st;
-  vec4 p = z_normalization(positionClipSpace);
-  out_data.depth = p.w;
-  gl_Position = p;
+  gl_Position = z_normalization(positionClipSpace);
+  out_data.depth = gl_Position.w;
 
   // The normal transform should be the transposed inverse of the model transform?
   out_data.normalViewSpace = normalize(

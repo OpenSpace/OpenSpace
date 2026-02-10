@@ -38,9 +38,8 @@ uniform mat4 proj;
 
 
 void main() {
+  gl_Position = proj * vec4(in_position, 1.0);
   out_data.color = in_color;
   out_data.uv = in_uv;
-  vec4 p = proj * vec4(in_position, 1.0);
-  gl_Position = p;
-  out_data.depth = p.w;
+  out_data.depth = gl_Position.w;
 }

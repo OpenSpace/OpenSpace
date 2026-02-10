@@ -43,20 +43,20 @@ uniform bool showOptimistic;
 float computeTextureCoord(float radius, float innerRadius, float conservativeInner,
                           float conservativeOuter)
 {
-  const float T1 = 1.0 / 3.0;
-  const float T2 = 2.0 / 3.0;
+  const float t1 = 1.0 / 3.0;
+  const float t2 = 2.0 / 3.0;
 
   if (radius < conservativeInner) {
     float t = (radius - innerRadius) / (conservativeInner - innerRadius);
-    return mix(0.0, T1, t);
+    return mix(0.0, t1, t);
   }
   else if (radius > conservativeOuter) {
     float t = (radius - conservativeOuter) / (1.0 - conservativeOuter);
-    return mix(T2, 1.0, t);
+    return mix(t2, 1.0, t);
   }
   else {
     float t = (radius - conservativeInner) / (conservativeOuter - conservativeInner);
-    return mix(T1, T2, t);
+    return mix(t1, t2, t);
   }
 }
 
@@ -74,7 +74,6 @@ Fragment getFragment() {
   float consInner = conservativeBounds.x;
   float consOuter = conservativeBounds.y;
   bool outsideConservative = (radius < consInner) || (radius > consOuter);
-
   if (!showOptimistic && outsideConservative) {
     discard;
   }

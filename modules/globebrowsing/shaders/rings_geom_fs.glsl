@@ -36,16 +36,16 @@ uniform vec2 textureOffset;
 
 
 Fragment getFragment() {
+  // Discard if normal is perpendicular to the camera direction
+  if (abs(dot(normalize(in_data.normal), vec3(0.0, 0.0, 1.0))) <= 0.01) {
+    discard;
+  }
+
   // Moving the origin to the center
   vec2 st = (in_data.st - vec2(0.5)) * 2.0;
 
   // The length of the texture coordinates vector is our distance from the center
   float radius = length(st);
-
-  // Discard if normal is perpendicular to the camera direction
-  if (abs(dot(normalize(in_data.normal), vec3(0.0, 0.0, 1.0))) <= 0.01) {
-    discard;
-  }
 
   // We only want to consider ring-like objects so we need to discard everything else
   if (radius > 1.0) {

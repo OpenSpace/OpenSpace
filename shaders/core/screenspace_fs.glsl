@@ -54,7 +54,8 @@ Fragment getFragment() {
     vec2 flippedTexCoords = vec2(in_data.st.x, 1.0 - in_data.st.y);
     // Correcting both orientation and color channels
     originalColor = texture(tex, flippedTexCoords).bgra;
-  } else {
+  }
+  else {
     originalColor = texture(tex, in_data.st);
   }
 

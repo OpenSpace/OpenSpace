@@ -27,8 +27,8 @@
 #include "powerscaling/powerscalingmath.glsl"
 
 layout(location = 0) in vec3 in_position; // in meters
-layout(location = 1) in float fluxValue; // the extra value used to color lines
-layout(location = 2) in float rValue; // the extra value used to mask out parts of lines
+layout(location = 1) in float in_fluxValue; // the extra value used to color lines
+layout(location = 2) in float in_rValue; // the extra value used to mask parts of lines
 
 out Data {
   vec4 color;
@@ -97,21 +97,21 @@ vec4 transferFunctionColor(sampler1D inColorTable) {
   // Remap the color scalar to a [0,1] range
   float scaleValue = 0.0;
   if (scalingMode == ScalingModeFlux) {
-    scaleValue = fluxValue;
+    scaleValue = in_fluxValue;
   }
   else if (scalingMode == ScalingModeRFlux) {
-    scaleValue = rValue * fluxValue;
+    scaleValue = in_rValue * in_fluxValue;
   }
   else if (scalingMode == ScalingModeLog10RFlux) {
     // conversion from logbase e to log10 since glsl does not support log10.
-    float logtoTen = log(rValue) / log(10.0);
-    scaleValue = logtoTen * fluxValue;
+    float logToTen = log(in_rValue) / log(10.0);
+    scaleValue = logToTen * in_fluxValue;
   }
   else if (scalingMode == ScalingModeLnRFlux) {
-    scaleValue = log(rValue) * fluxValue;
+    scaleValue = log(in_rValue) * in_fluxValue;
   }
   else if (scalingMode == ScalingModeR2Flux) {
-    scaleValue = rValue * rValue * fluxValue;
+    scaleValue = in_rValue * in_rValue * in_fluxValue;
   }
   float val = (scaleValue - colorTableRange.x) / (colorTableRange.y - colorTableRange.x);
   return texture(inColorTable, val);
@@ -126,18 +126,18 @@ bool checkIfSkipVertex() {
     }
   }
   else if (nodeSkipMethod == NodeSkipFlux) {
-    if (fluxValue > nodeSkipFluxThreshold && mod(nodeIndex, nodeSkip) == 0) {
+    if (in_fluxValue > nodeSkipFluxThreshold && mod(nodeIndex, nodeSkip) == 0) {
       return true;
     }
-    if (fluxValue < nodeSkipFluxThreshold && mod(nodeIndex, nodeSkipDefault) == 0) {
+    if (in_fluxValue < nodeSkipFluxThreshold && mod(nodeIndex, nodeSkipDefault) == 0) {
       return true;
     }
   }
   else if (nodeSkipMethod == NodeSkipRadius) {
-    if (rValue < nodeSkipRadiusThreshold && mod(nodeIndex, nodeSkip) == 0) {
+    if (in_rValue < nodeSkipRadiusThreshold && mod(nodeIndex, nodeSkip) == 0) {
       return true;
     }
-    if (rValue > nodeSkipRadiusThreshold && mod(nodeIndex, nodeSkipDefault) == 0) {
+    if (in_rValue > nodeSkipRadiusThreshold && mod(nodeIndex, nodeSkipDefault) == 0) {
       return true;
     }
   }
@@ -145,14 +145,14 @@ bool checkIfSkipVertex() {
 }
 
 void setEarthProximitySettings() {
-  float distancevec = distance(earthPos, in_position.xyz);
+  float distancevec = distance(earthPos, in_position);
   out_data.closeToEarth = 0.0;
 
   if (distancevec < AUtoMeter * distanceThreshold) {
     if (usingPulse) {
       const int Speed = 2;
       int modulusResult = int(Speed * time) % 2;
-      if (fluxValue > thresholdFlux) {
+      if (in_fluxValue > thresholdFlux) {
         out_data.color.a = modulusResult == 1  ?  0.01  :  1.0;
       }
       else {
@@ -178,13 +178,13 @@ void main() {
   // by using modulus.
   if ((checkIfSkipVertex() ||
       distance(earthPos, in_position) < (distanceThreshold * AUtoMeter)) &&
-      filterLower < rValue / AUtoMeter && filterUpper > rValue / AUtoMeter &&
+      filterLower < in_rValue / AUtoMeter && filterUpper > in_rValue / AUtoMeter &&
       in_position.z > (domainLimZ.x * AUtoMeter) &&
       in_position.z < (domainLimZ.y * AUtoMeter))
   {
     out_data.color = transferFunctionColor(colorTable);
     if (colorMode == ColorModeColorByFluxValue) {
-      if (fluxValue > thresholdFlux) {
+      if (in_fluxValue > thresholdFlux) {
         out_data.color = transferFunctionColor(colorTable);
         out_data.color.a = fluxColorAlpha;
         gl_PointSize = nodeSize;
@@ -203,15 +203,13 @@ void main() {
   }
 
   if (usingCameraPerspective) {
-    float rtemp = min(rValue, 1.0);
-
+    float distanceVec = distance(cameraPos, in_position);
     float maxDistance = 100000000000.0 * perspectiveDistanceFactor;
-    float distanceVec = distance(cameraPos, in_position.xyz);
 
     if (distanceVec < maxDistance) {
       float distScale = 1.0 - smoothstep(0.0, maxDistance, distanceVec);
       float factorS = pow(distScale, 9.0) * 500.0;
-      if (distance(earthPos, in_position.xyz) < (distanceThreshold * AUtoMeter)) {
+      if (distance(earthPos, in_position) < (distanceThreshold * AUtoMeter)) {
         gl_PointSize = proximityNodesSize;
       }
       else {
@@ -228,9 +226,7 @@ void main() {
     }
   }
 
-  vec4 positionInMeters = vec4(in_position, 1.0);
-  vec4 positionClipSpace = modelViewProjection * positionInMeters;
-
+  vec4 positionClipSpace = modelViewProjection * vec4(in_position, 1.0);
   gl_Position = vec4(positionClipSpace.xy, 0.0, positionClipSpace.w);
   out_data.depth = gl_Position.w;
 }

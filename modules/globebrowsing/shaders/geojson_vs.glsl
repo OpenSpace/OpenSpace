@@ -49,19 +49,15 @@ void main() {
   // Offset model pos based on height info
   if (length(in_position) > 0.0) {
     dvec3 outDirection = normalize(dvec3(in_position));
-    float height = heightOffset;
-    if (useHeightMapData) {
-      height += in_height;
-    }
-    modelPos += dvec4(outDirection * double(height), 0.0);
+    double height = useHeightMapData  ?  in_height + heightOffset  :  heightOffset;
+    modelPos += dvec4(outDirection * height, 0.0);
   }
 
-  out_data.positionViewSpace = vec4(viewTransform * modelTransform * modelPos);
-  vec4 positionScreenSpace = vec4(projectionTransform * out_data.positionViewSpace);
-  out_data.depth = positionScreenSpace.w;
-  out_data.normal = normalize(normalTransform * in_normal);
-  gl_Position = positionScreenSpace;
-
+  gl_Position = vec4(projectionTransform * out_data.positionViewSpace);
   // Set z to 0 to disable near and far plane, unique handling for perspective in space
   gl_Position.z = 0.0;
+  out_data.positionViewSpace = vec4(viewTransform * modelTransform * modelPos);
+  out_data.normal = normalize(normalTransform * in_normal);
+  out_data.depth = gl_Position.w;
+
 }

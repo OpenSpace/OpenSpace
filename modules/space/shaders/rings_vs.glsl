@@ -39,9 +39,8 @@ uniform mat4 modelViewProjectionTransform;
 
 void main() {
   out_data.st = in_st;
-
   out_data.position = z_normalization(
-    modelViewProjectionTransform * vec4(in_position.xy, 0.0, 1.0)
+    modelViewProjectionTransform * vec4(in_position, 0.0, 1.0)
   );
   gl_Position = out_data.position;
 }

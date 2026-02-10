@@ -46,7 +46,6 @@ Fragment getFragment() {
   else {
     frag.color = texture(colormapTexture, mixedTexture.r);
   }
-
   frag.color.a = mixedTexture.a;
   return frag;
 }

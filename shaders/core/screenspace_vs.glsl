@@ -36,8 +36,7 @@ uniform mat4 mvpMatrix;
 
 
 void main() {
+  gl_Position = mvpMatrix * vec4(in_position, 1.0);
   out_data.st = in_st;
-  vec4 p = mvpMatrix * vec4(in_position, 1.0);
-  out_data.depth = p.z;
-  gl_Position = vec4(p);
+  out_data.depth = gl_Position.z;
 }

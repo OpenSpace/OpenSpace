@@ -71,6 +71,5 @@ Fragment getFragment() {
   frag.depth = in_data.viewSpaceDepth;
   frag.gPosition = in_data.viewSpacePosition;
   frag.gNormal = vec4(1.0, 1.0, 1.0, 0.0);
-
   return frag;
 }

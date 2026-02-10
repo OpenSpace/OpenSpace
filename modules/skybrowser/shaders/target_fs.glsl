@@ -49,10 +49,8 @@ const float VerticalThickness = 1.1;
 
 
 float createLine(float lineCenter, float lineWidth, float coord) {
-  // Calculate edges of line
   float startEdge = lineCenter - (lineWidth * 0.5);
   float endEdge = lineCenter + (lineWidth * 0.5);
-
   return step(startEdge, coord) - step(endEdge, coord);
 }
 
@@ -64,7 +62,6 @@ float createCrosshair(float linewidth, float ratio, vec2 coord) {
   const float Center = 0.5;
   float crosshairVertical = createLine(Center, linewidth * VerticalThickness, coord.x);
   float crosshairHorizontal = createLine(Center, linewidth, coord.y);
-
   return crosshairHorizontal + crosshairVertical;
 }
 
@@ -88,7 +85,7 @@ Fragment getFragment() {
   if (showRectangle) {
     float lineWidthY = lineWidth * 2.0;
     float lineWidthX = lineWidth * 2.0 * VerticalThickness;
-    float height = ((fov * 0.5) / MaxWwtFov) - lineWidth;
+    float height = (fov * 0.5) / MaxWwtFov - lineWidth;
     float width = (height * ratio) - lineWidthY;
     vec2 size = vec2(width, height);
 
@@ -110,9 +107,9 @@ Fragment getFragment() {
 
     // Border
     float borderThickness = lineWidth * 0.5;
-    float borderSoftness = 0.0;
+    const float BorderSoftness = 0.0;
     float borderAlpha =
-      1.0 - smoothstep(borderThickness - borderSoftness, borderThickness, abs(distance));
+      1.0 - smoothstep(borderThickness - BorderSoftness, borderThickness, abs(distance));
 
     // Colors
     const float BorderColor = 1.0;
@@ -123,22 +120,18 @@ Fragment getFragment() {
 
   float result = clamp(crosshair + rectangle, 0.0, 1.0);
 
-  Fragment frag;
-  frag.color = lineColor * vec4(multiplyColor, result * opacity);
-
-  if (frag.color.a == 0.0) {
+  float alpha = lineColor.a * result * opacity;
+  if (alpha == 0.0) {
     discard;
   }
 
+  Fragment frag;
+  frag.color = vec4(lineColor.rgb * multiplyColor, alpha);
   frag.depth = in_data.screenSpaceDepth;
-
   if (additiveBlending) {
     frag.blend = BlendModeAdditive;
   }
-
-  // G-Buffer
   frag.gPosition = in_data.gPosition;
   frag.gNormal = vec4(in_data.gNormal, 1.0);
-
   return frag;
 }

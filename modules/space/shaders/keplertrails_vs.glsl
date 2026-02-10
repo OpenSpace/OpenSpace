@@ -63,11 +63,8 @@ void main() {
     out_data.periodFraction += 1.0;
   }
 
-  // Same procedure for the current vertex
   out_data.offsetPeriods = float(timeOffset / period);
-
   out_data.viewSpacePosition = vec4(modelViewTransform * dvec4(vertexData.xyz, 1.0));
-  vec4 vs_position = z_normalization(projectionTransform * out_data.viewSpacePosition);
-  gl_Position = vs_position;
-  out_data.viewSpaceDepth = vs_position.w;
+  gl_Position = z_normalization(projectionTransform * out_data.viewSpacePosition);
+  out_data.viewSpaceDepth = gl_Position.w;
 }

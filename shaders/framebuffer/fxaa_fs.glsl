@@ -90,25 +90,17 @@ void main() {
   }
 
   // Estimating the gradient
-  float pixelLumDownLeft = luminance(
-    textureOffset(renderedTexture, st, ivec2(-1, -1)).rgb
-  );
-  float pixelLumUpRight = luminance(
-    textureOffset(renderedTexture, st, ivec2(1, 1)).rgb
-  );
-  float pixelLumUpLeft = luminance(
-    textureOffset(renderedTexture, st, ivec2(-1, 1)).rgb
-  );
-  float pixelLumDownRight = luminance(
-    textureOffset(renderedTexture, st, ivec2(1, -1)).rgb
-  );
+  float pixelLumLL = luminance(textureOffset(renderedTexture, st, ivec2(-1, -1)).rgb);
+  float pixelLumUR = luminance(textureOffset(renderedTexture, st, ivec2(1, 1)).rgb);
+  float pixelLumUL = luminance(textureOffset(renderedTexture, st, ivec2(-1, 1)).rgb);
+  float pixelLumDR = luminance(textureOffset(renderedTexture, st, ivec2(1, -1)).rgb);
 
   float pixelLumDownUp = pixelLumDown + pixelLumUp;
   float pixelLumLeftRight = pixelLumLeft + pixelLumRight;
-  float pixelLumLeftCorners = pixelLumDownLeft + pixelLumUpLeft;
-  float pixelLumDownCorners = pixelLumDownLeft + pixelLumDownRight;
-  float pixelLumRightCorners = pixelLumDownRight + pixelLumUpRight;
-  float pixelLumUpCorners = pixelLumUpRight + pixelLumUpLeft;
+  float pixelLumLeftCorners = pixelLumLL + pixelLumUL;
+  float pixelLumDownCorners = pixelLumLL + pixelLumDR;
+  float pixelLumRightCorners = pixelLumDR + pixelLumUR;
+  float pixelLumUpCorners = pixelLumUR + pixelLumUL;
 
   // Compute an estimation of the gradient
   float edgeHorizontal = abs(-2.0 * pixelLumLeft + pixelLumLeftCorners) +
@@ -136,7 +128,7 @@ void main() {
   float pixelLumLocalAverage = 0.0;
 
   if (is1Steepest) {
-    stepLength = - stepLength;
+    stepLength = -stepLength;
     pixelLumLocalAverage = 0.5 * (pixelLum1 + pixelLumCenter);
   }
   else {

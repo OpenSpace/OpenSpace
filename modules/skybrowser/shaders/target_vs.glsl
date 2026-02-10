@@ -50,7 +50,6 @@ void main() {
   // G-Buffer
   out_data.gNormal = vec3(0.0);
   out_data.gPosition = vec4(modelViewTransform * position); // Must be in SGCT eye space;
-
   out_data.st = in_st;
   out_data.screenSpaceDepth = positionScreenSpace.w;
 }

@@ -44,6 +44,11 @@ Fragment getFragment() {
     discard;
   }
 
+  vec2 coord = gl_PointCoord - vec2(0.5);
+  if (drawCircles && length(coord) > 0.5) {
+    discard;
+  }
+
   vec2 pos = vec2(0.5) - in_data.st;
   float r = length(pos) * 2.0;
   float a = atan(pos.y, pos.x);
@@ -54,20 +59,14 @@ Fragment getFragment() {
   Fragment frag;
   frag.depth = in_data.depth;
   frag.color = in_data.color;
-  vec2 coord = gl_PointCoord - vec2(0.5);
 
-  if (drawCircles && length(coord) > 0.5) {
-    discard;
-  }
-
-  if (drawHollow &&
-      length(coord) < 0.4 &&
+  if (drawHollow && length(coord) < 0.4 &&
       (in_data.closeToEarth > 0.5 || distance(cameraPos, vec3(0.0)) < 500000000000.0))
   {
     if (usingGaussianPulse && usingCameraPerspective && in_data.closeToEarth > 0.5) {
       if (length(coord) < 0.3) {
         const float e = 2.718055;
-        float y = pow(e, - (pow(length(coord), 2.0)) / (2.0 * pow(0.2, 2.0)));
+        float y = pow(e, -(pow(length(coord), 2.0)) / (2.0 * pow(0.2, 2.0)));
         if (y < 0.05) {
           discard;
         }
@@ -81,7 +80,7 @@ Fragment getFragment() {
 
   if (useGaussian) {
     float e = 2.718055;
-    float y = pow(e, - (pow(length(coord), 2.0)) / (2.0 * pow(0.2, 2.0)));
+    float y = pow(e, -(pow(length(coord), 2.0)) / (2.0 * pow(0.2, 2.0)));
     if (y < 0.05) {
       discard;
     }

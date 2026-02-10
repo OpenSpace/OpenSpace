@@ -42,8 +42,6 @@ const vec4 Transparent = vec4(0.0);
 
 
 Fragment getFragment() {
-  vec4 position = in_data.position;
-  float depth = pscDepth(position);
   vec4 diffuse = Transparent;
 
   float x = backgroundValues.x;
@@ -82,8 +80,10 @@ Fragment getFragment() {
     discard;
   }
 
+  diffuse.a *= transparency;
+
   Fragment frag;
-  frag.color = diffuse * vec4(1.0, 1.0, 1.0, transparency);
-  frag.depth = depth;
+  frag.color = diffuse;
+  frag.depth = pscDepth(in_data.position);
   return frag;
 }

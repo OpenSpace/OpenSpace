@@ -36,19 +36,18 @@ float log10(float x) {
 vec4 psc_normalization(vec4 v) {
   vec4 v2 = v;
   float l = length(v.xyz);
-  v2.xyz = v.xyz / l;
-  v2.w = v.w - log10(1.0/l);
-  return v2;
+  return vec4(v.xyz / l, v.w - log10(1.0 / l));
 }
 
 vec4 psc_addition(vec4 v1, vec4 v2) {
   float ds = v2.w - v1.w;
   if (ds >= 0) {
-    float p = pow(k,-ds);
-    return vec4(v1.x*p + v2.x, v1.y*p + v2.y, v1.z*p + v2.z, v2.w);
-  } else {
-    float p = pow(k,ds);
-    return vec4(v1.x + v2.x*p, v1.y + v2.y*p, v1.z + v2.z*p, v1.w);
+    float p = pow(k, -ds);
+    return vec4(v1.x * p + v2.x, v1.y * p + v2.y, v1.z * p + v2.z, v2.w);
+  }
+  else {
+    float p = pow(k, ds);
+    return vec4(v1.x + v2.x * p, v1.y + v2.y * p, v1.z + v2.z * p, v1.w);
   }
 }
 
@@ -60,11 +59,12 @@ vec4 psc_subtraction(vec4 v1, vec4 v2) {
 vec2 psc_addition(vec2 v1, vec2 v2) {
   float ds = v2.y - v1.y;
   if (ds >= 0) {
-    float p = pow(k,-ds);
-    return vec2(v1.x*p + v2.x, v2.y);
-  } else {
-    float p = pow(k,ds);
-    return vec2(v1.x + v2.x*p, v1.y);
+    float p = pow(k, -ds);
+    return vec2(v1.x * p + v2.x, v2.y);
+  }
+  else {
+    float p = pow(k, ds);
+    return vec2(v1.x + v2.x * p, v1.y);
   }
 }
 

@@ -32,11 +32,8 @@ in Data {
 
 
 Fragment getFragment() {
-  vec4 position = in_data.worldPosition;
-  float depth = pscDepth(position);
-
   Fragment frag;
   frag.color = vec4(in_data.vPosition + 0.5, 1.0);
-  frag.depth = depth;
+  frag.depth = pscDepth(in_data.worldPosition);
   return frag;
 }

@@ -35,7 +35,7 @@ uniform vec2 textureOffset;
 uniform float colorFilterValue;
 uniform bool hasSunPosition;
 uniform vec3 sunPosition;
-uniform float _nightFactor;
+uniform float nightFactor;
 
 
 Fragment getFragment() {
@@ -72,20 +72,14 @@ Fragment getFragment() {
 
   // The normal for the one plane depends on whether we are dealing
   // with a front facing or back facing fragment
-  vec3 normal;
   // The plane is oriented on the xz plane
   // WARNING: This might not be the case for Uranus
-  if (gl_FrontFacing) {
-    normal = vec3(-1.0, 0.0, 0.0);
-  }
-  else {
-    normal = vec3(1.0, 0.0, 0.0);
-  }
+  vec3 normal = gl_FrontFacing  ?  vec3(-1.0, 0.0, 0.0)  :  vec3(1.0, 0.0, 0.0);
 
   // Reduce the color of the fragment by the user factor
   // if we are facing away from the Sun
-  if (dot(sunPosition, normal) < 0) {
-    diffuse.xyz *= _nightFactor;
+  if (dot(sunPosition, normal) < 0.0) {
+    diffuse.xyz *= nightFactor;
   }
 
   Fragment frag;

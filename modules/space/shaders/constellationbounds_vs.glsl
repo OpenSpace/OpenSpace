@@ -27,7 +27,6 @@
 #include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec3 in_position;
-
 out Data {
   vec4 position;
 } out_data;
@@ -37,11 +36,8 @@ uniform mat4 ModelTransform;
 
 
 void main() {
-  vec4 tmp = vec4(in_position, 0.0);
-  out_data.position = tmp;
-
-  vec4 position = pscTransform(tmp, ModelTransform);
-  out_data.position = tmp;
-  position = ViewProjection * position;
-  gl_Position = z_normalization(position);
+  out_data.position = vec4(in_position, 0.0);
+  gl_Position = z_normalization(
+    ViewProjection * pscTransform(vec4(in_position, 0.0), ModelTransform)
+  );
 }

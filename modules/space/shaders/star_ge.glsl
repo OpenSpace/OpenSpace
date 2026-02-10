@@ -83,12 +83,12 @@ double scaleForApparentBrightness(dvec3 dpos, float luminance) {
 }
 
 double scaleForLuminositySize(float bv, float luminance, float absMagnitude) {
-  double adjustedLuminance = luminance + 5E9;
+  double adjustedLum = luminance + 5E9;
   float L_over_Lsun = pow(2.51, SunAbsMagnitude - absMagnitude);
   float temperature = bvToKelvin(bv);
   float relativeTemperature = SunTemperature / temperature;
-  double starRadius = SunRadius * pow(relativeTemperature, 2.0) * sqrt(L_over_Lsun);
-  return (lumCent * adjustedLuminance + (radiusCent * starRadius)) * pow(10.0, magnitudeExponent);
+  double rStar = SunRadius * pow(relativeTemperature, 2.0) * sqrt(L_over_Lsun);
+  return (lumCent * adjustedLum + (radiusCent * rStar)) * pow(10.0, magnitudeExponent);
 }
 
 double scaleForAbsoluteMagnitude(float absMagnitude) {
@@ -98,8 +98,8 @@ double scaleForAbsoluteMagnitude(float absMagnitude) {
 double scaleForApparentMagnitude(dvec3 dpos, float absMag) {
   double distanceToStarInMeters = length(dpos - eyePosition);
   double distanceToCenterInMeters = length(eyePosition);
-  float distanceToStarInParsecs = float(distanceToStarInMeters/PARSEC);
-  float appMag = absMag + 5.0 * (log(distanceToStarInParsecs/10.0)/log(2.0));
+  float distanceToStarInParsecs = float(distanceToStarInMeters / PARSEC);
+  float appMag = absMag + 5.0 * (log(distanceToStarInParsecs/10.0) / log(2.0));
   return (-appMag + 50.0) * pow(10.0, magnitudeExponent + 7.5);
 }
 
@@ -110,7 +110,7 @@ double scaleForDistanceModulus(float absMag) {
 
 void main() {
   vec3 pos = gl_in[0].gl_Position.xyz;
-  out_data.position = pos; // in object space
+  out_data.position = pos;
   dvec4 dpos = modelMatrix * dvec4(pos, 1.0);
 
   out_data.bv = in_data[0].bvLumAbsMag.x;

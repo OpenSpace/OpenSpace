@@ -34,11 +34,9 @@ in Data {
 
 Fragment getFragment() {
    Fragment frag;
-
    frag.color = in_data.finalColor;
    frag.depth = in_data.depth;
    frag.gPosition = in_data.positionViewSpace;
    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-
    return frag;
 }

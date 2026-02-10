@@ -53,7 +53,6 @@ vec4 uvToModel(vec2 uv, vec3 radius, float segments) {
   float x = radius.x * sin(theta) * cos(phi);
   float y = radius.y * sin(theta) * sin(phi);
   float z = radius.z * cos(theta);
-
   return vec4(x, y, z, 0.0);
 }
 

@@ -197,7 +197,7 @@ Fragment getFragment() {
             shadow_depth_map,
             coords.xy + vec2(x * stepSize.x, y * stepSize.y)
           ).r;
-          if (coords.z < 1.f && depth > coords.z - Bias) {
+          if (coords.z < 1.0 && depth > coords.z - Bias) {
             accum++;
           }
         }
@@ -208,7 +208,7 @@ Fragment getFragment() {
       float shadowFactor = float(accum) / Norm;
       // Apply shadow to diffuse lighting (with ambient contribution)
       vec3 ambientLightColor = ambientIntensity * lightColor * diffuseAlbedo.rgb;
-      totalLightColor *= ambientLightColor + (1.f - ambientLightColor) * shadowFactor;
+      totalLightColor *= ambientLightColor + (1.0 - ambientLightColor) * shadowFactor;
       // Apply shadow to specular lighting (more aggressive - specular highlights should
       // be sharply attenuated in shadows)
       totalSpecularColor *= shadowFactor;

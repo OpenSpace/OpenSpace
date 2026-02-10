@@ -34,7 +34,7 @@
  */
 float normalizeFloat(float inpt) {
   if (inpt > 1.0) {
-    return inpt / pow(10, 30);
+    return inpt / pow(10.0, 30.0);
   }
   else {
     return inpt - 1.0;
@@ -46,7 +46,7 @@ float denormalizeFloat(float inpt) {
     return inpt + 1.0;
   }
   else {
-    return inpt * pow(10, 30);
+    return inpt * pow(10.0, 30.0);
   }
 }
 
@@ -57,12 +57,7 @@ float denormalizeFloat(float inpt) {
  */
 float safeLength(vec4 v) {
   float m = max(max(max(abs(v.x), abs(v.y)), abs(v.z)), abs(v.w));
-  if (m > 0.f) {
-    return length(v / m) * m;
-  }
-  else {
-    return 0.0;
-  }
+  return m > 0.0  ?  length(v / m) * m  :  0.0;
 }
 
 float safeLength(vec3 v) {

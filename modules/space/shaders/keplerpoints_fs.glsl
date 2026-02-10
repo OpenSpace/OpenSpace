@@ -55,6 +55,5 @@ Fragment getFragment() {
   frag.depth = in_data.projectionViewDepth;
   frag.gPosition = in_data.viewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-
   return frag;
 }

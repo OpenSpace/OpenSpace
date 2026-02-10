@@ -115,8 +115,6 @@ void main() {
   // Translate the point along normal
   p += patchNormalCameraSpace * height;
 
-  vec4 positionClippingSpace = projectionTransform * vec4(p, 1.0);
-
 #if USE_ACCURATE_NORMALS
   // Calculate tangents
   out_data.ellipsoidTangentThetaCameraSpace = normalize(p10 - p00);
@@ -125,7 +123,7 @@ void main() {
 
   // Write output
   out_data.uv = in_uv;
-  out_data.position = z_normalization(positionClippingSpace);
+  out_data.position = z_normalization(projectionTransform * vec4(p, 1.0));
   gl_Position = out_data.position;
   out_data.ellipsoidNormalCameraSpace = patchNormalCameraSpace;
   out_data.positionCameraSpace = p;

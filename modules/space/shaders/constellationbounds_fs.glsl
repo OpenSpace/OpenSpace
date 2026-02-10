@@ -38,10 +38,8 @@ Fragment getFragment() {
     discard;
   }
 
-  vec4 position = in_data.position;
-
   Fragment frag;
   frag.color = vec4(color, opacity);
-  frag.depth = pscDepth(position);
+  frag.depth = pscDepth(in_data.position);
   return frag;
 }
