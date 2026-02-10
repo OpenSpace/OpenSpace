@@ -151,6 +151,5 @@ Fragment getFragment() {
   frag.depth = in_data.screenSpaceDepth;
   frag.gPosition = in_data.positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-
   return frag;
 }

@@ -28,7 +28,7 @@ in Data {
   vec2 texCoord;
 } in_data;
 
-layout (location = 0) out vec4 finalColor;
+layout (location = 0) out vec4 out_color;
 
 uniform sampler2D downscaledRenderedVolume;
 uniform sampler2D downscaledRenderedVolumeDepth;
@@ -48,6 +48,6 @@ void main() {
   st.x = st.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
   st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
 
-  finalColor = texture(downscaledRenderedVolume, st);
+  out_color = texture(downscaledRenderedVolume, st);
   gl_FragDepth = texture(downscaledRenderedVolumeDepth, st).r;
 }

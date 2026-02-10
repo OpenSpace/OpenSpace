@@ -30,8 +30,8 @@ in Data {
   vec2 position;
 } in_data;
 
-layout (location = 0) out vec4 color;
-layout (location = 1) out vec4 stencil;
+layout (location = 0) out vec4 out_color;
+layout (location = 1) out vec4 out_stencil;
 
 uniform sampler2D projectionTexture;
 uniform mat4 ProjectorMatrix;
@@ -82,11 +82,11 @@ void main() {
   if ((inRange(projected.x, 0.0, 1.0) && inRange(projected.y, 0.0, 1.0)) &&
       dot(v_b, normal) < 0.0)
   {
-    color = texture(projectionTexture, vec2(projected.x, projected.y));
-    stencil = vec4(1.0);
+    out_color = texture(projectionTexture, vec2(projected.x, projected.y));
+    out_stencil = vec4(1.0);
   }
   else {
-    color = vec4(0.0);
-    stencil = vec4(0.0);
+    out_color = vec4(0.0);
+    out_stencil = vec4(0.0);
   }
 }

@@ -25,9 +25,9 @@
 #include "floatoperations.glsl"
 #include <#{fragmentPath}>
 
-layout(location = 0) out vec4 _out_color_;
-layout(location = 1) out vec4 gPosition;
-layout(location = 2) out vec4 gNormal;
+layout(location = 0) out vec4 out_color;
+layout(location = 1) out vec4 out_gPosition;
+layout(location = 2) out vec4 out_gNormal;
 
 #define exposure #{rendererData.hdrExposure}
 #define disableHDRPipeline #{rendererData.disableHDR}
@@ -40,21 +40,21 @@ void main() {
 
   // Color is already in HDR space
   if (f.disableLDR2HDR || (disableHDRPipeline == 1)) {
-    _out_color_ = f.color;
+    out_color = f.color;
   }
   else {
-    _out_color_ = vec4(
+    out_color = vec4(
       log2(vec3(1.0) - (f.color.rgb - vec3(DeltaError))) / -exposure,
       f.color.a
     );
   }
 
-  _out_color_.x = isnan(_out_color_.x)  ?  MaxValueColorBuffer  :  _out_color_.x;
-  _out_color_.y = isnan(_out_color_.y)  ?  MaxValueColorBuffer  :  _out_color_.y;
-  _out_color_.z = isnan(_out_color_.z)  ?  MaxValueColorBuffer  :  _out_color_.z;
+  out_color.x = isnan(out_color.x)  ?  MaxValueColorBuffer  :  out_color.x;
+  out_color.y = isnan(out_color.y)  ?  MaxValueColorBuffer  :  out_color.y;
+  out_color.z = isnan(out_color.z)  ?  MaxValueColorBuffer  :  out_color.z;
 
-  gPosition = f.gPosition;
-  gNormal = f.gNormal;
+  out_gPosition = f.gPosition;
+  out_gNormal = f.gNormal;
 
   gl_FragDepth = f.disableDepthNormalization  ?  f.depth  :  normalizeFloat(f.depth);
 }

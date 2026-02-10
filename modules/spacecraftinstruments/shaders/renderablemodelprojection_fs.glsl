@@ -29,10 +29,8 @@ in Data {
   vec4 normal;
 } in_data;
 
-layout (location = 0) out vec4 color;
-// Even though the stencil texture is only a single channel, we still need to
-// output a vec4, or the result will disappear
-layout (location = 1) out vec4 stencil;
+layout (location = 0) out vec4 out_color;
+layout (location = 1) out vec4 out_stencil;
 
 uniform sampler2D projectionTexture;
 uniform sampler2D depthTexture;
@@ -57,9 +55,9 @@ void main() {
     if (inRange(uv.x, 0.0, 1.0) && inRange(uv.y, 0.0, 1.0) &&
         dot(n, boresight) < 0 && thisDepth <= closestDepth + epsilon)
     {
-      color = texture(projectionTexture, vec2(1.0) - uv);
-      color.a = 1.0;
-      stencil = vec4(1.0);
+      out_color = texture(projectionTexture, vec2(1.0) - uv);
+      out_color.a = 1.0;
+      out_stencil = vec4(1.0);
     }
     else {
       discard;
@@ -67,9 +65,9 @@ void main() {
   }
   else {
     if (inRange(uv.x, 0.0, 1.0) && inRange(uv.y, 0.0, 1.0) && dot(n, boresight) < 0) {
-      color = texture(projectionTexture, vec2(1.0) - uv);
-      color.a = 1.0;
-      stencil = vec4(1.0);
+      out_color = texture(projectionTexture, vec2(1.0) - uv);
+      out_color.a = 1.0;
+      out_stencil = vec4(1.0);
     }
     else {
       discard;

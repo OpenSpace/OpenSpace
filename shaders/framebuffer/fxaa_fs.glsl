@@ -28,7 +28,7 @@ in Data {
   vec2 texCoord;
 } in_data;
 
-layout (location = 0) out vec4 aaFinalColor;
+layout (location = 0) out vec4 out_color;
 
 uniform vec2 inverseScreenSize;
 uniform sampler2D renderedTexture;
@@ -85,7 +85,7 @@ void main() {
   // If the pixelLum variation is lower that a threshold (or if we are in a really dark
   // area), we are not on an edge, don't perform any AA.
   if (pixelLumRange < max(EdgeThresholdMin, pixelLumMax * EdgeThresholdMax)) {
-    aaFinalColor = colorCenter;
+    out_color = colorCenter;
     return;
   }
 
@@ -257,5 +257,5 @@ void main() {
     finalUV.x += finalOffset * stepLength;
   }
 
-  aaFinalColor = texture(renderedTexture, finalUV);
+  out_color = texture(renderedTexture, finalUV);
 }

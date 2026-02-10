@@ -30,7 +30,7 @@ in Data {
   vec2 texCoord;
 } in_data;
 
-layout (location = 0) out vec4 finalColor;
+layout (location = 0) out vec4 out_color;
 
 uniform float hdrExposure;
 uniform float blackoutFactor;
@@ -73,5 +73,5 @@ void main() {
   hsvColor.z = clamp(hsvColor.z * Value, 0.0, 1.0);
 
   // Gamma Correction
-  finalColor = vec4(gammaCorrection(hsv2rgb(hsvColor), gamma), color.a);
+  out_color = vec4(gammaCorrection(hsv2rgb(hsvColor), gamma), color.a);
 }

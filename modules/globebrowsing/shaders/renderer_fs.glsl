@@ -84,15 +84,11 @@ uniform float orenNayarRoughness;
 uniform float ambientIntensity;
 #endif // PERFORM_SHADING
 
-#if SHADOW_MAPPING_ENABLED
-#if USE_RING_SHADOWS
-// Color of the rings
+#if SHADOW_MAPPING_ENABLED && USE_RING_SHADOWS
 uniform sampler1D ringTextureColor;
-// Transparency of the rings
 uniform sampler1D ringTextureTransparency;
 uniform vec2 textureOffset;
-#endif // USE_RING_SHADOWS
-#endif // SHADOW_MAPPING_ENABLED
+#endif // SHADOW_MAPPING_ENABLED && USE_RING_SHADOWS
 
 #define USE_DEPTHMAP_SHADOWS #{useDepthmapShadows}
 

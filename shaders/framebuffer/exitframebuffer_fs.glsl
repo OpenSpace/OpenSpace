@@ -27,11 +27,11 @@
 #include "floatoperations.glsl"
 #include <#{fragmentPath}>
 
-out vec4 _out_color_;
+out vec4 out_color;
 
 
 void main() {
   Fragment f = getFragment();
-  _out_color_ = f.color;
+  out_color = f.color;
   gl_FragDepth = normalizeFloat(f.depth);
 }

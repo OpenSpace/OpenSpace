@@ -24,15 +24,6 @@
 
 #version __CONTEXT__
 
-uniform sampler2D exitColorTexture;
-uniform sampler2D exitDepthTexture;
-uniform sampler2D mainDepthTexture;
-
-uniform vec3 cameraPosInRaycaster;
-uniform vec2 windowSize;
-
-uniform int rayCastSteps;
-
 #include "blending.glsl"
 #include "rand.glsl"
 #include "floatoperations.glsl"
@@ -43,7 +34,16 @@ uniform int rayCastSteps;
 
 #include <#{raycastPath}>
 
-out vec4 finalColor;
+out vec4 out_color;
+
+uniform sampler2D exitColorTexture;
+uniform sampler2D exitDepthTexture;
+uniform sampler2D mainDepthTexture;
+
+uniform vec3 cameraPosInRaycaster;
+uniform vec2 windowSize;
+
+uniform int rayCastSteps;
 
 const float AlphaLimit = 0.99;
 
@@ -130,12 +130,12 @@ void main() {
     nextStepSize = min(nextStepSize, maxStepSize);
   }
 
-  finalColor = vec4(
+  out_color = vec4(
     accumulatedColor,
     (accumulatedAlpha.r + accumulatedAlpha.g + accumulatedAlpha.b) / 3.0
   );
 
-  finalColor.rgb /= finalColor.a;
+  out_color.rgb /= out_color.a;
 
   gl_FragDepth = normalizeFloat(entryDepth);
 }

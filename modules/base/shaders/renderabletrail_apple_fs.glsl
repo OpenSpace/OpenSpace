@@ -33,10 +33,10 @@ uniform int renderPhase;
 uniform float opacity = 1.0;
 
 // Fragile! Keep in sync with RenderableTrail::render::RenderPhase
-#define RenderPhaseLines 0
-#define RenderPhasePoints 1
+const int RenderPhaseLines = 0;
+const int RenderPhasePoints  = 1;
 
-#define Delta 0.25
+const float Delta = 0.25;
 
 
 Fragment getFragment() {
@@ -55,9 +55,6 @@ Fragment getFragment() {
   }
 
   frag.gPosition = vs_gPosition;
-
-  // There is no normal here
-  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
-
+  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0); // There is no normal here
   return frag;
 }

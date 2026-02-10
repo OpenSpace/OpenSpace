@@ -29,11 +29,11 @@ in Data {
   vec2 uv;
 } in_data;
 
-out vec4 FragColor;
+out vec4 out_color;
 
 uniform sampler2D tex;
 
 
 void main() {
-  FragColor = in_data.color * texture(tex, in_data.uv);
+  out_color = in_data.color * texture(tex, in_data.uv);
 }
