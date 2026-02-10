@@ -24,11 +24,12 @@
 
 #include "fragment.glsl"
 
-in vec4 vs_gPosition;
-in vec3 vs_gNormal;
-in float vs_screenSpaceDepth;
-in vec2 vs_st;
-in vec4 vs_position;
+in Data {
+  vec4 gPosition;
+  vec3 gNormal;
+  vec2 st;
+  float screenSpaceDepth;
+} in_data;
 
 uniform float crossHairSize;
 uniform bool showRectangle;
@@ -78,10 +79,10 @@ Fragment getFragment() {
   float rectangle = 0.0;
   const float MaxWwtFov = 70;
 
-  float crosshair = createCrosshair(lineWidth, ratio, vs_st);
+  float crosshair = createCrosshair(lineWidth, ratio, in_data.st);
   float crossHairHeight = crossHairSize / MaxWwtFov;
   float crossHairWidth = crossHairHeight * ratio;
-  float crossHairBox = createFilledRectangle(crossHairWidth, crossHairHeight, vs_st);
+  float crossHairBox = createFilledRectangle(crossHairWidth, crossHairHeight, in_data.st);
   crosshair *= crossHairBox;
 
   if (showRectangle) {
@@ -99,7 +100,7 @@ Fragment getFragment() {
     );
 
     // Calculate distance to edge
-    float distance = roundedRectangle(vs_st.xy - vec2(0.5), size * 0.5, radius);
+    float distance = roundedRectangle(in_data.st.xy - vec2(0.5), size * 0.5, radius);
 
     // How soft the edges should be (in pixels)
     // Higher values could be used to simulate a drop shadow
@@ -129,15 +130,15 @@ Fragment getFragment() {
     discard;
   }
 
-  frag.depth = vs_screenSpaceDepth;
+  frag.depth = in_data.screenSpaceDepth;
 
   if (additiveBlending) {
     frag.blend = BlendModeAdditive;
   }
 
   // G-Buffer
-  frag.gPosition = vs_gPosition;
-  frag.gNormal = vec4(vs_gNormal, 1.0);
+  frag.gPosition = in_data.gPosition;
+  frag.gNormal = vec4(in_data.gNormal, 1.0);
 
   return frag;
 }

@@ -27,17 +27,21 @@
 #include "floatoperations.glsl"
 
 layout(points) in;
-in vec2 vs_brightness[];
-in vec4 vs_gPosition[];
-in float vs_starDistFromSun[];
-in float vs_cameraDistFromSun[];
+in Data {
+  vec4 gPosition;
+  vec2 brightness;
+  float starDistFromSun;
+  float cameraDistFromSun;
+} in_data[];
 
 layout(points, max_vertices = 1) out;
-out vec2 ge_brightness;
-out vec4 ge_gPosition;
-out float ge_starDistFromSun;
-out float ge_cameraDistFromSun;
-out float ge_observedDist;
+out Data {
+  vec4 gPosition;
+  vec2 brightness;
+  float starDistFromSun;
+  float cameraDistFromSun;
+  float observedDist;
+} out_data;
 
 uniform dmat4 view;
 uniform float viewScaling;
@@ -47,14 +51,14 @@ const float Eps = 1e-5;
 
 
 void main() {
-  ge_brightness = vs_brightness[0];
-  ge_starDistFromSun = vs_starDistFromSun[0];
-  ge_cameraDistFromSun = vs_cameraDistFromSun[0];
+  out_data.brightness = in_data[0].brightness;
+  out_data.starDistFromSun = in_data[0].starDistFromSun;
+  out_data.cameraDistFromSun = in_data[0].cameraDistFromSun;
 
-  vec4 viewPosition = vec4(view * vs_gPosition[0]);
+  vec4 viewPosition = vec4(view * in_data[0].gPosition);
 
-  ge_observedDist = safeLength(viewPosition / viewScaling);
-  float distThreshold = cutOffThreshold - log(ge_observedDist) / log(4.0);
+  out_data.observedDist = safeLength(viewPosition / viewScaling);
+  float distThreshold = cutOffThreshold - log(out_data.observedDist) / log(4.0);
 
   vec4 position = gl_in[0].gl_Position;
 
@@ -68,7 +72,7 @@ void main() {
   //gl_PointSize = 1.0;
   gl_Position = position;
   gl_Position.z = 0.0;
-  ge_gPosition = viewPosition;
+  out_data.gPosition = viewPosition;
 
   EmitVertex();
   EndPrimitive();

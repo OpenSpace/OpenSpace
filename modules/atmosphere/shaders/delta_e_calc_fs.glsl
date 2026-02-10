@@ -24,9 +24,9 @@
 
 #version __CONTEXT__
 
-out vec4 renderTableColor;
+out vec4 out_color;
 
 
 void main() {
-  renderTableColor = vec4(0.0, 0.0, 0.0, 1.0);
+  out_color = vec4(0.0, 0.0, 0.0, 1.0);
 }

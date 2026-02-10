@@ -28,7 +28,7 @@ in Data {
   vec2 st;
 } in_data;
 
-out vec4 outputColor;
+out vec4 out_color;
 
 uniform sampler2D tex;
 #define USE_ACCELERATED_RENDERING #{useAcceleratedRendering}
@@ -38,8 +38,8 @@ void main() {
 #if USE_ACCELERATED_RENDERING
   vec2 flippedTexCoords = vec2(in_data.st.x, 1.0 - in_data.st.y);
   vec4 texColor = texture(tex, flippedTexCoords);
-  outputColor = texColor.bgra;  // Correcting both orientation and color channels
+  out_color = texColor.bgra;  // Correcting both orientation and color channels
 #else // USE_ACCELERATED_RENDERING
-  outputColor = texture(tex, in_data.st);
+  out_color = texture(tex, in_data.st);
 #endif // USE_ACCELERATED_RENDERING
 }

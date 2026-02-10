@@ -29,8 +29,10 @@
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 
-out vec4 vs_position;
-out vec2 vs_st;
+out Data {
+  vec4 position;
+  vec2 st;
+} out_data;
 
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
@@ -40,8 +42,8 @@ void main() {
   vec4 tmp = in_position;
   vec4 position = pscTransform(tmp, ModelTransform);
 
-  vs_position = tmp;
-  vs_st = in_st;
+  out_data.position = tmp;
+  out_data.st = in_st;
 
   position = ViewProjection * position;
   gl_Position = z_normalization(position);

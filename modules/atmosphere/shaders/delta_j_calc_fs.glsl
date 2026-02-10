@@ -26,7 +26,7 @@
 
 #include "atmosphere_common.glsl"
 
-out vec4 renderTarget;
+out vec4 out_color;
 
 uniform float Rg;
 uniform float Rt;
@@ -238,5 +238,5 @@ void main() {
   vec3 radianceJ = inscatter(r, mu, muSun, nu);
 
   // Write to texture detaJ
-  renderTarget = vec4(radianceJ, 1.0);
+  out_color = vec4(radianceJ, 1.0);
 }

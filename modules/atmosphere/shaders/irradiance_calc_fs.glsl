@@ -26,7 +26,7 @@
 
 #include "atmosphere_common.glsl"
 
-out vec4 renderTableColor;
+out vec4 out_color;
 
 uniform float Rg;
 uniform float Rt;
@@ -45,7 +45,7 @@ void main() {
   // Because we consider the planet as a perfect sphere and we are considering only single
   // scattering here, the dot product dot(w,n) is equal to dot(s,n) that is equal to
   // dot(s, r/||r||) = muSun.
-  renderTableColor = vec4(
+  out_color = vec4(
     transmittance(transmittanceTexture, r, muSun, Rg, Rt) * max(muSun, 0.0),
     0.0
   );

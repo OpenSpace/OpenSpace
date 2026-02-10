@@ -26,8 +26,8 @@
 
 #include "atmosphere_common.glsl"
 
-layout(location = 0) out vec4 renderTarget1;
-layout(location = 1) out vec4 renderTarget2;
+layout(location = 0) out vec4 out_color1;
+layout(location = 1) out vec4 out_color2;
 
 uniform float Rg;
 uniform float Rt;
@@ -138,6 +138,6 @@ void main() {
   vec3 S_R; // First Order Rayleigh InScattering
   vec3 S_M; // First Order Mie InScattering
   inscatter(r, mu, muSun, nu, S_R, S_M);
-  renderTarget1 = vec4(S_R, 1.0);
-  renderTarget2 = vec4(S_M, 1.0);
+  out_color1 = vec4(S_R, 1.0);
+  out_color2 = vec4(S_M, 1.0);
 }

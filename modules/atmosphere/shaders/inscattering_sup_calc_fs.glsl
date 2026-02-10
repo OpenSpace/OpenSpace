@@ -26,7 +26,7 @@
 
 #include "atmosphere_common.glsl"
 
-out vec4 renderTarget;
+out vec4 out_color;
 
 uniform float Rg;
 uniform float Rt;
@@ -86,5 +86,5 @@ void main() {
   unmappingMuMuSunNu(r, dhdH, SAMPLES_MU, Rg, Rt, SAMPLES_MU_S, SAMPLES_NU, mu, muSun, nu);
 
   // Write to texture deltaSR
-  renderTarget = vec4(inscatter(r, mu, muSun, nu), 1.0);
+  out_color = vec4(inscatter(r, mu, muSun, nu), 1.0);
 }

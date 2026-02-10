@@ -59,9 +59,11 @@
 #include "floatoperations.glsl"
 #include "atmosphere_common.glsl"
 
-in vec2 texCoord;
+in Data {
+  vec2 texCoord;
+} in_data;
 
-out vec4 renderTarget;
+out vec4 out_color;
 
 uniform int cullAtmosphere;
 uniform float opacity;
@@ -538,19 +540,19 @@ void main() {
   // of the "missing" half.  If you don't believe me, load a configuration file with the
   // side_by_side stereo mode enabled, disable FXAA, and remove this modification.
   // The same calculation is done in the FXAA shader and the HDR resolving
-  vec2 st = texCoord;
+  vec2 st = in_data.texCoord;
   st.x = st.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
   st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
 
   // Color from G-Buffer
   vec4 color = texture(mainColorTexture, st);
   if (cullAtmosphere == 1) {
-    renderTarget = color;
+    out_color = color;
     return;
   }
 
   // Get the ray from camera to atm in object space
-  Ray ray = calculateRayRenderableGlobe(texCoord);
+  Ray ray = calculateRayRenderableGlobe(in_data.texCoord);
 
   double offset = 0.0;   // in KM
   double maxLength = 0.0;   // in KM
@@ -561,7 +563,7 @@ void main() {
     maxLength
   );
   if (!intersect) {
-    renderTarget = color;
+    out_color = color;
     return;
   }
 
@@ -616,7 +618,7 @@ void main() {
 
   if (pixelDepth < offset) {
     // ATM Occluded - Something in front of ATM
-    renderTarget = color;
+    out_color = color;
     return;
   }
 
@@ -688,5 +690,5 @@ void main() {
   // Final Color of ATM plus terrain. We want to support opacity so we blend between the
   // planet color and the full atmosphere color using the opacity value
   vec3 c = mix(color.rgb, inscatterColor + atmColor, opacity);
-  renderTarget = vec4(c, 1.0);
+  out_color = vec4(c, 1.0);
 }

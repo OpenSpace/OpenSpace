@@ -34,10 +34,12 @@ layout (std430) buffer ssbo_comb_data {
   float allData[];
 };
 
-out vec2 vs_brightness;
-out vec4 vs_gPosition;
-out float vs_starDistFromSun;
-out float vs_cameraDistFromSun;
+out Data {
+  vec4 gPosition;
+  vec2 brightness;
+  float starDistFromSun;
+  float cameraDistFromSun;
+} out_data;
 
 uniform dmat4 model;
 uniform dmat4 view;
@@ -88,7 +90,7 @@ void main() {
   int chunkId = findChunkId(0, nChunksToRender - 1, gl_VertexID);
   // Fail safe - this should never happen!
   if (chunkId == -1) {
-    vs_gPosition = vec4(0.0);
+    out_data.gPosition = vec4(0.0);
     gl_Position = vec4(0.0);
     return;
   }
@@ -97,7 +99,7 @@ void main() {
   int nStarsInChunk = starsPerChunk[chunkId + 1] - starsPerChunk[chunkId];
   // Remove possible duplicates
   if (nStarsInChunk <= 0) {
-    vs_gPosition = vec4(0.0);
+    out_data.gPosition = vec4(0.0);
     gl_Position = vec4(0.0);
     return;
   }
@@ -122,7 +124,7 @@ void main() {
       abs(length(in_position) - distThreshold.y) < Eps))
   {
     // Discard star in geometry shader
-    vs_gPosition = vec4(0.0);
+    out_data.gPosition = vec4(0.0);
     gl_Position = vec4(0.0);
     return;
   }
@@ -143,7 +145,7 @@ void main() {
         (abs(bpRpThreshold.y) > Eps && in_brightness.y > bpRpThreshold.y))
     {
       // Discard star in geometry shader
-      vs_gPosition = vec4(0.0);
+      out_data.gPosition = vec4(0.0);
       gl_Position = vec4(0.0);
       return;
     }
@@ -157,7 +159,7 @@ void main() {
       );
     }
   }
-  vs_brightness = in_brightness;
+  out_data.brightness = in_brightness;
 
   // Convert kiloParsec to meter
   vec4 objectPosition = vec4(in_position * 1000.0 * Parsec, 1.0);
@@ -172,7 +174,7 @@ void main() {
       (abs(distThreshold.y) > Eps && distPosition > distThreshold.y))))
   {
     // Discard star in geometry shader
-    vs_gPosition = vec4(0.0);
+    out_data.gPosition = vec4(0.0);
     gl_Position = vec4(0.0);
     return;
   }
@@ -181,17 +183,17 @@ void main() {
   dvec4 viewPosition = view * model * objectPosition;
   vec4 sunPosition = vec4(view * model * dvec4(0.0, 0.0, 0.0, 1.0));
 
-  vs_starDistFromSun = safeLength(objectPosition);
-  vs_cameraDistFromSun = safeLength(sunPosition);
+  out_data.starDistFromSun = safeLength(objectPosition);
+  out_data.cameraDistFromSun = safeLength(sunPosition);
 
   // Remove stars without position, happens when VBO chunk is stuffed with zeros.
   // Has to be done in Geometry shader because Vertices cannot be discarded here.
   if (length(in_position) > Eps) {
-    vs_gPosition = vec4(model * objectPosition);
+    out_data.gPosition = vec4(model * objectPosition);
     gl_Position = vec4(projection * viewPosition);
   }
   else {
-    vs_gPosition = vec4(0.0);
+    out_data.gPosition = vec4(0.0);
     gl_Position = vec4(0.0);
   }
 }

@@ -25,8 +25,10 @@
 #include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
 
-in vec2 vs_st;
-in vec4 vs_position;
+in Data {
+  vec4 position;
+  vec2 st;
+} in_data;
 
 uniform sampler2D textures[6];
 uniform sampler2D transferFunctions[6];
@@ -40,7 +42,7 @@ const vec4 Transparent = vec4(0.0);
 
 
 Fragment getFragment() {
-  vec4 position = vs_position;
+  vec4 position = in_data.position;
   float depth = pscDepth(position);
   vec4 diffuse = Transparent;
 
@@ -51,7 +53,7 @@ Fragment getFragment() {
     if ((numTransferFunctions == 1) || (numTextures > numTransferFunctions)) {
       float v = 0.0;
       for (int i = 0; i < numTextures; i++) {
-        v += texture(textures[i], vs_st).r;
+        v += texture(textures[i], in_data.st).r;
       }
       v /= numTextures;
 
@@ -66,7 +68,7 @@ Fragment getFragment() {
     else {
       float v = 0.0;
       for (int i = 0; i < numTextures; i++) {
-        v = texture(textures[i], vs_st).r;
+        v = texture(textures[i], in_data.st).r;
         vec4 color = texture(transferFunctions[i], vec2(v, 0.0));
         if ((v < (x + y)) && v > (x - y)) {
           color = Transparent;

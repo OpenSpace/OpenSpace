@@ -24,12 +24,14 @@
 
 #version __CONTEXT__
 
-in vec3 in_position;
+layout(location = 0) in vec3 in_position;
 
-out vec2 uv;
+out Data {
+  vec2 uv;
+} out_data;
 
 
 void main() {
-  uv = (in_position.xy + 1.0) / 2.0;
+  out_data.uv = (in_position.xy + 1.0) / 2.0;
   gl_Position = vec4(in_position, 1.0);
 }

@@ -27,18 +27,22 @@
 #include "floatoperations.glsl"
 
 layout(points) in;
-in vec2 vs_brightness[];
-in vec4 vs_gPosition[];
-in float vs_starDistFromSun[];
-in float vs_cameraDistFromSun[];
+in Data {
+  vec4 gPosition;
+  vec2 brightness;
+  float starDistFromSun;
+  float cameraDistFromSun;
+} in_data[];
 
 layout(triangle_strip, max_vertices = 4) out;
-out vec2 ge_brightness;
-out vec4 ge_gPosition;
-out vec2 texCoord;
-out float ge_starDistFromSun;
-out float ge_cameraDistFromSun;
-out float ge_observedDist;
+out Data {
+  vec4 gPosition;
+  vec2 brightness;
+  vec2 texCoord;
+  float starDistFromSun;
+  float cameraDistFromSun;
+  float observedDist;
+} out_data;
 
 uniform dmat4 view;
 uniform dmat4 projection;
@@ -66,15 +70,15 @@ const vec2 Corners[4] = vec2[4](
 
 
 void main() {
-  ge_brightness = vs_brightness[0];
-  ge_starDistFromSun = vs_starDistFromSun[0];
-  ge_cameraDistFromSun = vs_cameraDistFromSun[0];
+  out_data.brightness = in_data[0].brightness;
+  out_data.starDistFromSun = in_data[0].starDistFromSun;
+  out_data.cameraDistFromSun = in_data[0].cameraDistFromSun;
 
-  vec4 viewPosition = vec4(view * vs_gPosition[0]);
+  vec4 viewPosition = vec4(view * in_data[0].gPosition);
 
   // Make closer stars look a bit bigger.
-  ge_observedDist = safeLength(viewPosition / viewScaling);
-  float closeUpBoost = closeUpBoostDist / ge_observedDist;
+  out_data.observedDist = safeLength(viewPosition / viewScaling);
+  float closeUpBoost = closeUpBoostDist / out_data.observedDist;
   float initStarSize = billboardSize;
 
   // Use magnitude for size boost as well.
@@ -83,7 +87,7 @@ void main() {
     // https://qph.fs.quoracdn.net/main-qimg-317a18e3b228efc7d7f67a1632a55961
     // Negative magnitude => Giants
     // Big positive magnitude => Dwarfs
-    float absoluteMagnitude = vs_brightness[0].x;
+    float absoluteMagnitude = in_data[0].brightness.x;
     float normalizedMagnitude = (absoluteMagnitude - 20.0) / -1.0; // (-15 - 20);
 
     // TODO: A linear scale is prabably not the best!
@@ -93,7 +97,7 @@ void main() {
   vec4 position = gl_in[0].gl_Position;
   vec2 starSize = vec2(initStarSize + closeUpBoost) * position.w / 1000.0;
 
-  float distThreshold = cutOffThreshold - log(ge_observedDist) / log(4.0);
+  float distThreshold = cutOffThreshold - log(out_data.observedDist) / log(4.0);
 
   // Discard geometry if star has no position (but wasn't a nullArray).
   // Or if observed distance is above threshold set by cutOffThreshold.
@@ -102,7 +106,7 @@ void main() {
     return;
   }
 
-  vec4 centerWorldPos = vs_gPosition[0];
+  vec4 centerWorldPos = in_data[0].gPosition;
 
   dvec3 cameraNormal = normalize(cameraPos - dvec3(centerWorldPos.xyz));
   dvec3 newRight = normalize(cross(cameraLookUp, cameraNormal));
@@ -119,8 +123,8 @@ void main() {
       wCameraUp * starSize.y * (Corners[i].y - 0.5);
     gl_Position = vec4(projection * view * cornerPoint);
     gl_Position.z = 0.0;
-    texCoord = Corners[i];
-    ge_gPosition = viewPosition;
+    out_data.texCoord = Corners[i];
+    out_data.gPosition = viewPosition;
 
     EmitVertex();
   }

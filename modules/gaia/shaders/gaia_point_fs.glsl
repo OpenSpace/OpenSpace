@@ -26,13 +26,15 @@
 
 #include "floatoperations.glsl"
 
-in vec2 ge_brightness;
-in vec4 ge_gPosition;
-in float ge_starDistFromSun;
-in float ge_cameraDistFromSun;
-in float ge_observedDist;
+in Data {
+  vec4 gPosition;
+  vec2 brightness;
+  float starDistFromSun;
+  float cameraDistFromSun;
+  float observedDist;
+} in_data;
 
-layout (location = 0) out vec4 outColor;
+layout (location = 0) out vec4 out_color;
 
 uniform sampler1D colorTexture;
 uniform float luminosityMultiplier;
@@ -66,11 +68,11 @@ void main() {
 
   // Calculate the color and luminosity if we have the magnitude and B-V color.
   if (renderOption != RenderOptionStatic) {
-    color = color2rgb(ge_brightness.y);
+    color = color2rgb(in_data.brightness.y);
     ratioMultiplier = 0.01;
 
     // Absolute magnitude is brightness a star would have at 10 pc away.
-    float absoluteMagnitude = ge_brightness.x;
+    float absoluteMagnitude = in_data.brightness.x;
 
     // From formula: MagSun - MagStar = 2.5*log(LumStar / LumSun), it gives that:
     // LumStar = 10^(1.89 - 0.4*Magstar) , if LumSun = 1 and MagSun = 4.72
@@ -83,17 +85,17 @@ void main() {
   }
 
   // Luminosity decrease by {squared} distance [measured in Pc].
-  float observedDistance = ge_observedDist / Parsec;
+  float observedDistance = in_data.observedDist / Parsec;
   luminosity /= pow(observedDistance, 2.0);
 
   // Multiply our color with the luminosity as well as a user-controlled property.
   color *= luminosity * pow(luminosityMultiplier, 3.0);
 
   // Decrease contributing brightness for stars in central cluster.
-  if (ge_cameraDistFromSun > ge_starDistFromSun) {
-    float ratio = ge_starDistFromSun / ge_cameraDistFromSun;
+  if (in_data.cameraDistFromSun > in_data.starDistFromSun) {
+    float ratio = in_data.starDistFromSun / in_data.cameraDistFromSun;
     //color *= ratio * ratioMultiplier;
   }
 
-  outColor = vec4(color, 1.0);
+  out_color = vec4(color, 1.0);
 }

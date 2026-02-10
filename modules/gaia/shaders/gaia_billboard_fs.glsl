@@ -26,14 +26,16 @@
 
 #include "floatoperations.glsl"
 
-in vec2 ge_brightness;
-in vec4 ge_gPosition;
-in vec2 texCoord;
-in float ge_starDistFromSun;
-in float ge_cameraDistFromSun;
-in float ge_observedDist;
+in Data {
+  vec4 gPosition;
+  vec2 brightness;
+  vec2 texCoord;
+  float starDistFromSun;
+  float cameraDistFromSun;
+  float observedDist;
+} in_data;
 
-layout (location = 0) out vec4 outColor;
+layout (location = 0) out vec4 out_color;
 
 uniform sampler2D psfTexture;
 uniform sampler1D colorTexture;
@@ -65,7 +67,7 @@ void main() {
   vec3 color = vec3(luminosity);
   float ratioMultiplier = 0.05;
 
-  vec4 textureColor = texture(psfTexture, texCoord);
+  vec4 textureColor = texture(psfTexture, in_data.texCoord);
   textureColor.a = pow(textureColor.a, sharpness);
   if (textureColor.a < 0.001) {
     discard;
@@ -73,11 +75,11 @@ void main() {
 
   // Calculate the color and luminosity if we have the magnitude and B-V color.
   if (renderOption != RenderOptionStatic) {
-    color = color2rgb(ge_brightness.y);
+    color = color2rgb(in_data.brightness.y);
     ratioMultiplier = 0.5;
 
     // Absolute magnitude is brightness a star would have at 10 pc away.
-    float absoluteMagnitude = ge_brightness.x;
+    float absoluteMagnitude = in_data.brightness.x;
 
     // From formula: MagSun - MagStar = 2.5*log(LumStar / LumSun), it gives that:
     // LumStar = 10^(1.89 - 0.4*Magstar) , if LumSun = 1 and MagSun = 4.72
@@ -90,15 +92,15 @@ void main() {
   }
 
   // Luminosity decrease by {squared} distance [measured in Pc].
-  float observedDistance = ge_observedDist / Parsec;
+  float observedDistance = in_data.observedDist / Parsec;
   luminosity /= pow(observedDistance, 2.0);
 
   // Multiply our color with the luminosity as well as a user-controlled property.
   color *= luminosity * pow(luminosityMultiplier, 3.0);
 
   // Decrease contributing brightness for stars in central cluster.
-  if (ge_cameraDistFromSun > ge_starDistFromSun) {
-    float ratio = ge_starDistFromSun / ge_cameraDistFromSun;
+  if (in_data.cameraDistFromSun > in_data.starDistFromSun) {
+    float ratio = in_datastarDistFromSun / in_data.cameraDistFromSun;
     //color *= ratio * ratioMultiplier;
   }
 
@@ -109,5 +111,5 @@ void main() {
     color /= maxVal;
   }
 
-  outColor = vec4(color, textureColor.a);
+  out_color = vec4(color, textureColor.a);
 }

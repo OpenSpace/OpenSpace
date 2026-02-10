@@ -29,16 +29,18 @@
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
 
-out vec2 vs_st;
-out vec4 vs_position;
+out Data {
+  vec4 position;
+  vec2 st;
+} out_data;
 
 uniform mat4 ViewProjection;
 uniform mat4 ModelTransform;
 
 
 void main() {
-  vs_st = in_st;
-  vs_position = in_position;
+  out_data.st = in_st;
+  out_data.position = in_position;
   vec4 tmp = in_position;
 
   // this is wrong for the normal. The normal transform is the transposed inverse of the
@@ -46,7 +48,7 @@ void main() {
   // vs_normal = normalize(ModelTransform * vec4(in_normal,0));
 
   vec4 position = pscTransform(tmp, ModelTransform);
-  vs_position = tmp;
+  out_data.position = tmp;
   position = ViewProjection * position;
   gl_Position = z_normalization(position);
 }

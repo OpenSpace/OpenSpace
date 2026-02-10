@@ -24,7 +24,9 @@
 
 #include "fragment.glsl"
 
-in vec2 uv;
+in Data {
+  vec2 uv;
+} in_data;
 
 uniform sampler2D renderedTexture;
 uniform dmat4 projection;
@@ -55,7 +57,7 @@ Fragment getFragment() {
   float fullAspect = planeAspect / screenAspect;
 
   // Find screenPos in skewed frustum. uv is [0, 1]
-  vec2 screenPos = uv * vec2(right - left, top - bottom) + vec2(left, bottom);
+  vec2 screenPos = in_data.uv * vec2(right - left, top - bottom) + vec2(left, bottom);
 
   // Find our elliptic scale factors by trigonometric approximation.
   float beta = atan(length(screenPos) / near);
@@ -124,7 +126,7 @@ Fragment getFragment() {
   ivec2 halfFilterSize = ivec2((newFilterSize - 1.0) / 2.0);
   for (int y = -halfFilterSize.y; y <= halfFilterSize.y; y += 1) {
     for (int x = -halfFilterSize.x; x <= halfFilterSize.x; x += 1) {
-      vec2 sPoint = uv + (pixelSize * ivec2(x, y));
+      vec2 sPoint = in_data.uv + (pixelSize * ivec2(x, y));
 
       // Calculate the contribution of this pixel (elliptic gaussian distribution).
       float pixelWeight = exp(

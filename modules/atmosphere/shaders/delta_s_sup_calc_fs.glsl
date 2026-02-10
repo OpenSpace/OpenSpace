@@ -26,7 +26,7 @@
 
 #include "atmosphere_common.glsl"
 
-out vec4 renderTarget;
+out vec4 out_color;
 
 uniform int SAMPLES_R;
 uniform int SAMPLES_MU;
@@ -46,5 +46,5 @@ void main() {
 
   // See Bruneton and Neyret paper, "Angular Precision" paragraph to understanding why we
   // are dividing the S[L*] by the Rayleigh phase function.
-  renderTarget = vec4(texture(deltaSTexture, uvw).rgb / rayleighPhaseFunction(nu), 0.0);
+  out_color = vec4(texture(deltaSTexture, uvw).rgb / rayleighPhaseFunction(nu), 0.0);
  }

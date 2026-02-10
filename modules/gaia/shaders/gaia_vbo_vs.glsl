@@ -26,14 +26,16 @@
 
 #include "floatoperations.glsl"
 
-in vec3 in_position;
-in vec2 in_brightness;
-in vec3 in_velocity;
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec2 in_brightness;
+layout(location = 2) in vec3 in_velocity;
 
-out vec2 vs_brightness;
-out vec4 vs_gPosition;
-out float vs_starDistFromSun;
-out float vs_cameraDistFromSun;
+out Data {
+  vec4 gPosition;
+  vec2 brightness;
+  float starDistFromSun;
+  float cameraDistFromSun;
+} out_data;
 
 uniform dmat4 model;
 uniform dmat4 view;
@@ -56,7 +58,7 @@ const float Parsec = 3.0856776e16;
 
 
 void main() {
-  vs_brightness = in_brightness;
+  out_data.brightness = in_brightness;
 
   // Check if we should filter this star by position. Thres depending on original values.
   if ((abs(posXThreshold.x) > Eps && in_position.x < posXThreshold.x) ||
@@ -76,7 +78,7 @@ void main() {
       (abs(bpRpThreshold.y) > Eps && in_brightness.y > bpRpThreshold.y))))
   {
     // Discard star in geometry shader.
-    vs_gPosition = vec4(0.0);
+    out_data.gPosition = vec4(0.0);
     gl_Position = vec4(0.0);
     return;
   }
@@ -97,7 +99,7 @@ void main() {
       (abs(distThreshold.y) > Eps && distPosition > distThreshold.y))))
   {
     // Discard star in geometry shader.
-    vs_gPosition = vec4(0.0);
+    out_data.gPosition = vec4(0.0);
     gl_Position = vec4(0.0);
     return;
   }
@@ -106,17 +108,17 @@ void main() {
   dvec4 viewPosition = view * model * objectPosition;
   vec4 sunPosition = vec4(view * model * vec4(0.0, 0.0, 0.0, 1.0));
 
-  vs_starDistFromSun = safeLength(objectPosition);
-  vs_cameraDistFromSun = safeLength(sunPosition);
+  out_data.starDistFromSun = safeLength(objectPosition);
+  out_data.cameraDistFromSun = safeLength(sunPosition);
 
   // Remove stars without position, happens when VBO chunk is stuffed with zeros.
   // Has to be done in Geometry shader because Vertices cannot be discarded here.
   if (length(in_position) > Eps) {
-    vs_gPosition = vec4(model * objectPosition);
+    out_data.gPosition = vec4(model * objectPosition);
     gl_Position = vec4(projection * viewPosition);
   }
   else {
-    vs_gPosition = vec4(0.0);
+    out_data.gPosition = vec4(0.0);
     gl_Position = vec4(0.0);
   }
 }

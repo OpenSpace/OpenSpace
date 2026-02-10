@@ -25,8 +25,10 @@
 #include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
 
-in vec2 vs_st;
-in vec4 vs_position;
+in Data {
+  vec4 position;
+  vec2 st;
+} in_data;
 
 uniform float time;
 uniform sampler2D texture1;
@@ -34,9 +36,9 @@ uniform float transparency;
 
 
 Fragment getFragment() {
-  vec4 position = vs_position;
+  vec4 position = in_data.position;
   float depth = pscDepth(position);
-  vec4 diffuse = texture(texture1, vs_st);
+  vec4 diffuse = texture(texture1, in_data.st);
 
   Fragment frag;
   frag.color = diffuse * vec4(1.0, 1.0, 1.0, transparency);

@@ -26,7 +26,7 @@
 
 #include "atmosphere_common.glsl"
 
-out vec4 renderTableColor;
+out vec4 out_color;
 
 uniform float Rg;
 uniform float Rt;
@@ -98,5 +98,5 @@ void main() {
   }
 
   // Write the higher order irradiance to texture deltaE
-  renderTableColor = vec4(irradianceE, 0.0);
+  out_color = vec4(irradianceE, 0.0);
 }

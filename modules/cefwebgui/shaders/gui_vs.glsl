@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-layout(location = 0) in vec2 position;
+layout(location = 0) in vec2 in_position;
 
 out Data {
   vec2 st;
@@ -32,7 +32,7 @@ out Data {
 
 
 void main() {
-  out_data.st = (position + 1.0) * 0.5;
-  gl_Position = vec4(position, 0.0, 1.0);
+  out_data.st = (in_position + 1.0) * 0.5;
+  gl_Position = vec4(in_position, 0.0, 1.0);
 }
 

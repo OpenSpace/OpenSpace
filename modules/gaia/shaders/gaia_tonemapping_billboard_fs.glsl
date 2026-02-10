@@ -24,7 +24,9 @@
 
 #include "fragment.glsl"
 
-in vec2 uv;
+in Data {
+  vec2 uv;
+} in_data;
 
 uniform sampler2D renderedTexture;
 
@@ -36,14 +38,13 @@ Fragment getFragment() {
 
   // BILLBOARDS
   // Sample color. Tonemapping done in first shader pass.
-  vec4 textureColor = texture(renderedTexture, uv);
+  vec4 textureColor = texture(renderedTexture, in_data.uv);
 
   // Use the following to check for any intensity at all.
   //color = (length(intensity.rgb) > 0.001)  ?  vec4(1.0)  :  vec4(0.0);
 
   Fragment frag;
   frag.color = textureColor;
-  // Place stars at back to begin with.
   frag.depth = DefaultDepth;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   frag.blend = BlendModeNormal;

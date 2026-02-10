@@ -26,7 +26,7 @@
 
 #include "atmosphere_common.glsl"
 
-out vec4 renderTarget;
+out vec4 out_color;
 
 uniform int SAMPLES_R;
 uniform int SAMPLES_MU;
@@ -47,5 +47,5 @@ void main() {
 
   // We are using only the red component of the Mie scattering. See the Precomputed
   // Atmosphere Scattering paper for details about the angular precision
-  renderTarget = vec4(rayleighInscattering, mieInscattering);
+  out_color = vec4(rayleighInscattering, mieInscattering);
 }
