@@ -27,12 +27,12 @@
 #include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
+layout(location = 1) in vec2 in_texCoord;
 layout(location = 2) in vec3 in_normal;
 
 out Data {
   vec3 normal;
-  vec2 st;
+  vec2 texCoord;
   float depth;
 } out_data;
 
@@ -48,7 +48,7 @@ void main() {
   vec3 tmp = in_position.xyz;
 
   if (hasHeightMap) {
-    vec2 st = out_data.st;
+    vec2 st = out_data.texCoord;
     if (meridianShift) {
       st += vec2(0.5, 0.0);
     }
@@ -66,7 +66,7 @@ void main() {
   // This is wrong for the normal.
   // The normal transform is the transposed inverse of the model transform
   out_data.normal = normalize(modelTransform * vec4(in_normal, 0.0)).xyz;
-  out_data.st = in_st;
+  out_data.texCoord = in_texCoord;
   out_data.depth = p.w;
   gl_Position = p;
 }

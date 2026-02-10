@@ -28,7 +28,7 @@
 in Data {
   vec4 positionCameraSpace;
   vec3 normalViewSpace;
-  vec2 st;
+  vec2 texCoord;
   float depth;
 } in_data;
 
@@ -59,14 +59,14 @@ Fragment getFragment() {
   // Base color
   vec4 textureColor;
   if (has_texture_diffuse) {
-    textureColor = texture(baseTexture, in_data.st);
+    textureColor = texture(baseTexture, in_data.texCoord);
   }
   else {
     textureColor = vec4(baseColor.rgb, 1.0);
   }
 
   // Mix base color with the projection images
-  vec4 projectionColor = texture(projectionTexture, in_data.st);
+  vec4 projectionColor = texture(projectionTexture, in_data.texCoord);
   if (projectionColor.a > 0.0) {
     textureColor.rgb = mix(
       textureColor.rgb,

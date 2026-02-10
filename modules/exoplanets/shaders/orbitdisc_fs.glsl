@@ -25,7 +25,7 @@
 #include "fragment.glsl"
 
 in Data {
-  vec2 st;
+  vec2 texCoord;
   float depth;
 } in_data;
 
@@ -57,7 +57,7 @@ float ellipseTest(vec2 point, float a, float b, float cx) {
 
 Fragment getFragment() {
   // Moving the origin to the center
-  vec2 st = (in_data.st - vec2(0.5)) * 2.0;
+  vec2 st = (in_data.texCoord - vec2(0.5)) * 2.0;
 
   float offsetLower = offset.x * semiMajorAxis;
   float offsetUpper = offset.y * semiMajorAxis;

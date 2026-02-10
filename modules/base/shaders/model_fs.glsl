@@ -30,7 +30,7 @@ in Data {
   vec4 lightspacePosition;
   vec3 normalViewSpace;
   vec3 color;
-  vec2 st;
+  vec2 texCoord;
   float screenSpaceDepth;
 } in_data;
 
@@ -108,7 +108,7 @@ Fragment getFragment() {
 
   // Base color
   vec4 diffuseAlbedo =
-    has_texture_diffuse  ?  texture(texture_diffuse, in_data.st)  :  color_diffuse;
+    has_texture_diffuse  ?  texture(texture_diffuse, in_data.texCoord)  :  color_diffuse;
 
   // Multiply with vertex color if specified
   if (use_vertex_colors) {
@@ -122,7 +122,7 @@ Fragment getFragment() {
     // Specular color
     vec3 specularAlbedo;
     if (has_texture_specular) {
-      specularAlbedo = texture(texture_specular, in_data.st).rgb;
+      specularAlbedo = texture(texture_specular, in_data.texCoord).rgb;
     }
     else {
       specularAlbedo = has_color_specular  ?  color_specular.rgb  :  diffuseAlbedo.rgb;
@@ -131,7 +131,7 @@ Fragment getFragment() {
     // Bump mapping
     vec3 normal;
     if (has_texture_normal) {
-      vec3 normalAlbedo = texture(texture_normal, in_data.st).rgb;
+      vec3 normalAlbedo = texture(texture_normal, in_data.texCoord).rgb;
       normalAlbedo = normalize(normalAlbedo * 2.0 - 1.0);
       normal = normalize(in_data.tbn * normalAlbedo);
     }

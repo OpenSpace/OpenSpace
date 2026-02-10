@@ -27,7 +27,7 @@
 in Data {
   vec4 gPosition;
   vec3 gNormal;
-  vec2 st;
+  vec2 texCoord;
   float screenSpaceDepth;
 } in_data;
 
@@ -40,14 +40,14 @@ uniform vec3 multiplyColor;
 Fragment getFragment() {
   vec4 color;
   if (gl_FrontFacing) {
-    color = texture(colorTexture, in_data.st);
+    color = texture(colorTexture, in_data.texCoord);
   }
   else {
     if (mirrorBackside) {
-      color = texture(colorTexture, vec2(1.0 - in_data.st.s, in_data.st.t));
+      color = texture(colorTexture, vec2(1.0 - in_data.texCoord.s, in_data.texCoord.t));
     }
     else {
-      color = texture(colorTexture, in_data.st);
+      color = texture(colorTexture, in_data.texCoord);
     }
   }
 

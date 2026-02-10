@@ -33,7 +33,7 @@ in Data {
   vec4 shadowCoords;
   vec3 normal;
   vec3 posObj;
-  vec2 st;
+  vec2 texCoord;
   float screenSpaceDepth;
 } in_data;
 
@@ -50,7 +50,7 @@ uniform vec3 ellipsoidRadii;
 
 Fragment getFragment() {
   // Moving the origin to the center
-  vec2 st = (in_data.st - vec2(0.5)) * 2.0;
+  vec2 st = (in_data.texCoord - vec2(0.5)) * 2.0;
 
   // The length of the texture coordinates vector is our distance from the center
   float radius = length(st);

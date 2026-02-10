@@ -26,7 +26,7 @@
 
 in Data {
   vec4 color;
-  vec2 st;
+  vec2 texCoord;
   float depth;
   float closeToEarth;
 } in_data;
@@ -49,7 +49,7 @@ Fragment getFragment() {
     discard;
   }
 
-  vec2 pos = vec2(0.5) - in_data.st;
+  vec2 pos = vec2(0.5) - in_data.texCoord;
   float r = length(pos) * 2.0;
   float a = atan(pos.y, pos.x);
   float f = cos(a * 3.0);

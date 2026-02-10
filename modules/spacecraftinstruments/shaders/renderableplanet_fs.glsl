@@ -27,7 +27,7 @@
 
 in Data {
   vec3 normal;
-  vec2 st;
+  vec2 texCoord;
   float depth;
 } in_data;
 
@@ -42,7 +42,7 @@ uniform vec3 sun_pos;
 
 
 Fragment getFragment() {
-  vec2 st = in_data.st;
+  vec2 st = in_data.texCoord;
   if (meridianShift) {
     st.s += 0.5;
   }
@@ -55,7 +55,7 @@ Fragment getFragment() {
   if (hasBaseMap) {
     textureColor = texture(baseTexture, st);
   }
-  vec4 projectionColor = texture(projectionTexture, in_data.st);
+  vec4 projectionColor = texture(projectionTexture, in_data.texCoord);
   if (projectionColor.a != 0.0) {
     textureColor.rgb = mix(
       textureColor.rgb,

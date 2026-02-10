@@ -27,7 +27,7 @@
 in Data {
   vec4 gPosition;
   vec3 gNormal;
-  vec2 st;
+  vec2 texCoord;
   float screenSpaceDepth;
 } in_data;
 
@@ -76,10 +76,14 @@ Fragment getFragment() {
   float rectangle = 0.0;
   const float MaxWwtFov = 70;
 
-  float crosshair = createCrosshair(lineWidth, ratio, in_data.st);
+  float crosshair = createCrosshair(lineWidth, ratio, in_data.texCoord);
   float crossHairHeight = crossHairSize / MaxWwtFov;
   float crossHairWidth = crossHairHeight * ratio;
-  float crossHairBox = createFilledRectangle(crossHairWidth, crossHairHeight, in_data.st);
+  float crossHairBox = createFilledRectangle(
+    crossHairWidth,
+    crossHairHeight,
+    in_data.texCoord
+  );
   crosshair *= crossHairBox;
 
   if (showRectangle) {
@@ -97,7 +101,11 @@ Fragment getFragment() {
     );
 
     // Calculate distance to edge
-    float distance = roundedRectangle(in_data.st.xy - vec2(0.5), size * 0.5, radius);
+    float distance = roundedRectangle(
+      in_data.texCoord.st - vec2(0.5),
+      size * 0.5,
+      radius
+    );
 
     // How soft the edges should be (in pixels)
     // Higher values could be used to simulate a drop shadow

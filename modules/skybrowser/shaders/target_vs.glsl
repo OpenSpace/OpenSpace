@@ -27,12 +27,12 @@
 #include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
+layout(location = 1) in vec2 in_texCoord;
 
 out Data {
   vec4 gPosition;
   vec3 gNormal;
-  vec2 st;
+  vec2 texCoord;
   float screenSpaceDepth;
 } out_data;
 
@@ -50,6 +50,6 @@ void main() {
   // G-Buffer
   out_data.gNormal = vec3(0.0);
   out_data.gPosition = vec4(modelViewTransform * position); // Must be in SGCT eye space;
-  out_data.st = in_st;
+  out_data.texCoord = in_texCoord;
   out_data.screenSpaceDepth = positionScreenSpace.w;
 }

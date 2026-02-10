@@ -27,7 +27,7 @@
 
 in Data {
   vec4 position;
-  vec2 st;
+  vec2 texCoord;
 } in_data;
 
 uniform sampler1D texture1;
@@ -40,7 +40,7 @@ uniform float nightFactor;
 
 Fragment getFragment() {
   // Moving the origin to the center
-  vec2 st = (in_data.st - vec2(0.5)) * 2.0;
+  vec2 st = (in_data.texCoord - vec2(0.5)) * 2.0;
 
   // The length of the texture coordinates vector is our distance from the center
   float radius = length(st);

@@ -27,14 +27,14 @@
 #include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_st;
+layout(location = 1) in vec2 in_texCoord;
 layout(location = 2) in vec3 in_normal;
 
 out Data {
   vec4 shadowCoords;
   vec3 normal;
   vec3 posObj;
-  vec2 st;
+  vec2 texCoord;
   float screenSpaceDepth;
 } out_data;
 
@@ -47,7 +47,7 @@ uniform dmat4 shadowMatrix;
 
 
 void main() {
-  out_data.st = in_st;
+  out_data.texCoord = in_texCoord;
   out_data.normal = mat3(modelViewProjectionMatrix) * in_normal;
   out_data.posObj = vec3(in_position, 0.0);
 

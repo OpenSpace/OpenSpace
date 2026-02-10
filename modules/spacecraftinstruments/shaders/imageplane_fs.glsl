@@ -25,7 +25,7 @@
 #include "fragment.glsl"
 
 in Data {
-  vec2 st;
+  vec2 texCoord;
   float screenSpaceDepth;
 } in_data;
 
@@ -34,7 +34,8 @@ uniform sampler2D texture1;
 
 Fragment getFragment() {
   Fragment frag;
-  frag.color = gl_FrontFacing  ?  texture(texture1, in_data.st)  :  vec4(vec3(0.1), 1.0);
+  frag.color =
+    gl_FrontFacing  ?  texture(texture1, in_data.texCoord)  :  vec4(vec3(0.1), 1.0);
   frag.depth = in_data.screenSpaceDepth;
   return frag;
 }

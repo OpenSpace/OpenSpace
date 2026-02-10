@@ -25,7 +25,7 @@
 #include "fragment.glsl"
 
 in Data {
-  vec2 st;
+  vec2 texCoord;
   float screenSpaceDepth;
 } in_data;
 
@@ -36,7 +36,7 @@ uniform float opacity;
 
 Fragment getFragment() {
   // The length of the texture coordinates vector is our distance from the center
-  float radius = length(in_data.st);
+  float radius = length(in_data.texCoord);
 
   // We only want to consider ring-like objects so we need to discard everything else
   if (radius > 1.0) {

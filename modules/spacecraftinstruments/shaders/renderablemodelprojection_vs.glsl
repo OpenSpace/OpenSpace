@@ -27,7 +27,7 @@
 #include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
+layout(location = 1) in vec2 in_texCoord;
 layout(location = 2) in vec3 in_normal;
 
 out Data {
@@ -49,5 +49,5 @@ void main() {
   );
   out_data.ndc = position / position.w;
 
-  gl_Position = vec4((in_st * 2.0) - 1.0, 0.0, 1.0);
+  gl_Position = vec4((in_texCoord * 2.0) - 1.0, 0.0, 1.0);
 }
