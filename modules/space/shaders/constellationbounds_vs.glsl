@@ -27,6 +27,7 @@
 #include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec3 in_position;
+
 out Data {
   vec4 position;
 } out_data;

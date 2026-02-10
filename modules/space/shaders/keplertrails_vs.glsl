@@ -26,8 +26,8 @@
 
 #include "powerscaling/powerscalingmath.glsl"
 
-layout (location = 0) in vec3 vertexData; // 1: x, 2: y, 3: z
-layout (location = 1) in dvec3 orbitData; // 1: timeOffset, 2: epoch, 3: period
+layout(location = 0) in vec3 vertexData; // 1: x, 2: y, 3: z
+layout(location = 1) in dvec3 orbitData; // 1: timeOffset, 2: epoch, 3: period
 
 out Data {
   vec4 viewSpacePosition;

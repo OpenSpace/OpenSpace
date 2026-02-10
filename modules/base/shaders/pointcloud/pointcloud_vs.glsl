@@ -26,11 +26,11 @@
 
 #include "powerscaling/powerscaling_vs.glsl"
 
-in vec3 in_position;
-in float in_textureLayer;
-in float in_colorParameter;
-in float in_scalingParameter;
-in vec4 in_orientation; // quaternion
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in float in_textureLayer;
+layout(location = 2) in float in_colorParameter;
+layout(location = 3) in float in_scalingParameter;
+layout(location = 4) in vec4 in_orientation; // quaternion
 
 out Data {
   flat vec4 orientation; // quaternion

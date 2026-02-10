@@ -26,7 +26,7 @@
 
 #include "powerscaling/powerscaling_vs.glsl"
 
-layout(location = 0) in vec4 in_point_position;
+layout(location = 0) in vec4 in_position;
 
 out Data {
   vec3 color;
@@ -46,7 +46,7 @@ void main() {
   }
 
   // Transform the damn psc to homogenous coordinate
-  vec4 position = vec4(in_point_position.xyz * pow(10, in_point_position.w), 1.0);
+  vec4 position = vec4(in_position.xyz * pow(10.0, in_position.w), 1.0);
   vec4 positionClipSpace = modelViewProjectionTransform * position;
   vec4 p = z_normalization(positionClipSpace);
   out_data.depth = p.w;

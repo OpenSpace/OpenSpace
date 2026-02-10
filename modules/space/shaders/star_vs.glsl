@@ -24,11 +24,11 @@
 
 #version __CONTEXT__
 
-in vec3 in_position;
-in vec3 in_bvLumAbsMag;
-in vec3 in_velocity;
-in float in_speed;
-in float in_otherData;
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec3 in_bvLumAbsMag;
+layout(location = 2) in vec3 in_velocity;
+layout(location = 3) in float in_speed;
+layout(location = 4) in float in_otherData;
 
 out Data {
   vec3 bvLumAbsMag;

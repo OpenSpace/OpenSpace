@@ -27,7 +27,7 @@
 #include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec3 in_point_position;
-layout (location = 1) in int colorInformation;
+layout(location = 1) in int colorInformation;
 
 out Data {
   vec4 color;

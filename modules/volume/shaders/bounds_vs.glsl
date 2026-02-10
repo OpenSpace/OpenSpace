@@ -26,7 +26,7 @@
 
 #include "powerscaling/powerscaling_vs.glsl"
 
-layout(location = 0) in vec3 vertPosition;
+layout(location = 0) in vec3 in_position;
 
 out Data {
   vec4 positionLocalSpace;
@@ -38,7 +38,7 @@ uniform mat4 projectionTransform;
 
 
 void main() {
-  out_data.positionLocalSpace = vec4(vertPosition, 1.0);
+  out_data.positionLocalSpace = vec4(in_position, 1.0);
   out_data.positionCameraSpace = modelViewTransform * out_data.positionLocalSpace;
 
   vec4 positionClipSpace = projectionTransform * out_data.positionCameraSpace;

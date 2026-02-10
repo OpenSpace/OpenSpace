@@ -26,7 +26,7 @@
 
 #include "powerscaling/powerscaling_vs.glsl"
 
-layout (location = 0) in vec3 in_position;
+layout(location = 0) in vec3 in_position;
 
 out Data {
   float depth;

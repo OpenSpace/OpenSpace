@@ -24,9 +24,9 @@
 
 #version __CONTEXT__
 
-in vec2 in_position;
-in vec2 in_uv;
-in vec4 in_color;
+layout(location = 0) in vec2 in_position;
+layout(location = 1) in vec2 in_uv;
+layout(location = 2) in vec4 in_color;
 
 out Data {
   vec4 color;

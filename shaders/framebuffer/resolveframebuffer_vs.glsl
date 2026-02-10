@@ -24,9 +24,9 @@
 
 #version __CONTEXT__
 
-in vec4 position;
+layout(location = 0) in vec4 in_position;
 
 
 void main() {
-  gl_Position = position;
+  gl_Position = in_position;
 }

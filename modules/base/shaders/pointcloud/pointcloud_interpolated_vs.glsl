@@ -26,22 +26,22 @@
 
 #include "powerscaling/powerscaling_vs.glsl"
 
-in vec3 in_position0;
-in vec3 in_position1;
+layout(location = 0) in vec3 in_position0;
+layout(location = 1) in vec3 in_position1;
 
 // Only used if spline interpolation is desired
-in vec3 in_position_before;
-in vec3 in_position_after;
+layout(location = 2) in vec3 in_position_before;
+layout(location = 3) in vec3 in_position_after;
 
-in float in_colorParameter0;
-in float in_colorParameter1;
-in float in_scalingParameter0;
-in float in_scalingParameter1;
+layout(location = 4) in float in_colorParameter0;
+layout(location = 5) in float in_colorParameter1;
+layout(location = 6) in float in_scalingParameter0;
+layout(location = 7) in float in_scalingParameter1;
 
-in float in_textureLayer;
+layout(location = 8) in float in_textureLayer;
 
-in vec4 in_orientation0; // quaternion
-in vec4 in_orientation1; // quaternion
+layout(location = 9) in vec4 in_orientation0; // quaternion
+layout(location = 10) in vec4 in_orientation1; // quaternion
 
 out Data {
   flat vec4 orientation; // quaternion
