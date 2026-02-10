@@ -46,7 +46,7 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
 
   // Source textures currently are square-rooted to avoid dithering in the shadows.
   // So square them back
-  sampledColor = sampledColor*sampledColor;
+  sampledColor = sampledColor * sampledColor;
 
   // Fudge for the dust "spreading"
   sampledColor.a = clamp(sampledColor.a, 0.0, 1.0);

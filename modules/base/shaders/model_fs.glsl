@@ -27,6 +27,7 @@
 in Data {
   mat3 tbn;
   vec4 positionCameraSpace;
+  vec4 lightspacePosition;
   vec3 normalViewSpace;
   vec3 color;
   vec2 st;
@@ -66,7 +67,6 @@ uniform vec2 resolution;
 // See renderableglobe and renderer_fs.glsl
 uniform bool has_shadow_depth_map;
 uniform sampler2D shadow_depth_map;
-in vec4 lightspace_position;
 
 uniform bool has_override_color;
 uniform vec4 override_color;
@@ -83,9 +83,7 @@ Fragment getFragment() {
   if (performManualDepthTest) {
     // gl_FragCoord.x goes from 0 to resolution.x and gl_FragCoord.y goes from 0 to
     // resolution.y, need to normalize it
-    vec2 texCoord = gl_FragCoord.xy;
-    texCoord.x = texCoord.x / resolution.x;
-    texCoord.y = texCoord.y / resolution.y;
+    vec2 texCoord = gl_FragCoord.xy / resolution;
 
     // Manual depth test
     float gBufferDepth = denormalizeFloat(texture(gBufferDepthTexture, texCoord).x);
@@ -109,22 +107,15 @@ Fragment getFragment() {
   }
 
   // Base color
-  vec4 diffuseAlbedo = vec4(0.0);
-  if (has_texture_diffuse) {
-    diffuseAlbedo = texture(texture_diffuse, in_data.st);
-  }
-  else {
-    diffuseAlbedo = color_diffuse;
-  }
+  vec4 diffuseAlbedo =
+    has_texture_diffuse  ?  texture(texture_diffuse, in_data.st)  :  color_diffuse;
 
   // Multiply with vertex color if specified
   if (use_vertex_colors) {
     diffuseAlbedo.rgb *= in_data.color;
 
     // Make sure to not go beyond color range
-    diffuseAlbedo.r = clamp(diffuseAlbedo.r, 0.0, 1.0);
-    diffuseAlbedo.g = clamp(diffuseAlbedo.g, 0.0, 1.0);
-    diffuseAlbedo.b = clamp(diffuseAlbedo.b, 0.0, 1.0);
+    diffuseAlbedo = clamp(diffuseAlbedo, 0.0, 1.0);
   }
 
   if (performShading) {
@@ -134,12 +125,7 @@ Fragment getFragment() {
       specularAlbedo = texture(texture_specular, in_data.st).rgb;
     }
     else {
-      if (has_color_specular) {
-        specularAlbedo = color_specular.rgb;
-      }
-      else {
-        specularAlbedo = diffuseAlbedo.rgb;
-      }
+      specularAlbedo = has_color_specular  ?  color_specular.rgb  :  diffuseAlbedo.rgb;
     }
 
     // Bump mapping
@@ -154,11 +140,11 @@ Fragment getFragment() {
     }
     frag.gNormal = vec4(normal, 0.0);
 
-    // Could be seperated into ambinet, diffuse and specular and passed in as uniforms
-    const vec3 lightColor = vec3(1.0);
+    // Could be seperated into ambient, diffuse and specular and passed in as uniforms
+    const vec3 LightColor = vec3(1.0);
 
     // Ambient light
-    vec3 totalLightColor = ambientIntensity * lightColor * diffuseAlbedo.rgb;
+    vec3 totalLightColor = ambientIntensity * LightColor * diffuseAlbedo.rgb;
 
     vec3 viewDirection = normalize(in_data.positionCameraSpace.xyz);
     vec3 totalSpecularColor = vec3(0.0);
@@ -167,24 +153,23 @@ Fragment getFragment() {
       // Diffuse light
       vec3 lightDirection = lightDirectionsViewSpace[i];
       float diffuseFactor = max(dot(normal, lightDirection), 0.0);
-      vec3 diffuseColor =
-        diffuseIntensity * lightColor * diffuseFactor * diffuseAlbedo.rgb;
+      vec3 diffuse = diffuseIntensity * LightColor * diffuseFactor * diffuseAlbedo.rgb;
 
       // Specular light
       vec3 reflectDirection = reflect(lightDirection, normal);
       float specularFactor =
         pow(max(dot(viewDirection, reflectDirection), 0.0), specularPower);
-      vec3 specularColor =
-        specularIntensity * lightColor * specularFactor * specularAlbedo;
+      vec3 specular = specularIntensity * LightColor * specularFactor * specularAlbedo;
 
-      totalLightColor += lightIntensities[i] * diffuseColor;
-      totalSpecularColor += lightIntensities[i] * specularColor;
+      totalLightColor += lightIntensities[i] * diffuse;
+      totalSpecularColor += lightIntensities[i] * specular;
     }
     frag.color.rgb = totalLightColor + totalSpecularColor;
 
     if (has_shadow_depth_map) {
       const float Bias = 0.0005;
-      vec3 coords = 0.5 + 0.5 * lightspace_position.xyz / lightspace_position.w;
+      vec3 coords =
+        0.5 + 0.5 * in_data.lightspacePosition.xyz / in_data.lightspacePosition.w;
 
       // Any fragment that is behind the stored depth is in shadow, multisampling for
       // smoother shadows
@@ -207,7 +192,7 @@ Fragment getFragment() {
       const float Norm = pow(2.0 * ShadowFilterSize + 1, 2.0);
       float shadowFactor = float(accum) / Norm;
       // Apply shadow to diffuse lighting (with ambient contribution)
-      vec3 ambientLightColor = ambientIntensity * lightColor * diffuseAlbedo.rgb;
+      vec3 ambientLightColor = ambientIntensity * LightColor * diffuseAlbedo.rgb;
       totalLightColor *= ambientLightColor + (1.0 - ambientLightColor) * shadowFactor;
       // Apply shadow to specular lighting (more aggressive - specular highlights should
       // be sharply attenuated in shadows)

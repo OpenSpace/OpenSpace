@@ -120,12 +120,10 @@ Fragment getFragment() {
   }
 
   Fragment frag;
-
   frag.color = diffuse * shadow;
-  frag.color.a = frag.color.a * opacity + (1.0 - shadow) * 0.5;
+  frag.color.a *= opacity + (1.0 - shadow) * 0.5;
   frag.depth = in_data.screenSpaceDepth;
   frag.gPosition = vec4(1e30, 1e30, 1e30, 1.0);
   frag.gNormal = vec4(normal, 1.0);
-
   return frag;
 }

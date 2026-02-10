@@ -136,29 +136,29 @@ vec2 calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], dvec3 po
   dvec3 pcProj = dot(pc, scNorm) * scNorm;
   dvec3 d = pc - pcProj;
 
-  float length_d = float(length(d));
+  float lengthD = float(length(d));
   double lengthPcProj = length(pcProj);
 
-  float r_p_pi = float(
+  float rPenumbra = float(
     shadowInfoArray[0].rc * (lengthPcProj + shadowInfoArray[0].xp) / shadowInfoArray[0].xp
   );
-  float r_u_pi = float(
+  float rUmbra = float(
     shadowInfoArray[0].rc * (shadowInfoArray[0].xu - lengthPcProj) / shadowInfoArray[0].xu
   );
 
-  if (length_d < r_u_pi) {
+  if (lengthD < rUmbra) {
     // umbra
     if (hardShadows) {
       return ground  ?  vec2(1.0, 0.2)  :  vec2(1.0, 0.5);
     }
     else {
       // butterworth function
-      return vec2(1.0, sqrt(r_u_pi / (r_u_pi + pow(length_d, 4.0))));
+      return vec2(1.0, sqrt(rUmbra / (rUmbra + pow(lengthD, 4.0))));
     }
   }
-  else if (length_d < r_p_pi) {
+  else if (lengthD < rPenumbra) {
     // penumbra
-    return hardShadows  ?  vec2(1.0, 0.5)  :  vec2(1.0, length_d / r_p_pi);
+    return hardShadows  ?  vec2(1.0, 0.5)  :  vec2(1.0, lengthD / rPenumbra);
   }
   else {
     return vec2(1.0, 1.0);
@@ -216,9 +216,8 @@ struct Ray {
  *                outside the atmosphere or the initial (and only) intersection of the ray
  *                with atmosphere when the eye position is inside atmosphere.
  */
-bool atmosphereIntersection(Ray ray, double atmRadius, out double offset,
-                            out double maxLength)
-{
+bool atmosphereIntersection(Ray ray, out double offset, out double maxLength) {
+  double atmRadius = Rt - (AtmEpsilon * 0.001);
   dvec3 l = -ray.origin;
   double s = dot(l, ray.direction);
   double l2 = dot(l, l);
@@ -556,12 +555,7 @@ void main() {
 
   double offset = 0.0;   // in KM
   double maxLength = 0.0;   // in KM
-  bool intersect = atmosphereIntersection(
-    ray,
-    Rt - (AtmEpsilon * 0.001),
-    offset,
-    maxLength
-  );
+  bool intersect = atmosphereIntersection(ray, offset, maxLength);
   if (!intersect) {
     out_color = color;
     return;
@@ -605,9 +599,7 @@ void main() {
     const float alpha = 1000.0;
     const float beta = 1000000.0;
     const float x2 = 1e9;
-    const float diffGreek = beta - alpha;
-    const float diffDist = x2 - x1;
-    const float varA = diffGreek / diffDist;
+    const float varA = (beta - alpha) / (x2 - x1);
     const float varB = (alpha - varA * x1);
     pixelDepth += double(varA * dC + varB);
   }

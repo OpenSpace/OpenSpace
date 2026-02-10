@@ -56,8 +56,7 @@ Fragment getFragment() {
   }
 
   Fragment frag;
-  frag.color.rgb = textureColor.rgb;
-  frag.color.a = opacity * textureColor.a;
+  frag.color = vec4(textureColor.rgb, textureColor.a * opacity);
   frag.depth = denormalizeFloat(texture(depthTexture, in_data.st).x);
   frag.disableLDR2HDR = true;
   return frag;

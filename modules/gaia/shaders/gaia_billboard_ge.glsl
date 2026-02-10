@@ -78,7 +78,6 @@ void main() {
 
   // Make closer stars look a bit bigger.
   out_data.observedDist = safeLength(viewPosition / viewScaling);
-  float closeUpBoost = closeUpBoostDist / out_data.observedDist;
   float initStarSize = billboardSize;
 
   // Use magnitude for size boost as well.
@@ -90,18 +89,19 @@ void main() {
     float absoluteMagnitude = in_data[0].brightness.x;
     float normalizedMagnitude = (absoluteMagnitude - 20.0) / -1.0; // (-15 - 20);
 
-    // TODO: A linear scale is prabably not the best!
+    // TODO: A linear scale is probably not the best
     initStarSize += normalizedMagnitude * (magnitudeBoost / 50.0);
   }
 
   vec4 position = gl_in[0].gl_Position;
+  float closeUpBoost = closeUpBoostDist / out_data.observedDist;
   vec2 starSize = vec2(initStarSize + closeUpBoost) * position.w / 1000.0;
 
   float distThreshold = cutOffThreshold - log(out_data.observedDist) / log(4.0);
 
   // Discard geometry if star has no position (but wasn't a nullArray).
   // Or if observed distance is above threshold set by cutOffThreshold.
-  // By discarding in gs instead of fs we save computations for when nothing is visible.
+  // By discarding in gs instead of fs we save computations for when nothing is visible
   if (length(position) < Eps || distThreshold <= 0) {
     return;
   }
@@ -118,7 +118,7 @@ void main() {
   starSize *= float(multiplier / 10.0);
 
   for (int i = 0; i < 4; i++) {
-    // Always turn the billboard towards the camera (needed for warped screen).
+    // Always turn the billboard towards the camera (needed for warped screen)
     vec4 cornerPoint = centerWorldPos + wCameraRight * starSize.x * (Corners[i].x - 0.5) +
       wCameraUp * starSize.y * (Corners[i].y - 0.5);
     gl_Position = vec4(projection * view * cornerPoint);

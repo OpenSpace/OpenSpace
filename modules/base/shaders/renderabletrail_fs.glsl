@@ -54,7 +54,6 @@ Fragment getFragment() {
     // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
     // smoothstep to gradually decrease the alpha on the edges of the point
     vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
-    //float circleClipping = 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));
     float circleClipping = smoothstep(1.0, 1.0 - Delta, dot(circCoord, circCoord));
     frag.color.a *= circleClipping;
   }
@@ -67,20 +66,17 @@ Fragment getFragment() {
 
     double distanceCenter = length(in_data.mathLine - xy);
     double dLW = double(lineWidth);
-    const float blendFactor = 20.0;
+    const float BlendFactor = 20.0;
 
     if (distanceCenter > dLW) {
       frag.color.a = 0.0;
     }
     else {
-      frag.color.a *= pow(float((dLW - distanceCenter) / dLW), blendFactor);
+      frag.color.a *= pow(float((dLW - distanceCenter) / dLW), BlendFactor);
     }
   }
 
   frag.gPosition = in_data.gPosition;
-
-  // There is no normal here
   frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
-
   return frag;
 }

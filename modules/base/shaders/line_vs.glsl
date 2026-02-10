@@ -37,9 +37,8 @@ uniform mat4 projectionTransform;
 
 void main() {
   out_data.positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1.0));
-  vec4 positionScreenSpace = projectionTransform * out_data.positionViewSpace;
-  out_data.depth = positionScreenSpace.w;
-  gl_Position = positionScreenSpace;
+  gl_Position = projectionTransform * out_data.positionViewSpace;
+  out_data.depth = gl_Position.w;
 
   // Set z to 0 to disable near and far plane, unique handling for perspective in space
   gl_Position.z = 0.0;

@@ -52,50 +52,38 @@ const float LumLowerCap = 0.01;
 vec3 color2rgb(float color) {
   // BV is [-0.4, 2.0]
   float st = (color + 0.4) / (2.0 + 0.4);
-
-  // Bp-Rp[-2.0, 6.5], Bp-G[-2.1, 5.0], G-Rp[-1.0, 3.0]
-  //float st = (color + 1.0) / (5.0 + 1.0);
-
   return texture(colorTexture, st).rgb;
 }
 
 
 void main() {
-  // Assume all stars has equal luminosity as the Sun when no magnitude is loaded.
+  // Assume all stars has equal luminosity as the Sun when no magnitude is loaded
   float luminosity = 0.05;
   vec3 color = vec3(luminosity);
-  float ratioMultiplier = 1.0;
 
-  // Calculate the color and luminosity if we have the magnitude and B-V color.
+  // Calculate the color and luminosity if we have the magnitude and B-V color
   if (renderOption != RenderOptionStatic) {
     color = color2rgb(in_data.brightness.y);
-    ratioMultiplier = 0.01;
 
-    // Absolute magnitude is brightness a star would have at 10 pc away.
+    // Absolute magnitude is brightness a star would have at 10 pc away
     float absoluteMagnitude = in_data.brightness.x;
 
     // From formula: MagSun - MagStar = 2.5*log(LumStar / LumSun), it gives that:
     // LumStar = 10^(1.89 - 0.4*Magstar) , if LumSun = 1 and MagSun = 4.72
     luminosity = pow(10.0, 1.89 - 0.4 * absoluteMagnitude);
 
-    // If luminosity is really really small then set it to a static low number.
+    // If luminosity is really really small then set it to a static low number
     if (luminosity < LumLowerCap) {
       luminosity = LumLowerCap;
     }
   }
 
-  // Luminosity decrease by {squared} distance [measured in Pc].
+  // Luminosity decrease by {squared} distance [measured in Pc]
   float observedDistance = in_data.observedDist / Parsec;
   luminosity /= pow(observedDistance, 2.0);
 
-  // Multiply our color with the luminosity as well as a user-controlled property.
+  // Multiply our color with the luminosity as well as a user-controlled property
   color *= luminosity * pow(luminosityMultiplier, 3.0);
-
-  // Decrease contributing brightness for stars in central cluster.
-  if (in_data.cameraDistFromSun > in_data.starDistFromSun) {
-    float ratio = in_data.starDistFromSun / in_data.cameraDistFromSun;
-    //color *= ratio * ratioMultiplier;
-  }
 
   out_color = vec4(color, 1.0);
 }

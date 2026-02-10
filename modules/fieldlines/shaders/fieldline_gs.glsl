@@ -44,15 +44,10 @@ uniform vec3 cameraViewDir;
 
 
 // Calculate the correct powerscaled position and depth for the ABuffer
-void ABufferEmitVertex(vec4 pos) {
-  // calculate psc position
-  vec4 tmp = pos;
-  vec4 position = pscTransform(tmp, modelTransform);
-  out_data.position = tmp;
-
-  // project the position to view space
-  position = modelViewProjection*position;
-  gl_Position = z_normalization(position);
+void emitVertex(vec4 pos) {
+  vec4 position = pscTransform(pos, modelTransform);
+  out_data.position = pos;
+  gl_Position = z_normalization(modelViewProjection * position);
   EmitVertex();
 }
 
@@ -89,15 +84,15 @@ void main() {
 
   // Send normals and verticies to fragment shader
   out_data.normal = normals0;
-  ABufferEmitVertex(prismoid0);
+  emitVertex(prismoid0);
 
   out_data.normal = normals1;
-  ABufferEmitVertex(prismoid1);
+  emitVertex(prismoid1);
 
   out_data.normal = normals3;
-  ABufferEmitVertex(prismoid3);
+  emitVertex(prismoid3);
 
   out_data.normal = normals2;
-  ABufferEmitVertex(prismoid2);
+  emitVertex(prismoid2);
   EndPrimitive();
 }

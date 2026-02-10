@@ -39,7 +39,7 @@ uniform vec3 betaMieExtinction;
 uniform bool ozoneLayerEnabled;
 uniform ivec2 TRANSMITTANCE;
 
-const int TRANSMITTANCE_STEPS = 500;
+const int TransmittanceSteps = 500;
 
 
 // Optical depth by integration, from ray starting at point vec(x), i.e, height r and
@@ -64,12 +64,12 @@ float opticalDepth(float r, float mu, float H) {
   // Integrating using the Trapezoidal rule:
   // Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
   float b_a = rayDistance(r, mu, Rt, Rg);
-  float deltaStep = b_a / float(TRANSMITTANCE_STEPS);
+  float deltaStep = b_a / float(TransmittanceSteps);
   // cosine law
   float y_i = exp(-(r - Rg) / H);
 
   float accumulation = 0.0;
-  for (int i = 1; i <= TRANSMITTANCE_STEPS; i++) {
+  for (int i = 1; i <= TransmittanceSteps; i++) {
     float x_i = float(i) * deltaStep;
     // cosine law for triangles: y_i^2 = a^2 + b^2 - 2abcos(alpha)
     // In this case, a = r, b = x_i and cos(alpha) = cos(PI-zenithView) = mu
@@ -77,7 +77,7 @@ float opticalDepth(float r, float mu, float H) {
     accumulation += (y_ii + y_i);
     y_i = y_ii;
   }
-  return accumulation * (b_a / (2.0 * TRANSMITTANCE_STEPS));
+  return accumulation * (b_a / (2.0 * TransmittanceSteps));
 }
 
 

@@ -45,17 +45,16 @@ const double Parsec = 3.08567756E16;
 
 void main() {
   out_data.position = vec4(in_position, 1.0);
-  dvec4 dpos = dvec4(out_data.position);
 
-  double distanceToStar = length(dpos.xyz - eyePosition);
+  double distanceToStar = length(dvec3(out_data.position.xyz) - eyePosition);
   out_data.starBrightness = clamp(float(8000.0 * Parsec / distanceToStar), 0.0, 1.0);
 
+  dvec4 dpos = dvec4(out_data.position) * dvec4(8.0, 8.0, 8.0, 1.0);
   dpos.xyz *= 8.0;
   dpos = modelMatrix * dpos;
   dpos /= Parsec;
 
-  vec4 positionScreenSpace = z_normalization(vec4(viewProjectionMatrix * dpos));
+  gl_Position = z_normalization(vec4(viewProjectionMatrix * dpos));
   out_data.color = in_color;
-  out_data.screenSpaceDepth = positionScreenSpace.w;
-  gl_Position = positionScreenSpace;
+  out_data.screenSpaceDepth = gl_Position.w;
 }

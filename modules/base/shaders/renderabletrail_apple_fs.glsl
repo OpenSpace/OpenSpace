@@ -24,9 +24,11 @@
 
 #include "fragment.glsl"
 
-in float vs_positionDepth;
-in vec4 vs_gPosition;
-in float fade;
+in Data {
+  vec4 gPosition;
+  float positionDepth;
+  in float fade;
+} in_data;
 
 uniform vec3 color;
 uniform int renderPhase;
@@ -41,8 +43,8 @@ const float Delta = 0.25;
 
 Fragment getFragment() {
   Fragment frag;
-  frag.color = vec4(color * fade, fade * opacity);
-  frag.depth = vs_positionDepth;
+  frag.color = vec4(color * in_data.fade, in_data.fade * opacity);
+  frag.depth = in_data.positionDepth;
   frag.blend = BlendModeAdditive;
 
   if (renderPhase == RenderPhasePoints) {
@@ -54,7 +56,7 @@ Fragment getFragment() {
     frag.color.a *= circleClipping;
   }
 
-  frag.gPosition = vs_gPosition;
+  frag.gPosition = in_data.gPosition;
   frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0); // There is no normal here
   return frag;
 }

@@ -40,9 +40,7 @@ const float DefaultDepth = 3.08567758e19; // 1000 Pc
 
 
 Fragment getFragment() {
-  // GL_POINTS
-
-  // Use frustum params to be able to compensate for a skewed frustum (in a dome).
+  // Use frustum params to be able to compensate for a skewed frustum (in a dome)
   float near = float(projection[3][2] / (projection[2][2] - 1.0));
   float left = float(near * (projection[2][0] - 1.0) / projection[0][0]);
   float right = float(near * (projection[2][0] + 1.0) / projection[0][0]);
@@ -59,14 +57,14 @@ Fragment getFragment() {
   // Find screenPos in skewed frustum. uv is [0, 1]
   vec2 screenPos = in_data.uv * vec2(right - left, top - bottom) + vec2(left, bottom);
 
-  // Find our elliptic scale factors by trigonometric approximation.
+  // Find our elliptic scale factors by trigonometric approximation
   float beta = atan(length(screenPos) / near);
   vec2 sigmaScaleFactor = vec2(1.0 / cos(beta), 1.0 / pow(cos(beta), 2.0));
 
   float defaultScreen = 1200.0;
   float scaling = screenSize.y / defaultScreen * yFactor;
 
-  // Scale filter size depending on screen pos.
+  // Scale filter size depending on screen pos
   vec2 filterScaleFactor = vec2(
     pow(screenPos.x / near, 2.0) * fullAspect,
     pow(screenPos.y / near, 2.0)
@@ -99,10 +97,10 @@ Fragment getFragment() {
   // distribution.
   bool useCircleDist = false;
 
-  // Apply scaling on bloom filter.
+  // Apply scaling on bloom filter
   vec2 newFilterSize = vec2(filterSize) * (1.0 + length(filterScaleFactor)) * scaling;
 
-  // Calculate params for a rotated Elliptic Gaussian distribution.
+  // Calculate params for a rotated Elliptic Gaussian distribution
   float a = 0.0;
   float b = 0.0;
   float c = 0.0;
@@ -124,22 +122,22 @@ Fragment getFragment() {
   vec3 intensity = vec3(0.0);
   vec2 pixelSize = 1.0 / screenSize;
   ivec2 halfFilterSize = ivec2((newFilterSize - 1.0) / 2.0);
-  for (int y = -halfFilterSize.y; y <= halfFilterSize.y; y += 1) {
-    for (int x = -halfFilterSize.x; x <= halfFilterSize.x; x += 1) {
+  for (int y = -halfFilterSize.y; y <= halfFilterSize.y; y++) {
+    for (int x = -halfFilterSize.x; x <= halfFilterSize.x; x++) {
       vec2 sPoint = in_data.uv + (pixelSize * ivec2(x, y));
 
-      // Calculate the contribution of this pixel (elliptic gaussian distribution).
+      // Calculate the contribution of this pixel (elliptic gaussian distribution)
       float pixelWeight = exp(
         -(a * pow(x * fullAspect, 2.0) + 2.0 * b * x * y * fullAspect + c * pow(y, 2.0))
       );
 
-      // Only sample inside FBO texture and if the pixel will contribute to final color.
+      // Only sample inside FBO texture and if the pixel will contribute to final color
       if (all(greaterThan(sPoint, vec2(0.0))) && all(lessThan(sPoint, vec2(1.0))) &&
           pixelWeight > pixelWeightThreshold)
       {
         vec4 sIntensity = texture(renderedTexture, sPoint);
 
-        // Use normal distribution function for halo/bloom effect.
+        // Use normal distribution function for halo/bloom effect
         if (useCircleDist) {
           float circleDist = sqrt(pow(x / (1.0 + length(filterScaleFactor)), 2.0) +
             pow(y / (1.0 + length(filterScaleFactor)), 2.0));
@@ -147,26 +145,22 @@ Fragment getFragment() {
             exp(-(pow(circleDist, 2.0) / (2.0 * pow(sigma, 2.0)))) / filterSize;
         }
         else {
-          // Divide contribution by area of ellipse.
+          // Divide contribution by area of ellipse
           intensity += sIntensity.rgb * pixelWeight * fullAspect;
         }
       }
     }
   }
-  // Tonemap intensity to color!
-  //intensity = 1.0 - 1.0 * exp(-25.0 * intensity);
+
+  // Tonemap intensity to color
   intensity = pow(intensity, vec3(0.8));
 
   if (length(intensity) < 0.01) {
     discard;
   }
 
-  // Use the following to check for any intensity at all.
-  //color = (length(intensity.rgb) > 0.001)  ?  vec4(1.0)  :  vec4(0.0);
-
   Fragment frag;
   frag.color = vec4(intensity, 1.0);
-  // Place stars at back to begin with.
   frag.depth = DefaultDepth;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   frag.blend = BlendModeNormal;

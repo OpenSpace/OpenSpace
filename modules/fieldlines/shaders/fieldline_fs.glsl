@@ -39,20 +39,11 @@ Fragment getFragment() {
   float alpha = 1.0 - length(in_data.normal) * length(in_data.normal);
 
   Fragment frag;
-  if (classification) {
-    frag.color = vec4(in_data.color.rgb * alpha, 1.0);
-  }
-  else {
-    frag.color = vec4(fieldLineColor.rgb * fieldLineColor.a * alpha, 1.0);
-  }
-
+  frag.color = classification ?
+    vec4(in_data.color.rgb * alpha, 1.0) :
+    vec4(fieldLineColor.rgb * fieldLineColor.a * alpha, 1.0);
   frag.depth = pscDepth(in_data.position);
-
-  // G-Buffer
-  frag.gPosition = vec4(0.0);//vs_gPosition;
-  // There is no normal here
-  // TODO: Add the correct normal if necessary (JCC)
+  frag.gPosition = vec4(0.0);
   frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
-
   return frag;
 }

@@ -38,9 +38,7 @@ uniform dmat4 modelViewTransform;
 
 
 void main() {
+  out_data.viewPosition = vec4(modelViewTransform * vertPosition);
   out_data.modelPosition = vertPosition.xyz;
-  dvec4 vp = modelViewTransform * vertPosition;
-  out_data.viewPosition = vec4(vp);
-
   gl_Position = z_normalization(vec4(projectionTransform * out_data.viewPosition));
 }

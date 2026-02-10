@@ -30,8 +30,8 @@ layout(location = 0) in vec3 in_position0;
 layout(location = 1) in vec3 in_position1;
 
 // Only used if spline interpolation is desired
-layout(location = 2) in vec3 in_position_before;
-layout(location = 3) in vec3 in_position_after;
+layout(location = 2) in vec3 in_positionBefore;
+layout(location = 3) in vec3 in_positionAfter;
 
 layout(location = 4) in float in_colorParameter0;
 layout(location = 5) in float in_colorParameter1;
@@ -54,7 +54,7 @@ uniform bool useSpline;
 uniform float interpolationValue;
 
 
-float interpolateDataValue(float v0, float v1, float t) {
+float interpolateValue(float v0, float v1, float t) {
   const float Epsilon = 1E-7;
   const float NaN = log(-1.0); // undefined
   // To make sure we render values at knots with neighboring missing values,
@@ -84,10 +84,7 @@ vec3 interpolateCatmullRom(float t, vec3 p0, vec3 p1, vec3 p2, vec3 p3) {
 vec4 quaternionSlerp(vec4 a, vec4 b, float t) {
   // if either input is zero, return the other.
   if (length(a) == 0.0) {
-    if (length(b) == 0.0) {
-      return vec4(0.0, 0.0, 0.0, 1.0);
-    }
-    return b;
+    return length(b) == 0.0  ?  vec4(0.0, 0.0, 0.0, 1.0)  :  b;
   }
   else if (length(b) == 0.0) {
     return a;
@@ -121,24 +118,15 @@ vec4 quaternionSlerp(vec4 a, vec4 b, float t) {
   }
 
   vec4 result = vec4(blendA * a.xyz + blendB * b.xyz, blendA * a.w + blendB * b.w);
-  if (length(result) > 0.0) {
-    return normalize(result);
-  }
-  else {
-    return vec4(0.0, 0.0, 0.0, 1.0);
-  }
+  return length(result) > 0.0  ?  normalize(result)  :  vec4(0.0, 0.0, 0.0, 1.0);
 }
 
 
 void main() {
   float t = interpolationValue;
 
-  out_data.colorParameter = interpolateDataValue(
-    in_colorParameter0,
-    in_colorParameter1,
-    t
-  );
-  out_data.scalingParameter = interpolateDataValue(
+  out_data.colorParameter = interpolateValue(in_colorParameter0, in_colorParameter1, t);
+  out_data.scalingParameter = interpolateValue(
     in_scalingParameter0,
     in_scalingParameter1,
     t
@@ -148,16 +136,14 @@ void main() {
   if (useSpline) {
     position = interpolateCatmullRom(
       t,
-      in_position_before,
+      in_positionBefore,
       in_position0,
       in_position1,
-      in_position_after
+      in_positionAfter
     );
   }
 
   out_data.orientation = quaternionSlerp(in_orientation0, in_orientation1, t);
-
   out_data.textureLayer = in_textureLayer;
-
   gl_Position = vec4(position, 1.0);
 }

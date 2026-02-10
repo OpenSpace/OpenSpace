@@ -502,8 +502,8 @@ void RenderableInterpolatedPoints::initializeBufferData() {
     offset = bufferVertexAttribute("in_position1", 3, attibsPerPoint, offset);
 
     if (useSplineInterpolation()) {
-        offset = bufferVertexAttribute("in_position_before", 3, attibsPerPoint, offset);
-        offset = bufferVertexAttribute("in_position_after", 3, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_positionBefore", 3, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_positionAfter", 3, attibsPerPoint, offset);
     }
 
     if (hasColorData()) {

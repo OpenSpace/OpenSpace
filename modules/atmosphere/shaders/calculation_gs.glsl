@@ -32,8 +32,8 @@ uniform int layer;
 
 
 void main() {
-  for (int n = 0; n < gl_in.length(); n++) {
-    gl_Position = gl_in[n].gl_Position;
+  for (int i = 0; i < gl_in.length(); i++) {
+    gl_Position = gl_in[i].gl_Position;
     gl_Layer = layer;
     EmitVertex();
   }

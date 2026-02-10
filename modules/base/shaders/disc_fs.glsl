@@ -51,11 +51,9 @@ Fragment getFragment() {
     discard;
   }
 
-  vec4 diffuse = texture(colorTexture, texCoord);
-  diffuse.a *= opacity;
-
   Fragment frag;
-  frag.color = diffuse;
+  frag.color = texture(colorTexture, texCoord);
+  frag.color.a *= opacity;
   frag.depth = in_data.screenSpaceDepth;
   return frag;
 }

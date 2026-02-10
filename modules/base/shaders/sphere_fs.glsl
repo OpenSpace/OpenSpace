@@ -56,29 +56,25 @@ vec2 equiToAngularFisheye(vec2 textureCoords) {
   float lon = pos2.x * M_PI;
 
   // Map to 3D position, with Z being the north pole
-  vec3 pos3 = vec3(
-    cos(lat) * cos(lon),
-    sin(lat),
-    cos(lat) * sin(lon)
-  );
-
-  float coverAngle = M_PI; // 180 degrees
+  vec3 pos3 = vec3(cos(lat) * cos(lon), sin(lat), cos(lat) * sin(lon));
 
   // 3D vector to normalized 2D fisheye [-1,1]
-  float r = 2.0 / coverAngle * atan(sqrt(dot(pos3.xz, pos3.xz)), pos3.y);
+  float r = 2.0 / M_PI * atan(sqrt(dot(pos3.xz, pos3.xz)), pos3.y);
+  if (r > 1.0) {
+    // Invalid coordinates (outside fisheye frame)
+     discard;
+  }
+
   float theta = atan(pos3.z, pos3.x);
   vec2 fisheye2D = vec2(r * cos(theta), r * sin(theta));
-
-  if (r > 1.0) {
-     discard; // Invalid coordinates (outside fisheye frame)
-  }
 
   // Remap to [0,1]
   return 0.5 * fisheye2D + 0.5;
 }
 
 Fragment getFragment() {
-  vec2 texCoord = in_data.textureCoords; // Equirectangular
+  // Equirectangular
+  vec2 texCoord = in_data.textureCoords;
 
   if (textureProjection == AngularFisheye) {
     texCoord = equiToAngularFisheye(in_data.textureCoords);
@@ -94,20 +90,14 @@ Fragment getFragment() {
     float maxVal = dataMinMaxValues.y;
     // dataValue and minVal comes from the same texture so dataValue cannot be < minVal
     float lookUpVal = (dataValue.x - minVal) / (maxVal - minVal);
-    frag.color = vec4(
-        texture(transferFunction, lookUpVal).rgb,
-        1.0
-    );
+    frag.color = vec4(texture(transferFunction, lookUpVal).rgb, 1.0);
   }
   else {
     frag.color = texture(colorTexture, texCoord);
   }
   frag.color.a *= opacity;
   frag.depth = in_data.screenSpaceDepth;
-
-  // G-Buffer
   frag.gPosition = in_data.position;
   frag.gNormal = vec4(in_data.normal, 1.0);
-
   return frag;
 }

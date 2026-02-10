@@ -38,12 +38,9 @@ uniform mat4 projectionTransform;
 
 void main() {
   vec4 positionViewSpace = modelViewTransform * vec4(in_position, 1.0);
-  vec4 positionClipSpace = projectionTransform * positionViewSpace;
-  vec4 positionScreenSpace = positionClipSpace;
-  positionScreenSpace.z = 0.0;
+  gl_Position = projectionTransform * positionViewSpace;
+  gl_Position.z = 0.0;
   out_data.positionViewSpace = positionViewSpace;
   out_data.positionModelSpace = in_position;
-  out_data.screenSpaceDepth = positionScreenSpace.w;
-
-  gl_Position = positionScreenSpace;
+  out_data.screenSpaceDepth = gl_Position.w;
 }

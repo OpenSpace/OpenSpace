@@ -52,22 +52,18 @@ void main() {
   out_data.position = gl_in[0].gl_Position;
   out_data.color = in_data[0].color;
 
-  double scaleMultiply = 8.0;
-
   dvec4 dpos = dvec4(out_data.position);
-  dpos.xyz *= scaleMultiply;
+  dpos.xyz *= 8.0;
   dpos = modelMatrix * dpos;
   dpos /= Parsec;
   // It lies about 8 kpc from the center on the Orion Arm of the Milky Way
   dpos.x += 8000.0;
 
-  scaleMultiply *= 4.0;
-
   dvec3 normal = normalize(eyePosition - dpos.xyz);
   dvec3 newRight = normalize(cross(cameraUp, normal));
   dvec3 newUp = cross(normal, newRight);
-  dvec3 scaledRight = scaleMultiply * newRight;
-  dvec3 scaledUp = scaleMultiply * newUp;
+  dvec3 scaledRight = 32.0 * newRight;
+  dvec3 scaledUp = 32.0 * newUp;
 
   vec4 bottomLeftVertex = z_normalization(
     vec4(viewProjectionMatrix * dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w))
@@ -90,14 +86,18 @@ void main() {
   gl_Position = topLeftVertex;
   out_data.psfCoords = vec2(-1.0, 1.0);
   EmitVertex();
+
   gl_Position = bottomLeftVertex;
   out_data.psfCoords = vec2(-1.0, -1.0);
   EmitVertex();
+
   gl_Position = topRightVertex;
   out_data.psfCoords = vec2(1.0, 1.0);
   EmitVertex();
+
   gl_Position = bottomRightVertex;
   out_data.psfCoords = vec2(1.0, -1.0);
   EmitVertex();
+
   EndPrimitive();
 }

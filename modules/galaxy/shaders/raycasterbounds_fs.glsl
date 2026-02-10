@@ -33,9 +33,7 @@ in Data {
 
 Fragment getFragment() {
   Fragment frag;
-  vec3 pos = in_data.modelPosition + 0.5;
-  frag.color = vec4(pos, 1.0);
-
+  frag.color = vec4(in_data.modelPosition + 0.5, 1.0);
   frag.depth = safeLength(in_data.viewPosition);
   return frag;
 }

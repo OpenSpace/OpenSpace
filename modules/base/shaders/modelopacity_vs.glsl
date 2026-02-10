@@ -34,5 +34,5 @@ out Data {
 
 void main() {
   out_data.st = in_st;
-  gl_Position = vec4(in_position.x, in_position.y, 0.0, 1.0);
+  gl_Position = vec4(in_position.xy, 0.0, 1.0);
 }

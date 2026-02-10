@@ -54,6 +54,7 @@ vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
   // But vec(y_i) = vec(x) + vec(dist), and vec(x) dot vec(s) = muSun, cos(sigma_i + theta_i) = nu
   float muSun_i = (r * muSun + dist * nu) / r_i;
   // The irradiance attenuated from point r until y (y-x = dist)
+
   return
     transmittance(transmittanceTexture, r, mu, dist, Rg, Rt) *
     texture4D(deltaJTexture, r_i, mu_i, muSun_i, nu, Rg, SAMPLES_MU, Rt, SAMPLES_R,
@@ -63,16 +64,16 @@ vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
 vec3 inscatter(float r, float mu, float muSun, float nu) {
   vec3 inScatteringRadiance = vec3(0.0);
   float dy = rayDistance(r, mu, Rt, Rg) / float(InscatterIntegralScamples);
-  vec3 inScatteringRadiance_i = integrand(r, mu, muSun, nu, 0.0);
+  vec3 inScatteringRadianceI = integrand(r, mu, muSun, nu, 0.0);
 
   // In order to solve the integral from equation (11) we use the trapezoidal rule:
   // Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
   // where y_i+1 = y_j
   for (int i = 1; i <= InscatterIntegralScamples; i++) {
     float y_j = float(i) * dy;
-    vec3 inScatteringRadiance_j = integrand(r, mu, muSun, nu, y_j);
-    inScatteringRadiance += (inScatteringRadiance_i + inScatteringRadiance_j) / 2.0 * dy;
-    inScatteringRadiance_i = inScatteringRadiance_j;
+    vec3 inScatteringRadianceJ = integrand(r, mu, muSun, nu, y_j);
+    inScatteringRadiance += (inScatteringRadianceI + inScatteringRadianceJ) / 2.0 * dy;
+    inScatteringRadianceI = inScatteringRadianceJ;
   }
   return inScatteringRadiance;
 }

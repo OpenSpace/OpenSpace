@@ -115,7 +115,6 @@ Fragment getFragment() {
     }
   }
 
-  vec4 textureColor = vec4(1.0);
   if (hasSpriteTexture) {
     fullColor *= texture(spriteTexture, vec3(in_data.texCoord, in_data.layer));
   }
@@ -136,18 +135,13 @@ Fragment getFragment() {
     }
 
     if (pixelIsOutline) {
-      vec4 theOutlineColor = vec4(outlineColor, 1.0);
-      if (useColorMap && useCmapOutline) {
-        theOutlineColor = cmapColor;
-      }
-      fullColor = theOutlineColor;
+      fullColor = useColorMap && useCmapOutline  ?  cmapColor  :  vec4(outlineColor, 1.0);
     }
   }
 
-  fullColor.a *= opacity * fadeInValue;
-
   Fragment frag;
   frag.color = fullColor;
+  frag.color.a *= opacity * fadeInValue;
   frag.depth = in_data.screenSpaceDepth;
   frag.gPosition = in_data.positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);

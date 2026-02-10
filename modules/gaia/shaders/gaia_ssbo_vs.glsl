@@ -86,9 +86,9 @@ int findChunkId(int left, int right, int id) {
 
 
 void main() {
-  // Fetch our data.
+  // Fetch our data
   int chunkId = findChunkId(0, nChunksToRender - 1, gl_VertexID);
-  // Fail safe - this should never happen!
+  // Fail safe - this should never happen
   if (chunkId == -1) {
     out_data.gPosition = vec4(0.0);
     gl_Position = vec4(0.0);
@@ -104,24 +104,18 @@ void main() {
     return;
   }
 
-  int startOfPos = firstStarInChunk + placeInChunk * 3;
-  vec3 in_position = vec3(
-    allData[startOfPos],
-    allData[startOfPos + 1],
-    allData[startOfPos + 2]
-  );
-  vec2 in_brightness = vec2(0.0);
-  vec3 in_velocity = vec3(0.0);
+  int idxPos = firstStarInChunk + placeInChunk * 3;
+  vec3 position = vec3(allData[idxPos], allData[idxPos + 1], allData[idxPos + 2]);
 
   // Check if we should filter this star by position
-  if ((abs(posXThreshold.x) > Eps && in_position.x < posXThreshold.x) ||
-      (abs(posXThreshold.y) > Eps && in_position.x > posXThreshold.y) ||
-      (abs(posYThreshold.x) > Eps && in_position.y < posYThreshold.x) ||
-      (abs(posYThreshold.y) > Eps && in_position.y > posYThreshold.y) ||
-      (abs(posZThreshold.x) > Eps && in_position.z < posZThreshold.x) ||
-      (abs(posZThreshold.y) > Eps && in_position.z > posZThreshold.y) ||
+  if ((abs(posXThreshold.x) > Eps && position.x < posXThreshold.x) ||
+      (abs(posXThreshold.y) > Eps && position.x > posXThreshold.y) ||
+      (abs(posYThreshold.x) > Eps && position.y < posYThreshold.x) ||
+      (abs(posYThreshold.y) > Eps && position.y > posYThreshold.y) ||
+      (abs(posZThreshold.x) > Eps && position.z < posZThreshold.x) ||
+      (abs(posZThreshold.y) > Eps && position.z > posZThreshold.y) ||
       (abs(distThreshold.x - distThreshold.y) < Eps &&
-      abs(length(in_position) - distThreshold.y) < Eps))
+      abs(length(position) - distThreshold.y) < Eps))
   {
     // Discard star in geometry shader
     out_data.gPosition = vec4(0.0);
@@ -129,20 +123,21 @@ void main() {
     return;
   }
 
-
+  vec2 brightness = vec2(0.0);
+  vec3 velocity = vec3(0.0);
   if (renderOption != RenderOptionStatic) {
-    int startOfCol = firstStarInChunk + nStarsInChunk * 3 + placeInChunk * 2;
-    in_brightness = vec2(allData[startOfCol], allData[startOfCol + 1]);
+    int idxCol = firstStarInChunk + nStarsInChunk * 3 + placeInChunk * 2;
+    brightness = vec2(allData[idxCol], allData[idxCol + 1]);
 
     // Check if we should filter this star by magnitude or color
     if ((abs(gMagThreshold.x - gMagThreshold.y) < Eps &&
-         abs(gMagThreshold.x - in_brightness.x) < Eps) ||
-        (abs(gMagThreshold.x - 20.0) > Eps && in_brightness.x < gMagThreshold.x) ||
-        (abs(gMagThreshold.y - 20.0) > Eps && in_brightness.x > gMagThreshold.y) ||
+         abs(gMagThreshold.x - brightness.x) < Eps) ||
+        (abs(gMagThreshold.x - 20.0) > Eps && brightness.x < gMagThreshold.x) ||
+        (abs(gMagThreshold.y - 20.0) > Eps && brightness.x > gMagThreshold.y) ||
         (abs(bpRpThreshold.x - bpRpThreshold.y) < Eps &&
-         abs(bpRpThreshold.x - in_brightness.y) < Eps) ||
-        (abs(bpRpThreshold.x) > Eps && in_brightness.y < bpRpThreshold.x) ||
-        (abs(bpRpThreshold.y) > Eps && in_brightness.y > bpRpThreshold.y))
+         abs(bpRpThreshold.x - brightness.y) < Eps) ||
+        (abs(bpRpThreshold.x) > Eps && brightness.y < bpRpThreshold.x) ||
+        (abs(bpRpThreshold.y) > Eps && brightness.y > bpRpThreshold.y))
     {
       // Discard star in geometry shader
       out_data.gPosition = vec4(0.0);
@@ -151,21 +146,17 @@ void main() {
     }
 
     if (renderOption == RenderOptionMotion) {
-      int startOfVel = firstStarInChunk + nStarsInChunk * 5 + placeInChunk * 3;
-      in_velocity = vec3(
-        allData[startOfVel],
-        allData[startOfVel + 1],
-        allData[startOfVel + 2]
-      );
+      int idxVel = firstStarInChunk + nStarsInChunk * 5 + placeInChunk * 3;
+      velocity = vec3(allData[idxVel], allData[idxVel + 1], allData[idxVel + 2]);
     }
   }
-  out_data.brightness = in_brightness;
+  out_data.brightness = brightness;
 
   // Convert kiloParsec to meter
-  vec4 objectPosition = vec4(in_position * 1000.0 * Parsec, 1.0);
+  vec4 objectPosition = vec4(position * 1000.0 * Parsec, 1.0);
 
   // Add velocity [m/s] if we've read any
-  objectPosition.xyz += time * in_velocity;
+  objectPosition.xyz += time * velocity;
 
   // Thres moving stars by their new position
   float distPosition = length(objectPosition.xyz / (1000.0 * Parsec));
@@ -186,9 +177,8 @@ void main() {
   out_data.starDistFromSun = safeLength(objectPosition);
   out_data.cameraDistFromSun = safeLength(sunPosition);
 
-  // Remove stars without position, happens when VBO chunk is stuffed with zeros.
-  // Has to be done in Geometry shader because Vertices cannot be discarded here.
-  if (length(in_position) > Eps) {
+  // Remove stars without position, happens when VBO chunk is stuffed with zeros
+  if (length(position) > Eps) {
     out_data.gPosition = vec4(model * objectPosition);
     gl_Position = vec4(projection * viewPosition);
   }

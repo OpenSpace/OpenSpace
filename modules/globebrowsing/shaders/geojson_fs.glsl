@@ -58,18 +58,13 @@ Fragment getFragment() {
     vec3 n = -normalize(in_data.normal);
 
     // Ambient color
-    vec3 shadedColor = ambientIntensity * color;
+    frag.color.xyz = ambientIntensity * color;
 
     for (int i = 0; i < nLightSources; i++) {
       vec3 l = lightDirectionsViewSpace[i];
-
-      // Diffuse
       vec3 diffuseColor = diffuseIntensity * max(dot(n, l), 0.0) * color;
-
-      // Light contribution
-      shadedColor += lightIntensities[i] * (LightColor * diffuseColor);
+      frag.color.xyz += lightIntensities[i] * (LightColor * diffuseColor);
     }
-    frag.color.xyz = shadedColor;
   }
 
   frag.depth = in_data.depth;

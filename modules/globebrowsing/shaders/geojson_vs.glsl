@@ -53,11 +53,10 @@ void main() {
     modelPos += dvec4(outDirection * height, 0.0);
   }
 
+  out_data.positionViewSpace = vec4(viewTransform * modelTransform * modelPos);
+  out_data.normal = normalize(normalTransform * in_normal);
   gl_Position = vec4(projectionTransform * out_data.positionViewSpace);
   // Set z to 0 to disable near and far plane, unique handling for perspective in space
   gl_Position.z = 0.0;
-  out_data.positionViewSpace = vec4(viewTransform * modelTransform * modelPos);
-  out_data.normal = normalize(normalTransform * in_normal);
   out_data.depth = gl_Position.w;
-
 }

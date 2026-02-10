@@ -178,13 +178,9 @@ vec3 transmittance(sampler2D tex, float r, float mu, float d, float Rg, float Rt
   // x --> x0, then x0-->x.
   // Also, let's use the property: T(a,c) = T(a,b)*T(b,c)
   // Because T(a,c) and T(b,c) are already in the table T, T(a,b) = T(a,c)/T(b,c).
-  vec3 res;
-  if (mu > 0.0) {
-    res = transmittance(tex, r, mu, Rg, Rt) / transmittance(tex, ri, mui, Rg, Rt);
-  }
-  else {
-    res = transmittance(tex, ri, -mui, Rg, Rt) / transmittance(tex, r, -mu, Rg, Rt);
-  }
+  vec3 res = mu > 0.0 ?
+    transmittance(tex, r, mu, Rg, Rt) / transmittance(tex, ri, mui, Rg, Rt) :
+    transmittance(tex, ri, -mui, Rg, Rt) / transmittance(tex, r, -mu, Rg, Rt);
   return min(res, 1.0);
 }
 
@@ -212,8 +208,7 @@ float miePhaseFunction(float mu, float mieG) {
 // muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
 // nu := cosine of the angle between vec(s) and vec(v)
 vec4 texture4D(sampler3D table, float r, float mu, float muSun, float nu, float Rg,
-               int samplesMu, float Rt, int samplesR, int samplesMuS,
-               int samplesNu)
+               int samplesMu, float Rt, int samplesR, int samplesMuS, int samplesNu)
 {
   float r2 = r * r;
   float Rg2 = Rg * Rg;
@@ -226,10 +221,13 @@ vec4 texture4D(sampler3D table, float r, float mu, float muSun, float nu, float 
     vec4(1.0, 0.0, 0.0, 0.5 - 0.5 / float(samplesMu)) :
     vec4(-1.0, Rt2 - Rg2, sqrt(Rt2 - Rg2), 0.5 + 0.5 / float(samplesMu));
 
-  float u_r = 0.5 / float(samplesR) + rho / sqrt(Rt2 - Rg2) * (1.0 - 1.0 / float(samplesR));
-  float u_mu = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) * (0.5 - 1.0 / samplesMu);
+  float u_r = 0.5 / float(samplesR) + rho / sqrt(Rt2 - Rg2) *
+    (1.0 - 1.0 / float(samplesR));
+  float u_mu = cst.w + (rmu * cst.x + sqrt(delta + cst.y)) / (rho + cst.z) *
+    (0.5 - 1.0 / samplesMu);
   float u_mu_s = 0.5 / float(samplesMuS) +
-    (atan(max(muSun, -0.1975) * tan(1.386)) * 0.9090909090909090 + 0.74) * 0.5 * (1.0 - 1.0 / float(samplesMuS));
+    (atan(max(muSun, -0.1975) * tan(1.386)) * 0.9090909090909090 + 0.74) *
+    0.5 * (1.0 - 1.0 / float(samplesMuS));
   float t = (nu + 1.0) / 2.0 * (float(samplesNu) - 1.0);
   float u_nu = floor(t);
   t = t - u_nu;

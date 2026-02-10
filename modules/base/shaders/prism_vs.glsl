@@ -36,9 +36,6 @@ uniform mat4 modelViewProjectionTransform;
 
 
 void main() {
-  vec4 position = vec4(in_position, 1.0);
-  vec4 positionClipSpace = modelViewProjectionTransform * position;
-  vec4 positionScreenSpace = z_normalization(positionClipSpace);
-  gl_Position = positionScreenSpace;
-  out_data.depth = positionScreenSpace.w;
+  gl_Position = z_normalization(modelViewProjectionTransform * vec4(in_position, 1.0));
+  out_data.depth = gl_Position.w;
 }

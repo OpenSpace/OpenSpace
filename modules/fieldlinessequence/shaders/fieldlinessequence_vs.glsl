@@ -24,13 +24,12 @@
 
 #version __CONTEXT__
 
-// Inputs
 // Should be provided in meters
 layout(location = 0) in vec3 in_position;
 // The extra value used to color lines
-layout(location = 1) in float in_color_scalar;
+layout(location = 1) in float in_color;
 // The extra value used to mask out parts of lines
-layout(location = 2) in float in_masking_scalar;
+layout(location = 2) in float in_masking;
 
 out Data {
   vec4 color;
@@ -72,7 +71,7 @@ const int ColorMethodColorByQuantity = 1;
 
 vec4 transferFunctionColor() {
   // Remap the color scalar to a [0,1] range
-  float lookUpVal = (in_color_scalar - selectedColorRange.x) /
+  float lookUpVal = (in_color - selectedColorRange.x) /
                     (selectedColorRange.y - selectedColorRange.x);
   return texture(transferFunction, lookUpVal);
 }
@@ -88,19 +87,17 @@ bool isPartOfParticle(double time, int vertexId, int particleSize, int particleS
 void main() {
   bool hasColor = true;
 
-  if (usingMasking && (in_masking_scalar < maskingRange.x ||
-                        in_masking_scalar > maskingRange.y))
-  {
+  if (usingMasking && (in_masking < maskingRange.x || in_masking > maskingRange.y)) {
     hasColor = false;
   }
 
   if (usingDomain && hasColor) {
     float radius = length(in_position);
+    vec3 lowerLimit = vec3(domainLimX.x, domainLimY.x, domainLimZ.x);
+    vec3 upperLimit = vec3(domainLimX.y, domainLimY.y, domainLimZ.y);
     // If position is outside of domain
-    if (in_position.x < domainLimX.x || in_position.x > domainLimX.y ||
-        in_position.y < domainLimY.x || in_position.y > domainLimY.y ||
-        in_position.z < domainLimZ.x || in_position.z > domainLimZ.y ||
-        radius        < domainLimR.x || radius        > domainLimR.y)
+    if (any(in_position < lowerLimit) || any(in_position > upperLimit) ||
+        radius < domainLimR.x || radius > domainLimR.y)
     {
       hasColor = false;
     }
@@ -110,12 +107,7 @@ void main() {
     bool isParticle = usingParticles &&
       isPartOfParticle(time, gl_VertexID, particleSize, particleSpeed, particleSpacing);
 
-    if (isParticle) {
-      out_data.color = flowColor;
-    }
-    else {
-      out_data.color = lineColor;
-    }
+    out_data.color = isParticle  ?  flowColor  :  lineColor;
 
     if (colorMethod == ColorMethodColorByQuantity) {
       vec4 quantityColor = transferFunctionColor();
@@ -126,10 +118,7 @@ void main() {
     out_data.color = vec4(0.0);
   }
 
-  vec4 position_in_meters = vec4(in_position, 1.0);
-  vec4 positionClipSpace = modelViewProjection * position_in_meters;
-  //vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
+  vec4 positionClipSpace = modelViewProjection * vec4(in_position, 1.0);
   gl_Position = vec4(positionClipSpace.xy, 0, positionClipSpace.w);
-
   out_data.depth = gl_Position.w;
 }

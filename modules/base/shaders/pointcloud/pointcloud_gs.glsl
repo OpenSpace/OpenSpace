@@ -92,18 +92,17 @@ vec4 quatMult(vec4 q1, vec4 q2) {
 
 // Vector rotation with a quaternion
 // http://mathworld.wolfram.com/Quaternion.html
-vec3 rotate_vector(vec3 v, vec4 q) {
+vec3 rotateVector(vec3 v, vec4 q) {
   vec4 q_conjugate = q * vec4(-1.0, -1.0, -1.0, 1.0);
   return quatMult(q, quatMult(vec4(v, 0.0), q_conjugate)).xyz;
 }
 
 
 void main() {
-  vec4 pos = gl_in[0].gl_Position;
   out_data.layer = int(in_data[0].textureLayer);
   out_data.colorParameter = in_data[0].colorParameter;
 
-  dvec4 dpos = modelMatrix * dvec4(dvec3(pos.xyz), 1.0);
+  dvec4 dpos = modelMatrix * dvec4(dvec3(gl_in[0].gl_Position.xyz), 1.0);
 
   float scaleMultiply = pow(10.0, scaleExponent);
   if (hasDvarScaling) {
@@ -128,10 +127,9 @@ void main() {
   else if (renderOption == RenderOptionFixedRotation) {
     if (useOrientationData) {
       vec4 quat = in_data[0].orientation;
-      scaledRight = normalize(rotate_vector(scaledRight, quat));
-      scaledUp = normalize(rotate_vector(scaledUp, quat));
+      scaledRight = normalize(rotateVector(scaledRight, quat));
+      scaledUp = normalize(rotateVector(scaledUp, quat));
     }
-    // Else use default
   }
 
   scaledRight *= scaleMultiply * 0.5;
@@ -164,14 +162,10 @@ void main() {
   vec4 scaledUpClip = scaleFactor * aspectRatioScale.y *
     vec4(cameraViewProjectionMatrix * dvec4(scaledUp, 0.0));
 
-  vec4 dposViewSpace= vec4(cameraViewMatrix * dpos);
-  out_data.positionViewSpace = dposViewSpace;
+  out_data.positionViewSpace = vec4(cameraViewMatrix * dpos);
 
   vec4 initialPosition = z_normalization(dposClip - scaledRightClip - scaledUpClip);
   out_data.screenSpaceDepth = initialPosition.w;
-  vec4 secondPosition = z_normalization(dposClip + scaledRightClip - scaledUpClip);
-  vec4 crossCorner = z_normalization(dposClip + scaledUpClip + scaledRightClip);
-  vec4 thirdPosition = z_normalization(dposClip + scaledUpClip - scaledRightClip);
 
   // Build primitive
   out_data.texCoord = corners[0];
@@ -179,15 +173,15 @@ void main() {
   EmitVertex();
 
   out_data.texCoord = corners[1];
-  gl_Position = secondPosition;
+  gl_Position = z_normalization(dposClip + scaledRightClip - scaledUpClip);
   EmitVertex();
 
   out_data.texCoord = corners[3];
-  gl_Position = thirdPosition;
+  gl_Position = z_normalization(dposClip + scaledUpClip - scaledRightClip);
   EmitVertex();
 
   out_data.texCoord = corners[2];
-  gl_Position = crossCorner;
+  gl_Position = z_normalization(dposClip + scaledUpClip + scaledRightClip);
   EmitVertex();
 
   EndPrimitive();

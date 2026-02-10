@@ -36,8 +36,6 @@ uniform float opacityCoefficient;
 
 
 Fragment getFragment() {
-  Fragment frag;
-
   float multipliedOpacityCoefficient = opacityCoefficient * opacityCoefficient;
   vec3 extinction = exp(vec3(0.6, 0.2, 0.3) - in_data.color);
 
@@ -48,11 +46,11 @@ Fragment getFragment() {
     in_data.color * extinction * in_data.starBrightness * multipliedOpacityCoefficient,
     in_data.starBrightness
   );
-  frag.color = fullColor;
 
+  Fragment frag;
+  frag.color = fullColor;
   frag.depth = in_data.screenSpaceDepth;
   frag.gPosition = in_data.position;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-
   return frag;
 }

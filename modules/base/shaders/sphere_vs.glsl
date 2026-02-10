@@ -40,14 +40,12 @@ uniform mat3 modelViewRotation;
 
 
 void main() {
+  out_data.position = modelViewTransform * vec4(in_position.xyz, 1.0);
+  out_data.normal = modelViewRotation * normalize(in_position.xyz);
   out_data.textureCoords = in_textureCoords;
 
-  out_data.normal = modelViewRotation * normalize(in_position.xyz);
   vec4 position = modelViewProjection * vec4(in_position.xyz, 1.0);
-  out_data.position = modelViewTransform * vec4(in_position.xyz, 1.0);
-
   // Set z to 0 to disable near/far-plane clipping
   gl_Position = vec4(position.xy, 0.0, position.w);
-
   out_data.screenSpaceDepth = position.w;
 }

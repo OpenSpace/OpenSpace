@@ -34,20 +34,10 @@ const float DefaultDepth = 3.08567758e19; // 1000 Pc
 
 
 Fragment getFragment() {
-  vec4 color = vec4(0.0);
-
-  // BILLBOARDS
-  // Sample color. Tonemapping done in first shader pass.
-  vec4 textureColor = texture(renderedTexture, in_data.uv);
-
-  // Use the following to check for any intensity at all.
-  //color = (length(intensity.rgb) > 0.001)  ?  vec4(1.0)  :  vec4(0.0);
-
   Fragment frag;
-  frag.color = textureColor;
+  frag.color = texture(renderedTexture, in_data.uv);
   frag.depth = DefaultDepth;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   frag.blend = BlendModeNormal;
-
   return frag;
 }

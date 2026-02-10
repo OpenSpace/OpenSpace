@@ -48,11 +48,11 @@ uniform sampler3D deltaSRTexture;
 uniform sampler3D deltaSMTexture;
 uniform int firstIteration;
 
-const int INSCATTER_SPHERICAL_INTEGRAL_SAMPLES = 16;
+const int InscatterSphericalIntegralSamples = 16;
 
 // -- Spherical Coordinates Steps. phi e [0,2PI] and theta e [0, PI]
-const float stepPhi = (2.0 * M_PI) / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
-const float stepTheta = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
+const float StepPhi = (2.0 * M_PI) / float(InscatterSphericalIntegralSamples);
+const float StepTheta = M_PI / float(InscatterSphericalIntegralSamples);
 
 
 // Given the irradiance texture table, the cosine of zenith sun vector and the height of
@@ -62,7 +62,7 @@ const float stepTheta = M_PI / float(INSCATTER_SPHERICAL_INTEGRAL_SAMPLES);
 // muSun := cosine of the zeith angle of vec(s). Or muSun = (vec(s) * vec(v))
 // r     := height of starting point vect(x)
 vec3 irradianceLUT(sampler2D lut, float muSun, float r) {
-  // See Bruneton paper and Coliene to understand the mapping
+  // See Bruneton paper and Collienne to understand the mapping
   float u_muSun = (muSun + 0.2) / 1.2;
   float u_r = (r - Rg) / (Rt - Rg);
   return texture(lut, vec2(u_muSun, u_r)).rgb;
@@ -86,7 +86,8 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
   float muSun2 = muSun * muSun;
   float sinThetaSinSigma = sqrt(1.0 - mu2) * sqrt(1.0 - muSun2);
   // cos(sigma + theta) = cos(theta)cos(sigma)-sin(theta)sin(sigma)
-  // cos(ni) = nu = mu * muSun - sqrt(1.0 - mu*mu)*sqrt(1.0 - muSun*muSun) // sin(theta) = sqrt(1.0 - mu*mu)
+  // cos(ni) = nu = mu * muSun - sqrt(1.0 - mu*mu)*sqrt(1.0 - muSun*muSun)
+  // sin(theta) = sqrt(1.0 - mu*mu)
   // Now we make sure the angle between vec(s) and vec(v) is in the right range:
   nu = clamp(nu, muSun * mu - sinThetaSinSigma, muSun * mu + sinThetaSinSigma);
 
@@ -125,8 +126,8 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
   // In order to integrate over 4PI, we scan the sphere using the spherical coordinates
   // previously defined
   vec3 radianceJAcc = vec3(0.0);
-  for (int theta_i = 0; theta_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; theta_i++) {
-    float theta = (float(theta_i) + 0.5) * stepTheta;
+  for (int iTheta = 0; iTheta < InscatterSphericalIntegralSamples; iTheta++) {
+    float theta = (float(iTheta) + 0.5) * StepTheta;
     float cosineTheta = cos(theta);
     float cosineTheta2 = cosineTheta * cosineTheta;
     float distanceToGround = 0.0;
@@ -138,7 +139,8 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
     if (cosineTheta < cosHorizon) { // ray hits ground
       // AverageGroundReflectance e [0,1]
       groundReflectance = AverageGroundReflectance / M_PI;
-      // From cosine law: Rg*Rg = r*r + distanceToGround*distanceToGround - 2*r*distanceToGround*cos(PI-theta)
+      // From cosine law:
+      // Rg*Rg = r*r + distToGround*distToGround - 2*r*distToGround*cos(PI-theta)
       distanceToGround = -r * cosineTheta - sqrt(r2 * (cosineTheta2 - 1.0) + Rg2);
       //               |
       //               | theta
@@ -149,24 +151,32 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       //               |  /
       //               | / Rg
       //               |/
-      // So cos(alpha) = ((vec(x)+vec(dg)) dot -vec(distG))/(||(vec(x)+vec(distG))|| * ||vec(distG)||)
+      // So cos(alpha) = ((vec(x)+vec(dg)) dot
+      //                 -vec(distG))/(||(vec(x)+vec(distG))|| * ||vec(distG)||)
       //    cos(alpha) = (-r*distG*cos(theta) - distG*distG)/(Rg*distG)
       //      muGround = -(r*cos(theta) + distG)/Rg
       float muGround = -(r * cosineTheta + distanceToGround) / Rg;
       // We can use the same triangle in calculate the distanceToGround to calculate the
       // cosine of the angle between the ground touching point at height Rg and the zenith
       // angle
-      // float muGround = (r2 - distanceToGround*distanceToGround - Rg2)/(2*distanceToGround*Rg);
+      // float muGround = (r2 - distToGround*distToGround - Rg2)/(2*distToGround*Rg);
       // Access the Transmittance LUT in order to calculate the transmittance from the
       // ground point Rg, thorugh the atmosphere, at a distance: distanceToGround
-      groundTransmittance = transmittance(transmittanceTexture, Rg, muGround, distanceToGround, Rg, Rt);
+      groundTransmittance = transmittance(
+        transmittanceTexture,
+        Rg,
+        muGround,
+        distanceToGround,
+        Rg,
+        Rt
+      );
     }
 
-    for (int phi_i = 0; phi_i < INSCATTER_SPHERICAL_INTEGRAL_SAMPLES; phi_i++) {
-      float phi = (float(phi_i) + 0.5) * stepPhi;
+    for (int iPhi = 0; iPhi < InscatterSphericalIntegralSamples; iPhi++) {
+      float phi = (float(iPhi) + 0.5) * StepPhi;
       // spherical coordinates: dw = dtheta*dphi*sin(theta)*rho^2
       // rho = 1, we are integrating over a unit sphere
-      float dw = stepTheta * stepPhi * sin(theta);
+      float dw = StepTheta * StepPhi * sin(theta);
       // w = (rho*sin(theta)*cos(phi), rho*sin(theta)*sin(phi), rho*cos(theta))
       float sinPhi = sin(phi);
       float sinTheta = sin(theta);
@@ -197,14 +207,37 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       if (firstIteration == 1) {
         float phaseRaySW = rayleighPhaseFunction(nuSW);
         float phaseMieSW = miePhaseFunction(nuSW, mieG);
-        // We can now access the values for the single InScattering in the textures deltaS textures.
-        vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nuSW, Rg, SAMPLES_MU,
-          Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU).rgb;
-        vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nuSW, Rg, SAMPLES_MU,
-          Rt, SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU).rgb;
+        // We can now access the values for the single InScattering in the textures deltaS
+        // textures.
+        vec4 singleRay = texture4D(
+          deltaSRTexture,
+          r,
+          w.z,
+          muSun,
+          nuSW,
+          Rg,
+          SAMPLES_MU,
+          Rt,
+          SAMPLES_R,
+          SAMPLES_MU_S,
+          SAMPLES_NU
+        );
+        vec4 singleMie = texture4D(
+          deltaSMTexture,
+          r,
+          w.z,
+          muSun,
+          nuSW,
+          Rg,
+          SAMPLES_MU,
+          Rt,
+          SAMPLES_R,
+          SAMPLES_MU_S,
+          SAMPLES_NU
+        );
 
         // Initial InScattering including the phase functions
-        radianceJ1 += singleRay * phaseRaySW + singleMie * phaseMieSW;
+        radianceJ1 += singleRay.rgb * phaseRaySW + singleMie.rgb * phaseMieSW;
       }
       else {
         // On line 9 of the algorithm, the texture table deltaSR is updated, so when we
@@ -212,8 +245,19 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
         // (not the single inscattered light but the accumulated (higher order)
         // inscattered light.
         // w.z is the cosine(theta) = mu for vec(w)
-        radianceJ1 += texture4D(deltaSRTexture, r, w.z, muSun, nuSW, Rg, SAMPLES_MU, Rt,
-          SAMPLES_R, SAMPLES_MU_S, SAMPLES_NU).rgb;
+        radianceJ1 += texture4D(
+          deltaSRTexture,
+          r,
+          w.z,
+          muSun,
+          nuSW,
+          Rg,
+          SAMPLES_MU,
+          Rt,
+          SAMPLES_R,
+          SAMPLES_MU_S,
+          SAMPLES_NU
+        ).rgb;
       }
 
       // Finally, we add the atmospheric scale height (See: Radiation Transfer on the

@@ -60,17 +60,13 @@ void main() {
   out_data.observedDist = safeLength(viewPosition / viewScaling);
   float distThreshold = cutOffThreshold - log(out_data.observedDist) / log(4.0);
 
-  vec4 position = gl_in[0].gl_Position;
-
   // Discard geometry if star has no position (but wasn't a nullArray).
-  // Or if observed distance is above threshold set by cutOffThreshold.
-  // By discarding in gs instead of fs we save computations for when nothing is visible.
-  if (length(position) < Eps || distThreshold <= 0.0) {
+  // Or if observed distance is above threshold set by cutOffThreshold
+  if (length(gl_in[0].gl_Position) < Eps || distThreshold <= 0.0) {
     return;
   }
 
-  //gl_PointSize = 1.0;
-  gl_Position = position;
+  gl_Position = gl_in[0].gl_Position;
   gl_Position.z = 0.0;
   out_data.gPosition = viewPosition;
 

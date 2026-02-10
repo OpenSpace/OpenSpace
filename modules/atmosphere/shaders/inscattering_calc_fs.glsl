@@ -26,8 +26,8 @@
 
 #include "atmosphere_common.glsl"
 
-layout(location = 0) out vec4 out_color1;
-layout(location = 1) out vec4 out_color2;
+layout(location = 0) out vec4 out_rayleigh;
+layout(location = 1) out vec4 out_mie;
 
 uniform float Rg;
 uniform float Rt;
@@ -121,7 +121,9 @@ void inscatter(float r, float mu, float muSun, float nu, out vec3 S_R, out vec3 
 void main() {
   // From the layer interpolation (see C++ code for layer to r) and the textures
   // parameters (uv), we unmapping mu, muSun and nu.
-  float mu, muSun, nu;
+  float mu;
+  float muSun;
+  float nu;
   unmappingMuMuSunNu(r, dhdH, SAMPLES_MU, Rg, Rt, SAMPLES_MU_S, SAMPLES_NU, mu, muSun, nu);
 
   // Here we calculate the single inScattered light. Because this is a single
@@ -138,6 +140,6 @@ void main() {
   vec3 S_R; // First Order Rayleigh InScattering
   vec3 S_M; // First Order Mie InScattering
   inscatter(r, mu, muSun, nu, S_R, S_M);
-  out_color1 = vec4(S_R, 1.0);
-  out_color2 = vec4(S_M, 1.0);
+  out_rayleigh = vec4(S_R, 1.0);
+  out_mie = vec4(S_M, 1.0);
 }

@@ -62,31 +62,26 @@ Fragment getFragment() {
   float offsetLower = offset.x * semiMajorAxis;
   float offsetUpper = offset.y * semiMajorAxis;
 
-  float AUpper = semiMajorAxis + offsetUpper;
-  float BUpper = semiMinorAxis(AUpper, eccentricity);
-  float CUpper = sqrt(AUpper * AUpper - BUpper * BUpper);
-  float outerApoapsisDistance = AUpper * (1.0 + eccentricity);
+  float aUpper = semiMajorAxis + offsetUpper;
+  float bUpper = semiMinorAxis(aUpper, eccentricity);
+  float cUpper = sqrt(aUpper * aUpper - bUpper * bUpper);
+  float outerApoapsisDistance = aUpper * (1.0 + eccentricity);
 
-  float ALower = semiMajorAxis - offsetLower;
-  float BLower = semiMinorAxis(ALower, eccentricity);
-  float CLower = sqrt(ALower * ALower - BLower * BLower);
-  float innerApoapsisDistance = ALower * (1.0 + eccentricity);
+  float aLower = semiMajorAxis - offsetLower;
+  float bLower = semiMinorAxis(aLower, eccentricity);
+  float cLower = sqrt(aLower * aLower - bLower * bLower);
+  float innerApoapsisDistance = aLower * (1.0 + eccentricity);
 
   // Normalize based on outer apoapsis distance (size of plane)
-  float AU_n = AUpper / outerApoapsisDistance;
-  float BU_n = BUpper / outerApoapsisDistance;
-  float CU_n = CUpper / outerApoapsisDistance;
-  float AL_n = ALower / outerApoapsisDistance;
-  float BL_n = BLower / outerApoapsisDistance;
-  float CL_n = CLower / outerApoapsisDistance;
+  float normAU = aUpper / outerApoapsisDistance;
+  float normBU = bUpper / outerApoapsisDistance;
+  float normCU = eccentricity <= Epsilon  ?  cUpper / outerApoapsisDistance  :  0.0;
+  float normAL = aLower / outerApoapsisDistance;
+  float normBL = bLower / outerApoapsisDistance;
+  float normCL = eccentricity <= Epsilon  ?  cLower / outerApoapsisDistance  :  0.0;
 
-  if (eccentricity <= Epsilon) {
-    CU_n = 0.0;
-    CL_n = 0.0;
-  }
-
-  float outer = ellipseTest(st, AU_n, BU_n, -CU_n);
-  float inner = ellipseTest(st, AL_n, BL_n, -CL_n);
+  float outer = ellipseTest(st, normAU, normBU, -normCU);
+  float inner = ellipseTest(st, normAL, normBL, -normCL);
   if (outer > 1.0 || inner < 1.0) {
     // Point is outside outer ellipse or inside inner ellipse
     discard;
@@ -96,10 +91,10 @@ Fragment getFragment() {
   vec2 dir = normalize(st);
 
   // Find outer ellipse: where along the direction does the equation == 1?
-  float denominator = pow(BU_n * dir.x, 2.0) + pow(AU_n * dir.y, 2.0);
-  float first = -(BU_n * BU_n * dir.x * CU_n) / denominator;
-  float second = pow((BU_n * BU_n * dir.x * CU_n)  /  denominator, 2.0);
-  float third = (pow(BU_n * CU_n, 2.0) - pow(AU_n * BU_n, 2.0)) / denominator;
+  float denominator = pow(normBU * dir.x, 2.0) + pow(normAU * dir.y, 2.0);
+  float first = -(normBU * normBU * dir.x * normCU) / denominator;
+  float second = pow((normBU * normBU * dir.x * normCU)  /  denominator, 2.0);
+  float third = (pow(normBU * normCU, 2.0) - pow(normAU * normBU, 2.0)) / denominator;
 
   float scale = first + sqrt(second - third);
 
@@ -111,24 +106,16 @@ Fragment getFragment() {
   float relativeDistance = distanceFromOuterEdge / discWidth;
 
   // Compute texture coordinate based on the distance to outer edge
-  float textureCoord = 0.0;
 
   // The midpoint (textureCoord = 0.5) depends on the ratio between the offsets
   // (Note that the texture goes from outer to inner edge of disc)
   float midPoint = offsetUpper / (offsetUpper + offsetLower);
-  if (relativeDistance > midPoint) {
-    textureCoord = 0.5 + 0.5 * (relativeDistance - midPoint) / (1.0 - midPoint);
-  }
-  else {
-    textureCoord = 0.5 * (relativeDistance / midPoint);
-  }
-
-  vec4 diffuse = texture(discTexture, textureCoord);
-  diffuse.a *= opacity;
-  diffuse.rgb *= multiplyColor;
+  float textureCoord = relativeDistance > midPoint ?
+    0.5 + 0.5 * (relativeDistance - midPoint) / (1.0 - midPoint) :
+    0.5 * (relativeDistance / midPoint);
 
   Fragment frag;
-  frag.color = diffuse;
+  frag.color = texture(discTexture, textureCoord) * vec4(multiplyColor, opacity);
   frag.depth = in_data.depth;
   return frag;
 }

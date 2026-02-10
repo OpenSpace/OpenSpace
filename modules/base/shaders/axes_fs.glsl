@@ -37,16 +37,13 @@ uniform float opacity;
 
 
 Fragment getFragment() {
-
   // We compare against a small value as the first vertex doesn't have a positional
   // information (or rather it is 0) and we don't want to miss out on the color close to
   // the origin
-  vec3 colorComponents = step(2e-32, in_data.positionModelSpace);
+  vec3 colorComp = step(2e-32, in_data.positionModelSpace);
 
   Fragment frag;
-  frag.color.rgb = colorComponents.x * xColor +
-    colorComponents.y * yColor +
-    colorComponents.z * zColor;
+  frag.color.rgb = colorComp.x * xColor + colorComp.y * yColor + colorComp.z * zColor;
   frag.color.a = opacity;
   frag.depth = in_data.screenSpaceDepth;
   frag.gPosition = in_data.positionViewSpace;
