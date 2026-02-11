@@ -25,12 +25,12 @@
 #version __CONTEXT__
 
 layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec2 in_uv;
+layout(location = 1) in vec2 in_texCoords;
 layout(location = 2) in vec4 in_color;
 
 out Data {
   vec4 color;
-  vec2 uv;
+  vec2 texCoords;
   float depth;
 } out_data;
 
@@ -40,6 +40,6 @@ uniform mat4 proj;
 void main() {
   gl_Position = proj * vec4(in_position, 1.0);
   out_data.color = in_color;
-  out_data.uv = in_uv;
+  out_data.texCoords = in_texCoords;
   out_data.depth = gl_Position.w;
 }

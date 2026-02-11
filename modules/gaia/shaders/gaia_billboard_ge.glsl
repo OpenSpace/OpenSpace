@@ -38,7 +38,7 @@ layout(triangle_strip, max_vertices = 4) out;
 out Data {
   vec4 gPosition;
   vec2 brightness;
-  vec2 texCoord;
+  vec2 texCoords;
   float starDistFromSun;
   float cameraDistFromSun;
   float observedDist;
@@ -123,7 +123,7 @@ void main() {
       wCameraUp * starSize.y * (Corners[i].y - 0.5);
     gl_Position = vec4(projection * view * cornerPoint);
     gl_Position.z = 0.0;
-    out_data.texCoord = Corners[i];
+    out_data.texCoords = Corners[i];
     out_data.gPosition = viewPosition;
 
     EmitVertex();

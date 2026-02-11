@@ -26,8 +26,8 @@
 
 in Data {
   vec4 position;
-  flat vec3 color;
   vec2 psfCoords;
+  flat vec3 color;
   flat float screenSpaceDepth;
 } in_data;
 

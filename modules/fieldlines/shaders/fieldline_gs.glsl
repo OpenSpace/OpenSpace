@@ -33,8 +33,8 @@ in Data {
 
 layout(triangle_strip, max_vertices = 4) out;
 out Data {
-  vec4 color;
   vec4 position;
+  vec4 color;
   vec3 normal;
 } out_data;
 

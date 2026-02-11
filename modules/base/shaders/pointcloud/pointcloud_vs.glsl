@@ -33,10 +33,10 @@ layout(location = 3) in float in_scalingParameter;
 layout(location = 4) in vec4 in_orientation; // quaternion
 
 out Data {
-  flat vec4 orientation; // quaternion
   flat float textureLayer;
   flat float colorParameter;
   flat float scalingParameter;
+  flat vec4 orientation; // quaternion
 } out_data;
 
 

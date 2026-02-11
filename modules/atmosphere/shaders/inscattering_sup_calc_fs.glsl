@@ -57,8 +57,19 @@ vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
 
   return
     transmittance(transmittanceTexture, r, mu, dist, Rg, Rt) *
-    texture4D(deltaJTexture, r_i, mu_i, muSun_i, nu, Rg, muSamples, Rt, rSamples,
-      muSSamples, nuSamples).rgb;
+    texture4D(
+      deltaJTexture,
+      r_i,
+      mu_i,
+      muSun_i,
+      nu,
+      Rg,
+      muSamples,
+      Rt,
+      rSamples,
+      muSSamples,
+      nuSamples
+    ).rgb;
 }
 
 vec3 inscatter(float r, float mu, float muSun, float nu) {

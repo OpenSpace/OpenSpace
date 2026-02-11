@@ -343,13 +343,7 @@ void RenderableNodeLine::update(const UpdateData&) {
     const glm::vec3 endPos = _endPos - endOffset * dir;
 
     std::array<Vertex, 2> Vertices = { startPos, endPos };
-
-    glNamedBufferSubData(
-        _vbo,
-        0,
-        Vertices.size() * sizeof(Vertex),
-        Vertices.data()
-    );
+    glNamedBufferSubData(_vbo, 0, Vertices.size() * sizeof(Vertex), Vertices.data());
 }
 
 void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {

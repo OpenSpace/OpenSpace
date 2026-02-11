@@ -26,8 +26,8 @@
 
 #include "powerscaling/powerscaling_vs.glsl"
 
-layout(location = 0) in vec3 in_pointPosition;
-layout(location = 1) in int in_colorInformation;
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in int in_color;
 
 out Data {
   vec4 color;
@@ -55,14 +55,14 @@ const int VertexColorTypeSquare = 6;
 
 
 void main() {
-  vec4 positionClipSpace = modelViewProjectionTransform * vec4(in_pointPosition, 1.0);
+  vec4 positionClipSpace = modelViewProjectionTransform * vec4(in_position, 1.0);
 
   vec4 pos = z_normalization(positionClipSpace);
   out_data.depth = pos.w;
   gl_Position = pos;
 
   vec3 color;
-  switch (in_colorInformation) {
+  switch (in_color) {
     case VertexColorTypeDefaultStart:
       out_data.color = vec4(colorStart, 1.0);
       break;

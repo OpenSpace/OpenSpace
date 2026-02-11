@@ -28,15 +28,14 @@
 
 layout(points) in;
 in Data {
-  flat vec3 normal; // Point normals correspond to globe out direction, model space
+  vec3 normal; // Point normals correspond to globe out direction, model space
   flat float dynamicHeight;
 } in_data[];
 
 layout(triangle_strip, max_vertices = 4) out;
 out Data {
   vec4 positionViewSpace;
-  flat vec3 normal;
-  vec2 texCoord;
+  vec2 texCoords;
   flat float screenSpaceDepth;
 } out_data;
 
@@ -77,7 +76,6 @@ const vec2 Corners[4] = vec2[4](
 
 
 void main() {
-  out_data.normal = in_data[0].normal;
   dvec4 dpos = dvec4(dvec3(gl_in[0].gl_Position.xyz), 1.0);
 
   // Offset position based on height information
@@ -89,7 +87,7 @@ void main() {
   }
   // World coordinates
   dpos = modelTransform * dpos;
-  vec3 worldNormal = normalize(mat3(modelTransform) * out_data.normal);
+  vec3 worldNormal = normalize(mat3(modelTransform) * in_data[0].normal);
 
   // Set up and right directions based on render mode.
   // renderMode 0 is default
@@ -140,19 +138,19 @@ void main() {
   out_data.positionViewSpace = vec4(viewTransform * dpos);
 
   // Build primitive
-  out_data.texCoord = Corners[0];
+  out_data.texCoords = Corners[0];
   gl_Position = bottomLeft;
   EmitVertex();
 
-  out_data.texCoord = Corners[1];
+  out_data.texCoords = Corners[1];
   gl_Position = bottomRight;
   EmitVertex();
 
-  out_data.texCoord = Corners[3];
+  out_data.texCoords = Corners[3];
   gl_Position = topLeft;
   EmitVertex();
 
-  out_data.texCoord = Corners[2];
+  out_data.texCoords = Corners[2];
   gl_Position = topRight;
   EmitVertex();
 

@@ -26,13 +26,16 @@
 
 #include "fragment.glsl"
 
-in vec4 fs_vertexPosition;
+in Data {
+  float depth;
+} in_data;
 
 uniform vec4 color;
 
+
 Fragment getFragment() {
-    Fragment frag;
-    frag.color = color;
-    frag.depth = fs_vertexPosition.w;
-    return frag;
+  Fragment frag;
+  frag.color = color;
+  frag.depth = in_data.depth;
+  return frag;
 }

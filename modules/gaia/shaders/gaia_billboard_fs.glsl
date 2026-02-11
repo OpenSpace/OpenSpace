@@ -29,7 +29,7 @@
 in Data {
   vec4 gPosition;
   vec2 brightness;
-  vec2 texCoord;
+  vec2 texCoords;
   float starDistFromSun;
   float cameraDistFromSun;
   float observedDist;
@@ -63,7 +63,7 @@ void main() {
   float luminosity = 0.05;
   vec3 color = vec3(luminosity);
 
-  vec4 textureColor = texture(psfTexture, in_data.texCoord);
+  vec4 textureColor = texture(psfTexture, in_data.texCoords);
   textureColor.a = pow(textureColor.a, sharpness);
   if (textureColor.a < 0.001) {
     discard;

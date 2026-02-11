@@ -27,19 +27,19 @@
 #include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_texCoord;
+layout(location = 1) in vec2 in_texCoords;
 layout(location = 2) in vec3 in_normal;
 layout(location = 3) in vec3 in_tangent;
 layout(location = 4) in vec3 in_color;
 
 out Data {
-  mat3 tbn;
   vec4 positionCameraSpace;
-  vec4 lightspacePosition;
+  vec2 texCoords;
   vec3 normalViewSpace;
   vec3 color;
-  vec2 texCoord;
   float screenSpaceDepth;
+  mat3 tbn;
+  vec4 lightspacePosition;
 } out_data;
 
 uniform mat4 modelViewTransform;
@@ -56,7 +56,7 @@ void main() {
   out_data.positionCameraSpace = modelViewTransform * (meshTransform * in_position);
 
   gl_Position = z_normalization(projectionTransform * out_data.positionCameraSpace);
-  out_data.texCoord = in_texCoord;
+  out_data.texCoords = in_texCoords;
   out_data.color = in_color;
   out_data.screenSpaceDepth = gl_Position.w;
 

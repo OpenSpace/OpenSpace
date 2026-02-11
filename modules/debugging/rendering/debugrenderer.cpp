@@ -47,8 +47,8 @@ DebugRenderer* DebugRenderer::_reference = nullptr;
 DebugRenderer::DebugRenderer()  {
     _programObject = global::renderEngine->buildRenderProgram(
         "BasicDebugShader",
-        absPath("${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl"),
-        absPath("${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl")
+        absPath("${MODULE_DEBUGGING}/shaders/debugshader_vs.glsl"),
+        absPath("${MODULE_DEBUGGING}/shaders/debugshader_fs.glsl")
     );
 }
 

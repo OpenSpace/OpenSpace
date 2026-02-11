@@ -32,16 +32,16 @@
 
 #define nDepthMaps #{nDepthMaps}
 
-layout(location = 1) in vec2 in_uv;
+layout(location = 1) in vec2 in_texCoords;
 
 out Data {
   vec4 position;
+  vec2 texCoords;
   vec3 ellipsoidNormalCameraSpace;
   vec3 levelWeights;
   vec3 positionCameraSpace;
   vec3 posObjSpace;
   vec3 normalObjSpace;
-  vec2 uv;
 #if USE_ACCURATE_NORMALS
   vec3 ellipsoidTangentThetaCameraSpace;
   vec3 ellipsoidTangentPhiCameraSpace;
@@ -90,7 +90,7 @@ vec3 bilinearInterpolation(vec2 uv) {
 
 void main() {
   // Position in cameraspace
-  vec3 p = bilinearInterpolation(in_uv);
+  vec3 p = bilinearInterpolation(in_texCoords);
 
   // Calculate desired level based on distance to the vertex on the ellipsoid
   // Before any heightmapping is done
@@ -108,7 +108,7 @@ void main() {
 
   // Get the height value and apply skirts
   float height = tileHeightScaled(
-    in_uv,
+    in_texCoords,
     out_data.levelWeights
   ) - tileVertexSkirtLength() * 100.0;
 
@@ -122,7 +122,7 @@ void main() {
 #endif // USE_ACCURATE_NORMALS
 
   // Write output
-  out_data.uv = in_uv;
+  out_data.texCoords = in_texCoords;
   out_data.position = z_normalization(projectionTransform * vec4(p, 1.0));
   gl_Position = out_data.position;
   out_data.ellipsoidNormalCameraSpace = patchNormalCameraSpace;

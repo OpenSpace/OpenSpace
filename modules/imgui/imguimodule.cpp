@@ -452,7 +452,7 @@ void ImGUIModule::internalInitializeGL() {
     glVertexArrayAttribFormat(vao, positionAttrib, 2, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(vao, positionAttrib, 0);
 
-    const GLuint uvAttrib = _program->attributeLocation("in_uv");
+    const GLuint uvAttrib = _program->attributeLocation("in_texCoords");
     glEnableVertexArrayAttrib(vao, uvAttrib);
     glVertexArrayAttribFormat(
         vao,

@@ -25,7 +25,7 @@
 #include "fragment.glsl"
 
 in Data {
-  vec2 uv;
+  vec2 texCoords;
 } in_data;
 
 uniform sampler2D renderedTexture;
@@ -35,7 +35,7 @@ const float DefaultDepth = 3.08567758e19; // 1000 Pc
 
 Fragment getFragment() {
   Fragment frag;
-  frag.color = texture(renderedTexture, in_data.uv);
+  frag.color = texture(renderedTexture, in_data.texCoords);
   frag.depth = DefaultDepth;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   frag.blend = BlendModeNormal;

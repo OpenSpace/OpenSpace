@@ -44,10 +44,10 @@ layout(location = 9) in vec4 in_orientation0; // quaternion
 layout(location = 10) in vec4 in_orientation1; // quaternion
 
 out Data {
-  flat vec4 orientation; // quaternion
   flat float textureLayer;
   flat float colorParameter;
   flat float scalingParameter;
+  flat vec4 orientation; // quaternion
 } out_data;
 
 uniform bool useSpline;

@@ -27,11 +27,11 @@
 layout(location = 0) in vec4 in_position;
 
 out Data {
-  vec2 texCoord;
+  vec2 texCoords;
 } out_data;
 
 
 void main() {
-  out_data.texCoord = 0.5 + in_position.xy * 0.5;
+  out_data.texCoords = 0.5 + in_position.xy * 0.5;
   gl_Position = in_position;
 }

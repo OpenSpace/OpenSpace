@@ -227,12 +227,8 @@ void RenderableKameleonPlane::initializeGL() {
 
 bool RenderableKameleonPlane::createGeometry() {
     struct Vertex {
-        GLfloat x;
-        GLfloat y;
-        GLfloat z;
-        GLfloat w;
-        GLfloat s;
-        GLfloat t;
+        glm::vec4 position;
+        glm::vec2 texCoords;
     };
 
     glCreateBuffers(1, &_vbo);
@@ -242,12 +238,12 @@ bool RenderableKameleonPlane::createGeometry() {
     const GLfloat z = s * _data.scale.z / 2.f;
     const GLfloat w = _data.spatialScale.w;
     const Vertex VertexData[] = {
-        { -x, -y,             -z,  w, 0, 1, },
-        {  x,  y,              z,  w, 1, 0, },
-        { -x, ((x > 0) ? y : -y),   z,  w, 0, 0, },
-        { -x, -y,             -z,  w, 0, 1, },
-        { x,  ((x > 0) ? -y : y),  -z,  w, 1, 1, },
-        { x,  y,              z,  w, 1, 0 }
+        { glm::vec4(-x, -y,                  -z,  w), glm::vec2(0.f, 1.f) },
+        { glm::vec4( x,  y,                   z,  w), glm::vec2(1.f, 0.f) },
+        { glm::vec4(-x, ((x > 0) ? y : -y),   z,  w), glm::vec2(0.f, 0.f) },
+        { glm::vec4(-x, -y,                  -z,  w), glm::vec2(0.f, 1.f) },
+        { glm::vec4( x,  ((x > 0) ? -y : y), -z,  w), glm::vec2(1.f, 1.f) },
+        { glm::vec4( x,  y,                   z,  w), glm::vec2(1.f, 0.f) }
     };
     glNamedBufferStorage(_vbo, sizeof(VertexData), VertexData, GL_NONE_BIT);
 

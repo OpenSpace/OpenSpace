@@ -27,7 +27,7 @@
 
 in Data {
   vec4 position;
-  vec2 texCoord;
+  vec2 texCoords;
 } in_data;
 
 uniform float time;
@@ -37,7 +37,7 @@ uniform float transparency;
 
 Fragment getFragment() {
   float depth = pscDepth(in_data.position);
-  vec4 diffuse = texture(texture1, in_data.texCoord);
+  vec4 diffuse = texture(texture1, in_data.texCoords);
   diffuse.a *= transparency;
 
   Fragment frag;

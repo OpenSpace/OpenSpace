@@ -25,12 +25,12 @@
 #version __CONTEXT__
 
 layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_uv;
+layout(location = 1) in vec2 in_texCoords;
 layout(location = 2) in vec4 in_color;
 
 out Data {
+  vec2 texCoords;
   vec4 color;
-  vec2 uv;
 } out_data;
 
 uniform mat4 ortho;
@@ -38,6 +38,6 @@ uniform mat4 ortho;
 
 void main() {
   out_data.color = in_color;
-  out_data.uv = in_uv;
+  out_data.texCoords = in_texCoords;
   gl_Position = ortho * vec4(in_position, 0.0, 1.0);
 }

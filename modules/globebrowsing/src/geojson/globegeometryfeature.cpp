@@ -421,20 +421,14 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
     _pointsProgram->setUniform("cameraPosition", cameraPositionWorld);
     _pointsProgram->setUniform("cameraLookUp", glm::vec3(cameraUpDirWorld));
 
-    if (_pointTexture && _hasTexture) {
-        ghoul::opengl::TextureUnit unit;
-        unit.bind(*_pointTexture->texture());
-        _pointsProgram->setUniform("pointTexture", unit);
-        _pointsProgram->setUniform("hasTexture", true);
+    ghoul::opengl::TextureUnit unit;
+    unit.bind(*_pointTexture->texture());
+    _pointsProgram->setUniform("pointTexture", unit);
 
-        const float widthHeightRatio =
-            static_cast<float>(_pointTexture->texture()->width()) /
-            static_cast<float>(_pointTexture->texture()->height());
-        _pointsProgram->setUniform("textureWidthFactor", widthHeightRatio);
-    }
-    else {
-        _pointsProgram->setUniform("hasTexture", false);
-    }
+    const float widthHeightRatio =
+        static_cast<float>(_pointTexture->texture()->width()) /
+        static_cast<float>(_pointTexture->texture()->height());
+    _pointsProgram->setUniform("textureWidthFactor", widthHeightRatio);
 
     glEnable(GL_PROGRAM_POINT_SIZE);
     glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(feature.nVertices));

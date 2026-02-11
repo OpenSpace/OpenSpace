@@ -26,8 +26,8 @@
 #include "fragment.glsl"
 
 in Data {
-  vec4 viewPosition;
   vec3 modelPosition;
+  vec4 viewPosition;
 } in_data;
 
 

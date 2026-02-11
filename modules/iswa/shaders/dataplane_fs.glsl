@@ -27,7 +27,7 @@
 
 in Data {
   vec4 position;
-  vec2 texCoord;
+  vec2 texCoords;
 } in_data;
 
 uniform sampler2D textures[6];
@@ -51,7 +51,7 @@ Fragment getFragment() {
     if ((numTransferFunctions == 1) || (numTextures > numTransferFunctions)) {
       float v = 0.0;
       for (int i = 0; i < numTextures; i++) {
-        v += texture(textures[i], in_data.texCoord).r;
+        v += texture(textures[i], in_data.texCoords).r;
       }
       v /= numTextures;
 
@@ -66,7 +66,7 @@ Fragment getFragment() {
     else {
       float v = 0.0;
       for (int i = 0; i < numTextures; i++) {
-        v = texture(textures[i], in_data.texCoord).r;
+        v = texture(textures[i], in_data.texCoords).r;
         vec4 color = texture(transferFunctions[i], vec2(v, 0.0));
         if ((v < (x + y)) && v > (x - y)) {
           color = Transparent;

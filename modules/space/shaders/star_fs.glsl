@@ -25,13 +25,13 @@
 #include "fragment.glsl"
 
 in Data {
-  vec3 position;
-  flat vec3 velocity;
-  vec2 texCoords;
   flat float bv;
+  flat vec3 velocity;
   flat float speed;
   flat float otherData;
   flat float screenSpaceDepth;
+  vec3 position;
+  vec2 texCoords;
 } in_data;
 
 // layout(bindless_sampler) uniform sampler1D colorTexture;

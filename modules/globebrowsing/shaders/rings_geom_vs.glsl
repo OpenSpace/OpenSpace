@@ -27,12 +27,12 @@
 #include "powerscaling/powerscalingmath.glsl"
 
 layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_texCoord;
+layout(location = 1) in vec2 in_texCoords;
 layout(location = 2) in vec3 in_normal;
 
 out Data {
+  vec2 texCoords;
   vec3 normal;
-  vec2 texCoord;
   float screenSpaceDepth;
 } out_data;
 
@@ -43,6 +43,6 @@ void main() {
   dvec4 positionClipSpace = modelViewProjectionMatrix * dvec4(in_position, 0.0, 1.0);
   gl_Position = z_normalization(vec4(positionClipSpace));
   out_data.normal = mat3(modelViewProjectionMatrix) * in_normal;
-  out_data.texCoord = in_texCoord;
+  out_data.texCoords = in_texCoords;
   out_data.screenSpaceDepth = gl_Position.w;
 }

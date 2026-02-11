@@ -26,8 +26,8 @@
 
 in Data {
   vec4 gPosition;
+  vec2 texCoords;
   vec3 gNormal;
-  vec2 texCoord;
   float screenSpaceDepth;
 } in_data;
 
@@ -76,13 +76,13 @@ Fragment getFragment() {
   float rectangle = 0.0;
   const float MaxWwtFov = 70;
 
-  float crosshair = createCrosshair(lineWidth, ratio, in_data.texCoord);
+  float crosshair = createCrosshair(lineWidth, ratio, in_data.texCoords);
   float crossHairHeight = crossHairSize / MaxWwtFov;
   float crossHairWidth = crossHairHeight * ratio;
   float crossHairBox = createFilledRectangle(
     crossHairWidth,
     crossHairHeight,
-    in_data.texCoord
+    in_data.texCoords
   );
   crosshair *= crossHairBox;
 
@@ -102,7 +102,7 @@ Fragment getFragment() {
 
     // Calculate distance to edge
     float distance = roundedRectangle(
-      in_data.texCoord.st - vec2(0.5),
+      in_data.texCoords.st - vec2(0.5),
       size * 0.5,
       radius
     );

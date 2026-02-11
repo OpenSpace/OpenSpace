@@ -26,7 +26,7 @@
 
 in Data {
   vec4 color;
-  vec2 uv;
+  vec2 texCoords;
   float depth;
 } in_data;
 
@@ -40,7 +40,7 @@ Fragment getFragment() {
   Fragment frag;
 
   if (hasTexture) {
-    vec2 uv = in_data.uv;
+    vec2 uv = in_data.texCoords;
     if (shouldFlipTexture.x) {
       uv.x = 1.0 - uv.x;
     }

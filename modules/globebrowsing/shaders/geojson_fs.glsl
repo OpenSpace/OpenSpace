@@ -26,7 +26,7 @@
 
 in Data {
   vec4 positionViewSpace;
-  flat vec3 normal;
+  vec3 normal;
   float depth;
 } in_data;
 

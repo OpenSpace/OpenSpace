@@ -27,10 +27,10 @@
 #include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec2 in_texCoord;
+layout(location = 1) in vec2 in_texCoords;
 
 out Data {
-  vec2 texCoord;
+  vec2 texCoords;
   float screenSpaceDepth;
 } out_data;
 
@@ -43,6 +43,6 @@ void main() {
   vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
   gl_Position = positionScreenSpace;
-  out_data.texCoord = in_texCoord;
-  out_datascreenSpaceDepth = positionScreenSpace.w;
+  out_data.texCoords = in_texCoords;
+  out_data.screenSpaceDepth = positionScreenSpace.w;
 }

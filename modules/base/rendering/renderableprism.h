@@ -41,7 +41,6 @@ class RenderablePrism : public Renderable {
 public:
     explicit RenderablePrism(const ghoul::Dictionary& dictionary);
 
-    void initialize() override;
     void initializeGL() override;
     void deinitializeGL() override;
 
@@ -70,8 +69,7 @@ private:
     GLuint _vao = 0;
     GLuint _vbo = 0;
     GLuint _ibo = 0;
-    std::vector<float> _vertexArray;
-    std::vector<uint8_t> _indexArray;
+    GLsizei _count = 0;
 
     bool _prismIsDirty = false;
 };

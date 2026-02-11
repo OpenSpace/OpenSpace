@@ -32,16 +32,16 @@
 
 #define nDepthMaps #{nDepthMaps}
 
-layout(location = 1) in vec2 in_uv;
+layout(location = 1) in vec2 in_texCoords;
 
 out Data {
   vec4 position;
+  vec2 texCoords;
   vec3 ellipsoidNormalCameraSpace;
   vec3 levelWeights;
   vec3 positionCameraSpace;
   vec3 posObjSpace;
   vec3 normalObjSpace;
-  vec2 uv;
 #if USE_ACCURATE_NORMALS
   vec3 ellipsoidTangentThetaCameraSpace;
   vec3 ellipsoidTangentPhiCameraSpace;
@@ -105,7 +105,7 @@ PositionNormalPair globalInterpolation(vec2 uv) {
 
 
 void main() {
-  PositionNormalPair pair = globalInterpolation(in_uv);
+  PositionNormalPair pair = globalInterpolation(in_texCoords);
   float distToVertexOnEllipsoid =
     length((pair.normal * chunkMinHeight + pair.position) - cameraPosition);
 
@@ -120,15 +120,20 @@ void main() {
   );
 
   // Get the height value and apply skirts
-  float height = tileHeight(in_uv, out_data.levelWeights) - tileVertexSkirtLength();
+  float height =
+    tileHeight(in_texCoords, out_data.levelWeights) - tileVertexSkirtLength();
 
 #if USE_ACCURATE_NORMALS
   // Calculate tangents
   // tileDelta is a step length (epsilon). Should be small enough for accuracy but not
   // Too small for precision. 1 / 512 is good.
   const float tileDelta = 1.0 / 512.0;
-  PositionNormalPair pair10 = globalInterpolation(vec2(1.0, 0.0) * tileDelta + in_uv);
-  PositionNormalPair pair01 = globalInterpolation(vec2(0.0, 1.0) * tileDelta + in_uv);
+  PositionNormalPair pair10 = globalInterpolation(
+    vec2(1.0, 0.0) * tileDelta + in_texCoords
+  );
+  PositionNormalPair pair01 = globalInterpolation(
+    vec2(0.0, 1.0) * tileDelta + in_texCoords
+  );
   vec3 ellipsoidTangentTheta = normalize(pair10.position - pair.position);
   vec3 ellipsoidTangentPhi = normalize(pair01.position - pair.position);
   out_data.ellipsoidTangentThetaCameraSpace =
@@ -142,7 +147,7 @@ void main() {
   vec4 positionClippingSpace = modelViewProjectionTransform * vec4(pair.position, 1.0);
 
   // Write output
-  out_data.uv = in_uv;
+  out_data.texCoords = in_texCoords;
   out_data.position = z_normalization(positionClippingSpace);
   gl_Position = out_data.position;
   out_data.ellipsoidNormalCameraSpace = mat3(modelViewTransform) * pair.normal;

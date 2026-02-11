@@ -25,10 +25,10 @@
 #version __CONTEXT__
 
 layout(location = 0) in vec3 in_position;
-layout(location = 1) in vec2 in_texCoord;
+layout(location = 1) in vec2 in_texCoords;
 
 out Data {
-  vec2 texCoord;
+  vec2 texCoords;
   float depth;
 } out_data;
 
@@ -37,6 +37,6 @@ uniform mat4 mvpMatrix;
 
 void main() {
   gl_Position = mvpMatrix * vec4(in_position, 1.0);
-  out_data.texCoord = in_texCoord;
+  out_data.texCoords = in_texCoords;
   out_data.depth = gl_Position.z;
 }

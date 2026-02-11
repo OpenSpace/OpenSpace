@@ -25,11 +25,11 @@
 #include "fragment.glsl"
 
 in Data {
-  flat vec4 positionViewSpace;
-  vec2 texCoord;
+  flat int textureLayer;
   flat float colorParameter;
+  vec2 texCoords;
   flat float screenSpaceDepth;
-  flat int layer;
+  flat vec4 positionViewSpace;
 } in_data;
 
 uniform float opacity;
@@ -96,7 +96,7 @@ Fragment getFragment() {
   }
 
   // Moving the origin to the center and calculating the length
-  vec2 centeredTexCoords = (in_data.texCoord - vec2(0.5)) * 2.0;
+  vec2 centeredTexCoords = (in_data.texCoords - vec2(0.5)) * 2.0;
   float lengthFromCenter = length(centeredTexCoords);
 
   bool shouldBeRound = (!hasSpriteTexture && !enableOutline) ||
@@ -116,7 +116,7 @@ Fragment getFragment() {
   }
 
   if (hasSpriteTexture) {
-    fullColor *= texture(spriteTexture, vec3(in_data.texCoord, in_data.layer));
+    fullColor *= texture(spriteTexture, vec3(in_data.texCoords, in_data.textureLayer));
   }
 
   // Border
@@ -131,7 +131,7 @@ Fragment getFragment() {
       pixelIsOutline = isOutsideY || isOutsideX;
     }
     else if (outlineStyle == OutlineStyleBottom) {
-      pixelIsOutline = in_data.texCoord.y < 0.5 * outlineWeight;
+      pixelIsOutline = in_data.texCoords.y < 0.5 * outlineWeight;
     }
 
     if (pixelIsOutline) {

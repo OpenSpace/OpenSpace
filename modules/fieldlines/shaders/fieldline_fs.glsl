@@ -26,8 +26,8 @@
 #include "powerscaling/powerscaling_fs.glsl"
 
 in Data {
-  vec4 color;
   vec4 position;
+  vec4 color;
   vec3 normal;
 } in_data;
 

@@ -136,8 +136,8 @@ private:
     ghoul::Dictionary _ringsDictionary;
     bool _textureIsDirty = false;
     bool _isAdvancedTextureEnabled = false;
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
     bool _planeIsDirty = false;
 
     glm::vec3 _sunPosition = glm::vec3(0.f);

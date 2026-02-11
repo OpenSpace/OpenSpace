@@ -26,8 +26,8 @@
 #include "fragment.glsl"
 
 in Data {
+  vec2 texCoords;
   vec3 normal;
-  vec2 texCoord;
   float screenSpaceDepth;
 } in_data;
 
@@ -42,7 +42,7 @@ Fragment getFragment() {
   }
 
   // Moving the origin to the center
-  vec2 st = (in_data.texCoord - vec2(0.5)) * 2.0;
+  vec2 st = (in_data.texCoords - vec2(0.5)) * 2.0;
 
   // The length of the texture coordinates vector is our distance from the center
   float radius = length(st);
@@ -53,15 +53,15 @@ Fragment getFragment() {
   }
 
   // Remapping the texture coordinates
-  // Radius \in [0,1],  texCoord \in [textureOffset.x, textureOffset.y]
+  // Radius \in [0,1],  texCoords \in [textureOffset.x, textureOffset.y]
   // textureOffset.x -> 0
   // textureOffset.y -> 1
-  float texCoord = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
-  if (texCoord < 0.0 || texCoord > 1.0) {
+  float texCoords = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
+  if (texCoords < 0.0 || texCoords > 1.0) {
     discard;
   }
 
-  float diffuse = length(texture(ringTexture, texCoord).rgb);
+  float diffuse = length(texture(ringTexture, texCoords).rgb);
 
   // The normal for the one plane depends on whether we are dealing
   // with a front facing or back facing fragment

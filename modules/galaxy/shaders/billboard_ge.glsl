@@ -35,8 +35,8 @@ in Data {
 layout(triangle_strip, max_vertices = 4) out;
 out Data {
   vec4 position;
-  flat vec3 color;
   vec2 psfCoords;
+  flat vec3 color;
   flat float screenSpaceDepth;
 } out_data;
 

@@ -60,7 +60,7 @@
 #include "atmosphere_common.glsl"
 
 in Data {
-  vec2 texCoord;
+  vec2 texCoords;
 } in_data;
 
 out vec4 out_color;
@@ -532,14 +532,14 @@ vec3 sunColor(vec3 v, vec3 s, float r, float mu, float irradianceFactor) {
 
 
 void main() {
-  // Modify the texCoord based on the Viewport and Resolution. This modification is
+  // Modify the texCoords based on the Viewport and Resolution. This modification is
   // necessary in case of side-by-side stereo as we only want to access the part of the
   // feeding texture that we are currently responsible for.  Otherwise we would map the
   // entire feeding texture into our half of the result texture, leading to a doubling
   // of the "missing" half.  If you don't believe me, load a configuration file with the
   // side_by_side stereo mode enabled, disable FXAA, and remove this modification.
   // The same calculation is done in the FXAA shader and the HDR resolving
-  vec2 st = in_data.texCoord;
+  vec2 st = in_data.texCoords;
   st.x = st.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
   st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
 
@@ -551,7 +551,7 @@ void main() {
   }
 
   // Get the ray from camera to atm in object space
-  Ray ray = calculateRayRenderableGlobe(in_data.texCoord);
+  Ray ray = calculateRayRenderableGlobe(in_data.texCoords);
 
   double offset = 0.0;   // in KM
   double maxLength = 0.0;   // in KM

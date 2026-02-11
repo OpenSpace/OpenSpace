@@ -26,13 +26,13 @@
 
 #include "powerscaling/powerscaling_vs.glsl"
 
-layout(location = 0) in vec3 in_point_position;
+layout(location = 0) in vec3 in_pointPosition;
 
 out Data {
   vec4 gPosition;
-  noperspective vec2 mathLine;
   float positionDepth;
   float fade;
+  noperspective vec2 mathLine;
 } out_data;
 
 uniform dmat4 modelViewTransform;
@@ -103,7 +103,7 @@ void main() {
     out_data.fade = 1.0;
   }
 
-  out_data.gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
+  out_data.gPosition = vec4(modelViewTransform * dvec4(in_pointPosition, 1.0));
   vec4 positionClipSpace = projectionTransform * out_data.gPosition;
   out_data.positionDepth = positionClipSpace.w;
 

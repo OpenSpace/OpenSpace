@@ -25,8 +25,8 @@
 #version __CONTEXT__
 
 in Data {
+  vec2 texCoords;
   vec4 color;
-  vec2 uv;
 } in_data;
 
 out vec4 out_color;
@@ -35,5 +35,5 @@ uniform sampler2D tex;
 
 
 void main() {
-  out_color = in_data.color * texture(tex, in_data.uv);
+  out_color = in_data.color * texture(tex, in_data.texCoords);
 }

@@ -27,7 +27,7 @@
 #include "powerscaling/powerscaling_fs.glsl"
 
 in Data {
-  vec2 texCoord;
+  vec2 texCoords;
   float depth;
 } in_data;
 
@@ -51,12 +51,12 @@ Fragment getFragment() {
   Fragment frag;
   vec4 originalColor;
   if (useAcceleratedRendering) {
-    vec2 flippedTexCoords = vec2(in_data.texCoord.s, 1.0 - in_data.texCoord.t);
+    vec2 flippedTexCoords = vec2(in_data.texCoords.s, 1.0 - in_data.texCoords.t);
     // Correcting both orientation and color channels
     originalColor = texture(tex, flippedTexCoords).bgra;
   }
   else {
-    originalColor = texture(tex, in_data.texCoord);
+    originalColor = texture(tex, in_data.texCoords);
   }
 
   vec4 texColor = originalColor * vec4(color, opacity);
@@ -64,14 +64,14 @@ Fragment getFragment() {
   frag.color = texColor.a * texColor + (1.0 - texColor.a) * backgroundColor;
 
   // Set border color
-  if (in_data.texCoord.s < borderWidth.x || in_data.texCoord.s > 1 - borderWidth.x ||
-      in_data.texCoord.t < borderWidth.y || in_data.texCoord.t > 1 - borderWidth.y)
+  if (in_data.texCoords.s < borderWidth.x || in_data.texCoords.s > 1 - borderWidth.x ||
+      in_data.texCoords.t < borderWidth.y || in_data.texCoords.t > 1 - borderWidth.y)
   {
     frag.color = vec4(borderColor, opacity);
     if (borderFeather == 1) {
-      vec2 f1 = in_data.texCoord / borderWidth;
+      vec2 f1 = in_data.texCoords / borderWidth;
       float g1 = min(f1.x, f1.y);
-      vec2 f2 = (vec2(1) - in_data.texCoord) / borderWidth;
+      vec2 f2 = (vec2(1) - in_data.texCoords) / borderWidth;
       float g2 = min(f2.x, f2.y);
       frag.color *= min(g1, g2);
     }

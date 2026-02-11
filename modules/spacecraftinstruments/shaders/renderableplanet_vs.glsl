@@ -27,12 +27,12 @@
 #include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_texCoord;
+layout(location = 1) in vec2 in_texCoords;
 layout(location = 2) in vec3 in_normal;
 
 out Data {
   vec3 normal;
-  vec2 texCoord;
+  vec2 texCoords;
   float depth;
 } out_data;
 
@@ -45,28 +45,27 @@ uniform bool meridianShift;
 
 
 void main() {
-  vec3 tmp = in_position.xyz;
+  vec3 pos = in_position.xyz;
 
   if (hasHeightMap) {
-    vec2 st = out_data.texCoord;
+    vec2 st = in_texCoords;
     if (meridianShift) {
       st += vec2(0.5, 0.0);
     }
     float height = texture(heightTexture, st).s;
-    vec3 displacementDirection = normalize(tmp);
+    vec3 displacementDirection = normalize(pos);
     float displacementFactor = height * heightExaggeration;
-    tmp += displacementDirection * displacementFactor;
+    pos += displacementDirection * displacementFactor;
   }
 
   // convert from psc to homogeneous coordinates
-  vec4 position = vec4(tmp, 1.0);
-  vec4 positionClipSpace = modelViewProjectionTransform * position;
+  vec4 positionClipSpace = modelViewProjectionTransform * vec4(pos, 1.0);
   vec4 p = z_normalization(positionClipSpace);
 
   // This is wrong for the normal.
   // The normal transform is the transposed inverse of the model transform
   out_data.normal = normalize(modelTransform * vec4(in_normal, 0.0)).xyz;
-  out_data.texCoord = in_texCoord;
+  out_data.texCoords = in_texCoords;
   out_data.depth = p.w;
   gl_Position = p;
 }

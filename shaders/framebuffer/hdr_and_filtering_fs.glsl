@@ -27,7 +27,7 @@
 #include "hdr.glsl"
 
 in Data {
-  vec2 texCoord;
+  vec2 texCoords;
 } in_data;
 
 layout (location = 0) out vec4 out_color;
@@ -46,14 +46,14 @@ uniform sampler2D hdrFeedingTexture;
 
 
 void main() {
-  // Modify the texCoord based on the Viewport and Resolution. This modification is
+  // Modify the texCoords based on the Viewport and Resolution. This modification is
   // necessary in case of side-by-side stereo as we only want to access the part of the
   // feeding texture that we are currently responsible for.  Otherwise we would map the
   // entire feeding texture into our half of the result texture, leading to a doubling
   // of the "missing" half.  If you don't believe me, load a configuration file with the
   // side_by_side stereo mode enabled, disable FXAA, and remove this modification.
   // The same calculation is done in the FXAA shader
-  vec2 st = in_data.texCoord;
+  vec2 st = in_data.texCoords;
   st.x = st.x / (Resolution.x / Viewport[2]) + (Viewport[0] / Resolution.x);
   st.y = st.y / (Resolution.y / Viewport[3]) + (Viewport[1] / Resolution.y);
 

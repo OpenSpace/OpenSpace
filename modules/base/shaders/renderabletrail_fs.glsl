@@ -26,9 +26,9 @@
 
 in Data {
   vec4 gPosition;
-  noperspective vec2 mathLine;
   float positionDepth;
   float fade;
+  noperspective vec2 mathLine;
 } in_data;
 
 uniform vec3 color;

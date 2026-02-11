@@ -44,5 +44,4 @@ void main() {
 
   out_data.screenSpaceDepth = gl_Position.w;
   out_data.positionViewSpace = vec4(positionViewSpace);
-
 }

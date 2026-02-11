@@ -96,7 +96,8 @@ void main() {
     vec3 lowerLimit = vec3(domainLimX.x, domainLimY.x, domainLimZ.x);
     vec3 upperLimit = vec3(domainLimX.y, domainLimY.y, domainLimZ.y);
     // If position is outside of domain
-    if (any(in_position < lowerLimit) || any(in_position > upperLimit) ||
+    if (any(lessThan(in_position, lowerLimit)) ||
+        any(lessThan(in_position, upperLimit)) ||
         radius < domainLimR.x || radius > domainLimR.y)
     {
       hasColor = false;

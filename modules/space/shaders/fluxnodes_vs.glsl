@@ -32,9 +32,9 @@ layout(location = 2) in float in_rValue; // the extra value used to mask parts o
 
 out Data {
   vec4 color;
-  vec2 vs_st;
-  float vs_depth;
-  float vs_closeToEarth;
+  vec2 texCoords;
+  float depth;
+  float closeToEarth;
 } out_data;
 
 // General Uniforms that's always needed

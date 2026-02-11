@@ -29,8 +29,8 @@ layout(location = 1) in vec2 in_textureCoords;
 
 out Data {
   vec4 position;
-  vec3 normal;
   vec2 textureCoords;
+  vec3 normal;
   float screenSpaceDepth;
 } out_data;
 

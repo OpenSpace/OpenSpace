@@ -26,14 +26,14 @@
 #include "fragment.glsl"
 
 in Data {
+  vec3 vertexPosition;
   vec4 worldPosition;
-  vec3 vPosition;
 } in_data;
 
 
 Fragment getFragment() {
   Fragment frag;
-  frag.color = vec4(in_data.vPosition + 0.5, 1.0);
+  frag.color = vec4(in_data.vertexPosition + 0.5, 1.0);
   frag.depth = pscDepth(in_data.worldPosition);
   return frag;
 }

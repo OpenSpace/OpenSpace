@@ -26,11 +26,11 @@
 
 #include "powerscaling/powerscaling_vs.glsl"
 
-layout(location = 0) in vec4 vertPosition;
+layout(location = 0) in vec4 in_position;
 
 out Data {
+  vec3 vertexPosition;
   vec4 worldPosition;
-  vec3 vPosition;
 } out_data;
 
 uniform mat4 viewProjection;
@@ -38,8 +38,8 @@ uniform mat4 modelTransform;
 
 
 void main() {
-  out_data.worldPosition = vec4(vertPosition.xyz, 0.0);
-  out_data.vPosition = vertPosition.xyz;
+  out_data.worldPosition = vec4(in_position.xyz, 0.0);
+  out_data.vertexPosition = in_position.xyz;
   vec4 position = pscTransform(out_data.worldPosition, modelTransform);
   gl_Position = z_normalization(viewProjection * position);
 }

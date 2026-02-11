@@ -26,13 +26,11 @@
 
 in Data {
   vec4 positionViewSpace;
-  flat vec3 normal; // TODO: not needed for shading, remove somehow
-  vec2 texCoord;
+  vec2 texCoords;
   flat float screenSpaceDepth;
 } in_data;
 
 uniform sampler2D pointTexture;
-uniform bool hasTexture;
 uniform vec3 color;
 uniform float opacity;
 
@@ -43,16 +41,11 @@ const bool PreserveWhite = true;
 Fragment getFragment() {
   Fragment frag;
 
-  if (hasTexture) {
-    frag.color = texture(pointTexture, in_data.texCoord);
-    if (!PreserveWhite || frag.color.r * frag.color.g * frag.color.b < 0.95) {
-      frag.color.rgb *= color;
-    }
-    frag.color.a *= opacity;
+  frag.color = texture(pointTexture, in_data.texCoords);
+  if (!PreserveWhite || frag.color.r * frag.color.g * frag.color.b < 0.95) {
+    frag.color.rgb *= color;
   }
-  else {
-    frag.color = vec4(color * in_data.normal, opacity);
-  }
+  frag.color.a *= opacity;
 
   if (frag.color.a < 0.01) {
     discard;

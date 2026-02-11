@@ -28,19 +28,19 @@
 
 layout(points) in;
 in Data {
-  flat vec4 orientation; // quaternion
   flat float textureLayer;
   flat float colorParameter;
   flat float scalingParameter;
+  flat vec4 orientation; // quaternion
 } in_data[];
 
 layout(triangle_strip, max_vertices = 4) out;
 out Data {
-  flat vec4 positionViewSpace;
-  vec2 texCoord;
+  flat int textureLayer;
   flat float colorParameter;
+  vec2 texCoords;
   flat float screenSpaceDepth;
-  flat int layer;
+  flat vec4 positionViewSpace;
 } out_data;
 
 // General settings
@@ -93,13 +93,13 @@ vec4 quatMult(vec4 q1, vec4 q2) {
 // Vector rotation with a quaternion
 // http://mathworld.wolfram.com/Quaternion.html
 vec3 rotateVector(vec3 v, vec4 q) {
-  vec4 q_conjugate = q * vec4(-1.0, -1.0, -1.0, 1.0);
-  return quatMult(q, quatMult(vec4(v, 0.0), q_conjugate)).xyz;
+  vec4 qConjugate = q * vec4(-1.0, -1.0, -1.0, 1.0);
+  return quatMult(q, quatMult(vec4(v, 0.0), qConjugate)).xyz;
 }
 
 
 void main() {
-  out_data.layer = int(in_data[0].textureLayer);
+  out_data.textureLayer = int(in_data[0].textureLayer);
   out_data.colorParameter = in_data[0].colorParameter;
 
   dvec4 dpos = modelMatrix * dvec4(dvec3(gl_in[0].gl_Position.xyz), 1.0);
@@ -168,19 +168,19 @@ void main() {
   out_data.screenSpaceDepth = initialPosition.w;
 
   // Build primitive
-  out_data.texCoord = corners[0];
+  out_data.texCoords = corners[0];
   gl_Position = initialPosition;
   EmitVertex();
 
-  out_data.texCoord = corners[1];
+  out_data.texCoords = corners[1];
   gl_Position = z_normalization(dposClip + scaledRightClip - scaledUpClip);
   EmitVertex();
 
-  out_data.texCoord = corners[3];
+  out_data.texCoords = corners[3];
   gl_Position = z_normalization(dposClip + scaledUpClip - scaledRightClip);
   EmitVertex();
 
-  out_data.texCoord = corners[2];
+  out_data.texCoords = corners[2];
   gl_Position = z_normalization(dposClip + scaledUpClip + scaledRightClip);
   EmitVertex();
 

@@ -26,8 +26,8 @@
 
 in Data {
   vec4 position;
-  vec3 normal;
   vec2 textureCoords;
+  vec3 normal;
   float screenSpaceDepth;
 } in_data;
 

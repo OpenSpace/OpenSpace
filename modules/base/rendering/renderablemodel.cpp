@@ -711,12 +711,12 @@ void RenderableModel::initializeGL() {
         float t;
     };
     constexpr std::array<Vertex, 6> QuadVtx = {
-        Vertex { -1.f, -1.f,  0.f,  0.f },
-        Vertex {  1.f,  1.f,  1.f,  1.f },
-        Vertex { -1.f,  1.f,  0.f,  1.f },
-        Vertex { -1.f, -1.f,  0.f,  0.f },
-        Vertex {  1.f, -1.f,  1.f,  0.f },
-        Vertex {  1.f,  1.f,  1.f,  1.f }
+        Vertex{ -1.f, -1.f,  0.f,  0.f },
+        Vertex{  1.f,  1.f,  1.f,  1.f },
+        Vertex{ -1.f,  1.f,  0.f,  1.f },
+        Vertex{ -1.f, -1.f,  0.f,  0.f },
+        Vertex{  1.f, -1.f,  1.f,  0.f },
+        Vertex{  1.f,  1.f,  1.f,  1.f }
     };
     glNamedBufferStorage(_vbo, sizeof(QuadVtx), QuadVtx.data(), GL_NONE_BIT);
 

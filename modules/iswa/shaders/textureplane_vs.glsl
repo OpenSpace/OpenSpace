@@ -27,11 +27,11 @@
 #include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_texCoord;
+layout(location = 1) in vec2 in_texCoords;
 
 out Data {
   vec4 position;
-  vec2 texCoord;
+  vec2 texCoords;
 } out_data;
 
 uniform mat4 ViewProjection;
@@ -40,7 +40,7 @@ uniform mat4 ModelTransform;
 
 void main() {
   out_data.position = in_position;
-  out_data.texCoord = in_texCoord;
+  out_data.texCoords = in_texCoords;
   gl_Position =
     z_normalization(ViewProjection * pscTransform(in_position, ModelTransform));
 }

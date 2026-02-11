@@ -35,7 +35,7 @@ in Data {
 layout(triangle_strip, max_vertices = 4) out;
 out Data {
   vec4 viewSpace;
-  vec2 texCoord;
+  vec2 texCoords;
   float projectionViewDepth;
 } out_data;
 
@@ -126,22 +126,22 @@ void main() {
 
   // left-top
   gl_Position = z_normalization(vec4(viewProjectionTransform * p0World));
-  out_data.texCoord = vec2(0.0, 0.0);
+  out_data.texCoords = vec2(0.0, 0.0);
   EmitVertex();
 
   // left-bot
   gl_Position = z_normalization(vec4(viewProjectionTransform * p1World));
-  out_data.texCoord = vec2(1.0, 0.0);
+  out_data.texCoords = vec2(1.0, 0.0);
   EmitVertex();
 
   // right-top
   gl_Position = z_normalization(vec4(viewProjectionTransform * p2World));
-  out_data.texCoord = vec2(0.0, 1.0);
+  out_data.texCoords = vec2(0.0, 1.0);
   EmitVertex();
 
   // right-bot
   gl_Position = z_normalization(vec4(viewProjectionTransform * p3World));
-  out_data.texCoord = vec2(1.0, 1.0);
+  out_data.texCoords = vec2(1.0, 1.0);
   EmitVertex();
 
   EndPrimitive();

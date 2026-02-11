@@ -48,12 +48,8 @@
 
 namespace {
     struct Vertex {
-        float x;
-        float y;
-        float z;
-        float w;
-        float s;
-        float t;
+        glm::vec4 position;
+        glm::vec2 texCoords;
     };
 
     enum RenderOption {
@@ -362,7 +358,14 @@ void RenderablePlane::initializeGL() {
     glVertexArrayAttribBinding(_vao, 0, 0);
 
     glEnableVertexArrayAttrib(_vao, 1);
-    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, s));
+    glVertexArrayAttribFormat(
+        _vao,
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        offsetof(Vertex, texCoords)
+    );
     glVertexArrayAttribBinding(_vao, 1, 0);
 
     createPlane();
@@ -502,13 +505,12 @@ void RenderablePlane::createPlane() {
     const GLfloat sizeY = _size.value().y;
 
     const std::array<Vertex, 6> vertexData = {
-        //   x       y    z    w    s    t
-        Vertex { -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f },
-        Vertex {  sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f },
-        Vertex { -sizeX,  sizeY, 0.f, 0.f, 0.f, 1.f },
-        Vertex { -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f },
-        Vertex {  sizeX, -sizeY, 0.f, 0.f, 1.f, 0.f },
-        Vertex {  sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f }
+        Vertex{ glm::vec4(-sizeX, -sizeY, 0.f, 0.f), glm::vec2(0.f, 0.f) },
+        Vertex{ glm::vec4( sizeX,  sizeY, 0.f, 0.f), glm::vec2(1.f, 1.f) },
+        Vertex{ glm::vec4(-sizeX,  sizeY, 0.f, 0.f), glm::vec2(0.f, 1.f) },
+        Vertex{ glm::vec4(-sizeX, -sizeY, 0.f, 0.f), glm::vec2(0.f, 0.f) },
+        Vertex{ glm::vec4( sizeX, -sizeY, 0.f, 0.f), glm::vec2(1.f, 0.f) },
+        Vertex{ glm::vec4( sizeX,  sizeY, 0.f, 0.f), glm::vec2(1.f, 1.f) }
     };
 
     glNamedBufferSubData(_vbo, 0, sizeof(vertexData), vertexData.data());

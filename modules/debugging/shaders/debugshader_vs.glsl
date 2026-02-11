@@ -26,12 +26,14 @@
 
 #include "powerscaling/powerscaling_vs.glsl"
 
-layout(location = 0) in vec4 vertexPositionClippingSpace;
+layout(location = 0) in vec4 in_position;
 
+out Data {
+  float depth;
+} out_data;
 
-out vec4 fs_vertexPosition;
 
 void main() {
-    fs_vertexPosition = z_normalization(vertexPositionClippingSpace);
-    gl_Position = fs_vertexPosition;
+  gl_Position = z_normalization(in_position);
+  out_data.depth = gl_Position.w;
 }

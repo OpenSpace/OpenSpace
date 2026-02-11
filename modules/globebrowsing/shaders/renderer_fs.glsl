@@ -33,12 +33,12 @@
 
 in Data {
   vec4 position;
+  vec2 texCoords;
   vec3 ellipsoidNormalCameraSpace;
   vec3 levelWeights;
   vec3 positionCameraSpace;
   vec3 posObjSpace;
   vec3 normalObjSpace;
-  vec2 uv;
 #if USE_ACCURATE_NORMALS
   vec3 ellipsoidTangentThetaCameraSpace;
   vec3 ellipsoidTangentPhiCameraSpace;
@@ -206,7 +206,7 @@ Fragment getFragment() {
 
 #if USE_ACCURATE_NORMALS
   normal = getTileNormal(
-    in_data.uv,
+    in_data.texCoords,
     in_data.levelWeights,
     normalize(in_data.ellipsoidNormalCameraSpace),
     normalize(in_data.ellipsoidTangentThetaCameraSpace),
@@ -215,14 +215,19 @@ Fragment getFragment() {
 #endif /// USE_ACCURATE_NORMALS
 
 #if USE_COLORTEXTURE
-  frag.color = calculateColor(frag.color, in_data.uv, in_data.levelWeights, ColorLayers);
+  frag.color = calculateColor(
+    frag.color,
+    in_data.texCoords,
+    in_data.levelWeights,
+    ColorLayers
+  );
 #endif // USE_COLORTEXTURE
 
 #if USE_WATERMASK
   float waterReflectance = 0.0;
   frag.color = calculateWater(
     frag.color,
-    in_data.uv,
+    in_data.texCoords,
     in_data.levelWeights,
     WaterMasks,
     normal,
@@ -235,7 +240,7 @@ Fragment getFragment() {
 #if USE_NIGHTTEXTURE
   frag.color = calculateNight(
     frag.color,
-    in_data.uv,
+    in_data.texCoords,
     in_data.levelWeights,
     NightLayers,
     normalize(in_data.ellipsoidNormalCameraSpace),
@@ -260,14 +265,19 @@ Fragment getFragment() {
 #endif // USE_ECLIPSE_SHADOWS
 
 #if USE_OVERLAY
-  frag.color = calculateOverlay(frag.color, in_data.uv, in_data.levelWeights, Overlays);
+  frag.color = calculateOverlay(
+    frag.color,
+    in_data.texCoords,
+    in_data.levelWeights,
+    Overlays
+  );
 #endif // USE_OVERLAY
 
 #if SHOW_HEIGHT_INTENSITIES
   frag.color.rgb *= vec3(0.1);
 
   float untransformedHeight = getUntransformedTileVertexHeight(
-    in_data.uv,
+    in_data.texCoords,
     in_data.levelWeights
   );
   float contourLine = fract(10.0 * untransformedHeight) > 0.98  ?  1.0  :  0.0;
@@ -277,11 +287,14 @@ Fragment getFragment() {
 
 #if SHOW_HEIGHT_RESOLUTION
   frag.color +=
-    0.0001 * calculateDebugColor(in_data.uv, in_data.position, vertexResolution);
+    0.0001 * calculateDebugColor(in_data.texCoords, in_data.position, vertexResolution);
   #if USE_HEIGHTMAP
     frag.color.r = min(frag.color.r, 0.8);
     frag.color.r +=
-      tileResolution(in_data.uv, HeightLayers[0].pile.chunkTile0) > 0.9  ?  1.0  :  0.0;
+      tileResolution(
+        in_data.texCoords,
+        HeightLayers[0].pile.chunkTile0
+      ) > 0.9  ?  1.0  :  0.0;
   #endif // USE_HEIGHTMAP
 #endif // SHOW_HEIGHT_RESOLUTION
 
@@ -308,7 +321,7 @@ Fragment getFragment() {
   const float BorderSize = 0.005;
   const vec3 BorderColor = vec3(1.0, 0.0, 0.0);
 
-  vec2 uvOffset = in_data.uv - vec2(0.5);
+  vec2 uvOffset = in_data.texCoords - vec2(0.5);
   float thres = 0.5 - BorderSize * 0.5;
   bool isBorder = abs(uvOffset.x) > thres || abs(uvOffset.y) > thres;
   if (isBorder) {

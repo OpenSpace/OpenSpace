@@ -50,14 +50,10 @@
 namespace {
     constexpr std::string_view _loggerCat = "RingsComponent";
 
-    struct VertexData {
-        GLfloat x;
-        GLfloat y;
-        GLfloat s;
-        GLfloat t;
-        GLfloat nx;
-        GLfloat ny;
-        GLfloat nz;
+    struct Vertex {
+        glm::vec2 position;
+        glm::vec2 texCoords;
+        glm::vec3 normal;
     };
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
@@ -354,21 +350,21 @@ void RingsComponent::initializeGL() {
         LERROR(e.message);
     }
 
-    glCreateBuffers(1, &_vertexPositionBuffer);
-    glCreateVertexArrays(1, &_quad);
-    glVertexArrayVertexBuffer(_quad, 0, _vertexPositionBuffer, 0, sizeof(VertexData));
+    glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
-    glEnableVertexArrayAttrib(_quad, 0);
-    glVertexArrayAttribFormat(_quad, 0, 2, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_quad, 0, 0);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
-    glEnableVertexArrayAttrib(_quad, 1);
-    glVertexArrayAttribFormat(_quad, 1, 2, GL_FLOAT, GL_FALSE, offsetof(VertexData, s));
-    glVertexArrayAttribBinding(_quad, 1, 0);
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, texCoords));
+    glVertexArrayAttribBinding(_vao, 1, 0);
 
-    glEnableVertexArrayAttrib(_quad, 2);
-    glVertexArrayAttribFormat(_quad, 2, 3, GL_FLOAT, GL_FALSE, offsetof(VertexData, nx));
-    glVertexArrayAttribBinding(_quad, 2, 0);
+    glEnableVertexArrayAttrib(_vao, 2);
+    glVertexArrayAttribFormat(_vao, 2, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, normal));
+    glVertexArrayAttribBinding(_vao, 2, 0);
 
     createPlane();
 
@@ -377,8 +373,8 @@ void RingsComponent::initializeGL() {
 }
 
 void RingsComponent::deinitializeGL() {
-    glDeleteVertexArrays(1, &_quad);
-    glDeleteBuffers(1, &_vertexPositionBuffer);
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     _textureFile = nullptr;
     _texture = nullptr;
@@ -520,7 +516,7 @@ void RingsComponent::draw(const RenderData& data,
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
-    glBindVertexArray(_quad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glEnable(GL_CULL_FACE);
@@ -710,21 +706,16 @@ void RingsComponent::loadTexture() {
 void RingsComponent::createPlane() {
     const GLfloat size = _size;
 
-    const std::array<VertexData, 6> vertices = {
-        VertexData{ -size, -size, 0.f, 0.f, 0.f, 0.f, 1.f },
-        VertexData{  size,  size, 1.f, 1.f, 0.f, 0.f, 1.f },
-        VertexData{ -size,  size, 0.f, 1.f, 0.f, 0.f, 1.f },
-        VertexData{ -size, -size, 0.f, 0.f, 0.f, 0.f, 1.f },
-        VertexData{  size, -size, 1.f, 0.f, 0.f, 0.f, 1.f },
-        VertexData{  size,  size, 1.f, 1.f, 0.f, 0.f, 1.f },
+    const std::array<Vertex, 6> vertices = {
+        Vertex { glm::vec2(-size, -size), glm::vec2(0.f, 0.f), glm::vec3(0.f, 0.f, 1.f) },
+        Vertex { glm::vec2( size,  size), glm::vec2(1.f, 1.f), glm::vec3(0.f, 0.f, 1.f) },
+        Vertex { glm::vec2(-size,  size), glm::vec2(0.f, 1.f), glm::vec3(0.f, 0.f, 1.f) },
+        Vertex { glm::vec2(-size, -size), glm::vec2(0.f, 0.f), glm::vec3(0.f, 0.f, 1.f) },
+        Vertex { glm::vec2( size, -size), glm::vec2(1.f, 0.f), glm::vec3(0.f, 0.f, 1.f) },
+        Vertex { glm::vec2( size,  size), glm::vec2(1.f, 1.f), glm::vec3(0.f, 0.f, 1.f) }
     };
 
-    glNamedBufferData(
-        _vertexPositionBuffer,
-        sizeof(vertices),
-        vertices.data(),
-        GL_STATIC_DRAW
-    );
+    glNamedBufferData(_vbo, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
 }
 
 void RingsComponent::compileShadowShader() {

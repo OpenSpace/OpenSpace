@@ -27,13 +27,13 @@
 #include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_texCoord;
+layout(location = 1) in vec2 in_texCoords;
 layout(location = 2) in vec3 in_normal;
 
 out Data {
   vec4 positionCameraSpace;
+  vec2 texCoords;
   vec3 normalViewSpace;
-  vec2 texCoord;
   float depth;
 } out_data;
 
@@ -48,7 +48,7 @@ void main() {
   out_data.positionCameraSpace = modelViewTransform * position;
   vec4 positionClipSpace = projectionTransform * out_data.positionCameraSpace;
 
-  out_data.texCoord = in_texCoord;
+  out_data.texCoords = in_texCoords;
   gl_Position = z_normalization(positionClipSpace);
   out_data.depth = gl_Position.w;
 

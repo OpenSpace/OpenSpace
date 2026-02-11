@@ -30,11 +30,11 @@
 #define NSSamples (NSSamplesMinusOne + 1)
 
 in Data {
-  vec4 shadowCoords;
-  vec3 normal;
   vec3 posObj;
-  vec2 texCoord;
+  vec2 texCoords;
+  vec3 normal;
   float screenSpaceDepth;
+  vec4 shadowCoords;
 } in_data;
 
 uniform sampler1D textureForwards;
@@ -55,7 +55,7 @@ uniform vec3 ellipsoidRadii;
 
 Fragment getFragment() {
   // Moving the origin to the center
-  vec2 st = (in_data.texCoord - vec2(0.5)) * 2.0;
+  vec2 st = (in_data.texCoords - vec2(0.5)) * 2.0;
 
   // The length of the texture coordinates vector is our distance from the center
   float radius = length(st);
@@ -66,18 +66,18 @@ Fragment getFragment() {
   }
 
   // Remapping the texture coordinates
-  // Radius \in [0,1],  texCoord \in [textureOffset.x, textureOffset.y]
+  // Radius \in [0,1],  texCoords \in [textureOffset.x, textureOffset.y]
   // textureOffset.x -> 0
   // textureOffset.y -> 1
-  float texCoord = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
-  if (texCoord < 0.0 || texCoord > 1.0) {
+  float texCoords = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
+  if (texCoords < 0.0 || texCoords > 1.0) {
     discard;
   }
 
-  vec4 colorBckwrd = texture(textureBackwards, texCoord);
-  vec4 colorFwrd = texture(textureForwards, texCoord);
-  vec4 colorMult = texture(textureColor, texCoord);
-  float transparency = 1.0 - texture(textureTransparency, texCoord).r;
+  vec4 colorBckwrd = texture(textureBackwards, texCoords);
+  vec4 colorFwrd = texture(textureForwards, texCoords);
+  vec4 colorMult = texture(textureColor, texCoords);
+  float transparency = 1.0 - texture(textureTransparency, texCoords).r;
 
   float lerpFactor = dot(camPositionObj, sunPositionObj);
 
@@ -115,8 +115,8 @@ Fragment getFragment() {
   // Reduce the color of the fragment by the user factor
   // if we are facing away from the Sun
   if (dot(sunPosition, normal) < 0.0) {
-    diffuse.xyz =
-      vec3(1.0, 0.97075, 0.952) *  texture(textureUnlit, texCoord).xyz * nightFactor;
+    diffuse.rgb =
+      vec3(1.0, 0.97075, 0.952) *  texture(textureUnlit, texCoords).rgb * nightFactor;
   }
 
   Fragment frag;

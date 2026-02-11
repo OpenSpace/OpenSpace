@@ -26,7 +26,7 @@
 
 in Data {
   vec4 viewSpace;
-  vec2 texCoord;
+  vec2 texCoords;
   float projectionViewDepth;
 } in_data;
 
@@ -39,7 +39,7 @@ uniform float opacity;
 
 Fragment getFragment() {
   // Only draw circle instead of entire quad
-  vec2 st = (in_data.texCoord - vec2(0.5)) * 2.0;
+  vec2 st = (in_data.texCoords - vec2(0.5)) * 2.0;
   if (length(st) > 1.0) {
     discard;
   }

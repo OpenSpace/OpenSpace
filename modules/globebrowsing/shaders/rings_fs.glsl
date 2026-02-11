@@ -30,11 +30,11 @@
 #define NSSamples (NSSamplesMinusOne + 1)
 
 in Data {
-  vec4 shadowCoords;
-  vec3 normal;
   vec3 posObj;
-  vec2 texCoord;
+  vec2 texCoords;
+  vec3 normal;
   float screenSpaceDepth;
+  vec4 shadowCoords;
 } in_data;
 
 uniform sampler1D ringTexture;
@@ -50,7 +50,7 @@ uniform vec3 ellipsoidRadii;
 
 Fragment getFragment() {
   // Moving the origin to the center
-  vec2 st = (in_data.texCoord - vec2(0.5)) * 2.0;
+  vec2 st = (in_data.texCoords - vec2(0.5)) * 2.0;
 
   // The length of the texture coordinates vector is our distance from the center
   float radius = length(st);
@@ -61,15 +61,15 @@ Fragment getFragment() {
   }
 
   // Remapping the texture coordinates
-  // Radius \in [0,1],  texCoord \in [textureOffset.x, textureOffset.y]
+  // Radius \in [0,1],  texCoords \in [textureOffset.x, textureOffset.y]
   // textureOffset.x -> 0
   // textureOffset.y -> 1
-  float texCoord = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
-  if (texCoord < 0.0 || texCoord > 1.0) {
+  float texCoords = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
+  if (texCoords < 0.0 || texCoords > 1.0) {
     discard;
   }
 
-  vec4 diffuse = texture(ringTexture, texCoord);
+  vec4 diffuse = texture(ringTexture, texCoords);
   // divided by 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
   // to normalize the alpha value to [0,1]
   float colorValue = length(diffuse.rgb) / 3.0;

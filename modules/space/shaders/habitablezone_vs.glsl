@@ -27,10 +27,10 @@
 #include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_texCoord;
+layout(location = 1) in vec2 in_texCoords;
 
 out Data {
-  vec2 texCoord;
+  vec2 texCoords;
   float screenSpaceDepth;
 } out_data;
 
@@ -42,6 +42,6 @@ void main() {
   gl_Position = z_normalization(modelViewProjection * position);
 
   // Moving the origin to the center
-  out_data.texCoord = (in_texCoord - vec2(0.5)) * 2.0;
+  out_data.texCoords = (in_texCoords - vec2(0.5)) * 2.0;
   out_data.screenSpaceDepth = gl_Position.w;
 }

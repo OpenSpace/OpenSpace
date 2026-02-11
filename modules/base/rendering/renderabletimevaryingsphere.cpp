@@ -180,7 +180,7 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
 }
 
 void RenderableTimeVaryingSphere::bindTexture(ghoul::opengl::TextureUnit& unit) {
-    if (_texture) {
+    if (_texture) [[likely]] {
         unit.bind(*_texture);
     }
 }

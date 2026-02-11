@@ -26,11 +26,11 @@
 
 #include "powerscaling/powerscalingmath.glsl"
 
-layout(location = 0) in vec4 vertPosition;
+layout(location = 0) in vec4 in_position;
 
 out Data {
-  vec4 viewPosition;
   vec3 modelPosition;
+  vec4 viewPosition;
 } out_data;
 
 uniform mat4 projectionTransform;
@@ -38,7 +38,7 @@ uniform dmat4 modelViewTransform;
 
 
 void main() {
-  out_data.viewPosition = vec4(modelViewTransform * vertPosition);
-  out_data.modelPosition = vertPosition.xyz;
+  out_data.viewPosition = vec4(modelViewTransform * in_position);
+  out_data.modelPosition = in_position.xyz;
   gl_Position = z_normalization(vec4(projectionTransform * out_data.viewPosition));
 }
