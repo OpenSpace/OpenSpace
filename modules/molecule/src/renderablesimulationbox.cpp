@@ -578,6 +578,19 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
+
+    glEnablei(GL_BLEND, 0);
+    glDisablei(GL_BLEND, 1);
+    glBlendColor(0.f, 0.f, 0.f, opacity());
+    glBlendEquationi(0, GL_FUNC_ADD);
+    glBlendFuncSeparatei(
+        0,
+        GL_SRC_ALPHA,
+        GL_ONE_MINUS_SRC_ALPHA,
+        GL_CONSTANT_ALPHA,
+        GL_ONE_MINUS_CONSTANT_ALPHA
+    );
+
     md_gl_draw(&args);
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFbo);
