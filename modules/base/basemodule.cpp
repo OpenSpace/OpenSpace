@@ -76,6 +76,7 @@
 #include <modules/base/scale/nonuniformstaticscale.h>
 #include <modules/base/scale/staticscale.h>
 #include <modules/base/scale/timedependentscale.h>
+#include <modules/base/scale/timelinescale.h>
 #include <modules/base/translation/timelinetranslation.h>
 #include <modules/base/translation/luatranslation.h>
 #include <modules/base/translation/statictranslation.h>
@@ -195,6 +196,7 @@ void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     fScale->registerClass<NonUniformStaticScale>("NonUniformStaticScale");
     fScale->registerClass<StaticScale>("StaticScale");
     fScale->registerClass<TimeDependentScale>("TimeDependentScale");
+    fScale->registerClass<TimelineScale>("TimelineScale");
 
     ghoul::TemplateFactory<TimeFrame>* fTimeFrame =
         FactoryManager::ref().factory<TimeFrame>();
