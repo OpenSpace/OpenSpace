@@ -28,6 +28,7 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
+#include <modules/solarbrowsing/util/structs.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
@@ -37,8 +38,6 @@
 #include <memory>
 #include <optional>
 #include <chrono>
-#include <unordered_set>
-#include <mutex>
 
 namespace ghoul::opengl { class Texture; }
 
@@ -52,8 +51,7 @@ class TransferFunction;
 
 namespace solarbrowsing {
     class AsyncImageDecoder;
-    struct DecodedImageData;
-}
+} // namespace solarbrowsing
 
 class RenderableSolarImagery : public Renderable {
 public:
@@ -81,6 +79,14 @@ public:
 
 private:
     void uploadDecodedDataToGPU(const solarbrowsing::DecodedImageData& data);
+    solarbrowsing::DecodedImageData loadDecodedDataFromCache(
+        const std::filesystem::path& path,
+        const ImageMetadata* metadata,
+        unsigned int imageSize
+    );
+    void saveDecodedDataToCache(const std::filesystem::path& path,
+        const solarbrowsing::DecodedImageData& data
+    );
     properties::OptionProperty _activeInstruments;
     properties::FloatProperty _contrastValue;
     properties::BoolProperty _enableBorder;
@@ -114,10 +120,7 @@ private:
     const ImageMetadata* _currentImage = nullptr;
     std::unordered_map<std::string, Timeline<ImageMetadata>> _imageMetadataMap;
     std::unique_ptr<SpacecraftCameraPlane> _spacecraftCameraPlane;
-    std::vector<unsigned char> _decodeBuffer;
     std::unique_ptr<solarbrowsing::AsyncImageDecoder> _asyncDecoder;
-    std::mutex _cacheMutex;
-    std::unordered_map<size_t, solarbrowsing::DecodedImageData> _decodedImageCache;
 
     void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
     //void listen();
