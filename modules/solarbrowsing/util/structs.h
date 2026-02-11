@@ -42,19 +42,17 @@ struct ImageMetadata {
     bool isCoronaGraph;
 };
 
-struct SolarImageData {
-    unsigned char* data;
-    const ImageMetadata* im;
-    double timeObserved;
+namespace solarbrowsing {
+
+struct DecodedImageData {
+    std::vector<uint8_t> buffer;
+    const ImageMetadata* metadata; // non-owning
+    unsigned int imageSize;
 };
 
-struct DecodeData {
-    const ImageMetadata* im;
-    unsigned int resolutionLevel;
-    double timeObserved;
-    bool verboseMode;
-};
+}
 
+using ImagePrecision = unsigned char;
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SOLARBROWSING___STRUCTS___H__

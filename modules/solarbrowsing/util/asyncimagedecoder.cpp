@@ -50,6 +50,12 @@ AsyncImageDecoder::~AsyncImageDecoder() {
 void AsyncImageDecoder::requestDecode(const DecodeRequest& request) {
     {
         std::lock_guard<std::mutex> lock(_queueMutex);
+        if (_activeRequests.contains(request.metadata->filePath)) {
+            // Request is already being processed
+            return;
+        }
+
+        _activeRequests[request.metadata->filePath] = true;
         _requestQueue.push(request);
     }
 
@@ -89,13 +95,13 @@ void AsyncImageDecoder::workerThread() {
 void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
     DecodedImageData decodedData;
 
-    const size_t imageSize = static_cast<size_t>(
+    const unsigned int imageSize = static_cast<unsigned int>(
         request.metadata->fullResolution /
         std::pow(2, request.downsamplingLevel)
     );
     decodedData.imageSize = imageSize;
 
-    decodedData.buffer.resize(imageSize * imageSize * sizeof(IMG_PRECISION));
+    decodedData.buffer.resize(imageSize * imageSize * sizeof(ImagePrecision));
     decodedData.metadata = request.metadata;
 
     J2kCodec j2c(true);
@@ -104,6 +110,11 @@ void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
         decodedData.buffer.data(),
         request.downsamplingLevel
     );
+
+    {
+        std::lock_guard lock(_queueMutex);
+        _activeRequests.erase(request.metadata->filePath);
+    }
 
     // Send data back to main thread
     request.callback(std::move(decodedData));

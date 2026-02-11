@@ -34,8 +34,6 @@
 #include <valarray>
 #include <vector>
 
-#define IMG_PRECISION unsigned char
-
 namespace ghoul {
   namespace opengl { class Texture; }
   namespace filesystem { class File; }

@@ -29,8 +29,10 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <filesystem>
 #include <functional>
 #include <mutex>
+#include <unordered_map>
 #include <thread>
 #include <vector>
 #include <queue>
@@ -39,12 +41,6 @@
 
 namespace openspace::solarbrowsing {
 
-// TODO @anden88 move to struct.h?
-struct DecodedImageData {
-    std::vector<uint8_t> buffer;
-    const ImageMetadata* metadata; // non-owning
-    unsigned int imageSize;
-};
 
 using DecodeCompleteCallback = std::function<void(DecodedImageData&&)>;
 
@@ -73,6 +69,7 @@ private:
     std::mutex _queueMutex;
     std::condition_variable _queueCV;
     std::queue<DecodeRequest> _requestQueue;
+    std::unordered_map<std::filesystem::path, bool> _activeRequests;
 };
 
 } //namespace openspace::solarbrowsing
