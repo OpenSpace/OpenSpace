@@ -13,6 +13,9 @@ from astropy import constants as const
 import math
 import json
 
+# Enable for easier API query debugging
+PRINT_QUERIES = False
+
 # T - temperature (Kelvin)
 # lam - wavelength (meter)
 # http://spiff.rit.edu/classes/phys317/lectures/planck.html
@@ -75,7 +78,8 @@ columns='pl_name,hostname,default_flag,sy_snum,sy_pnum,discoverymethod,disc_year
         'pl_orbeccenlim,pl_insol,pl_insolerr1,pl_insolerr2,pl_insollim,pl_eqt,pl_eqterr1,pl_eqterr2,pl_eqtlim,' \
         'pl_orbincl,pl_orbinclerr1,pl_orbinclerr2,pl_orbincllim,ttv_flag,pl_trandur,pl_trandurerr1,pl_trandurerr2,pl_trandurlim,' \
         'pl_ratdor,pl_ratdorerr1,pl_ratdorerr2,pl_ratdorlim,pl_ratror,pl_ratrorerr1,pl_ratrorerr2,pl_ratrorlim,' \
-        'gaia_id,disc_telescope,disc_instrument,pl_letter,pl_trandep,pl_trandeperr1,pl_trandeperr2,' \
+        'gaia_dr2_id,gaia_dr3_id,'\
+        'disc_telescope,disc_instrument,pl_letter,pl_trandep,pl_trandeperr1,pl_trandeperr2,' \
         'st_nphot,st_nrvc,pl_ntranspec,pl_nespec,st_nspec,' \
         'st_age,st_ageerr1,st_ageerr2,st_dens,st_denserr1,st_denserr2,st_vsin,st_vsinerr1,st_vsinerr2,'\
         'st_rotp,st_rotperr1,st_rotperr2,st_radv,st_radverr1,st_radverr2,sy_plx,sy_plxerr1,sy_plxerr2,' \
@@ -88,11 +92,18 @@ columns='pl_name,hostname,default_flag,sy_snum,sy_pnum,discoverymethod,disc_year
 print("Downloading default_flag=1")
 where1 = 'where+default_flag=1+and+upper%28soltype%29+like+%27%25CONF%25%27'
 full1 = NEW_API + 'select+' + columns + '+from+ps+' + where1 + '&format=csv'
+
+if PRINT_QUERIES:
+    print("Query: " + full1)
 df0 = pd.read_csv(full1, index_col=None)
+
 
 print("Downloading default_flag=0")
 where0 = 'where+default_flag=0+and+upper%28soltype%29+like+%27%25CONF%25%27'
 full0 = NEW_API + 'select+' + columns + '+from+ps+' + where0 + '&format=csv'
+
+if PRINT_QUERIES:
+    print("Query: " + full0)
 df1 = pd.read_csv(full0, index_col=None)
 
 with open(DATA_FOLDER + 'last_update_time.txt', 'w+') as ff:
@@ -112,6 +123,11 @@ print("Aggregating data and computing additional parameters...")
 
 # concatenates data sets
 df = pd.concat([df0,df1])
+
+# Create a copy of gaia_dr2_id column, just named gaia_id. When this code was first
+# written, there was no gaia_dr3_id column, so it was just called gaia_id. Now, there is
+# a new column for dr3, but we want to keep the old name for backwards compatibility
+df['gaia_id'] = df['gaia_dr2_id']
 
 # ## Convert the pubdate to a datetime object
 # This is messy since there are three different datetime formats here.
