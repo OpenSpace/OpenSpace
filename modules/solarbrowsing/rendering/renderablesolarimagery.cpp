@@ -273,98 +273,101 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
             true
         );
 
-    if (keyframe) {
-        if (_currentImage == &(keyframe->data)) {
-            // This keyframe is already uploaded to the GPU.
-            return;
-        }
+    if (!keyframe) {
+        // No keyframe avaialble so we clear the texture
+        if (_currentImage != nullptr) {
+            // No need to re-upload an empty image.
+            _isCoronaGraph = false;
+            _imageSize = DefaultTextureSize;
+            _currentScale = 0;
+            _currentCenterPixel = glm::vec2(2.f);
+            _currentImage = nullptr;
 
-        auto imageSize = static_cast<unsigned int>(
+            // @TODO (anden88 2026-02-11): Is it necessary to update the texture to some dummy
+            // data version here or can we just set the above params and move on?
+
+            // Create some dummy data that will be uploaded to GPU
+            std::vector<unsigned char> buffer;
+            buffer.resize(DefaultTextureSize * DefaultTextureSize * sizeof(ImagePrecision));
+            _texture->setDimensions(glm::uvec3(_imageSize, _imageSize, 1));
+            _texture->setPixelData(
+                buffer.data(),
+                ghoul::opengl::Texture::TakeOwnership::No
+            );
+            _texture->uploadTexture();
+        }
+        return;
+    }
+
+    if (_currentImage == &(keyframe->data)) {
+        // This keyframe is already uploaded to the GPU.
+        return;
+    }
+
+    unsigned int imageSize = static_cast<unsigned int>(
+        keyframe->data.fullResolution /
+        std::pow(2, static_cast<int>(_downsamplingLevel))
+        );
+
+    std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
+        keyframe->data.filePath,
+        std::format("{}x{}", imageSize, imageSize),
+        "solarbrowsing"
+    );
+
+    // Note: If the image has not yet been decoded and cached we'll just wait until it is
+    // available. The previous image will be shown until the new one arrives.
+    if (std::filesystem::exists(cached)) {
+        // Load data from cache
+        solarbrowsing::DecodedImageData data = loadDecodedDataFromCache(
+            cached,
+            &keyframe->data,
+            imageSize
+        );
+        uploadDecodedDataToGPU(data);
+    }
+
+    // Load and decode the next frames -- TODO this should probably be own separate
+    // update step regardless
+    std::vector<const Keyframe<ImageMetadata>*> keyframes =
+        _imageMetadataMap[_currentActiveInstrument].lastNKeyframesBefore(
+            global::timeManager->time().j2000Seconds(),
+            10,
+            true
+    );
+
+    for (const Keyframe<ImageMetadata>* kf : keyframes) {
+        // Check if the keyframe has already been decoded and exists in cache
+        unsigned int imgSize = static_cast<unsigned int>(
             keyframe->data.fullResolution /
             std::pow(2, static_cast<int>(_downsamplingLevel))
             );
 
-        std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-            keyframe->data.filePath,
-            std::format("{}x{}", imageSize, imageSize),
+        std::filesystem::path cacheFile = FileSys.cacheManager()->cachedFilename(
+            kf->data.filePath,
+            std::format("{}x{}", imgSize, imgSize),
             "solarbrowsing"
         );
 
-        if (std::filesystem::exists(cached)) {
-            // Load data from cache
-            solarbrowsing::DecodedImageData data = loadDecodedDataFromCache(
-                cached,
-                &keyframe->data,
-                imageSize
-            );
-            uploadDecodedDataToGPU(data);
+        if (std::filesystem::exists(cacheFile)) {
+            continue;
         }
 
-        // Load and decode the next frames -- TODO this should probably be own separate
-        // update step regardless
-        std::vector<const Keyframe<ImageMetadata>*> keyframes =
-            _imageMetadataMap[_currentActiveInstrument].lastNKeyframesBefore(
-                global::timeManager->time().j2000Seconds(),
-                10,
-                true
-        );
-
-        for (const Keyframe<ImageMetadata>* kf : keyframes) {
-            // Check if the keyframe has already been decoded and exists in cache
-            unsigned int imgSize = static_cast<unsigned int>(
-                keyframe->data.fullResolution /
-                std::pow(2, static_cast<int>(_downsamplingLevel))
-                );
-
-            std::filesystem::path cacheFile = FileSys.cacheManager()->cachedFilename(
-                kf->data.filePath,
-                std::format("{}x{}", imgSize, imgSize),
-                "solarbrowsing"
-            );
-
-            if (std::filesystem::exists(cacheFile)) {
-                continue;
+        // Request new images to decode
+        solarbrowsing::DecodeRequest request(
+            &kf->data,
+            _downsamplingLevel,
+            [this, cacheFile](solarbrowsing::DecodedImageData&& decodedData)
+            {
+                LINFO(std::format("Recieved decoded data for '{}'",
+                    decodedData.metadata->filePath
+                    ));
+                saveDecodedDataToCache(cacheFile, decodedData);
             }
-
-            // Request new images to decode
-            solarbrowsing::DecodeRequest request(
-                &kf->data,
-                _downsamplingLevel,
-                [this, cacheFile](solarbrowsing::DecodedImageData&& decodedData)
-                {
-                    LINFO(std::format("Recieved decoded data for '{}'",
-                        decodedData.metadata->filePath
-                        ));
-                    saveDecodedDataToCache(cacheFile, decodedData);
-                }
-            );
-            _asyncDecoder->requestDecode(std::move(request));
-        }
-    }
-    else {
-        if (_currentImage == nullptr) {
-            // No need to re-upload an empty image.
-            return;
-        }
-        _isCoronaGraph = false;
-        _imageSize = DefaultTextureSize;
-        _currentScale = 0;
-        _currentCenterPixel = glm::vec2(2.f);
-        _currentImage = nullptr;
-
-        // @TODO (anden88 2026-02-11): Is it necessary to update the texture to some dummy
-        // data version here or can we just set the above params and move on?
-
-        // Create some dummy data that will be uploaded to GPU
-        std::vector<unsigned char> buffer;
-        buffer.resize(DefaultTextureSize * DefaultTextureSize * sizeof(ImagePrecision));
-        _texture->setDimensions(glm::uvec3(_imageSize, _imageSize, 1));
-        _texture->setPixelData(
-            buffer.data(),
-            ghoul::opengl::Texture::TakeOwnership::No
         );
-        _texture->uploadTexture();
+        _asyncDecoder->requestDecode(std::move(request));
     }
+
 }
 
 void RenderableSolarImagery::uploadDecodedDataToGPU(
