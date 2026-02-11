@@ -24,11 +24,11 @@
 
 #include "fragment.glsl"
 
-out vec4 outColor;
-
 flat in vec3 vs_direction;
 flat in float vs_magnitude;
 in float vs_positionDepth;
+
+out vec4 outColor;
 
 uniform float opacity;
 uniform vec2 dataRangeFilter;
@@ -38,29 +38,29 @@ uniform vec2 magDomain;
 uniform sampler1D colorTexture;
 
 Fragment getFragment() {
-    Fragment frag;
+  Fragment frag;
 
-    if (opacity == 0.0) {
-        discard;
-    }
+  if (opacity == 0.0) {
+      discard;
+  }
 
-    bool magnitudeOutOfRange =
-        vs_magnitude < dataRangeFilter.x || vs_magnitude > dataRangeFilter.y;
-    if (filterOutOfRange && magnitudeOutOfRange) {
-        discard;
-    }
+  bool magnitudeOutOfRange =
+    vs_magnitude < dataRangeFilter.x || vs_magnitude > dataRangeFilter.y;
+  if (filterOutOfRange && magnitudeOutOfRange) {
+    discard;
+  }
 
-    if (colorByMag) {
-        float t = (vs_magnitude - magDomain.x) / (magDomain.y - magDomain.x);
-        t = clamp(t, 0.0, 1.0);
-        frag.color = texture(colorTexture, t);
-    }
-    else {
-        vec3 dir = normalize(vs_direction);
-        vec3 color = 0.5 * (dir + vec3(1.0)); // remaps [-1, 1] -> [0, 1]
-        frag.color = vec4(color, 1.0);
-    }
-    frag.color.a *= opacity;
-    frag.depth = vs_positionDepth;
-    return frag;
+  if (colorByMag) {
+    float t = (vs_magnitude - magDomain.x) / (magDomain.y - magDomain.x);
+    t = clamp(t, 0.0, 1.0);
+    frag.color = texture(colorTexture, t);
+  }
+  else {
+    vec3 dir = normalize(vs_direction);
+    vec3 color = 0.5 * (dir + vec3(1.0)); // remaps [-1, 1] -> [0, 1]
+    frag.color = vec4(color, 1.0);
+  }
+  frag.color.a *= opacity;
+  frag.depth = vs_positionDepth;
+  return frag;
 }

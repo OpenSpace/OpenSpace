@@ -36,6 +36,7 @@
 #include <openspace/properties/vector/uvec3property.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/opengl/uniformcache.h>
+#include <filesystem>
 
 namespace openspace::documentation { struct Documentation; }
 
@@ -48,18 +49,6 @@ namespace openspace::volume {
 
 class RenderableVectorField : public Renderable {
 public:
-    struct VelocityData {
-        float vx;
-        float vy;
-        float vz;
-    };
-
-    struct ArrowInstance {
-        glm::vec3 position;
-        glm::vec3 direction;
-        float magnitude;
-    };
-
    explicit RenderableVectorField(const ghoul::Dictionary& dictionary);
 
    ~RenderableVectorField() override = default;
@@ -76,6 +65,18 @@ public:
    static documentation::Documentation Documentation();
 
 private:
+    struct VelocityData {
+        float vx;
+        float vy;
+        float vz;
+    };
+
+    struct ArrowInstance {
+        glm::vec3 position;
+        glm::vec3 direction;
+        float magnitude;
+    };
+
     void computeFieldLinesParallel();
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
@@ -102,9 +103,9 @@ private:
     std::shared_ptr<RawVolume<VelocityData>> _volumeData;
     std::vector<ArrowInstance> _instances;
 
-    std::string _sourceFile;
-    glm::dvec3 _minDomain;
-    glm::dvec3 _maxDomain;
+    std::filesystem::path _sourceFile;
+    glm::vec3 _minDomain;
+    glm::vec3 _maxDomain;
     glm::uvec3 _dimensions;
 
     ghoul::lua::LuaState _state;
@@ -116,20 +117,6 @@ private:
 
     bool _vectorFieldIsDirty = true;
     bool _textureIsDirty = true;
-
-    // Arrow pointed along +X direction
-    const std::vector<glm::vec3> _arrowVertices = {
-        // shaft
-        {0.0f, 0.0f, 0.0f},
-        {1.0f, 0.0f, 0.0f},
-
-        // head
-        {1.0f, 0.0f, 0.0f},
-        {0.8f, 0.1f, 0.0f},
-
-        {1.0f, 0.0f, 0.0f},
-        {0.8f,-0.1f, 0.0f}
-    };
 };
 
 } // namespace openspace::volume

@@ -35,25 +35,40 @@
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/logging/logmanager.h>
 #include <algorithm>
+#include <array>
 #include <execution>
 #include <numeric>
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderableVectorField";
 
+    // Arrow pointed along +X direction
+    constexpr std::array<glm::vec3, 6> ArrowVertices = {
+        // shaft
+        glm::vec3{ 0.0f, 0.0f, 0.0f },
+        glm::vec3{ 1.0f, 0.0f, 0.0f },
+
+        // head
+        glm::vec3{ 1.0f, 0.0f, 0.0f },
+        glm::vec3{ 0.8f, 0.1f, 0.0f },
+
+        glm::vec3{ 1.0f, 0.0f, 0.0f },
+        glm::vec3{ 0.8f,-0.1f, 0.0f }
+    };
+
     constexpr openspace::properties::Property::PropertyInfo StrideInfo = {
         "Stride",
         "Stride",
         "Controls how densely vectors are sampled from the volume. A stride of 1 renders "
         "every vector.",
-        openspace::properties::Property::Visibility::NoviceUser
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
     constexpr openspace::properties::Property::PropertyInfo VectorFieldScaleInfo = {
         "VectorFieldScale",
         "Vector field scale",
         "Scales the vector field lines using an exponential scale.",
-        openspace::properties::Property::Visibility::NoviceUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
@@ -68,7 +83,7 @@ namespace {
         "Filter out of range",
         "Determines whether data values outside the value range should be visible or "
         "filtered out.",
-        openspace::properties::Property::Visibility::NoviceUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo FilterDataRangeInfo = {
@@ -76,7 +91,7 @@ namespace {
         "Filter data range",
         "The data range to use when filtering by data value. Magnitudes outside this "
         "range will be filtered out.",
-        openspace::properties::Property::Visibility::NoviceUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorByMagnitudeInfo = {
@@ -84,14 +99,14 @@ namespace {
         "Color by magnitude",
         "If enabled, color the vector field based on the min and max magnitudes defined"
         "in the volume.",
-        openspace::properties::Property::Visibility::NoviceUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "Color texture",
         "The path to the texture used to color the vector field.",
-        openspace::properties::Property::Visibility::NoviceUser
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorMappingDataRangeInfo = {
@@ -131,36 +146,36 @@ namespace {
     //
     // By default, the vectors are colored according to their direction, similar to a 3D
     // model normal map as follows:
-    // +X → Red, -X → Cyan
-    // +Y → Green, -Y → Magenta
-    // +Z → Blue, -Z → Yellow
+    // +X -> Red, -X -> Cyan
+    // +Y -> Green, -Y -> Magenta
+    // +Z -> Blue, -Z -> Yellow
     struct [[codegen::Dictionary(RenderableVectorField)]] Parameters {
         // The path to the file containing the volume data.
         std::filesystem::path volumeFile;
 
         // [[codegen::verbatim(StrideInfo.description)]]
-        int stride;
+        std::optional<int> stride;
 
         // The min domain values that the volume should be mapped to.
-        glm::dvec3 minDomain;
+        glm::vec3 minDomain;
 
         // The max domain values that the volume should be mapped to.
-        glm::dvec3 maxDomain;
+        glm::vec3 maxDomain;
 
         // The dimensions of the volume data.
-        glm::dvec3 dimensions;
+        glm::ivec3 dimensions;
 
         // [[codegen::verbatim(VectorFieldScaleInfo.description)]]
-        std::optional<double> vectorFieldScale;
+        std::optional<float> vectorFieldScale;
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<double> lineWidth;
+        std::optional<float> lineWidth;
 
         // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
         std::optional<bool> filterOutOfRange;
 
         // [[codegen::verbatim(FilterDataRangeInfo.description)]]
-        std::optional<glm::dvec2> dataRange;
+        std::optional<glm::vec2> dataRange;
 
         // [[codgen::verbatim(ColorByMagnitudeInfo.description)]]
         std::optional<bool> colorByMagnitude;
@@ -169,7 +184,7 @@ namespace {
         std::optional<std::filesystem::path> colorMapFile;
 
         // [[codegen::verbatim(ColorMappingDataRangeInfo.description)]]
-        std::optional<glm::dvec2> colorMappingRange;
+        std::optional<glm::vec2> colorMappingRange;
 
         // [[codegen::verbatim(FilterByLuaInfo.description)]]
         std::optional<bool> filterByLua;
@@ -198,8 +213,12 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     , _filterOutOfRange(FilterOutOfRangeInfo, false)
     , _magnitudeDomain(
         ColorMappingDataRangeInfo,
-        glm::vec2(std::numeric_limits<float>::max(),
-        std::numeric_limits<float>::lowest()), glm::vec2(0.f), glm::vec2(1500.f),
+        glm::vec2(
+            std::numeric_limits<float>::max(),
+            std::numeric_limits<float>::lowest()
+        ),
+        glm::vec2(0.f),
+        glm::vec2(1500.f),
         glm::vec2(1.f)
     )
     , _stride(StrideInfo, 1, 1, 16)
@@ -213,20 +232,21 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(Fadeable::_opacity);
+    //addProperty(Fadeable::_fade);
 
-    _sourceFile = p.volumeFile.string();
+    _sourceFile = p.volumeFile;
     _minDomain = p.minDomain;
     _maxDomain = p.maxDomain;
     _dimensions = p.dimensions;
 
-    _stride = p.stride;
+    _stride = p.stride.value_or(_stride);
     _stride.onChange([this]() { _vectorFieldIsDirty = true; });
     addProperty(_stride);
 
-    _vectorFieldScale = static_cast<float>(p.vectorFieldScale.value_or(_vectorFieldScale));
+    _vectorFieldScale = p.vectorFieldScale.value_or(_vectorFieldScale);
     addProperty(_vectorFieldScale);
 
-    _lineWidth = static_cast<float>(p.lineWidth.value_or(_lineWidth));
+    _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
     _colorTexturePath.onChange([this]() {
@@ -239,14 +259,14 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     });
 
     if (p.colorMapFile.has_value()) {
-        _colorTexturePath = p.colorMapFile.value().string();
+        _colorTexturePath = p.colorMapFile->string();
     }
     addProperty(_colorTexturePath);
 
     _colorByMagnitude = p.colorByMagnitude.value_or(_colorByMagnitude);
     addProperty(_colorByMagnitude);
 
-    _magnitudeDomain = p.colorMappingRange.value_or(_magnitudeDomain.value());
+    _magnitudeDomain = p.colorMappingRange.value_or(_magnitudeDomain);
     _computeMagnitudeRange = !p.colorMappingRange.has_value();
     addProperty(_magnitudeDomain);
 
@@ -275,14 +295,14 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     });
 
     if (p.script.has_value()) {
-        _luaScriptFile = p.script.value().string();
+        _luaScriptFile = p.script->string();
     }
     addProperty(_luaScriptFile);
 
     _filterOutOfRange = p.filterOutOfRange.value_or(_filterOutOfRange);
     addProperty(_filterOutOfRange);
 
-    _dataRange = p.dataRange.value_or(_dataRange.value());
+    _dataRange = p.dataRange.value_or(_dataRange);
     addProperty(_dataRange);
 
     global::scriptEngine->initializeLuaState(_state);
@@ -301,7 +321,7 @@ void RenderableVectorField::initialize() {
         _volumeData->forEachVoxel(
             [this](const glm::uvec3&, const VelocityData& data) {
                 float magnitude = glm::length(glm::vec3(data.vx, data.vy, data.vz));
-                const glm::vec2& mag = _magnitudeDomain.value();
+                const glm::vec2& mag = _magnitudeDomain;
                 _magnitudeDomain = glm::vec2(
                     std::min(mag.x, magnitude),
                     std::max(mag.y, magnitude)
@@ -331,8 +351,8 @@ void RenderableVectorField::initializeGL() {
     glBindBuffer(GL_ARRAY_BUFFER, _arrowVbo);
     glBufferData(
         GL_ARRAY_BUFFER,
-        _arrowVertices.size() * sizeof(glm::vec3),
-        _arrowVertices.data(),
+        ArrowVertices.size() * sizeof(glm::vec3),
+        ArrowVertices.data(),
         GL_STATIC_DRAW
     );
 
@@ -366,7 +386,7 @@ void RenderableVectorField::initializeGL() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(ArrowInstance),
-        (void*)offsetof(ArrowInstance, position)
+        reinterpret_cast<void*>(offsetof(ArrowInstance, position))
     );
     glVertexAttribDivisor(1, 1);
 
@@ -378,7 +398,7 @@ void RenderableVectorField::initializeGL() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(ArrowInstance),
-        (void*)offsetof(ArrowInstance, direction)
+        reinterpret_cast<void*>(offsetof(ArrowInstance, direction))
     );
     glVertexAttribDivisor(2, 1);
 
@@ -390,12 +410,11 @@ void RenderableVectorField::initializeGL() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(ArrowInstance),
-        (void*)offsetof(ArrowInstance, magnitude)
+        reinterpret_cast<void*>(offsetof(ArrowInstance, magnitude))
     );
-    glVertexAttribDivisor(3, 1);
+    glVertexAttribDivisor(23, 1);
 
     glBindVertexArray(0);
-
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 }
 
@@ -438,19 +457,19 @@ void RenderableVectorField::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.colorByMag, _colorByMagnitude);
     _program->setUniform(_uniformCache.magDomain, _magnitudeDomain);
 
+    ghoul::opengl::TextureUnit colorUnit;
     if (_colorTexture) {
-        ghoul::opengl::TextureUnit colorUnit;
         colorUnit.activate();
         _colorTexture->bind();
         _program->setUniform(_uniformCache.colorTexture, colorUnit);
     }
 
     glBindVertexArray(_vao);
-    glLineWidth(_lineWidth.value());
+    glLineWidth(_lineWidth);
     glDrawArraysInstanced(
         GL_LINES,
         0,
-        static_cast<GLsizei>(_arrowVertices.size()),
+        static_cast<GLsizei>(ArrowVertices.size()),
         static_cast<GLsizei>(_instances.size())
     );
     glBindVertexArray(0);
@@ -506,17 +525,17 @@ void RenderableVectorField::computeFieldLinesParallel() {
     LDEBUG("Computing vector field");
 
     // Divide volume into blocks of stride * stride * stride voxels
-    const unsigned int numBlocksX = (_dimensions.x + _stride - 1) / _stride;
-    const unsigned int numBlocksY = (_dimensions.y + _stride - 1) / _stride;
-    const unsigned int numBlocksZ = (_dimensions.z + _stride - 1) / _stride;
-    const size_t totalBlocks = static_cast<size_t>(numBlocksX) * numBlocksY * numBlocksZ;
+    const uint64_t numBlocksX = (_dimensions.x + _stride - 1) / _stride;
+    const uint64_t numBlocksY = (_dimensions.y + _stride - 1) / _stride;
+    const uint64_t numBlocksZ = (_dimensions.z + _stride - 1) / _stride;
+    const uint64_t totalBlocks = numBlocksX * numBlocksY * numBlocksZ;
 
-    const glm::uvec3 blockDims(numBlocksX, numBlocksY, numBlocksZ);
+    const glm::uvec3 blockDims = glm::uvec3(numBlocksX, numBlocksY, numBlocksZ);
 
     _instances.clear();
     _instances.resize(totalBlocks);
 
-    auto computeArrowInstance = [&blockDims, this](size_t blockIdx) {
+    auto computeArrowInstance = [this, &blockDims](size_t blockIdx) {
         // Convert linear block index to 3D block coordinates
         glm::uvec3 blockCoords = indexToCoords(blockIdx, blockDims);
 
@@ -555,7 +574,7 @@ void RenderableVectorField::computeFieldLinesParallel() {
         avgVelocity /= static_cast<float>(count);
 
         // Calculate block center in voxel space
-        glm::vec3 blockCenterVoxel(
+        glm::vec3 blockCenterVoxel = glm::vec3(
             x + 0.5f * _stride,
             y + 0.5f * _stride,
             z + 0.5f * _stride
@@ -563,9 +582,9 @@ void RenderableVectorField::computeFieldLinesParallel() {
 
         // Transform from voxel space [0, dims] to world space [minDomain, maxDomain]
         glm::vec3 normalized = blockCenterVoxel / static_cast<glm::vec3>(_dimensions);
-        glm::dvec3 minD = _minDomain;
-        glm::dvec3 maxD = _maxDomain;
-        glm::dvec3 startPos = minD + glm::dvec3(normalized) * (maxD - minD);
+        glm::vec3 minD = _minDomain;
+        glm::vec3 maxD = _maxDomain;
+        glm::vec3 startPos = minD + glm::vec3(normalized) * (maxD - minD);
 
         float magnitude = glm::length(avgVelocity);
         glm::vec3 direction = (magnitude > 0.f) ?
@@ -586,9 +605,8 @@ void RenderableVectorField::computeFieldLinesParallel() {
     );
 
     // The bounding sphere radius is the distance to the furthest corner of the domain
-    double boundingSphereRadius = glm::length(glm::max(
-        glm::abs(_minDomain),
-        glm::abs(_maxDomain))
+    float boundingSphereRadius = glm::length(
+        glm::max(glm::abs(_minDomain),glm::abs(_maxDomain))
     );
 
     setBoundingSphere(boundingSphereRadius);
@@ -598,7 +616,7 @@ void RenderableVectorField::computeFieldLinesParallel() {
     }
 
     if (_filterByLua) {
-        std::string path = _luaScriptFile.value();
+        std::filesystem::path path = _luaScriptFile.value();
         if (path.empty()) {
             LERROR(std::format(
                 "Trying to filter data using an empty script file '{}'", path
@@ -620,24 +638,25 @@ void RenderableVectorField::computeFieldLinesParallel() {
             std::remove_if(
                 _instances.begin(),
                 _instances.end(),
-                [this](const ArrowInstance& i) {
+                [&state = _state](const ArrowInstance& i) {
                     // Get the filter function
-                    lua_getglobal(_state, "filter");
+                    lua_getglobal(state, "filter");
                     // First argument (x,y,z) is the averaged position of the arrow
-                    ghoul::lua::push(_state, i.position);
+                    ghoul::lua::push(state, i.position);
                     // Second argument (vx, vy, vz) is the averaged direction vector
-                    ghoul::lua::push(_state, i.direction);
+                    ghoul::lua::push(state, i.direction);
 
-                    const int success = lua_pcall(_state, 2, 1, 0);
+                    const int success = lua_pcall(state, 2, 1, 0);
 
                     if (success != 0) {
                         LERROR(std::format(
-                            "Error executing 'filter': {}", lua_tostring(_state, -1)
+                            "Error executing 'filter': {}", lua_tostring(state, -1)
                         ));
                     }
 
                     // The Lua function returns true for the values that should be kept
-                    return !ghoul::lua::value<bool>(_state);
+                    const bool filter = ghoul::lua::value<bool>(state);
+                    return !filter;
                 }
             ),
             _instances.end()

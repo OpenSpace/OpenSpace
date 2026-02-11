@@ -38,38 +38,38 @@ flat out float vs_magnitude;
 out float vs_positionDepth;
 
 mat3 makeRotation(vec3 dir) {
-    vec3 x = normalize(dir);
-    // Pick an up vector that is not parallel to x. Avoids numerical instability issues
-    vec3 up = abs(x.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(0.0, 1.0, 0.0);
-    vec3 y = normalize(cross(up, x));
-    vec3 z = cross(x, y);
-    return mat3(x, y, z);
+  vec3 x = normalize(dir);
+  // Pick an up vector that is not parallel to x. Avoids numerical instability issues
+  vec3 up = abs(x.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(0.0, 1.0, 0.0);
+  vec3 y = normalize(cross(up, x));
+  vec3 z = cross(x, y);
+  return mat3(x, y, z);
 }
 
 float exponentialScale(float sliderValue, float minExp, float maxExp) {
-    // Clamp input just in case
-    sliderValue = clamp(sliderValue, 1.0, 100.0);
-    // Normalize slider to 0–1
-    float t = (sliderValue - 1.0) / (100.0 - 1.0);
+  // Clamp input just in case
+  sliderValue = clamp(sliderValue, 1.0, 100.0);
+  // Normalize slider to 0-1
+  float t = (sliderValue - 1.0) / (100.0 - 1.0);
 
-    // Interpolate exponent
-    float exponent = minExp + t * (maxExp - minExp);
+  // Interpolate exponent
+  float exponent = minExp + t * (maxExp - minExp);
 
-    // Base-10 exponential
-    return pow(10.0, exponent);
+  // Base-10 exponential
+  return pow(10.0, exponent);
 }
 
 void main() {
-    mat3 rotationMatrix = makeRotation(in_direction);
+  mat3 rotationMatrix = makeRotation(in_direction);
 
-    float scale = exponentialScale(arrowScale, 2.5, 23.0);
-    vec3 scaledPosition = in_arrowVertex * in_magnitude * scale;
-    vec3 worldPosition = in_position + rotationMatrix * scaledPosition;
+  float scale = exponentialScale(arrowScale, 2.5, 23.0);
+  vec3 scaledPosition = in_arrowVertex * in_magnitude * scale;
+  vec3 worldPosition = in_position + rotationMatrix * scaledPosition;
 
-    vec4 positionClipSpace = modelViewProjection * vec4(worldPosition, 1.0);
-    vs_positionDepth = positionClipSpace.w;
+  vec4 positionClipSpace = modelViewProjection * vec4(worldPosition, 1.0);
+  vs_positionDepth = positionClipSpace.w;
 
-    gl_Position = z_normalization(positionClipSpace);
-    vs_direction = in_direction;
-    vs_magnitude = in_magnitude;
+  gl_Position = z_normalization(positionClipSpace);
+  vs_direction = in_direction;
+  vs_magnitude = in_magnitude;
 }

@@ -8,42 +8,40 @@
 --
 -- Note that the color map is loaded from another asset. This is a utility asset that
 -- includes some common color maps for general usage.
+
 local colormaps = asset.require("util/default_colormaps")
 
 -- Load the volume data from OpenSpace servers
--- If you want to use your own volume, this block of code can be safely deleted
+
 local volume = asset.resource({
-  Name = "Vector Field - Color Mapped",
+  Name = "Vector Field - Example",
   Type = "HttpSynchronization",
   Identifier = "vectorfield_volume",
   Version = 1
 })
 
 local Node = {
-    Identifier = "RenderableVectorField_Example_ColorMapped",
-    Renderable = {
-        Type = "RenderableVectorField",
-        VolumeFile = volume .. "vectorfield_16x16x16_magnitude_radial.bin",
-        -- Use the line below instead of the one above if using your own volume
-        -- VolumeFile = "C:/path/to/volume.bin",
+  Identifier = "RenderableVectorField_Example_ColorMapped",
+  Renderable = {
+    Type = "RenderableVectorField",
+    VolumeFile = volume .. "vectorfield_16x16x16_magnitude_radial.bin",
 
-        Stride = 1,
-        MinDomain = { -5000.0, -5000.0, -5000.0 },
-        MaxDomain = { 5000.0, 5000.0, 5000.0 },
-        Dimensions = { 16, 16, 16 },
-        ColorByMagnitude = true,
-        ColorMapFile = colormaps.Uniform.Viridis
-    },
-    GUI = {
-        Name = "RenderableVectorField - Color Mapped",
-        Path = "/Examples"
-    }
+    MinDomain = { -5000.0, -5000.0, -5000.0 },
+    MaxDomain = { 5000.0, 5000.0, 5000.0 },
+    Dimensions = { 16, 16, 16 },
+    ColorByMagnitude = true,
+    ColorMapFile = colormaps.Uniform.Viridis
+  },
+  GUI = {
+    Name = "RenderableVectorField - Color Mapped",
+    Path = "/Examples"
+  }
 }
 
 asset.onInitialize(function()
-    openspace.addSceneGraphNode(Node)
+  openspace.addSceneGraphNode(Node)
 end)
 
 asset.onDeinitialize(function()
-    openspace.removeSceneGraphNode(Node)
+  openspace.removeSceneGraphNode(Node)
 end)
