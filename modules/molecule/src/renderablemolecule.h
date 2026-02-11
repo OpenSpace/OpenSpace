@@ -60,7 +60,7 @@ private:
 
     void initMolecule(std::string_view molFile, std::string_view trajFile);
 
-    // indicates whether the molecule is in view in any camera's viewpoint
+    // Indicates whether the molecule is in view in any camera's viewpoint
     bool _renderableInView = true;
 
     // This represents the epoch which we derive our local frame time from
@@ -75,7 +75,7 @@ private:
 
     struct Representation : public properties::PropertyOwner {
         explicit Representation(size_t number, const md_molecule_t& molecule_,
-            bool enabled_, mol::rep::Type type_, mol::rep::Color color_,
+            bool enabled_, molecule::rep::Type type_, molecule::rep::Color color_,
             std::string filter_, float scale_, glm::vec4 uniformColor_);
         ~Representation();
 

@@ -27,7 +27,7 @@
 const float SpecularExponent = 100.0;
 const vec3 EnvironmentalRadiance = vec3(5.0);
 
-in vec2 tc;
+in vec2 texCoords;
 out vec4 fragColor;
 
 uniform sampler2D texDepth;
@@ -38,7 +38,8 @@ uniform vec3 lightDir;
 uniform vec3 lightCol;
 
 
-// TODO: Use linear depth instead and use uniform vec4 for unpacking to view coords.
+// @TODO (2026-02-11, abock): Use linear depth instead and use uniform vec4 for unpacking
+// to view coords.
 
 vec4 depthToViewCoord(vec2 texCoord, float depth) {
   vec4 clipCoord = vec4(vec3(texCoord, depth) * 2.0 - 1.0, 1.0);
@@ -87,7 +88,7 @@ void main() {
   }
   vec4 c = texelFetch(texColor, ivec2(gl_FragCoord.xy), 0);
   vec3 normal = decodeNormal(texelFetch(texNormal, ivec2(gl_FragCoord.xy), 0).xy);
-  vec4 viewCoord = depthToViewCoord(tc, depth);
+  vec4 viewCoord = depthToViewCoord(texCoords, depth);
 
   vec3 N = normal;
   vec3 V = -normalize(viewCoord.xyz);

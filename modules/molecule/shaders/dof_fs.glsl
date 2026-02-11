@@ -26,7 +26,7 @@
 
 #pragma optionNV(unroll all)
 
-in vec2 tc;
+in vec2 texCoords;
 out vec4 fragColor;
 
 // From http://blog.tuxedolabs.com/2018/05/04/bokeh-depth-of-field-in-single-pass.html
@@ -43,8 +43,6 @@ uniform float time;
 const float GoldenAngle = 2.39996323;
 const float MaxBlurSize = 15.0;
 const float RadScale = 1.0; // Smaller = nicer blur, larger = faster
-
-#define APPROX
 
 vec4 srand4(vec2 n) {
   vec4 r = fract(
@@ -88,14 +86,11 @@ vec3 depthOfField(vec2 texCoord, float focusPoint, float focusScale) {
     contribSum += 1.0;
     radius += RadScale / radius;
 
-#ifdef APPROX
     if (colorCocSum.a / contribSum > 1.0) {
       break;
     }
-#endif // APPROX
   }
 
-#ifdef APPROX
   const float HalfResRadScale = 2.0;
   for (; radius < MaxBlurSize; ang += GoldenAngle) {
     vec2 tc = texCoord + vec2(cos(ang), sin(ang)) * texelSize * radius;
@@ -114,15 +109,14 @@ vec3 depthOfField(vec2 texCoord, float focusPoint, float focusScale) {
     contribSum += 1.0;
     radius += HalfResRadScale / radius;
   }
-#endif // APPROX
   return colorCocSum.rgb /= contribSum;
 }
 
 void main() {
-  vec3 dof = depthOfField(tc, focusDepth, focusScale);
+  vec3 dof = depthOfField(texCoords, focusDepth, focusScale);
 
   // To hide banding artifacts
-  vec4 noise = srand4(tc + time + 0.6959174) / 15.0;
+  vec4 noise = srand4(texCoords + time + 0.6959174) / 15.0;
   dof += noise.xyz;
   fragColor = vec4(dof, 1.0);
 }

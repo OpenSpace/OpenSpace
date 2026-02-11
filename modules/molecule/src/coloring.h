@@ -30,7 +30,7 @@
 struct md_bitfield_t;
 struct md_molecule_t;
 
-namespace mol::color::atoms {
+namespace molecule::color::atoms {
 
 void uniform(uint32_t* colors, int64_t count, uint32_t rgba,
     const md_bitfield_t* mask = nullptr);
@@ -42,6 +42,6 @@ void chainId(uint32_t* colors, int64_t count, const md_molecule_t& mol);
 void chainIndex(uint32_t* colors, int64_t count, const md_molecule_t& mol);
 void secondaryStructure(uint32_t* colors, int64_t count, const md_molecule_t& mol);
 
-} // namespace mol::color::atoms
+} // namespace molecule::color::atoms
 
 #endif // __OPENSPACE_MODULE_MOLECULE___COLORING___H__

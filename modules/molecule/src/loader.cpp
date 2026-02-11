@@ -259,9 +259,9 @@ namespace {
     }
 } // namespace
 
-namespace load::mol {
+namespace molecule::load {
 
-md_molecule_api* api(std::filesystem::path filename) {
+md_molecule_api* moleculeApi(std::filesystem::path filename) {
     std::filesystem::path ext = filename.extension();
     if (ext == ".pdb") {
         return md_pdb_molecule_api();
@@ -283,11 +283,7 @@ md_molecule_api* api(std::filesystem::path filename) {
     }
 }
 
-}  // namespace load::mol
-
-namespace load::traj {
-
-md_trajectory_api* api(std::filesystem::path filename) {
+md_trajectory_api* trajectoryApi(std::filesystem::path filename) {
     std::filesystem::path ext = filename.extension();
     if (ext == ".pdb") {
         return md_pdb_trajectory_api();
@@ -318,7 +314,7 @@ md_trajectory_i* openFile(std::filesystem::path filename, const md_molecule_t* m
     ghoul_assert(alloc, "No allocator provided");
     ghoul_assert(mol, "No molecule provided");
 
-    md_trajectory_api* api = traj::api(filename);
+    md_trajectory_api* api = trajectoryApi(filename);
     if (!api) {
         LERROR(std::format("Unsupported file extension: '{}'", filename));
         return nullptr;
@@ -420,4 +416,4 @@ int64_t numCacheFrames(md_trajectory_i* traj) {
     return 0;
 }
 
-}  // namespace load::traj
+}  // namespace molecule::load

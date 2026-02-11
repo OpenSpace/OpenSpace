@@ -57,25 +57,16 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableSimulationBox";
 
-    constexpr double normalizeDouble(double input) {
-        if (input > 1.0) {
-            return input / pow(10, 30);
-        }
-        else {
-            return input - 1.0;
-        }
-    }
-
     constexpr openspace::properties::Property::PropertyInfo RepresentationInfo = {
         "Representation",
         "Representation Type",
-        "Visual representation type of the molecule."
+        "The visual representation type to use for the molecule."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColoringInfo = {
         "Coloring",
         "Coloring",
-        "Select a color mapping for the atoms."
+        "The color mapping for the atoms."
     };
 
     constexpr openspace::properties::Property::PropertyInfo RepScaleInfo = {
@@ -144,25 +135,35 @@ namespace {
         "Falloff exponent of the circle outlining the simulation."
     };
 
-    /**
-     * This Renderable type is capable of rendering a number of different molecules on a
-     * moving path using periodic boundary conditions. This can be used to show, for
-     * example the distribution of different molecules or atoms in a specific spatial
-     * region, such as the atmosphere of a planet.
-     * Multiple molecules can be provided and for each the path containing the structural
-     * data and the count of molecules has to be provided; specifying the trajectory file
-     * that describes the movement of each individual molecule in its on relative frame,
-     * is optional.
-     */
+    // This `Renderable` type is capable of rendering a number of different molecules on a
+    // moving path using periodic boundary conditions. This can be used to show, for
+    // example the distribution of different molecules or atoms in a specific spatial
+    // region, such as the atmosphere of a planet.
+    //
+    // Multiple molecules can be provided and for each the path containing the structural
+    // data and the count of molecules has to be provided. Specifying the trajectory file
+    // that describes the movement of each individual molecule in its own relative frame,
+    // is optional.
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
         struct MoleculeData {
+            // The path to a molecule file that contains the structural information for
+            // the molecule.
             std::string moleculeFile;
+
+            // If provided, this trajectory file is used to move the individual atoms of
+            // the molecule. In addition, each molecule as a whole will be moving through
+            // the simulation box on a straight path, even if no trajectory file is
+            // provided.
             std::optional<std::string> trajectoryFile;
+
+            // How many of this type of molecule should be rendered in the simulation box.
             int count;
         };
+
+        // The list of files that are used to initiate this simulation box.
         std::vector<MoleculeData> molecules;
 
-        enum class [[codegen::map(mol::rep::Type)]] Representation {
+        enum class [[codegen::map(molecule::rep::Type)]] Representation {
             SpaceFill,
             Licorice,
             Ribbons,
@@ -172,7 +173,7 @@ namespace {
         // [[codegen::verbatim(RepresentationInfo.description)]]
         std::optional<Representation> representation;
 
-        enum class [[codegen::map(mol::rep::Color)]] Coloring {
+        enum class [[codegen::map(molecule::rep::Color)]] Coloring {
             // Uniform,
             Cpk,
             AtomIndex,
@@ -250,10 +251,13 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     , _circleWidth(CircleWidthInfo, 1.f, 0.f, 10.f)
     , _circleFalloff(CircleFalloffInfo, 0.f, 0.f, 1.f)
 {
+    addProperty(Fadeable::_opacity);
+
     auto onUpdateRep = [this]() {
         for (Molecules& mol : _molecules) {
-            const mol::rep::Type t = static_cast<mol::rep::Type>(_representation.value());
-            mol::util::updateRepType(mol.data.drawRep, t, _repScale);
+            const molecule::rep::Type t =
+                static_cast<molecule::rep::Type>(_representation.value());
+            molecule::util::updateRepType(mol.data.drawRep, t, _repScale);
         }
     };
 
@@ -285,10 +289,12 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
                 md_bitfield_set_range(&mask, 0, mol.data.molecule.atom.count);
             }
 
-            const mol::rep::Type t = static_cast<mol::rep::Type>(_representation.value());
-            mol::util::updateRepType(mol.data.drawRep, t, _repScale);
-            const mol::rep::Color c = static_cast<mol::rep::Color>(_coloring.value());
-            mol::util::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
+            const molecule::rep::Type t =
+                static_cast<molecule::rep::Type>(_representation.value());
+            molecule::util::updateRepType(mol.data.drawRep, t, _repScale);
+            const molecule::rep::Color c =
+                static_cast<molecule::rep::Color>(_coloring.value());
+            molecule::util::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
         }
     };
 
@@ -299,27 +305,30 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     }
 
     _representation.addOptions({
-        { static_cast<int>(mol::rep::Type::SpaceFill), "Space Fill" },
-        { static_cast<int>(mol::rep::Type::Ribbons), "Ribbons" },
-        { static_cast<int>(mol::rep::Type::Cartoon), "Cartoon" },
-        { static_cast<int>(mol::rep::Type::Licorice), "Licorice" }
+        { static_cast<int>(molecule::rep::Type::SpaceFill), "Space Fill" },
+        { static_cast<int>(molecule::rep::Type::Ribbons), "Ribbons" },
+        { static_cast<int>(molecule::rep::Type::Cartoon), "Cartoon" },
+        { static_cast<int>(molecule::rep::Type::Licorice), "Licorice" }
     });
-    _representation = static_cast<int>(codegen::map<mol::rep::Type>(
+    _representation = static_cast<int>(codegen::map<molecule::rep::Type>(
         p.representation.value_or(Parameters::Representation::SpaceFill)
     ));
     _representation.onChange(onUpdateRep);
     addProperty(_representation);
 
     _coloring.addOptions({
-        { static_cast<int>(mol::rep::Color::Cpk), "CPK" },
-        { static_cast<int>(mol::rep::Color::AtomIndex), "Atom Index" },
-        { static_cast<int>(mol::rep::Color::ResId), "Residue ID" },
-        { static_cast<int>(mol::rep::Color::ResIndex), "Residue Index" },
-        { static_cast<int>(mol::rep::Color::ChainId), "Chain ID" },
-        { static_cast<int>(mol::rep::Color::ChainIndex), "Chain Index" },
-        { static_cast<int>(mol::rep::Color::SecondaryStructure), "Secondary Structure" }
+        { static_cast<int>(molecule::rep::Color::Cpk), "CPK" },
+        { static_cast<int>(molecule::rep::Color::AtomIndex), "Atom Index" },
+        { static_cast<int>(molecule::rep::Color::ResId), "Residue ID" },
+        { static_cast<int>(molecule::rep::Color::ResIndex), "Residue Index" },
+        { static_cast<int>(molecule::rep::Color::ChainId), "Chain ID" },
+        { static_cast<int>(molecule::rep::Color::ChainIndex), "Chain Index" },
+        {
+            static_cast<int>(molecule::rep::Color::SecondaryStructure),
+            "Secondary Structure"
+        }
     });
-    _coloring = static_cast<int>(codegen::map<mol::rep::Color>(
+    _coloring = static_cast<int>(codegen::map<molecule::rep::Color>(
         p.coloring.value_or(Parameters::Coloring::Cpk)
     ));
     _coloring.onChange(onUpdateCol);
@@ -381,7 +390,7 @@ RenderableSimulationBox::~RenderableSimulationBox() {
 }
 
 void RenderableSimulationBox::initializeGL() {
-    ZoneScoped
+    ZoneScoped;
 
     global::moduleEngine->module<MoleculeModule>()->initializeShaders();
 
@@ -423,10 +432,12 @@ void RenderableSimulationBox::initializeGL() {
             md_bitfield_set_range(&mask, 0, mol.data.molecule.atom.count);
         }
 
-        const mol::rep::Type t = static_cast<mol::rep::Type>(_representation.value());
-        mol::util::updateRepType(mol.data.drawRep, t, _repScale);
-        const mol::rep::Color c = static_cast<mol::rep::Color>(_coloring.value());
-        mol::util::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
+        const molecule::rep::Type t =
+            static_cast<molecule::rep::Type>(_representation.value());
+        molecule::util::updateRepType(mol.data.drawRep, t, _repScale);
+        const molecule::rep::Color c =
+            static_cast<molecule::rep::Color>(_coloring.value());
+        molecule::util::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
     }
 }
 
@@ -463,10 +474,10 @@ void RenderableSimulationBox::update(const UpdateData& data) {
                 frame = 2.0 * numFrames - frame;
             }
 
-            mol::util::interpolateFrame(
+            molecule::util::interpolateFrame(
                 mol.data.molecule,
                 mol.data.trajectory,
-                mol::util::InterpolationType::Cubic,
+                molecule::util::InterpolationType::Cubic,
                 frame
             );
             md_gl_molecule_set_atom_position(
@@ -588,7 +599,6 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
 
     const glm::dvec4 depthVec = glm::dmat4(data.camera.sgctInternal.projectionMatrix()) *
         billboardModel * glm::dvec4(0.0, 0.0, 0.0, 1.0);
-    const double depth = normalizeDouble(depthVec.w);
 
     _billboard.program->activate();
     _billboard.program->setUniform(_billboard.uniforms.transform, transform);
@@ -602,9 +612,10 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     );
     _billboard.program->setUniform(
         _billboard.uniforms.fragDepth,
-        static_cast<float>(depth)
+        static_cast<float>(depthVec.w)
     );
     _billboard.program->setUniform(_billboard.uniforms.strokeColor, _circleColor);
+    _billboard.program->setUniform(_billboard.uniforms.opacity, opacity());
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -671,7 +682,7 @@ void RenderableSimulationBox::initMolecule(Molecules::Data& mol,
     // free previously loaded molecule
     freeMolecule(mol);
 
-    const md_molecule_t* molecule = mol::loadMolecule(molFile);
+    const md_molecule_t* molecule = molecule::loadMolecule(molFile);
     if (!molecule) {
         return;
     }
@@ -680,7 +691,7 @@ void RenderableSimulationBox::initMolecule(Molecules::Data& mol,
 
     if (!trajFile.empty()) {
         LDEBUG(std::format("Loading trajectory file '{}'", trajFile));
-        mol.trajectory = mol::loadTrajectory(trajFile);
+        mol.trajectory = molecule::loadTrajectory(trajFile);
 
         if (!mol.trajectory) {
             LERROR("Failed to initialize trajectory: failed to load file");

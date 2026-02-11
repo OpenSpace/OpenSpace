@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-in vec2 tc;
+in vec2 texCoords;
 out vec4 fragColor;
 
 uniform sampler2D texDepth; // Linear depth
@@ -38,8 +38,8 @@ float blurSize(float d, float fp, float fs) {
 }
 
 void main() {
-  float depth = textureLod(texDepth, tc, 1).r;
-  vec3 color = textureLod(texColor, tc, 1).rgb;
+  float depth = textureLod(texDepth, texCoords, 1).r;
+  vec3 color = textureLod(texColor, texCoords, 1).rgb;
   float coc = blurSize(depth, focusPoint, focusScale);
   fragColor = vec4(color, coc);
 }

@@ -30,7 +30,7 @@ uniform vec4 clipInfo;
 uniform sampler2D texDepth;
 uniform bool isPerspective;
 
-float ReconstructCSZ(float d, vec4 clip) {
+float reconstructCsz(float d, vec4 clip) {
   if (isPerspective) {
     return (clip[0] / (d * clip[1] + clip[2]));
   }
@@ -41,5 +41,5 @@ float ReconstructCSZ(float d, vec4 clip) {
 
 void main() {
   float d = texelFetch(texDepth, ivec2(gl_FragCoord.xy), 0).x;
-  fragColor = vec4(ReconstructCSZ(d, clipInfo), 0, 0, 0);
+  fragColor = vec4(reconstructCsz(d, clipInfo), 0, 0, 0);
 }

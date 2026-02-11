@@ -69,7 +69,10 @@ local EarthMoleculesTroposphere = {
   },
   GUI = {
     Name = "Earth Troposphere",
-    Path = "/Microcosmos/Atmosphere"
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes Earth's atmosphere at a height of approximately 10km into
+      the troposphere. Only N2, O2, and Water molecules, the three dominant constituents
+      of the atmosphere are rendered in their correct density.]]
   }
 }
 
@@ -108,7 +111,10 @@ local EarthMoleculesThermosphere = {
   },
   GUI = {
     Name = "Earth Thermosphere",
-    Path = "/Microcosmos/Atmosphere"
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes Earth's atmosphere at a height of approximately 100km into
+      the thermosphere. Only N2, O2, and Water molecules, the three dominant constituents
+      of the atmosphere are rendered in an approximate density.]]
   }
 }
 

@@ -120,19 +120,19 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
-        "Enables the representation"
+        "Enables the representation."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
-        "Visual representation type of the molecule."
+        "The visual representation type to use for the molecule."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
-        "Select a color mapping for the atoms."
+        "The color mapping for the atoms."
     };
 
     constexpr openspace::properties::Property::PropertyInfo UniformColorInfo = {
@@ -157,7 +157,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo AnimationBaseScaleInfo = {
         "AnimationBaseScale",
         "Animation Base Scale",
-        "Base scale for the animation, tune this to sync up its animation with other "
+        "Base scale for the animation. Tune this to sync up its animation with other "
         "trajectories."
     };
 
@@ -174,21 +174,19 @@ namespace {
         "reached."
     };
 
-    /**
-     * This Renderable class is used to render a single molecular system, which can be
-     * either static or dynamic. The rendering is done using the rendering engine of the
-     * [ViaMD](https://github.com/scanberg/viamd) framework. Many of the parameters are
-     * described in greater detail on their [Wiki](https://github.com/scanberg/viamd/wiki)
-     * page. It is possible to assign multiple representations to a molecular structure
-     * and specify individual settings per representation, including the ability to filter
-     * using ViaMD's powerful filtering scripting language.
-     *
-     * The current implementation supports the loading of "PDB", "Gromacs", "XYZ", "XMOL",
-     * and "ARC" files for the molecular structure and "PDB", "XTC", "TRR", "XYZ", "XMOL",
-     * and "ARC" files for the optional trajectories.
-     *
-     * If no trajectory file is provided only the structural information is shown.
-     */
+    // This `Renderable` class is used to render a single molecular system, which can be
+    // either static or dynamic. The rendering is done using the rendering engine of the
+    // [ViaMD](https://github.com/scanberg/viamd) framework. Many of the parameters are
+    // described in greater detail on their [Wiki](https://github.com/scanberg/viamd/wiki)
+    // page. It is possible to assign multiple representations to a molecular structure
+    // and specify individual settings per representation, including the ability to filter
+    // using ViaMD's powerful filtering scripting language.
+    //
+    // The current implementation supports the loading of "PDB", "Gromacs", "XYZ", "XMOL",
+    // and "ARC" files for the molecular structure and "PDB", "XTC", "TRR", "XYZ", "XMOL",
+    // and "ARC" files for the optional trajectories.
+    //
+    // If no trajectory file is provided only the structural information is shown.
     struct [[codegen::Dictionary(RenderableMolecule)]] Parameters {
         // [[codegen::verbatim(MoleculeFileInfo.description)]]
         std::string moleculeFile;
@@ -199,15 +197,18 @@ namespace {
         // [[codegen::verbatim(CoarseGrainedInfo.description)]]
         std::optional<bool> coarseGrained;
 
+        // This is a representation of a molecular dataset. Each representation is
+        // rendered independently and can contain different rendering and filtering
+        // parameters.
         struct Representation {
-            enum class [[codegen::map(mol::rep::Type)]] Type {
+            enum class [[codegen::map(molecule::rep::Type)]] Type {
                 SpaceFill,
                 Licorice,
                 Ribbons,
                 Cartoon
             };
 
-            enum class [[codegen::map(mol::rep::Color)]] Color {
+            enum class [[codegen::map(molecule::rep::Color)]] Color {
                 // Uniform,
                 Cpk,
                 AtomIndex,
@@ -219,15 +220,33 @@ namespace {
                 Uniform
             };
 
+            // Determines whether this `Representation` is enabled or not. If it is
+            // enabled, it will be rendered, if it is not enabled, it will be hidden.
             std::optional<bool> enabled;
+
+            // The type of representation that should be used.
             std::optional<Type> type;
+
+            // The method by which the selected representation should be colored.
             std::optional<Color> color;
+
+            // The ViaMD filter that can be used to filter atoms, residues, chains, and
+            // other primary or secondary structures.
             std::optional<std::string> filter;
+
+            // A scaling factor that causes a different scaling effect depending on the
+            // selected representation type. In general, a larger value will cause the
+            // representation to be rendered larger and more prominently.
             std::optional<float> scale;
+
+            // The uniform color that is used if not coloring method is selected.
             std::optional<glm::vec4> uniformColor;
         };
 
-        // Repro
+        // The list of representations that are used to render this molecular dataset.
+        // Each representation can consist of a representation type, a coloring method,
+        // and and optional filter and scaling that can be applied to each representation
+        // individually.
         std::optional<std::vector<Representation>> representations;
 
         // [[codegen::verbatim(ApplyPbcOnLoadInfo.description)]]
@@ -273,6 +292,8 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     , _animationSpeed(AnimationSpeedInfo, 1.0, -100.0, 100.0)
     , _animationRepeatMode(AnimationRepeatModeInfo)
 {
+    addProperty(Fadeable::_opacity);
+
     Parameters p = codegen::bake<Parameters>(dictionary);
 
     _moleculeFile = p.moleculeFile;
@@ -312,8 +333,8 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
             _repProps.propertySubOwners().size(),
             _molecule,
             rep.enabled.value_or(true),
-            codegen::map<mol::rep::Type>(*rep.type),
-            codegen::map<mol::rep::Color>(rep.color.value()),
+            codegen::map<molecule::rep::Type>(*rep.type),
+            codegen::map<molecule::rep::Color>(rep.color.value()),
             rep.filter.value_or(""),
             rep.scale.value_or(1.f),
             rep.uniformColor.value_or(glm::vec4(1.f))
@@ -376,23 +397,23 @@ bool RenderableMolecule::isReady() const {
 }
 
 void RenderableMolecule::update(const UpdateData& data) {
-    // avoid updating if not in view, as it can be quite expensive.
+    // Avoid updating if not in view, as it can be quite expensive
     if (!_renderableInView) {
         return;
     }
 
     _renderableInView = false;
 
-    // update animation
+    // Update animation
     if (_trajectory) {
         updateTrajectoryFrame(data);
     }
 }
 
 void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
-    ZoneScoped
+    ZoneScoped;
 
-    // compute distance from camera to molecule
+    // Compute distance from camera to molecule
     const glm::dvec3 frwd = data.modelTransform.translation - data.camera.positionVec3();
     const glm::dvec3 dir = data.camera.viewDirectionWorldSpace();
     // "signed" distance from camera to object
@@ -405,7 +426,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
 
     _renderableInView = true;
 
-    // because the molecule is small, a scaling of the view matrix causes the molecule
+    // Because the molecule is small, a scaling of the view matrix causes the molecule
     // to be moved out of view in clip space. Resetting the scaling for the molecule
     // is fine for now. This will have an impact on stereoscopic depth though
     Camera camCopy = data.camera;
@@ -475,11 +496,11 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
 
 void RenderableMolecule::initMolecule(std::string_view molFile, std::string_view trajFile)
 {
-    ZoneScoped
+    ZoneScoped;
 
     LDEBUG(std::format("Loading molecule file '{}'", molFile));
 
-    const md_molecule_t* molecule = mol::loadMolecule(molFile, _coarseGrained);
+    const md_molecule_t* molecule = molecule::loadMolecule(molFile, _coarseGrained);
     if (!molecule) {
         throw ghoul::RuntimeError("Failed to initialize molecule: Failed to load file");
     }
@@ -496,12 +517,14 @@ void RenderableMolecule::initMolecule(std::string_view molFile, std::string_view
         md_gl_representation_init(&rep->glRep, &_glMolecule);
 
         if (rep->enabled) {
+            using namespace molecule;
+
             computeMask(rep->mask, rep->filter, _molecule, rep->isDynamic);
 
-            mol::rep::Type type = static_cast<mol::rep::Type>(rep->type.value());
-            mol::rep::Color color = static_cast<mol::rep::Color>(rep->color.value());
-            mol::util::updateRepType(rep->glRep, type, rep->scale);
-            mol::util::updateRepColor(
+            rep::Type type = static_cast<rep::Type>(rep->type.value());
+            rep::Color color = static_cast<rep::Color>(rep->color.value());
+            util::updateRepType(rep->glRep, type, rep->scale);
+            util::updateRepColor(
                 rep->glRep,
                 _molecule,
                 color,
@@ -527,7 +550,7 @@ void RenderableMolecule::initMolecule(std::string_view molFile, std::string_view
 
     if (!trajFile.empty()) {
         LDEBUG(std::format("Loading trajectory file '{}'", trajFile));
-        _trajectory = mol::loadTrajectory(trajFile, molecule, _applyPbcOnLoad);
+        _trajectory = molecule::loadTrajectory(trajFile, molecule, _applyPbcOnLoad);
     }
 }
 
@@ -547,10 +570,10 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
 
     if (frame != _frame) {
         _frame = frame;
-        mol::util::interpolateFrame(
+        molecule::util::interpolateFrame(
             _molecule,
             _trajectory,
-            mol::util::InterpolationType::Cubic,
+            molecule::util::InterpolationType::Cubic,
             frame,
             _applyPbcPerFrame
         );
@@ -582,8 +605,9 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
                 continue;
             }
 
-            mol::rep::Color color = static_cast<mol::rep::Color>(rep->color.value());
-            if (color == mol::rep::Color::SecondaryStructure) {
+            molecule::rep::Color color =
+                static_cast<molecule::rep::Color>(rep->color.value());
+            if (color == molecule::rep::Color::SecondaryStructure) {
                 repHasSsIndices.push_back(rep.get());
             }
             if (rep->isDynamic) {
@@ -608,10 +632,10 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
         }
 
         for (Representation* rep : repUpdateColIndices) {
-            mol::util::updateRepColor(
+            molecule::util::updateRepColor(
                 rep->glRep,
                 _molecule,
-                static_cast<mol::rep::Color>(rep->color.value()),
+                static_cast<molecule::rep::Color>(rep->color.value()),
                 rep->mask,
                 rep->uniformColor
             );
@@ -649,14 +673,14 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
 
     std::vector<int64_t> f =
         std::vector<int64_t>(frames.begin(), frames.end());
-    mol::prefetchFrames(_trajectory, f);
+    molecule::prefetchFrames(_trajectory, f);
 }
 
 RenderableMolecule::Representation::Representation(size_t number,
                                                    const md_molecule_t& molecule_,
                                                    bool enabled_,
-                                                   mol::rep::Type type_,
-                                                   mol::rep::Color color_,
+                                                   molecule::rep::Type type_,
+                                                   molecule::rep::Color color_,
                                                    std::string filter_,
                                                    float scale_,
                                                    glm::vec4 uniformColor_)
@@ -677,33 +701,40 @@ RenderableMolecule::Representation::Representation(size_t number,
     addProperty(enabled);
 
     type.addOptions({
-        { static_cast<int>(mol::rep::Type::SpaceFill), "SpaceFill" },
-        { static_cast<int>(mol::rep::Type::Licorice), "Licorice" },
-        { static_cast<int>(mol::rep::Type::Ribbons), "Ribbons" },
-        { static_cast<int>(mol::rep::Type::Cartoon), "Cartoon" }
+        { static_cast<int>(molecule::rep::Type::SpaceFill), "SpaceFill" },
+        { static_cast<int>(molecule::rep::Type::Licorice), "Licorice" },
+        { static_cast<int>(molecule::rep::Type::Ribbons), "Ribbons" },
+        { static_cast<int>(molecule::rep::Type::Cartoon), "Cartoon" }
     });
     type = static_cast<int>(type_);
     type.onChange([&]() {
-        mol::util::updateRepType(glRep, static_cast<mol::rep::Type>(type.value()), scale);
+        molecule::util::updateRepType(
+            glRep,
+            static_cast<molecule::rep::Type>(type.value()),
+            scale
+        );
     });
     addProperty(type);
 
     color.addOptions({
-        { static_cast<int>(mol::rep::Color::Cpk), "CPK" },
-        { static_cast<int>(mol::rep::Color::AtomIndex), "Atom Index" },
-        { static_cast<int>(mol::rep::Color::ResId), "Residue ID" },
-        { static_cast<int>(mol::rep::Color::ResIndex), "Residue Index" },
-        { static_cast<int>(mol::rep::Color::ChainId), "Chain ID" },
-        { static_cast<int>(mol::rep::Color::ChainIndex), "Chain Index" },
-        { static_cast<int>(mol::rep::Color::SecondaryStructure), "Secondary Structure" },
-        { static_cast<int>(mol::rep::Color::Uniform), "Uniform" }
+        { static_cast<int>(molecule::rep::Color::Cpk), "CPK" },
+        { static_cast<int>(molecule::rep::Color::AtomIndex), "Atom Index" },
+        { static_cast<int>(molecule::rep::Color::ResId), "Residue ID" },
+        { static_cast<int>(molecule::rep::Color::ResIndex), "Residue Index" },
+        { static_cast<int>(molecule::rep::Color::ChainId), "Chain ID" },
+        { static_cast<int>(molecule::rep::Color::ChainIndex), "Chain Index" },
+        {
+            static_cast<int>(molecule::rep::Color::SecondaryStructure),
+            "Secondary Structure"
+        },
+        { static_cast<int>(molecule::rep::Color::Uniform), "Uniform" }
     });
     color = static_cast<int>(color_);
     color.onChange([&]() {
-        mol::util::updateRepColor(
+        molecule::util::updateRepColor(
             glRep,
             molecule,
-            static_cast<mol::rep::Color>(color.value()),
+            static_cast<molecule::rep::Color>(color.value()),
             mask,
             uniformColor
         );
@@ -712,10 +743,10 @@ RenderableMolecule::Representation::Representation(size_t number,
 
     filter.onChange([&]() {
         computeMask(mask, filter, molecule, isDynamic);
-        mol::util::updateRepColor(
+        molecule::util::updateRepColor(
             glRep,
             molecule,
-            static_cast<mol::rep::Color>(color.value()),
+            static_cast<molecule::rep::Color>(color.value()),
             mask,
             uniformColor
         );
@@ -723,16 +754,20 @@ RenderableMolecule::Representation::Representation(size_t number,
     addProperty(filter);
 
     scale.onChange([&]() {
-        mol::util::updateRepType(glRep, static_cast<mol::rep::Type>(type.value()), scale);
+        molecule::util::updateRepType(
+            glRep,
+            static_cast<molecule::rep::Type>(type.value()),
+            scale
+        );
     });
     addProperty(scale);
 
     uniformColor.setViewOption(properties::Property::ViewOptions::Color);
     uniformColor.onChange([&]() {
-        mol::util::updateRepColor(
+        molecule::util::updateRepColor(
             glRep,
             molecule,
-            static_cast<mol::rep::Color>(color.value()),
+            static_cast<molecule::rep::Color>(color.value()),
             mask,
             uniformColor
         );

@@ -24,6 +24,8 @@
 
 #version __CONTEXT__
 
+#include "PowerScaling/powerScaling_fs.hglsl"
+
 in vec2 pos;
 out vec4 fragColor;
 
@@ -31,6 +33,7 @@ uniform float strokeWidth;
 uniform float strokeFalloffExp;
 uniform float fragDepth;
 uniform vec4 strokeColor;
+uniform float opacity;
 
 void main() {
   float len = length(pos) * 2.0;
@@ -45,6 +48,7 @@ void main() {
     1.0
   );
 
-  gl_FragDepth = fragDepth;
+  gl_FragDepth = normalizeFloat(fragDepth);
   fragColor = mix(strokeColor, vec4(0.0), falloff);
+  fragColor.a *= opacity;
 }

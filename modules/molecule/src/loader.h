@@ -35,20 +35,20 @@ struct md_trajectory_i;
 struct md_trajectory_api;
 struct md_bitfield_t;
 
-namespace load::mol {
-    md_molecule_api* api(std::filesystem::path filename);
-} // namespace load::mol
+namespace molecule::load {
 
-namespace load::traj {
-    md_trajectory_api* api(std::filesystem::path filename);
+md_molecule_api* moleculeApi(std::filesystem::path filename);
 
-    md_trajectory_i* openFile(std::filesystem::path filename, const md_molecule_t* mol,
-        md_allocator_i* alloc, bool deperiodize_on_load);
-    bool close(md_trajectory_i* traj);
+md_trajectory_api* trajectoryApi(std::filesystem::path filename);
 
-    bool setRecenterTarget(md_trajectory_i* traj, const md_bitfield_t* atom_mask);
-    bool clearCache(md_trajectory_i* traj);
-    int64_t numCacheFrames(md_trajectory_i* traj);
-} // namespace load::traj
+md_trajectory_i* openFile(std::filesystem::path filename, const md_molecule_t* mol,
+    md_allocator_i* alloc, bool deperiodize_on_load);
+bool close(md_trajectory_i* traj);
+
+bool setRecenterTarget(md_trajectory_i* traj, const md_bitfield_t* atom_mask);
+bool clearCache(md_trajectory_i* traj);
+int64_t numCacheFrames(md_trajectory_i* traj);
+
+} // namespace molecule::load
 
 #endif // __OPENSPACE_MODULE_MOLECULE___LOADER___H__

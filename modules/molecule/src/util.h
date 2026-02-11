@@ -33,7 +33,7 @@ struct md_gl_representation_t;
 struct md_molecule_t;
 struct md_trajectory_i;
 
-namespace mol::util {
+namespace molecule::util {
 
 enum class InterpolationType {
     Nearest,
@@ -41,9 +41,9 @@ enum class InterpolationType {
     Cubic
 };
 
-void updateRepType(md_gl_representation_t& rep, mol::rep::Type type, float scale);
+void updateRepType(md_gl_representation_t& rep, molecule::rep::Type type, float scale);
 void updateRepColor(md_gl_representation_t& rep, const md_molecule_t& mol,
-    mol::rep::Color color, const md_bitfield_t& mask,
+    molecule::rep::Color color, const md_bitfield_t& mask,
     const glm::vec4& uniformColor = glm::vec4(0));
 
 // ensure_pbc enforces that atoms are wrapped properly within the given simulation box
@@ -52,6 +52,6 @@ void updateRepColor(md_gl_representation_t& rep, const md_molecule_t& mol,
 void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
     InterpolationType interp, double frame, bool ensurePbc = false);
 
-} // namespace mol::util
+} // namespace molecule::util
 
 #endif // __OPENSPACE_MODULE_MOLECULE___UTIL___H__

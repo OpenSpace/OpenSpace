@@ -34,7 +34,7 @@
 #define AO_NUM_SAMPLES 32
 #endif
 
-in vec2 tc;
+in vec2 texCoords;
 out vec4 fragColor;
 
 struct HBAOData {
@@ -113,17 +113,18 @@ vec2 rotateSample(vec2 smpl, vec2 cosSin) {
   );
 }
 
-vec4 getJitter(vec2 uv) {
-  // (cos(Alpha),sin(Alpha),rand1,rand2)
+vec4 jitter(vec2 uv) {
+  // Returns the jitter vector for the provided uv coordinates. The returned value is
+  // (cos(Alpha),sin(Alpha),rand1,rand2) for a random number Alpha, rand1, and rand2
   vec2 coord = gl_FragCoord.xy / AO_RANDOM_TEX_SIZE;
   vec4 jitter = textureLod(texRandom, coord, 0);
   return jitter;
 }
 
 float computeAo(vec2 fullResUv, float radiusPixels, vec4 jitter, vec3 viewPosition,
-                 vec3 viewNormal)
+                vec3 viewNormal)
 {
-  // -4.3 is recomended in the intel ASSAO implementation
+  // -4.3 is recomended in the Intel ASSAO implementation
   const float GlobalMipOffset = -4.3;
   float mipOffset = log2(radiusPixels) + GlobalMipOffset;
 
@@ -150,7 +151,7 @@ float computeAo(vec2 fullResUv, float radiusPixels, vec4 jitter, vec3 viewPositi
 
 //----------------------------------------------------------------------------------
 void main() {
-  vec2 uv = tc;
+  vec2 uv = texCoords;
   vec3 viewPosition = fetchViewPos(uv, 0);
   vec3 viewNormal = fetchViewNormal(uv);
 
@@ -161,8 +162,8 @@ void main() {
   }
 
   // Get jitter vector for the current full-res pixel
-  vec4 jitter = getJitter(uv);
-  float ao = computeAo(uv, radiusPixels, jitter, viewPosition, viewNormal);
+  vec4 j = jitter(uv);
+  float ao = computeAo(uv, radiusPixels, j, viewPosition, viewNormal);
 
   fragColor = vec4(vec3(pow(ao, control.powExponent)), 1.0);
 }

@@ -84,7 +84,7 @@ namespace {
                 GLuint fbo = 0;
                 std::unique_ptr<ghoul::opengl::Texture> texture;
                 std::unique_ptr<ghoul::opengl::ProgramObject> program;
-                UniformCache(texLinearDepth, texNormal, texRandom, tcScale,
+                UniformCache(texLinearDepth, texNormal, texRandom, texCoordsScale,
                     isPerspective) uniforms;
             } hbao;
 
@@ -93,7 +93,7 @@ namespace {
                 std::unique_ptr<ghoul::opengl::Texture> texture;
                 std::unique_ptr<ghoul::opengl::ProgramObject> program;
                 UniformCache(texLinearDepth, texAo, sharpness, invResDir,
-                    tcScale) uniforms;
+                    texCoordsScale) uniforms;
             } blur;
         } ssao;
 
@@ -886,7 +886,7 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
         program.setUniform(uniforms.texRandom, randomUnit);
         program.setUniform(uniforms.isPerspective, isOrtho ? 0 : 1);
         program.setUniform(
-            uniforms.tcScale,
+            uniforms.texCoordsScale,
             static_cast<float>(width) / static_cast<float>(glObj.texWidth),
             static_cast<float>(height) / static_cast<float>(glObj.texHeight)
         );
@@ -907,7 +907,7 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
         program.setUniform(uniforms.sharpness, sharpness);
         program.setUniform(uniforms.invResDir, 1.f / glObj.texWidth, 0.f);
         program.setUniform(
-            uniforms.tcScale,
+            uniforms.texCoordsScale,
             static_cast<float>(width) / static_cast<float>(glObj.texWidth),
             static_cast<float>(height) / static_cast<float>(glObj.texHeight)
         );

@@ -34,8 +34,8 @@ local moleculeC2H6 = asset.resource({
 local Latitude = 58.5877
 local Longitude = 16.1924
 
-local TitanMolecules = {
-  Identifier = "TitanMolecules",
+local TitanMolecules1km = {
+  Identifier = "TitanMolecules1km",
   Parent = titan.Titan.Identifier,
   Transform = {
     Translation = {
@@ -72,13 +72,16 @@ local TitanMolecules = {
     AnimationSpeed = 100
   },
   GUI = {
-    Name = "Titan",
-    Path = "/Microcosmos/Atmosphere"
+    Name = "Titan 1km",
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes Titan's atmosphere at a height of approximately 1km above
+      the surface. The three major consitutents of the atmosphere (N2, Methane, and
+      Hydrogen) are shown in approximate relative density.]]
   }
 }
 
 local TitanMoleculesMethaneCloud = {
-  Identifier = "TitanMoleculesMethaneCloud",
+  Identifier = "TitanMoleculesMethaneCloud20km",
   Parent = titan.Titan.Identifier,
   Transform = {
     Translation = {
@@ -115,13 +118,17 @@ local TitanMoleculesMethaneCloud = {
     AnimationSpeed = 100
   },
   GUI = {
-    Name = "Titan Methane Cloud",
-    Path = "/Microcosmos/Atmosphere"
+    Name = "Titan Methane Cloud 20km",
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes a simulated cloud of methane in Titan's atmosphere at a
+      height of approximately 20km above the surface. The three major consitutents of the
+      atmosphere (N2, Methane, and Hydrogen) are shown in approximate relative density as
+      they would be found in such a cloud.]]
   }
 }
 
 local TitanMoleculesEthaneCloud = {
-  Identifier = "TitanMoleculesEthaneCloud",
+  Identifier = "TitanMoleculesEthaneCloud45km",
   Parent = titan.Titan.Identifier,
   Transform = {
     Translation = {
@@ -163,14 +170,18 @@ local TitanMoleculesEthaneCloud = {
     AnimationSpeed = 100
   },
   GUI = {
-    Name = "Titan Ethane Cloud",
-    Path = "/Microcosmos/Atmosphere"
+    Name = "Titan Ethane Cloud 45km",
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes a simulated cloud of ethane in Titan's atmosphere at a
+      height of approximately 45km above the surface. The four major consitutents of the
+      atmosphere (N2, Methane, Ethane, and Hydrogen) are shown in approximate relative
+      density as they would be found in such an ethane cloud.]]
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(TitanMolecules)
+  openspace.addSceneGraphNode(TitanMolecules1km)
   openspace.addSceneGraphNode(TitanMoleculesMethaneCloud)
   openspace.addSceneGraphNode(TitanMoleculesEthaneCloud)
 end)
@@ -178,19 +189,19 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(TitanMoleculesEthaneCloud)
   openspace.removeSceneGraphNode(TitanMoleculesMethaneCloud)
-  openspace.removeSceneGraphNode(TitanMolecules)
+  openspace.removeSceneGraphNode(TitanMolecules1km)
 end)
 
-asset.export(TitanMolecules)
+asset.export(TitanMolecules1km)
 asset.export(TitanMoleculesMethaneCloud)
 asset.export(TitanMoleculesEthaneCloud)
 
 
 
 asset.meta = {
-  Name = "TitanMolecules Atmosphere",
-  Description = [[Visualizes TitanMolecules' atmosphere at the molecular scale as well
-    as showing a methane cloud at 20km altitude and an ethane cloud at 45km altitude.]],
+  Name = "Titan Atmosphere",
+  Description = [[Visualizes Titan's atmosphere at the molecular scale as well as showing
+    a methane cloud at 20km altitude and an ethane cloud at 45km altitude.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

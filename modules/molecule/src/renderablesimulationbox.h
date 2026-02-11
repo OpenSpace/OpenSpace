@@ -88,7 +88,7 @@ private:
     struct {
         std::unique_ptr<ghoul::opengl::ProgramObject> program;
         UniformCache(transform, strokeWidth, strokeFalloffExp, fragDepth,
-            strokeColor) uniforms;
+            strokeColor, opacity) uniforms;
         GLuint vao = 0;
     } _billboard;
 

@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_MOLECULE___DEF___H__
 #define __OPENSPACE_MODULE_MOLECULE___DEF___H__
 
-namespace mol::rep {
+namespace molecule::rep {
 
 enum class Type {
     SpaceFill,
@@ -45,6 +45,6 @@ enum class Color {
     Uniform
 };
 
-} // namespace mol::rep
+} // namespace molecule::rep
 
 #endif // __OPENSPACE_MODULE_MOLECULE___DEF___H__

@@ -73,17 +73,18 @@ private:
 
     std::unique_ptr<md_gl_shaders_t> _shaders = nullptr;
 
-    properties::BoolProperty _ssaoEnabled;
-    properties::FloatProperty _ssaoIntensity;
-    properties::FloatProperty _ssaoRadius;
-    properties::FloatProperty _ssaoHorizonBias;
-    properties::FloatProperty _ssaoNormalBias;
+    struct SSAO : public properties::PropertyOwner {
+        explicit SSAO(PropertyOwnerInfo info);
 
-    properties::BoolProperty _ssao2Enabled;
-    properties::FloatProperty _ssao2Intensity;
-    properties::FloatProperty _ssao2Radius;
-    properties::FloatProperty _ssao2HorizonBias;
-    properties::FloatProperty _ssao2NormalBias;
+        properties::BoolProperty enabled;
+        properties::FloatProperty intensity;
+        properties::FloatProperty radius;
+        properties::FloatProperty horizonBias;
+        properties::FloatProperty normalBias;
+    };
+
+    SSAO _ssao;
+    SSAO _ssao2;
 
     properties::FloatProperty _exposure;
 

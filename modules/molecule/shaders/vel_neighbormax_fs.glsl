@@ -28,7 +28,7 @@
 
 const int Extent = 2;
 
-in vec2 tc;
+in vec2 texCoords;
 out vec4 fragColor;
 
 uniform sampler2D texVel;
@@ -40,7 +40,7 @@ void main() {
 
   for (int i = -Extent; i <= Extent; i++) {
     for (int j = -Extent; j <= Extent; j++) {
-      vec2 v = texture(texVel, tc + vec2(i, j) * texVelTexelSize).xy;
+      vec2 v = texture(texVel, texCoords + vec2(i, j) * texVelTexelSize).xy;
       float v2 = dot(v,v);
       if (v2 > mv2) {
         mv = v;

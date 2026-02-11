@@ -13,8 +13,8 @@ local moleculeCO2 = asset.resource({
 local Latitude = 58.5877
 local Longitude = 16.1924
 
-local MarsMolecules = {
-  Identifier = "MarsMolecules",
+local MarsMolecules1km = {
+  Identifier = "MarsMolecules1km",
   Parent = mars.Mars.Identifier,
   Transform = {
     Translation = {
@@ -41,21 +41,24 @@ local MarsMolecules = {
     AnimationSpeed = 100
   },
   GUI = {
-    Name = "Mars",
-    Path = "/Microcosmos/Atmosphere"
+    Name = "Mars 1km",
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes Mars' atmosphere at a height of approximately 1km above the
+      surface. As Mars' atmosphere almost exclusively consists of carbon dioxide, only
+      that molecule is shown in the simulation box at an approximate density.]]
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(MarsMolecules)
+  openspace.addSceneGraphNode(MarsMolecules1km)
 end)
 
 asset.onDeinitialize(function()
-  openspace.removeSceneGraphNode(MarsMolecules)
+  openspace.removeSceneGraphNode(MarsMolecules1km)
 end)
 
-asset.export(MarsMolecules)
+asset.export(MarsMolecules1km)
 
 
 

@@ -65,9 +65,9 @@ namespace {
     }
 } // namespace
 
-namespace mol::util {
+namespace molecule::util {
 
-void updateRepType(md_gl_representation_t& rep, mol::rep::Type type, float scale) {
+void updateRepType(md_gl_representation_t& rep, rep::Type type, float scale) {
     md_gl_representation_args_t repArgs = {};
     md_gl_representation_type_t repType = 0;
 
@@ -76,7 +76,7 @@ void updateRepType(md_gl_representation_t& rep, mol::rep::Type type, float scale
             repArgs.licorice.radius = scale * 0.5f;
             repType = MD_GL_REP_LICORICE;
             break;
-        case mol::rep::Type::Ribbons:
+        case rep::Type::Ribbons:
             repArgs.ribbons.width_scale = scale * 5;
             repArgs.ribbons.thickness_scale = scale * 5;
             repType = MD_GL_REP_RIBBONS;
@@ -96,7 +96,7 @@ void updateRepType(md_gl_representation_t& rep, mol::rep::Type type, float scale
 }
 
 void updateRepColor(md_gl_representation_t& rep, const md_molecule_t& mol,
-                    mol::rep::Color color, const md_bitfield_t& mask,
+                    rep::Color color, const md_bitfield_t& mask,
                     const glm::vec4& uniformColor)
 {
     uint32_t count = static_cast<uint32_t>(mol.atom.count);
@@ -109,29 +109,29 @@ void updateRepColor(md_gl_representation_t& rep, const md_molecule_t& mol,
     };
 
     switch (color) {
-        case mol::rep::Color::Cpk:
-            mol::color::atoms::cpk(colors, count, mol);
+        case rep::Color::Cpk:
+            color::atoms::cpk(colors, count, mol);
             break;
-        case mol::rep::Color::AtomIndex:
-            mol::color::atoms::idx(colors, count, mol);
+        case rep::Color::AtomIndex:
+            color::atoms::idx(colors, count, mol);
             break;
-        case mol::rep::Color::ResId:
-            mol::color::atoms::residueId(colors, count, mol);
+        case rep::Color::ResId:
+            color::atoms::residueId(colors, count, mol);
             break;
-        case mol::rep::Color::ResIndex:
-            mol::color::atoms::residueIndex(colors, count, mol);
+        case rep::Color::ResIndex:
+            color::atoms::residueIndex(colors, count, mol);
             break;
-        case mol::rep::Color::ChainId:
-            mol::color::atoms::chainId(colors, count, mol);
+        case rep::Color::ChainId:
+            color::atoms::chainId(colors, count, mol);
             break;
-        case mol::rep::Color::ChainIndex:
-            mol::color::atoms::chainIndex(colors, count, mol);
+        case rep::Color::ChainIndex:
+            color::atoms::chainIndex(colors, count, mol);
             break;
-        case mol::rep::Color::SecondaryStructure:
-            mol::color::atoms::secondaryStructure(colors, count, mol);
+        case rep::Color::SecondaryStructure:
+            color::atoms::secondaryStructure(colors, count, mol);
             break;
-        case mol::rep::Color::Uniform:
-            mol::color::atoms::uniform(colors, count, convertColor(uniformColor));
+        case rep::Color::Uniform:
+            color::atoms::uniform(colors, count, convertColor(uniformColor));
             break;
     }
 
@@ -203,10 +203,7 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
         }
         case InterpolationType::Linear:
         {
-            FrameData frame[2] = {
-                mol::frameData(traj, fIdx[1]),
-                mol::frameData(traj, fIdx[2])
-            };
+            FrameData frame[2] = { frameData(traj, fIdx[1]), frameData(traj, fIdx[2]) };
 
             if (mol.backbone.count) {
                 for (int64_t i = 0; i < mol.backbone.count; i++) {
@@ -248,10 +245,10 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
         case InterpolationType::Cubic:
         {
             FrameData frame[4] = {
-                mol::frameData(traj, fIdx[0]),
-                mol::frameData(traj, fIdx[1]),
-                mol::frameData(traj, fIdx[2]),
-                mol::frameData(traj, fIdx[3])
+                frameData(traj, fIdx[0]),
+                frameData(traj, fIdx[1]),
+                frameData(traj, fIdx[2]),
+                frameData(traj, fIdx[3])
             };
 
             if (mol.backbone.count) {
@@ -308,4 +305,4 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
     }
 }
 
-} // namespace mol::util
+} // namespace molecule::util

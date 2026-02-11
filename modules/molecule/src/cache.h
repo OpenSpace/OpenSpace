@@ -51,7 +51,7 @@ struct FrameData {
     md_frame_cache_lock_t* lock = nullptr;
 };
 
-namespace mol {
+namespace molecule {
 
 const md_molecule_t* loadMolecule(std::filesystem::path file,
     bool isCoarseGrained = false);
@@ -66,6 +66,6 @@ void prefetchFrames(const md_trajectory_i* traj, std::span<int64_t> frames);
 // access its x,y,z data after the object has been destroyed
 FrameData frameData(const md_trajectory_i* traj, int64_t frame);
 
-} // namespace mol
+} // namespace molecule
 
 #endif // __OPENSPACE_MODULE_MOLECULE___CACHE___H__

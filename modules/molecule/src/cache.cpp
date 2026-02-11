@@ -421,8 +421,6 @@ namespace {
             const int64_t end =
                 (i == numChunks - 1) ? numFrames : (i + 1) * numFrames / numChunks;
             pool.enqueue([ssData, ssStride, traj, old_mol = mol, beg, end]() {
-                // @TODO(Robin) This is stupid and the interface to compute secondary
-                // structure should be changed
                 md_molecule_t mol = *old_mol;
                 const int64_t stride = ALIGN_TO(mol.atom.count, 16);
                 const int64_t bytes = stride * sizeof(float) * 3;
@@ -465,7 +463,7 @@ FrameData::~FrameData() {
     }
 }
 
-namespace mol {
+namespace molecule {
 
 const md_molecule_t* loadMolecule(std::filesystem::path file, bool isCoarseGrained) {
     ghoul_assert(!file.empty(), "No file provided");
@@ -476,7 +474,7 @@ const md_molecule_t* loadMolecule(std::filesystem::path file, bool isCoarseGrain
         return &entry->second;
     }
 
-    md_molecule_api* api = load::mol::api(file);
+    md_molecule_api* api = load::moleculeApi(file);
     if (!api) {
         throw ghoul::RuntimeError("Failed to find molecule loader api", "MOLD");
     }
@@ -506,7 +504,7 @@ const md_trajectory_i* loadTrajectory(std::filesystem::path file,
         return entry->second;
     }
 
-    md_trajectory_api* api = load::traj::api(file);
+    md_trajectory_api* api = load::trajectoryApi(file);
     if (!api) {
         throw ghoul::RuntimeError("Failed to find trajectory loader api", "MOLD");
     }
@@ -665,4 +663,4 @@ FrameData frameData(const md_trajectory_i* traj, int64_t frame) {
     return data;
 }
 
-} // namespace mol
+} // namespace molecule

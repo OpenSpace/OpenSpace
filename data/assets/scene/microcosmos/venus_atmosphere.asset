@@ -34,8 +34,8 @@ local moleculeH2O = asset.resource({
 local Latitude = 58.5877
 local Longitude = 16.1924
 
-local VenusMolecules = {
-  Identifier = "VenusMolecules",
+local VenusMolecules10km = {
+  Identifier = "VenusMolecules10km",
   Parent = venus.Venus.Identifier,
   Transform = {
     Translation = {
@@ -43,7 +43,7 @@ local VenusMolecules = {
       Globe = venus.Venus.Identifier,
       Latitude = Latitude,
       Longitude = Longitude,
-      Altitude = 1000.0
+      Altitude = 10000.0
     }
   },
   Renderable = {
@@ -67,8 +67,11 @@ local VenusMolecules = {
     AnimationSpeed = 100
   },
   GUI = {
-    Name = "Venus",
-    Path = "/Microcosmos/Atmosphere"
+    Name = "Venus 10km",
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes Venus' atmosphere at an altitude of approximately 10km
+      above the surface. The two major consitutents of the atmosphere (CO2 and N2) are
+      shown in approximate relative density for this altitude.]]
   }
 }
 
@@ -106,7 +109,10 @@ local VenusMolecules50km = {
   },
   GUI = {
     Name = "Venus 50km",
-    Path = "/Microcosmos/Atmosphere"
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes Venus' atmosphere at an altitude of approximately 50km
+      above the surface. The two major consitutents of the atmosphere (CO2 and N2) are
+      shown in approximate relative density for this altitude.]]
   }
 }
 
@@ -154,13 +160,18 @@ local VenusMolecules50kmCloud = {
   },
   GUI = {
     Name = "Venus 50km Cloud",
-    Path = "/Microcosmos/Atmosphere"
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes Venus' atmosphere at an altitude of approximately 50km
+      above the surface. At this altitude, the atmosphere not only consists of the primary
+      onstituents (CO2 and N2), but also contains Sulfuric Acid (H2SO4) and water. These
+      four moleculaes are shown in their approximate relative density found at this
+      altitude above the Venusian surface.]]
   }
 }
 
 
 asset.onInitialize(function()
-  openspace.addSceneGraphNode(VenusMolecules)
+  openspace.addSceneGraphNode(VenusMolecules10km)
   openspace.addSceneGraphNode(VenusMolecules50km)
   openspace.addSceneGraphNode(VenusMolecules50kmCloud)
 end)
@@ -168,10 +179,10 @@ end)
 asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(VenusMolecules50kmCloud)
   openspace.removeSceneGraphNode(VenusMolecules50km)
-  openspace.removeSceneGraphNode(VenusMolecules)
+  openspace.removeSceneGraphNode(VenusMolecules10km)
 end)
 
-asset.export(VenusMolecules)
+asset.export(VenusMolecules10km)
 asset.export(VenusMolecules50km)
 asset.export(VenusMolecules50kmCloud)
 

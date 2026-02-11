@@ -44,7 +44,7 @@ namespace {
 layout(location = 0) out vec4 out_color;
 layout(location = 1) out vec4 out_normal;
 
-vec2 encode_normal (vec3 n) {
+vec2 encode_normal(vec3 n) {
   float p = sqrt(n.z * 8 + 8);
   return n.xy / p + 0.5;
 }
@@ -124,31 +124,36 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 
 namespace openspace {
 
+MoleculeModule::SSAO::SSAO(properties::PropertyOwner::PropertyOwnerInfo info)
+    : properties::PropertyOwner(info)
+    , enabled(SSAOEnabledInfo, true)
+    , intensity(SSAOIntensityInfo, 7.5f, 0.f, 100.f)
+    , radius(SSAORadiusInfo, 1.f, 0.1f, 1000.f)
+    , horizonBias(SSAOBiasInfo, 0.1f, 0.f, 1.f)
+    , normalBias(SSAONormalBiasInfo, 1.f, 0.f, 1.f)
+{
+    addProperty(enabled);
+    addProperty(intensity);
+    addProperty(radius);
+    addProperty(horizonBias);
+    addProperty(normalBias);
+}
+
+
 MoleculeModule::MoleculeModule()
     : OpenSpaceModule(Name)
-    , _ssaoEnabled(SSAOEnabledInfo, true)
-    , _ssaoIntensity(SSAOIntensityInfo, 7.5f, 0.f, 100.f)
-    , _ssaoRadius(SSAORadiusInfo, 1.f, 0.1f, 10.f)
-    , _ssaoHorizonBias(SSAOBiasInfo, 0.1f, 0.f, 1.0f)
-    , _ssaoNormalBias(SSAONormalBiasInfo, 1.f, 0.f, 1.f)
-    , _ssao2Enabled(SSAO2EnabledInfo, true)
-    , _ssao2Intensity(SSAO2IntensityInfo, 7.5f, 0.f, 100.f)
-    , _ssao2Radius(SSAO2RadiusInfo, 10.f, 10.f, 1000.f)
-    , _ssao2HorizonBias(SSAO2BiasInfo, 0.f, 0.f, 1.f)
-    , _ssao2NormalBias(SSAO2NormalBiasInfo, 1.f, 0.f, 0.f)
+    , _ssao({ "SSAO", "SSAO", "First SSAO Pass" })
+    , _ssao2({ "SSAO2", "SSAO 2", "Second SSAO Pass" })
     , _exposure(ExposureInfo, 1.f, 0.1f, 10.f)
     , _threadPool(std::max(1U, std::thread::hardware_concurrency() - 1))
 {
-    addProperty(_ssaoEnabled);
-    addProperty(_ssaoIntensity);
-    addProperty(_ssaoRadius);
-    addProperty(_ssaoHorizonBias);
-    addProperty(_ssaoNormalBias);
-    addProperty(_ssao2Enabled);
-    addProperty(_ssao2Intensity);
-    addProperty(_ssao2Radius);
-    addProperty(_ssao2HorizonBias);
-    addProperty(_ssao2NormalBias);
+    // @TODO (2026-02-11, abock) These settings should be made configurable from the cfg
+    // file at some point
+    addPropertySubOwner(_ssao);
+    _ssao2.radius = 10.f;
+    _ssao2.horizonBias = 0.f;
+    addPropertySubOwner(_ssao2);
+
     addProperty(_exposure);
 }
 
@@ -316,16 +321,16 @@ void MoleculeModule::render(const glm::mat4&, const glm::mat4& viewMatrix,
 
     postprocessing::Settings settings;
     settings.background.enabled = false;
-    settings.ambientOcclusion[0].enabled = _ssaoEnabled;
-    settings.ambientOcclusion[0].intensity = _ssaoIntensity;
-    settings.ambientOcclusion[0].radius = _ssaoRadius;
-    settings.ambientOcclusion[0].horizonBias = _ssaoHorizonBias;
-    settings.ambientOcclusion[0].normalBias = _ssaoNormalBias;
-    settings.ambientOcclusion[1].enabled = _ssao2Enabled;
-    settings.ambientOcclusion[1].intensity = _ssao2Intensity;
-    settings.ambientOcclusion[1].radius = _ssao2Radius;
-    settings.ambientOcclusion[1].horizonBias = _ssao2HorizonBias;
-    settings.ambientOcclusion[1].normalBias = _ssao2NormalBias;
+    settings.ambientOcclusion[0].enabled = _ssao.enabled;
+    settings.ambientOcclusion[0].intensity = _ssao.intensity;
+    settings.ambientOcclusion[0].radius = _ssao.radius;
+    settings.ambientOcclusion[0].horizonBias = _ssao.horizonBias;
+    settings.ambientOcclusion[0].normalBias = _ssao.normalBias;
+    settings.ambientOcclusion[1].enabled = _ssao2.enabled;
+    settings.ambientOcclusion[1].intensity = _ssao2.intensity;
+    settings.ambientOcclusion[1].radius = _ssao2.radius;
+    settings.ambientOcclusion[1].horizonBias = _ssao2.horizonBias;
+    settings.ambientOcclusion[1].normalBias = _ssao2.normalBias;
     settings.bloom.enabled = false;
     settings.depthOfField.enabled = false;
     settings.temporalReprojection.enabled = false;

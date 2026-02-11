@@ -28,7 +28,7 @@
 
 const float KernelRadius = 3;
 
-in vec2 tc;
+in vec2 texCoords;
 out vec4 fragColor;
 
 uniform sampler2D texLinearDepth;
@@ -52,19 +52,19 @@ float blurFunction(vec2 uv, float r, float centerC, float centerD, inout float w
 }
 
 void main() {
-  float centerC = texture(texAo, tc).x;
-  float centerD = texture(texLinearDepth, tc).x;
+  float centerC = texture(texAo, texCoords).x;
+  float centerD = texture(texLinearDepth, texCoords).x;
 
   float cTotal = centerC;
   float wTotal = 1.0;
 
   for (float r = 1; r <= KernelRadius; r++) {
-    vec2 uv = tc + invResDir * r;
+    vec2 uv = texCoords + invResDir * r;
     cTotal += blurFunction(uv, r, centerC, centerD, wTotal);
   }
 
   for (float r = 1; r <= KernelRadius; r++) {
-    vec2 uv = tc - invResDir * r;
+    vec2 uv = texCoords - invResDir * r;
     cTotal += blurFunction(uv, r, centerC, centerD, wTotal);
   }
 

@@ -30,7 +30,7 @@ const float EdgeThresholdMax = 0.125;
 const int Iterations = 12;
 const float SubpixelQuality = 0.75;
 
-in vec2 tc;
+in vec2 texCoords;
 out vec4 fragColor;
 
 uniform sampler2D tex;
@@ -50,16 +50,16 @@ float quality(float q) {
  * and the associated shader code.
  */
 void main() {
-  vec4 colorCenter = texture(tex, tc);
+  vec4 colorCenter = texture(tex, texCoords);
 
   // Luma at the current fragment
   float lumaCenter = rgb2luma(colorCenter.rgb);
 
   // Luma at the four direct neighbours of the current fragment
-  float lumaDown = rgb2luma(textureLodOffset(tex, tc, 0.0, ivec2( 0, -1)).rgb);
-  float lumaUp = rgb2luma(textureLodOffset(tex, tc, 0.0, ivec2( 0, 1)).rgb);
-  float lumaLeft = rgb2luma(textureLodOffset(tex, tc, 0.0, ivec2(-1, 0)).rgb);
-  float lumaRight = rgb2luma(textureLodOffset(tex, tc, 0.0, ivec2( 1, 0)).rgb);
+  float lumaDown = rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2( 0, -1)).rgb);
+  float lumaUp = rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2( 0, 1)).rgb);
+  float lumaLeft = rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2(-1, 0)).rgb);
+  float lumaRight = rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2( 1, 0)).rgb);
 
   // Find the maximum and minimum luma around the current fragment.
   float lumaMin = min(lumaCenter, min(min(lumaDown, lumaUp), min(lumaLeft, lumaRight)));
@@ -76,10 +76,11 @@ void main() {
   }
 
   // Query the 4 remaining corners lumas.
-  float lumaDownLeft = rgb2luma(textureLodOffset(tex, tc, 0.0, ivec2(-1, -1)).rgb);
-  float lumaUpRight = rgb2luma(textureLodOffset(tex, tc, 0.0, ivec2( 1, 1)).rgb);
-  float lumaUpLeft = rgb2luma(textureLodOffset(tex, tc, 0.0, ivec2(-1, 1)).rgb);
-  float lumaDownRight = rgb2luma(textureLodOffset(tex, tc, 0.0, ivec2( 1, -1)).rgb);
+  float lumaDownLeft = rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2(-1, -1)).rgb);
+  float lumaUpRight = rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2( 1, 1)).rgb);
+  float lumaUpLeft = rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2(-1, 1)).rgb);
+  float lumaDownRight =
+    rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2( 1, -1)).rgb);
 
   // Combine the four edges lumas (using intermediary variables for future computations
   // with the same values)
@@ -131,7 +132,7 @@ void main() {
   }
 
   // Shift UV in the correct direction by half a pixel
-  vec2 currentUv = tc;
+  vec2 currentUv = texCoords;
   if (isHorizontal) {
     currentUv.y += stepLength * 0.5;
   }
@@ -206,8 +207,8 @@ void main() {
   }
 
   // Compute the distances to each side edge of the edge (!)
-  float distance1 = isHorizontal ? (tc.x - uv1.x) : (tc.y - uv1.y);
-  float distance2 = isHorizontal ? (uv2.x - tc.x) : (uv2.y - tc.y);
+  float distance1 = isHorizontal ? (texCoords.x - uv1.x) : (texCoords.y - uv1.y);
+  float distance2 = isHorizontal ? (uv2.x - texCoords.x) : (uv2.y - texCoords.y);
 
   // In which direction is the side of the edge closer?
   bool isDirection1 = distance1 < distance2;
@@ -249,7 +250,7 @@ void main() {
   finalOffset = max(finalOffset, subPixelOffsetFinal);
 
   // Compute the final UV coordinates
-  vec2 finalUv = tc;
+  vec2 finalUv = texCoords;
   if (isHorizontal) {
     finalUv.y += finalOffset * stepLength;
   }

@@ -71,7 +71,7 @@ const float FltEps = 0.00000001f;
 #define MINMAX_4TAP_VARYING 0
 #endif
 
-in vec2 tc;
+in vec2 texCoords;
 layout(location = 0) out vec4 outBuff;
 layout(location = 1) out vec4 outFrag;
 
@@ -235,7 +235,7 @@ vec4 clipAabb(vec3 aabbMin, vec3 aabbMax, vec4 p, vec4 q) {
     r *= (rmin.z / r.z);
   }
 
-	return p + r;
+  return p + r;
 #endif // USE_OPTIMIZATIONS
 }
 
@@ -453,9 +453,9 @@ vec4 temporalReprojection(vec2 ssTxc, vec2 ssVel, float vsDist) {
 
 void main() {
 #if UNJITTER_REPROJECTION
-  vec2 uv = tc - jitterUv.xy;
+  vec2 uv = texCoords - jitterUv.xy;
 #else // UNJITTER_REPROJECTION
-  vec2 uv = tc;
+  vec2 uv = texCoords;
 #endif // UNJITTER_REPROJECTION
 
 #if USE_DILATION
