@@ -8,14 +8,31 @@
       "windows": [
         {
           "fullscreen": false,
+          "name": "GUI",
+          "tags": [ "GUI" ],
+          "draw3d": false,
+          "stereo": "none",
+          "pos": { "x": 50, "y": 50 },
+          "size": { "x": 1280, "y": 720 },
+          "res": { "x": 2048, "y": 2048 },
+          "viewports": [
+            {
+              "pos": { "x": 0.0, "y": 0.0 },
+              "size": { "x": 1.0, "y": 1.0 }
+            }
+          ]
+        },
+        {
+          "fullscreen": false,
           "name": "Spherical Projection",
           "stereo": "none",
+          "draw2d": false,
           "pos": { "x": 0, "y": 100 },
           "size": { "x": 1280, "y": 720 },
           "res": { "x": 2048, "y": 2048 },
           "viewports": [
             {
-              "mesh": "mesh/standard_16x9.data",
+              "mesh": "../mesh/standard_16x9.data",
               "pos": { "x": 0.0, "y": 0.0 },
               "size": { "x": 1.0, "y": 1.0 },
               "projection": {
@@ -39,9 +56,9 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "A single 1280x720 window with spherical projection rendering at 2048x2048 resolution.",
+    "description": "Two windows: Primary 1280x720 window with menu and text overlays minus rendering, and a secondary 1280x720 window at 2048x2048 resolution with spherical mirror projection rendering without the menu or text overlays.",
     "license": "MIT License",
-    "name": "Spherical Mirror",
+    "name": "Spherical Mirror + GUI",
     "version": "1.0"
   }
 }

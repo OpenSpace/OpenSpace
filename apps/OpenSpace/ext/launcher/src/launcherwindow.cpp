@@ -58,9 +58,9 @@ namespace {
 
     constexpr int LeftRuler = 40;
     constexpr int TopRuler = 80;
-    constexpr int ItemWidth = 260;
+    constexpr int ItemWidth = 300;
     constexpr int ItemHeight = ItemWidth / 4;
-    constexpr int SmallItemWidth = 100;
+    constexpr int SmallItemWidth = 115;
     constexpr int SmallItemHeight = SmallItemWidth / 4;
 
     constexpr int NotificationShelfHeight = FullScreenHeight - MainScreenHeight;
@@ -73,18 +73,18 @@ namespace {
         constexpr QRect ChooseLabel(LeftRuler + 10, TopRuler + 80, 151, 24);
         constexpr QRect ProfileBox(LeftRuler, TopRuler + 110, ItemWidth, ItemHeight);
         constexpr QRect NewProfileButton(
-            LeftRuler + 160, TopRuler + 180, SmallItemWidth, SmallItemHeight
+            LeftRuler + 185, TopRuler + 190, SmallItemWidth, SmallItemHeight
         );
         constexpr QRect EditProfileButton(
-            LeftRuler, TopRuler + 180, SmallItemWidth, SmallItemHeight
+            LeftRuler, TopRuler + 190, SmallItemWidth, SmallItemHeight
         );
         constexpr QRect OptionsLabel(LeftRuler + 10, TopRuler + 230, 151, 24);
         constexpr QRect WindowConfigBox(LeftRuler, TopRuler + 260, ItemWidth, ItemHeight);
         constexpr QRect NewWindowButton(
-            LeftRuler + 160, TopRuler + 330, SmallItemWidth, SmallItemHeight
+            LeftRuler + 185, TopRuler + 340, SmallItemWidth, SmallItemHeight
         );
         constexpr QRect EditWindowButton(
-            LeftRuler, TopRuler + 330, SmallItemWidth, SmallItemHeight
+            LeftRuler, TopRuler + 340, SmallItemWidth, SmallItemHeight
         );
         constexpr QRect StartButton(
             LeftRuler, TopRuler + 400, ItemWidth, ItemHeight

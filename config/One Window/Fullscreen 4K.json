@@ -13,14 +13,12 @@
       "port": 20401,
       "windows": [
         {
+          "fullscreen": true,
           "name": "OpenSpace",
-          "fullscreen": false,
-          "stereo": "none",
-          "pos": { "x": 50, "y": 50 },
-          "size": { "x": 1280, "y": 720 },
+          "pos": { "x": 0, "y": 0 },
+          "size": { "x": 3840, "y": 2160 },
           "viewports": [
             {
-              "tracked": true,
               "pos": { "x": 0.0, "y": 0.0 },
               "size": { "x": 1.0, "y": 1.0 },
               "projection": {
@@ -45,9 +43,9 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "A single 1280x720 window with planar projection rendering at 2560x1440 resolution.",
+    "description": "A single 3840x2160 fullscreen window with planar projection rendering. The display will automatically be set to 3840x2160, regardless of native resolution.",
     "license": "MIT License",
-    "name": "Single",
+    "name": "Fullscreen 4K",
     "version": "1.0"
   }
 }

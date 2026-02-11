@@ -13,36 +13,28 @@
       "port": 20401,
       "windows": [
         {
+          "fullscreen": false,
+          "border": true,
           "name": "GUI",
           "tags": [ "GUI" ],
-          "fullscreen": false,
           "draw3d": false,
-          "blitwindowid": 1,
           "stereo": "none",
-          "pos": { "x": 50, "y": 50 },
-          "size": { "x": 1280, "y": 720 },
+          "pos": { "x": 0, "y": 0 },
+          "size": { "x": 1920, "y": 1080 },
           "viewports": [
             {
               "pos": { "x": 0.0, "y": 0.0 },
-              "size": { "x": 1.0, "y": 1.0 },
-              "projection": {
-                "type": "PlanarProjection",
-                "fov": {
-                  "hfov": 80.0,
-                  "vfov": 50.534015846724
-                },
-                "orientation": { "yaw": 0.0, "pitch": 0.0, "roll": 0.0 }
-              }
+              "size": { "x": 1.0, "y": 1.0 }
             }
           ]
         },
         {
-          "name": "OpenSpace",
           "fullscreen": false,
+          "name": "OpenSpace",
           "draw2d": false,
           "stereo": "none",
-          "pos": { "x": 50, "y": 50 },
-          "size": { "x": 1280, "y": 720 },
+          "pos": { "x": 1920, "y": 0},
+          "size": { "x": 1920, "y": 1080 },
           "viewports": [
             {
               "tracked": true,
@@ -70,9 +62,9 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "Two windows: Primary 1280x720 window with planar projection rendering without menu or text overlays, and a secondary with menu and text overlays plus rendering from the primary.",
+    "description": "Two windows for a side-by-side dual-monitor configuration, where the right-side monitor can be considered a projector. Primary 1920x1080 window with menu and text overlays minus rendering, and a secondary 1920x1080 fullscreen window with planar projection rendering without menu or text overlays.",
     "license": "MIT License",
-    "name": "Planar + GUI",
+    "name": "Side Projector + GUI",
     "version": "1.0"
   }
 }

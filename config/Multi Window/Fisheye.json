@@ -7,9 +7,29 @@
       "port": 20401,
       "windows": [
         {
+          "name": "GUI",
+          "tags": [ "GUI" ],
+          "fullscreen": false,
+          "draw3d": false,
+          "stereo": "none",
+          "blitwindowid": 1,
+          "id": 0,
+          "pos": { "x": 50, "y": 50 },
+          "size": { "x": 1024, "y": 1024 },
+          "viewports": [
+            {
+              "pos": { "x": 0.0, "y": 0.0 },
+              "size": { "x": 1.0, "y": 1.0 }
+            }
+          ]
+        },
+        {
           "name": "OpenSpace",
           "fullscreen": false,
+          "draw2d": false,
           "stereo": "none",
+          "id": 1,
+          "pos": { "x": 200.0, "y": 50.0 },
           "size": { "x": 1024, "y": 1024 },
           "viewports": [
             {
@@ -19,7 +39,7 @@
                 "type": "FisheyeProjection",
                 "fov": 180.0,
                 "quality": "1k",
-                "tilt": 90.0,
+                "tilt": 0.0,
                 "background": { "r": 0.1, "g": 0.1, "b": 0.1, "a": 1.0 }
               }
             }
@@ -36,9 +56,10 @@
   ],
   "meta": {
     "author": "OpenSpace Team",
-    "description": "A single 1024x1024 window with fisheye projection rendering.",
+    "description": "Two windows: Primary 1024x1024 window with menu and text overlays minus rendering, and a secondary 1024x1024 window with fisheye projection rendering without menu and text overlays.",
     "license": "MIT License",
-    "name": "Fisheye",
+    "name": "Fisheye + GUI",
     "version": "1.0"
   }
+
 }
