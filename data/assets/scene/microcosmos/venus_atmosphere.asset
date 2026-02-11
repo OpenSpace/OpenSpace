@@ -66,6 +66,7 @@ local VenusMolecules10km = {
     CollisionRadius = 2.0,
     AnimationSpeed = 100
   },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
   GUI = {
     Name = "Venus 10km",
     Path = "/Microcosmos/Atmosphere",
@@ -107,6 +108,7 @@ local VenusMolecules50km = {
     CollisionRadius = 2.0,
     AnimationSpeed = 100
   },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
   GUI = {
     Name = "Venus 50km",
     Path = "/Microcosmos/Atmosphere",
@@ -158,6 +160,7 @@ local VenusMolecules50kmCloud = {
     CollisionRadius = 2.0,
     AnimationSpeed = 100
   },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
   GUI = {
     Name = "Venus 50km Cloud",
     Path = "/Microcosmos/Atmosphere",

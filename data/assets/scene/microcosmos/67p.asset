@@ -111,6 +111,7 @@ local MoleculeRosetta = {
       Position = { 10000.0, 0.0, 0.0 }
     }
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Molecule Rosetta",
     Path = "/Microcosmos/Molecules/Rosetta",
@@ -131,6 +132,7 @@ local MoleculeAcetaldehyde = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeAcetaldehyde .. "acetaldehyde.arc"
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Acetaldehyde",
     Path = "/Microcosmos/Molecules/Rosetta"
@@ -150,6 +152,7 @@ local MoleculeAceticAcid = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeAceticacid .. "acetic-acid.arc"
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Acetic Acid",
     Path = "/Microcosmos/Molecules/Rosetta"
@@ -169,6 +172,7 @@ local MoleculeButanal = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeButanal .. "butanal.arc"
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Butanal",
     Path = "/Microcosmos/Molecules/Rosetta"
@@ -188,6 +192,7 @@ local MoleculeCo2 = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeCO2 .. "co2.arc"
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Co2",
     Path = "/Microcosmos/Molecules/Rosetta"
@@ -207,6 +212,7 @@ local MoleculeEg = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeEG .. "eg.arc"
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Eg",
     Path = "/Microcosmos/Molecules/Rosetta"
@@ -226,6 +232,7 @@ local MoleculeEthanol = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeEthanol .. "ethanol.arc"
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Ethanol",
     Path = "/Microcosmos/Molecules/Rosetta"
@@ -245,6 +252,7 @@ local MoleculeFormaldehyde = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeFormaldehyde .. "formaldehyde.arc"
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Formaldehyde",
     Path = "/Microcosmos/Molecules/Rosetta"
@@ -264,6 +272,7 @@ local MoleculeFormic = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeFormic .. "formic.arc"
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Formic",
     Path = "/Microcosmos/Molecules/Rosetta"
@@ -283,6 +292,7 @@ local MoleculeH20 = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeH2O .. "h2o.arc"
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "H20",
     Path = "/Microcosmos/Molecules/Rosetta"
@@ -302,6 +312,7 @@ local MoleculeMethanol = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeMethanol .. "methanol.arc"
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Methanol",
     Path = "/Microcosmos/Molecules/Rosetta"
@@ -321,6 +332,7 @@ local MoleculeMethylAcetate = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeMethylAcetate .. "methyl-acetate.arc"
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Methyl Acetate",
     Path = "/Microcosmos/Molecules/Rosetta"
@@ -340,6 +352,7 @@ local MoleculeN2 = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeN2 .. "n2.arc"
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "N2",
     Path = "/Microcosmos/Molecules/Rosetta"
@@ -359,6 +372,7 @@ local MoleculeO2 = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeO2 .. "o2.arc"
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "O2",
     Path = "/Microcosmos/Molecules/Rosetta"
@@ -378,6 +392,7 @@ local MoleculePropanal = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculePropanal .. "propanal.arc"
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Propanal",
     Path = "/Microcosmos/Molecules/Rosetta"

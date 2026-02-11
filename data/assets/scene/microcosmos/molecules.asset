@@ -70,6 +70,7 @@ local DefaultAnimSpeed = 100
 
 local MoleculeMisc = {
   Identifier = "MoleculeMisc",
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Molecule Museum",
     Path = "/Microcosmos/Molecules/Misc",
@@ -92,6 +93,7 @@ local MoleculeO2 = {
     TrajectoryFile = moleculeO2 .. "o2.arc",
     AnimationSpeed = 5.0
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Dioxygen (O2)",
     Path = "/Microcosmos/Molecules/Misc"
@@ -111,6 +113,7 @@ local MoleculeH2O = {
     Type = "RenderableMolecule",
     MoleculeFile = moleculeH2O .. "h2o.arc"
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Water (H2O)",
     Path = "/Microcosmos/Molecules/Misc"
@@ -135,6 +138,7 @@ local MoleculeCO2 = {
       }
     }
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Carbon Dioxyde (CO2)",
     Path = "/Microcosmos/Molecules/Misc"
@@ -159,6 +163,7 @@ local MoleculeC60 = {
       }
     }
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "C60",
     Path = "/Microcosmos/Molecules/Misc"
@@ -180,6 +185,7 @@ local MoleculeAlanin = {
     TrajectoryFile = molecule1ala500 .. "1ALA-500.pdb",
     AnimationSpeed = 5.0
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Alanin",
     Path = "/Microcosmos/Molecules/Misc"
@@ -204,6 +210,7 @@ local MoleculeDNA = {
       }
     }
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "DNA",
     Path = "/Microcosmos/Molecules/Misc"
@@ -225,6 +232,7 @@ local MoleculeIce = {
     TrajectoryFile = iceMelting .. "ice.xtc",
     AnimationSpeed = 10.0
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Ice Melting",
     Path = "/Microcosmos/Molecules/Misc"
@@ -252,6 +260,7 @@ local MoleculeAspirin = {
       }
     }
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Aspirin",
     Path = "/Microcosmos/Molecules/Misc"
@@ -273,6 +282,7 @@ local MoleculeAmyloidMarker = {
     TrajectoryFile = amyloid .. "60pft_in_tau-traj-96-106ns.xtc",
     AnimationSpeed = 0.1
   },
+  Tag = { "molecule_visualization" },
   GUI = {
     Name = "Amyloid Marker",
     Path = "/Microcosmos/Molecules/Misc"

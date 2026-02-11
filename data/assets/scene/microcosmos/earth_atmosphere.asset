@@ -67,6 +67,7 @@ local EarthMoleculesTroposphere = {
     CollisionRadius = 2.0,
     AnimationSpeed = 100
   },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
   GUI = {
     Name = "Earth Troposphere",
     Path = "/Microcosmos/Atmosphere",
@@ -109,6 +110,7 @@ local EarthMoleculesThermosphere = {
     CollisionRadius = 4.0,
     AnimationSpeed = 100
   },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
   GUI = {
     Name = "Earth Thermosphere",
     Path = "/Microcosmos/Atmosphere",

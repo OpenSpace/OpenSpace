@@ -71,6 +71,7 @@ local TitanMolecules1km = {
     CollisionRadius = 2.0,
     AnimationSpeed = 100
   },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
   GUI = {
     Name = "Titan 1km",
     Path = "/Microcosmos/Atmosphere",
@@ -117,6 +118,7 @@ local TitanMoleculesMethaneCloud = {
     CollisionRadius = 2.0,
     AnimationSpeed = 100
   },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
   GUI = {
     Name = "Titan Methane Cloud 20km",
     Path = "/Microcosmos/Atmosphere",
@@ -169,6 +171,7 @@ local TitanMoleculesEthaneCloud = {
     CollisionRadius = 2.0,
     AnimationSpeed = 100
   },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
   GUI = {
     Name = "Titan Ethane Cloud 45km",
     Path = "/Microcosmos/Atmosphere",
