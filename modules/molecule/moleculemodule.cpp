@@ -56,69 +56,41 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 )";
 
     constexpr openspace::properties::Property::PropertyInfo SSAOEnabledInfo = {
-        "SSAOEnabled",
-        "Enable SSAO",
-        "Enable SSAO"
+        "Enabled",
+        "Enabled",
+        "Determines whether this SSAO pass should be enabled or not."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SSAOIntensityInfo = {
-        "SSAOIntensity",
-        "SSAO Intensity",
-        "SSAO Intensity"
+        "Intensity",
+        "Intensity",
+        "Controls the strength of the ambient occlusion effect. Higher values darken "
+        "occluded areas more strongly."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SSAORadiusInfo = {
-        "SSAORadius",
-        "SSAO Radius",
-        "SSAO Radius"
+        "Radius",
+        "Radius",
+        "Sets the sampling radius for occlusion. Larger values produce broader, smoother "
+        "shading, while smaller values create tighter shadows."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SSAOBiasInfo = {
-        "SSAOHorizonBias",
-        "SSAO Horizon Bias",
-        "SSAO Horizon Bias"
+        "HorizonBias",
+        "Horizon Bias",
+        "" // @TODO Missing documentation
     };
 
     constexpr openspace::properties::Property::PropertyInfo SSAONormalBiasInfo = {
-        "SSAONormalBias",
-        "SSAO Normal Bias",
-        "SSAO Normal Bias"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SSAO2EnabledInfo = {
-        "SSAO2Enabled",
-        "Enable SSAO",
-        "Enable SSAO"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SSAO2IntensityInfo = {
-        "SSAO2Intensity",
-        "SSAO Intensity",
-        "SSAO Intensity"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SSAO2RadiusInfo = {
-        "SSAO2Radius",
-        "SSAO Radius",
-        "SSAO Radius"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SSAO2BiasInfo = {
-        "SSAO2HorizonBias",
-        "SSAO Horizon Bias",
-        "SSAO Horizon Bias"
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo SSAO2NormalBiasInfo = {
-        "SSAO2NormalBias",
-        "SSAO Normal Bias",
-        "SSAO Normal Bias"
+        "NormalBias",
+        "Normal Bias",
+        "" // @TODO Missing documentation
     };
 
     constexpr openspace::properties::Property::PropertyInfo ExposureInfo = {
         "Exposure",
         "Exposure",
-        "Exposure, Controls the Exposure setting for the tonemap"
+        "Controls the Exposure setting for the tonemap."
     };
 } // namespace
 
@@ -142,8 +114,8 @@ MoleculeModule::SSAO::SSAO(properties::PropertyOwner::PropertyOwnerInfo info)
 
 MoleculeModule::MoleculeModule()
     : OpenSpaceModule(Name)
-    , _ssao({ "SSAO", "SSAO", "First SSAO Pass" })
-    , _ssao2({ "SSAO2", "SSAO 2", "Second SSAO Pass" })
+    , _ssao({ "SSAO", "SSAO", "First SSAO pass" })
+    , _ssao2({ "SSAO2", "SSAO 2", "Second SSAO pass" })
     , _exposure(ExposureInfo, 1.f, 0.1f, 10.f)
     , _threadPool(std::max(1U, std::thread::hardware_concurrency() - 1))
 {

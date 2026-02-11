@@ -59,7 +59,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RepresentationInfo = {
         "Representation",
-        "Representation Type",
+        "Representation type",
         "The visual representation type to use for the molecule."
     };
 
@@ -71,43 +71,43 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo RepScaleInfo = {
         "RepScale",
-        "Representation Scale",
+        "Representation scale",
         "Thickness of the atoms when using the Space Fill or Licorice representations."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
         "AnimationSpeed",
-        "Animation Speed",
+        "Animation speed",
         "Playback speed of the animation (in frames per second)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SimulationSpeedInfo = {
         "SimulationSpeed",
-        "Simulation Speed",
+        "Simulation speed",
         "Adjust the speed of the simulation (seconds per second)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo LinearVelocityInfo = {
         "LinearVelocity",
-        "Linear Velocity",
+        "Linear velocity",
         "Average linear velocity at the start of the simulation (m/s)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AngularVelocityInfo = {
         "AngularVelocity",
-        "Angular Velocity",
+        "Angular velocity",
         "Average angular velocity at the start of the simulation (radians/s)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SimulationBoxInfo = {
         "SimulationBox",
-        "Simulation Box",
+        "Simulation box",
         "Size of the periodic simulation box."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CollisionRadiusInfo = {
         "CollisionRadius",
-        "Collision Radius",
+        "Collision radius",
         "Radius of the collision sphere around molecules."
     };
 
@@ -119,19 +119,19 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo CircleColorInfo = {
         "CircleColor",
-        "Circle Color",
+        "Circle color",
         "Color of the circle outlining the simulation."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CircleWidthInfo = {
         "CircleWidth",
-        "Circle Width",
+        "Circle width",
         "Width of the circle outlining the simulation."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CircleFalloffInfo = {
         "CircleFalloff",
-        "Circle Falloff",
+        "Circle falloff",
         "Falloff exponent of the circle outlining the simulation."
     };
 

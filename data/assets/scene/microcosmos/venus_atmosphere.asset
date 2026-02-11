@@ -71,7 +71,7 @@ local VenusMolecules10km = {
     Name = "Venus 10km",
     Path = "/Microcosmos/Atmosphere",
     Description = [[Visualizes Venus' atmosphere at an altitude of approximately 10km
-      above the surface. The two major consitutents of the atmosphere (CO2 and N2) are
+      above the surface. The two major constituents of the atmosphere (CO2 and N2) are
       shown in approximate relative density for this altitude.]]
   }
 }
@@ -113,7 +113,7 @@ local VenusMolecules50km = {
     Name = "Venus 50km",
     Path = "/Microcosmos/Atmosphere",
     Description = [[Visualizes Venus' atmosphere at an altitude of approximately 50km
-      above the surface. The two major consitutents of the atmosphere (CO2 and N2) are
+      above the surface. The two major constituents of the atmosphere (CO2 and N2) are
       shown in approximate relative density for this altitude.]]
   }
 }
@@ -166,8 +166,8 @@ local VenusMolecules50kmCloud = {
     Path = "/Microcosmos/Atmosphere",
     Description = [[Visualizes Venus' atmosphere at an altitude of approximately 50km
       above the surface. At this altitude, the atmosphere not only consists of the primary
-      onstituents (CO2 and N2), but also contains Sulfuric Acid (H2SO4) and water. These
-      four moleculaes are shown in their approximate relative density found at this
+      constituents (CO2 and N2), but also contains Sulfuric Acid (H2SO4) and water. These
+      four molecules are shown in their approximate relative density found at this
       altitude above the Venusian surface.]]
   }
 }

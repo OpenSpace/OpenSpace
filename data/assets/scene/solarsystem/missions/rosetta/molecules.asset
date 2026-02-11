@@ -100,8 +100,6 @@ local moleculePropanal = asset.resource({
 })
 
 
-local DefaultAnimSpeed = 100
-
 local MoleculeRosetta = {
   Identifier = "MoleculeRosetta",
   Parent = comet67p.Barycenter.Identifier,

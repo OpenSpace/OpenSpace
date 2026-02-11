@@ -76,7 +76,7 @@ local TitanMolecules1km = {
     Name = "Titan 1km",
     Path = "/Microcosmos/Atmosphere",
     Description = [[Visualizes Titan's atmosphere at a height of approximately 1km above
-      the surface. The three major consitutents of the atmosphere (N2, Methane, and
+      the surface. The three major constituents of the atmosphere (N2, Methane, and
       Hydrogen) are shown in approximate relative density.]]
   }
 }
@@ -123,7 +123,7 @@ local TitanMoleculesMethaneCloud = {
     Name = "Titan Methane Cloud 20km",
     Path = "/Microcosmos/Atmosphere",
     Description = [[Visualizes a simulated cloud of methane in Titan's atmosphere at a
-      height of approximately 20km above the surface. The three major consitutents of the
+      height of approximately 20km above the surface. The three major constituents of the
       atmosphere (N2, Methane, and Hydrogen) are shown in approximate relative density as
       they would be found in such a cloud.]]
   }
@@ -176,7 +176,7 @@ local TitanMoleculesEthaneCloud = {
     Name = "Titan Ethane Cloud 45km",
     Path = "/Microcosmos/Atmosphere",
     Description = [[Visualizes a simulated cloud of ethane in Titan's atmosphere at a
-      height of approximately 45km above the surface. The four major consitutents of the
+      height of approximately 45km above the surface. The four major constituents of the
       atmosphere (N2, Methane, Ethane, and Hydrogen) are shown in approximate relative
       density as they would be found in such an ethane cloud.]]
   }

@@ -66,8 +66,6 @@ local amyloid = asset.resource({
 })
 
 
-local DefaultAnimSpeed = 100
-
 local MoleculeMisc = {
   Identifier = "MoleculeMisc",
   Tag = { "molecule_visualization" },

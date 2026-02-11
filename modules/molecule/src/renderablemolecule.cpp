@@ -88,31 +88,31 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo MoleculeFileInfo = {
         "MoleculeFile",
-        "Molecule File",
+        "Molecule file",
         "The path to the file from which the molecular structure is read."
     };
 
     constexpr openspace::properties::Property::PropertyInfo TrajectoryFileInfo = {
         "TrajectoryFile",
-        "Trajectory File",
-        "The path to the file from which the trajectory informatoin is read."
+        "Trajectory file",
+        "The path to the file from which the trajectory information is read."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CoarseGrainedInfo = {
         "CoarseGrained",
-        "Coarse Grained",
+        "Coarse grained",
         "Enable if the dataset should be interpreted as coarse grained."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyPbcOnLoadInfo = {
         "ApplyPbcOnLoad",
-        "Apply PBC On Load",
+        "Apply PBC on load",
         "Applies Periodic Boundary Constraints upon loading trajectory frames."
     };
 
     constexpr openspace::properties::Property::PropertyInfo ApplyPbcPerFrameInfo = {
         "ApplyPbcPerFrame",
-        "Apply PBC Per Frame",
+        "Apply PBC per frame",
         "Applies Periodic Boundary Constraints for each interpolated frame (can be "
         "CPU-intensive)."
     };
@@ -137,7 +137,7 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UniformColorInfo = {
         "UniformColor",
-        "Uniform Color",
+        "Uniform color",
         "The uniform color to apply for the representation if that color mode is "
         "selected."
     };
@@ -156,20 +156,20 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo AnimationBaseScaleInfo = {
         "AnimationBaseScale",
-        "Animation Base Scale",
+        "Animation base scale",
         "Base scale for the animation. Tune this to sync up its animation with other "
         "trajectories."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
         "AnimationSpeed",
-        "Animation Speed",
+        "Animation speed",
         "Playback speed of the animation (in frames per second)."
     };
 
     constexpr openspace::properties::Property::PropertyInfo AnimationRepeatModeInfo = {
         "AnimationRepeatMode",
-        "Animation Repeat Mode",
+        "Animation repeat mode",
         "Controls how the animation should be repeated when the end of the animation is "
         "reached."
     };
