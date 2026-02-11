@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,18 +34,11 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <chrono>
 #include <filesystem>
-
-namespace ghoul { class Dictionary; }
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+#include <memory>
 
 namespace openspace {
 
 class AtlasManager;
-class BrickSelector;
 class ErrorHistogramManager;
 class HistogramManager;
 class LocalErrorHistogramManager;
@@ -75,14 +68,8 @@ public:
 
     bool isReady() const override;
 
-    virtual void update(const UpdateData& data) override;
-    virtual void render(const RenderData& data, RendererTasks& tasks) override;
-
-    //virtual void preResolve(ghoul::opengl::ProgramObject* program) override;
-    //virtual std::string getHeaderPath() override;
-    //virtual std::string getHelperPath() override;
-    //virtual std::vector<ghoul::opengl::Texture*> getTextures() override;
-    //virtual std::vector<unsigned int> getBuffers() override;
+    void update(const UpdateData& data) override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
 
 private:
     properties::BoolProperty _useGlobalTime;
@@ -103,7 +90,6 @@ private:
     double _time;
     double _startTime;
     double _endTime;
-
 
     // Stats timers
     std::string _statsFileName;

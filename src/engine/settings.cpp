@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,15 @@
 
 #include <openspace/engine/settings.h>
 
-#include <openspace/engine/configuration.h>
+#include <openspace/json.h>
+#include <fstream>
 #include <sstream>
 
 namespace openspace {
 
 namespace {
 template <typename T>
-std::optional<T> get_to(nlohmann::json& obj, const std::string& key)
-{
+std::optional<T> get_to(nlohmann::json& obj, const std::string& key) {
     auto it = obj.find(key);
     if (it != obj.end()) {
         return it->get<T>();
@@ -44,7 +44,7 @@ std::optional<T> get_to(nlohmann::json& obj, const std::string& key)
 } // namespace
 
 namespace version1 {
-    Settings parseSettings(nlohmann::json json) {
+    static Settings parseSettings(nlohmann::json json) {
         ghoul_assert(json.at("version").get<int>() == 1, "Wrong value");
 
         Settings settings;

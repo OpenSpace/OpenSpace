@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,12 +22,16 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <openspace/documentation/documentation.h>
+#include <ghoul/glm.h>
 #include <ghoul/lua/lua_helper.h>
+#include <variant>
+#include <utility>
 
 namespace {
 
-// Checks if the passed identifier corresponds to an action.
+/**
+ * Checks if the passed identifier corresponds to an action.
+ */
 [[codegen::luawrap]] bool hasAction(std::string identifier) {
     if (identifier.empty()) {
         throw ghoul::lua::LuaError("Identifier must not be empty");
@@ -73,20 +77,20 @@ namespace {
 }
 
 struct [[codegen::Dictionary(Action)]] Action {
-    // The identifier under which the action is registered
+    /// The identifier under which the action is registered
     std::string identifier;
 
-    // The Lua script that is to be executed when the action is triggered
+    /// The Lua script that is to be executed when the action is triggered
     std::string command;
 
-    // The user-facing name of the action
+    /// The user-facing name of the action
     std::optional<std::string> name;
 
-    // A documentation that explains what the action does
+    /// A documentation that explains what the action does
     std::optional<std::string> documentation;
 
-    // The path in the GUI under which the action is shown to the user. If the value is
-    // not provided, the default value is /
+    /// The path in the GUI under which the action is shown to the user. If the value is
+    /// not provided, the default value is /
     std::optional<std::string> guiPath;
 
     /// This parameter, if specified, will be used as a hint to any potential user
@@ -99,10 +103,11 @@ struct [[codegen::Dictionary(Action)]] Action {
     /// group similar Actions together
     std::optional<glm::vec4> textColor [[codegen::color()]];
 
-    // Determines whether the provided command will be executed locally or will be sent to
-    // connected computers in a cluster or parallel connection environment
+    /// Determines whether the provided command will be executed locally or will be sent
+    /// to connected computers in a cluster or parallel connection environment
     std::optional<bool> isLocal;
 };
+
 /**
  * Registers a new action. The first argument is the identifier which cannot have been
  * used to register a previous action before, the second argument is the Lua command that
@@ -204,7 +209,9 @@ struct [[codegen::Dictionary(Action)]] Action {
     return res;
 }
 
-// Triggers the action given by the specified identifier.
+/**
+ * Triggers the action given by the specified identifier.
+ */
 [[codegen::luawrap]] void triggerAction(std::string id,
                                         ghoul::Dictionary arg = ghoul::Dictionary())
 {

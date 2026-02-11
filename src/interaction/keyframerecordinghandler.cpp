@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,9 +24,21 @@
 
 #include <openspace/interaction/keyframerecordinghandler.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/navigation/keyframenavigator.h>
+#include <openspace/network/messagestructures.h>
 #include <openspace/network/messagestructureshelper.h>
+#include <openspace/properties/propertyowner.h>
+#include <openspace/scripting/lualibrary.h>
 #include <openspace/util/timemanager.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <algorithm>
+#include <optional>
+#include <utility>
+#include <variant>
 
 #include "keyframerecordinghandler_lua.inl"
 

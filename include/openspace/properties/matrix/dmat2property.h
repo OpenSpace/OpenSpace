@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -34,7 +34,8 @@ namespace openspace::properties {
 
 class DMat2Property : public NumericalProperty<glm::dmat2x2> {
 public:
-    DMat2Property(Property::PropertyInfo info, glm::dmat2x2 value = glm::dmat2x2(0.0),
+    explicit DMat2Property(Property::PropertyInfo info,
+        glm::dmat2x2 value = glm::dmat2x2(0.0),
         glm::dmat2x2 minValue =
             ghoul::createFillMat2x2<double>(std::numeric_limits<double>::lowest()),
         glm::dmat2x2 maxValue =

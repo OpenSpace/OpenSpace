@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,12 +27,12 @@
 
 namespace openspace {
 
-template<typename P>
+template <typename P>
 ConcurrentJobManager<P>::ConcurrentJobManager(ThreadPool pool)
     : threadPool(pool)
 {}
 
-template<typename P>
+template <typename P>
 void ConcurrentJobManager<P>::enqueueJob(std::shared_ptr<Job<P>> job) {
     threadPool.enqueue([this, job]() {
         job->execute();
@@ -41,12 +41,12 @@ void ConcurrentJobManager<P>::enqueueJob(std::shared_ptr<Job<P>> job) {
     });
 }
 
-template<typename P>
+template <typename P>
 void ConcurrentJobManager<P>::clearEnqueuedJobs() {
     threadPool.clearTasks();
 }
 
-template<typename P>
+template <typename P>
 std::shared_ptr<Job<P>> ConcurrentJobManager<P>::popFinishedJob() {
     ghoul_assert(!_finishedJobs.empty(), "There is no finished job to pop");
 
@@ -54,7 +54,7 @@ std::shared_ptr<Job<P>> ConcurrentJobManager<P>::popFinishedJob() {
     return _finishedJobs.pop();
 }
 
-template<typename P>
+template <typename P>
 size_t ConcurrentJobManager<P>::numFinishedJobs() const {
     return _finishedJobs.size();
 }

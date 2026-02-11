@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,7 @@
 #define __OPENSPACE_CORE___USHORTPROPERTY___H__
 
 #include <openspace/properties/numericalproperty.h>
+
 #include <limits>
 
 namespace openspace::properties {
@@ -36,7 +37,7 @@ namespace openspace::properties {
  */
 class UShortProperty : public NumericalProperty<unsigned short> {
 public:
-    UShortProperty(Property::PropertyInfo info, unsigned short value = 0,
+    explicit UShortProperty(Property::PropertyInfo info, unsigned short value = 0,
         unsigned short minValue = std::numeric_limits<unsigned short>::lowest(),
         unsigned short maxValue = std::numeric_limits<unsigned short>::max(),
         unsigned short stepValue = 1);

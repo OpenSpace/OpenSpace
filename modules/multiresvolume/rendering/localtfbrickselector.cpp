@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,11 +24,14 @@
 
 #include <modules/multiresvolume/rendering/localtfbrickselector.h>
 
-#include <modules/multiresvolume/rendering/tsp.h>
+#include <modules/multiresvolume/rendering/brickcover.h>
 #include <modules/multiresvolume/rendering/localerrorhistogrammanager.h>
+#include <modules/multiresvolume/rendering/tsp.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/util/histogram.h>
 #include <ghoul/misc/assert.h>
 #include <algorithm>
+#include <cmath>
 
 namespace {
     bool compareSplitPoints(const openspace::BrickSelection& a,

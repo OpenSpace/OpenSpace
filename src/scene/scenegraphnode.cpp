@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,6 +27,7 @@
 #include <modules/base/scale/staticscale.h>
 #include <modules/base/rotation/staticrotation.h>
 #include <modules/base/translation/statictranslation.h>
+#include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
@@ -34,13 +35,25 @@
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/rendering/renderengine.h>
+#include <openspace/scene/rotation.h>
+#include <openspace/scene/scale.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/timeframe.h>
+#include <openspace/scene/translation.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/opengl/ghoul_gl.h>
+#include <ghoul/opengl/programobject.h>
+#include <algorithm>
+#include <cmath>
+#include <memory>
+#include <utility>
+#include <variant>
 
 namespace {
     constexpr std::string_view _loggerCat = "SceneGraphNode";
@@ -831,10 +844,6 @@ void SceneGraphNode::update(const UpdateData& data) {
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
-#ifdef TRACY_ENABLE
-    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
-    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
-#endif // TRACY_ENABLE
 
     if (_state != State::GLInitialized ||
         !(_renderable && _renderable->isVisible() && _renderable->isReady()) ||
@@ -842,6 +851,11 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     {
         return;
     }
+
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
 
     RenderData newData = {
         .camera = data.camera,

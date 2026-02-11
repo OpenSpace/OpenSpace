@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,9 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <ghoul/lua/lua_helper.h>
-
+#include <openspace/documentation/documentation.h>
+#include <openspace/engine/openspaceengine.h>
+#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/util/geodetic.h>
+#include <openspace/util/time.h>
+#include <ghoul/lua/lua_helper.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/dictionaryluaformatter.h>
+#include <ghoul/misc/stringconversion.h>
+#include <algorithm>
+#include <numeric>
+#include <tuple>
+#include <variant>
+#include <string>
+#include <optional>
+#include <utility>
+#include <vector>
 
 namespace {
 
@@ -535,8 +551,8 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  *
  * \param horizontal The value to add in the x-direction (a positive value rotates to the
  *                   left and a negative value to the right)
- * \param vertical The value to add in the y-direction (a positive value rotates the camera
- *                 upwards and a negative value downwards)
+ * \param vertical The value to add in the y-direction (a positive value rotates the
+ *                 camera upwards and a negative value downwards)
  */
 [[codegen::luawrap]] void addLocalRotation(double horizontal, double vertical) {
     using namespace openspace;
@@ -604,7 +620,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
     try {
         global::navigationHandler->orbitalNavigator().triggerIdleBehavior(choice);
     }
-    catch (ghoul::RuntimeError& e) {
+    catch (const ghoul::RuntimeError& e) {
         throw ghoul::lua::LuaError(e.message);
     }
 }
@@ -627,8 +643,8 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 [[codegen::luawrap]] double distanceToFocus() {
     using namespace openspace;
 
-    const SceneGraphNode * focus = global::navigationHandler->anchorNode();
-    Camera * camera = global::navigationHandler->camera();
+    const SceneGraphNode* focus = global::navigationHandler->anchorNode();
+    Camera* camera = global::navigationHandler->camera();
 
     return glm::distance(camera->positionVec3(), focus->worldPosition());
 }

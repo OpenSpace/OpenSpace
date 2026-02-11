@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -30,11 +30,17 @@
 
 #include <modules/globebrowsing/src/basictypes.h>
 #include <modules/globebrowsing/src/layeradjustment.h>
+#include <modules/globebrowsing/src/layergroupid.h>
 #include <modules/globebrowsing/src/layerrendersettings.h>
-#include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 #include <openspace/properties/misc/optionproperty.h>
+#include <openspace/properties/misc/triggerproperty.h>
+#include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <functional>
+#include <memory>
 
+namespace ghoul { class Dictionary; }
 namespace openspace::documentation { struct Documentation; }
 
 namespace openspace::globebrowsing {

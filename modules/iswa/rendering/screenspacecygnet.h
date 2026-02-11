@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,19 +27,16 @@
 
 #include <modules/base/rendering/screenspaceimageonline.h>
 
-#include <openspace/documentation/documentation.h>
 #include <chrono>
 
 namespace openspace {
-
-namespace documentation { struct Documentation; }
 
 class ScreenSpaceCygnet : public ScreenSpaceImageOnline {
 public:
     explicit ScreenSpaceCygnet(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceCygnet() = default;
 
-    virtual void update() override;
+    void update() override;
 
     static documentation::Documentation Documentation();
 

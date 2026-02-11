@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -74,14 +74,14 @@ glm::dvec3 geoPositionFromCamera();
 /**
  * Returns the camera view direction relative to the current anchor node as geodetic
  * coordinates. The returned value contains the latitude and longitude in degrees in the
- * x, and y-coordinate respectively. 
+ * x, and y-coordinate respectively.
  */
 glm::dvec3 geoViewFromCamera();
 
 /**
  * Return the coordinates where the sun is at its zenith at the current anchor at the
  * current time. The returned value contains the latitude and longitude in degrees.
- */ 
+ */
 glm::dvec2 subSolarCoordinates();
 
 /**

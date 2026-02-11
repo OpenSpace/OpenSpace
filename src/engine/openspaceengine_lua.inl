@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,42 +24,39 @@
 
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/downloadmanager.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/windowdelegate.h>
 #include <openspace/openspace.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/json_helper.h>
 #include <ghoul/filesystem/cachemanager.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <ghoul/glm.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/io/texture/texturewriter.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/base64.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
-#include <filesystem>
+#include <array>
+#include <iterator>
 
 namespace {
 
 /**
  * Toggles the shutdown mode that will close the application after the countdown timer
- * is reached
+ * is reached.
  */
 [[codegen::luawrap]] void toggleShutdown() {
     openspace::global::openSpaceEngine->toggleShutdownMode();
 }
 
 /**
- * Writes out documentation files
+ * Writes out documentation files.
  */
 [[codegen::luawrap]] void writeDocumentation() {
     DocEng.writeJavascriptDocumentation();
 }
 
-// Sets the folder used for storing screenshots or session recording frames
+/**
+ * Sets the folder used for storing screenshots or session recording frames.
+ */
 [[codegen::luawrap]] void setScreenshotFolder(std::string newFolder) {
     using namespace openspace;
 
@@ -77,7 +74,9 @@ namespace {
     global::windowDelegate->setScreenshotFolder(std::move(folder));
 }
 
-// Adds a Tag to a SceneGraphNode identified by the provided uri
+/**
+ * Adds a Tag to a SceneGraphNode identified by the provided uri.
+ */
 [[codegen::luawrap]] void addTag(std::string uri, std::string tag) {
     using namespace openspace;
 
@@ -89,7 +88,9 @@ namespace {
     node->addTag(std::move(tag));
 }
 
-// Removes a tag (second argument) from a scene graph node (first argument)
+/**
+ * Removes a tag(second argument) from a scene graph node (first argument).
+ */
 [[codegen::luawrap]] void removeTag(std::string uri, std::string tag) {
     using namespace openspace;
 
@@ -101,7 +102,9 @@ namespace {
     node->removeTag(tag);
 }
 
-// Downloads a file from Lua interpreter
+/**
+ * Downloads a file from Lua interpreter.
+ */
 [[codegen::luawrap]] void downloadFile(std::string url, std::string savePath,
                                        bool waitForCompletion = false,
                                        bool overrideExistingFile = true)
@@ -198,6 +201,16 @@ namespace {
     }
 
     return fileName;
+}
+
+/**
+ * This function returns the size in pixels of an image file.
+ *
+ * \param path The location of the image file for which the pixel size will be returned
+ * \return The size of the image in pixels
+ */
+[[codegen::luawrap]] glm::ivec2 imageSize(std::filesystem::path path) {
+    return ghoul::io::TextureReader::ref().imageSize(path);
 }
 
 /**

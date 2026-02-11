@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,8 +26,8 @@
 
 #include <modules/server/include/connection.h>
 #include <openspace/engine/globals.h>
-#include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "SessionRecordingTopic";
@@ -41,8 +41,6 @@ namespace {
     constexpr const char* StateKey = "state";
 } // namespace
 
-using nlohmann::json;
-
 namespace openspace {
 
 SessionRecordingTopic::SessionRecordingTopic() {
@@ -53,10 +51,6 @@ SessionRecordingTopic::~SessionRecordingTopic() {
     if (_stateCallbackHandle != UnsetOnChangeHandle) {
         global::sessionRecordingHandler->removeStateChangeCallback(_stateCallbackHandle);
     }
-}
-
-bool SessionRecordingTopic::isDone() const {
-    return _isDone;
 }
 
 void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
@@ -112,8 +106,12 @@ void SessionRecordingTopic::handleJson(const nlohmann::json& json) {
     }
 }
 
+bool SessionRecordingTopic::isDone() const {
+    return _isDone;
+}
+
 void SessionRecordingTopic::sendJsonData() {
-    json stateJson;
+    nlohmann::json stateJson;
     using SessionRecordingHandler = interaction::SessionRecordingHandler;
     if (_sendState) {
         std::string stateString;

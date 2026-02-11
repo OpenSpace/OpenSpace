@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,27 +24,34 @@
 
 #include <modules/globebrowsing/src/geojson/geojsoncomponent.h>
 
-#include <modules/globebrowsing/src/geojson/globegeometryhelper.h>
 #include <modules/globebrowsing/src/renderableglobe.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/json.h>
-#include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/lightsource.h>
 #include <openspace/scene/scene.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/scripting/scriptengine.h>
+#include <openspace/util/ellipsoid.h>
+#include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/openglstatecache.h>
-#include <ghoul/opengl/programobject.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
+#include <geos/geom/CoordinateSequence.h>
+#include <geos/geom/Point.h>
+#include <geos/util/GEOSException.h>
+#include <algorithm>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <functional>
-#include <optional>
+#include <iterator>
+#include <utility>
 
 namespace geos_nlohmann = nlohmann;
 #include <geos/geom/Geometry.h>

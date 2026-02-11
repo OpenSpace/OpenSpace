@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,16 +24,19 @@
 
 #include <modules/spacecraftinstruments/util/instrumenttimesparser.h>
 
+#include <modules/spacecraftinstruments/util/decoder.h>
+#include <modules/spacecraftinstruments/util/image.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/util/spicemanager.h>
-#include <ghoul/filesystem/file.h>
+#include <openspace/util/timerange.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
-#include <filesystem>
+#include <algorithm>
 #include <fstream>
+#include <string_view>
 
 namespace {
     constexpr std::string_view _loggerCat = "InstrumentTimesParser";

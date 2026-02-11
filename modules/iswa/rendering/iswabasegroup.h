@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -31,16 +31,19 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <ghoul/designpattern/event.h>
+#include <memory>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
 class DataProcessor;
-class IswaCygnet;
 
 class IswaBaseGroup : public properties::PropertyOwner {
 public:
     IswaBaseGroup(std::string name, std::string type);
     ~IswaBaseGroup();
+
     bool isType(const std::string& type) const;
 
     void updateGroup();
@@ -61,6 +64,7 @@ protected:
     std::shared_ptr<DataProcessor> _dataProcessor;
 
     bool _registered = false;
+
 private:
     std::string _iswaType;
 };

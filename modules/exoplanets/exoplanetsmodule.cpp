@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,27 +25,17 @@
 #include <modules/exoplanets/exoplanetsmodule.h>
 
 #include <modules/exoplanets/datastructure.h>
-#include <modules/exoplanets/exoplanetshelper.h>
 #include <modules/exoplanets/rendering/renderableorbitdisc.h>
 #include <modules/exoplanets/tasks/exoplanetsdatapreparationtask.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/query/query.h>
-#include <openspace/rendering/renderengine.h>
-#include <openspace/scene/scenegraphnode.h>
-#include <openspace/scripting/scriptengine.h>
-#include <openspace/util/distanceconstants.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/util/factorymanager.h>
-#include <openspace/util/timeconversion.h>
-#include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
-#include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
-#include <filesystem>
-#include <fstream>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/templatefactory.h>
+#include <optional>
 #include <sstream>
 
 #include "exoplanetsmodule_lua.inl"

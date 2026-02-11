@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,6 +29,7 @@
 
 namespace openspace {
 
+namespace properties { class SelectionProperty; }
 class KameleonWrapper;
 
 class DataProcessorKameleon : public DataProcessor {
@@ -36,13 +37,13 @@ public:
     DataProcessorKameleon();
     virtual ~DataProcessorKameleon();
 
-    virtual std::vector<std::string> readMetadata(const std::string& path,
+    std::vector<std::string> readMetadata(const std::string& path,
         glm::size3_t& dimensions) override;
 
-    virtual void addDataValues(const std::string& data,
+    void addDataValues(const std::string& data,
         properties::SelectionProperty& dataOptions) override;
 
-    virtual std::vector<float*> processData(const std::string& path,
+    std::vector<float*> processData(const std::string& path,
         properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
 
     void setSlice(float slice);

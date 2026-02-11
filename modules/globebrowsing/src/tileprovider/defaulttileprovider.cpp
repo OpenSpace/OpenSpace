@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -29,7 +29,16 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
+#include <modules/globebrowsing/src/rawtile.h>
+#include <modules/globebrowsing/src/rawtiledatareader.h>
+#include <modules/globebrowsing/src/tileindex.h>
+#include <ghoul/format.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <algorithm>
 #include <optional>
+#include <utility>
 
 namespace {
     constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,11 +25,14 @@
 #include <modules/video/include/renderablevideosphere.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/sphere.h>
+#include <openspace/scene/scenegraphnode.h>
+#include <ghoul/misc/dictionary.h>
 
 namespace {
-    // This `Renderable` creates a textured 3D sphere where the texture is a video.
+    // This `Renderable` creates a textured 3D sphere where the texture is a video. Per
+    // default, the sphere uses an equirectangular projection for the image mapping
+    // and hence expects a video in equirectangular format. However, it can also be used
+    // to play fisheye videos by changing the `TextureProjection`.
     //
     // The video can either be played back based on a given simulation time
     // (`PlaybackMode` MapToSimulationTime) or through the user interface (for
@@ -83,7 +86,8 @@ void RenderableVideoSphere::render(const RenderData& data, RendererTasks& render
     }
 }
 
-void RenderableVideoSphere::update(const UpdateData&) {
+void RenderableVideoSphere::update(const UpdateData& data) {
+    RenderableSphere::update(data);
     if (!_videoPlayer.isInitialized()) {
         return;
     }

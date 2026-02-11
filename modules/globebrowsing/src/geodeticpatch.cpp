@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -26,6 +26,10 @@
 
 #include <modules/globebrowsing/src/tileindex.h>
 #include <ghoul/misc/assert.h>
+#include <algorithm>
+#include <cmath>
+#include <cstdlib>
+#include <utility>
 
 namespace {
     // Normalizes the angle to the interval [center - pi, center + pi[

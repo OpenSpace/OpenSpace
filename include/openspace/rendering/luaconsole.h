@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -32,15 +32,14 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/util/keys.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
-#include <map>
+#include <openspace/util/mouse.h>
+#include <functional>
 #include <memory>
-#include <string>
-#include <vector>
 
-namespace ghoul::fontrendering { class Font; }
-namespace ghoul::opengl { class ProgramObject; }
+namespace ghoul {
+    namespace fontrendering { class Font; }
+    namespace opengl { class ProgramObject; }
+} // namespace ghoul
 
 namespace openspace {
 
@@ -54,6 +53,8 @@ public:
 
     bool keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
     void charCallback(unsigned int codepoint, KeyModifier modifier);
+    bool mouseActivationCallback(glm::vec2 pos, MouseButton button, MouseAction action,
+        KeyModifier mods);
 
     void update();
     void render();
@@ -65,7 +66,8 @@ private:
     void parallelConnectionChanged(const ParallelConnection::Status& status);
     void addToCommand(const std::string& c);
     void registerKeyHandlers();
-    void registerKeyHandler(Key key, KeyModifier modifier, std::function<void()> callback);
+    void registerKeyHandler(Key key, KeyModifier modifier,
+        std::function<void()> callback);
 
     // Helper functions for tab autocomplete
     void autoCompleteCommand();

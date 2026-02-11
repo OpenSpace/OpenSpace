@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,21 +28,23 @@
 #include <openspace/util/screenlog.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
-#include <ghoul/opengl/ghoul_gl.h>
-#include <ghoul/opengl/uniformcache.h>
-#include <atomic>
+#include <chrono>
+#include <cstdint>
 #include <memory>
 #include <mutex>
 #include <random>
+#include <string>
+#include <vector>
 
 // #define LOADINGSCREEN_DEBUGGING
 
-namespace ghoul::fontrendering { class Font; }
-
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul {
+    namespace fontrendering { class Font; }
+    namespace opengl {
+        class ProgramObject;
+        class Texture;
+    } // namespace ghoul::opengl
+} // namespace ghoul
 
 namespace openspace {
 

@@ -2,7 +2,7 @@
 #                                                                                        #
 # OpenSpace                                                                              #
 #                                                                                        #
-# Copyright (c) 2014-2025                                                                #
+# Copyright (c) 2014-2026                                                                #
 #                                                                                        #
 # Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
 # software and associated documentation files (the "Software"), to deal in the Software  #
@@ -85,6 +85,7 @@ set(OPENSPACE_SOURCE
   navigation/pathnavigator.cpp
   navigation/pathnavigator_lua.inl
   navigation/waypoint.cpp
+  network/messagestructures.cpp
   network/messagestructureshelper.cpp
   network/parallelconnection.cpp
   network/parallelpeer.cpp
@@ -132,6 +133,7 @@ set(OPENSPACE_SOURCE
   rendering/dashboarditem.cpp
   rendering/dashboardtextitem.cpp
   rendering/framebufferrenderer.cpp
+  rendering/deferredcaster.cpp
   rendering/deferredcastermanager.cpp
   rendering/fadeable.cpp
   rendering/helper.cpp
@@ -145,6 +147,7 @@ set(OPENSPACE_SOURCE
   rendering/screenspacerenderableframebuffer.cpp
   rendering/screenspacerenderable.cpp
   rendering/screenspacerenderabletext.cpp
+  rendering/shadowmapping.cpp
   rendering/texturecomponent.cpp
   rendering/transferfunction.cpp
   rendering/volumeraycaster.cpp
@@ -190,6 +193,7 @@ set(OPENSPACE_SOURCE
   util/sphere.cpp
   util/spicemanager.cpp
   util/spicemanager_lua.inl
+  util/syncable.cpp
   util/syncbuffer.cpp
   util/tstring.cpp
   util/histogram.cpp
@@ -345,6 +349,7 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/screenspacerenderableframebuffer.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/screenspacerenderable.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/screenspacerenderabletext.h
+  ${PROJECT_SOURCE_DIR}/include/openspace/rendering/shadowmapping.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/texturecomponent.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/transferfunction.h
   ${PROJECT_SOURCE_DIR}/include/openspace/rendering/volumeraycaster.h

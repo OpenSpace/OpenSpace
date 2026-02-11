@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,15 +24,12 @@
 
 #version __CONTEXT__
 
-#define EDGE_THRESHOLD_MIN 0.0312f
-#define EDGE_THRESHOLD_MAX 0.125f
-#define ITERATIONS 12
-#define SUBPIXEL_QUALITY 0.75f
+const float EdgeThresholdMin = 0.0312;
+const float EdgeThresholdMax = 0.125;
+const int Iterations = 12;
+const float SubpixelQuality = 0.75;
 
-const float[12] QUALITY = float[](1.f, 1.f, 1.f, 1.f, 1.f, 1.5f, 2.f, 2.f, 2.f, 2.f, 4.f, 8.f);
-// const float[24] QUALITY = {2.f, 4.f, 6.f, 8.f, 10.f, 12.f, 12.f, 12.f, 12.f, 12.f, 14.f, 18.f,
-//                             18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f, 18.f,
-//                             18.f, 18.f};
+const float[12] Quality = float[](1.f, 1.f, 1.f, 1.f, 1.f, 1.5f, 2.f, 2.f, 2.f, 2.f, 4.f, 8.f);
 
 in vec2 texCoord;
 layout (location = 0) out vec4 aaFinalColor;
@@ -43,7 +40,7 @@ uniform vec4 Viewport;
 uniform vec2 Resolution;
 
 // Relative luminance
-float getLum(vec3 rgb){
+float luminance(vec3 rgb) {
   return dot(vec3(0.2126, 0.7152, 0.0722), rgb);
 }
 
@@ -62,30 +59,42 @@ void main() {
   vec4 colorCenter = texture(renderedTexture, st);
 
   // Detecting where to apply AA
-  float pixelLumCenter = getLum(colorCenter.rgb);
-  float pixelLumDown   = getLum(textureOffset(renderedTexture, st, ivec2(0,-1)).rgb);
-  float pixelLumUp     = getLum(textureOffset(renderedTexture, st, ivec2(0,1)).rgb);
-  float pixelLumLeft   = getLum(textureOffset(renderedTexture, st, ivec2(-1,0)).rgb);
-  float pixelLumRight  = getLum(textureOffset(renderedTexture, st, ivec2(1,0)).rgb);
+  float pixelLumCenter = luminance(colorCenter.rgb);
+  float pixelLumDown = luminance(textureOffset(renderedTexture, st, ivec2(0, -1)).rgb);
+  float pixelLumUp = luminance(textureOffset(renderedTexture, st, ivec2(0, 1)).rgb);
+  float pixelLumLeft = luminance(textureOffset(renderedTexture, st, ivec2(-1, 0)).rgb);
+  float pixelLumRight = luminance(textureOffset(renderedTexture, st, ivec2(1, 0)).rgb);
 
-  float pixelLumMin = min(pixelLumCenter, min(min(pixelLumDown, pixelLumUp), min(pixelLumLeft, pixelLumRight)));
-  float pixelLumMax = max(pixelLumCenter, max(max(pixelLumDown, pixelLumUp), max(pixelLumLeft, pixelLumRight)));
+  float pixelLumMin = min(
+    pixelLumCenter, min(min(pixelLumDown, pixelLumUp), min(pixelLumLeft, pixelLumRight))
+  );
+  float pixelLumMax = max(
+    pixelLumCenter, max(max(pixelLumDown, pixelLumUp), max(pixelLumLeft, pixelLumRight))
+  );
 
   // Delta
   float pixelLumRange = pixelLumMax - pixelLumMin;
 
   // If the pixelLum variation is lower that a threshold (or if we are in a really dark
   // area), we are not on an edge, don't perform any AA.
-  if (pixelLumRange < max(EDGE_THRESHOLD_MIN, pixelLumMax * EDGE_THRESHOLD_MAX)) {
+  if (pixelLumRange < max(EdgeThresholdMin, pixelLumMax * EdgeThresholdMax)) {
     aaFinalColor = colorCenter;
     return;
   }
 
   // Estimating the gradient
-  float pixelLumDownLeft = getLum(textureOffset(renderedTexture, st, ivec2(-1,-1)).rgb);
-  float pixelLumUpRight = getLum(textureOffset(renderedTexture, st, ivec2(1,1)).rgb);
-  float pixelLumUpLeft = getLum(textureOffset(renderedTexture, st, ivec2(-1,1)).rgb);
-  float pixelLumDownRight = getLum(textureOffset(renderedTexture, st, ivec2(1,-1)).rgb);
+  float pixelLumDownLeft = luminance(
+    textureOffset(renderedTexture, st, ivec2(-1, -1)).rgb
+  );
+  float pixelLumUpRight = luminance(
+    textureOffset(renderedTexture, st, ivec2(1, 1)).rgb
+  );
+  float pixelLumUpLeft = luminance(
+    textureOffset(renderedTexture, st, ivec2(-1, 1)).rgb
+  );
+  float pixelLumDownRight = luminance(
+    textureOffset(renderedTexture, st, ivec2(1, -1)).rgb
+  );
 
   float pixelLumDownUp = pixelLumDown + pixelLumUp;
   float pixelLumLeftRight = pixelLumLeft + pixelLumRight;
@@ -96,14 +105,16 @@ void main() {
 
   // Compute an estimation of the gradient
   float edgeHorizontal = abs(-2.0 * pixelLumLeft + pixelLumLeftCorners) +
-    abs(-2.0 * pixelLumCenter + pixelLumDownUp) * 2.0 + abs(-2.0 * pixelLumRight + pixelLumRightCorners);
+    abs(-2.0 * pixelLumCenter + pixelLumDownUp) * 2.0 +
+    abs(-2.0 * pixelLumRight + pixelLumRightCorners);
   float edgeVertical = abs(-2.0 * pixelLumUp + pixelLumUpCorners) +
-    abs(-2.0 * pixelLumCenter + pixelLumLeftRight) * 2.0  + abs(-2.0 * pixelLumDown + pixelLumDownCorners);
+    abs(-2.0 * pixelLumCenter + pixelLumLeftRight) * 2.0 +
+    abs(-2.0 * pixelLumDown + pixelLumDownCorners);
 
   // Choosing Edge Orientation
   bool isHorizontal = (edgeHorizontal >= edgeVertical);
-  float pixelLum1  = isHorizontal ? pixelLumDown : pixelLumLeft;
-  float pixelLum2  = isHorizontal ? pixelLumUp : pixelLumRight;
+  float pixelLum1 = isHorizontal ? pixelLumDown : pixelLumLeft;
+  float pixelLum2 = isHorizontal ? pixelLumUp : pixelLumRight;
 
   // Gradients
   float gradient1 = pixelLum1 - pixelLumCenter;
@@ -143,8 +154,8 @@ void main() {
 
   // Read the pixelLums at both current extremities of the exploration segment,
   // and compute the delta wrt to the local average pixelLum.
-  float pixelLumEnd1 = getLum(texture(renderedTexture, uv1).rgb);
-  float pixelLumEnd2 = getLum(texture(renderedTexture, uv2).rgb);
+  float pixelLumEnd1 = luminance(texture(renderedTexture, uv1).rgb);
+  float pixelLumEnd2 = luminance(texture(renderedTexture, uv2).rgb);
   pixelLumEnd1 -= pixelLumLocalAverage;
   pixelLumEnd2 -= pixelLumLocalAverage;
 
@@ -162,15 +173,15 @@ void main() {
 
   // Still exploring
   if (!reachedBoth) {
-    for (int i = 2; i < ITERATIONS; i++) {
+    for (int i = 2; i < Iterations; i++) {
       // If needed, read pixelLum in 1st direction, compute delta.
       if (!reached1) {
-        pixelLumEnd1 = getLum(texture(renderedTexture, uv1).rgb);
+        pixelLumEnd1 = luminance(texture(renderedTexture, uv1).rgb);
         pixelLumEnd1 = pixelLumEnd1 - pixelLumLocalAverage;
       }
       // If needed, read pixelLum in opposite direction, compute delta.
       if (!reached2) {
-        pixelLumEnd2 = getLum(texture(renderedTexture, uv2).rgb);
+        pixelLumEnd2 = luminance(texture(renderedTexture, uv2).rgb);
         pixelLumEnd2 = pixelLumEnd2 - pixelLumLocalAverage;
       }
       reached1 = abs(pixelLumEnd1) >= gradientScaled;
@@ -179,11 +190,11 @@ void main() {
 
       // If the side is not reached
       if (!reached1) {
-        uv1 -= offset * QUALITY[i];
+        uv1 -= offset * Quality[i];
       }
 
       if (!reached2) {
-        uv2 += offset * QUALITY[i];
+        uv2 += offset * Quality[i];
       }
 
       // If both sides have been reached
@@ -205,22 +216,28 @@ void main() {
   // Read in the direction of the closest side of the edge
   float pixelOffset = - distanceFinal / edgeThickness + 0.5;
 
-  bool ispixelLumCenterSmaller = pixelLumCenter < pixelLumLocalAverage;
+  bool isPixelLumCenterSmaller = pixelLumCenter < pixelLumLocalAverage;
 
   // If the pixelLum at center is smaller than at its neighbour, the delta pixelLum at
   // each end should be positive (same variation).
-  bool correctVariation = ((isDirection1 ? pixelLumEnd1 : pixelLumEnd2) < 0.0) != ispixelLumCenterSmaller;
+  bool correctVariation =
+    ((isDirection1 ? pixelLumEnd1 : pixelLumEnd2) < 0.0) != isPixelLumCenterSmaller;
 
   // If the pixelLum variation is incorrect, do not offset.
   float finalOffset = correctVariation ? pixelOffset : 0.0;
 
   // Subpixel antialiasing
-  float pixelLumAverage = (1.0/12.0) * (2.0 * (pixelLumDownUp + pixelLumLeftRight) +
+  float pixelLumAverage = (1.0 / 12.0) * (2.0 * (pixelLumDownUp + pixelLumLeftRight) +
     pixelLumLeftCorners + pixelLumRightCorners);
 
-  float subPixelOffset1 = clamp(abs(pixelLumAverage - pixelLumCenter) / pixelLumRange, 0.0, 1.0);
-  float subPixelOffset2 = (-2.0 * subPixelOffset1 + 3.0) * subPixelOffset1 * subPixelOffset1;
-  float subPixelOffsetFinal = subPixelOffset2 * subPixelOffset2 * SUBPIXEL_QUALITY;
+  float subPixelOffset1 =
+    clamp(abs(pixelLumAverage - pixelLumCenter) / pixelLumRange,
+    0.0,
+    1.0
+  );
+  float subPixelOffset2 =
+    (-2.0 * subPixelOffset1 + 3.0) * subPixelOffset1 * subPixelOffset1;
+  float subPixelOffsetFinal = subPixelOffset2 * subPixelOffset2 * SubpixelQuality;
 
   // Biggest of the two offsets
   finalOffset = max(finalOffset, subPixelOffsetFinal);

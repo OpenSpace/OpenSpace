@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -35,6 +35,10 @@ vec4 blendNormal(vec4 oldColor, vec4 newColor) {
 
 vec4 blendMultiply(vec4 oldColor, vec4 newColor) {
   return oldColor * newColor;
+}
+
+vec4 blendMultiplyMix(vec4 oldColor, vec4 newColor, float blendFactor) {
+  return blendNormal(oldColor, blendMultiply(oldColor, newColor * blendFactor));
 }
 
 vec4 blendAdd(vec4 oldColor, vec4 newColor) {

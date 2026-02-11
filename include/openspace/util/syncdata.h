@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -42,7 +42,7 @@ namespace openspace {
  *
  * `((T&) t).method();`
  */
-template<class T>
+template <class T>
 class SyncData : public Syncable {
 public:
     SyncData() = default;
@@ -75,9 +75,9 @@ public:
     const T& data() const;
 
 protected:
-    virtual void encode(SyncBuffer* syncBuffer) override;
-    virtual void decode(SyncBuffer* syncBuffer) override;
-    virtual void postSync(bool isMaster) override;
+    void encode(SyncBuffer* syncBuffer) override;
+    void decode(SyncBuffer* syncBuffer) override;
+    void postSync(bool isMaster) override;
 
     T _data;
     T _doubleBufferedData;

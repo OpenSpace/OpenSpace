@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,14 +24,16 @@
 
 #include <openspace/scene/translation.h>
 
-#include <openspace/documentation/verifier.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/util/factorymanager.h>
 #include <openspace/util/memorymanager.h>
 #include <openspace/util/updatestructures.h>
-#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
+#include <ghoul/misc/profiling.h>
+#include <optional>
+#include <string>
+#include <utility>
 
 namespace {
     struct [[codegen::Dictionary(Translation)]] Parameters {

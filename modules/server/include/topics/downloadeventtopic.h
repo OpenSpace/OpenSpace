@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,6 +28,7 @@
 #include <modules/server/include/topics/topic.h>
 
 #include <chrono>
+#include <unordered_map>
 
 namespace openspace {
 
@@ -41,7 +42,7 @@ public:
 private:
     bool _isSubscribedTo = false;
     int _subscriptionID = -1;
-    std::unordered_map<std::string, std::chrono::steady_clock::time_point> _lastCallBack;
+    std::unordered_map<std::string, std::chrono::steady_clock::time_point> _lastCallback;
 };
 
 } // namespace openspace

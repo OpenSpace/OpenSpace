@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,17 +27,12 @@
 
 #include <modules/base/rendering/renderableplane.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <filesystem>
-
-namespace ghoul::filesystem { class File; }
-namespace ghoul::opengl { class Texture; }
+#include <limits>
+#include <memory>
 
 namespace openspace {
-
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 class RenderablePlaneTimeVaryingImage : public RenderablePlane {
 public:

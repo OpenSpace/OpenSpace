@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -33,16 +33,14 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <ghoul/glm.h>
 #include <memory>
 
 namespace openspace {
+    namespace scripting { struct LuaLibrary; }
     class Camera;
     struct CameraPose;
     class SceneGraphNode;
 } // namespace openspace
-
-namespace openspace::scripting { struct LuaLibrary; }
 
 namespace openspace::interaction {
 
@@ -51,7 +49,7 @@ class Path;
 class PathNavigator : public properties::PropertyOwner {
 public:
     PathNavigator();
-    virtual ~PathNavigator() override;
+    ~PathNavigator() override;
 
     // Accessors
     Camera* camera() const;

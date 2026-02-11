@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,14 +28,22 @@
 #include <modules/iswa/util/dataprocessor.h>
 #include <modules/iswa/util/iswamanager.h>
 #include <openspace/documentation/documentation.h>
+#include <openspace/engine/downloadmanager.h>
 #include <openspace/rendering/transferfunction.h>
+#include <ghoul/designpattern/event.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
+#include <algorithm>
 #include <fstream>
+#include <iterator>
+#include <set>
+#include <utility>
 
 namespace {
     constexpr std::string_view _loggerCat = "DataCygnet";

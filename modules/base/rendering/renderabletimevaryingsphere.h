@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,16 +27,13 @@
 
 #include <modules/base/rendering/renderablesphere.h>
 
+#include <openspace/properties/misc/stringproperty.h>
 #include <filesystem>
+#include <limits>
 
 namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
-
-struct RenderData;
-struct UpdateData;
-
-namespace documentation { struct Documentation; }
 
 class RenderableTimeVaryingSphere : public RenderableSphere {
 public:
@@ -59,10 +56,12 @@ private:
         double time;
         std::unique_ptr<ghoul::opengl::Texture> texture;
     };
+
     void loadTexture();
     void extractMandatoryInfoFromSourceFolder();
     void updateActiveTriggerTimeIndex(double currenttime);
     void computeSequenceEndTime();
+
     // If there's just one state it should never disappear!
     double _sequenceEndTime = std::numeric_limits<double>::max();
     std::vector<FileData> _files;

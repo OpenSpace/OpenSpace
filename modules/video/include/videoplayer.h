@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,19 +28,23 @@
 #include <openspace/properties/propertyowner.h>
 #include <openspace/util/syncable.h>
 
-#include <openspace/documentation/documentation.h>
 #include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <ghoul/glm.h>
 #include <ghoul/misc/boolean.h>
+#include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
-#include <map>
-
-// libmpv
 #include <client.h>
-#include <render_gl.h>
+#include <render.h>
+#include <cstdint>
+#include <filesystem>
+#include <memory>
+
+namespace ghoul { class Dictionary; }
 
 namespace openspace {
+
+namespace documentation { struct Documentation; }
 
 enum class PlaybackMode {
     MapToSimulationTime = 0,
@@ -71,10 +75,10 @@ public:
     void destroy();
     void update();
 
-    virtual void preSync(bool isMaster) override;
-    virtual void encode(SyncBuffer* syncBuffer) override;
-    virtual void decode(SyncBuffer* syncBuffer) override;
-    virtual void postSync(bool isMaster) override;
+    void preSync(bool isMaster) override;
+    void encode(SyncBuffer* syncBuffer) override;
+    void decode(SyncBuffer* syncBuffer) override;
+    void postSync(bool isMaster) override;
 
     static documentation::Documentation Documentation();
 

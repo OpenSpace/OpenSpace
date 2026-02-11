@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -23,11 +23,20 @@
  ****************************************************************************************/
 
 #include <modules/fitsfilereader/include/wsafitshelper.h>
+
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureconversion.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <CCfits>
+#include <algorithm>
+#include <string>
+#include <string_view>
+#include <vector>
 
-constexpr std::string_view _loggerCat = "RenderableTimeVaryingSphere";
+namespace {
+    constexpr std::string_view _loggerCat = "RenderableTimeVaryingSphere";
+} // namespace
 
 using namespace CCfits;
 
@@ -89,7 +98,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         // Create texture from imagedata
         auto texture = std::make_unique<ghoul::opengl::Texture>(
             imageData,
-            glm::size3_t(fitsValues->width, fitsValues->height, 1),
+            glm::uvec3(fitsValues->width, fitsValues->height, 1),
             GL_TEXTURE_2D,
             ghoul::opengl::Texture::Format::Red,
             GL_RED,
@@ -140,7 +149,7 @@ int nLayers(const std::filesystem::path& path) {
     }
 }
 
-template<typename T, typename U>
+template <typename T, typename U>
 std::shared_ptr<ImageData<T>> readImageInternal(U& image) {
     try {
         std::valarray<T> contents;

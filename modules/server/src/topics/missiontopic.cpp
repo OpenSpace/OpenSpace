@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,17 +25,21 @@
 #include <modules/server/include/topics/missiontopic.h>
 
 #include <modules/server/include/connection.h>
-#include <modules/server/include/jsonconverters.h>
 #include <modules/spacecraftinstruments/util/imagesequencer.h>
 #include <openspace/engine/globals.h>
+#include <openspace/mission/mission.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/time.h>
 #include <ghoul/logging/logmanager.h>
-
-using nlohmann::json;
+#include <utility>
 
 namespace openspace {
+
+void MissionTopic::handleJson(const nlohmann::json&) {
+    const nlohmann::json data = { {"missions", missionJson()} };
+    _connection->sendJson(wrappedPayload(data));
+}
 
 bool MissionTopic::isDone() const {
     return true;
@@ -56,7 +60,7 @@ nlohmann::json MissionTopic::missionJson() const {
         );
         captureTimesString[i] = std::move(str);
     }
-    json json;
+    nlohmann::json json;
     for (auto const& [identifier, mission] : missions) {
         nlohmann::json missionJson = createPhaseJson(mission);
         missionJson["capturetimes"] = captureTimesString;
@@ -66,16 +70,16 @@ nlohmann::json MissionTopic::missionJson() const {
 }
 
 nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
-    json phases = json::array();
+    nlohmann::json phases = nlohmann::json::array();
     for (const MissionPhase& missionPhase : phase.phases()) {
-        json subphaseJson = createPhaseJson(missionPhase);
+        nlohmann::json subphaseJson = createPhaseJson(missionPhase);
         phases.push_back(std::move(subphaseJson));
     }
 
-    json milestones = json::array();
+    nlohmann::json milestones = nlohmann::json::array();
     const std::vector<Milestone>& dates = phase.milestones();
     for (const Milestone& date : dates) {
-        json jsonDate = {
+        nlohmann::json jsonDate = {
             { "date", std::string(date.date.ISO8601()) },
             { "name", date.name }
         };
@@ -113,11 +117,6 @@ nlohmann::json MissionTopic::createPhaseJson(const MissionPhase& phase) const {
     };
 
     return phaseJson;
-}
-
-void MissionTopic::handleJson(const nlohmann::json&) {
-    const nlohmann::json data = { {"missions", missionJson()} };
-    _connection->sendJson(wrappedPayload(data));
 }
 
 } // namespace openspace

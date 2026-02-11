@@ -50,7 +50,7 @@
     },
     {
       "action": "os.2012july.LoopBatsrus",
-      "key": "B"
+      "key": "S"
     }
   ],
   "mark_nodes": [

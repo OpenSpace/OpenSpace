@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,16 +28,17 @@
 #include <openspace/properties/propertyowner.h>
 
 #include <openspace/properties/list/intlistproperty.h>
-#include <openspace/properties/misc/optionproperty.h>
-#include <openspace/properties/misc/triggerproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
 #include <openspace/rendering/framebufferrenderer.h>
+#include <ghoul/opengl/ghoul_gl.h>
+#include <cstdint>
 #include <chrono>
 #include <filesystem>
+#include <memory>
 
 namespace ghoul {
     namespace fontrendering { class Font; }
@@ -45,19 +46,18 @@ namespace ghoul {
         class ProgramObject;
         class OpenGLStateCache;
     } // namespace opengl
-
     class Dictionary;
     class SharedMemory;
-} // ghoul
+} // namespace ghoul
 
 namespace openspace {
 
 namespace scripting { struct LuaLibrary; }
-
 class Camera;
-class RaycasterManager;
 class DeferredcasterManager;
+class RaycasterManager;
 class Scene;
+class SceneGraphNode;
 class SceneManager;
 class ScreenLog;
 class ScreenSpaceRenderable;
@@ -66,7 +66,7 @@ struct ShutdownInformation;
 class RenderEngine : public properties::PropertyOwner {
 public:
     RenderEngine();
-    virtual ~RenderEngine() override;
+    ~RenderEngine() override;
 
     const FramebufferRenderer& renderer() const;
 
@@ -159,6 +159,12 @@ public:
     glm::mat4 nodeRotation() const;
 
     uint64_t frameNumber() const;
+
+    void registerShadowCaster(const std::string& shadowGroup,
+        const SceneGraphNode* lightSource, SceneGraphNode* shadower,
+        SceneGraphNode* shadowee);
+    void removeShadowCaster(const std::string& shadowGroup, SceneGraphNode* shadower,
+        SceneGraphNode* shadowee);
 
 private:
     void renderScreenLog();

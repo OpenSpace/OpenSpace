@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -27,15 +27,25 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
-#include <openspace/network/parallelpeer.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scripting/scriptscheduler.h>
-#include <openspace/util/keys.h>
-#include <openspace/util/timeline.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/assert.h>
+#include <ghoul/misc/invariants.h>
 #include <ghoul/misc/profiling.h>
+#include <algorithm>
+#include <array>
+#include <cmath>
+#include <deque>
+#include <iterator>
+#include <string>
+#include <string_view>
+#include <variant>
 
 namespace {
     constexpr std::string_view _loggerCat = "TimeManager";

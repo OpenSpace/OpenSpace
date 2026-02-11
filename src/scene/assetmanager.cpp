@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -25,15 +25,23 @@
 #include <openspace/scene/assetmanager.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/scene/asset.h>
+#include <openspace/scene/profile.h>
 #include <openspace/scripting/lualibrary.h>
+#include <openspace/util/resourcesynchronization.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/misc/defer.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
+#include <ghoul/lua/luastate.h>
+#include <algorithm>
+#include <string_view>
+#include <utility>
 
 #include "assetmanager_lua.inl"
 
@@ -193,7 +201,6 @@ void AssetManager::runRemoveQueue() {
 void AssetManager::runAddQueue() {
     ZoneScoped;
     for (const std::string& asset : _assetAddQueue) {
-
         const std::filesystem::path path = generateAssetPath(_assetRootDirectory, asset);
         Asset* a = nullptr;
         try {
@@ -895,7 +902,30 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
     const auto it = std::find_if(
         _assets.cbegin(),
         _assets.cend(),
-        [&path](const std::unique_ptr<Asset>& asset) { return asset->path() == path; }
+        [&path](const std::unique_ptr<Asset>& asset) {
+#ifdef WIN32
+            // std::filesystem::path is case-sensitive, but paths on Windows are not, so
+            // we have to compare them in lower-case instead
+            std::string p1 = asset->path().string();
+            std::transform(
+                p1.begin(),
+                p1.end(),
+                p1.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+            std::string p2 = path.string();
+            std::transform(
+                p2.begin(),
+                p2.end(),
+                p2.begin(),
+                [](unsigned char c) { return std::tolower(c); }
+            );
+
+            return p1 == p2;
+#else // ^^^^ WIN32 // !WIN32
+            return asset->path() == path;
+#endif // WIN32
+        }
     );
     if (it != _assets.end()) {
         Asset* a = it->get();

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -24,17 +24,14 @@
 
 #include <modules/video/include/videotileprovider.h>
 
-#include <modules/globebrowsing/globebrowsingmodule.h>
-#include <modules/globebrowsing/src/memoryawaretilecache.h>
 #include <openspace/documentation/documentation.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
-#include <openspace/engine/moduleengine.h>
-#include <openspace/engine/windowdelegate.h>
-#include <openspace/util/time.h>
-#include <openspace/util/timemanager.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/profiling.h>
+#include <cmath>
+#include <cstdint>
+#include <limits>
+#include <optional>
 
 namespace {
     constexpr std::string_view _loggerCat = "VideoTileProvider";
@@ -71,8 +68,6 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     ZoneScoped;
     addPropertySubOwner(_videoPlayer);
 }
-
-VideoTileProvider::~VideoTileProvider() {}
 
 globebrowsing::Tile VideoTileProvider::tile(const globebrowsing::TileIndex& tileIndex) {
     ZoneScoped;
