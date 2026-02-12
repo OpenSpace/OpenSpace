@@ -47,7 +47,7 @@ using DecodeCompleteCallback = std::function<void(DecodedImageData&&)>;
 struct DecodeRequest {
     const ImageMetadata* metadata; // non-owning
     int downsamplingLevel;
-    DecodeCompleteCallback callback;
+    DecodeCompleteCallback callback; // Synchronous callback assumed, can lead to race conditions if async
 };
 
 class AsyncImageDecoder {

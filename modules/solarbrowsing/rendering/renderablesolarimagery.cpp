@@ -51,6 +51,9 @@ namespace {
     constexpr char* _loggerCat = "RenderableSolarImagery";
 
     constexpr unsigned int DefaultTextureSize = 32;
+    constexpr int PredictFramesBefore = 2;
+    constexpr int PredictFramesAfter = 10;
+    constexpr int PredictFramesSymmetric = 5;
 
     constexpr openspace::properties::Property::PropertyInfo ActiveInstrumentsInfo = {
         "ActiveInstrument",
@@ -186,10 +189,12 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
             _activeInstruments
         );
         _currentImage = nullptr;
+        _predictionIsDirty = true;
     });
 
     _downsamplingLevel.onChange([this]() {
         _currentImage = nullptr;
+        _predictionIsDirty = true;
     });
 
     _moveFactor.onChange([this]() {
@@ -271,7 +276,7 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
         _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
             global::timeManager->time().j2000Seconds(),
             true
-        );
+    );
 
     if (!keyframe) {
         // No keyframe avaialble so we clear the texture
@@ -283,10 +288,7 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
             _currentCenterPixel = glm::vec2(2.f);
             _currentImage = nullptr;
 
-            // @TODO (anden88 2026-02-11): Is it necessary to update the texture to some dummy
-            // data version here or can we just set the above params and move on?
-
-            // Create some dummy data that will be uploaded to GPU
+            // Create some dummy data that will be uploaded to GPU avoid UB
             std::vector<unsigned char> buffer;
             buffer.resize(DefaultTextureSize * DefaultTextureSize * sizeof(ImagePrecision));
             _texture->setDimensions(glm::uvec3(_imageSize, _imageSize, 1));
@@ -315,8 +317,8 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
         "solarbrowsing"
     );
 
-    // Note: If the image has not yet been decoded and cached we'll just wait until it is
-    // available. The previous image will be shown until the new one arrives.
+    // If the current keyframe image has not yet been decoded and cached we'll just wait
+    // until it is available. The previous image will be shown until the new one is ready.
     if (std::filesystem::exists(cached)) {
         // Load data from cache
         solarbrowsing::DecodedImageData data = loadDecodedDataFromCache(
@@ -326,48 +328,110 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
         );
         uploadDecodedDataToGPU(data);
     }
+}
 
-    // Load and decode the next frames -- TODO this should probably be own separate
-    // update step regardless
-    std::vector<const Keyframe<ImageMetadata>*> keyframes =
-        _imageMetadataMap[_currentActiveInstrument].lastNKeyframesBefore(
-            global::timeManager->time().j2000Seconds(),
-            10,
-            true
+void RenderableSolarImagery::requestPredictiveFrames(
+                                                  const Keyframe<ImageMetadata>* keyframe,
+                                                                   const UpdateData& data)
+{
+    if (!keyframe) {
+        return;
+    }
+
+    // Only update prediction if we've moved to a different keyframe
+    if (!_predictionIsDirty && _lastPredictedKeyframe == keyframe)
+    {
+        // We've already predicted this keyframe
+        return;
+    }
+
+    // Detech playback direction
+    const double now = data.time.j2000Seconds();
+    const double prevTime = data.previousFrameTime.j2000Seconds();
+    const double dt = now - prevTime;
+
+    const bool isPlayingForward = dt >= 0;
+    const bool isPaused = now == prevTime;
+
+    // Find keyframes within prediction window
+    int framesBefore = 0;
+    int framesAfter = 0;
+
+    if (isPaused) {
+        framesBefore = PredictFramesSymmetric;
+        framesAfter = PredictFramesSymmetric;
+    }
+    else if (isPlayingForward) {
+        framesBefore = PredictFramesBefore;
+        framesAfter = PredictFramesAfter;
+    }
+    else {
+        // Swap for backward
+        framesBefore = PredictFramesAfter;
+        framesAfter = PredictFramesBefore;
+    }
+
+    // Get the corresponding keyframes within the prediction window
+    const Timeline<ImageMetadata>& timeline = _imageMetadataMap[_currentActiveInstrument];
+    const std::deque<Keyframe<ImageMetadata>>& keyframes = timeline.keyframes();
+
+    // Find the current keyframe iterator
+    auto currentIt = std::find_if(
+        keyframes.begin(),
+        keyframes.end(),
+        [keyframe](const Keyframe<ImageMetadata>& kf) {
+            return &kf == keyframe;
+        }
     );
 
-    for (const Keyframe<ImageMetadata>* kf : keyframes) {
+    if (currentIt == keyframes.end()) {
+        return;
+    }
+
+    auto requestFrameIfNeeded = [this](const Keyframe<ImageMetadata>& kf) {
         // Check if the keyframe has already been decoded and exists in cache
-        unsigned int imgSize = static_cast<unsigned int>(
-            keyframe->data.fullResolution /
-            std::pow(2, static_cast<int>(_downsamplingLevel))
-            );
+        const int imageSize =
+            kf.data.fullResolution / std::pow(2, _downsamplingLevel.value());
 
         std::filesystem::path cacheFile = FileSys.cacheManager()->cachedFilename(
-            kf->data.filePath,
-            std::format("{}x{}", imgSize, imgSize),
+            kf.data.filePath,
+            std::format("{}x{}", imageSize, imageSize),
             "solarbrowsing"
         );
 
+        // Skip if file is already cached
         if (std::filesystem::exists(cacheFile)) {
-            continue;
+            return;
         }
 
         // Request new images to decode
         solarbrowsing::DecodeRequest request(
-            &kf->data,
+            &kf.data,
             _downsamplingLevel,
-            [this, cacheFile](solarbrowsing::DecodedImageData&& decodedData)
-            {
-                LINFO(std::format("Recieved decoded data for '{}'",
-                    decodedData.metadata->filePath
-                    ));
+            [this, cacheFile](solarbrowsing::DecodedImageData&& decodedData) {
                 saveDecodedDataToCache(cacheFile, decodedData);
             }
         );
         _asyncDecoder->requestDecode(std::move(request));
+    };
+
+    // Request frames after and before the current keyframe
+    for (int i = 0; i <= framesAfter; i++) {
+        auto afterIt = std::next(currentIt, i);
+        if (afterIt == keyframes.end()) {
+            break;
+        }
+        requestFrameIfNeeded(*afterIt);
     }
 
+    std::deque<Keyframe<ImageMetadata>>::const_iterator beforeIt = currentIt;
+    for (int i = 0; i < framesBefore && beforeIt != keyframes.begin(); i++) {
+        beforeIt--;
+        requestFrameIfNeeded(*beforeIt);
+    }
+
+    _lastPredictedKeyframe = keyframe;
+    _predictionIsDirty = false;
 }
 
 void RenderableSolarImagery::uploadDecodedDataToGPU(
@@ -395,6 +459,10 @@ solarbrowsing::DecodedImageData RenderableSolarImagery::loadDecodedDataFromCache
 {
     std::ifstream file = std::ifstream(path, std::ifstream::binary);
     if (!file.good()) {
+        FileSys.cacheManager()->removeCacheFile(
+            metadata->filePath,
+            std::format("{}x{}", imageSize, imageSize)
+        );
         throw ghoul::RuntimeError(std::format("Error, could not open cache file '{}'",
             path
         ));
@@ -409,6 +477,10 @@ solarbrowsing::DecodedImageData RenderableSolarImagery::loadDecodedDataFromCache
     file.read(reinterpret_cast<char*>(data.buffer.data()), nEntries * sizeof(uint8_t));
 
     if (!file) {
+        FileSys.cacheManager()->removeCacheFile(
+            metadata->filePath,
+            std::format("{}x{}", imageSize, imageSize)
+        );
         throw ghoul::RuntimeError(std::format("Failed to read image data from cache '{}'",
             path
         ));
@@ -446,6 +518,14 @@ bool RenderableSolarImagery::checkBoundaries(const RenderData& data) {
 }
 
 void RenderableSolarImagery::update(const UpdateData& data) {
+    const Keyframe<ImageMetadata>* keyframe =
+        _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
+            global::timeManager->time().j2000Seconds(),
+            true
+    );
+
+    requestPredictiveFrames(keyframe, data);
+
     // Update lookup table, TODO: No need to do this every update
     _lut = _tfMap[_currentActiveInstrument].get();
     _spacecraftCameraPlane->update();

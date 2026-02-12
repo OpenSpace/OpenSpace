@@ -78,6 +78,12 @@ public:
     bool isCoronaGraph();
 
 private:
+    void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
+    //void listen();
+    bool checkBoundaries(const RenderData& data);
+
+    void decode(unsigned char* buffer, const std::string& fileame);
+
     void uploadDecodedDataToGPU(const solarbrowsing::DecodedImageData& data);
     solarbrowsing::DecodedImageData loadDecodedDataFromCache(
         const std::filesystem::path& path,
@@ -87,6 +93,11 @@ private:
     void saveDecodedDataToCache(const std::filesystem::path& path,
         const solarbrowsing::DecodedImageData& data
     );
+
+    void requestPredictiveFrames(const Keyframe<ImageMetadata>* keyframe,
+        const UpdateData& data
+    );
+
     properties::OptionProperty _activeInstruments;
     properties::FloatProperty _contrastValue;
     properties::BoolProperty _enableBorder;
@@ -122,11 +133,9 @@ private:
     std::unique_ptr<SpacecraftCameraPlane> _spacecraftCameraPlane;
     std::unique_ptr<solarbrowsing::AsyncImageDecoder> _asyncDecoder;
 
-    void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
-    //void listen();
-    bool checkBoundaries(const RenderData& data);
 
-    void decode(unsigned char* buffer, const std::string& fileame);
+    const Keyframe<ImageMetadata>* _lastPredictedKeyframe = nullptr;
+    bool _predictionIsDirty = true;
 };
 
 } // namespace openspace

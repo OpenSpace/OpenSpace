@@ -114,6 +114,10 @@ void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
         request.downsamplingLevel
     );
 
+    // Send data back to main thread
+    request.callback(std::move(decodedData));
+
+    // Once the callback is finished we're done with the request and can remove it.
     {
         std::lock_guard lock(_queueMutex);
         const std::string key = std::format("{}_ds_{}",
@@ -121,9 +125,6 @@ void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
         );
         _activeRequests.erase(key);
     }
-
-    // Send data back to main thread
-    request.callback(std::move(decodedData));
 }
 
 } // namespace openspace::solarbrowsing
