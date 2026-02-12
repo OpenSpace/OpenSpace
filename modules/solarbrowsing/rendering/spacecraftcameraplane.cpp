@@ -36,8 +36,8 @@
 
 
 namespace {
-    constexpr const double SUN_RADIUS = (1391600000.0 * 0.5);
-    constexpr const char* _loggerCat = "SpacecraftCameraPlane";
+    constexpr double SUN_RADIUS = (1391600000.0 * 0.5);
+    constexpr char* _loggerCat = "SpacecraftCameraPlane";
 } // namespace
 
 namespace openspace {
@@ -64,7 +64,7 @@ bool SpacecraftCameraPlane::destroy() {
     return true;
 }
 
-bool SpacecraftCameraPlane::initialize() {
+void SpacecraftCameraPlane::initialize() {
     // Initialize plane buffer
     glGenVertexArrays(1, &_quad);
     glGenBuffers(1, &_vertexPositionBuffer);
@@ -77,7 +77,7 @@ bool SpacecraftCameraPlane::initialize() {
             absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_fs.glsl")
         );
         if (!_planeShader) {
-            return false;
+            return;
         }
     }
 
@@ -87,7 +87,7 @@ bool SpacecraftCameraPlane::initialize() {
             absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_fs.glsl")
         );
         if (!_frustumShader) {
-            return false;
+            return;
         }
     }
 }
@@ -210,8 +210,7 @@ void SpacecraftCameraPlane::render(const RenderData& data,
                                    float contrastValue, float gammaValue,
                                    bool enableBorder, bool enableFrustum,
                                    const glm::vec2& currentCenterPixel,
-                                   float currentScale, float multipleImageryOffset,
-                                   bool isCoronaGraph)
+                                   float currentScale, bool isCoronaGraph)
 {
     glEnable(GL_CULL_FACE);
 
@@ -224,7 +223,7 @@ void SpacecraftCameraPlane::render(const RenderData& data,
     const glm::dmat3 spacecraftRotWorld = data.modelTransform.rotation;
 
     const glm::dvec3 sunDir = sunPositionWorld - spacecraftPosWorld;
-    const glm::dvec3 offset = sunDir * (_gaussianMoveFactor + static_cast<double>(multipleImageryOffset));
+    const glm::dvec3 offset = sunDir * _gaussianMoveFactor;
 
     _position = spacecraftPosWorld + offset;
     // normal should point from plane toward spacecraft (i.e. plane faces spacecraft)

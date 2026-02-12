@@ -26,9 +26,7 @@
 
 #include <modules/solarbrowsing/solarbrowsingmodule.h>
 #include <modules/solarbrowsing/util/structs.h>
-#include <modules/solarbrowsing/util/j2kcodec.h>
 #include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
-#include <modules/solarbrowsing/util/pixelbufferobject.h>
 #include <modules/solarbrowsing/util/asyncimagedecoder.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
@@ -148,10 +146,9 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 
     // Add GUI names
     unsigned int guiNameCount = 0;
-    using K = std::string;
-    using V = Timeline<ImageMetadata>;
-    for (const std::pair<K, V>& el : _imageMetadataMap) {
-        _activeInstruments.addOption(guiNameCount++, el.first);
+    using T = Timeline<ImageMetadata>;
+    for (const std::pair<InstrumentName, T>& instrument : _imageMetadataMap) {
+        _activeInstruments.addOption(guiNameCount++, instrument.first);
     }
 
     if (p.startInstrument.has_value()) {
@@ -208,7 +205,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 
 void RenderableSolarImagery::initializeGL() {
     _spacecraftCameraPlane = std::make_unique<SpacecraftCameraPlane>(_moveFactor);
-    _texture = std::make_unique<ghoul::opengl::Texture>(
+    _imageryTexture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(DefaultTextureSize, DefaultTextureSize, 1),
         GL_TEXTURE_2D,
         ghoul::opengl::Texture::Format::Red, // Format of the pixeldata
@@ -220,50 +217,13 @@ void RenderableSolarImagery::initializeGL() {
         ghoul::opengl::Texture::WrappingMode::ClampToEdge,
         ghoul::opengl::Texture::AllocateData::Yes,
         ghoul::opengl::Texture::TakeOwnership::No
-        );
+    );
 
-    updateTextureGPU();
+    updateImageryTexture();
 }
 
 void RenderableSolarImagery::deinitializeGL() {
     _spacecraftCameraPlane->destroy();
-}
-
-TransferFunction* RenderableSolarImagery::getTransferFunction() {
-    return _lut;
-}
-
-const std::unique_ptr<ghoul::opengl::Texture>& RenderableSolarImagery::getImageryTexture()
-{
-    return _texture;
-}
-
-const SpacecraftCameraPlane& RenderableSolarImagery::getCameraPlane() {
-    return *_spacecraftCameraPlane;
-}
-
-float RenderableSolarImagery::getContrastValue() {
-    return _contrastValue;
-}
-
-float RenderableSolarImagery::getGammaValue() {
-    return _gammaValue;
-}
-
-unsigned int RenderableSolarImagery::getImageResolutionFactor() {
-    return _imageSize;
-}
-
-glm::vec2 RenderableSolarImagery::getCenterPixel() {
-    return _currentCenterPixel;
-}
-
-float RenderableSolarImagery::getScale() {
-    return _currentScale;
-}
-
-bool RenderableSolarImagery::isCoronaGraph() {
-    return _isCoronaGraph;
 }
 
 bool RenderableSolarImagery::isReady() const {
@@ -271,7 +231,77 @@ bool RenderableSolarImagery::isReady() const {
         _spacecraftCameraPlane->isReady();
 }
 
-void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged) {
+void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
+    // Update texture
+    //if (checkBoundaries(data)) {
+    // TODO: The checkBoundaries logic was temporarily disabled since it causes
+    // a bug that prevents this renderablesolarimageryprojection component to be updated
+    // as soon as the view frustum is more than 90 degrees off.
+    updateImageryTexture();
+    //}
+    const glm::dvec3& sunPositionWorld = sceneGraphNode("Sun")->worldPosition();
+    _spacecraftCameraPlane->render(
+        data,
+        *_imageryTexture,
+        _tfMap[_currentActiveInstrument].get(),
+        sunPositionWorld,
+        _planeOpacity,
+        _contrastValue,
+        _gammaValue,
+        _enableBorder,
+        _enableFrustum,
+        _currentCenterPixel,
+        _currentScale,
+        _isCoronaGraph
+    );
+}
+
+void RenderableSolarImagery::update(const UpdateData& data) {
+    const Keyframe<ImageMetadata>* keyframe =
+        _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
+            global::timeManager->time().j2000Seconds(),
+            true
+        );
+
+    requestPredictiveFrames(keyframe, data);
+    _spacecraftCameraPlane->update();
+}
+
+TransferFunction* RenderableSolarImagery::transferFunction() {
+    return _tfMap[_currentActiveInstrument].get();
+}
+
+const std::unique_ptr<ghoul::opengl::Texture>&
+RenderableSolarImagery::imageryTexture() const
+{
+    return _imageryTexture;
+}
+
+const SpacecraftCameraPlane& RenderableSolarImagery::cameraPlane() const {
+    return *_spacecraftCameraPlane;
+}
+
+float RenderableSolarImagery::contrastValue() const {
+    return _contrastValue;
+}
+
+float RenderableSolarImagery::gammaValue() const {
+    return _gammaValue;
+}
+
+float RenderableSolarImagery::scale() const {
+    return _currentScale;
+}
+
+bool RenderableSolarImagery::isCoronaGraph() const {
+    return _isCoronaGraph;
+}
+
+glm::vec2 RenderableSolarImagery::getCenterPixel() const {
+    return _currentCenterPixel;
+}
+
+void RenderableSolarImagery::updateImageryTexture() {
     const Keyframe<ImageMetadata>* keyframe =
         _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
             global::timeManager->time().j2000Seconds(),
@@ -283,20 +313,23 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
         if (_currentImage != nullptr) {
             // No need to re-upload an empty image.
             _isCoronaGraph = false;
-            _imageSize = DefaultTextureSize;
             _currentScale = 0;
             _currentCenterPixel = glm::vec2(2.f);
             _currentImage = nullptr;
 
             // Create some dummy data that will be uploaded to GPU avoid UB
             std::vector<unsigned char> buffer;
-            buffer.resize(DefaultTextureSize * DefaultTextureSize * sizeof(ImagePrecision));
-            _texture->setDimensions(glm::uvec3(_imageSize, _imageSize, 1));
-            _texture->setPixelData(
+            buffer.resize(static_cast<size_t>(DefaultTextureSize) * DefaultTextureSize *
+                sizeof(ImagePrecision)
+            );
+            _imageryTexture->setDimensions(
+                glm::uvec3(DefaultTextureSize, DefaultTextureSize, 1)
+            );
+            _imageryTexture->setPixelData(
                 buffer.data(),
                 ghoul::opengl::Texture::TakeOwnership::No
             );
-            _texture->uploadTexture();
+            _imageryTexture->uploadTexture();
         }
         return;
     }
@@ -308,8 +341,8 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
 
     unsigned int imageSize = static_cast<unsigned int>(
         keyframe->data.fullResolution /
-        std::pow(2, static_cast<int>(_downsamplingLevel))
-        );
+        std::pow(2, static_cast<unsigned int>(_downsamplingLevel))
+    );
 
     std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
         keyframe->data.filePath,
@@ -326,7 +359,19 @@ void RenderableSolarImagery::updateTextureGPU(bool asyncUpload, bool resChanged)
             &keyframe->data,
             imageSize
         );
-        uploadDecodedDataToGPU(data);
+
+        _isCoronaGraph = data.metadata->isCoronaGraph;
+        _currentScale = data.metadata->scale;
+        _currentCenterPixel = data.metadata->centerPixel;
+        _currentImage = data.metadata;
+
+        _imageryTexture->setDimensions(glm::uvec3(data.imageSize, data.imageSize, 1));
+        _imageryTexture->setPixelData(
+            // @TODO (anden88 2026-02-09) : Can we do this without casting const away?+
+            const_cast<uint8_t*>(data.buffer.data()),
+            ghoul::opengl::Texture::TakeOwnership::No
+        );
+        _imageryTexture->uploadTexture();
     }
 }
 
@@ -390,8 +435,9 @@ void RenderableSolarImagery::requestPredictiveFrames(
 
     auto requestFrameIfNeeded = [this](const Keyframe<ImageMetadata>& kf) {
         // Check if the keyframe has already been decoded and exists in cache
-        const int imageSize =
-            kf.data.fullResolution / std::pow(2, _downsamplingLevel.value());
+        const int imageSize = kf.data.fullResolution /
+            static_cast<int>(std::pow(2, _downsamplingLevel.value())
+        );
 
         std::filesystem::path cacheFile = FileSys.cacheManager()->cachedFilename(
             kf.data.filePath,
@@ -434,24 +480,6 @@ void RenderableSolarImagery::requestPredictiveFrames(
     _predictionIsDirty = false;
 }
 
-void RenderableSolarImagery::uploadDecodedDataToGPU(
-                                              const solarbrowsing::DecodedImageData& data)
-{
-    _imageSize = data.imageSize;
-    _isCoronaGraph = data.metadata->isCoronaGraph;
-    _currentScale = data.metadata->scale;
-    _currentCenterPixel = data.metadata->centerPixel;
-    _currentImage = data.metadata;
-
-    _texture->setDimensions(glm::uvec3(_imageSize, _imageSize, 1));
-    _texture->setPixelData(
-        //_decodeBuffer.data(),
-        const_cast<uint8_t*>(data.buffer.data()), // YIKES, @TODO (anden88 2026-02-09) do not cast const away!!
-        ghoul::opengl::Texture::TakeOwnership::No
-    );
-    _texture->uploadTexture();
-}
-
 solarbrowsing::DecodedImageData RenderableSolarImagery::loadDecodedDataFromCache(
                                                         const std::filesystem::path& path,
                                                         const ImageMetadata* metadata,
@@ -477,6 +505,7 @@ solarbrowsing::DecodedImageData RenderableSolarImagery::loadDecodedDataFromCache
     file.read(reinterpret_cast<char*>(data.buffer.data()), nEntries * sizeof(uint8_t));
 
     if (!file) {
+        file.close();
         FileSys.cacheManager()->removeCacheFile(
             metadata->filePath,
             std::format("{}x{}", imageSize, imageSize)
@@ -496,13 +525,11 @@ void RenderableSolarImagery::saveDecodedDataToCache(const std::filesystem::path&
     std::ofstream file = std::ofstream(path, std::ofstream::binary);
     size_t nEntries = data.buffer.size();
     file.write(reinterpret_cast<const char*>(&nEntries), sizeof(nEntries));
-    file.write(reinterpret_cast<const char*>(data.buffer.data()), nEntries * sizeof(uint8_t));
+    file.write(
+        reinterpret_cast<const char*>(data.buffer.data()),
+        nEntries * sizeof(uint8_t)
+    );
     file.close();
-}
-
-void RenderableSolarImagery::decode(unsigned char* buffer, const std::string& filename) {
-    J2kCodec j2c(_verboseMode);
-    j2c.decodeIntoBuffer(filename, buffer, _downsamplingLevel);
 }
 
 bool RenderableSolarImagery::checkBoundaries(const RenderData& data) {
@@ -515,46 +542,6 @@ bool RenderableSolarImagery::checkBoundaries(const RenderData& data) {
         return false;
     }
     return true;
-}
-
-void RenderableSolarImagery::update(const UpdateData& data) {
-    const Keyframe<ImageMetadata>* keyframe =
-        _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
-            global::timeManager->time().j2000Seconds(),
-            true
-    );
-
-    requestPredictiveFrames(keyframe, data);
-
-    // Update lookup table, TODO: No need to do this every update
-    _lut = _tfMap[_currentActiveInstrument].get();
-    _spacecraftCameraPlane->update();
-}
-
-void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
-    // Update texture
-    //if (checkBoundaries(data)) {
-    // TODO: The checkBoundaries logic was temporarily disabled since it causes
-    // a bug that prevents this renderablesolarimageryprojection component to be updated
-    // as soon as the view frustum is more than 90 degrees off.
-    updateTextureGPU();
-    //}
-    const glm::dvec3& sunPositionWorld = sceneGraphNode("Sun")->worldPosition();
-    _spacecraftCameraPlane->render(
-        data,
-        *_texture,
-        _lut,
-        sunPositionWorld,
-        _planeOpacity,
-        _contrastValue,
-        _gammaValue,
-        _enableBorder,
-        _enableFrustum,
-        _currentCenterPixel,
-        _currentScale,
-        _imagePlaneOffset,
-        _isCoronaGraph
-    );
 }
 
 } // namespace openspace

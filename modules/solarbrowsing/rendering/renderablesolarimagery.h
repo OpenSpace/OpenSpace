@@ -35,9 +35,9 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/util/timeline.h>
+#include <chrono>
 #include <memory>
 #include <optional>
-#include <chrono>
 
 namespace ghoul::opengl { class Texture; }
 
@@ -45,7 +45,6 @@ namespace openspace {
 
 namespace documentation { struct Documentation; }
 
-class PixelBufferObject;
 class SpacecraftCameraPlane;
 class TransferFunction;
 
@@ -56,6 +55,7 @@ namespace solarbrowsing {
 class RenderableSolarImagery : public Renderable {
 public:
     RenderableSolarImagery(const ghoul::Dictionary& dictionary);
+    ~RenderableSolarImagery() override = default;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -67,24 +67,23 @@ public:
 
     static documentation::Documentation Documentation();
 
-    TransferFunction* getTransferFunction();
-    const std::unique_ptr<ghoul::opengl::Texture>& getImageryTexture();
-    const SpacecraftCameraPlane& getCameraPlane();
-    float getContrastValue();
-    float getGammaValue();
-    unsigned int getImageResolutionFactor();
-    glm::vec2 getCenterPixel();
-    float getScale();
-    bool isCoronaGraph();
+    TransferFunction* transferFunction();
+    const std::unique_ptr<ghoul::opengl::Texture>& imageryTexture() const;
+    const SpacecraftCameraPlane& cameraPlane() const;
+    float contrastValue() const;
+    float gammaValue() const;
+    float scale() const;
+    bool isCoronaGraph() const;
+    glm::vec2 getCenterPixel() const;
 
 private:
-    void updateTextureGPU(bool asyncUpload = true, bool resChanged = false);
-    //void listen();
-    bool checkBoundaries(const RenderData& data);
+    using InstrumentName = std::string;
 
-    void decode(unsigned char* buffer, const std::string& fileame);
+    void updateImageryTexture();
+    void requestPredictiveFrames(const Keyframe<ImageMetadata>* keyframe,
+        const UpdateData& data
+    );
 
-    void uploadDecodedDataToGPU(const solarbrowsing::DecodedImageData& data);
     solarbrowsing::DecodedImageData loadDecodedDataFromCache(
         const std::filesystem::path& path,
         const ImageMetadata* metadata,
@@ -94,9 +93,9 @@ private:
         const solarbrowsing::DecodedImageData& data
     );
 
-    void requestPredictiveFrames(const Keyframe<ImageMetadata>* keyframe,
-        const UpdateData& data
-    );
+    // @TODO anden88 2026-02-12: Currently unused, check if this is even something that
+    // we might need and update the render function accordingly.
+    bool checkBoundaries(const RenderData& data);
 
     properties::OptionProperty _activeInstruments;
     properties::FloatProperty _contrastValue;
@@ -108,32 +107,24 @@ private:
     properties::IntProperty _downsamplingLevel;
     properties::BoolProperty _verboseMode;
 
-    TransferFunction* _lut = nullptr;
-    std::unique_ptr<ghoul::opengl::Texture> _texture;
-
-    float _imagePlaneOffset = 0.0;
-    //double _realTimeDiff; // @TODO: figure out if this is needed
-
-    bool _isWithinFrustum = false;
-    bool _isWithinFrustumLast = true;
-    unsigned int _bufferCountOffset = 1;
-    unsigned int _imageSize = 32;
-
-    float _currentScale = 0;
-    glm::vec2 _currentCenterPixel = glm::vec2(2.f);
-    bool _isCoronaGraph = false;
-
-    // For debugging
-    unsigned int _frameSkipCount = 0;
-
-    std::unordered_map<std::string, std::shared_ptr<TransferFunction>> _tfMap;
-    std::string _currentActiveInstrument;
+    // The decoded image texture
+    std::unique_ptr<ghoul::opengl::Texture> _imageryTexture;
+    // @TODO anden88 2026-02-12: This pointer points to the current keyframe metadata in
+    // the timeline given by _imageMetadataMap. We risk dangling pointers if the timeline
+    // reallocates due to additional keyframes.
     const ImageMetadata* _currentImage = nullptr;
-    std::unordered_map<std::string, Timeline<ImageMetadata>> _imageMetadataMap;
+    // Data for the currently shown image
+    float _currentScale = 0;
+    bool _isCoronaGraph = false;
+    glm::vec2 _currentCenterPixel = glm::vec2(2.f);
+
+    InstrumentName _currentActiveInstrument;
+    std::unordered_map<InstrumentName, Timeline<ImageMetadata>> _imageMetadataMap;
+    std::unordered_map<InstrumentName, std::shared_ptr<TransferFunction>> _tfMap;
+
     std::unique_ptr<SpacecraftCameraPlane> _spacecraftCameraPlane;
+
     std::unique_ptr<solarbrowsing::AsyncImageDecoder> _asyncDecoder;
-
-
     const Keyframe<ImageMetadata>* _lastPredictedKeyframe = nullptr;
     bool _predictionIsDirty = true;
 };

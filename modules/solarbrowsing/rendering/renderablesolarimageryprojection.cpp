@@ -152,7 +152,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
         bool isCoronaGraph = solarImagery->isCoronaGraph();
         bool enabled = solarImagery->isEnabled();
 
-        const SpacecraftCameraPlane& plane = solarImagery->getCameraPlane();
+        const SpacecraftCameraPlane& plane = solarImagery->cameraPlane();
         const glm::dvec3 planePos = plane.worldPosition();
         const glm::dmat4 planeRot = glm::inverse(plane.worldRotation());
 
@@ -162,18 +162,18 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
                         planeRot * glm::dmat4(data.modelTransform.rotation));
         _shader->setUniform("planePositionSpacecraft[" + std::to_string(i) + "]",
                             glm::dvec3(planeRot * glm::dvec4(planePos - data.modelTransform.translation, 1.0)));
-        _shader->setUniform("gammaValue[" + std::to_string(i) + "]", solarImagery->getGammaValue());
-        _shader->setUniform("contrastValue[" + std::to_string(i) + "]", solarImagery->getContrastValue());
-        _shader->setUniform("scale[" + std::to_string(i) + "]", solarImagery->getScale());
+        _shader->setUniform("gammaValue[" + std::to_string(i) + "]", solarImagery->gammaValue());
+        _shader->setUniform("contrastValue[" + std::to_string(i) + "]", solarImagery->contrastValue());
+        _shader->setUniform("scale[" + std::to_string(i) + "]", solarImagery->scale());
         _shader->setUniform("centerPixel[" + std::to_string(i) + "]", solarImagery->getCenterPixel());
 
         // Imagery texture
         txUnits[i].activate();
-        solarImagery->getImageryTexture()->bind();
+        solarImagery->imageryTexture()->bind();
         _shader->setUniform("imageryTexture[" + std::to_string(i) + "]", txUnits[i]);
         tfUnits[i].activate();
 
-        TransferFunction* lut = solarImagery->getTransferFunction();
+        TransferFunction* lut = solarImagery->transferFunction();
         if (lut && solarImagery->isEnabled()) {
             lut->bind();
             _shader->setUniform("hasLut[" + std::to_string(i) + "]", true);
