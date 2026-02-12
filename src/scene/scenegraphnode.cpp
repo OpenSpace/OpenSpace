@@ -847,6 +847,8 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
 
     if (_state != State::GLInitialized ||
         !(_renderable && _renderable->isVisible() && _renderable->isReady()) ||
+        (!_renderable->matchesRenderBinMask(data.renderBinMask) &&
+            !_renderable->matchesSecondaryRenderBin(data.renderBinMask)) ||
         !isTimeFrameActive())
     {
         return;
