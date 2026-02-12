@@ -25,108 +25,69 @@
 #include <modules/solarbrowsing/tasks/helioviewerdownloadtask.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/documentation/verifier.h>
-#include <openspace/util/spicemanager.h>
-#include <openspace/util/httprequest.h>
-#include <unordered_set>
-#include <ghoul/logging/logmanager.h>
-#include <ghoul/filesystem/filesystem.h>
 #include <openspace/json.h>
-#include <iostream>
+#include <openspace/util/httprequest.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <atomic>
+#include <execution>
 #include <format>
+#include <ctime>
+#include <mutex>
+#include <sstream>
 
 namespace {
     constexpr const char* _loggerCat = "HelioviewerDownloadTask";
 
-    constexpr const char* KeySourceId = "SourceId";
-    constexpr const char* KeyName = "Name";
-    constexpr const char* KeyInstrument = "Instrument";
-    constexpr const char* KeyStartTime = "StartTime";
-    constexpr const char* KeyTimeStep = "TimeStep";
-    constexpr const char* KeyEndTime = "EndTime";
-    constexpr const char* KeyOutputFolder = "OutputFolder";
-    constexpr const char* KeyTimeKernel = "TimeKernel";
-}
+    struct [[codegen::Dictionary(HelioviewerDownloadTask)]] Parameters {
+        // The folder where to output the downloaded jp2 files.
+        std::filesystem::path outputFolder [[codegen::directory()]];
+
+        // Name of the spacecraft or telescope.
+        std::string name;
+
+        // Name of the instrument e.g., 'AIA-171', this name is used to lookup the
+        // corresponding colormaps and as such must match the naming convetion.
+        std::string instrument;
+
+        // The preferred number of seconds between each timestep. The actual timestep will
+        // be determined by the availability of data products but will never be smaller
+        // than this number. Use this for  Use this for temporal downsampling.
+        double timeStep;
+
+        // The beginning of the time interval to extract data from. Format:
+        // YYYY-MM-DDTHH:MM:SS
+        std::string startTime [[codegen::annotation("A valid date in ISO 8601 format")]];
+
+        // The end of the time interval to extract data from. Format YYYY-MM-DDTHH:MM:SS
+        std::string endTime [[codegen::annotation("A valid date in ISO 8601 format")]];
+
+        // The unique identifier as specified in the helioviewer documentation:
+        // https://api.helioviewer.org/docs/v2/appendix/data_sources.html
+        int sourceId;
+    };
+#include "helioviewerdownloadtask_codegen.cpp"
+} // namespace
 
 namespace openspace {
 
 documentation::Documentation HelioviewerDownloadTask::documentation() {
-    using namespace documentation;
-    return {
-        "HelioviewerDownloadTask",
-        "helioviewer_download_task",
-        /*{
-            {
-                "Type",
-                new StringEqualVerifier("HelioviewerDownloadTask"),
-                Optional::No,
-                "The type of this task"
-            },
-            {
-                KeyOutputFolder,
-                new StringAnnotationVerifier("A folder on the local machine"),
-                Optional::No,
-                "The folder where to output the downloaded jp2 files"
-            },
-            {
-                KeyName,
-                new StringVerifier,
-                Optional::No,
-                "Name of the spacecraft or telescope"
-            },
-            {
-                KeyInstrument,
-                new StringVerifier,
-                Optional::No,
-                "Name of the intrument"
-            },
-            {
-                KeyTimeStep,
-                new DoubleAnnotationVerifier("A positive number"),
-                Optional::No,
-                "The preferred number of seconds between each timestep. "
-                "The actual timestep will be determined by the availability of data "
-                "products but will never be smaller than this number. Use this for "
-                "temporal downsampling."
-            },
-            {
-                KeyStartTime,
-                new StringAnnotationVerifier("A date with format YYYY-MM-DDTHH:MM:SS"),
-                Optional::No,
-                "The beginning of the time interval to exteract data from"
-            },
-            {
-                KeyEndTime,
-                new StringAnnotationVerifier("A date with format YYYY-MM-DDTHH:MM:SS"),
-                Optional::No,
-                "The end of the time interval to exteract data from"
-            },
-            {
-                KeySourceId,
-                new IntVerifier,
-                Optional::No,
-                "The unique identifier as specified in "
-                "https://api.helioviewer.org/docs/v2/#appendix"
-            },
-            {
-                KeyTimeKernel,
-                new StringAnnotationVerifier("A file path to a cdf file"),
-                Optional::No,
-                "A file path to a tls spice kernel used for time",
-            },
-        }*/
-    };
+    return codegen::doc<Parameters>("helio_viewer_download_task");
 }
 
 HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictionary) {
-    _startTime = dictionary.value<std::string>(KeyStartTime);
-    _endTime = dictionary.value<std::string>(KeyEndTime);
-    _timeStep = dictionary.value<double>(KeyTimeStep);
-    _sourceId = static_cast<int>(dictionary.value<double>(KeySourceId));
-    _name = dictionary.value<std::string>(KeyName);
-    _instrument = dictionary.value<std::string>(KeyInstrument);
-    _outputFolder = dictionary.value<std::string>(KeyOutputFolder);
-    _timeKernelPath = absPath(dictionary.value<std::string>(KeyTimeKernel));
+
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _startTime = p.startTime;
+    _endTime = p.endTime;
+    _timeStep = p.timeStep;
+    _sourceId = p.sourceId;
+    _name = p.name;
+    _instrument = p.instrument;
+    _outputFolder = p.outputFolder;
 }
 
 std::string HelioviewerDownloadTask::description() {
@@ -134,43 +95,36 @@ std::string HelioviewerDownloadTask::description() {
 }
 
 void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCallback) {
-    SpiceManager::ref().loadKernel(_timeKernelPath);
-
-    const std::string jpxRequest =
-        std::format("http://api.helioviewer.org/v2/getJPX/?startTime={}&endTime={}"
-                    "&sourceId={}&verbose=true&cadence=true&cadence={}",
-                    _startTime,
-                    _endTime,
-                    _sourceId,
-                    _timeStep);
+    const std::string jpxRequest = std::format(
+        "http://api.helioviewer.org/v2/getJPX/?startTime={}&endTime={}"
+        "&sourceId={}&verbose=true&cadence=true&cadence={}",
+        _startTime,
+        _endTime,
+        _sourceId,
+        _timeStep
+    );
 
     LINFO(std::format("Requesting {}", jpxRequest));
 
     HttpMemoryDownload fileListing(jpxRequest);
     fileListing.start();
     fileListing.wait();
-    //const HttpRequest::RequestOptions opt = { 0 };
 
-    //fileListing.download(opt);
     if (!fileListing.hasSucceeded()) {
-        LERROR(std::format("Request to Heliviewer API failed."));
+        throw ghoul::RuntimeError(std::format("Request to Helioviewer API failed."));
     }
 
+    LDEBUG("Fetching Helioviewer JPX data");
     const std::vector<char>& listingData = fileListing.downloadedData();
     const std::string listingString(listingData.begin(), listingData.end());
 
     std::vector<double> frames;
     try {
         nlohmann::json json = nlohmann::json::parse(listingString.c_str());
-        const auto& framesIt = json.find("frames");
-        if (framesIt == json.end()) {
-            LERROR(std::format("Failed to acquire frames"));
-        }
+        frames = json["frames"].get<std::vector<double>>();
 
-        nlohmann::json frameData = framesIt.value().get<nlohmann::json>();
-        for (const auto& frame : frameData) {
-            double epoch = frame.get<size_t>();
-            frames.push_back(epoch);
+        if (frames.empty()) {
+            LERROR(std::format("Failed to acquire frames"));
         }
     }
     catch (...) {
@@ -178,53 +132,92 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
         return;
     }
 
-    for (size_t i = 0; i < frames.size(); ++i) {
-        const double epoch = frames[i];
+    LDEBUG("Processing frames");
+    std::vector<std::string> epochAsIsoString;
+    epochAsIsoString.reserve(frames.size());
+
+    size_t count = 0;
+    for (double epoch : frames) {
         const double j2000InEpoch = 946684800.0;
         const Time time(epoch - j2000InEpoch);
 
-        std::string_view formattedDate = time.ISO8601();
-        const std::string imageUrl = std::format(
-            "http://api.helioviewer.org/v2/getJP2Image/?date={}Z&sourceId={}",
-            formattedDate,
-            _sourceId
-        );
-
-        // Format file name according to solarbrowsing convention.
-        const std::string year(formattedDate.begin(), formattedDate.begin() + 4);
-        const std::string month(formattedDate.begin() + 5,  formattedDate.begin() + 7);
-        const std::string day(formattedDate.begin() + 8, formattedDate.begin() + 10);
-        const std::string hour(formattedDate.begin() + 11, formattedDate.begin() + 13);
-        const std::string minute(formattedDate.begin() + 14, formattedDate.begin() + 16);
-        const std::string second(formattedDate.begin() + 17, formattedDate.begin() + 19);
-        const std::string millis(formattedDate.begin() + 20, formattedDate.begin() + 23);
-
-        const std::string outFilename = std::format(
-            "{}/{}_{}_{}__{}_{}_{}_{}__{}_{}.jp2",
-            _outputFolder,
-            year,
-            month,
-            day,
-            hour,
-            minute,
-            second,
-            millis,
-            _name,
-            _instrument,
-            static_cast<size_t>(epoch)
-        );
-
-        HttpFileDownload imageDownload(imageUrl, absPath(outFilename));
-        //imageDownload.download(opt);
-        imageDownload.start();
-        imageDownload.wait();
-        if (!imageDownload.hasSucceeded()) {
-            LERROR(std::format("Request to image {} failed.", imageUrl));
-            continue;
-        }
-
-        progressCallback(static_cast<float>(i) / static_cast<float>(frames.size()));
+        epochAsIsoString.emplace_back(time.ISO8601());
+        count++;
+        progressCallback(static_cast<float>(count) / static_cast<float>(frames.size()));
     }
+
+    std::atomic<size_t> i = 0;
+    std::mutex progressMutex;
+    const size_t totalFrames = epochAsIsoString.size();
+
+    // TODO anden88 2026-02-12 can we flush so the output doesn't look lile this:
+    // (D) HelioviewerDow..Task Downloading image data from Helioviewer=======>] 100 %
+    LDEBUG("Downloading image data from Helioviewer               ");
+    std::for_each(
+        std::execution::par,
+        epochAsIsoString.begin(),
+        epochAsIsoString.end(),
+        [&](const std::string& formattedDate) {
+
+            const std::string imageUrl = std::format(
+                "http://api.helioviewer.org/v2/getJP2Image/?date={}Z&sourceId={}",
+                formattedDate,
+                _sourceId
+            );
+
+            // Format file name according to solarbrowsing convention. Since we cannot save
+            // files with ':' we have to destruct the ISO string and reconstruct it when
+            // loading the image.
+            std::istringstream ss = std::istringstream(std::string(formattedDate));
+
+            std::tm tm = {};
+            int milliseconds = 0;
+            const std::string format = "%Y-%m-%dT%H:%M:%S";
+
+            ss >> std::get_time(&tm, format.c_str());
+            if (ss.peek() == '.') {
+                ss.get();
+                ss >> milliseconds;
+            }
+
+            const std::string outFilename = std::format(
+                "{}/{:04}_{:02}_{:02}__{:02}_{:02}_{:02}_{:03}__{}_{}.jp2",
+                _outputFolder,
+                tm.tm_year + 1900,
+                tm.tm_mon + 1,
+                tm.tm_mday,
+                tm.tm_hour,
+                tm.tm_min,
+                tm.tm_sec,
+                milliseconds,
+                _name,
+                _instrument
+            );
+
+            // Skip existing files
+            if (std::filesystem::exists(outFilename)) {
+                size_t done = ++i;
+                {
+                    std::lock_guard lock(progressMutex);
+                    progressCallback(static_cast<float>(done) / static_cast<float>(totalFrames));
+                }
+                return;
+            }
+
+            HttpFileDownload imageDownload(imageUrl, absPath(outFilename));
+            imageDownload.start();
+            imageDownload.wait();
+            if (!imageDownload.hasSucceeded()) {
+                LERROR(std::format("Request to image {} failed.", imageUrl));
+                return;
+            }
+            size_t done = ++i;
+            {
+                std::lock_guard lock(progressMutex);
+                progressCallback(static_cast<float>(done) / static_cast<float>(totalFrames));
+            }
+        }
+    );
 }
 
-}
+} // namespace openspace

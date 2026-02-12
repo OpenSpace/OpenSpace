@@ -41,7 +41,7 @@ public:
     static documentation::Documentation documentation();
 
 private:
-    std::string _outputFolder;
+    std::filesystem::path _outputFolder;
     double _timeStep;
     int _sourceId;
     std::string _name;
