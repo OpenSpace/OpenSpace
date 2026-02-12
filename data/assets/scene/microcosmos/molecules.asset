@@ -1,0 +1,337 @@
+local moleculeDb = "https://home.thissma.fr/moldata/"
+
+
+
+local moleculeO2 = asset.resource({
+  Name = "Molecule O2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_o2",
+  Version = 1
+})
+
+local moleculeH2O = asset.resource({
+  Name = "Molecule H2O",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_h2o",
+  Version = 1
+})
+
+local moleculeCO2 = asset.resource({
+  Name = "Molecule CO2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_co2",
+  Version = 1
+})
+
+local moleculeC60 = asset.resource({
+  Name = "Molecule C60",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_c60",
+  Version = 1
+})
+
+local molecule1ala500 = asset.resource({
+  Name = "Molecule 1ALA-500",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_1ala-500",
+  Version = 1
+})
+
+local molecule1bna = asset.resource({
+  Name = "Molecule 1BNA",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_1bna",
+  Version = 1
+})
+
+local iceMelting = asset.resource({
+  Name = "Ice Melting Simulation",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_ice-melting",
+  Version = 1
+})
+
+local aspirin = asset.resource({
+  Name = "Molecule Aspirin",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_aspirin",
+  Version = 1
+})
+
+local amyloid = asset.resource({
+  Name = "Molecule Amyloid",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_amyloid",
+  Version = 1
+})
+
+
+local MoleculeMisc = {
+  Identifier = "MoleculeMisc",
+  Tag = { "molecule_visualization" },
+  GUI = {
+    Name = "Molecule Museum",
+    Path = "/Microcosmos/Molecules/Misc",
+    Hidden = true
+  }
+}
+
+local MoleculeO2 = {
+  Identifier = "MoleculeMiscO2",
+  Parent = MoleculeMisc.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 0.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeO2 .. "o2.arc",
+    TrajectoryFile = moleculeO2 .. "o2.arc",
+    AnimationSpeed = 5.0
+  },
+  Tag = { "molecule_visualization" },
+  GUI = {
+    Name = "Dioxygen (O2)",
+    Path = "/Microcosmos/Molecules/Misc"
+  }
+}
+
+local MoleculeH2O = {
+  Identifier = "MoleculeMiscH2O",
+  Parent = MoleculeMisc.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 20.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeH2O .. "h2o.arc"
+  },
+  Tag = { "molecule_visualization" },
+  GUI = {
+    Name = "Water (H2O)",
+    Path = "/Microcosmos/Molecules/Misc"
+  }
+}
+
+local MoleculeCO2 = {
+  Identifier = "MoleculeMiscCO2",
+  Parent = MoleculeMisc.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 40.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeCO2 .. "co2.arc",
+    Representations = {
+      {
+        Type = "Licorice"
+      }
+    }
+  },
+  Tag = { "molecule_visualization" },
+  GUI = {
+    Name = "Carbon Dioxyde (CO2)",
+    Path = "/Microcosmos/Molecules/Misc"
+  }
+}
+
+local MoleculeC60 = {
+  Identifier = "MoleculeMiscC60",
+  Parent = MoleculeMisc.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 60.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = moleculeC60 .. "c60.arc",
+    Representations = {
+      {
+        Type = "Licorice"
+      }
+    }
+  },
+  Tag = { "molecule_visualization" },
+  GUI = {
+    Name = "C60",
+    Path = "/Microcosmos/Molecules/Misc"
+  }
+}
+
+local MoleculeAlanin = {
+  Identifier = "MoleculeMiscAlanin",
+  Parent = MoleculeMisc.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 110.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = molecule1ala500 .. "1ALA-500.pdb",
+    TrajectoryFile = molecule1ala500 .. "1ALA-500.pdb",
+    AnimationSpeed = 5.0
+  },
+  Tag = { "molecule_visualization" },
+  GUI = {
+    Name = "Alanin",
+    Path = "/Microcosmos/Molecules/Misc"
+  }
+}
+
+local MoleculeDNA = {
+  Identifier = "MoleculeMiscDNA",
+  Parent = MoleculeMisc.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 160.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = molecule1bna .. "1bna.pdb",
+    Representations = {
+      {
+        Type = "Licorice"
+      }
+    }
+  },
+  Tag = { "molecule_visualization" },
+  GUI = {
+    Name = "DNA",
+    Path = "/Microcosmos/Molecules/Misc"
+  }
+}
+
+local MoleculeIce = {
+  Identifier = "MoleculeMiscIce",
+  Parent = MoleculeMisc.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 210.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = iceMelting .. "ice.gro",
+    TrajectoryFile = iceMelting .. "ice.xtc",
+    AnimationSpeed = 10.0
+  },
+  Tag = { "molecule_visualization" },
+  GUI = {
+    Name = "Ice Melting",
+    Path = "/Microcosmos/Molecules/Misc"
+  }
+}
+
+local MoleculeAspirin = {
+  Identifier = "MoleculeMiscAspirin",
+  Parent = MoleculeMisc.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 310.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = aspirin .. "aspirin.gro",
+    TrajectoryFile = aspirin .. "aspirin.xtc",
+    AnimationSpeed = 5.0,
+    Representations = {
+      {
+        Type = "Licorice",
+        Filter = "not water"
+      }
+    }
+  },
+  Tag = { "molecule_visualization" },
+  GUI = {
+    Name = "Aspirin",
+    Path = "/Microcosmos/Molecules/Misc"
+  }
+}
+
+local MoleculeAmyloidMarker = {
+  Identifier = "MoleculeMiscAmyloidMarker",
+  Parent = MoleculeMisc.Identifier,
+  Transform = {
+    Translation = {
+      Type = "StaticTranslation",
+      Position = { 510.0, 0.0, 0.0 }
+    }
+  },
+  Renderable = {
+    Type = "RenderableMolecule",
+    MoleculeFile = amyloid .. "60pft_in_tau.gro",
+    TrajectoryFile = amyloid .. "60pft_in_tau-traj-96-106ns.xtc",
+    AnimationSpeed = 0.1
+  },
+  Tag = { "molecule_visualization" },
+  GUI = {
+    Name = "Amyloid Marker",
+    Path = "/Microcosmos/Molecules/Misc"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(MoleculeMisc)
+  openspace.addSceneGraphNode(MoleculeO2)
+  openspace.addSceneGraphNode(MoleculeH2O)
+  openspace.addSceneGraphNode(MoleculeCO2)
+  openspace.addSceneGraphNode(MoleculeC60)
+  openspace.addSceneGraphNode(MoleculeAlanin)
+  openspace.addSceneGraphNode(MoleculeDNA)
+  openspace.addSceneGraphNode(MoleculeIce)
+  openspace.addSceneGraphNode(MoleculeAspirin)
+  openspace.addSceneGraphNode(MoleculeAmyloidMarker)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(MoleculeAmyloidMarker)
+  openspace.removeSceneGraphNode(MoleculeAspirin)
+  openspace.removeSceneGraphNode(MoleculeIce)
+  openspace.removeSceneGraphNode(MoleculeDNA)
+  openspace.removeSceneGraphNode(MoleculeAlanin)
+  openspace.removeSceneGraphNode(MoleculeC60)
+  openspace.removeSceneGraphNode(MoleculeCO2)
+  openspace.removeSceneGraphNode(MoleculeH2O)
+  openspace.removeSceneGraphNode(MoleculeO2)
+  openspace.removeSceneGraphNode(MoleculeMisc)
+end)
+
+asset.export(MoleculeMisc)
+asset.export(MoleculeO2)
+asset.export(MoleculeH2O)
+asset.export(MoleculeCO2)
+asset.export(MoleculeC60)
+asset.export(MoleculeAlanin)
+asset.export(MoleculeDNA)
+asset.export(MoleculeIce)
+asset.export(MoleculeAspirin)
+asset.export(MoleculeAmyloidMarker)
+
+
+
+asset.meta = {
+  Name = "Various Molecules",
+  Description = [[Visualizes a selection of different molecules to represent the
+    functionality of the MolVis rendering framework.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

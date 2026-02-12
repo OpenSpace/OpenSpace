@@ -1,0 +1,62 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#version __CONTEXT__
+
+const float ExposureBias = 0.5;
+
+out vec4 fragColor;
+
+uniform sampler2D tex;
+uniform float exposure = 1.0;
+uniform float gamma = 2.2;
+
+// Source from here
+// http://filmicworlds.com/blog/filmic-tonemapping-operators/
+
+vec3 unchartedTonemap(vec3 x) {
+  const float A = 0.15;
+  const float B = 0.50;
+  const float C = 0.10;
+  const float D = 0.20;
+  const float E = 0.02;
+  const float F = 0.30;
+  return ((x * (A * x + C * B) + D * E) / (x * (A * x + B) + D * F)) - E / F;
+}
+
+vec3 uncharted(vec3 c) {
+  const float W = 11.2;
+  c *= exposure;
+
+  vec3 curr = unchartedTonemap(ExposureBias * c);
+  vec3 whiteScale = vec3(1.0) / unchartedTonemap(vec3(W));
+  vec3 color = curr * whiteScale;
+  return pow(color, 1.0 / vec3(gamma));
+}
+
+void main() {
+  vec4 color = texelFetch(tex, ivec2(gl_FragCoord.xy), 0);
+  color.rgb = uncharted(color.rgb);
+  fragColor = color;
+}
