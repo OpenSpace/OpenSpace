@@ -24,9 +24,7 @@
 
 #version __CONTEXT__
 
-uniform mat4 modelViewProjectionTransform;
-uniform float scale;
-uniform vec2 centerPixel;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
@@ -35,21 +33,23 @@ out vec2 vs_st;
 out vec4 vs_positionScreenSpace;
 out float s;
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+uniform mat4 modelViewProjectionTransform;
+uniform float scale;
+uniform vec2 centerPixel;
 
 float HALF_SUN_RADIUS = 696701000.0; //(1391600000.0 * 0.50);
 float R_SUN = 995.90523 / 1.5877740;
 
 void main() {
-    // Transform the damn psc to homogenous coordinate
-    vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
-    position.x += centerPixel.x;
-    position.y += centerPixel.y;
-    position.xy *= 1.0 / scale;
+  // Transform the damn psc to homogenous coordinate
+  vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
+  position.x += centerPixel.x;
+  position.y += centerPixel.y;
+  position.xy *= 1.0 / scale;
 
-    vec4 positionClipSpace = modelViewProjectionTransform * position;
-    vs_positionScreenSpace = z_normalization(positionClipSpace);
-    gl_Position = vs_positionScreenSpace;
+  vec4 positionClipSpace = modelViewProjectionTransform * position;
+  vs_positionScreenSpace = z_normalization(positionClipSpace);
+  gl_Position = vs_positionScreenSpace;
 
-    vs_st = in_st;
+  vs_st = in_st;
 }

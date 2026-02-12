@@ -28,16 +28,11 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/util/sphere.h>
-
-
 #include <memory>
 #include <string>
 #include <vector>
 
-namespace ghoul::opengl {
-    class ProgramObject;
-    class Texture;
-} // namespace ghoul::opengl
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
@@ -48,6 +43,7 @@ class SceneGraphNode;
 class RenderableSolarImageryProjection : public Renderable {
 public:
     RenderableSolarImageryProjection(const ghoul::Dictionary& dictionary);
+    ~RenderableSolarImageryProjection() override = default;
 
     void initialize() override;
 

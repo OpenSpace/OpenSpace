@@ -24,13 +24,9 @@
 
 #version __CONTEXT__
 
-const int MAX_SPACECRAFT_OBSERVATORY = 7;
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-uniform mat4 modelViewProjectionTransform;
-uniform bool isCoronaGraph[MAX_SPACECRAFT_OBSERVATORY];
-uniform bool isEnabled[MAX_SPACECRAFT_OBSERVATORY];
-uniform dmat4 sunToSpacecraftReferenceFrame[MAX_SPACECRAFT_OBSERVATORY];
-uniform int numSpacecraftCameraPlanes;
+const int MaxSpacecraftObservatories = 7;
 
 layout(location = 0) in vec4 in_position;
 layout(location = 1) in vec2 in_st;
@@ -38,26 +34,31 @@ layout(location = 1) in vec2 in_st;
 out vec4 vs_positionScreenSpace;
 out vec3 vs_positionModelSpace;
 out vec4 clipSpace;
-out vec3 vUv[MAX_SPACECRAFT_OBSERVATORY];
+out vec3 vUv[MaxSpacecraftObservatories];
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+uniform mat4 modelViewProjectionTransform;
+uniform bool isCoronaGraph[MaxSpacecraftObservatories];
+uniform bool isEnabled[MaxSpacecraftObservatories];
+uniform dmat4 sunToSpacecraftReferenceFrame[MaxSpacecraftObservatories];
+uniform int numSpacecraftCameraPlanes;
+
 
 void main() {
-    // Transform the damn psc to homogenous coordinate
-    vec4 position = vec4(in_position.xyz, 1);
-    vs_positionModelSpace = position.xyz;
+  // Transform the damn psc to homogenous coordinate
+  vec4 position = vec4(in_position.xyz, 1);
+  vs_positionModelSpace = position.xyz;
 
-    // Transform the positions to the reference frame of the spacecraft to get tex coords
-    for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
-        vUv[i] = vec3(0.0, 0.0, 0.0);
-        if (isCoronaGraph[i] || !isEnabled[i])  {
-            continue;
-        };
-        vUv[i] = vec3(sunToSpacecraftReferenceFrame[i] * dvec4(position)).xyz;
-    }
+  // Transform the positions to the reference frame of the spacecraft to get tex coords
+  for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
+    vUv[i] = vec3(0.0, 0.0, 0.0);
+    if (isCoronaGraph[i] || !isEnabled[i])  {
+      continue;
+    };
+    vUv[i] = vec3(sunToSpacecraftReferenceFrame[i] * dvec4(position)).xyz;
+  }
 
-    vec4 positionClipSpace = modelViewProjectionTransform * position;
-    clipSpace = positionClipSpace;
-    vs_positionScreenSpace = z_normalization(positionClipSpace);
-    gl_Position = vs_positionScreenSpace;
+  vec4 positionClipSpace = modelViewProjectionTransform * position;
+  clipSpace = positionClipSpace;
+  vs_positionScreenSpace = z_normalization(positionClipSpace);
+  gl_Position = vs_positionScreenSpace;
 }

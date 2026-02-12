@@ -26,26 +26,21 @@
 #define __OPENSPACE_MODULE_SPACE___HELIOVIEWERDOWNLOADTASK___H__
 
 #include <openspace/util/task.h>
-#include <openspace/util/time.h>
-#include <openspace/documentation/documentation.h>
 
-#include <ghoul/glm.h>
-
+#include <filesystem>
 #include <string>
-#include <vector>
-#include <ghoul/filesystem/filesystem.h>
 
 namespace openspace {
 
 class HelioviewerDownloadTask : public Task {
 public:
-    HelioviewerDownloadTask(const ghoul::Dictionary& dictionary);
+    explicit HelioviewerDownloadTask(const ghoul::Dictionary& dictionary);
+
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
     static documentation::Documentation documentation();
 
 private:
-
     std::string _outputFolder;
     double _timeStep;
     int _sourceId;

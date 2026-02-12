@@ -27,17 +27,13 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
 #include <modules/solarbrowsing/util/structs.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/doubleproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
-#include <openspace/util/timeline.h>
-#include <chrono>
 #include <memory>
-#include <optional>
 
 namespace ghoul::opengl { class Texture; }
 
@@ -77,8 +73,6 @@ public:
     glm::vec2 getCenterPixel() const;
 
 private:
-    using InstrumentName = std::string;
-
     void updateImageryTexture();
     void requestPredictiveFrames(const Keyframe<ImageMetadata>* keyframe,
         const UpdateData& data
@@ -121,7 +115,7 @@ private:
     glm::vec2 _currentCenterPixel = glm::vec2(2.f);
 
     InstrumentName _currentActiveInstrument;
-    std::unordered_map<InstrumentName, Timeline<ImageMetadata>> _imageMetadataMap;
+    ImageMetadataMap _imageMetadataMap;
     std::unordered_map<InstrumentName, std::shared_ptr<TransferFunction>> _tfMap;
 
     std::unique_ptr<SpacecraftCameraPlane> _spacecraftCameraPlane;

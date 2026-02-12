@@ -24,32 +24,31 @@
 
 #version __CONTEXT__
 
+#include "PowerScaling/powerScaling_vs.hglsl"
+
+layout(location = 0) in vec4 in_position;
+
+out vec4 vs_positionScreenSpace;
+
 uniform mat4 modelViewProjectionTransform;
 uniform mat4 modelViewProjectionTransformPlane;
 
 uniform float scale;
 uniform vec2 centerPixel;
 
-layout(location = 0) in vec4 in_position;
-
-out vec4 vs_positionScreenSpace;
-
-#include "PowerScaling/powerScaling_vs.hglsl"
-
 void main() {
+  // Transform in either planes or spacecraft coordinate system
+  if (in_position.w == 1) {
+    vec4 position = in_position;
+    position.x += centerPixel.x;
+    position.y += centerPixel.y;
+    position.xy *= 1.0 / scale;
+    vec4 positionClipSpace = modelViewProjectionTransformPlane * vec4(position.xyz, 1);
+    vs_positionScreenSpace = z_normalization(positionClipSpace);
+  } else {
+    vec4 positionClipSpace = modelViewProjectionTransform * vec4(in_position.xyz, 1);
+    vs_positionScreenSpace = z_normalization(positionClipSpace);
+  }
 
-    // Transform in either planes or spacecraft coordinate system
-    if (in_position.w == 1) {
-        vec4 position = in_position;
-        position.x += centerPixel.x;
-        position.y += centerPixel.y;
-        position.xy *= 1.0 / scale;
-        vec4 positionClipSpace = modelViewProjectionTransformPlane * vec4(position.xyz, 1);
-        vs_positionScreenSpace = z_normalization(positionClipSpace);
-    } else {
-        vec4 positionClipSpace = modelViewProjectionTransform * vec4(in_position.xyz, 1);
-        vs_positionScreenSpace = z_normalization(positionClipSpace);
-    }
-
-    gl_Position = vs_positionScreenSpace;
+  gl_Position = vs_positionScreenSpace;
 }

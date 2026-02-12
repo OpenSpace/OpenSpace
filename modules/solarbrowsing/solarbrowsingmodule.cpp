@@ -28,9 +28,7 @@
 #include <modules/solarbrowsing/tasks/helioviewerdownloadtask.h>
 #include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/globals.h>
-#include <openspace/engine/globalscallbacks.h>
+#include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/task.h>
 #include <openspace/util/factorymanager.h>
@@ -38,15 +36,15 @@
 
 namespace openspace {
 
-SolarBrowsingModule::SolarBrowsingModule() : OpenSpaceModule(Name) {
-}
+SolarBrowsingModule::SolarBrowsingModule() : OpenSpaceModule(Name) {}
 
 SpacecraftImageryManager& SolarBrowsingModule::spacecraftImageryManager() {
     return _spacecraftImageryManager;
 }
 
 void SolarBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
     fRenderable->registerClass<RenderableSolarImagery>(
@@ -56,11 +54,18 @@ void SolarBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
         "RenderableSolarImageryProjection"
     );
 
-    auto fTask = FactoryManager::ref().factory<Task>();
+    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fTask, "No task factory existed");
+
     fTask->registerClass<HelioviewerDownloadTask>("HelioviewerDownloadTask");
+}
 
-
+std::vector<documentation::Documentation> SolarBrowsingModule::documentations() const {
+    return {
+        RenderableSolarImagery::Documentation(),
+        RenderableSolarImageryProjection::Documentation(),
+        HelioviewerDownloadTask::documentation()
+    };
 }
 
 } // namespace openspace

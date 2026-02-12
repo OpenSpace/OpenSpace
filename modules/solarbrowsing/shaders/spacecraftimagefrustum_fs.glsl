@@ -22,25 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-in vec4 vs_positionScreenSpace;
 #include "fragment.glsl"
+
+in vec4 vs_positionScreenSpace;
 
 uniform float planeOpacity;
 
 Fragment getFragment() {
+  vec4 diffuse;
+  if (planeOpacity < 0.25) {
+    diffuse = vec4(1.0, 1.0, 1.0, planeOpacity);
+  } else {
+    diffuse = vec4(1.0, 1.0, 1.0, 0.25);
+  }
 
-    vec4 diffuse;
-    if (planeOpacity < 0.25) {
-        diffuse = vec4(1.0, 1.0, 1.0, planeOpacity);
-    } else {
-        diffuse = vec4(1.0, 1.0, 1.0, 0.25);
-    }
+  if (diffuse.a == 0.0)
+    discard;
 
-    if (diffuse.a == 0.0)
-        discard;
-
-    Fragment frag;
-    frag.color = diffuse;
-    frag.depth = vs_positionScreenSpace.w;
-    return frag;
+  Fragment frag;
+  frag.color = diffuse;
+  frag.depth = vs_positionScreenSpace.w;
+  return frag;
 }

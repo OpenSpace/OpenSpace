@@ -28,7 +28,6 @@
 #include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/scene/scene.h>
@@ -49,9 +48,9 @@ namespace {
     // This number MUST match the constant specified in the shader, otherwise UB / MN
     constexpr int MaxSpacecraftObservatories = 7;
 
-
     struct [[codegen::Dictionary(RenderableSolarImageryProjection)]] Parameters {
-        // List of spacecraft identifiers that will be projected on the sphere
+        // List of spacecraft identifiers that will be projected on the sphere (Sun)
+        // surface.
         std::vector<std::string> dependentNodes;
 
         //std::optional<float> radius;
@@ -73,23 +72,27 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    for (const std::string& n : p.dependentNodes) {
-        SceneGraphNode* depNode = global::renderEngine->scene()->sceneGraphNode(n);
-        if (!depNode) {
+    for (const std::string& nodeName : p.dependentNodes) {
+        SceneGraphNode* dependentNode =
+            global::renderEngine->scene()->sceneGraphNode(nodeName);
+
+        if (!dependentNode) {
             LWARNING(std::format(
-                "Specified dependent node '{}' did not exist", n
+                "Specified dependent node '{}' did not exist", nodeName
             ));
             continue;
         }
-        Renderable* depR = depNode->renderable();
-        RenderableSolarImagery* siR = dynamic_cast<RenderableSolarImagery*>(depR);
-        if (!siR) {
+        Renderable* dependentRenderable = dependentNode->renderable();
+        RenderableSolarImagery* renderableSolarImagery =
+            dynamic_cast<RenderableSolarImagery*>(dependentRenderable);
+        if (!renderableSolarImagery) {
             LWARNING(std::format(
-                "Specified dependent node '{}' that was not a RenderableSolarImagery", n
+                "Specified dependent node '{}' that was not a RenderableSolarImagery",
+                nodeName
             ));
             continue;
         }
-        _solarImageryDependencies.push_back(depNode);
+        _solarImageryDependencies.push_back(dependentNode);
     }
 }
 
@@ -141,56 +144,79 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
     const int numPlanes = static_cast<int>(_solarImageryDependencies.size());
     int solarImageryCount = 0;
 
-    ghoul::opengl::TextureUnit txUnits[MaxSpacecraftObservatories];
-    ghoul::opengl::TextureUnit tfUnits[MaxSpacecraftObservatories];
+    ghoul::opengl::TextureUnit textureImageryUnits[MaxSpacecraftObservatories];
+    ghoul::opengl::TextureUnit transferFunctionUnits[MaxSpacecraftObservatories];
 
-    for (int i = 0; i < numPlanes; ++i) {
+    for (int i = 0; i < numPlanes && i < MaxSpacecraftObservatories; ++i) {
         RenderableSolarImagery* solarImagery = static_cast<RenderableSolarImagery*>(
             _solarImageryDependencies[i]->renderable()
         );
 
-        bool isCoronaGraph = solarImagery->isCoronaGraph();
-        bool enabled = solarImagery->isEnabled();
+        const bool isCoronaGraph = solarImagery->isCoronaGraph();
+        const bool solarImageryEnabled = solarImagery->isEnabled();
 
         const SpacecraftCameraPlane& plane = solarImagery->cameraPlane();
         const glm::dvec3 planePos = plane.worldPosition();
         const glm::dmat4 planeRot = glm::inverse(plane.worldRotation());
+        const glm::dvec3 planePosSpacecraft = glm::dvec3(
+            planeRot * glm::dvec4(planePos - data.modelTransform.translation, 1.0)
+        );
 
         _shader->setUniform("isCoronaGraph[" + std::to_string(i) + "]", isCoronaGraph);
-        _shader->setUniform("isEnabled[" + std::to_string(i) + "]", enabled);
-        _shader->setUniform("sunToSpacecraftReferenceFrame[" + std::to_string(i) + "]",
-                        planeRot * glm::dmat4(data.modelTransform.rotation));
-        _shader->setUniform("planePositionSpacecraft[" + std::to_string(i) + "]",
-                            glm::dvec3(planeRot * glm::dvec4(planePos - data.modelTransform.translation, 1.0)));
-        _shader->setUniform("gammaValue[" + std::to_string(i) + "]", solarImagery->gammaValue());
-        _shader->setUniform("contrastValue[" + std::to_string(i) + "]", solarImagery->contrastValue());
+        _shader->setUniform("isEnabled[" + std::to_string(i) + "]", solarImageryEnabled);
         _shader->setUniform("scale[" + std::to_string(i) + "]", solarImagery->scale());
-        _shader->setUniform("centerPixel[" + std::to_string(i) + "]", solarImagery->getCenterPixel());
+        _shader->setUniform(
+            "sunToSpacecraftReferenceFrame[" + std::to_string(i) + "]",
+            planeRot * glm::dmat4(data.modelTransform.rotation)
+        );
+        _shader->setUniform(
+            "planePositionSpacecraft[" + std::to_string(i) + "]",
+            planePosSpacecraft
+        );
+        _shader->setUniform(
+            "gammaValue[" + std::to_string(i) + "]",
+            solarImagery->gammaValue()
+        );
+        _shader->setUniform(
+            "contrastValue[" + std::to_string(i) + "]",
+            solarImagery->contrastValue()
+        );
+        _shader->setUniform(
+            "centerPixel[" + std::to_string(i) + "]",
+            solarImagery->getCenterPixel()
+        );
 
         // Imagery texture
-        txUnits[i].activate();
+        textureImageryUnits[i].activate();
         solarImagery->imageryTexture()->bind();
-        _shader->setUniform("imageryTexture[" + std::to_string(i) + "]", txUnits[i]);
-        tfUnits[i].activate();
-
-        TransferFunction* lut = solarImagery->transferFunction();
-        if (lut && solarImagery->isEnabled()) {
-            lut->bind();
+        _shader->setUniform(
+            "imageryTexture[" + std::to_string(i) + "]",
+            textureImageryUnits[i]
+        );
+        // Transfer function texture
+        transferFunctionUnits[i].activate();
+        TransferFunction* transferFunction = solarImagery->transferFunction();
+        if (transferFunction && solarImageryEnabled) {
+            transferFunction->bind();
             _shader->setUniform("hasLut[" + std::to_string(i) + "]", true);
         } else {
             _shader->setUniform("hasLut[" + std::to_string(i) + "]", false);
         }
         // Must bind all sampler2D, otherwise undefined behaviour
-        _shader->setUniform("lut[" + std::to_string(i) + "]", tfUnits[i]);
+        _shader->setUniform("lut[" + std::to_string(i) + "]", transferFunctionUnits[i]);
+
         solarImageryCount++;
     }
 
     // Set the rest of the texture units for well defined behaviour
     for (int i = solarImageryCount; i < MaxSpacecraftObservatories; ++i) {
-        txUnits[i].activate();
-        _shader->setUniform("imageryTexture[" + std::to_string(i) + "]", txUnits[i]);
-        tfUnits[i].activate();
-        _shader->setUniform("lut[" + std::to_string(i) + "]", tfUnits[i]);
+        textureImageryUnits[i].activate();
+        _shader->setUniform(
+            "imageryTexture[" + std::to_string(i) + "]",
+            textureImageryUnits[i]
+        );
+        transferFunctionUnits[i].activate();
+        _shader->setUniform("lut[" + std::to_string(i) + "]", transferFunctionUnits[i]);
     }
 
     _shader->setUniform("numSpacecraftCameraPlanes", numPlanes);

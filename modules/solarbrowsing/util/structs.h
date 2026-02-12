@@ -25,8 +25,9 @@
 #ifndef __OPENSPACE_MODULE_SOLARBROWSING___STRUCTS___H__
 #define __OPENSPACE_MODULE_SOLARBROWSING___STRUCTS___H__
 
-#include <ghoul/filesystem/filesystem.h>
+#include <openspace/util/timeline.h>
 #include <ghoul/glm.h>
+#include <filesystem>
 #include <memory>
 #include <string>
 
@@ -36,10 +37,10 @@ namespace openspace {
  // Assume everything in arcsec to minimize metadata
 struct ImageMetadata {
     std::filesystem::path filePath;
-    int fullResolution;
-    float scale;
+    int fullResolution = 0;
+    float scale = 0;;
     glm::vec2 centerPixel;
-    bool isCoronaGraph;
+    bool isCoronaGraph = false;
 };
 
 namespace solarbrowsing {
@@ -47,12 +48,24 @@ namespace solarbrowsing {
 struct DecodedImageData {
     std::vector<uint8_t> buffer;
     const ImageMetadata* metadata; // non-owning
-    unsigned int imageSize;
+    unsigned int imageSize = 0;
 };
 
-}
+using DecodeCompleteCallback = std::function<void(DecodedImageData&&)>;
+struct DecodeRequest {
+    // non-owning
+    const ImageMetadata* metadata;
+    int downsamplingLevel;
+    // Synchronous callback assumed, can lead to race conditions if async
+    DecodeCompleteCallback callback;
+};
 
+} // namespace openspace::solarbrowsing
+
+using InstrumentName = std::string;
+using ImageMetadataMap = std::unordered_map<InstrumentName, Timeline<ImageMetadata>>;
 using ImagePrecision = unsigned char;
+
 } // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SOLARBROWSING___STRUCTS___H__

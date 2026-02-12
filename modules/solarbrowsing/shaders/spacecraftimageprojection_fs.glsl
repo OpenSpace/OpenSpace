@@ -22,94 +22,94 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-const int MAX_SPACECRAFT_OBSERVATORY = 7;
+#include "fragment.glsl"
+
+const int MaxSpacecraftObservatories = 7;
 
 in vec4 vs_positionScreenSpace;
 in vec4 clipSpace;
-in vec3 vUv[MAX_SPACECRAFT_OBSERVATORY];
+in vec3 vUv[MaxSpacecraftObservatories];
 in vec3 vs_positionModelSpace;
 
 uniform int numSpacecraftCameraPlanes;
-uniform dvec3 planePositionSpacecraft[MAX_SPACECRAFT_OBSERVATORY];
-uniform sampler1D lut[MAX_SPACECRAFT_OBSERVATORY];
-uniform sampler2D imageryTexture[MAX_SPACECRAFT_OBSERVATORY];
-uniform bool hasLut[MAX_SPACECRAFT_OBSERVATORY];
-uniform float contrastValue[MAX_SPACECRAFT_OBSERVATORY];
-uniform float opacityValue[MAX_SPACECRAFT_OBSERVATORY];
-uniform float gammaValue[MAX_SPACECRAFT_OBSERVATORY];
-uniform float imageSize[MAX_SPACECRAFT_OBSERVATORY];
-uniform bool isEnabled[MAX_SPACECRAFT_OBSERVATORY];
-uniform bool isCoronaGraph[MAX_SPACECRAFT_OBSERVATORY];
-uniform float scale[MAX_SPACECRAFT_OBSERVATORY];
-uniform vec2 centerPixel[MAX_SPACECRAFT_OBSERVATORY];
+uniform dvec3 planePositionSpacecraft[MaxSpacecraftObservatories];
+uniform sampler1D lut[MaxSpacecraftObservatories];
+uniform sampler2D imageryTexture[MaxSpacecraftObservatories];
+uniform bool hasLut[MaxSpacecraftObservatories];
+uniform float contrastValue[MaxSpacecraftObservatories];
+uniform float opacityValue[MaxSpacecraftObservatories];
+uniform float gammaValue[MaxSpacecraftObservatories];
+uniform float imageSize[MaxSpacecraftObservatories];
+uniform bool isEnabled[MaxSpacecraftObservatories];
+uniform bool isCoronaGraph[MaxSpacecraftObservatories];
+uniform float scale[MaxSpacecraftObservatories];
+uniform vec2 centerPixel[MaxSpacecraftObservatories];
 
-const float SUN_RADIUS = 1391600000 * 0.5;
-
-#include "fragment.glsl"
+const float HalfSunRadius = 1391600000 * 0.5;
 
 float contrast(float intensity, int i) {
-    return min(clamp(0.5 + (intensity - 0.5) * (1 + contrastValue[i]/10.0), 0.0, 1.0), sqrt(intensity) + intensity);
+  return min(clamp(0.5 + (intensity - 0.5) * (1 + contrastValue[i]/10.0), 0.0, 1.0), sqrt(intensity) + intensity);
 }
 
 Fragment getFragment() {
-    vec4 outColor = vec4(0);
-    bool renderSurface = true;
+  vec4 outColor = vec4(0);
+  bool renderSurface = true;
 
-    for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
-        if (isCoronaGraph[i] || !isEnabled[i]) {
-            continue;
-        }
-
-        // bool isPixelHidden = dot(normalize(planePositionSpacecraft[i]), normalize(vUv[i])) < 0.0;
-        // if (isPixelHidden) {
-        //     continue;
-        // }
-
-        if (planePositionSpacecraft[i].z < vUv[i].z) {
-            vec3 uv = vUv[i].xyz;
-            uv /= ( (SUN_RADIUS / scale[i]) * 2);
-            uv += 0.5;
-
-            uv.x += ((centerPixel[i].x) / SUN_RADIUS) / 2.0;
-            uv.y -= ((centerPixel[i].y) /  SUN_RADIUS) / 2.0;
-
-            float intensityOrg = texture(imageryTexture[i], vec2(uv.x, 1.0 - uv.y)).r;
-            intensityOrg = contrast(intensityOrg, i);
-
-            vec4 res;
-            if (hasLut[i]) {
-                res = texture(lut[i], intensityOrg);
-            } else {
-                res = vec4(intensityOrg, intensityOrg, intensityOrg, 1.0);
-            }
-
-            res.r = pow(res.r, gammaValue[i]);
-            res.g = pow(res.g, gammaValue[i]);
-            res.b = pow(res.b, gammaValue[i]);
-
-            // Not initialized
-            if (outColor == vec4(0)) {
-                float factor2 = smoothstep(0.5, uv.x, uv.z);
-                outColor = mix(res, res, factor2);
-            } else {
-                // Blend between
-                float factor = smoothstep(0.5, 1.0 - uv.x, uv.z);
-                float factor2 = smoothstep(0.5, uv.x, uv.z);
-                outColor = mix(outColor, res, factor + factor2);
-            }
-            renderSurface = false;
-        }
+  for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
+    if (isCoronaGraph[i] || !isEnabled[i]) {
+      continue;
     }
 
-    if (renderSurface) {
-        // Arbitrary default shading
-        vec3 diffuse = vec3((vs_positionModelSpace.y) / SUN_RADIUS) * 0.18;
-        outColor = vec4(clamp(diffuse, vec3(-1.0), vec3(1.0)) + vec3(0.2, 0.21, 0.22), 1.0);
+    // bool isPixelHidden = dot(normalize(planePositionSpacecraft[i]), normalize(vUv[i])) < 0.0;
+    // if (isPixelHidden) {
+    //     continue;
+    // }
+
+    if (planePositionSpacecraft[i].z < vUv[i].z) {
+      vec3 uv = vUv[i].xyz;
+      uv /= ( (HalfSunRadius / scale[i]) * 2);
+      uv += 0.5;
+
+      uv.x += ((centerPixel[i].x) / HalfSunRadius) / 2.0;
+      uv.y -= ((centerPixel[i].y) /  HalfSunRadius) / 2.0;
+
+      float intensityOrg = texture(imageryTexture[i], vec2(uv.x, 1.0 - uv.y)).r;
+      intensityOrg = contrast(intensityOrg, i);
+
+      vec4 res;
+      if (hasLut[i]) {
+          res = texture(lut[i], intensityOrg);
+      } else {
+          res = vec4(intensityOrg, intensityOrg, intensityOrg, 1.0);
+      }
+
+      res.r = pow(res.r, gammaValue[i]);
+      res.g = pow(res.g, gammaValue[i]);
+      res.b = pow(res.b, gammaValue[i]);
+
+      // Not initialized
+      if (outColor == vec4(0)) {
+          float factor2 = smoothstep(0.5, uv.x, uv.z);
+          outColor = mix(res, res, factor2);
+      } else {
+          // Blend between
+          float factor = smoothstep(0.5, 1.0 - uv.x, uv.z);
+          float factor2 = smoothstep(0.5, uv.x, uv.z);
+          outColor = mix(outColor, res, factor + factor2);
+      }
+      renderSurface = false;
     }
+  }
 
-    Fragment frag;
-    frag.color = outColor;
-    frag.depth = vs_positionScreenSpace.w;
+  if (renderSurface) {
+    // Arbitrary default shading
+    vec3 diffuse = vec3((vs_positionModelSpace.y) / HalfSunRadius) * 0.18;
+    outColor = vec4(clamp(diffuse, vec3(-1.0), vec3(1.0)) + vec3(0.2, 0.21, 0.22), 1.0);
+  }
 
-    return frag;
+  Fragment frag;
+  frag.color = outColor;
+  frag.depth = vs_positionScreenSpace.w;
+
+  return frag;
 }

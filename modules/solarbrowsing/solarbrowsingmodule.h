@@ -26,6 +26,7 @@
 #define __OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+
 #include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
 
 namespace openspace {
@@ -35,8 +36,10 @@ public:
     constexpr static const char* Name = "SolarBrowsing";
 
     SolarBrowsingModule();
-    SpacecraftImageryManager& spacecraftImageryManager();
+    ~SolarBrowsingModule() override = default;
+    std::vector<documentation::Documentation> documentations() const override;
 
+    SpacecraftImageryManager& spacecraftImageryManager();
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
 

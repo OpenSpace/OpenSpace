@@ -27,7 +27,6 @@
 #include <modules/solarbrowsing/util/j2kcodec.h>
 
 namespace openspace::solarbrowsing {
-#define IMG_PRECISION unsigned char
 
 AsyncImageDecoder::AsyncImageDecoder(size_t numThreads) {
     _workers.reserve(numThreads);

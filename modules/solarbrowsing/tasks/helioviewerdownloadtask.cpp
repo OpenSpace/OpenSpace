@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <modules/solarbrowsing/tasks/helioviewerdownloadtask.h>
+
+#include <openspace/documentation/documentation.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/httprequest.h>

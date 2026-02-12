@@ -31,7 +31,6 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
-#include <openspace/engine/openspaceengine.h>
 #include <openspace/query/query.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/timemanager.h>
@@ -39,10 +38,7 @@
 #include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/defer.h>
-#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
-#include <chrono>
 #include <fstream>
 
 namespace {
@@ -120,15 +116,35 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-    // @TODO anden88 2026-02-12: Write description of this renderable
+    // A RenderableSolarImagery renders time-sequenced solar observations from spacecraft
+    // instruments as textured planes in 3D space. The renderable automatically displays
+    // the image corresponding to the current simulation time.
+    //
+    // Multiple instruments are supported (e.g., AIA-171, AIA-193, EUVI-A-171), and the
+    // active instrument can be selected via the `ActiveInstrument` property.
+    //
+    // For optimal performance, images are decoded asynchronously in the background and
+    // cached to disk. When changing time, the previous image remains visible until the
+    // new one is ready. The renderable also predicts and pre-loads nearby frames based
+    // on playback direction to ensure smooth playback.
+    //
+    // The `DownsamplingLevel` property can be used to reduce image resolution for
+    // improved performance. A value of 0 uses full resolution, while higher values
+    // progressively reduce the resolution (1 = half, 2 = quarter, etc.).
+    //
+    // Visual adjustments can be made via color mapping (transfer functions), gamma,
+    // and contrast controls. Coronagraph instruments can optionally display frustum
+    // visualization.
     struct [[codegen::Dictionary(RenderableSolarImagery)]] Parameters {
-        // Path to the image directory
-        std::filesystem::path rootDir [[codegen::directory()]];
+        // The root directory containing solar imagery organized by instrument. Each
+        // subdirectory represents an instrument and contains its observation images
+        std::filesystem::path imageDirectory [[codegen::directory()]];
 
-        // Path to transfer function directory
+        // Directory containing color tables (transfer functions) for each instrument.
         std::filesystem::path transferfunctionDir [[codegen::directory()]];
 
-        // Name of the instrument to set as active on startup
+        // The instrument to display on startup (e.g., "AIA-171"). If not specified,
+        // the first available instrument is used
         std::optional<std::string> startInstrument;
 
         // [[codegen::verbatim(EnableBorderInfo.description)]]
@@ -191,7 +207,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         solarbrowsingModule->spacecraftImageryManager();
 
     spacecraftImageryManager.loadTransferFunctions(p.transferfunctionDir, _tfMap);
-    spacecraftImageryManager.loadImageMetadata(p.rootDir, _imageMetadataMap);
+    spacecraftImageryManager.loadImageMetadata(p.imageDirectory, _imageMetadataMap);
 
     _enableBorder = p.enableBorder.value_or(_enableBorder);
     addProperty(_enableBorder);
@@ -250,9 +266,11 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     addProperty(_verboseMode);
 
     _predictFramesAfter = p.predictFramesAfter.value_or(_predictFramesAfter);
+    _predictFramesAfter.onChange([this]() { _predictionIsDirty = true;  });
     addProperty(_predictFramesAfter);
 
     _predictFramesBefore = p.predictFramesBefore.value_or(_predictFramesBefore);
+    _predictFramesBefore.onChange([this]() { _predictionIsDirty = true;  });
     addProperty(_predictFramesBefore);
 
     _asyncDecoder = std::make_unique<solarbrowsing::AsyncImageDecoder>(
@@ -318,7 +336,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
         _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
             global::timeManager->time().j2000Seconds(),
             true
-        );
+    );
 
     requestPredictiveFrames(keyframe, data);
     _spacecraftCameraPlane->update();
@@ -329,8 +347,7 @@ TransferFunction* RenderableSolarImagery::transferFunction() {
 }
 
 const std::unique_ptr<ghoul::opengl::Texture>&
-RenderableSolarImagery::imageryTexture() const
-{
+RenderableSolarImagery::imageryTexture() const {
     return _imageryTexture;
 }
 
