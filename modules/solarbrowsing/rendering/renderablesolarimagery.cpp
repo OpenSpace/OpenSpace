@@ -49,61 +49,86 @@ namespace {
     constexpr char* _loggerCat = "RenderableSolarImagery";
 
     constexpr unsigned int DefaultTextureSize = 32;
-    constexpr int PredictFramesBefore = 2;
-    constexpr int PredictFramesAfter = 10;
-    constexpr int PredictFramesSymmetric = 5;
 
     constexpr openspace::properties::Property::PropertyInfo ActiveInstrumentsInfo = {
         "ActiveInstrument",
         "Active instrument",
-        "The active instrument of the current spacecraft imagery"
+        "The active instrument of the current spacecraft imagery.",
+        openspace::properties::Property::Visibility::User
     };
-    constexpr openspace::properties::Property::PropertyInfo ContrastValueInfo = {
-        "ContrastValue",
-        "Contrast",
-        "Contrast of the current spacecraft imagery"
-    };
-    constexpr openspace::properties::Property::PropertyInfo DownsamplingLevelInfo = {
-        "DownsamplingLevel",
-        "Downsampling Level",
-        "How much to downsample the original data. 0 is original resolution."
-    };
+
     constexpr openspace::properties::Property::PropertyInfo EnableBorderInfo = {
         "EnableBorder",
-        "Enable Border",
-        "Enables border around the current spacecraft imagery"
+        "Enable border",
+        "Enables border around the current spacecraft imagery.",
+        openspace::properties::Property::Visibility::User
     };
+
     constexpr openspace::properties::Property::PropertyInfo EnableFrustumInfo = {
         "EnableFrustum",
         "Enable frustum",
-        "Enables frustum around the current spacecraft imagery"
+        "Enables frustum around the current spacecraft imagery.",
+        openspace::properties::Property::Visibility::User
     };
+
+    constexpr openspace::properties::Property::PropertyInfo MoveFactorInfo = {
+        "MoveFactor",
+        "Move factor",
+        "How close to the Sun to render the imagery.",
+        openspace::properties::Property::Visibility::User
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo DownsamplingLevelInfo = {
+        "DownsamplingLevel",
+        "Downsampling level",
+        "How much to downsample the original data. 0 is original resolution.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ContrastValueInfo = {
+        "ContrastValue",
+        "Contrast",
+        "Contrast of the current spacecraft imagery",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     constexpr openspace::properties::Property::PropertyInfo GammaValueInfo = {
         "GammaValue",
         "Gamma",
-        "Gamma of the current spacecraft imagery"
+        "Gamma of the current spacecraft imagery.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
-    constexpr openspace::properties::Property::PropertyInfo MoveFactorInfo = {
-        "MoveFactor",
-        "Move Factor",
-        "How close to the sun to render the imagery"
-    };
-    constexpr openspace::properties::Property::PropertyInfo PlaneOpacityInfo = {
-        "PlaneOpacity",
-        "Plane Opacity",
-        "Opacity of the image plane"
-    };
+
     constexpr openspace::properties::Property::PropertyInfo VerboseModeInfo = {
         "VerboseMode",
-        "Verbose Mode",
-        "Output information about image decoding etc"
+        "Verbose mode",
+        "Output information about image decoding etc.",
+        openspace::properties::Property::Visibility::AdvancedUser
     };
 
+    constexpr openspace::properties::Property::PropertyInfo PredictFramesAfterInfo = {
+        "PredictFramesAfter",
+        "Predict frames after",
+        "Determines how many images to pre-fetch after the current image frame.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo PredictFramesBeforeInfo = {
+        "PredictFramesBefore",
+        "Predict frames before",
+        "Determines how many images to pre-fetch before the current image frame.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    // @TODO anden88 2026-02-12: Write description of this renderable
     struct [[codegen::Dictionary(RenderableSolarImagery)]] Parameters {
+        // Path to the image directory
         std::filesystem::path rootDir [[codegen::directory()]];
 
+        // Path to transfer function directory
         std::filesystem::path transferfunctionDir [[codegen::directory()]];
 
+        // Name of the instrument to set as active on startup
         std::optional<std::string> startInstrument;
 
         // [[codegen::verbatim(EnableBorderInfo.description)]]
@@ -111,6 +136,27 @@ namespace {
 
         // [[codegen::verbatim(EnableFrustumInfo.description)]]
         std::optional<bool> enableFrustum;
+
+        // [[codegen::verbatim(MoveFactorInfo.description)]]
+        std::optional<float> moveFactor;
+
+        // [[codegen::verbatim(DownsamplingLevelInfo.description)]]
+        std::optional<int> downsamplingLevel;
+
+        // [[codegen::verbatim(ContrastValueInfo.description)]]
+        std::optional<float> contrast;
+
+        // [[codegen::verbatim(GammaValueInfo.description)]]
+        std::optional<float> gamma;
+
+        // [[codegen::verbatim(VerboseModeInfo.description)]]
+        std::optional<bool> verboseMode;
+
+        // [[codegen::verbatim(PredictFramesAfterInfo.description)]]
+        std::optional<int> predictFramesAfter;
+
+        // [[codegen::verbatim(PredictFramesBeforeInfo.description)]]
+        std::optional<int> predictFramesBefore;
     };
 #include "renderablesolarimagery_codegen.cpp"
 } // namespace
@@ -129,11 +175,14 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     , _enableFrustum(EnableFrustumInfo, false)
     , _gammaValue(GammaValueInfo, 0.9f, 0.1f, 10.f)
     , _moveFactor(MoveFactorInfo, 1.0, 0.0, 1.0)
-    , _planeOpacity(PlaneOpacityInfo, 1.f, 0.f, 1.f)
     , _downsamplingLevel(DownsamplingLevelInfo, 2, 0, 5)
     , _verboseMode(VerboseModeInfo, false)
+    , _predictFramesAfter(PredictFramesAfterInfo, 10, 0, 20)
+    , _predictFramesBefore(PredictFramesBeforeInfo, 2, 0, 20)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    addProperty(Fadeable::_opacity);
 
     SolarBrowsingModule* solarbrowsingModule =
         global::moduleEngine->module<SolarBrowsingModule>();
@@ -144,7 +193,16 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     spacecraftImageryManager.loadTransferFunctions(p.transferfunctionDir, _tfMap);
     spacecraftImageryManager.loadImageMetadata(p.rootDir, _imageMetadataMap);
 
-    // Add GUI names
+    _enableBorder = p.enableBorder.value_or(_enableBorder);
+    addProperty(_enableBorder);
+
+    _enableFrustum = p.enableFrustum.value_or(_enableFrustum);
+    _enableFrustum.onChange([this]() {
+        _enableBorder.setValue(_enableFrustum.value());
+    });
+    addProperty(_enableFrustum);
+
+    // Add Instrument GUI names
     unsigned int guiNameCount = 0;
     using T = Timeline<ImageMetadata>;
     for (const std::pair<InstrumentName, T>& instrument : _imageMetadataMap) {
@@ -159,27 +217,6 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
             _activeInstruments
         );
     }
-    // Some sanity checks
-    if (_imageMetadataMap.empty()) {
-        LERROR("Images map is empty! Check your path");
-    }
-
-    _enableBorder = p.enableBorder.value_or(_enableBorder);
-    _enableFrustum = p.enableFrustum.value_or(_enableFrustum);
-
-    addProperty(_planeOpacity);
-    addProperty(_enableBorder);
-    addProperty(_enableFrustum);
-    addProperty(_activeInstruments);
-    addProperty(_gammaValue);
-    addProperty(_contrastValue);
-    addProperty(_downsamplingLevel);
-    addProperty(_moveFactor);
-    addProperty(_verboseMode);
-
-    _enableFrustum.onChange([this]() {
-        _enableBorder.setValue(_enableFrustum.value());
-    });
 
     _activeInstruments.onChange([this]() {
         _currentActiveInstrument = _activeInstruments.getDescriptionByValue(
@@ -188,15 +225,35 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         _currentImage = nullptr;
         _predictionIsDirty = true;
     });
+    addProperty(_activeInstruments);
 
+    _downsamplingLevel = p.downsamplingLevel.value_or(_downsamplingLevel);
     _downsamplingLevel.onChange([this]() {
         _currentImage = nullptr;
         _predictionIsDirty = true;
     });
+    addProperty(_downsamplingLevel);
 
+    _moveFactor = p.moveFactor.value_or(_moveFactor);
     _moveFactor.onChange([this]() {
         _spacecraftCameraPlane->createPlaneAndFrustum(_moveFactor);
     });
+    addProperty(_moveFactor);
+
+    _gammaValue = p.gamma.value_or(_gammaValue);
+    addProperty(_gammaValue);
+
+    _contrastValue = p.contrast.value_or(_contrastValue);
+    addProperty(_contrastValue);
+
+    _verboseMode = p.verboseMode.value_or(_verboseMode);
+    addProperty(_verboseMode);
+
+    _predictFramesAfter = p.predictFramesAfter.value_or(_predictFramesAfter);
+    addProperty(_predictFramesAfter);
+
+    _predictFramesBefore = p.predictFramesBefore.value_or(_predictFramesBefore);
+    addProperty(_predictFramesBefore);
 
     _asyncDecoder = std::make_unique<solarbrowsing::AsyncImageDecoder>(
         std::thread::hardware_concurrency() / 2
@@ -245,7 +302,7 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
         *_imageryTexture,
         _tfMap[_currentActiveInstrument].get(),
         sunPositionWorld,
-        _planeOpacity,
+        opacity(),
         _contrastValue,
         _gammaValue,
         _enableBorder,
@@ -403,17 +460,17 @@ void RenderableSolarImagery::requestPredictiveFrames(
     int framesAfter = 0;
 
     if (isPaused) {
-        framesBefore = PredictFramesSymmetric;
-        framesAfter = PredictFramesSymmetric;
+        framesBefore = _predictFramesAfter / 2;
+        framesAfter = _predictFramesAfter / 2;
     }
     else if (isPlayingForward) {
-        framesBefore = PredictFramesBefore;
-        framesAfter = PredictFramesAfter;
+        framesBefore = _predictFramesBefore;
+        framesAfter = _predictFramesAfter;
     }
     else {
         // Swap for backward
-        framesBefore = PredictFramesAfter;
-        framesAfter = PredictFramesBefore;
+        framesBefore = _predictFramesAfter;
+        framesAfter = _predictFramesBefore;
     }
 
     // Get the corresponding keyframes within the prediction window

@@ -226,43 +226,6 @@ const Keyframe<T>* Timeline<T>::lastKeyframeBefore(double timestamp, bool inclus
 }
 
 template <typename T>
-std::vector<const Keyframe<T>*> Timeline<T>::lastNKeyframesBefore(double timestamp,
-                                                           size_t n, bool inclusive) const
-{
-    typename std::deque<Keyframe<T>>::const_iterator it;
-    if (inclusive) {
-        it = std::upper_bound(
-            _keyframes.begin(),
-            _keyframes.end(),
-            timestamp,
-            &compareTimeWithKeyframeTime
-        );
-    }
-    else {
-        it = std::lower_bound(
-            _keyframes.begin(),
-            _keyframes.end(),
-            timestamp,
-            &compareKeyframeTimeWithTime
-        );
-    }
-
-    if (it == _keyframes.begin()) {
-        return {};
-    }
-    it--;
-
-    std::vector<const Keyframe<T>*> result;
-    result.reserve(n);
-
-    for (size_t i = 0; i < n && it != _keyframes.end(); i++, it++) {
-        result.push_back(&(*it));
-    }
-
-    return result;
-}
-
-template <typename T>
 const std::deque<Keyframe<T>>& Timeline<T>::keyframes() const {
     return _keyframes;
 }

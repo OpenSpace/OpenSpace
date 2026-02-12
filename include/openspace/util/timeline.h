@@ -72,8 +72,6 @@ public:
     size_t nKeyframes() const;
     const Keyframe<T>* firstKeyframeAfter(double timestamp, bool inclusive = false) const;
     const Keyframe<T>* lastKeyframeBefore(double timestamp, bool inclusive = false) const;
-    std::vector<const Keyframe<T>*> lastNKeyframesBefore(double timestap, size_t n,
-        bool inclusive = false) const;
 
     const std::deque<Keyframe<T>>& keyframes() const;
 

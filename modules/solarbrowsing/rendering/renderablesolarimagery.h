@@ -103,9 +103,11 @@ private:
     properties::BoolProperty _enableFrustum;
     properties::FloatProperty _gammaValue;
     properties::DoubleProperty _moveFactor;
-    properties::FloatProperty _planeOpacity;
     properties::IntProperty _downsamplingLevel;
+
     properties::BoolProperty _verboseMode;
+    properties::IntProperty _predictFramesAfter;
+    properties::IntProperty _predictFramesBefore;
 
     // The decoded image texture
     std::unique_ptr<ghoul::opengl::Texture> _imageryTexture;
