@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_fs.hglsl"
+#include "powerscaling/powerscaling_fs.glsl"
 
 in vec2 pos;
 out vec4 fragColor;

@@ -207,8 +207,7 @@ namespace {
 
     void blitTexture(const ghoul::opengl::Texture& tex) {
         ghoul::opengl::TextureUnit texUnit;
-        texUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, tex);
+        texUnit.bind(tex);
 
         glObj.blit.tex.program->activate();
         glObj.blit.tex.program->setUniform(glObj.blit.tex.uniforms.tex, 0);
@@ -222,12 +221,10 @@ namespace {
                      const ghoul::opengl::Texture& depth)
     {
         ghoul::opengl::TextureUnit texUnit;
-        texUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, tex);
+        texUnit.bind(tex);
 
         ghoul::opengl::TextureUnit depthUnit;
-        depthUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, depth);
+        depthUnit.bind(depth);
 
         glObj.blit.texDepth.program->activate();
         glObj.blit.texDepth.program->setUniform(
@@ -285,7 +282,7 @@ namespace {
 namespace postprocessing {
 
 void initialize(int width, int height) {
-    glGenVertexArrays(1, &glObj.vao);
+    glCreateVertexArrays(1, &glObj.vao);
 
     glObj.linearDepth.program = ghoul::opengl::ProgramObject::Build(
         "Linearize Depth",
@@ -308,16 +305,13 @@ void initialize(int width, int height) {
     );
     glObj.linearDepth.texture->uploadTexture();
 
-    glGenFramebuffers(1, &glObj.linearDepth.fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.linearDepth.fbo);
-    glFramebufferTexture2D(
-        GL_DRAW_FRAMEBUFFER,
+    glCreateFramebuffers(1, &glObj.linearDepth.fbo);
+    glNamedFramebufferTexture(
+        glObj.linearDepth.fbo,
         GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D,
         *glObj.linearDepth.texture,
         0
     );
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     glObj.targets.texColor[0] = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(width, height, 1),
@@ -362,33 +356,28 @@ void initialize(int width, int height) {
     );
     glObj.targets.texTemporalBuffer[1]->uploadTexture();
 
-    glGenFramebuffers(1, &glObj.targets.fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.targets.fbo);
-    glFramebufferTexture2D(
-        GL_DRAW_FRAMEBUFFER,
+    glCreateFramebuffers(1, &glObj.targets.fbo);
+    glNamedFramebufferTexture(
+        glObj.targets.fbo,
         GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D,
         *glObj.targets.texColor[0],
         0
     );
-    glFramebufferTexture2D(
-        GL_DRAW_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        glObj.targets.fbo,
         GL_COLOR_ATTACHMENT1,
-        GL_TEXTURE_2D,
         *glObj.targets.texColor[1],
         0
     );
-    glFramebufferTexture2D(
-        GL_DRAW_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        glObj.targets.fbo,
         GL_COLOR_ATTACHMENT2,
-        GL_TEXTURE_2D,
         *glObj.targets.texTemporalBuffer[0],
         0
     );
-    glFramebufferTexture2D(
-        GL_DRAW_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        glObj.targets.fbo,
         GL_COLOR_ATTACHMENT3,
-        GL_TEXTURE_2D,
         *glObj.targets.texTemporalBuffer[1],
         0
     );
@@ -399,7 +388,8 @@ void initialize(int width, int height) {
         GL_COLOR_ATTACHMENT2,
         GL_COLOR_ATTACHMENT3
     };
-    glDrawBuffers(4, buffers);
+    glNamedFramebufferDrawBuffers(glObj.targets.fbo, 4, buffers);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.targets.fbo);
     glClear(GL_COLOR_BUFFER_BIT);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
@@ -534,16 +524,13 @@ void initialize(int width, int height) {
     );
     glObj.bokehDof.halfRes.colorCoc->uploadTexture();
 
-    glGenFramebuffers(1, &glObj.bokehDof.halfRes.fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.bokehDof.halfRes.fbo);
-    glFramebufferTexture2D(
-        GL_DRAW_FRAMEBUFFER,
+    glCreateFramebuffers(1, &glObj.bokehDof.halfRes.fbo);
+    glNamedFramebufferTexture(
+        glObj.bokehDof.halfRes.fbo,
         GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D,
         *glObj.bokehDof.halfRes.colorCoc,
         0
     );
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     glObj.bokehDof.program = ghoul::opengl::ProgramObject::Build(
         "DOF Bokeh",
@@ -609,24 +596,19 @@ void initialize(int width, int height) {
     );
     glObj.velocity.texNeighbormax->uploadTexture();
 
-    glGenFramebuffers(1, &glObj.velocity.fbo);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.velocity.fbo);
-    glFramebufferTexture2D(
-        GL_DRAW_FRAMEBUFFER,
+    glCreateFramebuffers(1, &glObj.velocity.fbo);
+    glNamedFramebufferTexture(
+        glObj.velocity.fbo,
         GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D,
         *glObj.velocity.texTilemax,
         0
     );
-    glFramebufferTexture2D(
-        GL_DRAW_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        glObj.velocity.fbo,
         GL_COLOR_ATTACHMENT1,
-        GL_TEXTURE_2D,
         *glObj.velocity.texNeighbormax,
         0
     );
-
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
     glObj.ssao.hbao.program = ghoul::opengl::ProgramObject::Build(
         "SSAO Perspective",
@@ -700,30 +682,29 @@ void initialize(int width, int height) {
     );
     glObj.ssao.blur.texture->uploadTexture();
 
-    glGenFramebuffers(1, &glObj.ssao.hbao.fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, glObj.ssao.hbao.fbo);
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER,
+    glCreateFramebuffers(1, &glObj.ssao.hbao.fbo);
+    glNamedFramebufferTexture(
+        glObj.ssao.hbao.fbo,
         GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D,
         *glObj.ssao.hbao.texture,
         0
     );
 
-    glGenFramebuffers(1, &glObj.ssao.blur.fbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, glObj.ssao.blur.fbo);
-    glFramebufferTexture2D(
-        GL_FRAMEBUFFER,
+    glCreateFramebuffers(1, &glObj.ssao.blur.fbo);
+    glNamedFramebufferTexture(
+        glObj.ssao.blur.fbo,
         GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D,
         *glObj.ssao.blur.texture,
         0
     );
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    glGenBuffers(1, &glObj.ssao.uboHbaoData);
-    glBindBuffer(GL_UNIFORM_BUFFER, glObj.ssao.uboHbaoData);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(HBAOData), nullptr, GL_DYNAMIC_DRAW);
+    glCreateBuffers(1, &glObj.ssao.uboHbaoData);
+    glNamedBufferStorage(
+        glObj.ssao.uboHbaoData,
+        sizeof(HBAOData),
+        nullptr,
+        GL_DYNAMIC_STORAGE_BIT
+    );
 }
 
 void resize(int width, int height) {
@@ -843,9 +824,7 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
         .projInfo = projInfo
     };
 
-    glBindBuffer(GL_UNIFORM_BUFFER, glObj.ssao.uboHbaoData);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(HBAOData), &data, GL_DYNAMIC_DRAW);
-    glBindBuffer(GL_UNIFORM_BUFFER, 0);
+    glNamedBufferSubData(glObj.ssao.uboHbaoData, 0, sizeof(HBAOData), &data);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.ssao.hbao.fbo);
     glViewport(0, 0, glObj.texWidth, glObj.texHeight);
@@ -856,24 +835,21 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
 
 
     ghoul::opengl::TextureUnit linearDepthUnit;
-    linearDepthUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, linearDepthTex);
+    linearDepthUnit.bind(linearDepthTex);
 
     ghoul::opengl::TextureUnit normalUnit;
-    normalUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, normalTex);
+    normalUnit.bind(normalTex);
 
     // HBAO
     {
         ghoul::opengl::ProgramObject& program = *glObj.ssao.hbao.program;
         auto& uniforms = glObj.ssao.hbao.uniforms;
 
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "HBAO");
+        ghoul::GLDebugGroup<1> group("HBAO");
         program.activate();
 
         ghoul::opengl::TextureUnit randomUnit;
-        randomUnit.activate();
-        glObj.ssao.texRandom->bind();
+        randomUnit.bind(*glObj.ssao.texRandom);
 
         glBindBufferBase(GL_UNIFORM_BUFFER, 0, glObj.ssao.uboHbaoData);
         glUniformBlockBinding(
@@ -893,7 +869,6 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
 
         glBindVertexArray(glObj.vao);
         glDrawArrays(GL_TRIANGLES, 0, 3);
-        glPopDebugGroup();
     }
 
     // Blur
@@ -913,36 +888,36 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
         );
 
         // First pass
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "BLUR 1st");
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.ssao.blur.fbo);
-        glViewport(0, 0, width, height);
-        glClearColor(0, 0, 0, 0);
-        glClear(GL_COLOR_BUFFER_BIT);
-        normalUnit.activate();
-        glObj.ssao.hbao.texture->bind();
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glPopDebugGroup();
+        {
+            ghoul::GLDebugGroup<1> group("BLUR 1st");
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.ssao.blur.fbo);
+            glViewport(0, 0, width, height);
+            glClearColor(0, 0, 0, 0);
+            glClear(GL_COLOR_BUFFER_BIT);
+            normalUnit.bind(*glObj.ssao.hbao.texture);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
+        }
 
         // Second pass
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "BLUR 2nd");
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
-        glViewport(lastViewport[0], lastViewport[1], lastViewport[2], lastViewport[3]);
-        normalUnit.activate();
-        glObj.ssao.blur.texture->bind();
-        program.setUniform(uniforms.invResDir, 0.f, 1.f / glObj.texHeight);
+        {
+            ghoul::GLDebugGroup<1> group("BLUR 2nd");
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
+            glViewport(lastViewport[0], lastViewport[1], lastViewport[2], lastViewport[3]);
+            normalUnit.bind(*glObj.ssao.blur.texture);
+            program.setUniform(uniforms.invResDir, 0.f, 1.f / glObj.texHeight);
 
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ZERO, GL_SRC_COLOR);
-        glColorMask(1, 1, 1, 0);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+            glColorMask(1, 1, 1, 0);
 
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+            glDrawArrays(GL_TRIANGLES, 0, 3);
 
-        glDisable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
-        glColorMask(1, 1, 1, 1);
+            glDisable(GL_BLEND);
+            glBlendFunc(GL_ONE, GL_ONE);
+            glColorMask(1, 1, 1, 1);
 
-        glBindVertexArray(0);
-        glPopDebugGroup();
+            glBindVertexArray(0);
+        }
     }
 }
 
@@ -953,6 +928,10 @@ void applyTemporalAa(const ghoul::opengl::Texture& linearDepthTex,
                      const glm::vec2& currJitter, const glm::vec2& prevJitter,
                      float feedbackMin, float feedbackMax, float motionScale, float time)
 {
+    ghoul::GLDebugGroup<1> group(
+        motionScale != 0.f ? "Temporal AA + Motion Blur" : "Temporal AA"
+    );
+
     static int target = 0;
     target = (target + 1) % 2;
 
@@ -975,20 +954,16 @@ void applyTemporalAa(const ghoul::opengl::Texture& linearDepthTex,
     );
 
     ghoul::opengl::TextureUnit linearDepthUnit;
-    linearDepthUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, linearDepthTex);
+    linearDepthUnit.bind(linearDepthTex);
 
     ghoul::opengl::TextureUnit colorUnit;
-    colorUnit.activate();
-    colorTex.bind();
+    colorUnit.bind(colorTex);
 
     ghoul::opengl::TextureUnit tempBufferUnit;
-    tempBufferUnit.activate();
-    glObj.targets.texTemporalBuffer[srcBuf]->bind();
+    tempBufferUnit.bind(*glObj.targets.texTemporalBuffer[srcBuf]);
 
     ghoul::opengl::TextureUnit velocityUnit;
-    velocityUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, velocityTex);
+    velocityUnit.bind(velocityTex);
 
     int boundBuffer;
     glGetIntegerv(GL_DRAW_BUFFER, &boundBuffer);
@@ -1000,15 +975,14 @@ void applyTemporalAa(const ghoul::opengl::Texture& linearDepthTex,
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.targets.fbo);
     glViewport(0, 0, glObj.texWidth, glObj.texHeight);
-    glDrawBuffers(2, drawBuffers);
+    glNamedFramebufferDrawBuffers(glObj.targets.fbo, 2, drawBuffers);
 
     if (motionScale != 0.f) {
         ghoul::opengl::ProgramObject& program = *glObj.temporal.withMotionBlur.program;
         auto& uniforms = glObj.temporal.withMotionBlur.uniforms;
 
         ghoul::opengl::TextureUnit velocityNeighbormaxUnit;
-        velocityNeighbormaxUnit.activate();
-        velocityNeighbormaxTex.bind();
+        velocityNeighbormaxUnit.bind(velocityNeighbormaxTex);
 
         program.activate();
         program.setUniform(uniforms.texLinearDepth, linearDepthUnit);
@@ -1107,7 +1081,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         ghoul::opengl::ProgramObject& program = *glObj.linearDepth.program;
         auto& uniforms = glObj.linearDepth.uniforms;
 
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Linearize Depth");
+        ghoul::GLDebugGroup<1> group("Linearize Depth");
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.linearDepth.fbo);
         glViewport(0, 0, glObj.texWidth, glObj.texHeight);
         glClearColor(far, 0, 0, 0);
@@ -1117,8 +1091,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         glDisable(GL_BLEND);
 
         ghoul::opengl::TextureUnit unit;
-        unit.activate();
-        settings.inputTextures.depth->bind();
+        unit.bind(*settings.inputTextures.depth);
 
         program.activate();
         program.setUniform(uniforms.texDepth, unit);
@@ -1132,12 +1105,12 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
-    glPopDebugGroup();
 
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Generate Linear Depth Mipmaps");
-    glObj.linearDepth.texture->bind();
-    glGenerateMipmap(GL_TEXTURE_2D);
-    glPopDebugGroup();
+    {
+        ghoul::GLDebugGroup<1> group("Generate Linear Depth Mipmaps");
+        glBindTexture(GL_TEXTURE_2D, *glObj.linearDepth.texture);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
 
     if (settings.temporalReprojection.enabled) {
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.velocity.fbo);
@@ -1153,11 +1126,10 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             ghoul::opengl::ProgramObject& program = *glObj.blitTilemax.program;
             auto& uniforms = glObj.blitTilemax.uniforms;
 
-            glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Velocity: Tilemax");
+            ghoul::GLDebugGroup<1> group("Velocity: Tilemax");
 
             ghoul::opengl::TextureUnit velocityUnit;
-            velocityUnit.activate();
-            settings.inputTextures.velocity->bind();
+            velocityUnit.bind(*settings.inputTextures.velocity);
 
             program.activate();
             program.setUniform(uniforms.texVel, velocityUnit);
@@ -1170,7 +1142,6 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             glBindVertexArray(glObj.vao);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             glBindVertexArray(0);
-            glPopDebugGroup();
         }
 
         // Blit Neighbormax
@@ -1178,12 +1149,11 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             ghoul::opengl::ProgramObject& program = *glObj.blitNeighbormax.program;
             auto& uniforms = glObj.blitNeighbormax.uniforms;
 
-            glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Velocity: Neighbormax");
+            ghoul::GLDebugGroup<1> group("Velocity: Neighbormax");
             glDrawBuffer(GL_COLOR_ATTACHMENT1);
 
             ghoul::opengl::TextureUnit velocityUnit;
-            velocityUnit.activate();
-            glObj.velocity.texTilemax->bind();
+            velocityUnit.bind(*glObj.velocity.texTilemax);
 
             program.activate();
             program.setUniform(uniforms.texVel, velocityUnit);
@@ -1198,7 +1168,6 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             glBindVertexArray(glObj.vao);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             glBindVertexArray(0);
-            glPopDebugGroup();
         }
     }
 
@@ -1220,7 +1189,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     glViewport(0, 0, width, height);
 
     if (settings.background.enabled) {
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Clear HDR");
+        ghoul::GLDebugGroup<1> group("Clear HDR");
         glDrawBuffer(dstBuffer);
         glClearColor(
             settings.background.r,
@@ -1229,7 +1198,6 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             0.f
         );
         glClear(GL_COLOR_BUFFER_BIT);
-        glPopDebugGroup();
     }
     else {
         GLenum drawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
@@ -1244,18 +1212,15 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         ghoul::opengl::ProgramObject& program = *glObj.shading.program;
         auto& uniforms = glObj.shading.uniforms;
 
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Shading");
+        ghoul::GLDebugGroup<1> group("Shading");
         ghoul::opengl::TextureUnit depthUnit;
-        depthUnit.activate();
-        settings.inputTextures.depth->bind();
+        depthUnit.bind(*settings.inputTextures.depth);
 
         ghoul::opengl::TextureUnit colorUnit;
-        colorUnit.activate();
-        settings.inputTextures.color->bind();
+        colorUnit.bind(*settings.inputTextures.color);
 
         ghoul::opengl::TextureUnit normalUnit;
-        normalUnit.activate();
-        settings.inputTextures.normal->bind();
+        normalUnit.bind(*settings.inputTextures.normal);
 
         program.activate();
         program.setUniform(uniforms.texDepth, depthUnit);
@@ -1268,11 +1233,10 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         glBindVertexArray(glObj.vao);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
-        glPopDebugGroup();
     }
 
-    glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "SSAO");
     if (settings.ambientOcclusion[0].enabled) {
+        ghoul::GLDebugGroup<1> group("SSAO 1");
         applySsao(
             *glObj.linearDepth.texture,
             *settings.inputTextures.normal,
@@ -1284,6 +1248,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         );
     }
     if (settings.ambientOcclusion[1].enabled) {
+        ghoul::GLDebugGroup<1> group("SSAO 2");
         applySsao(
             *glObj.linearDepth.texture,
             *settings.inputTextures.normal,
@@ -1294,7 +1259,6 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             settings.ambientOcclusion[1].normalBias
         );
     }
-    glPopDebugGroup();
 
     if (settings.temporalReprojection.enabled) {
         swapTarget();
@@ -1306,17 +1270,6 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             settings.temporalReprojection.motionBlur.motionScale :
             0.f;
 
-        if (motionScale != 0.f) {
-            glPushDebugGroup(
-                GL_DEBUG_SOURCE_APPLICATION,
-                1,
-                -1,
-                "Temporal AA + Motion Blur"
-            );
-        }
-        else {
-            glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Temporal AA");
-        }
         applyTemporalAa(
             *glObj.linearDepth.texture,
             *srcTexture,
@@ -1329,15 +1282,13 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             motionScale,
             time
         );
-        glPopDebugGroup();
 
         {
-            glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Sharpen");
+            ghoul::GLDebugGroup<1> group("Sharpen");
             swapTarget();
             glDrawBuffer(dstBuffer);
             ghoul::opengl::TextureUnit srcUnit;
-            srcUnit.activate();
-            srcTexture->bind();
+            srcUnit.bind(*srcTexture);
 
             glObj.sharpen.program->activate();
             glObj.sharpen.program->setUniform(glObj.sharpen.uniforms.tex, srcUnit);
@@ -1345,35 +1296,32 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             glBindVertexArray(glObj.vao);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             glBindVertexArray(0);
-            glPopDebugGroup();
         }
     }
 
     if (settings.inputTextures.emissive) {
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Add Emissive");
+        ghoul::GLDebugGroup<1> group("Add Emissive");
         glEnable(GL_BLEND);
         glBlendFunc(GL_ONE, GL_ONE);
         blitTexture(*settings.inputTextures.emissive);
         glDisable(GL_BLEND);
-        glPopDebugGroup();
     }
 
     if (settings.depthOfField.enabled) {
         swapTarget();
         glDrawBuffer(dstBuffer);
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "DOF");
+        ghoul::GLDebugGroup<1> group("DOF");
         int prevFbo;
         glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prevFbo);
 
         ghoul::opengl::TextureUnit linearDepthUnit;
-        linearDepthUnit.activate();
-        glObj.linearDepth.texture->bind();
+        linearDepthUnit.bind(*glObj.linearDepth.texture);
 
         {
             ghoul::opengl::ProgramObject& program = *glObj.bokehDof.halfRes.program;
             auto& uniforms = glObj.bokehDof.halfRes.uniforms;
 
-            glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "DOF Prepass");
+            ghoul::GLDebugGroup<1> group("DOF Prepass");
             int prevViewport[4];
             glGetIntegerv(GL_VIEWPORT, prevViewport);
             glViewport(0, 0, glObj.texWidth / 2, glObj.texHeight / 2);
@@ -1381,8 +1329,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.bokehDof.halfRes.fbo);
 
             ghoul::opengl::TextureUnit colorUnit;
-            colorUnit.activate();
-            srcTexture->bind();
+            colorUnit.bind(*srcTexture);
 
             program.activate();
             program.setUniform(uniforms.texDepth, linearDepthUnit);
@@ -1395,7 +1342,6 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             glBindVertexArray(0);
 
             glViewport(prevViewport[0], prevViewport[1], prevViewport[2], prevViewport[3]);
-            glPopDebugGroup();
             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, prevFbo);
         }
 
@@ -1404,12 +1350,10 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             auto& uniforms = glObj.bokehDof.uniforms;
 
             ghoul::opengl::TextureUnit colorCocUnit;
-            colorCocUnit.activate();
-            glObj.bokehDof.halfRes.colorCoc->bind();
+            colorCocUnit.bind(*glObj.bokehDof.halfRes.colorCoc);
 
             ghoul::opengl::TextureUnit srcUnit;
-            srcUnit.activate();
-            srcTexture->bind();
+            srcUnit.bind(*srcTexture);
 
             program.activate();
             program.setUniform(uniforms.texHalfRes, colorCocUnit);
@@ -1426,13 +1370,12 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             glBindVertexArray(glObj.vao);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             glBindVertexArray(0);
-            glPopDebugGroup();
         }
     }
 
     // Tonemapping
     {
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Tonemapping");
+        ghoul::GLDebugGroup<1> group("Tonemapping");
         swapTarget();
         glDrawBuffer(dstBuffer);
         const Tonemapping tonemapping =
@@ -1440,8 +1383,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             settings.tonemapping.mode :
             Tonemapping::Passthrough;
         ghoul::opengl::TextureUnit srcUnit;
-        srcUnit.activate();
-        srcTexture->bind();
+        srcUnit.bind(*srcTexture);
 
         switch (tonemapping) {
             case Tonemapping::Passthrough:
@@ -1501,17 +1443,15 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         glBindVertexArray(glObj.vao);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
-        glPopDebugGroup();
     }
 
     if (settings.inputTextures.postTonemap) {
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "Add Post Tonemap");
+        ghoul::GLDebugGroup<1> group("Add Post Tonemap");
         glEnable(GL_BLEND);
         glColorMask(1, 1, 1, 1);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         blitTexture(*settings.inputTextures.postTonemap);
         glDisable(GL_BLEND);
-        glPopDebugGroup();
     }
 
     prevJitter = jitter;
@@ -1522,10 +1462,9 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
 
         swapTarget();
         glDrawBuffer(dstBuffer);
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "FXAA");
+        ghoul::GLDebugGroup<1> group("FXAA");
         ghoul::opengl::TextureUnit unit;
-        unit.activate();
-        srcTexture->bind();
+        unit.bind(*srcTexture);
 
         program.activate();
         program.setUniform(uniforms.tex, unit);
@@ -1534,12 +1473,11 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         glBindVertexArray(glObj.vao);
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
-        glPopDebugGroup();
     }
 
     // Activate backbuffer or whatever was bound before
     {
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 1, -1, "PostProcess Blit Result");
+        ghoul::GLDebugGroup<1> group("PostProcess Blit Result");
 
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, lastFbo);
         glViewport(lastViewport[0], lastViewport[1], lastViewport[2], lastViewport[3]);
@@ -1552,8 +1490,6 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         blitTexture(*srcTexture, *settings.inputTextures.depth);
         glDisable(GL_BLEND);
-
-        glPopDebugGroup();
     }
 
     // Reset rest of state
