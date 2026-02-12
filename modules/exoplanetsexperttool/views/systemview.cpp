@@ -59,7 +59,7 @@ namespace {
 
     void setDefaultValueOrbitVisuals(bool shouldShowIfDefault) {
         using namespace openspace;
-        const std::string appearanceUri = "{defaultvalues_shape}.Renderable";
+        const std::string appearanceUri = "{defaultvalues_shape}.Renderable"; // @TODO (2026-02-12) This tag no longer exists
         if (shouldShowIfDefault) {
             // Draw using points
             global::scriptEngine->queueScript(std::format(
