@@ -84,11 +84,6 @@
   },
   "properties": [
     {
-      "name": "Modules.SkyBrowser.Enabled",
-      "type": "setPropertyValueSingle",
-      "value": "false"
-    },
-    {
       "name": "Dashboard.StartPositionOffset",
       "type": "setPropertyValueSingle",
       "value": "{20.000000,-50.000000}"
