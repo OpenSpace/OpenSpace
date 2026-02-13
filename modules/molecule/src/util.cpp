@@ -162,7 +162,7 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
         return;
     }
 
-    const int64_t lastFrame = std::max(0LL, nFrames - 1);
+    const int64_t lastFrame = std::max<int64_t>(0, nFrames - 1);
     // This is not actually time, but the fractional frame representation
     time = std::clamp(time, 0.0, static_cast<double>(lastFrame));
 
