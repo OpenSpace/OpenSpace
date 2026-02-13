@@ -25,8 +25,9 @@
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
 
 #include <modules/solarbrowsing/solarbrowsingmodule.h>
-#include <modules/solarbrowsing/util/structs.h>
 #include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
+#include <modules/solarbrowsing/util/solarbrowsinghelper.h>
+#include <modules/solarbrowsing/util/structs.h>
 #include <modules/solarbrowsing/util/asyncimagedecoder.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
@@ -40,9 +41,10 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <fstream>
+#include <string_view>
 
 namespace {
-    constexpr char* _loggerCat = "RenderableSolarImagery";
+    constexpr std::string_view _loggerCat = "RenderableSolarImagery";
 
     constexpr unsigned int DefaultTextureSize = 32;
 
@@ -200,14 +202,14 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 
     addProperty(Fadeable::_opacity);
 
-    SolarBrowsingModule* solarbrowsingModule =
-        global::moduleEngine->module<SolarBrowsingModule>();
+    //SolarBrowsingModule* solarbrowsingModule =
+    //    global::moduleEngine->module<SolarBrowsingModule>();
 
-    SpacecraftImageryManager& spacecraftImageryManager =
-        solarbrowsingModule->spacecraftImageryManager();
+    //SpacecraftImageryManager& spacecraftImageryManager =
+    //    solarbrowsingModule->spacecraftImageryManager();
 
-    spacecraftImageryManager.loadTransferFunctions(p.transferfunctionDir, _tfMap);
-    spacecraftImageryManager.loadImageMetadata(p.imageDirectory, _imageMetadataMap);
+    solarbrowsing::loadTransferFunctions(p.transferfunctionDir, _tfMap);
+    solarbrowsing::loadImageMetadata(p.imageDirectory, _imageMetadataMap);
 
     _enableBorder = p.enableBorder.value_or(_enableBorder);
     addProperty(_enableBorder);
@@ -307,13 +309,7 @@ bool RenderableSolarImagery::isReady() const {
 }
 
 void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
-    // Update texture
-    //if (checkBoundaries(data)) {
-    // TODO: The checkBoundaries logic was temporarily disabled since it causes
-    // a bug that prevents this renderablesolarimageryprojection component to be updated
-    // as soon as the view frustum is more than 90 degrees off.
     updateImageryTexture();
-    //}
     const glm::dvec3& sunPositionWorld = sceneGraphNode("Sun")->worldPosition();
     _spacecraftCameraPlane->render(
         data,
@@ -441,8 +437,7 @@ void RenderableSolarImagery::updateImageryTexture() {
 
         _imageryTexture->setDimensions(glm::uvec3(data.imageSize, data.imageSize, 1));
         _imageryTexture->setPixelData(
-            // @TODO (anden88 2026-02-09) : Can we do this without casting const away?+
-            const_cast<uint8_t*>(data.buffer.data()),
+            data.buffer.data(),
             ghoul::opengl::Texture::TakeOwnership::No
         );
         _imageryTexture->uploadTexture();
@@ -604,18 +599,6 @@ void RenderableSolarImagery::saveDecodedDataToCache(const std::filesystem::path&
         nEntries * sizeof(uint8_t)
     );
     file.close();
-}
-
-bool RenderableSolarImagery::checkBoundaries(const RenderData& data) {
-    const glm::dvec3& normal = _spacecraftCameraPlane->normal();
-    const glm::dvec3& cameraPosition = data.camera.positionVec3();
-    const glm::dvec3& planePosition = _spacecraftCameraPlane->worldPosition();
-
-    const glm::dvec3 toCamera = glm::normalize(cameraPosition - planePosition);
-    if (glm::dot(toCamera, normal) < 0) {
-        return false;
-    }
-    return true;
 }
 
 } // namespace openspace

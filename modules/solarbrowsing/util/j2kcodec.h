@@ -36,7 +36,8 @@ namespace openspace {
  * bottlenecks which are listed below:
  *
  * 1. We can't perform decoding on multiple threads, this feature is not stable and
- *    results in a segmentation fault.
+ *    results in a segmentation fault. (anden88 2026-02-13) We can however let each thread
+ *    have its own instance of the `J2KCodec` class.
  * 2. We want to be able to decode directly into our buffer without having to go through
  *    the opj_image_t object.
  *    See: https://github.com/uclouvain/openjpeg/issues/837

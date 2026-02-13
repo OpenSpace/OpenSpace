@@ -41,7 +41,7 @@
 
 namespace openspace::solarbrowsing {
 
-// @TODO anden 2026-02-12 document this class
+// @TODO (anden 2026-02-12) document this class
 class AsyncImageDecoder {
 public:
     explicit AsyncImageDecoder(size_t numThreads);

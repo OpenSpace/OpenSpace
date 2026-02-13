@@ -87,10 +87,6 @@ private:
         const solarbrowsing::DecodedImageData& data
     );
 
-    // @TODO anden88 2026-02-12: Currently unused, check if this is even something that
-    // we might need and update the render function accordingly.
-    bool checkBoundaries(const RenderData& data);
-
     properties::OptionProperty _activeInstruments;
     properties::FloatProperty _contrastValue;
     properties::BoolProperty _enableBorder;
@@ -105,7 +101,7 @@ private:
 
     // The decoded image texture
     std::unique_ptr<ghoul::opengl::Texture> _imageryTexture;
-    // @TODO anden88 2026-02-12: This pointer points to the current keyframe metadata in
+    // @TODO (anden88 2026-02-12): This pointer points to the current keyframe metadata in
     // the timeline given by _imageMetadataMap. We risk dangling pointers if the timeline
     // reallocates due to additional keyframes.
     const ImageMetadata* _currentImage = nullptr;

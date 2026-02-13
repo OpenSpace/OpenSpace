@@ -34,10 +34,9 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 
-
 namespace {
     constexpr double SUN_RADIUS = (1391600000.0 * 0.5);
-    constexpr char* _loggerCat = "SpacecraftCameraPlane";
+    constexpr std::string_view _loggerCat = "SpacecraftCameraPlane";
 } // namespace
 
 namespace openspace {
@@ -119,22 +118,17 @@ bool SpacecraftCameraPlane::isReady() {
 }
 
 void SpacecraftCameraPlane::createPlaneAndFrustum(double moveDistance) {
-    //const double a = 1;
-    //const double b = 0;
-    //const double c = 0.31622776601; // sqrt(0.1)
-    //_move = a * exp(-(pow((_moveFactor.value() - 1) - b, 2.0)) / (2.0 * pow(c, 2.0)));
-    //_move = /*a **/ exp(-(pow((_moveFactor.value() - 1) /*- b*/, 2.0)) / (2.0 /** pow(c, 2.0)*/));
-
     // Computing the image plane position using linear scale is not sufficient for fine
     // tuning movement near the Sun. A Gaussian function* (3.1) is used to address this
     // issue: *https://www.diva-portal.org/smash/get/diva2:1147161/FULLTEXT01.pdf
-    _gaussianMoveFactor = /*a **/ exp(-(pow((moveDistance - 1) /*- b*/, 2.0)) / (2.0 /** pow(c, 2.0)*/));
-    _size = static_cast<float>(_gaussianMoveFactor * SUN_RADIUS); /// _scaleFactor;
+    //_gaussianMoveFactor = a * exp(-(pow((moveDistance - 1) - b, 2.0)) / (2.0 * pow(c, 2.0)));
+    _gaussianMoveFactor = exp(-(pow((moveDistance - 1), 2.0)) / (2.0));
+    _size = static_cast<float>(_gaussianMoveFactor * SUN_RADIUS);
     createPlane();
     createFrustum();
 }
 
-void SpacecraftCameraPlane::createPlane() {
+void SpacecraftCameraPlane::createPlane() const {
     const GLfloat size = _size;
     const GLfloat vertex_data[] = {
         // x      y     z     w     s     t
@@ -169,7 +163,7 @@ void SpacecraftCameraPlane::createPlane() {
     );
 }
 
-void SpacecraftCameraPlane::createFrustum() {
+void SpacecraftCameraPlane::createFrustum() const {
     // Vertex orders x, y, z, w
     // Where w indicates if vertex should be drawn in spacecraft
     // or planes coordinate system
@@ -229,9 +223,9 @@ void SpacecraftCameraPlane::render(const RenderData& data,
     // normal should point from plane toward spacecraft (i.e. plane faces spacecraft)
     _normal = glm::normalize(spacecraftPosWorld - sunPositionWorld);
 
-    // anden88 2025-12-10: An attempt was made to use the glm::lookAt to "simplify" the
-    // rotation matrix without having to build the basis vectors ourselves. However, the
-    // plane rotation would be rotating in all different kinds of orientations
+    // @TODO (anden88 2025-12-10): An attempt was made to use the glm::lookAt to "simplify"
+    // the rotation matrix without having to build the basis vectors ourselves. However,
+    // the plane rotation would be rotating in all different kinds of orientations
     // _rotation = glm::lookAt(spacecraftPosWorld, glm::dvec3(sunPositionWorld), glm::normalize(up));
     // _rotation[3] = glm::dvec4(0.0, 0.0, 0.0, 1.0);
 
@@ -243,9 +237,10 @@ void SpacecraftCameraPlane::render(const RenderData& data,
         worldUp = glm::dvec3(0.0, 1.0, 0.0);
     }
 
-    // build tangent basis for the plane: right, upOnPlane, normal
+    // Build tangent basis for the plane: right, upOnPlane, normal
     glm::vec3 right = glm::normalize(glm::cross(worldUp, _normal));
-    glm::vec3 upOnPlane = glm::cross(_normal, right); // already normalized if right and N are normalized
+    // Already normalized if right and N are normalized
+    glm::vec3 upOnPlane = glm::cross(_normal, right);
 
     // Build a rotation matrix that transforms local axes -> world axes.
     // Local axes: +X = right, +Y = upOnPlane, +Z = _normal

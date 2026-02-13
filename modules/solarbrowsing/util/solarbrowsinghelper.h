@@ -22,50 +22,24 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SOLARBROWSING___SPACECRAFTIMAGERYMANAGER___H__
-#define __OPENSPACE_MODULE_SOLARBROWSING___SPACECRAFTIMAGERYMANAGER___H__
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGHELPER___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGHELPER___H__
 
 #include <modules/solarbrowsing/util/structs.h>
-#include <openspace/util/timeline.h>
-#include <ghoul/filesystem/filesystem.h>
-#include <memory>
-#include <unordered_map>
-#include <optional>
-#include <valarray>
-#include <vector>
-
-namespace ghoul {
-  namespace opengl { class Texture; }
-  namespace filesystem { class File; }
-} // namespace ghoul
 
 namespace openspace {
-
 class TransferFunction;
 
-// @TODO anden88 2025-12-05: Move these functions to a utility file instead. Unlees there
-// is a need for a manager (currently not since it has no member variables or keep tracks of
-// anything particular)
-class SpacecraftImageryManager {
-public:
-    void loadTransferFunctions(const std::filesystem::path& dir,
-        std::unordered_map<InstrumentName, std::shared_ptr<TransferFunction>>& _tfMap);
-    void loadImageMetadata(const std::filesystem::path& rootDir,
-        ImageMetadataMap& _imageMetadataMap);
+namespace solarbrowsing {
 
-private:
-    std::optional<ImageMetadata> parseJ2kMetadata(const std::filesystem::path& filePath);
-    //ImageMetadata parseJsonMetadata(const ghoul::filesystem::File& file);
+void loadTransferFunctions(const std::filesystem::path& dir,
+    std::unordered_map<InstrumentName, std::shared_ptr<TransferFunction>>& _tfMap);
 
-    std::string ISO8601(std::string& datetime);
-
-    bool loadMetadataFromDisk(const std::filesystem::path& rootDir,
-       ImageMetadataMap& _imageMetadataMap);
-
-    void saveMetadataToDisk(const std::filesystem::path& rootPath,
-        const ImageMetadataMap& _imageMetadataMap);
-};
+void loadImageMetadata(const std::filesystem::path& rootDir,
+    ImageMetadataMap& _imageMetadataMap);
 
 } //namespace openspace
 
-#endif // __OPENSPACE_MODULE_SOLARBROWSING___SPACECRAFTIMAGERYMANAGER___H__
+} // namespace openspace::solarbrowsing
+
+#endif // !__OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGHELPER___H__

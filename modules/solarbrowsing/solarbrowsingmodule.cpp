@@ -27,7 +27,6 @@
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
 #include <modules/solarbrowsing/tasks/helioviewerdownloadtask.h>
 #include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
-#include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/util/task.h>
@@ -37,10 +36,6 @@
 namespace openspace {
 
 SolarBrowsingModule::SolarBrowsingModule() : OpenSpaceModule(Name) {}
-
-SpacecraftImageryManager& SolarBrowsingModule::spacecraftImageryManager() {
-    return _spacecraftImageryManager;
-}
 
 void SolarBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<Renderable>* fRenderable =

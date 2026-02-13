@@ -71,6 +71,9 @@ namespace {
         // (hyphen-separated). The string is used to locate the corresponding
         // colormap file on disk (e.g., "AIA-94", "AIA-131", ..., "AIA-4500"),
         // so it must match those filenames exactly.
+
+        // @TODO anden88 add an path to the instrument color map path add as part of the
+        // cache metadata
         std::string instrument;
 
         // The beginning of the time interval to extract data from. Format:
@@ -171,7 +174,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
     std::mutex progressMutex;
     const size_t totalFrames = epochAsIsoString.size();
 
-    // TODO anden88 2026-02-12 can we flush so the output doesn't look lile this:
+    // TODO (anden88 2026-02-12) can we flush so the output doesn't look lile this:
     // (D) HelioviewerDow..Task Downloading image data from Helioviewer=======>] 100 %
     LDEBUG("Downloading image data from Helioviewer               ");
     std::for_each(

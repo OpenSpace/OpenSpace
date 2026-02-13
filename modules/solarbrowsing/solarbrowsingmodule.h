@@ -27,8 +27,6 @@
 
 #include <openspace/util/openspacemodule.h>
 
-#include <modules/solarbrowsing/util/spacecraftimagerymanager.h>
-
 namespace openspace {
 
 class SolarBrowsingModule : public OpenSpaceModule {
@@ -39,11 +37,8 @@ public:
     ~SolarBrowsingModule() override = default;
     std::vector<documentation::Documentation> documentations() const override;
 
-    SpacecraftImageryManager& spacecraftImageryManager();
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
-
-    SpacecraftImageryManager _spacecraftImageryManager;
 };
 
 } // namespace openspace

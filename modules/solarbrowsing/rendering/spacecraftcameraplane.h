@@ -76,8 +76,8 @@ private:
     double _gaussianMoveFactor;
     float _size;
 
-    void createFrustum();
-    void createPlane();
+    void createFrustum() const;
+    void createPlane() const;
     void initialize();
 };
 

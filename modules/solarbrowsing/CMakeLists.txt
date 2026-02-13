@@ -37,9 +37,8 @@ set(HEADER_FILES
   tasks/helioviewerdownloadtask.h
   util/asyncimagedecoder.h
   util/j2kcodec.h
-  util/spacecraftimagerymanager.h
+  util/solarbrowsinghelper.h
   util/structs.h
-  util/pixelbufferobject.h
 )
 
 source_group("Header Files" FILES ${HEADER_FILES})
@@ -51,8 +50,7 @@ set(SOURCE_FILES
   tasks/helioviewerdownloadtask.cpp
   util/asyncimagedecoder.cpp
   util/j2kcodec.cpp
-  util/spacecraftimagerymanager.cpp
-  util/pixelbufferobject.cpp
+  util/solarbrowsinghelper.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 
