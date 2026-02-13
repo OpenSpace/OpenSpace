@@ -37,8 +37,13 @@
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/logging/logmanager.h>
 #include <string_view>
+#include <md_gl.h>
 
 namespace {
+    // Defining the shaders here since we don't want to need to include MOLD header files
+    // in the module header, which would mean that the core would need to know about them
+    std::unique_ptr<md_gl_shaders_t> _shaders = nullptr;
+
     constexpr std::string_view ShaderOutputSnippet = R"(
 layout(location = 0) out vec4 out_color;
 layout(location = 1) out vec4 out_normal;

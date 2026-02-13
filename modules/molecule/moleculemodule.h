@@ -32,7 +32,8 @@
 #include <openspace/util/threadpool.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/texture.h>
-#include <md_gl.h>
+
+struct md_gl_shaders_t;
 
 namespace openspace {
 
@@ -69,8 +70,6 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _depthTex;
     int _width = 0;
     int _height = 0;
-
-    std::unique_ptr<md_gl_shaders_t> _shaders = nullptr;
 
     struct SSAO : public properties::PropertyOwner {
         explicit SSAO(PropertyOwnerInfo info);
