@@ -603,12 +603,13 @@ void RenderableDUMeshes::createMeshes() {
         for (int i = 0; i < p.second.numU; i++) {
             GLuint vbo = 0;
             glCreateBuffers(1, &vbo);
-            glNamedBufferData(
+            glNamedBufferStorage(
                 vbo,
                 p.second.vertices.size() * sizeof(GLfloat),
                 p.second.vertices.data(),
-                GL_STATIC_DRAW
+                GL_NONE_BIT
             );
+            p.second.vertices.clear();
             p.second.vboArray.push_back(vbo);
 
             GLuint vao = 0;
@@ -626,12 +627,13 @@ void RenderableDUMeshes::createMeshes() {
             for (int i = 0; i < p.second.numV; i++) {
                 GLuint cvbo = 0;
                 glCreateBuffers(1, &cvbo);
-                glNamedBufferData(
+                glNamedBufferStorage(
                     cvbo,
                     p.second.vertices.size() * sizeof(GLfloat),
                     p.second.vertices.data(),
-                    GL_STATIC_DRAW
+                    GL_NONE_BIT
                 );
+                p.second.vertices.clear();
                 p.second.vboArray.push_back(cvbo);
 
                 GLuint cvao = 0;

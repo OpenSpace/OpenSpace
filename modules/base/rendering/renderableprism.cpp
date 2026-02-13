@@ -179,12 +179,7 @@ void RenderablePrism::initializeGL() {
     );
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
-    glCreateBuffers(1, &_vbo);
-    glCreateBuffers(1, &_ibo);
     glCreateVertexArrays(1, &_vao);
-    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
-    glVertexArrayElementBuffer(_vao, _ibo);
-
     glEnableVertexArrayAttrib(_vao, 0);
     glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_vao, 0, 0);
@@ -288,18 +283,24 @@ void RenderablePrism::updateVertexData() {
         indexArray.push_back(static_cast<uint8_t>(2 * _nShapeSegments + k + 1));
     }
 
-    glNamedBufferData(
+    glDeleteBuffers(1, &_vbo);
+    glCreateBuffers(1, &_vbo);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
+    glNamedBufferStorage(
         _vbo,
         vertexArray.size() * sizeof(float),
         vertexArray.data(),
-        GL_STREAM_DRAW
+        GL_NONE_BIT
     );
 
-    glNamedBufferData(
+    glDeleteBuffers(1, &_ibo);
+    glCreateBuffers(1, &_ibo);
+    glVertexArrayElementBuffer(_vao, _ibo);
+    glNamedBufferStorage(
         _ibo,
         indexArray.size() * sizeof(uint8_t),
         indexArray.data(),
-        GL_STREAM_DRAW
+        GL_NONE_BIT
     );
 
     _count = static_cast<GLsizei>(indexArray.size());

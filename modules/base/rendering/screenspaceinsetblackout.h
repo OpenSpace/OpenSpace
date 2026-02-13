@@ -141,15 +141,10 @@ private:
     void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
     void generateTexture();
-    void generateVertexArrayData();
 
     BlackoutShape _blackoutShape;
-    std::vector<glm::vec2> _vboData;
     std::unique_ptr<ghoul::opengl::Texture> _blackoutTexture;
     std::unique_ptr<ghoul::opengl::Texture> _calibrationTexture;
-    GLuint _vao = 0;
-    GLuint _vbo = 0;
-    GLuint _fbo = 0;
     ghoul::opengl::ProgramObject* _fboProgram = nullptr;
     UniformCache(color) _uniformCache;
 };

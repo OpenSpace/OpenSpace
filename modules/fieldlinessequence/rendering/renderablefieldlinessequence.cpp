@@ -1272,7 +1272,6 @@ void unbindGL() {
 
 void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
     glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vboPosition);
 
     const FieldlinesState& state = _files[_activeIndex].state;
     const std::vector<glm::vec3>& vertPos = state.vertexPositions();
@@ -1287,12 +1286,11 @@ void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
     glEnableVertexArrayAttrib(_vao, 0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-    unbindGL();
+    glBindVertexArray(0);
 }
 
 void RenderableFieldlinesSequence::updateVertexColorBuffer() {
     glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vboColor);
 
     const FieldlinesState& state = _files[_activeIndex].state;
     bool success = false;
@@ -1311,12 +1309,12 @@ void RenderableFieldlinesSequence::updateVertexColorBuffer() {
 
         _shouldUpdateColorBuffer = false;
     }
-    unbindGL();
+
+    glBindVertexArray(0);
 }
 
 void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
     glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vboMasking);
 
     const FieldlinesState& state = _files[_activeIndex].state;
     bool success = false;
@@ -1333,9 +1331,10 @@ void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
         glEnableVertexArrayAttrib(_vao, 2);
         glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-        unbindGL();
         _shouldUpdateMaskingBuffer = false;
     }
+
+    glBindVertexArray(0);
 }
 
 } // namespace openspace

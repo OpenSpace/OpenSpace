@@ -63,10 +63,10 @@ protected:
         GeometryData& operator=(GeometryData&& other) noexcept;
         ~GeometryData();
 
-        void update() const;
+        void update(const std::vector<rendering::helper::VertexXYZ>& data);
         void render() const;
 
-        std::vector<rendering::helper::VertexXYZ> varray;
+        GLsizei size = 0;
         GLuint vao = 0;
         GLuint vbo = 0;
         GLenum mode = GL_LINE_STRIP;
@@ -83,7 +83,7 @@ protected:
     bool _gridIsDirty = true;
 
     std::vector<GeometryData> _circles;
-    GeometryData _lines{GL_LINES};
+    GeometryData _lines = GeometryData(GL_LINES);
 
     // Labels
     bool _hasLabels = false;

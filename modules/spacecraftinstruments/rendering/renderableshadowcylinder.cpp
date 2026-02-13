@@ -280,7 +280,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.opacity, opacity());
 
     glBindVertexArray(_vao);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, _count);
     glBindVertexArray(0);
 
     _shader->deactivate();
@@ -300,6 +300,7 @@ void RenderableShadowCylinder::update(const UpdateData& data) {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
+
     createCylinder(data.time.j2000Seconds());
 }
 
@@ -342,22 +343,26 @@ void RenderableShadowCylinder::createCylinder(double time) {
     vecLightSource = glm::inverse(_stateMatrix) * vecLightSource;
 
     vecLightSource *= _shadowLength.value();
-    _vertices.clear();
+
+    std::vector<CylinderVBOLayout> vertices;
+    vertices.reserve(terminatorPoints.size() * 2 + 2);
 
     for (const glm::vec3& v : terminatorPoints) {
-        _vertices.push_back({ v[0], v[1], v[2], 0.f });
+        vertices.push_back({ v[0], v[1], v[2], 0.f });
         glm::vec3 f = v + glm::vec3(vecLightSource);
-        _vertices.push_back({ f[0], f[1], f[2], 0.f });
+        vertices.push_back({ f[0], f[1], f[2], 0.f });
     }
-    _vertices.push_back(_vertices[0]);
-    _vertices.push_back(_vertices[1]);
+    vertices.push_back(vertices[0]);
+    vertices.push_back(vertices[1]);
 
     glNamedBufferData(
         _vbo,
-        _vertices.size() * sizeof(CylinderVBOLayout),
-        _vertices.data(),
+        vertices.size() * sizeof(CylinderVBOLayout),
+        vertices.data(),
         GL_DYNAMIC_DRAW
     );
+
+    _count = static_cast<GLsizei>(vertices.size());
 }
 
 } // namespace openspace

@@ -209,19 +209,12 @@ void RenderableGrid::initializeGL() {
         }
     );
 
-    glCreateBuffers(1, &_vbo);
     glCreateVertexArrays(1, &_vao);
-    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
-
     glEnableVertexArrayAttrib(_vao, 0);
     glVertexArrayAttribFormat(_vao, 0, 3, GL_DOUBLE, GL_FALSE, 0);
     glVertexArrayAttribBinding(_vao, 0, 0);
 
-
-    glCreateBuffers(1, &_highlightVbo);
     glCreateVertexArrays(1, &_highlightVao);
-    glVertexArrayVertexBuffer(_highlightVao, 0, _highlightVbo, 0, sizeof(Vertex));
-
     glEnableVertexArrayAttrib(_highlightVao, 0);
     glVertexArrayAttribFormat(_highlightVao, 0, 3, GL_DOUBLE, GL_FALSE, 0);
     glVertexArrayAttribBinding(_highlightVao, 0, 0);
@@ -431,23 +424,27 @@ void RenderableGrid::update(const UpdateData&) {
 
     setBoundingSphere(glm::length(glm::dvec2(halfSize)));
 
-    // Minor grid
-    glNamedBufferData(
+    glDeleteBuffers(1, &_vbo);
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(
         _vbo,
         _varray.size() * sizeof(Vertex),
         _varray.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
-    // Major grid
-    glNamedBufferData(
-        _highlightVbo,
-        _highlightArray.size() * sizeof(Vertex),
-        _highlightArray.data(),
-        GL_STATIC_DRAW
-    );
-
-    _gridIsDirty = false;
+    glDeleteBuffers(1, &_highlightVbo);
+    if (!_highlightArray.empty()) {
+        glCreateBuffers(1, &_highlightVbo);
+        glNamedBufferStorage(
+            _highlightVbo,
+            _highlightArray.size() * sizeof(Vertex),
+            _highlightArray.data(),
+            GL_NONE_BIT
+        );
+        glVertexArrayVertexBuffer(_highlightVao, 0, _highlightVbo, 0, sizeof(Vertex));
+    }
 }
 
 } // namespace openspace

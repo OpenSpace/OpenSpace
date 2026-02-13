@@ -544,14 +544,6 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
 void ScreenSpaceInsetBlackout::initializeGL() {
     ScreenSpaceRenderable::initializeGL();
 
-    glCreateBuffers(1, &_vbo);
-    glCreateVertexArrays(1, &_vao);
-    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(glm::vec2));
-
-    glEnableVertexArrayAttrib(_vao, 0);
-    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(_vao, 0, 0);
-
     // Setup program object and shaders
     _fboProgram = BaseModule::ProgramObjectManager.request(
         "ScreenSpaceInsetBlackout",
@@ -563,9 +555,6 @@ void ScreenSpaceInsetBlackout::initializeGL() {
             );
         }
     );
-
-    // Setup FBO & Texture (UHD resolution)
-    glCreateFramebuffers(1, &_fbo);
 
     _blackoutTexture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(BlackoutTextureSize, 1),
@@ -584,24 +573,17 @@ void ScreenSpaceInsetBlackout::initializeGL() {
         BlackoutTextureSize.y
     );
 
-    glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_blackoutTexture, 0);
-
     _blackoutTexture->purgeFromRAM();
 
     _uniformCache.color = _fboProgram->uniformLocation("color");
 
     // Generate vertex data and texture
-    generateVertexArrayData();
     generateTexture();
 }
 
 void ScreenSpaceInsetBlackout::deinitializeGL() {
     _blackoutTexture = nullptr;
     _calibrationTexture = nullptr;
-
-    glDeleteVertexArrays(1, &_vao);
-    glDeleteBuffers(1, &_vbo);
-    glDeleteFramebuffers(1, &_fbo);
 
     if (_fboProgram) {
         BaseModule::ProgramObjectManager.release(
@@ -619,24 +601,54 @@ void ScreenSpaceInsetBlackout::deinitializeGL() {
 void ScreenSpaceInsetBlackout::update() {
     _blackoutShape.checkAndUpdateGUI();
     if (_blackoutShape.checkHasChanged()) {
-        generateVertexArrayData();
         generateTexture();
         _blackoutShape.resetHasChanged();
     }
 }
 
-void ScreenSpaceInsetBlackout::generateVertexArrayData() {
-    // Clear old data
-    _vboData.clear();
+void ScreenSpaceInsetBlackout::generateTexture() {
+    GLuint vao = 0;
+    GLuint vbo = 0;
+    GLuint fbo = 0;
+
+    glCreateBuffers(1, &vbo);
+    glCreateVertexArrays(1, &vao);
+    glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(glm::vec2));
+
+    glEnableVertexArrayAttrib(vao, 0);
+    glVertexArrayAttribFormat(vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vao, 0, 0);
+
+    glCreateFramebuffers(1, &fbo);
+    glNamedFramebufferTexture(fbo, GL_COLOR_ATTACHMENT0, *_blackoutTexture, 0);
+
+
+    defer {
+        glDeleteVertexArrays(1, &vao);
+        glDeleteBuffers(1, &vbo);
+        glDeleteFramebuffers(1, &fbo);
+    };
+
+
+
+    std::vector<glm::vec2> vboData;
 
     // Set vertex buffer data based on calibration pattern or blackout shape
     if (_blackoutShape.enableCalibrationPattern && _calibrationTexture.get()) {
-        _vboData = {
+        vboData = {
             glm::vec2(-1.f, 1.f),
             glm::vec2(1.f, 1.f),
             glm::vec2(1.f, -1.f),
             glm::vec2(-1.f, -1.f)
         };
+
+        glNamedBufferStorage(
+            vbo,
+            vboData.size() * sizeof(glm::vec2),
+            vboData.data(),
+            GL_NONE_BIT
+        );
+
         return;
     }
 
@@ -711,20 +723,18 @@ void ScreenSpaceInsetBlackout::generateVertexArrayData() {
     // Incoming vertex data is: top -> right -> bottom -> left (clockwise)
     // VBO data needs to be counter-clockwise for correct winding
     // Also adds extra point first and last for Triangle Fan drawing
-    _vboData.push_back(glm::vec2(0.f, 0.f));
-    _vboData.insert(_vboData.end(), splineTop.rbegin(), splineTop.rend());
-    _vboData.insert(_vboData.end(), splineLeft.rbegin(), splineLeft.rend());
-    _vboData.insert(_vboData.end(), splineBottom.rbegin(), splineBottom.rend());
-    _vboData.insert(_vboData.end(), splineRight.rbegin(), splineRight.rend());
-    _vboData.push_back(splineTop.back());
-}
+    vboData.push_back(glm::vec2(0.f, 0.f));
+    vboData.insert(vboData.end(), splineTop.rbegin(), splineTop.rend());
+    vboData.insert(vboData.end(), splineLeft.rbegin(), splineLeft.rend());
+    vboData.insert(vboData.end(), splineBottom.rbegin(), splineBottom.rend());
+    vboData.insert(vboData.end(), splineRight.rbegin(), splineRight.rend());
+    vboData.push_back(splineTop.back());
 
-void ScreenSpaceInsetBlackout::generateTexture() {
-    glNamedBufferData(
-        _vbo,
-        _vboData.size() * sizeof(glm::vec2),
-        _vboData.data(),
-        GL_STATIC_DRAW
+    glNamedBufferStorage(
+        vbo,
+        vboData.size() * sizeof(glm::vec2),
+        vboData.data(),
+        GL_NONE_BIT
     );
 
     _fboProgram->activate();
@@ -739,16 +749,15 @@ void ScreenSpaceInsetBlackout::generateTexture() {
     // Clear current buffer
     glViewport(0, 0, BlackoutTextureSize.x, BlackoutTextureSize.y);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, _fbo);
-    glClearColor(0.f, 0.f, 0.f, 0.f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    constexpr glm::vec4 Black = glm::vec4(0.f);
+    glClearNamedFramebufferfv(fbo, GL_COLOR, 0, glm::value_ptr(Black));
 
-    // Draw
-    glBindVertexArray(_vao);
-    glDrawArrays(GL_TRIANGLE_FAN, 0, static_cast<gl::GLsizei>(_vboData.size()));
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    glBindVertexArray(vao);
+    glDrawArrays(GL_TRIANGLE_FAN, 0, static_cast<gl::GLsizei>(vboData.size()));
     glBindVertexArray(0);
-
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
     _fboProgram->deactivate();
 }

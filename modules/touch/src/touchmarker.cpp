@@ -129,28 +129,31 @@ void TouchMarker::render(const std::vector<openspace::TouchInputHolder>& list) {
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
         glBindVertexArray(_vao);
-        glDrawArrays(GL_POINTS, 0, static_cast<int>(_vertexData.size() / 2));
+        glDrawArrays(GL_POINTS, 0, _count);
 
         _shader->deactivate();
     }
 }
 
 void TouchMarker::createVertexList(const std::vector<openspace::TouchInputHolder>& list) {
-    _vertexData.resize(list.size() * 2);
+    std::vector<GLfloat> vertexData;
+    vertexData.resize(list.size() * 2);
 
     int i = 0;
     for (const openspace::TouchInputHolder& inputHolder : list) {
-        _vertexData[i] = 2.f * (inputHolder.latestInput().x - 0.5f);
-        _vertexData[i + 1] = -2.f * (inputHolder.latestInput().y - 0.5f);
+        vertexData[i] = 2.f * (inputHolder.latestInput().x - 0.5f);
+        vertexData[i + 1] = -2.f * (inputHolder.latestInput().y - 0.5f);
         i += 2;
     }
 
     glNamedBufferData(
         _vbo,
-        _vertexData.size() * sizeof(GLfloat),
-        _vertexData.data(),
+        vertexData.size() * sizeof(GLfloat),
+        vertexData.data(),
         GL_STATIC_DRAW
     );
+
+    _count = static_cast<GLsizei>(list.size());
 }
 
 } // openspace namespace

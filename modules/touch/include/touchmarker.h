@@ -61,7 +61,7 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     UniformCache(radius, opacity, thickness, color) _uniformCache;
 
-    std::vector<GLfloat> _vertexData;
+    GLsizei _count = 0;
     GLuint _vao = 0;
     GLuint _vbo = 0;
 };

@@ -78,7 +78,7 @@ private:
     GLuint _vao = 0;
     GLuint _vbo = 0;
 
-    std::vector<CylinderVBOLayout> _vertices;
+    GLsizei _count = 0;
 };
 
 } // namespace openspace

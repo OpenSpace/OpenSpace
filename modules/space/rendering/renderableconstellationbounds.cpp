@@ -177,12 +177,15 @@ void RenderableConstellationBounds::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     glCreateBuffers(1, &_vbo);
-    glNamedBufferData(
+    glNamedBufferStorage(
         _vbo,
         _vertexValues.size() * 3 * sizeof(float),
         _vertexValues.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
+
+    // We don't need the data anymore and can remove it
+    _vertexValues.clear();
 
     glCreateVertexArrays(1, &_vao);
     glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
