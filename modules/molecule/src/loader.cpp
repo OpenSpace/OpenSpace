@@ -344,7 +344,8 @@ md_trajectory_i* openFile(std::filesystem::path filename, const md_molecule_t* m
     const uint64_t numTrajFrames = md_trajectory_num_frames(internalTraj);
     const uint64_t frameCacheSize = MEGABYTES(16);
     const uint64_t approxFrameSize = numAtoms * 3 * sizeof(float);
-    const uint64_t maxNumCacheFrames = std::max(16ULL, frameCacheSize / approxFrameSize);
+    const uint64_t maxNumCacheFrames =
+        std::max<uint64_t>(16U, frameCacheSize / approxFrameSize);
 
     const int64_t numCacheFrames = std::min(numTrajFrames, maxNumCacheFrames);
 
