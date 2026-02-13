@@ -31,6 +31,7 @@
 #include <openspace/util/time.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <scn/scan.h>
 #include <atomic>
 #include <ctime>
 #include <execution>
@@ -194,26 +195,23 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
             // loading the image.
             std::istringstream ss = std::istringstream(std::string(formattedDate));
 
-            std::tm tm = {};
-            int milliseconds = 0;
-            const std::string format = "%Y-%m-%dT%H:%M:%S";
-
-            ss >> std::get_time(&tm, format.c_str());
-            if (ss.peek() == '.') {
-                ss.get();
-                ss >> milliseconds;
-            }
+            auto r = scn::scan<int, int, int, int, int, int, int>(
+                std::string(formattedDate),
+                "{}-{}-{}T{}:{}:{}.{}"
+            );
+            ghoul_assert(r, "Invalid date");
+            auto& [year, month, day, hour, minute, second, millisecond] = r->values();
 
             const std::string outFilename = std::format(
                 "{}/{:04}_{:02}_{:02}__{:02}_{:02}_{:02}_{:03}__{}_{}.jp2",
                 _outputFolder,
-                tm.tm_year + 1900,
-                tm.tm_mon + 1,
-                tm.tm_mday,
-                tm.tm_hour,
-                tm.tm_min,
-                tm.tm_sec,
-                milliseconds,
+                year,
+                month,
+                day,
+                hour,
+                minute,
+                second,
+                millisecond,
                 _name,
                 _instrument
             );

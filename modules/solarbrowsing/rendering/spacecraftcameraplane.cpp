@@ -223,9 +223,9 @@ void SpacecraftCameraPlane::render(const RenderData& data,
     // normal should point from plane toward spacecraft (i.e. plane faces spacecraft)
     _normal = glm::normalize(spacecraftPosWorld - sunPositionWorld);
 
-    // @TODO (anden88 2025-12-10): An attempt was made to use the glm::lookAt to "simplify"
+    // (anden88 2025-12-10): An attempt was made to use the glm::lookAt to "simplify"
     // the rotation matrix without having to build the basis vectors ourselves. However,
-    // the plane rotation would be rotating in all different kinds of orientations
+    // the plane rotation would be rotating in all different kinds of orientations.
     // _rotation = glm::lookAt(spacecraftPosWorld, glm::dvec3(sunPositionWorld), glm::normalize(up));
     // _rotation[3] = glm::dvec4(0.0, 0.0, 0.0, 1.0);
 

@@ -52,11 +52,14 @@ struct ImageData {
     uint32_t h;
 };
 
+// @TODO (anden88: 2026-02-13): This decoder has some experimental code and a lot of
+// unused variables. I can't say for certain what they are all about or what the goal was.
+// Should this be left as is, or should we clean it all out?
 class J2kCodec {
 public:
     static constexpr const int ALL_THREADS = 0;
 
-    J2kCodec(bool verboseMode = false);
+    explicit J2kCodec(bool verboseMode = false);
     ~J2kCodec();
 
     // Decode into a client allocated buffer
@@ -65,9 +68,9 @@ public:
         int x1 = -1, int y1 = -1, int numThreads = ALL_THREADS);
 
     // Experimental and not used at the moment
-    void encodeAsTiles(const char* outfile, const int32_t* data, unsigned int imageWidth,
-        unsigned int imageHeight, unsigned int tileWidth, unsigned int tileHeight,
-        unsigned int numComps, unsigned int compPrec);
+    //void encodeAsTiles(const char* outfile, const int32_t* data, unsigned int imageWidth,
+    //    unsigned int imageHeight, unsigned int tileWidth, unsigned int tileHeight,
+    //    unsigned int numComps, unsigned int compPrec);
 
 private:
     void destroy();
@@ -81,7 +84,7 @@ private:
 
     std::string _infileName;
     opj_stream_t* _infileStream = nullptr;
-    bool _verboseMode;
+    bool _verboseMode = false;
 };
 
 } // namespace openspace

@@ -26,10 +26,13 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/util/progressbar.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
+#include <scn/scan.h>
+#include <execution>
 #include <format>
 #include <fstream>
 #include <string>
@@ -474,11 +477,16 @@ void loadImageMetadata(const std::filesystem::path& rootDir,
 
 
     LDEBUG("Reading metadata");
-    size_t count = 0;
-
+    std::atomic<size_t> count = 0;
     std::mutex spiceAndPushMutex;
+    std::mutex onProgressMutex;
+    const size_t totalImages = sequencePaths.size();
 
-    std::cout << '\n';
+    ProgressBar progressBar = ProgressBar(100);
+    auto onProgress = [&progressBar](float progress) {
+        progressBar.print(static_cast<int>(progress * 100.f));
+    };
+
     auto exec = [&](const std::filesystem::path& seqPath) {
         // An example image has the following naming scheme:
         // 2024_05_08__00_58_23_814__SDO_AIA-211.jp2
@@ -494,14 +502,14 @@ void loadImageMetadata(const std::filesystem::path& rootDir,
         size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
         std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart); // e.g., AIA-211
 
-        // @TODO (anden88 2026-02-12): can this be done with std::tm instead?
-        int year, month, day, hour, minute, second, millisecond;
-
-        int scanned = std::sscanf(fileName.c_str(), "%d_%d_%d__%d_%d_%d_%d",
-            &year, &month, &day, &hour, &minute, &second, &millisecond
+        auto r = scn::scan<int, int, int, int, int, int, int>(
+            fileName,
+            "{}_{}_{}__{}_{}_{}_{}"
         );
+        ghoul_assert(r, "Invalid date");
+        auto& [year, month, day, hour, minute, second, millisecond] = r->values();
 
-        if (scanned == 7) {
+        if (r) {
             std::string dateTime = std::format(
                 "{:04}-{:02}-{:02}T{:02}:{:02}:{:02}.{:03}",
                 year, month, day,
@@ -511,12 +519,11 @@ void loadImageMetadata(const std::filesystem::path& rootDir,
             std::optional<ImageMetadata> im = parseJ2kMetadata(seqPath);
 
             if (im.has_value()) {
-                spiceAndPushMutex.lock();
+                std::lock_guard lock(spiceAndPushMutex);
                 result[instrumentName].addKeyframe(
                     global::timeManager->time().convertTime(dateTime),
                     std::move(im.value())
                 );
-                spiceAndPushMutex.unlock();
             }
             else {
                 LERROR(std::format(
@@ -530,25 +537,27 @@ void loadImageMetadata(const std::filesystem::path& rootDir,
                 fileName, seqPath
             ));
         }
-        ++count;
 
-        if (count % 250 == 0) {
-            LINFO(std::format(
-                "Processing image {} out of {} ", count, sequencePaths.size()
-            ));
+        size_t done = ++count;
+        {
+            std::lock_guard lock(onProgressMutex);
+            onProgress(done / static_cast<float>(totalImages));
         }
     };
 
-    for (const std::filesystem::path& seqPath : sequencePaths) {
-        exec(seqPath);
-    }
+    std::for_each(
+        std::execution::par,
+        sequencePaths.begin(),
+        sequencePaths.end(),
+        exec
+    );
 
+    progressBar.finish();
     LDEBUG("Finish loading imagery metadata");
     LDEBUG("Saving imagery metadata");
     saveMetadataToDisk(rootDir, result);
-
     imageMetadataMap.insert(result.begin(), result.end());
-    LDEBUG(std::format("{} images loaded", count));
+    LDEBUG(std::format("{} images loaded", static_cast<size_t>(count)));
     LDEBUG(std::format("{} values in metamap", imageMetadataMap.size()));
 }
 
