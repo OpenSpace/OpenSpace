@@ -46,7 +46,7 @@ namespace {
     constexpr uint64_t MdMemTrajMagic = 0x1289371265F17256;
 
     struct SecondaryStructureData {
-        md_array(md_secondary_structure_t) ss = 0;
+        md_array(md_secondary_structure_t) ss = nullptr;
         uint64_t stride = 0;
     };
 
@@ -231,13 +231,13 @@ namespace {
                             int64_t frame, const md_molecule_t* mol,
                             bool deperiodizeOnLoad)
     {
-        const int64_t frameDataSize = md_trajectory_fetch_frame_data(traj, frame, 0);
-        void* frameDataPtr = md_alloc(default_allocator, frameDataSize);
+        const int64_t frameDataSz = md_trajectory_fetch_frame_data(traj, frame, nullptr);
+        void* frameDataPtr = md_alloc(default_allocator, frameDataSz);
         md_trajectory_fetch_frame_data(traj, frame, frameDataPtr);
         bool result = md_trajectory_decode_frame_data(
             traj,
             frameDataPtr,
-            frameDataSize,
+            frameDataSz,
             &frameData->header,
             frameData->x,
             frameData->y,
@@ -258,7 +258,7 @@ namespace {
             }
         }
 
-        md_free(default_allocator, frameDataPtr, frameDataSize);
+        md_free(default_allocator, frameDataPtr, frameDataSz);
         return result;
     }
 
@@ -293,7 +293,7 @@ namespace {
         );
 
         md_frame_data_t* frameData;
-        md_frame_cache_lock_t* lock = 0;
+        md_frame_cache_lock_t* lock = nullptr;
         bool result = true;
         const bool inCache = md_frame_cache_find_or_reserve(
             &cached->cache,
@@ -354,7 +354,7 @@ namespace {
         CachedTrajectory* cachedTraj = reinterpret_cast<CachedTrajectory*>(traj + 1);
 
         const int64_t numFrames = md_trajectory_num_frames(backingTraj);
-        const int64_t numCacheFrames = std::min(32LL, numFrames);
+        const int64_t numCacheFrames = std::min<int64_t>(32LL, numFrames);
 
         cachedTraj->magic = MdCachedTrajMagic;
         cachedTraj->deperiodizeOnLoad = deperiodizeOnLoad;
@@ -382,18 +382,19 @@ namespace {
         return traj;
     }
 
-    void loadSecondaryStructureData(md_trajectory_i* traj, const md_molecule_t* mol) {
+    void loadSecondaryStructureData(md_trajectory_i* traj, const md_molecule_t* molecule)
+    {
         ghoul_assert(traj, "Missing trajectory");
         ghoul_assert(traj->inst, "Trajectory has not data");
-        ghoul_assert(mol, "Missing molecular data");
+        ghoul_assert(molecule, "Missing molecular data");
 
         using namespace openspace;
 
-        if (mol->backbone.range_count == 0) {
+        if (molecule->backbone.range_count == 0) {
             return;
         }
 
-        uint64_t ssStride = mol->backbone.count;
+        uint64_t ssStride = molecule->backbone.count;
         md_secondary_structure_t* ssData = nullptr;
 
         const uint64_t magic = *reinterpret_cast<uint64_t*>(traj->inst);
@@ -420,7 +421,7 @@ namespace {
             const int64_t beg = i * numFrames / numChunks;
             const int64_t end =
                 (i == numChunks - 1) ? numFrames : (i + 1) * numFrames / numChunks;
-            pool.enqueue([ssData, ssStride, traj, old_mol = mol, beg, end]() {
+            pool.enqueue([ssData, ssStride, traj, old_mol = molecule, beg, end]() {
                 md_molecule_t mol = *old_mol;
                 const int64_t stride = ALIGN_TO(mol.atom.count, 16);
                 const int64_t bytes = stride * sizeof(float) * 3;
@@ -437,17 +438,17 @@ namespace {
                 mol.atom.y = coords + stride * 1;
                 mol.atom.z = coords + stride * 2;
 
-                for (int64_t i = beg; i < end; i++) {
+                for (int64_t j = beg; j < end; j++) {
                     md_trajectory_load_frame(
                         traj,
-                        i,
+                        j,
                         nullptr,
                         mol.atom.x,
                         mol.atom.y,
                         mol.atom.z
                     );
                     md_util_backbone_secondary_structure_compute(
-                        ssData + ssStride * i,
+                        ssData + ssStride * j,
                         ssStride,
                         &mol
                     );

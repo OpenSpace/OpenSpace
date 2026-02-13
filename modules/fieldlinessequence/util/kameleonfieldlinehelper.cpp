@@ -88,14 +88,14 @@ namespace openspace::fls {
  * Returns `false` if it fails to create a valid state. Requires the kameleon module to
  * be activated!
  *
- * \param state, FieldlineState which should hold the extracted data
- * \param cdfPath, std::string of the absolute path to a .cdf file
- * \param seedPoints, vector of seed points from which to trace field lines
- * \param tracingVar, which quantity to trace lines from. Typically "b" for magnetic field
+ * \param state FieldlineState which should hold the extracted data
+ * \param cdfPath std::string of the absolute path to a .cdf file
+ * \param seedPoints vector of seed points from which to trace field lines
+ * \param tracingVar which quantity to trace lines from. Typically "b" for magnetic field
  *        lines and "u" for velocity flow lines
- * \param extraVars, extra scalar quantities to be stored in the FieldlinesState; e.g. "T"
+ * \param extraVars extra scalar quantities to be stored in the FieldlinesState; e.g. "T"
  *        for temperature, "rho" for density or "P" for pressure
- * \param extraMagVars, variables which should be used for extracting magnitudes, must be
+ * \param extraMagVars variables which should be used for extracting magnitudes, must be
  *        a multiple of 3; e.g. "ux", "uy" & "uz" to get the magnitude of the velocity
  *        vector at each line vertex
  */

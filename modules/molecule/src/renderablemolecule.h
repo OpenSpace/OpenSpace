@@ -44,7 +44,7 @@ namespace openspace {
 class RenderableMolecule : public Renderable {
 public:
     explicit RenderableMolecule(const ghoul::Dictionary& dictionary);
-    virtual ~RenderableMolecule();
+    ~RenderableMolecule() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -77,7 +77,7 @@ private:
         explicit Representation(size_t number, const md_molecule_t& molecule_,
             bool enabled_, molecule::rep::Type type_, molecule::rep::Color color_,
             std::string filter_, float scale_, glm::vec4 uniformColor_);
-        ~Representation();
+        ~Representation() override;
 
         md_gl_representation_t glRep = {};
         md_bitfield_t mask;
