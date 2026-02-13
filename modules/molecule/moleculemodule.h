@@ -32,8 +32,7 @@
 #include <openspace/util/threadpool.h>
 #include <ghoul/glm.h>
 #include <ghoul/opengl/texture.h>
-
-struct md_gl_shaders_t;
+#include <md_gl.h>
 
 namespace openspace {
 
@@ -42,7 +41,6 @@ public:
     constexpr static const char* Name = "Molecule";
 
     MoleculeModule();
-    ~MoleculeModule() override;
 
     void internalDeinitializeGL() final;
 

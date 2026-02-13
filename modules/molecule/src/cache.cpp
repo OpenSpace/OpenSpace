@@ -258,7 +258,7 @@ namespace {
             }
         }
 
-        md_free(default_allocator, frameDataPtr, frameDataSize);
+        md_free(default_allocator, frameDataPtr, frameDataSz);
         return result;
     }
 

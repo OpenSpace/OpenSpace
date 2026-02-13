@@ -36,7 +36,6 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/logging/logmanager.h>
-#include <md_gl.h>
 #include <string_view>
 
 namespace {
@@ -143,8 +142,6 @@ void MoleculeModule::internalInitialize(const ghoul::Dictionary&) {
         }
     );
 }
-
-MoleculeModule::~MoleculeModule() {}
 
 void MoleculeModule::internalDeinitializeGL() {
     ghoul_assert(_initializeCounter == 0, "Renderable type did not deinitialize shaders");
