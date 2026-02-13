@@ -32,30 +32,46 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <atomic>
+#include <ctime>
 #include <execution>
 #include <format>
-#include <ctime>
 #include <mutex>
 #include <sstream>
 
 namespace {
     constexpr const char* _loggerCat = "HelioviewerDownloadTask";
 
+    // This task downloads solar image data from the Helioviewer API and stores the
+    // resulting JP2 files on disk for use in OpenSpace.
+    //
+    // All available images within the given interval are retrieved at the requested
+    // temporal cadence and stored locally as JP2 files. The filenames are formatted
+    // according to the OpenSpace solar browsing convention,encoding timestamp, spacecraft
+    // name, and instrument identifier. The instrument string must match the local
+    // colormap naming convention (hyphen-separated, e.g., "AIA-193") so that the correct
+    // colormap can be resolved at runtime. Existing files are not re-downloaded.
+    //
+    // The actual temporal spacing of the downloaded images depends on data availability
+    // from Helioviewer, but will never be shorter than the requested cadence.
     struct [[codegen::Dictionary(HelioviewerDownloadTask)]] Parameters {
-        // The folder where to output the downloaded jp2 files.
-        std::filesystem::path outputFolder [[codegen::directory()]];
+        // Directory where the downloaded JP2 images will be stored.
+        std::string outputFolder [[codegen::annotation("A valid directory")]];
 
         // Name of the spacecraft or telescope.
         std::string name;
 
-        // Name of the instrument e.g., 'AIA-171', this name is used to lookup the
-        // corresponding colormaps and as such must match the naming convetion.
-        std::string instrument;
+        // The unique identifier as specified in the Helioviewer documentation:
+        // https://api.helioviewer.org/docs/v2/appendix/data_sources.html
+        int sourceId;
 
-        // The preferred number of seconds between each timestep. The actual timestep will
-        // be determined by the availability of data products but will never be smaller
-        // than this number. Use this for  Use this for temporal downsampling.
-        double timeStep;
+        // Instrument identifier (e.g., "AIA-171").
+        //
+        // Note that while Helioviewer may use names such as "AIA 171",
+        // this value must follow the local colormap naming convention
+        // (hyphen-separated). The string is used to locate the corresponding
+        // colormap file on disk (e.g., "AIA-94", "AIA-131", ..., "AIA-4500"),
+        // so it must match those filenames exactly.
+        std::string instrument;
 
         // The beginning of the time interval to extract data from. Format:
         // YYYY-MM-DDTHH:MM:SS
@@ -64,9 +80,11 @@ namespace {
         // The end of the time interval to extract data from. Format YYYY-MM-DDTHH:MM:SS
         std::string endTime [[codegen::annotation("A valid date in ISO 8601 format")]];
 
-        // The unique identifier as specified in the helioviewer documentation:
-        // https://api.helioviewer.org/docs/v2/appendix/data_sources.html
-        int sourceId;
+        // Desired temporal sampling interval in seconds.
+        // The system will attempt to retrieve images spaced at approximately this
+        // interval, depending on data availability. The actual interval will never
+        // be shorter than this value. Useful for temporal downsampling.
+        double timeStep;
     };
 #include "helioviewerdownloadtask_codegen.cpp"
 } // namespace
@@ -78,7 +96,6 @@ documentation::Documentation HelioviewerDownloadTask::documentation() {
 }
 
 HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictionary) {
-
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _startTime = p.startTime;
@@ -95,6 +112,10 @@ std::string HelioviewerDownloadTask::description() {
 }
 
 void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCallback) {
+    if (!std::filesystem::is_directory(_outputFolder)) {
+        std::filesystem::create_directories(_outputFolder);
+    }
+
     const std::string jpxRequest = std::format(
         "http://api.helioviewer.org/v2/getJPX/?startTime={}&endTime={}"
         "&sourceId={}&verbose=true&cadence=true&cadence={}",
@@ -104,6 +125,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
         _timeStep
     );
 
+    LDEBUG("Fetching Helioviewer JPX data");
     LINFO(std::format("Requesting {}", jpxRequest));
 
     HttpMemoryDownload fileListing(jpxRequest);
@@ -114,7 +136,6 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
         throw ghoul::RuntimeError(std::format("Request to Helioviewer API failed."));
     }
 
-    LDEBUG("Fetching Helioviewer JPX data");
     const std::vector<char>& listingData = fileListing.downloadedData();
     const std::string listingString(listingData.begin(), listingData.end());
 
@@ -199,7 +220,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
                 size_t done = ++i;
                 {
                     std::lock_guard lock(progressMutex);
-                    progressCallback(static_cast<float>(done) / static_cast<float>(totalFrames));
+                    progressCallback(done / static_cast<float>(totalFrames));
                 }
                 return;
             }
@@ -207,14 +228,16 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
             HttpFileDownload imageDownload(imageUrl, absPath(outFilename));
             imageDownload.start();
             imageDownload.wait();
+
             if (!imageDownload.hasSucceeded()) {
                 LERROR(std::format("Request to image {} failed.", imageUrl));
                 return;
             }
+
             size_t done = ++i;
             {
                 std::lock_guard lock(progressMutex);
-                progressCallback(static_cast<float>(done) / static_cast<float>(totalFrames));
+                progressCallback(done / static_cast<float>(totalFrames));
             }
         }
     );
