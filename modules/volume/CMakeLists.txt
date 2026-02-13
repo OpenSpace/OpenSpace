@@ -45,6 +45,7 @@ set(HEADER_FILES
   volumesampler.inl
   volumeutils.h
   rendering/renderabletimevaryingvolume.h
+  rendering/renderablevolumevectorfield.h
   rendering/basicvolumeraycaster.h
   rendering/volumeclipplane.h
   rendering/volumeclipplanes.h
@@ -67,6 +68,7 @@ set(SOURCE_FILES
   volumegridtype.cpp
   volumeutils.cpp
   rendering/renderabletimevaryingvolume.cpp
+  rendering/renderablevolumevectorfield.cpp
   rendering/basicvolumeraycaster.cpp
   rendering/volumeclipplane.cpp
   rendering/volumeclipplanes.cpp
@@ -75,6 +77,17 @@ set(SOURCE_FILES
 )
 
 source_group("Source Files" FILES ${SOURCE_FILES})
+
+set(SHADER_FILES
+  shaders/bounds_fs.glsl
+  shaders/bounds_vs.glsl
+  shaders/helper.glsl
+  shaders/raycast.glsl
+  shaders/vectorfield_fs.glsl
+  shaders/vectorfield_vs.glsl
+)
+
+source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
   "Volume"

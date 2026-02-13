@@ -22,47 +22,54 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/volumemodule.h>
+#version __CONTEXT__
+#include "PowerScaling/powerScaling_vs.hglsl"
 
-#include <modules/volume/rendering/renderabletimevaryingvolume.h>
-#include <modules/volume/rendering/renderablevolumevectorfield.h>
-#include <modules/volume/tasks/generaterawvolumetask.h>
-#include <modules/volume/tasks/generaterawvolumefromfiletask.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
+layout(location = 0) in vec3 in_arrowVertex;
+layout(location = 1) in vec3 in_position;
+layout(location = 2) in vec3 in_direction;
+layout(location = 3) in float in_magnitude;
 
-namespace openspace {
+uniform mat4 modelViewProjection;
+uniform float arrowScale;
 
-using namespace volume;
+flat out vec3 vs_direction;
+flat out float vs_magnitude;
+out float vs_positionDepth;
 
-VolumeModule::VolumeModule() : OpenSpaceModule(Name) {}
-
-void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* rFactory =
-        FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(rFactory, "No renderable factory existed");
-    rFactory->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");
-    rFactory->registerClass<RenderableVectorField>("RenderableVectorField");
-
-    ghoul::TemplateFactory<Task>* tFactory = FactoryManager::ref().factory<Task>();
-    ghoul_assert(tFactory, "No task factory existed");
-    tFactory->registerClass<GenerateRawVolumeTask>("GenerateRawVolumeTask");
-    tFactory->registerClass<GenerateRawVolumeFromFileTask>(
-        "GenerateRawVolumeFromFileTask"
-    );
+mat3 makeRotation(vec3 dir) {
+  vec3 x = normalize(dir);
+  // Pick an up vector that is not parallel to x. Avoids numerical instability issues
+  vec3 up = abs(x.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(0.0, 1.0, 0.0);
+  vec3 y = normalize(cross(up, x));
+  vec3 z = cross(x, y);
+  return mat3(x, y, z);
 }
 
-std::vector<documentation::Documentation> VolumeModule::documentations() const {
-    return {
-        RenderableTimeVaryingVolume::Documentation(),
-        RenderableVectorField::Documentation(),
-        GenerateRawVolumeTask::Documentation()
-    };
+float exponentialScale(float sliderValue, float minExp, float maxExp) {
+  // Clamp input just in case
+  sliderValue = clamp(sliderValue, 1.0, 100.0);
+  // Normalize slider to 0-1
+  float t = (sliderValue - 1.0) / (100.0 - 1.0);
+
+  // Interpolate exponent
+  float exponent = minExp + t * (maxExp - minExp);
+
+  // Base-10 exponential
+  return pow(10.0, exponent);
 }
 
-} // namespace openspace
+void main() {
+  mat3 rotationMatrix = makeRotation(in_direction);
+
+  float scale = exponentialScale(arrowScale, 2.5, 23.0);
+  vec3 scaledPosition = in_arrowVertex * in_magnitude * scale;
+  vec3 worldPosition = in_position + rotationMatrix * scaledPosition;
+
+  vec4 positionClipSpace = modelViewProjection * vec4(worldPosition, 1.0);
+  vs_positionDepth = positionClipSpace.w;
+
+  gl_Position = z_normalization(positionClipSpace);
+  vs_direction = in_direction;
+  vs_magnitude = in_magnitude;
+}
