@@ -350,23 +350,26 @@ void RingsComponent::initializeGL() {
         LERROR(e.message);
     }
 
-    glCreateBuffers(1, &_vbo);
     glCreateVertexArrays(1, &_vao);
-    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
     glEnableVertexArrayAttrib(_vao, 0);
     glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(_vao, 0, 0);
 
     glEnableVertexArrayAttrib(_vao, 1);
-    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, texCoords));
+    glVertexArrayAttribFormat(
+        _vao,
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        offsetof(Vertex, texCoords)
+    );
     glVertexArrayAttribBinding(_vao, 1, 0);
 
     glEnableVertexArrayAttrib(_vao, 2);
     glVertexArrayAttribFormat(_vao, 2, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, normal));
     glVertexArrayAttribBinding(_vao, 2, 0);
-
-    createPlane();
 
     // Check if readiness state has changed after shader compilation
     checkAndNotifyReadinessChange();
@@ -538,7 +541,21 @@ void RingsComponent::update(const UpdateData& data) {
     }
 
     if (_planeIsDirty) [[unlikely]] {
-        createPlane();
+        const GLfloat s = _size;
+
+        const std::array<Vertex, 6> vertices = {
+            Vertex { glm::vec2(-s, -s), glm::vec2(0.f, 0.f), glm::vec3(0.f, 0.f, 1.f) },
+            Vertex { glm::vec2( s,  s), glm::vec2(1.f, 1.f), glm::vec3(0.f, 0.f, 1.f) },
+            Vertex { glm::vec2(-s,  s), glm::vec2(0.f, 1.f), glm::vec3(0.f, 0.f, 1.f) },
+            Vertex { glm::vec2(-s, -s), glm::vec2(0.f, 0.f), glm::vec3(0.f, 0.f, 1.f) },
+            Vertex { glm::vec2( s, -s), glm::vec2(1.f, 0.f), glm::vec3(0.f, 0.f, 1.f) },
+            Vertex { glm::vec2( s,  s), glm::vec2(1.f, 1.f), glm::vec3(0.f, 0.f, 1.f) }
+        };
+
+        glDeleteBuffers(1, &_vbo);
+        glCreateBuffers(1, &_vbo);
+        glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+        glNamedBufferStorage(_vbo, 6 * sizeof(Vertex), vertices.data(), GL_NONE_BIT);
         _planeIsDirty = false;
     }
 
@@ -701,21 +718,6 @@ void RingsComponent::loadTexture() {
 
     // Check if readiness state has changed after loading textures
     checkAndNotifyReadinessChange();
-}
-
-void RingsComponent::createPlane() {
-    const GLfloat size = _size;
-
-    const std::array<Vertex, 6> vertices = {
-        Vertex { glm::vec2(-size, -size), glm::vec2(0.f, 0.f), glm::vec3(0.f, 0.f, 1.f) },
-        Vertex { glm::vec2( size,  size), glm::vec2(1.f, 1.f), glm::vec3(0.f, 0.f, 1.f) },
-        Vertex { glm::vec2(-size,  size), glm::vec2(0.f, 1.f), glm::vec3(0.f, 0.f, 1.f) },
-        Vertex { glm::vec2(-size, -size), glm::vec2(0.f, 0.f), glm::vec3(0.f, 0.f, 1.f) },
-        Vertex { glm::vec2( size, -size), glm::vec2(1.f, 0.f), glm::vec3(0.f, 0.f, 1.f) },
-        Vertex { glm::vec2( size,  size), glm::vec2(1.f, 1.f), glm::vec3(0.f, 0.f, 1.f) }
-    };
-
-    glNamedBufferData(_vbo, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
 }
 
 void RingsComponent::compileShadowShader() {

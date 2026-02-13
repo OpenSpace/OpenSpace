@@ -100,9 +100,6 @@ private:
     void setModelDependentConstants();
 
     int updateActiveIndex(double currentTime);
-    void updateVertexPositionBuffer();
-    void updateVertexColorBuffer();
-    void updateVertexMaskingBuffer();
 
     void staticallyLoadFiles(const std::optional<std::filesystem::path>& seed,
         const std::optional<std::string>& traceVariable);

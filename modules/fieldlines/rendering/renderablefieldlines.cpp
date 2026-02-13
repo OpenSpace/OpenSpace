@@ -230,9 +230,7 @@ void RenderableFieldlines::initializeGL() {
         absPath("${MODULE_FIELDLINES}/shaders/fieldline_gs.glsl")
     );
 
-    glCreateBuffers(1, &_vbo);
     glCreateVertexArrays(1, &_vao);
-    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(LinePoint));
 
     GLuint vertexLocation = 0;
     glEnableVertexArrayAttrib(_vao, vertexLocation);
@@ -326,12 +324,15 @@ void RenderableFieldlines::update(const UpdateData&) {
         }
         LDEBUG(std::format("Number of vertices: {}", vertexData.size()));
 
-        glNamedBufferData(
+        glDeleteBuffers(1, &_vbo);
+        glCreateBuffers(1, &_vbo);
+        glNamedBufferStorage(
             _vbo,
             vertexData.size() * sizeof(LinePoint),
             &vertexData.front(),
-            GL_STATIC_DRAW
+            GL_NONE_BIT
         );
+        glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(LinePoint));
 
         _fieldLinesAreDirty = false;
     }
