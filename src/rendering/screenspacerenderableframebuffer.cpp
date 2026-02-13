@@ -46,7 +46,8 @@ documentation::Documentation ScreenSpaceRenderableFramebuffer::Documentation() {
     using namespace documentation;
     return {
         "ScreenSpaceRenderableFramebuffer",
-        "screenspace_framebuffer"
+        "screenspace_framebuffer",
+        ""
     };
 }
 

@@ -85,5 +85,12 @@ option(MD_UNITTEST OFF)
 option(MD_BENCHMARK OFF)
 
 add_subdirectory(ext/mold SYSTEM)
+if (MSVC)
+  target_compile_options(mdlib PRIVATE "/W0")
+  target_compile_definitions(mdlib PRIVATE "_SCL_SECURE_NO_WARNINGS")
+else ()
+  target_compile_options(mdlib PRIVATE "-w")
+endif ()
+
 target_link_libraries(${molecule_module} PRIVATE mdlib)
 set_target_properties(mdlib PROPERTIES FOLDER "External")

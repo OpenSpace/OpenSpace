@@ -111,7 +111,6 @@ MoleculeModule::SSAO::SSAO(properties::PropertyOwner::PropertyOwnerInfo info)
     addProperty(normalBias);
 }
 
-
 MoleculeModule::MoleculeModule()
     : OpenSpaceModule(Name)
     , _ssao({ "SSAO", "SSAO", "First SSAO pass" })
@@ -144,6 +143,8 @@ void MoleculeModule::internalInitialize(const ghoul::Dictionary&) {
         }
     );
 }
+
+MoleculeModule::~MoleculeModule() {}
 
 void MoleculeModule::internalDeinitializeGL() {
     ghoul_assert(_initializeCounter == 0, "Renderable type did not deinitialize shaders");
@@ -282,9 +283,9 @@ void MoleculeModule::render(const glm::mat4&, const glm::mat4& viewMatrix,
     GLint lastDrawBufferCount = 0;
     std::array<GLenum, 8> lastDrawBuffers;
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &lastFbo);
-    for (int i = 0; i < lastDrawBuffers.size(); i++) {
+    for (int i = 0; i < static_cast<int>(lastDrawBuffers.size()); i++) {
         GLint drawBuf;
-        glGetIntegerv(GL_DRAW_BUFFER0+i, &drawBuf);
+        glGetIntegerv(GL_DRAW_BUFFER0 + i, &drawBuf);
         if (!drawBuf) {
             break;
         }

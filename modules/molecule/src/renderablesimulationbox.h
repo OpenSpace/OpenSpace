@@ -42,7 +42,7 @@ namespace openspace {
 class RenderableSimulationBox : public Renderable {
 public:
     explicit RenderableSimulationBox(const ghoul::Dictionary& dictionary);
-    virtual ~RenderableSimulationBox();
+    ~RenderableSimulationBox() override;
 
     void initializeGL() override;
     void deinitializeGL() override;

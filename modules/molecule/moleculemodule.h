@@ -42,6 +42,7 @@ public:
     constexpr static const char* Name = "Molecule";
 
     MoleculeModule();
+    ~MoleculeModule() override;
 
     void internalDeinitializeGL() final;
 
