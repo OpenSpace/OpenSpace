@@ -162,7 +162,7 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
         return;
     }
 
-    const int64_t lastFrame = std::max(0LL, nFrames - 1);
+    const int64_t lastFrame = std::max<int64_t>(0, nFrames - 1);
     // This is not actually time, but the fractional frame representation
     time = std::clamp(time, 0.0, static_cast<double>(lastFrame));
 
@@ -170,10 +170,10 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
     const int64_t f = static_cast<int64_t>(time);
 
     const int64_t fIdx[4] = {
-        std::max(0LL, f - 1),
-        std::max(0LL, f),
-        std::min(f + 1, lastFrame),
-        std::min(f + 2, lastFrame)
+        std::max<int64_t>(0LL, f - 1),
+        std::max<int64_t>(0LL, f),
+        std::min<int64_t>(f + 1, lastFrame),
+        std::min<int64_t>(f + 2, lastFrame)
     };
 
     md_vec3_soa_t dst = { mol.atom.x, mol.atom.y, mol.atom.z };
@@ -184,7 +184,7 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
         case InterpolationType::Nearest:
         {
             const int64_t nearestFrame =
-                std::clamp(static_cast<int64_t>(time + 0.5), 0LL, lastFrame);
+                std::clamp<int64_t>(static_cast<int64_t>(time + 0.5), 0, lastFrame);
             FrameData frame = frameData(traj, nearestFrame);
 
             mol.cell = frame.header->cell;

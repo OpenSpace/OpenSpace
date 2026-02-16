@@ -224,11 +224,6 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     //=======================================================================
 
 
-    //============= Light Matrix by Camera Matrices Composition =============
-    //=======================================================================
-    const glm::dmat4 lightProjectionMatrix = glm::dmat4(_lightCamera->projectionMatrix());
-
-
     // Saves current state
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_currentFBO);
     global::renderEngine->openglStateCache().viewport(_viewport.data());

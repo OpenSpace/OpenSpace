@@ -1,6 +1,7 @@
 local transforms = asset.require("scene/solarsystem/sun/transforms")
 local earthTransforms = asset.require("scene/solarsystem/planets/earth/transforms")
 local coreKernels = asset.require("spice/core")
+local neptuneKernels = asset.require("./kernels095")
 
 
 
@@ -12,7 +13,7 @@ local NeptuneTrailEarth = {
     Enabled = false,
     Translation = {
       Type = "SpiceTranslation",
-      Target = coreKernels.ID.Neptune,
+      Target = neptuneKernels.ID.Neptune,
       Observer = coreKernels.ID.Earth
     },
     Color = { 0.2, 0.5, 1.0 },

@@ -197,10 +197,6 @@ namespace {
         return r;
     }
 
-    constexpr bool isOrthoProjMatrix(const mat4_t& P) {
-        return P.elem[2][3] == 0.f;
-    }
-
     constexpr bool isOrthoProjMatrix(const glm::mat4& P) {
         return P[2][3] == 0.f;
     }
@@ -254,7 +250,7 @@ namespace {
         glm::vec4 projInfo = { 0.f, 0.f, 0.f, 0.f };
 
         // From Intel SSAO
-        const std::array<vec4_t, 32> samplePattern = {
+        const std::array<float, 4 * 32> samplePattern = {
              0.78488064f, 0.56661671f, 1.5f, -0.126083f, 0.26022232f, -0.29575172f, 1.5f,
              -1.06403f, 0.10459357f, 0.08372527f, 1.11f, -2.730563f, -0.682868f,
              0.04963045f, 1.09f, -0.498827f, -0.13570161f, -0.64190155f, 1.25f,

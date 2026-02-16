@@ -36,10 +36,14 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
 #include <ghoul/logging/logmanager.h>
-#include <md_gl.h>
 #include <string_view>
+#include <md_gl.h>
 
 namespace {
+    // Defining the shaders here since we don't want to need to include MOLD header files
+    // in the module header, which would mean that the core would need to know about them
+    std::unique_ptr<md_gl_shaders_t> _shaders = nullptr;
+
     constexpr std::string_view ShaderOutputSnippet = R"(
 layout(location = 0) out vec4 out_color;
 layout(location = 1) out vec4 out_normal;
@@ -110,7 +114,6 @@ MoleculeModule::SSAO::SSAO(properties::PropertyOwner::PropertyOwnerInfo info)
     addProperty(horizonBias);
     addProperty(normalBias);
 }
-
 
 MoleculeModule::MoleculeModule()
     : OpenSpaceModule(Name)
@@ -282,9 +285,9 @@ void MoleculeModule::render(const glm::mat4&, const glm::mat4& viewMatrix,
     GLint lastDrawBufferCount = 0;
     std::array<GLenum, 8> lastDrawBuffers;
     glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &lastFbo);
-    for (int i = 0; i < lastDrawBuffers.size(); i++) {
+    for (int i = 0; i < static_cast<int>(lastDrawBuffers.size()); i++) {
         GLint drawBuf;
-        glGetIntegerv(GL_DRAW_BUFFER0+i, &drawBuf);
+        glGetIntegerv(GL_DRAW_BUFFER0 + i, &drawBuf);
         if (!drawBuf) {
             break;
         }

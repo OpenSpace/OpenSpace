@@ -471,7 +471,7 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
 
     GLint lastDrawBufferCount = 0;
     std::array<GLenum, 8> lastDrawBuffers;
-    for (int i = 0; i < lastDrawBuffers.size(); i++) {
+    for (int i = 0; i < static_cast<int>(lastDrawBuffers.size()); i++) {
         GLint drawBuf;
         glGetIntegerv(GL_DRAW_BUFFER0 + i, &drawBuf);
         if (!drawBuf) {
@@ -586,7 +586,9 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
         vec3_t* xyz = reinterpret_cast<vec3_t*>(md_alloc(alloc, size));
 
         for (int64_t i = 0; i < _molecule.atom.count; i++) {
-            xyz[i] = { _molecule.atom.x[i], _molecule.atom.y[i], _molecule.atom.z[i] };
+            xyz[i] = {
+                { _molecule.atom.x[i], _molecule.atom.y[i], _molecule.atom.z[i] }
+            };
         }
         md_gl_molecule_set_atom_position_xyz(
             &_glMolecule,
@@ -644,20 +646,20 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
 
     using FrameSet = std::array<int64_t, 4>;
 
-    auto frameSet = [](double time, int64_t numFrames, AnimationRepeatMode mode) {
-        const int64_t frameIdx = static_cast<int64_t>(timeToFrame(time, numFrames, mode));
+    auto frameSet = [](double time, int64_t nFrames, AnimationRepeatMode mode) {
+        const int64_t frameIdx = static_cast<int64_t>(timeToFrame(time, nFrames, mode));
 
-        auto wrap = [](int64_t idx, int64_t numFrames) -> int64_t {
-            idx = idx < 0 ? numFrames - 1 : idx;
-            idx = idx >= numFrames ? 0 : idx;
+        auto wrap = [](int64_t idx, int64_t nf) -> int64_t {
+            idx = idx < 0 ? nf - 1 : idx;
+            idx = idx >= nf ? 0 : idx;
             return idx;
         };
 
         return FrameSet {
-            wrap(frameIdx - 1, numFrames),
-            wrap(frameIdx + 0, numFrames),
-            wrap(frameIdx + 1, numFrames),
-            wrap(frameIdx + 2, numFrames)
+            wrap(frameIdx - 1, nFrames),
+            wrap(frameIdx + 0, nFrames),
+            wrap(frameIdx + 1, nFrames),
+            wrap(frameIdx + 2, nFrames)
         };
     };
 

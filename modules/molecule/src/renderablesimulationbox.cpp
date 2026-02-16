@@ -559,7 +559,12 @@ void RenderableSimulationBox::render(const RenderData& data, RendererTasks&) {
     md_gl_draw_args_t args = {
         .shaders = &mod->shaders(),
         .draw_operations = { static_cast<uint32_t>(drawOps.size()), drawOps.data() },
-        .view_transform = { glm::value_ptr(viewMatrix), glm::value_ptr(projMatrix) },
+        .view_transform = {
+            glm::value_ptr(viewMatrix),
+            glm::value_ptr(projMatrix),
+            nullptr,
+            nullptr
+        },
         .options = 0
     };
 
