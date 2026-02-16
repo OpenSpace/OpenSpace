@@ -144,8 +144,8 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
         glm::vec2(1000.f)
     )
     , _useFixedRingWidth(UseFixedWidthInfo, true)
-    , _drawLabels(DrawLabelInfo, false)
     , _currentlyHoveredIndex(CurrentIndexInfo, -1)
+    , _drawLabels(DrawLabelInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
