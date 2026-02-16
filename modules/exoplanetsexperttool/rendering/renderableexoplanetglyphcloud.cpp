@@ -260,13 +260,13 @@ void RenderableExoplanetGlyphCloud::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     // Generate texture and frame buffer for rendering glyph id
-    glGenFramebuffers(1, &_glyphIdFramebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, _glyphIdFramebuffer);
+    glGenFramebuffers(1, &_glyphIdFbo);
+    glBindFramebuffer(GL_FRAMEBUFFER, _glyphIdFbo);
     createGlyphIdTexture(glm::uvec3(1080, 720, 1));
 
     // Give the framebuffer a reasonable name (for RonderDoc debugging)
     if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_FRAMEBUFFER, _glyphIdFramebuffer, -1, "Glyph ID Framebuffer");
+        glObjectLabel(GL_FRAMEBUFFER, _glyphIdFbo, -1, "Glyph ID Framebuffer");
     }
 
     // Check status
@@ -277,17 +277,17 @@ void RenderableExoplanetGlyphCloud::initializeGL() {
 }
 
 void RenderableExoplanetGlyphCloud::deinitializeGL() {
-    glDeleteVertexArrays(1, &_primaryPointsVAO);
-    _primaryPointsVAO = 0;
+    glDeleteVertexArrays(1, &_pointsVao);
+    _pointsVao = 0;
 
-    glDeleteBuffers(1, &_primaryPointsVBO);
-    _primaryPointsVBO = 0;
+    glDeleteBuffers(1, &_pointsVbo);
+    _pointsVbo = 0;
 
-    glDeleteVertexArrays(1, &_selectedPointsVAO);
-    _selectedPointsVAO = 0;
+    glDeleteVertexArrays(1, &_selectedVao);
+    _selectedVao = 0;
 
-    glDeleteBuffers(1, &_selectedPointsVBO);
-    _selectedPointsVBO = 0;
+    glDeleteBuffers(1, &_selectedVbo);
+    _selectedVbo = 0;
 
     if (_program) {
         global::renderEngine->removeRenderProgram(_program.get());
@@ -336,23 +336,23 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     glGetIntegerv(GL_VIEWPORT, viewport);
     _program->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
 
-    // 1st rendering pass: render the glyohs normally, with correct color
+    // 1st rendering pass: render the glyphs normally, with correct color
     {
         glEnablei(GL_BLEND, 0);
         glDepthMask(true);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-        glBindVertexArray(_primaryPointsVAO);
+        glBindVertexArray(_pointsVao);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_fullGlyphData.size()));
     }
 
-    // 2nd rendering pass: Render ids to a separate texture every frame as well
+    // 2nd rendering pass: Render IDs to a separate texture every frame as well
     // To use for picking
     {
         _program->setUniform(_uniformCache.isRenderIndexStep, true);
         GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
 
-        glBindFramebuffer(GL_FRAMEBUFFER, _glyphIdFramebuffer);
+        glBindFramebuffer(GL_FRAMEBUFFER, _glyphIdFbo);
         GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
         glDrawBuffers(1, drawBuffers);
 
@@ -388,7 +388,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     if (nSelected > 0) {
         _program->setUniform(_uniformCache.opacity, 1.f);
         _program->setUniform(_uniformCache.onTop, true);
-        glBindVertexArray(_selectedPointsVAO);
+        glBindVertexArray(_selectedVao);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(nSelected));
     }
 
@@ -436,19 +436,19 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
     }
 
     if (_renderDataIsDirty) {
-        if (_primaryPointsVAO == 0) {
-            glGenVertexArrays(1, &_primaryPointsVAO);
-            LDEBUG(std::format("Generating Vertex Array id '{}'", _primaryPointsVAO));
+        if (_pointsVao == 0) {
+            glGenVertexArrays(1, &_pointsVao);
+            LDEBUG(std::format("Generating Vertex Array id '{}'", _pointsVao));
         }
-        if (_primaryPointsVBO == 0) {
-            glGenBuffers(1, &_primaryPointsVBO);
+        if (_pointsVbo == 0) {
+            glGenBuffers(1, &_pointsVbo);
             LDEBUG(std::format(
-                "Generating Vertex Buffer Object id '{}'", _primaryPointsVBO
+                "Generating Vertex Buffer Object id '{}'", _pointsVbo
             ));
         }
 
-        glBindVertexArray(_primaryPointsVAO);
-        glBindBuffer(GL_ARRAY_BUFFER, _primaryPointsVBO);
+        glBindVertexArray(_pointsVao);
+        glBindBuffer(GL_ARRAY_BUFFER, _pointsVbo);
         glBufferData(
             GL_ARRAY_BUFFER,
             _fullGlyphData.size() * sizeof(GlyphData),
@@ -460,14 +460,14 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
     }
 
     if (_selectionChanged) {
-        if (_selectedPointsVAO == 0) {
-            glGenVertexArrays(1, &_selectedPointsVAO);
-            LDEBUG(std::format("Generating Vertex Array id '{}'", _selectedPointsVAO));
+        if (_selectedVao == 0) {
+            glGenVertexArrays(1, &_selectedVao);
+            LDEBUG(std::format("Generating Vertex Array id '{}'", _selectedVao));
         }
-        if (_selectedPointsVBO == 0) {
-            glGenBuffers(1, &_selectedPointsVBO);
+        if (_selectedVbo == 0) {
+            glGenBuffers(1, &_selectedVbo);
             LDEBUG(std::format(
-                "Generating Vertex Buffer Object id '{}'", _selectedPointsVBO
+                "Generating Vertex Buffer Object id '{}'", _selectedVbo
             ));
         }
 
@@ -502,8 +502,8 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
         _selectedIndices = newIndices;
 
         if (selectedPoints.size() > 0) {
-            glBindVertexArray(_selectedPointsVAO);
-            glBindBuffer(GL_ARRAY_BUFFER, _selectedPointsVBO);
+            glBindVertexArray(_selectedVao);
+            glBindBuffer(GL_ARRAY_BUFFER, _selectedVbo);
             glBufferData(
                 GL_ARRAY_BUFFER,
                 selectedPoints.size() * sizeof(GlyphData),

@@ -106,16 +106,16 @@ private:
     properties::BoolProperty _drawLabels;
     std::unique_ptr<LabelsComponent> _labels;
 
-    GLuint _primaryPointsVAO = 0;
-    GLuint _primaryPointsVBO = 0;
+    GLuint _pointsVao = 0;
+    GLuint _pointsVbo = 0;
 
-    GLuint _selectedPointsVAO = 0;
-    GLuint _selectedPointsVBO = 0;
+    GLuint _selectedVao = 0;
+    GLuint _selectedVbo = 0;
 
     // Point id from screenspace position
     std::unique_ptr<ghoul::opengl::Texture> _glyphIdTexture;
     std::unique_ptr<ghoul::opengl::Texture> _depthTexture;
-    GLuint _glyphIdFramebuffer = 0;
+    GLuint _glyphIdFbo = 0;
 
     glm::ivec2 _lastViewPortSize;
 };
