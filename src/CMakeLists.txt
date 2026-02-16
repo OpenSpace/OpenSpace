@@ -212,17 +212,6 @@ set(OPENSPACE_SOURCE
   util/versionchecker.cpp
 )
 
-if (APPLE)
-  set(OPENSPACE_SOURCE
-    ${OPENSPACE_SOURCE}
-    interaction/touchbar.mm
-  )
-  set_source_files_properties(
-    interaction/touchbar.mm
-    PROPERTIES SKIP_PRECOMPILE_HEADERS ON
-  )
-endif ()
-
 set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/json.h
   ${PROJECT_SOURCE_DIR}/include/openspace/camera/camera.h
@@ -423,13 +412,6 @@ set(OPENSPACE_HEADER
   ${PROJECT_SOURCE_DIR}/include/openspace/util/histogram.h
 )
 
-if (APPLE)
-  set(OPENSPACE_HEADER
-    ${OPENSPACE_HEADER}
-    ${PROJECT_SOURCE_DIR}/include/openspace/interaction/touchbar.h
-  )
-endif ()
-
 set(OPENSPACE_SHADERS
   ${PROJECT_SOURCE_DIR}/shaders/blending.glsl
   ${PROJECT_SOURCE_DIR}/shaders/core/screenspace_fs.glsl
@@ -566,9 +548,6 @@ configure_file(
   @ONLY
 )
 
-if (APPLE)
-  target_link_libraries(openspace-core INTERFACE external-system-apple)
-endif ()
 if (WIN32)
   target_link_libraries(openspace-core PUBLIC "pdh")
 endif ()

@@ -44,21 +44,12 @@
 #include <optional>
 
 namespace {
-#ifdef __APPLE__
-    constexpr std::array<const char*, 16> UniformNames = {
-        "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
-        "lineLength", "lineFadeAmount", "vertexSortingMethod", "idOffset", "nVertices",
-        "stride", "pointSize", "renderPhase", "useSplitRenderMode", "floatingOffset",
-        "numberOfUniqueVertices"
-    };
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     constexpr std::array<const char*, 18> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineLength", "lineFadeAmount", "vertexSortingMethod", "idOffset", "nVertices",
         "stride", "pointSize", "renderPhase", "viewport", "lineWidth", "floatingOffset",
         "useSplitRenderMode", "numberOfUniqueVertices"
     };
-#endif // __APPLE__
 
     // The possible values for the _renderingModes property
     enum RenderingMode {
@@ -259,18 +250,6 @@ void RenderableTrail::initialize() {
 void RenderableTrail::initializeGL() {
     ZoneScoped;
 
-#ifdef __APPLE__
-    _programObject = BaseModule::ProgramObjectManager.request(
-        "EphemerisProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine->buildRenderProgram(
-                "EphemerisProgram",
-                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_fs.glsl")
-            );
-        }
-    );
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     _programObject = BaseModule::ProgramObjectManager.request(
         "EphemerisProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -281,7 +260,6 @@ void RenderableTrail::initializeGL() {
             );
         }
     );
-#endif // __APPLE__
 
     ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
 }
@@ -353,7 +331,6 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     _programObject->setUniform(_uniformCache.numberOfUniqueVertices,
         numberOfUniqueVertices);
 
-#ifndef __APPLE__
     std::array<GLint, 4> viewport;
     global::renderEngine->openglStateCache().viewport(viewport.data());
     _programObject->setUniform(
@@ -367,7 +344,6 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         _uniformCache.lineWidth,
         std::ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f))
     );
-#endif // __APPLE__
 
     if (renderPoints) {
         // The stride parameter determines the distance between larger points and
@@ -460,11 +436,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
                               (_appearance.renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
-#ifdef __APPLE__
-        glLineWidth(1);
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
         glLineWidth(std::ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
-#endif // __APPLE__
     }
     if (renderPoints) {
         glEnable(GL_PROGRAM_POINT_SIZE);

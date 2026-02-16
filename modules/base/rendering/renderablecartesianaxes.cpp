@@ -189,11 +189,7 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&) {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
-#ifndef __APPLE__
     glLineWidth(3.f);
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
-    glLineWidth(1.f);
-#endif // __APPLE__
 
     glBindVertexArray(_vao);
     glDrawElements(GL_LINES, 6, GL_UNSIGNED_INT, nullptr);

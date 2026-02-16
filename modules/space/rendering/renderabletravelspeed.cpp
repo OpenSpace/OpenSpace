@@ -319,11 +319,7 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("lineColor", _lineColor);
     _shaderProgram->setUniform("opacity", opacity());
 
-#ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
-    glLineWidth(1.f);
-#endif // __APPLE__
     glBindVertexArray(_vao);
     glDrawArrays(GL_LINE_STRIP, 0, 3);
     glBindVertexArray(0);
