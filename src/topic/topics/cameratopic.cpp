@@ -79,7 +79,6 @@ void CameraTopic::handleJson(const nlohmann::json& json) {
 }
 
 void CameraTopic::sendCameraData() {
-#ifdef OPENSPACE_MODULE_SPACE_ENABLED
     glm::dvec3 position = geoPositionFromCamera();
     glm::dvec3 direction = geoViewFromCamera();
     const double viewLength = direction.z;
@@ -106,12 +105,6 @@ void CameraTopic::sendCameraData() {
     };
 
     _connection->sendJson(wrappedPayload(jsonData));
-#else // ^^^ OPENSPACE_MODULE_SPACE_ENABLED ||| !OPENSPACE_MODULE_SPACE_ENABLED vvv
-    LWARNINGC(
-        "CameraTopic",
-        "Cannot send camera data, compiled without globebrowsing support"
-    );
-#endif // OPENSPACE_MODULE_SPACE_ENABLED
 }
 
 } // namespace openspace
