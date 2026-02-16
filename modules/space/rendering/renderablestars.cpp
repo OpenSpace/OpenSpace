@@ -761,29 +761,6 @@ void RenderableStars::deinitializeGL() {
 void RenderableStars::loadPSFTexture() {
     auto markPsfTextureAsDirty = [this]() { _pointSpreadFunctionTextureIsDirty = true; };
     auto loadTexture = [markPsfTextureAsDirty](TextureComponent& component) {
-        //component.texture = nullptr;
-        //const std::string path = component.texturePath;
-        //if (path.empty() || !std::filesystem::exists(path)) {
-        //    return;
-        //}
-
-        //std::unique_ptr<ghoul::opengl::Texture> t =
-        //    ghoul::io::TextureReader::ref().loadTexture(absPath(path), 2);
-        //t->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToBorder);
-        //t->setBorderColor(glm::vec4(0.f));
-        //t->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-        //component.texture = std::make_unique<ghoul::opengl::NewTexture>(*t);
-
-        //t = nullptr;
-
-        //if (!component.texture) {
-        //    return;
-        //}
-
-        //LDEBUG(std::format("Loaded texture from '{}'", absPath(component.texturePath)));
-        //component.texture->makeResident();
-
         using Texture = ghoul::opengl::Texture;
 
         component.texture = nullptr;
@@ -877,7 +854,6 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
         _program->setUniform(_uniformCache.opacity, opacity());
     }
 
-    //glProgramUniformHandleui64ARB(*_program, _uniformCache.glareTexture, *_glare.texture);
     ghoul::opengl::TextureUnit glareUnit;
     glareUnit.bind(*_glare.texture);
     _program->setUniform(_uniformCache.glareTexture, glareUnit);
@@ -887,7 +863,6 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit coreUnit;
     if (_core.texture) {
-        //glProgramUniformHandleui64ARB(*_program, _uniformCache.coreTexture, *_core.texture);
         coreUnit.bind(*_core.texture);
         _program->setUniform(_uniformCache.coreTexture, coreUnit);
         _program->setUniform(_uniformCache.coreMultiplier, _core.multiplier);
@@ -898,20 +873,17 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit colorUnit;
     if (_colorTexture) {
-        //glProgramUniformHandleui64ARB(_program, _uniformCache.colorTexture, *_colorTexture);
         colorUnit.bind(*_colorTexture);
         _program->setUniform(_uniformCache.colorTexture, colorUnit);
     }
 
     ghoul::opengl::TextureUnit otherDataUnit;
     if (_colorOption == ColorOption::OtherData && _otherDataColorMapTexture) {
-        // glProgramUniformHandleui64ARB(_program, _uniformCache.otherDataTexture, *_otherDataColorMapTexture);
         otherDataUnit.bind(*_otherDataColorMapTexture);
         _program->setUniform(_uniformCache.otherDataTexture, otherDataUnit);
     }
     else {
         // We need to set the uniform to something, or the shader doesn't work
-        // glProgramUniformHandleui64ARB(_program, _uniformCache.otherDataTexture, *_colorTexture);
         _program->setUniform(_uniformCache.otherDataTexture, colorUnit);
     }
     // Same here, if we don't set this value, the rendering disappears even if we don't
@@ -955,28 +927,6 @@ void RenderableStars::update(const UpdateData&) {
     }
 
     if (_colorTextureIsDirty) [[unlikely]] {
-        //LDEBUG("Reloading Color Texture");
-        //_colorTexture = nullptr;
-        //if (!_colorTexturePath.value().empty()) {
-        //    std::unique_ptr<ghoul::opengl::Texture> t =
-        //        ghoul::io::TextureReader::ref().loadTexture(
-        //            absPath(_colorTexturePath),
-        //            1
-        //        );
-
-        //    _colorTexture = std::make_unique<ghoul::opengl::NewTexture>(*t);
-        //    t = nullptr;
-
-        //    LDEBUG(std::format("Loaded texture '{}'", _colorTexturePath.value()));
-        //    _colorTexture->makeResident();
-
-        //    _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
-        //        _colorTexturePath.value()
-        //    );
-        //    _colorTextureFile->setCallback([this]() { _colorTextureIsDirty = true; });
-        //}
-        //_colorTextureIsDirty = false;
-
         LDEBUG("Reloading Color Texture");
         _colorTexture = nullptr;
         if (!_colorTexturePath.value().empty()) {
