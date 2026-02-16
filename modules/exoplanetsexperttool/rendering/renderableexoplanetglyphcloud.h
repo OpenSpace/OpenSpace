@@ -66,7 +66,7 @@ public:
 
 private:
     void createGlyphIdTexture(const glm::uvec3 dimensions);
-    void mapVertexAttributes();
+    void mapVertexAttributes(GLuint vao);
 
     bool _renderDataIsDirty = true;
     bool _selectionChanged = true;

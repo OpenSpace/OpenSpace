@@ -260,8 +260,7 @@ void RenderableExoplanetGlyphCloud::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     // Generate texture and frame buffer for rendering glyph id
-    glGenFramebuffers(1, &_glyphIdFbo);
-    glBindFramebuffer(GL_FRAMEBUFFER, _glyphIdFbo);
+    glCreateFramebuffers(1, &_glyphIdFbo);
     createGlyphIdTexture(glm::uvec3(1080, 720, 1));
 
     // Give the framebuffer a reasonable name (for RonderDoc debugging)
@@ -273,21 +272,20 @@ void RenderableExoplanetGlyphCloud::initializeGL() {
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Framebuffer is not complete!");
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    glCreateVertexArrays(1, &_pointsVao);
+    glCreateBuffers(1, &_pointsVbo);
+
+    glCreateVertexArrays(1, &_selectedVao);
+    glCreateBuffers(1, &_selectedVbo);
 }
 
 void RenderableExoplanetGlyphCloud::deinitializeGL() {
     glDeleteVertexArrays(1, &_pointsVao);
-    _pointsVao = 0;
-
     glDeleteBuffers(1, &_pointsVbo);
-    _pointsVbo = 0;
 
     glDeleteVertexArrays(1, &_selectedVao);
-    _selectedVao = 0;
-
     glDeleteBuffers(1, &_selectedVbo);
-    _selectedVbo = 0;
 
     if (_program) {
         global::renderEngine->removeRenderProgram(_program.get());
@@ -436,42 +434,17 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
     }
 
     if (_renderDataIsDirty) {
-        if (_pointsVao == 0) {
-            glGenVertexArrays(1, &_pointsVao);
-            LDEBUG(std::format("Generating Vertex Array id '{}'", _pointsVao));
-        }
-        if (_pointsVbo == 0) {
-            glGenBuffers(1, &_pointsVbo);
-            LDEBUG(std::format(
-                "Generating Vertex Buffer Object id '{}'", _pointsVbo
-            ));
-        }
-
-        glBindVertexArray(_pointsVao);
-        glBindBuffer(GL_ARRAY_BUFFER, _pointsVbo);
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glNamedBufferData(
+            _pointsVbo,
             _fullGlyphData.size() * sizeof(GlyphData),
             _fullGlyphData.data(),
             GL_STATIC_DRAW
         );
-        mapVertexAttributes();
-        glBindVertexArray(0);
+        mapVertexAttributes(_pointsVao);
+        glVertexArrayVertexBuffer(_pointsVao, 0, _pointsVbo, 0, sizeof(GlyphData));
     }
 
     if (_selectionChanged) {
-        if (_selectedVao == 0) {
-            glGenVertexArrays(1, &_selectedVao);
-            LDEBUG(std::format("Generating Vertex Array id '{}'", _selectedVao));
-        }
-        if (_selectedVbo == 0) {
-            glGenBuffers(1, &_selectedVbo);
-            LDEBUG(std::format(
-                "Generating Vertex Buffer Object id '{}'", _selectedVbo
-            ));
-        }
-
-
         const int nSelected = static_cast<int>(_selectedIndices.value().size());
         std::vector<GlyphData> selectedPoints;
         std::vector<int> newIndices;
@@ -502,17 +475,14 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
         _selectedIndices = newIndices;
 
         if (selectedPoints.size() > 0) {
-            glBindVertexArray(_selectedVao);
-            glBindBuffer(GL_ARRAY_BUFFER, _selectedVbo);
-            glBufferData(
-                GL_ARRAY_BUFFER,
+            glNamedBufferData(
+                _selectedVbo,
                 selectedPoints.size() * sizeof(GlyphData),
                 selectedPoints.data(),
                 GL_STATIC_DRAW
             );
-
-            mapVertexAttributes();
-            glBindVertexArray(0);
+            mapVertexAttributes(_selectedVao);
+            glVertexArrayVertexBuffer(_selectedVao, 0, _selectedVbo, 0, sizeof(GlyphData));
         }
     }
 
@@ -532,14 +502,6 @@ void RenderableExoplanetGlyphCloud::createGlyphIdTexture(const glm::uvec3 dimens
      );
     _glyphIdTexture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
     _glyphIdTexture->uploadTexture();
-    _glyphIdTexture->bind();
-
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
-        GL_COLOR_ATTACHMENT0,
-        *_glyphIdTexture,
-        0
-    );
 
     // And a depth buffer of the same dimension
     _depthTexture = std::make_unique<ghoul::opengl::Texture>(
@@ -551,69 +513,70 @@ void RenderableExoplanetGlyphCloud::createGlyphIdTexture(const glm::uvec3 dimens
     );
     _depthTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
     _depthTexture->uploadTexture();
-    _depthTexture->bind();
 
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
-        GL_DEPTH_ATTACHMENT,
-        *_depthTexture,
-        0
-    );
+    glNamedFramebufferTexture(_glyphIdFbo, GL_COLOR_ATTACHMENT0, *_glyphIdTexture, 0);
+    glNamedFramebufferTexture(_glyphIdFbo, GL_DEPTH_ATTACHMENT, *_depthTexture, 0);
 }
 
-void RenderableExoplanetGlyphCloud::mapVertexAttributes() {
+void RenderableExoplanetGlyphCloud::mapVertexAttributes(GLuint vao) {
     GLint positionAttribute = _program->attributeLocation("in_position");
-    glEnableVertexAttribArray(positionAttribute);
-    glVertexAttribPointer(
+    glEnableVertexArrayAttrib(vao, positionAttribute);
+    glVertexArrayAttribBinding(vao, positionAttribute, 0);
+    glVertexArrayAttribFormat(
+        vao,
         positionAttribute,
         3,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(GlyphData),
-        nullptr
+        offsetof(GlyphData, position)
     );
 
     GLint componentAttribute = _program->attributeLocation("in_component");
-    glEnableVertexAttribArray(componentAttribute);
-    glVertexAttribPointer(
+    glEnableVertexArrayAttrib(vao, componentAttribute);
+    glVertexArrayAttribBinding(vao, componentAttribute, 0);
+    glVertexArrayAttribFormat(
+        vao,
         componentAttribute,
         1,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(GlyphData),
-        reinterpret_cast<void*>(offsetof(GlyphData, component))
+        offsetof(GlyphData, component)
     );
 
     GLint indexAttribute = _program->attributeLocation("in_glyphIndex");
-    glEnableVertexAttribArray(indexAttribute);
-    glVertexAttribIPointer(
+    glEnableVertexArrayAttrib(vao, indexAttribute);
+    glVertexArrayAttribBinding(vao, indexAttribute, 0);
+    glVertexArrayAttribIFormat(
+        vao,
         indexAttribute,
         1,
         GL_INT,
-        sizeof(GlyphData),
-        reinterpret_cast<void*>(offsetof(GlyphData, index))
+        offsetof(GlyphData, index)
     );
 
     GLint nColorsAttribute = _program->attributeLocation("in_nColors");
-    glEnableVertexAttribArray(nColorsAttribute);
-    glVertexAttribIPointer(
+    glEnableVertexArrayAttrib(vao, nColorsAttribute);
+    glVertexArrayAttribBinding(vao, nColorsAttribute, 0);
+    glVertexArrayAttribIFormat(
+        vao,
         nColorsAttribute,
         1,
         GL_INT,
-        sizeof(GlyphData),
-        reinterpret_cast<void*>(offsetof(GlyphData, nColors))
+        offsetof(GlyphData, nColors)
     );
 
     GLint colorAttribute = _program->attributeLocation("in_colors");
     for (int i = 0; i < MaxNumberColors; i++) {
-        glEnableVertexAttribArray(colorAttribute + i);
-        glVertexAttribPointer(
-            colorAttribute + i,
+        GLint currentColorIndex = colorAttribute + i;
+        glEnableVertexArrayAttrib(vao, currentColorIndex);
+        glVertexArrayAttribBinding(vao, currentColorIndex, 0);
+        glVertexArrayAttribFormat(
+            vao,
+            currentColorIndex,
             4,
             GL_FLOAT,
             GL_FALSE,
-            sizeof(GlyphData),
-            reinterpret_cast<void*>(offsetof(GlyphData, colors) + i * 4 * sizeof(float))
+            offsetof(GlyphData, colors) + i * 4 * sizeof(float)
         );
     }
 }
