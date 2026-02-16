@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -36,9 +36,10 @@
 #include <openspace/util/factorymanager.h>
 #include <openspace/query/query.h>
 #include <ghoul/logging/logmanager.h>
+#include <string_view>
 
 namespace {
-    constexpr const char _loggerCat[] = "ExoplanetsExpertToolModule";
+    constexpr std::string_view _loggerCat = "ExoplanetsExpertToolModule";
 
     constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
         "Enabled",

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -37,13 +37,11 @@
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <implot.h>
+#include <string_view>
 
 namespace {
-    constexpr const char* _loggerCat = "ExoplanetsModuleGUI";
-    constexpr const char* GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
-    constexpr const float FontSize = 16.f;
-
-    constexpr const std::array<const char*, 2> UniformNames = { "tex", "ortho" };
+    constexpr std::string_view GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
+    constexpr float FontSize = 16.f;
 } // namespace
 
 namespace openspace::exoplanets::gui {
@@ -66,12 +64,12 @@ void Gui::deinitialize() {
 }
 
 void Gui::initializeGL() {
-    int nWindows = global::windowDelegate->nWindows();
+    size_t nWindows = global::windowDelegate->nWindows();
     _contexts.resize(nWindows);
 
     // TODO: maybe set up .ini file?
 
-    for (int i = 0; i < nWindows; ++i) {
+    for (size_t i = 0; i < nWindows; ++i) {
         _contexts[i] = createContext();
         setCurrectContext(_contexts[i]);
 
@@ -107,7 +105,7 @@ void Gui::initializeGL() {
         absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/gui_fs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     {
         unsigned char* texData;
@@ -217,7 +215,7 @@ void Gui::startFrame(float deltaTime, const glm::vec2& windowSize,
 void Gui::endFrame() {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
     render();

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -50,6 +50,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <string_view>
 
 #include <chrono>
 
@@ -67,14 +68,14 @@
 #define SHOW_IMGUI_HELPERS
 
 namespace {
-    constexpr char _loggerCat[] = "ExoplanetsDataViewer";
+    constexpr std::string_view _loggerCat = "ExoplanetsDataViewer";
 
-    constexpr char RenderDataFile[] = "${TEMPORARY}/pointrenderdata.dat";
-    constexpr char LabelsFile[] = "${TEMPORARY}/exosystems.label";
+    constexpr std::string_view RenderDataFile = "${TEMPORARY}/pointrenderdata.dat";
+    constexpr std::string_view LabelsFile = "${TEMPORARY}/exosystems.label";
 
-    constexpr char WebpagePath[] = "${MODULE_EXOPLANETSEXPERTTOOL}/webpage/index.html";
+    constexpr std::string_view WebpagePath = "${MODULE_EXOPLANETSEXPERTTOOL}/webpage/index.html";
 
-    constexpr char AboutTheTool[] =
+    constexpr std::string_view AboutTheTool =
         "This is a research tool under development and we are currently \n"
         "looking for feedback from users. This feedback will be included \n"
         "in our scientific publication covering the tool. \n"
@@ -380,7 +381,7 @@ void DataViewer::renderStartupInfo() {
     if (ImGui::BeginPopupModal("We need your help!", NULL, flags)) {
         ImGui::Text("Welcome to the Exoplanet Explorer");
         ImGui::Spacing();
-        ImGui::Text(AboutTheTool);
+        ImGui::Text(AboutTheTool.data());
         ImGui::Spacing();
 
         if (ImGui::Button("Get in touch!")) {

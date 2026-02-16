@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -51,25 +51,6 @@
 
 namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsDataLoader";
-
-    bool hasEnding(std::string const& fullString, std::string const& ending) {
-        if (fullString.length() >= ending.length()) {
-            int comp = fullString.compare(
-                fullString.length() - ending.length(),
-                ending.length(),
-                ending
-            );
-            return (0 == comp);
-        }
-        else {
-            return false;
-        }
-    }
-
-    bool isNumber(const std::string& s) {
-        return !s.empty() && std::find_if(s.begin(),
-            s.end(), [](unsigned char c) { return !std::isdigit(c); }) == s.end();
-    }
 
     bool isNan(const std::string& s) {
         if (s.empty()) {

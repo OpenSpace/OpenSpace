@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -39,15 +39,10 @@
 #include <ghoul/opengl/programobject.h>
 #include <fstream>
 #include <optional>
+#include <string_view>
 
 namespace {
-    constexpr const char* _loggerCat = "ExoplanetGlyphCloud";
-
-    constexpr std::array<const char*, 12> UniformNames = {
-        "modelMatrix", "cameraViewProjectionMatrix", "onTop", "useFixedRingWidth",
-        "opacity", "size", "screenSize", "minBillboardSize", "maxBillboardSize",
-        "maxIndex", "currentIndex", "isRenderIndexStep"
-    };
+    constexpr std::string_view _loggerCat = "ExoplanetGlyphCloud";
 
     constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
         "HighlightColor",
@@ -161,10 +156,7 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     _size = p.size.value_or(_size);
     addProperty(_size);
 
-    addProperty(_opacity);
-    // Use renderbin set from property
-    //registerUpdateRenderBinFromOpacity();
-    //setRenderBin(RenderBin::PostDeferredTransparent);
+    addProperty(Fadeable::_opacity);
 
     _selectedIndices = p.selection.value_or(_selectedIndices);
     _selectedIndices.onChange([this]() { _selectionChanged = true; });
@@ -219,22 +211,25 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
             }
 
             // Convert mouse position to pixel position
-            glm::vec2 lastViewportSize = glm::vec2(_lastViewPortSize);
-            float normalizedX = x / lastViewportSize.x;
-            float normalizedY = (lastViewportSize.y - y) / lastViewportSize.y;
+            glm::dvec2 lastViewportSize = glm::dvec2(_lastViewPortSize);
+            double normalizedX = x / lastViewportSize.x;
+            double normalizedY = (lastViewportSize.y - y) / lastViewportSize.y;
 
             if (_glyphIdTexture) {
                 glm::uvec2 texturePos = glm::uvec2(
-                    normalizedX * static_cast<float>(_glyphIdTexture->width()),
-                    normalizedY * static_cast<float>(_glyphIdTexture->height())
+                    normalizedX * static_cast<double>(_glyphIdTexture->width()),
+                    normalizedY * static_cast<double>(_glyphIdTexture->height())
                 );
 
                 _glyphIdTexture->downloadTexture();
 
                 // TODO: make sure pos is within texture
-                if (texturePos.x < _glyphIdTexture->width() && texturePos.y < _glyphIdTexture->height()) {
+                if (texturePos.x < _glyphIdTexture->width() &&
+                    texturePos.y < _glyphIdTexture->height())
+                {
                     glm::vec4 pixelValue = _glyphIdTexture->texelAsFloat(texturePos);
-                    _currentlyHoveredIndex = std::round(pixelValue.r * static_cast<float>(_maxIndex)) - 1;
+                    _currentlyHoveredIndex =
+                        static_cast<int>(std::round(pixelValue.r * _maxIndex)) - 1;
                 }
             }
         }
@@ -262,7 +257,7 @@ void RenderableExoplanetGlyphCloud::initializeGL() {
         absPath("${MODULE_EXOPLANETSEXPERTTOOL}/shaders/glyphs_gs.glsl")
     );
 
-    ghoul::opengl::updateUniformLocations(*_program, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     // Generate texture and frame buffer for rendering glyph id
     glGenFramebuffers(1, &_glyphIdFramebuffer);
@@ -362,7 +357,9 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
         glDrawBuffers(1, drawBuffers);
 
         // Potentially upate texture size
-        if (viewport[2] != _glyphIdTexture->width() || viewport[3] != _glyphIdTexture->height()) {
+        if (static_cast<unsigned int>(viewport[2]) != _glyphIdTexture->width() ||
+            static_cast<unsigned int>(viewport[3]) != _glyphIdTexture->height())
+        {
             createGlyphIdTexture(glm::uvec3(viewport[2], viewport[3], 1));
         }
 
@@ -431,11 +428,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
 void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
     if (_program->isDirty()) {
         _program->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(
-            *_program,
-            _uniformCache,
-            UniformNames
-        );
+        ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
     if (_dataFileIsDirty) {
@@ -644,7 +637,7 @@ void RenderableExoplanetGlyphCloud::updateDataFromFile() {
     _fullGlyphData.reserve(nPoints);
     _glyphIndices.reserve(nPoints);
 
-    size_t maxIndex = -1;
+    int maxIndex = -1;
 
     // OBS: this reading must match the writing in the dataviewer
     for (size_t i = 0; i < nPoints; i++) {
@@ -682,15 +675,15 @@ void RenderableExoplanetGlyphCloud::updateDataFromFile() {
 
         d.index = index + 1;
 
-        if (d.index > maxIndex) {
-            maxIndex = d.index;
+        if (static_cast<int>(d.index) > maxIndex) {
+            maxIndex = static_cast<int>(d.index);
         }
 
         _fullGlyphData.push_back(std::move(d));
         _glyphIndices.push_back(index);
     }
 
-    _maxIndex = static_cast<int>(maxIndex);
+    _maxIndex = maxIndex;
 
     _dataFileIsDirty = false;
     _renderDataIsDirty = true;

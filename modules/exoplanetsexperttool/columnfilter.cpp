@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -28,16 +28,17 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
+#include <string_view>
 
 namespace {
-    constexpr const char _loggerCat[] = "ColumnFilter";
+    constexpr std::string_view _loggerCat = "ColumnFilter";
 
-    constexpr const char Separator = ',';
-    constexpr const char GreaterOperator = '>';
-    constexpr const char LessOperator = '<';
-    constexpr const char EqualsOperator = '=';
-    constexpr const char NotOperator = '!';
-    constexpr const char* NullOperator = "null";
+    constexpr char Separator = ',';
+    constexpr char GreaterOperator = '>';
+    constexpr char LessOperator = '<';
+    constexpr char EqualsOperator = '=';
+    constexpr char NotOperator = '!';
+    constexpr char* NullOperator = "null";
 
     bool contains(const char* op, const std::string& str, size_t& pos) {
         pos = str.find(op);

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2024                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -88,9 +88,9 @@ private:
 
     struct GlyphData {
         glm::vec3 position;
-        float component;
-        size_t index;
-        int nColors;
+        float component = -1.f;
+        size_t index = 0;
+        int nColors = -1;
         glm::vec4 colors[MaxNumberColors];
     };
 
