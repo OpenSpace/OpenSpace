@@ -29,6 +29,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 #include <array>
 
 namespace {
@@ -164,8 +165,8 @@ int ScreenSpaceRenderableFramebuffer::id() {
     return id++;
 }
 
-void ScreenSpaceRenderableFramebuffer::bindTexture() {
-    _texture->bind();
+void ScreenSpaceRenderableFramebuffer::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_texture);
 }
 
 } //namespace openspace

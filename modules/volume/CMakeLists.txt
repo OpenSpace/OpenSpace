@@ -73,8 +73,15 @@ set(SOURCE_FILES
   tasks/generaterawvolumetask.cpp
   tasks/generaterawvolumefromfiletask.cpp
 )
-
 source_group("Source Files" FILES ${SOURCE_FILES})
+
+set(SHADER_FILES
+  shaders/bounds_fs.glsl
+  shaders/bounds_vs.glsl
+  shaders/helper.glsl
+  shaders/raycast.glsl
+)
+source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
   "Volume"

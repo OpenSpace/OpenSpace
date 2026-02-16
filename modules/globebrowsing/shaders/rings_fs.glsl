@@ -22,18 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "PowerScaling/powerScaling_fs.hglsl"
+#include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
 #include "ellipsoid.glsl"
 
 #define NSSamplesMinusOne #{nShadowSamples}
 #define NSSamples (NSSamplesMinusOne + 1)
 
-in vec2 vs_st;
-in float vs_screenSpaceDepth;
-in vec4 shadowCoords;
-in vec3 vs_normal;
-in vec3 posObj;
+in Data {
+  vec3 posObj;
+  vec2 texCoords;
+  vec3 normal;
+  float screenSpaceDepth;
+  vec4 shadowCoords;
+} in_data;
 
 uniform sampler1D ringTexture;
 uniform vec2 textureOffset;
@@ -48,7 +50,7 @@ uniform vec3 ellipsoidRadii;
 
 Fragment getFragment() {
   // Moving the origin to the center
-  vec2 st = (vs_st - vec2(0.5)) * 2.0;
+  vec2 st = (in_data.texCoords - vec2(0.5)) * 2.0;
 
   // The length of the texture coordinates vector is our distance from the center
   float radius = length(st);
@@ -59,15 +61,15 @@ Fragment getFragment() {
   }
 
   // Remapping the texture coordinates
-  // Radius \in [0,1],  texCoord \in [textureOffset.x, textureOffset.y]
+  // Radius \in [0,1],  texCoords \in [textureOffset.x, textureOffset.y]
   // textureOffset.x -> 0
   // textureOffset.y -> 1
-  float texCoord = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
-  if (texCoord < 0.0 || texCoord > 1.0) {
+  float texCoords = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
+  if (texCoords < 0.0 || texCoords > 1.0) {
     discard;
   }
 
-  vec4 diffuse = texture(ringTexture, texCoord);
+  vec4 diffuse = texture(ringTexture, texCoords);
   // divided by 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
   // to normalize the alpha value to [0,1]
   float colorValue = length(diffuse.rgb) / 3.0;
@@ -81,34 +83,32 @@ Fragment getFragment() {
   // Check if ray from fragment to sun intersects the ellipsoid (globe)
   // This creates more accurate shadowing for rings
   bool intersectsGlobe = rayIntersectsEllipsoid(
-    posObj,
+    in_data.posObj,
     sunPositionObj,
     vec3(0.0),
     ellipsoidRadii
   );
 
   // shadow == 1.0 means it is not in shadow
-  float shadow = intersectsGlobe ? 0.05 : 1.0;
+  float shadow = intersectsGlobe  ?  0.05  :  1.0;
 
   // The normal for the one plane depends on whether we are dealing
   // with a front facing or back facing fragment
   // The plane is oriented on the xz plane
   // WARNING: This might not be the case for Uranus
-  vec3 normal = gl_FrontFacing ? vec3(-1.0, 0.0, 0.0) : vec3(1.0, 0.0, 0.0);
+  vec3 normal = gl_FrontFacing  ?  vec3(-1.0, 0.0, 0.0)  :  vec3(1.0, 0.0, 0.0);
 
   // Reduce the color of the fragment by the user factor
   // if we are facing away from the Sun
   if (dot(sunPosition, normal) < 0.0) {
-    diffuse.xyz *= _nightFactor;
+    diffuse.xyz *= nightFactor;
   }
 
   Fragment frag;
-
   frag.color = diffuse * shadow;
   frag.color.a *= opacity;
-  frag.depth = vs_screenSpaceDepth;
+  frag.depth = in_data.screenSpaceDepth;
   frag.gPosition = vec4(1e30, 1e30, 1e30, 1.0);
   frag.gNormal = vec4(normal, 1.0);
-
   return frag;
 }

@@ -24,13 +24,15 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
-layout(location = 0) in vec3 in_point_position;
+layout(location = 0) in vec3 in_pointPosition;
 
-out float vs_positionDepth;
-out vec4 vs_gPosition;
-out float fade;
+out Data {
+  vec4 gPosition;
+  float positionDepth;
+  float fade;
+} out_data;
 
 uniform dmat4 modelViewTransform;
 uniform mat4 projectionTransform;
@@ -50,15 +52,15 @@ uniform int numberOfUniqueVertices;
 uniform int floatingOffset;
 
 // Fragile! Keep in sync with RenderableTrail::render
-#define VERTEX_SORTING_NEWESTFIRST 0
-#define VERTEX_SORTING_OLDESTFIRST 1
-#define VERTEX_SORTING_NOSORTING 2
+const int VertexSortingNewestFirst = 0;
+const int VertexSortingOldestFirst = 1;
+const int VertexSortingNoSorting = 2;
 
 
 void main() {
   int modId = gl_VertexID;
 
-  if ((vertexSortingMethod != VERTEX_SORTING_NOSORTING) && useLineFade) {
+  if ((vertexSortingMethod != VertexSortingNoSorting) && useLineFade) {
     float id = 0;
 
     if (useSplitRenderMode) {
@@ -71,12 +73,12 @@ void main() {
         if (modId < 0) {
           modId += nVertices;
         }
-        
+
         // Convert the index to a [0,1] range
         id = float(modId) / float(nVertices);
     }
 
-    if (vertexSortingMethod == VERTEX_SORTING_NEWESTFIRST) {
+    if (vertexSortingMethod == VertexSortingNewestFirst) {
       id = 1.0 - id;
     }
 
@@ -85,27 +87,26 @@ void main() {
 
     float fadeValue = 0.0;
     if (id <= b0) {
-        fadeValue = 0.0;
+      fadeValue = 0.0;
     }
     else if (id > b0 && id < b1) {
-        float delta = b1 - b0;
-        fadeValue = (id - b0) / delta;
+      fadeValue = (id - b0) / (b1 - b0);
     }
     else {
-        fadeValue = 1.0;
+      fadeValue = 1.0;
     }
 
-    fade = clamp(fadeValue, 0.0, 1.0);
+    out_data.fade = clamp(fadeValue, 0.0, 1.0);
   }
   else {
-    fade = 1.0;
+    out_data.fade = 1.0;
   }
 
-  vs_gPosition = vec4(modelViewTransform * dvec4(in_point_position, 1));
-  vec4 vs_positionClipSpace = projectionTransform * vs_gPosition;
-  vs_positionDepth = vs_positionClipSpace.w;
+  out_data.gPosition = vec4(modelViewTransform * dvec4(in_pointPosition, 1.0));
+  vec4 positionClipSpace = projectionTransform * out_data.gPosition;
+  out_data.positionDepth = positionClipSpace.w;
 
-  gl_PointSize = (stride == 1 || int(modId) % stride == 0) ?
-                  float(pointSize) : float(pointSize) / 2;
-  gl_Position  = z_normalization(vs_positionClipSpace);
+  float pts = float(pointSize);
+  gl_PointSize = (stride == 1 || int(modId) % stride == 0) ? pts : pts / 2.0;
+  gl_Position = z_normalization(positionClipSpace);
 }

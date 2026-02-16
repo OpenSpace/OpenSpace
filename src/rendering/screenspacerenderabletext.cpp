@@ -28,6 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/font/fontmanager.h>
+#include <ghoul/opengl/textureunit.h>
 #include <array>
 #include <optional>
 
@@ -169,8 +170,8 @@ void ScreenSpaceRenderableText::updateFramebuffer() {
     ghoul::opengl::FramebufferObject::deactivate();
 }
 
-void ScreenSpaceRenderableText::bindTexture() {
-    _texture->bind();
+void ScreenSpaceRenderableText::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_texture);
 }
 
 } //namespace openspace

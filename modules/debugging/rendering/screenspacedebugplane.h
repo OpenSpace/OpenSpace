@@ -38,7 +38,7 @@ public:
     static documentation::Documentation Documentation();
 
 private:
-    virtual void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
     properties::IntProperty _texture;
 };

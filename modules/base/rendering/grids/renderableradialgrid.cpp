@@ -283,8 +283,9 @@ void RenderableRadialGrid::update(const UpdateData&) {
             rendering::helper::createRing(nSegments, radius);
 
         _circles.emplace_back(GL_LINE_STRIP);
-        _circles.back().varray = rendering::helper::convert(std::move(vertices));
-        _circles.back().update();
+        std::vector<rendering::helper::VertexXYZ> data =
+            rendering::helper::convert(std::move(vertices));
+        _circles.back().update(data);
     };
 
     // add an extra inmost circle
@@ -301,8 +302,8 @@ void RenderableRadialGrid::update(const UpdateData&) {
     const int nLines = _gridSegments.value()[1];
     const int nVertices = 2 * nLines;
 
-    _lines.varray.clear();
-    _lines.varray.reserve(nVertices);
+    std::vector<rendering::helper::VertexXYZ> data;
+    data.reserve(nVertices);
 
     if (nLines > 1) {
         std::vector<rendering::helper::Vertex> outerVertices =
@@ -318,11 +319,11 @@ void RenderableRadialGrid::update(const UpdateData&) {
             const rendering::helper::VertexXYZ vIn =
                 rendering::helper::convertToXYZ(innerVertices[i]);
 
-            _lines.varray.push_back(vOut);
-            _lines.varray.push_back(vIn);
+            data.push_back(vOut);
+            data.push_back(vIn);
         }
     }
-    _lines.update();
+    _lines.update(data);
 
     setBoundingSphere(static_cast<double>(outerRadius));
 
@@ -332,13 +333,10 @@ void RenderableRadialGrid::update(const UpdateData&) {
 RenderableRadialGrid::GeometryData::GeometryData(GLenum renderMode)
     : mode(renderMode)
 {
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
-
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &vao);
+    glEnableVertexArrayAttrib(vao, 0);
+    glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vao, 0, 0);
 }
 
 RenderableRadialGrid::GeometryData::GeometryData(GeometryData&& other) noexcept {
@@ -348,7 +346,7 @@ RenderableRadialGrid::GeometryData::GeometryData(GeometryData&& other) noexcept 
 
     vao = other.vao;
     vbo = other.vbo;
-    varray = std::move(other.varray);
+    size = other.size;
     mode = other.mode;
 
     other.vao = 0;
@@ -361,7 +359,7 @@ RenderableRadialGrid::GeometryData::operator=(GeometryData&& other) noexcept
     if (this != &other) {
         vao = other.vao;
         vbo = other.vbo;
-        varray = std::move(other.varray);
+        size = other.size;
         mode = other.mode;
 
         other.vao = 0;
@@ -372,35 +370,29 @@ RenderableRadialGrid::GeometryData::operator=(GeometryData&& other) noexcept
 
 RenderableRadialGrid::GeometryData::~GeometryData() {
     glDeleteVertexArrays(1, &vao);
-    vao = 0;
-
     glDeleteBuffers(1, &vbo);
-    vbo = 0;
 }
 
-void RenderableRadialGrid::GeometryData::update() const {
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        varray.size() * sizeof(rendering::helper::VertexXYZ),
-        varray.data(),
-        GL_STATIC_DRAW
+void RenderableRadialGrid::GeometryData::update(
+                                    const std::vector<rendering::helper::VertexXYZ>& data)
+{
+    glDeleteBuffers(1, &vbo);
+    glCreateBuffers(1, &vbo);
+    glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(rendering::helper::VertexXYZ));
+
+    glNamedBufferStorage(
+        vbo,
+        data.size() * sizeof(rendering::helper::VertexXYZ),
+        data.data(),
+        GL_NONE_BIT
     );
 
-    glVertexAttribPointer(
-        0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(rendering::helper::VertexXYZ),
-        nullptr
-    );
+    size = static_cast<GLsizei>(data.size());
 }
 
 void RenderableRadialGrid::GeometryData::render() const {
     glBindVertexArray(vao);
-    glDrawArrays(mode, 0, static_cast<GLsizei>(varray.size()));
+    glDrawArrays(mode, 0, size);
     glBindVertexArray(0);
 }
 

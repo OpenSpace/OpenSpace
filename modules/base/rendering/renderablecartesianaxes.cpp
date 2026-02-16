@@ -130,54 +130,38 @@ void RenderableCartesianAxes::initializeGL() {
         }
     );
 
-    glGenVertexArrays(1, &_vaoId);
-    glBindVertexArray(_vaoId);
-
-    constexpr std::array<Vertex, 4> vertices = {
-        Vertex{0.f, 0.f, 0.f},
-        Vertex{1.f, 0.f, 0.f},
-        Vertex{0.f, 1.f, 0.f},
-        Vertex{0.f, 0.f, 1.f}
+    glCreateBuffers(1, &_vbo);
+    constexpr std::array<Vertex, 4> Vertices = {
+        Vertex{ 0.f, 0.f, 0.f },
+        Vertex{ 1.f, 0.f, 0.f },
+        Vertex{ 0.f, 1.f, 0.f },
+        Vertex{ 0.f, 0.f, 1.f }
     };
-
-    constexpr std::array<int, 6> indices = {
-        0, 1,
-        0, 2,
-        0, 3
-    };
-
-    glGenBuffers(1, &_vBufferId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        vertices.size() * sizeof(Vertex),
-        vertices.data(),
-        GL_STATIC_DRAW
+    glNamedBufferStorage(
+        _vbo,
+        Vertices.size() * sizeof(Vertex),
+        Vertices.data(),
+        GL_NONE_BIT
     );
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+    glCreateBuffers(1, &_ibo);
+    constexpr std::array<int, 6> indices = { 0, 1, 0, 2, 0, 3 };
+    glNamedBufferStorage(_ibo, indices.size() * sizeof(int), indices.data(), GL_NONE_BIT);
 
-    glGenBuffers(1, &_iBufferId);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferId);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        indices.size() * sizeof(int),
-        indices.data(),
-        GL_STATIC_DRAW
-    );
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_vao);
+    glBindVertexArray(_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+    glVertexArrayElementBuffer(_vao, _ibo);
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 }
 
 void RenderableCartesianAxes::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vaoId);
-    _vaoId = 0;
-
-    glDeleteBuffers(1, &_vBufferId);
-    _vBufferId = 0;
-
-    glDeleteBuffers(1, &_iBufferId);
-    _iBufferId = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
+    glDeleteBuffers(1, &_ibo);
 
     BaseModule::ProgramObjectManager.release(
         "CartesianAxesProgram",
@@ -211,7 +195,7 @@ void RenderableCartesianAxes::render(const RenderData& data, RendererTasks&) {
     glLineWidth(1.f);
 #endif // __APPLE__
 
-    glBindVertexArray(_vaoId);
+    glBindVertexArray(_vao);
     glDrawElements(GL_LINES, 6, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 

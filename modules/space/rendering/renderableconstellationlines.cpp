@@ -465,28 +465,26 @@ void RenderableConstellationLines::createConstellations() {
     LDEBUG("Creating constellations");
 
     for (std::pair<const int, ConstellationLine>& p : _renderingConstellationsMap) {
-        GLuint vao = 0;
-        glGenVertexArrays(1, &vao);
-        p.second.vaoArray = vao;
-
         GLuint vbo = 0;
-        glGenBuffers(1, &vbo);
-        p.second.vboArray = vbo;
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glCreateBuffers(1, &vbo);
+        glNamedBufferStorage(
+            vbo,
             p.second.vertices.size() * sizeof(GLfloat),
             p.second.vertices.data(),
-            GL_STATIC_DRAW
+            GL_NONE_BIT
         );
-        // in_position
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    }
+        p.second.vboArray = vbo;
 
-    glBindVertexArray(0);
+        GLuint vao = 0;
+        glCreateVertexArrays(1, &vao);
+        glVertexArrayVertexBuffer(vao, 0, vbo, 0, 3 * sizeof(float));
+        p.second.vaoArray = vao;
+
+        // in_position
+        glEnableVertexArrayAttrib(vao, 0);
+        glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribBinding(vao, 0, 0);
+    }
 }
 
 } // namespace openspace

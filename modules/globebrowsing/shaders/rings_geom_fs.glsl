@@ -22,28 +22,30 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "PowerScaling/powerScaling_fs.hglsl"
+#include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
 
-in vec2 vs_st;
-in float vs_screenSpaceDepth;
-in vec3 vs_normal;
+in Data {
+  vec2 texCoords;
+  vec3 normal;
+  float screenSpaceDepth;
+} in_data;
 
 uniform sampler1D ringTexture;
 uniform vec2 textureOffset;
 
 
 Fragment getFragment() {
+  // Discard if normal is perpendicular to the camera direction
+  if (abs(dot(normalize(in_data.normal), vec3(0.0, 0.0, 1.0))) <= 0.01) {
+    discard;
+  }
+
   // Moving the origin to the center
-  vec2 st = (vs_st - vec2(0.5)) * 2.0;
+  vec2 st = (in_data.texCoords - vec2(0.5)) * 2.0;
 
   // The length of the texture coordinates vector is our distance from the center
   float radius = length(st);
-
-  // Discard if normal is perpendicular to the camera direction
-  if (abs(dot(normalize(vs_normal), vec3(0.0, 0.0, 1.0))) <= 0.01) {
-    discard;
-  }
 
   // We only want to consider ring-like objects so we need to discard everything else
   if (radius > 1.0) {
@@ -51,15 +53,15 @@ Fragment getFragment() {
   }
 
   // Remapping the texture coordinates
-  // Radius \in [0,1],  texCoord \in [textureOffset.x, textureOffset.y]
+  // Radius \in [0,1],  texCoords \in [textureOffset.x, textureOffset.y]
   // textureOffset.x -> 0
   // textureOffset.y -> 1
-  float texCoord = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
-  if (texCoord < 0.0 || texCoord > 1.0) {
+  float texCoords = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
+  if (texCoords < 0.0 || texCoords > 1.0) {
     discard;
   }
 
-  float diffuse = length(texture(ringTexture, texCoord).rgb);
+  float diffuse = length(texture(ringTexture, texCoords).rgb);
 
   // The normal for the one plane depends on whether we are dealing
   // with a front facing or back facing fragment
@@ -74,8 +76,7 @@ Fragment getFragment() {
   // }
 
   Fragment frag;
-  frag.color = vec4(vec3(vs_screenSpaceDepth), 1.0);
-  frag.depth = (diffuse < 0.5) ? 1E30 : vs_screenSpaceDepth;
-
+  frag.color = vec4(vec3(in_data.screenSpaceDepth), 1.0);
+  frag.depth = (diffuse < 0.5)  ?  1E30  :  in_data.screenSpaceDepth;
   return frag;
 }

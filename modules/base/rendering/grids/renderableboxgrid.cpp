@@ -119,22 +119,21 @@ void RenderableBoxGrid::initializeGL() {
         }
     );
 
-    glGenVertexArrays(1, &_vaoID);
-    glGenBuffers(1, &_vBufferID);
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, 16 * sizeof(Vertex), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 }
 
 void RenderableBoxGrid::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vaoID);
-    _vaoID = 0;
-
-    glDeleteBuffers(1, &_vBufferID);
-    _vBufferID = 0;
-
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
+    
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
         [](ghoul::opengl::ProgramObject* p) {
@@ -166,8 +165,8 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_LINE_SMOOTH);
     glDepthMask(false);
 
-    glBindVertexArray(_vaoID);
-    glDrawArrays(_mode, 0, static_cast<GLsizei>(_varray.size()));
+    glBindVertexArray(_vao);
+    glDrawArrays(_mode, 0, 16);
     glBindVertexArray(0);
 
     _gridProgram->deactivate();
@@ -182,6 +181,7 @@ void RenderableBoxGrid::update(const UpdateData&) {
     if (_gridIsDirty) [[unlikely]] {
         const glm::vec3 llf = -_size.value() / 2.f;
         const glm::vec3 urb =  _size.value() / 2.f;
+        setBoundingSphere(glm::length(glm::dvec3(urb)));
 
         //     7
         //      --------------------  6
@@ -212,40 +212,25 @@ void RenderableBoxGrid::update(const UpdateData&) {
         const glm::vec3 v6 = glm::vec3(urb.x, urb.y, urb.z);
         const glm::vec3 v7 = glm::vec3(llf.x, urb.y, urb.z);
 
-        _varray.clear();
-        _varray.reserve(16);
-
-        // First add the bounds
-        _varray.push_back({ v0.x, v0.y, v0.z });
-        _varray.push_back({ v1.x, v1.y, v1.z });
-        _varray.push_back({ v2.x, v2.y, v2.z });
-        _varray.push_back({ v3.x, v3.y, v3.z });
-        _varray.push_back({ v0.x, v0.y, v0.z });
-        _varray.push_back({ v4.x, v4.y, v4.z });
-        _varray.push_back({ v5.x, v5.y, v5.z });
-        _varray.push_back({ v6.x, v6.y, v6.z });
-        _varray.push_back({ v7.x, v7.y, v7.z });
-        _varray.push_back({ v4.x, v4.y, v4.z });
-        _varray.push_back({ v5.x, v5.y, v5.z });
-        _varray.push_back({ v1.x, v1.y, v1.z });
-        _varray.push_back({ v2.x, v2.y, v2.z });
-        _varray.push_back({ v6.x, v6.y, v6.z });
-        _varray.push_back({ v7.x, v7.y, v7.z });
-        _varray.push_back({ v3.x, v3.y, v3.z });
-
-        setBoundingSphere(glm::length(glm::dvec3(urb)));
-
-        glBindVertexArray(_vaoID);
-        glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            _varray.size() * sizeof(Vertex),
-            _varray.data(),
-            GL_STATIC_DRAW
-        );
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-        glBindVertexArray(0);
+        std::array<Vertex, 16> arr = {
+            Vertex{ v0.x, v0.y, v0.z },
+            Vertex{ v1.x, v1.y, v1.z },
+            Vertex{ v2.x, v2.y, v2.z },
+            Vertex{ v3.x, v3.y, v3.z },
+            Vertex{ v0.x, v0.y, v0.z },
+            Vertex{ v4.x, v4.y, v4.z },
+            Vertex{ v5.x, v5.y, v5.z },
+            Vertex{ v6.x, v6.y, v6.z },
+            Vertex{ v7.x, v7.y, v7.z },
+            Vertex{ v4.x, v4.y, v4.z },
+            Vertex{ v5.x, v5.y, v5.z },
+            Vertex{ v1.x, v1.y, v1.z },
+            Vertex{ v2.x, v2.y, v2.z },
+            Vertex{ v6.x, v6.y, v6.z },
+            Vertex{ v7.x, v7.y, v7.z },
+            Vertex{ v3.x, v3.y, v3.z }
+        };
+        glNamedBufferSubData(_vbo, 0, arr.size() * sizeof(Vertex), arr.data());
 
         _gridIsDirty = false;
     }

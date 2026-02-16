@@ -24,20 +24,26 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "powerscaling/powerscalingmath.glsl"
 
 layout(points) in;
-in vec3 vs_bvLumAbsMag[];
-in vec3 vs_velocity[];
-in float vs_speed[];
+in Data {
+  vec3 bvLumAbsMag;
+  vec3 velocity;
+  float speed;
+  float otherData;
+} in_data[];
 
 layout(triangle_strip, max_vertices = 4) out;
-out vec3 vs_position;
-out vec2 texCoords;
-flat out float ge_bv;
-flat out vec3 ge_velocity;
-flat out float ge_speed;
-flat out float gs_screenSpaceDepth;
+out Data {
+  flat float bv;
+  flat vec3 velocity;
+  flat float speed;
+  flat float otherData;
+  flat float screenSpaceDepth;
+  vec3 position;
+  vec2 texCoords;
+} out_data;
 
 uniform float magnitudeExponent;
 uniform dvec3 eyePosition;
@@ -77,12 +83,12 @@ double scaleForApparentBrightness(dvec3 dpos, float luminance) {
 }
 
 double scaleForLuminositySize(float bv, float luminance, float absMagnitude) {
-  double adjustedLuminance = luminance + 5E9;
+  double adjustedLum = luminance + 5E9;
   float L_over_Lsun = pow(2.51, SunAbsMagnitude - absMagnitude);
   float temperature = bvToKelvin(bv);
   float relativeTemperature = SunTemperature / temperature;
-  double starRadius = SunRadius * pow(relativeTemperature, 2.0) * sqrt(L_over_Lsun);
-  return (lumCent * adjustedLuminance + (radiusCent * starRadius)) * pow(10.0, magnitudeExponent);
+  double rStar = SunRadius * pow(relativeTemperature, 2.0) * sqrt(L_over_Lsun);
+  return (lumCent * adjustedLum + (radiusCent * rStar)) * pow(10.0, magnitudeExponent);
 }
 
 double scaleForAbsoluteMagnitude(float absMagnitude) {
@@ -92,8 +98,8 @@ double scaleForAbsoluteMagnitude(float absMagnitude) {
 double scaleForApparentMagnitude(dvec3 dpos, float absMag) {
   double distanceToStarInMeters = length(dpos - eyePosition);
   double distanceToCenterInMeters = length(eyePosition);
-  float distanceToStarInParsecs = float(distanceToStarInMeters/PARSEC);
-  float appMag = absMag + 5.0 * (log(distanceToStarInParsecs/10.0)/log(2.0));
+  float distanceToStarInParsecs = float(distanceToStarInMeters / PARSEC);
+  float appMag = absMag + 5.0 * (log(distanceToStarInParsecs/10.0) / log(2.0));
   return (-appMag + 50.0) * pow(10.0, magnitudeExponent + 7.5);
 }
 
@@ -104,39 +110,40 @@ double scaleForDistanceModulus(float absMag) {
 
 void main() {
   vec3 pos = gl_in[0].gl_Position.xyz;
-  vs_position = pos; // in object space
+  out_data.position = pos;
   dvec4 dpos = modelMatrix * dvec4(pos, 1.0);
 
-  ge_bv = vs_bvLumAbsMag[0].x;
-  ge_velocity = vs_velocity[0];
-  ge_speed = vs_speed[0];
+  out_data.bv = in_data[0].bvLumAbsMag.x;
+  out_data.velocity = in_data[0].velocity;
+  out_data.speed = in_data[0].speed;
+  out_data.otherData = in_data[0].otherData;
 
   double scaleMultiply = 1.0;
 
   if (sizeComposition == SizeCompositionOptionLumSizeDistanceModulus) {
-    float absMagnitude = vs_bvLumAbsMag[0].z;
+    float absMagnitude = in_data[0].bvLumAbsMag.z;
 
     scaleMultiply = scaleForDistanceModulus(absMagnitude);
   }
   else if (sizeComposition == SizeCompositionOptionAppBrightness) {
-    float luminance = vs_bvLumAbsMag[0].y;
+    float luminance = in_data[0].bvLumAbsMag.y;
 
     scaleMultiply = scaleForApparentBrightness(dpos.xyz, luminance);
   }
   else if (sizeComposition == SizeCompositionOptionLumSize) {
-    float bv = vs_bvLumAbsMag[0].x;
-    float luminance = vs_bvLumAbsMag[0].y;
-    float absMagnitude = vs_bvLumAbsMag[0].z;
+    float bv = in_data[0].bvLumAbsMag.x;
+    float luminance = in_data[0].bvLumAbsMag.y;
+    float absMagnitude = in_data[0].bvLumAbsMag.z;
 
     scaleMultiply = scaleForLuminositySize(bv, luminance, absMagnitude);
   }
   else if (sizeComposition == SizeCompositionOptionLumSizeAbsMagnitude) {
-    float absMagnitude = vs_bvLumAbsMag[0].z;
+    float absMagnitude = in_data[0].bvLumAbsMag.z;
 
     scaleMultiply = scaleForAbsoluteMagnitude(absMagnitude);
   }
   else if (sizeComposition == SizeCompositionOptionLumSizeAppMagnitude) {
-    float absMagnitude = vs_bvLumAbsMag[0].z;
+    float absMagnitude = in_data[0].bvLumAbsMag.z;
 
     scaleMultiply = scaleForApparentMagnitude(dpos.xyz, absMagnitude);
   }
@@ -163,23 +170,23 @@ void main() {
     vec4(cameraViewProjectionMatrix * dvec4(dpos.xyz + scaledUp - scaledRight, dpos.w))
   );
 
-  gs_screenSpaceDepth = lowerLeft.w;
+  out_data.screenSpaceDepth = lowerLeft.w;
 
   // Build primitive
   gl_Position = lowerLeft;
-  texCoords = vec2(0.0, 0.0);
+  out_data.texCoords = vec2(0.0, 0.0);
   EmitVertex();
 
   gl_Position = lowerRight;
-  texCoords = vec2(1.0, 0.0);
+  out_data.texCoords = vec2(1.0, 0.0);
   EmitVertex();
 
   gl_Position = upperLeft;
-  texCoords = vec2(0.0, 1.0);
+  out_data.texCoords = vec2(0.0, 1.0);
   EmitVertex();
 
   gl_Position = upperRight;
-  texCoords = vec2(1.0, 1.0);
+  out_data.texCoords = vec2(1.0, 1.0);
   EmitVertex();
 
   EndPrimitive();

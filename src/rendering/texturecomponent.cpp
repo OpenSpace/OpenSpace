@@ -69,11 +69,6 @@ void TextureComponent::setShouldPurgeFromRAM(bool value) {
     _shouldPurgeFromRAM = value;
 }
 
-void TextureComponent::bind() {
-    ghoul_assert(_texture, "Texture must be loaded before binding");
-    _texture->bind();
-}
-
 void TextureComponent::uploadToGpu() {
     if (!_texture) {
         LERROR("Could not upload texture to GPU. Texture not loaded");

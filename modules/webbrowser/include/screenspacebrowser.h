@@ -93,7 +93,7 @@ private:
     CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
 
 private:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
     properties::StringProperty _url;
 

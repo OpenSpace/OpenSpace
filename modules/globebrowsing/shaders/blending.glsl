@@ -22,15 +22,12 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef BLENDING_HGLSL
-#define BLENDING_HGLSL
+#ifndef _GLOBEBROWSING___BLENDING___GLSL_
+#define _GLOBEBROWSING___BLENDING___GLSL_
 
 vec4 blendNormal(vec4 oldColor, vec4 newColor) {
-  vec4 toReturn;
-  toReturn.a = mix(oldColor.a, 1.0, newColor.a);
-  toReturn.rgb =
-    (newColor.rgb * newColor.a + oldColor.rgb * oldColor.a * (1 - newColor.a)) / toReturn.a;
-  return toReturn;
+  float a = mix(oldColor.a, 1.0, newColor.a);
+  return vec4(mix(oldColor.rgb * oldColor.a, newColor.rgb, newColor.a) / a, a);
 }
 
 vec4 blendMultiply(vec4 oldColor, vec4 newColor) {
@@ -49,69 +46,56 @@ vec4 blendSubtract(vec4 oldColor, vec4 newColor) {
   return oldColor - newColor;
 }
 
-vec3 hsl2rgb(in vec3 c) {
+vec3 hsl2rgb(vec3 c) {
   vec3 rgb = clamp(abs(mod(c.x * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0);
-
   return c.z + c.y * (rgb - 0.5) * (1.0 - abs(2.0 * c.z - 1.0));
 }
 
-vec3 HueShift(in vec3 color, in float shift) {
-  vec3 P = vec3(0.55735) * dot(vec3(0.55735), color);
-  vec3 U = color - P;
-  vec3 V = cross(vec3(0.55735), U);
-  vec3 c = U * cos(shift*6.2832) + V * sin(shift*6.2832) + P;
-  return c;
-}
+vec3 rgb2hsl(vec3 c) {
+  float cMin = min(c.r, min(c.g, c.b));
+  float cMax = max(c.r, max(c.g, c.b));
 
-vec3 rgb2hsl(in vec3 c) {
-  float r = c.r;
-  float g = c.g;
-  float b = c.b;
-  float cMin = min(r, min(g, b));
-  float cMax = max(r, max(g, b));
-
-  if (cMax > cMin) {
-    float l = (cMax + cMin) / 2.0;
-    float cDelta = cMax - cMin;
-    float s = (l < 0.0) ? cDelta / (cMax + cMin) : cDelta / (2.0 - (cMax + cMin));
-
-    float h = 0.0;
-    if (r == cMax) {
-      h = (g - b) / cDelta;
-    }
-    else if (g == cMax) {
-      h = 2.0 + (b - r) / cDelta;
-    }
-    else {
-      h = 4.0 + (r - g) / cDelta;
-    }
-
-    if (h < 0.0) {
-      h += 6.0;
-    }
-    h = h / 6.0;
-
-    return vec3(h, s, l);
-  }
-  else {
+  if (cMax <= cMin) {
     return vec3(0.0);
   }
+
+  float l = (cMax + cMin) / 2.0;
+  float cDelta = cMax - cMin;
+  float s = (l < 0.0)  ?  cDelta / (cMax + cMin)  :  cDelta / (2.0 - (cMax + cMin));
+
+  float h = 0.0;
+  if (c.r == cMax) {
+    h = (c.g - c.b) / cDelta;
+  }
+  else if (c.g == cMax) {
+    h = 2.0 + (c.b - c.r) / cDelta;
+  }
+  else {
+    h = 4.0 + (c.r - c.g) / cDelta;
+  }
+
+  if (h < 0.0) {
+    h += 6.0;
+  }
+  h = h / 6.0;
+
+  return vec3(h, s, l);
 }
 
 vec3 rgb2hsv(vec3 c) {
-  vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-  vec4 p = (c.g < c.b) ? vec4(c.bg, K.wz) : vec4(c.gb, K.xy);
-  vec4 q = (c.r < p.x) ? vec4(p.xyw, c.r) : vec4(c.r, p.yzx);
+  const vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+  vec4 p = (c.g < c.b)  ?  vec4(c.bg, K.wz)  :  vec4(c.gb, K.xy);
+  vec4 q = (c.r < p.x)  ?  vec4(p.xyw, c.r)  :  vec4(c.r, p.yzx);
 
   float d = q.x - min(q.w, q.y);
-  float e = 1.0e-10;
+  const float e = 1.0e-10;
   return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
 }
 
 vec3 hsv2rgb(vec3 c) {
-  vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+  const vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
   vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
   return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
-#endif // BLENDING_HGLSL
+#endif // _GLOBEBROWSING___BLENDING___GLSL_

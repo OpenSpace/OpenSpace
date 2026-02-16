@@ -176,30 +176,29 @@ void RenderableConstellationBounds::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
-    glGenVertexArrays(1, &_vao);
-    glBindVertexArray(_vao);
-
-    glGenBuffers(1, &_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(
+        _vbo,
         _vertexValues.size() * 3 * sizeof(float),
         _vertexValues.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
 
-    const GLint positionAttrib = _program->attributeLocation("in_position");
-    glEnableVertexAttribArray(positionAttrib);
-    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    // We don't need the data anymore and can remove it
+    _vertexValues.clear();
 
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
+
+    const GLint positionAttrib = _program->attributeLocation("in_position");
+    glEnableVertexArrayAttrib(_vao, positionAttrib);
+    glVertexArrayAttribFormat(_vao, positionAttrib, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 }
 
 void RenderableConstellationBounds::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
 
     if (_program) {
         global::renderEngine->removeRenderProgram(_program.get());

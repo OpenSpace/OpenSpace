@@ -24,17 +24,20 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "powerscaling/powerscalingmath.glsl"
 
 layout(points) in;
-flat in vec3 normal[]; // Point normals correspond to globe out direction, model space
-flat in float dynamicHeight[];
+in Data {
+  vec3 normal; // Point normals correspond to globe out direction, model space
+  flat float dynamicHeight;
+} in_data[];
 
 layout(triangle_strip, max_vertices = 4) out;
-out vec2 texCoord;
-flat out float vs_screenSpaceDepth;
-out vec4 vs_positionViewSpace;
-flat out vec3 vs_normal;
+out Data {
+  vec4 positionViewSpace;
+  vec2 texCoords;
+  flat float screenSpaceDepth;
+} out_data;
 
 // General settings
 uniform dmat4 modelTransform;
@@ -50,6 +53,12 @@ uniform vec3 cameraRight;
 uniform dvec3 cameraPosition; // world coordinates
 uniform vec3 cameraLookUp;
 
+uniform float pointSize;
+uniform float textureWidthFactor;
+
+// If false, use the center
+uniform bool useBottomAnchorPoint = true;
+
 // Render mode
 uniform int renderMode;
 // OBS! Keep in sync with option property options
@@ -58,36 +67,27 @@ const int RenderOptionCameraPos = 1;
 const int RenderOptionGlobeNormal = 2;
 const int RenderOptionGlobeSurface = 3;
 
-uniform float pointSize;
-uniform float textureWidthFactor;
-
-// If false, use the center
-uniform bool useBottomAnchorPoint = true;
-
-const vec2 corners[4] = vec2[4](
+const vec2 Corners[4] = vec2[4](
   vec2(0.0, 0.0),
   vec2(1.0, 0.0),
   vec2(1.0, 1.0),
   vec2(0.0, 1.0)
 );
 
+
 void main() {
-  vec4 pos = gl_in[0].gl_Position;
-  vs_normal = normal[0];
-  dvec4 dpos = dvec4(dvec3(pos.xyz), 1.0);
+  dvec4 dpos = dvec4(dvec3(gl_in[0].gl_Position.xyz), 1.0);
 
   // Offset position based on height information
-  if (length(pos.xyz) > 0) {
-      dvec3 outDirection = normalize(dvec3(dpos));
-      float height = heightOffset;
-      if (useHeightMapData) {
-        height += dynamicHeight[0];
-      }
-      dpos += dvec4(outDirection * double(height), 0.0);
+  if (length(dpos.xyz) > 0) {
+    dvec3 outDirection = normalize(dvec3(dpos));
+    double height =
+      useHeightMapData  ?  in_data[0].dynamicHeight + heightOffset  :  heightOffset;
+    dpos += dvec4(outDirection * height, 0.0);
   }
   // World coordinates
   dpos = modelTransform * dpos;
-  vec3 worldNormal = normalize(mat3(modelTransform) * vs_normal);
+  vec3 worldNormal = normalize(mat3(modelTransform) * in_data[0].normal);
 
   // Set up and right directions based on render mode.
   // renderMode 0 is default
@@ -114,11 +114,11 @@ void main() {
   dvec4 scaledRight = pointSize * dvec4(right, 0.0) * 0.5;
   dvec4 scaledUp = pointSize * dvec4(up, 0.0) * 0.5;
 
-  dmat4 cameraViewProjectionMatrix = projectionTransform * viewTransform;
+  dmat4 cameraViewProjection = projectionTransform * viewTransform;
 
-  vec4 dposClip = vec4(cameraViewProjectionMatrix * dpos);
-  vec4 scaledRightClip = textureWidthFactor * vec4(cameraViewProjectionMatrix * scaledRight);
-  vec4 scaledUpClip = vec4(cameraViewProjectionMatrix * scaledUp);
+  vec4 dposClip = vec4(cameraViewProjection * dpos);
+  vec4 scaledRightClip = textureWidthFactor * vec4(cameraViewProjection * scaledRight);
+  vec4 scaledUpClip = vec4(cameraViewProjection * scaledUp);
 
   // Place anchor point at the bottom
   vec4 bottomLeft = z_normalization(dposClip - scaledRightClip);
@@ -134,23 +134,23 @@ void main() {
     topLeft = z_normalization(dposClip + scaledUpClip - scaledRightClip);
   }
 
-  vs_screenSpaceDepth = bottomLeft.w;
-  vs_positionViewSpace = vec4(viewTransform * dpos);
+  out_data.screenSpaceDepth = bottomLeft.w;
+  out_data.positionViewSpace = vec4(viewTransform * dpos);
 
   // Build primitive
-  texCoord = corners[0];
+  out_data.texCoords = Corners[0];
   gl_Position = bottomLeft;
   EmitVertex();
 
-  texCoord = corners[1];
+  out_data.texCoords = Corners[1];
   gl_Position = bottomRight;
   EmitVertex();
 
-  texCoord = corners[3];
+  out_data.texCoords = Corners[3];
   gl_Position = topLeft;
   EmitVertex();
 
-  texCoord = corners[2];
+  out_data.texCoords = Corners[2];
   gl_Position = topRight;
   EmitVertex();
 

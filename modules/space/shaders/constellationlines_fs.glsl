@@ -24,24 +24,24 @@
 
 #include "fragment.glsl"
 
-in float vs_screenSpaceDepth;
-in vec4 vs_positionViewSpace;
+in Data {
+  vec4 positionViewSpace;
+  float screenSpaceDepth;
+} in_data;
 
 uniform vec3 color;
 uniform float opacity;
 
 
 Fragment getFragment() {
-  Fragment frag;
   if (opacity == 0.0) {
     discard;
   }
 
+  Fragment frag;
   frag.color = vec4(color, opacity);
-  frag.depth = vs_screenSpaceDepth;
-
-  frag.gPosition = vs_positionViewSpace;
+  frag.depth = in_data.screenSpaceDepth;
+  frag.gPosition = in_data.positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-
   return frag;
 }

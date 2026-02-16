@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef _BLENDING_GLSL_
-#define _BLENDING_GLSL_
+#ifndef _BLENDING___GLSL_
+#define _BLENDING___GLSL_
 
 /**
  * Blend in src behind dst using normal blending
@@ -32,7 +32,7 @@
  */
 void normalBlend(inout vec4 dst, vec4 src) {
   dst.rgb = dst.rgb + (1.0 - dst.a) * src.a * src.rgb;
-  dst.a = dst.a + (1.0 - dst.a) * src.a;
+  dst.a = mix(src.a, 1.0, dst.a);
 }
 
 /**
@@ -43,7 +43,6 @@ void normalBlend(inout vec4 dst, vec4 src) {
 void additiveBlend(inout vec4 dst, vec4 src) {
   dst.rgb = dst.rgb + (1.0 - dst.a) * src.a * src.rgb;
 }
-
 
 /**
  * Blend in src behind dst using normal blending
@@ -76,7 +75,7 @@ void additiveBlendStep(inout vec4 dst, vec4 src, float stepSize) {
  */
 void blend(inout vec4 dst, vec4 src) {
   dst.rgb = dst.rgb + (1.0 - dst.a) * src.a * src.rgb;
-  dst.a = dst.a + (1.0 - dst.a) * src.a;
+  dst.a = mix(src.a, 1.0, dst.a);
 }
 
 /**
@@ -91,4 +90,4 @@ void blendStep(inout vec4 dst, vec4 src, float stepSize) {
   blend(dst, src);
 }
 
-#endif // _BLENDING_GLSL_
+#endif // _BLENDING___GLSL_

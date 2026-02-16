@@ -37,6 +37,8 @@
 #include <ghoul/opengl/uniformcache.h>
 #include <memory>
 
+namespace ghoul::opengl { class TextureUnit; }
+
 namespace openspace {
 
 class RenderableSphere : public Renderable {
@@ -54,7 +56,7 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    virtual void bindTexture() = 0;
+    virtual void bindTexture(ghoul::opengl::TextureUnit& unit) = 0;
     virtual void unbindTexture();
 
     properties::FloatProperty _size;

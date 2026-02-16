@@ -24,26 +24,28 @@
 
 #include "fragment.glsl"
 
-in float vs_positionDepth;
-in vec4 vs_gPosition;
-in float fade;
+in Data {
+  vec4 gPosition;
+  float positionDepth;
+  in float fade;
+} in_data;
 
 uniform vec3 color;
 uniform int renderPhase;
 uniform float opacity = 1.0;
 
 // Fragile! Keep in sync with RenderableTrail::render::RenderPhase
-#define RenderPhaseLines 0
-#define RenderPhasePoints 1
+const int RenderPhaseLines = 0;
+const int RenderPhasePoints  = 1;
 
-#define Delta 0.25
+const float Delta = 0.25;
 
 
 Fragment getFragment() {
   Fragment frag;
-  frag.color = vec4(color * fade, fade * opacity);
-  frag.depth = vs_positionDepth;
-  frag.blend = BLEND_MODE_ADDITIVE;
+  frag.color = vec4(color * in_data.fade, in_data.fade * opacity);
+  frag.depth = in_data.positionDepth;
+  frag.blend = BlendModeAdditive;
 
   if (renderPhase == RenderPhasePoints) {
     // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
@@ -54,10 +56,7 @@ Fragment getFragment() {
     frag.color.a *= circleClipping;
   }
 
-  frag.gPosition = vs_gPosition;
-
-  // There is no normal here
-  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
-
+  frag.gPosition = in_data.gPosition;
+  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0); // There is no normal here
   return frag;
 }

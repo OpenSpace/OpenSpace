@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef _RAND_GLSL_
-#define _RAND_GLSL_
+#ifndef _RAND___GLSL_
+#define _RAND___GLSL_
 
 /**
  * Return a random number between 0 and 1, based on a vec2
@@ -32,4 +32,4 @@ float rand(vec2 co) {
   return fract(sin(dot(co.xy, vec2(12.9898, 78.233))) * 43758.5453);
 }
 
-#endif
+#endif // _RAND___GLSL_

@@ -50,16 +50,16 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-  shaders/gaia_vbo_vs.glsl
-  shaders/gaia_ssbo_vs.glsl
-  shaders/gaia_billboard_nofbo_fs.glsl
   shaders/gaia_billboard_fs.glsl
   shaders/gaia_billboard_ge.glsl
+  shaders/gaia_billboard_nofbo_fs.glsl
   shaders/gaia_point_fs.glsl
   shaders/gaia_point_ge.glsl
-  shaders/gaia_tonemapping_vs.glsl
-  shaders/gaia_tonemapping_point_fs.glsl
+  shaders/gaia_ssbo_vs.glsl
   shaders/gaia_tonemapping_billboard_fs.glsl
+  shaders/gaia_tonemapping_point_fs.glsl
+  shaders/gaia_tonemapping_vs.glsl
+  shaders/gaia_vbo_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

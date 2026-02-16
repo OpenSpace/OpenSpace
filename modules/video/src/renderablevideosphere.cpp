@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace {
     // This `Renderable` creates a textured 3D sphere where the texture is a video. Per
@@ -95,8 +96,8 @@ void RenderableVideoSphere::update(const UpdateData& data) {
     _videoPlayer.update();
 }
 
-void RenderableVideoSphere::bindTexture() {
-    _videoPlayer.frameTexture()->bind();
+void RenderableVideoSphere::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_videoPlayer.frameTexture());
 }
 
 } // namespace openspace

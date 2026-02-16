@@ -45,6 +45,12 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableTravelSpeed";
 
+    struct VertexPositions {
+        glm::vec3 endOfFade;
+        glm::vec3 betweenLightAndFade;
+        glm::vec3 headOfLight;
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
         "TravelSpeed",
         "Speed of travel",
@@ -209,8 +215,15 @@ void RenderableTravelSpeed::initializeGL() {
         }
     );
 
-    glGenVertexArrays(1, &_vaoId);
-    glGenBuffers(1, &_vBufferId);
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, sizeof(VertexPositions), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(glm::vec3));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
 }
@@ -222,47 +235,35 @@ void RenderableTravelSpeed::deinitializeGL() {
             global::renderEngine->removeRenderProgram(p);
         }
     );
-    glDeleteVertexArrays(1, &_vaoId);
-    glDeleteBuffers(1, &_vBufferId);
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 }
 
-void RenderableTravelSpeed::calculateVerticesPositions() {
+void RenderableTravelSpeed::updateVertexData() {
+    VertexPositions positions;
+
     // 3: start of light, 2: start of fade, 1: end of fade
-    _vertexPositions.headOfLight = _travelSpeed * _timeSinceStart * _directionVector;
+    positions.headOfLight = _travelSpeed * _timeSinceStart * _directionVector;
 
     // This if statment is there to not start the line from behind the source node
     if (_timeSinceStart < _indicatorLength) {
-        _vertexPositions.betweenLightAndFade = glm::vec3(0.0, 0.0, 0.0); // = source node
+        positions.betweenLightAndFade = glm::vec3(0.0, 0.0, 0.0); // = source node
     }
     else {
-        _vertexPositions.betweenLightAndFade =
+        positions.betweenLightAndFade =
             _travelSpeed * (_timeSinceStart - _indicatorLength) * _directionVector;
     }
 
     // This if statment is there to not start the line from behind the source node
     if (_timeSinceStart < (_indicatorLength + _fadeLength)) {
-        _vertexPositions.endOfFade = glm::vec3(0.0, 0.0, 0.0); // = source node
+        positions.endOfFade = glm::vec3(0.0, 0.0, 0.0); // = source node
     }
     else {
-        _vertexPositions.endOfFade = _travelSpeed *
+        positions.endOfFade = _travelSpeed *
             (_timeSinceStart - _indicatorLength - _fadeLength) * _directionVector;
     }
-}
 
-void RenderableTravelSpeed::updateVertexData() {
-    calculateVerticesPositions();
-
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(VertexPositions),
-        &_vertexPositions,
-        GL_DYNAMIC_DRAW
-    );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glBindVertexArray(0);
+    glNamedBufferSubData(_vbo, 0, sizeof(positions), &positions);
 }
 
 void RenderableTravelSpeed::reinitiateTravel() {
@@ -323,8 +324,7 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {
 #else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     glLineWidth(1.f);
 #endif // __APPLE__
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_LINE_STRIP, 0, 3);
     glBindVertexArray(0);
 

@@ -32,6 +32,7 @@
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 #include <optional>
 
 namespace {
@@ -183,8 +184,8 @@ bool ScreenSpaceBrowser::isReady() const {
     return _shader != nullptr;
 }
 
-void ScreenSpaceBrowser::bindTexture() {
-    _renderHandler->bindTexture();
+void ScreenSpaceBrowser::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    _renderHandler->bindTexture(unit);
 }
 
 } // namespace openspace

@@ -24,23 +24,26 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
-in vec3 in_position;
-in float in_textureLayer;
-in float in_colorParameter;
-in float in_scalingParameter;
-in vec4 in_orientation; // quaternion
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in float in_textureLayer;
+layout(location = 2) in float in_colorParameter;
+layout(location = 3) in float in_scalingParameter;
+layout(location = 4) in vec4 in_orientation; // quaternion
 
-flat out float textureLayer;
-flat out float colorParameter;
-flat out float scalingParameter;
-flat out vec4 orientation; // quaternion
+out Data {
+  flat float textureLayer;
+  flat float colorParameter;
+  flat float scalingParameter;
+  flat vec4 orientation; // quaternion
+} out_data;
+
 
 void main() {
-  textureLayer = in_textureLayer;
-  colorParameter = in_colorParameter;
-  scalingParameter = in_scalingParameter;
-  orientation = in_orientation;
+  out_data.textureLayer = in_textureLayer;
+  out_data.colorParameter = in_colorParameter;
+  out_data.scalingParameter = in_scalingParameter;
+  out_data.orientation = in_orientation;
   gl_Position = vec4(in_position, 1.0);
 }

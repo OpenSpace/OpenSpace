@@ -24,18 +24,20 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec4 in_color;
 
-out vec4 vs_color;
+out Data {
+  vec4 color;
+} out_data;
 
 uniform mat4 modelViewProjection;
 uniform mat4 modelTransform;
 
 
 void main() {
-  vs_color = in_color;
-  gl_Position = vec4(in_position, 0);
+  out_data.color = in_color;
+  gl_Position = vec4(in_position, 0.0);
 }

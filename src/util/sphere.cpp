@@ -29,10 +29,6 @@
 #include <cstring>
 #include <string_view>
 
-namespace {
-    constexpr std::string_view _loggerCat = "Sphere";
-} // namespace
-
 namespace openspace {
 
 Sphere::Sphere(float radius, int segments)
@@ -113,9 +109,9 @@ Sphere::Sphere(glm::vec3 radius, int segments)
 }
 
 Sphere::Sphere(const Sphere& cpy)
-    : _vaoID(cpy._vaoID)
-    , _vBufferID(cpy._vBufferID)
-    , _iBufferID(cpy._iBufferID)
+    : _vao(cpy._vao)
+    , _vbo(cpy._vbo)
+    , _ibo(cpy._ibo)
     , _isize(cpy._isize)
     , _vsize(cpy._vsize)
     , _varray(new Vertex[_vsize])
@@ -134,74 +130,40 @@ Sphere::~Sphere() {
     _varray = nullptr;
     _iarray = nullptr;
 
-    glDeleteBuffers(1, &_vBufferID);
-    glDeleteBuffers(1, &_iBufferID);
-    glDeleteVertexArrays(1, &_vaoID);
+    glDeleteBuffers(1, &_vbo);
+    glDeleteBuffers(1, &_ibo);
+    glDeleteVertexArrays(1, &_vao);
 }
 
 bool Sphere::initialize() {
-    // Initialize and upload to graphics card
-    if (_vaoID == 0) {
-        glGenVertexArrays(1, &_vaoID);
-    }
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, _vsize * sizeof(Vertex), _varray, GL_NONE_BIT);
 
-    if (_vBufferID == 0) {
-        glGenBuffers(1, &_vBufferID);
+    glCreateBuffers(1, &_ibo);
+    glNamedBufferStorage(_ibo, _isize * sizeof(int), _iarray, GL_NONE_BIT);
 
-        if (_vBufferID == 0) {
-            LERROR("Could not create vertex buffer");
-            return false;
-        }
-    }
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+    glVertexArrayElementBuffer(_vao, _ibo);
 
-    if (_iBufferID == 0) {
-        glGenBuffers(1, &_iBufferID);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
-        if (_iBufferID == 0) {
-            LERROR("Could not create index buffer");
-            return false;
-        }
-    }
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, tex));
+    glVertexArrayAttribBinding(_vao, 1, 0);
 
-    // First VAO setup
-    glBindVertexArray(_vaoID);
+    glEnableVertexArrayAttrib(_vao, 2);
+    glVertexArrayAttribFormat(_vao, 2, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, normal));
+    glVertexArrayAttribBinding(_vao, 2, 0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBufferData(GL_ARRAY_BUFFER, _vsize * sizeof(Vertex), _varray, GL_STATIC_DRAW);
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, tex))
-    );
-
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(
-        2,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(Vertex),
-        reinterpret_cast<const GLvoid*>(offsetof(Vertex, normal))
-    );
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, _isize * sizeof(int), _iarray, GL_STATIC_DRAW);
-
-    glBindVertexArray(0);
     return true;
 }
 
 void Sphere::render() const {
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iBufferID);
+    glBindVertexArray(_vao);
     glDrawElements(GL_TRIANGLES, _isize, GL_UNSIGNED_INT, nullptr);
     glBindVertexArray(0);
 }

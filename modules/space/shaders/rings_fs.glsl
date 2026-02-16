@@ -22,25 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "PowerScaling/powerScaling_fs.hglsl"
+#include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
 
-in vec2 vs_st;
-in vec4 vs_position;
-//in vec4 vs_gPosition;
-//in vec3 vs_gNormal;
+in Data {
+  vec4 position;
+  vec2 texCoords;
+} in_data;
 
 uniform sampler1D texture1;
 uniform vec2 textureOffset;
 uniform float colorFilterValue;
 uniform bool hasSunPosition;
 uniform vec3 sunPosition;
-uniform float _nightFactor;
+uniform float nightFactor;
 
 
 Fragment getFragment() {
   // Moving the origin to the center
-  vec2 st = (vs_st - vec2(0.5)) * 2.0;
+  vec2 st = (in_data.texCoords - vec2(0.5)) * 2.0;
 
   // The length of the texture coordinates vector is our distance from the center
   float radius = length(st);
@@ -51,15 +51,15 @@ Fragment getFragment() {
   }
 
   // Remapping the texture coordinates
-  // Radius \in [0,1],  texCoord \in [textureOffset.x, textureOffset.y]
+  // Radius \in [0,1],  texCoords \in [textureOffset.x, textureOffset.y]
   // textureOffset.x -> 0
   // textureOffset.y -> 1
-  float texCoord = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
-  if (texCoord < 0.0 || texCoord > 1.0) {
+  float texCoords = (radius - textureOffset.x) / (textureOffset.y - textureOffset.x);
+  if (texCoords < 0.0 || texCoords > 1.0) {
     discard;
   }
 
-  vec4 diffuse = texture(texture1, texCoord);
+  vec4 diffuse = texture(texture1, texCoords);
   // divided by 3 as length of vec3(1.0, 1.0, 1.0) will return 3 and we want
   // to normalize the alpha value to [0,1]
   float colorValue = length(diffuse.rgb) / 3.0;
@@ -72,28 +72,18 @@ Fragment getFragment() {
 
   // The normal for the one plane depends on whether we are dealing
   // with a front facing or back facing fragment
-  vec3 normal;
   // The plane is oriented on the xz plane
   // WARNING: This might not be the case for Uranus
-  if (gl_FrontFacing) {
-    normal = vec3(-1.0, 0.0, 0.0);
-  }
-  else {
-    normal = vec3(1.0, 0.0, 0.0);
-  }
+  vec3 normal = gl_FrontFacing  ?  vec3(-1.0, 0.0, 0.0)  :  vec3(1.0, 0.0, 0.0);
 
   // Reduce the color of the fragment by the user factor
   // if we are facing away from the Sun
-  if (dot(sunPosition, normal) < 0) {
-    diffuse.xyz *= _nightFactor;
+  if (dot(sunPosition, normal) < 0.0) {
+    diffuse.xyz *= nightFactor;
   }
 
   Fragment frag;
   frag.color = diffuse;
-  frag.depth = vs_position.w;
-
-  //frag.gPosition  = vs_gPosition;
-  //frag.gNormal    = vs_gNormal;
-
+  frag.depth = in_data.position.w;
   return frag;
 }

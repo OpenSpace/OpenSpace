@@ -24,18 +24,24 @@
 
 #include "fragment.glsl"
 
-in vec3 vs_position;
-in vec2 texCoords;
-flat in float ge_bv;
-flat in vec3 ge_velocity;
-flat in float ge_speed;
-flat in float gs_screenSpaceDepth;
+in Data {
+  flat float bv;
+  flat vec3 velocity;
+  flat float speed;
+  flat float otherData;
+  flat float screenSpaceDepth;
+  vec3 position;
+  vec2 texCoords;
+} in_data;
 
+// layout(bindless_sampler) uniform sampler1D colorTexture;
 uniform sampler1D colorTexture;
+// layout(bindless_sampler) uniform sampler2D glareTexture;
 uniform sampler2D glareTexture;
 uniform float opacity;
 uniform vec3 fixedColor;
 uniform int colorOption;
+// layout(bindless_sampler) uniform sampler1D otherDataTexture;
 uniform sampler1D otherDataTexture;
 uniform vec2 otherDataRange;
 uniform bool filterOutOfRange;
@@ -45,6 +51,7 @@ uniform float glareGamma;
 uniform float glareScale;
 
 uniform bool hasCore;
+// layout(bindless_sampler) uniform sampler2D coreTexture;
 uniform sampler2D coreTexture;
 uniform float coreMultiplier;
 uniform float coreGamma;
@@ -59,19 +66,20 @@ const int ColorOptionFixedColor = 4;
 
 
 vec4 bv2rgb(float bv) {
-  // BV is [-0.4,2.0]
-  float t = (bv + 0.4) / (2.0 + 0.4);
-  t = clamp(t, 0.0, 1.0);
+  // BV is [-0.4, 2.0]
+  float t = clamp((bv + 0.4) / (2.0 + 0.4), 0.0, 1.0);
   return texture(colorTexture, t);
 }
 
 bool isOtherDataValueInRange() {
-  float t = (ge_bv - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
+  float t =
+    (in_data.otherData - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
   return t >= 0.0 && t <= 1.0;
 }
 
 vec4 otherDataValue() {
-  float t = (ge_bv - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
+  float t =
+    (in_data.otherData - otherDataRange.x) / (otherDataRange.y - otherDataRange.x);
   t = clamp(t, 0.0, 1.0);
   return texture(otherDataTexture, t);
 }
@@ -82,14 +90,14 @@ Fragment getFragment() {
 
   switch (colorOption) {
     case ColorOptionColor:
-      color = bv2rgb(ge_bv);
+      color = bv2rgb(in_data.bv);
       break;
     case ColorOptionVelocity:
-      color = vec4(abs(ge_velocity), 0.5);
+      color = vec4(abs(in_data.velocity), 0.5);
       break;
     case ColorOptionSpeed:
       // @TODO Include a transfer function here ---abock
-      color = vec4(vec3(ge_speed), 0.5);
+      color = vec4(vec3(in_data.speed), 0.5);
       break;
     case ColorOptionOtherData:
       if (filterOutOfRange && !isOtherDataValueInRange()) {
@@ -104,7 +112,7 @@ Fragment getFragment() {
       break;
   }
 
-  vec2 shiftedCoords = (texCoords - 0.5) * 2;
+  vec2 shiftedCoords = (in_data.texCoords - 0.5) * 2;
 
   vec2 scaledCoordsGlare = shiftedCoords / glareScale;
   vec2 unshiftedCoordsGlare = (scaledCoordsGlare + 1.0) / 2.0;
@@ -126,10 +134,9 @@ Fragment getFragment() {
 
   Fragment frag;
   frag.color = fullColor;
-  frag.depth = gs_screenSpaceDepth;
-  frag.gPosition = vec4(vs_position, 1.0);
+  frag.depth = in_data.screenSpaceDepth;
+  frag.gPosition = vec4(in_data.position, 1.0);
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   frag.disableLDR2HDR = true;
-
   return frag;
 }

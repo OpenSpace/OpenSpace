@@ -171,10 +171,6 @@ bool RenderablePrism::isReady() const {
     return _shader != nullptr;
 }
 
-void RenderablePrism::initialize() {
-    updateVertexData();
-}
-
 void RenderablePrism::initializeGL() {
     _shader = global::renderEngine->buildRenderProgram(
         "PrismProgram",
@@ -183,38 +179,27 @@ void RenderablePrism::initializeGL() {
     );
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
-    glGenVertexArrays(1, &_vaoId);
-    glGenBuffers(1, &_vboId);
-    glGenBuffers(1, &_iboId);
+    glCreateVertexArrays(1, &_vao);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
-    glBindVertexArray(_vaoId);
-
-    updateBufferData();
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glBindVertexArray(0);
+    updateVertexData();
 }
 
 void RenderablePrism::deinitializeGL() {
     global::renderEngine->removeRenderProgram(_shader.get());
     _shader = nullptr;
 
-    glDeleteVertexArrays(1, &_vaoId);
-    _vaoId = 0;
-
-    glDeleteBuffers(1, &_vboId);
-    _vboId = 0;
-
-    glDeleteBuffers(1, &_iboId);
-    _iboId = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
+    glDeleteBuffers(1, &_ibo);
 }
 
 void RenderablePrism::updateVertexData() {
-    _vertexArray.clear();
-    _indexArray.clear();
-
     using namespace rendering::helper;
+
+    std::vector<float> vertexArray;
 
     // Get unit circle vertices on the XY-plane
     std::vector<VertexXYZ> unitVertices = createRingXYZ(_nShapeSegments, 1.f);
@@ -222,51 +207,51 @@ void RenderablePrism::updateVertexData() {
 
     // Put base vertices into array
     for (int j = 0; j < _nShapeSegments; j++) {
-        const float ux = unitVertices[j].xyz[0];
-        const float uy = unitVertices[j].xyz[1];
+        const float ux = unitVertices[j].position.x;
+        const float uy = unitVertices[j].position.y;
 
-        _vertexArray.push_back(ux * _baseRadius); // x
-        _vertexArray.push_back(uy * _baseRadius); // y
-        _vertexArray.push_back(0.f);              // z
+        vertexArray.push_back(ux * _baseRadius); // x
+        vertexArray.push_back(uy * _baseRadius); // y
+        vertexArray.push_back(0.f);              // z
     }
 
     // Put top shape vertices into array
     for (int j = 0; j < _nShapeSegments; j++) {
-        const float ux = unitVertices[j].xyz[0];
-        const float uy = unitVertices[j].xyz[1];
+        const float ux = unitVertices[j].position.x;
+        const float uy = unitVertices[j].position.y;
 
-        _vertexArray.push_back(ux * _radius); // x
-        _vertexArray.push_back(uy * _radius); // y
-        _vertexArray.push_back(_length);      // z
+        vertexArray.push_back(ux * _radius); // x
+        vertexArray.push_back(uy * _radius); // y
+        vertexArray.push_back(_length);      // z
     }
 
     // Put the vertices for the connecting lines into array
     if (_nLines == 1) {
         // In the case of just one line then connect the center points instead
         // Center for base shape
-        _vertexArray.push_back(0.f);
-        _vertexArray.push_back(0.f);
-        _vertexArray.push_back(0.f);
+        vertexArray.push_back(0.f);
+        vertexArray.push_back(0.f);
+        vertexArray.push_back(0.f);
 
         // Center for top shape
-        _vertexArray.push_back(0.f);
-        _vertexArray.push_back(0.f);
-        _vertexArray.push_back(_length);
+        vertexArray.push_back(0.f);
+        vertexArray.push_back(0.f);
+        vertexArray.push_back(_length);
     }
     else {
         for (int j = 0; j < _nLines; j++) {
-            const float ux = unitVerticesLines[j].xyz[0];
-            const float uy = unitVerticesLines[j].xyz[1];
+            const float ux = unitVerticesLines[j].position.x;
+            const float uy = unitVerticesLines[j].position.y;
 
             // Base
-            _vertexArray.push_back(ux * _baseRadius); // x
-            _vertexArray.push_back(uy * _baseRadius); // y
-            _vertexArray.push_back(0.f);              // z
+            vertexArray.push_back(ux * _baseRadius); // x
+            vertexArray.push_back(uy * _baseRadius); // y
+            vertexArray.push_back(0.f);              // z
 
             // Top
-            _vertexArray.push_back(ux * _radius); // x
-            _vertexArray.push_back(uy * _radius); // y
-            _vertexArray.push_back(_length);      // z
+            vertexArray.push_back(ux * _radius); // x
+            vertexArray.push_back(uy * _radius); // y
+            vertexArray.push_back(_length);      // z
         }
     }
 
@@ -275,44 +260,50 @@ void RenderablePrism::updateVertexData() {
         _nShapeSegments.value() <= std::numeric_limits<uint8_t>::max(),
         "Too many shape segments"
     );
+    std::vector<uint8_t> indexArray;
+
     for (uint8_t i = 0; i < _nShapeSegments; i++) {
-        _indexArray.push_back(i);
+        indexArray.push_back(i);
     }
 
     // Reset
-    _indexArray.push_back(255);
+    indexArray.push_back(255);
 
     // Indices for Top shape
     for (int i = _nShapeSegments; i < 2 * _nShapeSegments; i++) {
-        _indexArray.push_back(static_cast<uint8_t>(i));
+        indexArray.push_back(static_cast<uint8_t>(i));
     }
 
     // Indices for connecting lines
     for (int i = 0, k = 0; i < _nLines; i++, k += 2) {
         // Reset
-        _indexArray.push_back(255);
+        indexArray.push_back(255);
 
-        _indexArray.push_back(static_cast<uint8_t>(2 * _nShapeSegments + k));
-        _indexArray.push_back(static_cast<uint8_t>(2 * _nShapeSegments + k + 1));
+        indexArray.push_back(static_cast<uint8_t>(2 * _nShapeSegments + k));
+        indexArray.push_back(static_cast<uint8_t>(2 * _nShapeSegments + k + 1));
     }
-}
 
-void RenderablePrism::updateBufferData() {
-    glBindBuffer(GL_ARRAY_BUFFER, _vboId);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _vertexArray.size() * sizeof(float),
-        _vertexArray.data(),
-        GL_STREAM_DRAW
+    glDeleteBuffers(1, &_vbo);
+    glCreateBuffers(1, &_vbo);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
+    glNamedBufferStorage(
+        _vbo,
+        vertexArray.size() * sizeof(float),
+        vertexArray.data(),
+        GL_NONE_BIT
     );
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        _indexArray.size() * sizeof(uint8_t),
-        _indexArray.data(),
-        GL_STREAM_DRAW
+    glDeleteBuffers(1, &_ibo);
+    glCreateBuffers(1, &_ibo);
+    glVertexArrayElementBuffer(_vao, _ibo);
+    glNamedBufferStorage(
+        _ibo,
+        indexArray.size() * sizeof(uint8_t),
+        indexArray.data(),
+        GL_NONE_BIT
     );
+
+    _count = static_cast<GLsizei>(indexArray.size());
 }
 
 void RenderablePrism::render(const RenderData& data, RendererTasks&) {
@@ -333,14 +324,9 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(255);
     glLineWidth(_lineWidth);
-    glBindVertexArray(_vaoId);
+    glBindVertexArray(_vao);
 
-    glDrawElements(
-        GL_LINE_LOOP,
-        static_cast<GLsizei>(_indexArray.size()),
-        GL_UNSIGNED_BYTE,
-        nullptr
-    );
+    glDrawElements(GL_LINE_LOOP, _count, GL_UNSIGNED_BYTE, nullptr);
 
     glBindVertexArray(0);
     global::renderEngine->openglStateCache().resetLineState();
@@ -357,7 +343,6 @@ void RenderablePrism::update(const UpdateData& data) {
 
     if (_prismIsDirty) [[unlikely]] {
         updateVertexData();
-        updateBufferData();
         setBoundingSphere(_length * glm::compMax(data.modelTransform.scale));
         _prismIsDirty = false;
     }

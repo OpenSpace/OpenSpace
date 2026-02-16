@@ -24,22 +24,24 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
-layout(location = 0) in vec3 vertPosition;
+layout(location = 0) in vec3 in_position;
 
-out vec4 positionLocalSpace;
-out vec4 positionCameraSpace;
+out Data {
+  vec4 positionLocalSpace;
+  vec4 positionCameraSpace;
+} out_data;
 
 uniform mat4 modelViewTransform;
 uniform mat4 projectionTransform;
 
 
 void main() {
-  positionLocalSpace = vec4(vertPosition, 1.0);
-  positionCameraSpace = modelViewTransform * positionLocalSpace;
+  out_data.positionLocalSpace = vec4(in_position, 1.0);
+  out_data.positionCameraSpace = modelViewTransform * out_data.positionLocalSpace;
 
-  vec4 positionClipSpace = projectionTransform * positionCameraSpace;
+  vec4 positionClipSpace = projectionTransform * out_data.positionCameraSpace;
   vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
   gl_Position = positionScreenSpace;
