@@ -74,6 +74,8 @@ namespace {
 #ifdef WIN32
     constexpr int TotalSize =
         sizeof(MemoryManager) +
+        sizeof(TopicManager) +
+        sizeof(OpenSpaceEngine) +
         sizeof(DownloadEventEngine) +
         sizeof(EventEngine) +
         sizeof(ghoul::fontrendering::FontManager) +
@@ -83,7 +85,6 @@ namespace {
         sizeof(LuaConsole) +
         sizeof(MissionManager) +
         sizeof(ModuleEngine) +
-        sizeof(OpenSpaceEngine) +
         sizeof(ParallelPeer) +
         sizeof(RaycasterManager) +
         sizeof(RenderEngine) +
@@ -269,14 +270,6 @@ void create() {
     currentPos += sizeof(TimeManager);
 #else // ^^^ WIN32 / !WIN32 vvv
     timeManager = new TimeManager;
-#endif // WIN32
-
-#ifdef WIN32
-    topicManager = new (currentPos) TopicManager;
-    ghoul_assert(topicManager, "No topicManager");
-    currentPos += sizeof(TopicManager);
-#else // ^^^ WIN32 / !WIN32 vvv
-    topicManager = new TopicManager;
 #endif // WIN32
 
 #ifdef WIN32
@@ -560,13 +553,6 @@ void destroy() {
     versionChecker->~VersionChecker();
 #else // ^^^ WIN32 / !WIN32 vvv
     delete versionChecker;
-#endif // WIN32
-
-    LDEBUGC("Globals", "Destroying 'TopicManager'");
-#ifdef WIN32
-    topicManager->~TopicManager();
-#else // ^^^ WIN32 / !WIN32 vvv
-    delete topicManager;
 #endif // WIN32
 
     LDEBUGC("Globals", "Destroying 'TimeManager'");

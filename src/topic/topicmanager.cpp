@@ -183,13 +183,19 @@ void TopicManager::cleanUpFinishedThreads() {
             }
         }
     }
-    _connections.erase(std::remove_if(
-        _connections.begin(),
-        _connections.end(),
-        [](const ConnectionData& connectionData) {
-            return connectionData.isMarkedForRemoval;
-        }
-    ), _connections.end());
+
+    if (!_connections.empty()) {
+        _connections.erase(
+            std::remove_if(
+                _connections.begin(),
+                _connections.end(),
+                [](const ConnectionData& connectionData) {
+                    return connectionData.isMarkedForRemoval;
+                }
+            ),
+            _connections.end()
+        );
+    }
 }
 
 void TopicManager::disconnectAll() {
