@@ -690,6 +690,10 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
 
             }
 
+            if (parent == dependency) {
+                return ghoul::lua::luaError(L, "Asset required itself");
+            }
+
             if (dependency->isFailed()) {
                 return 0;
             }
