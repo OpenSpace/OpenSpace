@@ -270,11 +270,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->setUniform("gridColor", _color);
 
     // Change GL state:
-#ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
-    glLineWidth(1.f);
-#endif // __APPLE__
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
@@ -285,11 +281,7 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&) {
     glDrawArrays(_mode, 0, static_cast<GLsizei>(_varray.size()));
 
     // Render major grid
-#ifndef __APPLE__
     glLineWidth(_highlightLineWidth);
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
-    glLineWidth(1.f);
-#endif // __APPLE__
     _gridProgram->setUniform("gridColor", _highlightColor);
 
     glBindVertexArray(_highlightVao);

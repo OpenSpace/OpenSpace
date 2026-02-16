@@ -1295,11 +1295,7 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     }
 
     glBindVertexArray(_vao);
-#ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else
-    glLineWidth(1.f);
-#endif
 
     int loadedIndex = _activeIndex;
     if (loadedIndex == -1) {

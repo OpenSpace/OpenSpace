@@ -22,28 +22,6 @@
 # OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
 ##########################################################################################
 
-# System libraries
-if (APPLE)
-  begin_dependency("Core Libraries")
-  add_library(external-system-apple INTERFACE)
-
-  target_include_directories(external-system-apple INTERFACE "/Developer/Headers/FlatCarbon")
-  find_library(COREFOUNDATION_LIBRARY CoreFoundation REQUIRED)
-  find_library(CARBON_LIBRARY Carbon REQUIRED)
-  find_library(COCOA_LIBRARY Cocoa REQUIRED) # This was Carbon before
-  find_library(APP_SERVICES_LIBRARY ApplicationServices REQUIRED)
-  find_library(APPKIT_LIBRARY AppKit REQUIRED)
-  mark_as_advanced(COREFOUNDATION_LIBRARY CARBON_LIBRARY COCOA_LIBRARY
-    APP_SERVICES_LIBRARY APPKIT_LIBRARY
-  )
-  target_link_libraries(external-system-apple INTERFACE # This was PUBLIC before
-    ${CARBON_LIBRARY} ${COREFOUNDATION_LIBRARY}
-    ${COCOA_LIBRARY} ${APP_SERVICES_LIBRARY}
-    ${APPKIT_LIBRARY}
-  )
-  end_dependency()
-endif ()
-
 # Ghoul
 if (NOT OPENSPACE_HAVE_TESTS)
   # Unless overriden, disable ghoul tests if OpenSpace tests are disabled

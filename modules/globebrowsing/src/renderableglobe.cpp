@@ -377,23 +377,23 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
     return *n;
 }
 
-#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
+#if defined(__linux__) && defined(__clang__)
 using ChunkTileVector = std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
-#else
+#else // ^^^^ __linux__ && __clang__ // !(__linux__ && __clang__) vvvv
 using ChunkTileVector =
     std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
-#endif
+#endif // __linux__ && __clang__
 
 ChunkTileVector tilesAndSettingsUnsorted(const LayerGroup& layerGroup,
                                          const TileIndex& tileIndex)
 {
     ZoneScoped;
 
-#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
+#if (defined(__linux__) && defined(__clang__))
     ChunkTileVector tilesAndSettings;
-#else
+#else // ^^^^ __linux__ && __clang__ // !(__linux__ && __clang__) vvvv
     ChunkTileVector tilesAndSettings(&global::memoryManager->TemporaryMemory);
-#endif
+#endif // __linux__ && __clang__
     for (Layer* layer : layerGroup.activeLayers()) {
         if (layer->tileProvider()) {
             tilesAndSettings.emplace_back(

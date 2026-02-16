@@ -304,11 +304,7 @@ void GlobeGeometryFeature::render(const RenderData& renderData, int pass,
 
     const glm::dmat4 projectionTransform = renderData.camera.projectionMatrix();
 
-#ifndef __APPLE__
     glLineWidth(_properties.lineWidth() * extraRenderData.lineWidthScale);
-#else  // ^^^^ __APPLE__ // !__APPLE__ vvvv
-    glLineWidth(1.f);
-#endif // __APPLE__
 
     for (const RenderFeature& r : _renderFeatures) {
         if (r.isExtrusionFeature && !_properties.extrude()) {

@@ -193,18 +193,11 @@ private:
 
     /// Program object used to render the data stored in RenderInformation
     ghoul::opengl::ProgramObject* _programObject = nullptr;
-#ifdef __APPLE__
-    UniformCache(opacity, modelViewTransform, projectionTransform, color, useLineFade,
-        lineLength, lineFadeAmount, vertexSortingMethod, idOffset, nVertices, stride,
-        pointSize, renderPhase, useSplitRenderMode, floatingOffset, numberOfUniqueVertices
-    ) _uniformCache;
-#else
     UniformCache(opacity, modelViewTransform, projectionTransform, color, useLineFade,
         lineLength, lineFadeAmount, vertexSortingMethod, idOffset, nVertices, stride,
         pointSize, renderPhase, viewport, lineWidth, floatingOffset, useSplitRenderMode,
         numberOfUniqueVertices
     ) _uniformCache;
-#endif
 };
 
 } // namespace openspace

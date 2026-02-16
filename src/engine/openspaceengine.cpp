@@ -110,10 +110,6 @@
 #include "Psapi.h"
 #endif // WIN32
 
-#ifdef __APPLE__
-#include <openspace/interaction/touchbar.h>
-#endif // __APPLE__
-
 #include "openspaceengine_lua.inl"
 
 namespace {
@@ -883,10 +879,6 @@ void OpenSpaceEngine::loadAssets() {
     if (_scene && _scene->camera()) {
         global::syncEngine->addSyncables(_scene->camera()->syncables());
     }
-
-#ifdef __APPLE__
-    showTouchbar();
-#endif // APPLE
 
     runGlobalCustomizationScripts();
 

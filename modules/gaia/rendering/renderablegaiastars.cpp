@@ -96,7 +96,7 @@ namespace {
         "filter. If 'Billboard_*' is chosen then the geometry shaders will generate "
         "screen-faced billboards for all stars. For '*_SSBO' the data will be stored in "
         "Shader Storage Buffer Objects while '*_VBO' uses Vertex Buffer Objects for the "
-        "streaming. OBS! SSBO won't work on Apple.",
+        "streaming.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -527,16 +527,6 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
 
     if (p.shaderOption.has_value()) {
         _shaderOption = codegen::map<gaia::ShaderOption>(*p.shaderOption);
-
-#ifdef __APPLE__
-        switch (_shaderOption) {
-            case gaia::ShaderOption::PointSSBO:
-            case gaia::ShaderOption::BillboardSSBO:
-            case gaia::ShaderOption::BillboardSSBONoFBO:
-                LWARNING("Shader option unsupported, changing to Point VBO");
-                _shaderOption = gaia::ShaderOption::PointVBO;
-        }
-#endif // __APPLE__
     }
     _shaderOption.onChange([this]() {
         _buffersAreDirty = true;
@@ -973,7 +963,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         shaderOption == gaia::ShaderOption::PointSSBO ||
         shaderOption == gaia::ShaderOption::BillboardSSBONoFBO)
     {
-#ifndef __APPLE__
         //------------------------ RENDER WITH SSBO ---------------------------
         // Update SSBO Index array with accumulated stars in all chunks.
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboIdx);
@@ -1036,7 +1025,6 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         }
 
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-#endif // !__APPLE__
     }
     else {
         //---------------------- RENDER WITH VBO -----------------------------
@@ -1304,7 +1292,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
     if (_program->isDirty() || _shadersAreDirty) {
         switch (shaderOption) {
             case gaia::ShaderOption::PointSSBO: {
-#ifndef __APPLE__
                 std::unique_ptr<ghoul::opengl::ProgramObject> program =
                     ghoul::opengl::ProgramObject::Build(
                         "GaiaStar",
@@ -1364,7 +1351,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 if (!hasProperty(&_tmPointPixelWeightThreshold)) {
                     addProperty(_tmPointPixelWeightThreshold);
                 }
-    #endif // !__APPLE__
                 break;
             }
             case gaia::ShaderOption::PointVBO: {
@@ -1408,7 +1394,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
             }
             case gaia::ShaderOption::BillboardSSBO:
             case gaia::ShaderOption::BillboardSSBONoFBO: {
-    #ifndef __APPLE__
                 std::unique_ptr<ghoul::opengl::ProgramObject> program;
                 if (shaderOption == gaia::ShaderOption::BillboardSSBO) {
                     program = ghoul::opengl::ProgramObject::Build(
@@ -1489,7 +1474,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 if (hasProperty(&_tmPointPixelWeightThreshold)) {
                     removeProperty(_tmPointPixelWeightThreshold);
                 }
-    #endif // !__APPLE__
                 break;
             }
             case gaia::ShaderOption::BillboardVBO: {
@@ -1659,7 +1643,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
             shaderOption == gaia::ShaderOption::PointSSBO ||
             shaderOption == gaia::ShaderOption::BillboardSSBONoFBO)
         {
-#ifndef __APPLE__
             _useVBO = false;
 
             // Trigger a rebuild of buffer data from octree.
@@ -1732,7 +1715,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 glNamedBufferData(_vboVel, 0, nullptr, GL_STREAM_DRAW);
             }
             glBindBuffer(GL_ARRAY_BUFFER, 0);
-#endif // !__APPLE__
         }
         else { // ------------------ RENDER WITH VBO -----------------------
             _useVBO = true;
@@ -1864,7 +1846,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
             glBindBuffer(GL_ARRAY_BUFFER, 0);
             glBindVertexArray(0);
 
-#ifndef __APPLE__
             // Deallocate SSBO buffers if they existed.
             if (_ssboIdx != 0) {
                 glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboIdx);
@@ -1875,7 +1856,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 glNamedBufferData(_ssboData, 0, nullptr, GL_STREAM_DRAW);
             }
             glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-#endif //!__APPLE__
         }
 
         // Generate VAO and VBO for Quad.
