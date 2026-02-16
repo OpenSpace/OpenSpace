@@ -11,6 +11,7 @@ local kernels = asset.resource({
 
 
 local ID = {
+  Mars = "MARS",
   Deimos = "DEIMOS",
   Phobos = "PHOBOS"
 }
