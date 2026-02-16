@@ -37,7 +37,6 @@
 #include <execution>
 #include <format>
 #include <mutex>
-#include <sstream>
 
 namespace {
     constexpr const char* _loggerCat = "HelioviewerDownloadTask";
@@ -79,10 +78,10 @@ namespace {
 
         // The beginning of the time interval to extract data from. Format:
         // YYYY-MM-DDTHH:MM:SS
-        std::string startTime [[codegen::annotation("A valid date in ISO 8601 format")]];
+        std::string startTime [[codegen::datetime()]];
 
         // The end of the time interval to extract data from. Format YYYY-MM-DDTHH:MM:SS
-        std::string endTime [[codegen::annotation("A valid date in ISO 8601 format")]];
+        std::string endTime [[codegen::datetime()]];
 
         // Desired temporal sampling interval in seconds.
         // The system will attempt to retrieve images spaced at approximately this
@@ -175,9 +174,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
     std::mutex progressMutex;
     const size_t totalFrames = epochAsIsoString.size();
 
-    // TODO (anden88 2026-02-12) can we flush so the output doesn't look lile this:
-    // (D) HelioviewerDow..Task Downloading image data from Helioviewer=======>] 100 %
-    LDEBUG("Downloading image data from Helioviewer               ");
+    LDEBUG("\nDownloading image data from Helioviewer");
     std::for_each(
         std::execution::par,
         epochAsIsoString.begin(),
@@ -193,7 +190,6 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
             // Format file name according to solarbrowsing convention. Since we cannot save
             // files with ':' we have to destruct the ISO string and reconstruct it when
             // loading the image.
-            std::istringstream ss = std::istringstream(std::string(formattedDate));
 
             auto r = scn::scan<int, int, int, int, int, int, int>(
                 std::string(formattedDate),
