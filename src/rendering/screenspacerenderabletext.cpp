@@ -112,7 +112,6 @@ void ScreenSpaceRenderableText::update() {
 }
 
 void ScreenSpaceRenderableText::render(const RenderData& renderData) {
-    const glm::vec2& resolution = global::windowDelegate->currentDrawBufferResolution();
     glm::vec2 size = _texture->dimensions();
 
     std::array<GLint, 4> viewport;

@@ -1306,7 +1306,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     if (settings.depthOfField.enabled) {
         swapTarget();
         glDrawBuffer(dstBuffer);
-        ghoul::GLDebugGroup<1> group("DOF");
+        ghoul::GLDebugGroup<1> groupDof("DOF");
         int prevFbo;
         glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &prevFbo);
 
@@ -1317,7 +1317,7 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
             ghoul::opengl::ProgramObject& program = *glObj.bokehDof.halfRes.program;
             auto& uniforms = glObj.bokehDof.halfRes.uniforms;
 
-            ghoul::GLDebugGroup<1> group("DOF Prepass");
+            ghoul::GLDebugGroup<1> groupPrepass("DOF Prepass");
             int prevViewport[4];
             glGetIntegerv(GL_VIEWPORT, prevViewport);
             glViewport(0, 0, glObj.texWidth / 2, glObj.texHeight / 2);
