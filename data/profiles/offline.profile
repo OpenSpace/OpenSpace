@@ -6,7 +6,6 @@
     "nightsky/nightsky",
     "scene/digitaluniverse/digitaluniverse",
     "scene/milkyway/constellations/constellation_art",
-    "scene/milkyway/constellations/constellation_keybinds",
     "scene/milkyway/milkyway/volume",
     "scene/solarsystem/dwarf_planets/pluto/system",
     "scene/solarsystem/planets/earth/earth",
