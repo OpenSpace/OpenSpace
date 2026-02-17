@@ -1,0 +1,110 @@
+-- Most of the local bookmarks we are loading are relative to the Earth so we should
+-- ensure that it is loaded first
+asset.require("scene/solarsystem/planets/earth/earth")
+
+
+
+local function loadBookmarks(guiPath, bookmarkfile)
+  local bookmarks = {}
+
+  local extract_first_line = false
+  local contents = openspace.readCSVFile(bookmarkfile, extract_first_line)
+
+  for _,v in ipairs(contents) do
+    local group = v[1]
+    local name = v[2]
+    local globe = (v[3] == "" and "Root") or v[3]
+    local lat = v[4]
+    local lon = v[5]
+    local altitude = v[6]
+    local scale = (v[7] == "" and 75000) or v[7]
+    local linewidth = (v[8] == "" and 2.0) or v[8]
+
+    local identifier = openspace.makeIdentifier(guiPath .. "-" .. name)
+
+    local path = "/" .. guiPath
+    if (group ~= "") then
+      path = path .. "/" .. group
+    end
+
+    local translation = {
+      Type = "GlobeTranslation",
+      Globe = globe,
+      Latitude = tonumber(lat),
+      Longitude = tonumber(lon)
+    }
+    if (altitude == nil) then
+      translation.UseHeightMap = true
+    else
+      translation.UseHeightMap = false
+      translation.Altitude = tonumber(altitude)
+    end
+
+    local sgn = {
+      Identifier = identifier,
+      Parent = globe,
+      Transform = {
+        Translation = translation,
+        Scale = {
+          Type = "StaticScale",
+          Scale = tonumber(scale)
+        }
+      },
+      Renderable = {
+        Type = "RenderableSphericalGrid",
+        Enabled = false,
+        Opacity = 0.3,
+        Color = { 0.3, 0.84, 1.0 },
+        LineWidth = tonumber(linewidth)
+      },
+      GUI = {
+        Name = name,
+        Path = path
+      }
+    }
+
+    table.insert(bookmarks, sgn)
+  end
+  return bookmarks
+end
+
+
+local localBookmarks = openspace.absPath("${USER}/bookmarks/globe_bookmarks.csv")
+local bookmarksDirectory = openspace.absPath("${USER}/bookmarks")
+
+if not openspace.directoryExists(bookmarksDirectory) then
+  openspace.createDirectory(bookmarksDirectory)
+end
+
+-- Create bookmarks file if it does not exist
+if not openspace.fileExists(localBookmarks) then
+  openspace.downloadFile(
+    "http://liu-se.cdn.openspaceproject.com/files/misc/globe_bookmarks.csv",
+    localBookmarks,
+    true
+  )
+end
+
+local nodes = loadBookmarks("Local Bookmarks", localBookmarks)
+
+
+asset.onInitialize(function()
+  for _, n in ipairs(nodes) do
+    local success, error = pcall(openspace.addSceneGraphNode, n)
+    if not success then
+      openspace.printError(error)
+    end
+  end
+end)
+
+asset.onDeinitialize(function()
+  for _, n in ipairs(nodes) do
+    if openspace.hasSceneGraphNode(n.Identifier) then
+      openspace.removeSceneGraphNode(n)
+    end
+  end
+end)
+
+for _, n in ipairs(nodes) do
+  asset.export(n)
+end
