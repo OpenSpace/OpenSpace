@@ -182,10 +182,12 @@ Path::Path(Waypoint start, Waypoint end, Type type, std::optional<float> duratio
         const float angle = static_cast<float>(std::acos(glm::dot(a, b)));
 
         // Seconds per pi angles. Per default, it takes 5 seconds to turn 90 degrees
-        float factor = 5.f / glm::half_pi<float>();
-        factor *= global::navigationHandler->pathNavigator().linearRotationSpeedFactor();
+        constexpr float BaseFactor = 5.f / glm::half_pi<float>();
+        float factor =
+            BaseFactor * global::navigationHandler->pathNavigator().linearRotationSpeedFactor();
 
-        const float minTurnDuration = std::max(angle * factor, 1.f); // Always at least 1 second
+        // Always at least 1 second
+        const float minTurnDuration = std::max(angle * factor, 1.f);
         const float turnDuration = std::max(minTurnDuration, estimatedDuration);
 
         _speedFactorFromDuration = estimatedDuration / turnDuration;
@@ -295,7 +297,9 @@ void Path::resetPlaybackVariables() {
     _shouldQuit = false;
 }
 
-CameraPose Path::linearInterpolatedPose(double distance, double displacement, double speedScale) {
+CameraPose Path::linearInterpolatedPose(double distance, double displacement
+                                        double speedScale)
+{
     ghoul_assert(_type == Type::Linear, "Path type must be linear");
     const double relativeDistance = distance / pathLength();
 

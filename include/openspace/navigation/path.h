@@ -116,7 +116,8 @@ public:
      * path. Note that the linear path is a special case, to avoid risks of precision
      * problems for long paths.
      */
-    CameraPose linearInterpolatedPose(double distance, double displacement, double speedScale);
+    CameraPose linearInterpolatedPose(double distance, double displacement,
+        double speedScale);
 
     /**
      * Compute the interpolated camera pose at a certain distance along the path.
