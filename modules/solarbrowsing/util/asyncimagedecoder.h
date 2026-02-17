@@ -97,7 +97,7 @@ private:
     /**
      * Performs the actual decoding for a single request.
      *
-     * Decodes the requested image at the specified downsampling level and nvokes the
+     * Decodes the requested image at the specified downsampling level and invokes the
      * request callback with the resulting image data.
      *
      * \param request The decode request to process
