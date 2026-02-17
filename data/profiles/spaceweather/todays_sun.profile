@@ -39,12 +39,6 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [
-    {
-      "action": "os.solarsystem.ToggleSatelliteTrails",
-      "key": "S"
-    }
-  ],
   "mark_nodes": [
     "Sun",
     "Earth"

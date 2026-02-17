@@ -38,40 +38,6 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [
-    {
-      "action": "os.apollo8.SetupEarthrise",
-      "key": "E"
-    },
-    {
-      "action": "os.apollo8.SetupLaunch",
-      "key": "U"
-    },
-    {
-      "action": "os.apollo.moon.ToggleKaguyaLayer",
-      "key": "K"
-    },
-    {
-      "action": "os.apollo.FocusEarth",
-      "key": "HOME"
-    },
-    {
-      "action": "os.apollo.FocusMoon",
-      "key": "M"
-    },
-    {
-      "action": "os.apollo17.setup.LandingSite",
-      "key": "F7"
-    },
-    {
-      "action": "os.apollo.DisableApolloSites",
-      "key": "F9"
-    },
-    {
-      "action": "os.apollo11.setup.LandingSite",
-      "key": "F11"
-    }
-  ],
   "mark_nodes": [
     "Earth",
     "Moon",
