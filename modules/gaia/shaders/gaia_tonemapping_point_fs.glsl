@@ -29,7 +29,7 @@ in Data {
 } in_data;
 
 uniform sampler2D renderedTexture;
-uniform dmat4 projection;
+uniform mat4 projection;
 uniform vec2 screenSize;
 uniform int filterSize;
 uniform float sigma;
@@ -41,14 +41,15 @@ const float DefaultDepth = 3.08567758e19; // 1000 Pc
 
 Fragment getFragment() {
   // Use frustum params to be able to compensate for a skewed frustum (in a dome)
-  float near = float(projection[3][2] / (projection[2][2] - 1.0));
-  float left = float(near * (projection[2][0] - 1.0) / projection[0][0]);
-  float right = float(near * (projection[2][0] + 1.0) / projection[0][0]);
-  float top = float(near * (projection[2][1] + 1.0) / projection[1][1]);
-  float bottom = float(near * (projection[2][1] - 1.0) / projection[1][1]);
+  dmat4 proj = dmat4(projection);
+  float near = float(proj[3][2] / (proj[2][2] - 1.0));
+  float left = float(near * (proj[2][0] - 1.0) / proj[0][0]);
+  float right = float(near * (proj[2][0] + 1.0) / proj[0][0]);
+  float top = float(near * (proj[2][1] + 1.0) / proj[1][1]);
+  float bottom = float(near * (proj[2][1] - 1.0) / proj[1][1]);
 
-  float xFactor = float(projection[0][0]);
-  float yFactor = float(projection[1][1]);
+  float xFactor = float(proj[0][0]);
+  float yFactor = float(proj[1][1]);
 
   float planeAspect = yFactor / xFactor; // Equals: (right - left) / (top - bottom)
   float screenAspect = screenSize.x / screenSize.y;

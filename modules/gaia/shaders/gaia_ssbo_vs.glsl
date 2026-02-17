@@ -43,7 +43,7 @@ out Data {
 
 uniform dmat4 model;
 uniform dmat4 view;
-uniform dmat4 projection;
+uniform mat4 projection;
 uniform float time;
 uniform int renderOption;
 uniform int maxStarsPerNode;
@@ -180,7 +180,7 @@ void main() {
   // Remove stars without position, happens when VBO chunk is stuffed with zeros
   if (length(position) > Eps) {
     out_data.gPosition = vec4(model * objectPosition);
-    gl_Position = vec4(projection * viewPosition);
+    gl_Position = vec4(dmat4(projection) * viewPosition);
   }
   else {
     out_data.gPosition = vec4(0.0);

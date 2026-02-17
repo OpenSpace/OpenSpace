@@ -39,11 +39,11 @@ namespace {
     constexpr std::string_view _loggerCat = "ReadSpeckTask";
 
     struct [[codegen::Dictionary(ReadSpeckTask)]] Parameters {
-        // The path to the SPECK file that are to be read
-        std::string inFilePath;
+        // The path to the SPECK file that are to be read.
+        std::filesystem::path inFilePath;
 
-        // The path to the file to export raw VBO data to
-        std::string outFilePath;
+        // The path to the file to export raw VBO data to.
+        std::filesystem::path outFilePath;
     };
 #include "readspecktask_codegen.cpp"
 } // namespace
@@ -56,8 +56,8 @@ documentation::Documentation ReadSpeckTask::Documentation() {
 
 ReadSpeckTask::ReadSpeckTask(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    _inFilePath = absPath(p.inFilePath);
-    _outFilePath = absPath(p.outFilePath);
+    _inFilePath = p.inFilePath;
+    _outFilePath = p.outFilePath;
 }
 
 std::string ReadSpeckTask::description() {
@@ -72,18 +72,15 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
 
     int32_t nRenderValues = 0;
 
-    FitsFileReader fileReader(false);
-    std::vector<float> fullData = fileReader.readSpeckFile(
-        _inFilePath,
-        nRenderValues
-    );
+    FitsFileReader fileReader = FitsFileReader(false);
+    std::vector<float> fullData = fileReader.readSpeckFile(_inFilePath, nRenderValues);
 
     onProgress(0.9f);
 
     std::ofstream fileStream(_outFilePath, std::ofstream::binary);
     if (fileStream.good()) {
         int32_t nValues = static_cast<int32_t>(fullData.size());
-        LINFO("nValues: " + std::to_string(nValues));
+        LINFO(std::format("nValues: {}", nValues));
 
         if (nValues == 0) {
             LERROR("Error writing file - No values were read from file");
@@ -91,10 +88,8 @@ void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
         fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
         fileStream.write(reinterpret_cast<const char*>(&nRenderValues), sizeof(int32_t));
 
-        const size_t nBytes = nValues * sizeof(fullData[0]);
+        const size_t nBytes = nValues * sizeof(float);
         fileStream.write(reinterpret_cast<const char*>(fullData.data()), nBytes);
-
-        fileStream.close();
     }
     else {
         LERROR(std::format("Error opening file '{}' as output data file", _outFilePath));
