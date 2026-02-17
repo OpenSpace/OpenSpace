@@ -83,7 +83,7 @@ public:
      *
      * \param request The decode request to enqueue
      */
-    void requestDecode(const DecodeRequest& request);
+    void requestDecode(DecodeRequest request);
     void setVerboseFlag(bool verbose);
 
 private:

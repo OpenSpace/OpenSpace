@@ -239,14 +239,14 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
         _currentActiveInstrument = _activeInstruments.getDescriptionByValue(
             _activeInstruments
         );
-        _currentImage = nullptr;
+        _currentKeyframe = NoActiveKeyframe;
         _predictionIsDirty = true;
     });
     addProperty(_activeInstruments);
 
     _downsamplingLevel = p.downsamplingLevel.value_or(_downsamplingLevel);
     _downsamplingLevel.onChange([this]() {
-        _currentImage = nullptr;
+        _currentKeyframe = NoActiveKeyframe;
         _predictionIsDirty = true;
     });
     addProperty(_downsamplingLevel);
@@ -490,6 +490,7 @@ void RenderableSolarImagery::update(const UpdateData& data) {
     );
 
     requestPredictiveFrames(keyframe, data);
+
     if (_planeShader->isDirty()) {
         _planeShader->rebuildFromFile();
     }
@@ -537,12 +538,12 @@ void RenderableSolarImagery::updateImageryTexture() {
 
     if (!keyframe) {
         // No keyframe avaialble so we clear the texture
-        if (_currentImage != nullptr) {
+        if (_currentKeyframe != NoActiveKeyframe) {
             // No need to re-upload an empty image.
             _isCoronaGraph = false;
             _currentScale = 0;
             _currentCenterPixel = glm::vec2(2.f);
-            _currentImage = nullptr;
+            _currentKeyframe = NoActiveKeyframe;
 
             // Create some dummy data that will be uploaded to GPU avoid UB
             std::vector<unsigned char> buffer;
@@ -561,7 +562,7 @@ void RenderableSolarImagery::updateImageryTexture() {
         return;
     }
 
-    if (_currentImage == &(keyframe->data)) {
+    if (_currentKeyframe == keyframe->id) {
         // This keyframe is already uploaded to the GPU.
         return;
     }
@@ -583,14 +584,14 @@ void RenderableSolarImagery::updateImageryTexture() {
         // Load data from cache
         solarbrowsing::DecodedImageData data = solarbrowsing::loadDecodedDataFromCache(
             cached,
-            &keyframe->data,
+            keyframe->data,
             imageSize
         );
 
-        _isCoronaGraph = data.metadata->isCoronaGraph;
-        _currentScale = data.metadata->scale;
-        _currentCenterPixel = data.metadata->centerPixel;
-        _currentImage = data.metadata;
+        _isCoronaGraph = data.metadata.isCoronaGraph;
+        _currentScale = data.metadata.scale;
+        _currentCenterPixel = data.metadata.centerPixel;
+        _currentKeyframe = keyframe->id;
 
         _imageryTexture->setDimensions(glm::uvec3(data.imageSize, data.imageSize, 1));
         _imageryTexture->setPixelData(
@@ -610,13 +611,12 @@ void RenderableSolarImagery::requestPredictiveFrames(
     }
 
     // Only update prediction if we've moved to a different keyframe
-    if (!_predictionIsDirty && _lastPredictedKeyframe == keyframe)
-    {
+    if (!_predictionIsDirty && _lastPredictedKeyframe == keyframe->id) {
         // We've already predicted this keyframe
         return;
     }
 
-    // Detech playback direction
+    // Detect playback direction
     const double now = data.time.j2000Seconds();
     const double prevTime = data.previousFrameTime.j2000Seconds();
     const double dt = now - prevTime;
@@ -678,10 +678,10 @@ void RenderableSolarImagery::requestPredictiveFrames(
 
         // Request new images to decode
         solarbrowsing::DecodeRequest request(
-            &kf.data,
+            kf.data,
             _downsamplingLevel,
             [this, cacheFile](solarbrowsing::DecodedImageData&& decodedData) {
-                saveDecodedDataToCache(cacheFile, decodedData, _verboseMode);
+                saveDecodedDataToCache(cacheFile, std::move(decodedData), _verboseMode);
             }
         );
         _asyncDecoder->requestDecode(std::move(request));
@@ -702,7 +702,7 @@ void RenderableSolarImagery::requestPredictiveFrames(
         requestFrameIfNeeded(*beforeIt);
     }
 
-    _lastPredictedKeyframe = keyframe;
+    _lastPredictedKeyframe = keyframe->id;
     _predictionIsDirty = false;
 }
 

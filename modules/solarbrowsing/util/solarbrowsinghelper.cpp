@@ -663,13 +663,13 @@ ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir) {
 }
 
 DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
-                                          const ImageMetadata* metadata,
+                                          const ImageMetadata& metadata,
                                           unsigned int imageSize)
 {
     std::ifstream file = std::ifstream(path, std::ifstream::binary);
     if (!file.good()) {
         FileSys.cacheManager()->removeCacheFile(
-            metadata->filePath,
+            metadata.filePath,
             std::format("{}x{}", imageSize, imageSize)
         );
         throw ghoul::RuntimeError(std::format("Error, could not open cache file '{}'",
@@ -688,7 +688,7 @@ DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
     if (!file) {
         file.close();
         FileSys.cacheManager()->removeCacheFile(
-            metadata->filePath,
+            metadata.filePath,
             std::format("{}x{}", imageSize, imageSize)
         );
         throw ghoul::RuntimeError(std::format("Failed to read image data from cache '{}'",

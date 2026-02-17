@@ -48,13 +48,12 @@ namespace solarbrowsing {
     class AsyncImageDecoder;
 } // namespace solarbrowsing
 
-// @TODO (anden88 2026-02-04):
-// Steps for streaming new image data
+// @TODO (anden88 2026-02-04): Steps for streaming new image data from HelioViewer
 // 1. Check if image exists in cache (since this will be at runtime we check the ram
 // _imageMetadataMap)
-// 2. If not -> spawn a thread to download it
+// 2. If not -> spawn a thread to download data from HelioViewer
 // 3. Once downloaded put it through the normal pipeline of storing the file in
-// correct folder.
+// correct folder
 // 4. Add the image data to the cache (file and in memory)
 
 class RenderableSolarImagery : public Renderable {
@@ -107,10 +106,8 @@ private:
 
     // The decoded image texture
     std::unique_ptr<ghoul::opengl::Texture> _imageryTexture;
-    // @TODO (anden88 2026-02-12): This pointer points to the current keyframe metadata in
-    // the timeline given by _imageMetadataMap. We risk dangling pointers if the timeline
-    // reallocates due to additional keyframes.
-    const ImageMetadata* _currentImage = nullptr;
+    const size_t NoActiveKeyframe = std::numeric_limits<size_t>::max();
+    size_t _currentKeyframe = NoActiveKeyframe;
     // Data for the currently shown image
     float _currentScale = 0;
     bool _isCoronaGraph = false;
@@ -123,7 +120,7 @@ private:
 
     // Decoder
     std::unique_ptr<solarbrowsing::AsyncImageDecoder> _asyncDecoder;
-    const Keyframe<ImageMetadata>* _lastPredictedKeyframe = nullptr;
+    size_t _lastPredictedKeyframe = NoActiveKeyframe;
     bool _predictionIsDirty = true;
 
     // Image plane and frustum

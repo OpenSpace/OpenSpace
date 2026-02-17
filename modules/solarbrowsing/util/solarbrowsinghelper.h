@@ -54,7 +54,7 @@ ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir);
 
 
 DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
-    const ImageMetadata* metadata, unsigned int imageSize
+    const ImageMetadata& metadata, unsigned int imageSize
 );
 
 void saveDecodedDataToCache(const std::filesystem::path& path,

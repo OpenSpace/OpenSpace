@@ -48,11 +48,11 @@ AsyncImageDecoder::~AsyncImageDecoder() {
     }
 }
 
-void AsyncImageDecoder::requestDecode(const DecodeRequest& request) {
+void AsyncImageDecoder::requestDecode(DecodeRequest request) {
     {
         std::lock_guard<std::mutex> lock(_queueMutex);
         const std::string key = std::format("{}_ds_{}",
-            request.metadata->filePath, request.downsamplingLevel
+            request.metadata.filePath, request.downsamplingLevel
         );
         if (_activeRequests.contains(key)) {
             // Request is already being processed
@@ -60,7 +60,7 @@ void AsyncImageDecoder::requestDecode(const DecodeRequest& request) {
         }
 
         _activeRequests[key] = true;
-        _requestQueue.push(request);
+        _requestQueue.push(std::move(request));
     }
 
     _queueCV.notify_one();
@@ -100,7 +100,7 @@ void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
     DecodedImageData decodedData;
 
     const unsigned int imageSize = static_cast<unsigned int>(
-        request.metadata->fullResolution /
+        request.metadata.fullResolution /
         std::pow(2, request.downsamplingLevel)
     );
     decodedData.imageSize = imageSize;
@@ -110,7 +110,7 @@ void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
 
     J2kCodec j2c(_verbose);
     j2c.decodeIntoBuffer(
-        request.metadata->filePath.string(),
+        request.metadata.filePath.string(),
         decodedData.buffer.data(),
         request.downsamplingLevel
     );
@@ -122,7 +122,7 @@ void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
     {
         std::lock_guard lock(_queueMutex);
         const std::string key = std::format("{}_ds_{}",
-            request.metadata->filePath, request.downsamplingLevel
+            request.metadata.filePath, request.downsamplingLevel
         );
         _activeRequests.erase(key);
     }

@@ -34,7 +34,7 @@
 //namespace openspace::solarbrowsing {
 namespace openspace {
 
- // Assume everything in arcsec to minimize metadata
+// Assume everything in arcsec to minimize metadata
 struct ImageMetadata {
     std::filesystem::path filePath;
     int fullResolution = 0;
@@ -43,28 +43,28 @@ struct ImageMetadata {
     bool isCoronaGraph = false;
 };
 
+using InstrumentName = std::string;
+using ImageMetadataMap = std::unordered_map<InstrumentName, Timeline<ImageMetadata>>;
+using ImagePrecision = unsigned char;
+
 namespace solarbrowsing {
 
 struct DecodedImageData {
     std::vector<uint8_t> buffer;
-    const ImageMetadata* metadata = nullptr; // non-owning
+    ImageMetadata metadata;
     unsigned int imageSize = 0;
 };
 
 using DecodeCompleteCallback = std::function<void(DecodedImageData&&)>;
+
 struct DecodeRequest {
-    // non-owning
-    const ImageMetadata* metadata = nullptr;
+    ImageMetadata metadata;
     int downsamplingLevel = 0;
     // Synchronous callback assumed, can lead to race conditions if async
     DecodeCompleteCallback callback;
 };
 
 } // namespace openspace::solarbrowsing
-
-using InstrumentName = std::string;
-using ImageMetadataMap = std::unordered_map<InstrumentName, Timeline<ImageMetadata>>;
-using ImagePrecision = unsigned char;
 
 } // namespace openspace
 
