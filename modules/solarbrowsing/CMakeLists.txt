@@ -33,7 +33,6 @@ set(HEADER_FILES
   # Other
   rendering/renderablesolarimagery.h
   rendering/renderablesolarimageryprojection.h
-  rendering/spacecraftcameraplane.h
   tasks/helioviewerdownloadtask.h
   util/asyncimagedecoder.h
   util/j2kcodec.h
@@ -46,7 +45,6 @@ source_group("Header Files" FILES ${HEADER_FILES})
 set(SOURCE_FILES
   rendering/renderablesolarimagery.cpp
   rendering/renderablesolarimageryprojection.cpp
-  rendering/spacecraftcameraplane.cpp
   tasks/helioviewerdownloadtask.cpp
   util/asyncimagedecoder.cpp
   util/j2kcodec.cpp

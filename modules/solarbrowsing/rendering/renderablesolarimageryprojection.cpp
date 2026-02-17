@@ -25,13 +25,13 @@
 #include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
 
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
-#include <modules/solarbrowsing/rendering/spacecraftcameraplane.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
+#include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
@@ -155,9 +155,8 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
         const bool isCoronaGraph = solarImagery->isCoronaGraph();
         const bool solarImageryEnabled = solarImagery->isEnabled();
 
-        const SpacecraftCameraPlane& plane = solarImagery->cameraPlane();
-        const glm::dvec3 planePos = plane.worldPosition();
-        const glm::dmat4 planeRot = glm::inverse(plane.worldRotation());
+        const glm::dvec3 planePos = solarImagery->planeWorldPosition();
+        const glm::dmat4 planeRot = glm::inverse(solarImagery->planeWorldRotation());
         const glm::dvec3 planePosSpacecraft = glm::dvec3(
             planeRot * glm::dvec4(planePos - data.modelTransform.translation, 1.0)
         );

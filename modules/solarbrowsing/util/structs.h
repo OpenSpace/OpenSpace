@@ -47,15 +47,15 @@ namespace solarbrowsing {
 
 struct DecodedImageData {
     std::vector<uint8_t> buffer;
-    const ImageMetadata* metadata; // non-owning
+    const ImageMetadata* metadata = nullptr; // non-owning
     unsigned int imageSize = 0;
 };
 
 using DecodeCompleteCallback = std::function<void(DecodedImageData&&)>;
 struct DecodeRequest {
     // non-owning
-    const ImageMetadata* metadata;
-    int downsamplingLevel;
+    const ImageMetadata* metadata = nullptr;
+    int downsamplingLevel = 0;
     // Synchronous callback assumed, can lead to race conditions if async
     DecodeCompleteCallback callback;
 };

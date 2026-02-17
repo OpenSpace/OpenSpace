@@ -64,7 +64,7 @@ public:
      *
      * \param numThreads The number of background threads used for decoding
      */
-    explicit AsyncImageDecoder(size_t numThreads);
+    explicit AsyncImageDecoder(size_t numThreads, bool verbose = false);
 
     /**
      * Stops all worker threads and waits for them to finish.
@@ -84,6 +84,7 @@ public:
      * \param request The decode request to enqueue
      */
     void requestDecode(const DecodeRequest& request);
+    void setVerboseFlag(bool verbose);
 
 private:
     /**
@@ -104,6 +105,7 @@ private:
      */
     void decodeRequest(const DecodeRequest& request);
 
+    bool _verbose;
     // Thread management
     std::vector<std::thread> _workers;
     std::atomic<bool> _stopRequest = false;

@@ -28,7 +28,9 @@
 
 namespace openspace::solarbrowsing {
 
-AsyncImageDecoder::AsyncImageDecoder(size_t numThreads) {
+AsyncImageDecoder::AsyncImageDecoder(size_t numThreads, bool verbose)
+    : _verbose(verbose)
+{
     _workers.reserve(numThreads);
     for (size_t i = 0; i < numThreads; i++) {
         _workers.emplace_back(&AsyncImageDecoder::workerThread, this);
@@ -106,7 +108,7 @@ void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
     decodedData.buffer.resize(imageSize * imageSize * sizeof(ImagePrecision));
     decodedData.metadata = request.metadata;
 
-    J2kCodec j2c(true);
+    J2kCodec j2c(_verbose);
     j2c.decodeIntoBuffer(
         request.metadata->filePath.string(),
         decodedData.buffer.data(),
@@ -124,6 +126,10 @@ void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
         );
         _activeRequests.erase(key);
     }
+}
+
+void AsyncImageDecoder::setVerboseFlag(bool verbose) {
+    _verbose = verbose;
 }
 
 } // namespace openspace::solarbrowsing
