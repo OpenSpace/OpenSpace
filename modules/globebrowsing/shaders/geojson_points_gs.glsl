@@ -82,7 +82,7 @@ void main() {
   if (length(dpos.xyz) > 0) {
     dvec3 outDirection = normalize(dvec3(dpos));
     double height =
-      useHeightMapData  ?  in_data[0].dynamicHeight + heightOffset  :  heightOffset;
+      useHeightMapData ? in_data[0].dynamicHeight + heightOffset : heightOffset;
     dpos += dvec4(outDirection * height, 0.0);
   }
   // World coordinates

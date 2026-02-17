@@ -1135,7 +1135,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
-    glActiveTexture(GL_TEXTURE0);
 }
 
 void RenderableModel::update(const UpdateData& data) {

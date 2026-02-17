@@ -135,7 +135,7 @@ Fragment getFragment() {
     }
 
     if (pixelIsOutline) {
-      fullColor = useColorMap && useCmapOutline  ?  cmapColor  :  vec4(outlineColor, 1.0);
+      fullColor = useColorMap && useCmapOutline ? cmapColor : vec4(outlineColor, 1.0);
     }
   }
 

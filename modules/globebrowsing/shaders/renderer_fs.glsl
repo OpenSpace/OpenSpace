@@ -186,7 +186,7 @@ float rayPlaneIntersection(vec3 rayOrigin, vec3 rayDirection, vec3 planePoint,
   float t = dot(p0l0, planeNormal) / denom;
 
   // Return negative if intersection is behind ray origin
-  return t >= 0.0  ?  t  :  -1.0;
+  return t >= 0.0 ? t : -1.0;
 }
 
 uniform float opacity;
@@ -250,7 +250,7 @@ Fragment getFragment() {
 
   float untransformedHeight = getUntransformedTileVertexHeight(in_data.texCoords,
     in_data.levelWeights);
-  float contourLine = fract(10.0 * untransformedHeight) > 0.98  ?  1.0  :  0.0;
+  float contourLine = fract(10.0 * untransformedHeight) > 0.98 ? 1.0 : 0.0;
   frag.color.r += untransformedHeight;
   frag.color.b = contourLine;
 #endif // SHOW_HEIGHT_INTENSITIES

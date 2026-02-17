@@ -49,7 +49,7 @@ void main() {
   // Offset model pos based on height info
   if (length(in_position) > 0.0) {
     dvec3 outDirection = normalize(dvec3(in_position));
-    double height = useHeightMapData  ?  in_height + heightOffset  :  heightOffset;
+    double height = useHeightMapData ? in_height + heightOffset : heightOffset;
     modelPos += dvec4(outDirection * height, 0.0);
   }
 

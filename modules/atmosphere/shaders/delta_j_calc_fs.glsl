@@ -117,7 +117,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
   // So, from vec(s) dot vec(v) = cos(ni) = nu we have,
   // s.x*v.x +s.y*v.y + s.z*v.z = nu
   // s.x = (nu - s.z*v.z)/v.x = (nu - mu*muSun)/v.x
-  float sx = (v.x == 0.0)  ?  0.0  :  (nu - muSun * mu) / v.x;
+  float sx = (v.x == 0.0) ? 0.0 : (nu - muSun * mu) / v.x;
   // Also, ||vec(s)|| = 1, so:
   // 1 = sqrt(s.x*s.x + s.y*s.y + s.z*s.z)
   // s.y = sqrt(1 - s.x*s.x - s.z*s.z) = sqrt(1 - s.x*s.x - muSun*muSun)

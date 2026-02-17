@@ -153,7 +153,7 @@ void setEarthProximitySettings() {
       const int Speed = 2;
       int modulusResult = int(Speed * time) % 2;
       if (in_fluxValue > thresholdFlux) {
-        out_data.color.a = modulusResult == 1  ?  0.01  :  1.0;
+        out_data.color.a = modulusResult == 1 ? 0.01 : 1.0;
       }
       else {
         out_data.color.a = 0.0;

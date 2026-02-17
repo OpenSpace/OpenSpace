@@ -149,7 +149,7 @@ vec2 calcShadow(ShadowRenderingStruct shadowInfoArray[NumberOfShadows], dvec3 po
   if (lengthD < rUmbra) {
     // umbra
     if (hardShadows) {
-      return ground  ?  vec2(1.0, 0.2)  :  vec2(1.0, 0.5);
+      return ground ? vec2(1.0, 0.2) : vec2(1.0, 0.5);
     }
     else {
       // butterworth function
@@ -158,7 +158,7 @@ vec2 calcShadow(ShadowRenderingStruct shadowInfoArray[NumberOfShadows], dvec3 po
   }
   else if (lengthD < rPenumbra) {
     // penumbra
-    return hardShadows  ?  vec2(1.0, 0.5)  :  vec2(1.0, lengthD / rPenumbra);
+    return hardShadows ? vec2(1.0, 0.5) : vec2(1.0, lengthD / rPenumbra);
   }
   else {
     return vec2(1.0, 1.0);
@@ -171,7 +171,7 @@ float opticalDepth(float localH, float r, float mu, float d, float rPlanet) {
   vec2 a01 = a * vec2(mu, mu + d / r);
   vec2 a01s = sign(a01);
   vec2 a01sq = a01 * a01;
-  float x = a01s.y > a01s.x  ?  exp(a01sq.x)  :  0.0;
+  float x = a01s.y > a01s.x ? exp(a01sq.x) : 0.0;
   vec2 y = a01s / (2.3193 * abs(a01) + sqrt(1.52 * a01sq + 4.0)) *
     vec2(1.0, exp(-d * invH * (d / (2.0 * r) + mu)));
   return
@@ -434,7 +434,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
   // Finally we add the Lsun (all calculations are done with no Lsun so we can change it
   // on the fly with no precomputations)
   vec3 finalScatteringRadiance = radiance * sunIntensity;
-  return groundHit  ?   finalScatteringRadiance  :  spaceColor + finalScatteringRadiance;
+  return groundHit ?  finalScatteringRadiance : spaceColor + finalScatteringRadiance;
 }
 
 /*

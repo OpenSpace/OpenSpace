@@ -44,11 +44,11 @@ const mat3 XYZ2RGB = mat3(
 // See wiki:
 // https://en.wikipedia.org/wiki/SRGB#The_sRGB_transfer_function_.28.22gamma.22.29
 float gammaF(float u) {
-  return u < 0.0031308  ?  12.92 * u  :  1.055 * pow(u, 1.0 / 2.4) - 0.055;
+  return u < 0.0031308 ? 12.92 * u : 1.055 * pow(u, 1.0 / 2.4) - 0.055;
 }
 
 float invgammaF(float u) {
-  return u < 0.04045  ?  u / 12.92  :  pow((u + 0.055) / 1.055, 2.4);
+  return u < 0.04045 ? u / 12.92 : pow((u + 0.055) / 1.055, 2.4);
 }
 
 vec3 rgbToSRGB(vec3 rgb) {
@@ -114,8 +114,8 @@ vec3 rgb2hcv(vec3 rgb) {
 
   // Based on work by Sam Hocevar and Emil Persson
   vec4 p =
-    (rgb.g < rgb.b)  ?  vec4(rgb.bg, -1.0, 2.0 / 3.0)  :  vec4(rgb.gb, 0.0, -1.0 / 3.0);
-  vec4 q = (rgb.r < p.x)  ?  vec4(p.xyw, rgb.r)  :  vec4(rgb.r, p.yzx);
+    (rgb.g < rgb.b) ? vec4(rgb.bg, -1.0, 2.0 / 3.0) : vec4(rgb.gb, 0.0, -1.0 / 3.0);
+  vec4 q = (rgb.r < p.x) ? vec4(p.xyw, rgb.r) : vec4(rgb.r, p.yzx);
   float c = q.x - min(q.w, q.y);
   float h = abs((q.w - q.y) / (6 * c + HCV_EPSILON) + q.z);
   return vec3(h, c, q.x);
@@ -144,9 +144,9 @@ vec3 exponentialToneMapping(vec3 color, float exposure, float gamma) {
   float invG = 1.0 / gamma;
 
   return vec3(
-    color.r < 1.413  ?  pow(color.r * 0.38317, invG)  :  1.0 - exp2(-exposure * color.r),
-    color.g < 1.413  ?  pow(color.g * 0.38317, invG)  :  1.0 - exp2(-exposure * color.g),
-    color.b < 1.413  ?  pow(color.b * 0.38317, invG)  :  1.0 - exp2(-exposure * color.b)
+    color.r < 1.413 ? pow(color.r * 0.38317, invG) : 1.0 - exp2(-exposure * color.r),
+    color.g < 1.413 ? pow(color.g * 0.38317, invG) : 1.0 - exp2(-exposure * color.g),
+    color.b < 1.413 ? pow(color.b * 0.38317, invG) : 1.0 - exp2(-exposure * color.b)
   );
 }
 

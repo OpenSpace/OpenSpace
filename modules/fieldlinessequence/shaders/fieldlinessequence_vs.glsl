@@ -108,7 +108,7 @@ void main() {
     bool isParticle = usingParticles &&
       isPartOfParticle(time, gl_VertexID, particleSize, particleSpeed, particleSpacing);
 
-    out_data.color = isParticle  ?  flowColor  :  lineColor;
+    out_data.color = isParticle ? flowColor : lineColor;
 
     if (colorMethod == ColorMethodColorByQuantity) {
       vec4 quantityColor = transferFunctionColor();

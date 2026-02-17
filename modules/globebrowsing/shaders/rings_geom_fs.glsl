@@ -77,6 +77,6 @@ Fragment getFragment() {
 
   Fragment frag;
   frag.color = vec4(vec3(in_data.screenSpaceDepth), 1.0);
-  frag.depth = (diffuse < 0.5)  ?  1E30  :  in_data.screenSpaceDepth;
+  frag.depth = (diffuse < 0.5) ? 1E30 : in_data.screenSpaceDepth;
   return frag;
 }

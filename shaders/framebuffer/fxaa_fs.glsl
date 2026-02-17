@@ -112,8 +112,8 @@ void main() {
 
   // Choosing Edge Orientation
   bool isHorizontal = (edgeHorizontal >= edgeVertical);
-  float pixelLum1 = isHorizontal  ?  pixelLumDown  :  pixelLumLeft;
-  float pixelLum2 = isHorizontal  ?  pixelLumUp  :  pixelLumRight;
+  float pixelLum1 = isHorizontal ? pixelLumDown : pixelLumLeft;
+  float pixelLum2 = isHorizontal ? pixelLumUp :  pixelLumRight;
 
   // Gradients
   float gradient1 = pixelLum1 - pixelLumCenter;
@@ -123,7 +123,7 @@ void main() {
   float gradientScaled = 0.25 * max(abs(gradient1), abs(gradient2));
 
   // Step size (one pixel) according to the edge direction.
-  float stepLength = isHorizontal  ?  inverseScreenSize.y  :  inverseScreenSize.x;
+  float stepLength = isHorizontal ? inverseScreenSize.y : inverseScreenSize.x;
 
   float pixelLumLocalAverage = 0.0;
 
@@ -204,8 +204,8 @@ void main() {
   }
 
   // Estimating the offset
-  float distance1 = isHorizontal  ?  (st.x - uv1.x)  :  (st.y - uv1.y);
-  float distance2 = isHorizontal  ?  (uv2.x - st.x)  :  (uv2.y - st.y);
+  float distance1 = isHorizontal ? (st.x - uv1.x) : (st.y - uv1.y);
+  float distance2 = isHorizontal ? (uv2.x - st.x) : (uv2.y - st.y);
 
   bool isDirection1 = distance1 < distance2;
   float distanceFinal = min(distance1, distance2);
@@ -220,10 +220,10 @@ void main() {
   // If the pixelLum at center is smaller than at its neighbour, the delta pixelLum at
   // each end should be positive (same variation).
   bool correctVariation =
-    ((isDirection1  ?  pixelLumEnd1  :  pixelLumEnd2) < 0.0) != isPixelLumCenterSmaller;
+    ((isDirection1 ? pixelLumEnd1 : pixelLumEnd2) < 0.0) != isPixelLumCenterSmaller;
 
   // If the pixelLum variation is incorrect, do not offset.
-  float finalOffset = correctVariation  ?  pixelOffset  :  0.0;
+  float finalOffset = correctVariation ? pixelOffset : 0.0;
 
   // Subpixel antialiasing
   float pixelLumAverage = (1.0 / 12.0) * (2.0 * (pixelLumDownUp + pixelLumLeftRight) +

@@ -49,12 +49,12 @@ void main() {
     );
   }
 
-  out_color.x = isnan(out_color.x)  ?  MaxValueColorBuffer  :  out_color.x;
-  out_color.y = isnan(out_color.y)  ?  MaxValueColorBuffer  :  out_color.y;
-  out_color.z = isnan(out_color.z)  ?  MaxValueColorBuffer  :  out_color.z;
+  out_color.x = isnan(out_color.x) ? MaxValueColorBuffer : out_color.x;
+  out_color.y = isnan(out_color.y) ? MaxValueColorBuffer : out_color.y;
+  out_color.z = isnan(out_color.z) ? MaxValueColorBuffer : out_color.z;
 
   out_gPosition = f.gPosition;
   out_gNormal = f.gNormal;
 
-  gl_FragDepth = f.disableDepthNormalization  ?  f.depth  :  normalizeFloat(f.depth);
+  gl_FragDepth = f.disableDepthNormalization ? f.depth : normalizeFloat(f.depth);
 }

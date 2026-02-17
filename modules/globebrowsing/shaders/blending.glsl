@@ -61,7 +61,7 @@ vec3 rgb2hsl(vec3 c) {
 
   float l = (cMax + cMin) / 2.0;
   float cDelta = cMax - cMin;
-  float s = (l < 0.0)  ?  cDelta / (cMax + cMin)  :  cDelta / (2.0 - (cMax + cMin));
+  float s = (l < 0.0) ? cDelta / (cMax + cMin) : cDelta / (2.0 - (cMax + cMin));
 
   float h = 0.0;
   if (c.r == cMax) {
@@ -84,8 +84,8 @@ vec3 rgb2hsl(vec3 c) {
 
 vec3 rgb2hsv(vec3 c) {
   const vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
-  vec4 p = (c.g < c.b)  ?  vec4(c.bg, K.wz)  :  vec4(c.gb, K.xy);
-  vec4 q = (c.r < p.x)  ?  vec4(p.xyw, c.r)  :  vec4(c.r, p.yzx);
+  vec4 p = (c.g < c.b) ? vec4(c.bg, K.wz) : vec4(c.gb, K.xy);
+  vec4 q = (c.r < p.x) ? vec4(p.xyw, c.r) : vec4(c.r, p.yzx);
 
   float d = q.x - min(q.w, q.y);
   const float E = 1.0e-10;

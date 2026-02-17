@@ -74,7 +74,7 @@ Fragment getFragment() {
   // with a front facing or back facing fragment
   // The plane is oriented on the xz plane
   // WARNING: This might not be the case for Uranus
-  vec3 normal = gl_FrontFacing  ?  vec3(-1.0, 0.0, 0.0)  :  vec3(1.0, 0.0, 0.0);
+  vec3 normal = gl_FrontFacing ? vec3(-1.0, 0.0, 0.0) : vec3(1.0, 0.0, 0.0);
 
   // Reduce the color of the fragment by the user factor
   // if we are facing away from the Sun

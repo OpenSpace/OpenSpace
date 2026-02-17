@@ -41,7 +41,7 @@ void main() {
   vec4 position = vec4(in_position.xyz * pow(10.0, in_position.w), 1.0);
   vec4 positionClipSpace = modelViewProjectionTransform * position;
   vec4 p = z_normalization(positionClipSpace);
-  out_data.color = mod(gl_VertexID, 2) == 0.0  ?  shadowColor  :  vec3(0.0);
+  out_data.color = mod(gl_VertexID, 2) == 0.0 ? shadowColor : vec3(0.0);
   out_data.depth = p.w;
   gl_Position = p;
 }

@@ -66,7 +66,7 @@ float interpolateValue(float v0, float v1, float t) {
     return v1;
   }
   bool isMissing = isnan(v0) || isnan(v1);
-  return isMissing  ?  NaN  :  mix(v0, v1, t);
+  return isMissing ? NaN : mix(v0, v1, t);
 }
 
 vec3 interpolateCatmullRom(float t, vec3 p0, vec3 p1, vec3 p2, vec3 p3) {
@@ -84,7 +84,7 @@ vec3 interpolateCatmullRom(float t, vec3 p0, vec3 p1, vec3 p2, vec3 p3) {
 vec4 quaternionSlerp(vec4 a, vec4 b, float t) {
   // if either input is zero, return the other.
   if (length(a) == 0.0) {
-    return length(b) == 0.0  ?  vec4(0.0, 0.0, 0.0, 1.0)  :  b;
+    return length(b) == 0.0 ? vec4(0.0, 0.0, 0.0, 1.0) : b;
   }
   else if (length(b) == 0.0) {
     return a;
@@ -118,7 +118,7 @@ vec4 quaternionSlerp(vec4 a, vec4 b, float t) {
   }
 
   vec4 result = vec4(blendA * a.xyz + blendB * b.xyz, blendA * a.w + blendB * b.w);
-  return length(result) > 0.0  ?  normalize(result)  :  vec4(0.0, 0.0, 0.0, 1.0);
+  return length(result) > 0.0 ? normalize(result) : vec4(0.0, 0.0, 0.0, 1.0);
 }
 
 

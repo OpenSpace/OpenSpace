@@ -108,7 +108,7 @@ Fragment getFragment() {
 
   // Base color
   vec4 diffuseAlbedo =
-    has_texture_diffuse  ?  texture(texture_diffuse, in_data.texCoords)  :  color_diffuse;
+    has_texture_diffuse ? texture(texture_diffuse, in_data.texCoords) : color_diffuse;
 
   // Multiply with vertex color if specified
   if (use_vertex_colors) {
@@ -125,7 +125,7 @@ Fragment getFragment() {
       specularAlbedo = texture(texture_specular, in_data.texCoords).rgb;
     }
     else {
-      specularAlbedo = has_color_specular  ?  color_specular.rgb  :  diffuseAlbedo.rgb;
+      specularAlbedo = has_color_specular ? color_specular.rgb : diffuseAlbedo.rgb;
     }
 
     // Bump mapping

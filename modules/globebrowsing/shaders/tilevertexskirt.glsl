@@ -39,7 +39,7 @@ bool tileVertexIsSkirtVertex() {
 }
 
 float tileVertexSkirtLength() {
-  return tileVertexIsSkirtVertex()  ?  skirtLength  :  0.0;
+  return tileVertexIsSkirtVertex() ? skirtLength : 0.0;
 }
 
 #endif // _GLOBEBROWSING___TILEVERTEXSKIRT___GLSL_
