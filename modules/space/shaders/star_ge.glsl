@@ -54,7 +54,7 @@ uniform float radiusCent;
 uniform dmat4 cameraViewProjectionMatrix;
 uniform dmat4 modelMatrix;
 
-const double PARSEC = 3.08567756E16;
+const double Parsec = 3.08567756E16;
 
 // FRAGILE
 // All of these values have to be synchronized with the values in the optionproperty
@@ -98,8 +98,8 @@ double scaleForAbsoluteMagnitude(float absMagnitude) {
 double scaleForApparentMagnitude(dvec3 dpos, float absMag) {
   double distanceToStarInMeters = length(dpos - eyePosition);
   double distanceToCenterInMeters = length(eyePosition);
-  float distanceToStarInParsecs = float(distanceToStarInMeters / PARSEC);
-  float appMag = absMag + 5.0 * (log(distanceToStarInParsecs/10.0) / log(2.0));
+  float distanceToStarInParsecs = float(distanceToStarInMeters / Parsec);
+  float appMag = absMag + 5.0 * (log(distanceToStarInParsecs / 10.0) / log(2.0));
   return (-appMag + 50.0) * pow(10.0, magnitudeExponent + 7.5);
 }
 

@@ -83,32 +83,10 @@ void main() {
       if (firstIteration == 1) {
         float phaseRay = rayleighPhaseFunction(nu);
         float phaseMie = miePhaseFunction(nu, mieG);
-        vec3 singleRay = texture4D(
-          deltaSRTexture,
-          r,
-          w.z,
-          muSun,
-          nu,
-          rPlanet,
-          muSamples,
-          rAtmosphere,
-          rSamples,
-          muSSamples,
-          nuSamples
-        ).rgb;
-        vec3 singleMie = texture4D(
-          deltaSMTexture,
-          r,
-          w.z,
-          muSun,
-          nu,
-          rPlanet,
-          muSamples,
-          rAtmosphere,
-          rSamples,
-          muSSamples,
-          nuSamples
-        ).rgb;
+        vec3 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nu, rPlanet, muSamples,
+          rAtmosphere, rSamples, muSSamples, nuSamples).rgb;
+        vec3 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nu, rPlanet, muSamples,
+          rAtmosphere, rSamples, muSSamples, nuSamples).rgb;
         // w.z is the cosine(theta) = mu for vec(w) and also vec(w) dot vec(n(xo))
         irradianceE += (singleRay * phaseRay + singleMie * phaseMie) * w.z * dw;
       }
@@ -117,19 +95,8 @@ void main() {
         // are not in the first iteration, we are getting the updated result of deltaE
         // (not the single irradiance light but the accumulated (higher order) irradiance
         // light. w.z is the cosine(theta) = mu for vec(w) and also vec(w) dot vec(n(xo))
-        irradianceE += texture4D(
-          deltaSRTexture,
-          r,
-          w.z,
-          muSun,
-          nu,
-          rPlanet,
-          muSamples,
-          rAtmosphere,
-          rSamples,
-          muSSamples,
-          nuSamples
-        ).rgb * w.z * dw;
+        irradianceE += texture4D(deltaSRTexture, r, w.z, muSun, nu, rPlanet, muSamples,
+          rAtmosphere, rSamples, muSSamples, nuSamples).rgb * w.z * dw;
       }
     }
   }

@@ -103,7 +103,7 @@ uniform dvec3 sunDirectionObj;
  ***** ALL CALCULATIONS FOR ECLIPSE ARE IN METERS AND IN WORLD SPACE SYSTEM ****
  *******************************************************************************/
 // JCC: Remove and use dictionary to decide the number of shadows
-const uint numberOfShadows = 1;
+const uint NumberOfShadows = 1;
 
 struct ShadowRenderingStruct {
   double xu;
@@ -117,14 +117,14 @@ struct ShadowRenderingStruct {
 
 // Eclipse shadow data
 // JCC: Remove and use dictionary to decide the number of shadows
-uniform ShadowRenderingStruct shadowDataArray[numberOfShadows];
+uniform ShadowRenderingStruct shadowDataArray[NumberOfShadows];
 uniform int shadows;
 uniform bool hardShadows;
 
 
 // Returns whether there is an eclipse in the x component and the strength of the
 // shadowing in the y component
-vec2 calcShadow(ShadowRenderingStruct shadowInfoArray[numberOfShadows], dvec3 position,
+vec2 calcShadow(ShadowRenderingStruct shadowInfoArray[NumberOfShadows], dvec3 position,
                 bool ground)
 {
   if (!shadowInfoArray[0].isShadowing) {
@@ -304,7 +304,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
                        double pixelDepth, vec3 spaceColor, float sunIntensity,
                        out float mu, out vec3 attenuation, out bool groundHit)
 {
-  const float INTERPOLATION_EPS = 0.004; // precision const from Brunetton
+  const float InterpolationEpsilon = 0.004; // precision const from Bruneton
 
   vec3 radiance;
 
@@ -333,7 +333,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
   float muSun0 = dot(fragPosObj, s) * invr0;
   float mu0 = dot(fragPosObj, v) * invr0;
 
-  if ((pixelDepth > INTERPOLATION_EPS) && (pixelDepth < maxLength)) {
+  if ((pixelDepth > InterpolationEpsilon) && (pixelDepth < maxLength)) {
     t = float(pixelDepth);
     groundHit = true;
 
@@ -351,8 +351,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     vec4 inscatterFromSurface = texture4D(inscatterTexture, r0, mu0, muSun0, nu, rPlanet,
       muSamples, rAtmosphere, rSamples, muSSamples, nuSamples);
     inscatterRadiance = max(
-      inscatterRadiance - attenuation.rgbr * inscatterFromSurface,
-      0.0
+      inscatterRadiance - attenuation.rgbr * inscatterFromSurface, 0.0
     );
 
     // We set the irradianceFactor to 1.0 so the reflected irradiance will be considered
@@ -371,14 +370,14 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
 
   // In order to avoid precision problems near horizon, we interpolate between two
   // points: above and below horizon
-  if (abs(mu - muHorizon) < INTERPOLATION_EPS) {
+  if (abs(mu - muHorizon) < InterpolationEpsilon) {
     // We want an interpolation value close to 1/2, so the contribution of each radiance
     // value is almost the same or it has a heavy weight if from above or below horizon
     float interpolationValue =
-      (mu - muHorizon + INTERPOLATION_EPS) / (2.0 * INTERPOLATION_EPS);
+      (mu - muHorizon + InterpolationEpsilon) / (2.0 * InterpolationEpsilon);
 
     // Above Horizon
-    mu = muHorizon - INTERPOLATION_EPS;
+    mu = muHorizon - InterpolationEpsilon;
     // r0 = sqrt(r * r + t * t + 2.0 * r * t * mu);
     // From cosine law where t = distance between x and x0
     // r0^2 = r^2 + t^2 - 2 * r * t * cos(PI-theta)
@@ -401,7 +400,7 @@ vec3 inscatterRadiance(vec3 x, inout float t, inout float irradianceFactor, vec3
     vec4 inScatterAbove = max(inScatterAboveX - attenuation.rgbr * inScatterAboveXs, 0.0);
 
     // Below Horizon
-    mu = muHorizon + INTERPOLATION_EPS;
+    mu = muHorizon + InterpolationEpsilon;
     //r0 = sqrt(r2 + t2 + 2.0 * r * t * mu);
     r0 = sqrt(halfCosineLaw1 + halfCosineLaw2 * mu);
 
@@ -598,15 +597,15 @@ void main() {
   // We see a squared noise on planet's surface when seeing the planet from far away
   // @TODO (abock, 2021-07-01) I don't think this does anything. Remove?
   float dC = float(length(camPosObj));
-  const float x1 = 1e8;
-  if (dC > x1) {
+  const float X1 = 1e8;
+  if (dC > X1) {
     pixelDepth += 1000.0;
-    const float alpha = 1000.0;
-    const float beta = 1000000.0;
-    const float x2 = 1e9;
-    const float varA = (beta - alpha) / (x2 - x1);
-    const float varB = (alpha - varA * x1);
-    pixelDepth += double(varA * dC + varB);
+    const float Alpha = 1000.0;
+    const float Beta = 1000000.0;
+    const float X2 = 1e9;
+    const float VarA = (Beta - Alpha) / (X2 - X1);
+    const float VarB = (Alpha - VarA * X1);
+    pixelDepth += double(VarA * dC + VarB);
   }
 
   // All calculations are done in KM:
@@ -645,38 +644,15 @@ void main() {
   bool groundHit = false;
   vec3 attenuation;
 
-  vec3 inscatterColor = inscatterRadiance(
-    x,
-    tF,
-    irradianceFactor,
-    v,
-    s,
-    r,
-    vec3(positionObjectsCoords),
-    maxLength,
-    pixelDepth,
-    color.rgb,
-    sunIntensityInscatter,
-    mu,
-    attenuation,
-    groundHit
-  );
+  vec3 inscatterColor = inscatterRadiance(x, tF, irradianceFactor, v, s, r,
+    vec3(positionObjectsCoords), maxLength, pixelDepth, color.rgb, sunIntensityInscatter,
+    mu, attenuation, groundHit);
   vec3 atmColor = vec3(0.0);
   if (groundHit) {
     vec2 eclipseShadowPlanet = calcShadow(shadowDataArray, positionWorldCoords.xyz, true);
     float sunIntensityGround = sunRadiance * eclipseShadowPlanet.y;
-    atmColor = groundColor(
-      x,
-      tF,
-      v,
-      s,
-      attenuation,
-      color.rgb,
-      normal.xyz,
-      irradianceFactor,
-      normal.w,
-      sunIntensityGround
-    );
+    atmColor = groundColor(x, tF, v, s, attenuation, color.rgb, normal.xyz,
+      irradianceFactor, normal.w, sunIntensityGround);
   }
   else {
     // In order to get better performance, we are not tracing multiple rays per pixel

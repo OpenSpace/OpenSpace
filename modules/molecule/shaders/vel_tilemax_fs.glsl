@@ -28,14 +28,18 @@
 
 const int TileSize = #{TileSize};
 
-in vec2 texCoords;
-out vec4 fragColor;
+in Data {
+  vec2 texCoords;
+} in_data;
+
+out vec4 out_color;
 
 uniform sampler2D texVel;
 uniform vec2 texVelTexelSize;
 
+
 void main() {
-  vec2 base = texCoords + (0.5 - 0.5 * TileSize) * texVelTexelSize;
+  vec2 base = in_data.texCoords + (0.5 - 0.5 * TileSize) * texVelTexelSize;
 
   vec2 mv = vec2(0.0);
   float mv2 = 0.0;
@@ -51,5 +55,5 @@ void main() {
     }
   }
 
-  fragColor = vec4(min(mv, length(texVelTexelSize) * TileSize), 0.0, 0.0);
+  out_color = vec4(min(mv, length(texVelTexelSize) * TileSize), 0.0, 0.0);
 }

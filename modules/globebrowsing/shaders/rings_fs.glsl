@@ -82,12 +82,8 @@ Fragment getFragment() {
 
   // Check if ray from fragment to sun intersects the ellipsoid (globe)
   // This creates more accurate shadowing for rings
-  bool intersectsGlobe = rayIntersectsEllipsoid(
-    in_data.posObj,
-    sunPositionObj,
-    vec3(0.0),
-    ellipsoidRadii
-  );
+  bool intersectsGlobe = rayIntersectsEllipsoid(in_data.posObj, sunPositionObj, vec3(0.0),
+    ellipsoidRadii);
 
   // shadow == 1.0 means it is not in shadow
   float shadow = intersectsGlobe  ?  0.05  :  1.0;

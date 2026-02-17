@@ -26,8 +26,11 @@
 
 #include "powerscaling/powerscaling_fs.glsl"
 
-in vec2 pos;
-out vec4 fragColor;
+in Data {
+  vec2 position;
+} in_data;
+
+out vec4 out_color;
 
 uniform float strokeWidth;
 uniform float strokeFalloffExp;
@@ -35,20 +38,17 @@ uniform float fragDepth;
 uniform vec4 strokeColor;
 uniform float opacity;
 
-void main() {
-  float len = length(pos) * 2.0;
 
-  if (len > 1) {
+void main() {
+  float len = length(in_data.position) * 2.0;
+
+  if (len > 1.0) {
     discard;
   }
 
-  float falloff = clamp(
-    1.0 - pow(len / (1.0 - strokeWidth), strokeFalloffExp),
-    0.0,
-    1.0
-  );
+  float falloff = clamp(1.0 - pow(len / (1.0 - strokeWidth), strokeFalloffExp), 0.0, 1.0);
 
   gl_FragDepth = normalizeFloat(fragDepth);
-  fragColor = mix(strokeColor, vec4(0.0), falloff);
-  fragColor.a *= opacity;
+  out_color = mix(strokeColor, vec4(0.0), falloff);
+  out_color.a *= opacity;
 }

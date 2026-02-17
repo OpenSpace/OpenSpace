@@ -27,8 +27,11 @@
 const float SpecularExponent = 100.0;
 const vec3 EnvironmentalRadiance = vec3(5.0);
 
-in vec2 texCoords;
-out vec4 fragColor;
+in Data {
+  vec2 texCoords;
+} in_data;
+
+out vec4 out_color;
 
 uniform sampler2D texDepth;
 uniform sampler2D texColor;
@@ -83,16 +86,16 @@ vec3 shade(vec3 color, vec3 V, vec3 N) {
 void main() {
   float depth = texelFetch(texDepth, ivec2(gl_FragCoord.xy), 0).x;
   if (depth == 1.0) {
-    fragColor = vec4(0.0);
+    out_color = vec4(0.0);
     return;
   }
   vec4 c = texelFetch(texColor, ivec2(gl_FragCoord.xy), 0);
   vec3 normal = decodeNormal(texelFetch(texNormal, ivec2(gl_FragCoord.xy), 0).xy);
-  vec4 viewCoord = depthToViewCoord(texCoords, depth);
+  vec4 viewCoord = depthToViewCoord(in_data.texCoords, depth);
 
   vec3 N = normal;
   vec3 V = -normalize(viewCoord.xyz);
   vec3 result = shade(c.rgb, V, N);
 
-  fragColor = vec4(result, c.a);
+  out_color = vec4(result, c.a);
 }

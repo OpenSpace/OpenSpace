@@ -162,14 +162,8 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       // float muGround = (r2 - distToGround*distToGround - rPlanet2)/(2*distToGround*Rg);
       // Access the Transmittance LUT in order to calculate the transmittance from the
       // ground point Rg, thorugh the atmosphere, at a distance: distanceToGround
-      groundTransmittance = transmittance(
-        transmittanceTexture,
-        rPlanet,
-        muGround,
-        distanceToGround,
-        rPlanet,
-        rAtmosphere
-      );
+      groundTransmittance = transmittance(transmittanceTexture, rPlanet, muGround,
+        distanceToGround, rPlanet, rAtmosphere);
     }
 
     for (int iPhi = 0; iPhi < InscatterSphericalIntegralSamples; iPhi++) {
@@ -209,32 +203,10 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
         float phaseMieSW = miePhaseFunction(nuSW, mieG);
         // We can now access the values for the single InScattering in the textures deltaS
         // textures.
-        vec4 singleRay = texture4D(
-          deltaSRTexture,
-          r,
-          w.z,
-          muSun,
-          nuSW,
-          rPlanet,
-          muSamples,
-          rAtmosphere,
-          rSamples,
-          muSSamples,
-          nuSamples
-        );
-        vec4 singleMie = texture4D(
-          deltaSMTexture,
-          r,
-          w.z,
-          muSun,
-          nuSW,
-          rPlanet,
-          muSamples,
-          rAtmosphere,
-          rSamples,
-          muSSamples,
-          nuSamples
-        );
+        vec4 singleRay = texture4D(deltaSRTexture, r, w.z, muSun, nuSW, rPlanet,
+          muSamples, rAtmosphere, rSamples, muSSamples, nuSamples);
+        vec4 singleMie = texture4D(deltaSMTexture, r, w.z, muSun, nuSW, rPlanet,
+          muSamples, rAtmosphere, rSamples, muSSamples, nuSamples);
 
         // Initial InScattering including the phase functions
         radianceJ1 += singleRay.rgb * phaseRaySW + singleMie.rgb * phaseMieSW;
@@ -245,19 +217,8 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
         // (not the single inscattered light but the accumulated (higher order)
         // inscattered light.
         // w.z is the cosine(theta) = mu for vec(w)
-        radianceJ1 += texture4D(
-          deltaSRTexture,
-          r,
-          w.z,
-          muSun,
-          nuSW,
-          rPlanet,
-          muSamples,
-          rAtmosphere,
-          rSamples,
-          muSSamples,
-          nuSamples
-        ).rgb;
+        radianceJ1 += texture4D(deltaSRTexture, r, w.z, muSun, nuSW, rPlanet, muSamples,
+          rAtmosphere, rSamples, muSSamples, nuSamples).rgb;
       }
 
       // Finally, we add the atmospheric scale height (See: Radiation Transfer on the

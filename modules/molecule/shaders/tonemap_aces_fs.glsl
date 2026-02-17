@@ -44,11 +44,12 @@ const mat3 ACESOutputMat = mat3(
 
 const float ExposureBias = 0.5;
 
-out vec4 fragColor;
+out vec4 out_color;
 
 uniform sampler2D tex;
 uniform float exposure = 1.0;
 uniform float gamma = 2.2;
+
 
 vec3 RRTAndODTFit(vec3 v) {
   vec3 a = v * (v + 0.0245786f) - 0.000090537f;
@@ -72,10 +73,11 @@ vec3 ACES(in vec3 c) {
   return clamp((c * (a * c + b)) / (c * (y * c + d) + e), 0.0, 1.0);
 }
 
+
 void main() {
   vec4 frag = texelFetch(tex, ivec2(gl_FragCoord.xy), 0);
   vec3 color = frag.rgb * ExposureBias * exposure;
   color = ACESFitted(color);
   color = pow(color, vec3(1.0 / vec3(gamma)));
-  fragColor = vec4(color, frag.a);
+  out_color = vec4(color, frag.a);
 }

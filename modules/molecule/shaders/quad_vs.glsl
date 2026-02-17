@@ -24,9 +24,12 @@
 
 #version __CONTEXT__
 
-out vec2 texCoords;
+out Data {
+  vec2 texCoords;
+} out_data;
 
 uniform vec2 texCoordsScale = vec2(1.0, 1.0);
+
 
 void main() {
   uint idx = uint(gl_VertexID) % 3U;
@@ -36,5 +39,5 @@ void main() {
     0,
     1.0
   );
-  texCoords = (gl_Position.xy * 0.5 + 0.5) * texCoordsScale;
+  out_data.texCoords = (gl_Position.xy * 0.5 + 0.5) * texCoordsScale;
 }

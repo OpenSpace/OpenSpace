@@ -40,7 +40,7 @@ uniform bool performShading;
 uniform float projectionFading;
 uniform vec3 directionToSunViewSpace;
 
-const vec3 specularAlbedo = vec3(1.0);
+const vec3 SpecularAlbedo = vec3(1.0);
 
 const float AmbientIntensity = 0.15;
 const float DiffuseIntensity = 1.0;
@@ -79,23 +79,23 @@ Fragment getFragment() {
 
   if (performShading) {
     // Could be seperated into ambient, diffuse, and specular and passed in as uniforms
-    const vec3 lightColor = vec3(1.0);
+    const vec3 LightColor = vec3(1.0);
 
     // Ambient light
-    vec3 ambientColor = AmbientIntensity * lightColor * diffuseAlbedo;
+    vec3 ambientColor = AmbientIntensity * LightColor * diffuseAlbedo;
 
     // Diffuse light
     vec3 normal = normalize(in_data.normalViewSpace);
     vec3 lightDirection = directionToSunViewSpace;
     float diffuseFactor = max(dot(normal, lightDirection), 0.0);
-    vec3 diffuseColor = DiffuseIntensity * lightColor * diffuseFactor * diffuseAlbedo;
+    vec3 diffuseColor = DiffuseIntensity * LightColor * diffuseFactor * diffuseAlbedo;
 
     // Specular light
     vec3 viewDirection = normalize(in_data.positionCameraSpace.xyz);
     vec3 reflectDirection = reflect(lightDirection, normal);
     float specularFactor =
       pow(max(dot(viewDirection, reflectDirection), 0.0), SpecularPower);
-    vec3 specularColor = SpecularIntensity * lightColor * specularFactor * specularAlbedo;
+    vec3 specularColor = SpecularIntensity * LightColor * specularFactor * SpecularAlbedo;
 
     // Total light
     frag.color.rgb = ambientColor + diffuseColor + specularColor;

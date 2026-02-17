@@ -126,21 +126,13 @@ void main() {
   float t = interpolationValue;
 
   out_data.colorParameter = interpolateValue(in_colorParameter0, in_colorParameter1, t);
-  out_data.scalingParameter = interpolateValue(
-    in_scalingParameter0,
-    in_scalingParameter1,
-    t
-  );
+  out_data.scalingParameter = interpolateValue(in_scalingParameter0, in_scalingParameter1,
+    t);
 
   vec3 position = mix(in_position0, in_position1, t);
   if (useSpline) {
-    position = interpolateCatmullRom(
-      t,
-      in_positionBefore,
-      in_position0,
-      in_position1,
-      in_positionAfter
-    );
+    position = interpolateCatmullRom(t, in_positionBefore, in_position0, in_position1,
+      in_positionAfter);
   }
 
   out_data.orientation = quaternionSlerp(in_orientation0, in_orientation1, t);

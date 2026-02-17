@@ -24,11 +24,12 @@
 
 #version __CONTEXT__
 
-out vec4 fragColor;
+out vec4 out_color;
 
 uniform vec4 clipInfo;
 uniform sampler2D texDepth;
 uniform bool isPerspective;
+
 
 float reconstructCsz(float d, vec4 clip) {
   if (isPerspective) {
@@ -39,7 +40,8 @@ float reconstructCsz(float d, vec4 clip) {
   }
 }
 
+
 void main() {
   float d = texelFetch(texDepth, ivec2(gl_FragCoord.xy), 0).x;
-  fragColor = vec4(reconstructCsz(d, clipInfo), 0, 0, 0);
+  out_color = vec4(reconstructCsz(d, clipInfo), 0, 0, 0);
 }

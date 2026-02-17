@@ -69,7 +69,7 @@ uniform float maxAngularSize;
 
 uniform vec2 aspectRatioScale;
 
-const vec2 corners[4] = vec2[4](
+const vec2 Corners[4] = vec2[4](
   vec2(0.0, 0.0),
   vec2(1.0, 0.0),
   vec2(1.0, 1.0),
@@ -168,19 +168,19 @@ void main() {
   out_data.screenSpaceDepth = initialPosition.w;
 
   // Build primitive
-  out_data.texCoords = corners[0];
+  out_data.texCoords = Corners[0];
   gl_Position = initialPosition;
   EmitVertex();
 
-  out_data.texCoords = corners[1];
+  out_data.texCoords = Corners[1];
   gl_Position = z_normalization(dposClip + scaledRightClip - scaledUpClip);
   EmitVertex();
 
-  out_data.texCoords = corners[3];
+  out_data.texCoords = Corners[3];
   gl_Position = z_normalization(dposClip + scaledUpClip - scaledRightClip);
   EmitVertex();
 
-  out_data.texCoords = corners[2];
+  out_data.texCoords = Corners[2];
   gl_Position = z_normalization(dposClip + scaledUpClip + scaledRightClip);
   EmitVertex();
 

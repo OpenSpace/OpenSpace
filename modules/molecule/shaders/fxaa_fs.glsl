@@ -30,11 +30,15 @@ const float EdgeThresholdMax = 0.125;
 const int Iterations = 12;
 const float SubpixelQuality = 0.75;
 
-in vec2 texCoords;
-out vec4 fragColor;
+in Data {
+  vec2 texCoords;
+} in_data;
+
+out vec4 out_color;
 
 uniform sampler2D tex;
 uniform vec2 inverseScreenSize;
+
 
 // Relative luminance
 float rgb2luma(vec3 rgb) {
@@ -45,21 +49,30 @@ float quality(float q) {
   return (q < 5 ? 1.0 : (q > 5 ? (q < 10 ? 2.0 : (q < 11 ? 4.0 : 8.0)) : 1.5));
 }
 
+
 /**
  * Performs FXAA post-process anti-aliasing as described in the Nvidia FXAA white paper
  * and the associated shader code.
  */
 void main() {
-  vec4 colorCenter = texture(tex, texCoords);
+  vec4 colorCenter = texture(tex, in_data.texCoords);
 
   // Luma at the current fragment
   float lumaCenter = rgb2luma(colorCenter.rgb);
 
   // Luma at the four direct neighbours of the current fragment
-  float lumaDown = rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2( 0, -1)).rgb);
-  float lumaUp = rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2( 0, 1)).rgb);
-  float lumaLeft = rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2(-1, 0)).rgb);
-  float lumaRight = rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2( 1, 0)).rgb);
+  float lumaDown = rgb2luma(
+    textureLodOffset(tex, in_data.texCoords, 0.0, ivec2( 0, -1)).rgb
+  );
+  float lumaUp = rgb2luma(
+    textureLodOffset(tex, in_data.texCoords, 0.0, ivec2( 0, 1)).rgb
+  );
+  float lumaLeft = rgb2luma(
+    textureLodOffset(tex, in_data.texCoords, 0.0, ivec2(-1, 0)).rgb
+  );
+  float lumaRight = rgb2luma(
+    textureLodOffset(tex, in_data.texCoords, 0.0, ivec2( 1, 0)).rgb
+  );
 
   // Find the maximum and minimum luma around the current fragment.
   float lumaMin = min(lumaCenter, min(min(lumaDown, lumaUp), min(lumaLeft, lumaRight)));
@@ -71,16 +84,22 @@ void main() {
   // If the luma variation is lower that a threshold (or if we are in a really dark area),
   // we are not on an edge, don't perform any AA
   if (lumaRange < max(EdgeThresholdMin, lumaMax * EdgeThresholdMax)) {
-    fragColor = colorCenter;
+    out_color = colorCenter;
     return;
   }
 
   // Query the 4 remaining corners lumas.
-  float lumaDownLeft = rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2(-1, -1)).rgb);
-  float lumaUpRight = rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2( 1, 1)).rgb);
-  float lumaUpLeft = rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2(-1, 1)).rgb);
+  float lumaDownLeft = rgb2luma(
+    textureLodOffset(tex, in_data.texCoords, 0.0, ivec2(-1, -1)).rgb
+  );
+  float lumaUpRight = rgb2luma(
+    textureLodOffset(tex, in_data.texCoords, 0.0, ivec2( 1, 1)).rgb
+  );
+  float lumaUpLeft = rgb2luma(
+    textureLodOffset(tex, in_data.texCoords, 0.0, ivec2(-1, 1)).rgb
+  );
   float lumaDownRight =
-    rgb2luma(textureLodOffset(tex, texCoords, 0.0, ivec2( 1, -1)).rgb);
+    rgb2luma(textureLodOffset(tex, in_data.texCoords, 0.0, ivec2( 1, -1)).rgb);
 
   // Combine the four edges lumas (using intermediary variables for future computations
   // with the same values)
@@ -132,7 +151,7 @@ void main() {
   }
 
   // Shift UV in the correct direction by half a pixel
-  vec2 currentUv = texCoords;
+  vec2 currentUv = in_data.texCoords;
   if (isHorizontal) {
     currentUv.y += stepLength * 0.5;
   }
@@ -207,8 +226,8 @@ void main() {
   }
 
   // Compute the distances to each side edge of the edge (!)
-  float distance1 = isHorizontal ? (texCoords.x - uv1.x) : (texCoords.y - uv1.y);
-  float distance2 = isHorizontal ? (uv2.x - texCoords.x) : (uv2.y - texCoords.y);
+  float distance1 = isHorizontal ? (in_data.texCoords.x - uv1.x) : (in_data.texCoords.y - uv1.y);
+  float distance2 = isHorizontal ? (uv2.x - in_data.texCoords.x) : (uv2.y - in_data.texCoords.y);
 
   // In which direction is the side of the edge closer?
   bool isDirection1 = distance1 < distance2;
@@ -250,7 +269,7 @@ void main() {
   finalOffset = max(finalOffset, subPixelOffsetFinal);
 
   // Compute the final UV coordinates
-  vec2 finalUv = texCoords;
+  vec2 finalUv = in_data.texCoords;
   if (isHorizontal) {
     finalUv.y += finalOffset * stepLength;
   }
@@ -259,5 +278,5 @@ void main() {
   }
 
   // Read the color at the new UV coordinates, and use it
-  fragColor = textureLod(tex, finalUv, 0.0);
+  out_color = textureLod(tex, finalUv, 0.0);
 }

@@ -34,8 +34,11 @@
 #define AO_NUM_SAMPLES 32
 #endif
 
-in vec2 texCoords;
-out vec4 fragColor;
+in Data {
+  vec2 texCoords;
+} in_data;
+
+out vec4 out_color;
 
 struct HBAOData {
   float radiusToScreen;
@@ -149,9 +152,9 @@ float computeAo(vec2 fullResUv, float radiusPixels, vec4 jitter, vec3 viewPositi
   return clamp(1.0 - ao, 0.0, 1.0);
 }
 
-//----------------------------------------------------------------------------------
+
 void main() {
-  vec2 uv = texCoords;
+  vec2 uv = in_data.texCoords;
   vec3 viewPosition = fetchViewPos(uv, 0);
   vec3 viewNormal = fetchViewNormal(uv);
 
@@ -165,5 +168,5 @@ void main() {
   vec4 j = jitter(uv);
   float ao = computeAo(uv, radiusPixels, j, viewPosition, viewNormal);
 
-  fragColor = vec4(vec3(pow(ao, control.powExponent)), 1.0);
+  out_color = vec4(vec3(pow(ao, control.powExponent)), 1.0);
 }

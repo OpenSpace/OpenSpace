@@ -24,22 +24,27 @@
 
 #version __CONTEXT__
 
-in vec2 texCoords;
-out vec4 fragColor;
+in Data {
+  vec2 texCoords;
+} in_data;
+
+out vec4 out_color;
 
 uniform sampler2D texDepth; // Linear depth
 uniform sampler2D texColor;
 uniform float focusPoint;
 uniform float focusScale;
 
+
 float blurSize(float d, float fp, float fs) {
   float coc = clamp((1.0 / fp - 1.0 / d) * fs, -1.0, 1.0);
   return abs(coc);
 }
 
+
 void main() {
-  float depth = textureLod(texDepth, texCoords, 1).r;
-  vec3 color = textureLod(texColor, texCoords, 1).rgb;
+  float depth = textureLod(texDepth, in_data.texCoords, 1).r;
+  vec3 color = textureLod(texColor, in_data.texCoords, 1).rgb;
   float coc = blurSize(depth, focusPoint, focusScale);
-  fragColor = vec4(color, coc);
+  out_color = vec4(color, coc);
 }

@@ -26,7 +26,7 @@
 
 const float ExposureBias = 0.5;
 
-out vec4 fragColor;
+out vec4 out_color;
 
 uniform sampler2D tex;
 uniform float exposure = 1.0;
@@ -34,6 +34,7 @@ uniform float gamma = 2.2;
 
 // Source from here
 // http://filmicworlds.com/blog/filmic-tonemapping-operators/
+
 
 vec3 unchartedTonemap(vec3 x) {
   const float A = 0.15;
@@ -58,5 +59,5 @@ vec3 uncharted(vec3 c) {
 void main() {
   vec4 color = texelFetch(tex, ivec2(gl_FragCoord.xy), 0);
   color.rgb = uncharted(color.rgb);
-  fragColor = color;
+  out_color = color;
 }

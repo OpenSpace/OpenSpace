@@ -28,11 +28,15 @@
 
 const int Extent = 2;
 
-in vec2 texCoords;
-out vec4 fragColor;
+in Data {
+  vec2 texCoords;
+} in_data;
+
+out vec4 out_color;
 
 uniform sampler2D texVel;
 uniform vec2 texVelTexelSize;
+
 
 void main() {
   vec2 mv = vec2(0.0);
@@ -40,7 +44,7 @@ void main() {
 
   for (int i = -Extent; i <= Extent; i++) {
     for (int j = -Extent; j <= Extent; j++) {
-      vec2 v = texture(texVel, texCoords + vec2(i, j) * texVelTexelSize).xy;
+      vec2 v = texture(texVel, in_data.texCoords + vec2(i, j) * texVelTexelSize).xy;
       float v2 = dot(v,v);
       if (v2 > mv2) {
         mv = v;
@@ -49,5 +53,5 @@ void main() {
     }
   }
 
-  fragColor = vec4(mv, 0.0, 0.0);
+  out_color = vec4(mv, 0.0, 0.0);
 }

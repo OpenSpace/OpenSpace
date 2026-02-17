@@ -28,8 +28,11 @@
 
 const float KernelRadius = 3;
 
-in vec2 texCoords;
-out vec4 fragColor;
+in Data {
+  vec2 texCoords;
+} in_data;
+
+out vec4 out_color;
 
 uniform sampler2D texLinearDepth;
 uniform sampler2D texAo;
@@ -51,22 +54,23 @@ float blurFunction(vec2 uv, float r, float centerC, float centerD, inout float w
   return c * w;
 }
 
+
 void main() {
-  float centerC = texture(texAo, texCoords).x;
-  float centerD = texture(texLinearDepth, texCoords).x;
+  float centerC = texture(texAo, in_data.texCoords).x;
+  float centerD = texture(texLinearDepth, in_data.texCoords).x;
 
   float cTotal = centerC;
   float wTotal = 1.0;
 
   for (float r = 1; r <= KernelRadius; r++) {
-    vec2 uv = texCoords + invResDir * r;
+    vec2 uv = in_data.texCoords + invResDir * r;
     cTotal += blurFunction(uv, r, centerC, centerD, wTotal);
   }
 
   for (float r = 1; r <= KernelRadius; r++) {
-    vec2 uv = texCoords - invResDir * r;
+    vec2 uv = in_data.texCoords - invResDir * r;
     cTotal += blurFunction(uv, r, centerC, centerD, wTotal);
   }
 
-  fragColor = vec4(vec3(cTotal / wTotal), 1.0);
+  out_color = vec4(vec3(cTotal / wTotal), 1.0);
 }

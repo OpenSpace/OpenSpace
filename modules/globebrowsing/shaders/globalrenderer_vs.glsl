@@ -124,14 +124,14 @@ void main() {
 
 #if USE_ACCURATE_NORMALS
   // Calculate tangents
-  // tileDelta is a step length (epsilon). Should be small enough for accuracy but not
+  // TileDelta is a step length (epsilon). Should be small enough for accuracy but not
   // Too small for precision. 1 / 512 is good.
-  const float tileDelta = 1.0 / 512.0;
+  const float TileDelta = 1.0 / 512.0;
   PositionNormalPair pair10 = globalInterpolation(
-    vec2(1.0, 0.0) * tileDelta + in_texCoords
+    vec2(1.0, 0.0) * TileDelta + in_texCoords
   );
   PositionNormalPair pair01 = globalInterpolation(
-    vec2(0.0, 1.0) * tileDelta + in_texCoords
+    vec2(0.0, 1.0) * TileDelta + in_texCoords
   );
   vec3 ellipsoidTangentTheta = normalize(pair10.position - pair.position);
   vec3 ellipsoidTangentPhi = normalize(pair01.position - pair.position);

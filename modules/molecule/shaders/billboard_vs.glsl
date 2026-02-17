@@ -29,12 +29,15 @@ vec2 positions[6] = vec2[](
   vec2(0.5, -0.5), vec2(-0.5, -0.5), vec2(-0.5, 0.5)
 );
 
-out vec2 pos;
+out Data {
+  vec2 position;
+} out_data;
 
 uniform mat4 transform;
+
 
 void main() {
   gl_Position = transform * vec4(positions[gl_VertexID], 0.0, 1.0);
   gl_Position.z = -1.0; // always visible
-  pos = positions[gl_VertexID];
+  out_data.position = positions[gl_VertexID];
 }

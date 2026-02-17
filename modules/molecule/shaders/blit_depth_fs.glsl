@@ -24,17 +24,18 @@
 
 #version __CONTEXT__
 
-out vec4 fragColor;
+out vec4 out_color;
 
 uniform sampler2D texColor;
 uniform sampler2D texDepth;
 
+
 void main() {
   float depth = texelFetch(texDepth, ivec2(gl_FragCoord.xy), 0).x;
   if (depth == 1.0) {
-    fragColor = vec4(0.0, 0.0, 0.0, 0.0);
+    out_color = vec4(0.0, 0.0, 0.0, 0.0);
   }
   else {
-    fragColor = texelFetch(texColor, ivec2(gl_FragCoord.xy), 0);
+    out_color = texelFetch(texColor, ivec2(gl_FragCoord.xy), 0);
   }
 }

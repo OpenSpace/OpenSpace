@@ -65,8 +65,8 @@ Fragment getFragment() {
   {
     if (usingGaussianPulse && usingCameraPerspective && in_data.closeToEarth > 0.5) {
       if (length(coord) < 0.3) {
-        const float e = 2.718055;
-        float y = pow(e, -(pow(length(coord), 2.0)) / (2.0 * pow(0.2, 2.0)));
+        const float E = 2.718055;
+        float y = pow(E, -(pow(length(coord), 2.0)) / (2.0 * pow(0.2, 2.0)));
         if (y < 0.05) {
           discard;
         }

@@ -71,13 +71,15 @@ const float FltEps = 0.00000001f;
 #define MINMAX_4TAP_VARYING 0
 #endif
 
-in vec2 texCoords;
+in Data {
+  vec2 texCoords;
+} in_data;
+
 layout(location = 0) out vec4 outBuff;
 layout(location = 1) out vec4 outFrag;
 
 // This is ported straight from the implementation given by playdeadgames (MIT License)
 // https://github.com/playdeadgames/temporal/blob/master/Assets/Shaders/TemporalReprojection.shader
-
 
 uniform sampler2D texMain;
 uniform sampler2D texPrev;
@@ -90,6 +92,7 @@ uniform float time;
 uniform float feedbackMin = 0.88;
 uniform float feedbackMax = 0.97;
 uniform float motionScale = 0.1;
+
 
 // https://software.intel.com/en-us/node/503873
 vec3 rgbToYcocg(vec3 c) {
@@ -213,25 +216,23 @@ vec4 clipAabb(vec3 aabbMin, vec3 aabbMax, vec4 p, vec4 q) {
   vec3 rmax = aabbMax - p.xyz;
   vec3 rmin = aabbMin - p.xyz;
 
-  const float eps = FltEps;
-
-  if (r.x > rmax.x + eps) {
+  if (r.x > rmax.x + FltEps) {
     r *= (rmax.x / r.x);
   }
-  if (r.y > rmax.y + eps) {
+  if (r.y > rmax.y + FltEps) {
     r *= (rmax.y / r.y);
   }
-  if (r.z > rmax.z + eps) {
+  if (r.z > rmax.z + FltEps) {
     r *= (rmax.z / r.z);
   }
 
-  if (r.x < rmin.x - eps) {
+  if (r.x < rmin.x - FltEps) {
     r *= (rmin.x / r.x);
   }
-  if (r.y < rmin.y - eps) {
+  if (r.y < rmin.y - FltEps) {
     r *= (rmin.y / r.y);
   }
-  if (r.z < rmin.z - eps) {
+  if (r.z < rmin.z - FltEps) {
     r *= (rmin.z / r.z);
   }
 
@@ -400,8 +401,8 @@ vec4 temporalReprojection(vec2 ssTxc, vec2 ssVel, float vsDist) {
   const float GatherSubpixelMotion = 0.1666;
 
   vec2 texelVel = ssVel * texelSize.xy;
-  float TexelVelMag = length(texelVel) * vsDist;
-  float kSubpixelMotion = clamp(SubpixelThreshold / (FltEps + TexelVelMag), 0.0, 1.0);
+  float texelVelMag = length(texelVel) * vsDist;
+  float kSubpixelMotion = clamp(SubpixelThreshold / (FltEps + texelVelMag), 0.0, 1.0);
   float kMinMaxSupport = GatherBase + GatherSubpixelMotion * kSubpixelMotion;
 
   vec2 ssOffset01 = kMinMaxSupport * vec2(-texelSize.x, texelSize.y);
@@ -451,11 +452,12 @@ vec4 temporalReprojection(vec2 ssTxc, vec2 ssVel, float vsDist) {
   return mix(texel0, texel1, k_feedback);
 }
 
+
 void main() {
 #if UNJITTER_REPROJECTION
-  vec2 uv = texCoords - jitterUv.xy;
+  vec2 uv = in_data.texCoords - jitterUv.xy;
 #else // UNJITTER_REPROJECTION
-  vec2 uv = texCoords;
+  vec2 uv = in_data.texCoords;
 #endif // UNJITTER_REPROJECTION
 
 #if USE_DILATION

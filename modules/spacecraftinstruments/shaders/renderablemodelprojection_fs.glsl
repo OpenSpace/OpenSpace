@@ -50,10 +50,10 @@ void main() {
   if (needShadowMap) {
     float thisDepth = in_data.ndc.z * 0.5 + 0.5;
     float closestDepth = texture(depthTexture, uv).r;
-    const float epsilon = 0.001;
+    const float Epsilon = 0.001;
 
     if (inRange(uv.x, 0.0, 1.0) && inRange(uv.y, 0.0, 1.0) &&
-        dot(n, boresight) < 0 && thisDepth <= closestDepth + epsilon)
+        dot(n, boresight) < 0 && thisDepth <= closestDepth + Epsilon)
     {
       out_color = texture(projectionTexture, vec2(1.0) - uv);
       out_color.a = 1.0;

@@ -88,8 +88,8 @@ vec3 rgb2hsv(vec3 c) {
   vec4 q = (c.r < p.x)  ?  vec4(p.xyw, c.r)  :  vec4(c.r, p.yzx);
 
   float d = q.x - min(q.w, q.y);
-  const float e = 1.0e-10;
-  return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+  const float E = 1.0e-10;
+  return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + E)), d / (q.x + E), q.x);
 }
 
 vec3 hsv2rgb(vec3 c) {

@@ -107,10 +107,9 @@ void main() {
   );
 
   // Get the height value and apply skirts
-  float height = tileHeightScaled(
-    in_texCoords,
-    out_data.levelWeights
-  ) - tileVertexSkirtLength() * 100.0;
+  float height =
+    tileHeightScaled(in_texCoords, out_data.levelWeights) - tileVertexSkirtLength() *
+    100.0;
 
   // Translate the point along normal
   p += patchNormalCameraSpace * height;

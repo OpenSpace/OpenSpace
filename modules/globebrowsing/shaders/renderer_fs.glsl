@@ -205,9 +205,7 @@ Fragment getFragment() {
   vec3 normal = normalize(in_data.ellipsoidNormalCameraSpace);
 
 #if USE_ACCURATE_NORMALS
-  normal = getTileNormal(
-    in_data.texCoords,
-    in_data.levelWeights,
+  normal = getTileNormal(in_data.texCoords, in_data.levelWeights,
     normalize(in_data.ellipsoidNormalCameraSpace),
     normalize(in_data.ellipsoidTangentThetaCameraSpace),
     normalize(in_data.ellipsoidTangentPhiCameraSpace)
@@ -215,49 +213,27 @@ Fragment getFragment() {
 #endif /// USE_ACCURATE_NORMALS
 
 #if USE_COLORTEXTURE
-  frag.color = calculateColor(
-    frag.color,
-    in_data.texCoords,
-    in_data.levelWeights,
-    ColorLayers
-  );
+  frag.color = calculateColor(frag.color, in_data.texCoords, in_data.levelWeights,
+    ColorLayers);
 #endif // USE_COLORTEXTURE
 
 #if USE_WATERMASK
   float waterReflectance = 0.0;
-  frag.color = calculateWater(
-    frag.color,
-    in_data.texCoords,
-    in_data.levelWeights,
-    WaterMasks,
-    normal,
-    lightDirectionCameraSpace, // Should already be normalized
-    in_data.positionCameraSpace,
-    waterReflectance
-  );
+  frag.color = calculateWater(frag.color, in_data.texCoords, in_data.levelWeights,
+    WaterMasks, normal, lightDirectionCameraSpace, in_data.positionCameraSpace,
+    waterReflectance);
 #endif // USE_WATERMASK
 
 #if USE_NIGHTTEXTURE
-  frag.color = calculateNight(
-    frag.color,
-    in_data.texCoords,
-    in_data.levelWeights,
-    NightLayers,
-    normalize(in_data.ellipsoidNormalCameraSpace),
-    lightDirectionCameraSpace // Should already be normalized
-  );
+  frag.color = calculateNight(frag.color, in_data.texCoords, in_data.levelWeights,
+    NightLayers, normalize(in_data.ellipsoidNormalCameraSpace),
+    lightDirectionCameraSpace);
 #endif // USE_NIGHTTEXTURE
 
 #if PERFORM_SHADING
   vec3 preShadedColor = frag.color.rgb;
-  frag.color = calculateShadedColor(
-    frag.color,
-    normal,
-    lightDirectionCameraSpace,
-    normalize(in_data.positionCameraSpace),
-    orenNayarRoughness,
-    ambientIntensity
-  );
+  frag.color = calculateShadedColor(frag.color, normal, lightDirectionCameraSpace,
+    normalize(in_data.positionCameraSpace), orenNayarRoughness, ambientIntensity);
 #endif // PERFORM_SHADING
 
 #if USE_ECLIPSE_SHADOWS
@@ -265,21 +241,15 @@ Fragment getFragment() {
 #endif // USE_ECLIPSE_SHADOWS
 
 #if USE_OVERLAY
-  frag.color = calculateOverlay(
-    frag.color,
-    in_data.texCoords,
-    in_data.levelWeights,
-    Overlays
-  );
+  frag.color = calculateOverlay(frag.color, in_data.texCoords, in_data.levelWeights,
+    Overlays);
 #endif // USE_OVERLAY
 
 #if SHOW_HEIGHT_INTENSITIES
   frag.color.rgb *= vec3(0.1);
 
-  float untransformedHeight = getUntransformedTileVertexHeight(
-    in_data.texCoords,
-    in_data.levelWeights
-  );
+  float untransformedHeight = getUntransformedTileVertexHeight(in_data.texCoords,
+    in_data.levelWeights);
   float contourLine = fract(10.0 * untransformedHeight) > 0.98  ?  1.0  :  0.0;
   frag.color.r += untransformedHeight;
   frag.color.b = contourLine;
@@ -291,10 +261,9 @@ Fragment getFragment() {
   #if USE_HEIGHTMAP
     frag.color.r = min(frag.color.r, 0.8);
     frag.color.r +=
-      tileResolution(
-        in_data.texCoords,
-        HeightLayers[0].pile.chunkTile0
-      ) > 0.9  ?  1.0  :  0.0;
+      tileResolution(in_data.texCoords, HeightLayers[0].pile.chunkTile0) > 0.9  ?
+      1.0 :
+      0.0;
   #endif // USE_HEIGHTMAP
 #endif // SHOW_HEIGHT_RESOLUTION
 
@@ -366,11 +335,8 @@ Fragment getFragment() {
   }
 
   // Blend the light color passing through the rings with the pre-shaded color
-  frag.color.rgb = mix(
-    preShadedColor * lightColor * ambientIntensity,
-    frag.color.rgb,
-    shadow
-  );
+  frag.color.rgb =
+    mix(preShadedColor * lightColor * ambientIntensity, frag.color.rgb, shadow);
 #endif // (SHADOW_MAPPING_ENABLED && PERFORM_SHADING && USE_RING_SHADOWS)
 
 #if USE_DEPTHMAP_SHADOWS && nDepthMaps > 0

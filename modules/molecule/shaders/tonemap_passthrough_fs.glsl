@@ -24,10 +24,11 @@
 
 #version __CONTEXT__
 
-out vec4 fragColor;
+out vec4 out_color;
 
 uniform sampler2D tex;
 
+
 void main() {
-  fragColor = texelFetch(tex, ivec2(gl_FragCoord.xy), 0);
+  out_color = texelFetch(tex, ivec2(gl_FragCoord.xy), 0);
 }
