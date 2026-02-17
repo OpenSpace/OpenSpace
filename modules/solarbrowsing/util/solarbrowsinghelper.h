@@ -52,6 +52,16 @@ void loadTransferFunctions(const std::filesystem::path& dir,
  */
 ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir);
 
+
+DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
+    const ImageMetadata* metadata, unsigned int imageSize
+);
+
+void saveDecodedDataToCache(const std::filesystem::path& path,
+    const DecodedImageData& data, bool verboseMode
+);
+
+
 } //namespace openspace
 
 } // namespace openspace::solarbrowsing

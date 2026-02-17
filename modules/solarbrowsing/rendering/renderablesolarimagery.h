@@ -79,7 +79,6 @@ public:
     float scale() const;
     bool isCoronaGraph() const;
     glm::vec2 getCenterPixel() const;
-
     const glm::vec3& planeNormal() const;
     const glm::dvec3& planeWorldPosition() const;
     const glm::dmat4& planeWorldRotation() const;
@@ -88,16 +87,6 @@ private:
     void updateImageryTexture();
     void requestPredictiveFrames(const Keyframe<ImageMetadata>* keyframe,
         const UpdateData& data
-    );
-
-    solarbrowsing::DecodedImageData loadDecodedDataFromCache(
-        const std::filesystem::path& path,
-        const ImageMetadata* metadata,
-        unsigned int imageSize
-    );
-
-    void saveDecodedDataToCache(const std::filesystem::path& path,
-        const solarbrowsing::DecodedImageData& data
     );
 
     void createPlaneAndFrustum(double moveDistance);

@@ -29,6 +29,7 @@
 #include <openspace/util/progressbar.h>
 #include <openspace/util/spicemanager.h>
 #include <openspace/util/timemanager.h>
+#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/logging/logmanager.h>
 #include <scn/scan.h>
@@ -659,6 +660,59 @@ ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir) {
     saveMetadataToDisk(rootDir, result);
     LDEBUG(std::format("{} images loaded", static_cast<size_t>(count)));
     return result;
+}
+
+DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
+                                          const ImageMetadata* metadata,
+                                          unsigned int imageSize)
+{
+    std::ifstream file = std::ifstream(path, std::ifstream::binary);
+    if (!file.good()) {
+        FileSys.cacheManager()->removeCacheFile(
+            metadata->filePath,
+            std::format("{}x{}", imageSize, imageSize)
+        );
+        throw ghoul::RuntimeError(std::format("Error, could not open cache file '{}'",
+            path
+        ));
+    }
+
+    size_t nEntries = 0;
+    file.read(reinterpret_cast<char*>(&nEntries), sizeof(nEntries));
+    solarbrowsing::DecodedImageData data;
+    data.imageSize = imageSize;
+    data.metadata = metadata;
+    data.buffer.resize(nEntries);
+    file.read(reinterpret_cast<char*>(data.buffer.data()), nEntries * sizeof(uint8_t));
+
+    if (!file) {
+        file.close();
+        FileSys.cacheManager()->removeCacheFile(
+            metadata->filePath,
+            std::format("{}x{}", imageSize, imageSize)
+        );
+        throw ghoul::RuntimeError(std::format("Failed to read image data from cache '{}'",
+            path
+        ));
+    }
+
+    return data;
+}
+
+void saveDecodedDataToCache(const std::filesystem::path& path,
+                            const DecodedImageData& data, bool verboseMode)
+{
+    if (verboseMode) {
+        LINFO(std::format("Saving cache '{}'", path));
+    }
+    std::ofstream file = std::ofstream(path, std::ofstream::binary);
+    size_t nEntries = data.buffer.size();
+    file.write(reinterpret_cast<const char*>(&nEntries), sizeof(nEntries));
+    file.write(
+        reinterpret_cast<const char*>(data.buffer.data()),
+        nEntries * sizeof(uint8_t)
+    );
+    file.close();
 }
 
 } // namespace openspace::solarbrowsing

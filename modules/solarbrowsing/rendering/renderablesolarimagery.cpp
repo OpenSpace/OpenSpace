@@ -581,7 +581,7 @@ void RenderableSolarImagery::updateImageryTexture() {
     // until it is available. The previous image will be shown until the new one is ready.
     if (std::filesystem::exists(cached)) {
         // Load data from cache
-        solarbrowsing::DecodedImageData data = loadDecodedDataFromCache(
+        solarbrowsing::DecodedImageData data = solarbrowsing::loadDecodedDataFromCache(
             cached,
             &keyframe->data,
             imageSize
@@ -681,7 +681,7 @@ void RenderableSolarImagery::requestPredictiveFrames(
             &kf.data,
             _downsamplingLevel,
             [this, cacheFile](solarbrowsing::DecodedImageData&& decodedData) {
-                saveDecodedDataToCache(cacheFile, decodedData);
+                saveDecodedDataToCache(cacheFile, decodedData, _verboseMode);
             }
         );
         _asyncDecoder->requestDecode(std::move(request));
@@ -704,60 +704,6 @@ void RenderableSolarImagery::requestPredictiveFrames(
 
     _lastPredictedKeyframe = keyframe;
     _predictionIsDirty = false;
-}
-
-solarbrowsing::DecodedImageData RenderableSolarImagery::loadDecodedDataFromCache(
-                                                        const std::filesystem::path& path,
-                                                        const ImageMetadata* metadata,
-                                                        unsigned int imageSize)
-{
-    std::ifstream file = std::ifstream(path, std::ifstream::binary);
-    if (!file.good()) {
-        FileSys.cacheManager()->removeCacheFile(
-            metadata->filePath,
-            std::format("{}x{}", imageSize, imageSize)
-        );
-        throw ghoul::RuntimeError(std::format("Error, could not open cache file '{}'",
-            path
-        ));
-    }
-
-    size_t nEntries = 0;
-    file.read(reinterpret_cast<char*>(&nEntries), sizeof(nEntries));
-    solarbrowsing::DecodedImageData data;
-    data.imageSize = imageSize;
-    data.metadata = metadata;
-    data.buffer.resize(nEntries);
-    file.read(reinterpret_cast<char*>(data.buffer.data()), nEntries * sizeof(uint8_t));
-
-    if (!file) {
-        file.close();
-        FileSys.cacheManager()->removeCacheFile(
-            metadata->filePath,
-            std::format("{}x{}", imageSize, imageSize)
-        );
-        throw ghoul::RuntimeError(std::format("Failed to read image data from cache '{}'",
-            path
-        ));
-    }
-
-    return data;
-}
-
-void RenderableSolarImagery::saveDecodedDataToCache(const std::filesystem::path& path,
-                                              const solarbrowsing::DecodedImageData& data)
-{
-    if (_verboseMode) {
-        LINFO(std::format("Saving cache '{}'", path));
-    }
-    std::ofstream file = std::ofstream(path, std::ofstream::binary);
-    size_t nEntries = data.buffer.size();
-    file.write(reinterpret_cast<const char*>(&nEntries), sizeof(nEntries));
-    file.write(
-        reinterpret_cast<const char*>(data.buffer.data()),
-        nEntries * sizeof(uint8_t)
-    );
-    file.close();
 }
 
 void RenderableSolarImagery::createPlaneAndFrustum(double moveDistance) {
