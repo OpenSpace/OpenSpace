@@ -41,16 +41,67 @@
 
 namespace openspace::solarbrowsing {
 
-// @TODO (anden 2026-02-12) document this class
+/**
+ * An asynchronous image decoding utility that processes image decode requests
+ * on a dedicated pool of worker threads.
+ *
+ * The AsyncImageDecoder manages a set of background threads that process
+ * DecodeRequest objects submitted through requestDecode(). Each request
+ * decodes a specific image at a given downsampling level and delivers the
+ * resulting data through a callback function.
+ *
+ * Each decode operation is uniquely identified by the combination of image file path and
+ * downsampling level. If multiple identical requests are issued while one is already
+ * being processed, only a single decode operation will be performed.
+ *
+ * The decoder owns its worker threads for its entire lifetime and joins them during
+ * destruction.
+ */
 class AsyncImageDecoder {
 public:
+    /**
+     * Creates an asynchronous image decoder with \p numThreads worker threads.
+     *
+     * \param numThreads The number of background threads used for decoding
+     */
     explicit AsyncImageDecoder(size_t numThreads);
+
+    /**
+     * Stops all worker threads and waits for them to finish.
+     *
+     * Pending requests in the queue may not be processed after destruction
+     * begins.
+     */
     ~AsyncImageDecoder();
 
+    /**
+     * Submits a decode request to be processed asynchronously. If an equivalent request
+     * (same image file and downsampling level) is already being processed, the request
+     * is ignored.
+     *
+     * The provided callback will be invoked once decoding has completed.
+     *
+     * \param request The decode request to enqueue
+     */
     void requestDecode(const DecodeRequest& request);
 
 private:
+    /**
+     * Entry point for each worker thread.
+     *
+     * Continuously waits for queued decode requests and processes them until
+     * the decoder is stopped.
+     */
     void workerThread();
+
+    /**
+     * Performs the actual decoding for a single request.
+     *
+     * Decodes the requested image at the specified downsampling level and nvokes the
+     * request callback with the resulting image data.
+     *
+     * \param request The decode request to process
+     */
     void decodeRequest(const DecodeRequest& request);
 
     // Thread management

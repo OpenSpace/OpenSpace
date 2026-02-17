@@ -113,7 +113,7 @@ void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
         request.downsamplingLevel
     );
 
-    // Send data back to main thread
+    // Invoke callback and pass the image data back to caller thread.
     request.callback(std::move(decodedData));
 
     // Once the callback is finished we're done with the request and can remove it.

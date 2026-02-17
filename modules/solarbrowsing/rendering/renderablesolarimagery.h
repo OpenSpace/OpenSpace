@@ -48,6 +48,15 @@ namespace solarbrowsing {
     class AsyncImageDecoder;
 } // namespace solarbrowsing
 
+// @TODO (anden88 2026-02-04):
+// Steps for streaming new image data
+// 1. Check if image exists in cache (since this will be at runtime we check the ram
+// _imageMetadataMap)
+// 2. If not -> spawn a thread to download it
+// 3. Once downloaded put it through the normal pipeline of storing the file in
+// correct folder.
+// 4. Add the image data to the cache (file and in memory)
+
 class RenderableSolarImagery : public Renderable {
 public:
     RenderableSolarImagery(const ghoul::Dictionary& dictionary);
