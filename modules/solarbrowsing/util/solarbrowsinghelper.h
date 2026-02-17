@@ -28,15 +28,29 @@
 #include <modules/solarbrowsing/util/structs.h>
 
 namespace openspace {
-class TransferFunction;
+    class TransferFunction;
 
 namespace solarbrowsing {
 
 void loadTransferFunctions(const std::filesystem::path& dir,
     std::unordered_map<InstrumentName, std::shared_ptr<TransferFunction>>& _tfMap);
 
-void loadImageMetadata(const std::filesystem::path& rootDir,
-    ImageMetadataMap& _imageMetadataMap);
+/**
+ * Loads image metadata from all image sequence directories contained in
+ * \p rootDir.
+ *
+ * Reuse previously generated cache files where possible. Any directory without a valid
+ * cache is processed directly and its metadata is reconstructed from the contained image
+ * files. Newly generated metadata is written back to disk for future runs.
+ *
+ * The resulting metadata is grouped by instrument and inserted into
+ * \p imageMetadataMap.
+ *
+ * \param rootDir The root directory containing image sequence subdirectories
+ *
+ * \return The metadata map that will be populated with all discovered image metadata
+ */
+ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir);
 
 } //namespace openspace
 

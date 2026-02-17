@@ -43,6 +43,15 @@
 namespace {
     constexpr std::string_view _loggerCat = "SolarBrowsingHelper";
     constexpr double SUN_RADIUS = 1391600000.0 * 0.5;
+    using IsValidCacheFile = bool;
+
+    bool isValidJ2000ImageFile(const std::filesystem::path& path) {
+        if (!std::filesystem::is_regular_file(path)) {
+            return false;
+        }
+        const std::string& ext = path.extension().string();
+        return (ext == ".jp2") || (ext == ".j2k");
+    }
 
     // @TODO emiax: If openjpeg ever starts supporting reading XML metadata,
     // this implementation should be improved in order not to search the entire buffer for
@@ -152,7 +161,8 @@ namespace {
         glm::vec2 centerPixel;
         centerPixel.x = std::stof(std::string(centerPixelX.value()));
         centerPixel.y = std::stof(std::string(centerPixelY.value()));
-        const glm::vec2 offset = ((halfRes - centerPixel) / halfRes) * glm::vec2(SUN_RADIUS);
+        const glm::vec2 offset =
+            ((halfRes - centerPixel) / halfRes) * glm::vec2(SUN_RADIUS);
         im.centerPixel = offset;
 
         if (telescop.value() == "SOHO") {
@@ -171,8 +181,14 @@ namespace {
             im.isCoronaGraph = true;
         }
         else if (telescop.value() == "SDO") {
-            std::optional<std::string_view> rsunObs = extractInnerXml(bufferView, "RSUN_OBS");
-            std::optional<std::string_view> cDelt1 = extractInnerXml(bufferView, "CDELT1");
+            std::optional<std::string_view> rsunObs = extractInnerXml(
+                bufferView,
+                "RSUN_OBS"
+            );
+            std::optional<std::string_view> cDelt1 = extractInnerXml(
+                bufferView,
+                "CDELT1"
+            );
 
             if (!rsunObs.has_value()) {
                 LERROR(std::format("Could not find RSUN_OBS tag {}", filePath));
@@ -190,7 +206,10 @@ namespace {
         }
         else { // Telescope is assumed to be STEREO
             std::optional<std::string_view> rsun = extractInnerXml(bufferView, "RSUN");
-            std::optional<std::string_view> cDelt1 = extractInnerXml(bufferView, "CDELT1");
+            std::optional<std::string_view> cDelt1 = extractInnerXml(
+                bufferView,
+                "CDELT1"
+            );
 
             if (!rsun.has_value()) {
                 LERROR(std::format("Could not find RSUN_OBS tag {}", filePath));
@@ -206,7 +225,10 @@ namespace {
             im.scale = (rSunvalue / cDelt1Value) / (im.fullResolution / 2.f);
             im.isCoronaGraph = false;
 
-            std::optional<std::string_view> detector = extractInnerXml(bufferView, "DETECTOR");
+            std::optional<std::string_view> detector = extractInnerXml(
+                bufferView,
+                "DETECTOR"
+            );
 
             if (detector.has_value()) {
                 im.isCoronaGraph =
@@ -244,8 +266,29 @@ namespace {
         return datetime;
     }
 
-    bool loadMetadataFromDisk(const std::filesystem::path& rootDir,
-        openspace::ImageMetadataMap& imageMetadataMap)
+    /**
+     * Loads image metadata from cache files located in the immediate subdirectories of
+     * \p rootDir.
+     *
+     * Any valid cache file found in the directory is parsed and its metadata is inserted
+     * into \p imageMetadataMap. Cache files are validated to ensure that they are
+     * consistent with the current contents of their corresponding image directory. If
+     * validation fails, the directory is marked for reprocessing.
+     *
+     * The returned map indicates, for each discovered subdirectory, whether a
+     * corresponding cache file was considered valid and successfully loaded.
+     *
+     * \param rootDir The root directory containing image sequence subdirectories and
+     *        optional cache files
+     * \param imageMetadataMap The metadata map that will be populated with metadata from
+     *        valid cache files
+     *
+     * \return A map from subdirectory path to a boolean indicating whether the cache for
+     *         that directory was valid
+     */
+    std::unordered_map<std::filesystem::path, IsValidCacheFile> loadMetadataFromDisk(
+                                                     const std::filesystem::path& rootDir,
+                                            openspace::ImageMetadataMap& imageMetadataMap)
     {
         if (!std::filesystem::is_directory(rootDir)) {
             throw ghoul::RuntimeError(std::format(
@@ -253,36 +296,68 @@ namespace {
             ));
         }
 
-        bool metadataLoaded = false;
-
-        std::vector<std::filesystem::path> sequencePaths = ghoul::filesystem::walkDirectory(
-            rootDir,
-            ghoul::filesystem::Recursive::No,
-            ghoul::filesystem::Sorted::No
+        std::vector<std::filesystem::path> subdirectories =
+            ghoul::filesystem::walkDirectory(
+                rootDir,
+                ghoul::filesystem::Recursive::No,
+                ghoul::filesystem::Sorted::No,
+                [](const std::filesystem::path& path) {
+                    return std::filesystem::is_directory(path);
+            }
         );
 
-        size_t readCachedFiles = 0;
-        for (const std::filesystem::path& seqPath : sequencePaths) {
-            const std::string extension = seqPath.extension().string();
-            const std::string base = seqPath.filename().string();
-            const size_t foundCachedImageData = base.find("_cached");
-            if (extension != ".txt" || foundCachedImageData == std::string::npos) {
-                continue;
-            }
+        std::unordered_map<std::filesystem::path, IsValidCacheFile> subDirectoriesMap;
+        for (const std::filesystem::path& path : subdirectories) {
+            // Assume all cache files are invalid from the beginning.
+            subDirectoriesMap[path] = false;
+        }
 
+        std::vector<std::filesystem::path> cacheFiles = ghoul::filesystem::walkDirectory(
+            rootDir,
+            ghoul::filesystem::Recursive::No,
+            ghoul::filesystem::Sorted::No,
+            [](const std::filesystem::path& path) {
+                const std::string extension = path.extension().string();
+                const std::string base = path.filename().string();
+                const size_t pos = base.find("_cached");
+                const bool isCacheFile = extension == ".txt" && pos != std::string::npos;
+                return isCacheFile;
+            }
+        );
+
+        for (const std::filesystem::path& cacheFile : cacheFiles) {
+            const std::string base = cacheFile.filename().string();
             const size_t separator = base.rfind("_");
             const std::string instrument = base.substr(0, separator);
             LDEBUG(std::format("Loading instrument: {}", instrument));
 
-            metadataLoaded = true;
-            std::ifstream myfile(seqPath);
+            std::ifstream myfile(cacheFile);
             if (!myfile.is_open()) {
-                LERROR(std::format("Failed to open metadata file '{}'", seqPath));
-                return false;
+                LERROR(std::format("Failed to open metadata file '{}'", cacheFile));
+                //subDirectoriesMap[subDirectory] = false; -- Implicit
+                continue;
             }
 
             int numStates;
             myfile >> numStates;
+
+            std::string subDir;
+            myfile >> subDir;
+            std::filesystem::path subDirectory = rootDir / subDir;
+
+            // Early check if the number of files in the subdirectoy match what was stored
+            // in cache, however, this does not guarantee that the files are the same.
+            const bool cacheHasCorrectNFiles = ghoul::filesystem::walkDirectory(
+                subDirectory,
+                ghoul::filesystem::Recursive::No,
+                ghoul::filesystem::Sorted::No,
+                isValidJ2000ImageFile
+            ).size() == numStates;
+
+            if (!cacheHasCorrectNFiles) {
+                subDirectoriesMap[subDirectory] = false;
+                continue;
+            }
 
             for (int i = 0; i < numStates; i++) {
                 openspace::ImageMetadata im;
@@ -293,9 +368,10 @@ namespace {
 
                 if (date.empty()) {
                     LERROR(std::format(
-                        "Failed to read metadata state: date, file: '{}'", seqPath
+                        "Failed to read metadata state: date, file: '{}'", cacheFile
                     ));
-                    return false;
+                    subDirectoriesMap[subDirectory] = false;
+                    break;
                 }
 
                 double timeObserved =
@@ -306,29 +382,39 @@ namespace {
 
                 if (myfile.bad()) {
                     LERROR(std::format(
-                        "Failed to read metadata state: relPath, file: '{}'", seqPath
+                        "Failed to read metadata state: relPath, file: '{}'", cacheFile
                     ));
-                    return false;
+                    subDirectoriesMap[subDirectory] = false;
+                    break;
                 }
 
                 im.filePath = rootDir / relPath;
+
+                // Check that the filePath still exists
+                if (!std::filesystem::is_regular_file(im.filePath)) {
+                    subDirectoriesMap[subDirectory] = false;
+                    break;
+                }
 
                 myfile >> im.fullResolution;
 
                 if (myfile.bad()) {
                     LERROR(std::format(
-                        "Failed to read metadata state: fullResolution, file: '{}'", seqPath
+                        "Failed to read metadata state: fullResolution, file: '{}'",
+                        cacheFile
                     ));
-                    return false;
+                    subDirectoriesMap[subDirectory] = false;
+                    break;
                 }
 
                 myfile >> im.scale;
 
                 if (myfile.bad()) {
                     LERROR(std::format(
-                        "Failed to read metadata state: scale, file: '{}'", seqPath
+                        "Failed to read metadata state: scale, file: '{}'", cacheFile
                     ));
-                    return false;
+                    subDirectoriesMap[subDirectory] = false;
+                    break;
                 }
 
                 float x, y;
@@ -338,22 +424,22 @@ namespace {
 
                 if (myfile.bad()) {
                     LERROR(std::format(
-                        "Failed to read metadata state : isCoronaGraph, file : '{}'", seqPath
+                        "Failed to read metadata state : isCoronaGraph, file : '{}'",
+                        cacheFile
                     ));
-                    return false;
+                    subDirectoriesMap[subDirectory] = false;
+                    break;
                 }
 
                 imageMetadataMap[instrument].addKeyframe(timeObserved, std::move(im));
             }
             myfile.close();
-            readCachedFiles++;
+            // All files in cache exists and there were no additional files in the
+            // subdirectory, cache is assumed to be up-to-date.
+            subDirectoriesMap[subDirectory] = true;
         }
 
-        // Currently assumes each cache file is correct @TODO (anden88 2026-02-13) make sure
-        // it actually is. This catches any new folder added - However, it does not catch if
-        // one removes a folder and add a new one.
-        bool readAllCacheFiles = sequencePaths.size() == readCachedFiles * 2;
-        return readAllCacheFiles;
+        return subDirectoriesMap;
     }
 
     void saveMetadataToDisk(const std::filesystem::path& rootPath,
@@ -371,16 +457,25 @@ namespace {
 
             ofs << sequence.nKeyframes() << '\n';
 
-            for (const openspace::Keyframe<openspace::ImageMetadata>& metadata : sequence.keyframes()) {
-                const std::string date = openspace::SpiceManager::ref().dateFromEphemerisTime(
-                    metadata.timestamp
-                );
+            bool isFirstWrite = true;
 
+            using Metadata = openspace::Keyframe<openspace::ImageMetadata>;
+            for (const Metadata& metadata : sequence.keyframes()) {
+                const std::string date =
+                    openspace::SpiceManager::ref().dateFromEphemerisTime(
+                        metadata.timestamp
+                );
                 const openspace::ImageMetadata& im = metadata.data;
                 const std::filesystem::path relativePath = std::filesystem::relative(
                     im.filePath,
                     rootPath
                 );
+
+                if (isFirstWrite) {
+                    std::filesystem::path relativeDirectory = relativePath.parent_path();
+                    ofs << relativeDirectory.generic_string() << '\n';
+                    isFirstWrite = false;
+                }
 
                 ofs << std::format("{}\n{}\n{}\n{}\n{}\n{}\n{}\n",
                     date,
@@ -421,9 +516,7 @@ void loadTransferFunctions(const std::filesystem::path& dir,
     }
 }
 
-void loadImageMetadata(const std::filesystem::path& rootDir,
-                       ImageMetadataMap& imageMetadataMap)
-{
+ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir) {
     if (!std::filesystem::is_directory(rootDir)) {
         throw ghoul::RuntimeError(std::format(
             "Could not load directory '{}'", rootDir
@@ -432,51 +525,54 @@ void loadImageMetadata(const std::filesystem::path& rootDir,
 
     LDEBUG("Begin loading spacecraft imagery metadata");
     ImageMetadataMap result;
-    // Pre-processed data
-    if (loadMetadataFromDisk(rootDir, result)) {
-        imageMetadataMap.insert(result.begin(), result.end());
-        return;
-    }
 
-    LDEBUG("Loading sequence directory");
-    std::vector<std::filesystem::path> sequencePaths = ghoul::filesystem::walkDirectory(
-        rootDir,
-        ghoul::filesystem::Recursive::Yes,
-        ghoul::filesystem::Sorted::Yes
+    // Load pre-processed data from any cache file that might exist.
+    std::unordered_map<std::filesystem::path, IsValidCacheFile> cacheFilesValidityMap =
+        loadMetadataFromDisk(rootDir, result);
+
+    // There might be cache files that are outdated due to new images or if a new
+    // directory of images have been added. Remove the cache files that were validated.
+    std::erase_if(cacheFilesValidityMap,
+        [](const std::pair<std::filesystem::path, bool>& entry) {
+            return entry.second;
+        }
     );
 
-    LDEBUG("Filtering data values");
+    if (cacheFilesValidityMap.empty()) {
+        // All cache files are ok, no more files to load.
+        return result;
+    }
+
+    std::vector<std::filesystem::path> sequencePaths;
+
+    // Get all files that were not correctly processed from cache file.
+    for (const auto& [directory, isValidCacheFile] : cacheFilesValidityMap) {
+        LDEBUG(std::format("Loading sequence directory '{}'", directory));
+        std::vector<std::filesystem::path> files = ghoul::filesystem::walkDirectory(
+            directory,
+            ghoul::filesystem::Recursive::No,
+            ghoul::filesystem::Sorted::Yes
+        );
+
+        sequencePaths.reserve(sequencePaths.size() + files.size());
+        for (std::filesystem::path& file : files) {
+            sequencePaths.push_back(std::move(file));
+        }
+    }
+
     sequencePaths.erase(
         std::remove_if(
             sequencePaths.begin(),
             sequencePaths.end(),
             [](const std::filesystem::path& path) {
-        const std::string& ext = path.extension().string();
-        return (ext != ".jp2") && (ext != ".j2k");
-    }
+                const std::string& ext = path.extension().string();
+                return (ext != ".jp2") && (ext != ".j2k");
+            }
         ),
         sequencePaths.end()
     );
 
-    // @TODO (anden88 2026-02-04):
-    // Steps to validate cache:
-    // 1. Check that all files in the cache still exists
-    // 2. Remove any entry from cache that doesn't have a valid path
-    // 3. Read new files:
-    // 3.5 Filter away any file already in the cache
-    // 4. Add new files to cache
-
-
-    // @TODO (anden88 2026-02-04):
-    // Steps for streaming new image data
-    // 1. Check if image exists in cache
-    // 2. If not -> spawn a thread to download it
-    // 3. once downloaded put it through the normal pipeline of storing the file in
-    // correct folder.
-    // 4. Add the image data to the cache (file and in memory)
-
-
-    LDEBUG("Reading metadata");
+    LDEBUG("Processing metadata");
     std::atomic<size_t> count = 0;
     std::mutex spiceAndPushMutex;
     std::mutex onProgressMutex;
@@ -487,20 +583,25 @@ void loadImageMetadata(const std::filesystem::path& rootDir,
         progressBar.print(static_cast<int>(progress * 100.f));
     };
 
-    auto exec = [&](const std::filesystem::path& seqPath) {
+    auto processImageMetadata = [&](const std::filesystem::path& seqPath) {
         // An example image has the following naming scheme:
         // 2024_05_08__00_58_23_814__SDO_AIA-211.jp2
         std::string fileName = seqPath.stem().string();
+
+        // Satellite
         size_t posSatelliteInfoStart = fileName.rfind("__") + 2;
-        std::string satelliteInfo = fileName.substr(posSatelliteInfoStart); // e.g., SDO_AIA-211
+        // e.g., SDO_AIA-211
+        std::string satelliteInfo = fileName.substr(posSatelliteInfoStart);
 
         // Name
         size_t posSatelliteNameEnd = satelliteInfo.find_first_of("_");
-        //std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd); // e.g., SDO
+        // e.g., SDO
+        //std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd);
 
         // Instrument
         size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
-        std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart); // e.g., AIA-211
+        // e.g., AIA-211
+        std::string instrumentName = satelliteInfo.substr(posInstrumentNameStart);
 
         auto r = scn::scan<int, int, int, int, int, int, int>(
             fileName,
@@ -539,7 +640,7 @@ void loadImageMetadata(const std::filesystem::path& rootDir,
         }
 
         size_t done = ++count;
-        {
+        if (done % 20 == 0) { // Reduce spam on the callback.
             std::lock_guard lock(onProgressMutex);
             onProgress(done / static_cast<float>(totalImages));
         }
@@ -549,16 +650,15 @@ void loadImageMetadata(const std::filesystem::path& rootDir,
         std::execution::par,
         sequencePaths.begin(),
         sequencePaths.end(),
-        exec
+        processImageMetadata
     );
 
     progressBar.finish();
     LDEBUG("Finish loading imagery metadata");
     LDEBUG("Saving imagery metadata");
     saveMetadataToDisk(rootDir, result);
-    imageMetadataMap.insert(result.begin(), result.end());
     LDEBUG(std::format("{} images loaded", static_cast<size_t>(count)));
-    LDEBUG(std::format("{} values in metamap", imageMetadataMap.size()));
+    return result;
 }
 
 } // namespace openspace::solarbrowsing

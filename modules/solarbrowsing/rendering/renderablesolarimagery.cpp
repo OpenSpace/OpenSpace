@@ -202,14 +202,8 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 
     addProperty(Fadeable::_opacity);
 
-    //SolarBrowsingModule* solarbrowsingModule =
-    //    global::moduleEngine->module<SolarBrowsingModule>();
-
-    //SpacecraftImageryManager& spacecraftImageryManager =
-    //    solarbrowsingModule->spacecraftImageryManager();
-
     solarbrowsing::loadTransferFunctions(p.transferfunctionDir, _tfMap);
-    solarbrowsing::loadImageMetadata(p.imageDirectory, _imageMetadataMap);
+    _imageMetadataMap = solarbrowsing::loadImageMetadata(p.imageDirectory);
 
     _enableBorder = p.enableBorder.value_or(_enableBorder);
     addProperty(_enableBorder);
