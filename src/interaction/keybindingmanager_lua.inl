@@ -37,14 +37,28 @@ namespace {
  * Binds a key to Lua command to both execute locally and broadcast to all clients if this
  * node is hosting a parallel connection.
  */
-[[codegen::luawrap]] void bindKey(std::string key, std::string action) {
+[[codegen::luawrap]] void bindKey(std::string key,
+                                  std::variant<std::string, ghoul::Dictionary> action)
+{
     using namespace openspace;
 
-    if (action.empty()) {
+    std::string identifier;
+    if (std::holds_alternative<ghoul::Dictionary>(action)) {
+        const ghoul::Dictionary& d = std::get<ghoul::Dictionary>(action);
+        if (!d.hasValue<std::string>("Identifier")) {
+            throw ghoul::lua::LuaError("Provided action table must have an Identifer");
+        }
+        identifier = d.value<std::string>("Identifier");
+    }
+    else {
+        identifier = std::get<std::string>(action);
+    }
+
+    if (identifier.empty()) {
         throw ghoul::lua::LuaError("Action must not be empty");
     }
-    if (!global::actionManager->hasAction(action)) {
-        throw ghoul::lua::LuaError(std::format("Action '{}' does not exist", action));
+    if (!global::actionManager->hasAction(identifier)) {
+        throw ghoul::lua::LuaError(std::format("Action '{}' does not exist", identifier));
     }
 
     openspace::KeyWithModifier iKey = openspace::stringToKey(key);
@@ -52,7 +66,7 @@ namespace {
         throw ghoul::lua::LuaError(std::format("Could not find key '{}'", key));
     }
 
-    global::keybindingManager->bindKey(iKey.key, iKey.modifier, std::move(action));
+    global::keybindingManager->bindKey(iKey.key, iKey.modifier, std::move(identifier));
 }
 
 /**
