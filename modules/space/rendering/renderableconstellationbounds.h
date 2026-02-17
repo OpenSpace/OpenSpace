@@ -108,7 +108,7 @@ private:
 
     GLuint _vao = 0;
     GLuint _vbo = 0;
-    UniformCache(campos, objpos, camrot, scaling, ViewProjection, ModelTransform, color,
+    UniformCache(campos, objpos, camrot, scaling, viewProjection, modelTransform, color,
         opacity) _uniformCache;
 };
 

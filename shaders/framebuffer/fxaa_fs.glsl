@@ -32,8 +32,8 @@ layout (location = 0) out vec4 out_color;
 
 uniform vec2 inverseScreenSize;
 uniform sampler2D renderedTexture;
-uniform vec4 Viewport;
-uniform vec2 Resolution;
+uniform vec4 viewport;
+uniform vec2 resolution;
 
 const float EdgeThresholdMin = 0.0312;
 const float EdgeThresholdMax = 0.125;
@@ -52,7 +52,7 @@ float luminance(vec3 rgb) {
 
 
 void main() {
-  // Modify the texCoords based on the Viewport and Resolution. This modification is
+  // Modify the texCoords based on the viewport and resolution. This modification is
   // necessary in case of side-by-side stereo as we only want to access the part of the
   // feeding texture that we are currently responsible for.  Otherwise we would map the
   // entire feeding texture into our half of the result texture, leading to a doubling of
@@ -60,8 +60,8 @@ void main() {
   // side_by_side stereo mode enabled, disable FXAA, and remove this modification.
   // The same calculation is done in the HDR resolving shader
   vec2 st = in_data.texCoords;
-  st.x = st.x / (Resolution.x / Viewport[2]) + (Viewport[0] / Resolution.x);
-  st.y = st.y / (Resolution.y / Viewport[3]) + (Viewport[1] / Resolution.y);
+  st.x = st.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
+  st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
 
   vec4 colorCenter = texture(renderedTexture, st);
 

@@ -34,8 +34,8 @@ out Data {
   vec2 texCoords;
 } out_data;
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+uniform mat4 viewProjection;
+uniform mat4 modelTransform;
 
 
 void main() {
@@ -44,8 +44,8 @@ void main() {
 
   // this is wrong for the normal. The normal transform is the transposed inverse of the
   // model transform
-  // vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+  // vs_normal = normalize(modelTransform * vec4(in_normal,0));
 
   gl_Position =
-    z_normalization(ViewProjection * pscTransform(in_position, ModelTransform));
+    z_normalization(viewProjection * pscTransform(in_position, modelTransform));
 }

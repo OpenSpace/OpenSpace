@@ -29,12 +29,12 @@
 layout(location = 0) out vec4 out_rayleigh;
 layout(location = 1) out vec4 out_mie;
 
-uniform float Rg;
-uniform float Rt;
-uniform float HR;
+uniform float rPlanet;
+uniform float rAtmosphere;
+uniform float rayleighHeightScale;
 uniform vec3 betaRayleigh;
-uniform float HO;
-uniform float HM;
+uniform float ozoneHeightScale;
+uniform float mieHeightScale;
 uniform vec3 betaMieScattering;
 uniform bool ozoneLayerEnabled;
 uniform int muSamples;
@@ -61,7 +61,7 @@ void integrand(float r, float mu, float muSun, float nu, float y, out vec3 S_R,
   S_M = vec3(0.0);
 
   // cosine law
-  float ri = max(sqrt(r * r + y * y + 2.0 * r * mu * y), Rg);
+  float ri = max(sqrt(r * r + y * y + 2.0 * r * mu * y), rPlanet);
 
   // Considering the Sun as a parallel light source, thew vector s_i = s.
   // So muSun_i = (vec(y_i) dot vec(s))/r_i = ((vec(x) + vec(yi-x)) dot vec(s))/r_i
@@ -70,20 +70,23 @@ void integrand(float r, float mu, float muSun, float nu, float y, out vec3 S_R,
 
   // If the muSun_i is smaller than the angle to horizon (no sun radiance hitting the
   // point y), we return S_R = S_M = 0.0.
-  if (muSun_i >= -sqrt(1.0 - Rg * Rg / (ri * ri))) {
+  if (muSun_i >= -sqrt(1.0 - rPlanet * rPlanet / (ri * ri))) {
     // It's the transmittance from the point y (ri) to the top of atmosphere in direction
     // of the sun (muSun_i) and the transmittance from the observer at x (r) to y (ri).
     vec3 transmittanceY =
-      transmittance(transmittanceTexture, r, mu, y, Rg, Rt) *
-      transmittance(transmittanceTexture, ri, muSun_i, Rg, Rt);
+      transmittance(transmittanceTexture, r, mu, y, rPlanet, rAtmosphere) *
+      transmittance(transmittanceTexture, ri, muSun_i, rPlanet, rAtmosphere);
     // exp(-h/H)*T(x,v)
     if (ozoneLayerEnabled) {
-      S_R = (exp(-(ri - Rg) / HO) + exp(-(ri - Rg) / HR)) * transmittanceY;
-      S_M = exp(-(ri - Rg) / HM) * transmittanceY;
+      S_R =
+        (exp(-(ri - rPlanet) / ozoneHeightScale) +
+         exp(-(ri - rPlanet) / rayleighHeightScale)) *
+        transmittanceY;
+      S_M = exp(-(ri - rPlanet) / mieHeightScale) * transmittanceY;
     }
     else {
-      S_R = exp(-(ri - Rg) / HR) * transmittanceY;
-      S_M = exp(-(ri - Rg) / HM) * transmittanceY;
+      S_R = exp(-(ri - rPlanet) / rayleighHeightScale) * transmittanceY;
+      S_M = exp(-(ri - rPlanet) / mieHeightScale) * transmittanceY;
     }
     // The L0 (sun radiance) is added in real-time.
   }
@@ -98,7 +101,7 @@ void inscatter(float r, float mu, float muSun, float nu, out vec3 S_R, out vec3 
   S_R = vec3(0.0);
   S_M = vec3(0.0);
 
-  float rayDist = rayDistance(r, mu, Rt, Rg);
+  float rayDist = rayDistance(r, mu, rAtmosphere, rPlanet);
   float dy = rayDist / float(InscatterIntegralScamples);
   vec3 S_Ri;
   vec3 S_Mi;
@@ -124,7 +127,8 @@ void main() {
   float mu;
   float muSun;
   float nu;
-  unmappingMuMuSunNu(r, dhdH, muSamples, Rg, Rt, muSSamples, nuSamples, mu, muSun, nu);
+  unmappingMuMuSunNu(r, dhdH, muSamples, rPlanet, rAtmosphere, muSSamples, nuSamples, mu,
+    muSun, nu);
 
   // Here we calculate the single inScattered light. Because this is a single
   // inscattering, the light that arrives at a point y in the path from the eye to the

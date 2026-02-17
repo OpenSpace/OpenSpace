@@ -236,10 +236,10 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
     const glm::dmat4 modelTransform = calcModelTransform(data);
 
     _program->setUniform(
-        _uniformCache.ViewProjection,
+        _uniformCache.viewProjection,
         data.camera.viewProjectionMatrix()
     );
-    _program->setUniform(_uniformCache.ModelTransform, glm::mat4(modelTransform));
+    _program->setUniform(_uniformCache.modelTransform, glm::mat4(modelTransform));
     _program->setUniform(_uniformCache.color, _color);
     _program->setUniform(_uniformCache.opacity, opacity());
 

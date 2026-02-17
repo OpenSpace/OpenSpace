@@ -77,9 +77,8 @@ uniform float distanceScaleFactor;
 uniform int chunkLevel;
 
 #if nDepthMaps > 0
-  uniform dmat4 inv_vp;
-  uniform dmat4 light_vps[nDepthMaps];
-  uniform sampler2D light_depth_maps[nDepthMaps];
+  uniform dmat4 inverseView;
+  uniform dmat4 lightView[nDepthMaps];
 #endif // nDepthMaps > 0
 
 
@@ -166,7 +165,7 @@ void main() {
 #if nDepthMaps > 0
   for (int idx = 0; idx < nDepthMaps; idx++) {
     out_data.positions_lightspace[idx] =
-      vec4(light_vps[idx] * (inv_vp * dvec4(out_data.positionCameraSpace, 1.0)));
+      vec4(lightView[idx] * (inverseView * dvec4(out_data.positionCameraSpace, 1.0)));
   }
 #endif // nDepthMaps > 0
 }

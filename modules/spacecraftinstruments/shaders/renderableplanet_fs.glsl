@@ -38,7 +38,7 @@ uniform float ambientBrightness;
 uniform float projectionFading;
 uniform bool hasBaseMap;
 uniform vec4 objpos;
-uniform vec3 sun_pos;
+uniform vec3 sunPos;
 
 
 Fragment getFragment() {
@@ -48,7 +48,7 @@ Fragment getFragment() {
   }
 
   vec3 n = normalize(in_data.normal);
-  vec3 l_dir = normalize(sun_pos - objpos.xyz);
+  vec3 l_dir = normalize(sunPos - objpos.xyz);
   float intensity = min(max(5.0 * dot(n, l_dir), ambientBrightness), 1.0);
 
   vec4 textureColor = vec4(0.2, 0.2, 0.2, 1.0);

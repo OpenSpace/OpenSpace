@@ -204,8 +204,8 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
         calcAllTransforms(data);
 
-    _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform("MVPTransform", modelViewProjectionTransform);
+    _gridProgram->setUniform("modelView", modelViewTransform);
+    _gridProgram->setUniform("modelViewProjection", modelViewProjectionTransform);
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 

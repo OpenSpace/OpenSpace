@@ -356,11 +356,11 @@ void RenderableModelProjection::imageProjectGPU(
         _projectionComponent.depthMapRenderBegin();
         _depthFboProgramObject->activate();
         _depthFboProgramObject->setUniform(
-            _depthFboUniformCache.ProjectorMatrix,
+            _depthFboUniformCache.projectorMatrix,
             projectorMatrix
         );
         _depthFboProgramObject->setUniform(
-            _depthFboUniformCache.ModelTransform,
+            _depthFboUniformCache.modelTransform,
             _transform
         );
 
@@ -388,8 +388,8 @@ void RenderableModelProjection::imageProjectGPU(
         _fboProgramObject->setUniform(_fboUniformCache.depthTexture, unitDepthFbo);
     }
 
-    _fboProgramObject->setUniform(_fboUniformCache.ProjectorMatrix, projectorMatrix);
-    _fboProgramObject->setUniform(_fboUniformCache.ModelTransform, _transform);
+    _fboProgramObject->setUniform(_fboUniformCache.projectorMatrix, projectorMatrix);
+    _fboProgramObject->setUniform(_fboUniformCache.modelTransform, _transform);
     _fboProgramObject->setUniform(_fboUniformCache.boresight, _boresight);
 
     _geometry->render(*_fboProgramObject, false, true);

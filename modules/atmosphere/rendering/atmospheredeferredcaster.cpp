@@ -337,17 +337,17 @@ void AtmosphereDeferredcaster::preRaycast(const RenderData& data, const Deferred
     {
         program.setUniform(_uniformCache.cullAtmosphere, 0);
         program.setUniform(_uniformCache.opacity, _opacity);
-        program.setUniform(_uniformCache.Rg, _atmospherePlanetRadius);
-        program.setUniform(_uniformCache.Rt, _atmosphereRadius);
+        program.setUniform(_uniformCache.rPlanet, _atmospherePlanetRadius);
+        program.setUniform(_uniformCache.rAtmosphere, _atmosphereRadius);
         program.setUniform(_uniformCache.groundRadianceEmission, _groundRadianceEmission);
-        program.setUniform(_uniformCache.HR, _rayleighHeightScale);
+        program.setUniform(_uniformCache.rayleighHeightScale, _rayleighHeightScale);
         program.setUniform(_uniformCache.betaRayleigh, _rayleighScatteringCoeff);
-        program.setUniform(_uniformCache.HM, _mieHeightScale);
+        program.setUniform(_uniformCache.mieHeightScale, _mieHeightScale);
         program.setUniform(_uniformCache.betaMieExtinction, _mieExtinctionCoeff);
         program.setUniform(_uniformCache.mieG, _miePhaseConstant);
         program.setUniform(_uniformCache.sunRadiance, _sunRadianceIntensity);
         program.setUniform(_uniformCache.ozoneLayerEnabled, _ozoneEnabled);
-        program.setUniform(_uniformCache.HO, _ozoneHeightScale);
+        program.setUniform(_uniformCache.ozoneHeightScale, _ozoneHeightScale);
         program.setUniform(_uniformCache.betaOzoneExtinction, _ozoneExtinctionCoeff);
         program.setUniform(_uniformCache.rSamples, _rSamples);
         program.setUniform(_uniformCache.muSamples, _muSamples);
@@ -615,15 +615,15 @@ void AtmosphereDeferredcaster::calculateTransmittance() {
         absPath("${MODULE_ATMOSPHERE}/shaders/transmittance_calc_fs.glsl")
     );
     program->activate();
-    program->setUniform("Rg", _atmospherePlanetRadius);
-    program->setUniform("Rt", _atmosphereRadius);
-    program->setUniform("HR", _rayleighHeightScale);
+    program->setUniform("rPlanet", _atmospherePlanetRadius);
+    program->setUniform("rAtmosphere", _atmosphereRadius);
+    program->setUniform("rayleighHeightScale", _rayleighHeightScale);
     program->setUniform("betaRayleigh", _rayleighScatteringCoeff);
-    program->setUniform("HM", _mieHeightScale);
+    program->setUniform("mieHeightScale", _mieHeightScale);
     program->setUniform("betaMieExtinction", _mieExtinctionCoeff);
-    program->setUniform("TRANSMITTANCE", _transmittanceTableSize);
+    program->setUniform("transmittanceTableSize", _transmittanceTableSize);
     program->setUniform("ozoneLayerEnabled", _ozoneEnabled);
-    program->setUniform("HO", _ozoneHeightScale);
+    program->setUniform("ozoneHeightScale", _ozoneHeightScale);
     program->setUniform("betaOzoneExtinction", _ozoneExtinctionCoeff);
 
     constexpr glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
@@ -660,9 +660,9 @@ GLuint AtmosphereDeferredcaster::calculateDeltaE() {
     ghoul::opengl::TextureUnit unit;
     unit.bind(_transmittanceTableTexture);
     program->setUniform("transmittanceTexture", unit);
-    program->setUniform("Rg", _atmospherePlanetRadius);
-    program->setUniform("Rt", _atmosphereRadius);
-    program->setUniform("OTHER_TEXTURES", _deltaETableSize);
+    program->setUniform("rPlanet", _atmospherePlanetRadius);
+    program->setUniform("rAtmosphere", _atmosphereRadius);
+    program->setUniform("deltaESize", _deltaETableSize);
     glClear(GL_COLOR_BUFFER_BIT);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -702,17 +702,17 @@ std::pair<GLuint, GLuint> AtmosphereDeferredcaster::calculateDeltaS() {
     ghoul::opengl::TextureUnit unit;
     unit.bind(_transmittanceTableTexture);
     program->setUniform("transmittanceTexture", unit);
-    program->setUniform("Rg", _atmospherePlanetRadius);
-    program->setUniform("Rt", _atmosphereRadius);
-    program->setUniform("HR", _rayleighHeightScale);
+    program->setUniform("rPlanet", _atmospherePlanetRadius);
+    program->setUniform("rAtmosphere", _atmosphereRadius);
+    program->setUniform("rayleighHeightScale", _rayleighHeightScale);
     program->setUniform("betaRayleigh", _rayleighScatteringCoeff);
-    program->setUniform("HM", _mieHeightScale);
+    program->setUniform("mieHeightScale", _mieHeightScale);
     program->setUniform("betaMieScattering", _mieScatteringCoeff);
     program->setUniform("muSSamples", _muSSamples);
     program->setUniform("nuSamples", _nuSamples);
     program->setUniform("muSamples", _muSamples);
     program->setUniform("ozoneLayerEnabled", _ozoneEnabled);
-    program->setUniform("HO", _ozoneHeightScale);
+    program->setUniform("ozoneHeightScale", _ozoneHeightScale);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -844,12 +844,12 @@ void AtmosphereDeferredcaster::calculateDeltaJ(int scatteringOrder,
     program.setUniform("deltaSMTexture", deltaSMieUnit);
 
     program.setUniform("firstIteration", (scatteringOrder == 2) ? 1 : 0);
-    program.setUniform("Rg", _atmospherePlanetRadius);
-    program.setUniform("Rt", _atmosphereRadius);
+    program.setUniform("rPlanet", _atmospherePlanetRadius);
+    program.setUniform("rAtmosphere", _atmosphereRadius);
     program.setUniform("AverageGroundReflectance", _averageGroundReflectance);
-    program.setUniform("HR", _rayleighHeightScale);
+    program.setUniform("rayleighHeightScale", _rayleighHeightScale);
     program.setUniform("betaRayleigh", _rayleighScatteringCoeff);
-    program.setUniform("HM", _mieHeightScale);
+    program.setUniform("mieHeightScale", _mieHeightScale);
     program.setUniform("betaMieScattering", _mieScatteringCoeff);
     program.setUniform("mieG", _miePhaseConstant);
     program.setUniform("muSSamples", _muSSamples);
@@ -898,10 +898,10 @@ void AtmosphereDeferredcaster::calculateDeltaE(int scatteringOrder,
     program.setUniform("deltaSMTexture", deltaSMieUnit);
 
     program.setUniform("firstIteration", (scatteringOrder == 2) ? 1 : 0);
-    program.setUniform("Rg", _atmospherePlanetRadius);
-    program.setUniform("Rt", _atmosphereRadius);
+    program.setUniform("rPlanet", _atmospherePlanetRadius);
+    program.setUniform("rAtmosphere", _atmosphereRadius);
     program.setUniform("mieG", _miePhaseConstant);
-    program.setUniform("SKY", _irradianceTableSize);
+    program.setUniform("irradianceTableSize", _irradianceTableSize);
     program.setUniform("muSSamples", _muSSamples);
     program.setUniform("nuSamples", _nuSamples);
     program.setUniform("muSamples", _muSamples);
@@ -942,8 +942,8 @@ void AtmosphereDeferredcaster::calculateDeltaS(int scatteringOrder,
     deltaJUnit.bind(deltaJ);
     program.setUniform("deltaJTexture", deltaJUnit);
 
-    program.setUniform("Rg", _atmospherePlanetRadius);
-    program.setUniform("Rt", _atmosphereRadius);
+    program.setUniform("rPlanet", _atmospherePlanetRadius);
+    program.setUniform("rAtmosphere", _atmosphereRadius);
     program.setUniform("muSSamples", _muSSamples);
     program.setUniform("nuSamples", _nuSamples);
     program.setUniform("muSamples", _muSamples);
@@ -983,7 +983,7 @@ void AtmosphereDeferredcaster::calculateIrradiance(int scatteringOrder,
     ghoul::opengl::TextureUnit unit;
     unit.bind(deltaE);
     program.setUniform("deltaETexture", unit);
-    program.setUniform("OTHER_TEXTURES", _deltaETableSize);
+    program.setUniform("deltaESize", _deltaETableSize);
 
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glDrawArrays(GL_TRIANGLES, 0, 6);

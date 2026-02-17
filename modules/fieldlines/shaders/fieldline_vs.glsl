@@ -33,9 +33,6 @@ out Data {
   vec4 color;
 } out_data;
 
-uniform mat4 modelViewProjection;
-uniform mat4 modelTransform;
-
 
 void main() {
   out_data.color = in_color;

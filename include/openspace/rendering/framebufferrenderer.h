@@ -216,9 +216,9 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _downscaledVolumeProgram;
 
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
-        Hue, Saturation, Value, Viewport, Resolution) _hdrUniformCache;
-    UniformCache(renderedTexture, inverseScreenSize, Viewport,
-        Resolution) _fxaaUniformCache;
+        hue, saturation, value, viewport, resolution) _hdrUniformCache;
+    UniformCache(renderedTexture, inverseScreenSize, viewport,
+        resolution) _fxaaUniformCache;
     UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth, viewport,
         resolution) _writeDownscaledVolumeUniformCache;
 

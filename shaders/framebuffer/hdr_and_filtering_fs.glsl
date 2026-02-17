@@ -35,18 +35,17 @@ layout (location = 0) out vec4 out_color;
 uniform float hdrExposure;
 uniform float blackoutFactor;
 uniform float gamma;
-uniform float Hue;
-uniform float Saturation;
-uniform float Value;
-uniform float Lightness;
-uniform vec4 Viewport;
-uniform vec2 Resolution;
+uniform float hue;
+uniform float saturation;
+uniform float value;
+uniform vec4 viewport;
+uniform vec2 resolution;
 
 uniform sampler2D hdrFeedingTexture;
 
 
 void main() {
-  // Modify the texCoords based on the Viewport and Resolution. This modification is
+  // Modify the texCoords based on the viewport and resolution. This modification is
   // necessary in case of side-by-side stereo as we only want to access the part of the
   // feeding texture that we are currently responsible for.  Otherwise we would map the
   // entire feeding texture into our half of the result texture, leading to a doubling
@@ -54,8 +53,8 @@ void main() {
   // side_by_side stereo mode enabled, disable FXAA, and remove this modification.
   // The same calculation is done in the FXAA shader
   vec2 st = in_data.texCoords;
-  st.x = st.x / (Resolution.x / Viewport[2]) + (Viewport[0] / Resolution.x);
-  st.y = st.y / (Resolution.y / Viewport[3]) + (Viewport[1] / Resolution.y);
+  st.x = st.x / (resolution.x / viewport[2]) + (viewport[0] / resolution.x);
+  st.y = st.y / (resolution.y / viewport[3]) + (viewport[1] / resolution.y);
 
   vec4 color = texture(hdrFeedingTexture, st);
   color.rgb *= blackoutFactor;
@@ -65,12 +64,12 @@ void main() {
 
   // Color control
   vec3 hsvColor = rgb2hsv(tColor);
-  hsvColor.x = (hsvColor.x + Hue);
+  hsvColor.x = (hsvColor.x + hue);
   if (hsvColor.x > 360.0) {
     hsvColor -= 360.0;
   }
-  hsvColor.y = clamp(hsvColor.y * Saturation, 0.0, 1.0);
-  hsvColor.z = clamp(hsvColor.z * Value, 0.0, 1.0);
+  hsvColor.y = clamp(hsvColor.y * saturation, 0.0, 1.0);
+  hsvColor.z = clamp(hsvColor.z * value, 0.0, 1.0);
 
   // Gamma Correction
   out_color = vec4(gammaCorrection(hsv2rgb(hsvColor), gamma), color.a);

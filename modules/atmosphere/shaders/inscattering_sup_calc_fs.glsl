@@ -28,8 +28,8 @@
 
 out vec4 out_color;
 
-uniform float Rg;
-uniform float Rt;
+uniform float rPlanet;
+uniform float rAtmosphere;
 uniform int rSamples;
 uniform int muSamples;
 uniform int muSSamples;
@@ -56,16 +56,16 @@ vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
   // The irradiance attenuated from point r until y (y-x = dist)
 
   return
-    transmittance(transmittanceTexture, r, mu, dist, Rg, Rt) *
+    transmittance(transmittanceTexture, r, mu, dist, rPlanet, rAtmosphere) *
     texture4D(
       deltaJTexture,
       r_i,
       mu_i,
       muSun_i,
       nu,
-      Rg,
+      rPlanet,
       muSamples,
-      Rt,
+      rAtmosphere,
       rSamples,
       muSSamples,
       nuSamples
@@ -74,7 +74,7 @@ vec3 integrand(float r, float mu, float muSun, float nu, float dist) {
 
 vec3 inscatter(float r, float mu, float muSun, float nu) {
   vec3 inScatteringRadiance = vec3(0.0);
-  float dy = rayDistance(r, mu, Rt, Rg) / float(InscatterIntegralScamples);
+  float dy = rayDistance(r, mu, rAtmosphere, rPlanet) / float(InscatterIntegralScamples);
   vec3 inScatteringRadianceI = integrand(r, mu, muSun, nu, 0.0);
 
   // In order to solve the integral from equation (11) we use the trapezoidal rule:
@@ -95,7 +95,8 @@ void main() {
   float muSun = 0.0;
   float nu = 0.0;
   // Unmapping the variables from texture texels coordinates to mapped coordinates
-  unmappingMuMuSunNu(r, dhdH, muSamples, Rg, Rt, muSSamples, nuSamples, mu, muSun, nu);
+  unmappingMuMuSunNu(r, dhdH, muSamples, rPlanet, rAtmosphere, muSSamples, nuSamples, mu,
+    muSun, nu);
 
   // Write to texture deltaSR
   out_color = vec4(inscatter(r, mu, muSun, nu), 1.0);

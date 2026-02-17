@@ -133,7 +133,7 @@ void RenderableBoxGrid::initializeGL() {
 void RenderableBoxGrid::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
     glDeleteBuffers(1, &_vbo);
-    
+
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
         [](ghoul::opengl::ProgramObject* p) {
@@ -149,8 +149,8 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&) {
     auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
         calcAllTransforms(data);
 
-    _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform("MVPTransform", modelViewProjectionTransform);
+    _gridProgram->setUniform("modelView", modelViewTransform);
+    _gridProgram->setUniform("modelViewProjection", modelViewProjectionTransform);
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 

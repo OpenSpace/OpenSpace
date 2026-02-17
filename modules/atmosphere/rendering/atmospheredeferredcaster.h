@@ -105,13 +105,13 @@ private:
     void calculateInscattering(int scatteringOrder,
         ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh);
 
-    UniformCache(cullAtmosphere, opacity, Rg, Rt, groundRadianceEmission, HR,
-        betaRayleigh, HM, betaMieExtinction, mieG, sunRadiance, ozoneLayerEnabled, HO,
-        betaOzoneExtinction, rSamples, muSamples, muSSamples, nuSamples,
-        inverseModelTransformMatrix, modelTransformMatrix,
-        projectionToModelTransformMatrix, viewToWorldMatrix, camPosObj, sunDirectionObj,
-        hardShadows, transmittanceTexture, irradianceTexture, inscatterTexture,
-        sunAngularSize) _uniformCache;
+    UniformCache(cullAtmosphere, opacity, rPlanet, rAtmosphere, groundRadianceEmission,
+        rayleighHeightScale, betaRayleigh, mieHeightScale, betaMieExtinction, mieG,
+        sunRadiance, ozoneLayerEnabled, ozoneHeightScale, betaOzoneExtinction, rSamples,
+        muSamples, muSSamples, nuSamples, inverseModelTransformMatrix,
+        modelTransformMatrix, projectionToModelTransformMatrix, viewToWorldMatrix,
+        camPosObj, sunDirectionObj, hardShadows, transmittanceTexture, irradianceTexture,
+        inscatterTexture, sunAngularSize) _uniformCache;
 
     ghoul::opengl::TextureUnit _transmittanceTableTextureUnit;
     ghoul::opengl::TextureUnit _irradianceTableTextureUnit;

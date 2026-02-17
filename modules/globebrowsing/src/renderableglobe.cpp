@@ -1473,9 +1473,9 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
     }
 
     if (!_shadowers.empty() && _shadowersOk) {
-        program.setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
-        program.setUniform("light_depth_maps", boundUnits);
-        GLint loc = glGetUniformLocation(program, "light_vps");
+        program.setUniform("inverseView", glm::inverse(data.camera.combinedViewMatrix()));
+        program.setUniform("lightDepthMaps", boundUnits);
+        GLint loc = glGetUniformLocation(program, "lightView");
         glUniformMatrix4dv(
             loc,
             static_cast<GLsizei>(lightViewProjections.size()),
@@ -1702,9 +1702,12 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
     }
 
     if (!_shadowers.empty() && _shadowersOk) {
-        _localRenderer.program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
-        _localRenderer.program->setUniform("light_depth_maps", boundUnits);
-        GLint loc = glGetUniformLocation(*_localRenderer.program, "light_vps");
+        _localRenderer.program->setUniform(
+            "inverseView",
+            glm::inverse(data.camera.combinedViewMatrix())
+        );
+        _localRenderer.program->setUniform("lightDepthMaps", boundUnits);
+        GLint loc = glGetUniformLocation(*_localRenderer.program, "lightView");
         glUniformMatrix4dv(
             loc,
             static_cast<GLsizei>(lightViewProjections.size()),

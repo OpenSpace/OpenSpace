@@ -34,8 +34,8 @@ layout (location = 0) out vec4 out_color;
 layout (location = 1) out vec4 out_stencil;
 
 uniform sampler2D projectionTexture;
-uniform mat4 ProjectorMatrix;
-uniform mat4 ModelTransform;
+uniform mat4 projectorMatrix;
+uniform mat4 modelTransform;
 uniform vec3 radius;
 uniform int segments;
 uniform vec3 boresight;
@@ -67,14 +67,14 @@ void main() {
   vec4 vertex = uvToModel(uv, radius, segments);
 
   vec4 raw_pos = psc_to_meter(vertex, vec2(1.0, 0.0));
-  vec4 projected = ProjectorMatrix * ModelTransform * raw_pos;
+  vec4 projected = projectorMatrix * modelTransform * raw_pos;
 
   projected.x /= projected.w;
   projected.y /= projected.w;
 
   projected = projected * 0.5 + vec4(0.5);
 
-  vec3 normal = normalize((ModelTransform * vec4(vertex.xyz, 0.0)).xyz);
+  vec3 normal = normalize((modelTransform * vec4(vertex.xyz, 0.0)).xyz);
 
   vec3 v_b = normalize(boresight);
 

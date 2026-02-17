@@ -35,17 +35,17 @@ out Data {
   vec4 normal;
 } out_data;
 
-uniform mat4 ProjectorMatrix;
-uniform mat4 ModelTransform;
+uniform mat4 projectorMatrix;
+uniform mat4 modelTransform;
 uniform mat4 meshTransform;
 uniform mat4 meshNormalTransform;
 
 
 void main() {
   vec4 raw_pos = psc_to_meter(meshTransform * in_position, vec2(1.0, 0.0));
-  vec4 position = ProjectorMatrix * ModelTransform * raw_pos;
+  vec4 position = projectorMatrix * modelTransform * raw_pos;
   out_data.normal = normalize(
-    ModelTransform * meshNormalTransform * vec4(in_normal, 0.0)
+    modelTransform * meshNormalTransform * vec4(in_normal, 0.0)
   );
   out_data.ndc = position / position.w;
 

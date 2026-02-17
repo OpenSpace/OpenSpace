@@ -28,12 +28,12 @@
 
 out vec4 out_color;
 
-uniform float Rg;
-uniform float Rt;
+uniform float rPlanet;
+uniform float rAtmosphere;
 uniform float AverageGroundReflectance;
-uniform float HR;
+uniform float rayleighHeightScale;
 uniform vec3 betaRayleigh;
-uniform float HM;
+uniform float mieHeightScale;
 uniform vec3 betaMieScattering;
 uniform float mieG;
 uniform int rSamples;
@@ -64,13 +64,13 @@ const float StepTheta = M_PI / float(InscatterSphericalIntegralSamples);
 vec3 irradianceLUT(sampler2D lut, float muSun, float r) {
   // See Bruneton paper and Collienne to understand the mapping
   float u_muSun = (muSun + 0.2) / 1.2;
-  float u_r = (r - Rg) / (Rt - Rg);
+  float u_r = (r - rPlanet) / (rAtmosphere - rPlanet);
   return texture(lut, vec2(u_muSun, u_r)).rgb;
 }
 
 vec3 inscatter(float r, float mu, float muSun, float nu) {
   // Be sure to not get a cosine or height out of bounds
-  r = clamp(r, Rg, Rt);
+  r = clamp(r, rPlanet, rAtmosphere);
   mu = clamp(mu, -1.0, 1.0);
   muSun = clamp(muSun, -1.0, 1.0);
 
@@ -95,9 +95,9 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
   // theta is the angle between vec(v) and x
   // cos(PI-theta) = d/r
   // -cos(theta) = sqrt(r*r-Rg*Rg)/r
-  float Rg2 = Rg * Rg;
+  float rPlanet2 = rPlanet * rPlanet;
   float r2 = r * r;
-  float cosHorizon = -sqrt(r2 - Rg2) / r;
+  float cosHorizon = -sqrt(r2 - rPlanet2) / r;
 
   // Now we get vec(v) and vec(s) from mu, muSun and nu:
   // Assuming:
@@ -141,7 +141,7 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       groundReflectance = AverageGroundReflectance / M_PI;
       // From cosine law:
       // Rg*Rg = r*r + distToGround*distToGround - 2*r*distToGround*cos(PI-theta)
-      distanceToGround = -r * cosineTheta - sqrt(r2 * (cosineTheta2 - 1.0) + Rg2);
+      distanceToGround = -r * cosineTheta - sqrt(r2 * (cosineTheta2 - 1.0) + rPlanet2);
       //               |
       //               | theta
       //               |
@@ -155,20 +155,20 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       //                 -vec(distG))/(||(vec(x)+vec(distG))|| * ||vec(distG)||)
       //    cos(alpha) = (-r*distG*cos(theta) - distG*distG)/(Rg*distG)
       //      muGround = -(r*cos(theta) + distG)/Rg
-      float muGround = -(r * cosineTheta + distanceToGround) / Rg;
+      float muGround = -(r * cosineTheta + distanceToGround) / rPlanet;
       // We can use the same triangle in calculate the distanceToGround to calculate the
       // cosine of the angle between the ground touching point at height Rg and the zenith
       // angle
-      // float muGround = (r2 - distToGround*distToGround - Rg2)/(2*distToGround*Rg);
+      // float muGround = (r2 - distToGround*distToGround - rPlanet2)/(2*distToGround*Rg);
       // Access the Transmittance LUT in order to calculate the transmittance from the
       // ground point Rg, thorugh the atmosphere, at a distance: distanceToGround
       groundTransmittance = transmittance(
         transmittanceTexture,
-        Rg,
+        rPlanet,
         muGround,
         distanceToGround,
-        Rg,
-        Rt
+        rPlanet,
+        rAtmosphere
       );
     }
 
@@ -189,8 +189,8 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
       float phaseRayleighWV = rayleighPhaseFunction(nuWV);
       float phaseMieWV = miePhaseFunction(nuWV, mieG);
 
-      vec3 groundNormal = (vec3(0.0, 0.0, r) + distanceToGround * w) / Rg;
-      vec3 groundIrradiance = irradianceLUT(deltaETexture, dot(groundNormal, s), Rg);
+      vec3 groundNormal = (vec3(0.0, 0.0, r) + distanceToGround * w) / rPlanet;
+      vec3 groundIrradiance = irradianceLUT(deltaETexture, dot(groundNormal, s), rPlanet);
 
       // We finally calculate the radiance from the reflected ray from ground
       // (0.0 if not reflected)
@@ -215,9 +215,9 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
           w.z,
           muSun,
           nuSW,
-          Rg,
+          rPlanet,
           muSamples,
-          Rt,
+          rAtmosphere,
           rSamples,
           muSSamples,
           nuSamples
@@ -228,9 +228,9 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
           w.z,
           muSun,
           nuSW,
-          Rg,
+          rPlanet,
           muSamples,
-          Rt,
+          rAtmosphere,
           rSamples,
           muSSamples,
           nuSamples
@@ -251,9 +251,9 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
           w.z,
           muSun,
           nuSW,
-          Rg,
+          rPlanet,
           muSamples,
-          Rt,
+          rAtmosphere,
           rSamples,
           muSSamples,
           nuSamples
@@ -262,8 +262,10 @@ vec3 inscatter(float r, float mu, float muSun, float nu) {
 
       // Finally, we add the atmospheric scale height (See: Radiation Transfer on the
       // Atmosphere and Ocean from Thomas and Stamnes, pg 9-10.
-      radianceJAcc += radianceJ1 * (betaRayleigh * exp(-(r - Rg) / HR) * phaseRayleighWV +
-        betaMieScattering * exp(-(r - Rg) / HM) * phaseMieWV) * dw;
+      radianceJAcc +=
+        radianceJ1 *
+        (betaRayleigh * exp(-(r - rPlanet) / rayleighHeightScale) * phaseRayleighWV +
+        betaMieScattering * exp(-(r - rPlanet) / mieHeightScale) * phaseMieWV) * dw;
     }
   }
 
@@ -275,7 +277,8 @@ void main() {
   // InScattering Radiance to be calculated at different points in the ray path
   // Unmapping the variables from texture texels coordinates to mapped coordinates
   float mu, muSun, nu;
-  unmappingMuMuSunNu(r, dhdH, muSamples, Rg, Rt, muSSamples, nuSamples, mu, muSun, nu);
+  unmappingMuMuSunNu(r, dhdH, muSamples, rPlanet, rAtmosphere, muSSamples, nuSamples, mu,
+    muSun, nu);
 
   // Calculate the the light inScattered in direction
   // -vec(v) for the point at height r (vec(y) following Bruneton and Neyret's paper

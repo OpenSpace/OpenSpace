@@ -28,10 +28,10 @@
 
 out vec4 out_color;
 
-uniform float Rg;
-uniform float Rt;
+uniform float rPlanet;
+uniform float rAtmosphere;
 uniform float mieG;
-uniform ivec2 SKY;
+uniform ivec2 irradianceTableSize;
 uniform int rSamples;
 uniform int muSamples;
 uniform int muSSamples;
@@ -49,8 +49,12 @@ const float stepTheta = M_PI / (2.0 * float(IrradianceIntegralSamples));
 
 void main() {
   // See Bruneton and Collienne to understand the mapping.
-  float muSun = -0.2 + (gl_FragCoord.x - 0.5) / (float(SKY.x) - 1.0) * 1.2;
-  float r = Rg + (gl_FragCoord.y - 0.5) / (float(SKY.y) - 1.0) * (Rt - Rg);
+  float muSun =
+    -0.2 + (gl_FragCoord.x - 0.5) / (float(irradianceTableSize.x) - 1.0) * 1.2;
+  float r =
+    rPlanet +
+    (gl_FragCoord.y - 0.5) / (float(irradianceTableSize.y) - 1.0)
+    * (rAtmosphere - rPlanet);
 
   // We know that muSun = cos(sigma) = s.z/||s||
   // But, ||s|| = 1, so s.z = muSun. Also,
@@ -85,9 +89,9 @@ void main() {
           w.z,
           muSun,
           nu,
-          Rg,
+          rPlanet,
           muSamples,
-          Rt,
+          rAtmosphere,
           rSamples,
           muSSamples,
           nuSamples
@@ -98,9 +102,9 @@ void main() {
           w.z,
           muSun,
           nu,
-          Rg,
+          rPlanet,
           muSamples,
-          Rt,
+          rAtmosphere,
           rSamples,
           muSSamples,
           nuSamples
@@ -119,9 +123,9 @@ void main() {
           w.z,
           muSun,
           nu,
-          Rg,
+          rPlanet,
           muSamples,
-          Rt,
+          rAtmosphere,
           rSamples,
           muSSamples,
           nuSamples

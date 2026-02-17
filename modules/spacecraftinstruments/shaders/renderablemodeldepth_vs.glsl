@@ -28,11 +28,11 @@
 
 layout(location = 0) in vec4 in_position;
 
-uniform mat4 ProjectorMatrix;
-uniform mat4 ModelTransform;
+uniform mat4 projectorMatrix;
+uniform mat4 modelTransform;
 
 
 void main() {
   gl_Position =
-    ProjectorMatrix * ModelTransform * psc_to_meter(in_position, vec2(1.0, 0.0));
+    projectorMatrix * modelTransform * psc_to_meter(in_position, vec2(1.0, 0.0));
 }

@@ -406,8 +406,8 @@ void RenderablePlanetProjection::imageProjectGPU(
     unitFbo.bind(projectionTexture);
     _fboProgramObject->setUniform(_fboUniformCache.projectionTexture, unitFbo);
 
-    _fboProgramObject->setUniform(_fboUniformCache.ProjectorMatrix, projectorMatrix);
-    _fboProgramObject->setUniform(_fboUniformCache.ModelTransform, _transform);
+    _fboProgramObject->setUniform(_fboUniformCache.projectorMatrix, projectorMatrix);
+    _fboProgramObject->setUniform(_fboUniformCache.modelTransform, _transform);
     _fboProgramObject->setUniform(_fboUniformCache.boresight, _boresight);
     _fboProgramObject->setUniform(_fboUniformCache.radius, _radius);
     _fboProgramObject->setUniform(_fboUniformCache.segments, _segments);
@@ -513,7 +513,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
 
     // Main renderpass
     _programObject->activate();
-    _programObject->setUniform(_mainUniformCache.sun_pos, static_cast<glm::vec3>(sunPos));
+    _programObject->setUniform(_mainUniformCache.sunPos, static_cast<glm::vec3>(sunPos));
 
     // Model transform and view transform needs to be in double precision
     const glm::dmat4 modelTransform = calcModelTransform(data);

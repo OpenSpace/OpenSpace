@@ -537,11 +537,11 @@ void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewp
     _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrExposure, _hdrExposure);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.gamma, _gamma);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Hue, _hue);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Viewport, glm::vec4(viewport));
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Resolution, glm::vec2(_resolution));
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.hue, _hue);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.saturation, _saturation);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.value, _value);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.viewport, glm::vec4(viewport));
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.resolution, glm::vec2(_resolution));
 
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
@@ -565,8 +565,8 @@ void FramebufferRenderer::applyFXAA(const glm::ivec4& viewport) {
 
     const glm::vec2 invScreenSize = glm::vec2(1.f / _resolution.x, 1.f / _resolution.y);
     _fxaaProgram->setUniform(_fxaaUniformCache.inverseScreenSize, invScreenSize);
-    _fxaaProgram->setUniform(_fxaaUniformCache.Viewport, glm::vec4(viewport));
-    _fxaaProgram->setUniform(_fxaaUniformCache.Resolution, glm::vec2(_resolution));
+    _fxaaProgram->setUniform(_fxaaUniformCache.viewport, glm::vec4(viewport));
+    _fxaaProgram->setUniform(_fxaaUniformCache.resolution, glm::vec2(_resolution));
 
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);

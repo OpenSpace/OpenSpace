@@ -47,7 +47,6 @@ uniform dmat4 shadowMatrix;
 
 
 void main() {
-
   dvec4 positionClipSpace = modelViewProjectionMatrix * dvec4(in_position, 0.0, 1.0);
   gl_Position = z_normalization(vec4(positionClipSpace));
   out_data.shadowCoords = vec4(shadowMatrix * dvec4(in_position, 0.0, 1.0));

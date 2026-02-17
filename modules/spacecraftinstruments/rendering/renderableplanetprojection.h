@@ -77,12 +77,12 @@ private:
 
     ghoul::opengl::ProgramObject* _programObject = nullptr;
     ghoul::opengl::ProgramObject* _fboProgramObject = nullptr;
-    UniformCache(sun_pos, modelTransform, modelViewProjectionTransform, hasBaseMap,
+    UniformCache(sunPos, modelTransform, modelViewProjectionTransform, hasBaseMap,
         hasHeightMap, heightExaggeration, meridianShift, ambientBrightness,
         projectionFading, baseTexture, projectionTexture,
         heightTexture) _mainUniformCache;
 
-    UniformCache(projectionTexture, ProjectorMatrix, ModelTransform, boresight,
+    UniformCache(projectionTexture, projectorMatrix, modelTransform, boresight,
         radius, segments) _fboUniformCache;
 
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;

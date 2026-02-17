@@ -193,7 +193,7 @@ uniform float opacity;
 
 #if USE_DEPTHMAP_SHADOWS
 #if nDepthMaps > 0
-  uniform sampler2D light_depth_maps[nDepthMaps];
+  uniform sampler2D lightDepthMaps[nDepthMaps];
 #endif // nDepthMaps > 0
 #endif // USE_DEPTHMAP_SHADOWS
 
@@ -380,12 +380,12 @@ Fragment getFragment() {
 
   float accum = 1.0;
   for (int idx = 0; idx < nDepthMaps; idx++) {
-    vec2 ssz = 1.0 / textureSize(light_depth_maps[idx], 0);
+    vec2 ssz = 1.0 / textureSize(lightDepthMaps[idx], 0);
     vec4 pls = in_data.positions_lightspace[idx];
     vec3 coords = 0.5 + 0.5 * pls.xyz / pls.w;
     for (int x = -Size; x <= Size; x++) {
       for (int y = -Size; y <= Size; y++) {
-        float depth = texture(light_depth_maps[idx], coords.xy + vec2(x, y) * ssz).r;
+        float depth = texture(lightDepthMaps[idx], coords.xy + vec2(x, y) * ssz).r;
         // inside of the far plane of the frustum
         if (coords.z < 1.0) {
           accum -= float(depth < coords.z - Bias) / Norm;

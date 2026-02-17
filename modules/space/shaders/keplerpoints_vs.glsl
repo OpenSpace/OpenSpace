@@ -24,8 +24,8 @@
 
 #version __CONTEXT__
 
-layout (location = 0) in vec3 vertexData; // 1: x, 2: y, 3: z
-layout (location = 1) in dvec3 orbitData; // 1: timeOffset, 2: epoch, 3: period
+layout (location = 0) in vec3 in_vertexData; // 1: x, 2: y, 3: z
+layout (location = 1) in dvec3 in_orbitData; // 1: timeOffset, 2: epoch, 3: period
 
 out Data {
   flat float currentRevolutionFraction;
@@ -36,9 +36,9 @@ uniform double inGameTime;
 
 
 void main() {
-  double timeOffset = orbitData.x;
-  double epoch = orbitData.y;
-  double period = orbitData.z;
+  double timeOffset = in_orbitData.x;
+  double epoch = in_orbitData.y;
+  double period = in_orbitData.z;
 
   // calculate nr of periods, get fractional part to know where the vertex closest to the
   // debris part is right now
@@ -52,5 +52,5 @@ void main() {
   // Same procedure for the current vertex
   out_data.vertexRevolutionFraction = float(timeOffset / period);
 
-  gl_Position = vec4(vertexData.xyz, 1.0);
+  gl_Position = vec4(in_vertexData, 1.0);
 }

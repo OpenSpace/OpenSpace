@@ -76,8 +76,8 @@ uniform float distanceScaleFactor;
 uniform int chunkLevel;
 
 #if nDepthMaps > 0
-  uniform dmat4 inv_vp;
-  uniform dmat4 light_vps[nDepthMaps];
+  uniform dmat4 inverseView;
+  uniform dmat4 lightView[nDepthMaps];
 #endif // nDepthMaps > 0
 
 

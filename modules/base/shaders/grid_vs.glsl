@@ -31,15 +31,15 @@ out Data {
   float depthClipSpace;
 } out_data;
 
-uniform dmat4 modelViewTransform;
-uniform dmat4 MVPTransform;
+uniform dmat4 modelView;
+uniform dmat4 modelViewProjection;
 
 
 void main() {
-  dvec4 positionClipSpace = MVPTransform * dvec4(in_position, 1.0);
+  dvec4 positionClipSpace = modelViewProjection * dvec4(in_position, 1.0);
   positionClipSpace.z = 0.0;
   out_data.depthClipSpace = float(positionClipSpace.w);
   gl_Position = vec4(positionClipSpace);
 
-  out_data.positionViewSpace = vec4(modelViewTransform * dvec4(in_position, 1.0));
+  out_data.positionViewSpace = vec4(modelView * dvec4(in_position, 1.0));
 }

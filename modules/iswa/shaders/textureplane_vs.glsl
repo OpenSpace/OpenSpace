@@ -34,13 +34,13 @@ out Data {
   vec2 texCoords;
 } out_data;
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+uniform mat4 viewProjection;
+uniform mat4 modelTransform;
 
 
 void main() {
   out_data.position = in_position;
   out_data.texCoords = in_texCoords;
   gl_Position =
-    z_normalization(ViewProjection * pscTransform(in_position, ModelTransform));
+    z_normalization(viewProjection * pscTransform(in_position, modelTransform));
 }

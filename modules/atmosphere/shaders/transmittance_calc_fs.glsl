@@ -28,16 +28,16 @@
 
 out vec4 out_color;
 
-uniform float Rg;
-uniform float Rt;
-uniform float HR;
+uniform float rPlanet;
+uniform float rAtmosphere;
+uniform float rayleighHeightScale;
 uniform vec3 betaRayleigh;
-uniform float HO;
+uniform float ozoneHeightScale;
 uniform vec3 betaOzoneExtinction;
-uniform float HM;
+uniform float mieHeightScale;
 uniform vec3 betaMieExtinction;
 uniform bool ozoneLayerEnabled;
-uniform ivec2 TRANSMITTANCE;
+uniform ivec2 transmittanceTableSize;
 
 const int TransmittanceSteps = 500;
 
@@ -56,24 +56,24 @@ float opticalDepth(float r, float mu, float H) {
   // direction and starting and ending points.
 
   // cosine law for triangles: y_i^2 = a^2 + b^2 - 2abcos(alpha)
-  float cosZenithHorizon = -sqrt(1.0 - ((Rg * Rg) / r2));
+  float cosZenithHorizon = -sqrt(1.0 - ((rPlanet * rPlanet) / r2));
   if (mu < cosZenithHorizon) {
     return 1e9;
   }
 
   // Integrating using the Trapezoidal rule:
   // Integral(f(y)dy)(from a to b) = ((b-a)/2n_steps)*(Sum(f(y_i+1)+f(y_i)))
-  float b_a = rayDistance(r, mu, Rt, Rg);
+  float b_a = rayDistance(r, mu, rAtmosphere, rPlanet);
   float deltaStep = b_a / float(TransmittanceSteps);
   // cosine law
-  float y_i = exp(-(r - Rg) / H);
+  float y_i = exp(-(r - rPlanet) / H);
 
   float accumulation = 0.0;
   for (int i = 1; i <= TransmittanceSteps; i++) {
     float x_i = float(i) * deltaStep;
     // cosine law for triangles: y_i^2 = a^2 + b^2 - 2abcos(alpha)
     // In this case, a = r, b = x_i and cos(alpha) = cos(PI-zenithView) = mu
-    float y_ii = exp(-(sqrt(r2 + x_i * x_i + 2.0 * x_i * r * mu) - Rg) / H);
+    float y_ii = exp(-(sqrt(r2 + x_i * x_i + 2.0 * x_i * r * mu) - rPlanet) / H);
     accumulation += (y_ii + y_i);
     y_i = y_ii;
   }
@@ -82,12 +82,12 @@ float opticalDepth(float r, float mu, float H) {
 
 
 void main() {
-  float u_mu = gl_FragCoord.x / float(TRANSMITTANCE.x);
-  float u_r = gl_FragCoord.y / float(TRANSMITTANCE.y);
+  float u_mu = gl_FragCoord.x / float(transmittanceTableSize.x);
+  float u_r = gl_FragCoord.y / float(transmittanceTableSize.y);
 
   // In the paper u_r^2 = (r^2-Rg^2)/(Rt^2-Rg^2)
   // So, extracting r from u_r in the above equation:
-  float r = Rg + (u_r * u_r) * (Rt - Rg);
+  float r = rPlanet + (u_r * u_r) * (rAtmosphere - rPlanet);
 
   // In the paper the Bruneton suggest mu = dot(v,x)/||x|| with ||v|| = 1.0
   // Later he proposes u_mu = (1-exp(-3mu-0.6))/(1-exp(-3.6))
@@ -97,11 +97,12 @@ void main() {
 
   vec3 ozoneContribution = vec3(0.0);
   if (ozoneLayerEnabled) {
-    ozoneContribution = betaOzoneExtinction * 0.0000006 * opticalDepth(r, muSun, HO);
+    ozoneContribution =
+      betaOzoneExtinction * 0.0000006 * opticalDepth(r, muSun, ozoneHeightScale);
   }
   vec3 opDepth = ozoneContribution +
-    betaMieExtinction * opticalDepth(r, muSun, HM) +
-    betaRayleigh * opticalDepth(r, muSun, HR);
+    betaMieExtinction * opticalDepth(r, muSun, mieHeightScale) +
+    betaRayleigh * opticalDepth(r, muSun, rayleighHeightScale);
 
   out_color = vec4(exp(-opDepth), 0.0);
 }

@@ -32,14 +32,14 @@ out Data {
   vec4 position;
 } out_data;
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+uniform mat4 viewProjection;
+uniform mat4 modelTransform;
 
 
 void main() {
   out_data.position = vec4(in_position, 0.0);
   vec4 pos = vec4(in_position, 0.0);
   gl_Position = z_normalization(
-    ViewProjection * pscTransform(pos, ModelTransform)
+    viewProjection * pscTransform(pos, modelTransform)
   );
 }

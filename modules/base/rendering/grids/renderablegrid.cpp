@@ -264,8 +264,8 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&) {
         );
     }
 
-    _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform("MVPTransform", modelViewProjectionMatrix);
+    _gridProgram->setUniform("modelView", modelViewTransform);
+    _gridProgram->setUniform("modelViewProjection", modelViewProjectionMatrix);
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
