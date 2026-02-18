@@ -1,5 +1,5 @@
 local transforms = asset.require("./transforms")
-local kernels115 = asset.require("./kernels115")
+local kernels = asset.require("./kernels")
 local coreKernels = asset.require("spice/core")
 
 
@@ -10,7 +10,7 @@ local Cordelia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Cordelia,
+      Target = kernels.ID.Cordelia,
       Observer = coreKernels.ID.UranusBarycenter
     }
   },
@@ -39,7 +39,7 @@ local CordeliaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Cordelia,
+      Target = kernels.ID.Cordelia,
       Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
@@ -91,7 +91,7 @@ local Ophelia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Ophelia,
+      Target = kernels.ID.Ophelia,
       Observer = coreKernels.ID.UranusBarycenter
     }
   },
@@ -120,7 +120,7 @@ local OpheliaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Ophelia,
+      Target = kernels.ID.Ophelia,
       Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
@@ -172,7 +172,7 @@ local Bianca = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Bianca,
+      Target = kernels.ID.Bianca,
       Observer = coreKernels.ID.UranusBarycenter
     }
   },
@@ -201,7 +201,7 @@ local BiancaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Bianca,
+      Target = kernels.ID.Bianca,
       Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
@@ -253,7 +253,7 @@ local Cressida = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Cressida,
+      Target = kernels.ID.Cressida,
       Observer = coreKernels.ID.UranusBarycenter
     }
   },
@@ -282,7 +282,7 @@ local CressidaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Cressida,
+      Target = kernels.ID.Cressida,
       Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
@@ -334,7 +334,7 @@ local Desdemona = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Desdemona,
+      Target = kernels.ID.Desdemona,
       Observer = coreKernels.ID.UranusBarycenter
     }
   },
@@ -363,7 +363,7 @@ local DesdemonaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Desdemona,
+      Target = kernels.ID.Desdemona,
       Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
@@ -415,7 +415,7 @@ local Juliet = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Juliet,
+      Target = kernels.ID.Juliet,
       Observer = coreKernels.ID.UranusBarycenter
     }
   },
@@ -444,7 +444,7 @@ local JulietTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Juliet,
+      Target = kernels.ID.Juliet,
       Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
@@ -496,7 +496,7 @@ local Portia = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Portia,
+      Target = kernels.ID.Portia,
       Observer = coreKernels.ID.UranusBarycenter
     }
   },
@@ -525,7 +525,7 @@ local PortiaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Portia,
+      Target = kernels.ID.Portia,
       Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
@@ -577,7 +577,7 @@ local Rosalind = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Rosalind,
+      Target = kernels.ID.Rosalind,
       Observer = coreKernels.ID.UranusBarycenter
     }
   },
@@ -606,7 +606,7 @@ local RosalindTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Rosalind,
+      Target = kernels.ID.Rosalind,
       Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
@@ -658,7 +658,7 @@ local Cupid = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Cupid,
+      Target = kernels.ID.Cupid,
       Observer = coreKernels.ID.UranusBarycenter
     }
   },
@@ -687,7 +687,7 @@ local CupidTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Cupid,
+      Target = kernels.ID.Cupid,
       Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
@@ -739,7 +739,7 @@ local Belinda = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Belinda,
+      Target = kernels.ID.Belinda,
       Observer = coreKernels.ID.UranusBarycenter
     }
   },
@@ -768,7 +768,7 @@ local BelindaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Belinda,
+      Target = kernels.ID.Belinda,
       Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
@@ -820,7 +820,7 @@ local Perdita = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Perdita,
+      Target = kernels.ID.Perdita,
       Observer = coreKernels.ID.UranusBarycenter
     }
   },
@@ -849,7 +849,7 @@ local PerditaTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Perdita,
+      Target = kernels.ID.Perdita,
       Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
@@ -901,7 +901,7 @@ local Puck = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Puck,
+      Target = kernels.ID.Puck,
       Observer = coreKernels.ID.UranusBarycenter
     }
   },
@@ -930,7 +930,7 @@ local PuckTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Puck,
+      Target = kernels.ID.Puck,
       Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
@@ -982,7 +982,7 @@ local Mab = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Mab,
+      Target = kernels.ID.Mab,
       Observer = coreKernels.ID.UranusBarycenter
     }
   },
@@ -1011,7 +1011,7 @@ local MabTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.Mab,
+      Target = kernels.ID.Mab,
       Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
@@ -1064,7 +1064,7 @@ local S2025U1 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.S2025U1,
+      Target = kernels.ID.S2025U1,
       Observer = coreKernels.ID.UranusBarycenter
     }
   },
@@ -1093,7 +1093,7 @@ local S2025U1Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels115.ID.S2025U1,
+      Target = kernels.ID.S2025U1,
       Observer = coreKernels.ID.UranusBarycenter
     },
     Color = { 0.60, 0.65, 0.84 },
