@@ -23,34 +23,27 @@
  ****************************************************************************************/
 
 #include "fragment.glsl"
-#include "PowerScaling/powerScaling_fs.hglsl"
+#include "powerscaling/powerscaling_fs.glsl"
 
-in vec4 gs_color;
-in vec4 gs_position;
-in vec3 gs_normal;
+in Data {
+  vec4 position;
+  vec4 color;
+  vec3 normal;
+} in_data;
 
 uniform bool classification;
 uniform vec4 fieldLineColor;
 
 
 Fragment getFragment() {
-  float alpha = 1 - length(gs_normal) * length(gs_normal);
+  float alpha = 1.0 - length(in_data.normal) * length(in_data.normal);
 
   Fragment frag;
-  if (classification) {
-    frag.color = vec4(gs_color.rgb * alpha, 1.0);
-  }
-  else {
-    frag.color = vec4(fieldLineColor.rgb * fieldLineColor.a * alpha, 1.0);
-  }
-
-  frag.depth = pscDepth(gs_position);
-
-  // G-Buffer
-  frag.gPosition  = vec4(0.0);//vs_gPosition;
-  // There is no normal here
-  // TODO: Add the correct normal if necessary (JCC)
+  frag.color = classification ?
+    vec4(in_data.color.rgb * alpha, 1.0) :
+    vec4(fieldLineColor.rgb * fieldLineColor.a * alpha, 1.0);
+  frag.depth = pscDepth(in_data.position);
+  frag.gPosition = vec4(0.0);
   frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
-
   return frag;
 }

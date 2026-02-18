@@ -24,22 +24,22 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec4 in_color;
 
-out vec4 vs_color;
-out float vs_depth;
+out Data {
+  vec4 color;
+  float depth;
+} out_data;
 
 uniform mat4 modelViewProjection;
 
 
 void main() {
   vec4 positionClipSpace = modelViewProjection * vec4(in_position, 1.0);
-  vec4 p = z_normalization(positionClipSpace);
-  vs_depth = p.w;
-  gl_Position = p;
-
-  vs_color = in_color;
+  gl_Position = z_normalization(positionClipSpace);
+  out_data.color = in_color;
+  out_data.depth = gl_Position.w;
 }

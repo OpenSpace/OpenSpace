@@ -24,19 +24,22 @@
 
 #version __CONTEXT__
 
-in vec2 vs_st;
+in Data {
+  vec2 texCoords;
+} in_data;
 
-out vec4 outputColor;
+out vec4 out_color;
 
 uniform sampler2D tex;
 #define USE_ACCELERATED_RENDERING #{useAcceleratedRendering}
 
+
 void main() {
-  #if USE_ACCELERATED_RENDERING
-    vec2 flippedTexCoords = vec2(vs_st.x, 1.0 - vs_st.y);
-    vec4 texColor = texture(tex, flippedTexCoords);
-    outputColor = texColor.bgra;  // Correcting both orientation and color channels
-  #else
-    outputColor = texture(tex, vs_st);
-  #endif
+#if USE_ACCELERATED_RENDERING
+  vec2 flippedTexCoords = vec2(in_data.texCoords.s, 1.0 - in_data.texCoords.t);
+  vec4 texColor = texture(tex, flippedTexCoords);
+  out_color = texColor.bgra;  // Correcting both orientation and color channels
+#else // USE_ACCELERATED_RENDERING
+  out_color = texture(tex, in_data.texCoords);
+#endif // USE_ACCELERATED_RENDERING
 }

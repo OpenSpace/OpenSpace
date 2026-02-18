@@ -24,25 +24,25 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "powerscaling/powerscalingmath.glsl"
 
 layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_st;
+layout(location = 1) in vec2 in_texCoords;
 layout(location = 2) in vec3 in_normal;
 
-out vec2 vs_st;
-out float vs_screenSpaceDepth;
-out vec3 vs_normal;
+out Data {
+  vec2 texCoords;
+  vec3 normal;
+  float screenSpaceDepth;
+} out_data;
 
 uniform dmat4 modelViewProjectionMatrix;
 
 
 void main() {
-  vs_st = in_st;
-  vs_normal = mat3(modelViewProjectionMatrix) * in_normal;
-
-  dvec4 positionClipSpace  = modelViewProjectionMatrix * dvec4(in_position, 0.0, 1.0);
-  vec4 positionClipSpaceZNorm = z_normalization(vec4(positionClipSpace));
-  vs_screenSpaceDepth  = positionClipSpaceZNorm.w;
-  gl_Position = positionClipSpaceZNorm;
+  dvec4 positionClipSpace = modelViewProjectionMatrix * dvec4(in_position, 0.0, 1.0);
+  gl_Position = z_normalization(vec4(positionClipSpace));
+  out_data.normal = mat3(modelViewProjectionMatrix) * in_normal;
+  out_data.texCoords = in_texCoords;
+  out_data.screenSpaceDepth = gl_Position.w;
 }

@@ -190,18 +190,20 @@ set(SHADER_FILES
   shaders/disc_vs.glsl
   shaders/grid_vs.glsl
   shaders/grid_fs.glsl
-  shaders/imageplane_fs.glsl
-  shaders/imageplane_vs.glsl
   shaders/line_fs.glsl
   shaders/line_vs.glsl
+  shaders/model_depth_fs.glsl
+  shaders/model_depth_vs.glsl
   shaders/model_fs.glsl
   shaders/model_vs.glsl
+  shaders/modelopacity_fs.glsl
+  shaders/modelopacity_vs.glsl
   shaders/plane_fs.glsl
   shaders/plane_vs.glsl
   shaders/pointcloud/pointcloud_fs.glsl
   shaders/pointcloud/pointcloud_gs.glsl
-  shaders/pointcloud/pointcloud_vs.glsl
   shaders/pointcloud/pointcloud_interpolated_vs.glsl
+  shaders/pointcloud/pointcloud_vs.glsl
   shaders/polygon_fs.glsl
   shaders/polygon_gs.glsl
   shaders/polygon_vs.glsl
@@ -209,8 +211,6 @@ set(SHADER_FILES
   shaders/prism_vs.glsl
   shaders/renderabletrail_fs.glsl
   shaders/renderabletrail_vs.glsl
-  shaders/screenspace_fs.glsl
-  shaders/screenspace_vs.glsl
   shaders/screenspaceinsetblackout_vs.glsl
   shaders/screenspaceinsetblackout_fs.glsl
   shaders/sphere_fs.glsl

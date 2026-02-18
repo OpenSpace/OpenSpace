@@ -72,15 +72,6 @@ if (SGCT_SPOUT_SUPPORT AND NOT OPENSPACE_MODULE_SPOUT)
 endif ()
 
 
-#####
-# MacOS
-#####
-if (APPLE)
-  set(MACOSX_BUNDLE_ICON_FILE openspace.icns)
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "13.3" CACHE STRING "Minimum OS X deployment version" FORCE)
-  set(CMAKE_XCODE_ATTRIBUTE_OTHER_CODE_SIGN_FLAGS "--deep" CACHE STRING "Other Code Signing Flags" FORCE)
-endif ()
-
 create_new_application(OpenSpace
   ${SGCT_OPENVR_FILES}
   ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
@@ -130,7 +121,7 @@ if (TARGET SGCTTest)
   set_target_properties(SGCTTest PROPERTIES FOLDER "External")
 endif ()
 
-if (UNIX AND (NOT APPLE))
+if (UNIX)
   target_link_libraries(OpenSpace PRIVATE Xcursor Xinerama X11)
 endif ()
 

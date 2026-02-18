@@ -116,7 +116,7 @@ void SettingsDialog::createWidgets() {
             _rememberLastProfile,
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             &QCheckBox::checkStateChanged,
-#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
+#else // ^^^^ >=6.7.0 // <6.7.0
             &QCheckBox::stateChanged,
 #endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
@@ -176,7 +176,7 @@ void SettingsDialog::createWidgets() {
             _rememberLastConfiguration,
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             &QCheckBox::checkStateChanged,
-#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
+#else // ^^^^ >=6.7.0 // <6.7.0
             &QCheckBox::stateChanged,
 #endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
@@ -255,7 +255,7 @@ void SettingsDialog::createWidgets() {
             _bypassLauncher,
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             &QCheckBox::checkStateChanged,
-#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
+#else // ^^^^ >=6.7.0 // <6.7.0
             &QCheckBox::stateChanged,
 #endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {
@@ -331,7 +331,7 @@ void SettingsDialog::createWidgets() {
             _mrf.isEnabled,
 #if (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             &QCheckBox::checkStateChanged,
-#else // ^^^^ >=6.7.0 // !WIN32 <6.7.0
+#else // ^^^^ >=6.7.0 // <6.7.0
             &QCheckBox::stateChanged,
 #endif // (QT_VERSION >= QT_VERSION_CHECK(6, 7, 0))
             [this]() {

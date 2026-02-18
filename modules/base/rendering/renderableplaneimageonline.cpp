@@ -31,6 +31,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <cstdlib>
 #include <limits>
 #include <utility>
@@ -105,12 +106,9 @@ void RenderablePlaneImageOnline::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-void RenderablePlaneImageOnline::bindTexture() {
+void RenderablePlaneImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture) {
-        _texture->bind();
-    }
-    else {
-        glBindTexture(GL_TEXTURE_2D, 0);
+        unit.bind(*_texture);
     }
 }
 

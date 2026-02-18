@@ -44,7 +44,7 @@ public:
     static documentation::Documentation Documentation();
 
 protected:
-    virtual void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
 private:
     void loadTexture();

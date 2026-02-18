@@ -273,11 +273,14 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     });
 
     // Render
-    global::callback::render->emplace_back([this]() {
-        ZoneScopedN("GlobeBrowsingModule");
+    global::callback::render->emplace_back(
+        [this](const glm::mat4&, const glm::mat4&, const glm::mat4&) {
+            ZoneScopedN("GlobeBrowsingModule");
 
-        _tileCache->update();
-    });
+            _tileCache->update();
+
+        }
+    );
 
     // Deinitialize
     global::callback::deinitialize->emplace_back([]() {

@@ -30,6 +30,7 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <optional>
 #include <utility>
 
@@ -161,9 +162,9 @@ std::future<DownloadManager::MemoryFile> ScreenSpaceImageOnline::downloadImageTo
     );
 }
 
-void ScreenSpaceImageOnline::bindTexture() {
+void ScreenSpaceImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture) [[likely]] {
-        _texture->bind();
+        unit.bind(*_texture);
     }
 }
 

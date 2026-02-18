@@ -24,19 +24,18 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
-layout (location = 0) in vec3 in_position;
+layout(location = 0) in vec3 in_position;
 
-out float vs_depth;
+out Data {
+  float depth;
+} out_data;
 
 uniform mat4 modelViewProjectionTransform;
 
 
 void main() {
-  vec4 position = vec4(in_position, 1.0);
-  vec4 positionClipSpace = modelViewProjectionTransform * position;
-  vec4 positionScreenSpace = z_normalization(positionClipSpace);
-  gl_Position = positionScreenSpace;
-  vs_depth = positionScreenSpace.w;
+  gl_Position = z_normalization(modelViewProjectionTransform * vec4(in_position, 1.0));
+  out_data.depth = gl_Position.w;
 }

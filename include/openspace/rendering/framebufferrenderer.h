@@ -174,9 +174,9 @@ public:
      */
     virtual void updateRendererData();
 
-    virtual void raycastersChanged(VolumeRaycaster& raycaster,
+    void raycastersChanged(VolumeRaycaster& raycaster,
         RaycasterListener::IsAttached attached) override;
-    virtual void deferredcastersChanged(Deferredcaster& deferredcaster,
+    void deferredcastersChanged(Deferredcaster& deferredcaster,
         DeferredcasterListener::IsAttached isAttached) override;
 
     void registerShadowCaster(const std::string& shadowGroup,
@@ -216,15 +216,15 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _downscaledVolumeProgram;
 
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
-        Hue, Saturation, Value, Viewport, Resolution) _hdrUniformCache;
-    UniformCache(renderedTexture, inverseScreenSize, Viewport,
-        Resolution) _fxaaUniformCache;
+        hue, saturation, value, viewport, resolution) _hdrUniformCache;
+    UniformCache(renderedTexture, inverseScreenSize, viewport,
+        resolution) _fxaaUniformCache;
     UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth, viewport,
         resolution) _writeDownscaledVolumeUniformCache;
 
     GLint _defaultFBO = 0;
-    GLuint _screenQuad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
     GLuint _exitColorTexture = 0;
     GLuint _exitDepthTexture = 0;
     GLuint _exitFramebuffer = 0;

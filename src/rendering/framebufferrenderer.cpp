@@ -59,14 +59,14 @@ namespace {
     constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
     constexpr std::string_view ExitFragmentShaderPath =
-        "${SHADERS}/framebuffer/exitframebuffer.frag";
+        "${SHADERS}/framebuffer/exitframebuffer_fs.glsl";
     constexpr std::string_view RaycastFragmentShaderPath =
-        "${SHADERS}/framebuffer/raycastframebuffer.frag";
+        "${SHADERS}/framebuffer/raycastframebuffer_fs.glsl";
     constexpr std::string_view GetEntryInsidePath = "${SHADERS}/framebuffer/inside.glsl";
     constexpr std::string_view GetEntryOutsidePath =
         "${SHADERS}/framebuffer/outside.glsl";
     constexpr std::string_view RenderFragmentShaderPath =
-        "${SHADERS}/framebuffer/renderframebuffer.frag";
+        "${SHADERS}/framebuffer/renderframebuffer_fs.glsl";
 
     constexpr std::array<GLenum, 4> ColorAttachmentArray = {
        GL_COLOR_ATTACHMENT0,
@@ -141,45 +141,55 @@ void FramebufferRenderer::initialize() {
          1.f,  1.f,
     };
 
-    glGenVertexArrays(1, &_screenQuad);
-    glBindVertexArray(_screenQuad);
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, sizeof(VertexData), VertexData.data(), GL_NONE_BIT);
 
-    glGenBuffers(1, &_vertexPositionBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 2 * sizeof(GLfloat));
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(0);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
     // GBuffers
-    glGenTextures(1, &_gBuffers.colorTexture);
-    glGenTextures(1, &_gBuffers.depthTexture);
-    glGenTextures(1, &_gBuffers.positionTexture);
-    glGenTextures(1, &_gBuffers.normalTexture);
-    glGenFramebuffers(1, &_gBuffers.framebuffer);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_gBuffers.colorTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_gBuffers.depthTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_gBuffers.positionTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_gBuffers.normalTexture);
+    glCreateFramebuffers(1, &_gBuffers.framebuffer);
+    glObjectLabel(GL_FRAMEBUFFER, _gBuffers.framebuffer, -1, "G-Buffer Main");
 
 
     // PingPong Buffers
     // The first pingpong buffer shares the color texture with the renderbuffer:
     _pingPongBuffers.colorTexture[0] = _gBuffers.colorTexture;
-    glGenTextures(1, &_pingPongBuffers.colorTexture[1]);
-    glGenFramebuffers(1, &_pingPongBuffers.framebuffer);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_pingPongBuffers.colorTexture[1]);
+    glCreateFramebuffers(1, &_pingPongBuffers.framebuffer);
+    glObjectLabel(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer, -1, "G-Buffer Ping-Pong");
 
     // Exit framebuffer
-    glGenTextures(1, &_exitColorTexture);
-    glGenTextures(1, &_exitDepthTexture);
-    glGenFramebuffers(1, &_exitFramebuffer);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_exitColorTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_exitDepthTexture);
+    glCreateFramebuffers(1, &_exitFramebuffer);
+    glObjectLabel(GL_FRAMEBUFFER, _exitFramebuffer, -1, "Exit");
 
     // FXAA Buffers
-    glGenFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
-    glGenTextures(1, &_fxaaBuffers.fxaaTexture);
+    glCreateFramebuffers(1, &_fxaaBuffers.fxaaFramebuffer);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_fxaaBuffers.fxaaTexture);
+    glObjectLabel(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer, -1, "FXAA");
 
     // DownscaleVolumeRendering
-    glGenFramebuffers(1, &_downscaleVolumeRendering.framebuffer);
-    glGenTextures(1, &_downscaleVolumeRendering.colorTexture);
-    glGenTextures(1, &_downscaleVolumeRendering.depthbuffer);
+    glCreateFramebuffers(1, &_downscaleVolumeRendering.framebuffer);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_downscaleVolumeRendering.colorTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_downscaleVolumeRendering.depthbuffer);
+    glObjectLabel(
+        GL_FRAMEBUFFER,
+        _downscaleVolumeRendering.framebuffer,
+        -1,
+        "Downscaled Volume"
+    );
 
     // Allocate Textures/Buffers Memory
     updateResolution();
@@ -190,36 +200,32 @@ void FramebufferRenderer::initialize() {
     //==============================//
     //=====  GBuffers Buffers  =====//
     //==============================//
-    glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _gBuffers.framebuffer,
         GL_COLOR_ATTACHMENT0,
         _gBuffers.colorTexture,
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _gBuffers.framebuffer,
         GL_COLOR_ATTACHMENT1,
         _gBuffers.positionTexture,
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _gBuffers.framebuffer,
         GL_COLOR_ATTACHMENT2,
         _gBuffers.normalTexture,
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _gBuffers.framebuffer,
         GL_DEPTH_ATTACHMENT,
         _gBuffers.depthTexture,
         0
     );
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_FRAMEBUFFER, _gBuffers.framebuffer, -1, "G-Buffer Main");
-    }
 
-    GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    GLenum status = glCheckNamedFramebufferStatus(_gBuffers.framebuffer, GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Main framebuffer is not complete");
     }
@@ -227,35 +233,26 @@ void FramebufferRenderer::initialize() {
     //==============================//
     //=====  PingPong Buffers  =====//
     //==============================//
-    glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _pingPongBuffers.framebuffer,
         GL_COLOR_ATTACHMENT0,
         _pingPongBuffers.colorTexture[0],
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _pingPongBuffers.framebuffer,
         GL_COLOR_ATTACHMENT1,
         _pingPongBuffers.colorTexture[1],
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _pingPongBuffers.framebuffer,
         GL_DEPTH_ATTACHMENT,
         _gBuffers.depthTexture,
         0
     );
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(
-            GL_FRAMEBUFFER,
-            _pingPongBuffers.framebuffer,
-            -1,
-            "G-Buffer Ping-Pong"
-        );
-    }
 
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    status = glCheckNamedFramebufferStatus(_pingPongBuffers.framebuffer, GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Ping pong buffer is not complete");
     }
@@ -264,24 +261,20 @@ void FramebufferRenderer::initialize() {
     //=====  Volume Rendering Buffers  =====//
     //======================================//
     // Builds Exit Framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, _exitFramebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _exitFramebuffer,
         GL_COLOR_ATTACHMENT0,
         _exitColorTexture,
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _exitFramebuffer,
         GL_DEPTH_ATTACHMENT,
         _exitDepthTexture,
         0
     );
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_FRAMEBUFFER, _exitFramebuffer, -1, "Exit");
-    }
 
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    status = glCheckNamedFramebufferStatus(_exitFramebuffer, GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Exit framebuffer is not complete");
     }
@@ -289,18 +282,14 @@ void FramebufferRenderer::initialize() {
     //===================================//
     //==========  FXAA Buffers  =========//
     //===================================//
-    glBindFramebuffer(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _fxaaBuffers.fxaaFramebuffer,
         GL_COLOR_ATTACHMENT0,
         _fxaaBuffers.fxaaTexture,
         0
     );
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_FRAMEBUFFER, _fxaaBuffers.fxaaFramebuffer, -1, "FXAA");
-    }
 
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    status = glCheckNamedFramebufferStatus(_fxaaBuffers.fxaaFramebuffer, GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("FXAA framebuffer is not complete");
     }
@@ -308,29 +297,24 @@ void FramebufferRenderer::initialize() {
     //================================================//
     //=====  Downscale Volume Rendering Buffers  =====//
     //================================================//
-    glBindFramebuffer(GL_FRAMEBUFFER, _downscaleVolumeRendering.framebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _downscaleVolumeRendering.framebuffer,
         GL_COLOR_ATTACHMENT0,
         _downscaleVolumeRendering.colorTexture,
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _downscaleVolumeRendering.framebuffer,
         GL_DEPTH_ATTACHMENT,
         _downscaleVolumeRendering.depthbuffer,
         0
     );
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(
-            GL_FRAMEBUFFER,
-            _downscaleVolumeRendering.framebuffer,
-            -1,
-            "Downscaled Volume"
-        );
-    }
 
-    status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+    status = glCheckNamedFramebufferStatus(
+        _downscaleVolumeRendering.framebuffer,
+        GL_FRAMEBUFFER
+    );
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Downscale Volume Rendering framebuffer is not complete");
     }
@@ -357,7 +341,6 @@ void FramebufferRenderer::initialize() {
     global::deferredcasterManager->addListener(*this);
 
     // Set Default Rendering OpenGL State
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
     glEnablei(GL_BLEND, 0);
     glDisablei(GL_BLEND, 1);
     glDisablei(GL_BLEND, 2);
@@ -409,8 +392,8 @@ void FramebufferRenderer::deinitialize() {
     glDeleteTextures(1, &_exitColorTexture);
     glDeleteTextures(1, &_exitDepthTexture);
 
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    glDeleteVertexArrays(1, &_screenQuad);
+    glDeleteBuffers(1, &_vbo);
+    glDeleteVertexArrays(1, &_vao);
 
     global::raycasterManager->removeListener(*this);
     global::deferredcasterManager->removeListener(*this);
@@ -443,10 +426,7 @@ void FramebufferRenderer::registerShadowCaster(const std::string& shadowGroup,
             glm::ivec2(OpenGLCap.max2DTextureSize())
         );
 
-        GLint prevFbo;
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFbo);
-
-        glGenTextures(1, &info.depthMap.texture);
+        glCreateTextures(GL_TEXTURE_2D, 1, &info.depthMap.texture);
         glBindTexture(GL_TEXTURE_2D, info.depthMap.texture);
         glTexImage2D(
             GL_TEXTURE_2D,
@@ -459,29 +439,26 @@ void FramebufferRenderer::registerShadowCaster(const std::string& shadowGroup,
             GL_FLOAT,
             nullptr
         );
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        glTextureParameteri(info.depthMap.texture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(info.depthMap.texture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTextureParameteri(info.depthMap.texture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTextureParameteri(info.depthMap.texture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         constexpr glm::vec4 borderColor = glm::vec4(1.f, 1.f, 1.f, 1.f);
-        glTexParameterfv(
-            GL_TEXTURE_2D,
+        glTextureParameterfv(
+            info.depthMap.texture,
             GL_TEXTURE_BORDER_COLOR,
             glm::value_ptr(borderColor)
         );
 
-        glGenFramebuffers(1, &info.fbo);
+        glCreateFramebuffers(1, &info.fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, info.fbo);
-        glFramebufferTexture(
-            GL_FRAMEBUFFER,
+        glNamedFramebufferTexture(
+            info.fbo,
             GL_DEPTH_ATTACHMENT,
             info.depthMap.texture,
             0
         );
-        glDrawBuffer(GL_NONE);
-        glReadBuffer(GL_NONE);
-
-        glBindFramebuffer(GL_FRAMEBUFFER, prevFbo);
+        glNamedFramebufferDrawBuffer(info.fbo, GL_NONE);
 
         _shadowMaps.emplace(shadowGroup, info);
     }
@@ -553,28 +530,23 @@ void FramebufferRenderer::applyTMO(float blackoutFactor, const glm::ivec4& viewp
 
     _hdrFilteringProgram->activate();
 
-    ghoul::opengl::TextureUnit hdrFeedingTextureUnit;
-    hdrFeedingTextureUnit.activate();
-    glBindTexture(GL_TEXTURE_2D, _pingPongBuffers.colorTexture[_pingPongIndex]);
-
-    _hdrFilteringProgram->setUniform(
-        _hdrUniformCache.hdrFeedingTexture,
-        hdrFeedingTextureUnit
-    );
+    ghoul::opengl::TextureUnit hdrFeedingUnit;
+    hdrFeedingUnit.bind(_pingPongBuffers.colorTexture[_pingPongIndex]);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrFeedingTexture, hdrFeedingUnit);
 
     _hdrFilteringProgram->setUniform(_hdrUniformCache.blackoutFactor, blackoutFactor);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.hdrExposure, _hdrExposure);
     _hdrFilteringProgram->setUniform(_hdrUniformCache.gamma, _gamma);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Hue, _hue);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Saturation, _saturation);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Value, _value);
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Viewport, glm::vec4(viewport));
-    _hdrFilteringProgram->setUniform(_hdrUniformCache.Resolution, glm::vec2(_resolution));
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.hue, _hue);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.saturation, _saturation);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.value, _value);
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.viewport, glm::vec4(viewport));
+    _hdrFilteringProgram->setUniform(_hdrUniformCache.resolution, glm::vec2(_resolution));
 
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
 
-    glBindVertexArray(_screenQuad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
@@ -588,26 +560,18 @@ void FramebufferRenderer::applyFXAA(const glm::ivec4& viewport) {
     _fxaaProgram->activate();
 
     ghoul::opengl::TextureUnit renderedTextureUnit;
-    renderedTextureUnit.activate();
-    glBindTexture(
-        GL_TEXTURE_2D,
-        _fxaaBuffers.fxaaTexture
-    );
-
-    _fxaaProgram->setUniform(
-        _fxaaUniformCache.renderedTexture,
-        renderedTextureUnit
-    );
+    renderedTextureUnit.bind(_fxaaBuffers.fxaaTexture);
+    _fxaaProgram->setUniform(_fxaaUniformCache.renderedTexture, renderedTextureUnit);
 
     const glm::vec2 invScreenSize = glm::vec2(1.f / _resolution.x, 1.f / _resolution.y);
     _fxaaProgram->setUniform(_fxaaUniformCache.inverseScreenSize, invScreenSize);
-    _fxaaProgram->setUniform(_fxaaUniformCache.Viewport, glm::vec4(viewport));
-    _fxaaProgram->setUniform(_fxaaUniformCache.Resolution, glm::vec2(_resolution));
+    _fxaaProgram->setUniform(_fxaaUniformCache.viewport, glm::vec4(viewport));
+    _fxaaProgram->setUniform(_fxaaUniformCache.resolution, glm::vec2(_resolution));
 
     glDepthMask(false);
     glDisable(GL_DEPTH_TEST);
 
-    glBindVertexArray(_screenQuad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
@@ -632,10 +596,22 @@ void FramebufferRenderer::updateDownscaleTextures() const {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    constexpr float VolumeBorderColor[] = { 0.f, 0.f, 0.f, 1.f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, VolumeBorderColor);
+    glTextureParameteri(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_MAG_FILTER,
+        GL_LINEAR
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_MIN_FILTER,
+        GL_LINEAR
+    );
+    constexpr glm::vec4 VolumeBorderColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
+    glTextureParameterfv(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_BORDER_COLOR,
+        glm::value_ptr(VolumeBorderColor)
+    );
 
     glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);
     glTexImage2D(
@@ -649,32 +625,28 @@ void FramebufferRenderer::updateDownscaleTextures() const {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(
+        _downscaleVolumeRendering.depthbuffer,
+        GL_TEXTURE_MAG_FILTER, GL_LINEAR
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.depthbuffer,
+        GL_TEXTURE_MIN_FILTER, GL_LINEAR
+    );
 }
 
 void FramebufferRenderer::writeDownscaledVolume(const glm::ivec4& viewport) {
     _downscaledVolumeProgram->activate();
 
     ghoul::opengl::TextureUnit downscaledTextureUnit;
-    downscaledTextureUnit.activate();
-    glBindTexture(
-        GL_TEXTURE_2D,
-        _downscaleVolumeRendering.colorTexture
-    );
-
+    downscaledTextureUnit.bind(_downscaleVolumeRendering.colorTexture);
     _downscaledVolumeProgram->setUniform(
         _writeDownscaledVolumeUniformCache.downscaledRenderedVolume,
         downscaledTextureUnit
     );
 
     ghoul::opengl::TextureUnit downscaledDepthUnit;
-    downscaledDepthUnit.activate();
-    glBindTexture(
-        GL_TEXTURE_2D,
-        _downscaleVolumeRendering.depthbuffer
-    );
-
+    downscaledDepthUnit.bind(_downscaleVolumeRendering.depthbuffer);
     _downscaledVolumeProgram->setUniform(
         _writeDownscaledVolumeUniformCache.downscaledRenderedVolumeDepth,
         downscaledDepthUnit
@@ -703,7 +675,7 @@ void FramebufferRenderer::writeDownscaledVolume(const glm::ivec4& viewport) {
 
     glDisable(GL_DEPTH_TEST);
 
-    glBindVertexArray(_screenQuad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
@@ -819,13 +791,11 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _gBuffers.colorTexture, -1, "G-Buffer Color");
-    }
+    glTextureParameteri(_gBuffers.colorTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.colorTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.colorTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_gBuffers.colorTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glObjectLabel(GL_TEXTURE, _gBuffers.colorTexture, -1, "G-Buffer Color");
 
     glBindTexture(GL_TEXTURE_2D, _gBuffers.positionTexture);
     glTexImage2D(
@@ -839,13 +809,11 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _gBuffers.positionTexture, -1, "G-Buffer Position");
-    }
+    glTextureParameteri(_gBuffers.positionTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.positionTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.positionTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_gBuffers.positionTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glObjectLabel(GL_TEXTURE, _gBuffers.positionTexture, -1, "G-Buffer Position");
 
     glBindTexture(GL_TEXTURE_2D, _gBuffers.normalTexture);
     glTexImage2D(
@@ -859,13 +827,11 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _gBuffers.normalTexture, -1, "G-Buffer Normal");
-    }
+    glTextureParameteri(_gBuffers.normalTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.normalTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.normalTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_gBuffers.normalTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glObjectLabel(GL_TEXTURE, _gBuffers.normalTexture, -1, "G-Buffer Normal");
 
     glBindTexture(GL_TEXTURE_2D, _gBuffers.depthTexture);
     glTexImage2D(
@@ -879,13 +845,11 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _gBuffers.depthTexture, -1, "G-Buffer Depth");
-    }
+    glTextureParameteri(_gBuffers.depthTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.depthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_gBuffers.depthTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_gBuffers.depthTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glObjectLabel(GL_TEXTURE, _gBuffers.depthTexture, -1, "G-Buffer Depth");
 
     glBindTexture(GL_TEXTURE_2D, _pingPongBuffers.colorTexture[1]);
     glTexImage2D(
@@ -899,18 +863,32 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(
-            GL_TEXTURE,
-            _pingPongBuffers.colorTexture[1],
-            -1,
-            "G-Buffer Color Ping-Pong"
-        );
-    }
+    glTextureParameteri(
+        _pingPongBuffers.colorTexture[1],
+        GL_TEXTURE_WRAP_S,
+        GL_CLAMP_TO_EDGE
+    );
+    glTextureParameteri(
+        _pingPongBuffers.colorTexture[1],
+        GL_TEXTURE_WRAP_T,
+        GL_CLAMP_TO_EDGE
+    );
+    glTextureParameteri(
+        _pingPongBuffers.colorTexture[1],
+        GL_TEXTURE_MAG_FILTER,
+        GL_LINEAR
+    );
+    glTextureParameteri(
+        _pingPongBuffers.colorTexture[1],
+        GL_TEXTURE_MIN_FILTER,
+        GL_LINEAR
+    );
+    glObjectLabel(
+        GL_TEXTURE,
+        _pingPongBuffers.colorTexture[1],
+        -1,
+        "G-Buffer Color Ping-Pong"
+    );
 
     // FXAA
     glBindTexture(GL_TEXTURE_2D, _fxaaBuffers.fxaaTexture);
@@ -925,13 +903,11 @@ void FramebufferRenderer::updateResolution() {
         GL_UNSIGNED_BYTE,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _fxaaBuffers.fxaaTexture, -1, "FXAA");
-    }
+    glTextureParameteri(_fxaaBuffers.fxaaTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_fxaaBuffers.fxaaTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_fxaaBuffers.fxaaTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_fxaaBuffers.fxaaTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glObjectLabel(GL_TEXTURE, _fxaaBuffers.fxaaTexture, -1, "FXAA");
 
     const float cdf = _downscaleVolumeRendering.currentDownscaleFactor;
 
@@ -948,21 +924,39 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_WRAP_S,
+        GL_CLAMP_TO_EDGE
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_WRAP_T,
+        GL_CLAMP_TO_EDGE
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_MAG_FILTER,
+        GL_LINEAR
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_MIN_FILTER,
+        GL_LINEAR
+    );
 
-    constexpr std::array<float, 4> VolumeBorderColor = { 0.f, 0.f, 0.f, 1.f };
-    glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, VolumeBorderColor.data());
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(
-            GL_TEXTURE,
-            _downscaleVolumeRendering.colorTexture,
-            -1,
-            "Downscaled Volume Color"
-        );
-    }
+    constexpr glm::vec4 VolumeBorderColor = glm::vec4(0.f, 0.f, 0.f, 1.f);
+    glTextureParameterfv(
+        _downscaleVolumeRendering.colorTexture,
+        GL_TEXTURE_BORDER_COLOR,
+        glm::value_ptr(VolumeBorderColor)
+    );
+    glObjectLabel(
+        GL_TEXTURE,
+        _downscaleVolumeRendering.colorTexture,
+        -1,
+        "Downscaled Volume Color"
+    );
 
     glBindTexture(GL_TEXTURE_2D, _downscaleVolumeRendering.depthbuffer);
     glTexImage2D(
@@ -976,18 +970,32 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(
-            GL_TEXTURE,
-            _downscaleVolumeRendering.depthbuffer,
-            -1,
-            "Downscaled Volume Depth"
-        );
-    }
+    glTextureParameteri(
+        _downscaleVolumeRendering.depthbuffer,
+        GL_TEXTURE_WRAP_S,
+        GL_CLAMP_TO_EDGE
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.depthbuffer,
+        GL_TEXTURE_WRAP_T,
+        GL_CLAMP_TO_EDGE
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.depthbuffer,
+        GL_TEXTURE_MAG_FILTER,
+        GL_LINEAR
+    );
+    glTextureParameteri(
+        _downscaleVolumeRendering.depthbuffer,
+        GL_TEXTURE_MIN_FILTER,
+        GL_LINEAR
+    );
+    glObjectLabel(
+        GL_TEXTURE,
+        _downscaleVolumeRendering.depthbuffer,
+        -1,
+        "Downscaled Volume Depth"
+    );
 
     // Volume Rendering Textures
     glBindTexture(GL_TEXTURE_2D, _exitColorTexture);
@@ -1002,13 +1010,11 @@ void FramebufferRenderer::updateResolution() {
         GL_UNSIGNED_SHORT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _exitColorTexture, -1, "Exit color");
-    }
+    glTextureParameteri(_exitColorTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_exitColorTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_exitColorTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_exitColorTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glObjectLabel(GL_TEXTURE, _exitColorTexture, -1, "Exit color");
 
     glBindTexture(GL_TEXTURE_2D, _exitDepthTexture);
     glTexImage2D(
@@ -1022,13 +1028,11 @@ void FramebufferRenderer::updateResolution() {
         GL_FLOAT,
         nullptr
     );
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_TEXTURE, _exitDepthTexture, -1, "Exit depth");
-    }
+    glTextureParameteri(_exitDepthTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_exitDepthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_exitDepthTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_exitDepthTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glObjectLabel(GL_TEXTURE, _exitDepthTexture, -1, "Exit depth");
 
     _dirtyResolution = false;
 }
@@ -1099,7 +1103,7 @@ void FramebufferRenderer::updateRaycastData() {
             insideDict.setValue("getEntryPath", std::string(GetEntryInsidePath));
             _insideRaycastPrograms[raycaster] = ghoul::opengl::ProgramObject::Build(
                 std::format("Volume {} inside raycast", data.id),
-                absPath("${SHADERS}/framebuffer/resolveframebuffer.vert"),
+                absPath("${SHADERS}/framebuffer/resolveframebuffer_vs.glsl"),
                 absPath(RaycastFragmentShaderPath),
                 insideDict
             );
@@ -1154,14 +1158,13 @@ void FramebufferRenderer::updateDeferredcastData() {
     _dirtyDeferredcastData = false;
 }
 
-
 void FramebufferRenderer::updateHDRAndFiltering() {
     ZoneScoped;
 
     _hdrFilteringProgram = ghoul::opengl::ProgramObject::Build(
         "HDR and Filtering Program",
-        absPath("${SHADERS}/framebuffer/hdrAndFiltering.vert"),
-        absPath("${SHADERS}/framebuffer/hdrAndFiltering.frag")
+        absPath("${SHADERS}/framebuffer/hdr_and_filtering_vs.glsl"),
+        absPath("${SHADERS}/framebuffer/hdr_and_filtering_fs.glsl")
     );
 }
 
@@ -1170,8 +1173,8 @@ void FramebufferRenderer::updateFXAA() {
 
     _fxaaProgram = ghoul::opengl::ProgramObject::Build(
         "FXAA Program",
-        absPath("${SHADERS}/framebuffer/fxaa.vert"),
-        absPath("${SHADERS}/framebuffer/fxaa.frag")
+        absPath("${SHADERS}/framebuffer/fxaa_vs.glsl"),
+        absPath("${SHADERS}/framebuffer/fxaa_fs.glsl")
     );
 }
 
@@ -1180,8 +1183,8 @@ void FramebufferRenderer::updateDownscaledVolume() {
 
     _downscaledVolumeProgram = ghoul::opengl::ProgramObject::Build(
         "Write Downscaled Volume Program",
-        absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.vert"),
-        absPath("${SHADERS}/framebuffer/mergeDownscaledVolume.frag")
+        absPath("${SHADERS}/framebuffer/mergedownscaledvolume_vs.glsl"),
+        absPath("${SHADERS}/framebuffer/mergedownscaledvolume_fs.glsl")
     );
 }
 
@@ -1206,16 +1209,10 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         return;
     }
 
-    {
-        // deferred g-buffer
-        ZoneScopedN("Deferred G-Buffer");
-        TracyGpuZone("Deferred G-Buffer");
-
-        glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
-        glDrawBuffers(3, ColorAttachmentArray.data());
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
-    }
+    glNamedFramebufferDrawBuffers(_gBuffers.framebuffer, 3, ColorAttachmentArray.data());
+    glBindFramebuffer(GL_FRAMEBUFFER, _gBuffers.framebuffer);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
 
     RenderData data = {
         .camera = *camera,
@@ -1270,9 +1267,13 @@ void FramebufferRenderer::render(Scene* scene, Camera* camera, float blackoutFac
         // We use ping pong rendering in order to be able to render multiple deferred
         // tasks at same time (e.g. more than 1 ATM being seen at once) to the same final
         // buffer
-        glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
-        glDrawBuffers(1, &ColorAttachmentArray[_pingPongIndex]);
+        glNamedFramebufferDrawBuffers(
+            _pingPongBuffers.framebuffer,
+            1,
+            &ColorAttachmentArray[_pingPongIndex]
+        );
 
+        glBindFramebuffer(GL_FRAMEBUFFER, _pingPongBuffers.framebuffer);
         performDeferredTasks(tasks.deferredcasterTasks, viewport);
     }
 
@@ -1489,18 +1490,15 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             raycaster->preRaycast(_raycastData[raycaster], *raycastProgram);
 
             ghoul::opengl::TextureUnit exitColorTextureUnit;
-            exitColorTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, _exitColorTexture);
+            exitColorTextureUnit.bind(_exitColorTexture);
             raycastProgram->setUniform("exitColorTexture", exitColorTextureUnit);
 
             ghoul::opengl::TextureUnit exitDepthTextureUnit;
-            exitDepthTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, _exitDepthTexture);
+            exitDepthTextureUnit.bind(_exitDepthTexture);
             raycastProgram->setUniform("exitDepthTexture", exitDepthTextureUnit);
 
             ghoul::opengl::TextureUnit mainDepthTextureUnit;
-            mainDepthTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, _gBuffers.depthTexture);
+            mainDepthTextureUnit.bind(_gBuffers.depthTexture);
             raycastProgram->setUniform("mainDepthTexture", mainDepthTextureUnit);
 
             if (raycaster->downscaleRender() < 1.f) {
@@ -1520,7 +1518,7 @@ void FramebufferRenderer::performRaycasterTasks(const std::vector<RaycasterTask>
             glDisable(GL_DEPTH_TEST);
             glDepthMask(false);
             if (isCameraInside) {
-                glBindVertexArray(_screenQuad);
+                glBindVertexArray(_vao);
                 glDrawArrays(GL_TRIANGLES, 0, 6);
                 glBindVertexArray(0);
             }
@@ -1572,15 +1570,8 @@ void FramebufferRenderer::performDeferredTasks(
 
             // adding G-Buffer
             ghoul::opengl::TextureUnit mainDColorTextureUnit;
-            mainDColorTextureUnit.activate();
-            glBindTexture(
-                GL_TEXTURE_2D,
-                _pingPongBuffers.colorTexture[fromIndex]
-            );
-            deferredcastProgram->setUniform(
-                "mainColorTexture",
-                mainDColorTextureUnit
-            );
+            mainDColorTextureUnit.bind(_pingPongBuffers.colorTexture[fromIndex]);
+            deferredcastProgram->setUniform("mainColorTexture", mainDColorTextureUnit);
 
             deferredcastProgram->setUniform(
                 "viewport",
@@ -1593,20 +1584,15 @@ void FramebufferRenderer::performDeferredTasks(
 
 
             ghoul::opengl::TextureUnit mainPositionTextureUnit;
-            mainPositionTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, _gBuffers.positionTexture);
+            mainPositionTextureUnit.bind(_gBuffers.positionTexture);
             deferredcastProgram->setUniform(
                 "mainPositionTexture",
                 mainPositionTextureUnit
             );
 
             ghoul::opengl::TextureUnit mainNormalTextureUnit;
-            mainNormalTextureUnit.activate();
-            glBindTexture(GL_TEXTURE_2D, _gBuffers.normalTexture);
-            deferredcastProgram->setUniform(
-                "mainNormalTexture",
-                mainNormalTextureUnit
-            );
+            mainNormalTextureUnit.bind(_gBuffers.normalTexture);
+            deferredcastProgram->setUniform("mainNormalTexture", mainNormalTextureUnit);
 
             deferredcaster->preRaycast(
                 deferredcasterTask.renderData,
@@ -1617,7 +1603,7 @@ void FramebufferRenderer::performDeferredTasks(
             glDisable(GL_DEPTH_TEST);
             glDepthMask(false);
 
-            glBindVertexArray(_screenQuad);
+            glBindVertexArray(_vao);
             glDrawArrays(GL_TRIANGLES, 0, 6);
             glBindVertexArray(0);
 

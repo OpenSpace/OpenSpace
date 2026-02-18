@@ -66,7 +66,7 @@ struct ShutdownInformation;
 class RenderEngine : public properties::PropertyOwner {
 public:
     RenderEngine();
-    virtual ~RenderEngine() override;
+    ~RenderEngine() override;
 
     const FramebufferRenderer& renderer() const;
 

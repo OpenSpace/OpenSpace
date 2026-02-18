@@ -308,10 +308,10 @@ void RenderablePlanetProjection::initializeGL() {
             return global::renderEngine->buildRenderProgram(
                 "ProjectiveProgram",
                 absPath(
-                    "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_vs.glsl"
+                    "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableplanet_vs.glsl"
                 ),
                 absPath(
-                    "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderablePlanet_fs.glsl"
+                    "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/renderableplanet_fs.glsl"
                 )
             );
         }
@@ -326,11 +326,11 @@ void RenderablePlanetProjection::initializeGL() {
                 "FBOPassProgram",
                     absPath(
                         "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
-                        "renderablePlanetProjection_vs.glsl"
+                        "renderableplanetprojection_vs.glsl"
                     ),
                     absPath(
                         "${MODULE_SPACECRAFTINSTRUMENTS}/shaders/"
-                        "renderablePlanetProjection_fs.glsl"
+                        "renderableplanetprojection_fs.glsl"
                     )
             );
         }
@@ -346,23 +346,27 @@ void RenderablePlanetProjection::initializeGL() {
     setBoundingSphere(std::max(std::max(radius[0], radius[1]), radius[2]));
 
     // SCREEN-QUAD
-    constexpr std::array<GLfloat, 12> VertexData = {
-        -1.f, -1.f,
-         1.f,  1.f,
-        -1.f,  1.f,
-        -1.f, -1.f,
-         1.f, -1.f,
-         1.f,  1.f,
+    glCreateBuffers(1, &_vbo);
+    struct Vertex {
+        float x;
+        float y;
     };
+    constexpr std::array<Vertex, 6> VertexData = {
+        Vertex { -1.f, -1.f },
+        Vertex {  1.f,  1.f },
+        Vertex { -1.f,  1.f },
+        Vertex { -1.f, -1.f },
+        Vertex {  1.f, -1.f },
+        Vertex {  1.f,  1.f }
+    };
+    glNamedBufferStorage(_vbo, 6 * sizeof(Vertex), VertexData.data(), GL_NONE_BIT);
 
-    glGenVertexArrays(1, &_quad);
-    glBindVertexArray(_quad);
-    glGenBuffers(1, &_vertexPositionBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 2 * sizeof(float));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 }
 
 void RenderablePlanetProjection::deinitializeGL() {
@@ -371,8 +375,8 @@ void RenderablePlanetProjection::deinitializeGL() {
     _projectionComponent.deinitialize();
     _baseTexture = nullptr;
 
-    glDeleteVertexArrays(1, &_quad);
-    glDeleteBuffers(1, &_vertexPositionBuffer);
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     SpacecraftInstrumentsModule::ProgramObjectManager.release(
         "ProjectiveProgram",
@@ -399,17 +403,16 @@ void RenderablePlanetProjection::imageProjectGPU(
     _fboProgramObject->activate();
 
     ghoul::opengl::TextureUnit unitFbo;
-    unitFbo.activate();
-    projectionTexture.bind();
+    unitFbo.bind(projectionTexture);
     _fboProgramObject->setUniform(_fboUniformCache.projectionTexture, unitFbo);
 
-    _fboProgramObject->setUniform(_fboUniformCache.ProjectorMatrix, projectorMatrix);
-    _fboProgramObject->setUniform(_fboUniformCache.ModelTransform, _transform);
+    _fboProgramObject->setUniform(_fboUniformCache.projectorMatrix, projectorMatrix);
+    _fboProgramObject->setUniform(_fboUniformCache.modelTransform, _transform);
     _fboProgramObject->setUniform(_fboUniformCache.boresight, _boresight);
     _fboProgramObject->setUniform(_fboUniformCache.radius, _radius);
     _fboProgramObject->setUniform(_fboUniformCache.segments, _segments);
 
-    glBindVertexArray(_quad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     _fboProgramObject->deactivate();
 
@@ -510,7 +513,7 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
 
     // Main renderpass
     _programObject->activate();
-    _programObject->setUniform(_mainUniformCache.sun_pos, static_cast<glm::vec3>(sunPos));
+    _programObject->setUniform(_mainUniformCache.sunPos, static_cast<glm::vec3>(sunPos));
 
     // Model transform and view transform needs to be in double precision
     const glm::dmat4 modelTransform = calcModelTransform(data);
@@ -539,20 +542,17 @@ void RenderablePlanetProjection::render(const RenderData& data, RendererTasks&) 
 
     ghoul::opengl::TextureUnit baseUnit;
     if (_baseTexture) {
-        baseUnit.activate();
-        _baseTexture->bind();
+        baseUnit.bind(*_baseTexture);
         _programObject->setUniform(_mainUniformCache.baseTexture, baseUnit);
     }
 
     ghoul::opengl::TextureUnit projectionUnit;
-    projectionUnit.activate();
-    _projectionComponent.projectionTexture().bind();
+    projectionUnit.bind(_projectionComponent.projectionTexture());
     _programObject->setUniform(_mainUniformCache.projectionTexture, projectionUnit);
 
     ghoul::opengl::TextureUnit heightUnit;
     if (_heightMapTexture) {
-        heightUnit.activate();
-        _heightMapTexture->bind();
+        heightUnit.bind(*_heightMapTexture);
         _programObject->setUniform(_mainUniformCache.heightTexture, heightUnit);
     }
 

@@ -77,7 +77,7 @@ public:
 
     explicit Renderable(const ghoul::Dictionary& dictionary,
         RenderableSettings settings = RenderableSettings());
-    virtual ~Renderable() override = default;
+    ~Renderable() override = default;
 
     virtual void initialize();
     virtual void initializeGL();

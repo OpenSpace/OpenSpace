@@ -29,6 +29,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 #include <array>
 
 namespace {
@@ -46,7 +47,8 @@ documentation::Documentation ScreenSpaceRenderableFramebuffer::Documentation() {
     using namespace documentation;
     return {
         "ScreenSpaceRenderableFramebuffer",
-        "screenspace_framebuffer"
+        "screenspace_framebuffer",
+        ""
     };
 }
 
@@ -163,8 +165,8 @@ int ScreenSpaceRenderableFramebuffer::id() {
     return id++;
 }
 
-void ScreenSpaceRenderableFramebuffer::bindTexture() {
-    _texture->bind();
+void ScreenSpaceRenderableFramebuffer::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_texture);
 }
 
 } //namespace openspace

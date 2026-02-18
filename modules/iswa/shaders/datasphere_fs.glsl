@@ -22,11 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "PowerScaling/powerScaling_fs.hglsl"
+#include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
 
-in vec2 vs_st;
-in vec4 vs_position;
+in Data {
+  vec4 position;
+  vec2 texCoords;
+} in_data;
 
 uniform sampler2D textures[6];
 uniform sampler2D transferFunctions[6];
@@ -41,8 +43,6 @@ const vec4 Transparent = vec4(0.0);
 
 
 Fragment getFragment() {
-  vec4 position = vs_position;
-  float depth = pscDepth(position);
   vec4 diffuse = Transparent;
 
   float x = backgroundValues.x;
@@ -51,7 +51,7 @@ Fragment getFragment() {
   if ((numTransferFunctions == 1) || (numTextures > numTransferFunctions)) {
     float v = 0;
     for (int i = 0; i < numTextures; i++) {
-      v += texture(textures[i], vec2(vs_st.t, vs_st.s)).r;
+      v += texture(textures[i], vec2(in_data.texCoords.ts)).r;
     }
     v /= numTextures;
 
@@ -64,7 +64,7 @@ Fragment getFragment() {
   }
   else {
     for (int i = 0; i < numTextures; i++) {
-      float v = texture(textures[i], vec2(vs_st.t, vs_st.s)).r;
+      float v = texture(textures[i], in_data.texCoords.ts).r;
       vec4 color = texture(transferFunctions[i], vec2(v, 0.0));
       if ((v < (x + y)) && v > (x - y)) {
           color = mix(Transparent, color, clamp(1.0, 0.0, abs(v - x)));
@@ -77,8 +77,10 @@ Fragment getFragment() {
     discard;
   }
 
+  diffuse.a *= transparency;
+
   Fragment frag;
-  frag.color = diffuse * vec4(1.0, 1.0, 1.0, transparency);
-  frag.depth = depth;
+  frag.color = diffuse;
+  frag.depth = pscDepth(in_data.position);
   return frag;
 }

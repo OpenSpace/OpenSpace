@@ -71,10 +71,10 @@ protected:
 
     bool _gridIsDirty = true;
 
-    GLuint _vaoID = 0;
-    GLuint _vBufferID = 0;
-    GLuint _highlightVaoID = 0;
-    GLuint _highlightVBufferID = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
+    GLuint _highlightVao = 0;
+    GLuint _highlightVbo = 0;
 
     GLenum _mode = GL_LINES;
     std::vector<Vertex> _varray;

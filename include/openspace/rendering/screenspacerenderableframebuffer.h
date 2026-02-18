@@ -45,7 +45,7 @@ public:
     using RenderFunction = std::function<void()>;
 
     explicit ScreenSpaceRenderableFramebuffer(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceRenderableFramebuffer() override;
+    ~ScreenSpaceRenderableFramebuffer() override;
 
     void initializeGL() override;
     void deinitializeGL() override;
@@ -62,7 +62,7 @@ protected:
     properties::Vec2Property _size;
 
 private:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
     static int id();
 

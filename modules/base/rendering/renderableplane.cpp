@@ -47,6 +47,11 @@
 #include <variant>
 
 namespace {
+    struct Vertex {
+        glm::vec4 position;
+        glm::vec2 texCoords;
+    };
+
     enum RenderOption {
         ViewDirection = 0,
         PositionNormal,
@@ -342,8 +347,27 @@ bool RenderablePlane::isReady() const {
 void RenderablePlane::initializeGL() {
     ZoneScoped;
 
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, 6 * sizeof(Vertex), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(
+        _vao,
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        offsetof(Vertex, texCoords)
+    );
+    glVertexArrayAttribBinding(_vao, 1, 0);
+
     createPlane();
 
     _shader = BaseModule::ProgramObjectManager.request(
@@ -363,11 +387,8 @@ void RenderablePlane::initializeGL() {
 void RenderablePlane::deinitializeGL() {
     ZoneScoped;
 
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     BaseModule::ProgramObjectManager.release(
         "Plane",
@@ -436,8 +457,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    bindTexture();
+    bindTexture(unit);
     defer { unbindTexture(); };
 
     _shader->setUniform(_uniformCache.colorTexture, unit);
@@ -451,7 +471,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     }
     glDisable(GL_CULL_FACE);
 
-    glBindVertexArray(_quad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
@@ -463,7 +483,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->deactivate();
 }
 
-void RenderablePlane::bindTexture() {}
+void RenderablePlane::bindTexture(ghoul::opengl::TextureUnit&) {}
 
 void RenderablePlane::unbindTexture() {}
 
@@ -483,32 +503,17 @@ void RenderablePlane::update(const UpdateData&) {
 void RenderablePlane::createPlane() {
     const GLfloat sizeX = _size.value().x;
     const GLfloat sizeY = _size.value().y;
-    const std::array<GLfloat, 36> vertexData = {
-        //   x       y    z    w    s    t
-        -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
-         sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f,
-        -sizeX,  sizeY, 0.f, 0.f, 0.f, 1.f,
-        -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
-         sizeX, -sizeY, 0.f, 0.f, 1.f, 0.f,
-         sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f
+
+    const std::array<Vertex, 6> vertexData = {
+        Vertex{ glm::vec4(-sizeX, -sizeY, 0.f, 0.f), glm::vec2(0.f, 0.f) },
+        Vertex{ glm::vec4( sizeX,  sizeY, 0.f, 0.f), glm::vec2(1.f, 1.f) },
+        Vertex{ glm::vec4(-sizeX,  sizeY, 0.f, 0.f), glm::vec2(0.f, 1.f) },
+        Vertex{ glm::vec4(-sizeX, -sizeY, 0.f, 0.f), glm::vec2(0.f, 0.f) },
+        Vertex{ glm::vec4( sizeX, -sizeY, 0.f, 0.f), glm::vec2(1.f, 0.f) },
+        Vertex{ glm::vec4( sizeX,  sizeY, 0.f, 0.f), glm::vec2(1.f, 1.f) }
     };
 
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
-    );
-    glBindVertexArray(0);
+    glNamedBufferSubData(_vbo, 0, sizeof(vertexData), vertexData.data());
 }
 
 glm::dmat4 RenderablePlane::rotationMatrix(const RenderData& data) const {

@@ -100,14 +100,11 @@ std::string GenerateRawVolumeFromFileTask::description() {
 }
 
 void GenerateRawVolumeFromFileTask::perform(const ProgressCallback& progressCallback) {
-
     dataloader::Dataset data = dataloader::csv::loadCsvFile(_inputFilePath);
     progressCallback(0.3f);
 
     if (data.isEmpty()) {
-        LERROR(std::format(
-            "Error loading CSV data in file '{}'", _inputFilePath.string()
-        ));
+        LERROR(std::format("Error loading CSV data in file '{}'", _inputFilePath));
         return;
     }
 

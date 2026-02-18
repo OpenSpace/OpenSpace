@@ -31,6 +31,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <filesystem>
 #include <optional>
 #include <utility>
@@ -126,9 +127,9 @@ void ScreenSpaceImageLocal::update() {
     }
 }
 
-void ScreenSpaceImageLocal::bindTexture() {
+void ScreenSpaceImageLocal::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture) [[likely]] {
-        _texture->bind();
+        unit.bind(*_texture);
     }
 }
 

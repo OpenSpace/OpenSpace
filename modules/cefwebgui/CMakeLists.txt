@@ -28,24 +28,30 @@ include(../webbrowser/cmake/webbrowser_helpers.cmake)
 set(CEFWEBGUI_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "CEFWEBGUI_MODULE_PATH")
 set(CEFWEBGUI_SOURCE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/web CACHE INTERNAL "CEFWEBGUI_MODULE_PATH")
 
-set(OPENSPACE_HEADER_FILES
+set(HEADER_FILES
   cefwebguimodule.h
   include/guirenderhandler.h
   include/guikeyboardhandler.h
 )
-source_group("Header Files" FILES ${OPENSPACE_HEADER_FILES})
+source_group("Header Files" FILES ${HEADER_FILES})
 
-set(OPENSPACE_SOURCE_FILES
+set(SOURCE_FILES
   cefwebguimodule.cpp
   src/guirenderhandler.cpp
   src/guikeyboardhandler.cpp
 )
-source_group("Source Files" FILES ${OPENSPACE_SOURCE_FILES})
+source_group("Source Files" FILES ${SOURCE_FILES})
+
+set(SHADER_FILES
+  shaders/gui_fs.glsl
+  shaders/gui_vs.glsl
+)
+source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
   CefWebGui
   cefwebgui_module
-  ${OPENSPACE_HEADER_FILES} ${OPENSPACE_SOURCE_FILES}
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
 target_precompile_headers(${cefwebgui_module} PRIVATE

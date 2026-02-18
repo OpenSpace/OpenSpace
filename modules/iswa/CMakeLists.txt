@@ -68,10 +68,11 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 set(SHADER_FILES
   shaders/dataplane_fs.glsl
   shaders/dataplane_vs.glsl
+  shaders/datasphere_fs.glsl
+  shaders/datasphere_vs.glsl
   shaders/textureplane_fs.glsl
   shaders/textureplane_vs.glsl
 )
-
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(

@@ -438,50 +438,43 @@ void ImGUIModule::internalInitializeGL() {
         ImGui::GetIO().Fonts->TexID = reinterpret_cast<void*>(texture);
     }
 
-    glGenBuffers(1, &vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, 0, nullptr, GL_DYNAMIC_DRAW);
+    glCreateBuffers(1, &vbo);
+    glNamedBufferData(vbo, 0, nullptr, GL_DYNAMIC_DRAW);
 
-    glGenBuffers(1, &vboElements);
+    glCreateBuffers(1, &vboElements);
 
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glCreateVertexArrays(1, &vao);
+    glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(ImDrawVert));
+    glVertexArrayElementBuffer(vao, vboElements);
 
     const GLuint positionAttrib = _program->attributeLocation("in_position");
-    const GLuint uvAttrib = _program->attributeLocation("in_uv");
-    const GLuint colorAttrib = _program->attributeLocation("in_color");
+    glEnableVertexArrayAttrib(vao, positionAttrib);
+    glVertexArrayAttribFormat(vao, positionAttrib, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vao, positionAttrib, 0);
 
-    glEnableVertexAttribArray(positionAttrib);
-    glVertexAttribPointer(
-        positionAttrib,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(ImDrawVert),
-        nullptr
-    );
-
-    glEnableVertexAttribArray(uvAttrib);
-    glVertexAttribPointer(
+    const GLuint uvAttrib = _program->attributeLocation("in_texCoords");
+    glEnableVertexArrayAttrib(vao, uvAttrib);
+    glVertexArrayAttribFormat(
+        vao,
         uvAttrib,
         2,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(ImDrawVert),
-        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, uv))
+        offsetof(ImDrawVert, uv)
     );
+    glVertexArrayAttribBinding(vao, uvAttrib, 0);
 
-    glEnableVertexAttribArray(colorAttrib);
-    glVertexAttribPointer(
+    const GLuint colorAttrib = _program->attributeLocation("in_color");
+    glEnableVertexArrayAttrib(vao, colorAttrib);
+    glVertexArrayAttribFormat(
+        vao,
         colorAttrib,
         4,
         GL_UNSIGNED_BYTE,
         GL_TRUE,
-        sizeof(ImDrawVert),
-        reinterpret_cast<GLvoid*>(offsetof(ImDrawVert, col))
+        offsetof(ImDrawVert, col)
     );
-    glBindVertexArray(0);
+    glVertexArrayAttribBinding(vao, colorAttrib, 0);
 
     for (gui::GuiComponent* comp : _components) {
         comp->initializeGL();
@@ -593,8 +586,7 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
     glEnable(GL_SCISSOR_TEST);
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    _fontTexture->bind();
+    unit.bind(*_fontTexture);
 
     // Setup orthographic projection matrix
     const float width = ImGui::GetIO().DisplaySize.x;
@@ -617,17 +609,15 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
         const ImDrawList* cmdList = drawData->CmdLists[i];
         const ImDrawIdx* indexBufferOffset = nullptr;
 
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glNamedBufferData(
+            vbo,
             cmdList->VtxBuffer.size() * sizeof(ImDrawVert),
             reinterpret_cast<const GLvoid*>(&cmdList->VtxBuffer.front()),
             GL_STREAM_DRAW
         );
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vboElements);
-        glBufferData(
-            GL_ELEMENT_ARRAY_BUFFER,
+        glNamedBufferData(
+            vboElements,
             cmdList->IdxBuffer.size() * sizeof(ImDrawIdx),
             reinterpret_cast<const GLvoid*>(&cmdList->IdxBuffer.front()),
             GL_STREAM_DRAW

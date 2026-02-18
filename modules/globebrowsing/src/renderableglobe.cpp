@@ -377,23 +377,23 @@ const Chunk& findChunkNode(const Chunk& node, const Geodetic2& location) {
     return *n;
 }
 
-#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
+#if defined(__linux__) && defined(__clang__)
 using ChunkTileVector = std::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
-#else
+#else // ^^^^ __linux__ && __clang__ // !(__linux__ && __clang__) vvvv
 using ChunkTileVector =
     std::pmr::vector<std::pair<ChunkTile, const LayerRenderSettings*>>;
-#endif
+#endif // __linux__ && __clang__
 
 ChunkTileVector tilesAndSettingsUnsorted(const LayerGroup& layerGroup,
                                          const TileIndex& tileIndex)
 {
     ZoneScoped;
 
-#if defined(__APPLE__) || (defined(__linux__) && defined(__clang__))
+#if (defined(__linux__) && defined(__clang__))
     ChunkTileVector tilesAndSettings;
-#else
+#else // ^^^^ __linux__ && __clang__ // !(__linux__ && __clang__) vvvv
     ChunkTileVector tilesAndSettings(&global::memoryManager->TemporaryMemory);
-#endif
+#endif // __linux__ && __clang__
     for (Layer* layer : layerGroup.activeLayers()) {
         if (layer->tileProvider()) {
             tilesAndSettings.emplace_back(
@@ -1468,15 +1468,14 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
 
     std::vector<GLint> boundUnits;
     for (auto& [unit, depthMap] : depthmapTextureUnits) {
-        unit.activate();
-        glBindTexture(GL_TEXTURE_2D, depthMap);
+        unit.bind(depthMap);
         boundUnits.push_back(unit);
     }
 
     if (!_shadowers.empty() && _shadowersOk) {
-        program.setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
-        program.setUniform("light_depth_maps", boundUnits);
-        GLint loc = glGetUniformLocation(program, "light_vps");
+        program.setUniform("inverseView", glm::inverse(data.camera.combinedViewMatrix()));
+        program.setUniform("lightDepthMaps", boundUnits);
+        GLint loc = glGetUniformLocation(program, "lightView");
         glUniformMatrix4dv(
             loc,
             static_cast<GLsizei>(lightViewProjections.size()),
@@ -1535,14 +1534,12 @@ void RenderableGlobe::renderChunkGlobally(const Chunk& chunk, const RenderData& 
             ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
 
             if (_ringsComponent->textureColor()) {
-                ringTextureColorUnit.activate();
-                _ringsComponent->textureColor()->bind();
+                ringTextureColorUnit.bind(*_ringsComponent->textureColor());
                 program.setUniform("ringTextureColor", ringTextureColorUnit);
             }
 
             if (_ringsComponent->textureTransparency()) {
-                ringTextureTransparencyUnit.activate();
-                _ringsComponent->textureTransparency()->bind();
+                ringTextureTransparencyUnit.bind(*_ringsComponent->textureTransparency());
                 program.setUniform(
                     "ringTextureTransparency",
                     ringTextureTransparencyUnit
@@ -1674,14 +1671,12 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
             ghoul::opengl::TextureUnit ringTextureTransparencyUnit;
 
             if (_ringsComponent->textureColor()) {
-                ringTextureColorUnit.activate();
-                _ringsComponent->textureColor()->bind();
+                ringTextureColorUnit.bind(*_ringsComponent->textureColor());
                 program.setUniform("ringTextureColor", ringTextureColorUnit);
             }
 
             if (_ringsComponent->textureTransparency()) {
-                ringTextureTransparencyUnit.activate();
-                _ringsComponent->textureTransparency()->bind();
+                ringTextureTransparencyUnit.bind(*_ringsComponent->textureTransparency());
                 program.setUniform(
                     "ringTextureTransparency",
                     ringTextureTransparencyUnit
@@ -1702,15 +1697,17 @@ void RenderableGlobe::renderChunkLocally(const Chunk& chunk, const RenderData& d
 
     std::vector<GLint> boundUnits;
     for (auto& [unit, depthMap] : depthmapTextureUnits) {
-        unit.activate();
-        glBindTexture(GL_TEXTURE_2D, depthMap);
+        unit.bind(depthMap);
         boundUnits.push_back(unit);
     }
 
     if (!_shadowers.empty() && _shadowersOk) {
-        _localRenderer.program->setUniform("inv_vp", glm::inverse(data.camera.combinedViewMatrix()));
-        _localRenderer.program->setUniform("light_depth_maps", boundUnits);
-        GLint loc = glGetUniformLocation(*_localRenderer.program, "light_vps");
+        _localRenderer.program->setUniform(
+            "inverseView",
+            glm::inverse(data.camera.combinedViewMatrix())
+        );
+        _localRenderer.program->setUniform("lightDepthMaps", boundUnits);
+        GLint loc = glGetUniformLocation(*_localRenderer.program, "lightView");
         glUniformMatrix4dv(
             loc,
             static_cast<GLsizei>(lightViewProjections.size()),

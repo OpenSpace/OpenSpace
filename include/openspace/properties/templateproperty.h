@@ -72,7 +72,7 @@ public:
      *
      * \return The type info object describing the template parameter `T`
      */
-    virtual const std::type_info& type() const override;
+    const std::type_info& type() const override;
 
     /**
      * This operator allows the TemplateProperty to be used almost transparently as if it

@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef TEXTURETILE_HGLSL
-#define TEXTURETILE_HGLSL
+#ifndef _GLOBEBROWSING___TEXTURETILE___GLSL_
+#define _GLOBEBROWSING___TEXTURETILE___GLSL_
 
 struct TileDepthTransform {
   float depthScale;
@@ -69,4 +69,4 @@ struct Layer {
   vec3 color;
 };
 
-#endif // TEXTURETILE_HGLSL
+#endif // _GLOBEBROWSING___TEXTURETILE___GLSL_

@@ -28,6 +28,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/font/fontmanager.h>
+#include <ghoul/opengl/textureunit.h>
 #include <array>
 #include <optional>
 
@@ -111,9 +112,7 @@ void ScreenSpaceRenderableText::update() {
 }
 
 void ScreenSpaceRenderableText::render(const RenderData& renderData) {
-    const glm::vec2& resolution = global::windowDelegate->currentDrawBufferResolution();
     glm::vec2 size = _texture->dimensions();
-    const glm::vec2 ratio = resolution / size;
 
     std::array<GLint, 4> viewport;
     glGetIntegerv(GL_VIEWPORT, viewport.data());
@@ -170,8 +169,8 @@ void ScreenSpaceRenderableText::updateFramebuffer() {
     ghoul::opengl::FramebufferObject::deactivate();
 }
 
-void ScreenSpaceRenderableText::bindTexture() {
-    _texture->bind();
+void ScreenSpaceRenderableText::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_texture);
 }
 
 } //namespace openspace

@@ -24,13 +24,15 @@
 
 #include "fragment.glsl"
 
-in vec4 vs_color;
-in float vs_depth;
+in Data {
+  vec4 color;
+  float depth;
+} in_data;
 
 
 Fragment getFragment() {
   Fragment frag;
-  frag.color = vs_color;
-  frag.depth = vs_depth;
+  frag.color = in_data.color;
+  frag.depth = in_data.depth;
   return frag;
 }

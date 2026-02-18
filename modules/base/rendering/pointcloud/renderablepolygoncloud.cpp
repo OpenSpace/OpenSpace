@@ -81,9 +81,7 @@ RenderablePolygonCloud::RenderablePolygonCloud(const ghoul::Dictionary& dictiona
 
 void RenderablePolygonCloud::deinitializeGL() {
     glDeleteBuffers(1, &_polygonVbo);
-    _polygonVbo = 0;
     glDeleteVertexArrays(1, &_polygonVao);
-    _polygonVao = 0;
 
     glDeleteTextures(1, &_pTexture);
 
@@ -108,13 +106,13 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     gl::GLenum format = gl::GLenum(glFormat(useAlpha));
     gl::GLenum internalFormat = GL_RGBA8;
 
-    glGenTextures(1, &_pTexture);
+    glCreateTextures(GL_TEXTURE_2D, 1, &_pTexture);
+    glTextureParameteri(_pTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(_pTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(_pTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(_pTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
     glBindTexture(GL_TEXTURE_2D, _pTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    // Stopped using a buffer object for GL_PIXEL_UNPACK_BUFFER
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
     glTexImage2D(
         GL_TEXTURE_2D,
@@ -134,17 +132,16 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     // Allocate memory: N channels, with one byte each
     constexpr unsigned int nChannels = 4;
     unsigned int arraySize = TexSize * TexSize * nChannels;
-    std::vector<GLubyte> pixelData;
-    pixelData.resize(arraySize);
-    glBindTexture(GL_TEXTURE_2D, _pTexture);
-    glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, pixelData.data());
+    std::vector<GLubyte> pixels;
+    pixels.resize(arraySize);
+    glGetTextureImage(_pTexture, 0, format, GL_UNSIGNED_BYTE, arraySize, pixels.data());
 
     // Create array from data, size and format
     unsigned int id = 0;
-    glGenTextures(1, &id);
+    glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
     glBindTexture(GL_TEXTURE_2D_ARRAY, id);
     initAndAllocateTextureArray(id, glm::uvec2(TexSize), 1, useAlpha);
-    fillAndUploadTextureLayer(0, 0, 0, glm::uvec2(TexSize), useAlpha, pixelData.data());
+    fillAndUploadTextureLayer(0, 0, 0, glm::uvec2(TexSize), useAlpha, pixels.data());
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
     _textureIsInitialized = true;
@@ -162,47 +159,27 @@ void RenderablePolygonCloud::renderToTexture(GLuint textureToRenderTo,
     glGetIntegerv(GL_VIEWPORT, viewport.data());
 
     GLuint textureFBO;
-    glGenFramebuffers(1, &textureFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
+    glCreateFramebuffers(1, &textureFBO);
     const GLenum drawBuffers = GL_COLOR_ATTACHMENT0;
-    glDrawBuffers(1, &drawBuffers);
-
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureToRenderTo, 0);
+    glNamedFramebufferDrawBuffers(textureFBO, 1, &drawBuffers);
+    glNamedFramebufferTexture(textureFBO, GL_COLOR_ATTACHMENT0, textureToRenderTo, 0);
 
     glViewport(viewport[0], viewport[1], textureWidth, textureHeight);
 
-    if (_polygonVao == 0) {
-        glGenVertexArrays(1, &_polygonVao);
-    }
-    if (_polygonVbo == 0) {
-        glGenBuffers(1, &_polygonVbo);
-    }
-
-    glBindVertexArray(_polygonVao);
-    glBindBuffer(GL_ARRAY_BUFFER, _polygonVbo);
-
+    glCreateBuffers(1, &_polygonVbo);
     constexpr std::array<GLfloat, 4> VertexData = {
         // x  y  z  w
         0.f, 0.f, 0.f, 1.f,
     };
+    glNamedBufferData(_polygonVbo, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_polygonVao);
+    glVertexArrayVertexBuffer(_polygonVao, 0, _polygonVbo, 0, sizeof(VertexData));
 
-    renderPolygonGeometry(_polygonVao);
+    glEnableVertexArrayAttrib(_polygonVao, 0);
+    glVertexArrayAttribFormat(_polygonVao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_polygonVao, 0, 0);
 
-    // Restores Applications' OpenGL State
-    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
-    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
-
-    glDeleteBuffers(1, &_polygonVbo);
-    glDeleteVertexArrays(1, &_polygonVao);
-    glDeleteFramebuffers(1, &textureFBO);
-}
-
-void RenderablePolygonCloud::renderPolygonGeometry(GLuint vao) const {
     std::unique_ptr<ghoul::opengl::ProgramObject> program =
         ghoul::opengl::ProgramObject::Build(
             "RenderablePointCloud_Polygon",
@@ -213,15 +190,22 @@ void RenderablePolygonCloud::renderPolygonGeometry(GLuint vao) const {
 
     program->activate();
     constexpr glm::vec4 Black = glm::vec4(0.f, 0.f, 0.f, 0.f);
-    glClearBufferfv(GL_COLOR, 0, glm::value_ptr(Black));
+    glClearNamedFramebufferfv(textureFBO, GL_COLOR, 0, glm::value_ptr(Black));
 
     program->setUniform("sides", _nPolygonSides);
 
-    glBindVertexArray(vao);
+    glBindFramebuffer(GL_FRAMEBUFFER, textureFBO);
+    glBindVertexArray(_polygonVao);
     glDrawArrays(GL_POINTS, 0, 1);
-    glBindVertexArray(0);
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
 
     program->deactivate();
+
+    glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
+
+    glDeleteBuffers(1, &_polygonVbo);
+    glDeleteVertexArrays(1, &_polygonVao);
+    glDeleteFramebuffers(1, &textureFBO);
 }
 
 } // namespace openspace

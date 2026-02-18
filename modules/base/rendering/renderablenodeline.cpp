@@ -43,6 +43,10 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableNodeLine";
 
+    struct Vertex {
+        glm::vec3 position;
+    };
+
     constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
         "StartNode",
         "Start node",
@@ -277,26 +281,20 @@ void RenderableNodeLine::initializeGL() {
         }
     );
 
-    // Generate
-    glGenVertexArrays(1, &_vaoId);
-    glGenBuffers(1, &_vBufferId);
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, 2 * sizeof(Vertex), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
 
-    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glEnableVertexAttribArray(_locVertex);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 }
 
 void RenderableNodeLine::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vaoId);
-    _vaoId = 0;
-
-    glDeleteBuffers(1, &_vBufferId);
-    _vBufferId = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     BaseModule::ProgramObjectManager.release(
         "NodeLineProgram",
@@ -313,7 +311,7 @@ bool RenderableNodeLine::isReady() const {
     return ready;
 }
 
-void RenderableNodeLine::updateVertexData() {
+void RenderableNodeLine::update(const UpdateData&) {
     SceneGraphNode* startNode = global::renderEngine->scene()->sceneGraphNode(_start);
     SceneGraphNode* endNode = global::renderEngine->scene()->sceneGraphNode(_end);
 
@@ -326,8 +324,6 @@ void RenderableNodeLine::updateVertexData() {
         LERROR(std::format("Could not find end node '{}'", _end.value()));
         return;
     }
-
-    _vertexArray.clear();
 
     // Update the positions of the nodes
     _startPos = coordinatePosFromAnchorNode(startNode->worldPosition());
@@ -343,35 +339,11 @@ void RenderableNodeLine::updateVertexData() {
 
     // Compute line positions
     const glm::dvec3 dir = glm::normalize(_endPos - _startPos);
-    const glm::dvec3 startPos = _startPos + startOffset * dir;
-    const glm::dvec3 endPos = _endPos - endOffset * dir;
+    const glm::vec3 startPos = _startPos + startOffset * dir;
+    const glm::vec3 endPos = _endPos - endOffset * dir;
 
-    _vertexArray.push_back(static_cast<float>(startPos.x));
-    _vertexArray.push_back(static_cast<float>(startPos.y));
-    _vertexArray.push_back(static_cast<float>(startPos.z));
-
-    _vertexArray.push_back(static_cast<float>(endPos.x));
-    _vertexArray.push_back(static_cast<float>(endPos.y));
-    _vertexArray.push_back(static_cast<float>(endPos.z));
-
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _vertexArray.size() * sizeof(float),
-        _vertexArray.data(),
-        GL_DYNAMIC_DRAW
-    );
-
-    // update vertex attributes
-    glVertexAttribPointer(_locVertex, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-void RenderableNodeLine::update(const UpdateData&) {
-    updateVertexData();
+    std::array<Vertex, 2> Vertices = { startPos, endPos };
+    glNamedBufferSubData(_vbo, 0, Vertices.size() * sizeof(Vertex), Vertices.data());
 }
 
 void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
@@ -394,20 +366,15 @@ void RenderableNodeLine::render(const RenderData& data, RendererTasks&) {
     _program->setUniform("projectionTransform", data.camera.projectionMatrix());
     _program->setUniform("color", glm::vec4(_lineColor.value(), opacity()));
 
-    // Change GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
     glLineWidth(_lineWidth);
 
-    // Bind and draw
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_LINES, 0, 2);
-
-    // Restore GL State
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
+
     _program->deactivate();
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();

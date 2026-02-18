@@ -42,36 +42,6 @@
     7372800.0,
     14745600.0
   ],
-  "keybindings": [
-    {
-      "action": "os.voyager.FocusVoyager1",
-      "key": "V"
-    },
-    {
-      "action": "os.voyager.FocusVoyager2",
-      "key": "SHIFT+V"
-    },
-    {
-      "action": "os.voyager.SetupJupiterApproach",
-      "key": "SHIFT+J"
-    },
-    {
-      "action": "os.voyager.SetupSaturnApproach",
-      "key": "SHIFT+S"
-    },
-    {
-      "action": "os.voyager.JupiterFocus",
-      "key": "J"
-    },
-    {
-      "action": "os.voyager.SaturnFocus",
-      "key": "S"
-    },
-    {
-      "action": "os.voyager.ToggleMinorMoonTrails",
-      "key": "SHIFT+H"
-    }
-  ],
   "mark_nodes": [
     "Voyager_1",
     "Voyager_2",

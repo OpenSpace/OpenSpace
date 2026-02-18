@@ -22,10 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "PowerScaling/powerScaling_fs.hglsl"
+#include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
-
-in vec2 out_position;
 
 uniform float opacity;
 uniform vec3 color;

@@ -35,6 +35,7 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <cstdlib>
 #include <limits>
 
@@ -136,8 +137,8 @@ void RenderablePlaneImageLocal::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-void RenderablePlaneImageLocal::bindTexture() {
-    _texture->bind();
+void RenderablePlaneImageLocal::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_texture);
 }
 
 void RenderablePlaneImageLocal::update(const UpdateData& data) {

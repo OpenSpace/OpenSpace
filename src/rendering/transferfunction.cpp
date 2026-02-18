@@ -235,9 +235,4 @@ size_t TransferFunction::width() {
     return _texture->width();
 }
 
-void TransferFunction::bind() {
-    update();
-    _texture->bind();
-}
-
 } // namespace openspace

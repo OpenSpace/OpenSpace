@@ -262,8 +262,13 @@ RenderableEclipseCone::RenderableEclipseCone(const ghoul::Dictionary& dictionary
 }
 
 void RenderableEclipseCone::initializeGL() {
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
+    glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(VBOLayout));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     _shader = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         "ShadowCylinderProgram",
@@ -289,9 +294,7 @@ void RenderableEclipseCone::deinitializeGL() {
     _shader = nullptr;
 
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
     glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
 }
 
 bool RenderableEclipseCone::isReady() const {
@@ -511,18 +514,12 @@ void RenderableEclipseCone::createCone(double et) {
         _nVertices = static_cast<int>(umbralVertices.size());
     }
 
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vbo,
         vertices.size() * sizeof(VBOLayout),
         vertices.data(),
         GL_DYNAMIC_DRAW
     );
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    glBindVertexArray(0);
 }
 
 } // namespace openspace

@@ -57,9 +57,9 @@ protected:
     properties::Vec3Property _yColor;
     properties::Vec3Property _zColor;
 
-    GLuint _vaoId = 0;
-    GLuint _vBufferId = 0;
-    GLuint _iBufferId = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
+    GLuint _ibo = 0;
 };
 
 }// namespace openspace

@@ -57,17 +57,12 @@ private:
     void deinitializeGL() override;
 
     bool isReady() const override;
-    void updateVertexData();
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
     ghoul::opengl::ProgramObject* _program = nullptr;
-    /// The vertex attribute location for position
-    /// must correlate to layout location in vertex shader
-    const GLuint _locVertex = 0;
-    GLuint _vaoId = 0;
-    GLuint _vBufferId = 0;
-    std::vector<float> _vertexArray;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 
     glm::dvec3 _startPos = glm::dvec3(0.0);
     glm::dvec3 _endPos = glm::dvec3(0.0);

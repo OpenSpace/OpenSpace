@@ -39,11 +39,11 @@
 
 namespace {
     constexpr std::string_view GlslRaycastPath =
-        "${MODULES}/galaxy/shaders/galaxyraycast.glsl";
+        "${MODULE_GALAXY}/shaders/galaxyraycast.glsl";
     constexpr std::string_view GlslBoundsVsPath =
-        "${MODULES}/galaxy/shaders/raycasterbounds_vs.glsl";
+        "${MODULE_GALAXY}/shaders/raycasterbounds_vs.glsl";
     constexpr std::string_view GlslBoundsFsPath =
-        "${MODULES}/galaxy/shaders/raycasterbounds_fs.glsl";
+        "${MODULE_GALAXY}/shaders/raycasterbounds_fs.glsl";
 } // namespace
 
 namespace openspace {
@@ -114,8 +114,7 @@ void GalaxyRaycaster::preRaycast(const RaycastData& data,
     program.setUniform(std::format("emissionMultiply{}", data.id), _emissionMultiply);
 
     _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _textureUnit->activate();
-    _texture.bind();
+    _textureUnit->bind(_texture);
     program.setUniform(std::format("galaxyTexture{}", data.id), *_textureUnit);
 }
 

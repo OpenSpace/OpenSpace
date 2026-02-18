@@ -24,10 +24,12 @@
 
 #include "fragment.glsl"
 
-in float vs_positionDepth;
-in vec4 vs_gPosition;
-in float fade;
-noperspective in vec2 mathLine;
+in Data {
+  vec4 gPosition;
+  float positionDepth;
+  float fade;
+  noperspective vec2 mathLine;
+} in_data;
 
 uniform vec3 color;
 uniform int renderPhase;
@@ -44,18 +46,17 @@ const float Delta = 0.25;
 
 Fragment getFragment() {
   Fragment frag;
-  frag.color = vec4(color * fade, fade * opacity);
-  frag.depth = vs_positionDepth;
-  frag.blend = BLEND_MODE_ADDITIVE;
+  frag.color = vec4(color * in_data.fade, in_data.fade * opacity);
+  frag.depth = in_data.positionDepth;
+  frag.blend = BlendModeAdditive;
 
   if (renderPhase == RenderPhasePoints) {
     // Use the length of the vector (dot(circCoord, circCoord)) as factor in the
     // smoothstep to gradually decrease the alpha on the edges of the point
     vec2 circCoord = 2.0 * gl_PointCoord - 1.0;
-    //float circleClipping = 1.0 - smoothstep(1.0 - Delta, 1.0, dot(circCoord, circCoord));
     float circleClipping = smoothstep(1.0, 1.0 - Delta, dot(circCoord, circCoord));
     frag.color.a *= circleClipping;
-  } 
+  }
   else {
     // We can't expect a viewport of the form (0, 0, res.x, res.y) used to convert the
     // window coordinates from gl_FragCoord into [0, 1] coordinates, so we need to use
@@ -63,22 +64,19 @@ Fragment getFragment() {
     vec2 xy = vec2(gl_FragCoord.xy);
     xy -= viewport.xy;
 
-    double distanceCenter = length(mathLine - xy);
+    double distanceCenter = length(in_data.mathLine - xy);
     double dLW = double(lineWidth);
-    const float blendFactor = 20.0;
+    const float BlendFactor = 20.0;
 
     if (distanceCenter > dLW) {
       frag.color.a = 0.0;
     }
     else {
-      frag.color.a *= pow(float((dLW - distanceCenter) / dLW), blendFactor);
+      frag.color.a *= pow(float((dLW - distanceCenter) / dLW), BlendFactor);
     }
   }
 
-  frag.gPosition = vs_gPosition;
-
-  // There is no normal here
+  frag.gPosition = in_data.gPosition;
   frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
-
   return frag;
 }

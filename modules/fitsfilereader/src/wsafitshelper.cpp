@@ -51,9 +51,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         readFitsHeader(path);
         std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
         if (!file.get()) {
-            LERROR(std::format(
-                "Failed to open, therefore removing file {}", path.string()
-            ));
+            LERROR(std::format("Failed to open, therefore removing file {}", path));
             std::filesystem::remove(path);
             return nullptr;
         }
@@ -76,9 +74,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
             fitsValues->contents[std::slice(layerIndex*layerSize, layerSize, 1)];
 
         if (layerValues.size() == 0) {
-            LERROR(std::format(
-                "Failed to load {} as no layers were available", path.string()
-            ));
+            LERROR(std::format("Failed to load {} as no layers were available", path));
             return nullptr;
         }
 
@@ -110,9 +106,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         return texture;
     }
     catch (const CCfits::FitsException& e) {
-        LERROR(std::format(
-            "Failed to open fits file '{}'. '{}'", path.string(), e.message()
-        ));
+        LERROR(std::format("Failed to open fits file '{}'. '{}'", path, e.message()));
         std::filesystem::remove(path);
         return nullptr;
     }

@@ -192,8 +192,8 @@ void RenderableIswaCygnet::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_ALPHA_TEST);
     glDisable(GL_CULL_FACE);
 
-    _shader->setUniform("ViewProjection", data.camera.viewProjectionMatrix());
-    _shader->setUniform("ModelTransform", transform);
+    _shader->setUniform("viewProjection", data.camera.viewProjectionMatrix());
+    _shader->setUniform("modelTransform", transform);
 
     _shader->setUniform("campos", glm::vec4(data.camera.positionVec3(), 1.f));
     _shader->setUniform("objpos", glm::vec4(position, 0.f));

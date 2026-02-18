@@ -124,14 +124,14 @@ private:
     // Estimated end of sequence.
     double _sequenceEndTime;
     // OpenGL Vertex Array Object
-    GLuint _vertexArrayObject = 0;
+    GLuint _vao = 0;
     // OpenGL Vertex Buffer Object containing the vertex positions
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vboPosition = 0;
     // OpenGL Vertex Buffer Object containing the Flux values used for coloring
     // the nodes
-    GLuint _vertexColorBuffer = 0;
+    GLuint _vboColor = 0;
     // OpenGL Vertex Buffer Object containing the positions to filter the nodes
-    GLuint _vertexFilteringBuffer = 0;
+    GLuint _vboFilter = 0;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shaderProgram;
 

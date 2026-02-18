@@ -33,7 +33,7 @@ class ScannerDecoder : public Decoder {
 public:
     explicit ScannerDecoder(const ghoul::Dictionary& dictionary);
 
-    virtual std::string_view decoderType() const override;
+    std::string_view decoderType() const override;
     const std::vector<std::string>& spiceIDs() const;
     void setStopCommand(std::string stopCommand);
 

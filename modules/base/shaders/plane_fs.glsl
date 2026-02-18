@@ -24,10 +24,12 @@
 
 #include "fragment.glsl"
 
-in vec4 vs_gPosition;
-in vec3 vs_gNormal;
-in float vs_screenSpaceDepth;
-in vec2 vs_st;
+in Data {
+  vec4 gPosition;
+  vec2 texCoords;
+  vec3 gNormal;
+  float screenSpaceDepth;
+} in_data;
 
 uniform sampler2D colorTexture;
 uniform float opacity = 1.0;
@@ -36,31 +38,27 @@ uniform vec3 multiplyColor;
 
 
 Fragment getFragment() {
-  Fragment frag;
+  vec4 color;
   if (gl_FrontFacing) {
-    frag.color = texture(colorTexture, vs_st);
+    color = texture(colorTexture, in_data.texCoords);
   }
   else {
     if (mirrorBackside) {
-      frag.color = texture(colorTexture, vec2(1.0 - vs_st.s, vs_st.t));
+      color = texture(colorTexture, vec2(1.0 - in_data.texCoords.s, in_data.texCoords.t));
     }
     else {
-      frag.color = texture(colorTexture, vs_st);
+      color = texture(colorTexture, in_data.texCoords);
     }
   }
 
-  frag.color.rgb *= multiplyColor;
-
-  frag.color.a *= opacity;
+  Fragment frag;
+  frag.color = color * vec4(multiplyColor, opacity);
   if (frag.color.a == 0.0) {
     discard;
   }
 
-  frag.depth = vs_screenSpaceDepth;
-
-  // G-Buffer
-  frag.gPosition = vs_gPosition;
-  frag.gNormal = vec4(vs_gNormal, 1.0);
-
+  frag.depth = in_data.screenSpaceDepth;
+  frag.gPosition = in_data.gPosition;
+  frag.gNormal = vec4(in_data.gNormal, 1.0);
   return frag;
 }

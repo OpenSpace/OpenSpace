@@ -83,7 +83,7 @@ namespace {
     constexpr std::string_view _loggerCat = "RenderEngine";
 
     constexpr std::chrono::seconds ScreenLogTimeToLive(15);
-    constexpr std::string_view RenderFsPath = "${SHADERS}/render.frag";
+    constexpr std::string_view RenderFsPath = "${SHADERS}/render_fs.glsl";
 
     constexpr std::string_view KeyFontMono = "Mono";
     constexpr std::string_view KeyFontLight = "Light";
