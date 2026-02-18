@@ -1963,7 +1963,94 @@ local S2017J11Label = {
   }
 }
 
+local S2003J24 = {
+  Identifier = "S2003J24",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2003J24,
+      Observer = coreKernels.ID.JupiterBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 1000, 1000, 1000 } -- 2km in diameter
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_jupiter",
+    "moon_ananke",
+    "moon_minor",
+    "moon_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 24",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J24"
+  }
+}
 
+local S2003J24Trail = {
+  Identifier = "S2003J24Trail",
+  Parent = transforms.JupiterBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels347.ID.S2003J24,
+      Observer = coreKernels.ID.JupiterBarycenter
+    },
+    Color = { 0.4, 0.3, 0.01 },
+    Period = 715.4,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_jupiter",
+    "moonTrail_ananke",
+    "moonTrail_minor",
+    "moonTrail_minor_jupiter"
+  },
+  GUI = {
+    Name = "S/2003 J 24 Trail",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J24",
+    Focusable = false
+  }
+}
+
+local S2003J24Label = {
+  Identifier = "S2003J24Label",
+  Parent = S2017J11.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2003 J 24",
+    FontSize = 70.0,
+    Size = 7.1,
+    MinMaxSize = { 1, 25 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Gm",
+    FadeDistances = { 1.5, 90.0 },
+    FadeWidths = { 0.5, 90.0 }
+  },
+  Tag = {
+    "solarsystem_labels",
+    "moon_labels",
+    "minor_moon_labels",
+    "minor_moon_labels_jupiter",
+    "minor_moon_labels_ananke"
+  },
+  GUI = {
+    Name = "S/2003 J 24 Label",
+    Path = "/Solar System/Planets/Jupiter/Minor Moons/Ananke Group/S2003J24",
+    Focusable = false,
+    Description = "Label for Jupiter's moon S/2003 J 24 (Ananke group)"
+  }
+}
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(S2010J2)
@@ -2053,9 +2140,17 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(S2017J11)
   openspace.addSceneGraphNode(S2017J11Trail)
   openspace.addSceneGraphNode(S2017J11Label)
+
+  openspace.addSceneGraphNode(S2003J24)
+  openspace.addSceneGraphNode(S2003J24Trail)
+  openspace.addSceneGraphNode(S2003J24Label)
 end)
 
 asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(S2003J24Label)
+  openspace.removeSceneGraphNode(S2003J24Trail)
+  openspace.removeSceneGraphNode(S2003J24)
+
   openspace.removeSceneGraphNode(S2017J11Label)
   openspace.removeSceneGraphNode(S2017J11Trail)
   openspace.removeSceneGraphNode(S2017J11)
@@ -2229,10 +2324,13 @@ asset.export(S2003J12)
 asset.export(S2003J12Trail)
 asset.export(S2003J12Label)
 
-asset.export(S2003J12)
-asset.export(S2003J12Trail)
-asset.export(S2003J12Label)
+asset.export(S2003J24)
+asset.export(S2003J24Trail)
+asset.export(S2003J24Label)
 
+asset.export(S2017J11)
+asset.export(S2017J11Trail)
+asset.export(S2017J11Label)
 
 asset.meta = {
   Name = "Jupiter Ananke Group Moons",
