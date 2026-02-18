@@ -105,7 +105,6 @@ local ID = {
   Valetudo = 562
 }
 
--- Combined frame references
 local Frame = {
   Adrastea = coreKernels.Frame.Adrastea,
   Amalthea = coreKernels.Frame.Amalthea,
@@ -132,7 +131,6 @@ local Frame = {
   Themisto = coreKernels.Frame.Themisto
 }
 
--- Load jup347 only
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels .. "jup347.bsp")
 end)
@@ -141,11 +139,9 @@ asset.onDeinitialize(function()
   openspace.spice.unloadKernel(kernels .. "jup347.bsp")
 end)
 
--- Export combined tables
 asset.export("ID", ID)
 asset.export("Frame", Frame)
 
--- Asset metadata
 asset.meta = {
   Name = "Jupiter Spice Kernels",
   Description = "All Jovian moons in a single SPICE kernel (jup347.bsp)",
