@@ -14,6 +14,8 @@ asset.onInitialize(function()
   openspace.bindKey("Shift+F", actions.ToggleZoomFriction)
   openspace.bindKey("Ctrl+F", actions.ToggleRollFriction)
 
+  openspace.bindKey("R", actions.ToggleIdleBehavior)
+
   openspace.bindKey("B", actions.FadeToBlack)
 
   openspace.bindKey("F1", actions.ToggleMainGui)
@@ -51,6 +53,8 @@ asset.onDeinitialize(function()
   openspace.clearKey("F1")           -- actions.ToggleMainGui
 
   openspace.clearKey("B")            -- actions.FadeToBlack
+
+  openspace.clearKey("R")            -- actions.ToggleIdleBehavior
 
   openspace.clearKey("Ctrl+F")       -- actions.ToggleRollFriction
   openspace.clearKey("Shift+F")      -- actions.ToggleZoomFriction
