@@ -132,7 +132,8 @@ scripting::LuaLibrary ScreenSpaceDashboard::luaLibrary() {
         "dashboard",
         {
             codegen::lua::AddDashboardItemToScreenSpace,
-            codegen::lua::RemoveDashboardItemsFromScreenSpace
+            codegen::lua::RemoveDashboardItemsFromScreenSpace,
+            codegen::lua::LoadCameraFBX
         }
     };
 }

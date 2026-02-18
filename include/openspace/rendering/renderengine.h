@@ -95,6 +95,8 @@ public:
     float hdrExposure() const;
     bool isHdrDisabled() const;
 
+    void loadCameraFBX(const std::filesystem::path& path);
+
     void addScreenSpaceRenderable(std::unique_ptr<ScreenSpaceRenderable> s);
     void removeScreenSpaceRenderable(ScreenSpaceRenderable* s);
     void removeScreenSpaceRenderable(std::string_view identifier);

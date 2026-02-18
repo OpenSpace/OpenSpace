@@ -52,6 +52,7 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
+#include <ghoul/io/model/modelgeometry.h>
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/io/model/modelreaderassimp.h>
 #include <ghoul/io/model/modelreaderbinary.h>
@@ -78,6 +79,7 @@
 
 #include "renderengine_lua.inl"
 #include <thread>
+
 
 namespace {
     constexpr std::string_view _loggerCat = "RenderEngine";
@@ -1132,7 +1134,7 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
             codegen::lua::RemoveScreenSpaceRenderable,
             codegen::lua::TakeScreenshot,
             codegen::lua::DpiScaling,
-            codegen::lua::ResetScreenshotNumber
+            codegen::lua::ResetScreenshotNumber,
         }
     };
 }
@@ -1203,6 +1205,13 @@ ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(std::string_view iden
     else {
         return nullptr;
     }
+}
+
+void RenderEngine::loadCameraFBX(const std::filesystem::path& path) {
+    ghoul::io::ModelReader::ref().loadCameraPath(
+        path
+    );
+    //const auto& nodes = geometry->nodes();
 }
 
 std::vector<ScreenSpaceRenderable*> RenderEngine::screenSpaceRenderables() const {
