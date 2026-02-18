@@ -9,41 +9,83 @@ local kernels = asset.resource({
   Version = 2
 })
 
-
 local ID = {
+  -- Major moons
   Ariel = "ARIEL",
   Miranda = "MIRANDA",
   Oberon = "OBERON",
   Titania = "TITANIA",
   Umbriel = "UMBRIEL",
-  Uranus = "URANUS"
+  Uranus = "URANUS",
+
+  -- Inner moons
+  Belinda = "BELINDA",
+  Bianca = "BIANCA",
+  Cordelia = "CORDELIA",
+  Cressida = "CRESSIDA",
+  Cupid = "CUPID",
+  Desdemona = "DESDEMONA",
+  Juliet = "JULIET",
+  Mab = "MAB",
+  Ophelia = "OPHELIA",
+  Perdita = "PERDITA",
+  Portia = "PORTIA",
+  Puck = "PUCK",
+  Rosalind = "ROSALIND",
+  S2025U1 = 75052
+
+  -- Irregular moons
+  Caliban = "CALIBAN",
+  Ferdinand = "FERDINAND",
+  Francisco = "FRANCISCO",
+  Margaret = "MARGARET",
+  Prospero = "PROSPERO",
+  Setebos = "SETEBOS",
+  Stephano = "STEPHANO",
+  Sycorax = "SYCORAX",
+  Trinculo = "TRINCULO",
+  S2023U1 = 75051
 }
 
 local Frame = {
+  -- Major moons
   Ariel = coreKernels.Frame.Ariel,
   Miranda = coreKernels.Frame.Miranda,
   Oberon = coreKernels.Frame.Oberon,
   Titania = coreKernels.Frame.Titania,
-  Umbriel = coreKernels.Frame.Umbriel
+  Umbriel = coreKernels.Frame.Umbriel,
+
+  -- Inner moons (only those defined in coreKernels)
+  Belinda = coreKernels.Frame.Belinda,
+  Bianca = coreKernels.Frame.Bianca,
+  Cordelia = coreKernels.Frame.Cordelia,
+  Cressida = coreKernels.Frame.Cressida,
+  Desdemona = coreKernels.Frame.Desdemona,
+  Juliet = coreKernels.Frame.Juliet,
+  Ophelia = coreKernels.Frame.Ophelia,
+  Portia = coreKernels.Frame.Portia,
+  Puck = coreKernels.Frame.Puck,
+  Rosalind = coreKernels.Frame.Rosalind
 }
 
-
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels .. "ura111.bsp")
+  openspace.spice.loadKernel(kernels .. "ura184_part-1.bsp")
+  openspace.spice.loadKernel(kernels .. "ura184_part-2.bsp")
+  openspace.spice.loadKernel(kernels .. "ura184_part-3.bsp")
 end)
 
 asset.onDeinitialize(function()
-  openspace.spice.unloadKernel(kernels .. "ura111.bsp")
+  openspace.spice.unloadKernel(kernels .. "ura184_part-3.bsp")
+  openspace.spice.unloadKernel(kernels .. "ura184_part-2.bsp")
+  openspace.spice.unloadKernel(kernels .. "ura184_part-1.bsp")
 end)
 
 asset.export("ID", ID)
 asset.export("Frame", Frame)
 
-
-
 asset.meta = {
   Name = "Uranus Spice Kernels",
-  Description = "Generic SPICE kernels for Uranus",
+  Description = "SPICE kernels for Uranus",
   Author = "OpenSpace Team",
   URL = "https://naif.jpl.nasa.gov/pub/naif/pds/wgc/kernels/spk/",
   License = "NASA"
