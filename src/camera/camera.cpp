@@ -191,7 +191,7 @@ const glm::dquat& Camera::rotationQuaternion() const {
     return _rotation;
 }
 
-const CameraPose& Camera::pose() const {
+const CameraPose Camera::pose() const {
     return {
         .position = _position,
         .rotation = _rotation
