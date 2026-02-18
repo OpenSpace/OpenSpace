@@ -1,6 +1,6 @@
 local transforms = asset.require("../transforms")
-local kernels344 = asset.require("../kernels344")
-local kernels346 = asset.require("../kernels346")
+local kernels347 = asset.require("../kernels347")
+local kernels347 = asset.require("../kernels347")
 local coreKernels = asset.require("spice/core")
 
 
@@ -11,7 +11,7 @@ local Carpo = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels344.ID.Carpo,
+      Target = kernels347.ID.Carpo,
       Observer = coreKernels.ID.JupiterBarycenter
     }
   },
@@ -40,7 +40,7 @@ local CarpoTrail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels344.ID.Carpo,
+      Target = kernels347.ID.Carpo,
       Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
@@ -132,7 +132,7 @@ local S2018J4 = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels346.ID.S2018J4,
+      Target = kernels347.ID.S2018J4,
       Observer = coreKernels.ID.JupiterBarycenter
     }
   },
@@ -161,7 +161,7 @@ local S2018J4Trail = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
-      Target = kernels346.ID.S2018J4,
+      Target = kernels347.ID.S2018J4,
       Observer = coreKernels.ID.JupiterBarycenter
     },
     Color = { 0.4, 0.3, 0.01 },
