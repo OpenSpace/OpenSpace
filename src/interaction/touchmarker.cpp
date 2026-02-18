@@ -78,8 +78,13 @@ TouchMarker::TouchMarker()
 TouchMarker::~TouchMarker() {}
 
 void TouchMarker::initializeGL() {
-    glGenVertexArrays(1, &_quad);
-    glGenBuffers(1, &_vertexPositionBuffer);
+    glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 2 * sizeof(float));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     _shader = global::renderEngine->buildRenderProgram(
         "TouchMarkerProgram",
@@ -91,11 +96,8 @@ void TouchMarker::initializeGL() {
 }
 
 void TouchMarker::deinitializeGL() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     if (_shader) {
         global::renderEngine->removeRenderProgram(_shader.get());
@@ -119,8 +121,8 @@ void TouchMarker::render(const std::vector<openspace::TouchInputHolder>& touchPo
     glBlendEquation(GL_FUNC_ADD);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_PROGRAM_POINT_SIZE); // Enable gl_PointSize in vertex shader
-    glBindVertexArray(_quad);
-    glDrawArrays(GL_POINTS, 0, static_cast<int>(_vertexData.size() / 2));
+    glBindVertexArray(_vao);
+    glDrawArrays(GL_POINTS, 0, _count);
 
     _shader->deactivate();
 }
@@ -128,25 +130,23 @@ void TouchMarker::render(const std::vector<openspace::TouchInputHolder>& touchPo
 void TouchMarker::createVertexList(
                               const std::vector<openspace::TouchInputHolder>& touchPoints)
 {
-    _vertexData.resize(touchPoints.size() * 2);
+    std::vector<GLfloat> vertexData;
+    vertexData.resize(touchPoints.size() * 2);
 
     int i = 0;
     for (const openspace::TouchInputHolder& touchPoint : touchPoints) {
-        _vertexData[i] = 2.f * (touchPoint.latestInput().x - 0.5f);
-        _vertexData[i + 1] = -2.f * (touchPoint.latestInput().y - 0.5f);
+        vertexData[i] = 2.f * (touchPoint.latestInput().x - 0.5f);
+        vertexData[i + 1] = -2.f * (touchPoint.latestInput().y - 0.5f);
         i += 2;
     }
 
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _vertexData.size() * sizeof(GLfloat),
-        _vertexData.data(),
+    glNamedBufferData(
+        _vbo,
+        vertexData.size() * sizeof(GLfloat),
+        vertexData.data(),
         GL_STATIC_DRAW
     );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, nullptr);
+    _count = static_cast<GLsizei>(touchPoints.size());
 }
 
 } // openspace namespace
