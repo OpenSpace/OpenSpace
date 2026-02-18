@@ -1058,6 +1058,87 @@ local MabLabel = {
 }
 
 
+local S2025U1 = {
+  Identifier = "S2025U1",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels115.ID.S2025U1,
+      Observer = coreKernels.ID.UranusBarycenter
+    }
+  },
+  Renderable = {
+    Type = "RenderableGlobe",
+    Radii = { 5000, 5000, 5000 }
+  },
+  Tag = {
+    "moon_solarSystem",
+    "moon_giants",
+    "moon_uranus",
+    "moon_inner",
+    "moon_minor",
+    "moon_minor_uranus"
+  },
+  GUI = {
+    Name = "S/2025 U 1",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/S2025U1"
+  }
+}
+
+local S2025U1Trail = {
+  Identifier = "S2025U1Trail",
+  Parent = transforms.UranusBarycenter.Identifier,
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels115.ID.S2025U1,
+      Observer = coreKernels.ID.UranusBarycenter
+    },
+    Color = { 0.60, 0.65, 0.84 },
+    Period = 0.923,
+    Resolution = 1000
+  },
+  Tag = {
+    "moonTrail_solarSystem",
+    "moonTrail_giants",
+    "moonTrail_uranus",
+    "moonTrail_minor",
+    "moonTrail_minor_uranus"
+  },
+  GUI = {
+    Name = "S/2025 U 1 Trail",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/S2025U1",
+    Focusable = false
+  }
+}
+
+local S2025U1Label = {
+  Identifier = "S2025U1Label",
+  Parent = S2025U1.Identifier,
+  Renderable = {
+    Type = "RenderableLabel",
+    Enabled = false,
+    Text = "S/2025 U 1",
+    FontSize = 70.0,
+    Size = 5.5,
+    MinMaxSize = { 1, 17 },
+    OrientationOption = "Camera View Direction",
+    BlendMode = "Additive",
+    EnableFading = true,
+    FadeUnit = "Mm",
+    FadeDistances = { 100.0, 500.0 },
+    FadeWidths = { 25.0, 500.0 }
+  },
+  Tag = { "solarsystem_labels", "moon_labels", "minor_moon_labels" },
+  GUI = {
+    Name = "S/2025 U 1 Label",
+    Path = "/Solar System/Planets/Uranus/Minor Moons/Inner Moons/S2025U1",
+    Focusable = false
+  }
+}
+
 asset.onInitialize(function()
   openspace.addSceneGraphNode(Cordelia)
   openspace.addSceneGraphNode(CordeliaTrail)
@@ -1110,6 +1191,10 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(Mab)
   openspace.addSceneGraphNode(MabTrail)
   openspace.addSceneGraphNode(MabLabel)
+
+  openspace.addSceneGraphNode(S2025U1)
+  openspace.addSceneGraphNode(S2025U1Trail)
+  openspace.addSceneGraphNode(S2025U1Label)
 end)
 
 asset.onDeinitialize(function()
@@ -1164,6 +1249,10 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(MabLabel)
   openspace.removeSceneGraphNode(MabTrail)
   openspace.removeSceneGraphNode(Mab)
+
+  openspace.addSceneGraphNode(S2025U1Label)
+  openspace.addSceneGraphNode(S2025U1Trail)
+  openspace.addSceneGraphNode(S2025U1)
 end)
 
 asset.export(Cordelia)
@@ -1205,6 +1294,7 @@ asset.export(PuckLabel)
 asset.export(Mab)
 asset.export(MabTrail)
 asset.export(MabLabel)
+asset.export(S2025U1)
 
 
 
@@ -1212,7 +1302,7 @@ asset.meta = {
   Name = "Uranus Irregular Retrograde Moons",
   Description = [[Procedural Globe asset containing Uranus' irregular retrograde moons:
     Cordelia, Ophelia, Bianca, Cressida, Desdemona, Juliet, Portia, Rosalind, Cupid,
-    Belinda, Perdita, Puck and Mab. Blank globes and SPICE trails are generated for each
+    Belinda, Perdita, Puck, Mab and S2025U1. Blank globes and SPICE trails are generated for each
     moon]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
