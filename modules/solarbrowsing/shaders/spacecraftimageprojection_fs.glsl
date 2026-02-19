@@ -60,11 +60,6 @@ Fragment getFragment() {
       continue;
     }
 
-    // bool isPixelHidden = dot(normalize(planePositionSpacecraft[i]), normalize(vUv[i])) < 0.0;
-    // if (isPixelHidden) {
-    //     continue;
-    // }
-
     if (planePositionSpacecraft[i].z < vUv[i].z) {
       vec3 uv = vUv[i].xyz;
       uv /= ( (HalfSunRadius / scale[i]) * 2);

@@ -190,9 +190,9 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
                 _sourceId
             );
 
-            // Format file name according to solarbrowsing convention. Since we cannot save
-            // files with ':' we have to destruct the ISO string and reconstruct it when
-            // loading the image.
+            // Format file name according to solarbrowsing convention. Since we cannot
+            // save files with ':' we have to destruct the ISO string and reconstruct it
+            // when loading the image
             auto r = scn::scan<int, int, int, int, int, int, int>(
                 std::string(formattedDate),
                 "{}-{}-{}T{}:{}:{}.{}"

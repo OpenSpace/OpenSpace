@@ -31,7 +31,6 @@
 #include <memory>
 #include <string>
 
-//namespace openspace::solarbrowsing {
 namespace openspace {
 
 // Assume everything in arcsec to minimize metadata

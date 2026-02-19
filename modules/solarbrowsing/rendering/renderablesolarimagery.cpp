@@ -49,8 +49,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableSolarImagery";
     constexpr double SUN_RADIUS = (1391600000.0 * 0.5);
-
-
     constexpr unsigned int DefaultTextureSize = 32;
 
     constexpr openspace::properties::Property::PropertyInfo ActiveInstrumentsInfo = {
@@ -91,7 +89,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo ContrastValueInfo = {
         "ContrastValue",
         "Contrast",
-        "Contrast of the current spacecraft imagery",
+        "Contrast of the current spacecraft imagery.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -105,7 +103,7 @@ namespace {
     constexpr openspace::properties::Property::PropertyInfo VerboseModeInfo = {
         "VerboseMode",
         "Verbose mode",
-        "Output information about image decoding etc.",
+        "Output information about image decoding.",
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
@@ -144,11 +142,11 @@ namespace {
     // visualization.
     struct [[codegen::Dictionary(RenderableSolarImagery)]] Parameters {
         // The root directory containing solar imagery organized by instrument. Each
-        // subdirectory represents an instrument and contains its observation images
+        // subdirectory represents an instrument and contains its observation images.
         std::filesystem::path imageDirectory [[codegen::directory()]];
 
         // The instrument to display on startup (e.g., "AIA-171"). If not specified,
-        // the first available instrument is used
+        // the first available instrument is used.
         std::optional<std::string> startInstrument;
 
         // [[codegen::verbatim(EnableBorderInfo.description)]]
@@ -225,7 +223,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 
     if (p.startInstrument.has_value()) {
         _currentActiveInstrument = p.startInstrument.value();
-        // Update the option property to show the correct label.
+        // Update the option property to show the correct label
         const std::vector<properties::OptionProperty::Option>& options =
             _activeInstruments.options();
 
@@ -331,11 +329,9 @@ void RenderableSolarImagery::initializeGL() {
     _imageryTexture = std::make_unique<ghoul::opengl::Texture>(
         glm::uvec3(DefaultTextureSize, DefaultTextureSize, 1),
         GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::Red, // Format of the pixeldata
-        GL_R8, // INTERNAL format:
-        // More preferable to give explicit precision here,
-        // otherwise up to the driver to decide
-        GL_UNSIGNED_BYTE, // Type of data
+        ghoul::opengl::Texture::Format::Red,
+        GL_R8,
+        GL_UNSIGNED_BYTE,
         ghoul::opengl::Texture::FilterMode::Linear,
         ghoul::opengl::Texture::WrappingMode::ClampToEdge,
         ghoul::opengl::Texture::AllocateData::Yes,
@@ -376,16 +372,16 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4& viewMatrix = data.camera.combinedViewMatrix();
     const glm::mat4& projectionMatrix = data.camera.projectionMatrix();
 
-    // TODO: We want to create sun imagery node from within the module,
-    // @TODO (anden88 2026-02-17): I'm not sure what the original TODO is referencing.
+    // TODO: We want to create sun imagery node from within the module
+    // @TODO (anden88 2026-02-17): I'm not sure what the original TODO is referencing
     const glm::dvec3& spacecraftPosWorld = data.modelTransform.translation;
     const glm::dmat3 spacecraftRotWorld = data.modelTransform.rotation;
 
     const glm::dvec3 sunDir = sunPositionWorld - spacecraftPosWorld;
     const glm::dvec3 offset = sunDir * _gaussianMoveFactor;
 
-    _position = spacecraftPosWorld + offset;
-    // Normal should point from plane toward spacecraft (i.e. plane faces spacecraft).
+    _position = spacecraftPosWorld + offset
+    // Normal should point from plane toward spacecraft (i.e. plane faces spacecraft)
     _normal = glm::normalize(spacecraftPosWorld - sunPositionWorld);
 
     // (anden88 2025-12-10): An attempt was made to use the glm::lookAt to "simplify"
@@ -395,16 +391,16 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     // _rotation[3] = glm::dvec4(0.0, 0.0, 0.0, 1.0);
 
     // Pick a world up. Prefer the spacecraft local +Z transformed to world, but fall back
-    // to a global up if nearly collinear with the normal.
+    // to a global up if nearly collinear with the normal
     glm::vec3 worldUp = spacecraftRotWorld * glm::dvec3(0.0, 0.0, 1.0);
     if (std::abs(glm::dot(worldUp, _normal)) > 0.9999) {
         // Nearly parallel: pick another stable up (e.g. world Y)
         worldUp = glm::dvec3(0.0, 1.0, 0.0);
     }
 
-    // Build tangent basis for the plane: right, upOnPlane, normal.
+    // Build tangent basis for the plane: right, upOnPlane, normal
     glm::vec3 right = glm::normalize(glm::cross(worldUp, _normal));
-    // Already normalized if right and N are normalized.
+    // Already normalized if right and N are normalized
     glm::vec3 upOnPlane = glm::cross(_normal, right);
 
     // Build a rotation matrix that transforms local axes -> world axes.
@@ -551,13 +547,13 @@ void RenderableSolarImagery::updateImageryTexture() {
     if (!keyframe) {
         // No keyframe avaialble so we clear the texture
         if (_currentKeyframe != NoActiveKeyframe) {
-            // No need to re-upload an empty image.
+            // No need to re-upload an empty image
             _isCoronaGraph = false;
             _currentScale = 0;
             _currentCenterPixel = glm::vec2(2.f);
             _currentKeyframe = NoActiveKeyframe;
 
-            // Create some dummy data that will be uploaded to GPU avoid UB
+            // Create some dummy data that will be uploaded to the GPU to avoid UB
             std::vector<unsigned char> buffer;
             buffer.resize(static_cast<size_t>(DefaultTextureSize) * DefaultTextureSize *
                 sizeof(ImagePrecision)
@@ -575,7 +571,7 @@ void RenderableSolarImagery::updateImageryTexture() {
     }
 
     if (_currentKeyframe == keyframe->id) {
-        // This keyframe is already uploaded to the GPU.
+        // This keyframe is already uploaded to the GPU
         return;
     }
 
@@ -591,7 +587,7 @@ void RenderableSolarImagery::updateImageryTexture() {
     );
 
     // If the current keyframe image has not yet been decoded and cached we'll just wait
-    // until it is available. The previous image will be shown until the new one is ready.
+    // until it is available. The previous image will be shown until the new one is ready
     if (std::filesystem::exists(cached)) {
         // Load data from cache
         solarbrowsing::DecodedImageData data = solarbrowsing::loadDecodedDataFromCache(
@@ -624,7 +620,7 @@ void RenderableSolarImagery::requestPredictiveFrames(
 
     // Only update prediction if we've moved to a different keyframe
     if (!_predictionIsDirty && _lastPredictedKeyframe == keyframe->id) {
-        // We've already predicted this keyframe
+        // Already predicted this keyframe
         return;
     }
 
@@ -649,7 +645,7 @@ void RenderableSolarImagery::requestPredictiveFrames(
         framesAfter = _predictFramesAfter;
     }
     else {
-        // Swap for backward
+        // Swap for backwards playtime
         framesBefore = _predictFramesAfter;
         framesAfter = _predictFramesBefore;
     }
@@ -699,7 +695,7 @@ void RenderableSolarImagery::requestPredictiveFrames(
         _asyncDecoder->requestDecode(std::move(request));
     };
 
-    // Request frames after and before the current keyframe
+    // Request frames before and after the current keyframe
     for (int i = 0; i <= framesAfter; i++) {
         auto afterIt = std::next(currentIt, i);
         if (afterIt == keyframes.end()) {
@@ -766,8 +762,8 @@ void RenderableSolarImagery::createPlane() const {
 
 void RenderableSolarImagery::createFrustum() const {
     // Vertex orders x, y, z, w
-    // Where w indicates if vertex should be drawn in spacecraft
-    // or planes coordinate system
+    // Where w indicates if vertex should be drawn in spacecraft or planes coordinate
+    // system
     const GLfloat vertex_data[] = {
         0.f,    0.f,    0.f, 0.0,
         _size,  _size,  0.f, 1.0,

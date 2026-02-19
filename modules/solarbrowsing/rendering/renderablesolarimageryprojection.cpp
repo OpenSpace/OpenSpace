@@ -44,8 +44,7 @@
 
 namespace {
     constexpr char* _loggerCat = "RendearbleSpacecraftCameraSphere";
-
-    // This number MUST match the constant specified in the shader, otherwise UB / MN
+    // This number MUST match the constant specified in the shader
     constexpr int MaxSpacecraftObservatories = 7;
 
     struct [[codegen::Dictionary(RenderableSolarImageryProjection)]] Parameters {

@@ -205,7 +205,7 @@ namespace {
             im.scale = (rSunObsValue / cDelt1Value) / (im.fullResolution / 2.f);
             im.isCoronaGraph = false;
         }
-        else { // Telescope is assumed to be STEREO
+        else if (telescop.value() == "STEREO") {
             std::optional<std::string_view> rsun = extractInnerXml(bufferView, "RSUN");
             std::optional<std::string_view> cDelt1 = extractInnerXml(
                 bufferView,
@@ -240,6 +240,13 @@ namespace {
                     "Could not find DETECTOR tag {}", filePath
                 ));
             }
+        }
+        else {
+            LERROR(std::format("Recieved unknown spacecraft image '{}'. Supported "
+                "spacecrafts are {}, {}, {}",
+                telescop.value(), "SOHO", "SDO", "STEREO"
+            ));
+            return std::nullopt;
         }
         return im;
     }
@@ -309,7 +316,7 @@ namespace {
 
         std::unordered_map<std::filesystem::path, IsValidCacheFile> subDirectoriesMap;
         for (const std::filesystem::path& path : subdirectories) {
-            // Assume all cache files are invalid from the beginning.
+            // Assume all cache files are invalid from the beginning
             subDirectoriesMap[path] = false;
         }
 
@@ -335,7 +342,7 @@ namespace {
             std::ifstream myfile(cacheFile);
             if (!myfile.is_open()) {
                 LERROR(std::format("Failed to open metadata file '{}'", cacheFile));
-                //subDirectoriesMap[subDirectory] = false; -- Implicit
+                //subDirectoriesMap[subDirectory] = false; -- Implicit default
                 continue;
             }
 
@@ -347,7 +354,7 @@ namespace {
             std::filesystem::path subDirectory = rootDir / subDir;
 
             // Early check if the number of files in the subdirectoy match what was stored
-            // in cache, however, this does not guarantee that the files are the same.
+            // in cache, however, this does not guarantee that the files are the same
             const bool cacheHasCorrectNFiles = ghoul::filesystem::walkDirectory(
                 subDirectory,
                 ghoul::filesystem::Recursive::No,
@@ -436,7 +443,7 @@ namespace {
             }
             myfile.close();
             // All files in cache exists and there were no additional files in the
-            // subdirectory, cache is assumed to be up-to-date.
+            // subdirectory, cache is assumed to be up-to-date
             subDirectoriesMap[subDirectory] = true;
         }
 
@@ -517,7 +524,7 @@ std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferF
     using T = Timeline<ImageMetadata>;
     for (const std::pair<InstrumentName, T>& instrument : imageMetadataMap) {
         // The subdirectories might have a different name than the instrument name so we
-        // have to search the directories for the correct texture map.
+        // have to search the directories for the correct texture map
         bool found = false;
         for (const std::filesystem::path& subdirectory : subdirectories) {
             const std::filesystem::path texturePath =
@@ -548,12 +555,12 @@ ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir) {
     LDEBUG("Begin loading spacecraft imagery metadata");
     ImageMetadataMap result;
 
-    // Load pre-processed data from any cache file that might exist.
+    // Load pre-processed data from any cache file that might exist
     std::unordered_map<std::filesystem::path, IsValidCacheFile> cacheFilesValidityMap =
         loadMetadataFromDisk(rootDir, result);
 
     // There might be cache files that are outdated due to new images or if a new
-    // directory of images have been added. Remove the cache files that were validated.
+    // directory of images have been added. Remove the cache files that were validated
     std::erase_if(cacheFilesValidityMap,
         [](const std::pair<std::filesystem::path, bool>& entry) {
             return entry.second;
@@ -567,7 +574,7 @@ ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir) {
 
     std::vector<std::filesystem::path> sequencePaths;
 
-    // Get all files that were not correctly processed from cache file.
+    // Get all files that were not correctly processed from cache file
     for (const auto& [directory, isValidCacheFile] : cacheFilesValidityMap) {
         LDEBUG(std::format("Loading sequence directory '{}'", directory));
         std::vector<std::filesystem::path> files = ghoul::filesystem::walkDirectory(
@@ -662,7 +669,7 @@ ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir) {
         }
 
         size_t done = ++count;
-        if (done % 20 == 0) { // Reduce spam on the callback.
+        if (done % 20 == 0) { // Reduce spam on the callback
             std::lock_guard lock(onProgressMutex);
             onProgress(done / static_cast<float>(totalImages));
         }

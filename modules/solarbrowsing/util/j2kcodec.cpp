@@ -43,9 +43,9 @@ namespace {
     // (anden88 2026-02-03): This function opens the file, reads some number of bytes from
     // the metadata header and compares to some specific byte string. Further it compares
     // that the read bytestring matches the extension. Imo, this is quite verbose, I think
-    // we could get away with only looking at the file extension. Did some timings and it
-    // is in the ballpark of ~200-300 microseconds of work. Compared to setting up the
-    // `inFileStream` which is ~100ms
+    // we could get away with only looking at the file extension. Did some measurements
+    // and it is in the ballpark of ~200-300 microseconds of work. Compared to setting up
+    // the `inFileStream` which is ~100ms
     int infileFormat(const std::string& fname) {
         const auto get_file_format = [](const char* filename) {
             unsigned int i;
@@ -141,7 +141,7 @@ void J2kCodec::decodeIntoBuffer(const std::string& path, unsigned char* buffer,
 
     // TODO(mnoven): It's a waste of resources having to decode into the image object and
     // then copy over the data to our buffer. Would be better if we could decode directly
-    // into the buffer.
+    // into the buffer
     // See: https://github.com/uclouvain/openjpeg/issues/837
     if (!opj_decode(_decoder, _infileStream, _image)) {
         LERROR("Could not decode image");
