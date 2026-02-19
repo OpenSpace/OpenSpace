@@ -91,8 +91,8 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
     : OpenSpaceModule(Name)
     , _enabled(EnabledInfo)
     , _showInfoWindowAtStartup(ShowInfoAtStartupInfo)
-    , _dataConfigFile(DataConfigFileInfo)
     , _filteredRows(FilteredDataRowsInfo)
+    , _dataConfigFile(DataConfigFileInfo)
     , _gui("ExoplanetsToolGui")
 {
     addProperty(_enabled);
