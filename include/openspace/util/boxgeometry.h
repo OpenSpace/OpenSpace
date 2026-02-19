@@ -38,8 +38,8 @@ public:
     bool initialize();
     void render() const;
 
-    GLuint _vaoId = 0;
-    GLuint _vBufferId = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
     glm::vec3 _size = glm::vec3(0.f);
 };
 

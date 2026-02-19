@@ -159,7 +159,6 @@ void RenderableOrbitDisc::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
     _texture->loadFromFile(_texturePath.value());
-    _texture->uploadToGpu();
 
     _plane->initialize();
 }
@@ -187,8 +186,7 @@ void RenderableOrbitDisc::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.multiplyColor, _multiplyColor);
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    _texture->bind();
+    unit.bind(*_texture->texture());
     _shader->setUniform(_uniformCache.discTexture, unit);
 
     glEnablei(GL_BLEND, 0);

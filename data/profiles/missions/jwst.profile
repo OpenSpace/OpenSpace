@@ -55,60 +55,6 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [
-    {
-      "action": "os.solarsystem.ToggleSatelliteTrails",
-      "key": "S"
-    },
-    {
-      "action": "os.jwst.ToggleLagrangianPoints",
-      "key": "P"
-    },
-    {
-      "action": "os.jwst.ToggleHudf",
-      "key": "U"
-    },
-    {
-      "action": "os.jwst.ToggleL2",
-      "key": "O"
-    },
-    {
-      "action": "os.jwst.ToggleFov",
-      "key": "V"
-    },
-    {
-      "action": "os.jwst.SetupLaunch",
-      "key": "J"
-    },
-    {
-      "action": "os.jwst.ToggleSunTrail",
-      "key": "K"
-    },
-    {
-      "action": "os.jwst.PlayForwards",
-      "key": "M"
-    },
-    {
-      "action": "os.jwst.PlayBackwards",
-      "key": "N"
-    },
-    {
-      "action": "os.jwst.ClearTimelapse",
-      "key": "B"
-    },
-    {
-      "action": "os.jwst.ToggleTrailsExceptMoon",
-      "key": "G"
-    },
-    {
-      "action": "os.jwst.ToggleDirection",
-      "key": "Y"
-    },
-    {
-      "action": "os.jwst.ToggleJwstTrails",
-      "key": "T"
-    }
-  ],
   "mark_nodes": [
     "JWSTModel",
     "JWSTTrail",

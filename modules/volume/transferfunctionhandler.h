@@ -53,7 +53,6 @@ public:
     void setMinAndMaxValue(float min, float max);
 
     ghoul::opengl::Texture& texture();
-    void uploadTexture();
     bool hasTexture() const;
 
     std::shared_ptr<openspace::TransferFunction> transferFunction();

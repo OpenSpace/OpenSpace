@@ -163,6 +163,7 @@ namespace {
         enum class BlendMode {
             Normal,
             Multiply,
+            MultiplyMix,
             Add,
             Subtract,
             Color
@@ -271,6 +272,9 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
                 break;
             case Parameters::BlendMode::Multiply:
                 _blendModeOption = static_cast<int>(layers::Blend::ID::Multiply);
+                break;
+            case Parameters::BlendMode::MultiplyMix:
+                _blendModeOption = static_cast<int>(layers::Blend::ID::MultiplyMix);
                 break;
             case Parameters::BlendMode::Add:
                 _blendModeOption = static_cast<int>(layers::Blend::ID::Add);

@@ -49,40 +49,6 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [
-    {
-      "action": "os.rosetta.Focus67p",
-      "key": "A"
-    },
-    {
-      "action": "os.rosetta.FocusRosetta",
-      "key": "S"
-    },
-    {
-      "action": "os.rosetta.SetupLanderRelease",
-      "key": "F6"
-    },
-    {
-      "action": "os.rosetta.ClearImageProjections",
-      "key": "F8"
-    },
-    {
-      "action": "os.rosetta.ToggleOuterPlanetaryTrails",
-      "key": "E"
-    },
-    {
-      "action": "os.rosetta.ToggleImagePlane",
-      "key": "I"
-    },
-    {
-      "action": "os.rosetta.TogglePhilaeTrail",
-      "key": "O"
-    },
-    {
-      "action": "os.rosetta.Toggle67pProjection",
-      "key": "P"
-    }
-  ],
   "mark_nodes": [
     "67P",
     "Rosetta",

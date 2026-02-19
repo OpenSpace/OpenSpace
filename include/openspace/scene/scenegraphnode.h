@@ -81,7 +81,7 @@ public:
     static constexpr std::string_view KeyTag = "Tag";
 
     SceneGraphNode();
-    virtual ~SceneGraphNode() override;
+    ~SceneGraphNode() override;
 
     static ghoul::mm_unique_ptr<SceneGraphNode> createFromDictionary(
         const ghoul::Dictionary& dictionary);

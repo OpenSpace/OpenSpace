@@ -34,6 +34,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <iterator>
 
@@ -119,10 +120,6 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
             absPath(_sourceFiles[i]),
             2
         );
-        _textureFiles[i]->setInternalFormat(GL_COMPRESSED_RGBA);
-        _textureFiles[i]->uploadTexture();
-        _textureFiles[i]->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        _textureFiles[i]->purgeFromRAM();
     }
     if (!_isLoadingLazily) {
         _texture = loadTexture();
@@ -162,9 +159,9 @@ void RenderablePlaneTimeVaryingImage::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-void RenderablePlaneTimeVaryingImage::bindTexture() {
+void RenderablePlaneTimeVaryingImage::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture && !_textureIsDirty) {
-        _texture->bind();
+        unit.bind(*_texture);
     }
 }
 

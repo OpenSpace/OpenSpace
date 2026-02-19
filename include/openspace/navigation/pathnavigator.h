@@ -49,7 +49,7 @@ class Path;
 class PathNavigator : public properties::PropertyOwner {
 public:
     PathNavigator();
-    virtual ~PathNavigator() override;
+    ~PathNavigator() override;
 
     // Accessors
     Camera* camera() const;

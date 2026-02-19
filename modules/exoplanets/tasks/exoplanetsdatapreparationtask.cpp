@@ -64,20 +64,25 @@ namespace {
     // be correct. Use the accompanying python script to download the datafile, or make
     // sure to include all columns in your download.
     struct [[codegen::Dictionary(ExoplanetsDataPreparationTask)]] Parameters {
-        // The csv file to extract data from
+        // The csv file to extract data from.
         std::string inputDataFile;
 
-        // The speck file with star locations
+        // The speck file with star locations.
         std::string inputSPECK;
 
-        // The bin file to export data into
-        std::string outputBIN [[codegen::annotation("A valid filepath")]];
+        // The directory to store the output files in.
+        std::string outputDirectory [[codegen::annotation("A valid filepath")]];
 
-        // The txt file to write look-up table into
-        std::string outputLUT [[codegen::annotation("A valid filepath")]];
+        // The name of the .bin file to export data into, inluding the .bin extension,
+        // e.g. 'exoplanets.bin'.
+        std::string outputBIN [[codegen::annotation("A valid filename")]];
+
+        // The name of the .txt file to write look-up table into, including the .txt
+        // extension, e.g. 'exoplanets_lut.txt'.
+        std::string outputLUT [[codegen::annotation("A valid filename")]];
 
         // The path to a teff to bv conversion file. Should be a txt file where each line
-        // has the format 'teff,bv'
+        // has the format 'teff,bv'.
         std::string teffToBvFile;
     };
 #include "exoplanetsdatapreparationtask_codegen.cpp"
@@ -96,9 +101,27 @@ ExoplanetsDataPreparationTask::ExoplanetsDataPreparationTask(
 
     _inputDataPath = absPath(p.inputDataFile);
     _inputSpeckPath = absPath(p.inputSPECK);
-    _outputBinPath = absPath(p.outputBIN);
-    _outputLutPath = absPath(p.outputLUT);
+
     _teffToBvFilePath = absPath(p.teffToBvFile);
+
+    // The output paths are created by combining the output directory with the specified
+    std::filesystem::path outputDir = absPath(p.outputDirectory);
+
+    // Create output directory if it doesn't exist
+    if (!std::filesystem::exists(outputDir)) {
+        std::error_code ec;
+        if (!std::filesystem::create_directories(outputDir, ec)) {
+            LERROR(std::format(
+                "Failed to create output directory '{}': {}",
+                outputDir, ec.message()
+            ));
+            return;
+        }
+        LINFO(std::format("Created output directory '{}'", outputDir));
+    }
+
+    _outputBinPath = outputDir / p.outputBIN;
+    _outputLutPath = outputDir / p.outputLUT;
 }
 
 std::string ExoplanetsDataPreparationTask::description() {

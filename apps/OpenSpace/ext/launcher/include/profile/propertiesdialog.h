@@ -58,7 +58,7 @@ public:
      *
      * \param evt The QKeyEvent object for the key press event
      */
-    virtual void keyPressEvent(QKeyEvent* evt) override;
+    void keyPressEvent(QKeyEvent* evt) override;
 
 private:
     void createWidgets();

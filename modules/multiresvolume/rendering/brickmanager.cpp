@@ -145,17 +145,17 @@ bool BrickManager::initialize() {
     dims.push_back(_atlasDim);
     dims.push_back(_atlasDim);
     _textureAtlas = new ghoul::opengl::Texture(
-        glm::size3_t(_atlasDim, _atlasDim, _atlasDim),
-        GL_TEXTURE_3D,
-        ghoul::opengl::Texture::Format::RGBA,
-        GL_RGBA,
-        GL_FLOAT
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(_atlasDim, _atlasDim, _atlasDim),
+            .type = GL_TEXTURE_3D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_FLOAT
+        }
     );
-    _textureAtlas->uploadTexture();
 
     _atlasInitialized = true;
 
-    glGenBuffers(2, _pboHandle);
+    glCreateBuffers(2, _pboHandle);
 
     return true;
 }
@@ -285,10 +285,9 @@ void BrickManager::coordinatesFromLinear(int idx, int& x, int& y, int& z) {
 
 bool BrickManager::diskToPBO(BufferIndex pboIndex) {
     // Map PBO
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[pboIndex]);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, _volumeSize, nullptr, GL_STREAM_DRAW);
+    glNamedBufferData(_pboHandle[pboIndex], _volumeSize, nullptr, GL_STREAM_DRAW);
     float* mappedBuffer = reinterpret_cast<float*>(
-        glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY)
+        glMapNamedBuffer(_pboHandle[pboIndex], GL_WRITE_ONLY)
     );
 
     if (!mappedBuffer) {
@@ -402,18 +401,15 @@ bool BrickManager::diskToPBO(BufferIndex pboIndex) {
         delete[] seqBuffer;
     }
 
-    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
+    glUnmapNamedBuffer(_pboHandle[pboIndex]);
     return true;
 }
 
 bool BrickManager::pboToAtlas(BufferIndex pboIndex) {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[pboIndex]);
     glm::size3_t dim = _textureAtlas->dimensions();
-    glBindTexture(GL_TEXTURE_3D, *_textureAtlas);
-    glTexSubImage3D(
-        GL_TEXTURE_3D,
+    glTextureSubImage3D(
+        *_textureAtlas,
         0,
         0,
         0,
@@ -425,7 +421,6 @@ bool BrickManager::pboToAtlas(BufferIndex pboIndex) {
         GL_FLOAT,
         nullptr
     );
-    glBindTexture(GL_TEXTURE_3D, 0);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 
     return true;

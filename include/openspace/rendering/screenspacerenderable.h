@@ -38,7 +38,10 @@
 #include <memory>
 
 namespace ghoul {
-    namespace opengl { class ProgramObject; }
+    namespace opengl {
+        class ProgramObject;
+        class TextureUnit;
+    } // namespace opengl
     class Dictionary;
 } // namespace ghoul
 
@@ -63,7 +66,7 @@ public:
     static constexpr std::string_view KeyIdentifier = "Identifier";
 
     explicit ScreenSpaceRenderable(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceRenderable() override;
+    ~ScreenSpaceRenderable() override;
 
     struct RenderData {
         float blackoutFactor;
@@ -116,7 +119,7 @@ protected:
     void draw(const glm::mat4& modelTransform, const RenderData& renderData,
         bool useAcceleratedRendering = false);
 
-    virtual void bindTexture() = 0;
+    virtual void bindTexture(ghoul::opengl::TextureUnit& unit) = 0;
     virtual void unbindTexture();
 
     glm::vec3 sphericalToRae(const glm::vec3& spherical) const;

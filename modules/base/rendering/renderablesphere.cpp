@@ -464,16 +464,14 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform("transferFunction", transferFunctionUnit);
     _shader->setUniform("dataMinMaxValues", _dataMinMaxValues);
     if (_useColorMap) {
-        transferFunctionUnit.activate();
-        _transferFunction->bind();
+        transferFunctionUnit.bind(_transferFunction->texture());
     }
 
     _shader->setUniform(_uniformCache.opacity, adjustedOpacity);
     _shader->setUniform(_uniformCache.mirrorTexture, _mirrorTexture.value());
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    bindTexture();
+    bindTexture(unit);
     defer{ unbindTexture(); };
     _shader->setUniform(_uniformCache.colorTexture, unit);
 
@@ -546,8 +544,6 @@ void RenderableSphere::update(const UpdateData&) {
     }
 }
 
-void RenderableSphere::unbindTexture() {
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
+void RenderableSphere::unbindTexture() {}
 
 } // namespace openspace

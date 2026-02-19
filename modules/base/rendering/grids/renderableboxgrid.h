@@ -60,11 +60,10 @@ protected:
 
     bool _gridIsDirty = true;
 
-    GLuint _vaoID = 0;
-    GLuint _vBufferID = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 
     GLenum _mode = GL_LINE_STRIP;
-    std::vector<Vertex> _varray;
 };
 
 }// namespace openspace

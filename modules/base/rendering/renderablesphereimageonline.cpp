@@ -31,6 +31,7 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <utility>
 
 namespace {
@@ -136,26 +137,15 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
         }
 
         try {
-            std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::TextureReader::ref().loadTexture(
-                    reinterpret_cast<void*>(imageFile.buffer),
-                    imageFile.size,
-                    2,
-                    imageFile.format
-                );
+            _texture = ghoul::io::TextureReader::ref().loadTexture(
+                reinterpret_cast<void*>(imageFile.buffer),
+                imageFile.size,
+                2,
+                { .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap },
+                imageFile.format
+            );
 
-            if (texture) {
-                // Images don't need to start on 4-byte boundaries, for example if the
-                // image is only RGB
-                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-                texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                texture->purgeFromRAM();
-
-                _texture = std::move(texture);
-                _textureIsDirty = false;
-            }
+            _textureIsDirty = false;
         }
         catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
             _textureIsDirty = false;
@@ -164,12 +154,9 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
     }
 }
 
-void RenderableSphereImageOnline::bindTexture() {
+void RenderableSphereImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture) {
-        _texture->bind();
-    }
-    else {
-        unbindTexture();
+        unit.bind(*_texture);
     }
 }
 

@@ -257,8 +257,6 @@ RenderableKameleonVolume::~RenderableKameleonVolume() {}
 void RenderableKameleonVolume::initializeGL() {
     load();
 
-    _volumeTexture->uploadTexture();
-
     _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
         _volumeTexture,
         _transferFunction,
@@ -424,17 +422,15 @@ void RenderableKameleonVolume::updateTextureFromVolume() {
     }
 
     _volumeTexture = std::make_shared<ghoul::opengl::Texture>(
-        _dimensions,
-        GL_TEXTURE_3D,
-        ghoul::opengl::Texture::Format::Red,
-        GL_RED,
-        GL_FLOAT,
-        ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::Repeat
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = _dimensions,
+            .type = GL_TEXTURE_3D,
+            .format = ghoul::opengl::Texture::Format::Red,
+            .dataType = GL_FLOAT
+        },
+        ghoul::opengl::Texture::SamplerInit{},
+        reinterpret_cast<std::byte*>(_normalizedVolume->data())
     );
-
-    void* data = reinterpret_cast<void*>(_normalizedVolume->data());
-    _volumeTexture->setPixelData(data, ghoul::opengl::Texture::TakeOwnership::No);
 }
 
 void RenderableKameleonVolume::storeRaw(const std::filesystem::path& path) {

@@ -25,15 +25,15 @@
 #include "fragment.glsl"
 #include "floatoperations.glsl"
 
-in vec4 positionLocalSpace;
-in vec4 positionCameraSpace;
+in Data {
+  vec4 positionLocalSpace;
+  vec4 positionCameraSpace;
+} in_data;
 
 
 Fragment getFragment() {
-  vec4 position = positionCameraSpace;
-
   Fragment frag;
-  frag.color = vec4(positionLocalSpace.xyz + 0.5, 1.0);
-  frag.depth = -position.z;
+  frag.color = vec4(in_data.positionLocalSpace.xyz + 0.5, 1.0);
+  frag.depth = -in_data.positionCameraSpace.z;
   return frag;
 }

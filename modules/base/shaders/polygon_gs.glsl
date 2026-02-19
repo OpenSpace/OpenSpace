@@ -29,25 +29,23 @@ layout(triangle_strip, max_vertices = 63) out;
 
 uniform int sides;
 
-const float PI = 3.1415926;
+const float M_PI = 3.14159265358979323846;
 
 
 void main() {
-  vec4 v0 = gl_in[0].gl_Position;
-
   for (int i = sides; i > 0; --i) {
     // Angle between each side in radians
-    float ang = 2.0 * PI / float(sides) * i;
+    float angle = 2.0 * M_PI / float(sides) * i;
 
-    gl_Position = v0;
+    gl_Position = gl_in[0].gl_Position;
     EmitVertex();
 
-    vec4 vi = v0 + vec4(cos(ang) * 0.8, -sin(ang) * 0.8, 0.0, 0.0);
+    vec4 vi = gl_in[0].gl_Position + vec4(cos(angle) * 0.8, -sin(angle) * 0.8, 0.0, 0.0);
     gl_Position = vi;
     EmitVertex();
 
-    ang = 2.0 * PI / float(sides) * (i - 1);
-    vec4 vii = v0 + vec4(cos(ang) * 0.8, -sin(ang) * 0.8, 0.0, 0.0);
+    angle = 2.0 * M_PI / float(sides) * (i - 1);
+    vec4 vii = gl_in[0].gl_Position + vec4(cos(angle) * 0.8, -sin(angle) * 0.8, 0.0, 0.0);
     gl_Position = vii;
     EmitVertex();
 

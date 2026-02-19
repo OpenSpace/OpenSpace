@@ -480,11 +480,11 @@ void RenderableInterpolatedPoints::addOrientationDataForPoint(unsigned int index
 
 void RenderableInterpolatedPoints::initializeBufferData() {
     if (_vao == 0) {
-        glGenVertexArrays(1, &_vao);
+        glCreateVertexArrays(1, &_vao);
         LDEBUG(std::format("Generating Vertex Array id '{}'", _vao));
     }
     if (_vbo == 0) {
-        glGenBuffers(1, &_vbo);
+        glCreateBuffers(1, &_vbo);
         LDEBUG(std::format("Generating Vertex Buffer Object id '{}'", _vbo));
     }
 
@@ -494,7 +494,7 @@ void RenderableInterpolatedPoints::initializeBufferData() {
     // Allocate the memory for the buffer (we will want to upload the data quite often)
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
+    glNamedBufferData(_vbo, bufferSize, nullptr, GL_DYNAMIC_DRAW);
 
     int offset = 0;
 
@@ -502,8 +502,8 @@ void RenderableInterpolatedPoints::initializeBufferData() {
     offset = bufferVertexAttribute("in_position1", 3, attibsPerPoint, offset);
 
     if (useSplineInterpolation()) {
-        offset = bufferVertexAttribute("in_position_before", 3, attibsPerPoint, offset);
-        offset = bufferVertexAttribute("in_position_after", 3, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_positionBefore", 3, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_positionAfter", 3, attibsPerPoint, offset);
     }
 
     if (hasColorData()) {
@@ -539,12 +539,7 @@ void RenderableInterpolatedPoints::updateBufferData() {
 
     // Regenerate data and update buffer
     std::vector<float> slice = createDataSlice();
-
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, slice.size() * sizeof(float), slice.data());
-
-    glBindVertexArray(0);
+    glNamedBufferSubData(_vbo, 0, slice.size() * sizeof(float), slice.data());
 
     _dataIsDirty = false;
 }

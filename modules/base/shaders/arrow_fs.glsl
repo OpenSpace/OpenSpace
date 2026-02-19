@@ -24,9 +24,11 @@
 
 #include "fragment.glsl"
 
-in float vs_depth;
-in vec3 vs_normal;
-in vec4 vs_positionViewSpace;
+in Data {
+  in vec4 positionViewSpace;
+  in vec3 normal;
+  in float depth;
+} in_data;
 
 uniform vec3 color;
 uniform float opacity;
@@ -37,6 +39,7 @@ uniform bool performShading = true;
 
 const vec3 LightColor = vec3(1.0);
 
+
 Fragment getFragment() {
   Fragment frag;
 
@@ -44,32 +47,29 @@ Fragment getFragment() {
 
   // Simple phong shading (same color for diffuse and ambient. White specular)
   if (performShading) {
-    const vec3 lightDirectionViewSpace = vec3(0.0, 0.0, 1.0);
-    const float lightIntensity = 1.0;
-    const float specularPower = 100.0;
+    const vec3 LightDirectionViewSpace = vec3(0.0, 0.0, 1.0);
+    const float LightIntensity = 1.0;
+    const float SpecularPower = 100.0;
 
     // Ambient color
-    vec3 shadedColor = ambientIntensity * color;
+    vec3 c = ambientIntensity * color;
 
     // Diffuse
-    vec3 n = normalize(vs_normal);
-    vec3 l = lightDirectionViewSpace;
-    shadedColor += diffuseIntensity * max(dot(n,l), 0.0) * color;
+    vec3 n = normalize(in_data.normal);
+    vec3 l = LightDirectionViewSpace;
+    c += diffuseIntensity * max(dot(n, l), 0.0) * color;
 
     // Specular
-    vec3 viewDir = normalize(vs_positionViewSpace.xyz);
-    vec3 reflectDir = reflect(l, n);
-    shadedColor +=
-        specularIntensity * pow(max(dot(viewDir,reflectDir), 0), specularPower) * color;
+    vec3 viewDir = normalize(in_data.positionViewSpace.xyz);
+    vec3 refDir = reflect(l, n);
+    c += specularIntensity * pow(max(dot(viewDir, refDir), 0.0), SpecularPower) * color;
 
     // Light contribution (one light soruce)
-    shadedColor *= lightIntensity * LightColor;
-
-    frag.color.xyz = shadedColor;
+    frag.color.rgb = c * LightIntensity * LightColor;
   }
 
-  frag.depth = vs_depth;
-  frag.gPosition = vs_positionViewSpace;
+  frag.depth = in_data.depth;
+  frag.gPosition = in_data.positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   return frag;
 }

@@ -29,6 +29,7 @@
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 #include <array>
 
 namespace {
@@ -46,7 +47,8 @@ documentation::Documentation ScreenSpaceRenderableFramebuffer::Documentation() {
     using namespace documentation;
     return {
         "ScreenSpaceRenderableFramebuffer",
-        "screenspace_framebuffer"
+        "screenspace_framebuffer",
+        ""
     };
 }
 
@@ -146,14 +148,14 @@ void ScreenSpaceRenderableFramebuffer::createFramebuffer() {
     _framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
     _framebuffer->activate();
     _texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(resolution.x, resolution.y, 1),
-        GL_TEXTURE_2D
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(resolution.x, resolution.y, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::Red,
+            .dataType = GL_UNSIGNED_BYTE
+        }
     );
     _objectSize = glm::ivec2(resolution);
-
-    _texture->uploadTexture();
-    _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-    _texture->purgeFromRAM();
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
     ghoul::opengl::FramebufferObject::deactivate();
 }
@@ -163,8 +165,8 @@ int ScreenSpaceRenderableFramebuffer::id() {
     return id++;
 }
 
-void ScreenSpaceRenderableFramebuffer::bindTexture() {
-    _texture->bind();
+void ScreenSpaceRenderableFramebuffer::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_texture);
 }
 
 } //namespace openspace

@@ -17,10 +17,13 @@ local ID = {
   Helene = "HELENE",
   Hyperion = "HYPERION",
   Iapetus = "IAPETUS",
+  Methone = "METHONE",
   Mimas = "MIMAS",
   Phoebe = "PHOEBE",
   Polydeuces = "POLYDEUCES",
   Rhea = "RHEA",
+  Saturn = "SATURN",
+  Telesto = "TELESTO",
   Tethys = "TETHYS",
   Titan = "TITAN"
 }

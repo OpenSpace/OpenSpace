@@ -115,11 +115,17 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    render = new (currentPos) std::vector<std::function<void()>>();
+    render = new (currentPos) std::vector<
+        std::function<void(const glm::mat4&, const glm::mat4&, const glm::mat4&)>
+    >();
     ghoul_assert(render, "No render");
-    currentPos += sizeof(std::vector<std::function<void()>>);
+    currentPos += sizeof(std::vector<
+        std::function<void(const glm::mat4&, const glm::mat4&, const glm::mat4&)>
+    >);
 #else // ^^^ WIN32 / !WIN32 vvv
-    render = new std::vector<std::function<void()>>();
+    render = new std::vector<
+        std::function<void(const glm::mat4&, const glm::mat4&, const glm::mat4&)>
+    >();
 #endif // WIN32
 
 #ifdef WIN32

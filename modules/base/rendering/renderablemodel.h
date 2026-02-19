@@ -127,8 +127,8 @@ private:
 
     // Framebuffer and screen space quad
     GLuint _framebuffer = 0;
-    GLuint _quadVao = 0;
-    GLuint _quadVbo = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
     bool _shouldRenderTwice = false;
 
     // Opacity program

@@ -27,9 +27,7 @@
 
 #include <openspace/rendering/renderable.h>
 
-#include <modules/gaia/rendering/octreeculler.h>
 #include <modules/gaia/rendering/octreemanager.h>
-#include <openspace/properties/list/stringlistproperty.h>
 #include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
@@ -108,26 +106,13 @@ private:
 
     properties::StringProperty _filePath;
     std::unique_ptr<ghoul::filesystem::File> _dataFile;
-    bool _dataIsDirty = true;
-    bool _buffersAreDirty = true;
-    bool _shadersAreDirty = false;
-
-    properties::StringProperty _pointSpreadFunctionTexturePath;
-    std::unique_ptr<ghoul::opengl::Texture> _pointSpreadFunctionTexture;
-    std::unique_ptr<ghoul::filesystem::File> _pointSpreadFunctionFile;
-    bool _pointSpreadFunctionTextureIsDirty = true;
 
     properties::StringProperty _colorTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
-    bool _colorTextureIsDirty = true;
 
     properties::FloatProperty _luminosityMultiplier;
-    properties::FloatProperty _magnitudeBoost;
     properties::FloatProperty _cutOffThreshold;
-    properties::FloatProperty _sharpness;
-    properties::FloatProperty _billboardSize;
-    properties::FloatProperty _closeUpBoostDist;
     properties::IntProperty _tmPointFilterSize;
     properties::FloatProperty _tmPointSigma;
     properties::IVec2Property _additionalNodes;
@@ -143,11 +128,9 @@ private:
 
     properties::IntProperty _firstRow;
     properties::IntProperty _lastRow;
-    properties::StringListProperty _columnNamesList;
     std::vector<std::string> _columnNames;
     properties::OptionProperty _fileReaderOption;
     properties::OptionProperty _renderMode;
-    properties::OptionProperty _shaderOption;
     properties::IntProperty _nRenderedStars;
     // LongLongProperty doesn't show up in menu, use FloatProperty instead.
     properties::FloatProperty _cpuRamBudgetProperty;
@@ -156,14 +139,11 @@ private:
     properties::FloatProperty _maxCpuMemoryPercent;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
-    UniformCache(model, view, cameraPos, cameraLookUp, viewScaling, projection,
-        renderOption, luminosityMultiplier, magnitudeBoost, cutOffThreshold,
-        sharpness, billboardSize, closeUpBoostDist, screenSize, psfTexture,
-        time, colorTexture, nChunksToRender, valuesPerStar, maxStarsPerNode)
+    UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,
+        cutOffThreshold, time, colorTexture, nChunksToRender, valuesPerStar,
+        maxStarsPerNode, posXThreshold, posYThreshold, posZThreshold, gMagThreshold,
+        bpRpThreshold, distThreshold)
         _uniformCache;
-
-    UniformCache(posXThreshold, posYThreshold, posZThreshold, gMagThreshold,
-        bpRpThreshold, distThreshold) _uniformFilterCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _programTM;
     UniformCache(renderedTexture, screenSize, filterSize, sigma, pixelWeightThreshold,
@@ -176,23 +156,21 @@ private:
     std::unique_ptr<ghoul::opengl::BufferBinding<
         ghoul::opengl::bufferbinding::Buffer::ShaderStorage>> _ssboDataBinding;
 
+    bool _dataIsDirty = true;
+    bool _buffersAreDirty = true;
+    bool _colorTextureIsDirty = true;
+
     std::vector<int> _accumulatedIndices;
     size_t _nRenderValuesPerStar = 0;
     int _nStarsToRender = 0;
     bool _firstDrawCalls = true;
-    glm::dquat _previousCameraRotation = glm::dquat(1.0, 0.0, 0.0, 0.0);
-    bool _useVBO = false;
     long long _cpuRamBudgetInBytes = 0;
     long long _totalDatasetSizeInBytes = 0;
     long long _gpuMemoryBudgetInBytes = 0;
     long long _maxStreamingBudgetInBytes = 0;
     size_t _chunkSize = 0;
 
-    GLuint _vao = 0;
     GLuint _vaoEmpty = 0;
-    GLuint _vboPos = 0;
-    GLuint _vboCol = 0;
-    GLuint _vboVel = 0;
     GLuint _ssboIdx = 0;
     GLuint _ssboData = 0;
     GLuint _vaoQuad = 0;

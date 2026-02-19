@@ -38,7 +38,7 @@ namespace openspace {
 class ScreenSpaceImageOnline : public ScreenSpaceRenderable {
 public:
     explicit ScreenSpaceImageOnline(const ghoul::Dictionary& dictionary);
-    virtual ~ScreenSpaceImageOnline() override;
+    ~ScreenSpaceImageOnline() override;
 
     void deinitializeGL() override;
 
@@ -53,7 +53,7 @@ protected:
     properties::StringProperty _texturePath;
 
 private:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
     std::future<DownloadManager::MemoryFile> downloadImageToMemory(
         const std::string& url);

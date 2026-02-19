@@ -22,8 +22,9 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-const float HCV_EPSILON = 1e-7;
-const float HSL_EPSILON = 1e-7;
+#ifndef _HDR___GLSL_
+#define _HDR___GLSL_
+
 const float HCY_EPSILON = 1e-7;
 
 // White given by D65
@@ -40,23 +41,14 @@ const mat3 XYZ2RGB = mat3(
 );
 
 // Gamma correction for linear RGB to sRGB
-// See wiki: https://en.wikipedia.org/wiki/SRGB#The_sRGB_transfer_function_.28.22gamma.22.29
+// See wiki:
+// https://en.wikipedia.org/wiki/SRGB#The_sRGB_transfer_function_.28.22gamma.22.29
 float gammaF(float u) {
-  if (u < 0.0031308) {
-    return 12.92 * u;
-  }
-  else {
-    return 1.055 * pow(u, 1.0 / 2.4) - 0.055;
-  }
+  return u < 0.0031308 ? 12.92 * u : 1.055 * pow(u, 1.0 / 2.4) - 0.055;
 }
 
 float invgammaF(float u) {
-  if (u < 0.04045) {
-    return u / 12.92;
-  }
-  else {
-    return pow((u + 0.055) / 1.055, 2.4);
-  }
+  return u < 0.04045 ? u / 12.92 : pow((u + 0.055) / 1.055, 2.4);
 }
 
 vec3 rgbToSRGB(vec3 rgb) {
@@ -110,45 +102,52 @@ See top of the file for full license terms.
 
 // Converts from pure Hue to linear RGB
 vec3 hue2rgb(float hue) {
-  float R = abs(hue * 6 - 3) - 1;
-  float G = 2 - abs(hue * 6 - 2);
-  float B = 2 - abs(hue * 6 - 4);
-  return clamp(vec3(R,G,B), 0, 1);
+  float r = abs(hue * 6 - 3) - 1;
+  float g = 2 - abs(hue * 6 - 2);
+  float b = 2 - abs(hue * 6 - 4);
+  return clamp(vec3(r, g, b), 0.0, 1.0);
 }
 
 // Converts a value from linear RGB to HCV (Hue, Chroma, Value)
 vec3 rgb2hcv(vec3 rgb) {
+  const float HCV_EPSILON = 1e-7;
+
   // Based on work by Sam Hocevar and Emil Persson
-  vec4 P = (rgb.g < rgb.b) ? vec4(rgb.bg, -1.0, 2.0/3.0) : vec4(rgb.gb, 0.0, -1.0/3.0);
-  vec4 Q = (rgb.r < P.x) ? vec4(P.xyw, rgb.r) : vec4(rgb.r, P.yzx);
-  float C = Q.x - min(Q.w, Q.y);
-  float H = abs((Q.w - Q.y) / (6 * C + HCV_EPSILON) + Q.z);
-  return vec3(H, C, Q.x);
+  vec4 p =
+    (rgb.g < rgb.b) ? vec4(rgb.bg, -1.0, 2.0 / 3.0) : vec4(rgb.gb, 0.0, -1.0 / 3.0);
+  vec4 q = (rgb.r < p.x) ? vec4(p.xyw, rgb.r) : vec4(rgb.r, p.yzx);
+  float c = q.x - min(q.w, q.y);
+  float h = abs((q.w - q.y) / (6 * c + HCV_EPSILON) + q.z);
+  return vec3(h, c, q.x);
 }
 
 // Converts from HSL to linear RGB
 vec3 hsl2rgb(vec3 hsl) {
   vec3 rgb = hue2rgb(hsl.x);
-  float C = (1 - abs(2 * hsl.z - 1)) * hsl.y;
-  return (rgb - 0.5) * C + hsl.z;
+  float c = (1.0 - abs(2.0 * hsl.z - 1.0)) * hsl.y;
+  return (rgb - 0.5) * c + hsl.z;
 }
 
 // Converts from linear rgb to HSL
 vec3 rgb2hsl(vec3 rgb) {
+  const float HSL_EPSILON = 1e-7;
+
   vec3 HCV = rgb2hcv(rgb);
   float L = HCV.z - HCV.y * 0.5;
-  float S = HCV.y / (1 - abs(L * 2 - 1) + HSL_EPSILON);
+  float S = HCV.y / (1.0 - abs(L * 2.0 - 1.0) + HSL_EPSILON);
   return vec3(HCV.x, S, L);
 }
 
 vec3 exponentialToneMapping(vec3 color, float exposure, float gamma) {
   color *= exposure;
 
-  color.r = color.r < 1.413 ? pow(color.r * 0.38317, 1.0 / gamma) : 1.0 - exp2(-exposure * color.r);
-  color.g = color.g < 1.413 ? pow(color.g * 0.38317, 1.0 / gamma) : 1.0 - exp2(-exposure * color.g);
-  color.b = color.b < 1.413 ? pow(color.b * 0.38317, 1.0 / gamma) : 1.0 - exp2(-exposure * color.b);
+  float invG = 1.0 / gamma;
 
-  return color;
+  return vec3(
+    color.r < 1.413 ? pow(color.r * 0.38317, invG) : 1.0 - exp2(-exposure * color.r),
+    color.g < 1.413 ? pow(color.g * 0.38317, invG) : 1.0 - exp2(-exposure * color.g),
+    color.b < 1.413 ? pow(color.b * 0.38317, invG) : 1.0 - exp2(-exposure * color.b)
+  );
 }
 
 vec3 toneMappingOperator(vec3 color, float exposure) {
@@ -156,5 +155,7 @@ vec3 toneMappingOperator(vec3 color, float exposure) {
 }
 
 vec3 gammaCorrection(vec3 color, float gamma) {
-  return pow(color, vec3(1.0f / gamma));
+  return pow(color, vec3(1.0 / gamma));
 }
+
+#endif // _HDR___GLSL_

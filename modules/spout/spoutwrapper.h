@@ -58,16 +58,8 @@ public:
     void saveGLState();
     void restoreGLState();
 
-    void saveGLTextureState();
-    void restoreGLTextureState();
-
 protected:
-    unsigned int _defaultTexture;
     unsigned int _defaultFBO;
-    unsigned int _defaultReadFBO;
-    unsigned int _defaultDrawFBO;
-    unsigned int _defaultReadBuffer;
-    unsigned int _defaultDrawBuffer[1] = { 0 };
 
     SPOUTHANDLE _spoutHandle = nullptr;
 

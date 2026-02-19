@@ -62,7 +62,7 @@ struct WebsocketInputStates;
 class NavigationHandler : public properties::PropertyOwner {
 public:
     NavigationHandler();
-    virtual ~NavigationHandler() override;
+    ~NavigationHandler() override;
 
     void initialize();
     void deinitialize();

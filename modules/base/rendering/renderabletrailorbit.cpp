@@ -151,15 +151,37 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
 void RenderableTrailOrbit::initializeGL() {
     RenderableTrail::initializeGL();
 
-    glGenVertexArrays(1, &_primaryRenderInformation._vaoID);
-    glGenBuffers(1, &_primaryRenderInformation._vBufferID);
-    glGenBuffers(1, &_primaryRenderInformation._iBufferID);
+    glCreateBuffers(1, &_primaryRenderInformation._vbo);
+    glCreateBuffers(1, &_primaryRenderInformation._ibo);
+    glCreateVertexArrays(1, &_primaryRenderInformation._vao);
+    glVertexArrayVertexBuffer(
+        _primaryRenderInformation._vao,
+        0,
+        _primaryRenderInformation._vbo,
+        0,
+        sizeof(TrailVBOLayout<float>)
+    );
+    glVertexArrayElementBuffer(
+        _primaryRenderInformation._vao,
+        _primaryRenderInformation._ibo
+    );
+
+    glEnableVertexArrayAttrib(_primaryRenderInformation._vao, 0);
+    glVertexArrayAttribFormat(
+        _primaryRenderInformation._vao,
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        0
+    );
+    glVertexArrayAttribBinding(_primaryRenderInformation._vao, 0, 0);
 }
 
 void RenderableTrailOrbit::deinitializeGL() {
-    glDeleteVertexArrays(1, &_primaryRenderInformation._vaoID);
-    glDeleteBuffers(1, &_primaryRenderInformation._vBufferID);
-    glDeleteBuffers(1, &_primaryRenderInformation._iBufferID);
+    glDeleteVertexArrays(1, &_primaryRenderInformation._vao);
+    glDeleteBuffers(1, &_primaryRenderInformation._vbo);
+    glDeleteBuffers(1, &_primaryRenderInformation._ibo);
 
     RenderableTrail::deinitializeGL();
 }
@@ -186,16 +208,13 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     const glm::vec3 p = translationPosition(data.time);
     _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
-    glBindVertexArray(_primaryRenderInformation._vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
-
     // 3
     if (!report.permanentPointsNeedUpdate) {
         if (report.floatingPointNeedsUpdate) {
             // If no other values have been touched, we only need to upload the
             // floating value
-            glBufferSubData(
-                GL_ARRAY_BUFFER,
+            glNamedBufferSubData(
+                _primaryRenderInformation._vbo,
                 _primaryRenderInformation.first * sizeof(TrailVBOLayout<float>),
                 sizeof(TrailVBOLayout<float>),
                 _vertexArray.data() + _primaryRenderInformation.first
@@ -207,8 +226,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
         if (report.nUpdated == UpdateReport::All) {
             // If all of the values have been invalidated, we need to upload the entire
             // array
-            glBufferData(
-                GL_ARRAY_BUFFER,
+            glNamedBufferData(
+                _primaryRenderInformation._vbo,
                 _vertexArray.size() * sizeof(TrailVBOLayout<float>),
                 _vertexArray.data(),
                 GL_STREAM_DRAW
@@ -217,12 +236,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             if (_indexBufferDirty) {
                 // We only need to upload the index buffer if it has been invalidated
                 // by changing the number of values we want to represent
-                glBindBuffer(
-                    GL_ELEMENT_ARRAY_BUFFER,
-                    _primaryRenderInformation._iBufferID
-                );
-                glBufferData(
-                    GL_ELEMENT_ARRAY_BUFFER,
+                glNamedBufferData(
+                    _primaryRenderInformation._ibo,
                     _indexArray.size() * sizeof(unsigned int),
                     _indexArray.data(),
                     GL_STATIC_DRAW
@@ -234,8 +249,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             // The lambda expression that will upload parts of the array starting at
             // begin and containing length number of elements
             auto upload = [this](int begin, int length) {
-                glBufferSubData(
-                    GL_ARRAY_BUFFER,
+                glNamedBufferSubData(
+                    _primaryRenderInformation._vbo,
                     begin * sizeof(TrailVBOLayout<float>),
                     sizeof(TrailVBOLayout<float>) * length,
                     _vertexArray.data() + begin
@@ -298,11 +313,6 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             }
         }
     }
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glBindVertexArray(0);
 }
 
 RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(

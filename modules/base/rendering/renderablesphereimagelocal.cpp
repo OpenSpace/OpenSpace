@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <filesystem>
 
 namespace {
@@ -86,7 +87,6 @@ void RenderableSphereImageLocal::initialize() {
 void RenderableSphereImageLocal::initializeGL() {
     RenderableSphere::initializeGL();
     _texture->loadFromFile(_texturePath.value());
-    _texture->uploadToGpu();
 }
 
 void RenderableSphereImageLocal::deinitializeGL() {
@@ -100,8 +100,8 @@ void RenderableSphereImageLocal::update(const UpdateData& data) {
     _texture->update();
 }
 
-void RenderableSphereImageLocal::bindTexture() {
-    _texture->bind();
+void RenderableSphereImageLocal::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_texture->texture());
 }
 
 } // namespace openspace

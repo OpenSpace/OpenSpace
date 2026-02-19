@@ -188,21 +188,15 @@ void RenderableSphericalGrid::initializeGL() {
         }
     );
 
-    glGenVertexArrays(1, &_vaoID);
-    glGenBuffers(1, &_vBufferID);
-
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_vao);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 }
 
 void RenderableSphericalGrid::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vaoID);
-    _vaoID = 0;
-
-    glDeleteBuffers(1, &_vBufferID);
-    _vBufferID = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
@@ -219,23 +213,18 @@ void RenderableSphericalGrid::render(const RenderData& data, RendererTasks&) {
     auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
         calcAllTransforms(data);
 
-    _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform("MVPTransform", modelViewProjectionTransform);
+    _gridProgram->setUniform("modelView", modelViewTransform);
+    _gridProgram->setUniform("modelViewProjection", modelViewProjectionTransform);
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
     // Change GL state:
-#ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else // ^^^^ !__APPLE__ // __APPLE__ vvvv
-    glLineWidth(1.f);
-#endif // __APPLE__
-
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
 
-    glBindVertexArray(_vaoID);
+    glBindVertexArray(_vao);
 
     // Render latitude rings
     glMultiDrawArrays(
@@ -358,11 +347,10 @@ void RenderableSphericalGrid::update(const UpdateData&) {
         _longitudeRenderInfo.count.push_back(_latSegments);
     }
 
-
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBufferData(GL_ARRAY_BUFFER, vertSize * sizeof(Vertex), vert.data(), GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
+    glDeleteBuffers(1, &_vbo);
+    glCreateBuffers(1, &_vbo);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+    glNamedBufferStorage(_vbo, vertSize * sizeof(Vertex), vert.data(), GL_NONE_BIT);
 
     _gridIsDirty = false;
 }

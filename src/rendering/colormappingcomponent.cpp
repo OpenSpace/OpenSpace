@@ -390,32 +390,31 @@ void ColorMappingComponent::initializeTexture() {
     const unsigned int width = static_cast<unsigned int>(_colorMap.entries.size());
     const unsigned int height = 1;
     const unsigned int size = width * height;
-    std::vector<GLubyte> img;
+    std::vector<std::byte> img;
     img.reserve(size * 4);
 
     for (const glm::vec4& c : _colorMap.entries) {
-        img.push_back(static_cast<GLubyte>(255 * c.r));
-        img.push_back(static_cast<GLubyte>(255 * c.g));
-        img.push_back(static_cast<GLubyte>(255 * c.b));
-        img.push_back(static_cast<GLubyte>(255 * c.a));
+        img.push_back(static_cast<std::byte>(255 * c.r));
+        img.push_back(static_cast<std::byte>(255 * c.g));
+        img.push_back(static_cast<std::byte>(255 * c.b));
+        img.push_back(static_cast<std::byte>(255 * c.a));
     }
 
-    _texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(width, height, 1),
-        GL_TEXTURE_1D,
-        ghoul::opengl::Texture::Format::RGBA
-
-    );
-
     // TODO: update this for linear mapping?
-    _texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
-    _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
-    _texture->setPixelData(
-        reinterpret_cast<char*>(img.data()),
-        ghoul::opengl::Texture::TakeOwnership::No
+    _texture = std::make_unique<ghoul::opengl::Texture>(
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(width, height, 1),
+            // @TODO (2026-02-18, abock): This was 1D before. Is this correct?
+            .type = GL_TEXTURE_1D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_UNSIGNED_BYTE
+        },
+        ghoul::opengl::Texture::SamplerInit{
+            .filter = ghoul::opengl::Texture::FilterMode::Nearest,
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        },
+        img.data()
     );
-
-    _texture->uploadTexture();
 }
 
 void ColorMappingComponent::update(const dataloader::Dataset& dataset, bool useCaching) {

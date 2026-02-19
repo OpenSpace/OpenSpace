@@ -24,15 +24,15 @@
 
 #version __CONTEXT__
 
-layout(location = 0) in vec2 position;
+layout(location = 0) in vec2 in_position;
 
-out vec2 vs_st;
-
-uniform mat4 ortho;
+out Data {
+  vec2 texCoords;
+} out_data;
 
 
 void main() {
-  vs_st = vec2(position.x + 1.0, position.y + 1.0) * 0.5;
-  gl_Position = vec4(position, 0.0, 1.0);
+  out_data.texCoords = (in_position + 1.0) * 0.5;
+  gl_Position = vec4(in_position, 0.0, 1.0);
 }
 

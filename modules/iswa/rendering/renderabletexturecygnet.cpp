@@ -54,22 +54,17 @@ RenderableTextureCygnet::RenderableTextureCygnet(const ghoul::Dictionary& dictio
 bool RenderableTextureCygnet::updateTexture() {
     using namespace ghoul;
 
-    std::unique_ptr<opengl::Texture> texture = io::TextureReader::ref().loadTexture(
+    _textures[0] = io::TextureReader::ref().loadTexture(
         reinterpret_cast<void*>(_imageFile.buffer),
         _imageFile.size,
         2,
+        { .filter = opengl::Texture::FilterMode::LinearMipMap },
         _imageFile.format
     );
 
-    if (texture) {
-        LDEBUG(std::format(
-            "Loaded texture from image iswa cygnet with id '{}'", _data.id
-        ));
-        texture->uploadTexture();
-        // Textures of planets looks much smoother with AnisotropicMipMap
-        texture->setFilter(opengl::Texture::FilterMode::LinearMipMap);
-        _textures[0] = std::move(texture);
-    }
+    LDEBUG(std::format(
+        "Loaded texture from image iswa cygnet with id '{}'", _data.id
+    ));
 
     return false;
 }

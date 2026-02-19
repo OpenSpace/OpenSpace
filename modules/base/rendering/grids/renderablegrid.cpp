@@ -209,30 +209,23 @@ void RenderableGrid::initializeGL() {
         }
     );
 
-    glGenVertexArrays(1, &_vaoID);
-    glGenBuffers(1, &_vBufferID);
-    glGenVertexArrays(1, &_highlightVaoID);
-    glGenBuffers(1, &_highlightVBufferID);
+    glCreateVertexArrays(1, &_vao);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_DOUBLE, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBindVertexArray(_highlightVaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _highlightVBufferID);
-
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_highlightVao);
+    glEnableVertexArrayAttrib(_highlightVao, 0);
+    glVertexArrayAttribFormat(_highlightVao, 0, 3, GL_DOUBLE, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_highlightVao, 0, 0);
 }
 
 void RenderableGrid::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vaoID);
-    _vaoID = 0;
-    glDeleteVertexArrays(1, &_highlightVaoID);
-    _highlightVaoID = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteVertexArrays(1, &_highlightVao);
 
-    glDeleteBuffers(1, &_vBufferID);
-    _vBufferID = 0;
-    glDeleteBuffers(1, &_highlightVBufferID);
-    _highlightVBufferID = 0;
+    glDeleteBuffers(1, &_vbo);
+    glDeleteBuffers(1, &_highlightVbo);
 
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
@@ -271,35 +264,27 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&) {
         );
     }
 
-    _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform("MVPTransform", modelViewProjectionMatrix);
+    _gridProgram->setUniform("modelView", modelViewTransform);
+    _gridProgram->setUniform("modelViewProjection", modelViewProjectionMatrix);
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
     // Change GL state:
-#ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
-    glLineWidth(1.f);
-#endif // __APPLE__
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_DEPTH_TEST);
 
     // Render minor grid
-    glBindVertexArray(_vaoID);
+    glBindVertexArray(_vao);
     glDrawArrays(_mode, 0, static_cast<GLsizei>(_varray.size()));
 
     // Render major grid
-#ifndef __APPLE__
     glLineWidth(_highlightLineWidth);
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
-    glLineWidth(1.f);
-#endif // __APPLE__
     _gridProgram->setUniform("gridColor", _highlightColor);
 
-    glBindVertexArray(_highlightVaoID);
+    glBindVertexArray(_highlightVao);
     glDrawArrays(_mode, 0, static_cast<GLsizei>(_highlightArray.size()));
 
     // Restore GL State
@@ -431,32 +416,27 @@ void RenderableGrid::update(const UpdateData&) {
 
     setBoundingSphere(glm::length(glm::dvec2(halfSize)));
 
-    // Minor grid
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glDeleteBuffers(1, &_vbo);
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(
+        _vbo,
         _varray.size() * sizeof(Vertex),
         _varray.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, sizeof(Vertex), nullptr);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
-    // Major grid
-    glBindVertexArray(_highlightVaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _highlightVBufferID);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _highlightArray.size() * sizeof(Vertex),
-        _highlightArray.data(),
-        GL_STATIC_DRAW
-    );
-    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, sizeof(Vertex), nullptr);
-
-    glBindVertexArray(0);
-
-    _gridIsDirty = false;
+    glDeleteBuffers(1, &_highlightVbo);
+    if (!_highlightArray.empty()) {
+        glCreateBuffers(1, &_highlightVbo);
+        glNamedBufferStorage(
+            _highlightVbo,
+            _highlightArray.size() * sizeof(Vertex),
+            _highlightArray.data(),
+            GL_NONE_BIT
+        );
+        glVertexArrayVertexBuffer(_highlightVao, 0, _highlightVbo, 0, sizeof(Vertex));
+    }
 }
 
 } // namespace openspace

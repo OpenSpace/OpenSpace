@@ -22,13 +22,14 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef TILE_VERTEX_SKIRT_HGLSL
-#define TILE_VERTEX_SKIRT_HGLSL
+#ifndef _GLOBEBROWSING___TILEVERTEXSKIRT___GLSL_
+#define _GLOBEBROWSING___TILEVERTEXSKIRT___GLSL_
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 uniform int xSegments;
 uniform float skirtLength;
+
 
 bool tileVertexIsSkirtVertex() {
   int vertexIDx = gl_VertexID % (xSegments + 3);
@@ -37,8 +38,8 @@ bool tileVertexIsSkirtVertex() {
          vertexIDx == (xSegments + 2) || vertexIDy == (xSegments + 2);
 }
 
-float getTileVertexSkirtLength() {
+float tileVertexSkirtLength() {
   return tileVertexIsSkirtVertex() ? skirtLength : 0.0;
 }
 
-#endif // TILE_VERTEX_SKIRT_HGLSL
+#endif // _GLOBEBROWSING___TILEVERTEXSKIRT___GLSL_

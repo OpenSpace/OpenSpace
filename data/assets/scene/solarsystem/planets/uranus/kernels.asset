@@ -15,7 +15,8 @@ local ID = {
   Miranda = "MIRANDA",
   Oberon = "OBERON",
   Titania = "TITANIA",
-  Umbriel = "UMBRIEL"
+  Umbriel = "UMBRIEL",
+  Uranus = "URANUS"
 }
 
 local Frame = {

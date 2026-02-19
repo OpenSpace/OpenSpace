@@ -37,16 +37,6 @@ function(DownloadNodeJs version download_dir)
       set(filename "${basename}.exe")
       set(path "v${version}/win-x64/${filename}")
     endif ()
-  elseif (APPLE)
-    if (CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64")
-      set(basename "node-v${version}-darwin-arm64")
-      set(filename "${basename}.tar.gz")
-      set(path "v${version}/${filename}")
-    else () # Default to x64
-      set(basename "node-v${version}-darwin-x64")
-      set(filename "${basename}.tar.gz")
-      set(path "v${version}/${filename}")
-    endif ()
   elseif (UNIX)
     if (CMAKE_SYSTEM_PROCESSOR MATCHES "ARM64|aarch64")
       set(basename "node-v${version}-linux-arm64")
@@ -81,15 +71,7 @@ function(DownloadNodeJs version download_dir)
   message(STATUS "URL: ${NODEJS_DOWNLOAD_URL}")
 
   # Extract the binary distribution for unix
-  if (APPLE)
-    # Apple uses tar.gz
-    message(STATUS "Extracting Node.js: ${NODEJS_DOWNLOAD_PATH} in ${download_dir}")
-    execute_process(
-      COMMAND tar xzf ${NODEJS_DOWNLOAD_PATH}
-      WORKING_DIRECTORY ${download_dir}
-    )
-  endif ()
-  if (UNIX AND NOT APPLE)
+  if (UNIX)
     # Linux uses tar.xz
     message(STATUS "Extracting Node.js: ${NODEJS_DOWNLOAD_PATH} in ${download_dir}")
     execute_process(

@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <filesystem>
 
 namespace {
@@ -103,8 +104,8 @@ void ScreenSpaceVideo::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
 }
 
-void ScreenSpaceVideo::bindTexture() {
-    _videoPlayer.frameTexture()->bind();
+void ScreenSpaceVideo::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_videoPlayer.frameTexture());
 }
 
 } // namespace openspace

@@ -35,6 +35,9 @@
 [submodule "modules/exoplanetsexperttool/webpage"]
 	path = modules/exoplanetsexperttool/webpage
 	url = https://github.com/WeirdRubberDuck/ExoplanetExplorer-D3App.git
+[submodule "modules/molecule/ext/mold"]
+	path = modules/molecule/ext/mold
+	url = https://github.com/scanberg/mdlib
 [submodule "modules/globebrowsing/ext/geos"]
 	path = modules/globebrowsing/ext/geos
 	url = https://github.com/OpenSpace/geos.git

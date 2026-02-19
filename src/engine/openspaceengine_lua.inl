@@ -170,20 +170,24 @@ namespace {
         constexpr unsigned int Width = 1;
         constexpr unsigned int Height = 1;
         constexpr unsigned int Size = Width * Height;
-        std::array<GLubyte, Size * 3> img = {
-            static_cast<GLubyte>(255 * color.r),
-            static_cast<GLubyte>(255 * color.g),
-            static_cast<GLubyte>(255 * color.b)
+        std::array<std::byte, Size * 3> img = {
+            static_cast<std::byte>(255 * color.r),
+            static_cast<std::byte>(255 * color.g),
+            static_cast<std::byte>(255 * color.b)
         };
 
         using Texture = ghoul::opengl::Texture;
+
         Texture textureFromData = Texture(
-            reinterpret_cast<void*>(img.data()),
-            glm::uvec3(Width, Height, 1),
-            GL_TEXTURE_2D,
-            Texture::Format::RGB
+            ghoul::opengl::Texture::FormatInit{
+                .dimensions = glm::uvec3(Width, Height, 1),
+                .type = GL_TEXTURE_2D,
+                .format = ghoul::opengl::Texture::Format::RGB,
+                .dataType = GL_UNSIGNED_BYTE
+            },
+            {},
+            img.data()
         );
-        textureFromData.setDataOwnership(Texture::TakeOwnership::No);
 
         try {
             ghoul::io::TextureWriter::ref().saveTexture(

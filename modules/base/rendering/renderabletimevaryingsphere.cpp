@@ -30,6 +30,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <iterator>
 #include <utility>
@@ -120,12 +121,6 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         const double time = extractTriggerTimeFromFileName(filePath);
         std::unique_ptr<ghoul::opengl::Texture> t =
             ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
-
-        t->setInternalFormat(GL_COMPRESSED_RGBA);
-        t->uploadTexture();
-        t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        t->purgeFromRAM();
-
         _files.push_back({ std::move(filePath), time, std::move(t) });
     }
 
@@ -178,12 +173,9 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     }
 }
 
-void RenderableTimeVaryingSphere::bindTexture() {
-    if (_texture) {
-        _texture->bind();
-    }
-    else {
-        unbindTexture();
+void RenderableTimeVaryingSphere::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    if (_texture) [[likely]] {
+        unit.bind(*_texture);
     }
 }
 

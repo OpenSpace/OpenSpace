@@ -39,7 +39,6 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/quaternion.hpp>
 #include <algorithm>
@@ -903,10 +902,8 @@ void RenderablePointCloud::initializeGL() {
 }
 
 void RenderablePointCloud::deinitializeGL() {
-    glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
+    glDeleteBuffers(1, &_vbo);
 
     deinitializeShaders();
 
@@ -925,6 +922,9 @@ void RenderablePointCloud::initializeShadersAndGlExtras() {
             );
         }
     );
+
+    glCreateVertexArrays(1, &_vao);
+    glCreateBuffers(1, &_vbo);
 }
 
 void RenderablePointCloud::deinitializeShaders() {
@@ -1001,19 +1001,10 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
 
     bool useAlpha = (t->numberOfChannels() > 3) && _texture.useAlphaChannel;
 
-    if (t) {
-        LINFOC("RenderablePlanesCloud", std::format("Loaded texture {}", path));
-        // Do not upload the loaded texture to the GPU, we just want it to hold the data.
-        // However, convert textures make sure they all use the same format
-        ghoul::opengl::Texture::Format targetFormat = glFormat(useAlpha);
-        convertTextureFormat(*t, targetFormat);
-    }
-    else {
-        throw ghoul::RuntimeError(std::format("Could not find image file {}", path));
-    }
+    LINFOC("RenderablePlanesCloud", std::format("Loaded texture {}", path));
 
     TextureFormat format = {
-        .resolution = glm::uvec2(t->width(), t->height()),
+        .resolution = glm::uvec2(t->dimensions().x, t->dimensions().y),
         .useAlpha = useAlpha
     };
 
@@ -1057,10 +1048,10 @@ void RenderablePointCloud::initAndAllocateTextureArray(unsigned int textureId,
         nullptr
     );
 
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(textureId, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTextureParameteri(textureId, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTextureParameteri(textureId, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTextureParameteri(textureId, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 }
 
 void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
@@ -1068,7 +1059,7 @@ void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
                                                      size_t textureIndex,
                                                      glm::uvec2 resolution,
                                                      bool useAlpha,
-                                                     const void* pixelData)
+                                                  const std::vector<std::byte>& pixelData)
 {
     gl::GLenum format = gl::GLenum(glFormat(useAlpha));
 
@@ -1083,7 +1074,7 @@ void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
         1, // depth
         format,
         GL_UNSIGNED_BYTE, // type
-        pixelData
+        pixelData.data()
     );
 
     // Keep track of which layer in which texture array corresponds to the texture with
@@ -1105,7 +1096,7 @@ void RenderablePointCloud::generateArrayTextures() {
 
         // Generate an array texture storage
         unsigned int id = 0;
-        glGenTextures(1, &id);
+        glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
         glBindTexture(GL_TEXTURE_2D_ARRAY, id);
 
         initAndAllocateTextureArray(id, res, nLayers, useAlpha);
@@ -1123,10 +1114,6 @@ void RenderablePointCloud::generateArrayTextures() {
                 texture->pixelData()
             );
             layer++;
-
-            // At this point we don't need the keep the texture data around anymore. If
-            // the textures need updating, we will reload them from file
-            texture->purgeFromRAM();
         }
 
         int nMaxTextureLayers = 0;
@@ -1263,8 +1250,7 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
     _program->setUniform(_uniformCache.colorMapTexture, colorMapTextureUnit);
 
     if (useColorMap) {
-        colorMapTextureUnit.activate();
-        _colorSettings.colorMapping->texture()->bind();
+        colorMapTextureUnit.bind(*_colorSettings.colorMapping->texture());
 
         const glm::vec2 range = _colorSettings.colorMapping->valueRange;
         _program->setUniform(_uniformCache.cmapRangeMin, range.x);
@@ -1315,20 +1301,18 @@ void RenderablePointCloud::renderPoints(const RenderData& data,
     glBindVertexArray(_vao);
 
     if (useTexture && !_textureArrays.empty()) {
-        spriteTextureUnit.activate();
         for (const TextureArrayInfo& arrayInfo : _textureArrays) {
+            spriteTextureUnit.bind(arrayInfo.renderId);
             _program->setUniform(
                 _uniformCache.aspectRatioScale,
                 arrayInfo.aspectRatioScale
             );
-            glBindTexture(GL_TEXTURE_2D_ARRAY, arrayInfo.renderId);
             glDrawArrays(
                 GL_POINTS,
                 arrayInfo.startOffset,
                 static_cast<GLsizei>(arrayInfo.nPoints)
             );
         }
-        glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
     }
     else {
         _program->setUniform(_uniformCache.aspectRatioScale, glm::vec2(1.f));
@@ -1460,7 +1444,7 @@ int RenderablePointCloud::bufferVertexAttribute(const std::string& name, GLint n
                                                 int nAttributesPerPoint, int offset) const
 {
     GLint attrib = _program->attributeLocation(name);
-    glEnableVertexAttribArray(attrib);
+    glEnableVertexArrayAttrib(_vao, attrib);
     glVertexAttribPointer(
         attrib,
         nValues,
@@ -1486,18 +1470,9 @@ void RenderablePointCloud::updateBufferData() {
 
     int size = static_cast<int>(slice.size());
 
-    if (_vao == 0) {
-        glGenVertexArrays(1, &_vao);
-        LDEBUG(std::format("Generating Vertex Array id '{}'", _vao));
-    }
-    if (_vbo == 0) {
-        glGenBuffers(1, &_vbo);
-        LDEBUG(std::format("Generating Vertex Buffer Object id '{}'", _vbo));
-    }
-
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
+    glNamedBufferData(_vbo, size * sizeof(float), slice.data(), GL_STATIC_DRAW);
 
     const int attibsPerPoint = nAttributesPerPoint();
     int offset = 0;

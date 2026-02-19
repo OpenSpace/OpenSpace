@@ -30,6 +30,7 @@
 #include <openspace/camera/camera.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/helper.h>
 #include <openspace/rendering/renderable.h>
@@ -843,17 +844,20 @@ void SceneGraphNode::update(const UpdateData& data) {
 void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     ZoneScoped;
     ZoneName(identifier().c_str(), identifier().size());
-#ifdef TRACY_ENABLE
-    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
-    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
-#endif // TRACY_ENABLE
 
     if (_state != State::GLInitialized ||
         !(_renderable && _renderable->isVisible() && _renderable->isReady()) ||
+        (!_renderable->matchesRenderBinMask(data.renderBinMask) &&
+            !_renderable->matchesSecondaryRenderBin(data.renderBinMask)) ||
         !isTimeFrameActive())
     {
         return;
     }
+
+#ifdef TRACY_ENABLE
+    TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
+    TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
+#endif // TRACY_ENABLE
 
     RenderData newData = {
         .camera = data.camera,

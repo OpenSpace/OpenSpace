@@ -24,8 +24,11 @@
 
 #version __CONTEXT__
 
-in vec2 vs_uv;
-out vec4 color;
+in Data {
+  vec2 texCoords;
+} in_data;
+
+out vec4 out_color;
 
 uniform sampler2D tex;
 uniform sampler2D stencil;
@@ -70,24 +73,19 @@ vec3 gatherNeighboringColors() {
 
   // GLSL normally doesn't have a problem taking vec3(0.0)/0.0 but we don't want to tempt
   // the compiler gods
-  if (nContributions > 0) {
-    return totalColor / nContributions;
-  }
-  else {
-    return vec3(0.0);
-  }
+  return nContributions > 0 ? totalColor / nContributions : vec3(0.0);
 }
 
 
 void main() {
-  if (texture(stencil, vs_uv).r == 0.0) {
+  if (texture(stencil, in_data.texCoords).r == 0.0) {
     // This means that the current fragment/texel we are looking at has not been projected
     // on and we only want to do the dilation into these texels
-    color = vec4(gatherNeighboringColors(), 1.0);
+    out_color = vec4(gatherNeighboringColors(), 1.0);
   }
   else {
     // We are in a region where an image has been projected, so we can reuse the already
     // sampled version
-    color = texture(tex, vs_uv);
+    out_color = texture(tex, in_data.texCoords);
   }
 }

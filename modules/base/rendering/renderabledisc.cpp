@@ -130,7 +130,6 @@ void RenderableDisc::initializeGL() {
     initializeShader();
 
     _texture->loadFromFile(_texturePath.value());
-    _texture->uploadToGpu();
 
     _plane.initialize();
 }
@@ -157,8 +156,7 @@ void RenderableDisc::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.opacity, opacity());
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    _texture->bind();
+    unit.bind(*_texture->texture());
     _shader->setUniform(_uniformCache.colorTexture, unit);
 
     glEnablei(GL_BLEND, 0);

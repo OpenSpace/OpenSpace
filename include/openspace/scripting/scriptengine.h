@@ -107,10 +107,10 @@ public:
     void addLibrary(LuaLibrary library);
     bool hasLibrary(const std::string& name);
 
-    virtual void preSync(bool isMaster) override;
-    virtual void encode(SyncBuffer* syncBuffer) override;
-    virtual void decode(SyncBuffer* syncBuffer) override;
-    virtual void postSync(bool isMaster) override;
+    void preSync(bool isMaster) override;
+    void encode(SyncBuffer* syncBuffer) override;
+    void decode(SyncBuffer* syncBuffer) override;
+    void postSync(bool isMaster) override;
 
     void queueScript(Script script);
     void queueScript(std::string script);

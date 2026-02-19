@@ -89,13 +89,15 @@ void TransferFunctionHandler::initialize() {
 
     addTag("TF");
     _texture = std::make_shared<ghoul::opengl::Texture>(
-        glm::uvec3(1024, 1, 1),
-        GL_TEXTURE_1D,
-        ghoul::opengl::Texture::Format::RGBA,
-        GL_RGBA,
-        GL_FLOAT,
-        ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(1024, 1, 1),
+            .type = GL_TEXTURE_1D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_FLOAT
+        },
+        ghoul::opengl::Texture::SamplerInit{
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        }
     );
 
     if (!_filePath.empty()) {
@@ -107,9 +109,7 @@ void TransferFunctionHandler::initialize() {
 }
 
 void TransferFunctionHandler::setTexture() {
-    if (_transferFunctionProperty.value().createTexture(*_texture)) {
-        uploadTexture();
-    }
+    _transferFunctionProperty.value().createTexture(*_texture);
 }
 
 void TransferFunctionHandler::setUnit(std::string unit) {
@@ -140,10 +140,6 @@ void TransferFunctionHandler::setFilepath(std::string path) {
 
 ghoul::opengl::Texture& TransferFunctionHandler::texture() {
     return *_texture;
-}
-
-void TransferFunctionHandler::uploadTexture() {
-    _texture->uploadTexture();
 }
 
 bool TransferFunctionHandler::hasTexture() const {

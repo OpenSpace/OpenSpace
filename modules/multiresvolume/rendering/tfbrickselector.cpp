@@ -30,6 +30,7 @@
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/histogram.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/opengl/texture.h>
 #include <algorithm>
 #include <cmath>
 
@@ -394,6 +395,7 @@ bool TfBrickSelector::calculateBrickErrors() {
     }
 
     std::vector<float> gradients(tfWidth - 1);
+    tf->texture().downloadTexture();
     for (size_t offset = 0; offset < tfWidth - 1; offset++) {
         glm::vec4 prevRgba = tf->sample(offset);
         glm::vec4 nextRgba = tf->sample(offset + 1);
@@ -403,6 +405,7 @@ bool TfBrickSelector::calculateBrickErrors() {
 
         gradients[offset] = colorDifference*alpha;
     }
+    tf->texture().clearDownloadedTexture();
 
     unsigned int nHistograms = _tsp->numTotalNodes();
     _brickErrors = std::vector<float>(nHistograms);

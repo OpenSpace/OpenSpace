@@ -102,43 +102,10 @@ void SpoutMain::saveGLState() {
     GLint buf;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &buf);
     _defaultFBO = static_cast<unsigned int>(buf);
-
-    glGetIntegerv(GL_READ_FRAMEBUFFER_BINDING, &buf);
-    _defaultReadFBO = static_cast<unsigned int>(buf);
-
-    glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING, &buf);
-    _defaultDrawFBO = static_cast<unsigned int>(buf);
-
-    glGetIntegerv(GL_READ_BUFFER, &buf);
-    _defaultReadBuffer = static_cast<unsigned int>(buf);
-
-    glGetIntegerv(GL_DRAW_BUFFER0, &buf);
-    _defaultDrawBuffer[0] = static_cast<unsigned int>(buf);
-
-    saveGLTextureState();
 }
 
 void SpoutMain::restoreGLState() {
     glBindFramebuffer(GL_FRAMEBUFFER, static_cast<GLuint>(_defaultFBO));
-    if (_defaultFBO) {
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, static_cast<GLuint>(_defaultReadFBO));
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, static_cast<GLuint>(_defaultDrawFBO));
-        glReadBuffer(static_cast<GLenum>(_defaultReadBuffer));
-        GLenum buf[1];
-        buf[0] = static_cast<GLenum>(_defaultDrawBuffer[0]);
-        glDrawBuffers(1, buf);
-    }
-    restoreGLTextureState();
-}
-
-void SpoutMain::saveGLTextureState() {
-    GLint buf;
-    glGetIntegerv(GL_TEXTURE_BINDING_2D, &buf);
-    _defaultTexture = static_cast<unsigned int>(buf);
-}
-
-void SpoutMain::restoreGLTextureState() {
-    glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(_defaultTexture));
 }
 
 SpoutReceiver::SpoutReceiver() {}
@@ -299,18 +266,15 @@ bool SpoutReceiver::updateTexture(unsigned int width, unsigned int height) {
     if (width != _spoutWidth || height != _spoutHeight) {
         releaseTexture();
         _spoutTexture = std::make_unique<ghoul::opengl::Texture>(
-            glm::uvec3(width, height, 1),
-            GL_TEXTURE_2D,
-            ghoul::opengl::Texture::Format::RGBA,
-            GL_RGBA, GL_UNSIGNED_BYTE,
-            ghoul::opengl::Texture::FilterMode::Linear,
-            ghoul::opengl::Texture::WrappingMode::Repeat,
-            ghoul::opengl::Texture::AllocateData::No,
-            ghoul::opengl::Texture::TakeOwnership::No
+            ghoul::opengl::Texture::FormatInit{
+                .dimensions = glm::uvec3(width, height, 1),
+                .type = GL_TEXTURE_2D,
+                .format = ghoul::opengl::Texture::Format::RGBA,
+                .dataType = GL_UNSIGNED_BYTE
+            }
         );
 
         if (_spoutTexture) {
-            _spoutTexture->uploadTexture();
             if (_onUpdateTextureCallback && !_onUpdateTextureCallback(width, height)) {
                 LWARNING(std::format(
                     "Could not create callback texture for {} -> {}x{}",

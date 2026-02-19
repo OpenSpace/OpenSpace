@@ -108,8 +108,8 @@ private:
     };
     Cut _cut;
 
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 } // namespace openspace

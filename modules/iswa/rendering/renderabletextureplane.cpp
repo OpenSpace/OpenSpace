@@ -64,67 +64,63 @@ void RenderableTexturePlane::deinitializeGL() {
 
 void RenderableTexturePlane::setUniforms() {
     ghoul::opengl::TextureUnit unit;
-
-    unit.activate();
-    _textures[0]->bind();
+    unit.bind(*_textures[0]);
     _shader->setUniform("texture1", unit);
     _shader->setUniform("transparency", _alpha.value());
 }
 
 bool RenderableTexturePlane::createGeometry() {
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    struct Vertex {
+        glm::vec4 position;
+        glm::vec2 texCoords;
+    };
 
-    // ============================
-    //         GEOMETRY (quad)
-    // ============================
-
+    glCreateBuffers(1, &_vbo);
     float s = _data.spatialScale.x;
     const GLfloat x = s * _data.scale.x / 2.f;
     const GLfloat y = s * _data.scale.y / 2.f;
     const GLfloat z = s * _data.scale.z / 2.f;
     const GLfloat w = _data.spatialScale.w;
-
-    const GLfloat vertex_data[] = { // square of two triangles (sigh)
-        //      x      y     z     w     s     t
-        -x, -y,             -z,  w, 0, 1,
-         x,  y,              z,  w, 1, 0,
-        -x,  ((x>0)?y:-y),   z,  w, 0, 0,
-        -x, -y,             -z,  w, 0, 1,
-         x,  ((x>0)?-y:y),  -z,  w, 1, 1,
-         x,  y,              z,  w, 1, 0,
+    const Vertex VertexData[] = {
+        { glm::vec4(-x, -y,                  -z,  w), glm::vec2(0.f, 1.f) },
+        { glm::vec4( x,  y,                   z,  w), glm::vec2(1.f, 0.f) },
+        { glm::vec4(-x, ((x > 0) ? y : -y),   z,  w), glm::vec2(0.f, 0.f) },
+        { glm::vec4(-x, -y,                  -z,  w), glm::vec2(0.f, 1.f) },
+        { glm::vec4( x,  ((x > 0) ? -y : y), -z,  w), glm::vec2(1.f, 1.f) },
+        { glm::vec4( x,  y,                   z,  w), glm::vec2(1.f, 0.f) }
     };
+    glNamedBufferStorage(_vbo, sizeof(VertexData), VertexData, GL_NONE_BIT);
 
-    glBindVertexArray(_quad); // bind array
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(
+        _vao,
         1,
         2,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+        offsetof(Vertex, texCoords)
     );
+    glVertexArrayAttribBinding(_vao, 1, 0);
 
     return true;
 }
 
 bool RenderableTexturePlane::destroyGeometry() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     return true;
 }
 
 void RenderableTexturePlane::renderGeometry() const {
-    glBindVertexArray(_quad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 

@@ -64,8 +64,8 @@ protected:
     properties::IntProperty _latSegments;
     properties::FloatProperty _lineWidth;
 
-    GLuint _vaoID = 0;
-    GLuint _vBufferID = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
     struct {
         std::vector<GLint> first;
         std::vector<GLsizei> count;

@@ -2,7 +2,7 @@ local dataPath = asset.resource({
   Name = "Exoplanet Data Files",
   Type = "HttpSynchronization",
   Identifier = "exoplanets_data",
-  Version = 7
+  Version = 8
 })
 
 local colormaps = asset.resource({

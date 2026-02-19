@@ -221,8 +221,13 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
 }
 
 void RenderableShadowCylinder::initializeGL() {
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
+    glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(CylinderVBOLayout));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     _shader = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         "ShadowCylinderProgram",
@@ -252,9 +257,7 @@ void RenderableShadowCylinder::deinitializeGL() {
     _shader = nullptr;
 
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
     glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
 }
 
 bool RenderableShadowCylinder::isReady() const {
@@ -277,7 +280,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.opacity, opacity());
 
     glBindVertexArray(_vao);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, _count);
     glBindVertexArray(0);
 
     _shader->deactivate();
@@ -297,6 +300,7 @@ void RenderableShadowCylinder::update(const UpdateData& data) {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
+
     createCylinder(data.time.j2000Seconds());
 }
 
@@ -339,34 +343,26 @@ void RenderableShadowCylinder::createCylinder(double time) {
     vecLightSource = glm::inverse(_stateMatrix) * vecLightSource;
 
     vecLightSource *= _shadowLength.value();
-    _vertices.clear();
+
+    std::vector<CylinderVBOLayout> vertices;
+    vertices.reserve(terminatorPoints.size() * 2 + 2);
 
     for (const glm::vec3& v : terminatorPoints) {
-        _vertices.push_back({ v[0], v[1], v[2], 0.f });
+        vertices.push_back({ v[0], v[1], v[2], 0.f });
         glm::vec3 f = v + glm::vec3(vecLightSource);
-        _vertices.push_back({ f[0], f[1], f[2], 0.f });
+        vertices.push_back({ f[0], f[1], f[2], 0.f });
     }
-    _vertices.push_back(_vertices[0]);
-    _vertices.push_back(_vertices[1]);
+    vertices.push_back(vertices[0]);
+    vertices.push_back(vertices[1]);
 
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _vertices.size() * sizeof(CylinderVBOLayout),
-        nullptr,
+    glNamedBufferData(
+        _vbo,
+        vertices.size() * sizeof(CylinderVBOLayout),
+        vertices.data(),
         GL_DYNAMIC_DRAW
     );
-    glBufferSubData(
-        GL_ARRAY_BUFFER,
-        0,
-        _vertices.size() * sizeof(CylinderVBOLayout),
-        _vertices.data()
-    );
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
-    glBindVertexArray(0);
+    _count = static_cast<GLsizei>(vertices.size());
 }
 
 } // namespace openspace

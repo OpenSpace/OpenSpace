@@ -39,7 +39,6 @@ asset.onInitialize(function()
     GuiPath = "/Slides",
     IsLocal = false
   })
-  openspace.bindKey("KP_4", "slide_deck.prevslide")
 
   openspace.action.registerAction({
     Identifier = "slide_deck.nextslide",
@@ -49,7 +48,6 @@ asset.onInitialize(function()
     GuiPath = "/Slides",
     IsLocal = false
   })
-  openspace.bindKey("KP_6", "slide_deck.nextslide")
 
   openspace.action.registerAction({
     Identifier = "slide_deck.toggleslides",
@@ -59,7 +57,6 @@ asset.onInitialize(function()
     GuiPath = "/Slides",
     IsLocal = false
   })
-  openspace.bindKey("KP_0", "slide_deck.toggleslides")
 
 end)
 

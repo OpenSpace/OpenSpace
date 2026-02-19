@@ -68,8 +68,8 @@ public:
 
     bool isReady() const override;
 
-    virtual void update(const UpdateData& data) override;
-    virtual void render(const RenderData& data, RendererTasks& tasks) override;
+    void update(const UpdateData& data) override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
 
 private:
     properties::BoolProperty _useGlobalTime;

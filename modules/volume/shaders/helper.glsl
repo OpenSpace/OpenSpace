@@ -22,12 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#define VOLUME_PI 3.14159265358979323846  /* pi */
-#define VOLUME_SQRT1_3 0.57735026919           /* 1/sqrt(3) */
+const float M_PI = 3.14159265358979323846;
+const float SQRT1_3 = 0.57735026919;
 
-vec3 volume_cartesianToSpherical(vec3 zeroToOneCoords) {
+
+vec3 cartesianToSpherical(vec3 zeroToOneCoords) {
   // Put cartesian in [-1..1] range first
-  vec3 cartesian = vec3(-1.0,-1.0,-1.0) + zeroToOneCoords * 2.0f;
+  vec3 cartesian = vec3(-1.0,-1.0,-1.0) + zeroToOneCoords * 2.0;
 
   float r = length(cartesian);
 
@@ -35,9 +36,13 @@ vec3 volume_cartesianToSpherical(vec3 zeroToOneCoords) {
   float phi = 0.0;
 
   if (r != 0.0) {
-      theta = acos(cartesian.z / r) / VOLUME_PI;
-      phi = (VOLUME_PI + atan(cartesian.y, cartesian.x)) / (2.0 * VOLUME_PI);
+    return vec3(
+      r,
+      acos(cartesian.z / r) / M_PI,
+      (M_PI + atan(cartesian.y, cartesian.x)) / (2.0 * M_PI)
+    );
   }
-
-  return vec3(r, theta, phi);
+  else {
+    return vec3(0.0);
+  }
 }

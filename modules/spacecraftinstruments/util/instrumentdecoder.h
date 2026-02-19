@@ -33,8 +33,8 @@ class InstrumentDecoder : public Decoder {
 public:
     explicit InstrumentDecoder(const ghoul::Dictionary& dictionary);
 
-    virtual std::string_view decoderType() const override;
-    virtual const std::vector<std::string>& translations() const override;
+    std::string_view decoderType() const override;
+    const std::vector<std::string>& translations() const override;
     const std::string& stopCommand();
 
 private:

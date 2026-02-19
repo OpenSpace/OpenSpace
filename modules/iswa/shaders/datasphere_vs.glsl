@@ -24,28 +24,28 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
+layout(location = 1) in vec2 in_texCoords;
 
-out vec2 vs_st;
-out vec4 vs_position;
+out Data {
+  vec4 position;
+  vec2 texCoords;
+} out_data;
 
-uniform mat4 ViewProjection;
-uniform mat4 ModelTransform;
+uniform mat4 viewProjection;
+uniform mat4 modelTransform;
 
 
 void main() {
-  vs_st = in_st;
-  vs_position = in_position;
-  vec4 tmp = in_position;
+  out_data.position = in_position;
+  out_data.texCoords = in_texCoords;
 
-  // this is wrong for the normal. The normal transform is the transposed inverse of the model transform
-  // vs_normal = normalize(ModelTransform * vec4(in_normal,0));
+  // this is wrong for the normal. The normal transform is the transposed inverse of the
+  // model transform
+  // vs_normal = normalize(modelTransform * vec4(in_normal,0));
 
-  vec4 position = pscTransform(tmp, ModelTransform);
-  vs_position = tmp;
-  position = ViewProjection * position;
-  gl_Position =  z_normalization(position);
+  gl_Position =
+    z_normalization(viewProjection * pscTransform(in_position, modelTransform));
 }

@@ -223,9 +223,12 @@ void TouchModule::internalInitialize(const ghoul::Dictionary& dict) {
         clearInputs();
     });
 
-    global::callback::render->push_back([this]() {
-        _markers.render(_touchPoints);
-    });
+    global::callback::render->push_back(
+        [this](const glm::mat4&, const glm::mat4&, const glm::mat4&) {
+            _markers.render(_touchPoints);
+
+        }
+    );
 }
 
 bool TouchModule::processNewInput() {

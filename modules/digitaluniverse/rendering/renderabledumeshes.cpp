@@ -392,8 +392,8 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
 
 void RenderableDUMeshes::render(const RenderData& data, RendererTasks&) {
     const glm::dmat4 modelMatrix =
-        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) * // Translation
-        glm::dmat4(data.modelTransform.rotation) *  // Spice rotation
+        glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+        glm::dmat4(data.modelTransform.rotation) *
         glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale));
 
     const glm::dmat4 modelViewMatrix = data.camera.combinedViewMatrix() * modelMatrix;
@@ -577,21 +577,6 @@ bool RenderableDUMeshes::readSpeckFile() {
                 // Check if new max radius
                 const double r = glm::length(glm::dvec3(pos));
                 maxRadius = std::max(maxRadius, r);
-
-                // OLD CODE:
-                // (2022-03-23, emmbr)  None of our files included texture coordinates,
-                // and if they would they would still not be used by the shader
-                //for (int i = 0; i < 7; i++) {
-                //    GLfloat value;
-                //    lineData >> value;
-                //    bool errorReading = lineData.rdstate() & std::ifstream::failbit;
-                //    if (!errorReading) {
-                //        mesh.vertices.push_back(value);
-                //    }
-                //    else {
-                //        break;
-                //    }
-                //}
             }
 
             ghoul::getline(file, line);
@@ -616,120 +601,73 @@ void RenderableDUMeshes::createMeshes() {
 
     for (std::pair<const int, RenderingMesh>& p : _renderingMeshesMap) {
         for (int i = 0; i < p.second.numU; i++) {
-            GLuint vao = 0;
-            glGenVertexArrays(1, &vao);
-            p.second.vaoArray.push_back(vao);
-
             GLuint vbo = 0;
-            glGenBuffers(1, &vbo);
-            p.second.vboArray.push_back(vbo);
-
-            glBindVertexArray(vao);
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            //glBufferData(GL_ARRAY_BUFFER, it->second.numV * sizeof(GLfloat),
-            glBufferData(
-                GL_ARRAY_BUFFER,
+            glCreateBuffers(1, &vbo);
+            glNamedBufferStorage(
+                vbo,
                 p.second.vertices.size() * sizeof(GLfloat),
                 p.second.vertices.data(),
-                GL_STATIC_DRAW
+                GL_NONE_BIT
             );
-            // in_position
-            glEnableVertexAttribArray(0);
-            // (2022-03-23, emmbr) This code was actually never used. We only read three
-            // values per line and did not handle any texture cooridnates, even if there
-            // would have been some in the file
-            //// U and V may not be given by the user
-            //if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {
-            //    glVertexAttribPointer(
-            //        0,
-            //        3,
-            //        GL_FLOAT,
-            //        GL_FALSE,
-            //        sizeof(GLfloat) * 5,
-            //        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i * p.second.numV)
-            //    );
+            p.second.vertices.clear();
+            p.second.vboArray.push_back(vbo);
 
-            //    // texture coords
-            //    glEnableVertexAttribArray(1);
-            //    glVertexAttribPointer(
-            //        1,
-            //        2,
-            //        GL_FLOAT,
-            //        GL_FALSE,
-            //        sizeof(GLfloat) * 7,
-            //        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
-            //    );
-            //}
-            //else { // no U and V:
-                glVertexAttribPointer(
-                    0,
-                    3,
-                    GL_FLOAT,
-                    GL_FALSE,
-                    0,
-                    reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i * p.second.numV)
-                );
-            //}
+            GLuint vao = 0;
+            glCreateVertexArrays(1, &vao);
+            glVertexArrayVertexBuffer(vao, 0, vbo, 0, 3 * sizeof(float));
+            p.second.vaoArray.push_back(vao);
+
+            glEnableVertexArrayAttrib(vao, 0);
+            glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+            glVertexArrayAttribBinding(vao, 0, 0);
         }
 
         // Grid: we need columns
         if (p.second.numU > 1) {
             for (int i = 0; i < p.second.numV; i++) {
-                GLuint cvao = 0;
-                glGenVertexArrays(1, &cvao);
-                p.second.vaoArray.push_back(cvao);
-
                 GLuint cvbo = 0;
-                glGenBuffers(1, &cvbo);
-                p.second.vboArray.push_back(cvbo);
-
-                glBindVertexArray(cvao);
-                glBindBuffer(GL_ARRAY_BUFFER, cvbo);
-                glBufferData(
-                    GL_ARRAY_BUFFER,
+                glCreateBuffers(1, &cvbo);
+                glNamedBufferStorage(
+                    cvbo,
                     p.second.vertices.size() * sizeof(GLfloat),
                     p.second.vertices.data(),
-                    GL_STATIC_DRAW
+                    GL_NONE_BIT
                 );
-                // in_position
-                glEnableVertexAttribArray(0);
-                // U and V may not be given by the user
-                if (p.second.vertices.size() / (p.second.numU * p.second.numV) > 3) {
-                    glVertexAttribPointer(
-                        0,
-                        3,
-                        GL_FLOAT,
-                        GL_FALSE,
-                        p.second.numV * sizeof(GLfloat) * 5,
-                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * i)
-                    );
+                p.second.vertices.clear();
+                p.second.vboArray.push_back(cvbo);
 
-                    // texture coords
-                    glEnableVertexAttribArray(1);
-                    glVertexAttribPointer(
+                GLuint cvao = 0;
+                glCreateVertexArrays(1, &cvao);
+                const bool hasUV =
+                    p.second.vertices.size() / (p.second.numU * p.second.numV) > 3;
+                glVertexArrayVertexBuffer(
+                    cvao,
+                    0,
+                    cvbo,
+                    0,
+                    hasUV ? 5 * sizeof(GLfloat) : 3 * sizeof(GLfloat)
+                );
+                p.second.vaoArray.push_back(cvao);
+
+                glEnableVertexArrayAttrib(cvao, 0);
+                glVertexArrayAttribFormat(cvao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+                glVertexArrayAttribBinding(cvao, 0, 0);
+
+                if (hasUV) {
+                    glEnableVertexArrayAttrib(cvao, 1);
+                    glVertexArrayAttribFormat(
+                        cvao,
                         1,
                         2,
                         GL_FLOAT,
                         GL_FALSE,
-                        p.second.numV * sizeof(GLfloat) * 7,
-                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i)
+                        3 * sizeof(GLfloat)
                     );
-                }
-                else { // no U and V:
-                    glVertexAttribPointer(
-                        0,
-                        3,
-                        GL_FLOAT,
-                        GL_FALSE,
-                        p.second.numV * sizeof(GLfloat) * 3,
-                        reinterpret_cast<GLvoid*>(sizeof(GLfloat) * 3 * i)
-                    );
+                    glVertexArrayAttribBinding(cvao, 0, 0);
                 }
             }
         }
     }
-
-    glBindVertexArray(0);
 
     _dataIsDirty = false;
 }

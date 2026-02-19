@@ -230,7 +230,7 @@ bool TransferFunction::createTexture(ghoul::opengl::Texture& ptr) {
             transferFunction[p] = value;
         }
     }
-    ptr.setPixelData(transferFunction);
+    ptr.setPixelData(reinterpret_cast<std::byte*>(transferFunction));
     return true;
 }
 

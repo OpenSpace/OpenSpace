@@ -229,13 +229,30 @@ void RenderableFieldlines::initializeGL() {
         absPath("${MODULE_FIELDLINES}/shaders/fieldline_fs.glsl"),
         absPath("${MODULE_FIELDLINES}/shaders/fieldline_gs.glsl")
     );
+
+    glCreateVertexArrays(1, &_vao);
+
+    GLuint vertexLocation = 0;
+    glEnableVertexArrayAttrib(_vao, vertexLocation);
+    glVertexArrayAttribFormat(_vao, vertexLocation, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, vertexLocation, 0);
+
+    GLuint colorLocation = 1;
+    glEnableVertexArrayAttrib(_vao, colorLocation);
+    glVertexArrayAttribFormat(
+        _vao,
+        colorLocation,
+        4,
+        GL_FLOAT,
+        GL_FALSE,
+        offsetof(LinePoint, color)
+    );
+    glVertexArrayAttribBinding(_vao, colorLocation, 0);
 }
 
 void RenderableFieldlines::deinitializeGL() {
-    glDeleteVertexArrays(1, &_fieldlineVAO);
-    _fieldlineVAO = 0;
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     if (_program) {
         global::renderEngine->removeRenderProgram(_program.get());
@@ -262,7 +279,7 @@ void RenderableFieldlines::render(const RenderData& data, RendererTasks&) {
         _program->setUniform("fieldLineColor", _fieldlineColor);
     }
 
-    glBindVertexArray(_fieldlineVAO);
+    glBindVertexArray(_vao);
     glMultiDrawArrays(
         GL_LINE_STRIP_ADJACENCY,
         &_lineStart[0],
@@ -307,47 +324,15 @@ void RenderableFieldlines::update(const UpdateData&) {
         }
         LDEBUG(std::format("Number of vertices: {}", vertexData.size()));
 
-        if (_fieldlineVAO == 0) {
-            glGenVertexArrays(1, &_fieldlineVAO);
-        }
-        glBindVertexArray(_fieldlineVAO);
-
-        if (_vertexPositionBuffer == 0) {
-            glGenBuffers(1, &_vertexPositionBuffer);
-        }
-        glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glDeleteBuffers(1, &_vbo);
+        glCreateBuffers(1, &_vbo);
+        glNamedBufferStorage(
+            _vbo,
             vertexData.size() * sizeof(LinePoint),
             &vertexData.front(),
-            GL_STATIC_DRAW
+            GL_NONE_BIT
         );
-
-        GLuint vertexLocation = 0;
-        glEnableVertexAttribArray(vertexLocation);
-        glVertexAttribPointer(
-            vertexLocation,
-            3,
-            GL_FLOAT,
-            GL_FALSE,
-            sizeof(LinePoint),
-            nullptr
-        );
-
-        GLuint colorLocation = 1;
-        glEnableVertexAttribArray(colorLocation);
-        glVertexAttribPointer(
-            colorLocation,
-            4,
-            GL_FLOAT,
-            GL_FALSE,
-            sizeof(LinePoint),
-            reinterpret_cast<void*>(sizeof(glm::vec3))
-        );
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+        glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(LinePoint));
 
         _fieldLinesAreDirty = false;
     }

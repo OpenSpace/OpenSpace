@@ -26,22 +26,20 @@
 
 layout(location = 0) in vec3 in_position;
 
-out float vs_depthClipSpace;
-out vec4 vs_positionViewSpace;
+out Data {
+  vec4 positionViewSpace;
+  float depthClipSpace;
+} out_data;
 
-uniform dmat4 modelViewTransform;
-uniform dmat4 MVPTransform;
+uniform dmat4 modelView;
+uniform dmat4 modelViewProjection;
 
 
 void main() {
-  dvec4 objPosDouble = dvec4(in_position, 1.0);
-  dvec4 positionViewSpace = modelViewTransform * objPosDouble;
-  dvec4 positionClipSpace = MVPTransform * objPosDouble;
-
+  dvec4 positionClipSpace = modelViewProjection * dvec4(in_position, 1.0);
   positionClipSpace.z = 0.0;
-
-  vs_depthClipSpace = float(positionClipSpace.w);
-  vs_positionViewSpace = vec4(positionViewSpace);
-
+  out_data.depthClipSpace = float(positionClipSpace.w);
   gl_Position = vec4(positionClipSpace);
+
+  out_data.positionViewSpace = vec4(modelView * dvec4(in_position, 1.0));
 }
