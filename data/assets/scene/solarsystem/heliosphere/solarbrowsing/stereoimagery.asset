@@ -1,4 +1,4 @@
-asset.require('scene/solarsystem/missions/stereo/stereo')
+asset.require('scene/solarsystem/missions/stereo/stereo_a')
 local coreKernels = asset.require("spice/core")
 local kernels = asset.require("scene/solarsystem/missions/stereo/kernels")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
@@ -25,7 +25,7 @@ local StereoPosition = {
   },
   GUI = {
     Name = "STEREO_A Position",
-    Path = "/Solar System/Missions/STEREO,
+    Path = "/Solar System/Missions/STEREO_A",
     Hidden = true,
     Focusable = false
   }

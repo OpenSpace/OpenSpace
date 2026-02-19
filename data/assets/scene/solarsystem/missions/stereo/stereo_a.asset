@@ -4,6 +4,14 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
+--Model from https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Solar%20TErrestrial%20RElations%20Observatory%20(STEREO)
+local models = asset.resource({
+  Name = "STEREO_A Models",
+  Type = "HttpSynchronization",
+  Identifier = "stereo_a_models",
+  Version = 1
+})
+
 local MissionBegin = "2006 OCT 26 00:01:06"
 local MissionEnd = "2026 FEB 11 19:51:09"
 
@@ -18,14 +26,13 @@ local StereoPosition = {
     }
   },
   GUI = {
-    Name = "STEREO Position",
-    Path = "/Solar System/Missions/STEREO",
+    Name = "STEREO_A Position",
+    Path = "/Solar System/Missions/STEREO_A",
     Hidden = true,
     Focusable = false
   }
 }
 
---Model from https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Solar%20TErrestrial%20RElations%20Observatory%20(STEREO)
 local StereoA = {
   Identifier = "StereoA_Model",
   Parent = StereoPosition.Identifier,
@@ -34,27 +41,28 @@ local StereoA = {
       Type = "FixedRotation",
       Attached = "StereoA_Model",
       YAxis = sunTransforms.SunCenter.Identifier,
-      ZAxis = { 0.0, 0.0, 1.0 },
+      ZAxis = { 0.0, 1.0, 0.0 },
       ZAxisOrthogonal = true,
-    },
-    TimeFrame = {
-      Type = "TimeFrameInterval",
-      Start = MissionBegin,
-      End = MissionEnd
     }
+  },
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = MissionBegin,
+    End = MissionEnd
   },
   Renderable = {
     Type = "RenderableModel",
     Body = "StereoA_Model",
-    GeometryFile = asset.resource("STEREO.fbx"),
+    GeometryFile = models .. "STEREO.fbx",
+    RotationVector = { 0, 260, 0 },
     LightSources = {sunTransforms.LightSource},
     AmbientIntensity = 0.2,
     SpecularIntensity = 0.0,
     ModelScale = 1
   },
   GUI = {
-    Name = "STEREO Model",
-    Path = "/Solar System/Missions/STEREO"
+    Name = "STEREO_A",
+    Path = "/Solar System/Missions/STEREO_A"
   }
 }
 
@@ -76,8 +84,8 @@ local StereoTrail = {
     EndTime = MissionEnd,
   },
   GUI = {
-    Name = "STEREO Trail",
-    Path = "/Solar System/Missions/STEREO"
+    Name = "STEREO_A Trail",
+    Path = "/Solar System/Missions/STEREO_A"
   }
 }
 

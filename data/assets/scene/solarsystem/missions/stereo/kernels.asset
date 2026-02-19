@@ -1,34 +1,55 @@
-kernels_bsp = openspace.walkDirectory(asset.resource('kernels/bsp'))
-kernels_sclk = openspace.walkDirectory(asset.resource('kernels/sclk'))
-
-
-
 -- bsp and sclk kernels:
 -- https://soho.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/
 --
 -- bc kernels:
 -- full resolution: https://soho.nascom.nasa.gov/sdb/stereo/gen/spice/ah/ahead/
 -- reduced resolution: https://soho.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/ah/
+local Stereo_A = asset.resource({
+  Name = "STEREO_A Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "stereo_a_kernels",
+  Version = 1
+})
 
--- local stereo = asset.resource({
---   Name = "STEREO_A Kernels",
---   Type = "HttpSynchronization",
---   Identifier = "stereo_a_kernels",
---   Version = 1
--- })
+local Stereo_A_Kernels = {
+  Stereo_A .. "ahead_2006_350_01.depm.bsp",
+  Stereo_A .. "ahead_2008_037_01.depm.bsp",
+  Stereo_A .. "ahead_2008_078_01.depm.bsp",
+  Stereo_A .. "ahead_2010_208_01.depm.bsp",
+  Stereo_A .. "ahead_2012_138_01.depm.bsp",
+  Stereo_A .. "ahead_2013_130_01.depm.bsp",
+  Stereo_A .. "ahead_2015_076_01.depm.bsp",
+  Stereo_A .. "ahead_2015_219_01.depm.bsp",
+  Stereo_A .. "ahead_2018_019_01.depm.bsp",
+  Stereo_A .. "ahead_2020_224_01.depm.bsp",
+  Stereo_A .. "ahead_2023_040_01.depm.bsp",
+  Stereo_A .. "ahead_2025_121_01.depm.bsp",
+  Stereo_A .. "ahead_2025_127_01.depm.bsp",
+  Stereo_A .. "ahead_2025_142_01.depm.bsp",
+  Stereo_A .. "ahead_2025_156_01.depm.bsp",
+  Stereo_A .. "ahead_2025_169_01.depm.bsp",
+  Stereo_A .. "ahead_2025_219_01.depm.bsp",
+  Stereo_A .. "ahead_2025_310_02.depm.bsp",
+  Stereo_A .. "ahead_2025_322_01.depm.bsp",
+  Stereo_A .. "ahead_2025_338_01.depm.bsp",
+  Stereo_A .. "ahead_2025_352_01.depm.bsp",
+  Stereo_A .. "ahead_2025_364_01.depm.bsp",
+  Stereo_A .. "ahead_2026_015_01.depm.bsp",
+  Stereo_A .. "ahead_2026_029_01.depm.bsp",
+  Stereo_A .. "ahead_2026_042_01.depm.bsp"
+}
 
 local ID = {
   STEREO_A = -234
 }
 
+
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels_bsp)
-  openspace.spice.loadKernel(kernels_sclk)
+  openspace.spice.loadKernel(Stereo_A_Kernels)
 end)
 
 asset.onDeinitialize(function()
-  openspace.spice.unloadKernel(kernels_bsp)
-  openspace.spice.unloadKernel(kernels_sclk)
+  openspace.spice.unloadKernel(Stereo_A_Kernels)
 end)
 
 asset.export("ID", ID)

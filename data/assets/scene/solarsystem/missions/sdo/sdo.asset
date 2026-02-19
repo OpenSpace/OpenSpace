@@ -5,6 +5,13 @@ local earthTransform = asset.require("scene/solarsystem/planets/earth/transforms
 
 
 
+local models = asset.resource({
+  Name = "SDO Models",
+  Type = "HttpSynchronization",
+  Identifier = "sdo_models",
+  Version = 1
+})
+
 local MissionBegin = "2010 FEB 11 05:02:58"
 local MissionEnd = "2026 JUN 12 07:11:59"
 
@@ -50,7 +57,7 @@ local Sdo = {
   Renderable = {
     Type = "RenderableModel",
     Body = "sdoModel",
-    GeometryFile = asset.resource("sdo.glb"),
+    GeometryFile = models .. "sdo.glb",
     RotationVector = { 90, 0, 0 },
     LightSources = { sunTransforms.LightSource },
     AmbientIntensity = 0.2,

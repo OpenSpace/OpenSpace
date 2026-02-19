@@ -1,14 +1,22 @@
-kernels_bsp = openspace.walkDirectory(asset.resource('kernels/bsp'))
+local sdo = asset.resource({
+  Name = "SDO Kernels",
+  Type = "HttpSynchronization",
+  Identifier = "sdo_kernels",
+  Version = 1
+})
 
 -- bsp kernels from:
 -- https://soho.nascom.nasa.gov/solarsoft/packages/sunspice/sdo/data/
-
--- local sdo = asset.resource({
---   Name = "SDO Kernels",
---   Type = "HttpSynchronization",
---   Identifier = "sdo_kernels",
---   Version = 1
--- })
+local SdoKernels = {
+  sdo .. "sdo.bsp",
+  sdo .. "SDO_EPHEM_2024091_2024341_00.bsp",
+  sdo .. "SDO_EPHEM_2024182_2025066_00.bsp",
+  sdo .. "SDO_EPHEM_2024273_2025157_00.bsp",
+  sdo .. "SDO_EPHEM_2025005_2025255_00.bsp",
+  sdo .. "SDO_EPHEM_2025089_2025339_00.bsp",
+  sdo .. "SDO_EPHEM_2025180_2026065_00.bsp",
+  sdo .. "SDO_EPHEM_2025278_2026163_00.bsp",
+}
 
 local ID = {
   SDO = -136395
@@ -16,11 +24,11 @@ local ID = {
 
 
 asset.onInitialize(function()
-  openspace.spice.loadKernel(kernels_bsp)
+  openspace.spice.loadKernel(SdoKernels)
 end)
 
 asset.onDeinitialize(function()
-  openspace.spice.unloadKernel(kernels_bsp)
+  openspace.spice.unloadKernel(SdoKernels)
 end)
 
 asset.export("ID", ID)
