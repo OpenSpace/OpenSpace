@@ -49,6 +49,7 @@ private:
     std::string _startTime;
     std::string _endTime;
     std::filesystem::path _timeKernelPath;
+    std::filesystem::path _colorMapPath;
 };
 
 } // namespace openspace

@@ -65,16 +65,11 @@ namespace {
         int sourceId;
 
         // Instrument identifier (e.g., "AIA-171").
-        //
-        // Note that while Helioviewer may use names such as "AIA 171",
-        // this value must follow the local colormap naming convention
-        // (hyphen-separated). The string is used to locate the corresponding
-        // colormap file on disk (e.g., "AIA-94", "AIA-131", ..., "AIA-4500"),
-        // so it must match those filenames exactly.
-
-        // @TODO anden88 add an path to the instrument color map path add as part of the
-        // cache metadata
         std::string instrument;
+
+        // The path to the colormap that will be used for this spacecraft and instrument.
+        // Note, the colormap is copied into the output folder.
+        std::string colorMap [[codegen::annotation("A valid path")]];
 
         // The beginning of the time interval to extract data from. Format:
         // YYYY-MM-DDTHH:MM:SS
@@ -107,7 +102,8 @@ HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictio
     _sourceId = p.sourceId;
     _name = p.name;
     _instrument = p.instrument;
-    _outputFolder = p.outputFolder;
+    _outputFolder = absPath(p.outputFolder);
+    _colorMapPath = absPath(p.colorMap);
 }
 
 std::string HelioviewerDownloadTask::description() {
@@ -173,6 +169,13 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
     std::atomic<size_t> i = 0;
     std::mutex progressMutex;
     const size_t totalFrames = epochAsIsoString.size();
+
+    // Make a copy of the colormap into the output folder
+    std::filesystem::copy(
+        _colorMapPath,
+        _outputFolder / std::format("{}.txt", _instrument),
+        std::filesystem::copy_options::skip_existing
+    );
 
     LDEBUG("\nDownloading image data from Helioviewer");
     std::for_each(

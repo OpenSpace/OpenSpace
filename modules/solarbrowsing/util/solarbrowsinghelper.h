@@ -32,8 +32,21 @@ namespace openspace {
 
 namespace solarbrowsing {
 
-void loadTransferFunctions(const std::filesystem::path& dir,
-    std::unordered_map<InstrumentName, std::shared_ptr<TransferFunction>>& _tfMap);
+/**
+ * Loads transfer functions for the instruments represented in \p imageMetadataMap.
+ *
+ * For each instrument in the provided metadata map, this function attempts to locate and
+ * construct a corresponding TransferFunction from files contained in \p rootDir.
+ *
+ * \param rootDir The directory containing transfer function definitions
+ * \param imageMetadataMap The metadata map whose instruments determine
+ *        which transfer functions are requested
+ *
+ * \return A map from instrument name to loaded TransferFunction instances
+ */
+std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferFunctions(
+    const std::filesystem::path& rootDir, const ImageMetadataMap& imageMetadataMap
+);
 
 /**
  * Loads image metadata from all image sequence directories contained in

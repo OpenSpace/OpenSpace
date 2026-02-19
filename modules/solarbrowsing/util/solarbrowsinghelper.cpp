@@ -495,33 +495,54 @@ namespace {
 
 
 namespace openspace::solarbrowsing {
-void loadTransferFunctions(const std::filesystem::path& dir,
-                std::unordered_map<std::string, std::shared_ptr<TransferFunction>>& tfMap)
+std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferFunctions(
+                                                     const std::filesystem::path& rootDir,
+                                                 const ImageMetadataMap& imageMetadataMap)
 {
+    std::unordered_map<std::string, std::shared_ptr<TransferFunction>> tfMap;
 
-    if (!std::filesystem::is_directory(dir)) {
-        LERROR(std::format("Could not load directory '{}'", dir.string()));
+    if (!std::filesystem::is_directory(rootDir)) {
+        throw ghoul::RuntimeError(std::format("Could not load directory '{}'", rootDir));
     }
 
-    std::vector<std::filesystem::path> sequencePaths = ghoul::filesystem::walkDirectory(
-        dir,
-        ghoul::filesystem::Recursive::Yes,
-        ghoul::filesystem::Sorted::Yes
+    std::vector<std::filesystem::path> subdirectories = ghoul::filesystem::walkDirectory(
+        rootDir,
+        ghoul::filesystem::Recursive::No,
+        ghoul::filesystem::Sorted::No,
+        [](const std::filesystem::path& path) {
+            return std::filesystem::is_directory(path);
+        }
     );
 
-    for (const std::filesystem::path& seqPath : sequencePaths) {
-        if (seqPath.extension() == ".txt") {
-            std::string key = seqPath.stem().string();
-            tfMap[key] = std::make_shared<TransferFunction>(seqPath);
+    using T = Timeline<ImageMetadata>;
+    for (const std::pair<InstrumentName, T>& instrument : imageMetadataMap) {
+        // The subdirectories might have a different name than the instrument name so we
+        // have to search the directories for the correct texture map.
+        bool found = false;
+        for (const std::filesystem::path& subdirectory : subdirectories) {
+            const std::filesystem::path texturePath =
+                subdirectory / std::format("{}.txt", instrument.first);
+
+            if (std::filesystem::is_regular_file(texturePath)) {
+                tfMap[instrument.first] = std::make_shared<TransferFunction>(texturePath);
+                found = true;
+                break;
+            }
+        }
+
+        if (!found) {
+            LERROR(std::format("Unable to load a color map for instrument '{}'",
+                instrument.first
+            ));
         }
     }
+
+    return tfMap;
 }
 
 ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir) {
     if (!std::filesystem::is_directory(rootDir)) {
-        throw ghoul::RuntimeError(std::format(
-            "Could not load directory '{}'", rootDir
-        ));
+        throw ghoul::RuntimeError(std::format("Could not load directory '{}'", rootDir));
     }
 
     LDEBUG("Begin loading spacecraft imagery metadata");

@@ -147,9 +147,6 @@ namespace {
         // subdirectory represents an instrument and contains its observation images
         std::filesystem::path imageDirectory [[codegen::directory()]];
 
-        // Directory containing color tables (transfer functions) for each instrument.
-        std::filesystem::path transferfunctionDir [[codegen::directory()]];
-
         // The instrument to display on startup (e.g., "AIA-171"). If not specified,
         // the first available instrument is used
         std::optional<std::string> startInstrument;
@@ -207,8 +204,8 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 
     addProperty(Fadeable::_opacity);
 
-    solarbrowsing::loadTransferFunctions(p.transferfunctionDir, _tfMap);
     _imageMetadataMap = solarbrowsing::loadImageMetadata(p.imageDirectory);
+    _tfMap = solarbrowsing::loadTransferFunctions(p.imageDirectory, _imageMetadataMap);
 
     _enableBorder = p.enableBorder.value_or(_enableBorder);
     addProperty(_enableBorder);
@@ -228,6 +225,21 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 
     if (p.startInstrument.has_value()) {
         _currentActiveInstrument = p.startInstrument.value();
+        // Update the option property to show the correct label.
+        const std::vector<properties::OptionProperty::Option>& options =
+            _activeInstruments.options();
+
+        auto it = std::find_if(
+            options.begin(),
+            options.end(),
+            [this](const properties::OptionProperty::Option& option) {
+                return option.description == _currentActiveInstrument;
+            }
+        );
+
+        if (it != options.end()) {
+            _activeInstruments = it->value;
+        }
     }
     else {
         _currentActiveInstrument = _activeInstruments.getDescriptionByValue(
