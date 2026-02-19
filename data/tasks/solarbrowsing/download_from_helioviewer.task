@@ -2,12 +2,19 @@
 -- Valid sourceIds can be found at:
 -- https://api.helioviewer.org/docs/v2/appendix/data_sources.html
 
+-- @TODO (anden88 2026-02-19): Manually download the color maps from the OpenSpace data
+-- servers since we cannot use asset.resource or similar functions to fetch data.
+-- local Url = "http://liu-se.cdn.openspaceproject.com/files/solarsystem/missions/sdo/colortables/v1_v1/AIA-171.txt"
+-- local SavePath = openspace.absPath("${CACHE}/solarbrowsing/AIA-171.txt")
+-- openspace.downloadFile(Url, SavePath, true)
+
 return {{
 	Type = "HelioviewerDownloadTask",
 	Name = "SDO",
 	SourceId = 10,
 	Instrument = "AIA-171",
 	ColorMap = "${ASSETS}/scene/solarsystem/heliosphere/solarbrowsing/colortables/AIA-171.txt",
+	-- ColorMap = SavePath,
 	StartTime = "2018-10-15T00:00:00.000Z",
 	EndTime = "2018-10-16T00:00:00.000Z",
 	TimeStep = 60*60, -- Download an image every hour
