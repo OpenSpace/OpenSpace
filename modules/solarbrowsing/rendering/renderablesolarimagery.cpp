@@ -380,7 +380,7 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     const glm::dvec3 sunDir = sunPositionWorld - spacecraftPosWorld;
     const glm::dvec3 offset = sunDir * _gaussianMoveFactor;
 
-    _position = spacecraftPosWorld + offset
+    _position = spacecraftPosWorld + offset;
     // Normal should point from plane toward spacecraft (i.e. plane faces spacecraft)
     _normal = glm::normalize(spacecraftPosWorld - sunPositionWorld);
 
