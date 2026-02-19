@@ -36,20 +36,20 @@ layout(location = 3) in int in_nColors;
 // Always pass 8 colors
 layout(location = 4) in vec4 in_colors[MaxColors];
 
-flat out float vs_component;
-flat out int vs_nColors;
-flat out vec4 vs_colors[MaxColors];
-out dvec4 vs_dposWorld;
-flat out int vs_glyphIndex;
+out Data {
+  flat float component;
+  flat int nColors;
+  flat vec4 colors[MaxColors];
+  flat int glyphIndex;
+  flat dvec4 dposWorld;
+} out_data;
 
 uniform dmat4 modelMatrix;
 
 void main() {
-    dvec4 position = dvec4(in_position, 1.0);
-
-    vs_component = in_component;
-    vs_nColors = in_nColors;
-    vs_colors = in_colors;
-    vs_dposWorld = modelMatrix * position;
-    vs_glyphIndex = in_glyphIndex;
+  out_data.component = in_component;
+  out_data.nColors = in_nColors;
+  out_data.colors = in_colors;
+  out_data.dposWorld = modelMatrix * dvec4(in_position, 1.0);
+  out_data.glyphIndex = in_glyphIndex;
 }
