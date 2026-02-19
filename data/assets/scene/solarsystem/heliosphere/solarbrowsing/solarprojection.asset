@@ -1,15 +1,17 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
-local SdoImagery = asset.require("./sdoimagery")
-local StereoImagery = asset.require("./stereoimagery")
+local sdoImagery = asset.require("./sdoimagery")
+local stereoImagery = asset.require("./stereoimagery")
 
-local SunProjection = {
+
+
+local SolarImageryProjection = {
   Identifier = "SunProjection_Stereo_Sdo",
   Parent = sunTransforms.SunIAU.Identifier,
   Renderable = {
     Type = "RenderableSolarImageryProjection",
     DependentNodes = {
-      SdoImagery.Imagery.Identifier,
-      StereoImagery.Imagery.Identifier
+      sdoImagery.Imagery.Identifier,
+      stereoImagery.Imagery.Identifier
     }
   },
   GUI = {
@@ -18,12 +20,22 @@ local SunProjection = {
   }
 }
 
+
 asset.onInitialize(function ()
-  openspace.addSceneGraphNode(SunProjection)
-end
-)
+  openspace.addSceneGraphNode(SolarImageryProjection)
+end)
 
 asset.onDeinitialize(function ()
-  openspace.removeSceneGraphNode(StereoA)
-end
-)
+  openspace.removeSceneGraphNode(SolarImageryProjection)
+end)
+
+
+
+asset.meta = {
+  Name = "Solar Imagery Projection",
+  Description = [[Projects images from a Solar Imagery such as SDO or STEREO onto the Sun
+    sphere.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -1,5 +1,7 @@
--- bsp kernels from: https://soho.nascom.nasa.gov/solarsoft/packages/sunspice/sdo/data/
 kernels_bsp = openspace.walkDirectory(asset.resource('kernels/bsp'))
+
+-- bsp kernels from:
+-- https://soho.nascom.nasa.gov/solarsoft/packages/sunspice/sdo/data/
 
 -- local sdo = asset.resource({
 --   Name = "SDO Kernels",
@@ -11,6 +13,7 @@ kernels_bsp = openspace.walkDirectory(asset.resource('kernels/bsp'))
 local ID = {
   SDO = -136395
 }
+
 
 asset.onInitialize(function()
   openspace.spice.loadKernel(kernels_bsp)

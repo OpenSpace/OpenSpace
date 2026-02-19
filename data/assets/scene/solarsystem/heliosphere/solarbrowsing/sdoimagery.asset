@@ -1,7 +1,9 @@
-local coreKernels = asset.require("spice/core")
 asset.require("scene/solarsystem/missions/sdo/sdo")
+local coreKernels = asset.require("spice/core")
 local kernels = asset.require("scene/solarsystem/missions/sdo/kernels")
 local earthTransform = asset.require("scene/solarsystem/planets/earth/transforms")
+
+
 
 -- We use the Sdo position relative to the inertial to get less wobbly image. Adding
 -- the rotation further removes any small variations visible when increasing the
@@ -31,13 +33,12 @@ local SdoPosition = {
   }
 }
 
-local Imagery = {
+local SolarImagery = {
   Identifier = "SolarImagery_SDO_AIA",
   Parent = SdoPosition.Identifier,
   Renderable = {
     Type = "RenderableSolarImagery",
-    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing/sdo"),
-    TransferfunctionDir = asset.resource("colortables"),
+    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing/sdo")
   },
   GUI = {
     Name = "SDO Imagery",
@@ -45,16 +46,26 @@ local Imagery = {
   }
 }
 
+
 asset.onInitialize(function ()
   openspace.addSceneGraphNode(SdoPosition)
-  openspace.addSceneGraphNode(Imagery)
-end
-)
+  openspace.addSceneGraphNode(SolarImagery)
+end)
 
 asset.onDeinitialize(function ()
-  openspace.removeSceneGraphNode(Imagery)
+  openspace.removeSceneGraphNode(SolarImagery)
   openspace.removeSceneGraphNode(SdoPosition)
-end
-)
+end)
 
-asset.export("Imagery", Imagery)
+asset.export("Imagery", SolarImagery)
+
+
+
+asset.meta = {
+  Name = "SDO Solar Imagery",
+  Description = [[The SDO spacecraft imagery, showing images of the Sun in different
+    wavelengths.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

@@ -2,8 +2,10 @@ local coreKernels = asset.require("spice/core")
 local kernels = asset.require("./kernels")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
-local missionBegin = "2006 OCT 26 00:01:06"
-local missionEnd = "2026 FEB 11 19:51:09"
+
+
+local MissionBegin = "2006 OCT 26 00:01:06"
+local MissionEnd = "2026 FEB 11 19:51:09"
 
 local StereoPosition = {
   Identifier = "StereoA_Position",
@@ -37,8 +39,8 @@ local StereoA = {
     },
     TimeFrame = {
       Type = "TimeFrameInterval",
-      Start = missionBegin,
-      End = missionEnd
+      Start = MissionBegin,
+      End = MissionEnd
     }
   },
   Renderable = {
@@ -70,14 +72,16 @@ local StereoTrail = {
     Period = 346,
     Resolution = 5000,
     EnableFade = true,
-    StartTime = missionBegin,
-    EndTime = missionEnd,
+    StartTime = MissionBegin,
+    EndTime = MissionEnd,
   },
   GUI = {
     Name = "STEREO Trail",
     Path = "/Solar System/Missions/STEREO"
   }
 }
+
+
 
 asset.onInitialize(function()
   openspace.addSceneGraphNode(StereoPosition)
@@ -95,12 +99,13 @@ asset.export("Position", StereoPosition)
 asset.export("StereoA", StereoA)
 asset.export("Trail", StereoTrail)
 
+
+
+
 asset.meta = {
   Name = "STEREO",
-  Description = [[
-    This asset adds the STEREO (Solar TErrestrial RElations Obervatory) Model,
-    including the trajectory for the entire duration of the STEREO mission.
-  ]],
+  Description = [[This asset adds the STEREO (Solar TErrestrial RElations Obervatory)
+    Model, including the trajectory for the entire duration of the STEREO mission.]],
   Author = "OpenSpace Team",
   URL = "http://openspaceproject.com",
   License = "MIT license"

@@ -1,11 +1,13 @@
-local coreKernels = asset.require("spice/core")
 asset.require('scene/solarsystem/missions/stereo/stereo')
+local coreKernels = asset.require("spice/core")
 local kernels = asset.require("scene/solarsystem/missions/stereo/kernels")
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
+
+
 -- We use the Stereo position with an added rotation to stabilize the image and remove
 -- any wobble effect since we don't have the ck kernels.
-local Position = {
+local StereoPosition = {
   Identifier = "StereoA_Position_Ecliptic",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
   Transform = {
@@ -22,16 +24,16 @@ local Position = {
     }
   },
   GUI = {
-    Name = "STEREO Position",
+    Name = "STEREO_A Position",
     Path = "/Solar System/Missions/STEREO,
     Hidden = true,
     Focusable = false
   }
 }
 
-local Imagery = {
+local SolarImagery = {
   Identifier = "SolarImagery_STEREO-A_EUV",
-  Parent = Position.Identifier,
+  Parent = StereoPosition.Identifier,
   Renderable = {
     Type = "RenderableSolarImagery",
     ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing/stereo"),
@@ -43,16 +45,28 @@ local Imagery = {
   }
 }
 
+
 asset.onInitialize(function ()
-  openspace.addSceneGraphNode(Position)
-  openspace.addSceneGraphNode(Imagery)
+  openspace.addSceneGraphNode(StereoPosition)
+  openspace.addSceneGraphNode(SolarImagery)
 end
 )
 
 asset.onDeinitialize(function ()
-  openspace.removeSceneGraphNode(Imagery)
-  openspace.removeSceneGraphNode(Position)
+  openspace.removeSceneGraphNode(SolarImagery)
+  openspace.removeSceneGraphNode(StereoPosition)
 end
 )
 
-asset.export("Imagery", Imagery)
+asset.export("Imagery", SolarImagery)
+
+
+
+asset.meta = {
+  Name = "STEREO Solar Imagery",
+  Description = [[The STEREO spacecraft imagery, showing images of the Sun in different
+    wavelengths.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
