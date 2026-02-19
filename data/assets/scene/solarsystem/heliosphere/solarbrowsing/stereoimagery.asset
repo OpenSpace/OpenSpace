@@ -1,0 +1,58 @@
+local coreKernels = asset.require("spice/core")
+asset.require('scene/solarsystem/missions/stereo/stereo')
+local kernels = asset.require("scene/solarsystem/missions/stereo/kernels")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+
+-- We use the Stereo position with an added rotation to stabilize the image and remove
+-- any wobble effect since we don't have the ck kernels.
+local Position = {
+  Identifier = "StereoA_Position_Ecliptic",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.STEREO_A,
+      Observer = coreKernels.ID.SolarSystemBarycenter,
+    },
+    -- This rotation removes tiny wobbles and fixes the frame in place.
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.EclipJ2000,
+      DestinationFrame = coreKernels.Frame.Galactic
+    }
+  },
+  GUI = {
+    Name = "STEREO Position",
+    Path = "/Solar System/Missions/STEREO,
+    Hidden = true,
+    Focusable = false
+  }
+}
+
+local Imagery = {
+  Identifier = "SolarImagery_STEREO-A_EUV",
+  Parent = Position.Identifier,
+  Renderable = {
+    Type = "RenderableSolarImagery",
+    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing/stereo"),
+    TransferfunctionDir = asset.resource("colortables")
+  },
+  GUI = {
+    Name = "STEREO_A EUV-I-A Imagery",
+    Path = "/Solar System/Solar Imagery"
+  }
+}
+
+asset.onInitialize(function ()
+  openspace.addSceneGraphNode(Position)
+  openspace.addSceneGraphNode(Imagery)
+end
+)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(Imagery)
+  openspace.removeSceneGraphNode(Position)
+end
+)
+
+asset.export("Imagery", Imagery)

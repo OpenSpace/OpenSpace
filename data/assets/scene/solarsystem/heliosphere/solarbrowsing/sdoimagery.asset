@@ -1,0 +1,60 @@
+local coreKernels = asset.require("spice/core")
+asset.require("scene/solarsystem/missions/sdo/sdo")
+local kernels = asset.require("scene/solarsystem/missions/sdo/kernels")
+local earthTransform = asset.require("scene/solarsystem/planets/earth/transforms")
+
+-- We use the Sdo position relative to the inertial to get less wobbly image. Adding
+-- the rotation further removes any small variations visible when increasing the
+-- simulation time.
+local SdoPosition = {
+  Identifier = "SDO_Position_Inertial",
+  Parent = earthTransform.EarthInertial.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.SDO,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.J2000
+    },
+    -- This rotation removes tiny wobbles and fixes the frame in place.
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.EclipJ2000,
+      DestinationFrame = coreKernels.Frame.J2000
+    }
+  },
+  GUI = {
+    Name = "SDO Position",
+    Path = "/Solar System/Missions/SDO",
+    Hidden = true,
+    Focusable = false
+  }
+}
+
+local Imagery = {
+  Identifier = "SolarImagery_SDO_AIA",
+  Parent = SdoPosition.Identifier,
+  Renderable = {
+    Type = "RenderableSolarImagery",
+    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing/sdo"),
+    TransferfunctionDir = asset.resource("colortables"),
+  },
+  GUI = {
+    Name = "SDO Imagery",
+    Path = "/Solar System/Solar Imagery"
+  }
+}
+
+asset.onInitialize(function ()
+  openspace.addSceneGraphNode(SdoPosition)
+  openspace.addSceneGraphNode(Imagery)
+end
+)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(Imagery)
+  openspace.removeSceneGraphNode(SdoPosition)
+end
+)
+
+asset.export("Imagery", Imagery)

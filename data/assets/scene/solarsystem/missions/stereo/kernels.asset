@@ -1,0 +1,31 @@
+kernels_bsp = openspace.walkDirectory(asset.resource('kernels/bsp'))
+kernels_sclk = openspace.walkDirectory(asset.resource('kernels/sclk'))
+
+-- bsp and sclk kernels from https://soho.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/
+-- bc kernels from
+-- full resolution: https://soho.nascom.nasa.gov/sdb/stereo/gen/spice/ah/ahead/
+-- reduced resolution: https://soho.nascom.nasa.gov/solarsoft/stereo/gen/data/spice/ah/
+-- local kernel = asset.resource("STEREO-A_merged.bsp")
+
+-- local stereo = asset.resource({
+--   Name = "STEREO_A Kernels",
+--   Type = "HttpSynchronization",
+--   Identifier = "stereo_a_kernels",
+--   Version = 1
+-- })
+
+local ID = {
+  STEREO_A = -234
+}
+
+asset.onInitialize(function()
+  openspace.spice.loadKernel(kernels_bsp)
+  openspace.spice.loadKernel(kernels_sclk)
+end)
+
+asset.onDeinitialize(function()
+  openspace.spice.unloadKernel(kernels_bsp)
+  openspace.spice.unloadKernel(kernels_sclk)
+end)
+
+asset.export("ID", ID)

@@ -1,0 +1,29 @@
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local SdoImagery = asset.require("./sdoimagery")
+local StereoImagery = asset.require("./stereoimagery")
+
+local SunProjection = {
+  Identifier = "SunProjection_Stereo_Sdo",
+  Parent = sunTransforms.SunIAU.Identifier,
+  Renderable = {
+    Type = "RenderableSolarImageryProjection",
+    DependentNodes = {
+      SdoImagery.Imagery.Identifier,
+      StereoImagery.Imagery.Identifier
+    }
+  },
+  GUI = {
+    Name = "Sun Projection",
+    Path = "/Solar System/Solar Imagery"
+  }
+}
+
+asset.onInitialize(function ()
+  openspace.addSceneGraphNode(SunProjection)
+end
+)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(StereoA)
+end
+)
