@@ -148,14 +148,14 @@ void ScreenSpaceRenderableFramebuffer::createFramebuffer() {
     _framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
     _framebuffer->activate();
     _texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(resolution.x, resolution.y, 1),
-        GL_TEXTURE_2D
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(resolution.x, resolution.y, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::Red,
+            .dataType = GL_UNSIGNED_BYTE
+        }
     );
     _objectSize = glm::ivec2(resolution);
-
-    _texture->uploadTexture();
-    _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-    _texture->purgeFromRAM();
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
     ghoul::opengl::FramebufferObject::deactivate();
 }

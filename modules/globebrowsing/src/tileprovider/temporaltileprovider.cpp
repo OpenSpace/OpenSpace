@@ -318,11 +318,10 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     if (_isInterpolating) {
         _interpolateTileProvider = std::make_unique<InterpolateTileProvider>(dictionary);
         _interpolateTileProvider->initialize();
-        _interpolateTileProvider->colormap =
-            ghoul::io::TextureReader::ref().loadTexture(_colormap, 1);
-        _interpolateTileProvider->colormap->uploadTexture();
-        _interpolateTileProvider->colormap->setFilter(
-            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+        _interpolateTileProvider->colormap = ghoul::io::TextureReader::ref().loadTexture(
+            _colormap,
+            1,
+            { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
         );
     }
 }
@@ -781,8 +780,8 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
 
 
     // Setup our own viewport settings
-    const GLsizei w = static_cast<GLsizei>(writeTexture->width());
-    const GLsizei h = static_cast<GLsizei>(writeTexture->height());
+    const GLsizei w = static_cast<GLsizei>(writeTexture->dimensions().x);
+    const GLsizei h = static_cast<GLsizei>(writeTexture->dimensions().y);
     glViewport(0, 0, w, h);
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glClearColor(0.f, 0.f, 0.f, 0.f);

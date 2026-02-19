@@ -156,7 +156,6 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
             absPath("${DATA}/openspace-logo.png"),
             2
         );
-        _logoTexture->uploadTexture();
     }
 }
 

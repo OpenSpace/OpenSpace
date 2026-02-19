@@ -81,8 +81,8 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
         // Render to texture
         glNamedFramebufferTexture(fbo, GL_COLOR_ATTACHMENT0, *texture, 0);
 
-        const GLsizei w = static_cast<GLsizei>(texture->width());
-        const GLsizei h = static_cast<GLsizei>(texture->height());
+        const GLsizei w = static_cast<GLsizei>(texture->dimensions().x);
+        const GLsizei h = static_cast<GLsizei>(texture->dimensions().y);
         global::renderEngine->openglStateCache().loadCurrentGLState();
         glViewport(0, 0, w, h);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
@@ -95,8 +95,6 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
         glClear(GL_COLOR_BUFFER_BIT);
 
         fontRenderer->render(*font, position, text, color);
-
-        texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
         tile = Tile{ texture, std::nullopt, Tile::Status::OK };
         tileCache->put(key, initData.hashKey, tile);

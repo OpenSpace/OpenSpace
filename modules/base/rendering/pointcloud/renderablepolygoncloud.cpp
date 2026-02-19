@@ -132,7 +132,7 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     // Allocate memory: N channels, with one byte each
     constexpr unsigned int nChannels = 4;
     unsigned int arraySize = TexSize * TexSize * nChannels;
-    std::vector<GLubyte> pixels;
+    std::vector<std::byte> pixels;
     pixels.resize(arraySize);
     glGetTextureImage(_pTexture, 0, format, GL_UNSIGNED_BYTE, arraySize, pixels.data());
 
@@ -141,7 +141,7 @@ void RenderablePolygonCloud::initializeCustomTexture() {
     glCreateTextures(GL_TEXTURE_2D_ARRAY, 1, &id);
     glBindTexture(GL_TEXTURE_2D_ARRAY, id);
     initAndAllocateTextureArray(id, glm::uvec2(TexSize), 1, useAlpha);
-    fillAndUploadTextureLayer(0, 0, 0, glm::uvec2(TexSize), useAlpha, pixels.data());
+    fillAndUploadTextureLayer(0, 0, 0, glm::uvec2(TexSize), useAlpha, pixels);
     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
 
     _textureIsInitialized = true;

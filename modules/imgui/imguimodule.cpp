@@ -423,14 +423,18 @@ void ImGUIModule::internalInitializeGL() {
 
             ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
         }
+
         _fontTexture = std::make_unique<ghoul::opengl::Texture>(
-            texData,
-            glm::uvec3(texSize.x, texSize.y, 1),
-            GL_TEXTURE_2D
+            ghoul::opengl::Texture::FormatInit{
+                .dimensions = glm::uvec3(texSize.x, texSize.y, 1),
+                .type = GL_TEXTURE_2D,
+                .format = ghoul::opengl::Texture::Format::RGBA,
+                .dataType = GL_UNSIGNED_BYTE
+            },
+            ghoul::opengl::Texture::SamplerInit{},
+            reinterpret_cast<std::byte*>(texData)
         );
-        _fontTexture->setName("Gui Text");
-        _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
-        _fontTexture->uploadTexture();
+        _fontTexture->setName("GUI Text");
     }
     for (size_t i = 0; i < nWindows; i++) {
         const uintptr_t texture = static_cast<GLuint>(*_fontTexture);

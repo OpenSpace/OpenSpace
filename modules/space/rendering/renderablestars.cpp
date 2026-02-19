@@ -769,20 +769,17 @@ void RenderableStars::loadPSFTexture() {
             return;
         }
 
-        component.texture = ghoul::io::TextureReader::ref().loadTexture(absPath(path), 2);
-
-        if (!component.texture) {
-            return;
-        }
+        component.texture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(path),
+            2,
+            {
+                .filter = Texture::FilterMode::AnisotropicMipMap,
+                .wrapping = Texture::WrappingMode::ClampToBorder,
+                .borderColor = glm::vec4(0.f),
+            }
+        );
 
         LDEBUG(std::format("Loaded texture from '{}'", absPath(component.texturePath)));
-        component.texture->uploadTexture();
-        component.texture->setWrapping(Texture::WrappingMode::ClampToBorder);
-
-        constexpr std::array<float, 4> border = { 0.f, 0.f, 0.f, 0.f };
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, border.data());
-        component.texture->setFilter(Texture::FilterMode::AnisotropicMipMap);
-
         component.file = std::make_unique<ghoul::filesystem::File>(path);
         component.file->setCallback(markPsfTextureAsDirty);
     };
@@ -934,11 +931,8 @@ void RenderableStars::update(const UpdateData&) {
                 absPath(_colorTexturePath),
                 1
             );
-            if (_colorTexture) {
-                LDEBUG(std::format("Loaded texture '{}'", _colorTexturePath.value()));
-                _colorTexture->uploadTexture();
-            }
 
+            LDEBUG(std::format("Loaded texture '{}'", _colorTexturePath.value()));
             _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
                 _colorTexturePath.value()
             );
@@ -955,12 +949,9 @@ void RenderableStars::update(const UpdateData&) {
                 absPath(_otherDataColorMapPath),
                 1
             );
-            if (_otherDataColorMapTexture) {
-                LDEBUG(std::format(
-                    "Loaded texture '{}'", _otherDataColorMapPath.value()
-                ));
-                _otherDataColorMapTexture->uploadTexture();
-            }
+            LDEBUG(std::format(
+                "Loaded texture '{}'", _otherDataColorMapPath.value()
+            ));
         }
         _otherDataColorMapIsDirty = false;
     }

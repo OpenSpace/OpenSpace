@@ -261,20 +261,17 @@ void RenderableTimeVaryingVolume::initializeGL() {
         // TODO: handle normalization properly for different timesteps + transfer function
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
-            t.metadata.dimensions,
-            GL_TEXTURE_3D,
-            ghoul::opengl::Texture::Format::Red,
-            GL_RED,
-            GL_FLOAT,
-            ghoul::opengl::Texture::FilterMode::Linear,
-            ghoul::opengl::Texture::WrappingMode::Clamp
+            ghoul::opengl::Texture::FormatInit{
+                .dimensions = t.metadata.dimensions,
+                .type = GL_TEXTURE_3D,
+                .format = ghoul::opengl::Texture::Format::Red,
+                .dataType = GL_FLOAT
+            },
+            ghoul::opengl::Texture::SamplerInit{
+                .wrapping = ghoul::opengl::Texture::WrappingMode::Clamp
+            },
+            reinterpret_cast<std::byte*>(data)
         );
-
-        t.texture->setPixelData(
-            reinterpret_cast<void*>(data),
-            ghoul::opengl::Texture::TakeOwnership::No
-        );
-        t.texture->uploadTexture();
     }
 
     _clipPlanes->initialize();

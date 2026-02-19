@@ -158,13 +158,13 @@ void ScreenSpaceRenderableText::updateFramebuffer() {
     _framebuffer->activate();
     // Create a texture that has 2 times the size to create a buffer
     _texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(bbox.x, bbox.y, 1),
-        GL_TEXTURE_2D
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(bbox.x, bbox.y, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::RGB,
+            .dataType = GL_UNSIGNED_BYTE
+        }
     );
-
-    _texture->uploadTexture();
-    _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-    _texture->purgeFromRAM();
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
     ghoul::opengl::FramebufferObject::deactivate();
 }

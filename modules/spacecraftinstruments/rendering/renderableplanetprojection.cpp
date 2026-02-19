@@ -36,7 +36,6 @@
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>
 #include <algorithm>
@@ -635,18 +634,20 @@ void RenderablePlanetProjection::loadColorTexture() {
     // run out in the case of two large textures
     _baseTexture = nullptr;
     if (selectedPath != NoImageText) {
+        ghoul::opengl::Texture::WrappingModes wrapping = {
+            Texture::WrappingMode::Repeat,
+            Texture::WrappingMode::MirroredRepeat
+        };
+
         _baseTexture = ghoul::io::TextureReader::ref().loadTexture(
             absPath(selectedPath),
-            2
+            2,
+            ghoul::opengl::Texture::SamplerInit{
+                .filter = Texture::FilterMode::LinearMipMap,
+                .wrapping = wrapping,
+                .swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
+            }
         );
-        if (_baseTexture) {
-            ghoul::opengl::convertTextureFormat(*_baseTexture, Texture::Format::RGB);
-            _baseTexture->uploadTexture();
-            _baseTexture->setWrapping(
-                { Texture::WrappingMode::Repeat, Texture::WrappingMode::MirroredRepeat }
-            );
-            _baseTexture->setFilter(Texture::FilterMode::LinearMipMap);
-        }
     }
 }
 
@@ -660,13 +661,11 @@ void RenderablePlanetProjection::loadHeightTexture() {
     if (selectedPath != NoImageText) {
         _heightMapTexture = ghoul::io::TextureReader::ref().loadTexture(
             absPath(selectedPath),
-            2
+            2,
+            {
+                .swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
+            }
         );
-        if (_heightMapTexture) {
-            ghoul::opengl::convertTextureFormat(*_heightMapTexture, Texture::Format::RGB);
-            _heightMapTexture->uploadTexture();
-            _heightMapTexture->setFilter(Texture::FilterMode::Linear);
-        }
     }
 }
 

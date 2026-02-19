@@ -2228,10 +2228,10 @@ float RenderableGlobe::getHeight(const glm::dvec3& position) const {
             glm::uvec2(dimensions) - glm::uvec2(1)
         );
 
-        const float sample00 = tileTexture->texelAsFloat(samplePos00).x;
-        const float sample10 = tileTexture->texelAsFloat(samplePos10).x;
-        const float sample01 = tileTexture->texelAsFloat(samplePos01).x;
-        const float sample11 = tileTexture->texelAsFloat(samplePos11).x;
+        const float sample00 = tileTexture->texelAsFloat({ samplePos00, 0 }).x;
+        const float sample10 = tileTexture->texelAsFloat({ samplePos10, 0 }).x;
+        const float sample01 = tileTexture->texelAsFloat({ samplePos01, 0 }).x;
+        const float sample11 = tileTexture->texelAsFloat({ samplePos11, 0 }).x;
 
         // In case the texture has NaN or no data values don't use this height map.
         const bool anySampleIsNaN =

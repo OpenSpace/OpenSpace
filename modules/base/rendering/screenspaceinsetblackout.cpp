@@ -511,23 +511,16 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
         p.blackoutshape.calibrationTexturePath;
     if (optTexturePath.has_value()) {
         if (std::filesystem::is_regular_file(*optTexturePath)) {
-            std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::TextureReader::ref().loadTexture(*optTexturePath, 2);
-            if (texture) {
-                // Images don't need to start on 4-byte boundaries, for example if the
-                // image is only RGB
-                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-                if (texture->format() == ghoul::opengl::Texture::Format::Red) {
-                    texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
-                }
-
-                texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                texture->purgeFromRAM();
-
-                _calibrationTexture = std::move(texture);
-            }
+            ghoul::opengl::Texture::SamplerInit samplerInit = {
+                // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+                //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
+                .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
+            };
+            _calibrationTexture = ghoul::io::TextureReader::ref().loadTexture(
+                *optTexturePath,
+                2,
+                samplerInit
+            );
         }
         else {
             LWARNINGC(
@@ -557,23 +550,13 @@ void ScreenSpaceInsetBlackout::initializeGL() {
     );
 
     _blackoutTexture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(BlackoutTextureSize, 1),
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::RGBA
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(BlackoutTextureSize, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_UNSIGNED_BYTE
+        }
     );
-
-    glTextureParameteri(*_blackoutTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTextureParameteri(*_blackoutTexture, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    glTextureStorage2D(
-        *_blackoutTexture,
-        1,
-        GL_RGBA8,
-        BlackoutTextureSize.x,
-        BlackoutTextureSize.y
-    );
-
-    _blackoutTexture->purgeFromRAM();
 
     _uniformCache.color = _fboProgram->uniformLocation("color");
 

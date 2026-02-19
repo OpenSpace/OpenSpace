@@ -25,7 +25,6 @@
 #include <modules/fitsfilereader/include/wsafitshelper.h>
 
 #include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureconversion.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <CCfits>
@@ -93,16 +92,15 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
 
         // Create texture from imagedata
         auto texture = std::make_unique<ghoul::opengl::Texture>(
-            imageData,
-            glm::uvec3(fitsValues->width, fitsValues->height, 1),
-            GL_TEXTURE_2D,
-            ghoul::opengl::Texture::Format::Red,
-            GL_RED,
-            GL_FLOAT
+            ghoul::opengl::Texture::FormatInit{
+                .dimensions = glm::uvec3(fitsValues->width, fitsValues->height, 1),
+                .type = GL_TEXTURE_2D,
+                .format = ghoul::opengl::Texture::Format::Red,
+                .dataType = GL_FLOAT
+            },
+            ghoul::opengl::Texture::SamplerInit{},
+            reinterpret_cast<std::byte*>(imageData)
         );
-        // Tell it to use the single color channel as grayscale
-        convertTextureFormat(*texture, ghoul::opengl::Texture::Format::RGB);
-        texture->uploadTexture();
         return texture;
     }
     catch (const CCfits::FitsException& e) {

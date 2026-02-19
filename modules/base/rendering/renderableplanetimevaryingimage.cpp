@@ -120,10 +120,6 @@ void RenderablePlaneTimeVaryingImage::initializeGL() {
             absPath(_sourceFiles[i]),
             2
         );
-        _textureFiles[i]->setInternalFormat(GL_COMPRESSED_RGBA);
-        _textureFiles[i]->uploadTexture();
-        _textureFiles[i]->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        _textureFiles[i]->purgeFromRAM();
     }
     if (!_isLoadingLazily) {
         _texture = loadTexture();

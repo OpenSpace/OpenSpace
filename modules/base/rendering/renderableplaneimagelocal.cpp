@@ -164,16 +164,18 @@ void RenderablePlaneImageLocal::loadTexture() {
             std::to_string(hash),
             [path = _texturePath.value()]() -> std::unique_ptr<ghoul::opengl::Texture> {
                 std::unique_ptr<ghoul::opengl::Texture> texture =
-                    ghoul::io::TextureReader::ref().loadTexture(absPath(path), 2);
+                    ghoul::io::TextureReader::ref().loadTexture(
+                        absPath(path),
+                        2,
+                        ghoul::opengl::Texture::SamplerInit{
+                            .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                        }
+                    );
 
                 LDEBUGC(
                     "RenderablePlaneImageLocal",
                     std::format("Loaded texture from '{}'", absPath(path))
                 );
-                texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                texture->purgeFromRAM();
-
                 return texture;
             }
         );

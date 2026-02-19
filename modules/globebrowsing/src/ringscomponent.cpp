@@ -583,135 +583,105 @@ void RingsComponent::loadTexture() {
     using namespace ghoul::opengl;
 
     if (!_texturePath.value().empty()) {
-        std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
+        _texture = TextureReader::ref().loadTexture(
             absPath(_texturePath),
-            1
+            1,
+            { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
         );
 
-        if (texture) {
-            LDEBUG(std::format("Loaded texture from '{}'", absPath(_texturePath)));
-            _texture = std::move(texture);
+        LDEBUG(std::format("Loaded texture from '{}'", absPath(_texturePath)));
 
-            _texture->uploadTexture();
-            _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFile = std::make_unique<ghoul::filesystem::File>(
-                _texturePath.value()
-            );
-            _textureFile->setCallback([this]() { _textureIsDirty = true; });
-        }
+        _textureFile = std::make_unique<ghoul::filesystem::File>(
+            _texturePath.value()
+        );
+        _textureFile->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (!_textureFwrdPath.value().empty()) {
-        std::unique_ptr<Texture> textureForwards = TextureReader::ref().loadTexture(
+        _textureForwards = TextureReader::ref().loadTexture(
             absPath(_textureFwrdPath),
-            1
+            1,
+            { .filter = Texture::FilterMode::AnisotropicMipMap }
         );
 
-        if (textureForwards) {
-            LDEBUG(std::format(
-                "Loaded forwards scattering texture from '{}'",
-                absPath(_textureFwrdPath)
-            ));
-            _textureForwards = std::move(textureForwards);
+        LDEBUG(std::format(
+            "Loaded forwards scattering texture from '{}'",
+            absPath(_textureFwrdPath)
+        ));
 
-            _textureForwards->uploadTexture();
-            _textureForwards->setFilter(Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFileForwards = std::make_unique<ghoul::filesystem::File>(
-                _textureFwrdPath.value()
-            );
-            _textureFileForwards->setCallback([this]() { _textureIsDirty = true; });
-        }
+        _textureFileForwards = std::make_unique<ghoul::filesystem::File>(
+            _textureFwrdPath.value()
+        );
+        _textureFileForwards->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (!_textureBckwrdPath.value().empty()) {
-        std::unique_ptr<Texture> textureBackwards = TextureReader::ref().loadTexture(
+        _textureBackwards = TextureReader::ref().loadTexture(
             absPath(_textureBckwrdPath),
-            1
+            1,
+            { .filter = Texture::FilterMode::AnisotropicMipMap }
         );
 
-        if (textureBackwards) {
-            LDEBUG(std::format(
-                "Loaded backwards scattering texture from '{}'",
-                absPath(_textureBckwrdPath)
-            ));
-            _textureBackwards = std::move(textureBackwards);
+        LDEBUG(std::format(
+            "Loaded backwards scattering texture from '{}'",
+            absPath(_textureBckwrdPath)
+        ));
 
-            _textureBackwards->uploadTexture();
-            _textureBackwards->setFilter(Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFileBackwards = std::make_unique<ghoul::filesystem::File>(
-                _textureBckwrdPath.value()
-            );
-            _textureFileBackwards->setCallback([this]() { _textureIsDirty = true; });
-        }
+        _textureFileBackwards = std::make_unique<ghoul::filesystem::File>(
+            _textureBckwrdPath.value()
+        );
+        _textureFileBackwards->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (!_textureUnlitPath.value().empty()) {
-        std::unique_ptr<Texture> textureUnlit = TextureReader::ref().loadTexture(
+        _textureUnlit = TextureReader::ref().loadTexture(
             absPath(_textureUnlitPath),
-            1
+            1,
+            { . filter = Texture::FilterMode::AnisotropicMipMap }
         );
 
-        if (textureUnlit) {
-            LDEBUG(std::format(
-                "Loaded unlit texture from '{}'", absPath(_textureUnlitPath)
-            ));
-            _textureUnlit = std::move(textureUnlit);
+        LDEBUG(std::format(
+            "Loaded unlit texture from '{}'", absPath(_textureUnlitPath)
+        ));
 
-            _textureUnlit->uploadTexture();
-            _textureUnlit->setFilter(Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFileUnlit = std::make_unique<ghoul::filesystem::File>(
-                _textureUnlitPath.value()
-            );
-            _textureFileUnlit->setCallback([this]() { _textureIsDirty = true; });
-        }
+        _textureFileUnlit = std::make_unique<ghoul::filesystem::File>(
+            _textureUnlitPath.value()
+        );
+        _textureFileUnlit->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (!_textureColorPath.value().empty()) {
-        std::unique_ptr<Texture> textureColor = TextureReader::ref().loadTexture(
+        _textureColor = TextureReader::ref().loadTexture(
             absPath(_textureColorPath),
-            1
+            1,
+            { .filter = Texture::FilterMode::AnisotropicMipMap }
         );
 
-        if (textureColor) {
-            LDEBUG(
-                std::format("Loaded color texture from '{}'", absPath(_textureColorPath))
-            );
-            _textureColor = std::move(textureColor);
+        LDEBUG(
+            std::format("Loaded color texture from '{}'", absPath(_textureColorPath))
+        );
 
-            _textureColor->uploadTexture();
-            _textureColor->setFilter(Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFileColor = std::make_unique<ghoul::filesystem::File>(
-                _textureColorPath.value()
-            );
-            _textureFileColor->setCallback([this]() { _textureIsDirty = true; });
-        }
+        _textureFileColor = std::make_unique<ghoul::filesystem::File>(
+            _textureColorPath.value()
+        );
+        _textureFileColor->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (!_textureTransparencyPath.value().empty()) {
-        std::unique_ptr<Texture> textureTransparency = TextureReader::ref().loadTexture(
+        _textureTransparency = TextureReader::ref().loadTexture(
             absPath(_textureTransparencyPath),
-            1
+            1,
+            { .filter = Texture::FilterMode::AnisotropicMipMap }
         );
 
-        if (textureTransparency) {
-            LDEBUG(std::format(
-                "Loaded transparency texture from '{}'", absPath(_textureTransparencyPath)
-            ));
-            _textureTransparency = std::move(textureTransparency);
+        LDEBUG(std::format(
+            "Loaded transparency texture from '{}'", absPath(_textureTransparencyPath)
+        ));
 
-            _textureTransparency->uploadTexture();
-            _textureTransparency->setFilter(Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFileTransparency = std::make_unique<ghoul::filesystem::File>(
-                _textureTransparencyPath.value()
-            );
-            _textureFileTransparency->setCallback([this]() { _textureIsDirty = true; });
-        }
+        _textureFileTransparency = std::make_unique<ghoul::filesystem::File>(
+            _textureTransparencyPath.value()
+        );
+        _textureFileTransparency->setCallback([this]() { _textureIsDirty = true; });
     }
 
     _isAdvancedTextureEnabled = _textureForwards && _textureBackwards && _textureUnlit;

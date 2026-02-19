@@ -44,9 +44,6 @@ public:
     void setFilterMode(ghoul::opengl::Texture::FilterMode filterMode);
     void setWrapping(ghoul::opengl::Texture::WrappingMode wrapping);
     void setShouldWatchFileForChanges(bool value);
-    void setShouldPurgeFromRAM(bool value);
-
-    void uploadToGpu();
 
     // Loads a texture from a file on disk
     void loadFromFile(const std::filesystem::path& path);
@@ -65,10 +62,8 @@ private:
         ghoul::opengl::Texture::WrappingMode::Repeat;
 
     bool _shouldWatchFile = true;
-    bool _shouldPurgeFromRAM = true;
 
     bool _fileIsDirty = false;
-    bool _textureIsDirty = false;
 
     const int _nDimensions;
 };

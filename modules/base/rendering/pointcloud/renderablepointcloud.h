@@ -144,7 +144,8 @@ protected:
         glm::uvec2 resolution, size_t nLayers, bool useAlpha);
 
     void fillAndUploadTextureLayer(unsigned int arrayindex, unsigned int layer,
-        size_t textureIndex, glm::uvec2 resolution, bool useAlpha, const void* pixelData);
+        size_t textureIndex, glm::uvec2 resolution, bool useAlpha,
+        const std::vector<std::byte>& pixelData);
 
     void generateArrayTextures();
 

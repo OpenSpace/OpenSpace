@@ -156,23 +156,23 @@ bool RenderableDataCygnet::updateTexture() {
 
         if (!_textures[option]) {
             auto texture = std::make_unique<ghoul::opengl::Texture>(
-                values,
-                _textureDimensions,
-                GL_TEXTURE_2D,
-                ghoul::opengl::Texture::Format::Red,
-                GL_RED,
-                GL_FLOAT,
-                ghoul::opengl::Texture::FilterMode::Linear,
-                ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                ghoul::opengl::Texture::FormatInit{
+                    .dimensions = _textureDimensions,
+                    .type = GL_TEXTURE_2D,
+                    .format = ghoul::opengl::Texture::Format::Red,
+                    .dataType = GL_FLOAT
+                },
+                ghoul::opengl::Texture::SamplerInit{
+                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
+                    .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                },
+                reinterpret_cast<std::byte*>(values)
             );
 
-            texture->uploadTexture();
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
             _textures[option] = std::move(texture);
         }
         else {
-            _textures[option]->setPixelData(values);
-            _textures[option]->uploadTexture();
+            _textures[option]->setPixelData(reinterpret_cast<std::byte*>(values));
         }
         texturesReady = true;
     }

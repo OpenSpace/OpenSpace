@@ -389,24 +389,17 @@ void RenderableGalaxy::initializeGL() {
     ZoneScoped;
 
     _texture = std::make_unique<ghoul::opengl::Texture>(
-        _volumeDimensions,
-        GL_TEXTURE_3D,
-        ghoul::opengl::Texture::Format::RGBA,
-        GL_RGBA,
-        GL_UNSIGNED_BYTE,
-        ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::ClampToEdge,
-        ghoul::opengl::Texture::AllocateData::No,
-        ghoul::opengl::Texture::TakeOwnership::No
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = _volumeDimensions,
+            .type = GL_TEXTURE_3D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_UNSIGNED_BYTE
+        },
+        ghoul::opengl::Texture::SamplerInit{
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        },
+        reinterpret_cast<std::byte*>(_volume->data())
     );
-
-    _texture->setPixelData(
-        reinterpret_cast<char*>(_volume->data()),
-        ghoul::opengl::Texture::TakeOwnership::No
-    );
-
-    _texture->setDimensions(_volume->dimensions());
-    _texture->uploadTexture();
 
     if (_raycastingShader.empty()) {
         _raycaster = std::make_unique<GalaxyRaycaster>(*_texture);
@@ -441,18 +434,13 @@ void RenderableGalaxy::initializeGL() {
     if (!_pointSpreadFunctionTexturePath.empty()) {
         _pointSpreadFunctionTexture = ghoul::io::TextureReader::ref().loadTexture(
             absPath(_pointSpreadFunctionTexturePath),
-            2
+            2,
+            { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
         );
 
-        if (_pointSpreadFunctionTexture) {
-            LDEBUG(std::format(
-                "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
-            ));
-            _pointSpreadFunctionTexture->uploadTexture();
-        }
-        _pointSpreadFunctionTexture->setFilter(
-            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
-        );
+        LDEBUG(std::format(
+            "Loaded texture from '{}'", absPath(_pointSpreadFunctionTexturePath)
+        ));
 
         _pointSpreadFunctionFile = std::make_unique<ghoul::filesystem::File>(
             _pointSpreadFunctionTexturePath

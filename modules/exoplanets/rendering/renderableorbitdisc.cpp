@@ -159,7 +159,6 @@ void RenderableOrbitDisc::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
     _texture->loadFromFile(_texturePath.value());
-    _texture->uploadToGpu();
 
     _plane->initialize();
 }

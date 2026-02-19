@@ -80,15 +80,19 @@ void TileProvider::initializeDefaultTile() {
         Texture::Format::RGBA,
         TileTextureInitData::ShouldAllocateDataOnCPU::Yes
     );
-    char* pixels = new char[initData.totalNumBytes];
-    memset(pixels, 0, initData.totalNumBytes * sizeof(char));
 
     // Create ghoul texture
-    DefaultTileTexture = std::make_unique<Texture>(initData.dimensions, GL_TEXTURE_2D);
-    DefaultTileTexture->setDataOwnership(Texture::TakeOwnership::Yes);
-    DefaultTileTexture->setPixelData(pixels);
-    DefaultTileTexture->uploadTexture();
-    DefaultTileTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    DefaultTileTexture = std::make_unique<Texture>(
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = initData.dimensions,
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_UNSIGNED_BYTE
+        },
+        ghoul::opengl::Texture::SamplerInit{
+            .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+        }
+    );
 
     // Create tile
     DefaultTile = Tile{ DefaultTileTexture.get(), std::nullopt, Tile::Status::OK };

@@ -70,23 +70,18 @@ SpoutImageProvider::SpoutImageProvider(
             if (!fbo[i]) {
                 glCreateFramebuffers(1, &fbo[i]);
             }
-            tileTexture[i].release();
             tileTexture[i] = std::make_unique<ghoul::opengl::Texture>(
-                glm::uvec3(width / 2, height, 1),
-                GL_TEXTURE_2D,
-                ghoul::opengl::Texture::Format::RGBA,
-                GL_RGBA,
-                GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::FilterMode::Linear,
-                ghoul::opengl::Texture::WrappingMode::Repeat,
-                ghoul::opengl::Texture::AllocateData::No,
-                ghoul::opengl::Texture::TakeOwnership::No
+                ghoul::opengl::Texture::FormatInit{
+                    .dimensions = glm::uvec3(width / 2, height, 1),
+                    .type = GL_TEXTURE_2D,
+                    .format = ghoul::opengl::Texture::Format::RGBA,
+                    .dataType = GL_UNSIGNED_BYTE
+                }
             );
 
             if (!tileTexture[i]) {
                 return false;
             }
-            tileTexture[i]->uploadTexture();
             tiles[i] = Tile{ tileTexture[i].get(), std::nullopt, Tile::Status::OK };
         }
         return true;

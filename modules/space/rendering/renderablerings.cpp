@@ -248,24 +248,19 @@ void RenderableRings::update(const UpdateData& data) {
 void RenderableRings::loadTexture() {
     using namespace ghoul::io;
     using namespace ghoul::opengl;
-    std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
+    _texture = TextureReader::ref().loadTexture(
         _texturePath.value(),
-        1
+        1,
+        { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
     );
 
-    if (texture) {
-        LDEBUGC(
-            "RenderableRings",
-            std::format("Loaded texture from '{}'", _texturePath.value())
-        );
-        _texture = std::move(texture);
+    LDEBUGC(
+        "RenderableRings",
+        std::format("Loaded texture from '{}'", _texturePath.value())
+    );
 
-        _texture->uploadTexture();
-        _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
-        _textureFile->setCallback([this]() { _textureIsDirty = true; });
-    }
+    _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
+    _textureFile->setCallback([this]() { _textureIsDirty = true; });
 }
 
 void RenderableRings::createPlane() {

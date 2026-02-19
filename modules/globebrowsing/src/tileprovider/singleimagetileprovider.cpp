@@ -87,15 +87,17 @@ void SingleImageProvider::reset() {
         return;
     }
 
-    _tileTexture = ghoul::io::TextureReader::ref().loadTexture(_filePath.value(), 2);
+    _tileTexture = ghoul::io::TextureReader::ref().loadTexture(
+        _filePath.value(),
+        2,
+        { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
+    );
     if (!_tileTexture) {
         throw ghoul::RuntimeError(std::format(
             "Unable to load texture '{}'", _filePath.value()
         ));
     }
 
-    _tileTexture->uploadTexture();
-    _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     _tile = Tile{ _tileTexture.get(), std::nullopt, Tile::Status::OK };
 }
 

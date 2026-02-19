@@ -176,15 +176,16 @@ void MoleculeModule::initializeShaders() {
     const glm::ivec2 size = global::windowDelegate->currentWindowSize();
 
     _colorTex = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(size.x, size.y, 1),
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::RGBA,
-        GL_RGBA8,
-        GL_UNSIGNED_BYTE,
-        ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(size.x, size.y, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_UNSIGNED_BYTE
+        },
+        ghoul::opengl::Texture::SamplerInit{
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        }
     );
-    _colorTex->uploadTexture();
     glFramebufferTexture2D(
         GL_DRAW_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT0,
@@ -194,15 +195,17 @@ void MoleculeModule::initializeShaders() {
     );
 
     _normalTex = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(size.x, size.y, 1),
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::RG,
-        GL_RG16,
-        GL_UNSIGNED_SHORT,
-        ghoul::opengl::Texture::FilterMode::Nearest,
-        ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(size.x, size.y, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::RG,
+            .dataType = GL_UNSIGNED_SHORT
+        },
+        ghoul::opengl::Texture::SamplerInit{
+            .filter = ghoul::opengl::Texture::FilterMode::Nearest,
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        }
     );
-    _normalTex->uploadTexture();
     glFramebufferTexture2D(
         GL_DRAW_FRAMEBUFFER,
         GL_COLOR_ATTACHMENT1,
@@ -212,15 +215,16 @@ void MoleculeModule::initializeShaders() {
     );
 
     _depthTex = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(size.x, size.y, 1),
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::DepthComponent,
-        GL_DEPTH_COMPONENT32F,
-        GL_FLOAT,
-        ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(size.x, size.y, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::DepthComponent,
+            .dataType = GL_FLOAT
+        },
+        ghoul::opengl::Texture::SamplerInit{
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        }
     );
-    _depthTex->uploadTexture();
     glFramebufferTexture2D(
         GL_DRAW_FRAMEBUFFER,
         GL_DEPTH_ATTACHMENT,
@@ -267,9 +271,34 @@ void MoleculeModule::preDraw() {
 
     _width = size.x;
     _height = size.y;
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _fbo);
+
     _colorTex->resize(glm::uvec3(size.x, size.y, 1));
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D,
+        *_colorTex,
+        0
+    );
+
     _normalTex->resize(glm::uvec3(size.x, size.y, 1));
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_COLOR_ATTACHMENT1,
+        GL_TEXTURE_2D,
+        *_normalTex,
+        0
+    );
+
     _depthTex->resize(glm::uvec3(size.x, size.y, 1));
+    glFramebufferTexture2D(
+        GL_DRAW_FRAMEBUFFER,
+        GL_DEPTH_ATTACHMENT,
+        GL_TEXTURE_2D,
+        *_depthTex,
+        0
+    );
 
     postprocessing::resize(size.x, size.y);
 }

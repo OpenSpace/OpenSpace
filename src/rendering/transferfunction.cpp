@@ -85,7 +85,6 @@ void TransferFunction::update() {
         else {
             setTextureFromImage();
         }
-        _texture->uploadTexture();
         _needsUpdate = false;
         if (_tfChangedCallback) {
             _tfChangedCallback(*this);
@@ -199,20 +198,25 @@ void TransferFunction::setTextureFromTxt() {
     // no need to deallocate transferFunction. Ownership is transferred to the Texture.
 
     _texture = std::make_unique<ghoul::opengl::Texture>(
-        transferFunction,
-        glm::uvec3(width, 1, 1),
-        GL_TEXTURE_1D,
-        ghoul::opengl::Texture::Format::RGBA,
-        GL_RGBA,
-        GL_FLOAT,
-        ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(width, 1, 1),
+            .type = GL_TEXTURE_1D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_FLOAT
+        },
+        ghoul::opengl::Texture::SamplerInit{
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        },
+        reinterpret_cast<std::byte*>(transferFunction)
     );
 }
 
 void TransferFunction::setTextureFromImage() {
-    _texture = ghoul::io::TextureReader::ref().loadTexture(_filepath, 1);
-    _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
+    _texture = ghoul::io::TextureReader::ref().loadTexture(
+        _filepath,
+        1,
+        { .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge }
+    );
 }
 
 glm::vec4 TransferFunction::sample(size_t offset) {
@@ -220,19 +224,19 @@ glm::vec4 TransferFunction::sample(size_t offset) {
         return glm::vec4(0.f);
     }
 
-    const int nPixels = _texture->width();
+    const int nPixels = _texture->dimensions().x;
 
     // Clamp to range.
     if (offset >= static_cast<size_t>(nPixels)) {
         offset = nPixels - 1;
     }
 
-    return _texture->texelAsFloat(static_cast<unsigned int>(offset));
+    return _texture->texelAsFloat(glm::uvec3(static_cast<unsigned int>(offset), 0, 0));
 }
 
 size_t TransferFunction::width() {
     update();
-    return _texture->width();
+    return _texture->dimensions().y;
 }
 
 } // namespace openspace

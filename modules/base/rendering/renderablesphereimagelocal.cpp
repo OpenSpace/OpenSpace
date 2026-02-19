@@ -87,7 +87,6 @@ void RenderableSphereImageLocal::initialize() {
 void RenderableSphereImageLocal::initializeGL() {
     RenderableSphere::initializeGL();
     _texture->loadFromFile(_texturePath.value());
-    _texture->uploadToGpu();
 }
 
 void RenderableSphereImageLocal::deinitializeGL() {

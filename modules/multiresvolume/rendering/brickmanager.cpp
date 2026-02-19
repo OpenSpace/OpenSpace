@@ -145,13 +145,13 @@ bool BrickManager::initialize() {
     dims.push_back(_atlasDim);
     dims.push_back(_atlasDim);
     _textureAtlas = new ghoul::opengl::Texture(
-        glm::size3_t(_atlasDim, _atlasDim, _atlasDim),
-        GL_TEXTURE_3D,
-        ghoul::opengl::Texture::Format::RGBA,
-        GL_RGBA,
-        GL_FLOAT
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(_atlasDim, _atlasDim, _atlasDim),
+            .type = GL_TEXTURE_3D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_FLOAT
+        }
     );
-    _textureAtlas->uploadTexture();
 
     _atlasInitialized = true;
 

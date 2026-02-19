@@ -130,7 +130,6 @@ void RenderableDisc::initializeGL() {
     initializeShader();
 
     _texture->loadFromFile(_texturePath.value());
-    _texture->uploadToGpu();
 
     _plane.initialize();
 }

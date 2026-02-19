@@ -151,7 +151,6 @@ void GlobeGeometryFeature::updateTexture(bool isInitializeStep) {
     if (std::filesystem::is_regular_file(texture)) {
         _hasTexture = true;
         _pointTexture->loadFromFile(texture);
-        _pointTexture->uploadToGpu();
     }
     else {
         LERROR(std::format(
@@ -422,8 +421,8 @@ void GlobeGeometryFeature::renderPoints(const RenderFeature& feature,
     _pointsProgram->setUniform("pointTexture", unit);
 
     const float widthHeightRatio =
-        static_cast<float>(_pointTexture->texture()->width()) /
-        static_cast<float>(_pointTexture->texture()->height());
+        static_cast<float>(_pointTexture->texture()->dimensions().x) /
+        static_cast<float>(_pointTexture->texture()->dimensions().y);
     _pointsProgram->setUniform("textureWidthFactor", widthHeightRatio);
 
     glEnable(GL_PROGRAM_POINT_SIZE);

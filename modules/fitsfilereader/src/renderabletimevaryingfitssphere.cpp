@@ -265,18 +265,22 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
             case static_cast<int>(ghoul::opengl::Texture::FilterMode::Nearest):
                 for (File& file : _files) {
                     if (file.texture) {
-                        file.texture->setFilter(
-                            ghoul::opengl::Texture::FilterMode::Nearest
-                        );
+                        // @TODO (2026-02-19, abock) This should be replaced with a
+                        //                           sampler at some point.
+                        GLuint id = *file.texture;
+                        glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                        glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
                     }
                 }
                 break;
             case static_cast<int>(ghoul::opengl::Texture::FilterMode::Linear):
                 for (File& file : _files) {
                     if (file.texture) {
-                        file.texture->setFilter(
-                            ghoul::opengl::Texture::FilterMode::Linear
-                        );
+                        // @TODO (2026-02-19, abock) This should be replaced with a
+                        //                           sampler at some point.
+                        GLuint id = *file.texture;
+                        glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                        glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                     }
                 }
                 break;
@@ -295,13 +299,20 @@ RenderableTimeVaryingFitsSphere::RenderableTimeVaryingFitsSphere(
                 if (file.status == File::FileStatus::Loaded) {
                     std::pair<float, float> minMax = _layerMinMaxCaps.at(_fitsLayerName);
                     file.texture = loadTextureFromFits(file.path, _fitsLayerName, minMax);
-                    file.texture->uploadTexture();
-                    using FM = ghoul::opengl::Texture::FilterMode;
-                    if (_textureFilterProperty == static_cast<int>(FM::Nearest)) {
-                        file.texture->setFilter(FM::Nearest);
+                    using enum ghoul::opengl::Texture::FilterMode;
+                    if (_textureFilterProperty == static_cast<int>(Nearest)) {
+                        // @TODO (2026-02-19, abock) This should be replaced with a
+                        //                           sampler at some point.
+                        GLuint id = *file.texture;
+                        glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+                        glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
                     }
-                    else if (_textureFilterProperty == static_cast<int>(FM::Linear)) {
-                        file.texture->setFilter(FM::Linear);
+                    else if (_textureFilterProperty == static_cast<int>(Linear)) {
+                        // @TODO (2026-02-19, abock) This should be replaced with a
+                        //                           sampler at some point.
+                        GLuint id = *file.texture;
+                        glTextureParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+                        glTextureParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
                     }
                 }
             }
@@ -414,10 +425,14 @@ void RenderableTimeVaryingFitsSphere::readFileFromFits(std::filesystem::path pat
 
     using FilterMode = ghoul::opengl::Texture::FilterMode;
     if (_textureFilterProperty == static_cast<int>(FilterMode::Nearest)) {
-        t->setFilter(FilterMode::Nearest);
+        // @TODO (2026-02-19, abock) This should be replaced with a sampler at some point.
+        glTextureParameteri(*t, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTextureParameteri(*t, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     }
     else if (_textureFilterProperty == static_cast<int>(FilterMode::Linear)) {
-        t->setFilter(FilterMode::Linear);
+        // @TODO (2026-02-19, abock) This should be replaced with a sampler at some point.
+        glTextureParameteri(*t, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTextureParameteri(*t, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     }
 
     glm::vec2 minMaxDataValues = minMaxTextureDataValues(t);
@@ -452,15 +467,17 @@ glm::vec2 RenderableTimeVaryingFitsSphere::minMaxTextureDataValues(
     std::vector<float> pixelValues;
     pixelValues.reserve(width * height * 4);
 
+    t->downloadTexture();
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            glm::vec4 texel = t->texelAsFloat(x, y);
+            glm::vec4 texel = t->texelAsFloat(glm::uvec3(x, y, 0));
             pixelValues.push_back(texel.r);
             pixelValues.push_back(texel.g);
             pixelValues.push_back(texel.b);
             pixelValues.push_back(texel.a);
         }
     }
+    t->clearDownloadedTexture();
     if (!pixelValues.empty()) {
         float min = *std::min_element(pixelValues.begin(), pixelValues.end());
         float max = *std::max_element(pixelValues.begin(), pixelValues.end());
@@ -548,10 +565,10 @@ void RenderableTimeVaryingFitsSphere::update(const UpdateData& data) {
                     loadTextureFromFits(file.path, _fitsLayerName, minMax);
                 using FilterMode = ghoul::opengl::Texture::FilterMode;
                 if (_textureFilterProperty == static_cast<int>(FilterMode::Nearest)) {
-                    file.texture->setFilter(FilterMode::Nearest);
+                    //file.texture->setFilter(FilterMode::Nearest);
                 }
                 else if (_textureFilterProperty == static_cast<int>(FilterMode::Linear)) {
-                    file.texture->setFilter(FilterMode::Linear);
+                    //file.texture->setFilter(FilterMode::Linear);
                 }
                 file.status = File::FileStatus::Loaded;
                 trackOldest(file);

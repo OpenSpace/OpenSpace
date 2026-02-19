@@ -39,7 +39,6 @@
 #include <ghoul/misc/exception.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/framebufferobject.h>
-#include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
@@ -361,16 +360,14 @@ bool ProjectionComponent::initializeGL() {
 
     using ghoul::opengl::Texture;
 
-    std::unique_ptr<Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
+    _placeholderTexture = ghoul::io::TextureReader::ref().loadTexture(
         absPath(PlaceholderFile),
-        2
+        2,
+        {
+            .filter = Texture::FilterMode::LinearMipMap,
+            .wrapping = Texture::WrappingMode::ClampToBorder
+        }
     );
-    if (texture) {
-        texture->uploadTexture();
-        texture->setFilter(Texture::FilterMode::LinearMipMap);
-        texture->setWrapping(Texture::WrappingMode::ClampToBorder);
-    }
-    _placeholderTexture = std::move(texture);
 
     if (_dilation.isEnabled) {
         _dilation.program = ghoul::opengl::ProgramObject::Build(
@@ -601,8 +598,8 @@ void ProjectionComponent::imageProjectBegin() {
 
     glViewport(
         0, 0,
-        static_cast<GLsizei>(_projectionTexture->width()),
-        static_cast<GLsizei>(_projectionTexture->height())
+        static_cast<GLsizei>(_projectionTexture->dimensions().x),
+        static_cast<GLsizei>(_projectionTexture->dimensions().y)
     );
 
     if (_dilation.isEnabled) {
@@ -631,8 +628,8 @@ void ProjectionComponent::depthMapRenderBegin() {
 
     glViewport(
         0, 0,
-        static_cast<GLsizei>(_shadowing.texture->width()),
-        static_cast<GLsizei>(_shadowing.texture->height())
+        static_cast<GLsizei>(_shadowing.texture->dimensions().x),
+        static_cast<GLsizei>(_shadowing.texture->dimensions().y)
     );
 
     glClear(GL_DEPTH_BUFFER_BIT);
@@ -822,8 +819,8 @@ void ProjectionComponent::clearAllProjections() {
     glViewport(
         0,
         0,
-        static_cast<GLsizei>(_projectionTexture->width()),
-        static_cast<GLsizei>(_projectionTexture->height())
+        static_cast<GLsizei>(_projectionTexture->dimensions().x),
+        static_cast<GLsizei>(_projectionTexture->dimensions().y)
     );
 
     glBindFramebuffer(GL_FRAMEBUFFER, _fboID);
@@ -843,8 +840,8 @@ void ProjectionComponent::clearAllProjections() {
 }
 
 void ProjectionComponent::generateMipMap() {
-    _projectionTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-    _mipMapDirty = false;
+    //_projectionTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    //_mipMapDirty = false;
 }
 
 std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTexture(
@@ -857,20 +854,19 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
         return _placeholderTexture;
     }
 
+    ghoul::opengl::Texture::WrappingModes wrapping = {
+        Texture::WrappingMode::Repeat,
+        Texture::WrappingMode::MirroredRepeat
+    };
     std::unique_ptr<Texture> texture = ghoul::io::TextureReader::ref().loadTexture(
         absPath(texturePath),
-        2
-    );
-    if (texture) {
-        if (texture->format() == Texture::Format::Red) {
-            ghoul::opengl::convertTextureFormat(*texture, Texture::Format::RGB);
+        2,
+        {
+            .filter = Texture::FilterMode::LinearMipMap,
+            .wrapping = wrapping,
+            .swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
         }
-        texture->uploadTexture();
-        texture->setWrapping(
-            { Texture::WrappingMode::Repeat, Texture::WrappingMode::MirroredRepeat }
-        );
-        texture->setFilter(Texture::FilterMode::LinearMipMap);
-    }
+    );
     return texture;
 }
 
@@ -879,35 +875,32 @@ bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size)
 
     using namespace ghoul::opengl;
     _projectionTexture = std::make_unique<Texture>(
-        glm::uvec3(size, 1),
-        GL_TEXTURE_2D,
-        Texture::Format::RGBA
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(size, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_UNSIGNED_BYTE
+        }
     );
-    if (_projectionTexture) {
-        _projectionTexture->uploadTexture();
-    }
 
     if (_dilation.isEnabled) {
         _dilation.texture = std::make_unique<ghoul::opengl::Texture>(
-            glm::uvec3(size, 1),
-            GL_TEXTURE_2D,
-            ghoul::opengl::Texture::Format::RGBA
+            ghoul::opengl::Texture::FormatInit{
+                .dimensions = glm::uvec3(size, 1),
+                .type = GL_TEXTURE_2D,
+                .format = ghoul::opengl::Texture::Format::RGBA,
+                .dataType = GL_UNSIGNED_BYTE
+            }
         );
-
-        if (_dilation.texture) {
-            _dilation.texture->uploadTexture();
-        }
 
         _dilation.stencilTexture = std::make_unique<ghoul::opengl::Texture>(
-            glm::uvec3(size, 1),
-            GL_TEXTURE_2D,
-            ghoul::opengl::Texture::Format::Red,
-            static_cast<GLenum>(ghoul::opengl::Texture::Format::Red)
+            ghoul::opengl::Texture::FormatInit{
+                .dimensions = glm::uvec3(size, 1),
+                .type = GL_TEXTURE_2D,
+                .format = ghoul::opengl::Texture::Format::Red,
+                .dataType = GL_UNSIGNED_BYTE
+            }
         );
-
-        if (_dilation.stencilTexture) {
-            _dilation.stencilTexture->uploadTexture();
-        }
     }
 
     return _projectionTexture != nullptr;
@@ -917,16 +910,13 @@ bool ProjectionComponent::generateDepthTexture(const glm::ivec2& size) {
     LINFO(std::format("Creating depth texture of size ({}, {})", size.x, size.y));
 
     _shadowing.texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(size, 1),
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::DepthComponent,
-        GL_DEPTH_COMPONENT32F
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(size, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::DepthComponent,
+            .dataType = GL_FLOAT
+        }
     );
-
-    if (_shadowing.texture) {
-        _shadowing.texture->uploadTexture();
-    }
-
     return _shadowing.texture != nullptr;
 }
 

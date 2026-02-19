@@ -121,12 +121,6 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         const double time = extractTriggerTimeFromFileName(filePath);
         std::unique_ptr<ghoul::opengl::Texture> t =
             ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
-
-        t->setInternalFormat(GL_COMPRESSED_RGBA);
-        t->uploadTexture();
-        t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        t->purgeFromRAM();
-
         _files.push_back({ std::move(filePath), time, std::move(t) });
     }
 

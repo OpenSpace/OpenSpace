@@ -7,7 +7,7 @@ local modelFolder = asset.resource({
   Name = "Scale Model Statue of Liberty",
   Type = "HttpSynchronization",
   Identifier = "scale_model_statue_of_liberty",
-  Version = 1
+  Version = 2
 })
 
 

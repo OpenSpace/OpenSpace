@@ -867,14 +867,13 @@ void VideoPlayer::createTexture(glm::ivec2 size) {
     _videoResolution = size;
 
     _frameTexture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(size, 1),
-        GL_TEXTURE_2D
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(size, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_UNSIGNED_BYTE
+        }
     );
-    _frameTexture->uploadTexture();
-
-    // Disable mipmaps
-    glTextureParameteri(*_frameTexture, GL_TEXTURE_BASE_LEVEL, 0);
-    glTextureParameteri(*_frameTexture, GL_TEXTURE_MAX_LEVEL, 0);
 
     // Bind texture to framebuffer
     glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_frameTexture, 0);

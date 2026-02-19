@@ -216,20 +216,16 @@ void RenderablePlaneProjection::loadTexture() {
         return;
     }
 
-    std::unique_ptr<ghoul::opengl::Texture> texture =
-        ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath), 2);
-    if (!texture) {
-        return;
-    }
-
-    if (texture->format() == ghoul::opengl::Texture::Format::Red) {
-        texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
-    }
-    texture->uploadTexture();
-    // TODO: AnisotropicMipMap crashes on ATI cards ---abock
-    //texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-    texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-    _texture = std::move(texture);
+    // @TODO (2026-02-18, abock): This code was settings the swizzle mask only if the
+    //                            returned image was having a single Red channel. This
+    //                            can't currently be expressed unfortunately
+    ghoul::opengl::Texture::SamplerInit samplerInit = {
+        // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+        //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
+        .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
+        //.swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
+    };
+    _texture = ghoul::io::TextureReader::ref().loadTexture(_texturePath, 2, samplerInit);
 
     _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath);
     _textureFile->setCallback([this]() { _textureIsDirty = true; });

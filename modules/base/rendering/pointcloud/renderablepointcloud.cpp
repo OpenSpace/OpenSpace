@@ -39,7 +39,6 @@
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/opengl/textureconversion.h>
 #include <ghoul/opengl/textureunit.h>
 #include <glm/gtx/quaternion.hpp>
 #include <algorithm>
@@ -1002,19 +1001,10 @@ void RenderablePointCloud::loadTexture(const std::filesystem::path& path, int in
 
     bool useAlpha = (t->numberOfChannels() > 3) && _texture.useAlphaChannel;
 
-    if (t) {
-        LINFOC("RenderablePlanesCloud", std::format("Loaded texture {}", path));
-        // Do not upload the loaded texture to the GPU, we just want it to hold the data.
-        // However, convert textures make sure they all use the same format
-        ghoul::opengl::Texture::Format targetFormat = glFormat(useAlpha);
-        convertTextureFormat(*t, targetFormat);
-    }
-    else {
-        throw ghoul::RuntimeError(std::format("Could not find image file {}", path));
-    }
+    LINFOC("RenderablePlanesCloud", std::format("Loaded texture {}", path));
 
     TextureFormat format = {
-        .resolution = glm::uvec2(t->width(), t->height()),
+        .resolution = glm::uvec2(t->dimensions().x, t->dimensions().y),
         .useAlpha = useAlpha
     };
 
@@ -1069,7 +1059,7 @@ void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
                                                      size_t textureIndex,
                                                      glm::uvec2 resolution,
                                                      bool useAlpha,
-                                                     const void* pixelData)
+                                                  const std::vector<std::byte>& pixelData)
 {
     gl::GLenum format = gl::GLenum(glFormat(useAlpha));
 
@@ -1084,7 +1074,7 @@ void RenderablePointCloud::fillAndUploadTextureLayer(unsigned int arrayIndex,
         1, // depth
         format,
         GL_UNSIGNED_BYTE, // type
-        pixelData
+        pixelData.data()
     );
 
     // Keep track of which layer in which texture array corresponds to the texture with
@@ -1124,10 +1114,6 @@ void RenderablePointCloud::generateArrayTextures() {
                 texture->pixelData()
             );
             layer++;
-
-            // At this point we don't need the keep the texture data around anymore. If
-            // the textures need updating, we will reload them from file
-            texture->purgeFromRAM();
         }
 
         int nMaxTextureLayers = 0;

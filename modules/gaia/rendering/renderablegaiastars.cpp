@@ -586,13 +586,13 @@ void RenderableGaiaStars::initializeGL() {
     glCreateFramebuffers(1, &_fbo);
     // Generate a new texture and attach it to our FBO
     _fboTexture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(global::renderEngine->renderingResolution(), 1),
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::RGBA,
-        GL_RGBA32F,
-        GL_FLOAT
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(global::renderEngine->renderingResolution(), 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_FLOAT
+        }
     );
-    _fboTexture->uploadTexture();
     glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_fboTexture, 0);
     const GLenum textureBuffer = GL_COLOR_ATTACHMENT0;
     glNamedFramebufferDrawBuffers(_fbo, 1, &textureBuffer);
@@ -955,7 +955,6 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 LDEBUG(std::format(
                     "Loaded texture from '{}'", _colorTexturePath.value()
                 ));
-                _colorTexture->uploadTexture();
             }
 
             _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
@@ -977,13 +976,13 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         if (hasChanged) {
             _fboTexture = std::make_unique<ghoul::opengl::Texture>(
-                glm::uvec3(screenSize, 1),
-                GL_TEXTURE_2D,
-                ghoul::opengl::Texture::Format::RGBA,
-                GL_RGBA32F,
-                GL_FLOAT
+                ghoul::opengl::Texture::FormatInit{
+                    .dimensions = glm::uvec3(screenSize, 1),
+                    .type = GL_TEXTURE_2D,
+                    .format = ghoul::opengl::Texture::Format::RGBA,
+                    .dataType = GL_FLOAT
+                }
             );
-            _fboTexture->uploadTexture();
             LDEBUG("Re-Generating Gaia Framebuffer Texture");
 
             glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_fboTexture, 0);
