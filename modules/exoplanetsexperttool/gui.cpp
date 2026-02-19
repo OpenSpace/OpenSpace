@@ -108,21 +108,25 @@ void Gui::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
     {
-        unsigned char* texData;
+        unsigned char* texData = nullptr;
         glm::ivec2 texSize = glm::ivec2(0);
         for (int i = 0; i < nWindows; ++i) {
             setCurrectContext(_contexts[i]);
 
             ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
         }
+
         _fontTexture = std::make_unique<ghoul::opengl::Texture>(
-            texData,
-            glm::uvec3(texSize.x, texSize.y, 1),
-            GL_TEXTURE_2D
+            ghoul::opengl::Texture::FormatInit{
+                .dimensions = glm::uvec3(texSize.x, texSize.y, 1),
+                .type = GL_TEXTURE_2D,
+                .format = ghoul::opengl::Texture::Format::RGBA,
+                .dataType = GL_UNSIGNED_BYTE
+            },
+            ghoul::opengl::Texture::SamplerInit{},
+            reinterpret_cast<std::byte*>(texData)
         );
         _fontTexture->setName("ExoGui Text");
-        _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
-        _fontTexture->uploadTexture();
     }
     for (int i = 0; i < nWindows; ++i) {
         uintptr_t texture = static_cast<GLuint>(*_fontTexture);
@@ -249,8 +253,7 @@ void Gui::endFrame() {
     glEnable(GL_SCISSOR_TEST);
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    _fontTexture->bind();
+    unit.bind(*_fontTexture);
 
     // Setup orthographic projection matrix
     const float width = ImGui::GetIO().DisplaySize.x;

@@ -216,18 +216,17 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
             double normalizedY = (lastViewportSize.y - y) / lastViewportSize.y;
 
             if (_glyphIdTexture) {
-                glm::uvec2 texturePos = glm::uvec2(
-                    normalizedX * static_cast<double>(_glyphIdTexture->width()),
-                    normalizedY * static_cast<double>(_glyphIdTexture->height())
+                glm::uvec3 textureDim = _glyphIdTexture->dimensions();
+                glm::uvec2 pos = glm::uvec2(
+                    normalizedX * static_cast<double>(textureDim.x),
+                    normalizedY * static_cast<double>(textureDim.y)
                 );
 
                 _glyphIdTexture->downloadTexture();
 
                 // TODO: make sure pos is within texture
-                if (texturePos.x < _glyphIdTexture->width() &&
-                    texturePos.y < _glyphIdTexture->height())
-                {
-                    glm::vec4 pixelValue = _glyphIdTexture->texelAsFloat(texturePos);
+                if (pos.x < textureDim.x && pos.y < textureDim.y) {
+                    glm::vec4 pixelValue = _glyphIdTexture->texelAsFloat({ pos, 0 });
                     _currentlyHoveredIndex =
                         static_cast<int>(std::round(pixelValue.r * _maxIndex)) - 1;
                 }
@@ -354,9 +353,11 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
         GLenum drawBuffers[1] = { GL_COLOR_ATTACHMENT0 };
         glDrawBuffers(1, drawBuffers);
 
+        glm::uvec3 textureDim = _glyphIdTexture->dimensions();
+
         // Potentially upate texture size
-        if (static_cast<unsigned int>(viewport[2]) != _glyphIdTexture->width() ||
-            static_cast<unsigned int>(viewport[3]) != _glyphIdTexture->height())
+        if (static_cast<unsigned int>(viewport[2]) != textureDim.x ||
+            static_cast<unsigned int>(viewport[3]) != textureDim.y)
         {
             createGlyphIdTexture(glm::uvec3(viewport[2], viewport[3], 1));
         }
@@ -368,7 +369,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
         glDisablei(GL_BLEND, 0);
 
         // Draw again! And specify viewport size
-        glViewport(viewport[0], viewport[1], _glyphIdTexture->width(), _glyphIdTexture->height());
+        glViewport(viewport[0], viewport[1], textureDim.x, textureDim.y);
         glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_fullGlyphData.size()));
 
         // Reset index rendering, viewport size and frame buffer
@@ -494,25 +495,29 @@ void RenderableExoplanetGlyphCloud::createGlyphIdTexture(const glm::uvec3 dimens
     // TODO (emmbr, 2022-11-15): at some point try using a integer value for the texture instead.
     // But for now, just make it work!
     _glyphIdTexture = std::make_unique<ghoul::opengl::Texture>(
-        dimensions,
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::Red,
-        GL_R32F,
-        GL_FLOAT
-     );
-    _glyphIdTexture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
-    _glyphIdTexture->uploadTexture();
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = dimensions,
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_FLOAT
+        },
+        ghoul::opengl::Texture::SamplerInit{
+            .filter = ghoul::opengl::Texture::FilterMode::Nearest
+        }
+    );
 
     // And a depth buffer of the same dimension
     _depthTexture = std::make_unique<ghoul::opengl::Texture>(
-        dimensions,
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::DepthComponent,
-        GL_DEPTH_COMPONENT32F,
-        GL_FLOAT
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = dimensions,
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::DepthComponent,
+            .dataType = GL_FLOAT
+        },
+        ghoul::opengl::Texture::SamplerInit{
+            .filter = ghoul::opengl::Texture::FilterMode::Linear
+        }
     );
-    _depthTexture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-    _depthTexture->uploadTexture();
 
     glNamedFramebufferTexture(_glyphIdFbo, GL_COLOR_ATTACHMENT0, *_glyphIdTexture, 0);
     glNamedFramebufferTexture(_glyphIdFbo, GL_DEPTH_ATTACHMENT, *_depthTexture, 0);

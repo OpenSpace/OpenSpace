@@ -24,7 +24,7 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "powerscaling/powerscalingmath.glsl"
 
 layout(points) in;
 layout(triangle_strip, max_vertices = 4) out;
