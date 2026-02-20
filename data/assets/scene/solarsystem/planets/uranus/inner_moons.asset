@@ -1,5 +1,5 @@
 local transforms = asset.require("./transforms")
-local kernels = asset.require("./kernels")
+local kernels = asset.require("./kernels184")
 local coreKernels = asset.require("spice/core")
 
 
