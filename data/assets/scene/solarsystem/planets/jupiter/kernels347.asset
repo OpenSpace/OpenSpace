@@ -6,7 +6,7 @@ local kernels = asset.resource({
   Name = "Jupiter Spice Kernels",
   Type = "HttpSynchronization",
   Identifier = "jupiter_kernels",
-  Version = 2
+  Version = 3
 })
 
 local ID = {
@@ -121,7 +121,7 @@ local Frame = {
   Kalyke = coreKernels.Frame.Kalyke,
   Leda = coreKernels.Frame.Leda,
   Lysithea = coreKernels.Frame.Lysithea,
-  Megaclite = coreKernels.Frame.Magaclite,
+  Megaclite = coreKernels.Frame.Megaclite,
   Metis = coreKernels.Frame.Metis,
   Pasiphae = coreKernels.Frame.Pasiphae,
   Praxidike = coreKernels.Frame.Praxidike,
