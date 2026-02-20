@@ -100,11 +100,6 @@ private:
 
     bool _isInSelectionMode = false;
 
-    // Labels
-    bool _hasLabels = false;
-    properties::BoolProperty _drawLabels;
-    std::unique_ptr<LabelsComponent> _labels;
-
     GLuint _pointsVao = 0;
     GLuint _pointsVbo = 0;
 

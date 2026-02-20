@@ -71,7 +71,6 @@ namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsDataViewer";
 
     constexpr std::string_view RenderDataFile = "${TEMPORARY}/pointrenderdata.dat";
-    constexpr std::string_view LabelsFile = "${TEMPORARY}/exosystems.label";
 
     constexpr std::string_view WebpagePath = "${MODULE_EXOPLANETSEXPERTTOOL}/webpage/index.html";
 
@@ -414,15 +413,9 @@ void DataViewer::initializeRenderables() {
     writeRenderDataToFile();
 
     std::filesystem::path dataFilePath = absPath(RenderDataFile);
-    std::filesystem::path labelsFilePath = absPath(LabelsFile);
 
     if (!std::filesystem::is_regular_file(dataFilePath)) {
         LWARNING("Count not find data file for points rendering");
-        return;
-    }
-
-    if (!std::filesystem::is_regular_file(labelsFilePath)) {
-        LWARNING("Count not find file for labels rendering");
         return;
     }
 
@@ -437,13 +430,6 @@ void DataViewer::initializeRenderables() {
     renderable.setValue("UseFixedWidth", false);
     renderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
     renderable.setValue("DataFile", dataFilePath.string());;
-
-    ghoul::Dictionary labels;
-    labels.setValue("File", labelsFilePath.string());
-    labels.setValue("Size", 15);
-    labels.setValue("MinMaxSize", glm::ivec2(4, 12));
-    labels.setValue("Unit", "pc"s);
-    renderable.setValue("Labels", labels);
 
     ghoul::Dictionary node;
     node.setValue("Identifier", std::string(ExoplanetsExpertToolModule::GlyphCloudIdentifier));
@@ -1355,12 +1341,6 @@ void DataViewer::writeRenderDataToFile() {
         return;
     }
 
-    std::ofstream labelfile(absPath(LabelsFile));
-    if (!labelfile) {
-        LERROR(std::format("Cannot open file '{}' for writing", LabelsFile));
-    }
-    labelfile << "textcolor 1" << std::endl;
-
     LDEBUG("Writing render data to file");
 
     std::vector<size_t> indicesWithPositions;
@@ -1412,17 +1392,6 @@ void DataViewer::writeRenderDataToFile() {
 
         // Get a number for the planet's index in system
         file.write(reinterpret_cast<const char*>(&item.indexInSystem), sizeof(int));
-
-        // Write label to file
-        bool isAdded = std::find(hosts.begin(), hosts.end(), item.hostName) != hosts.end();
-        if (!isAdded) {
-            labelfile << std::format(
-                "{} {} {} text {}",
-                position.x, position.y, position.z, item.hostName
-            );
-            labelfile << std::endl;
-            hosts.push_back(item.hostName);
-        }
     }
 
     file.close();
