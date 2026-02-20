@@ -436,10 +436,7 @@ void DataViewer::initializeRenderables() {
     renderable.setValue("BillboardMinMaxSize", glm::dvec2(DefaultGlyphSize));
     renderable.setValue("UseFixedWidth", false);
     renderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
-    renderable.setValue("DataFile", dataFilePath.string());
-    renderable.setValue("HighlightColor", glm::dvec3(
-        view::colors::DefaultSelected
-    ));
+    renderable.setValue("DataFile", dataFilePath.string());;
 
     ghoul::Dictionary labels;
     labels.setValue("File", labelsFilePath.string());

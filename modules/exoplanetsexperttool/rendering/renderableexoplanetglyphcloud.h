@@ -77,7 +77,6 @@ private:
         currentIndex, isRenderIndexStep
     ) _uniformCache;
 
-    properties::Vec3Property _highlightColor;
     properties::FloatProperty _size;
     properties::IntListProperty _selectedIndices;
     properties::Vec2Property _billboardMinMaxSize;

@@ -44,12 +44,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "ExoplanetGlyphCloud";
 
-    constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
-        "HighlightColor",
-        "Highlight Color",
-        "The color of the highlighted/selected points."
-    };
-
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
@@ -94,9 +88,6 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableExoplanetGlyphCloud)]] Parameters {
-        // [[codegen::verbatim(HighlightColorInfo.description)]]
-        std::optional<glm::vec3> highlightColor [[codegen::color()]];
-
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<float> size;
 
@@ -134,7 +125,6 @@ documentation::Documentation RenderableExoplanetGlyphCloud::Documentation() {
 RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
                                                      const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _highlightColor(HighlightColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _size(SizeInfo, 100.f, 0.f, 500.f)
     , _selectedIndices(SelectionInfo)
     , _billboardMinMaxSize(
@@ -148,10 +138,6 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     , _drawLabels(DrawLabelInfo, false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-
-    _highlightColor = p.highlightColor.value_or(_highlightColor);
-    _highlightColor.setViewOption(properties::Property::ViewOptions::Color);
-    addProperty(_highlightColor);
 
     _size = p.size.value_or(_size);
     addProperty(_size);
@@ -460,11 +446,7 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
             if (pos != _glyphIndices.end()) {
                 const int index = static_cast<int>(pos - _glyphIndices.begin());
                 const GlyphData& p = _fullGlyphData.at(index);
-                GlyphData newP = p;
-                newP.colors[0] = glm::vec4(_highlightColor.value(), 1.f);
-                newP.nColors = 1;
-
-                selectedPoints.push_back(newP);
+                selectedPoints.push_back(p);
                 newIndices.push_back(i);
             }
             else {

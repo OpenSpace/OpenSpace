@@ -66,8 +66,6 @@ Fragment getFragment() {
     discard;
   }
 
-  float maxRadius = 1.0;
-
   // Same width
   float width = 0.95 * 1.0 / in_data.component; // Make it a little smaller than full width
 
@@ -86,7 +84,7 @@ Fragment getFragment() {
 
   float minRadius = 1.0 - width;
 
-  float coord = (radius - minRadius) / (maxRadius - minRadius);
+  float coord = (radius - minRadius) / (1.0 - minRadius);
   if (coord < 0.0 || coord > 1.0) {
     discard;
   }
