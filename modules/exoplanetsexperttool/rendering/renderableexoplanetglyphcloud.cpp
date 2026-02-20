@@ -179,13 +179,13 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
                 );
 
                 _glyphIdTexture->downloadTexture();
-
                 // TODO: make sure pos is within texture
                 if (pos.x < textureDim.x && pos.y < textureDim.y) {
                     glm::vec4 pixelValue = _glyphIdTexture->texelAsFloat({ pos, 0 });
                     _currentlyHoveredIndex =
                         static_cast<int>(std::round(pixelValue.r * _maxIndex)) - 1;
                 }
+                _glyphIdTexture->clearDownloadedTexture();
             }
         }
     );
