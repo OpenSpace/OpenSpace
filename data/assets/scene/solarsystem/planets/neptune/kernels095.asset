@@ -6,7 +6,7 @@ local kernels = asset.resource({
   Name = "Neptune Spice Kernels",
   Type = "HttpSynchronization",
   Identifier = "neptune_kernels",
-  Version = 2
+  Version = 3
 })
 
 
