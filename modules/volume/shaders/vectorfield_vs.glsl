@@ -23,53 +23,17 @@
  ****************************************************************************************/
 
 #version __CONTEXT__
-#include "PowerScaling/powerScaling_vs.hglsl"
 
-layout(location = 0) in vec3 in_arrowVertex;
-layout(location = 1) in vec3 in_position;
-layout(location = 2) in vec3 in_direction;
-layout(location = 3) in float in_magnitude;
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec3 in_direction;
+layout(location = 2) in float in_magnitude;
 
-uniform mat4 modelViewProjection;
-uniform float arrowScale;
-
-flat out vec3 vs_direction;
-flat out float vs_magnitude;
-out float vs_positionDepth;
-
-mat3 makeRotation(vec3 dir) {
-  vec3 x = normalize(dir);
-  // Pick an up vector that is not parallel to x. Avoids numerical instability issues
-  vec3 up = abs(x.z) < 0.999 ? vec3(0.0, 0.0, 1.0) : vec3(0.0, 1.0, 0.0);
-  vec3 y = normalize(cross(up, x));
-  vec3 z = cross(x, y);
-  return mat3(x, y, z);
-}
-
-float exponentialScale(float sliderValue, float minExp, float maxExp) {
-  // Clamp input just in case
-  sliderValue = clamp(sliderValue, 1.0, 100.0);
-  // Normalize slider to 0-1
-  float t = (sliderValue - 1.0) / (100.0 - 1.0);
-
-  // Interpolate exponent
-  float exponent = minExp + t * (maxExp - minExp);
-
-  // Base-10 exponential
-  return pow(10.0, exponent);
-}
+out vec3 vs_position;
+out vec3 vs_direction;
+out float vs_magnitude;
 
 void main() {
-  mat3 rotationMatrix = makeRotation(in_direction);
-
-  float scale = exponentialScale(arrowScale, 2.5, 23.0);
-  vec3 scaledPosition = in_arrowVertex * in_magnitude * scale;
-  vec3 worldPosition = in_position + rotationMatrix * scaledPosition;
-
-  vec4 positionClipSpace = modelViewProjection * vec4(worldPosition, 1.0);
-  vs_positionDepth = positionClipSpace.w;
-
-  gl_Position = z_normalization(positionClipSpace);
+  vs_position = in_position;
   vs_direction = in_direction;
   vs_magnitude = in_magnitude;
 }

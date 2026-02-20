@@ -24,9 +24,9 @@
 
 #include "fragment.glsl"
 
-flat in vec3 vs_direction;
-flat in float vs_magnitude;
-in float vs_positionDepth;
+flat in vec3 gs_direction;
+flat in float gs_magnitude;
+in float gs_positionDepth;
 
 out vec4 outColor;
 
@@ -45,22 +45,22 @@ Fragment getFragment() {
   }
 
   bool magnitudeOutOfRange =
-    vs_magnitude < dataRangeFilter.x || vs_magnitude > dataRangeFilter.y;
+    gs_magnitude < dataRangeFilter.x || gs_magnitude > dataRangeFilter.y;
   if (filterOutOfRange && magnitudeOutOfRange) {
     discard;
   }
 
   if (colorByMag) {
-    float t = (vs_magnitude - magDomain.x) / (magDomain.y - magDomain.x);
+    float t = (gs_magnitude - magDomain.x) / (magDomain.y - magDomain.x);
     t = clamp(t, 0.0, 1.0);
     frag.color = texture(colorTexture, t);
   }
   else {
-    vec3 dir = normalize(vs_direction);
+    vec3 dir = normalize(gs_direction);
     vec3 color = 0.5 * (dir + vec3(1.0)); // remaps [-1, 1] -> [0, 1]
     frag.color = vec4(color, 1.0);
   }
   frag.color.a *= opacity;
-  frag.depth = vs_positionDepth;
+  frag.depth = gs_positionDepth;
   return frag;
 }

@@ -112,7 +112,6 @@ private:
 
     GLuint _vao = 0;
     GLuint _vectorFieldVbo = 0;
-    GLuint _arrowVbo = 0;
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
 
     bool _vectorFieldIsDirty = true;

@@ -42,20 +42,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableVectorField";
 
-    // Arrow pointed along +X direction
-    constexpr std::array<glm::vec3, 6> ArrowVertices = {
-        // shaft
-        glm::vec3{ 0.0f, 0.0f, 0.0f },
-        glm::vec3{ 1.0f, 0.0f, 0.0f },
-
-        // head
-        glm::vec3{ 1.0f, 0.0f, 0.0f },
-        glm::vec3{ 0.8f, 0.1f, 0.0f },
-
-        glm::vec3{ 1.0f, 0.0f, 0.0f },
-        glm::vec3{ 0.8f,-0.1f, 0.0f }
-    };
-
     constexpr openspace::properties::Property::PropertyInfo StrideInfo = {
         "Stride",
         "Stride",
@@ -166,10 +152,10 @@ namespace {
         glm::ivec3 dimensions;
 
         // [[codegen::verbatim(VectorFieldScaleInfo.description)]]
-        std::optional<float> vectorFieldScale;
+        std::optional<float> vectorFieldScale [[codegen::greater(1.f)]];
 
         // [[codegen::verbatim(LineWidthInfo.description)]]
-        std::optional<float> lineWidth;
+        std::optional<float> lineWidth [[codegen::greater(0.f)]];
 
         // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
         std::optional<bool> filterOutOfRange;
@@ -240,7 +226,12 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
     _dimensions = p.dimensions;
 
     _stride = p.stride.value_or(_stride);
-    _stride.onChange([this]() { _vectorFieldIsDirty = true; });
+    _stride.onChange([this]() {
+        if (_stride < 1) {
+            _stride = 1;
+        }
+        _vectorFieldIsDirty = true;
+    });
     addProperty(_stride);
 
     _vectorFieldScale = p.vectorFieldScale.value_or(_vectorFieldScale);
@@ -338,33 +329,14 @@ void RenderableVectorField::initializeGL() {
     _program = global::renderEngine->buildRenderProgram(
         "vectorfield",
         absPath("${MODULE_VOLUME}/shaders/vectorfield_vs.glsl"),
-        absPath("${MODULE_VOLUME}/shaders/vectorfield_fs.glsl")
+        absPath("${MODULE_VOLUME}/shaders/vectorfield_fs.glsl"),
+        absPath("${MODULE_VOLUME}/shaders/vectorfield_gs.glsl")
     );
 
     glGenVertexArrays(1, &_vao);
     glGenBuffers(1, &_vectorFieldVbo);
-    glGenBuffers(1, &_arrowVbo);
 
     glBindVertexArray(_vao);
-
-    // Arrow geometry
-    glBindBuffer(GL_ARRAY_BUFFER, _arrowVbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        ArrowVertices.size() * sizeof(glm::vec3),
-        ArrowVertices.data(),
-        GL_STATIC_DRAW
-    );
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(glm::vec3),
-        nullptr
-    );
 
     static_assert(sizeof(ArrowInstance) == 7 * sizeof(float),
         "Vertex layout is not tightly packed!"
@@ -379,6 +351,17 @@ void RenderableVectorField::initializeGL() {
     );
 
     // Position
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        sizeof(ArrowInstance),
+        reinterpret_cast<void*>(offsetof(ArrowInstance, position))
+    );
+
+    // Direction
     glEnableVertexAttribArray(1);
     glVertexAttribPointer(
         1,
@@ -386,33 +369,19 @@ void RenderableVectorField::initializeGL() {
         GL_FLOAT,
         GL_FALSE,
         sizeof(ArrowInstance),
-        reinterpret_cast<void*>(offsetof(ArrowInstance, position))
+        reinterpret_cast<void*>(offsetof(ArrowInstance, direction))
     );
-    glVertexAttribDivisor(1, 1);
 
-    // Direction
+    // Magnitude
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(
         2,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(ArrowInstance),
-        reinterpret_cast<void*>(offsetof(ArrowInstance, direction))
-    );
-    glVertexAttribDivisor(2, 1);
-
-    // Magnitude
-    glEnableVertexAttribArray(3);
-    glVertexAttribPointer(
-        3,
         1,
         GL_FLOAT,
         GL_FALSE,
         sizeof(ArrowInstance),
         reinterpret_cast<void*>(offsetof(ArrowInstance, magnitude))
     );
-    glVertexAttribDivisor(23, 1);
 
     glBindVertexArray(0);
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
@@ -423,8 +392,8 @@ void RenderableVectorField::deinitializeGL() {
     _vao = 0;
     glDeleteBuffers(1, &_vectorFieldVbo);
     _vectorFieldVbo = 0;
-    glDeleteBuffers(1, &_arrowVbo);
-    _arrowVbo = 0;
+    //glDeleteBuffers(1, &_arrowVbo);
+    //_arrowVbo = 0;
 
     _colorTexture = nullptr;
 
@@ -466,12 +435,7 @@ void RenderableVectorField::render(const RenderData& data, RendererTasks&) {
 
     glBindVertexArray(_vao);
     glLineWidth(_lineWidth);
-    glDrawArraysInstanced(
-        GL_LINES,
-        0,
-        static_cast<GLsizei>(ArrowVertices.size()),
-        static_cast<GLsizei>(_instances.size())
-    );
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_instances.size()));
     glBindVertexArray(0);
     _program->deactivate();
 }
