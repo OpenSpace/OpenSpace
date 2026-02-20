@@ -33,7 +33,7 @@ in Data {
   flat int glyphIndex;
   flat int nColors;
   flat vec4 colors[MaxColors];
-  vec2 texCoord; // [-1, 1]
+  vec2 texCoords; // [-1, 1]
   float sizeFactor; // The factor used for the radius of the ring
 } in_data;
 
@@ -48,17 +48,19 @@ uniform bool isRenderIndexStep = false;
 const float M_PI = 3.141592657;
 
 Fragment getFragment() {
-  float radius = length(in_data.texCoord);
+  Fragment frag;
+  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
+  frag.depth = in_data.depthClipSpace;
 
-  float x = in_data.texCoord.x;
-  float y = in_data.texCoord.y;
+  float radius = length(in_data.texCoords);
+  float x = in_data.texCoords.x;
+  float y = in_data.texCoords.y;
+
+  float component = in_data.component;
 
   // Render selection icon
   if (onTop && radius > 1.0 && (abs(x - y) < 0.2 || abs(-1.0 * x - y) < 0.2)) {
-    Fragment frag;
     frag.color = vec4(1.0);
-    frag.depth = in_data.depthClipSpace;
-    frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
     return frag;
   }
 
@@ -67,11 +69,11 @@ Fragment getFragment() {
   }
 
   // Same width
-  float width = 0.95 * 1.0 / in_data.component; // Make it a little smaller than full width
+  float width = 0.95 * 1.0 / component; // Make it a little smaller than full width
 
   if (!useFixedRingWidth) {
 //    // Same area: Compute width from radius relationship instead
-//    float underRoot = 1.0 - 1.0 / in_data.component;
+//    float underRoot = 1.0 - 1.0 / component;
 //    // Prevent problems with potentially taking square of negative value
 //    if (underRoot < 0.0) {
 //      underRoot = 0.0;
@@ -79,7 +81,7 @@ Fragment getFragment() {
 //    width = 1.0 - sqrt(underRoot); // r_n minus r_(n-1) divided by r_n
 
     // Ish 90% width of previous ring
-    width = pow(0.87, in_data.component) / in_data.sizeFactor;
+    width = pow(0.87, component) / in_data.sizeFactor;
   }
 
   float minRadius = 1.0 - width;
@@ -92,7 +94,7 @@ Fragment getFragment() {
   // Find what color corresponds to the given angle
   float angleSlice = 2.0 * M_PI / in_data.nColors;
   vec2 up = vec2(0.0, 1.0);
-  float angle = acos(dot(up, normalize(in_data.texCoord)));
+  float angle = acos(dot(up, normalize(in_data.texCoords)));
 
   // left half of circle quadrant
   if (x < 0) {
@@ -109,35 +111,29 @@ Fragment getFragment() {
     discard;
   }
 
-  Fragment frag;
-
   // Render glyph index if we are at that rendering step
   if (isRenderIndexStep) {
-    color.rgb = vec3(float(in_data.glyphIndex) / float(maxIndex));
-    color.a = 1.0;
+    float index = float(in_data.glyphIndex) / float(maxIndex);
+    color = vec4(vec3(index), 1.0);
     // Set to render the value as is, without any color adjustments
     frag.disableLDR2HDR = true;
   }
+  else {
+    bool isCurrentHoveredGlyph = in_data.glyphIndex == currentIndex;
 
-  bool isCurrentHoveredGlyph = in_data.glyphIndex == currentIndex && !isRenderIndexStep;
-  float borderWidth = isCurrentHoveredGlyph ? 0.20: 0.13;
-  if (coord > 1.0 - borderWidth || coord < 1.0 - 1.0 + borderWidth) {
+    // Ring border
+    float borderWidth = isCurrentHoveredGlyph ? 0.20: 0.13;
+    if (coord > 1.0 - borderWidth || coord < 1.0 - 1.0 + borderWidth) {
+      color.rgb = isCurrentHoveredGlyph ? color.rgb * 2.5 : vec3(0.0);
+    }
+
+    // Brighten hovered glyph
     if (isCurrentHoveredGlyph) {
-      color.rgb *= 2.5; // brighter border
+      color.rgb *= 1.5;
     }
-    else {
-      color.rgb = vec3(0.0, 0.0, 0.0); //black border
-    }
-  }
-
-  if (isCurrentHoveredGlyph) {
-    // Brighten glyph
-    color.rgb *= 1.5;
   }
 
   frag.color = color;
-  frag.depth = in_data.depthClipSpace;
-  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
 
   return frag;
 }

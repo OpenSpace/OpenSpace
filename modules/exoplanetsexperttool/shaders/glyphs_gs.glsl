@@ -46,7 +46,7 @@ out Data {
   flat int glyphIndex;
   flat int nColors;
   flat vec4 colors[MaxColors];
-  vec2 texCoord;
+  vec2 texCoords;
   float sizeFactor; // The factor used for the radius of the ring
 } out_data;
 
@@ -60,7 +60,7 @@ uniform bool onTop;
 uniform bool useFixedRingWidth;
 
 
-const vec2 corners[4] = vec2[4](
+const vec2 Corners[4] = vec2[4](
   vec2(-1.0, -1.0),
   vec2(1.0, -1.0),
   vec2(-1.0, 1.0),
@@ -138,29 +138,26 @@ void main() {
   scaledUpClip *= sizeFactor;
 
   lowerLeft = vec4(dposClip - scaledRightClip - scaledUpClip);
-  vec4 lowerRight = vec4(dposClip + scaledRightClip - scaledUpClip);
-  vec4 upperLeft = vec4(dposClip + scaledUpClip - scaledRightClip);
-  upperRight = vec4(dposClip + scaledUpClip + scaledRightClip);
   out_data.depthClipSpace = lowerLeft.w * (1 - int(onTop));
 
   // Lower left
-  out_data.texCoord = corners[0];
+  out_data.texCoords = Corners[0];
   gl_Position = z_normalization(lowerLeft);
   EmitVertex();
 
   // Lower right
-  out_data.texCoord = corners[1];
-  gl_Position = z_normalization(lowerRight);
+  out_data.texCoords = Corners[1];
+  gl_Position = z_normalization(vec4(dposClip + scaledRightClip - scaledUpClip));
   EmitVertex();
 
   // Upper left
-  out_data.texCoord = corners[2];
-  gl_Position = z_normalization(upperLeft);
+  out_data.texCoords = Corners[2];
+  gl_Position = z_normalization(vec4(dposClip + scaledUpClip - scaledRightClip));
   EmitVertex();
 
   // Upper right
-  out_data.texCoord = corners[3];
-  gl_Position = z_normalization(upperRight);
+  out_data.texCoords = Corners[3];
+  gl_Position = z_normalization(vec4(dposClip + scaledUpClip + scaledRightClip));
   EmitVertex();
 
   EndPrimitive();
