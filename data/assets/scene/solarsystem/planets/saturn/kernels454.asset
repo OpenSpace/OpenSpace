@@ -65,6 +65,7 @@ local ID = {
   Thiazzi = 663,
   Thrymr = "THRYMR",
   Ymir = "YMIR",
+  -- New discoveries from 2019-2023:
   S2019S2 = 65094,
   S2019S3 = 65095,
   S2020S1 = 65096,
