@@ -152,6 +152,7 @@ public:
     static scripting::LuaLibrary luaLibrary();
 
     glm::ivec2 renderingResolution() const;
+    glm::ivec2 maxRenderingResolution() const;
     glm::ivec2 fontResolution() const;
 
     glm::mat4 globalRotation() const;
