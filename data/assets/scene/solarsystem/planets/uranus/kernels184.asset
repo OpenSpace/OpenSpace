@@ -32,7 +32,7 @@ local ID = {
   Portia = "PORTIA",
   Puck = "PUCK",
   Rosalind = "ROSALIND",
-  S2025U1 = 75052
+  S2025U1 = 75052,
 
   -- Irregular moons
   Caliban = "CALIBAN",
