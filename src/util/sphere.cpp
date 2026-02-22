@@ -168,4 +168,4 @@ void Sphere::render() const {
     glBindVertexArray(0);
 }
 
-}  // namespace openspace
+} // namespace openspace

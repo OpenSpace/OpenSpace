@@ -28,12 +28,12 @@
 #include <openspace/properties/templateproperty.h>
 #include <modules/volume/transferfunction.h>
 
-namespace openspace::properties {
+namespace openspace {
 
-class TransferFunctionProperty : public TemplateProperty<volume::TransferFunction> {
+class TransferFunctionProperty : public TemplateProperty<VolumeTransferFunction> {
 public:
     explicit TransferFunctionProperty(Property::PropertyInfo info,
-        volume::TransferFunction value = volume::TransferFunction());
+        VolumeTransferFunction value = VolumeTransferFunction());
 
     std::string_view className() const override;
     ghoul::lua::LuaTypes typeLua() const override;
@@ -41,12 +41,12 @@ public:
     void getLuaValue(lua_State* state) const override;
 
     std::string stringValue() const override;
-    using TemplateProperty<volume::TransferFunction>::operator=;
+    using TemplateProperty<VolumeTransferFunction>::operator=;
 
 private:
-    volume::TransferFunction toValue(lua_State* state) const override;
+    VolumeTransferFunction toValue(lua_State* state) const override;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___TRANSFERFUNCTIONPROPERTY___H__

@@ -42,13 +42,12 @@ namespace {
     // The information presented contains how many clients are connected to the same
     // session and whether this machine is currently the host of the session.
     struct [[codegen::Dictionary(DashboardItemParallelConnection)]] Parameters {};
-
-#include "dashboarditemparallelconnection_codegen.cpp"
 } // namespace
+#include "dashboarditemparallelconnection_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemParallelConnection::Documentation() {
+Documentation DashboardItemParallelConnection::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_parallelconnection",
         DashboardTextItem::Documentation()

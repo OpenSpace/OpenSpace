@@ -38,7 +38,7 @@
 #include <optional>
 #include <utility>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 TextTileProvider::TextTileProvider(TileTextureInitData initData_, size_t fontSize_)
     : initData(std::move(initData_))
@@ -68,7 +68,7 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
     ZoneScoped;
     TracyGpuZone("tile");
 
-    const cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
+    const ProviderTileKey key = { tileIndex, uniqueIdentifier };
     Tile tile = tileCache->get(key);
     if (!tile.texture) {
         ghoul::opengl::Texture* texture = tileCache->texture(initData);
@@ -113,4 +113,4 @@ void TextTileProvider::reset() {
     tileCache->clear();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

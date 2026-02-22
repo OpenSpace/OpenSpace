@@ -76,7 +76,7 @@ std::string MissionManager::loadMission(Mission mission) {
         setCurrentMission(currentMission);
     }
 
-    global::eventEngine->publishEvent<events::EventMissionAdded>(identifier);
+    global::eventEngine->publishEvent<EventMissionAdded>(identifier);
     return identifier;
 }
 
@@ -89,7 +89,7 @@ void MissionManager::unloadMission(const std::string& identifier) {
         _currentMission = _missionMap.end();
     }
 
-    global::eventEngine->publishEvent<events::EventMissionRemoved>(identifier);
+    global::eventEngine->publishEvent<EventMissionRemoved>(identifier);
     _missionMap.erase(it);
 }
 
@@ -108,7 +108,7 @@ const std::map<std::string, Mission>& MissionManager::missionMap() {
     return _missionMap;
 }
 
-scripting::LuaLibrary MissionManager::luaLibrary() {
+LuaLibrary MissionManager::luaLibrary() {
     return {
         "",
         {
@@ -120,5 +120,4 @@ scripting::LuaLibrary MissionManager::luaLibrary() {
     };
 }
 
-// Singleton
-}  // namespace openspace
+} // namespace openspace

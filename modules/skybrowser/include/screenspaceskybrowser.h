@@ -82,18 +82,18 @@ public:
 
     WwtCommunicator* worldWideTelescope();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     static constexpr int RadiusTimeout = 25;
 
-    properties::BoolProperty _isHidden;
-    properties::BoolProperty _isPointingSpacecraft;
-    properties::BoolProperty _updateDuringTargetAnimation;
-    std::vector<std::unique_ptr<properties::Vec3Property>> _displayCopies;
-    std::vector<std::unique_ptr<properties::BoolProperty>> _showDisplayCopies;
+    BoolProperty _isHidden;
+    BoolProperty _isPointingSpacecraft;
+    BoolProperty _updateDuringTargetAnimation;
+    std::vector<std::unique_ptr<Vec3Property>> _displayCopies;
+    std::vector<std::unique_ptr<BoolProperty>> _showDisplayCopies;
 
-    properties::DoubleProperty _verticalFov;
+    DoubleProperty _verticalFov;
 
     double _borderRadius = 0.0;
     glm::ivec3 _wwtBorderColor = glm::ivec3(70);

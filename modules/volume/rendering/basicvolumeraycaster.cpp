@@ -45,11 +45,11 @@ namespace {
     constexpr std::string_view GlslBoundsFs = "${MODULE_VOLUME}/shaders/bounds_fs.glsl";
 } // namespace
 
-namespace openspace::volume {
+namespace openspace {
 
 BasicVolumeRaycaster::BasicVolumeRaycaster(
                                     std::shared_ptr<ghoul::opengl::Texture> volumeTexture,
-                            std::shared_ptr<openspace::TransferFunction> transferFunction,
+                                       std::shared_ptr<TransferFunction> transferFunction,
                                              std::shared_ptr<VolumeClipPlanes> clipPlanes)
     : _clipPlanes(std::move(clipPlanes))
     , _volumeTexture(std::move(volumeTexture))
@@ -177,7 +177,7 @@ std::filesystem::path BasicVolumeRaycaster::helperPath() const {
 }
 
 void BasicVolumeRaycaster::setTransferFunction(
-                            std::shared_ptr<openspace::TransferFunction> transferFunction)
+                                       std::shared_ptr<TransferFunction> transferFunction)
 {
     _transferFunction = std::move(transferFunction);
 }
@@ -232,4 +232,4 @@ void BasicVolumeRaycaster::setModelTransform(glm::mat4 transform) {
     _modelTransform = std::move(transform);
 }
 
-} // namespace openspace::volume
+} // namespace openspace

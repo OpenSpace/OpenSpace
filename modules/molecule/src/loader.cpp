@@ -259,7 +259,7 @@ namespace {
     }
 } // namespace
 
-namespace molecule::load {
+namespace molecule {
 
 md_molecule_api* moleculeApi(std::filesystem::path filename) {
     std::filesystem::path ext = filename.extension();
@@ -417,4 +417,4 @@ int64_t numCacheFrames(md_trajectory_i* traj) {
     return 0;
 }
 
-}  // namespace molecule::load
+} // namespace molecule

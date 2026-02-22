@@ -34,8 +34,8 @@
 
 namespace openspace {
 
-documentation::Documentation RenderableDataPlane::Documentation() {
-    documentation::Documentation doc = RenderableDataCygnet::Documentation();
+Documentation RenderableDataPlane::Documentation() {
+    openspace::Documentation doc = RenderableDataCygnet::Documentation();
     doc.name = "RenderableDataPlane";
     doc.id = "iswa_renderable_dataplane";
     return doc;
@@ -69,11 +69,11 @@ void RenderableDataPlane::initializeGL() {
             // and unregister backgroundvalues property.
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();
-                _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
+                _backgroundValues.setVisibility(Property::Visibility::Hidden);
             // else if autofilter is turned off, register backgroundValues
             }
             else {
-                _backgroundValues.setVisibility(properties::Property::Visibility::Always);
+                _backgroundValues.setVisibility(Property::Visibility::Always);
             }
         });
     }

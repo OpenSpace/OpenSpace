@@ -44,7 +44,11 @@
 #include <unordered_map>
 #include <vector>
 
+using nlohmann::json;
+
 namespace {
+    using namespace openspace;
+
     enum class Command {
         Connect = 0,
         Disconnect,
@@ -55,7 +59,7 @@ namespace {
         Lua
     };
 
-    using AxisType = openspace::interaction::WebsocketCameraStates::AxisType;
+    using AxisType = WebsocketCameraStates::AxisType;
 
     constexpr std::string_view _loggerCat = "FlightControllerTopic";
 
@@ -141,8 +145,6 @@ namespace {
     });
 } // namespace
 
-using nlohmann::json;
-
 namespace openspace {
 
 FlightControllerTopic::FlightControllerTopic() {
@@ -160,7 +162,7 @@ FlightControllerTopic::FlightControllerTopic() {
 FlightControllerTopic::~FlightControllerTopic() {
     // Reset global websocketInputStates
     global::websocketInputStates->erase(_topicId);
-    *global::websocketInputStates = interaction::WebsocketInputStates();
+    *global::websocketInputStates = WebsocketInputStates();
 }
 
 bool FlightControllerTopic::isDone() const {
@@ -336,9 +338,8 @@ void FlightControllerTopic::setRenderableEnabled(const nlohmann::json& json) con
 
     const SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(name);
     if (node && node->renderable() != nullptr) {
-        properties::Property* prop = node->renderable()->property(RenderableEnabled);
-        properties::BoolProperty* boolProp =
-            dynamic_cast<properties::BoolProperty*>(prop);
+        Property* prop = node->renderable()->property(RenderableEnabled);
+        BoolProperty* boolProp = dynamic_cast<BoolProperty*>(prop);
         ghoul_assert(boolProp, "Enabled is not a boolean property");
         *boolProp = enabled;
     }
@@ -347,7 +348,7 @@ void FlightControllerTopic::setRenderableEnabled(const nlohmann::json& json) con
 void FlightControllerTopic::disconnect() {
     // Reset global websocketInputStates
     global::websocketInputStates->erase(_topicId);
-    *global::websocketInputStates = interaction::WebsocketInputStates();
+    *global::websocketInputStates = WebsocketInputStates();
 
     // Update FlightController
     nlohmann::json j;
@@ -363,24 +364,20 @@ void FlightControllerTopic::setFriction(bool all) const {
 }
 
 void FlightControllerTopic::setFriction(bool roll, bool rotation, bool zoom) const {
-    const interaction::OrbitalNavigator& navigator =
-        global::navigationHandler->orbitalNavigator();
+    const OrbitalNavigator& navigator = global::navigationHandler->orbitalNavigator();
 
-    properties::Property* rollProp = navigator.property(RollFriction);
-    properties::BoolProperty* rollBoolProp =
-        dynamic_cast<properties::BoolProperty*>(rollProp);
+    Property* rollProp = navigator.property(RollFriction);
+    BoolProperty* rollBoolProp = dynamic_cast<BoolProperty*>(rollProp);
     ghoul_assert(rollBoolProp, "RollFriction is not a boolean property");
     *rollBoolProp = roll;
 
-    properties::Property* rotProp = navigator.property(RotationalFriction);
-    properties::BoolProperty* rotBoolProp =
-        dynamic_cast<properties::BoolProperty*>(rotProp);
+    Property* rotProp = navigator.property(RotationalFriction);
+    BoolProperty* rotBoolProp = dynamic_cast<BoolProperty*>(rotProp);
     ghoul_assert(rotBoolProp, "RotationFriction is not a boolean property");
     *rotBoolProp = rotation;
 
-    properties::Property* zoomProp = navigator.property(ZoomFriction);
-    properties::BoolProperty* zoomBoolProp =
-        dynamic_cast<properties::BoolProperty*>(zoomProp);
+    Property* zoomProp = navigator.property(ZoomFriction);
+    BoolProperty* zoomBoolProp = dynamic_cast<BoolProperty*>(zoomProp);
     ghoul_assert(zoomBoolProp, "ZoomFriction is not a boolean property");
     *zoomBoolProp = zoom;
 

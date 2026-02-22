@@ -84,6 +84,6 @@ private:
     int _numValues = 0;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___HISTOGRAM___H__

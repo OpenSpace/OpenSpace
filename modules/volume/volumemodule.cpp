@@ -37,8 +37,6 @@
 
 namespace openspace {
 
-using namespace volume;
-
 VolumeModule::VolumeModule() : OpenSpaceModule(Name) {}
 
 void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
@@ -55,7 +53,7 @@ void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
     );
 }
 
-std::vector<documentation::Documentation> VolumeModule::documentations() const {
+std::vector<Documentation> VolumeModule::documentations() const {
     return {
         RenderableTimeVaryingVolume::Documentation(),
         GenerateRawVolumeTask::Documentation()

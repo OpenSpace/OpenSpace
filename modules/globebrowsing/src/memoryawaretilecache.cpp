@@ -38,43 +38,45 @@
 #include <string_view>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "MemoryAwareTileCache";
 
-    constexpr openspace::properties::Property::PropertyInfo CpuAllocatedDataInfo = {
+    constexpr Property::PropertyInfo CpuAllocatedDataInfo = {
         "CpuAllocatedTileData",
         "CPU allocated tile data (MB)",
         "This value denotes the amount of RAM memory (in MB) that this tile cache is "
         "utilizing.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GpuAllocatedDataInfo = {
+    constexpr Property::PropertyInfo GpuAllocatedDataInfo = {
         "GpuAllocatedTileData",
         "GPU allocated tile data (MB)",
         "This value denotes the amount of GPU memory (in MB) that this tile cache is "
         "utilizing.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
+    constexpr Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile cache size",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ApplyTileCacheInfo = {
+    constexpr Property::PropertyInfo ApplyTileCacheInfo = {
         "ApplyTileCacheSize",
         "Apply tile cache size",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ClearTileCacheInfo = {
+    constexpr Property::PropertyInfo ClearTileCacheInfo = {
         "ClearTileCache",
         "Clear tile cache",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     GLenum toGlTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
@@ -192,11 +194,9 @@ namespace {
                 throw ghoul::MissingCaseException();
         }
     }
-
-
 } // namespace
 
-namespace openspace::globebrowsing::cache {
+namespace openspace {
 
 //
 // TextureContainer
@@ -531,4 +531,4 @@ size_t MemoryAwareTileCache::cpuAllocatedDataSize() const {
     return dataSize + _numTextureBytesAllocatedOnCPU;
 }
 
-} // namespace openspace::globebrowsing::cache
+} // namespace openspace

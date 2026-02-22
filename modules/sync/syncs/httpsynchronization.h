@@ -95,7 +95,7 @@ public:
 
     std::string generateUid() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     /** Creates a file next to the directory that indicates that this

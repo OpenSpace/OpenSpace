@@ -38,11 +38,11 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::OptionProperty _frametimeType;
-    properties::TriggerProperty _clearCache;
+    OptionProperty _frametimeType;
+    TriggerProperty _clearCache;
 
     double _minDeltaTimeCache = 1.0;
     double _maxDeltaTimeCache = -1.0;

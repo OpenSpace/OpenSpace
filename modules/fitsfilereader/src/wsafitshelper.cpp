@@ -33,11 +33,11 @@
 #include <string_view>
 #include <vector>
 
+using namespace CCfits;
+
 namespace {
     constexpr std::string_view _loggerCat = "RenderableTimeVaryingSphere";
 } // namespace
-
-using namespace CCfits;
 
 namespace openspace {
 

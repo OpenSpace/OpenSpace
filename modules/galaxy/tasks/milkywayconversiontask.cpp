@@ -40,12 +40,12 @@ namespace {
         std::string outFilename;
         glm::ivec3 outDimensions;
     };
-#include "milkywayconversiontask_codegen.cpp"
 } // namespace
+#include "milkywayconversiontask_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation MilkywayConversionTask::Documentation() {
+Documentation MilkywayConversionTask::Documentation() {
     return codegen::doc<Parameters>("galaxy_milkywayconversiontask");
 }
 
@@ -64,8 +64,6 @@ std::string MilkywayConversionTask::description() {
 }
 
 void MilkywayConversionTask::perform(const Task::ProgressCallback& onProgress) {
-    using namespace openspace::volume;
-
     std::vector<std::string> filenames;
     for (size_t i = 0; i < _inNSlices; i++) {
         filenames.push_back(

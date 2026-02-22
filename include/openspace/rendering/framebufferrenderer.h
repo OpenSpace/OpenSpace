@@ -183,7 +183,7 @@ public:
         const SceneGraphNode* lightSource, const SceneGraphNode* target);
     void removeShadowCaster(const std::string& shadowGroup, const SceneGraphNode* target);
 
-    shadowmapping::ShadowInfo shadowInformation(const std::string& shadowGroup) const;
+    ShadowInfo shadowInformation(const std::string& shadowGroup) const;
     std::vector<std::string> shadowGroups() const;
 
 private:
@@ -254,7 +254,7 @@ private:
         float currentDownscaleFactor  = 1.f;
     } _downscaleVolumeRendering;
 
-    std::map<std::string, shadowmapping::ShadowInfo> _shadowMaps;
+    std::map<std::string, ShadowInfo> _shadowMaps;
 
     unsigned int _pingPongIndex = 0u;
 

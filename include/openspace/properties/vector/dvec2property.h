@@ -30,7 +30,7 @@
 #include <ghoul/glm.h>
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 class DVec2Property : public NumericalProperty<glm::dvec2> {
 public:
@@ -52,6 +52,6 @@ private:
     glm::dvec2 toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___DVEC2PROPERTY___H__

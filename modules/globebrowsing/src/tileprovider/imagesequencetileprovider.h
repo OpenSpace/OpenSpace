@@ -32,7 +32,7 @@
 #include <openspace/properties/misc/stringproperty.h>
 #include <filesystem>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 class ImageSequenceTileProvider : public TileProvider {
 public:
@@ -47,21 +47,21 @@ public:
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     std::unique_ptr<DefaultTileProvider> _currentTileProvider = nullptr;
 
-    properties::IntProperty _index;
-    properties::IntProperty _nImages;
-    properties::StringProperty _currentImage;
-    properties::StringProperty _folderPath;
+    IntProperty _index;
+    IntProperty _nImages;
+    StringProperty _currentImage;
+    StringProperty _folderPath;
 
     ghoul::Dictionary _initDict;
     bool _isImageDirty = true;
     std::vector<std::filesystem::path> _imagePaths;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__IMAGESEQUENCETILEPROVIDER___H__

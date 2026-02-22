@@ -43,18 +43,18 @@ namespace {
     // Note that, unless playback is mapped to simulation time, the video must be started
     // manually via the user interface.
     struct [[codegen::Dictionary(RenderableVideoSphere)]] Parameters {};
-#include "renderablevideosphere_codegen.cpp"
 } // namespace
+#include "renderablevideosphere_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableVideoSphere::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>(
+Documentation RenderableVideoSphere::Documentation() {
+    openspace::Documentation doc = codegen::doc<Parameters>(
         "video_renderablevideosphere",
         RenderableSphere::Documentation()
     );
 
-    documentation::Documentation vp = VideoPlayer::Documentation();
+    openspace::Documentation vp = VideoPlayer::Documentation();
     doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
 
     return doc;

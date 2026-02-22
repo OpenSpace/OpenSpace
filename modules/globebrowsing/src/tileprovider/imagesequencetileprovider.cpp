@@ -33,35 +33,37 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo IndexInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo IndexInfo = {
         "Index",
         "Index",
         "The index into the list of images that is used to pick the currently displayed "
         "image.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NumImagesInfo = {
+    constexpr Property::PropertyInfo NumImagesInfo = {
         "NumberImages",
         "Number of images",
         "The number of images that can be shown. The 'Index' value must be between 0 and "
         "this value - 1.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CurrentImageInfo = {
+    constexpr Property::PropertyInfo CurrentImageInfo = {
         "CurrentImage",
         "Current image",
         "The read-only value of the currently selected image.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FolderPathInfo = {
+    constexpr Property::PropertyInfo FolderPathInfo = {
         "FolderPath",
         "Folder path",
         "The path that is used to look for images for this image provider. The path must "
         "point to an existing folder that contains images.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ImageSequenceTileProvider)]] Parameters {
@@ -71,12 +73,12 @@ namespace {
         // [[codegen::verbatim(FolderPathInfo.description)]]
         std::filesystem::path folderPath [[codegen::directory()]];
     };
-#include "imagesequencetileprovider_codegen.cpp"
 } // namespace
+#include "imagesequencetileprovider_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation ImageSequenceTileProvider::Documentation() {
+Documentation ImageSequenceTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_imagesequencetileprovider");
 }
 
@@ -184,4 +186,4 @@ float ImageSequenceTileProvider::noDataValueAsFloat() {
         std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

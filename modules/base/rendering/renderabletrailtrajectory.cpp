@@ -36,45 +36,35 @@
 #include <limits>
 #include <optional>
 
-// This class creates the entire trajectory at once and keeps it in memory the entire
-// time. This means that there is no need for updating the trail at runtime, but also that
-// the whole trail has to fit in memory.
-// Opposed to the RenderableTrailOrbit, no index buffer is needed as the vertex can be
-// written into the vertex buffer object continuously and then selected by using the
-// count variable from the RenderInformation struct to toggle rendering of the entire path
-// or subpath.
-// In addition, this RenderableTrail implementation uses an additional RenderInformation
-// bucket that contains the line from the last shown point to the current location of the
-// object iff not the entire path is shown and the object is between _startTime and
-// _endTime. This buffer is updated every frame.
-
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo StartTimeInfo = {
         "StartTime",
         "Start time",
         "The start time for the range of this trajectory. The date must be in ISO 8601 "
         "format: YYYY MM DD HH:mm:ss.xxx.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EndTimeInfo = {
+    constexpr Property::PropertyInfo EndTimeInfo = {
         "EndTime",
         "End time",
         "The end time for the range of this trajectory. The date must be in ISO 8601 "
         "format: YYYY MM DD HH:mm:ss.xxx.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SampleIntervalInfo = {
+    constexpr Property::PropertyInfo SampleIntervalInfo = {
         "SampleInterval",
         "Sample interval",
         "The interval between samples of the trajectory. This value (together with "
         "'TimeStampSubsampleFactor') determines how far apart (in seconds) the samples "
         "are spaced along the trajectory.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TimeSubSampleInfo = {
+    constexpr Property::PropertyInfo TimeSubSampleInfo = {
         "TimeStampSubsampleFactor",
         "Time stamp subsampling factor",
         "The factor that is used to create subsamples along the trajectory. This value "
@@ -82,32 +72,32 @@ namespace {
         "samples are spaced along the trajectory. Subsamples are rendered as smaller "
         "points compared to normal samples (from 'SampleInterval') when rendering the "
         "trail as points.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderFullPathInfo = {
+    constexpr Property::PropertyInfo RenderFullPathInfo = {
         "ShowFullTrail",
         "Render full trail",
         "If true, the entire trail will be rendered. If false, only the trail until "
         "the current time in the application will be shown.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AccurateTrailInfo = {
+    constexpr Property::PropertyInfo AccurateTrailInfo = {
         "AccurateTrail",
         "Use accurate trail",
         "If true, the trail around the spacecraft will be recalculated to present a "
         "smoother trail. If false, the original trail will be used.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AccurateTrailPositionsInfo = {
+    constexpr Property::PropertyInfo AccurateTrailPositionsInfo = {
         "AccurateTrailPositions",
         "Number of accurate trail points",
         "The number of vertices, each side of the object, that will be recalculated "
         "for greater accuracy. This also ensures that the object connects with the "
         "trail.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrailTrajectory)]] Parameters {
@@ -136,12 +126,24 @@ namespace {
         // [[codegen::verbatim(AccurateTrailPositionsInfo.description)]]
         std::optional<int> accurateTrailPositions;
     };
-#include "renderabletrailtrajectory_codegen.cpp"
 } // namespace
+#include "renderabletrailtrajectory_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableTrailTrajectory::Documentation() {
+// This class creates the entire trajectory at once and keeps it in memory the entire
+// time. This means that there is no need for updating the trail at runtime, but also that
+// the whole trail has to fit in memory.
+// Opposed to the RenderableTrailOrbit, no index buffer is needed as the vertex can be
+// written into the vertex buffer object continuously and then selected by using the
+// count variable from the RenderInformation struct to toggle rendering of the entire path
+// or subpath.
+// In addition, this RenderableTrail implementation uses an additional RenderInformation
+// bucket that contains the line from the last shown point to the current location of the
+// object iff not the entire path is shown and the object is between _startTime and
+// _endTime. This buffer is updated every frame.
+
+Documentation RenderableTrailTrajectory::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderable_renderabletrailtrajectory",
         RenderableTrail::Documentation()
@@ -152,12 +154,7 @@ RenderableTrailTrajectory::RenderableTrailTrajectory(const ghoul::Dictionary& di
     : RenderableTrail(dictionary)
     , _startTime(StartTimeInfo)
     , _endTime(EndTimeInfo)
-    , _sampleInterval(
-        SampleIntervalInfo,
-        openspace::timeconstants::SecondsPerDay / 2.0,
-        1.0,
-        1e6
-    )
+    , _sampleInterval(SampleIntervalInfo, timeconstants::SecondsPerDay / 2.0, 1.0, 1e6)
     , _timeStampSubsamplingFactor(TimeSubSampleInfo, 1, 1, 100)
     , _renderFullTrail(RenderFullPathInfo, false)
     , _useAccurateTrail(AccurateTrailInfo, true)

@@ -34,7 +34,7 @@ namespace ghoul {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 /**
  * This function provides the capabilities to create a new ghoul::logging::Log from the
@@ -63,7 +63,7 @@ std::unique_ptr<ghoul::logging::Log> createLog(const ghoul::Dictionary& dictiona
  * \return The Documentation that describes an acceptable Dictionary for the method
  *         createLog
  */
-documentation::Documentation LogFactoryDocumentation();
+Documentation LogFactoryDocumentation();
 
 } // namespace openspace
 

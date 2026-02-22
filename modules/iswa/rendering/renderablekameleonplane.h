@@ -50,7 +50,7 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     bool createGeometry() override;
@@ -79,9 +79,9 @@ private:
 
     void changeKwPath(std::string path);
 
-    properties::SelectionProperty _fieldlines;
-    properties::FloatProperty _resolution;
-    properties::FloatProperty _slice;
+    SelectionProperty _fieldlines;
+    FloatProperty _resolution;
+    FloatProperty _slice;
 
     std::string _kwPath;
 

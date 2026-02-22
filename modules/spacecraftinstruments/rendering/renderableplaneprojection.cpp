@@ -82,12 +82,12 @@ namespace {
         // `ImageSequencer`.
         std::optional<std::string> texture;
     };
-#include "renderableplaneprojection_codegen.cpp"
 } // namespace
+#include "renderableplaneprojection_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePlaneProjection::Documentation() {
+Documentation RenderablePlaneProjection::Documentation() {
     return codegen::doc<Parameters>("spacecraftinstruments_renderableplaneprojection");
 }
 

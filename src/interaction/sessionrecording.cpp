@@ -42,10 +42,10 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
-
-    using namespace openspace::interaction;
 
     class LoadingError final : public ghoul::RuntimeError {
     public:
@@ -597,11 +597,9 @@ namespace {
             writeEntry<DataMode::Ascii>(stream, entry) :
             writeEntry<DataMode::Binary>(stream, entry);
     }
-
-
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 bool SessionRecording::hasCameraFrame() const noexcept {
     for (const Entry& e : entries) {
@@ -713,4 +711,4 @@ std::vector<ghoul::Dictionary> sessionRecordingToDictionary(
     return result;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

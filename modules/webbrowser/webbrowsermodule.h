@@ -55,16 +55,16 @@ public:
 
     static bool canUseAcceleratedRendering();
 
-    std::vector<documentation::Documentation> documentations() const override;
-    static documentation::Documentation Documentation();
+    std::vector<openspace::Documentation> documentations() const override;
+    static openspace::Documentation Documentation();
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dictionary) override;
     void internalDeinitialize() override;
 
 private:
-    properties::BoolProperty _updateBrowserBetweenRenderables;
-    properties::FloatProperty _browserUpdateInterval;
+    BoolProperty _updateBrowserBetweenRenderables;
+    FloatProperty _browserUpdateInterval;
 
     std::vector<BrowserInstance*> _browsers;
     std::unique_ptr<EventHandler> _eventHandler;

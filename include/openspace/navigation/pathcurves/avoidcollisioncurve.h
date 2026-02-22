@@ -29,10 +29,9 @@
 
 #include <vector>
 
-namespace openspace { class SceneGraphNode; }
+namespace openspace {
 
-namespace openspace::interaction {
-
+class SceneGraphNode;
 class Waypoint;
 
 class AvoidCollisionCurve : public PathCurve {
@@ -45,6 +44,6 @@ private:
     std::vector<SceneGraphNode*> _relevantNodes;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___AVOIDCOLLISIONCURVE___H__

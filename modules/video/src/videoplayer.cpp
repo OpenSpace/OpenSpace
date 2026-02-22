@@ -45,60 +45,62 @@
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "VideoPlayer";
 
-    constexpr openspace::properties::Property::PropertyInfo VideoInfo = {
+    constexpr Property::PropertyInfo VideoInfo = {
         "Video",
         "Video",
         "The video file that is played."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PlayInfo = {
+    constexpr Property::PropertyInfo PlayInfo = {
         "Play",
         "Play",
         "Play video."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PauseInfo = {
+    constexpr Property::PropertyInfo PauseInfo = {
         "Pause",
         "Pause",
         "Pause video."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GoToStartInfo = {
+    constexpr Property::PropertyInfo GoToStartInfo = {
         "GoToStart",
         "Go To start",
         "Sets the time to the beginning of the video and pauses it."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
+    constexpr Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
         "Reloads the video and creates a new texture. This might be useful in case there "
         "was an error loading the video."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AudioInfo = {
+    constexpr Property::PropertyInfo AudioInfo = {
         "PlayAudio",
         "Play audio",
         "Decides whether to play audio when playing back the video."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StartTimeInfo = {
+    constexpr Property::PropertyInfo StartTimeInfo = {
         "StartTime",
         "Start time",
         "The date and time that the video should start in the format "
         "'YYYY MM DD hh:mm:ss'."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EndTimeInfo = {
+    constexpr Property::PropertyInfo EndTimeInfo = {
         "EndTime",
         "End time",
         "The date and time that the video should end in the format "
         "'YYYY MM DD hh:mm:ss'."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LoopVideoInfo = {
+    constexpr Property::PropertyInfo LoopVideoInfo = {
         "LoopVideo",
         "Loop video",
         "If checked, the video is continues playing from the start when it reaches the "
@@ -111,12 +113,6 @@ namespace {
             return false;
         }
         return true;
-    }
-
-    void* getOpenGLProcAddress(void*, const char* name) {
-        return reinterpret_cast<void*>(
-            openspace::global::windowDelegate->openGLProcedureAddress(name)
-        );
     }
 
     struct [[codegen::Dictionary(VideoPlayer)]] Parameters {
@@ -145,8 +141,8 @@ namespace {
         // in the user interface.
         std::optional<PlaybackMode> playbackMode;
     };
-#include "videoplayer_codegen.cpp"
 } // namespace
+#include "videoplayer_codegen.cpp"
 
 namespace openspace {
 
@@ -238,7 +234,7 @@ void VideoPlayer::commandAsyncMpv(const char* cmd[], MpvKey key) {
     }
 }
 
-documentation::Documentation VideoPlayer::Documentation() {
+Documentation VideoPlayer::Documentation() {
     return codegen::doc<Parameters>("video_videoplayer");
 }
 
@@ -414,7 +410,9 @@ void VideoPlayer::initializeMpv() {
     }
 
     mpv_opengl_init_params glInitParams;
-    glInitParams.get_proc_address = getOpenGLProcAddress;
+    glInitParams.get_proc_address = [](void*, const char* name) -> void* {
+        return global::windowDelegate->openGLProcedureAddress(name);
+    };
     glInitParams.get_proc_address_ctx = nullptr;
     int adv = 1; // Use libmpv advanced mode since we will use the update callback
     // Decouple mpv from waiting to get the correct fps. Use with flag video-timing-offset

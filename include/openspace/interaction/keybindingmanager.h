@@ -31,12 +31,10 @@
 #include <vector>
 
 namespace openspace {
-    namespace scripting { struct LuaLibrary; }
-    class Camera;
-    class SceneGraphNode;
-} // namespace openspace
 
-namespace openspace::interaction {
+class Camera;
+struct LuaLibrary;
+class SceneGraphNode;
 
 class KeybindingManager {
 public:
@@ -49,7 +47,7 @@ public:
     std::vector<std::pair<KeyWithModifier, std::string>> keyBinding(
         const KeyWithModifier& key) const;
 
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
     void keyboardCallback(Key key, KeyModifier modifier, KeyAction action);
 
@@ -59,6 +57,6 @@ private:
     std::multimap<KeyWithModifier, std::string> _keyLua;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___KEYBINDINGMANAGER___H__

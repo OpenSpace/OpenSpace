@@ -31,7 +31,7 @@
 #include <ghoul/misc/profiling.h>
 #include <algorithm>
 
-namespace openspace::properties {
+namespace openspace {
 
 const char* Property::ViewOptions::Color = "Color";
 const char* Property::ViewOptions::MinMaxRange = "MinMaxRange";
@@ -107,9 +107,7 @@ void Property::setVisibility(Visibility visibility) {
     // visibility changes during runtime, we need to notify the property owner
     // about the change for it to affect properties that are currently hidden
     if (_owner) {
-        global::eventEngine->publishEvent<events::EventPropertyTreeUpdated>(
-            _owner->uri()
-        );
+        global::eventEngine->publishEvent<EventPropertyTreeUpdated>(_owner->uri());
     }
 }
 
@@ -322,4 +320,4 @@ nlohmann::json Property::generateAdditionalJsonDescription() const {
 void Property::setLuaInterpolationTarget(lua_State*) {}
 void Property::interpolateValue(float, ghoul::EasingFunc<float>) {}
 
-} // namespace openspace::properties
+} // namespace openspace

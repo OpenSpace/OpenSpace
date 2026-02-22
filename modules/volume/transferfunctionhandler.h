@@ -35,13 +35,13 @@
 
 namespace ghoul::opengl { class Texture; }
 
-namespace openspace::volume {
+namespace openspace {
 
 class Envelope;
 
-class TransferFunctionHandler : public properties::PropertyOwner {
+class TransferFunctionHandler : public PropertyOwner {
 public:
-    explicit TransferFunctionHandler(properties::StringProperty prop);
+    explicit TransferFunctionHandler(StringProperty prop);
 
     void initialize();
 
@@ -55,20 +55,20 @@ public:
     ghoul::opengl::Texture& texture();
     bool hasTexture() const;
 
-    std::shared_ptr<openspace::TransferFunction> transferFunction();
+    std::shared_ptr<TransferFunction> transferFunction();
 
 private:
-    properties::StringProperty _transferFunctionPath;
-    properties::StringProperty _dataUnit;
-    properties::StringProperty _minValue;
-    properties::StringProperty _maxValue;
-    properties::TriggerProperty _saveTransferFunction;
+    StringProperty _transferFunctionPath;
+    StringProperty _dataUnit;
+    StringProperty _minValue;
+    StringProperty _maxValue;
+    TriggerProperty _saveTransferFunction;
     std::string _filePath;
-    properties::TransferFunctionProperty _transferFunctionProperty;
-    std::shared_ptr<openspace::TransferFunction> _transferFunction;
+    TransferFunctionProperty _transferFunctionProperty;
+    std::shared_ptr<TransferFunction> _transferFunction;
     std::shared_ptr<ghoul::opengl::Texture> _texture;
 };
 
-} //namespace openspace::volume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___TRANSFERFUNCTIONHANDLER___H__

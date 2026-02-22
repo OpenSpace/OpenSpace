@@ -41,7 +41,7 @@ class RenderableTravelSpeed : public Renderable {
 public:
     explicit RenderableTravelSpeed(const ghoul::Dictionary& dictionary);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
     void initializeGL() override;
     void initialize() override;
     void deinitializeGL() override;
@@ -57,13 +57,13 @@ private:
 
     UniformCache(lineColor, opacity) _uniformCache;
 
-    properties::StringProperty _targetIdentifier;
+    StringProperty _targetIdentifier;
     SceneGraphNode* _targetNode = nullptr;
-    properties::DoubleProperty _travelSpeed;
-    properties::FloatProperty _indicatorLength;
-    properties::FloatProperty _fadeLength;
-    properties::FloatProperty _lineWidth;
-    properties::Vec3Property _lineColor;
+    DoubleProperty _travelSpeed;
+    FloatProperty _indicatorLength;
+    FloatProperty _fadeLength;
+    FloatProperty _lineWidth;
+    Vec3Property _lineColor;
 
     double _travelTime = 0.0;
     glm::dvec3 _directionVector;

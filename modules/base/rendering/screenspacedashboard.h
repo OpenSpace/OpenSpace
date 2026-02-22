@@ -32,7 +32,7 @@
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
+struct LuaLibrary;
 
 class ScreenSpaceDashboard : public ScreenSpaceRenderableFramebuffer {
 public:
@@ -46,13 +46,13 @@ public:
     Dashboard& dashboard();
     const Dashboard& dashboard() const;
 
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     Dashboard _dashboard;
-    properties::BoolProperty _useMainDashboard;
+    BoolProperty _useMainDashboard;
 };
 
 } // namespace openspace

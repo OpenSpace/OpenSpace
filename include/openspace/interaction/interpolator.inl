@@ -24,7 +24,7 @@
 
 #include <ghoul/misc/assert.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 template <typename T>
 Interpolator<T>::Interpolator()
@@ -77,4 +77,4 @@ bool Interpolator<T>::isInterpolating() const {
     return (_t < 1.f) && (_t >= 0.f);
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

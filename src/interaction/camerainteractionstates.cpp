@@ -24,7 +24,7 @@
 
 #include <openspace/interaction/camerainteractionstates.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 template <typename T>
 CameraInteractionStates::InteractionState<T>::InteractionState(double scaleFactor)
@@ -123,4 +123,4 @@ double CameraInteractionStates::globalRollVelocity() const{
     return _globalRollState.velocity.get();
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

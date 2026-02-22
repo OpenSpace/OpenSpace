@@ -43,12 +43,11 @@
 #pragma warning (pop)
 #endif // _MSC_VER
 
-
 namespace {
     constexpr std::string_view _loggerCat = "KameleonHelper";
 } // namespace
 
-namespace openspace::kameleonhelper {
+namespace openspace {
 
 std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFilePath) {
     auto kameleon = std::make_unique<ccmc::Kameleon>();
@@ -171,4 +170,4 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     return seqStartDbl + stateStartOffset + manualOffset;
 }
 
-} // namespace openspace::kameleonhelper {
+} // namespace openspace

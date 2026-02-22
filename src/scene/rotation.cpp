@@ -48,12 +48,12 @@ namespace {
         std::optional<ghoul::Dictionary> timeFrame
             [[codegen::reference("core_time_frame")]];
     };
-#include "rotation_codegen.cpp"
 } // namespace
+#include "rotation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation Rotation::Documentation() {
+Documentation Rotation::Documentation() {
     return codegen::doc<Parameters>("core_transform_rotation");
 }
 
@@ -74,7 +74,7 @@ ghoul::mm_unique_ptr<Rotation> Rotation::createFromDictionary(
 }
 
 Rotation::Rotation(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "Rotation" })
+    : PropertyOwner({ "Rotation" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

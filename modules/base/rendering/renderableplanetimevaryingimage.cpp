@@ -39,14 +39,16 @@
 #include <iterator>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderablePlaneTimeVaryingImage";
 
-    constexpr openspace::properties::Property::PropertyInfo SourceFolderInfo = {
+    constexpr Property::PropertyInfo SourceFolderInfo = {
         "SourceFolder",
         "Source folder",
         "An image directory that is loaded from disk and contains the textures to use "
         "for this plane.",
-       openspace::properties::Property::Visibility::AdvancedUser
+       Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderablePlaneTimeVaryingImage)]] Parameters {
@@ -57,12 +59,12 @@ namespace {
         // instead of preloading them
         std::optional<bool> lazyLoading;
     };
-#include "renderableplanetimevaryingimage_codegen.cpp"
 } // namespace
+#include "renderableplanetimevaryingimage_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePlaneTimeVaryingImage::Documentation() {
+Documentation RenderablePlaneTimeVaryingImage::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderable_plane_time_varying_image",
         RenderablePlane::Documentation()
@@ -266,4 +268,5 @@ ghoul::opengl::Texture* RenderablePlaneTimeVaryingImage::loadTexture() const {
     }
     return texture;
 }
+
 } // namespace openspace

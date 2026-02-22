@@ -35,15 +35,17 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ScreenSpaceImageOnline";
 
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "The URL of the texture to be displayed on this screen space plane. If changed, "
         "the image at the new path will automatically be loaded and displayed. The "
         "default size of the plane will be set based on the size of the image.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `ScreenSpaceRenderable` can be used to display an image from a web URL.
@@ -56,12 +58,12 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::optional<std::string> url [[codegen::key("URL")]];
     };
-#include "screenspaceimageonline_codegen.cpp"
 } // namespace
+#include "screenspaceimageonline_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceImageOnline::Documentation() {
+Documentation ScreenSpaceImageOnline::Documentation() {
     return codegen::doc<Parameters>("base_screenspace_image_online");
 }
 

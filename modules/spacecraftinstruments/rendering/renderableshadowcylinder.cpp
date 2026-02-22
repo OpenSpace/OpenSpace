@@ -38,75 +38,77 @@
 #include <memory>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo NumberPointsInfo = {
         "NumberOfPoints",
         "Points",
         "The number of control points used for constructing the shadow geometry. The "
         "higher this number, the more detailed the shadow is, but it will have a "
         "negative impact on the performance.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
+    constexpr Property::PropertyInfo ShadowLengthInfo = {
         "ShadowLength",
         "Shadow length",
         "A factor that controls the length of the shadow that is cast by the target "
         "object. The total length of the shadow is equal to the distance from the "
         "target to the light source multiplied with this value.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShadowColorInfo = {
+    constexpr Property::PropertyInfo ShadowColorInfo = {
         "ShadowColor",
         "Shadow color",
         "The color used for the shadow cylinder.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TerminatorTypeInfo = {
+    constexpr Property::PropertyInfo TerminatorTypeInfo = {
         "TerminatorType",
         "Terminator type",
         "Determines the type of terminator to use for calculating the shadow eclipse.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LightSourceInfo = {
+    constexpr Property::PropertyInfo LightSourceInfo = {
         "LightSource",
         "Light source",
         "The SPICE name of the object that is used as the illuminator for computing the "
         "shadow cylinder.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ObserverInfo = {
+    constexpr Property::PropertyInfo ObserverInfo = {
         "Observer",
         "Observer",
         "The SPICE name of the object that is the observer.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BodyInfo = {
+    constexpr Property::PropertyInfo BodyInfo = {
         "Body",
         "Target body",
         "The SPICE name of target body that is used as the shadow caster.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BodyFrameInfo = {
+    constexpr Property::PropertyInfo BodyFrameInfo = {
         "BodyFrame",
         "Body frame",
         "The SPICE name of the reference frame in which the shadow cylinder is "
         "expressed.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AberrationInfo = {
+    constexpr Property::PropertyInfo AberrationInfo = {
         "Aberration",
         "Aberration",
         "The aberration method that is used for computing the shadow cylinder. The "
         "options are \"NONE\", \"LT\" (Light Time), \"LT + S\" (Light Time Stellar), "
         "\"CN\" (Converged Newtonian), and \"CN + S\" (Converged Newtonian Stellar).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This Renderable displays the shadow cylinder behind a planetary body. Given the
@@ -147,12 +149,12 @@ namespace {
         // [[codegen::verbatim(AberrationInfo.description)]]
         std::string aberration [[codegen::inlist("NONE", "LT", "LT+S", "CN", "CN+S")]];
     };
-#include "renderableshadowcylinder_codegen.cpp"
 } // namespace
+#include "renderableshadowcylinder_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableShadowCylinder::Documentation() {
+Documentation RenderableShadowCylinder::Documentation() {
     return codegen::doc<Parameters>("spacecraftinstruments_renderableshadowcylinder");
 }
 
@@ -179,7 +181,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     addProperty(_shadowLength);
 
     _shadowColor = p.shadowColor.value_or(_shadowColor);
-    _shadowColor.setViewOption(properties::Property::ViewOptions::Color);
+    _shadowColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_shadowColor);
 
     _terminatorType.addOptions({

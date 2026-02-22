@@ -36,6 +36,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "PlanetsCompareSonification";
 
     // Indices for data items
@@ -59,97 +61,93 @@ namespace {
         "Uranus", "Neptune"
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        PlanetsCompareSonificationInfo =
-    {
+    static const PropertyOwner::PropertyOwnerInfo PlanetsCompareSonificationInfo = {
         "PlanetsCompareSonification",
         "Planets Compare Sonification",
         "Sonification that compares two different planets to each other in a variety of "
         "aspects."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SelectedUpscaleInfo = {
+    constexpr Property::PropertyInfo SelectedUpscaleInfo = {
         "SelectedUpscale",
         "Selected planet upscale multiplier",
         "When a planet is selected to be compared, it is also upscaled as a visual "
         "indicator of which planets are currently being compared. This property "
         "determines how much the planet is scaled up as a multiplier of the original "
         "size.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        SelectedScaleInterpolationTimeInfo =
-    {
+    constexpr Property::PropertyInfo SelectedScaleInterpolationTimeInfo = {
         "SelectedScaleInterpolationTimeInfo",
         "Selected planet scale interpolation time",
         "When a planet is selected to be compared, it is also upscaled as a visual "
         "indicator of which planets are currently being compared. This property "
         "determines over how many seconds the scaling animation should play.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FirstOptionInfo = {
+    constexpr Property::PropertyInfo FirstOptionInfo = {
         "FirstOption",
         "Choose a planet to compare",
         "Choose a planet in the list to compare to the other selected planet.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SecondOptionInfo = {
+    constexpr Property::PropertyInfo SecondOptionInfo = {
         "SecondOption",
         "Choose another planet to compare",
         "Choose another planet in the list to compare to the other selected planet.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
+    constexpr Property::PropertyInfo ToggleAllInfo = {
         "ToggleAll",
         "All",
         "Toggle all comparing sonification varieties for both selected planets.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeDayInfo = {
+    constexpr Property::PropertyInfo SizeDayInfo = {
         "SizeDay",
         "Size/day",
         "Toggle size/day sonification for both selected planets.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GravityInfo = {
+    constexpr Property::PropertyInfo GravityInfo = {
         "Gravity",
         "Gravity",
         "Toggle gravity sonification for both selected planets.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TemperatureInfo = {
+    constexpr Property::PropertyInfo TemperatureInfo = {
         "Temperature",
         "Temperature",
         "Toggle temperature sonification for both selected planets.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AtmosphereInfo = {
+    constexpr Property::PropertyInfo AtmosphereInfo = {
         "Atmosphere",
         "Atmosphere",
         "Toggle atmosphere sonification for both selected planets.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MoonsInfo = {
+    constexpr Property::PropertyInfo MoonsInfo = {
         "Moons",
         "Moons",
         "Toggle moons sonification for both selected planets.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RingsInfo = {
+    constexpr Property::PropertyInfo RingsInfo = {
         "Rings",
         "Rings",
         "Toggle rings sonification for both selected planets.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 } // namespace
 
@@ -243,10 +241,9 @@ void PlanetsCompareSonification::sendData() {
     _connection->send(label, data);
 }
 
-void PlanetsCompareSonification::onPlanetSelectionChanged(
-                                                properties::OptionProperty& changedPlanet,
-                                                  properties::OptionProperty& otherPlanet,
-                                                           std::string& prevChangedPlanet)
+void PlanetsCompareSonification::onPlanetSelectionChanged(OptionProperty& changedPlanet,
+                                                          OptionProperty& otherPlanet,
+                                                          std::string& prevChangedPlanet)
 {
     if (changedPlanet != 0 && changedPlanet == otherPlanet) {
         LINFO("Cannot compare a planet to itself");

@@ -72,20 +72,20 @@ public:
     void render(const RenderData& data, RendererTasks& tasks) override;
 
 private:
-    properties::BoolProperty _useGlobalTime;
-    properties::BoolProperty _loop;
+    BoolProperty _useGlobalTime;
+    BoolProperty _loop;
     // used to vary time, if not using global time nor looping
-    properties::IntProperty _currentTime;
-    properties::IntProperty _memoryBudget;
-    properties::IntProperty _streamingBudget;
-    properties::FloatProperty _stepSizeCoefficient;
-    properties::StringProperty _selectorName;
-    properties::BoolProperty _statsToFile;
-    properties::StringProperty _statsToFileName;
-    properties::IntProperty _scalingExponent;
-    properties::Vec3Property _translation;
-    properties::Vec3Property _rotation;
-    properties::Vec3Property _scaling;
+    IntProperty _currentTime;
+    IntProperty _memoryBudget;
+    IntProperty _streamingBudget;
+    FloatProperty _stepSizeCoefficient;
+    StringProperty _selectorName;
+    BoolProperty _statsToFile;
+    StringProperty _statsToFileName;
+    IntProperty _scalingExponent;
+    Vec3Property _translation;
+    Vec3Property _rotation;
+    Vec3Property _scaling;
 
     double _time;
     double _startTime;

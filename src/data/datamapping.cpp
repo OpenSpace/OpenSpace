@@ -35,6 +35,8 @@
 #include <algorithm>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderablePolygonCloud";
 
     constexpr std::string_view DefaultX = "x";
@@ -44,8 +46,8 @@ namespace {
     enum class PositionColumn { X, Y, Z };
 
     bool checkPosColumnInternal(PositionColumn columnCase, const std::string& c,
-                         const std::optional<openspace::dataloader::DataMapping>& mapping,
-                             const std::string_view defaultValue)
+                                const std::optional<dataloader::DataMapping>& mapping,
+                                const std::string_view defaultValue)
     {
         std::string testColumn = c;
         std::string column = std::string(defaultValue);
@@ -143,12 +145,12 @@ namespace {
         // Note that not all data formats support this. E.g. SPECK files do not
         std::optional<std::vector<std::string>> excludeColumns;
     };
-#include "datamapping_codegen.cpp"
 } // namespace
+#include "datamapping_codegen.cpp"
 
 namespace openspace::dataloader {
 
-documentation::Documentation DataMapping::Documentation() {
+Documentation DataMapping::Documentation() {
     return codegen::doc<Parameters>("dataloader_datamapping");
 }
 

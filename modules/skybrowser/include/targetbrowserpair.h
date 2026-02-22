@@ -116,9 +116,9 @@ private:
     SceneGraphNode* _targetNode = nullptr;
 
     // Animation
-    skybrowser::Animation<double> _fovAnimation = skybrowser::Animation(0.0, 0.0, 0.0);
-    skybrowser::Animation<glm::dvec3> _targetAnimation =
-        skybrowser::Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
+    Animation<double> _fovAnimation = Animation(0.0, 0.0, 0.0);
+    Animation<glm::dvec3> _targetAnimation =
+        Animation(glm::dvec3(0.0), glm::dvec3(0.0), 0.0);
     bool _targetIsAnimating = false;
     bool _fovIsAnimating = false;
 

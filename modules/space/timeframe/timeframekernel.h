@@ -39,7 +39,7 @@ public:
     bool initialize() override;
     void update(const Time& time) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     ghoul::Dictionary _initialization;

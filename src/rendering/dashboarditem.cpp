@@ -32,9 +32,11 @@
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view KeyType = "Type";
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "If this value is set to 'true' this dashboard item is shown in the dashboard. "
@@ -61,12 +63,12 @@ namespace {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
     };
-#include "dashboarditem_codegen.cpp"
 } // namespace
+#include "dashboarditem_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItem::Documentation() {
+Documentation DashboardItem::Documentation() {
     return codegen::doc<Parameters>("dashboarditem");
 }
 
@@ -86,7 +88,7 @@ std::unique_ptr<DashboardItem> DashboardItem::createFromDictionary(
 }
 
 DashboardItem::DashboardItem(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "", "" })
+    : PropertyOwner({ "", "" })
     , _enabled(EnabledInfo, true)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);

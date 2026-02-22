@@ -80,12 +80,12 @@ namespace {
         };
         std::optional<std::vector<Milestone>> milestones;
     };
-#include "mission_codegen.cpp"
 } // namespace
+#include "mission_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation MissionPhase::Documentation() {
+Documentation MissionPhase::Documentation() {
     return codegen::doc<Parameters>("core_mission_mission");
 }
 
@@ -263,13 +263,8 @@ Mission missionFromFile(const std::string& filename) {
     ghoul::Dictionary missionDict;
     ghoul::lua::loadDictionaryFromFile(filename, missionDict);
 
-    documentation::testSpecificationAndThrow(
-        MissionPhase::Documentation(),
-        missionDict,
-        "Mission"
-    );
-
+    testSpecificationAndThrow(MissionPhase::Documentation(), missionDict, "Mission");
     return MissionPhase(missionDict);
 }
 
-}  // namespace openspace
+} // namespace openspace

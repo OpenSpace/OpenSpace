@@ -32,13 +32,13 @@
 #include <vector>
 
 namespace ghoul { class Dictionary; }
-namespace openspace::documentation { struct Documentation; }
+namespace openspace { struct Documentation; }
 
 namespace openspace::dataloader {
 
 struct DataMapping {
     static DataMapping createFromDictionary(const ghoul::Dictionary& dictionary);
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     bool hasExcludeColumns() const;
     bool isExcludeColumn(std::string_view column) const;

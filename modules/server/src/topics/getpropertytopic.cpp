@@ -99,11 +99,11 @@ json GetPropertyTopic::allProperties() {
 }
 
 json GetPropertyTopic::propertyFromKey(const std::string& key) {
-    properties::Property* prop = property(key);
+    Property* prop = property(key);
     if (prop) {
         return wrappedPayload(prop);
     }
-    properties::PropertyOwner* node = propertyOwner(key);
+    PropertyOwner* node = propertyOwner(key);
     if (node) {
         return wrappedPayload(node);
     }

@@ -39,7 +39,7 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     enum class DisplayFormat {
@@ -47,8 +47,8 @@ private:
         DegreeMinuteSeconds
     };
 
-    properties::OptionProperty _displayFormat;
-    properties::IntProperty _significantDigits;
+    OptionProperty _displayFormat;
+    IntProperty _significantDigits;
 
     std::string _formatString;
     std::vector<char> _localBuffer;

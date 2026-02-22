@@ -45,6 +45,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableConstellationBounds";
 
     constexpr float convertHrsToRadians(float rightAscension) {
@@ -52,19 +54,19 @@ namespace {
         return glm::radians(rightAscension * 15);
     }
 
-    constexpr openspace::properties::Property::PropertyInfo VertexInfo = {
+    constexpr Property::PropertyInfo VertexInfo = {
         "File",
         "Vertex file path",
         "A file that contains the vertex locations of the constellations bounds, as RA "
         "Dec coordinates on the celestial sphere.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color of the lines.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     // This `Renderable` type can be used to draw bounding shapes on the night sky, where
@@ -100,12 +102,12 @@ namespace {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
     };
-#include "renderableconstellationbounds_codegen.cpp"
 } // namespace
+#include "renderableconstellationbounds_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableConstellationBounds::Documentation() {
+Documentation RenderableConstellationBounds::Documentation() {
     return codegen::doc<Parameters>(
         "space_renderable_constellationbounds",
         RenderableConstellationsBase::Documentation()
@@ -125,7 +127,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     _vertexFilename.onChange([this](){ loadData(); });
     addProperty(_vertexFilename);
 
-    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color.setViewOption(Property::ViewOptions::Color);
     _color = p.color.value_or(_color);
     addProperty(_color);
 }

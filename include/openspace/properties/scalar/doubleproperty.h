@@ -29,10 +29,10 @@
 
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * This class is a concrete implementation of TemplateProperty with
  * the type `double`.
  */
 class DoubleProperty : public NumericalProperty<double> {
@@ -53,6 +53,6 @@ private:
     double toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___DOUBLEPROPERTY___H__

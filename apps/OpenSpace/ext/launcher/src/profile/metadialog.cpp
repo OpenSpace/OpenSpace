@@ -31,7 +31,9 @@
 #include <QVBoxLayout>
 #include <utility>
 
-MetaDialog::MetaDialog(QWidget* parent, std::optional<openspace::Profile::Meta>* meta)
+using namespace openspace;
+
+MetaDialog::MetaDialog(QWidget* parent, std::optional<Profile::Meta>* meta)
     : QDialog(parent)
     , _meta(meta)
 {
@@ -39,7 +41,7 @@ MetaDialog::MetaDialog(QWidget* parent, std::optional<openspace::Profile::Meta>*
     createWidgets();
 
     if (_meta->has_value()) {
-        const openspace::Profile::Meta& m = **_meta;
+        const Profile::Meta& m = **_meta;
         if (m.name.has_value()) {
             _nameEdit->setText(QString::fromStdString(*m.name));
         }
@@ -111,7 +113,7 @@ void MetaDialog::save() {
         _urlEdit->text().isEmpty() && _licenseEdit->text().isEmpty();
 
     if (!allEmpty) {
-        openspace::Profile::Meta m;
+        Profile::Meta m;
         if (!_nameEdit->text().isEmpty()) {
             m.name = _nameEdit->text().toStdString();
         }

@@ -51,7 +51,7 @@ public:
 
     ghoul::opengl::Texture& baseTexture() const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     glm::mat4 attitudeParameters(double time, const glm::vec3& up);
@@ -87,7 +87,7 @@ private:
     bool _shouldCapture = false;
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
-    properties::BoolProperty _performShading;
+    BoolProperty _performShading;
 };
 
 } // namespace openspace

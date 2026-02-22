@@ -39,13 +39,13 @@ namespace {
     constexpr int Width = 1024;
 } // namepsace
 
-namespace openspace::volume {
+namespace openspace {
 
-TransferFunction::TransferFunction(const std::string& string) {
+VolumeTransferFunction::VolumeTransferFunction(const std::string& string) {
     setEnvelopesFromString(string);
 }
 
-bool TransferFunction::setEnvelopesFromString(const std::string& s) {
+bool VolumeTransferFunction::setEnvelopesFromString(const std::string& s) {
     const nlohmann::json j = nlohmann::json::parse(s);
     for (const nlohmann::json& it : j) {
         Envelope env;
@@ -64,7 +64,7 @@ bool TransferFunction::setEnvelopesFromString(const std::string& s) {
     return true;
 }
 //TODO, implement this
-bool TransferFunction::setEnvelopesFromLua(lua_State* state) {
+bool VolumeTransferFunction::setEnvelopesFromLua(lua_State* state) {
     ghoul_assert(false, "Implement this");
 
     const bool success = (lua_istable(state, -1) == 1);
@@ -102,7 +102,7 @@ bool TransferFunction::setEnvelopesFromLua(lua_State* state) {
     return success;
 }
 
-void TransferFunction::envelopesToLua(lua_State* state) const {
+void VolumeTransferFunction::envelopesToLua(lua_State* state) const {
     lua_newtable(state);
     for (auto iter = _envelopes.begin(); iter != _envelopes.end(); iter++) {
         lua_newtable(state);
@@ -115,7 +115,7 @@ void TransferFunction::envelopesToLua(lua_State* state) const {
     }
 }
 
-void TransferFunction::loadEnvelopesFromFile(const std::string& path) {
+void VolumeTransferFunction::loadEnvelopesFromFile(const std::string& path) {
     lua_State* L = luaL_newstate();
     ghoul::Dictionary dictionary;
     ghoul::lua::loadDictionaryFromFile(path, dictionary, L);
@@ -150,7 +150,7 @@ void TransferFunction::loadEnvelopesFromFile(const std::string& path) {
     }
 }
 
-void TransferFunction::saveEnvelopesToFile(const std::string& path) const {
+void VolumeTransferFunction::saveEnvelopesToFile(const std::string& path) const {
     ghoul::Dictionary dictionary;
     lua_State* state = luaL_newstate();
     envelopesToLua(state);
@@ -164,7 +164,7 @@ void TransferFunction::saveEnvelopesToFile(const std::string& path) const {
     tfFile.close();
 }
 
-bool TransferFunction::operator!=(const TransferFunction& tf) {
+bool VolumeTransferFunction::operator!=(const VolumeTransferFunction& tf) {
     if (_envelopes.size() != tf._envelopes.size()) {
         return true;
     }
@@ -183,11 +183,11 @@ bool TransferFunction::operator!=(const TransferFunction& tf) {
     return false;
 }
 
-bool TransferFunction::hasEnvelopes() const {
+bool VolumeTransferFunction::hasEnvelopes() const {
     return !_envelopes.empty();
 }
 
-std::string TransferFunction::serializedToString() const {
+std::string VolumeTransferFunction::serializedToString() const {
     if (_envelopes.empty()) {
         return "";
     }
@@ -198,7 +198,7 @@ std::string TransferFunction::serializedToString() const {
     return j.dump();
 }
 
-bool TransferFunction::createTexture(ghoul::opengl::Texture& ptr) {
+bool VolumeTransferFunction::createTexture(ghoul::opengl::Texture& ptr) {
     if (_envelopes.empty()) {
         return false;
     }
@@ -234,5 +234,4 @@ bool TransferFunction::createTexture(ghoul::opengl::Texture& ptr) {
     return true;
 }
 
-} // namespace openspace::volume
-
+} // namespace openspace

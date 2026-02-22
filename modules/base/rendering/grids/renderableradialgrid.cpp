@@ -39,45 +39,47 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color used for the grid lines.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GridSegmentsInfo = {
+    constexpr Property::PropertyInfo GridSegmentsInfo = {
         "GridSegments",
         "Number of grid segments",
         "Specifies the number of segments for the grid, in the radial and angular "
         "direction respectively.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CircleSegmentsInfo = {
+    constexpr Property::PropertyInfo CircleSegmentsInfo = {
         "CircleSegments",
         "Number of circle segments",
         "The number of segments that is used to render each circle in the grid.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RadiiInfo = {
+    constexpr Property::PropertyInfo RadiiInfo = {
         "Radii",
         "Inner and outer radius",
         "The radii values that determine the size of the circular grid. The first value "
         "is the radius of the inmost ring and the second is the radius of the outmost "
         "ring.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the grid."
@@ -109,12 +111,12 @@ namespace {
         std::optional<ghoul::Dictionary> labels
             [[codegen::reference("labelscomponent")]];
     };
-#include "renderableradialgrid_codegen.cpp"
 } // namespace
+#include "renderableradialgrid_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableRadialGrid::Documentation() {
+Documentation RenderableRadialGrid::Documentation() {
     return codegen::doc<Parameters>("base_renderable_radialgrid");
 }
 
@@ -131,7 +133,7 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
-    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color.setViewOption(Property::ViewOptions::Color);
     addProperty(_color);
 
     _gridSegments = p.gridSegments.value_or(_gridSegments);
@@ -151,7 +153,7 @@ RenderableRadialGrid::RenderableRadialGrid(const ghoul::Dictionary& dictionary)
     addProperty(_lineWidth);
 
     _radii = p.radii.value_or(_radii);
-    _radii.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _radii.setViewOption(Property::ViewOptions::MinMaxRange);
     _radii.onChange([this]() { _gridIsDirty = true; });
 
     addProperty(_radii);
@@ -275,12 +277,11 @@ void RenderableRadialGrid::update(const UpdateData&) {
     _circles.reserve(nCircles);
 
     auto addRing = [this](int nSegments, float radius) {
-        std::vector<rendering::helper::Vertex> vertices =
-            rendering::helper::createRing(nSegments, radius);
+        std::vector<rendering::Vertex> vertices =
+            rendering::createRing(nSegments, radius);
 
         _circles.emplace_back(GL_LINE_STRIP);
-        std::vector<rendering::helper::VertexXYZ> data =
-            rendering::helper::convert(std::move(vertices));
+        std::vector<rendering::VertexXYZ> data = rendering::convert(std::move(vertices));
         _circles.back().update(data);
     };
 
@@ -298,22 +299,22 @@ void RenderableRadialGrid::update(const UpdateData&) {
     const int nLines = _gridSegments.value()[1];
     const int nVertices = 2 * nLines;
 
-    std::vector<rendering::helper::VertexXYZ> data;
+    std::vector<rendering::VertexXYZ> data;
     data.reserve(nVertices);
 
     if (nLines > 1) {
-        std::vector<rendering::helper::Vertex> outerVertices =
-            rendering::helper::createRing(nLines, outerRadius);
+        std::vector<rendering::Vertex> outerVertices =
+            rendering::createRing(nLines, outerRadius);
 
-        std::vector<rendering::helper::Vertex> innerVertices =
-            rendering::helper::createRing(nLines, innerRadius);
+        std::vector<rendering::Vertex> innerVertices =
+            rendering::createRing(nLines, innerRadius);
 
         for (int i = 0; i < nLines; i++) {
-            const rendering::helper::VertexXYZ vOut =
-                rendering::helper::convertToXYZ(outerVertices[i]);
+            const rendering::VertexXYZ vOut =
+                rendering::convertToXYZ(outerVertices[i]);
 
-            const rendering::helper::VertexXYZ vIn =
-                rendering::helper::convertToXYZ(innerVertices[i]);
+            const rendering::VertexXYZ vIn =
+                rendering::convertToXYZ(innerVertices[i]);
 
             data.push_back(vOut);
             data.push_back(vIn);
@@ -370,15 +371,15 @@ RenderableRadialGrid::GeometryData::~GeometryData() {
 }
 
 void RenderableRadialGrid::GeometryData::update(
-                                    const std::vector<rendering::helper::VertexXYZ>& data)
+                                            const std::vector<rendering::VertexXYZ>& data)
 {
     glDeleteBuffers(1, &vbo);
     glCreateBuffers(1, &vbo);
-    glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(rendering::helper::VertexXYZ));
+    glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(rendering::VertexXYZ));
 
     glNamedBufferStorage(
         vbo,
-        data.size() * sizeof(rendering::helper::VertexXYZ),
+        data.size() * sizeof(rendering::VertexXYZ),
         data.data(),
         GL_NONE_BIT
     );

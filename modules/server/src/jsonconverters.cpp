@@ -35,7 +35,62 @@
 
 using json = nlohmann::json;
 
-namespace openspace::properties {
+namespace glm {
+    void to_json(json& j, const dvec3& v) {
+        j = {
+            { "value", { v.x, v.y, v.z } },
+            { "type", "vec3" }
+        };
+    }
+} // namespace glm
+
+namespace ghoul {
+    void to_json(json& j, const Dictionary& d) {
+        json object = json::object();
+        for (const std::string_view k : d.keys()) {
+            const std::string key = std::string(k);
+            if (d.hasValue<glm::dvec4>(key)) {
+                const glm::dvec4 v = d.value<glm::dvec4>(key);
+                object[key] = json::array({ v[0], v[1], v[2], v[3] });
+            }
+            else if (d.hasValue<glm::dvec3>(key)) {
+                const glm::dvec3 v = d.value<glm::dvec3>(key);
+                object[key] = json::array({ v[0], v[1], v[2] });
+            }
+            else if (d.hasValue<glm::dvec2>(key)) {
+                const glm::dvec2 v = d.value<glm::dvec2>(key);
+                object[key] = json::array({ v[0], v[1] });
+            }
+            else if (d.hasValue<double>(key)) {
+                object[key] = d.value<double>(key);
+            }
+            else if (d.hasValue<int>(key)) {
+                object[key] = d.value<int>(key);
+            }
+            else if (d.hasValue<std::string>(key)) {
+                object[key] = d.value<std::string>(key);
+            }
+            else if (d.hasValue<bool>(key)) {
+                object[key] = d.value<bool>(key);
+            }
+            else if (d.hasValue<Dictionary>(key)) {
+                json child;
+                to_json(child, d.value<Dictionary>(key));
+                object[key] = child;
+            }
+            else {
+                object[key] = nullptr;
+            }
+        }
+        j = object;
+    }
+
+    void to_json(json& j, const Dictionary* d) {
+        j = *d;
+    }
+} // namespace ghoul
+
+namespace openspace {
 
 void to_json(json& j, const Property& p) {
     const json metaData = p.generateJsonDescription();
@@ -70,82 +125,27 @@ void to_json(json& j, const PropertyOwner* p) {
     j = *p;
 }
 
-} // namespace openspace::properties
+void to_json(json& j, const Action& action) {
+    j = {
+        { "identifier", action.identifier },
+        { "name", action.name },
+        { "isLocal", action.isLocal == Action::IsLocal::Yes },
+        { "documentation", action.documentation },
+        { "guiPath", action.guiPath }
+    };
 
-namespace openspace::interaction {
-
-    void to_json(json& j, const Action& action) {
-        j = {
-            { "identifier", action.identifier },
-            { "name", action.name },
-            { "isLocal", action.isLocal == Action::IsLocal::Yes },
-            { "documentation", action.documentation },
-            { "guiPath", action.guiPath }
-        };
-
-        // Add the color if we have it
-        if (action.color.has_value()) {
-            // Convert to std as nlohmann doesn't understand glm
-            glm::vec4 color = action.color.value();
-            j["color"] = { color.r, color.g, color.b, color.a };
-        }
+    // Add the color if we have it
+    if (action.color.has_value()) {
+        // Convert to std as nlohmann doesn't understand glm
+        glm::vec4 color = action.color.value();
+        j["color"] = { color.r, color.g, color.b, color.a };
     }
-
-    void to_json(json& j, const Action* pA) {
-        // Use reference converter instead of pointer
-        j = *pA;
-    }
-} // namespace openspace::interaction
-
-namespace ghoul {
-
-void to_json(json& j, const Dictionary& d) {
-    json object = json::object();
-    for (const std::string_view k : d.keys()) {
-        const std::string key = std::string(k);
-        if (d.hasValue<glm::dvec4>(key)) {
-            const glm::dvec4 v = d.value<glm::dvec4>(key);
-            object[key] = json::array({ v[0], v[1], v[2], v[3] });
-        }
-        else if (d.hasValue<glm::dvec3>(key)) {
-            const glm::dvec3 v = d.value<glm::dvec3>(key);
-            object[key] = json::array({ v[0], v[1], v[2] });
-        }
-        else if (d.hasValue<glm::dvec2>(key)) {
-            const glm::dvec2 v = d.value<glm::dvec2>(key);
-            object[key] = json::array({ v[0], v[1] });
-        }
-        else if (d.hasValue<double>(key)) {
-            object[key] = d.value<double>(key);
-        }
-        else if (d.hasValue<int>(key)) {
-            object[key] = d.value<int>(key);
-        }
-        else if (d.hasValue<std::string>(key)) {
-            object[key] = d.value<std::string>(key);
-        }
-        else if (d.hasValue<bool>(key)) {
-            object[key] = d.value<bool>(key);
-        }
-        else if (d.hasValue<Dictionary>(key)) {
-            json child;
-            to_json(child, d.value<Dictionary>(key));
-            object[key] = child;
-        }
-        else {
-            object[key] = nullptr;
-        }
-    }
-    j = object;
 }
 
-void to_json(json& j, const Dictionary* d) {
-    j = *d;
+void to_json(json& j, const Action* pA) {
+    // Use reference converter instead of pointer
+    j = *pA;
 }
-
-} // namespace ghoul
-
-namespace openspace {
 
 void to_json(json& j, const SceneGraphNode& n) {
     j = {
@@ -186,14 +186,3 @@ void to_json(json& j, const Renderable* pR) {
 }
 
 } // namespace openspace
-
-namespace glm {
-
-void to_json(json& j, const dvec3& v) {
-    j = {
-        { "value", { v.x, v.y, v.z } },
-        { "type", "vec3" }
-    };
-}
-
-} // namespace glm

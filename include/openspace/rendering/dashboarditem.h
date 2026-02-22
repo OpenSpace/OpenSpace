@@ -35,9 +35,9 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
-class DashboardItem : public properties::PropertyOwner {
+class DashboardItem : public PropertyOwner {
 public:
     static std::unique_ptr<DashboardItem> createFromDictionary(
         const ghoul::Dictionary& dictionary
@@ -60,10 +60,10 @@ public:
      */
     virtual void render(glm::vec2& penPosition) = 0;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    properties::BoolProperty _enabled;
+    BoolProperty _enabled;
 };
 
 } // openspace

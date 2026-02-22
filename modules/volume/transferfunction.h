@@ -35,12 +35,12 @@ namespace ghoul {
 } // namespace ghoul
 struct lua_State;
 
-namespace openspace::volume {
+namespace openspace {
 
-class TransferFunction {
+class VolumeTransferFunction {
 public:
-    TransferFunction() = default;
-    explicit TransferFunction(const std::string& string);
+    VolumeTransferFunction() = default;
+    explicit VolumeTransferFunction(const std::string& string);
 
     void envelopesToLua(lua_State* state) const;
 
@@ -50,7 +50,7 @@ public:
     void loadEnvelopesFromFile(const std::string& path);
     void saveEnvelopesToFile(const std::string& path) const;
 
-    bool operator!=(const TransferFunction& tf);
+    bool operator!=(const VolumeTransferFunction& tf);
     bool hasEnvelopes() const;
 
     bool createTexture(ghoul::opengl::Texture& ptr);
@@ -61,6 +61,6 @@ private:
     std::vector<Envelope> _envelopes;
 };
 
-} // namespace openspace::volume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___TRANSFERFUNCTION___H__

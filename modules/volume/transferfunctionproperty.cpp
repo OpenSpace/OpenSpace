@@ -27,11 +27,11 @@
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/lua/lua_types.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 TransferFunctionProperty::TransferFunctionProperty(Property::PropertyInfo info,
-                                                   volume::TransferFunction value)
-    : TemplateProperty<volume::TransferFunction>(std::move(info), std::move(value))
+                                                   VolumeTransferFunction value)
+    : TemplateProperty<VolumeTransferFunction>(std::move(info), std::move(value))
 {}
 
 std::string_view TransferFunctionProperty::className() const {
@@ -46,8 +46,8 @@ void TransferFunctionProperty::getLuaValue(lua_State* state) const {
     _value.envelopesToLua(state);
 }
 
-volume::TransferFunction TransferFunctionProperty::toValue(lua_State* state) const {
-    openspace::volume::TransferFunction tf;
+VolumeTransferFunction TransferFunctionProperty::toValue(lua_State* state) const {
+    VolumeTransferFunction tf;
     tf.setEnvelopesFromLua(state);
     return tf;
 }
@@ -56,4 +56,4 @@ std::string TransferFunctionProperty::stringValue() const {
     return _value.serializedToString();
 }
 
-} // namespace openspace::properties
+} // namespace openspace

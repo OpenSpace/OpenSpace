@@ -33,12 +33,14 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ShouldInterpolateInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ShouldInterpolateInfo = {
         "ShouldInterpolate",
         "Should interpolate",
         "If this value is set to 'true', an interpolation is applied between the given "
         "keyframes. If this value is set to 'false', the interpolation is not applied.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `Rotation` uses a timeline of other `Rotation` classes to calculate the
@@ -54,12 +56,12 @@ namespace {
         // [[codegen::verbatim(ShouldInterpolateInfo.description)]]
         std::optional<bool> shouldInterpolate;
     };
-#include "timelinerotation_codegen.cpp"
 } // namespace
+#include "timelinerotation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation TimelineRotation::Documentation() {
+Documentation TimelineRotation::Documentation() {
     return codegen::doc<Parameters>("base_transform_rotation_keyframe");
 }
 

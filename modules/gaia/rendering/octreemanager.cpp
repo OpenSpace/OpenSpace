@@ -34,6 +34,8 @@
 #include <thread>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "OctreeManager";
 
     constexpr size_t PosSize = 3;
@@ -66,7 +68,7 @@ namespace {
      * \param prefix the prefix that should be added to the string
      * \return an accumulated string containing all descendant nodes
      */
-    std::string printStarsPerNode(const openspace::OctreeManager::OctreeNode& node,
+    std::string printStarsPerNode(const OctreeManager::OctreeNode& node,
                                   std::string_view prefix)
     {
         // Print both inner and leaf nodes
@@ -93,13 +95,9 @@ namespace {
      * \param deltaStars keeps track of how many stars that were added
      * \return the data to be inserted
      */
-    std::vector<float> constructInsertData(
-                                         const openspace::OctreeManager::OctreeNode& node,
-                                                         openspace::gaia::RenderMode mode,
-                                                                          int& deltaStars)
+    std::vector<float> constructInsertData(const OctreeManager::OctreeNode& node,
+                                           RenderMode mode, int& deltaStars)
     {
-        using namespace openspace;
-
         // Return early if node doesn't contain any stars
         if (node.numStars == 0) {
             return std::vector<float>();
@@ -108,9 +106,9 @@ namespace {
         // Fill chunk by appending zeroes to data so we overwrite possible earlier values
         // And more importantly so our attribute pointers knows where to read
         std::vector<float> data = node.posData;
-        if (mode != gaia::RenderMode::Static) {
+        if (mode != RenderMode::Static) {
             data.insert(data.end(), node.colData.begin(), node.colData.end());
-            if (mode == gaia::RenderMode::Motion) {
+            if (mode == RenderMode::Motion) {
                 data.insert(data.end(), node.velData.begin(), node.velData.end());
             }
         }
@@ -123,11 +121,7 @@ namespace {
     /**
      * Get data in node and its descendants regardless if they are visible or not.
      */
-    std::vector<float> nodeData(const openspace::OctreeManager::OctreeNode& node,
-                                openspace::gaia::RenderMode mode)
-    {
-        using namespace openspace;
-
+    std::vector<float> nodeData(const OctreeManager::OctreeNode& node, RenderMode mode) {
         // Return node data if node is a leaf
         if (node.isLeaf) {
             int dStars = 0;
@@ -146,9 +140,7 @@ namespace {
     /**
      * Clear data from node and its descendants and shrink vectors to deallocate memory.
      */
-    void clearNodeData(openspace::OctreeManager::OctreeNode& node) {
-        using namespace openspace;
-
+    void clearNodeData(OctreeManager::OctreeNode& node) {
         // Clear data and its allocated memory
         node.posData.clear();
         node.colData.clear();
@@ -173,12 +165,9 @@ namespace {
      * \param writeData defines if data should be included or if only structure should be
      *        written
      */
-    void writeNodeToFile(std::ofstream& out,
-                         const openspace::OctreeManager::OctreeNode& node,
+    void writeNodeToFile(std::ofstream& out, const OctreeManager::OctreeNode& node,
                          bool writeData)
     {
-        using namespace openspace;
-
         // Write node structure
         bool isLeaf = node.isLeaf;
         int32_t numStars = static_cast<int32_t>(node.numStars);
@@ -216,11 +205,9 @@ namespace {
      *        child to write its descendents
      */
     void writeNodeToMultipleFiles(const std::string& outFilePrefix,
-                                  const openspace::OctreeManager::OctreeNode& node,
+                                  const OctreeManager::OctreeNode& node,
                                   bool threadWrites)
     {
-        using namespace openspace;
-
         // Prepare node data, save nothing else
         std::vector<float> data = node.posData;
         data.insert(data.end(), node.colData.begin(), node.colData.end());
@@ -282,10 +269,8 @@ namespace {
      * \param ancestorNodes the list of ancestors that should be checked
      */
     void propagateUnloadedNodes(
-         std::vector<std::shared_ptr<openspace::OctreeManager::OctreeNode>> ancestorNodes)
+                    std::vector<std::shared_ptr<OctreeManager::OctreeNode>> ancestorNodes)
     {
-        using namespace openspace;
-
         std::shared_ptr<OctreeManager::OctreeNode> parent = ancestorNodes.back();
         while (parent->octreePositionIndex != 8) {
             // Check if any children of inner node is still loaded or have loaded
@@ -318,12 +303,9 @@ namespace {
      * Private help function for `insertInNode()`. Stores star data in node and
      * keeps track of the brightest stars all children.
      */
-    void storeStarData(openspace::OctreeManager::OctreeNode& node,
-                       const std::vector<float>& starValues,
-                       size_t maxStarsPerNode)
+    void storeStarData(OctreeManager::OctreeNode& node,
+                       const std::vector<float>& starValues, size_t maxStarsPerNode)
     {
-        using namespace openspace;
-
         // Insert star data at the back of vectors and store a vector with pairs
         // consisting of star magnitude and insert index for later sorting and slicing of
         // LOD cache
@@ -350,17 +332,14 @@ namespace {
      * to be called after the last star has been inserted into Octree but before it is
      * saved to file(s). Slices all descendants recursively.
      */
-    void sliceNodeLodCache(openspace::OctreeManager::OctreeNode& node,
-                           size_t maxStarsPerNode)
-    {
-        using namespace openspace;
-
+    void sliceNodeLodCache(OctreeManager::OctreeNode& node, size_t maxStarsPerNode) {
         // Slice stored LOD data in inner nodes
         if (node.isLeaf) {
             return;
         }
 
-        // Sort by magnitude. Inverse relation (i.e. a lower magnitude means a brighter star)
+        // Sort by magnitude. Inverse relation (i.e. a lower magnitude means a brighter
+        // star)
         std::sort(node.magOrder.begin(), node.magOrder.end());
         node.magOrder.resize(maxStarsPerNode);
 
@@ -385,8 +364,6 @@ namespace {
             sliceNodeLodCache(*child, maxStarsPerNode);
         }
     }
-
-
 } // namespace
 
 namespace openspace {
@@ -402,7 +379,7 @@ void OctreeManager::initOctree(long long cpuRamBudget, int maxDist, int maxStars
     _root->octreePositionIndex = 8;
 
     // Initialize the culler. The NDC.z of the comparing corners are always -1 or 1
-    const globebrowsing::AABB3 box = {
+    const AABB3 box = {
         .min = glm::vec3(-1.f, -1.f, 0.f),
         .max = glm::vec3(1.f, 1.f, 100.f)
     };
@@ -699,7 +676,7 @@ void OctreeManager::findAndFetchNeighborNode(unsigned long long firstParentId, i
 std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& mvp,
                                                               const glm::vec2& screenSize,
                                                               int& deltaStars,
-                                                              gaia::RenderMode mode,
+                                                              RenderMode mode,
                                                               float lodPixelThreshold)
 {
     std::map<int, std::vector<float>> renderData;
@@ -812,7 +789,7 @@ std::map<int, std::vector<float>> OctreeManager::traverseData(const glm::dmat4& 
     return renderData;
 }
 
-std::vector<float> OctreeManager::getAllData(gaia::RenderMode mode) {
+std::vector<float> OctreeManager::getAllData(RenderMode mode) {
     std::vector<float> fullData;
 
     for (const std::shared_ptr<OctreeNode>& child : _root->children) {
@@ -1172,7 +1149,7 @@ std::map<int, std::vector<float>> OctreeManager::checkNodeIntersection(OctreeNod
                                                                     const glm::dmat4& mvp,
                                                               const glm::vec2& screenSize,
                                                                           int& deltaStars,
-                                                                    gaia::RenderMode mode)
+                                                                          RenderMode mode)
 {
     std::map<int, std::vector<float>> fetchedData;
 
@@ -1373,4 +1350,4 @@ bool OctreeManager::updateBufferIndex(OctreeNode& node) {
     return true;
 }
 
-}  // namespace openspace
+} // namespace openspace

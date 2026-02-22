@@ -27,7 +27,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 StringProperty::StringProperty(Property::PropertyInfo info, std::string value)
     : TemplateProperty<std::string>(std::move(info), std::move(value))
@@ -63,4 +63,4 @@ StringProperty::operator std::string_view() const {
     return _value;
 }
 
-} // namespace openspace::properties
+} // namespace openspace

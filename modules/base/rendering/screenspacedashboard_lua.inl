@@ -25,14 +25,14 @@
 #include <ghoul/lua/lua_helper.h>
 #include <openspace/rendering/renderengine.h>
 
+using namespace openspace;
+
 namespace {
 
 // Adds a new dashboard item to an existing SceenSpaceDashboard.
 [[codegen::luawrap]] void addDashboardItemToScreenSpace(std::string identifier,
                                                         ghoul::Dictionary dashboard)
 {
-    using namespace openspace;
-
     ScreenSpaceRenderable* ssr = global::renderEngine->screenSpaceRenderable(identifier);
     if (!ssr) {
         throw ghoul::lua::LuaError("Provided name is not a ScreenSpace item");
@@ -50,8 +50,6 @@ namespace {
 
 // Removes all dashboard items from an existing ScreenSpaceDashboard.
 [[codegen::luawrap]] void removeDashboardItemsFromScreenSpace(std::string identifier) {
-    using namespace openspace;
-
     ScreenSpaceRenderable* ssr = global::renderEngine->screenSpaceRenderable(identifier);
     if (!ssr) {
         throw ghoul::lua::LuaError("Provided identifier is not a ScreenSpace item");
@@ -67,6 +65,6 @@ namespace {
     dash->dashboard().clearDashboardItems();
 }
 
-#include "screenspacedashboard_lua_codegen.cpp"
-
 } // namespace
+
+#include "screenspacedashboard_lua_codegen.cpp"

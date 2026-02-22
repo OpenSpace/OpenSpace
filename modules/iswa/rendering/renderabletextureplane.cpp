@@ -34,8 +34,8 @@
 
 namespace openspace {
 
-documentation::Documentation RenderableTexturePlane::Documentation() {
-    documentation::Documentation doc = RenderableTextureCygnet::Documentation();
+Documentation RenderableTexturePlane::Documentation() {
+    openspace::Documentation doc = RenderableTextureCygnet::Documentation();
     doc.name = "RenderableTexturePlane";
     doc.id = "iswa_renderable_textureplane";
     return doc;

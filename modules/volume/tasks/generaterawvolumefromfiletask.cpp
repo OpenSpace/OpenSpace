@@ -66,12 +66,12 @@ namespace {
         // A vector representing the number of cells in each dimension
         glm::ivec3 dimensions;
     };
-#include "generaterawvolumefromfiletask_codegen.cpp"
 } // namespace
+#include "generaterawvolumefromfiletask_codegen.cpp"
 
-namespace openspace::volume {
+namespace openspace {
 
-documentation::Documentation GenerateRawVolumeFromFileTask::Documentation() {
+Documentation GenerateRawVolumeFromFileTask::Documentation() {
     return codegen::doc<Parameters>("generate_raw_volume_task");
 }
 
@@ -123,7 +123,7 @@ void GenerateRawVolumeFromFileTask::perform(const ProgressCallback& progressCall
     }
     progressCallback(0.4f);
 
-    volume::RawVolume<float> rawVolume(_dimensions);
+    RawVolume<float> rawVolume(_dimensions);
 
     float minVal = std::numeric_limits<float>::max();
     float maxVal = std::numeric_limits<float>::lowest();
@@ -171,7 +171,7 @@ void GenerateRawVolumeFromFileTask::perform(const ProgressCallback& progressCall
         std::filesystem::create_directories(directory);
     }
 
-    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
+    RawVolumeWriter<float> writer(_rawVolumeOutputPath);
     writer.write(rawVolume);
     progressCallback(0.9f);
 
@@ -199,4 +199,4 @@ void GenerateRawVolumeFromFileTask::perform(const ProgressCallback& progressCall
     progressCallback(1.f);
 }
 
-} // namespace openspace::volume
+} // namespace openspace

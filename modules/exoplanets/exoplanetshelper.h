@@ -28,7 +28,7 @@
 #include <ghoul/glm.h>
 #include <string>
 
-namespace openspace::exoplanets {
+namespace openspace {
 
 struct ExoplanetDataEntry;
 struct StarData;
@@ -62,6 +62,6 @@ void sanitizeNameString(std::string& s);
  */
 void updateStarDataFromNewPlanet(StarData& starData, const ExoplanetDataEntry& p);
 
-} // namespace openspace::exoplanets
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSHELPER___H__

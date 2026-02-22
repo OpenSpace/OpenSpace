@@ -53,7 +53,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     struct GeometryData {
@@ -63,7 +63,7 @@ protected:
         GeometryData& operator=(GeometryData&& other) noexcept;
         ~GeometryData();
 
-        void update(const std::vector<rendering::helper::VertexXYZ>& data);
+        void update(const std::vector<rendering::VertexXYZ>& data);
         void render() const;
 
         GLsizei size = 0;
@@ -74,11 +74,11 @@ protected:
 
     ghoul::opengl::ProgramObject* _gridProgram;
 
-    properties::Vec3Property _color;
-    properties::IVec2Property _gridSegments;
-    properties::IntProperty _circleSegments;
-    properties::FloatProperty _lineWidth;
-    properties::Vec2Property _radii;
+    Vec3Property _color;
+    IVec2Property _gridSegments;
+    IntProperty _circleSegments;
+    FloatProperty _lineWidth;
+    Vec2Property _radii;
 
     bool _gridIsDirty = true;
 

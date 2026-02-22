@@ -27,7 +27,7 @@
 
 #include <modules/imgui/include/guipropertycomponent.h>
 
-namespace openspace::gui {
+namespace openspace {
 
 class GuiParallelComponent : public GuiPropertyComponent {
 public:
@@ -43,6 +43,6 @@ private:
     void renderClientCommon();
 };
 
-} // namespace openspace::gui
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_IMGUI___GUIPARALLELCOMPONENT___H__

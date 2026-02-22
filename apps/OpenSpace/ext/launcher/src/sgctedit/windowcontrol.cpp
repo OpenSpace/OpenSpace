@@ -116,7 +116,6 @@ namespace {
         ghoul_assert(it != Quality.cend(), "Combobox has too many values");
         return static_cast<int>(std::distance(Quality.cbegin(), it));
     }
-
 } // namespace
 
 WindowControl::WindowControl(int monitorIndex, int windowIndex,

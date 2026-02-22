@@ -122,13 +122,13 @@ public:
      * keeps track of how many stars that were added/removed this render call.
      */
     std::map<int, std::vector<float>> traverseData(const glm::dmat4& mvp,
-        const glm::vec2& screenSize, int& deltaStars, gaia::RenderMode mode,
+        const glm::vec2& screenSize, int& deltaStars, RenderMode mode,
         float lodPixelThreshold);
 
     /**
      * Builds full render data structure by traversing all leaves in the Octree.
      */
-    std::vector<float> getAllData(gaia::RenderMode mode);
+    std::vector<float> getAllData(RenderMode mode);
 
     /**
      * Removes all data from Octree, or only from a specific branch if specified.
@@ -225,7 +225,7 @@ private:
      */
     std::map<int, std::vector<float>> checkNodeIntersection(OctreeNode& node,
         const glm::dmat4& mvp, const glm::vec2& screenSize, int& deltaStars,
-        gaia::RenderMode mode);
+        RenderMode mode);
 
     /**
      * Checks if specified node existed in cache, and removes it if that's the case.
@@ -337,6 +337,6 @@ private:
 
 }; // class OctreeManager
 
-}  // namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GAIA___OCTREEMANAGER___H__

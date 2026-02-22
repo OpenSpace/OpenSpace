@@ -38,7 +38,7 @@ public:
 
     SpacecraftInstrumentsModule();
 
-    std::vector<documentation::Documentation> documentations() const override;
+    std::vector<openspace::Documentation> documentations() const override;
 
     static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
 

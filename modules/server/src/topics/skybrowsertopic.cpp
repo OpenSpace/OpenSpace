@@ -35,12 +35,12 @@
 #include <string_view>
 #include <vector>
 
+using nlohmann::json;
+
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
     constexpr std::string_view UnsubscribeEvent = "stop_subscription";
 } // namespace
-
-using nlohmann::json;
 
 namespace openspace {
 
@@ -91,8 +91,6 @@ bool SkyBrowserTopic::isDone() const {
 }
 
 void SkyBrowserTopic::sendBrowserData() {
-    using namespace openspace;
-
     SkyBrowserModule* module = global::moduleEngine->module<SkyBrowserModule>();
     ghoul::Dictionary data;
 

@@ -40,6 +40,8 @@
 #include <md_util.h>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableMolecule";
 
     enum class AnimationRepeatMode {
@@ -86,88 +88,88 @@ namespace {
         return frame;
     }
 
-    constexpr openspace::properties::Property::PropertyInfo MoleculeFileInfo = {
+    constexpr Property::PropertyInfo MoleculeFileInfo = {
         "MoleculeFile",
         "Molecule file",
         "The path to the file from which the molecular structure is read."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TrajectoryFileInfo = {
+    constexpr Property::PropertyInfo TrajectoryFileInfo = {
         "TrajectoryFile",
         "Trajectory file",
         "The path to the file from which the trajectory information is read."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CoarseGrainedInfo = {
+    constexpr Property::PropertyInfo CoarseGrainedInfo = {
         "CoarseGrained",
         "Coarse grained",
         "Enable if the dataset should be interpreted as coarse grained."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ApplyPbcOnLoadInfo = {
+    constexpr Property::PropertyInfo ApplyPbcOnLoadInfo = {
         "ApplyPbcOnLoad",
         "Apply PBC on load",
         "Applies Periodic Boundary Constraints upon loading trajectory frames."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ApplyPbcPerFrameInfo = {
+    constexpr Property::PropertyInfo ApplyPbcPerFrameInfo = {
         "ApplyPbcPerFrame",
         "Apply PBC per frame",
         "Applies Periodic Boundary Constraints for each interpolated frame (can be "
         "CPU-intensive)."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Enables the representation."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
+    constexpr Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
         "The visual representation type to use for the molecule."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color mapping for the atoms."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UniformColorInfo = {
+    constexpr Property::PropertyInfo UniformColorInfo = {
         "UniformColor",
         "Uniform color",
         "The uniform color to apply for the representation if that color mode is "
         "selected."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterInfo = {
+    constexpr Property::PropertyInfo FilterInfo = {
         "Filter",
         "Filter",
         "The filter used to remove parts of the dataset."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
+    constexpr Property::PropertyInfo ScaleInfo = {
         "Scale",
         "Scale",
         "Scale for the geometric representation of atoms."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AnimationBaseScaleInfo = {
+    constexpr Property::PropertyInfo AnimationBaseScaleInfo = {
         "AnimationBaseScale",
         "Animation base scale",
         "Base scale for the animation. Tune this to sync up its animation with other "
         "trajectories."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
+    constexpr Property::PropertyInfo AnimationSpeedInfo = {
         "AnimationSpeed",
         "Animation speed",
         "Playback speed of the animation (in frames per second)."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AnimationRepeatModeInfo = {
+    constexpr Property::PropertyInfo AnimationRepeatModeInfo = {
         "AnimationRepeatMode",
         "Animation repeat mode",
         "Controls how the animation should be repeated when the end of the animation is "
@@ -270,12 +272,12 @@ namespace {
         // [[codegen::verbatim(AnimationRepeatModeInfo.description)]]
         std::optional<AnimationRepeatMode> animationRepeatMode;
     };
-#include "renderablemolecule_codegen.cpp"
 } // namespace
+#include "renderablemolecule_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableMolecule::Documentation() {
+Documentation RenderableMolecule::Documentation() {
     return codegen::doc<Parameters>("molecule_renderablemolecule");
 }
 
@@ -523,8 +525,8 @@ void RenderableMolecule::initMolecule(std::string_view molFile, std::string_view
 
             rep::Type type = static_cast<rep::Type>(rep->type.value());
             rep::Color color = static_cast<rep::Color>(rep->color.value());
-            util::updateRepType(rep->glRep, type, rep->scale);
-            util::updateRepColor(
+            updateRepType(rep->glRep, type, rep->scale);
+            updateRepColor(
                 rep->glRep,
                 _molecule,
                 color,
@@ -570,10 +572,10 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
 
     if (frame != _frame) {
         _frame = frame;
-        molecule::util::interpolateFrame(
+        molecule::interpolateFrame(
             _molecule,
             _trajectory,
-            molecule::util::InterpolationType::Cubic,
+            molecule::InterpolationType::Cubic,
             frame,
             _applyPbcPerFrame
         );
@@ -634,7 +636,7 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
         }
 
         for (Representation* rep : repUpdateColIndices) {
-            molecule::util::updateRepColor(
+            molecule::updateRepColor(
                 rep->glRep,
                 _molecule,
                 static_cast<molecule::rep::Color>(rep->color.value()),
@@ -686,7 +688,7 @@ RenderableMolecule::Representation::Representation(size_t number,
                                                    std::string filter_,
                                                    float scale_,
                                                    glm::vec4 uniformColor_)
-    : properties::PropertyOwner({
+    : PropertyOwner({
         .identifier = std::format("rep{}", number),
         .guiName = std::format("Representation {}", number),
         .description = std::format("Visual representation of molecule {}", number),
@@ -710,7 +712,7 @@ RenderableMolecule::Representation::Representation(size_t number,
     });
     type = static_cast<int>(type_);
     type.onChange([&]() {
-        molecule::util::updateRepType(
+        molecule::updateRepType(
             glRep,
             static_cast<molecule::rep::Type>(type.value()),
             scale
@@ -733,7 +735,7 @@ RenderableMolecule::Representation::Representation(size_t number,
     });
     color = static_cast<int>(color_);
     color.onChange([&]() {
-        molecule::util::updateRepColor(
+        molecule::updateRepColor(
             glRep,
             molecule,
             static_cast<molecule::rep::Color>(color.value()),
@@ -745,7 +747,7 @@ RenderableMolecule::Representation::Representation(size_t number,
 
     filter.onChange([&]() {
         computeMask(mask, filter, molecule, isDynamic);
-        molecule::util::updateRepColor(
+        molecule::updateRepColor(
             glRep,
             molecule,
             static_cast<molecule::rep::Color>(color.value()),
@@ -756,7 +758,7 @@ RenderableMolecule::Representation::Representation(size_t number,
     addProperty(filter);
 
     scale.onChange([&]() {
-        molecule::util::updateRepType(
+        molecule::updateRepType(
             glRep,
             static_cast<molecule::rep::Type>(type.value()),
             scale
@@ -764,9 +766,9 @@ RenderableMolecule::Representation::Representation(size_t number,
     });
     addProperty(scale);
 
-    uniformColor.setViewOption(properties::Property::ViewOptions::Color);
+    uniformColor.setViewOption(Property::ViewOptions::Color);
     uniformColor.onChange([&]() {
-        molecule::util::updateRepColor(
+        molecule::updateRepColor(
             glRep,
             molecule,
             static_cast<molecule::rep::Color>(color.value()),

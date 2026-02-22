@@ -33,6 +33,8 @@
 #include <variant>
 #include <utility>
 
+using namespace openspace;
+
 namespace {
 
 /**
@@ -47,7 +49,7 @@ namespace {
         if (!std::filesystem::is_regular_file(k)) {
             throw ghoul::lua::LuaError(std::format("Kernel file '{}' did not exist", k));
         }
-        openspace::SpiceManager::ref().loadKernel(k);
+        SpiceManager::ref().loadKernel(k);
     }
     else {
         std::vector<std::string> ks = std::get<std::vector<std::string>>(kernel);
@@ -57,7 +59,7 @@ namespace {
                     "Kernel file '{}' did not exist", k
                 ));
             }
-            openspace::SpiceManager::ref().loadKernel(k);
+            SpiceManager::ref().loadKernel(k);
         }
     }
 }
@@ -70,11 +72,11 @@ namespace {
                                std::variant<std::string, std::vector<std::string>> kernel)
 {
     if (std::holds_alternative<std::string>(kernel)) {
-        openspace::SpiceManager::ref().unloadKernel(std::get<std::string>(kernel));
+        SpiceManager::ref().unloadKernel(std::get<std::string>(kernel));
     }
     else {
         for (const std::string& k : std::get<std::vector<std::string>>(kernel)) {
-            openspace::SpiceManager::ref().unloadKernel(k);
+            SpiceManager::ref().unloadKernel(k);
         }
     }
 }
@@ -83,7 +85,7 @@ namespace {
  * Returns a list of all loaded kernels
  */
 [[codegen::luawrap]] std::vector<std::filesystem::path> kernels() {
-    return openspace::SpiceManager::ref().loadedKernels();
+    return SpiceManager::ref().loadedKernels();
 }
 
 /**
@@ -92,7 +94,7 @@ namespace {
  */
 [[codegen::luawrap]] std::map<std::string, std::string> spiceBodies(bool includeBuiltIn) {
     std::vector<std::pair<int, std::string>> bodies =
-        openspace::SpiceManager::ref().spiceBodies(includeBuiltIn);
+        SpiceManager::ref().spiceBodies(includeBuiltIn);
 
     std::map<std::string, std::string> res;
     for (const std::pair<int, std::string>& p : bodies) {
@@ -109,8 +111,6 @@ namespace {
 [[codegen::luawrap]] glm::dmat3 rotationMatrix(std::string body, std::string frame,
                                                std::string date)
 {
-    using namespace openspace;
-
     const double ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date);
     glm::dmat3 rotationMatrix = SpiceManager::ref().frameTransformationMatrix(
         body,
@@ -129,8 +129,6 @@ namespace {
 [[codegen::luawrap]] glm::dvec3 position(std::string target, std::string observer,
                                          std::string frame, std::string date)
 {
-    using namespace openspace;
-
     const double ephemerisTime = SpiceManager::ref().ephemerisTimeFromDate(date);
     glm::dvec3 position = SpiceManager::ref().targetPosition(
         target,
@@ -293,6 +291,6 @@ namespace {
     return bodyId;
 }
 
-#include "spicemanager_lua_codegen.cpp"
-
 } // namespace
+
+#include "spicemanager_lua_codegen.cpp"

@@ -31,6 +31,8 @@
 #include <variant>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
 
 /**
@@ -40,8 +42,6 @@ namespace {
 [[codegen::luawrap]] void bindKey(std::string key,
                                   std::variant<std::string, ghoul::Dictionary> action)
 {
-    using namespace openspace;
-
     std::string identifier;
     if (std::holds_alternative<ghoul::Dictionary>(action)) {
         const ghoul::Dictionary& d = std::get<ghoul::Dictionary>(action);
@@ -61,8 +61,8 @@ namespace {
         throw ghoul::lua::LuaError(std::format("Action '{}' does not exist", identifier));
     }
 
-    openspace::KeyWithModifier iKey = openspace::stringToKey(key);
-    if (iKey.key == openspace::Key::Unknown) {
+    KeyWithModifier iKey = stringToKey(key);
+    if (iKey.key == Key::Unknown) {
         throw ghoul::lua::LuaError(std::format("Could not find key '{}'", key));
     }
 
@@ -79,8 +79,6 @@ namespace {
  */
 [[codegen::luawrap]] std::vector<std::string> keyBindings(std::optional<std::string> key)
 {
-    using namespace openspace;
-
     std::vector<std::string> res;
     if (key.has_value()) {
         using K = KeyWithModifier;
@@ -114,8 +112,6 @@ namespace {
  * multiple keys, this function returns a list of all keys
  */
 [[codegen::luawrap]] std::vector<std::string> keyBindingsForAction(std::string action) {
-    using namespace openspace;
-
     const std::multimap<KeyWithModifier, std::string>& keybinds =
         global::keybindingManager->keyBindings();
 
@@ -135,8 +131,6 @@ namespace {
 [[codegen::luawrap]] void clearKey(
                                   std::variant<std::string, std::vector<std::string>> key)
 {
-    using namespace openspace;
-
     if (std::holds_alternative<std::string>(key)) {
         KeyWithModifier k = stringToKey(std::get<std::string>(key));
         global::keybindingManager->removeKeyBinding(k);
@@ -150,9 +144,9 @@ namespace {
 
 // Clear all key bindings
 [[codegen::luawrap]] void clearKeys() {
-    openspace::global::keybindingManager->resetKeyBindings();
+    global::keybindingManager->resetKeyBindings();
 }
 
-#include "keybindingmanager_lua_codegen.cpp"
-
 } // namespace
+
+#include "keybindingmanager_lua_codegen.cpp"

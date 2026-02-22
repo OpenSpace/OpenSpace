@@ -35,9 +35,9 @@
 #include <ghoul/misc/exception.h>
 #include <algorithm>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-LayerManager::LayerManager() : properties::PropertyOwner({ "Layers" }) {}
+LayerManager::LayerManager() : PropertyOwner({ "Layers" }) {}
 
 void LayerManager::initialize(
                   const std::map<layers::Group::ID, std::vector<ghoul::Dictionary>>& dict)
@@ -80,7 +80,7 @@ Layer* LayerManager::addLayer(layers::Group::ID id, const ghoul::Dictionary& lay
     try {
         return _layerGroups[static_cast<size_t>(id)]->addLayer(layerDict);
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         logError(e);
         return nullptr;
     }
@@ -155,4 +155,4 @@ void LayerManager::onChange(const std::function<void(Layer*)>& callback) {
     }
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

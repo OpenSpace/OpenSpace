@@ -44,13 +44,13 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     bool _downloadImage = false;
     bool _textureIsDirty;
     std::future<DownloadManager::MemoryFile> _imageFuture;
-    properties::StringProperty _texturePath;
+    StringProperty _texturePath;
 
 private:
     void bindTexture(ghoul::opengl::TextureUnit& unit) override;

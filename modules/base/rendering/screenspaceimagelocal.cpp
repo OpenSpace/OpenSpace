@@ -37,14 +37,16 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TexturePathInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TexturePathInfo = {
         "TexturePath",
         "Texture path",
         "Sets the path of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed. The size of the image will also automatically set the default "
         "size of this plane.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `ScreenSpaceRenderable` can be used to display an image from a local file on
@@ -58,12 +60,12 @@ namespace {
         // [[codegen::verbatim(TexturePathInfo.description)]]
         std::optional<std::filesystem::path> texturePath;
     };
-#include "screenspaceimagelocal_codegen.cpp"
 } // namespace
+#include "screenspaceimagelocal_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceImageLocal::Documentation() {
+Documentation ScreenSpaceImageLocal::Documentation() {
     return codegen::doc<Parameters>("base_screenspace_image_local");
 }
 

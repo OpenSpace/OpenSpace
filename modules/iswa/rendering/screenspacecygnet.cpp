@@ -38,12 +38,12 @@ namespace {
         int cygnetId;
         int updateInterval;
     };
-#include "screenspacecygnet_codegen.cpp"
 } // namespace
+#include "screenspacecygnet_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceCygnet::Documentation() {
+Documentation ScreenSpaceCygnet::Documentation() {
     return codegen::doc<Parameters>("iswa_screenspace_cygnet");
 }
 

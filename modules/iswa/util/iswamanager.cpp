@@ -71,6 +71,8 @@
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "IswaManager";
 
     constexpr std::string_view monthNumber(std::string_view month) {
@@ -90,7 +92,6 @@ namespace {
     }
 
     void createScreenSpace(int id) {
-        using namespace openspace;
         std::string idStr = std::to_string(id);
         global::scriptEngine->queueScript(
             "openspace.iswa.addScreenSpaceCygnet({CygnetId =" + idStr + "});"
@@ -103,7 +104,7 @@ namespace openspace {
 IswaManager* IswaManager::_instance = nullptr;
 
 IswaManager::IswaManager()
-    : properties::PropertyOwner({ "IswaManager", "Iswa Manager" })
+    : PropertyOwner({ "IswaManager", "Iswa Manager" })
     , _baseUrl("https://iswa-demo-server.herokuapp.com/")
 {
     _cygnetType[CygnetType::Texture] = "Texture";
@@ -753,7 +754,7 @@ void IswaManager::setBaseUrl(std::string bUrl) {
     _baseUrl = bUrl;
 }
 
-scripting::LuaLibrary IswaManager::luaLibrary() {
+LuaLibrary IswaManager::luaLibrary() {
     return {
         "iswa",
         {

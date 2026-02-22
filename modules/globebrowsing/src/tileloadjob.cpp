@@ -27,7 +27,7 @@
 #include <modules/globebrowsing/src/rawtiledatareader.h>
 #include <utility>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 TileLoadJob::TileLoadJob(RawTileDataReader& rawTileDataReader, TileIndex tileIndex)
     : _rawTileDataReader(rawTileDataReader)
@@ -50,4 +50,4 @@ RawTile TileLoadJob::product() {
     return std::move(_rawTile);
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

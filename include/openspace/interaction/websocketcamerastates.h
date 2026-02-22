@@ -36,7 +36,7 @@
 #include <string_view>
 #include <vector>
 
-namespace openspace::interaction {
+namespace openspace {
 
 class WebsocketCameraStates : public CameraInteractionStates {
 public:
@@ -105,48 +105,45 @@ private:
     std::multimap<int, ButtonInformation> _buttonMapping;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 namespace ghoul {
 
 template <>
-inline std::string to_string(
-                      const openspace::interaction::WebsocketCameraStates::AxisType& type)
-{
-    using T = openspace::interaction::WebsocketCameraStates::AxisType;
+inline std::string to_string(const openspace::WebsocketCameraStates::AxisType& type) {
+    using AxisType = openspace::WebsocketCameraStates::AxisType;
     switch (type) {
-        case T::None:        return "None";
-        case T::OrbitX:      return "Orbit X";
-        case T::OrbitY:      return "Orbit Y";
-        case T::ZoomIn:      return "Zoom In";
-        case T::ZoomOut:     return "Zoom Out";
-        case T::LocalRollX:  return "LocalRoll X";
-        case T::LocalRollY:  return "LocalRoll Y";
-        case T::GlobalRollX: return "GlobalRoll X";
-        case T::GlobalRollY: return "GlobalRoll Y";
-        case T::PanX:        return "Pan X";
-        case T::PanY:        return "Pan Y";
-        default:             return "";
+        case AxisType::None:        return "None";
+        case AxisType::OrbitX:      return "Orbit X";
+        case AxisType::OrbitY:      return "Orbit Y";
+        case AxisType::ZoomIn:      return "Zoom In";
+        case AxisType::ZoomOut:     return "Zoom Out";
+        case AxisType::LocalRollX:  return "LocalRoll X";
+        case AxisType::LocalRollY:  return "LocalRoll Y";
+        case AxisType::GlobalRollX: return "GlobalRoll X";
+        case AxisType::GlobalRollY: return "GlobalRoll Y";
+        case AxisType::PanX:        return "Pan X";
+        case AxisType::PanY:        return "Pan Y";
+        default:                    throw MissingCaseException();
     }
 }
 
 template <>
-constexpr openspace::interaction::WebsocketCameraStates::AxisType from_string(
-                                                                  std::string_view string)
+constexpr openspace::WebsocketCameraStates::AxisType from_string(std::string_view string)
 {
-    using T = openspace::interaction::WebsocketCameraStates::AxisType;
+    using AxisType = openspace::WebsocketCameraStates::AxisType;
 
-    if (string == "None") { return T::None; }
-    if (string == "Orbit X") { return T::OrbitX; }
-    if (string == "Orbit Y") { return T::OrbitY; }
-    if (string == "Zoom In") { return T::ZoomIn; }
-    if (string == "Zoom Out") { return T::ZoomOut; }
-    if (string == "LocalRoll X") { return T::LocalRollX; }
-    if (string == "LocalRoll Y") { return T::LocalRollY; }
-    if (string == "GlobalRoll X") { return T::GlobalRollX; }
-    if (string == "GlobalRoll Y") { return T::GlobalRollY; }
-    if (string == "Pan X") { return T::PanX; }
-    if (string == "Pan Y") { return T::PanY; }
+    if (string == "None") { return AxisType::None; }
+    if (string == "Orbit X") { return AxisType::OrbitX; }
+    if (string == "Orbit Y") { return AxisType::OrbitY; }
+    if (string == "Zoom In") { return AxisType::ZoomIn; }
+    if (string == "Zoom Out") { return AxisType::ZoomOut; }
+    if (string == "LocalRoll X") { return AxisType::LocalRollX; }
+    if (string == "LocalRoll Y") { return AxisType::LocalRollY; }
+    if (string == "GlobalRoll X") { return AxisType::GlobalRollX; }
+    if (string == "GlobalRoll Y") { return AxisType::GlobalRollY; }
+    if (string == "Pan X") { return AxisType::PanX; }
+    if (string == "Pan Y") { return AxisType::PanY; }
 
     throw RuntimeError("Unknown axis type '" + std::string(string) + "'");
 }

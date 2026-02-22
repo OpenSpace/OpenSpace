@@ -31,7 +31,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 class State {
 public:
@@ -42,7 +42,7 @@ public:
 
     std::string name() const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     std::string _name;

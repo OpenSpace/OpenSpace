@@ -58,7 +58,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     /**
@@ -104,39 +104,39 @@ private:
      */
     int readBinaryOctreeStructureFile(const std::filesystem::path& folderPath);
 
-    properties::StringProperty _filePath;
+    StringProperty _filePath;
     std::unique_ptr<ghoul::filesystem::File> _dataFile;
 
-    properties::StringProperty _colorTexturePath;
+    StringProperty _colorTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
 
-    properties::FloatProperty _luminosityMultiplier;
-    properties::FloatProperty _cutOffThreshold;
-    properties::IntProperty _tmPointFilterSize;
-    properties::FloatProperty _tmPointSigma;
-    properties::IVec2Property _additionalNodes;
-    properties::FloatProperty _tmPointPixelWeightThreshold;
-    properties::FloatProperty _lodPixelThreshold;
+    FloatProperty _luminosityMultiplier;
+    FloatProperty _cutOffThreshold;
+    IntProperty _tmPointFilterSize;
+    FloatProperty _tmPointSigma;
+    IVec2Property _additionalNodes;
+    FloatProperty _tmPointPixelWeightThreshold;
+    FloatProperty _lodPixelThreshold;
 
-    properties::Vec2Property _posXThreshold;
-    properties::Vec2Property _posYThreshold;
-    properties::Vec2Property _posZThreshold;
-    properties::Vec2Property _gMagThreshold;
-    properties::Vec2Property _bpRpThreshold;
-    properties::Vec2Property _distThreshold;
+    Vec2Property _posXThreshold;
+    Vec2Property _posYThreshold;
+    Vec2Property _posZThreshold;
+    Vec2Property _gMagThreshold;
+    Vec2Property _bpRpThreshold;
+    Vec2Property _distThreshold;
 
-    properties::IntProperty _firstRow;
-    properties::IntProperty _lastRow;
+    IntProperty _firstRow;
+    IntProperty _lastRow;
     std::vector<std::string> _columnNames;
-    properties::OptionProperty _fileReaderOption;
-    properties::OptionProperty _renderMode;
-    properties::IntProperty _nRenderedStars;
+    OptionProperty _fileReaderOption;
+    OptionProperty _renderMode;
+    IntProperty _nRenderedStars;
     // LongLongProperty doesn't show up in menu, use FloatProperty instead.
-    properties::FloatProperty _cpuRamBudgetProperty;
-    properties::FloatProperty _gpuStreamBudgetProperty;
-    properties::FloatProperty _maxGpuMemoryPercent;
-    properties::FloatProperty _maxCpuMemoryPercent;
+    FloatProperty _cpuRamBudgetProperty;
+    FloatProperty _gpuStreamBudgetProperty;
+    FloatProperty _maxGpuMemoryPercent;
+    FloatProperty _maxCpuMemoryPercent;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(model, view, viewScaling, projection, renderOption, luminosityMultiplier,

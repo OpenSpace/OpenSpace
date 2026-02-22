@@ -39,12 +39,12 @@ namespace {
     // global coordinate system used in the system.
     struct [[codegen::Dictionary(DashboardItemCameraOrientation)]] Parameters {
     };
-#include "dashboarditemcameraorientation_codegen.cpp"
 } // namespace
+#include "dashboarditemcameraorientation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemCameraOrientation::Documentation() {
+Documentation DashboardItemCameraOrientation::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_cameraorientation",
         DashboardTextItem::Documentation()

@@ -41,77 +41,77 @@
 #include <memory>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableNodeLine";
 
     struct Vertex {
         glm::vec3 position;
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StartNodeInfo = {
+    constexpr Property::PropertyInfo StartNodeInfo = {
         "StartNode",
         "Start node",
         "The identifier of the node the line starts from. Defaults to 'Root' if not "
         "specified.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EndNodeInfo = {
+    constexpr Property::PropertyInfo EndNodeInfo = {
         "EndNode",
         "End node",
         "The identifier of the node the line ends at. Defaults to 'Root' if not "
         "specified.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+    constexpr Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "The RGB color for the line.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the line. The larger number, the thicker the line.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StartOffsetInfo = {
+    constexpr Property::PropertyInfo StartOffsetInfo = {
         "StartOffset",
         "Offset to start node",
         "A distance from the start node at which the rendered line should begin. "
         "By default it takes a value in meters, but if 'UseRelativeOffsets' is set "
         "to true it is read as a multiplier times the bounding sphere of the node.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EndOffsetInfo = {
+    constexpr Property::PropertyInfo EndOffsetInfo = {
         "EndOffset",
         "Offset to end node",
         "A distance to the end node at which the rendered line should end. "
         "By default it takes a value in meters, but if 'UseRelativeOffsets' is set "
         "to true it is read as a multiplier times the bounding sphere of the node.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RelativeOffsetsInfo = {
+    constexpr Property::PropertyInfo RelativeOffsetsInfo = {
         "UseRelativeOffsets",
         "Use relative offsets",
         "If true, the offset values are interpreted as relative values to be multiplied "
         "with the bounding sphere of the start/end node. If false, the value is "
         "interpreted as a distance in meters.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // Returns a position that is relative to the current anchor node. This is a method to
     // handle precision problems that occur when approaching a line end point
     glm::dvec3 coordinatePosFromAnchorNode(const glm::dvec3& worldPos) {
-        using namespace openspace;
         glm::dvec3 anchorNodePos(0.0);
 
-        const interaction::OrbitalNavigator& nav =
-            global::navigationHandler->orbitalNavigator();
+        const OrbitalNavigator& nav = global::navigationHandler->orbitalNavigator();
 
         if (nav.anchorNode()) {
             anchorNodePos = nav.anchorNode()->worldPosition();
@@ -149,12 +149,12 @@ namespace {
         // [[codegen::verbatim(RelativeOffsetsInfo.description)]]
         std::optional<bool> useRelativeOffsets;
     };
-#include "renderablenodeline_codegen.cpp"
 } // namespace
+#include "renderablenodeline_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableNodeLine::Documentation() {
+Documentation RenderableNodeLine::Documentation() {
     return codegen::doc<Parameters>("base_renderable_nodeline");
 }
 
@@ -173,7 +173,7 @@ RenderableNodeLine::RenderableNodeLine(const ghoul::Dictionary& dictionary)
     addProperty(Fadeable::_opacity);
 
     _lineColor = p.color.value_or(_lineColor);
-    _lineColor.setViewOption(properties::Property::ViewOptions::Color);
+    _lineColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_lineColor);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);

@@ -56,7 +56,7 @@ public:
 
     void render(const RenderData& data, RendererTasks& tasks) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     /**
@@ -89,10 +89,10 @@ private:
     void selectionPropertyHasChanged() override;
 
     /// The filename containing the constellation bounds
-    properties::StringProperty _vertexFilename;
+    StringProperty _vertexFilename;
 
     /// Determines the color of the constellation lines
-    properties::Vec3Property _color;
+    Vec3Property _color;
 
     /// The list of all loaded constellation bounds
     std::vector<ConstellationBound> _constellationBounds;

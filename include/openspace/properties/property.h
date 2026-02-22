@@ -42,7 +42,7 @@
 
 struct lua_State;
 
-namespace openspace::properties {
+namespace openspace {
 
 class PropertyOwner;
 
@@ -580,6 +580,6 @@ private:
 #endif
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___PROPERTY___H__

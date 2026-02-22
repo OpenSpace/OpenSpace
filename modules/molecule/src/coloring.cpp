@@ -173,7 +173,7 @@ namespace {
     }
 } // namespace
 
-namespace molecule::color::atoms {
+namespace molecule {
 
 void uniform(uint32_t* colors, int64_t count, uint32_t rgba, const md_bitfield_t* mask) {
     if (mask) {
@@ -314,4 +314,4 @@ void secondaryStructure(uint32_t* colors, int64_t count, const md_molecule_t& mo
     }
 }
 
-} // namespace molecule::color::atoms
+} // namespace molecule

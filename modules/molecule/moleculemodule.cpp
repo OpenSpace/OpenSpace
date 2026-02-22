@@ -40,6 +40,8 @@
 #include <md_gl.h>
 
 namespace {
+    using namespace openspace;
+
     // Defining the shaders here since we don't want to need to include MOLD header files
     // in the module header, which would mean that the core would need to know about them
     std::unique_ptr<md_gl_shaders_t> _shaders = nullptr;
@@ -59,39 +61,39 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 }
 )";
 
-    constexpr openspace::properties::Property::PropertyInfo SSAOEnabledInfo = {
+    constexpr Property::PropertyInfo SSAOEnabledInfo = {
         "Enabled",
         "Enabled",
         "Determines whether this SSAO pass should be enabled or not."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SSAOIntensityInfo = {
+    constexpr Property::PropertyInfo SSAOIntensityInfo = {
         "Intensity",
         "Intensity",
         "Controls the strength of the ambient occlusion effect. Higher values darken "
         "occluded areas more strongly."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SSAORadiusInfo = {
+    constexpr Property::PropertyInfo SSAORadiusInfo = {
         "Radius",
         "Radius",
         "Sets the sampling radius for occlusion. Larger values produce broader, smoother "
         "shading, while smaller values create tighter shadows."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SSAOBiasInfo = {
+    constexpr Property::PropertyInfo SSAOBiasInfo = {
         "HorizonBias",
         "Horizon Bias",
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SSAONormalBiasInfo = {
+    constexpr Property::PropertyInfo SSAONormalBiasInfo = {
         "NormalBias",
         "Normal Bias",
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ExposureInfo = {
+    constexpr Property::PropertyInfo ExposureInfo = {
         "Exposure",
         "Exposure",
         "Controls the Exposure setting for the tonemap."
@@ -100,8 +102,8 @@ void write_fragment(vec3 view_coord, vec3 view_vel, vec3 view_normal, vec4 color
 
 namespace openspace {
 
-MoleculeModule::SSAO::SSAO(properties::PropertyOwner::PropertyOwnerInfo info)
-    : properties::PropertyOwner(info)
+MoleculeModule::SSAO::SSAO(PropertyOwner::PropertyOwnerInfo info)
+    : PropertyOwner(info)
     , enabled(SSAOEnabledInfo, true)
     , intensity(SSAOIntensityInfo, 7.5f, 0.f, 100.f)
     , radius(SSAORadiusInfo, 1.f, 0.1f, 1000.f)
@@ -360,7 +362,7 @@ void MoleculeModule::render(const glm::mat4&, const glm::mat4& viewMatrix,
     glDrawBuffers(lastDrawBufferCount, lastDrawBuffers.data());
 }
 
-std::vector<documentation::Documentation> MoleculeModule::documentations() const {
+std::vector<Documentation> MoleculeModule::documentations() const {
     return {
         RenderableMolecule::Documentation(),
         RenderableSimulationBox::Documentation()

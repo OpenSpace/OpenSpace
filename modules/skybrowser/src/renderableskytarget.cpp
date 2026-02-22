@@ -39,48 +39,50 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     enum BlendMode {
         Normal = 0,
         Additive
     };
 
-    constexpr openspace::properties::Property::PropertyInfo crossHairSizeInfo = {
+    constexpr Property::PropertyInfo crossHairSizeInfo = {
         "CrosshairSize",
         "Crosshair size",
         "The size of the crosshair given as a field of view (in degrees).",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RectangleThresholdInfo = {
+    constexpr Property::PropertyInfo RectangleThresholdInfo = {
         "RectangleThreshold",
         "Rectangle threshold",
         "A threshold value for the vertical field of view, in degrees, that decides when "
         "a rectangle will be used to visualize the target in addition to the crosshair. "
         "When the field of view is smaller than this value, only the crosshair will be "
         "shown.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The thickness of the line of the target. The larger number, the thicker line.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo VerticalFovInfo = {
+    constexpr Property::PropertyInfo VerticalFovInfo = {
         "VerticalFov",
         "Vertical field of view",
         "The vertical field of view of the target.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ApplyRollInfo = {
+    constexpr Property::PropertyInfo ApplyRollInfo = {
        "ApplyRoll",
        "Apply roll",
        "If true, always rotate the target to have its up direction aligned with the up "
        "direction of the camera.",
-       openspace::properties::Property::Visibility::User
+       Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableSkyTarget)]] Parameters {
@@ -99,13 +101,12 @@ namespace {
         // [[codegen::verbatim(ApplyRollInfo.description)]]
         std::optional<bool> applyRoll;
     };
-
+} // namespace
 #include "renderableskytarget_codegen.cpp"
-} //namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableSkyTarget::Documentation() {
+Documentation RenderableSkyTarget::Documentation() {
     return codegen::doc<Parameters>("skybrowser_renderableskytarget");
 }
 

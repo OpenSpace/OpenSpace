@@ -83,30 +83,30 @@ private:
         const glm::vec2& dpiScaling, const glm::vec2& mousePos,
         uint32_t mouseButtonsPressed);
 
-    properties::BoolProperty _isEnabled;
-    properties::BoolProperty _isCollapsed;
+    BoolProperty _isEnabled;
+    BoolProperty _isCollapsed;
 
-    gui::GuiPropertyComponent _sceneProperty;
-    gui::GuiPropertyComponent _property;
-    gui::GuiSpaceTimeComponent _spaceTime;
-    gui::GuiJoystickComponent _joystick;
-    gui::GuiActionComponent _actions;
-    gui::GuiParallelComponent _parallel;
-    gui::GuiGlobeBrowsingComponent _globeBrowsing;
-    gui::GuiGIBSComponent _gibs;
-    gui::GuiMissionComponent _mission;
-    gui::GuiMemoryComponent _memoryComponent;
-    gui::GuiSceneComponent _sceneView;
-    gui::GuiShadowComponent _shadowComponent;
-    gui::GuiFilePathComponent _filePath;
-    gui::GuiHelpComponent _help;
+    GuiPropertyComponent _sceneProperty;
+    GuiPropertyComponent _property;
+    GuiSpaceTimeComponent _spaceTime;
+    GuiJoystickComponent _joystick;
+    GuiActionComponent _actions;
+    GuiParallelComponent _parallel;
+    GuiGlobeBrowsingComponent _globeBrowsing;
+    GuiGIBSComponent _gibs;
+    GuiMissionComponent _mission;
+    GuiMemoryComponent _memoryComponent;
+    GuiSceneComponent _sceneView;
+    GuiShadowComponent _shadowComponent;
+    GuiFilePathComponent _filePath;
+    GuiHelpComponent _help;
 
-    properties::BoolProperty _showHelpText;
-    properties::FloatProperty _helpTextDelay;
+    BoolProperty _showHelpText;
+    FloatProperty _helpTextDelay;
 
     // The ordering of this array determines the order of components in the in-game menu
     static constexpr int nComponents = 14;
-    std::array<gui::GuiComponent*, nComponents> _components = {
+    std::array<GuiComponent*, nComponents> _components = {
         &_sceneProperty,
         &_property,
         &_spaceTime,

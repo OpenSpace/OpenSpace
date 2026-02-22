@@ -33,7 +33,7 @@
 #include <vector>
 
 TEST_CASE("SelectionProperty: Class Name and Default Value", "[selectionproperty]") {
-    const openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    const SelectionProperty p({ "id", "gui", "desc" });
 
     CHECK(p.className() == "SelectionProperty");
     CHECK(p.value().empty());
@@ -41,7 +41,7 @@ TEST_CASE("SelectionProperty: Class Name and Default Value", "[selectionproperty
 }
 
 TEST_CASE("SelectionProperty: Set Value", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
     const std::set<std::string> list{ "a", "b" };
@@ -55,7 +55,7 @@ TEST_CASE("SelectionProperty: Set Value", "[selectionproperty]") {
 }
 
 TEST_CASE("SelectionProperty: Set Value - Invalid Input", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
     p.setValue({ "d", "a" }); // d is not valid option and should be ignored
@@ -64,7 +64,7 @@ TEST_CASE("SelectionProperty: Set Value - Invalid Input", "[selectionproperty]")
 }
 
 TEST_CASE("SelectionProperty: Set Value - Duplicates", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
     p.setValue({ "a", "a" });
@@ -74,7 +74,7 @@ TEST_CASE("SelectionProperty: Set Value - Duplicates", "[selectionproperty]") {
 }
 
 TEST_CASE("SelectionProperty: Options and Selection Helpers", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b" });
     p.setValue({ "a" });
 
@@ -96,14 +96,14 @@ TEST_CASE("SelectionProperty: Options and Selection Helpers", "[selectionpropert
 }
 
 TEST_CASE("SelectionProperty: Options Sorting", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "c", "b" });
 
     CHECK(p.options() == std::vector<std::string>{ "a", "b", "c" });
 }
 
 TEST_CASE("SelectionProperty: Add Options", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    SelectionProperty p({ "id", "gui", "desc" });
 
     p.addOption("a");
     p.addOption("b");
@@ -115,7 +115,7 @@ TEST_CASE("SelectionProperty: Add Options", "[selectionproperty]") {
 }
 
 TEST_CASE("SelectionProperty: Get String Value", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
     const std::set<std::string> list{ "a", "b" };
@@ -130,7 +130,7 @@ TEST_CASE("SelectionProperty: Get String Value", "[selectionproperty]") {
 }
 
 TEST_CASE("SelectionProperty: Set Lua Value", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
     const ghoul::lua::LuaState L;
@@ -142,7 +142,7 @@ TEST_CASE("SelectionProperty: Set Lua Value", "[selectionproperty]") {
 }
 
 TEST_CASE("SelectionProperty: Set Lua Value - Duplicates", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
     const ghoul::lua::LuaState L;
@@ -154,7 +154,7 @@ TEST_CASE("SelectionProperty: Set Lua Value - Duplicates", "[selectionproperty]"
 }
 
 TEST_CASE("SelectionProperty: Set Lua Value - Invalid Key", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
     const ghoul::lua::LuaState L;
@@ -166,7 +166,7 @@ TEST_CASE("SelectionProperty: Set Lua Value - Invalid Key", "[selectionproperty]
 }
 
 TEST_CASE("SelectionProperty: Get Lua Value", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
     const std::set<std::string> list{ "a", "b" };
@@ -190,7 +190,7 @@ TEST_CASE("SelectionProperty: Get Lua Value", "[selectionproperty]") {
 }
 
 TEST_CASE("SelectionProperty: Get Empty Lua Value", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
     const ghoul::lua::LuaState L;
@@ -205,7 +205,7 @@ TEST_CASE("SelectionProperty: Get Empty Lua Value", "[selectionproperty]") {
 }
 
 TEST_CASE("SelectionProperty: Value From Copying Variable", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
     p = std::set<std::string>{ "a", "b" };
@@ -214,7 +214,7 @@ TEST_CASE("SelectionProperty: Value From Copying Variable", "[selectionproperty]
 }
 
 TEST_CASE("SelectionProperty: Re-set Options After Selection", "[selectionproperty]") {
-    openspace::properties::SelectionProperty p({ "id", "gui", "desc" });
+    SelectionProperty p({ "id", "gui", "desc" });
     p.setOptions({ "a", "b", "c" });
 
     p = std::set<std::string>{ "a", "b" };

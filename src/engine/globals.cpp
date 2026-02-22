@@ -92,19 +92,19 @@ namespace {
         sizeof(VersionChecker) +
         sizeof(WindowDelegate) +
         sizeof(Configuration) +
-        sizeof(interaction::ActionManager) +
-        sizeof(interaction::InteractionMonitor) +
-        sizeof(interaction::JoystickInputStates) +
-        sizeof(interaction::WebsocketInputStates) +
-        sizeof(interaction::KeybindingManager) +
-        sizeof(interaction::KeyframeRecordingHandler) +
-        sizeof(interaction::NavigationHandler) +
-        sizeof(interaction::SessionRecordingHandler) +
-        sizeof(properties::PropertyOwner) +
-        sizeof(properties::PropertyOwner) +
-        sizeof(properties::PropertyOwner) +
-        sizeof(scripting::ScriptEngine) +
-        sizeof(scripting::ScriptScheduler) +
+        sizeof(ActionManager) +
+        sizeof(InteractionMonitor) +
+        sizeof(JoystickInputStates) +
+        sizeof(WebsocketInputStates) +
+        sizeof(KeybindingManager) +
+        sizeof(KeyframeRecordingHandler) +
+        sizeof(NavigationHandler) +
+        sizeof(SessionRecordingHandler) +
+        sizeof(PropertyOwner) +
+        sizeof(PropertyOwner) +
+        sizeof(PropertyOwner) +
+        sizeof(ScriptEngine) +
+        sizeof(ScriptScheduler) +
         sizeof(Profile);
 
     std::array<std::byte, TotalSize> DataStorage;
@@ -286,108 +286,108 @@ void create() {
 #endif // WIN32
 
 #ifdef WIN32
-    actionManager = new (currentPos) interaction::ActionManager;
+    actionManager = new (currentPos) ActionManager;
     ghoul_assert(actionManager, "No action manager");
-    currentPos += sizeof(interaction::ActionManager);
+    currentPos += sizeof(ActionManager);
 #else // ^^^ WIN32 / !WIN32 vvv
-    actionManager = new interaction::ActionManager;
+    actionManager = new ActionManager;
 #endif // WIN32
 
 #ifdef WIN32
-    interactionMonitor = new (currentPos) interaction::InteractionMonitor;
+    interactionMonitor = new (currentPos) InteractionMonitor;
     ghoul_assert(interactionMonitor, "No interactionMonitor");
-    currentPos += sizeof(interaction::InteractionMonitor);
+    currentPos += sizeof(InteractionMonitor);
 #else // ^^^ WIN32 / !WIN32 vvv
-    interactionMonitor = new interaction::InteractionMonitor;
+    interactionMonitor = new InteractionMonitor;
 #endif // WIN32
 
 #ifdef WIN32
-    joystickInputStates = new (currentPos) interaction::JoystickInputStates;
+    joystickInputStates = new (currentPos) JoystickInputStates;
     ghoul_assert(joystickInputStates, "No joystickInputStates");
-    currentPos += sizeof(interaction::JoystickInputStates);
+    currentPos += sizeof(JoystickInputStates);
 #else // ^^^ WIN32 / !WIN32 vvv
-    joystickInputStates = new interaction::JoystickInputStates;
+    joystickInputStates = new JoystickInputStates;
 #endif // WIN32
 
 #ifdef WIN32
-    websocketInputStates = new (currentPos) interaction::WebsocketInputStates;
+    websocketInputStates = new (currentPos) WebsocketInputStates;
     ghoul_assert(websocketInputStates, "No websocketInputStates");
-    currentPos += sizeof(interaction::WebsocketInputStates);
+    currentPos += sizeof(WebsocketInputStates);
 #else // ^^^ WIN32 / !WIN32 vvv
-    websocketInputStates = new interaction::WebsocketInputStates;
+    websocketInputStates = new WebsocketInputStates;
 #endif // WIN32
 
 #ifdef WIN32
-    keybindingManager = new (currentPos) interaction::KeybindingManager;
+    keybindingManager = new (currentPos) KeybindingManager;
     ghoul_assert(keybindingManager, "No keybindingManager");
-    currentPos += sizeof(interaction::KeybindingManager);
+    currentPos += sizeof(KeybindingManager);
 #else // ^^^ WIN32 / !WIN32 vvv
-    keybindingManager = new interaction::KeybindingManager;
+    keybindingManager = new KeybindingManager;
 #endif // WIN32
 
 #ifdef WIN32
-    keyframeRecording = new (currentPos) interaction::KeyframeRecordingHandler;
+    keyframeRecording = new (currentPos) KeyframeRecordingHandler;
     ghoul_assert(keyframeRecording, "No keyframeRecording");
-    currentPos += sizeof(interaction::KeyframeRecordingHandler);
+    currentPos += sizeof(KeyframeRecordingHandler);
 #else // ^^^ WIN32 / !WIN32 vvv
-    keyframeRecording = new interaction::KeyframeRecordingHandler;
+    keyframeRecording = new KeyframeRecordingHandler;
 #endif // WIN32
 
 #ifdef WIN32
-    navigationHandler = new (currentPos) interaction::NavigationHandler;
+    navigationHandler = new (currentPos) NavigationHandler;
     ghoul_assert(navigationHandler, "No navigationHandler");
-    currentPos += sizeof(interaction::NavigationHandler);
+    currentPos += sizeof(NavigationHandler);
 #else // ^^^ WIN32 / !WIN32 vvv
-    navigationHandler = new interaction::NavigationHandler;
+    navigationHandler = new NavigationHandler;
 #endif // WIN32
 
 #ifdef WIN32
-    sessionRecordingHandler = new (currentPos) interaction::SessionRecordingHandler;
+    sessionRecordingHandler = new (currentPos) SessionRecordingHandler;
     ghoul_assert(sessionRecordingHandler, "No sessionRecording");
-    currentPos += sizeof(interaction::SessionRecordingHandler);
+    currentPos += sizeof(SessionRecordingHandler);
 #else // ^^^ WIN32 / !WIN32 vvv
-    sessionRecordingHandler = new interaction::SessionRecordingHandler;
+    sessionRecordingHandler = new SessionRecordingHandler;
 #endif // WIN32
 
 #ifdef WIN32
-    rootPropertyOwner = new (currentPos) properties::PropertyOwner({ "" });
+    rootPropertyOwner = new (currentPos) PropertyOwner({ "" });
     ghoul_assert(rootPropertyOwner, "No rootPropertyOwner");
-    currentPos += sizeof(properties::PropertyOwner);
+    currentPos += sizeof(PropertyOwner);
 #else // ^^^ WIN32 / !WIN32 vvv
-    rootPropertyOwner = new properties::PropertyOwner({ "" });
+    rootPropertyOwner = new PropertyOwner({ "" });
 #endif // WIN32
 
 #ifdef WIN32
     screenSpaceRootPropertyOwner =
-        new (currentPos) properties::PropertyOwner({ "ScreenSpace" });
+        new (currentPos) PropertyOwner({ "ScreenSpace" });
     ghoul_assert(screenSpaceRootPropertyOwner, "No screenSpaceRootPropertyOwner");
-    currentPos += sizeof(properties::PropertyOwner);
+    currentPos += sizeof(PropertyOwner);
 #else // ^^^ WIN32 / !WIN32 vvv
-    screenSpaceRootPropertyOwner = new properties::PropertyOwner({ "ScreenSpace" });
+    screenSpaceRootPropertyOwner = new PropertyOwner({ "ScreenSpace" });
 #endif // WIN32
 
 #ifdef WIN32
-    userPropertyOwner = new (currentPos) properties::PropertyOwner({ "UserProperties" });
+    userPropertyOwner = new (currentPos) PropertyOwner({ "UserProperties" });
     ghoul_assert(userPropertyOwner, "No userPropertyOwner");
-    currentPos += sizeof(properties::PropertyOwner);
+    currentPos += sizeof(PropertyOwner);
 #else // ^^^ WIN32 / !WIN32 vvv
-    userPropertyOwner = new properties::PropertyOwner({ "UserProperties" });
+    userPropertyOwner = new PropertyOwner({ "UserProperties" });
 #endif // WIN32
 
 #ifdef WIN32
-    scriptEngine = new (currentPos) scripting::ScriptEngine;
+    scriptEngine = new (currentPos) ScriptEngine;
     ghoul_assert(scriptEngine, "No scriptEngine");
-    currentPos += sizeof(scripting::ScriptEngine);
+    currentPos += sizeof(ScriptEngine);
 #else // ^^^ WIN32 / !WIN32 vvv
-    scriptEngine = new scripting::ScriptEngine;
+    scriptEngine = new ScriptEngine;
 #endif // WIN32
 
 #ifdef WIN32
-    scriptScheduler = new (currentPos) scripting::ScriptScheduler;
+    scriptScheduler = new (currentPos) ScriptScheduler;
     ghoul_assert(scriptScheduler, "No scriptScheduler");
-    currentPos += sizeof(scripting::ScriptScheduler);
+    currentPos += sizeof(ScriptScheduler);
 #else // ^^^ WIN32 / !WIN32 vvv
-    scriptScheduler = new scripting::ScriptScheduler;
+    scriptScheduler = new ScriptScheduler;
 #endif // WIN32
 
 #ifdef WIN32

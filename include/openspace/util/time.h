@@ -29,7 +29,7 @@
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
+struct LuaLibrary;
 
 /**
  * This singleton class represents the current simulation time in OpenSpace. It internally
@@ -182,7 +182,7 @@ public:
      * \return The Lua library that contains all Lua functions available to change the
      *         time
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     double _time;

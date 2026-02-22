@@ -37,14 +37,12 @@
 #include <filesystem>
 #include <memory>
 
-namespace openspace { class TransferFunction; }
-namespace openspace::volume {
-    class BasicVolumeRaycaster;
-    template <typename T> class RawVolume;
-    class VolumeClipPlanes;
-} // openspace::volume
+namespace openspace {
 
-namespace openspace::kameleonvolume {
+class BasicVolumeRaycaster;
+template <typename T> class RawVolume;
+class TransferFunction;
+class VolumeClipPlanes;
 
 class RenderableKameleonVolume : public Renderable {
 public:
@@ -69,36 +67,36 @@ private:
     void updateTextureFromVolume();
     void updateRaycasterModelTransform();
 
-    properties::UVec3Property _dimensions;
-    properties::StringProperty _variable;
-    properties::Vec3Property _lowerDomainBound;
-    properties::Vec3Property _upperDomainBound;
-    properties::Vec3Property _domainScale;
+    UVec3Property _dimensions;
+    StringProperty _variable;
+    Vec3Property _lowerDomainBound;
+    Vec3Property _upperDomainBound;
+    Vec3Property _domainScale;
     bool _autoDomainBounds = false;
 
-    properties::FloatProperty _lowerValueBound;
-    properties::FloatProperty _upperValueBound;
+    FloatProperty _lowerValueBound;
+    FloatProperty _upperValueBound;
     bool _autoValueBounds = false;
 
-    properties::OptionProperty _gridType;
+    OptionProperty _gridType;
     bool _autoGridType = false;
 
-    std::shared_ptr<volume::VolumeClipPlanes> _clipPlanes;
+    std::shared_ptr<VolumeClipPlanes> _clipPlanes;
 
-    properties::FloatProperty _stepSize;
-    properties::StringProperty _sourcePath;
-    properties::StringProperty _transferFunctionPath;
-    properties::BoolProperty _cache;
+    FloatProperty _stepSize;
+    StringProperty _sourcePath;
+    StringProperty _transferFunctionPath;
+    BoolProperty _cache;
 
 
-    std::unique_ptr<volume::RawVolume<float>> _rawVolume;
-    std::unique_ptr<volume::RawVolume<GLfloat>> _normalizedVolume;
-    std::unique_ptr<volume::BasicVolumeRaycaster> _raycaster;
+    std::unique_ptr<RawVolume<float>> _rawVolume;
+    std::unique_ptr<RawVolume<GLfloat>> _normalizedVolume;
+    std::unique_ptr<BasicVolumeRaycaster> _raycaster;
 
     std::shared_ptr<ghoul::opengl::Texture> _volumeTexture;
     std::shared_ptr<TransferFunction> _transferFunction;
 };
 
-} // namespace openspace::kameleonvolume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___RENDERABLEKAMELEONVOLUME___H__

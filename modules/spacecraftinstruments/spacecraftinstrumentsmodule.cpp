@@ -90,9 +90,7 @@ void SpacecraftInstrumentsModule::internalDeinitializeGL() {
     ProgramObjectManager.releaseAll(ghoul::opengl::ProgramObjectManager::Warnings::Yes);
 }
 
-std::vector<documentation::Documentation>
-SpacecraftInstrumentsModule::documentations() const
-{
+std::vector<Documentation> SpacecraftInstrumentsModule::documentations() const {
     return {
         DashboardItemInstruments::Documentation(),
         RenderableCrawlingLine::Documentation(),

@@ -41,7 +41,7 @@ namespace openspace {
     struct RenderData;
 } // namespace openspace
 
-namespace openspace::rendering::helper {
+namespace openspace::rendering {
 
 enum class Anchor { Center, NW, NE, SW, SE };
 
@@ -179,6 +179,6 @@ struct LightSourceRenderData {
         const std::vector<std::unique_ptr<LightSource>>& sources);
 };
 
-} // namespace openspace::rendering::helper
+} // namespace openspace::rendering
 
 #endif // __OPENSPACE_CORE___HELPER___H__

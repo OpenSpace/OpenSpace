@@ -1589,4 +1589,4 @@ void postprocess(const Settings& settings, const glm::mat4& V, const glm::mat4& 
     glColorMask(lastColormask[0], lastColormask[1], lastColormask[2], lastColormask[3]);
 }
 
-}  // namespace postprocessing
+} // namespace postprocessing

@@ -46,63 +46,65 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "DataCygnet";
     constexpr int MaxTextures = 6;
 
-    constexpr openspace::properties::Property::PropertyInfo DataOptionsInfo = {
+    constexpr Property::PropertyInfo DataOptionsInfo = {
         "DataOptions",
         "Data options",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseLogInfo = {
+    constexpr Property::PropertyInfo UseLogInfo = {
         "UseLog",
         "Use logarithm",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseHistogramInfo = {
+    constexpr Property::PropertyInfo UseHistogramInfo = {
         "UseHistogram",
         "Auto contrast",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AutoFilterInfo = {
+    constexpr Property::PropertyInfo AutoFilterInfo = {
         "AutoFilter",
         "Auto filter",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NormalizeValuesInfo = {
+    constexpr Property::PropertyInfo NormalizeValuesInfo = {
         "NormValues",
         "Normalize values",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
+    constexpr Property::PropertyInfo BackgroundInfo = {
         "BackgroundValues",
         "Background values",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransferFunctionsFile = {
+    constexpr Property::PropertyInfo TransferFunctionsFile = {
         "Transferfunctions",
         "Transfer functions",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableDataCygnet::Documentation() {
-    documentation::Documentation doc = RenderableIswaCygnet::Documentation();
+Documentation RenderableDataCygnet::Documentation() {
+    openspace::Documentation doc = RenderableIswaCygnet::Documentation();
     doc.name = "RenderableDataCygnet";
     doc.id = "iswa_renderable_datacygnet";
     return doc;
@@ -449,4 +451,4 @@ void RenderableDataCygnet::subscribeToGroup() {
     );
 }
 
-} //namespace openspace
+} // namespace openspace

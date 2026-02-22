@@ -34,8 +34,7 @@
 namespace openspace {
 
 class Camera;
-
-namespace scripting { struct LuaLibrary; }
+struct LuaLibrary;
 
 class NodesTelemetry : public TelemetryBase {
 public:
@@ -65,7 +64,7 @@ public:
      * \return The Lua library that contains all Lua functions available for the
      *         nodes telemetry
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     static constexpr int NumDataItems = 4;
@@ -122,21 +121,21 @@ private:
      */
     void sendData(int nodeIndex);
 
-    struct PrecisionProperties : properties::PropertyOwner {
-        PrecisionProperties(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
+    struct PrecisionProperties : PropertyOwner {
+        PrecisionProperties(PropertyOwner::PropertyOwnerInfo precisionInfo);
 
         // The low and high precision values are used in different situations. When the
         // node is the current focus node, then the high precision value is used. This
         // is due to the node being in the current focus and therfore needs better
         // precision. If the node is not the current focus node, then the low precision
         // value is used to save performance.
-        properties::DoubleProperty lowDistancePrecision;
-        properties::DoubleProperty highDistancePrecision;
-        properties::DoubleProperty lowAnglePrecision;
-        properties::DoubleProperty highAnglePrecision;
+        DoubleProperty lowDistancePrecision;
+        DoubleProperty highDistancePrecision;
+        DoubleProperty lowAnglePrecision;
+        DoubleProperty highAnglePrecision;
     };
 
-    properties::OptionProperty _distanceUnitOption;
+    OptionProperty _distanceUnitOption;
     PrecisionProperties _precisionProperties;
 
     std::vector<TelemetryNode> _nodes;

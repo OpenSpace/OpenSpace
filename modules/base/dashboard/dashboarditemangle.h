@@ -42,12 +42,12 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct Component {
-        properties::OptionProperty type;
-        properties::StringProperty nodeIdentifier;
+        OptionProperty type;
+        StringProperty nodeIdentifier;
         SceneGraphNode* node;
     };
 

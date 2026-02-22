@@ -56,6 +56,8 @@
 #include <thread>
 
 namespace {
+    using namespace openspace;
+
     // The possible values for the _renderingModes property
     enum class RenderMode {
         RenderingModeTrail = 0,
@@ -68,14 +70,14 @@ namespace {
         PositionNormal
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PathInfo = {
+    constexpr Property::PropertyInfo PathInfo = {
         "Path",
         "Path",
         "The file path to the data file to read.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointRenderingModeInfo = {
+    constexpr Property::PropertyInfo PointRenderingModeInfo = {
         "PointRenderingMode",
         "Point Rendering Mode",
         "Controls how the points will be oriented. \"Camera View Direction\" rotates the "
@@ -83,44 +85,44 @@ namespace {
         "(useful for planar displays), and \"Camera Position Normal\" rotates the points "
         "towards the position of the camera (useful for spherical displays, like dome "
         "theaters).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SegmentQualityInfo = {
+    constexpr Property::PropertyInfo SegmentQualityInfo = {
         "SegmentQuality",
         "Segment quality",
         "A segment quality value for the orbital trail. A value from 1 (lowest) to "
         "10 (highest) that controls the number of line segments in the rendering of the "
         "orbital trail. This does not control the direct number of segments because "
         "these automatically increase according to the eccentricity of the orbit.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TrailWidthInfo = {
+    constexpr Property::PropertyInfo TrailWidthInfo = {
         "TrailWidth",
         "Trail width",
         "The line width used for the trail, if the selected rendering method includes "
         "lines. If the rendering mode is set to Points, this value is ignored.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointSizeExponentInfo = {
+    constexpr Property::PropertyInfo PointSizeExponentInfo = {
         "PointSizeExponent",
         "Point size exponent",
         "An exponential scale value to set the absolute size of the point.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableMaxSizeInfo = {
+    constexpr Property::PropertyInfo EnableMaxSizeInfo = {
         "EnableMaxSize",
         "Enable max size",
         "If true, the Max Size property will be used as an upper limit for the size of "
         "the point. This reduces the size of the points when approaching them, so that "
         "they stick to a maximum visual size depending on the Max Size value.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxSizeInfo = {
+    constexpr Property::PropertyInfo MaxSizeInfo = {
         "MaxSize",
         "Max size",
         "Controls the maximum allowed size for the points, when the max size control "
@@ -128,79 +130,79 @@ namespace {
         "distance to the camera. The larger the value, the larger the points are allowed "
         "to be. In the background, the computations are made to limit the size of the "
         "angle between the CameraToPointMid and CameraToPointEdge vectors.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
+    constexpr Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering mode",
         "Determines how the trail should be rendered. If 'Trail' is selected, "
         "only the line part is visible, if 'Point' is selected, only the "
         "current satellite/debris point is visible.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The RGB main color for the trails and points.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TrailFadeInfo = {
+    constexpr Property::PropertyInfo TrailFadeInfo = {
         "TrailFade",
         "Trail fade",
         "Determines how fast the trail fades out. A smaller number shows less of the "
         "trail and a larger number shows more.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableOutlineInfo = {
+    constexpr Property::PropertyInfo EnableOutlineInfo = {
         "EnableOutline",
         "Enable point outline",
         "Determines if the points should be rendered with an outline or not.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OutlineColorInfo = {
+    constexpr Property::PropertyInfo OutlineColorInfo = {
         "OutlineColor",
         "Outline color",
         "The color of the outline.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OutlineWidthInfo = {
+    constexpr Property::PropertyInfo OutlineWidthInfo = {
         "OutlineWidth",
         "Outline width",
         "Determines the thickness of the outline. A value of 0 will not show any "
         "outline, while a value of 1 will cover the whole point.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StartRenderIdxInfo = {
+    constexpr Property::PropertyInfo StartRenderIdxInfo = {
         "StartRenderIdx",
         "Contiguous starting index of render",
         "Index of the first object in the block to render (all prior objects will be "
         "ignored). The block of objects to render will be determined by StartRenderIdx "
         "and RenderSize.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderSizeInfo = {
+    constexpr Property::PropertyInfo RenderSizeInfo = {
         "RenderSize",
         "Contiguous size of render block",
         "Number of objects to render sequentially from StartRenderIdx.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ContiguousModeInfo = {
+    constexpr Property::PropertyInfo ContiguousModeInfo = {
         "ContiguousMode",
         "Contiguous mode",
         "If enabled, the contiguous set of objects starting from StartRenderIdx "
         "of size RenderSize will be rendered. If disabled, the number of objects "
         "defined by UpperLimit will rendered from an evenly dispersed sample of the "
         "full length of the data file.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableOrbitalKepler)]] Parameters {
@@ -274,17 +276,17 @@ namespace {
         // [[codegen::verbatim(OutlineWidthInfo.description)]]
         std::optional<float> outlineWidth;
     };
-#include "renderableorbitalkepler_codegen.cpp"
 } // namespace
+#include "renderableorbitalkepler_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableOrbitalKepler::Documentation() {
+Documentation RenderableOrbitalKepler::Documentation() {
     return codegen::doc<Parameters>("space_renderableorbitalkepler");
 }
 
 RenderableOrbitalKepler::Appearance::Appearance()
-    : properties::PropertyOwner({
+    : PropertyOwner({
         "Appearance",
         "Appearance",
         "Appearance of RenderableOrbitalKepler"
@@ -308,7 +310,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
     });
     renderingModes.onChange([this]() { isRenderTypeDirty = true; });
     addProperty(renderingModes);
-    color.setViewOption(properties::Property::ViewOptions::Color);
+    color.setViewOption(Property::ViewOptions::Color);
     addProperty(color);
     addProperty(trailWidth);
     addProperty(trailFade);
@@ -317,7 +319,7 @@ RenderableOrbitalKepler::Appearance::Appearance()
     addProperty(enableMaxSize);
     addProperty(maxSize);
     addProperty(enableOutline);
-    outlineColor.setViewOption(properties::Property::ViewOptions::Color);
+    outlineColor.setViewOption(Property::ViewOptions::Color);
     addProperty(outlineColor);
     addProperty(outlineWidth);
 }

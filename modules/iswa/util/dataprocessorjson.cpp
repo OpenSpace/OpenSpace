@@ -66,7 +66,7 @@ std::vector<std::string> DataProcessorJson::readMetadata(const std::string& data
 }
 
 void DataProcessorJson::addDataValues(const std::string& data,
-                                      properties::SelectionProperty& dataOptions)
+                                      SelectionProperty& dataOptions)
 {
     int numOptions = static_cast<int>(dataOptions.options().size());
     initializeVectors(numOptions);
@@ -102,8 +102,8 @@ void DataProcessorJson::addDataValues(const std::string& data,
 }
 
 std::vector<float*> DataProcessorJson::processData(const std::string& data,
-                                                properties::SelectionProperty& optionProp,
-                                                                 glm::size3_t& dimensions)
+                                                   SelectionProperty& optionProp,
+                                                   glm::size3_t& dimensions)
 {
     if (data.empty()) {
         return std::vector<float*>();
@@ -147,4 +147,4 @@ std::vector<float*> DataProcessorJson::processData(const std::string& data,
     return dataOptions;
 }
 
-} //namespace openspace
+} // namespace openspace

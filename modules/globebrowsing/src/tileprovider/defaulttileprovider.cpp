@@ -41,22 +41,24 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo FilePathInfo = {
         "FilePath",
         "File path",
         "The path of the GDAL file or the image file that is to be used in this tile "
         "provider.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TilePixelSizeInfo = {
+    constexpr Property::PropertyInfo TilePixelSizeInfo = {
         "TilePixelSize",
         "Tile pixel size",
         "This value is the preferred size (in pixels) for each tile. Choosing the right "
         "value is a tradeoff between more efficiency (larger images) and better quality "
         "(smaller images). The tile pixel size has to be smaller than the size of the "
         "complete image if a single image is used.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     enum class [[codegen::stringify()]] Compression {
@@ -113,12 +115,12 @@ namespace {
         std::optional<std::string> globeName;
 
     };
-#include "defaulttileprovider_codegen.cpp"
 } // namespace
+#include "defaulttileprovider_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation DefaultTileProvider::Documentation() {
+Documentation DefaultTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_defaulttileprovider");
 }
 
@@ -221,11 +223,11 @@ Tile DefaultTileProvider::tile(const TileIndex& tileIndex) {
     if (tileIndex.level > maxLevel()) {
         return Tile{ nullptr, std::nullopt, Tile::Status::OutOfRange };
     }
-    const cache::ProviderTileKey key = {
+    const ProviderTileKey key = {
         .tileIndex = tileIndex,
         .providerID = uniqueIdentifier
     };
-    cache::MemoryAwareTileCache* tileCache =
+    MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     Tile tile = tileCache->get(key);
     if (!tile.texture) {
@@ -243,11 +245,11 @@ Tile::Status DefaultTileProvider::tileStatus(const TileIndex& index) {
         return Tile::Status::OutOfRange;
     }
 
-    const cache::ProviderTileKey key = {
+    const ProviderTileKey key = {
         .tileIndex = index,
         .providerID = uniqueIdentifier
     };
-    cache::MemoryAwareTileCache* tileCache =
+    MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     return tileCache->get(key).status;
 }
@@ -263,11 +265,11 @@ void DefaultTileProvider::update() {
 
     std::optional<RawTile> tile = _asyncTextureDataProvider->popFinishedRawTile();
     if (tile) {
-        const cache::ProviderTileKey key = {
+        const ProviderTileKey key = {
             .tileIndex = tile->tileIndex,
             .providerID = uniqueIdentifier
         };
-        cache::MemoryAwareTileCache* tileCache =
+        MemoryAwareTileCache* tileCache =
             global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
         ghoul_assert(!tileCache->exist(key), "Tile must not be existing in cache");
         tileCache->createTileAndPut(key, std::move(*tile));
@@ -302,4 +304,4 @@ float DefaultTileProvider::noDataValueAsFloat() {
     return _asyncTextureDataProvider->noDataValueAsFloat();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

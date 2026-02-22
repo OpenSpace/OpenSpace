@@ -51,7 +51,7 @@ public:
 
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     /**
@@ -91,9 +91,9 @@ private:
     UpdateReport updateTrails(const UpdateData& data);
 
     /// The orbital period of the RenderableTrail in days
-    properties::DoubleProperty _period;
+    DoubleProperty _period;
     /// The number of points that should be sampled between _period and now
-    properties::IntProperty _resolution;
+    IntProperty _resolution;
 
     /// A dirty flag that determines whether a full sweep (recomputing of all values)
     /// is necessary

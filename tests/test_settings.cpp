@@ -337,7 +337,7 @@ TEST_CASE("Settings Load: Visibility/NoviceUser", "[settings]") {
     CHECK(!settings.profile.has_value());
     CHECK(!settings.rememberLastProfile.has_value());
     REQUIRE(settings.visibility.has_value());
-    CHECK(*settings.visibility == properties::Property::Visibility::NoviceUser);
+    CHECK(*settings.visibility == Property::Visibility::NoviceUser);
     CHECK(!settings.bypassLauncher.has_value());
     CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
@@ -349,7 +349,7 @@ TEST_CASE("Settings Save: Visibility/NoviceUser", "[settings]") {
     const std::filesystem::path file = path / "test_settings_save_noviceuser.json";
 
     const Settings srcSettings = {
-        .visibility = openspace::properties::Property::Visibility::NoviceUser
+        .visibility = Property::Visibility::NoviceUser
     };
     saveSettings(srcSettings, file);
 
@@ -380,7 +380,7 @@ TEST_CASE("Settings Load: Visibility/User", "[settings]") {
     CHECK(!settings.profile.has_value());
     CHECK(!settings.rememberLastProfile.has_value());
     REQUIRE(settings.visibility.has_value());
-    CHECK(*settings.visibility == properties::Property::Visibility::User);
+    CHECK(*settings.visibility == Property::Visibility::User);
     CHECK(!settings.bypassLauncher.has_value());
     CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
@@ -392,7 +392,7 @@ TEST_CASE("Settings Save: Visibility/User", "[settings]") {
     const std::filesystem::path file = path / "test_settings_save_user.json";
 
     const Settings srcSettings = {
-        .visibility = openspace::properties::Property::Visibility::User
+        .visibility = Property::Visibility::User
     };
     saveSettings(srcSettings, file);
 
@@ -423,7 +423,7 @@ TEST_CASE("Settings Load: Visibility/AdvancedUser", "[settings]") {
     CHECK(!settings.profile.has_value());
     CHECK(!settings.rememberLastProfile.has_value());
     REQUIRE(settings.visibility.has_value());
-    CHECK(*settings.visibility == properties::Property::Visibility::AdvancedUser);
+    CHECK(*settings.visibility == Property::Visibility::AdvancedUser);
     CHECK(!settings.bypassLauncher.has_value());
     CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
@@ -435,7 +435,7 @@ TEST_CASE("Settings Save: Visibility/AdvancedUser", "[settings]") {
     const std::filesystem::path file = path / "test_settings_save_advanceduser.json";
 
     const Settings srcSettings = {
-        .visibility = openspace::properties::Property::Visibility::AdvancedUser
+        .visibility = Property::Visibility::AdvancedUser
     };
     saveSettings(srcSettings, file);
 
@@ -466,7 +466,7 @@ TEST_CASE("Settings Load: Visibility/Developer", "[settings]") {
     CHECK(!settings.profile.has_value());
     CHECK(!settings.rememberLastProfile.has_value());
     REQUIRE(settings.visibility.has_value());
-    CHECK(*settings.visibility == properties::Property::Visibility::Developer);
+    CHECK(*settings.visibility == Property::Visibility::Developer);
     CHECK(!settings.bypassLauncher.has_value());
     CHECK(!settings.layerServer.has_value());
     CHECK(!settings.mrf.isEnabled.has_value());
@@ -478,7 +478,7 @@ TEST_CASE("Settings Save: Visibility/Developer", "[settings]") {
     const std::filesystem::path file = path / "test_settings_save_developer.json";
 
     const Settings srcSettings = {
-        .visibility = openspace::properties::Property::Visibility::Developer
+        .visibility = Property::Visibility::Developer
     };
     saveSettings(srcSettings, file);
 
@@ -878,7 +878,7 @@ TEST_CASE("Settings Load: Full", "[settings]") {
     REQUIRE(settings.rememberLastProfile.has_value());
     CHECK(*settings.rememberLastProfile == false);
     REQUIRE(settings.visibility.has_value());
-    CHECK(*settings.visibility == properties::Property::Visibility::NoviceUser);
+    CHECK(*settings.visibility == Property::Visibility::NoviceUser);
     REQUIRE(settings.bypassLauncher.has_value());
     CHECK(*settings.bypassLauncher == false);
     REQUIRE(settings.layerServer.has_value());
@@ -899,7 +899,7 @@ TEST_CASE("Settings Save: Full", "[settings]") {
         .rememberLastConfiguration = true,
         .profile = "def",
         .rememberLastProfile = false,
-        .visibility = openspace::properties::Property::Visibility::NoviceUser,
+        .visibility = Property::Visibility::NoviceUser,
         .bypassLauncher = false,
         .layerServer = openspace::Configuration::LayerServer::All,
         .mrf = Settings::MRF {

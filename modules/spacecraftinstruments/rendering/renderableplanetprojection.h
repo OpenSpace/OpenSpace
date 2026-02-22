@@ -54,7 +54,7 @@ public:
     void update(const UpdateData& data) override;
     ghoul::opengl::Texture& baseTexture() const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void loadColorTexture();
@@ -67,12 +67,12 @@ private:
 
     ProjectionComponent _projectionComponent;
 
-    properties::OptionProperty _colorTexturePaths;
-    properties::StringProperty _addColorTexturePath;
+    OptionProperty _colorTexturePaths;
+    StringProperty _addColorTexturePath;
     bool _colorTextureDirty = false;
 
-    properties::OptionProperty _heightMapTexturePaths;
-    properties::StringProperty _addHeightMapTexturePath;
+    OptionProperty _heightMapTexturePaths;
+    StringProperty _addHeightMapTexturePath;
     bool _heightMapTextureDirty = false;
 
     ghoul::opengl::ProgramObject* _programObject = nullptr;
@@ -88,15 +88,15 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _baseTexture;
     std::unique_ptr<ghoul::opengl::Texture> _heightMapTexture;
 
-    properties::FloatProperty _heightExaggeration;
-    properties::BoolProperty _meridianShift;
-    properties::FloatProperty _ambientBrightness;
-    properties::IntProperty _maxProjectionsPerFrame;
-    properties::IntProperty _projectionsInBuffer;
-    properties::TriggerProperty _clearProjectionBuffer;
+    FloatProperty _heightExaggeration;
+    BoolProperty _meridianShift;
+    FloatProperty _ambientBrightness;
+    IntProperty _maxProjectionsPerFrame;
+    IntProperty _projectionsInBuffer;
+    TriggerProperty _clearProjectionBuffer;
 
-    properties::Vec3Property _radius;
-    properties::IntProperty _segments;
+    Vec3Property _radius;
+    IntProperty _segments;
     std::unique_ptr<Sphere> _sphere;
 
     glm::mat4 _transform = glm::mat4(1.f);
@@ -109,6 +109,6 @@ private:
     GLuint _vbo = 0;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACECRAFTINSTRUMENTS___RENDERABLEPLANETPROJECTION___H__

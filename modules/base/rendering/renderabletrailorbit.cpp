@@ -37,6 +37,41 @@
 #include <limits>
 #include <numeric>
 
+namespace {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo PeriodInfo = {
+        "Period",
+        "Period (in days)",
+        "The objects period, i.e. the length of its orbit around the parent object given "
+        "in (Earth) days. In the case of Earth, this would be a sidereal year "
+        "(=365.242 days). If this values is specified as multiples of the period, it is "
+        "possible to show the effects of precession.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo ResolutionInfo = {
+        "Resolution",
+        "Number of samples along the orbit",
+        "The number of samples along the orbit. This determines the resolution of the "
+        "trail; the tradeoff being that a higher resolution is able to resolve more "
+        "detail, but will take more resources while rendering, too. The higher, the "
+        "smoother the trail, but also more memory will be used.",
+        Property::Visibility::AdvancedUser
+    };
+
+    struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {
+        // [[codegen::verbatim(PeriodInfo.description)]]
+        double period;
+
+        // [[codegen::verbatim(ResolutionInfo.description)]]
+        int resolution;
+    };
+} // namespace
+#include "renderabletrailorbit_codegen.cpp"
+
+namespace openspace {
+
 // This class is using a VBO ring buffer + a constantly updated point as follows:
 // Structure of the array with a _resolution of 16. FF denotes the floating position that
 // is updated every frame:
@@ -84,40 +119,7 @@
 // NB: This method was implemented without a ring buffer before by manually shifting the
 // items in memory as was shown to be much slower than the current system.   ---abock
 
-namespace {
-    constexpr openspace::properties::Property::PropertyInfo PeriodInfo = {
-        "Period",
-        "Period (in days)",
-        "The objects period, i.e. the length of its orbit around the parent object given "
-        "in (Earth) days. In the case of Earth, this would be a sidereal year "
-        "(=365.242 days). If this values is specified as multiples of the period, it is "
-        "possible to show the effects of precession.",
-        openspace::properties::Property::Visibility::User
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
-        "Resolution",
-        "Number of samples along the orbit",
-        "The number of samples along the orbit. This determines the resolution of the "
-        "trail; the tradeoff being that a higher resolution is able to resolve more "
-        "detail, but will take more resources while rendering, too. The higher, the "
-        "smoother the trail, but also more memory will be used.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {
-        // [[codegen::verbatim(PeriodInfo.description)]]
-        double period;
-
-        // [[codegen::verbatim(ResolutionInfo.description)]]
-        int resolution;
-    };
-#include "renderabletrailorbit_codegen.cpp"
-} // namespace
-
-namespace openspace {
-
-documentation::Documentation RenderableTrailOrbit::Documentation() {
+Documentation RenderableTrailOrbit::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderable_renderabletrailorbit",
         RenderableTrail::Documentation()

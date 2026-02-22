@@ -34,7 +34,7 @@
 
 using namespace openspace;
 
-TimeDialog::TimeDialog(QWidget* parent, std::optional<openspace::Profile::Time>* time)
+TimeDialog::TimeDialog(QWidget* parent, std::optional<Profile::Time>* time)
     : QDialog(parent)
     , _time(time)
 {

@@ -57,7 +57,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     enum ColorOption {
@@ -72,39 +72,39 @@ private:
     void loadData();
     void updateData(ColorOption option);
 
-    properties::StringProperty _speckFile;
+    StringProperty _speckFile;
 
-    properties::StringProperty _colorTexturePath;
+    StringProperty _colorTexturePath;
     std::unique_ptr<ghoul::opengl::Texture> _colorTexture;
     std::unique_ptr<ghoul::filesystem::File> _colorTextureFile;
 
     struct {
-        properties::PropertyOwner container;
+        PropertyOwner container;
 
-        properties::StringProperty bvColor;
-        properties::StringProperty luminance;
-        properties::StringProperty absoluteMagnitude;
-        properties::StringProperty vx;
-        properties::StringProperty vy;
-        properties::StringProperty vz;
-        properties::StringProperty speed;
+        StringProperty bvColor;
+        StringProperty luminance;
+        StringProperty absoluteMagnitude;
+        StringProperty vx;
+        StringProperty vy;
+        StringProperty vz;
+        StringProperty speed;
     } _dataMapping;
 
-    properties::OptionProperty _colorOption;
-    properties::OptionProperty _otherDataOption;
-    properties::StringProperty _otherDataColorMapPath;
-    properties::Vec2Property _otherDataRange;
+    OptionProperty _colorOption;
+    OptionProperty _otherDataOption;
+    StringProperty _otherDataColorMapPath;
+    Vec2Property _otherDataRange;
     std::unique_ptr<ghoul::opengl::Texture> _otherDataColorMapTexture;
-    properties::Vec3Property _fixedColor;
-    properties::BoolProperty _filterOutOfRange;
+    Vec3Property _fixedColor;
+    BoolProperty _filterOutOfRange;
 
     struct TextureComponent {
-        properties::PropertyOwner container;
+        PropertyOwner container;
 
-        properties::StringProperty texturePath;
-        properties::FloatProperty multiplier;
-        properties::FloatProperty gamma;
-        properties::FloatProperty scale;
+        StringProperty texturePath;
+        FloatProperty multiplier;
+        FloatProperty gamma;
+        FloatProperty scale;
 
         std::unique_ptr<ghoul::opengl::Texture> texture;
         std::unique_ptr<ghoul::filesystem::File> file;
@@ -114,17 +114,17 @@ private:
     TextureComponent _glare;
 
     struct {
-        properties::PropertyOwner container;
-        properties::OptionProperty method;
-        properties::FloatProperty lumCent;
-        properties::FloatProperty radiusCent;
+        PropertyOwner container;
+        OptionProperty method;
+        FloatProperty lumCent;
+        FloatProperty radiusCent;
     } _parameters;
 
-    properties::FloatProperty _magnitudeExponent;
-    properties::Vec2Property _fadeInDistances;
-    properties::BoolProperty _useProperMotion;
-    properties::DoubleProperty _properMotionEpoch;
-    properties::BoolProperty _enableFadeInDistance;
+    FloatProperty _magnitudeExponent;
+    Vec2Property _fadeInDistances;
+    BoolProperty _useProperMotion;
+    DoubleProperty _properMotionEpoch;
+    BoolProperty _enableFadeInDistance;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(

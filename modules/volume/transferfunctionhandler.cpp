@@ -28,55 +28,55 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunction",
         "Transfer function",
         "All the envelopes used in the transfer function.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DataUnitInfo = {
+    constexpr Property::PropertyInfo DataUnitInfo = {
         "DataUnit",
         "Data unit",
         "Unit of the data.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MinValueInfo = {
+    constexpr Property::PropertyInfo MinValueInfo = {
         "MinValue",
         "Min value",
         "Minimum value in the data.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxValueInfo = {
+    constexpr Property::PropertyInfo MaxValueInfo = {
         "MaxValue",
         "Max value",
         "Maximum value in the data.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SaveTransferFunctionInfo = {
+    constexpr Property::PropertyInfo SaveTransferFunctionInfo = {
         "SaveTransferFunction",
         "Save transfer function",
         "Save your transfer function.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
-namespace openspace::volume {
+namespace openspace {
 
-TransferFunctionHandler::TransferFunctionHandler(properties::StringProperty prop)
-    : properties::PropertyOwner({ "TransferFunctionHandler", "Tranfer Function Handler" })
+TransferFunctionHandler::TransferFunctionHandler(StringProperty prop)
+    : PropertyOwner({ "TransferFunctionHandler", "Tranfer Function Handler" })
     , _transferFunctionPath(std::move(prop))
     , _dataUnit(DataUnitInfo)
     , _minValue(MinValueInfo)
     , _maxValue(MaxValueInfo)
     , _saveTransferFunction(SaveTransferFunctionInfo)
     , _transferFunctionProperty(TransferFunctionInfo)
-    , _transferFunction(std::make_shared<openspace::TransferFunction>(
-        _transferFunctionPath.value()
-    ))
+    , _transferFunction(std::make_shared<TransferFunction>(_transferFunctionPath.value()))
 {}
 
 void TransferFunctionHandler::initialize() {
@@ -122,7 +122,7 @@ void TransferFunctionHandler::setMinAndMaxValue(float min, float max) {
 }
 
 void TransferFunctionHandler::loadStoredEnvelopes() {
-    TransferFunction tf;
+    VolumeTransferFunction tf;
     tf.loadEnvelopesFromFile(_filePath);
     if (tf.hasEnvelopes()) {
         _transferFunctionProperty = std::move(tf);
@@ -146,8 +146,8 @@ bool TransferFunctionHandler::hasTexture() const {
     return _texture != nullptr;
 }
 
-std::shared_ptr<openspace::TransferFunction> TransferFunctionHandler::transferFunction() {
+std::shared_ptr<TransferFunction> TransferFunctionHandler::transferFunction() {
     return _transferFunction;
 }
 
-} // namespace openspace::volume
+} // namespace openspace

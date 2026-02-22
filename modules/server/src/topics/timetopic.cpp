@@ -31,13 +31,13 @@
 #include <optional>
 #include <string_view>
 
+using nlohmann::json;
+
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
     constexpr std::string_view UnsubscribeEvent = "stop_subscription";
     constexpr std::chrono::milliseconds TimeUpdateInterval(50);
 } // namespace
-
-using nlohmann::json;
 
 namespace openspace {
 

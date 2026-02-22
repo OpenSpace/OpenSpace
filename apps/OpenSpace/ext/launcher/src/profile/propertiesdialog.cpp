@@ -61,7 +61,7 @@ namespace {
 } // namespace
 
 PropertiesDialog::PropertiesDialog(QWidget* parent,
-                                   std::vector<openspace::Profile::Property>* properties)
+                                   std::vector<Profile::Property>* properties)
     : QDialog(parent)
     , _properties(properties)
     , _propertyData(*_properties)

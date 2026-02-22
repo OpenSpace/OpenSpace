@@ -58,6 +58,8 @@
 #include <variant>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableModel";
     constexpr std::string_view ProgramName = "ModelProgram";
 
@@ -77,131 +79,131 @@ namespace {
 
     constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
-    constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
+    constexpr Property::PropertyInfo EnableAnimationInfo = {
         "EnableAnimation",
         "Enable animation",
         "Enable or disable the animation for the model if it has any.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
+    constexpr Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient intensity",
         "A multiplier for ambient lighting.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
+    constexpr Property::PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
         "Diffuse intensity",
         "A multiplier for diffuse lighting.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
+    constexpr Property::PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
         "Specular intensity",
         "A multiplier for specular lighting.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SpecularPowerInfo = {
+    constexpr Property::PropertyInfo SpecularPowerInfo = {
         "SpecularPower",
         "Specular Power",
         "Power factor for specular component, higher value gives narrower specularity",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShadingInfo = {
+    constexpr Property::PropertyInfo ShadingInfo = {
         "PerformShading",
         "Perform shading",
         "Determines whether shading should be applied to this model, based on the "
         "provided list of light sources. If false, the model will be fully illuminated.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableFaceCullingInfo = {
+    constexpr Property::PropertyInfo EnableFaceCullingInfo = {
         "EnableFaceCulling",
         "Enable face culling",
         "Enable OpenGL automatic face culling optimization.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
+    constexpr Property::PropertyInfo ModelTransformInfo = {
         "ModelTransform",
         "Model transform",
         "An extra model transform matrix that is applied to the model before all other "
         "transformations are applied.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PivotInfo = {
+    constexpr Property::PropertyInfo PivotInfo = {
         "Pivot",
         "Pivot",
         "A vector that moves the place of origin for the model.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ModelScaleInfo = {
+    constexpr Property::PropertyInfo ModelScaleInfo = {
         "ModelScale",
         "Model scale",
         "The scale of the model. If a numeric value is provided in the asset file, the "
         "scale will be that exact value. If instead a unit name is provided, this is the "
         "value that that name represents. For example 'Centimeter' becomes 0.01.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
+    constexpr Property::PropertyInfo RotationVecInfo = {
         "RotationVector",
         "Rotation vector",
         "A rotation vector with Euler angles, specified in degrees.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
+    constexpr Property::PropertyInfo LightSourcesInfo = {
         "LightSources",
         "Light sources",
         "A list of light sources that this model should accept light from.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableDepthTestInfo = {
+    constexpr Property::PropertyInfo EnableDepthTestInfo = {
         "EnableDepthTest",
         "Enable depth test",
         "If true, depth testing is enabled for the model. This means that parts of the "
         "model that are occluded by other parts will not be rendered. If disabled, the "
         "depth of the model part will not be taken into account in rendering and some "
         "parts that should be hidden behind a model might be rendered in front.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderWireframeInfo = {
+    constexpr Property::PropertyInfo RenderWireframeInfo = {
         "RenderWireframe",
         "Enable Wireframe Rendering",
         "Enable Wireframe rendering for the Model",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
+    constexpr Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending options",
         "Controls the blending function used to calculate the colors of the model with "
         "respect to the opacity.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseOverrideColorInfo = {
+    constexpr Property::PropertyInfo UseOverrideColorInfo = {
         "UseOverrideColor",
         "Use Override Color",
         "Whether or not to render model with a single color.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OverrideColorInfo = {
+    constexpr Property::PropertyInfo OverrideColorInfo = {
         "OverrideColor",
         "Override Color",
         "The single color to use for entire model (RGBA).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `Renderable` shows a three-dimensional model. The provided model may contain
@@ -311,15 +313,15 @@ namespace {
         // [[codegen::verbatim(OverrideColorInfo.description)]]
         std::optional<glm::vec4> overrideColor;
     };
-#include "renderablemodel_codegen.cpp"
 } // namespace
+#include "renderablemodel_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableModel::Documentation() {
-    documentation::Documentation docs = codegen::doc<Parameters>("base_renderable_model");
+Documentation RenderableModel::Documentation() {
+    openspace::Documentation docs = codegen::doc<Parameters>("base_renderable_model");
 
-    documentation::Documentation d = Shadower::Documentation();
+    openspace::Documentation d = Shadower::Documentation();
     docs.entries.insert(docs.entries.end(), d.entries.begin(), d.entries.end());
 
     return docs;
@@ -504,7 +506,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_pivot);
     addProperty(_rotationVec);
     addProperty(_useOverrideColor);
-    _overrideColor.setViewOption(properties::Property::ViewOptions::Color);
+    _overrideColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_overrideColor);
 
     addProperty(_modelScale);
@@ -971,8 +973,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit shadowUnit;
     if (_castShadow && _lightSource) {
-        shadowmapping::ShadowInfo sm =
-            global::renderEngine->renderer().shadowInformation(_shadowGroup);
+        ShadowInfo sm = global::renderEngine->renderer().shadowInformation(_shadowGroup);
 
         _program->setUniform(_uniformCache.model, modelTransform);
         _program->setUniform(_uniformCache.light_vp, sm.viewProjectionMatrix);
@@ -1262,4 +1263,4 @@ glm::dvec3 RenderableModel::center() const {
     return model * glm::dvec4(0.0, 0.0, 0.0, 1.0);
 }
 
-}  // namespace openspace
+} // namespace openspace

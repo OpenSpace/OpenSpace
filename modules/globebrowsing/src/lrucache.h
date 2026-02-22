@@ -30,7 +30,7 @@
 #include <utility>
 #include <vector>
 
-namespace openspace::globebrowsing::cache {
+namespace openspace {
 
 /**
  * Templated class implementing a Least-Recently-Used Cache. `KeyType` needs to be an
@@ -85,7 +85,7 @@ private:
     size_t _maximumCacheSize;
 };
 
-} // namespace openspace::globebrowsing::cache
+} // namespace openspace
 
 #include <modules/globebrowsing/src/lrucache.inl>
 

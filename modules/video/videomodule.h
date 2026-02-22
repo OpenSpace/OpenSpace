@@ -35,7 +35,7 @@ public:
 
     VideoModule();
 
-    std::vector<documentation::Documentation> documentations() const override;
+    std::vector<openspace::Documentation> documentations() const override;
 
 protected:
     void internalInitialize(const ghoul::Dictionary& dict) override;

@@ -26,7 +26,7 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 Vec4Property::Vec4Property(Property::PropertyInfo info, glm::vec4 value,
                            glm::vec4 minValue, glm::vec4 maxValue, glm::vec4 stepValue)
@@ -59,4 +59,4 @@ std::string Vec4Property::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

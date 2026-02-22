@@ -42,14 +42,16 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ScreenSpaceTimeVaryingImageOnline";
 
-    constexpr openspace::properties::Property::PropertyInfo FileInfo = {
+    constexpr Property::PropertyInfo FileInfo = {
         "FilePath",
         "File path",
         "The file path to the data containing information about when to display which "
         "image.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `ScreenSpaceRenderable` displays an image based on the current in-game
@@ -68,12 +70,12 @@ namespace {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path filePath;
     };
-#include "screenspacetimevaryingimageonline_codegen.cpp"
 } // namespace
+#include "screenspacetimevaryingimageonline_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
+Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
     return codegen::doc<Parameters>("base_screenspace_time_varying_image_online");
 }
 

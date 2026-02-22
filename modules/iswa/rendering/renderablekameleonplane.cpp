@@ -50,27 +50,29 @@
 #include <set>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "KameleonPlane";
 
-    constexpr openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
+    constexpr Property::PropertyInfo FieldLineSeedsInfo = {
         "FieldlineSeedsIndexFile",
         "Fieldline seedpoints",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
+    constexpr Property::PropertyInfo ResolutionInfo = {
         "Resolution",
         "Resolution%",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SliceInfo = {
+    constexpr Property::PropertyInfo SliceInfo = {
         "Slice",
         "Slice",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableKameleonPlane)]] Parameters {
@@ -85,12 +87,12 @@ namespace {
         };
         std::optional<AxisCut> axisCut [[codegen::key("axisCut")]];
     };
-#include "renderablekameleonplane_codegen.cpp"
 } // namespace
+#include "renderablekameleonplane_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableKameleonPlane::Documentation() {
+Documentation RenderableKameleonPlane::Documentation() {
     return codegen::doc<Parameters>(
         "iswa_renderable_kameleonplane",
         RenderableDataCygnet::Documentation()
@@ -180,12 +182,12 @@ void RenderableKameleonPlane::initializeGL() {
             // and unregister backgroundvalues property.
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();
-                _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
+                _backgroundValues.setVisibility(Property::Visibility::Hidden);
                 //_backgroundValues.setVisible(false);
             // else if autofilter is turned off, register backgroundValues
             }
             else {
-                _backgroundValues.setVisibility(properties::Property::Visibility::Always);
+                _backgroundValues.setVisibility(Property::Visibility::Always);
                 //_backgroundValues.setVisible(true);
             }
         });
@@ -434,4 +436,4 @@ void RenderableKameleonPlane::changeKwPath(std::string kwPath) {
     _kwPath = std::move(kwPath);
 }
 
-}// namespace openspace
+} // namespace openspace

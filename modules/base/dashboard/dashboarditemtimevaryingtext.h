@@ -40,15 +40,15 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void loadDataFromJson(const std::string& filePath);
     void computeSequenceEndTime();
     int updateActiveTriggerTimeIndex(double currentTime) const;
 
-    properties::StringProperty _formatString;
-    properties::StringProperty _dataFile;
+    StringProperty _formatString;
+    StringProperty _dataFile;
 
     std::unordered_map<double, nlohmann::json> _data;
     std::vector<double> _startTimes;

@@ -26,7 +26,7 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 Vec3Property::Vec3Property(Property::PropertyInfo info, glm::vec3 value,
                            glm::vec3 minValue, glm::vec3 maxValue, glm::vec3 stepValue)
@@ -59,4 +59,4 @@ std::string Vec3Property::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace
