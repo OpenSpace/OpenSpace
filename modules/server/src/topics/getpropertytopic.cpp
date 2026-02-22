@@ -26,7 +26,6 @@
 
 #include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
-#include <modules/volume/transferfunctionhandler.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>

@@ -32,9 +32,6 @@ set(HEADER_FILES
   rawvolumewriter.h
   textureslicevolumereader.h
   textureslicevolumereader.inl
-  transferfunction.h
-  transferfunctionhandler.h
-  transferfunctionproperty.h
   rawvolumemetadata.h
   lrucache.h
   lrucache.inl
@@ -60,9 +57,6 @@ set(SOURCE_FILES
   rawvolumereader.inl
   rawvolumewriter.inl
   textureslicevolumereader.inl
-  transferfunction.cpp
-  transferfunctionhandler.cpp
-  transferfunctionproperty.cpp
   volumesampler.inl
   volumegridtype.cpp
   volumeutils.cpp
