@@ -630,7 +630,7 @@ void OpenSpaceEngine::initializeGL() {
     }
 
     if (debugActive) {
-        using namespace ghoul::opengl::debug;
+        using namespace ghoul::opengl;
 
         const bool synchronous = global::configuration->openGLDebugContext.isSynchronous;
         setDebugOutput(DebugOutput(debugActive), SynchronousOutput(synchronous));
@@ -658,7 +658,7 @@ void OpenSpaceEngine::initializeGL() {
             );
         }
 
-        ghoul::opengl::debug::setDebugCallback(
+        ghoul::opengl::setDebugCallback(
             [](Source source, Type type, Severity severity, unsigned int id,
                 const std::string& message)
             {
