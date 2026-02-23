@@ -29,6 +29,8 @@ local Node = {
     MinDomain = { -5000.0, -5000.0, -5000.0 },
     MaxDomain = { 5000.0, 5000.0, 5000.0 },
     Dimensions = { 16, 16, 16 },
+    VectorFieldScale = 8.0,
+
     FilterByLua = true,
     Script = asset.resource("script/filter.lua")
   },
