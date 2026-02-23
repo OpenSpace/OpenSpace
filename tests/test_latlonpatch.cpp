@@ -29,15 +29,13 @@
 #include <openspace/util/geodetic.h>
 #include <ghoul/glm.h>
 
-TEST_CASE("LatLonPatch: findCenterControlPoint", "[latlonpatch]") {
-    using namespace openspace;
+using namespace openspace;
 
+TEST_CASE("LatLonPatch: findCenterControlPoint", "[latlonpatch]") {
     const GeodeticPatch patch(0, 0, glm::pi<float>() / 4.f, glm::pi<float>() / 4.f);
 }
 
 TEST_CASE("LatLonPatch: Find Closest Corner", "[latlonpatch]") {
-    using namespace openspace;
-
     constexpr float piOver4 = glm::pi<float>() / 4.f;
     const Geodetic2 halfSize { piOver4, piOver4 };
     const Geodetic2 center { 0, 0 };
@@ -54,8 +52,6 @@ TEST_CASE("LatLonPatch: Find Closest Corner", "[latlonpatch]") {
 }
 
 TEST_CASE("LatLonPatch: Find Closest Corner 2", "[latlonpatch]") {
-    using namespace openspace;
-
     constexpr float piOver6 = glm::pi<float>() / 4.f;
 
     const Geodetic2 halfSize { 1.1 * piOver6, 1.1 * piOver6 };

@@ -26,6 +26,8 @@
 
 #include <openspace/properties/misc/optionproperty.h>
 
+using namespace openspace;
+
 TEST_CASE("OptionProperty: No Option", "[optionproperty]") {
     const OptionProperty p({ "id", "gui", "desc" });
 

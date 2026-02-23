@@ -34,6 +34,8 @@
 #include <string>
 #include <vector>
 
+using namespace openspace;
+
 TEST_CASE("StringListProperty: Class Name and Default Value", "[stringlistproperty]") {
     const StringListProperty p({ "id", "gui", "desc" });
 

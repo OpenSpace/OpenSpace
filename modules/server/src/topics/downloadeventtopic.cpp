@@ -50,11 +50,11 @@ void DownloadEventTopic::handleJson(const nlohmann::json& json) {
     if (event == StartSubscription) {
         _isSubscribedTo = true;
 
-        auto callback = [this](const DownloadEventEngine::DownloadEvent& event) {
+        auto callback = [this](const DownloadEventEngine::DownloadEvent& e) {
             // Limit how often we send data to frontend to reduce traffic
-            if (event.type == DownloadEventEngine::DownloadEvent::Type::Progress) {
+            if (e.type == DownloadEventEngine::DownloadEvent::Type::Progress) {
                 const auto now = std::chrono::steady_clock::now();
-                auto& last = _lastCallback[event.id];
+                auto& last = _lastCallback[e.id];
 
                 if (now - last >= CallbackUpdateInterval) {
                     last = now;
@@ -65,11 +65,11 @@ void DownloadEventTopic::handleJson(const nlohmann::json& json) {
             }
 
             nlohmann::json payload;
-            payload["type"] = event.type;
-            payload["id"] = event.id;
-            payload["downloadedBytes"] = event.downloadedBytes;
-            if (event.totalBytes.has_value()) {
-                payload["totalBytes"] = event.totalBytes.value();
+            payload["type"] = e.type;
+            payload["id"] = e.id;
+            payload["downloadedBytes"] = e.downloadedBytes;
+            if (e.totalBytes.has_value()) {
+                payload["totalBytes"] = e.totalBytes.value();
             }
 
             _connection->sendJson(wrappedPayload(payload));

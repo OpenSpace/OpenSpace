@@ -61,9 +61,6 @@ GuiGlobeBrowsingComponent::GuiGlobeBrowsingComponent()
 void GuiGlobeBrowsingComponent::render() {
 #ifdef OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
     GlobeBrowsingModule* module = global::moduleEngine->module<GlobeBrowsingModule>();
-    using UrlInfo = GlobeBrowsingModule::UrlInfo;
-    using Capabilities = GlobeBrowsingModule::Capabilities;
-    using Layer = GlobeBrowsingModule::Layer;
 
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
@@ -193,13 +190,13 @@ void GuiGlobeBrowsingComponent::render() {
     ImGui::Separator();
 
     // Render the list of servers for the planet
-    std::vector<UrlInfo> urlInfo = module->urlInfo(_currentNode);
+    std::vector<GlobeBrowsingModule::UrlInfo> urlInfo = module->urlInfo(_currentNode);
 
     const std::string serverList = std::accumulate(
         urlInfo.cbegin(),
         urlInfo.cend(),
         std::string(),
-        [](const std::string& lhs, const UrlInfo& i) {
+        [](const std::string& lhs, const GlobeBrowsingModule::UrlInfo& i) {
             return lhs + i.name + ": (" + i.url + ")" + '\0';
         }
     );
@@ -216,7 +213,7 @@ void GuiGlobeBrowsingComponent::render() {
         const auto it = std::find_if(
             urlInfo.cbegin(),
             urlInfo.cend(),
-            [this](const UrlInfo& i) {
+            [this](const GlobeBrowsingModule::UrlInfo& i) {
                 return i.name == _currentServer;
             }
         );
@@ -276,7 +273,7 @@ void GuiGlobeBrowsingComponent::render() {
 
     ImGui::Separator();
 
-    const Capabilities cap = module->capabilities(_currentServer);
+    const GlobeBrowsingModule::Capabilities cap = module->capabilities(_currentServer);
 
     if (cap.empty()) {
         LWARNINGC("GlobeBrowsing", std::format("Unknown server '{}'", _currentServer));
@@ -303,7 +300,7 @@ void GuiGlobeBrowsingComponent::render() {
     ImGui::NextColumn();
     ImGui::Separator();
 
-    for (const Layer& l : cap) {
+    for (const GlobeBrowsingModule::Layer& l : cap) {
         if (l.name.empty() || l.url.empty()) {
             continue;
         }

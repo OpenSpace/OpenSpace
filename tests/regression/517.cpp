@@ -26,6 +26,8 @@
 
 #include <openspace/properties/misc/optionproperty.h>
 
+using namespace openspace;
+
 TEST_CASE("Regression: 527", "[regression]") {
     // Error in OptionProperty if values not starting at 0 are used
     OptionProperty p({ "id", "gui", "desc" });

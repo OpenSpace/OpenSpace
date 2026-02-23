@@ -32,6 +32,8 @@
 #include <string>
 #include <vector>
 
+using namespace openspace;
+
 TEST_CASE("SelectionProperty: Class Name and Default Value", "[selectionproperty]") {
     const SelectionProperty p({ "id", "gui", "desc" });
 

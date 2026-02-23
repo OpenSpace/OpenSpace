@@ -564,7 +564,7 @@ TEST_CASE("Settings Save: LayerServer/All", "[settings]") {
     const std::filesystem::path file = path / "test_settings_save_layerserver_all.json";
 
     const Settings srcSettings = {
-        .layerServer = openspace::Configuration::LayerServer::All
+        .layerServer = Configuration::LayerServer::All
     };
     saveSettings(srcSettings, file);
 
@@ -607,7 +607,7 @@ TEST_CASE("Settings Save: LayerServer/NewYork", "[settings]") {
     const std::filesystem::path file = path / "test_settings_save_layerserver_nyc.json";
 
     const Settings srcSettings = {
-        .layerServer = openspace::Configuration::LayerServer::NewYork
+        .layerServer = Configuration::LayerServer::NewYork
     };
     saveSettings(srcSettings, file);
 
@@ -651,7 +651,7 @@ TEST_CASE("Settings Save: LayerServer/Sweden", "[settings]") {
     const std::filesystem::path file = path / "test_settings_save_layers_sweden.json";
 
     const Settings srcSettings = {
-        .layerServer = openspace::Configuration::LayerServer::Sweden
+        .layerServer = Configuration::LayerServer::Sweden
     };
     saveSettings(srcSettings, file);
 
@@ -694,7 +694,7 @@ TEST_CASE("Settings Save: LayerServer/Utah", "[settings]") {
     const std::filesystem::path file = path / "test_settings_save_layerserver_utah.json";
 
     const Settings srcSettings = {
-        .layerServer = openspace::Configuration::LayerServer::Utah
+        .layerServer = Configuration::LayerServer::Utah
     };
     saveSettings(srcSettings, file);
 
@@ -737,7 +737,7 @@ TEST_CASE("Settings Save: LayerServer/None", "[settings]") {
     const std::filesystem::path file = path / "test_settings_save_layerserver_none.json";
 
     const Settings srcSettings = {
-        .layerServer = openspace::Configuration::LayerServer::None
+        .layerServer = Configuration::LayerServer::None
     };
     saveSettings(srcSettings, file);
 
@@ -901,7 +901,7 @@ TEST_CASE("Settings Save: Full", "[settings]") {
         .rememberLastProfile = false,
         .visibility = Property::Visibility::NoviceUser,
         .bypassLauncher = false,
-        .layerServer = openspace::Configuration::LayerServer::All,
+        .layerServer = Configuration::LayerServer::All,
         .mrf = Settings::MRF {
             .isEnabled = true,
             .location = "ghi"

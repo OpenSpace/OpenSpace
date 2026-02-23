@@ -112,7 +112,6 @@ bool SessionRecordingTopic::isDone() const {
 
 void SessionRecordingTopic::sendJsonData() {
     nlohmann::json stateJson;
-    using SessionRecordingHandler = SessionRecordingHandler;
     if (_sendState) {
         std::string stateString;
         switch (global::sessionRecordingHandler->state()) {

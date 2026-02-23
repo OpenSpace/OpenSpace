@@ -62,9 +62,6 @@ namespace {
         bool deperiodize;
     };
 
-    LoadedMolecule loadedMolecules[8] = {};
-    int64_t numLoadedMolecules = 0;
-
     LoadedTrajectory loadedTrajectories[8] = {};
     int64_t numLoadedTrajectories = 0;
 
@@ -147,7 +144,7 @@ namespace {
             const int64_t frameDataSize = md_trajectory_fetch_frame_data(
                 trajectory->traj,
                 idx,
-                0
+                nullptr
             );
             void* frameDataPtr = md_alloc(default_allocator, frameDataSize);
             defer {

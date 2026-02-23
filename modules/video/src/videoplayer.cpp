@@ -411,7 +411,9 @@ void VideoPlayer::initializeMpv() {
 
     mpv_opengl_init_params glInitParams;
     glInitParams.get_proc_address = [](void*, const char* name) -> void* {
-        return global::windowDelegate->openGLProcedureAddress(name);
+        return reinterpret_cast<void*>(
+            global::windowDelegate->openGLProcedureAddress(name)
+        );
     };
     glInitParams.get_proc_address_ctx = nullptr;
     int adv = 1; // Use libmpv advanced mode since we will use the update callback

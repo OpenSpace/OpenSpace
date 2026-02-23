@@ -814,7 +814,7 @@ TEST_CASE("Save settings to profile", "[profile]") {
     p1 = 2.f;
     p2 = "test-string";
 
-    interaction::NavigationState state;
+    NavigationState state;
     state.anchor = "anchor";
     state.aim = "aim";
     state.referenceFrame = "refFrame";

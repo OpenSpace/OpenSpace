@@ -190,13 +190,14 @@ void uniform(uint32_t* colors, int64_t count, uint32_t rgba, const md_bitfield_t
 }
 
 void cpk(uint32_t* colors, int64_t count, const md_molecule_t& mol) {
-    // In the case of coarsegrained molecules, CPK is a bit illdefined as it operates on elements.
-    // What we do instead is to try and ad-hoc guess elements from the atom names.
+    // In the case of coarsegrained molecules, CPK is a bit illdefined as it operates on
+    // elements. What we do instead is to try and ad-hoc guess elements from the atom
+    // names
     if (count == 0) {
         return;
     }
 
-    md_element_t* elements = 0;
+    md_element_t* elements = nullptr;
     const md_element_t* elem = mol.atom.element;
 
     if (!elem) {

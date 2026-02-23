@@ -565,7 +565,7 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
     double nextTime = (currT + dt - _localEpoch) * scl;
 
     const int64_t numFrames = md_trajectory_num_frames(_trajectory);
-    AnimationRepeatMode mode = static_cast<AnimationRepeatMode>(
+    const AnimationRepeatMode mode = static_cast<AnimationRepeatMode>(
         _animationRepeatMode.value()
     );
     double frame = timeToFrame(currTime, numFrames, mode);
@@ -648,8 +648,8 @@ void RenderableMolecule::updateTrajectoryFrame(const UpdateData& data) {
 
     using FrameSet = std::array<int64_t, 4>;
 
-    auto frameSet = [](double time, int64_t nFrames, AnimationRepeatMode mode) {
-        const int64_t frameIdx = static_cast<int64_t>(timeToFrame(time, nFrames, mode));
+    auto frameSet = [](double time, int64_t nFrames, AnimationRepeatMode m) {
+        const int64_t frameIdx = static_cast<int64_t>(timeToFrame(time, nFrames, m));
 
         auto wrap = [](int64_t idx, int64_t nf) -> int64_t {
             idx = idx < 0 ? nf - 1 : idx;

@@ -593,7 +593,8 @@ void RenderableGaiaStars::initializeGL() {
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_FLOAT
-        }
+        },
+        ghoul::opengl::Texture::SamplerInit{}
     );
     glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_fboTexture, 0);
     const GLenum textureBuffer = GL_COLOR_ATTACHMENT0;
@@ -983,7 +984,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
                     .type = GL_TEXTURE_2D,
                     .format = ghoul::opengl::Texture::Format::RGBA,
                     .dataType = GL_FLOAT
-                }
+                },
+                ghoul::opengl::Texture::SamplerInit{}
             );
             LDEBUG("Re-Generating Gaia Framebuffer Texture");
 
