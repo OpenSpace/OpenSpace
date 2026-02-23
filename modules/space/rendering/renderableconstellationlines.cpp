@@ -265,8 +265,8 @@ void RenderableConstellationLines::initializeGL() {
 void RenderableConstellationLines::deinitializeGL() {
     using ConstellationKeyValuePair = std::pair<const int, ConstellationLine>;
     for (const ConstellationKeyValuePair& pair : _renderingConstellationsMap) {
-        glDeleteVertexArrays(1, &pair.second.vaoArray);
-        glDeleteBuffers(1, &pair.second.vboArray);
+        glDeleteVertexArrays(1, &pair.second.vao);
+        glDeleteBuffers(1, &pair.second.vbo);
     }
 
     if (_program) {
@@ -302,7 +302,7 @@ void RenderableConstellationLines::renderConstellations(const RenderData&,
             _constellationColorMap[pair.second.colorIndex]
         );
 
-        glBindVertexArray(pair.second.vaoArray);
+        glBindVertexArray(pair.second.vao);
 
         glLineWidth(_lineWidth);
         glDrawArrays(GL_LINE_STRIP, 0, pair.second.numV);
@@ -467,25 +467,21 @@ void RenderableConstellationLines::createConstellations() {
     LDEBUG("Creating constellations");
 
     for (std::pair<const int, ConstellationLine>& p : _renderingConstellationsMap) {
-        GLuint vbo = 0;
-        glCreateBuffers(1, &vbo);
+        glCreateBuffers(1, &p.second.vbo);
         glNamedBufferStorage(
-            vbo,
+            p.second.vbo,
             p.second.vertices.size() * sizeof(GLfloat),
             p.second.vertices.data(),
             GL_NONE_BIT
         );
-        p.second.vboArray = vbo;
 
-        GLuint vao = 0;
-        glCreateVertexArrays(1, &vao);
-        glVertexArrayVertexBuffer(vao, 0, vbo, 0, 3 * sizeof(float));
-        p.second.vaoArray = vao;
+        glCreateVertexArrays(1, &p.second.vao);
+        glVertexArrayVertexBuffer(p.second.vao, 0, p.second.vbo, 0, 3 * sizeof(float));
 
         // in_position
-        glEnableVertexArrayAttrib(vao, 0);
-        glVertexArrayAttribFormat(vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
-        glVertexArrayAttribBinding(vao, 0, 0);
+        glEnableVertexArrayAttrib(p.second.vao, 0);
+        glVertexArrayAttribFormat(p.second.vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribBinding(p.second.vao, 0, 0);
     }
 }
 

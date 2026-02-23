@@ -55,17 +55,17 @@ public:
         std::vector<float> colData;
         std::vector<float> velData;
         std::vector<std::pair<float, size_t>> magOrder;
-        float originX;
-        float originY;
-        float originZ;
-        float halfDimension;
+        float originX = 0.f;
+        float originY = 0.f;
+        float originZ = 0.f;
+        float halfDimension = 0.f;
         size_t numStars = 0;
         bool isLeaf = true;
         bool isLoaded = false;
         bool hasLoadedDescendant = false;
         std::mutex loadingLock;
         int bufferIndex = DefaultIndex;
-        unsigned long long octreePositionIndex;
+        unsigned long long octreePositionIndex = 0;
     };
 
     OctreeManager() = default;

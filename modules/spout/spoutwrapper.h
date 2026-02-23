@@ -60,7 +60,7 @@ public:
     void restoreGLState();
 
 protected:
-    unsigned int _defaultFBO;
+    unsigned int _defaultFBO = 0;
 
     SPOUTHANDLE _spoutHandle = nullptr;
 

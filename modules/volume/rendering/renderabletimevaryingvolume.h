@@ -60,8 +60,8 @@ public:
 private:
     struct Timestep {
         std::filesystem::path baseName;
-        bool inRam;
-        bool onGpu;
+        bool inRam = false;
+        bool onGpu = false;
         RawVolumeMetadata metadata;
         std::shared_ptr<RawVolume<float>> rawVolume;
         std::shared_ptr<ghoul::opengl::Texture> texture;

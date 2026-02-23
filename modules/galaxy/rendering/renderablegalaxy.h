@@ -60,7 +60,7 @@ private:
     void renderBillboards(const RenderData& data);
 
     struct Result {
-        bool success;
+        bool success = false;
         std::vector<glm::vec3> positions;
         std::vector<glm::vec3> color;
     };

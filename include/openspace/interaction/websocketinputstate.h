@@ -70,13 +70,13 @@ struct WebsocketInputState {
     int nAxes = 0;
     /// The values for each axis. Each value is in the range [-1, 1]. Only the first
     /// `nAxes` values are defined values, the rest are undefined
-    std::array<float, MaxAxes> axes;
+    std::array<float, MaxAxes> axes = {};
 
     /// The number of buttons that this websocket possesses
     int nButtons = 0;
     /// The status of each button. Only the first `nButtons` values are defined, the rest
     /// are undefined
-    std::array<WebsocketAction, MaxButtons> buttons;
+    std::array<WebsocketAction, MaxButtons> buttons = {};
 };
 
 /// The maximum number of websockets that are supported by this system. This number is

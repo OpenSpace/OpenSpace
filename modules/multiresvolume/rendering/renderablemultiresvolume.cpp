@@ -214,7 +214,6 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
 
     _tsp = std::make_shared<TSP>(_filename);
-    _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
     _selectorName = p.brickSelector.value_or(_selectorName);
 
@@ -355,7 +354,7 @@ void RenderableMultiresVolume::initializeGL() {
         setSelectorType(_selector);
     }
 
-    success &= _atlasManager && _atlasManager->initialize();
+    _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
     _transferFunction->update();
 

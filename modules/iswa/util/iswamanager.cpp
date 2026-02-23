@@ -299,19 +299,19 @@ void IswaManager::registerGroup(std::string groupName, std::string type) {
 
         if (dataGroup) {
             _groups[groupName] = std::make_shared<IswaDataGroup>(
-                std::move(groupName),
+                groupName,
                 std::move(type)
             );
         }
         else if (kameleonGroup) {
             _groups[groupName] = std::make_shared<IswaKameleonGroup>(
-                std::move(groupName),
+                groupName,
                 std::move(type)
             );
         }
         else {
             _groups[groupName] = std::make_shared<IswaBaseGroup>(
-                std::move(groupName),
+                groupName,
                 std::move(type)
             );
         }

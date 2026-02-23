@@ -51,15 +51,15 @@ struct PixelRegion {
 
 struct IODescription {
     struct ReadData {
-        int overview;
+        int overview = 0;
         PixelRegion region;
         PixelRegion fullRegion;
     } read;
 
     struct WriteData {
         PixelRegion region;
-        size_t bytesPerLine;
-        size_t totalNumBytes;
+        size_t bytesPerLine = 0;
+        size_t totalNumBytes = 0;
     } write;
 };
 

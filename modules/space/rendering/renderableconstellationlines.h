@@ -56,11 +56,11 @@ private:
     struct ConstellationLine {
         bool isEnabled = true;
         std::string name;
-        int lineIndex;
-        int colorIndex;
-        int numV;
-        GLuint vaoArray;
-        GLuint vboArray;
+        int lineIndex = 0;
+        int colorIndex = 0;
+        int numV = 0;
+        GLuint vao = 0;
+        GLuint vbo = 0;
         std::vector<GLfloat> vertices;
     };
 

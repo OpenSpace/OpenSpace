@@ -1821,8 +1821,8 @@ void RenderableGlobe::recompileShaders() {
 
     struct LayerShaderPreprocessingData {
         struct LayerGroupPreprocessingData {
-            int lastLayerIdx;
-            bool layerBlendingEnabled;
+            int lastLayerIdx = -1;
+            bool layerBlendingEnabled = true;
             std::vector<layers::Layer::ID> layerType;
             std::vector<layers::Blend::ID> blendMode;
             std::vector<layers::Adjustment::ID> layerAdjustmentType;

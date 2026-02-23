@@ -33,12 +33,12 @@ struct BrickCover {
 
     BrickCover split(bool x, bool y, bool z) const;
 
-    int lowX;
-    int highX;
-    int lowY;
-    int highY;
-    int lowZ;
-    int highZ;
+    int lowX = 0;
+    int highX = 0;
+    int lowY = 0;
+    int highY = 0;
+    int lowZ = 0;
+    int highZ = 0;
 };
 
 } // namespace openspace

@@ -34,26 +34,22 @@
 
 namespace openspace {
 
-AtlasManager::AtlasManager(TSP* tsp) : _tsp(tsp) {}
-
-bool AtlasManager::initialize() {
-    TSP::Header header = _tsp->header();
-
-    _nBricksPerDim = header.xNumBricks;
-    _nOtLeaves = _nBricksPerDim * _nBricksPerDim * _nBricksPerDim;
-    _nOtNodes = _tsp->numOTNodes();
-    _nOtLevels = static_cast<unsigned int>(log(_nOtLeaves) / log(8) + 1);
-    _paddedBrickDim = _tsp->paddedBrickDim();
-    _nBricksInMap = _nBricksPerDim * _nBricksPerDim * _nBricksPerDim;
-    _atlasDim = _nBricksPerDim * _paddedBrickDim;
-    _nBrickVals = _paddedBrickDim*_paddedBrickDim*_paddedBrickDim;
-    _brickSize = _nBrickVals * sizeof(float);
-    _volumeSize = _brickSize * _nOtLeaves;
-    _atlasMap = std::vector<unsigned int>(_nOtLeaves, NotUsedIndex);
-    _nBricksInAtlas = _nBricksInMap;
-
-    _freeAtlasCoords = std::vector<unsigned int>(_nBricksInAtlas, 0);
-
+AtlasManager::AtlasManager(TSP* tsp)
+    : _tsp(tsp)
+    , _nBricksPerDim(_tsp->header().xNumBricks)
+    , _nOtLeaves(_nBricksPerDim * _nBricksPerDim * _nBricksPerDim)
+    , _nOtNodes(_tsp->numOTNodes())
+    , _nOtLevels(static_cast<unsigned int>(log(_nOtLeaves) / log(8) + 1))
+    , _brickSize(_nBrickVals * sizeof(float))
+    , _nBrickVals(_paddedBrickDim * _paddedBrickDim * _paddedBrickDim)
+    , _volumeSize(_brickSize * _nOtLeaves)
+    , _nBricksInAtlas(_nBricksInMap)
+    , _paddedBrickDim(_tsp->paddedBrickDim())
+    , _nBricksInMap(_nBricksPerDim * _nBricksPerDim * _nBricksPerDim)
+    , _atlasDim(_nBricksPerDim * _paddedBrickDim)
+    , _atlasMap(std::vector<unsigned int>(_nOtLeaves, NotUsedIndex))
+    , _freeAtlasCoords(std::vector<unsigned int>(_nBricksInAtlas, 0))
+{
     for (unsigned int i = 0; i < _nBricksInAtlas; i++) {
         _freeAtlasCoords[i] = i;
     }
@@ -77,8 +73,6 @@ bool AtlasManager::initialize() {
         nullptr,
         GL_DYNAMIC_READ
     );
-
-    return true;
 }
 
 const std::vector<unsigned int>& AtlasManager::atlasMap() const {

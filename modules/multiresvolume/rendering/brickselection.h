@@ -36,7 +36,7 @@ struct BrickSelection {
         Spatial
     };
 
-    BrickSelection();
+    BrickSelection() = default;
     BrickSelection(int numBricks, int numTimeSteps, SplitType splitType,
         float splitPoints);
 
@@ -49,14 +49,14 @@ struct BrickSelection {
     int centerT() const;
     bool timestepInRightChild(int timestep) const;
 
-    unsigned int brickIndex;
-    float splitPoints;
-    BrickSelection::SplitType splitType;
+    unsigned int brickIndex = 0;
+    float splitPoints = 0.f;
+    SplitType splitType = SplitType::None;
     BrickCover cover;
-    int lowT;
-    int highT;
-    int nSpatialSplits;
-    int nTemporalSplits;
+    int lowT = 0;
+    int highT = 0;
+    int nSpatialSplits = 0;
+    int nTemporalSplits = 0;
 };
 
 } // namespace openspace

@@ -42,8 +42,8 @@ public:
 private:
     static constexpr int UnsetOnChangeHandle = -1;
 
-    bool _sendState;
-    bool _sendFiles;
+    bool _sendState = false;
+    bool _sendFiles = false;
 
     // Provides the idle/recording/playback state int value in json message
     void sendJsonData();

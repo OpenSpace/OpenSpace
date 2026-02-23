@@ -69,9 +69,9 @@ private:
     };
 
     struct RenderingMesh {
-        int meshIndex;
-        int colorIndex;
-        int textureIndex;
+        int meshIndex = 0;
+        int colorIndex = 0;
+        int textureIndex = 0;
         // From: Partiview User's Guide
         // Brian Abbott
         // Hayden Planetarium American Museum of Natural History New York, USA
@@ -80,8 +80,8 @@ private:
         // numV will equal the number of points to connect.
         // If you want a square, 4000×4000 grid with lines every 200 units,
         // then numU numV will both equal 21
-        int numU;
-        int numV;
+        int numU = 0;
+        int numV = 0;
         MeshType style;
         std::vector<GLuint> vaoArray;
         std::vector<GLuint> vboArray;

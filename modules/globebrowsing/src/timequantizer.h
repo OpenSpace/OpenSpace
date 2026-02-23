@@ -101,8 +101,8 @@ public:
 private:
     std::string _start;
     std::string _end;
-    double _startJ2000;
-    double _endJ2000;
+    double _startJ2000 = 0.0;
+    double _endJ2000 = 0.0;
 };
 
 /**

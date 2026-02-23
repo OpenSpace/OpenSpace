@@ -45,7 +45,7 @@ private:
     // Provides the mode int value in json message
     void sendJsonData();
 
-    OpenSpaceEngine::Mode _lastMode;
+    OpenSpaceEngine::Mode _lastMode = OpenSpaceEngine::Mode::UserControl;
     int _modeCallbackHandle = UnsetOnChangeHandle;
     bool _isDone = false;
 };

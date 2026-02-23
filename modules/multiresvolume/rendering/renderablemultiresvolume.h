@@ -87,9 +87,9 @@ private:
     Vec3Property _rotation;
     Vec3Property _scaling;
 
-    double _time;
-    double _startTime;
-    double _endTime;
+    double _time = 0.0;
+    double _startTime = 0.0;
+    double _endTime = 0.0;
 
     // Stats timers
     std::string _statsFileName;
@@ -97,9 +97,9 @@ private:
     std::chrono::system_clock::time_point _frameStart;
     std::chrono::duration<double> _selectionDuration;
     std::chrono::duration<double> _uploadDuration;
-    unsigned int _nDiskReads;
-    unsigned int _nUsedBricks;
-    unsigned int _nStreamedBricks;
+    unsigned int _nDiskReads = 0;
+    unsigned int _nUsedBricks = 0;
+    unsigned int _nStreamedBricks = 0;
 
     int _timestep = 0;
 

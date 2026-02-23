@@ -57,7 +57,7 @@ private:
     void setFriction(bool all) const;
 
     bool _isDone = false;
-    bool _autopilotEngaged;
+    bool _autopilotEngaged = false;
     nlohmann::json _payload;
     nlohmann::json _focusNodes;
     nlohmann::json _allNodes;

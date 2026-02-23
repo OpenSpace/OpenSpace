@@ -320,7 +320,7 @@ nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
         // Keep the library key for backwards compatability
         library[LibraryKey] = libraryName;
         library[NameKey] = libraryName;
-        std::string_view os = OpenSpaceScriptingKey;
+        std::string os = std::string(OpenSpaceScriptingKey);
         library[FullNameKey] =
             libraryName.empty() ? os : std::format("{}.{}", os, libraryName);
 

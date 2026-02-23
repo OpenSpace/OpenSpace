@@ -127,7 +127,7 @@ bool TSP::readHeader() {
     LDEBUG(std::format("Num total nodes: {}", _numTotalNodes));
 
     // Allocate space for TSP structure
-    _data.resize(_numTotalNodes*NUM_DATA);
+    _data.resize(_numTotalNodes * NUM_DATA);
     LDEBUG(std::format("Data size: {}",  _data.size()));
 
     return true;

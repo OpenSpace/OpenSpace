@@ -677,6 +677,7 @@ void RenderableFluxNodes::updateActiveTriggerTimeIndex(double currentTime) {
         _activeTriggerTimeIndex = static_cast<int>(_nStates) - 1;
     }
 }
+
 void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     if (_activeTriggerTimeIndex == -1) {
         return;
@@ -698,6 +699,7 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     SceneGraphNode* earthNode = sceneGraphNode("Earth");
     if (!earthNode) {
         LWARNING("Could not find scene graph node 'Earth'");
+        return;
     }
     const glm::vec3 earthPos = glm::vec3(
         earthNode->worldPosition() * data.modelTransform.rotation

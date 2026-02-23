@@ -51,18 +51,18 @@ struct CdfInfo {
 struct CygnetInfo {
     std::string name;
     std::string description;
-    int updateInterval;
-    bool selected;
+    int updateInterval = 0;
+    bool selected = false;
 };
 
 struct MetadataFuture {
-    int id;
+    int id = 0;
     std::string group;
     std::string name;
     std::string json;
-    int type;
-    int geom;
-    bool isFinished;
+    int type = 0;
+    int geom = 0;
+    bool isFinished = false;
 };
 
 class IswaManager : public PropertyOwner {

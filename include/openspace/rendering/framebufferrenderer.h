@@ -230,27 +230,27 @@ private:
     GLuint _exitFramebuffer = 0;
 
     struct {
-        GLuint colorTexture;
-        GLuint positionTexture;
-        GLuint normalTexture;
-        GLuint depthTexture;
-        GLuint framebuffer;
+        GLuint colorTexture = 0;
+        GLuint positionTexture = 0;
+        GLuint normalTexture = 0;
+        GLuint depthTexture = 0;
+        GLuint framebuffer = 0;
     } _gBuffers;
 
     struct {
-        GLuint framebuffer;
-        GLuint colorTexture[2];
+        GLuint framebuffer = 0;
+        GLuint colorTexture[2] = { 0, 0 };
     } _pingPongBuffers;
 
     struct {
-        GLuint fxaaFramebuffer;
-        GLuint fxaaTexture;
+        GLuint fxaaFramebuffer = 0;
+        GLuint fxaaTexture = 0;
     } _fxaaBuffers;
 
     struct {
-        GLuint framebuffer;
-        GLuint colorTexture;
-        GLuint depthbuffer;
+        GLuint framebuffer = 0;
+        GLuint colorTexture = 0;
+        GLuint depthbuffer = 0;
         float currentDownscaleFactor  = 1.f;
     } _downscaleVolumeRendering;
 
@@ -258,12 +258,12 @@ private:
 
     unsigned int _pingPongIndex = 0u;
 
-    bool _dirtyDeferredcastData;
-    bool _dirtyRaycastData;
-    bool _dirtyResolution;
+    bool _dirtyDeferredcastData = false;
+    bool _dirtyRaycastData = false;
+    bool _dirtyResolution = false;
 
     glm::ivec2 _resolution = glm::ivec2(0);
-    int _nAaSamples;
+    int _nAaSamples = 1;
     bool _enableFXAA = true;
     bool _disableHDR = false;
 

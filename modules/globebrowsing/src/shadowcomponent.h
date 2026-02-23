@@ -101,7 +101,7 @@ private:
     GLuint _positionInLightSpaceTexture = 0;
     GLuint _shadowFBO = 0;
     GLint _currentFBO = 0;
-    std::array<GLint, 4> _viewport;
+    std::array<GLint, 4> _viewport = { 0, 0, 0, 0 };
 
     GLboolean _faceCulling;
     GLboolean _polygonOffSet;

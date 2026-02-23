@@ -242,8 +242,8 @@ namespace {
 
     // The size of a type SPK10 spice kernel is not affected by the time validity, so we
     // just pick the greatest one
-    SpiceDouble first = -std::numeric_limits<double>::max();
-    SpiceDouble last = std::numeric_limits<double>::max();
+    constexpr SpiceDouble first = -std::numeric_limits<double>::max();
+    constexpr SpiceDouble last = std::numeric_limits<double>::max();
 
     // Extract the body id
     std::vector<std::string> tokens = ghoul::tokenizeString(line2, ' ');

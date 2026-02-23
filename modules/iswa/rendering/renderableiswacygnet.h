@@ -143,9 +143,9 @@ private:
     double _openSpaceTime = 0.0;
     double _lastUpdateOpenSpaceTime = 0.0;
 
-    std::chrono::milliseconds _realTime;
-    std::chrono::milliseconds _lastUpdateRealTime;
-    int _minRealTimeUpdateInterval;
+    std::chrono::milliseconds _realTime = std::chrono::milliseconds(0);
+    std::chrono::milliseconds _lastUpdateRealTime = std::chrono::milliseconds(0);
+    int _minRealTimeUpdateInterval = 0;
 };
 
 } // namespace openspace

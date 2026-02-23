@@ -547,7 +547,7 @@ protected:
         std::optional<std::string> group;
         Visibility visibility = Visibility::Default;
         std::optional<bool> readOnly;
-        bool needsConfirmation;
+        bool needsConfirmation = false;
         std::unordered_map<std::string, bool> viewOptions;
     } _metaData;
 

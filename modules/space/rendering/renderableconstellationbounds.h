@@ -68,9 +68,9 @@ private:
         std::string constellationFullName;
         bool isEnabled = false;
         /// The index of the first vertex describing the bounds
-        GLsizei startIndex;
+        GLsizei startIndex = 0;
         /// The number of vertices describing the bounds
-        GLsizei nVertices;
+        GLsizei nVertices = 0;
     };
 
     /**
