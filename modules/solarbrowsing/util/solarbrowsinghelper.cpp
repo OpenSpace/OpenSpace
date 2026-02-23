@@ -353,6 +353,13 @@ namespace {
             myfile >> subDir;
             std::filesystem::path subDirectory = rootDir / subDir;
 
+            if (!std::filesystem::is_directory(subDirectory)) {
+                LWARNING(std::format(
+                    "Could not find subdirectory '{}' for cache file '{}'",
+                    subDirectory, cacheFile));
+                continue;
+            }
+
             // Early check if the number of files in the subdirectoy match what was stored
             // in cache, however, this does not guarantee that the files are the same
             const bool cacheHasCorrectNFiles = ghoul::filesystem::walkDirectory(

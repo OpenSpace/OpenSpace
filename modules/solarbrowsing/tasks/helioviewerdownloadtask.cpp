@@ -146,20 +146,44 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
         if (frames.empty()) {
             LERROR(std::format("Failed to acquire frames"));
         }
+
+        // Display the optional message from HelioViewer which contains important
+        // regarding the settings used for the request.
+        std::string* message = json["message"].get_ptr<std::string*>();
+        if (message && !message->empty()) {
+            LWARNING(*message);
+        }
     }
     catch (...) {
         LERROR(std::format("Failed to parse json response: {}", listingString));
         return;
     }
 
+
     LDEBUG("Processing frames");
     std::vector<std::string> epochAsIsoString;
     epochAsIsoString.reserve(frames.size());
 
     size_t count = 0;
-    for (double epoch : frames) {
-        const double j2000InEpoch = 946684800.0;
-        const Time time(epoch - j2000InEpoch);
+    for (double unixTimestamp : frames) {
+        // @TODO (anden88 2026-02-23): Previously used SPICE to convert the timestamp we
+        // got back from HelioViewer, but, this produced an offset of ~12 hours
+        //const double j2000InEpoch = 946684800.0;
+        //const Time time(unixTimestamp - j2000InEpoch);
+        //epochAsIsoString.emplace_back(time.ISO8601());
+
+        std::time_t timestamp = static_cast<std::time_t>(unixTimestamp);
+        std::tm* utcTime = std::gmtime(&timestamp);
+        std::string utcTimeString = std::format(
+            "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}",
+            utcTime->tm_year + 1900,
+            utcTime->tm_mon + 1,
+            utcTime->tm_mday,
+            utcTime->tm_hour,
+            utcTime->tm_min,
+            utcTime->tm_sec
+        );
+        const Time time = Time(utcTimeString);
 
         epochAsIsoString.emplace_back(time.ISO8601());
         count++;
