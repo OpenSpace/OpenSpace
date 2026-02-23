@@ -165,7 +165,8 @@ void ScreenSpaceRenderableText::updateFramebuffer() {
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGB,
             .dataType = GL_UNSIGNED_BYTE
-        }
+        },
+        ghoul::opengl::Texture::SamplerInit{}
     );
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
     ghoul::opengl::FramebufferObject::deactivate();

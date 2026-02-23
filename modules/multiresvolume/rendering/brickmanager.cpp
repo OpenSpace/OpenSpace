@@ -150,7 +150,8 @@ bool BrickManager::initialize() {
             .type = GL_TEXTURE_3D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_FLOAT
-        }
+        },
+        ghoul::opengl::Texture::SamplerInit{}
     );
 
     _atlasInitialized = true;

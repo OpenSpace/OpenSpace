@@ -273,7 +273,8 @@ bool SpoutReceiver::updateTexture(unsigned int width, unsigned int height) {
                 .type = GL_TEXTURE_2D,
                 .format = ghoul::opengl::Texture::Format::RGBA,
                 .dataType = GL_UNSIGNED_BYTE
-            }
+            },
+            ghoul::opengl::Texture::SamplerInit{}
         );
 
         if (_spoutTexture) {

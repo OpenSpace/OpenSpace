@@ -64,7 +64,8 @@ bool AtlasManager::initialize() {
             .type = GL_TEXTURE_3D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_FLOAT
-        }
+        },
+        ghoul::opengl::Texture::SamplerInit{}
     );
 
     glCreateBuffers(2, _pboHandle);

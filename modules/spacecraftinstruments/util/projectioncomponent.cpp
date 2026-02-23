@@ -882,7 +882,8 @@ bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size)
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
-        }
+        },
+        ghoul::opengl::Texture::SamplerInit{}
     );
 
     if (_dilation.isEnabled) {
@@ -892,7 +893,8 @@ bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size)
                 .type = GL_TEXTURE_2D,
                 .format = ghoul::opengl::Texture::Format::RGBA,
                 .dataType = GL_UNSIGNED_BYTE
-            }
+            },
+            ghoul::opengl::Texture::SamplerInit{}
         );
 
         _dilation.stencilTexture = std::make_unique<ghoul::opengl::Texture>(
@@ -901,7 +903,8 @@ bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size)
                 .type = GL_TEXTURE_2D,
                 .format = ghoul::opengl::Texture::Format::Red,
                 .dataType = GL_UNSIGNED_BYTE
-            }
+            },
+            ghoul::opengl::Texture::SamplerInit{}
         );
     }
 
@@ -917,7 +920,8 @@ bool ProjectionComponent::generateDepthTexture(const glm::ivec2& size) {
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::DepthComponent,
             .dataType = GL_FLOAT
-        }
+        },
+        ghoul::opengl::Texture::SamplerInit{}
     );
     return _shadowing.texture != nullptr;
 }

@@ -870,7 +870,8 @@ void VideoPlayer::createTexture(glm::ivec2 size) {
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
-        }
+        },
+        ghoul::opengl::Texture::SamplerInit{}
     );
 
     // Bind texture to framebuffer

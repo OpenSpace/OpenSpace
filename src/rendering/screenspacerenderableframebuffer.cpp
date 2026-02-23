@@ -150,7 +150,8 @@ void ScreenSpaceRenderableFramebuffer::createFramebuffer() {
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::Red,
             .dataType = GL_UNSIGNED_BYTE
-        }
+        },
+        ghoul::opengl::Texture::SamplerInit{}
     );
     _objectSize = glm::ivec2(resolution);
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
