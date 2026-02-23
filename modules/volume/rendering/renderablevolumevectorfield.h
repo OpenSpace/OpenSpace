@@ -83,8 +83,8 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(
-        modelViewProjection, arrowScale, filterOutOfRange, dataRangeFilter, colorMode,
-        magDomain, colorTexture, opacity, fixedColor
+        modelViewProjection, arrowScale, colorMode, magDomain, colorTexture, opacity,
+        fixedColor
     ) _uniformCache;
 
     struct ColorSettings : properties::PropertyOwner {
@@ -95,9 +95,6 @@ private:
         properties::Vec4Property fixedColor;
     };
     ColorSettings _colorSettings;
-
-    properties::Vec2Property _dataRange;
-    properties::BoolProperty _filterOutOfRange;
 
     properties::IntProperty _stride;
     properties::FloatProperty _vectorFieldScale;

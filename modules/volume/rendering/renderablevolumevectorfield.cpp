@@ -90,22 +90,6 @@ namespace {
         openspace::properties::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterOutOfRangeInfo = {
-        "FilterOutOfRange",
-        "Filter out of range",
-        "Determines whether data values outside the value range should be visible or "
-        "filtered out.",
-        openspace::properties::Property::Visibility::User
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo FilterDataRangeInfo = {
-        "FilterDataRange",
-        "Filter data range",
-        "The data range to use when filtering by data value. Magnitudes outside this "
-        "range will be filtered out.",
-        openspace::properties::Property::Visibility::User
-    };
-
     constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "Color texture",
@@ -197,12 +181,6 @@ namespace {
         // [[codegen::verbatim(LineWidthInfo.description)]]
         std::optional<float> lineWidth [[codegen::greater(0.f)]];
 
-        // [[codegen::verbatim(FilterOutOfRangeInfo.description)]]
-        std::optional<bool> filterOutOfRange;
-
-        // [[codegen::verbatim(FilterDataRangeInfo.description)]]
-        std::optional<glm::vec2> dataRange;
-
         // [[codegen::verbatim(FilterByLuaInfo.description)]]
         std::optional<bool> filterByLua;
 
@@ -266,14 +244,6 @@ RenderableVectorField::ColorSettings::ColorSettings(const ghoul::Dictionary& dic
 RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _colorSettings(dictionary)
-    , _dataRange(
-        FilterDataRangeInfo,
-        glm::vec2(0.f, 1.f),
-        glm::vec2(0.f),
-        glm::vec2(1500.f),
-        glm::vec2(1.f)
-    )
-    , _filterOutOfRange(FilterOutOfRangeInfo, false)
     , _stride(StrideInfo, 1, 1, 16)
     , _vectorFieldScale(VectorFieldScaleInfo, 1.f, 1.f, 100.f)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 10.f)
@@ -350,12 +320,6 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
         _luaScriptFile = p.script->string();
     }
     addProperty(_luaScriptFile);
-
-    _filterOutOfRange = p.filterOutOfRange.value_or(_filterOutOfRange);
-    addProperty(_filterOutOfRange);
-
-    _dataRange = p.dataRange.value_or(_dataRange);
-    addProperty(_dataRange);
 
     global::scriptEngine->initializeLuaState(_state);
 }
@@ -480,8 +444,6 @@ void RenderableVectorField::render(const RenderData& data, RendererTasks&) {
 
     _program->setUniform(_uniformCache.opacity, opacity());
     _program->setUniform(_uniformCache.arrowScale, _vectorFieldScale);
-    _program->setUniform(_uniformCache.filterOutOfRange, _filterOutOfRange);
-    _program->setUniform(_uniformCache.dataRangeFilter, _dataRange);
     _program->setUniform(_uniformCache.colorMode, _colorSettings.colorModeOption);
     _program->setUniform(_uniformCache.fixedColor, _colorSettings.fixedColor);
     _program->setUniform(_uniformCache.magDomain, _colorSettings.colorMagnitudeDomain);

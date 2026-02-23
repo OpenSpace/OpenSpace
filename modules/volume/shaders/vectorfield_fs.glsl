@@ -32,7 +32,6 @@ out vec4 outColor;
 
 uniform float opacity;
 uniform vec2 dataRangeFilter;
-uniform bool filterOutOfRange;
 uniform int colorMode;
 uniform vec2 magDomain;
 uniform sampler1D colorTexture;
@@ -47,13 +46,6 @@ Fragment getFragment() {
 
   if (opacity == 0.0) {
       discard;
-  }
-
-  bool magnitudeOutOfRange =
-    gs_magnitude < dataRangeFilter.x || gs_magnitude > dataRangeFilter.y;
-
-  if (filterOutOfRange && magnitudeOutOfRange) {
-    discard;
   }
 
   // vec4 fixedColor = vec4(1.0, 0.0, 0.0, 1.0);
