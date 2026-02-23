@@ -67,6 +67,11 @@ public:
    static documentation::Documentation Documentation();
 
 private:
+    enum class Mode {
+        Volume,
+        Sparse
+    };
+
     struct VelocityData {
         float vx;
         float vy;
@@ -79,7 +84,35 @@ private:
         float magnitude;
     };
 
-    void computeFieldLinesParallel();
+    void applyLuaFilter();
+    void computeVolumeFieldLines();
+    void computeSparseFieldLines();
+    void loadVolumeData(const std::filesystem::path& path);
+    void loadCSVData(const std::filesystem::path& path);
+
+    Mode _mode = Mode::Volume;
+
+    struct {
+        std::shared_ptr<RawVolume<VelocityData>> volumeData;
+        glm::vec3 minDomain;
+        glm::vec3 maxDomain;
+        glm::uvec3 dimensions;
+    } _volume;
+
+    struct CsvData {
+        glm::vec3 position;
+        glm::vec3 velocity;
+    };
+
+    struct {
+        std::vector<CsvData> data;
+        std::string xColumnName;
+        std::string yColumnName;
+        std::string zColumnName;
+        std::string vxColumnName;
+        std::string vyColumnName;
+        std::string vzColumnName;
+    } _sparse;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(
@@ -93,27 +126,22 @@ private:
         properties::StringProperty colorTexturePath;
         properties::Vec2Property colorMagnitudeDomain;
         properties::Vec4Property fixedColor;
+        bool computeMagnitudeRange = true;
     };
     ColorSettings _colorSettings;
 
     properties::IntProperty _stride;
     properties::FloatProperty _vectorFieldScale;
     properties::FloatProperty _lineWidth;
-    bool _computeMagnitudeRange = true;
 
     properties::BoolProperty _filterByLua;
     properties::StringProperty _luaScriptFile;
     std::unique_ptr<ghoul::filesystem::File> _luaScriptFileHandle;
 
-    std::shared_ptr<RawVolume<VelocityData>> _volumeData;
-    std::vector<ArrowInstance> _instances;
+    ghoul::lua::LuaState _state;
 
     std::filesystem::path _sourceFile;
-    glm::vec3 _minDomain;
-    glm::vec3 _maxDomain;
-    glm::uvec3 _dimensions;
-
-    ghoul::lua::LuaState _state;
+    std::vector<ArrowInstance> _instances;
 
     GLuint _vao = 0;
     GLuint _vectorFieldVbo = 0;

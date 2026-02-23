@@ -31,6 +31,7 @@
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/misc/csvreader.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/logging/logmanager.h>
@@ -124,33 +125,81 @@ namespace {
     };
 
     // A RenderableVectorField can be used to render vectors from a given 3D volumetric
-    // dataset, optionally including color mapping and custom filtering via Lua script.
+    // dataset or a sparse point-like dataset, optionally including color mapping and
+    // custom filtering via Lua script.
     //
-    // The vector field is defined on a regular 3D grid specified by `Dimensions`, and
-    // occupies the spatial domain defined by `MinDomain` and `MaxDomain`. The `Stride`
-    // parameter controls how densely vectors are sampled from the volume (a stride of 1
-    // renders every vector).
+    // If `mode` is set to `Volume` the vector field is defined on a regular 3D grid
+    // specified by `Dimensions`, and occupies the spatial domain defined by `MinDomain`
+    // and `MaxDomain`.
     //
-    // By default, the vectors are colored according to their direction, similar to a 3D
-    // model normal map as follows:
+    // If `mode` is set to `Sparse` the vector field is defined by the position given by
+    // the carteesian coordinates and direction (e.g., velocity).
+    //
+    // The `Stride` parameter controls how densely vectors are sampled from the volume
+    // (a stride of 1 renders every vector).
+    //
+    // There are several coloring methods to choose from. By default the vectors are
+    // colored with a fixed color. Other options includes using a color map to coloring
+    // the vectors by the direction magnitude. And lastly color by direction, similar to a
+    // 3D model normal map as follows:
     // +X -> Red, -X -> Cyan
     // +Y -> Green, -Y -> Magenta
     // +Z -> Blue, -Z -> Yellow
     struct [[codegen::Dictionary(RenderableVectorField)]] Parameters {
-        // The path to the file containing the volume data.
-        std::filesystem::path volumeFile;
+        enum class Mode {
+            Volume,
+            Sparse
+        };
+
+        // The mode determines the type of vectorfield data that is loaded. In `volume`
+        // mode, the vectorfield is computed from a 3D volume data file, the volume is
+        // mapped to the domain [min, max]. In `sparse` mode the vectorfield is computed
+        // given the specified position and velocity components from a CSV file.
+        Mode mode;
+
+        struct Volume {
+            // The path to the file containing the volume data.
+            std::filesystem::path volumeFile;
+
+            // The min domain values that the volume should be mapped to.
+            glm::vec3 minDomain;
+
+            // The max domain values that the volume should be mapped to.
+            glm::vec3 maxDomain;
+
+            // The dimensions of the volume data.
+            glm::ivec3 dimensions;
+        };
+
+        std::optional<Volume> volume;
+
+        struct Sparse {
+            // The path to the CSV file containing the vector field data.
+            std::filesystem::path filePath;
+
+            // Specifies the column name for the x coordinate.
+            std::optional<std::string> x;
+
+            // Specifies the column name for the y coordinate.
+            std::optional<std::string> y;
+
+            // Specifies the column name for the z coordinate.
+            std::optional<std::string> z;
+
+            // Specifies the column name for the vx velocity component.
+            std::optional<std::string> vx;
+
+            // Specifies the column name for the vy velocity component.
+            std::optional<std::string> vy;
+
+            // Specifies the column name for the vz velocity component.
+            std::optional<std::string> vz;
+        };
+
+        std::optional<Sparse> sparse;
 
         // [[codegen::verbatim(StrideInfo.description)]]
         std::optional<int> stride;
-
-        // The min domain values that the volume should be mapped to.
-        glm::vec3 minDomain;
-
-        // The max domain values that the volume should be mapped to.
-        glm::vec3 maxDomain;
-
-        // The dimensions of the volume data.
-        glm::ivec3 dimensions;
 
         struct ColorSettings {
             enum class [[codegen::map(ColorMode)]] ColorMode {
@@ -161,6 +210,7 @@ namespace {
 
             // [[codegen::verbatim(ColorModeOptionInfo.description)]]
             ColorMode colorMode;
+
             // [[codegen::verbatim(FixedColorInfo.description)]]
             std::optional<glm::vec4> fixedColor [[codegen::color()]];
 
@@ -238,6 +288,7 @@ RenderableVectorField::ColorSettings::ColorSettings(const ghoul::Dictionary& dic
         colorMagnitudeDomain = settings.colorMappingRange.value_or(
             colorMagnitudeDomain
         );
+        computeMagnitudeRange = !p.coloring.value().colorMappingRange.has_value();
     }
 }
 
@@ -252,12 +303,39 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
+    if (p.mode == Parameters::Mode::Volume && !p.volume.has_value()) {
+        throw ghoul::RuntimeError(
+            "When selecting the `Volume` mode, a `Volume` table must be specified."
+        );
+    }
+    if (p.mode == Parameters::Mode::Sparse && !p.sparse.has_value()) {
+        throw ghoul::RuntimeError(
+            "When selecting the `Sparse` mode, a `Sparse` table must be specified."
+        );
+    }
+
     addProperty(Fadeable::_opacity);
 
-    _sourceFile = p.volumeFile;
-    _minDomain = p.minDomain;
-    _maxDomain = p.maxDomain;
-    _dimensions = p.dimensions;
+    if (p.volume.has_value()) {
+        _mode = Mode::Volume;
+
+        _sourceFile = p.volume->volumeFile;
+        _volume.minDomain = p.volume->minDomain;
+        _volume.maxDomain = p.volume->maxDomain;
+        _volume.dimensions = p.volume->dimensions;
+    }
+
+    if (p.sparse.has_value()) {
+        _mode = Mode::Sparse;
+
+        _sourceFile = p.sparse->filePath;
+        _sparse.xColumnName = p.sparse->x.value_or("x");
+        _sparse.yColumnName = p.sparse->y.value_or("y");
+        _sparse.zColumnName = p.sparse->z.value_or("z");
+        _sparse.vxColumnName = p.sparse->vx.value_or("vx");
+        _sparse.vyColumnName = p.sparse->vy.value_or("vy");
+        _sparse.vzColumnName = p.sparse->vz.value_or("vz");
+    }
 
     addPropertySubOwner(_colorSettings);
 
@@ -271,11 +349,6 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
             ));
         }
     });
-
-    const bool hasColoring = p.coloring.has_value();
-    if (hasColoring) {
-        _computeMagnitudeRange = !p.coloring.value().colorMappingRange.has_value();
-    }
 
     _stride = p.stride.value_or(_stride);
     _stride.onChange([this]() {
@@ -330,25 +403,23 @@ void RenderableVectorField::initialize() {
         throw ghoul::RuntimeError(std::format("Could not load data file '{}'", dataFile));
     }
 
-    RawVolumeReader<VelocityData> reader(dataFile, _dimensions);
-    _volumeData = reader.read();
-
-    if (_computeMagnitudeRange) {
-        _volumeData->forEachVoxel(
-            [this](const glm::uvec3&, const VelocityData& data) {
-                float magnitude = glm::length(glm::vec3(data.vx, data.vy, data.vz));
-                const glm::vec2& mag = _colorSettings.colorMagnitudeDomain;
-                _colorSettings.colorMagnitudeDomain = glm::vec2(
-                    std::min(mag.x, magnitude),
-                    std::max(mag.y, magnitude)
-                );
-            }
-        );
+    switch (_mode) {
+        case Mode::Volume:
+            loadVolumeData(dataFile);
+            computeVolumeFieldLines();
+            break;
+        case Mode::Sparse:
+            loadCSVData(dataFile);
+            computeSparseFieldLines();
+            break;
+        default:
+            throw ghoul::MissingCaseException();
     }
 
-    computeFieldLinesParallel();
+    applyLuaFilter();
     _vectorFieldIsDirty = false;
 }
+
 
 void RenderableVectorField::initializeGL() {
     _program = global::renderEngine->buildRenderProgram(
@@ -464,7 +535,17 @@ void RenderableVectorField::render(const RenderData& data, RendererTasks&) {
 
 void RenderableVectorField::update(const UpdateData&) {
     if (_vectorFieldIsDirty) [[unlikely]] {
-        computeFieldLinesParallel();
+        switch (_mode) {
+            case Mode::Volume:
+                computeVolumeFieldLines();
+                break;
+            case Mode::Sparse:
+                computeSparseFieldLines();
+                break;
+            default:
+                throw ghoul::MissingCaseException();
+        }
+        applyLuaFilter();
 
         glBindBuffer(GL_ARRAY_BUFFER, _vectorFieldVbo);
         glBufferData(
@@ -509,13 +590,63 @@ void RenderableVectorField::update(const UpdateData&) {
     }
 }
 
-void RenderableVectorField::computeFieldLinesParallel() {
+void RenderableVectorField::applyLuaFilter() {
+    if (_filterByLua) {
+        std::filesystem::path path = _luaScriptFile.value();
+        if (path.empty()) {
+            LERROR(std::format(
+                "Trying to filter data using an empty script file '{}'", path
+            ));
+            return;
+        }
+
+        // Load the Lua script
+        ghoul::lua::runScriptFile(_state, path);
+        // Get the filter function
+        lua_getglobal(_state, "filter");
+        const bool isFunction = lua_isfunction(_state, -1);
+        if (!isFunction) {
+            LERROR(std::format("Script '{}' does not have a function 'filter'", path));
+            return;
+        }
+
+        _instances.erase(
+            std::remove_if(
+                _instances.begin(),
+                _instances.end(),
+                [&state = _state](const ArrowInstance& i) {
+            // Get the filter function
+            lua_getglobal(state, "filter");
+            // First argument (x,y,z) is the averaged position of the arrow
+            ghoul::lua::push(state, i.position);
+            // Second argument (vx, vy, vz) is the averaged direction vector
+            ghoul::lua::push(state, i.direction);
+
+            const int success = lua_pcall(state, 2, 1, 0);
+
+            if (success != 0) {
+                LERROR(std::format(
+                    "Error executing 'filter': {}", lua_tostring(state, -1)
+                ));
+            }
+
+            // The Lua function returns true for the values that should be kept
+            const bool filter = ghoul::lua::value<bool>(state);
+            return !filter;
+        }
+            ),
+            _instances.end()
+        );
+    }
+}
+
+void RenderableVectorField::computeVolumeFieldLines() {
     LDEBUG("Computing vector field");
 
     // Divide volume into blocks of stride * stride * stride voxels
-    const uint64_t numBlocksX = (_dimensions.x + _stride - 1) / _stride;
-    const uint64_t numBlocksY = (_dimensions.y + _stride - 1) / _stride;
-    const uint64_t numBlocksZ = (_dimensions.z + _stride - 1) / _stride;
+    const uint64_t numBlocksX = (_volume.dimensions.x + _stride - 1) / _stride;
+    const uint64_t numBlocksY = (_volume.dimensions.y + _stride - 1) / _stride;
+    const uint64_t numBlocksZ = (_volume.dimensions.z + _stride - 1) / _stride;
     const uint64_t totalBlocks = numBlocksX * numBlocksY * numBlocksZ;
 
     const glm::uvec3 blockDims = glm::uvec3(numBlocksX, numBlocksY, numBlocksZ);
@@ -544,11 +675,14 @@ void RenderableVectorField::computeFieldLinesParallel() {
                     unsigned int iz = z + dz;
 
                     // Skip indices outside data volume
-                    if (ix >= _dimensions.x || iy >= _dimensions.y || iz >= _dimensions.z) {
+                    if (ix >= _volume.dimensions.x ||
+                        iy >= _volume.dimensions.y ||
+                        iz >= _volume.dimensions.z)
+                    {
                         continue;
                     }
-
-                    const VelocityData& v = _volumeData->get(glm::uvec3(ix, iy, iz));
+                    const glm::uvec3 indexCoordinates = glm::uvec3(ix, iy, iz);
+                    const VelocityData& v = _volume.volumeData->get(indexCoordinates);
                     avgVelocity += glm::vec3(v.vx, v.vy, v.vz);
                     count++;
                 }
@@ -569,9 +703,10 @@ void RenderableVectorField::computeFieldLinesParallel() {
         );
 
         // Transform from voxel space [0, dims] to world space [minDomain, maxDomain]
-        glm::vec3 normalized = blockCenterVoxel / static_cast<glm::vec3>(_dimensions);
-        glm::vec3 minD = _minDomain;
-        glm::vec3 maxD = _maxDomain;
+        glm::vec3 normalized = blockCenterVoxel /
+            static_cast<glm::vec3>(_volume.dimensions);
+        glm::vec3 minD = _volume.minDomain;
+        glm::vec3 maxD = _volume.maxDomain;
         glm::vec3 startPos = minD + glm::vec3(normalized) * (maxD - minD);
 
         float magnitude = glm::length(avgVelocity);
@@ -594,7 +729,7 @@ void RenderableVectorField::computeFieldLinesParallel() {
 
     // The bounding sphere radius is the distance to the furthest corner of the domain
     float boundingSphereRadius = glm::length(
-        glm::max(glm::abs(_minDomain),glm::abs(_maxDomain))
+        glm::max(glm::abs(_volume.minDomain), glm::abs(_volume.maxDomain))
     );
 
     setBoundingSphere(boundingSphereRadius);
@@ -602,53 +737,188 @@ void RenderableVectorField::computeFieldLinesParallel() {
     if (_instances.empty()) {
         throw ghoul::RuntimeError("Couldn't compute vector field segments");
     }
+}
 
-    if (_filterByLua) {
-        std::filesystem::path path = _luaScriptFile.value();
-        if (path.empty()) {
-            LERROR(std::format(
-                "Trying to filter data using an empty script file '{}'", path
-            ));
-            return;
-        }
+void RenderableVectorField::computeSparseFieldLines() {
+    if (_sparse.data.empty()) {
+        return;
+    }
 
-        // Load the Lua script
-        ghoul::lua::runScriptFile(_state, path);
-        // Get the filter function
-        lua_getglobal(_state, "filter");
-        const bool isFunction = lua_isfunction(_state, -1);
-        if (!isFunction) {
-            LERROR(std::format("Script '{}' does not have a function 'filter'", path));
-            return;
-        }
+    const size_t totalInstances = (_sparse.data.size() + _stride - 1) / _stride;
+    _instances.clear();
+    _instances.resize(totalInstances);
 
-        _instances.erase(
-            std::remove_if(
-                _instances.begin(),
-                _instances.end(),
-                [&state = _state](const ArrowInstance& i) {
-                    // Get the filter function
-                    lua_getglobal(state, "filter");
-                    // First argument (x,y,z) is the averaged position of the arrow
-                    ghoul::lua::push(state, i.position);
-                    // Second argument (vx, vy, vz) is the averaged direction vector
-                    ghoul::lua::push(state, i.direction);
 
-                    const int success = lua_pcall(state, 2, 1, 0);
+    std::vector<size_t> indices(totalInstances);
+    std::iota(indices.begin(), indices.end(), 0);
 
-                    if (success != 0) {
-                        LERROR(std::format(
-                            "Error executing 'filter': {}", lua_tostring(state, -1)
-                        ));
-                    }
 
-                    // The Lua function returns true for the values that should be kept
-                    const bool filter = ghoul::lua::value<bool>(state);
-                    return !filter;
-                }
-            ),
-            _instances.end()
+    auto computeArrowInstance = [this](size_t instanceIdx) {
+        const size_t dataIdx = instanceIdx * _stride;
+        const glm::vec3& position = _sparse.data[dataIdx].position;
+        const glm::vec3& velocity = _sparse.data[dataIdx].velocity;
+
+        float magnitude = glm::length(velocity);
+        glm::vec3 direction = (magnitude > 0.f) ?
+            glm::normalize(velocity) :
+            glm::vec3(0.f);
+
+        _instances[instanceIdx] = (ArrowInstance(position, direction, magnitude));
+    };
+
+    std::for_each(
+        std::execution::par,
+        indices.begin(),
+        indices.end(),
+        computeArrowInstance
+    );
+
+    // Compute the min and max domain boundaries
+    glm::vec3 minDomain = _sparse.data[0].position;
+    glm::vec3 maxDomain = _sparse.data[0].position;
+    for (const auto& [position, velocity] : _sparse.data) {
+        minDomain = glm::min(minDomain, position);
+        maxDomain = glm::max(maxDomain, position);
+    }
+
+    // The bounding sphere radius is the distance to the furthest corner of the domain
+    float boundingSphereRadius = glm::length(
+        glm::max(glm::abs(minDomain), glm::abs(maxDomain))
+    );
+    setBoundingSphere(boundingSphereRadius);
+
+    if (_instances.empty()) {
+        throw ghoul::RuntimeError("Couldn't compute vector field segments");
+    }
+}
+
+void RenderableVectorField::loadVolumeData(const std::filesystem::path& path) {
+    RawVolumeReader<VelocityData> reader(path, _volume.dimensions);
+    _volume.volumeData = reader.read();
+
+    if (_colorSettings.computeMagnitudeRange) {
+        _volume.volumeData->forEachVoxel(
+            [this](const glm::uvec3&, const VelocityData& data) {
+                float magnitude = glm::length(glm::vec3(data.vx, data.vy, data.vz));
+                const glm::vec2& mag = _colorSettings.colorMagnitudeDomain;
+                _colorSettings.colorMagnitudeDomain = glm::vec2(
+                    std::min(mag.x, magnitude),
+                    std::max(mag.y, magnitude)
+                );
+            }
         );
+    }
+}
+
+void RenderableVectorField::loadCSVData(const std::filesystem::path& path) {
+    std::vector<std::vector<std::string>> rows = ghoul::loadCSVFile(path, true);
+    if (rows.size() < 2) {
+        throw ghoul::RuntimeError(std::format(
+            "Error loading data file '{}'. No data items read", path
+        ));
+    }
+
+    const std::vector<std::string>& columns = rows.front();
+
+    std::optional<size_t> xColumn;
+    std::optional<size_t> yColumn;
+    std::optional<size_t> zColumn;
+
+    std::optional<size_t> vxColumn;
+    std::optional<size_t> vyColumn;
+    std::optional<size_t> vzColumn;
+
+    // Find the data indices for position and direction
+    for (size_t i = 0; i < columns.size(); i++) {
+        const std::string& column = columns[i];
+        if (column == _sparse.xColumnName) {
+            xColumn = i;
+        }
+        else if (column == _sparse.yColumnName) {
+            yColumn = i;
+        }
+        else if (column == _sparse.zColumnName) {
+            zColumn = i;
+        }
+        else if (column == _sparse.vxColumnName) {
+            vxColumn = i;
+        }
+        else if (column == _sparse.vyColumnName) {
+            vyColumn = i;
+        }
+        else if (column == _sparse.vzColumnName) {
+            vzColumn = i;
+        }
+    }
+
+    if (!xColumn.has_value() || !yColumn.has_value() || !zColumn.has_value() ||
+        !vxColumn.has_value() || !vyColumn.has_value() || !vzColumn.has_value()) {
+        throw ghoul::RuntimeError(std::format(
+            "Error loading data file '{}'. Missing position or direction column", path
+        ));
+    }
+
+    auto readFloatData = [](const std::string& str) -> float {
+        float result = 0.f;
+#ifdef WIN32
+        auto [p, ec] = std::from_chars(str.data(), str.data() + str.size(), result);
+        if (ec == std::errc() && std::isfinite(result)) {
+            return result;
+        }
+        return std::numeric_limits<float>::quiet_NaN();
+#else // ^^^^ WIN32 // !WIN32 vvvv
+        // clang is missing float support for std::from_chars
+        try {
+            result = std::stof(str, nullptr);
+            if (std::isfinite(result)) {
+                return result;
+            }
+        }
+        catch (const std::invalid_argument&) {}
+        return NAN;
+#endif // WIN32
+    };
+
+    // Skip first row (column names)
+    _sparse.data.reserve(rows.size() - 1);
+
+    for (size_t rowIdx = 1; rowIdx < rows.size(); rowIdx++) {
+        const std::vector<std::string>& row = rows[rowIdx];
+
+        glm::vec3 position;
+        glm::vec3 velocity;
+        for (size_t i = 0; i < row.size(); i++) {
+            const float value = readFloatData(row[i]);
+
+            if (*xColumn == i) {
+                position.x = value;
+            }
+            else if (*yColumn == i) {
+                position.y = value;
+            }
+            else if (*zColumn == i) {
+                position.z = value;
+            }
+            else if (*vxColumn == i) {
+                velocity.x = value;
+            }
+            else if (*vyColumn == i) {
+                velocity.y = value;
+            }
+            else if (*vzColumn == i) {
+                velocity.z = value;
+            }
+        }
+        _sparse.data.push_back({ position, velocity });
+
+        if (_colorSettings.computeMagnitudeRange) {
+            float magnitude = glm::length(velocity);
+            const glm::vec2& mag = _colorSettings.colorMagnitudeDomain;
+            _colorSettings.colorMagnitudeDomain = glm::vec2(
+                std::min(mag.x, magnitude),
+                std::max(mag.y, magnitude)
+            );
+        }
     }
 }
 
