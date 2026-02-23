@@ -47,51 +47,53 @@
 #include <variant>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view PlaceholderFile = "${DATA}/placeholder.png";
 
     constexpr std::string_view _loggerCat = "ProjectionComponent";
 
-    constexpr openspace::properties::Property::PropertyInfo ProjectionInfo = {
+    constexpr Property::PropertyInfo ProjectionInfo = {
         "PerformProjection",
         "Perform projections",
         "If this value is enabled, this ProjectionComponent will perform projections. If "
         "it is disabled, projections will be ignored.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ClearProjectionInfo = {
+    constexpr Property::PropertyInfo ClearProjectionInfo = {
         "ClearAllProjections",
         "Clear projections",
         "If this property is triggered, it will remove all the projections that have "
         "already been applied.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadingInfo = {
+    constexpr Property::PropertyInfo FadingInfo = {
         "ProjectionFading",
         "Projection fading",
         "This value fades the previously performed projections in or out. If this value "
         "is equal to '1', the projections are fully visible, if the value is equal to "
         "'0', the performed projections are completely invisible.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextureSizeInfo = {
+    constexpr Property::PropertyInfo TextureSizeInfo = {
         "TextureSize",
         "Texture size",
         "This value determines the size of the texture into which the images are "
         "projected and thus provides the limit to the resolution of projections that can "
         "be applied. Changing this value will not cause the texture to be automatically "
         "updated, but triggering the 'ApplyTextureSize' property is required.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ApplyTextureSizeInfo = {
+    constexpr Property::PropertyInfo ApplyTextureSizeInfo = {
         "ApplyTextureSize",
         "Apply texture size",
         "Triggering this property applies a new size to the underlying projection "
         "texture. The old texture is resized and interpolated to fit the new size.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ProjectionComponent)]] Parameters {
@@ -168,17 +170,17 @@ namespace {
 
         std::optional<ghoul::Dictionary> timesDataInputTranslation;
     };
-#include "projectioncomponent_codegen.cpp"
 } // namespace
+#include "projectioncomponent_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ProjectionComponent::Documentation() {
+Documentation ProjectionComponent::Documentation() {
     return codegen::doc<Parameters>("spacecraftinstruments_projectioncomponent");
 }
 
 ProjectionComponent::ProjectionComponent()
-    : properties::PropertyOwner({ "ProjectionComponent", "Projection Component" })
+    : PropertyOwner({ "ProjectionComponent", "Projection Component" })
     , _performProjection(ProjectionInfo, true)
     , _clearAllProjections(ClearProjectionInfo)
     , _projectionFading(FadingInfo, 1.f, 0.f, 1.f)

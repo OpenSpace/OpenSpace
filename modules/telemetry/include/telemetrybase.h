@@ -34,10 +34,9 @@ namespace openspace {
 class Camera;
 class OpenSoundControlConnection;
 
-class TelemetryBase : public properties::PropertyOwner {
+class TelemetryBase : public PropertyOwner {
 public:
-    TelemetryBase(properties::PropertyOwner::PropertyOwnerInfo info,
-        const std::string& ip, int port);
+    TelemetryBase(PropertyOwner::PropertyOwnerInfo info, const std::string& ip, int port);
     virtual ~TelemetryBase();
 
     /**
@@ -79,7 +78,7 @@ protected:
     virtual void sendData() = 0;
 
     std::string _identifier;
-    properties::BoolProperty _enabled;
+    BoolProperty _enabled;
     OpenSoundControlConnection* _connection = nullptr;
 };
 

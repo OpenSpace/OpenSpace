@@ -34,7 +34,7 @@
 #include <string_view>
 #include <vector>
 
-namespace openspace::interaction {
+namespace openspace {
 
 /**
  * Actions that any button of a joystick can have. Each button must be in one of these
@@ -129,28 +129,27 @@ struct JoystickInputStates : public std::array<JoystickInputState, MaxJoysticks>
     bool button(const std::string& joystickName, int button, JoystickAction action) const;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 namespace ghoul {
 
 template <>
-inline std::string to_string(const openspace::interaction::JoystickAction& value) {
+inline std::string to_string(const openspace::JoystickAction& value) {
     switch (value) {
-        case openspace::interaction::JoystickAction::Idle:    return "Idle";
-        case openspace::interaction::JoystickAction::Press:   return "Press";
-        case openspace::interaction::JoystickAction::Repeat:  return "Repeat";
-        case openspace::interaction::JoystickAction::Release: return "Release";
-        default:                                             throw MissingCaseException();
+        case openspace::JoystickAction::Idle:    return "Idle";
+        case openspace::JoystickAction::Press:   return "Press";
+        case openspace::JoystickAction::Repeat:  return "Repeat";
+        case openspace::JoystickAction::Release: return "Release";
+        default:                                 throw MissingCaseException();
     }
 }
 
 template <>
-constexpr openspace::interaction::JoystickAction from_string(std::string_view string) {
-    if (string == "Idle")    { return openspace::interaction::JoystickAction::Idle; }
-    if (string == "Press")   { return openspace::interaction::JoystickAction::Press; }
-    if (string == "Repeat")  { return openspace::interaction::JoystickAction::Repeat; }
-    if (string == "Release") { return openspace::interaction::JoystickAction::Release; }
-
+constexpr openspace::JoystickAction from_string(std::string_view string) {
+    if (string == "Idle")         { return openspace::JoystickAction::Idle; }
+    else if (string == "Press")   { return openspace::JoystickAction::Press; }
+    else if (string == "Repeat")  { return openspace::JoystickAction::Repeat; }
+    else if (string == "Release") { return openspace::JoystickAction::Release; }
     throw RuntimeError(std::format("Unknown action '{}'", string));
 }
 

@@ -41,10 +41,10 @@ public:
 
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::StringProperty _luaScriptFile;
+    StringProperty _luaScriptFile;
     std::unique_ptr<ghoul::filesystem::File> _fileHandle;
     ghoul::lua::LuaState _state;
 };

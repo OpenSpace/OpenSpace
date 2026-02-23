@@ -39,14 +39,16 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color of the grid lines.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LongSegmentsInfo = {
+    constexpr Property::PropertyInfo LongSegmentsInfo = {
         "LongSegments",
         "Number of longitudinal segments",
         "The number of longitudinal segments the sphere is split into. Determines the "
@@ -54,10 +56,10 @@ namespace {
         "straight at the equator. Should be an even value (if an odd value is provided, "
         "the value will be set to the new value minus one). If the `Segments` value is "
         "provided as well, it will have precedence over this value",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LatSegmentsInfo = {
+    constexpr Property::PropertyInfo LatSegmentsInfo = {
         "LatSegments",
         "Number of latitudinal segments",
         "The number of latitudinal segments the sphere is split into. Determines the "
@@ -65,17 +67,17 @@ namespace {
         "straight at the equator. Should be an even value (if an odd value is provided, "
         "the value will be set to the new value minus one). If the `Segments` value is "
         "provided as well, it will have precedence over this value",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the grid."
@@ -113,12 +115,12 @@ namespace {
         std::optional<ghoul::Dictionary> labels
             [[codegen::reference("labelscomponent")]];
     };
-#include "renderablesphericalgrid_codegen.cpp"
 } // namespace
+#include "renderablesphericalgrid_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableSphericalGrid::Documentation() {
+Documentation RenderableSphericalGrid::Documentation() {
     return codegen::doc<Parameters>("base_renderable_sphericalgrid");
 }
 
@@ -135,7 +137,7 @@ RenderableSphericalGrid::RenderableSphericalGrid(const ghoul::Dictionary& dictio
     addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
-    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color.setViewOption(Property::ViewOptions::Color);
     addProperty(_color);
 
     auto gridDirty = [this]() {

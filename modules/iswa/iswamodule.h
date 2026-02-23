@@ -35,8 +35,8 @@ public:
 
     IswaModule();
 
-    std::vector<documentation::Documentation> documentations() const override;
-    scripting::LuaLibrary luaLibrary() const override;
+    std::vector<openspace::Documentation> documentations() const override;
+    LuaLibrary luaLibrary() const override;
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;

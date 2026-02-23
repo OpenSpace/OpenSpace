@@ -30,7 +30,7 @@
 #include <openspace/properties/propertyowner.h>
 #include <vector>
 
-namespace openspace::documentation {
+namespace openspace {
 
 /**
  * The DocumentationEngine has the ability to collect all Documentation%s that are
@@ -76,7 +76,7 @@ public:
     nlohmann::json generateScriptEngineJson() const;
     nlohmann::json generateFactoryManagerJson() const;
     nlohmann::json generateKeybindingsJson() const;
-    nlohmann::json generatePropertyOwnerJson(properties::PropertyOwner* owner) const;
+    nlohmann::json generatePropertyOwnerJson(PropertyOwner* owner) const;
     nlohmann::json generateLicenseGroupsJson() const;
     nlohmann::json generateLicenseListJson() const;
     nlohmann::json generateActionJson() const;
@@ -88,8 +88,8 @@ private:
 
     static DocumentationEngine* _instance;
 };
-} // namespace openspace::documentation
+} // namespace openspace
 
-#define DocEng (openspace::documentation::DocumentationEngine::ref())
+#define DocEng (openspace::DocumentationEngine::ref())
 
 #endif // __OPENSPACE_CORE___DOCUMENTATIONENGINE___H__

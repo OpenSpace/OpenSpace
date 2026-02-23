@@ -40,7 +40,7 @@ public:
 
     void deinitializeGL() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void initializeCustomTexture() override;

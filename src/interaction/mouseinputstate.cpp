@@ -26,7 +26,7 @@
 
 #include <algorithm>
 
-namespace openspace::interaction {
+namespace openspace {
 
 void MouseInputState::mouseButtonCallback(MouseButton button, MouseAction action) {
     if (action == MouseAction::Press) {
@@ -65,4 +65,4 @@ bool MouseInputState::isMouseButtonPressed(MouseButton mouseButton) const {
     return it != _mouseButtonsDown.end();
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

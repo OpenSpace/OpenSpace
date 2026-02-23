@@ -24,7 +24,7 @@
 
 #include <openspace/interaction/scriptcamerastates.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 ScriptCameraStates::ScriptCameraStates() : CameraInteractionStates(1.0, 1.0) {}
 
@@ -105,4 +105,4 @@ void ScriptCameraStates::addGlobalRoll(double delta) {
     _globalRoll += delta;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

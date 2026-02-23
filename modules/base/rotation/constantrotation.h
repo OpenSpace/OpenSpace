@@ -38,11 +38,11 @@ public:
 
     glm::dmat3 matrix(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::DVec3Property _rotationAxis;
-    properties::FloatProperty _rotationRate;
+    DVec3Property _rotationAxis;
+    FloatProperty _rotationRate;
 
     mutable double _accumulatedRotation = 0.0;
 };

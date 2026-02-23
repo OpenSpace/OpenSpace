@@ -55,7 +55,6 @@ namespace {
 
     std::array<std::byte, TotalSize> DataStorage;
 #endif // WIN32
-
 } // namespace
 
 void create() {

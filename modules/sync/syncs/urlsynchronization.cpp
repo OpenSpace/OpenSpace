@@ -85,12 +85,12 @@ namespace {
         // first time.
         std::optional<double> secondsUntilResync [[codegen::greaterequal(0.0)]];
     };
-#include "urlsynchronization_codegen.cpp"
 } // namespace
+#include "urlsynchronization_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation UrlSynchronization::Documentation() {
+Documentation UrlSynchronization::Documentation() {
     return codegen::doc<Parameters>("sync_synchronization_url");
 }
 

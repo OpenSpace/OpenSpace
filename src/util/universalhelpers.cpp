@@ -27,7 +27,7 @@
 #include <ghoul/misc/assert.h>
 #include <algorithm>
 
-namespace openspace::helpers {
+namespace openspace {
 
 double shiftAndScale(double t, double start, double end) {
     ghoul_assert(
@@ -39,4 +39,4 @@ double shiftAndScale(double t, double start, double end) {
     return std::max(0.0, std::min(tScaled, 1.0));
 }
 
-} // namespace openspace::helpers
+} // namespace openspace

@@ -50,7 +50,7 @@ public:
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct ConstellationLine {
@@ -75,8 +75,8 @@ private:
      */
     void selectionPropertyHasChanged() override;
 
-    properties::StringProperty _speckFile;
-    properties::BoolProperty _drawElements;
+    StringProperty _speckFile;
+    BoolProperty _drawElements;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, opacity,

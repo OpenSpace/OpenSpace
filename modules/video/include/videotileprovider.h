@@ -31,7 +31,7 @@
 #include <modules/globebrowsing/src/tileindex.h>
 #include <modules/video/include/videoplayer.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 struct ChunkTile;
 
@@ -49,7 +49,7 @@ public:
     Tile::Status tileStatus(const TileIndex& tileIndex) override final;
     TileDepthTransform depthTransform() override final;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void internalInitialize() override final;
@@ -63,6 +63,6 @@ private:
     VideoPlayer _videoPlayer;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VIDEO___VIDEOTILEPROVIDER___H__

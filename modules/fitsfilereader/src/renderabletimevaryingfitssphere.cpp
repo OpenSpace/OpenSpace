@@ -45,6 +45,8 @@
 #include <vector>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableTimeVaryingFitsSphere";
 
     // Extract J2000 time from file names
@@ -91,45 +93,45 @@ namespace {
             << digits.substr(12, 2) << "." // Second
             << "000";
 
-        return openspace::Time::convertTime(oss.str());
+        return Time::convertTime(oss.str());
     }
 
-    constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
+    constexpr Property::PropertyInfo TextureSourceInfo = {
         "TextureSource",
         "Texture source",
         "A directory on disk from which to load the texture files for the sphere.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FitsLayerInfo = {
+    constexpr Property::PropertyInfo FitsLayerInfo = {
         "FitsLayer",
         "Texture layer",
         "The index, a whole positive number, of the layer in the FITS file to use as "
         "texture. If not specified, the first layer in the data will be used regardless. "
         "When specified, that data layer will be the option used.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FitsLayerNameInfo = {
+    constexpr Property::PropertyInfo FitsLayerNameInfo = {
         "LayerNames",
         "Texture layer options",
         "This value specifies which name of the fits layer to use as texture.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextureFilterInfo = {
+    constexpr Property::PropertyInfo TextureFilterInfo = {
         "TextureFilter",
         "Texture filter",
         "Option to choose nearest neighbor or linear filtering for the texture.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SaveDownloadsOnShutdown = {
+    constexpr Property::PropertyInfo SaveDownloadsOnShutdown = {
         "SaveDownloadsOnShutdown",
         "Save downloads on shutdown",
         "This is an option for if dynamically downloaded files should be saved for the"
         "next run or not.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `Renderable` reads a data sequence from specifically FITS files and makes
@@ -207,12 +209,12 @@ namespace {
         // specified, the field lines are shown at all times.
         std::optional<bool> showAtAllTimes;
     };
-#include "renderabletimevaryingfitssphere_codegen.cpp"
 } // namespace
+#include "renderabletimevaryingfitssphere_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableTimeVaryingFitsSphere::Documentation() {
+Documentation RenderableTimeVaryingFitsSphere::Documentation() {
     return codegen::doc<Parameters>(
         "fitsfilereader_renderable_time_varying_fits_sphere",
         RenderableSphere::Documentation()

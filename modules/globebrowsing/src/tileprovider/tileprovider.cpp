@@ -32,15 +32,13 @@
 #include <filesystem>
 
 namespace {
+    using namespace openspace;
+
     std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
-    openspace::globebrowsing::Tile DefaultTile = openspace::globebrowsing::Tile {
-        nullptr,
-        std::nullopt,
-        openspace::globebrowsing::Tile::Status::Unavailable
-    };
+    Tile DefaultTile = Tile { nullptr, std::nullopt, Tile::Status::Unavailable };
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 unsigned int TileProvider::NumTileProviders = 0;
 
@@ -102,9 +100,7 @@ void TileProvider::deinitializeDefaultTile() {
     DefaultTileTexture = nullptr;
 }
 
-TileProvider::TileProvider()
-    : properties::PropertyOwner({ "TileProvider", "Tile Provider" })
-{}
+TileProvider::TileProvider() : PropertyOwner({ "TileProvider", "Tile Provider" }) {}
 
 void TileProvider::initialize() {
     ZoneScoped;
@@ -234,4 +230,4 @@ ChunkTilePile TileProvider::chunkTilePile(TileIndex tileIndex, int pileSize) {
     return chunkTilePile;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

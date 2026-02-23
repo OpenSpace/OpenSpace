@@ -42,6 +42,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableFieldlines";
 
     constexpr float DefaultFieldlineStepSize = 0.5f;
@@ -73,39 +75,39 @@ namespace {
     constexpr int SeedPointSourceFile = 0;
     constexpr int SeedPointSourceTable = 1;
 
-    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    constexpr Property::PropertyInfo StepSizeInfo = {
         "Stepsize",
         "Fieldline step size.",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo Classification = {
+    constexpr Property::PropertyInfo Classification = {
         "Classification",
         "Fieldline classification",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FieldlineColorInfo = {
+    constexpr Property::PropertyInfo FieldlineColorInfo = {
         "FieldlineColor",
         "Fieldline color",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SeedPointSourceInfo = {
+    constexpr Property::PropertyInfo SeedPointSourceInfo = {
         "Source",
         "SeedPoint source",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SeedPointFileInfo = {
+    constexpr Property::PropertyInfo SeedPointFileInfo = {
         "SourceFile",
         "SeedPoint file",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
@@ -166,7 +168,7 @@ RenderableFieldlines::RenderableFieldlines(const ghoul::Dictionary& dictionary)
 
     addProperty(_classification);
 
-    _fieldlineColor.setViewOption(properties::Property::ViewOptions::Color);
+    _fieldlineColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_fieldlineColor);
 
     _seedPointSource.onChange(dirtySeedpoints);

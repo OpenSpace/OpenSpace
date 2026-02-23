@@ -51,13 +51,12 @@ namespace {
         // 3, i.e. to use triangles.
         std::optional<int> polygonSides [[codegen::greaterequal(3)]];
     };
-
+} // namespace
 #include "renderablepolygoncloud_codegen.cpp"
-}  // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderablePolygonCloud::Documentation() {
+Documentation RenderablePolygonCloud::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderablepolygoncloud",
         RenderablePointCloud::Documentation()

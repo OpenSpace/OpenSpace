@@ -34,10 +34,10 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 class Time;
 
-class TimeFrame : public properties::PropertyOwner {
+class TimeFrame : public PropertyOwner {
 public:
     static ghoul::mm_unique_ptr<TimeFrame> createFromDictionary(
         const ghoul::Dictionary& dictionary);
@@ -50,12 +50,12 @@ public:
 
     bool isActive() const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    properties::BoolProperty _isInTimeFrame;
+    BoolProperty _isInTimeFrame;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___TIMEFRAME___H__

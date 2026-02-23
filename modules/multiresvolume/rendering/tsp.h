@@ -139,6 +139,6 @@ private:
     float _medianTemporalError = 0.f;
 };
 
-}  // namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_MULTIRESVOLUME___TSP___H__

@@ -85,12 +85,12 @@ namespace {
         // has the format 'teff,bv'.
         std::string teffToBvFile;
     };
-#include "exoplanetsdatapreparationtask_codegen.cpp"
 } // namespace
+#include "exoplanetsdatapreparationtask_codegen.cpp"
 
-namespace openspace::exoplanets {
+namespace openspace {
 
-documentation::Documentation ExoplanetsDataPreparationTask::documentation() {
+Documentation ExoplanetsDataPreparationTask::documentation() {
     return codegen::doc<Parameters>("exoplanets_data_preparation_task");
 }
 
@@ -567,4 +567,4 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff,
     return bv;
 }
 
-} // namespace openspace::exoplanets
+} // namespace openspace

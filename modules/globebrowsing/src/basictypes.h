@@ -33,7 +33,7 @@
 
 namespace ghoul::opengl { class Texture; }
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 struct AABB3 {
     glm::vec3 min = glm::vec3(std::numeric_limits<float>::max());
@@ -149,6 +149,6 @@ struct ChunkTile {
 // the current layer is needed
 using ChunkTilePile = std::array<std::optional<ChunkTile>, 3>;
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING__BASICTYPES___H__

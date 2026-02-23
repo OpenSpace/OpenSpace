@@ -35,19 +35,18 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "A URL to an image to use as a texture for this sphere. The image is expected "
         "to be an equirectangular projection.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    std::future<openspace::DownloadManager::MemoryFile> downloadImageToMemory(
-                                                                   const std::string& url)
+    std::future<DownloadManager::MemoryFile> downloadImageToMemory(const std::string& url)
     {
-        using namespace openspace;
-
         return global::downloadManager->fetchFile(
             url,
             [url](const DownloadManager::MemoryFile&) {
@@ -77,12 +76,12 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
     };
-#include "renderablesphereimageonline_codegen.cpp"
 } // namespace
+#include "renderablesphereimageonline_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableSphereImageOnline::Documentation() {
+Documentation RenderableSphereImageOnline::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderable_sphere_image_online",
         RenderableSphere::Documentation()

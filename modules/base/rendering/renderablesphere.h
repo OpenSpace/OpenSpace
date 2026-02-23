@@ -53,34 +53,34 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     virtual void bindTexture(ghoul::opengl::TextureUnit& unit) = 0;
     virtual void unbindTexture();
 
-    properties::FloatProperty _size;
-    properties::IntProperty _segments;
+    FloatProperty _size;
+    IntProperty _segments;
 
-    properties::OptionProperty _orientation;
-    properties::BoolProperty _mirrorTexture;
-    properties::OptionProperty _textureProjection;
+    OptionProperty _orientation;
+    BoolProperty _mirrorTexture;
+    OptionProperty _textureProjection;
 
-    properties::BoolProperty _disableFadeInDistance;
-    properties::FloatProperty _fadeInThreshold;
-    properties::FloatProperty _fadeOutThreshold;
-    properties::OptionProperty _blendingFuncOption;
-    properties::BoolProperty _disableDepth;
+    BoolProperty _disableFadeInDistance;
+    FloatProperty _fadeInThreshold;
+    FloatProperty _fadeOutThreshold;
+    OptionProperty _blendingFuncOption;
+    BoolProperty _disableDepth;
 
     glm::vec2 _dataMinMaxValues;
     ghoul::opengl::ProgramObject* _shader = nullptr;
-    properties::BoolProperty _useColorMap;
+    BoolProperty _useColorMap;
 
 private:
     std::unique_ptr<Sphere> _sphere;
     bool _sphereIsDirty = false;
 
-    properties::StringProperty _colorMap;
+    StringProperty _colorMap;
     std::unique_ptr<TransferFunction> _transferFunction;
 
     UniformCache(opacity, modelViewProjection, modelViewTransform, modelViewRotation,

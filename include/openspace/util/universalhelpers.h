@@ -33,7 +33,7 @@
 // to document it and put it this file
 //
 
-namespace openspace::helpers {
+namespace openspace {
 
 /**
  * Remap a parameter t in [0,1] to a subinterval [start, end], by shifting and scaling
@@ -43,6 +43,6 @@ namespace openspace::helpers {
  */
 double shiftAndScale(double t, double start, double end);
 
-} // namespace openspace::helpers
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___UNIVERSALHELPERS___H__

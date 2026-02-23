@@ -39,7 +39,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-class ServerInterface : public properties::PropertyOwner {
+class ServerInterface : public PropertyOwner {
 public:
     static std::unique_ptr<ServerInterface> createFromDictionary(
         const ghoul::Dictionary& dictionary);
@@ -70,14 +70,14 @@ private:
         Allow
     };
 
-    properties::OptionProperty _socketType;
-    properties::IntProperty _port;
-    properties::BoolProperty _enabled;
-    properties::StringListProperty _allowAddresses;
-    properties::StringListProperty _requirePasswordAddresses;
-    properties::StringListProperty _denyAddresses;
-    properties::OptionProperty _defaultAccess;
-    properties::StringProperty _password;
+    OptionProperty _socketType;
+    IntProperty _port;
+    BoolProperty _enabled;
+    StringListProperty _allowAddresses;
+    StringListProperty _requirePasswordAddresses;
+    StringListProperty _denyAddresses;
+    OptionProperty _defaultAccess;
+    StringProperty _password;
 
     std::unique_ptr<ghoul::io::SocketServer> _socketServer;
 };

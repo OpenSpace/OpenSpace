@@ -36,7 +36,7 @@ namespace {
     constexpr std::string_view _loggerCat = "ReadFileJob";
 } // namespace
 
-namespace openspace::gaia {
+namespace openspace {
 
 ReadFileJob::ReadFileJob(std::filesystem::path filePath,
                          std::vector<std::string> allColumns, int firstRow, int lastRow,
@@ -250,4 +250,4 @@ std::vector<std::vector<float>> ReadFileJob::product() {
     return _octants;
 }
 
-} // namespace openspace::gaia
+} // namespace openspace

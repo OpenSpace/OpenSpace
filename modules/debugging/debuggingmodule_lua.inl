@@ -29,6 +29,8 @@
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
 
+using namespace openspace;
+
 namespace {
 
 constexpr const char RenderedPathIdentifier[] = "CurrentCameraPath";
@@ -50,14 +52,11 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
                                            bool renderDirections = false,
                                            double directionLineLength = 6e7)
 {
-    using namespace openspace;
-
     if (!global::navigationHandler->pathNavigator().hasCurrentPath()) {
         LWARNINGC("Debugging: PathNavigation", "There is no current path to render");
     }
 
-    const interaction::Path* currentPath =
-        global::navigationHandler->pathNavigator().currentPath();
+    const Path* currentPath = global::navigationHandler->pathNavigator().currentPath();
 
     // Parent node. Note that we only render one path at a time, so remove the previously
     // rendered one, if any
@@ -154,7 +153,6 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
 // Removes the currently rendered camera path if there is one.
 [[codegen::luawrap]] void removeRenderedCameraPath() {
-    using namespace openspace;
     const std::string script = std::format(
         "openspace.removeSceneGraphNode('{}');", RenderedPathIdentifier
     );
@@ -166,16 +164,13 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
  * can be used to set the radius of the created spheres.
  */
 [[codegen::luawrap]] void renderPathControlPoints(double radius = 2000000.0) {
-    using namespace openspace;
-
     if (!global::navigationHandler->pathNavigator().hasCurrentPath()) {
         LWARNINGC(
             "Debugging: PathNavigation", "There is no current path to sample points from"
         );
     }
 
-    const interaction::Path* currentPath =
-        global::navigationHandler->pathNavigator().currentPath();
+    const Path* currentPath = global::navigationHandler->pathNavigator().currentPath();
 
     // Parent node. Note that we only render one set of points at a time, so remove any
     // previously rendered ones
@@ -229,13 +224,12 @@ constexpr glm::vec3 OrientationLineColor = glm::vec3(0.0, 1.0, 1.0);
 
 // Removes the rendered control points.
 [[codegen::luawrap]] void removePathControlPoints() {
-    using namespace openspace;
     const std::string script = std::format(
         "openspace.removeSceneGraphNode('{}');", RenderedPointsIdentifier
     );
     global::scriptEngine->queueScript(script);
 }
 
-#include "debuggingmodule_lua_codegen.cpp"
-
 } // namespace
+
+#include "debuggingmodule_lua_codegen.cpp"

@@ -33,7 +33,7 @@
 
 struct lua_State;
 
-namespace openspace::volume {
+namespace openspace {
 
 class EnvelopePoint {
 public:
@@ -73,6 +73,6 @@ private:
     std::vector<EnvelopePoint> _points;
 };
 
-} //namespace openspace::volume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___ENVELOPE___H__

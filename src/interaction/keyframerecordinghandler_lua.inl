@@ -26,61 +26,53 @@
 #include <optional>
 #include <utility>
 
+using namespace openspace;
+
 namespace {
 
 // Starts a new sequence of keyframes, any previously loaded sequence is discarded
 [[codegen::luawrap]] void newSequence() {
-    using namespace openspace;
     global::keyframeRecording->newSequence();
 }
 
 // Adds a keyframe at the specified sequence-time
 [[codegen::luawrap]] void addCameraKeyframe(double sequenceTime) {
-    using namespace openspace;
     global::keyframeRecording->addCameraKeyframe(sequenceTime);
 }
 
 // Adds a keyframe at the specified sequence-time
 [[codegen::luawrap]] void addScriptKeyframe(double sequenceTime, std::string script) {
-    using namespace openspace;
     global::keyframeRecording->addScriptKeyframe(sequenceTime, std::move(script));
 }
 
 // Removes a keyframe at the specified 0-based index
 [[codegen::luawrap]] void removeKeyframe(int index) {
-    using namespace openspace;
     global::keyframeRecording->removeKeyframe(index);
 }
 
 // Update the camera position at keyframe specified by the 0-based index
 [[codegen::luawrap]] void updateKeyframe(int index) {
-    using namespace openspace;
     global::keyframeRecording->updateKeyframe(index);
 }
 
 // Move keyframe of `index` to the new specified `sequenceTime`
 [[codegen::luawrap]] void moveKeyframe(int index, double sequenceTime) {
-    using namespace openspace;
     global::keyframeRecording->moveKeyframe(index, sequenceTime);
 }
 
 // Saves the current sequence of keyframes to disk by the optionally specified `filename`.
 [[codegen::luawrap]] void saveSequence(std::filesystem::path filename) {
-    using namespace openspace;
     global::keyframeRecording->saveSequence(std::move(filename));
 }
 
 // Loads a sequence from the specified file
 [[codegen::luawrap]] void loadSequence(std::filesystem::path filename) {
-    using namespace openspace;
     global::keyframeRecording->loadSequence(std::move(filename));
 }
 
 // Playback sequence optionally from the specified `sequenceTime` or if not specified
 // starts playing from the current time set within the sequence
 [[codegen::luawrap]] void play(std::optional<double> sequenceTime) {
-    using namespace openspace;
-
     global::keyframeRecording->play();
     if (sequenceTime.has_value()) {
         global::sessionRecordingHandler->seek(*sequenceTime);
@@ -89,21 +81,18 @@ namespace {
 
 // Pauses a playing sequence
 [[codegen::luawrap]] void pause() {
-    using namespace openspace;
     global::sessionRecordingHandler->setPlaybackPause(true);
 }
 
 // Returns `true` if there currently is a sequence loaded, otherwise `false`
 [[codegen::luawrap]] bool hasKeyframeRecording() {
-    using namespace openspace;
     return global::keyframeRecording->hasKeyframeRecording();
 }
 
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> keyframes() {
-    using namespace openspace;
     return global::keyframeRecording->keyframes();
 }
 
-#include "keyframerecordinghandler_lua_codegen.cpp"
-
 } // namespace
+
+#include "keyframerecordinghandler_lua_codegen.cpp"

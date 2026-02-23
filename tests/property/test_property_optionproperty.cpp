@@ -27,13 +27,13 @@
 #include <openspace/properties/misc/optionproperty.h>
 
 TEST_CASE("OptionProperty: No Option", "[optionproperty]") {
-    const openspace::properties::OptionProperty p({ "id", "gui", "desc" });
+    const OptionProperty p({ "id", "gui", "desc" });
 
     CHECK_FALSE(p.hasOption());
 }
 
 TEST_CASE("OptionProperty: Single Option Single Zero", "[optionproperty]") {
-    openspace::properties::OptionProperty p({ "id", "gui", "desc"});
+    OptionProperty p({ "id", "gui", "desc"});
 
     p.addOption(0, "a");
 
@@ -44,7 +44,7 @@ TEST_CASE("OptionProperty: Single Option Single Zero", "[optionproperty]") {
 }
 
 TEST_CASE("OptionProperty: Single Option Single Negative", "[optionproperty]") {
-    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
+    OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(-1, "a");
     p = -1;
@@ -54,7 +54,7 @@ TEST_CASE("OptionProperty: Single Option Single Negative", "[optionproperty]") {
 }
 
 TEST_CASE("OptionProperty: Single Option Single Positive", "[optionproperty]") {
-    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
+    OptionProperty p({ "id", "gui", "desc" });
 
     p.addOptions({ { 1, "a" } });
     p = 1;
@@ -64,7 +64,7 @@ TEST_CASE("OptionProperty: Single Option Single Positive", "[optionproperty]") {
 }
 
 TEST_CASE("OptionProperty: Single Option Multiple Zero", "[optionproperty]") {
-    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
+    OptionProperty p({ "id", "gui", "desc" });
 
     p.addOptions({ "a" });
     p = 0;
@@ -74,7 +74,7 @@ TEST_CASE("OptionProperty: Single Option Multiple Zero", "[optionproperty]") {
 }
 
 TEST_CASE("OptionProperty: Single Option Multiple Negative", "[optionproperty]") {
-    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
+    OptionProperty p({ "id", "gui", "desc" });
 
     p.addOptions({ { -1, "a" } });
     p = -1;
@@ -84,7 +84,7 @@ TEST_CASE("OptionProperty: Single Option Multiple Negative", "[optionproperty]")
 }
 
 TEST_CASE("OptionProperty: Single Option Multiple Positive", "[optionproperty]") {
-    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
+    OptionProperty p({ "id", "gui", "desc" });
 
     p.addOptions({ { 1, "a" } });
     p = 1;
@@ -94,7 +94,7 @@ TEST_CASE("OptionProperty: Single Option Multiple Positive", "[optionproperty]")
 }
 
 TEST_CASE("OptionProperty: Single Options Zero Based Consecutive", "[optionproperty]") {
-    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
+    OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(0, "a");
     p.addOption(1, "b");
@@ -115,7 +115,7 @@ TEST_CASE("OptionProperty: Single Options Zero Based Consecutive", "[optionprope
 
 TEST_CASE("OptionProperty: Single Options Zero Based Non Consecutive", "[optionproperty]")
 {
-    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
+    OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(0, "a");
     p.addOption(2, "b");
@@ -136,7 +136,7 @@ TEST_CASE("OptionProperty: Single Options Zero Based Non Consecutive", "[optionp
 
 TEST_CASE("OptionProperty: Single Options Negative Based Consecutive", "[optionproperty]")
 {
-    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
+    OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(-1, "a");
     p.addOption(-2, "b");
@@ -159,7 +159,7 @@ TEST_CASE(
     "OptionProperty: Single Options Non Zero Based Non Consecutive",
     "[optionproperty]")
 {
-    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
+    OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(-1, "a");
     p.addOption(-3, "b");
@@ -179,7 +179,7 @@ TEST_CASE(
 }
 
 TEST_CASE("OptionProperty: Single Options Zero Based Alternating", "[optionproperty]") {
-    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
+    OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(0, "a");
     p.addOption(2, "b");
@@ -200,7 +200,7 @@ TEST_CASE("OptionProperty: Single Options Zero Based Alternating", "[optionprope
 
 TEST_CASE("OptionProperty: Single Options Non Zero Based Alternating", "[optionproperty]")
 {
-    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
+    OptionProperty p({ "id", "gui", "desc" });
 
     p.addOption(-20, "a");
     p.addOption(2, "b");

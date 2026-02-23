@@ -39,9 +39,10 @@ namespace ccmc {
     class Kameleon;
 } // namespace ccmc
 namespace ghoul { class Dictionary; }
-namespace openspace::volume { template <typename T> class RawVolume; }
 
-namespace openspace::kameleonvolume {
+namespace openspace {
+
+template <typename T> class RawVolume;
 
 class KameleonVolumeReader {
 public:
@@ -50,15 +51,15 @@ public:
     explicit KameleonVolumeReader(std::filesystem::path path);
     ~KameleonVolumeReader();
 
-    std::unique_ptr<volume::RawVolume<float>> readFloatVolume(
-        const glm::uvec3& dimensions, const std::string& variable,
-        const glm::vec3& lowerDomainBound, const glm::vec3& upperDomainBound) const;
+    std::unique_ptr<RawVolume<float>> readFloatVolume(const glm::uvec3& dimensions,
+        const std::string& variable, const glm::vec3& lowerDomainBound,
+        const glm::vec3& upperDomainBound) const;
 
-    std::unique_ptr<volume::RawVolume<float>> readFloatVolume(
-        const glm::uvec3& dimensions, const std::string& variable,
-        const glm::vec3& lowerBound, const glm::vec3& upperBound,
-        std::vector<std::string>& variableVector, float& minValue, float& maxValue,
-        bool factorRSquared = false, float innerRadialLimit = -1.f) const;
+    std::unique_ptr<RawVolume<float>> readFloatVolume(const glm::uvec3& dimensions,
+        const std::string& variable, const glm::vec3& lowerBound,
+        const glm::vec3& upperBound, std::vector<std::string>& variableVector,
+        float& minValue, float& maxValue, bool factorRSquared = false,
+        float innerRadialLimit = -1.f) const;
 
     ghoul::Dictionary readMetaData() const;
 
@@ -90,6 +91,6 @@ private:
     float _progress = 0.f;
 };
 
-} // namespace openspace::kameleonvolume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMEREADER___H__

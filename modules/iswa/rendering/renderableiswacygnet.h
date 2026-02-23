@@ -53,7 +53,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     struct Metadata {
@@ -120,8 +120,8 @@ protected:
      */
     virtual void setUniforms() = 0;
 
-    properties::FloatProperty _alpha;
-    properties::TriggerProperty _delete;
+    FloatProperty _alpha;
+    TriggerProperty _delete;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
@@ -148,6 +148,6 @@ private:
     int _minRealTimeUpdateInterval;
 };
 
-} //namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ISWA___RENDERABLEISWACYGNET___H__

@@ -52,7 +52,7 @@ namespace {
     const ImVec2 WindowSize = ImVec2(350, 500);
 } // namespace
 
-namespace openspace::gui {
+namespace openspace {
 
 GuiGlobeBrowsingComponent::GuiGlobeBrowsingComponent()
     : GuiPropertyComponent("GlobeBrowsing", "Globe Browsing")
@@ -85,7 +85,6 @@ void GuiGlobeBrowsingComponent::render() {
             nodes.begin(),
             nodes.end(),
             [](SceneGraphNode* n) {
-                using namespace globebrowsing;
                 const Renderable* r = n->renderable();
                 const RenderableGlobe* rg = dynamic_cast<const RenderableGlobe*>(r);
                 return rg == nullptr;
@@ -380,4 +379,4 @@ void GuiGlobeBrowsingComponent::render() {
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 }
 
-} // namespace openspace::gui
+} // namespace openspace

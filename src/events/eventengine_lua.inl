@@ -28,6 +28,8 @@
 #include <utility>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
 
 /**
@@ -38,8 +40,7 @@ namespace {
 [[codegen::luawrap]] void registerEventAction(std::string event, std::string action,
                                     std::optional<ghoul::Dictionary> filter)
 {
-    using namespace openspace;
-    events::Event::Type type = events::fromString(event);
+    Event::Type type = fromString(event);
     global::eventEngine->registerEventAction(type, std::move(action), std::move(filter));
 }
 
@@ -49,8 +50,7 @@ namespace {
 [[codegen::luawrap]] void unregisterEventAction(std::string event, std::string action,
                                                 std::optional<ghoul::Dictionary> filter)
 {
-    using namespace openspace;
-    events::Event::Type type = events::fromString(event);
+    Event::Type type = fromString(event);
     global::eventEngine->unregisterEventAction(type, action, filter);
 }
 
@@ -58,8 +58,6 @@ namespace {
  * Returns the list of registered events.
  */
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> registeredEvents() {
-    using namespace openspace;
-
     std::vector<EventEngine::ActionInfo> actions =
         global::eventEngine->registeredActions();
 
@@ -68,7 +66,7 @@ namespace {
     for (const EventEngine::ActionInfo& ai : actions) {
         ghoul::Dictionary d;
         d.setValue("Identifier", static_cast<int>(ai.id));
-        d.setValue("Type", std::string(events::toString(ai.type)));
+        d.setValue("Type", std::string(toString(ai.type)));
         d.setValue("Enabled", ai.isEnabled);
         d.setValue("Action", ai.action);
         if (ai.filter.has_value()) {
@@ -84,16 +82,16 @@ namespace {
  * Enables the event with the provided identifier.
  */
 [[codegen::luawrap]] void enableEvent(int identifier) {
-    openspace::global::eventEngine->enableEvent(static_cast<uint32_t>(identifier));
+    global::eventEngine->enableEvent(static_cast<uint32_t>(identifier));
 }
 
 /**
  * Disables the event with the provided identifier.
  */
 [[codegen::luawrap]] void disableEvent(int identifier) {
-    openspace::global::eventEngine->disableEvent(static_cast<uint32_t>(identifier));
+    global::eventEngine->disableEvent(static_cast<uint32_t>(identifier));
 }
 
-#include "eventengine_lua_codegen.cpp"
-
 } // namespace
+
+#include "eventengine_lua_codegen.cpp"

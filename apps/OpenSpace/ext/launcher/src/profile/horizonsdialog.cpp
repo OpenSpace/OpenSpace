@@ -50,6 +50,8 @@
 #include <string_view>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
     constexpr std::string_view _loggerCat = "HorizonsDialog";
 
@@ -852,9 +854,7 @@ std::string HorizonsDialog::constructUrl() {
     );
 }
 
-openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
-    using namespace openspace;
-
+HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
     auto it = answer.find("error");
     if (it != answer.end()) {
         _latestHorizonsError = it->get<std::string>();
@@ -870,7 +870,7 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
         // Special case with ErrorTimeRange since it is detected as an error
         // but could be nice to display the available time range of target to the user
         handleResult(isValid);
-        return openspace::HorizonsFile();
+        return HorizonsFile();
     }
 
     // Create a text file and write reply to it
@@ -883,7 +883,7 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
             "Malformed answer received '{}'", answer.dump()
         );
         appendLog(msg, HorizonsDialog::LogLevel::Error);
-        return openspace::HorizonsFile();
+        return HorizonsFile();
     }
 
     // Check if the file already exists
@@ -907,21 +907,19 @@ openspace::HorizonsFile HorizonsDialog::handleAnswer(nlohmann::json& answer) {
                     "File already exist, try another file path"
                 );
                 styleLabel(_fileLabel, true);
-                return openspace::HorizonsFile();
+                return HorizonsFile();
             default:
                 QMessageBox::critical(this, "Error", "Invalid answer");
                 styleLabel(_fileLabel, true);
-                return openspace::HorizonsFile();
+                return HorizonsFile();
         }
     }
 
     // Return a new file with the result
-    return openspace::HorizonsFile(filePath, result->get<std::string>());
+    return HorizonsFile(filePath, result->get<std::string>());
 }
 
-bool HorizonsDialog::handleResult(openspace::HorizonsResultCode& result) {
-    using namespace openspace;
-
+bool HorizonsDialog::handleResult(HorizonsResultCode& result) {
     switch (result) {
         case HorizonsResultCode::Valid: {
             // If the request worked then delete the corresponding error file if it exist

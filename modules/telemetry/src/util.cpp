@@ -33,6 +33,8 @@
 #include <limits>
 
 namespace {
+    using namespace openspace;
+
     /**
      * Get the position of the node with the given identifier.
      *
@@ -46,7 +48,7 @@ namespace {
         }
 
         // Find the node
-        openspace::SceneGraphNode* node = openspace::sceneGraphNode(nodeIdentifier);
+        SceneGraphNode* node = sceneGraphNode(nodeIdentifier);
         return node ? node->worldPosition() : glm::dvec3(0.0);
     }
 } // namespace

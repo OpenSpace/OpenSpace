@@ -35,9 +35,9 @@
 #include <cmath>
 
 namespace {
-    bool compareSplitPoints(const openspace::BrickSelection& a,
-        const openspace::BrickSelection& b)
-    {
+    using namespace openspace;
+
+    bool compareSplitPoints(const BrickSelection& a, const BrickSelection& b) {
         return a.splitPoints < b.splitPoints;
     }
 } // namespace

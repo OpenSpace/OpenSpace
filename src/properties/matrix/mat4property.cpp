@@ -26,7 +26,7 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 Mat4Property::Mat4Property(Property::PropertyInfo info, glm::mat4 value,
                            glm::mat4 minValue, glm::mat4 maxValue, glm::mat4 stepValue)
@@ -59,4 +59,4 @@ std::string Mat4Property::stringValue() const {
     return formatJson(_value);
 }
 
-}  // namespace openspace::properties
+} // namespace openspace

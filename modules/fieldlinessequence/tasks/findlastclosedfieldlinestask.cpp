@@ -57,12 +57,12 @@ namespace {
         // The folder to write the files to
         std::filesystem::path output [[codegen::directory()]];
     };
-#include "findlastclosedfieldlinestask_codegen.cpp"
 } // namespace
+#include "findlastclosedfieldlinestask_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation FindLastClosedFieldlinesTask::Documentation() {
+Documentation FindLastClosedFieldlinesTask::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_task_findlastclosedfieldlines");
 }
 
@@ -106,8 +106,7 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
     for (const std::filesystem::path& cdfPath : _sourceFiles) {
         ZoneScopedN("Per Path");
 
-        std::unique_ptr<ccmc::Kameleon> kameleon =
-            kameleonhelper::createKameleonObject(cdfPath.string());
+        std::unique_ptr<ccmc::Kameleon> kameleon = createKameleonObject(cdfPath.string());
         ccmc::Tracer tracer(kameleon.get());
         if (kameleon->doesAttributeExist("r_body")) {
             auto innerBoundary = kameleon->getVariableAttribute("r_body", "r_body");
@@ -120,8 +119,8 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
         FieldlinesState state;
         const std::string& modelname = kameleon->getModelName();
         LINFO(std::format("Model name: {}", modelname));
-        state.setModel(fls::stringToModel(modelname));
-        state.setTriggerTime(kameleonhelper::getTime(kameleon.get(),0.0));
+        state.setModel(stringToModel(modelname));
+        state.setTriggerTime(getTime(kameleon.get(),0.0));
 
         std::vector<std::string> variableNames;
         std::vector<std::string> magVariableNames;
@@ -180,13 +179,13 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
             state.addLine(vertices);
         }
 
-        fls::addExtraQuantities(kameleon.get(), variableNames, magVariableNames, state);
+        addExtraQuantities(kameleon.get(), variableNames, magVariableNames, state);
         switch (state.model()) {
-            case fls::Model::Batsrus:
-                state.scalePositions(fls::ReToMeter);
+            case Model::Batsrus:
+                state.scalePositions(ReToMeter);
                 break;
-            case fls::Model::Enlil:
-                state.convertLatLonToCartesian(fls::AuToMeter);
+            case Model::Enlil:
+                state.convertLatLonToCartesian(AuToMeter);
                 break;
             default:
                 break;
@@ -199,4 +198,4 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
     progressCallback(1.f);
 }
 
-} //namespace openspace
+} // namespace openspace

@@ -30,17 +30,18 @@
 #include <utility>
 #include <variant>
 
+using namespace openspace;
+
 namespace {
 
  // Adds a new dashboard item to the main dashboard.
 [[codegen::luawrap]] void addDashboardItem(ghoul::Dictionary dashboard) {
-    using namespace openspace;
     try {
         global::dashboard->addDashboardItem(
             DashboardItem::createFromDictionary(std::move(dashboard))
         );
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         logError(e);
         throw ghoul::lua::LuaError("Error adding dashboard item");
     }
@@ -67,12 +68,12 @@ namespace {
         identifierStr = d.value<std::string>("Identifier");
     }
 
-    openspace::global::dashboard->removeDashboardItem(identifierStr);
+    global::dashboard->removeDashboardItem(identifierStr);
 }
 
 // Removes all dashboard items from the main dashboard.
 [[codegen::luawrap]] void clearDashboardItems() {
-    openspace::global::dashboard->clearDashboardItems();
+    global::dashboard->clearDashboardItems();
 }
 
 
@@ -83,15 +84,14 @@ namespace {
  */
 [[codegen::luawrap]] std::vector<std::string> dashboardItems() {
     std::vector<std::string> result;
-    std::vector<openspace::DashboardItem*> dashboardItems =
-        openspace::global::dashboard->dashboardItems();
+    std::vector<DashboardItem*> dashboardItems = global::dashboard->dashboardItems();
     result.reserve(dashboardItems.size());
-    for (openspace::DashboardItem* dItem : dashboardItems) {
+    for (DashboardItem* dItem : dashboardItems) {
         result.push_back(dItem->identifier());
     }
     return result;
 }
 
-#include "dashboard_lua_codegen.cpp"
-
 } // namespace
+
+#include "dashboard_lua_codegen.cpp"

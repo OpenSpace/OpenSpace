@@ -47,12 +47,12 @@ namespace {
         // The path to the output file
         std::filesystem::path outputFilePath [[codegen::mustexist(false)]];
     };
-#include "convertmodeltask_codegen.cpp"
 } // namespace
+#include "convertmodeltask_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ConvertModelTask::Documentation() {
+Documentation ConvertModelTask::Documentation() {
     return codegen::doc<Parameters>("base_convert_model_task");
 }
 

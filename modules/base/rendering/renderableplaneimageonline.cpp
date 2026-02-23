@@ -37,13 +37,15 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // A `RenderablePlaneImageOnline` creates a textured 3D plane, where the texture image
@@ -52,12 +54,12 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
     };
-#include "renderableplaneimageonline_codegen.cpp"
 } // namespace
+#include "renderableplaneimageonline_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePlaneImageOnline::Documentation() {
+Documentation RenderablePlaneImageOnline::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderable_plane_image_online",
         RenderablePlane::Documentation()

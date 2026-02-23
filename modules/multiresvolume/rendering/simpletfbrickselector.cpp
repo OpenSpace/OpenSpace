@@ -36,11 +36,11 @@
 #include <string_view>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "SimpleTfBrickSelector";
 
-    bool compareSplitPoints(const openspace::BrickSelection& a,
-                            const openspace::BrickSelection& b)
-    {
+    bool compareSplitPoints(const BrickSelection& a, const BrickSelection& b) {
         return a.splitPoints < b.splitPoints;
     }
 } // namespace

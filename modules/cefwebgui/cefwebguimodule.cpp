@@ -40,39 +40,41 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether the browser should be enabled or not.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
+    constexpr Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
         "Trigger this property to reload the browser.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
+    constexpr Property::PropertyInfo VisibleInfo = {
         "Visible",
         "Is visible",
         "This setting determines whether the browser should be visible or not.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GuiUrlInfo = {
+    constexpr Property::PropertyInfo GuiUrlInfo = {
         "GuiUrl",
         "Gui URL",
         "The URL of the webpage that is used to load the WebGUI from.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GuiScaleInfo = {
+    constexpr Property::PropertyInfo GuiScaleInfo = {
         "GuiScale",
         "Gui scale",
         "GUI scale multiplier.",
-        openspace::properties::Property::Visibility::Always
+        Property::Visibility::Always
     };
 
     struct [[codegen::Dictionary(CefWebGuiModule)]] Parameters {
@@ -86,12 +88,12 @@ namespace {
         std::optional<bool> visible;
 
     };
-#include "cefwebguimodule_codegen.cpp"
 } // namespace
+#include "cefwebguimodule_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation CefWebGuiModule::Documentation() {
+Documentation CefWebGuiModule::Documentation() {
     return codegen::doc<Parameters>("module_cefwebgui");
 }
 

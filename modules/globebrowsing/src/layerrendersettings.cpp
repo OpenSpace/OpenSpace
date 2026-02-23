@@ -29,42 +29,44 @@
 #include <cstdlib>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo SetDefaultInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo SetDefaultInfo = {
         "SetDefault",
         "Set default",
         "If this value is triggered it will reset all of these values to their default "
         "values.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GammaInfo = {
+    constexpr Property::PropertyInfo GammaInfo = {
         "Gamma",
         "Gamma",
         "This value is used as an exponent to adjust the color for each tile.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MultiplierInfo = {
+    constexpr Property::PropertyInfo MultiplierInfo = {
         "Multiplier",
         "Multiplier",
         "This value is used as a multiplier to adjust the color applied after taking the "
         "gamma value as an exponent.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
+    constexpr Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
         "This value is used as an additive modifier to adjust the color applied after "
         "the gamma exponent and the multiplier has been performed.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 LayerRenderSettings::LayerRenderSettings()
-    : properties::PropertyOwner({ "Settings" })
+    : PropertyOwner({ "Settings" })
     , gamma(GammaInfo, 1.f, 0.f, 5.f)
     , multiplier(MultiplierInfo, 1.f, 0.f, 20.f)
     , offset(OffsetInfo, 0.f, -10000.f, 10000.f)
@@ -103,4 +105,4 @@ glm::vec4 LayerRenderSettings::performLayerSettings(const glm::vec4& currentValu
     );
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

@@ -33,8 +33,8 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-namespace scripting { struct LuaLibrary; }
+struct Documentation;
+struct LuaLibrary;
 class ModuleEngine;
 
 /**
@@ -42,7 +42,7 @@ class ModuleEngine;
  * into a useful granularity to be mostly used self-sufficiently. Each OpenSpaceModule
  * needs a unique, nonempty `name`.
  */
-class OpenSpaceModule : public properties::PropertyOwner {
+class OpenSpaceModule : public PropertyOwner {
 public:
     /**
      * Constructs the OpenSpaceModule with a specific \p name. The uniqueness of the
@@ -87,13 +87,13 @@ public:
      *
      * \return A list of Documentation classes that are valid for this OpenSapceModule
      */
-    virtual std::vector<documentation::Documentation> documentations() const;
+    virtual std::vector<Documentation> documentations() const;
 
     /**
      * Returns the documentation that describes the parameters that can be passed to the
      * initialize function of this module.
      */
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     /**
      * Returns the Lua library with functions defined by this OpenSpaceModule. The default
@@ -101,7 +101,7 @@ public:
      *
      * \return The Lua library with functions defined by this OpenSpaceModule
      */
-    virtual scripting::LuaLibrary luaLibrary() const;
+    virtual LuaLibrary luaLibrary() const;
 
     /**
      * Returns the Lua libraries that are defined by objects contained in this
@@ -111,7 +111,7 @@ public:
      *
      * \return A list of libraries defined by items contained in this OpenSpaceModule
      */
-    virtual std::vector<scripting::LuaLibrary> luaLibraries() const;
+    virtual std::vector<LuaLibrary> luaLibraries() const;
 
     /**
      * Returns the minimum required OpenGL version of this OpenSpaceModule. Unless

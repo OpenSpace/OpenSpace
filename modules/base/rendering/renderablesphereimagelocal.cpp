@@ -31,12 +31,14 @@
 #include <filesystem>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "The path to an image on disk to use as a texture for this sphere. The image is "
         "expected to be an equirectangular projection.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `Renderable` shows a sphere with an image provided by a local file on disk. To
@@ -50,12 +52,12 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::filesystem::path texture;
     };
-#include "renderablesphereimagelocal_codegen.cpp"
 } // namespace
+#include "renderablesphereimagelocal_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableSphereImageLocal::Documentation() {
+Documentation RenderableSphereImageLocal::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderable_sphere_image_local",
         RenderableSphere::Documentation()

@@ -37,7 +37,7 @@ public:
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     std::string _tracingVar = "b";

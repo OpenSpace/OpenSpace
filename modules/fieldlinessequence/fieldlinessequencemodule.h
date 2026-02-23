@@ -37,7 +37,7 @@ public:
 
     FieldlinesSequenceModule();
 
-    std::vector<documentation::Documentation> documentations() const override;
+    std::vector<openspace::Documentation> documentations() const override;
 
     static std::filesystem::path DefaultTransferFunctionFile;
 

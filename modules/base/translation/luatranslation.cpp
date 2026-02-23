@@ -38,7 +38,9 @@
 #include <filesystem>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ScriptInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ScriptInfo = {
         "Script",
         "Script",
         "This value is the path to the Lua script that will be executed to compute the "
@@ -48,7 +50,7 @@ namespace {
         "epoch of the last frame as the second argument, and the current wall time as "
         "milliseconds past the J2000 epoch the third argument and computes the three "
         "translation values returned as a table.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `Translation` type generates the translation values used to offset the
@@ -60,12 +62,12 @@ namespace {
         // [[codegen::verbatim(ScriptInfo.description)]]
         std::filesystem::path script;
     };
-#include "luatranslation_codegen.cpp"
 } // namespace
+#include "luatranslation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation LuaTranslation::Documentation() {
+Documentation LuaTranslation::Documentation() {
     return codegen::doc<Parameters>("base_transform_translation_lua");
 }
 

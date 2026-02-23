@@ -27,7 +27,7 @@
 
 #include <modules/globebrowsing/src/tileprovider/tileprovider.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 class TileProviderByDate : public TileProvider {
 public:
@@ -42,7 +42,7 @@ public:
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct Provider {
@@ -58,6 +58,6 @@ private:
     void internalDeinitialize() override final;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__TILEPROVIDERBYDATE___H__

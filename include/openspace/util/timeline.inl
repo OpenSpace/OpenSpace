@@ -230,4 +230,4 @@ const std::deque<Keyframe<T>>& Timeline<T>::keyframes() const {
     return _keyframes;
 }
 
-}  // namespace openspace
+} // namespace openspace

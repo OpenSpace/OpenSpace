@@ -40,6 +40,8 @@
 #include <vector>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "WwtDataHandler";
 
     constexpr std::string_view Thumbnail = "Thumbnail";
@@ -73,8 +75,6 @@ namespace {
 
     // Parsing and downloading of wtml files
     bool downloadFile(const std::string& url, const std::filesystem::path& destination) {
-        using namespace openspace;
-
         HttpFileDownload wtmlRoot(url, destination, HttpFileDownload::Overwrite::Yes);
         wtmlRoot.start(std::chrono::milliseconds(10000));
         return wtmlRoot.wait();
@@ -139,7 +139,6 @@ namespace {
     bool downloadWtmlFiles(const std::filesystem::path& directory, const std::string& url,
                            const std::string& fileName)
     {
-        using namespace openspace;
         // Download file from url
         const std::filesystem::path file = std::format("{}{}.aspx", directory, fileName);
         const bool success = downloadFile(url, file);
@@ -181,11 +180,9 @@ namespace {
         return true;
     }
 
-    std::optional<openspace::ImageData>
+    std::optional<ImageData>
     loadImageFromNode(const tinyxml2::XMLElement* node, const std::string& collection)
     {
-        using namespace openspace;
-
         // Collect the image set of the node. The structure is different depending on if
         // it is a Place or an ImageSet
         std::string thumbnailUrl = std::string(Undefined);
@@ -233,7 +230,7 @@ namespace {
             const double ra = 15.0 * std::stod(attribute(node, RA));
             const double dec = std::stod(attribute(node, Dec));
             equatorialSpherical = glm::dvec2(ra, dec);
-            equatorialCartesian = skybrowser::sphericalToCartesian(equatorialSpherical);
+            equatorialCartesian = sphericalToCartesian(equatorialSpherical);
         }
 
         // Collect field of view. The WWT definition of ZoomLevel is: VFOV = ZoomLevel / 6
@@ -256,7 +253,7 @@ namespace {
             ""
         };
     }
-} //namespace
+} // namespace
 
 namespace openspace {
 

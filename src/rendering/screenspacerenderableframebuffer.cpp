@@ -33,18 +33,19 @@
 #include <array>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "This value explicitly specifies the size of the screen space plane.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceRenderableFramebuffer::Documentation() {
-    using namespace documentation;
+Documentation ScreenSpaceRenderableFramebuffer::Documentation() {
     return {
         "ScreenSpaceRenderableFramebuffer",
         "screenspace_framebuffer",
@@ -57,11 +58,7 @@ ScreenSpaceRenderableFramebuffer::ScreenSpaceRenderableFramebuffer(
     : ScreenSpaceRenderable(dictionary)
     , _size(SizeInfo, glm::vec2(16), glm::vec2(16), glm::vec2(16384))
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ScreenSpaceFramebuffer"
-    );
+    testSpecificationAndThrow(Documentation(), dictionary, "ScreenSpaceFramebuffer");
 
     if (_identifier.empty()) {
         int idCounter = id();
@@ -169,4 +166,4 @@ void ScreenSpaceRenderableFramebuffer::bindTexture(ghoul::opengl::TextureUnit& u
     unit.bind(*_texture);
 }
 
-} //namespace openspace
+} // namespace openspace

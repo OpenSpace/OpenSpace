@@ -31,9 +31,10 @@
 #include <vector>
 
 namespace ghoul { class Dictionary; }
-namespace openspace::scripting { struct LuaLibrary; }
 
-namespace openspace::interaction {
+namespace openspace {
+
+struct LuaLibrary;
 
 class ActionManager {
 public:
@@ -49,12 +50,12 @@ public:
     void triggerAction(const std::string& identifier, const ghoul::Dictionary& arguments,
         ShouldBeSynchronized shouldBeSynchronized,
         ShouldBeLogged shouldBeLogged = ShouldBeLogged::No) const;
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     std::unordered_map<unsigned int, Action> _actions;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___ACTIONMANAGER___H__

@@ -39,8 +39,8 @@ public:
     BaseModule();
     ~BaseModule() override = default;
 
-    std::vector<documentation::Documentation> documentations() const override;
-    std::vector<scripting::LuaLibrary> luaLibraries() const override;
+    std::vector<openspace::Documentation> documentations() const override;
+    std::vector<LuaLibrary> luaLibraries() const override;
 
     static ghoul::opengl::ProgramObjectManager ProgramObjectManager;
     static ghoul::opengl::TextureManager TextureManager;

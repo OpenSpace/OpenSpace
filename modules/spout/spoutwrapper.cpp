@@ -39,37 +39,39 @@
 #include <SpoutLibrary.h>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "Spout";
 
-    constexpr openspace::properties::Property::PropertyInfo NameSenderInfo = {
+    constexpr Property::PropertyInfo NameSenderInfo = {
         "SpoutName",
         "Spout sender name",
         "This value sets the Spout sender to use a specific name.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NameReceiverInfo = {
+    constexpr Property::PropertyInfo NameReceiverInfo = {
         "SpoutName",
         "Spout receiver name",
         "This value explicitly sets the Spout receiver to use a specific name. If this "
         "is not a valid name, the first Spout image is used instead",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
+    constexpr Property::PropertyInfo SelectionInfo = {
         "SpoutSelection",
         "Spout selection",
         "This property displays all available Spout sender on the system. If one them is "
         "selected, its value is stored in the 'SpoutName' property, overwriting its "
         "previous value.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UpdateInfo = {
+    constexpr Property::PropertyInfo UpdateInfo = {
         "UpdateSelection",
         "Update selection",
         "If this property is trigged, the 'SpoutSelection' options will be refreshed.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(SpoutReceiver)]] ReceiverParameters {
@@ -81,10 +83,10 @@ namespace {
         // [[codegen::verbatim(NameSenderInfo.description)]]
         std::string spoutName;
     };
-#include "spoutwrapper_codegen.cpp"
 } // namespace
+#include "spoutwrapper_codegen.cpp"
 
-namespace openspace::spout {
+namespace openspace {
 
 SpoutMain::SpoutMain() {
     _spoutHandle = GetSpout();
@@ -305,26 +307,23 @@ void SpoutReceiver::releaseTexture() {
     _spoutTexture.release();
 }
 
-const properties::Property::PropertyInfo& SpoutReceiverPropertyProxy::NameInfoProperty() {
+const Property::PropertyInfo& SpoutReceiverPropertyProxy::NameInfoProperty() {
     return NameReceiverInfo;
 }
 
-const properties::Property::PropertyInfo&
-SpoutReceiverPropertyProxy::SelectionInfoProperty()
-{
+const Property::PropertyInfo& SpoutReceiverPropertyProxy::SelectionInfoProperty() {
     return SelectionInfo;
 }
 
-const properties::Property::PropertyInfo& SpoutReceiverPropertyProxy::UpdateInfoProperty()
-{
+const Property::PropertyInfo& SpoutReceiverPropertyProxy::UpdateInfoProperty() {
     return UpdateInfo;
 }
 
-documentation::Documentation SpoutReceiverPropertyProxy::Documentation() {
+Documentation SpoutReceiverPropertyProxy::Documentation() {
     return codegen::doc<ReceiverParameters>("spout_receiver");
 }
 
-SpoutReceiverPropertyProxy::SpoutReceiverPropertyProxy(properties::PropertyOwner& owner,
+SpoutReceiverPropertyProxy::SpoutReceiverPropertyProxy(PropertyOwner& owner,
                                                       const ghoul::Dictionary& dictionary)
     : _spoutName(NameReceiverInfo)
     , _spoutSelection(SelectionInfo)
@@ -559,15 +558,15 @@ void SpoutSender::onReleaseSender(std::function<void()> callback) {
     _onReleaseSenderCallback = std::move(callback);
 }
 
-const properties::Property::PropertyInfo& SpoutSenderPropertyProxy::NameInfoProperty() {
+const Property::PropertyInfo& SpoutSenderPropertyProxy::NameInfoProperty() {
     return NameSenderInfo;
 }
 
-documentation::Documentation SpoutSenderPropertyProxy::Documentation() {
+Documentation SpoutSenderPropertyProxy::Documentation() {
     return codegen::doc<SenderParameters>("spout_sender");
 }
 
-SpoutSenderPropertyProxy::SpoutSenderPropertyProxy(properties::PropertyOwner& owner,
+SpoutSenderPropertyProxy::SpoutSenderPropertyProxy(PropertyOwner& owner,
                                                    const ghoul::Dictionary& dictionary)
     : _spoutName(NameSenderInfo)
 {
@@ -597,4 +596,4 @@ void SpoutSenderPropertyProxy::releaseSender() {
     SpoutSender::releaseSender();
 }
 
-} // namespace openspace::spout
+} // namespace openspace

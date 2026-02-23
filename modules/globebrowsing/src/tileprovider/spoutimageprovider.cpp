@@ -45,12 +45,12 @@ namespace {
     struct [[codegen::Dictionary(SpoutImageProvider)]] Parameters {
         std::optional<std::string> spoutName;
     };
-#include "spoutimageprovider_codegen.cpp"
 } // namespace
+#include "spoutimageprovider_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation SpoutImageProvider::Documentation() {
+Documentation SpoutImageProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_spoutimageprovider");
 }
 
@@ -60,10 +60,7 @@ SpoutImageProvider::SpoutImageProvider(
     ZoneScoped;
 
 #ifdef OPENSPACE_HAS_SPOUT
-    spoutReceiver = std::make_unique<spout::SpoutReceiverPropertyProxy>(
-        *this,
-        dictionary
-    );
+    spoutReceiver = std::make_unique<SpoutReceiverPropertyProxy>(*this, dictionary);
 
     spoutReceiver->onUpdateTexture([this](int width, int height) {
         for (int i = 0; i < 2; i++) {
@@ -205,4 +202,4 @@ float SpoutImageProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

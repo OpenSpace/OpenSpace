@@ -105,10 +105,9 @@ namespace {
         }
         return textureCoordinates;
     }
-
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 SkirtedGrid::SkirtedGrid(unsigned int xSeg, unsigned int ySeg)
     : xSegments(xSeg)
@@ -172,4 +171,4 @@ void SkirtedGrid::drawUsingActiveProgram() const {
     glBindVertexArray(0);
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

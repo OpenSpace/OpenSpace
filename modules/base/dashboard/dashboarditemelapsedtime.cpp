@@ -36,38 +36,40 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo FormatStringInfo = {
         "FormatString",
         "Format string",
         "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will contain the value "
         "of the elapsed time.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ReferenceTimeInfo = {
+    constexpr Property::PropertyInfo ReferenceTimeInfo = {
         "ReferenceTime",
         "Reference time",
         "The reference time relative to which the elapsed time is specified. The format "
         "must be an ISO 8601-compliant date string.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SimplifyTimeInfo = {
+    constexpr Property::PropertyInfo SimplifyTimeInfo = {
         "SimplifyTime",
         "Simplify time",
         "If this value is enabled, the elapsed time will be simplified into seconds, "
         "minutes, hours, etc. If the value is disabled, the elapsed time is always "
         "presented in seconds. The default value for this is 'true'.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LowestTimeUnitInfo = {
+    constexpr Property::PropertyInfo LowestTimeUnitInfo = {
         "LowestTimeUnit",
         "Lowest time unit when simplifying",
         "If 'SimplifyTime' is enabled, this is the lowest time unit that will be shown. "
         "All finer grained timesteps will be ignored.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `DashboardItem` displays the remaining time until a provided `ReferenceTime`
@@ -98,12 +100,12 @@ namespace {
         // [[codegen::verbatim(LowestTimeUnitInfo.description)]]
         std::optional<TimeUnit> lowestTimeUnit;
     };
-#include "dashboarditemelapsedtime_codegen.cpp"
 } // namespace
+#include "dashboarditemelapsedtime_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemElapsedTime::Documentation() {
+Documentation DashboardItemElapsedTime::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_elapsedtime",
         DashboardTextItem::Documentation()

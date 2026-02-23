@@ -36,7 +36,7 @@
 #include <string_view>
 #include <vector>
 
-namespace openspace::interaction {
+namespace openspace {
 
 class JoystickCameraStates : public CameraInteractionStates {
 public:
@@ -156,15 +156,13 @@ private:
     JoystickCameraState* findOrAddJoystickCameraState(const std::string& joystickName);
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 namespace ghoul {
 
 template <>
-inline std::string to_string(
-                      const openspace::interaction::JoystickCameraStates::AxisType& value)
-{
-    using T = openspace::interaction::JoystickCameraStates::AxisType;
+inline std::string to_string(const openspace::JoystickCameraStates::AxisType& value) {
+    using T = openspace::JoystickCameraStates::AxisType;
     switch (value) {
         case T::None:       return "None";
         case T::OrbitX:     return "Orbit X";
@@ -182,10 +180,8 @@ inline std::string to_string(
 }
 
 template <>
-constexpr openspace::interaction::JoystickCameraStates::AxisType
-from_string(std::string_view string)
-{
-    using T = openspace::interaction::JoystickCameraStates::AxisType;
+constexpr openspace::JoystickCameraStates::AxisType from_string(std::string_view string) {
+    using T = openspace::JoystickCameraStates::AxisType;
 
     if (string == "None") { return T::None; }
     if (string == "Orbit X") { return T::OrbitX; }
@@ -203,26 +199,24 @@ from_string(std::string_view string)
 }
 
 template <>
-inline std::string to_string(
-    const openspace::interaction::JoystickCameraStates::JoystickType& value)
-{
-    using T = openspace::interaction::JoystickCameraStates::JoystickType;
+inline std::string to_string(const openspace::JoystickCameraStates::JoystickType& value) {
+    using JoystickType = openspace::JoystickCameraStates::JoystickType;
+
     switch (value) {
-        case T::JoystickLike: return "JoystickLike";
-        case T::TriggerLike:  return "TriggerLike";
-        default:              return "";
+        case JoystickType::JoystickLike: return "JoystickLike";
+        case JoystickType::TriggerLike:  return "TriggerLike";
+        default:                         throw MissingCaseException();
     }
 }
 
 template <>
-constexpr openspace::interaction::JoystickCameraStates::JoystickType
+constexpr openspace::JoystickCameraStates::JoystickType
 from_string(std::string_view string)
 {
-    using T = openspace::interaction::JoystickCameraStates::JoystickType;
+    using JoystickType = openspace::JoystickCameraStates::JoystickType;
 
-    if (string == "JoystickLike") { return T::JoystickLike; }
-    if (string == "TriggerLike") { return T::TriggerLike; }
-
+    if (string == "JoystickLike") { return JoystickType::JoystickLike; }
+    else if (string == "TriggerLike") { return JoystickType::TriggerLike; }
     throw RuntimeError(std::format("Unknown joystick type '{}'", string), "Joystick");
 }
 

@@ -33,25 +33,26 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo NameInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo NameInfo = {
         "SpoutName",
         "Spout sender name",
         "This value explicitly sets the Spout receiver to use a specific name. If this "
         "is not a valid name, an empty image is used.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ScreenSpaceSpout)]] Parameters {
         // [[codegen::verbatim(NameInfo.description)]]
         std::optional<std::string> spoutName;
     };
-#include "screenspacespout_codegen.cpp"
-
 } // namespace
+#include "screenspacespout_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceSpout::Documentation() {
+Documentation ScreenSpaceSpout::Documentation() {
     return codegen::doc<Parameters>("spout_screenspace_spout");
 }
 

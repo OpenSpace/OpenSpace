@@ -53,7 +53,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     enum OrientationOption {
@@ -67,20 +67,20 @@ protected:
     void createPlane();
     glm::dmat4 rotationMatrix(const RenderData& data) const;
 
-    properties::OptionProperty _blendMode;
-    properties::OptionProperty _renderOption;
-    properties::BoolProperty _mirrorBackside;
-    properties::Vec2Property _size;
-    properties::BoolProperty _autoScale;
-    properties::Vec3Property _multiplyColor;
+    OptionProperty _blendMode;
+    OptionProperty _renderOption;
+    BoolProperty _mirrorBackside;
+    Vec2Property _size;
+    BoolProperty _autoScale;
+    Vec3Property _multiplyColor;
 
-    struct DistanceScalingSettings : properties::PropertyOwner {
+    struct DistanceScalingSettings : PropertyOwner {
         explicit DistanceScalingSettings(const ghoul::Dictionary& dictionary);
 
-        properties::BoolProperty scaleByDistance;
-        properties::FloatProperty apparentSizeMultiplier;
-        properties::FloatProperty scaleByDistanceMaxHeight;
-        properties::FloatProperty scaleByDistanceMinHeight;
+        BoolProperty scaleByDistance;
+        FloatProperty apparentSizeMultiplier;
+        FloatProperty scaleByDistanceMaxHeight;
+        FloatProperty scaleByDistanceMinHeight;
     };
 
     DistanceScalingSettings _distanceScalingSettings;

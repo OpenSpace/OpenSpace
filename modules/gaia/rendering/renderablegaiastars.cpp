@@ -52,20 +52,22 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableGaiaStars";
 
     constexpr size_t PositionSize = 3;
     constexpr size_t ColorSize = 2;
     constexpr size_t VelocitySize = 3;
 
-    constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
+    constexpr Property::PropertyInfo FilePathInfo = {
         "File",
         "File path",
         "The path to the file with data for the stars to be rendered.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FileReaderOptionInfo = {
+    constexpr Property::PropertyInfo FileReaderOptionInfo = {
         "FileReaderOption",
         "File reader option",
         "This value tells the renderable what format the input data file has. "
@@ -76,204 +78,204 @@ namespace {
         "Octree from binary file and render full data. 'StreamOctree' will read an index "
         "file with full Octree structure and then stream nodes during runtime. (This "
         "option is suited for bigger datasets).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderModeInfo = {
+    constexpr Property::PropertyInfo RenderModeInfo = {
         "RenderMode",
         "Render mode",
         "This value determines which predefined columns to use in rendering. If "
         "'Static' only the position of the stars is used. 'Color' uses position + color "
         "parameters and 'Motion' uses pos, color as well as velocity for the stars.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LuminosityMultiplierInfo = {
+    constexpr Property::PropertyInfo LuminosityMultiplierInfo = {
         "LuminosityMultiplier",
         "Luminosity multiplier",
         "Factor by which to multiply the luminosity with. [Works in Color and Motion "
         "modes].",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CutOffThresholdInfo = {
+    constexpr Property::PropertyInfo CutOffThresholdInfo = {
         "CutOffThreshold",
         "Cut off threshold",
         "Set threshold for when to cut off star rendering. Stars closer than this "
         "threshold are given full opacity. Farther away, stars dim proportionally to the "
         "4-logarithm of their distance.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TmPointFilterSizeInfo = {
+    constexpr Property::PropertyInfo TmPointFilterSizeInfo = {
         "FilterSize",
         "Filter size [px]",
         "Set the filter size in pixels used in tonemapping for point splatting "
         "rendering.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TmPointSigmaInfo = {
+    constexpr Property::PropertyInfo TmPointSigmaInfo = {
         "Sigma",
         "Normal distribution sigma",
         "Set the normal distribution sigma used in tonemapping for point splatting "
         "rendering.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AdditionalNodesInfo = {
+    constexpr Property::PropertyInfo AdditionalNodesInfo = {
         "AdditionalNodes",
         "Additional nodes",
         "Determines how many additional nodes around the camera that will be fetched "
         "from disk. The first value determines how many additional layers of parents "
         "that will be fetched. The second value determines how many layers of descendant "
         "that will be fetched from the found parents.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TmPointPxThresholdInfo = {
+    constexpr Property::PropertyInfo TmPointPxThresholdInfo = {
         "PixelWeightThreshold",
         "Pixel weight threshold",
         "Set the threshold for how big the elliptic weight of a pixel has to be to "
         "contribute to the final elliptic shape. A smaller value gives a more visually "
         "pleasing result while a bigger value will speed up the rendering on skewed "
         "frustums (aka Domes).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+    constexpr Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "Color texture",
         "The path to the texture that is used to convert from the magnitude of the star "
         "to its color. The texture is used as a one dimensional lookup function.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FirstRowInfo = {
+    constexpr Property::PropertyInfo FirstRowInfo = {
         "FirstRow",
         "First row to read",
         "Defines the first row that will be read from the specified FITS file No need to "
         "define if data already has been processed. [Works only with "
         "FileReaderOption::Fits].",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LastRowInfo = {
+    constexpr Property::PropertyInfo LastRowInfo = {
         "LastRow",
         "Last row to read",
         "Defines the last row that will be read from the specified FITS file; has to be "
         "equal to or greater than FirstRow. No need to define if data already has been "
         "processed. [Works only with FileReaderOption::Fits].",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NumRenderedStarsInfo = {
+    constexpr Property::PropertyInfo NumRenderedStarsInfo = {
         "NumRenderedStars",
         "Rendered stars",
         "The number of rendered stars in the current frame.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CpuRamBudgetInfo = {
+    constexpr Property::PropertyInfo CpuRamBudgetInfo = {
         "CpuRamBudget",
         "CPU RAM budget",
         "Current remaining budget (bytes) on the CPU RAM for loading more node data "
         "files.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GpuStreamBudgetInfo = {
+    constexpr Property::PropertyInfo GpuStreamBudgetInfo = {
         "GpuStreamBudget",
         "GPU stream budget",
         "Current remaining memory budget [in number of chunks] on the GPU for streaming "
         "additional stars.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LodPixelThresholdInfo = {
+    constexpr Property::PropertyInfo LodPixelThresholdInfo = {
         "LodPixelThreshold",
         "LOD pixel threshold",
         "The number of total pixels a nodes AABB can have in clipping space before its "
         "parent is fetched as LOD cache.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxGpuMemoryPercentInfo = {
+    constexpr Property::PropertyInfo MaxGpuMemoryPercentInfo = {
         "MaxGpuMemoryPercent",
         "Max GPU memory",
         "Sets the max percent of existing GPU memory budget that the streaming will use.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxCpuMemoryPercentInfo = {
+    constexpr Property::PropertyInfo MaxCpuMemoryPercentInfo = {
         "MaxCpuMemoryPercent",
         "Max CPU memory",
         "Sets the max percent of existing CPU memory budget that the streaming of files "
         "will use.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterPosXInfo = {
+    constexpr Property::PropertyInfo FilterPosXInfo = {
         "FilterPosX",
         "PosX threshold",
         "If defined then only stars with Position X values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in KiloParsec.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterPosYInfo = {
+    constexpr Property::PropertyInfo FilterPosYInfo = {
         "FilterPosY",
         "PosY threshold",
         "If defined then only stars with Position Y values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in KiloParsec.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterPosZInfo = {
+    constexpr Property::PropertyInfo FilterPosZInfo = {
         "FilterPosZ",
         "PosZ threshold",
         "If defined then only stars with Position Z values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in KiloParsec.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterGMagInfo = {
+    constexpr Property::PropertyInfo FilterGMagInfo = {
         "FilterGMag",
         "GMag threshold",
         "If defined then only stars with G mean magnitude values between [min, max] will "
         "be rendered (if min is set to 20.0 it is read as -Inf, if max is set to 20.0 it "
         "is read as +Inf). If min = max then all values equal min|max will be filtered "
         "away.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterBpRpInfo = {
+    constexpr Property::PropertyInfo FilterBpRpInfo = {
         "FilterBpRp",
         "Bp-Rp threshold",
         "If defined then only stars with Bp-Rp color values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). If min = max then all values equal min|max will be filtered "
         "away.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterDistInfo = {
+    constexpr Property::PropertyInfo FilterDistInfo = {
         "FilterDist",
         "Dist threshold",
         "If defined then only stars with Distances values between [min, max] will be "
         "rendered (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it is "
         "read as +Inf). Measured in KiloParsec.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableGaiaStars)]] Parameters {
         // [[codegen::verbatim(FilePathInfo.description)]]
         std::string file;
 
-        enum class [[codegen::map(openspace::gaia::FileReaderOption)]] FileReader {
+        enum class [[codegen::map(openspace::FileReaderOption)]] FileReader {
             Fits,
             Speck,
             BinaryRaw,
@@ -283,7 +285,7 @@ namespace {
         // [[codegen::verbatim(FileReaderOptionInfo.description)]]
         FileReader fileReaderOption;
 
-        enum class [[codegen::map(openspace::gaia::RenderMode)]] RenderMode {
+        enum class [[codegen::map(openspace::RenderMode)]] RenderMode {
             Static,
             Color,
             Motion
@@ -353,12 +355,12 @@ namespace {
         // [codegen::verbatim(ReportGlErrorsInfo.description)]]
         std::optional<bool> reportGlErrors;
     };
+} // namespace
 #include "renderablegaiastars_codegen.cpp"
-}  // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableGaiaStars::Documentation() {
+Documentation RenderableGaiaStars::Documentation() {
     return codegen::doc<Parameters>("gaiamission_renderablegaiastars");
 }
 
@@ -407,21 +409,21 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     addProperty(_filePath);
 
     _fileReaderOption.addOptions({
-        { gaia::FileReaderOption::Fits, "Fits" },
-        { gaia::FileReaderOption::Speck, "Speck" },
-        { gaia::FileReaderOption::BinaryRaw, "BinaryRaw" },
-        { gaia::FileReaderOption::BinaryOctree, "BinaryOctree" },
-        { gaia::FileReaderOption::StreamOctree, "StreamOctree" }
+        { FileReaderOption::Fits, "Fits" },
+        { FileReaderOption::Speck, "Speck" },
+        { FileReaderOption::BinaryRaw, "BinaryRaw" },
+        { FileReaderOption::BinaryOctree, "BinaryOctree" },
+        { FileReaderOption::StreamOctree, "StreamOctree" }
     });
-    _fileReaderOption = codegen::map<gaia::FileReaderOption>(p.fileReaderOption);
+    _fileReaderOption = codegen::map<FileReaderOption>(p.fileReaderOption);
 
     _renderMode.addOptions({
-        { gaia::RenderMode::Static, "Static" },
-        { gaia::RenderMode::Color, "Color" },
-        { gaia::RenderMode::Motion, "Motion" }
+        { RenderMode::Static, "Static" },
+        { RenderMode::Color, "Color" },
+        { RenderMode::Motion, "Motion" }
     });
     if (p.renderMode.has_value()) {
-        _renderMode = codegen::map<gaia::RenderMode>(*p.renderMode);
+        _renderMode = codegen::map<RenderMode>(*p.renderMode);
     }
     _renderMode.onChange([this]() { _buffersAreDirty = true; });
     addProperty(_renderMode);
@@ -502,7 +504,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     addProperty(_distThreshold);
 
     // Only add properties correlated to fits files if we're reading from a fits file
-    if (_fileReaderOption == gaia::FileReaderOption::Fits) {
+    if (_fileReaderOption == FileReaderOption::Fits) {
         _firstRow = p.firstRow.value_or(_firstRow);
         _firstRow.onChange([this]() { _dataIsDirty = true; });
         addProperty(_firstRow);
@@ -671,7 +673,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFbo);
 
     // Update which nodes are stored in memory as the camera moves around (if streaming)
-    if (_fileReaderOption == gaia::FileReaderOption::StreamOctree) {
+    if (_fileReaderOption == FileReaderOption::StreamOctree) {
         const glm::dvec3 cameraPos = data.camera.positionVec3();
         const size_t chunkSizeBytes = _chunkSize * sizeof(GLfloat);
         _octreeManager.fetchSurroundingNodes(cameraPos, chunkSizeBytes, _additionalNodes);
@@ -688,7 +690,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
         modelViewProjMat,
         screenSize,
         deltaStars,
-        gaia::RenderMode(_renderMode.value()),
+        RenderMode(_renderMode.value()),
         _lodPixelThreshold
     );
 
@@ -876,13 +878,13 @@ void RenderableGaiaStars::update(const UpdateData&) {
         LDEBUG("Regenerating buffers");
 
         // Set values per star slice depending on render option
-        if (_renderMode == gaia::RenderMode::Static) {
+        if (_renderMode == RenderMode::Static) {
             _nRenderValuesPerStar = PositionSize;
         }
-        else if (_renderMode == gaia::RenderMode::Color) {
+        else if (_renderMode == RenderMode::Color) {
             _nRenderValuesPerStar = PositionSize + ColorSize;
         }
-        else { // (renderOption == gaia::RenderOption::Motion)
+        else { // (renderOption == RenderOption::Motion)
             _nRenderValuesPerStar = PositionSize + ColorSize + VelocitySize;
         }
 
@@ -1000,23 +1002,23 @@ bool RenderableGaiaStars::readDataFile() {
 
     int nReadStars = 0;
     switch (_fileReaderOption) {
-        case gaia::FileReaderOption::Fits:
+        case FileReaderOption::Fits:
             // Read raw fits file and construct Octree
             nReadStars = readFitsFile(file);
             break;
-        case gaia::FileReaderOption::Speck:
+        case FileReaderOption::Speck:
             // Read raw speck file and construct Octree
             nReadStars = readSpeckFile(file);
             break;
-        case gaia::FileReaderOption::BinaryRaw:
+        case FileReaderOption::BinaryRaw:
             // Stars are stored in an ordered binary file
             nReadStars = readBinaryRawFile(file);
             break;
-        case gaia::FileReaderOption::BinaryOctree:
+        case FileReaderOption::BinaryOctree:
             // Octree already constructed and stored as a binary file
             nReadStars = readBinaryOctreeFile(file);
             break;
-        case gaia::FileReaderOption::StreamOctree:
+        case FileReaderOption::StreamOctree:
             // Read Octree structure from file, without data
             nReadStars = readBinaryOctreeStructureFile(file);
             break;

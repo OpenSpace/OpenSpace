@@ -417,12 +417,12 @@ int main(int argc, char** argv) {
 
         windowConfiguration = global::configuration->windowConfiguration;
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         LFATALC("main", "Loading of configuration file failed");
-        for (const documentation::TestResult::Offense& o : e.result.offenses) {
+        for (const TestResult::Offense& o : e.result.offenses) {
             LERRORC(o.offender, ghoul::to_string(o.reason));
         }
-        for (const documentation::TestResult::Warning& w : e.result.warnings) {
+        for (const TestResult::Warning& w : e.result.warnings) {
             LWARNINGC(w.offender, ghoul::to_string(w.reason));
         }
         exit(EXIT_FAILURE);

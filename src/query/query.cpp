@@ -54,22 +54,22 @@ const Renderable* renderable(std::string_view name) {
     return node->renderable();
 }
 
-properties::Property* property(std::string_view uri) {
-    properties::Property* property = global::rootPropertyOwner->property(uri);
+Property* property(std::string_view uri) {
+    Property* property = global::rootPropertyOwner->property(uri);
     return property;
 }
 
-properties::PropertyOwner* propertyOwner(std::string_view uri) {
-    properties::PropertyOwner* property = global::rootPropertyOwner->propertyOwner(uri);
+PropertyOwner* propertyOwner(std::string_view uri) {
+    PropertyOwner* property = global::rootPropertyOwner->propertyOwner(uri);
     return property;
 }
 
-const std::vector<properties::Property*>& allProperties() {
+const std::vector<Property*>& allProperties() {
     return global::openSpaceEngine->allProperties();
 }
 
-const std::vector<properties::PropertyOwner*>& allPropertyOwners() {
+const std::vector<PropertyOwner*>& allPropertyOwners() {
     return global::openSpaceEngine->allPropertyOwners();
 }
 
-}  // namespace openspace
+} // namespace openspace

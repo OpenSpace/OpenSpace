@@ -26,7 +26,9 @@
 #include <ghoul/misc/stringhelper.h>
 #include <vector>
 
-namespace openspace::luascriptfunctions {
+using namespace openspace;
+
+namespace {
 
 int printInternal(ghoul::logging::LogLevel level, lua_State* L) {
     const int nArguments = lua_gettop(L);
@@ -60,10 +62,6 @@ int printError(lua_State* L) {
 int printFatal(lua_State* L) {
     return printInternal(ghoul::logging::LogLevel::Fatal, L);
 }
-
-} // namespace openspace::luascriptfunctions
-
-namespace {
 
 /**
  * Passes the argument to FileSystem::absolutePath, which resolves occuring path tokens
@@ -137,7 +135,7 @@ namespace {
  * any missing parent folder as well
  */
 [[codegen::luawrap]] bool createDirectory(std::filesystem::path path,
-    bool recursive = false)
+                                          bool recursive = false)
 {
     if (recursive) {
         return std::filesystem::create_directories(std::move(path));
@@ -284,7 +282,7 @@ namespace {
                                                  std::string preScript = "",
                                                  std::string postScript = "")
 {
-    openspace::global::scriptEngine->registerRepeatedScript(
+    global::scriptEngine->registerRepeatedScript(
         std::move(identifier),
         std::move(script),
         timeout,
@@ -297,7 +295,7 @@ namespace {
  * Removes a previously registered repeated script (see #registerRepeatedScript)
  */
 [[codegen::luawrap]] void removeRepeatedScript(std::string identifier) {
-    openspace::global::scriptEngine->removeRepeatedScript(identifier);
+    global::scriptEngine->removeRepeatedScript(identifier);
 }
 
 /**
@@ -306,9 +304,9 @@ namespace {
  * time.
  */
 [[codegen::luawrap]] void scheduleScript(std::string script, double delay) {
-    openspace::global::scriptEngine->scheduleScript(std::move(script), delay);
+    global::scriptEngine->scheduleScript(std::move(script), delay);
 }
 
-#include "scriptengine_lua_codegen.cpp"
-
 } // namespace
+
+#include "scriptengine_lua_codegen.cpp"

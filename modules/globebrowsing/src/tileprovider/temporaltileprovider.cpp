@@ -57,25 +57,47 @@
 #include <sstream>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view TimePlaceholder = "${OpenSpaceTimeId}";
 
-    constexpr openspace::properties::Property::PropertyInfo UseFixedTimeInfo = {
+    constexpr Property::PropertyInfo UseFixedTimeInfo = {
         "UseFixedTime",
         "Use fixed time",
         "If this value is enabled, the time-varying timevarying dataset will always use "
         "the time that is specified in the 'FixedTime' property, rather than using the "
         "actual time from OpenSpace.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FixedTimeInfo = {
+    constexpr Property::PropertyInfo FixedTimeInfo = {
         "FixedTime",
         "Fixed time",
         "If the 'UseFixedTime' is enabled, this time will be used instead of the actual "
         "time taken from OpenSpace for the displayed tiles.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
+    std::string_view timeStringify(const std::string& format, const Time& t) {
+        ZoneScoped;
+
+        constexpr int BufferSize = 64;
+        ghoul_assert(format.size() < BufferSize, "Format string too long");
+
+        char FormatBuf[BufferSize];
+        std::memset(FormatBuf, '\0', BufferSize);
+        std::memcpy(FormatBuf, format.c_str(), format.size());
+
+        char* OutBuf = reinterpret_cast<char*>(
+            global::memoryManager->TemporaryMemory.allocate(BufferSize)
+        );
+        std::memset(OutBuf, '\0', BufferSize);
+
+        const double time = t.j2000Seconds();
+        SpiceManager::ref().dateFromEphemerisTime(time, OutBuf, BufferSize, FormatBuf);
+        return std::string_view(OutBuf, format.size());
+    }
+    
     struct [[codegen::Dictionary(TemporalTileProvider)]] Parameters {
         // [[codegen::verbatim(UseFixedTimeInfo.description)]]
         std::optional<bool> useFixedTime;
@@ -144,34 +166,13 @@ namespace {
         // image to color
         std::optional<std::string> colormap;
     };
+
+} // namespace
 #include "temporaltileprovider_codegen.cpp"
 
-    std::string_view timeStringify(const std::string& format, const openspace::Time& t) {
-        ZoneScoped;
+namespace openspace {
 
-        constexpr int BufferSize = 64;
-        ghoul_assert(format.size() < BufferSize, "Format string too long");
-
-        using namespace openspace;
-
-        char FormatBuf[BufferSize];
-        std::memset(FormatBuf, '\0', BufferSize);
-        std::memcpy(FormatBuf, format.c_str(), format.size());
-
-        char* OutBuf = reinterpret_cast<char*>(
-            global::memoryManager->TemporaryMemory.allocate(BufferSize)
-        );
-        std::memset(OutBuf, '\0', BufferSize);
-
-        const double time = t.j2000Seconds();
-        SpiceManager::ref().dateFromEphemerisTime(time, OutBuf, BufferSize, FormatBuf);
-        return std::string_view(OutBuf, format.size());
-    }
-} // namespace
-
-namespace openspace::globebrowsing {
-
-documentation::Documentation TemporalTileProvider::Documentation() {
+Documentation TemporalTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_temporaltileprovider");
 }
 
@@ -734,7 +735,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     // return tile here, we just want to trigger the load already
     before->tile(tileIndex);
     future->tile(tileIndex);
-    const cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
+    const ProviderTileKey key = { tileIndex, uniqueIdentifier };
 
     if (!prev.texture || !next.texture) {
         return Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
@@ -754,7 +755,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     Tile ourTile;
     // The texture that will contain the interpolated image
     ghoul::opengl::Texture* writeTexture = nullptr;
-    cache::MemoryAwareTileCache* tileCache =
+    MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     if (tileCache->exist(key)) {
         ourTile = tileCache->get(key);
@@ -860,4 +861,4 @@ float TemporalTileProvider::InterpolateTileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

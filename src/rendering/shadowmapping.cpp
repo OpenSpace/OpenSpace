@@ -32,18 +32,20 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo CastShadowInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo CastShadowInfo = {
         "CastShadow",
         "Cast shadow",
         "Enable model to cast shadow on its parent renderable.",
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FrustumSizeInfo = {
+    constexpr Property::PropertyInfo FrustumSizeInfo = {
         "FrustumSize",
         "Size of the depth-pass view frustum",
         "Sets the width & height (effectively left/right & top/bottom) of the depth-pass "
         "view frustum, z-near & z-far are calculated.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(Shadower)]] Parameters {
@@ -53,12 +55,12 @@ namespace {
         // [[codegen::verbatim(CastShadowInfo.description)]]
         std::optional<bool> castShadow;
     };
-#include "shadowmapping_codegen.cpp"
 } // namespace
+#include "shadowmapping_codegen.cpp"
 
-namespace openspace::shadowmapping {
+namespace openspace {
 
-documentation::Documentation Shadower::Documentation() {
+Documentation Shadower::Documentation() {
     return codegen::doc<Parameters>("core_shadower");
 }
 
@@ -117,4 +119,4 @@ void Shadowee::removeShadower(const Shadower* shadower) {
     }
 }
 
-} // namespace openspace shadowmapping
+} // namespace openspace

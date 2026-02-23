@@ -33,7 +33,7 @@
 #include <ghoul/filesystem/filesystem.h>
 
 TEST_CASE("RawVolumeIO: TinyInputOutput", "[rawvolumeio]") {
-    using namespace openspace::volume;
+    using namespace openspace;
 
     const glm::uvec3 dims = glm::uvec3(1, 1, 1);
     const float value = 0.5f;
@@ -56,7 +56,7 @@ TEST_CASE("RawVolumeIO: TinyInputOutput", "[rawvolumeio]") {
 }
 
 TEST_CASE("RawVolumeIO: BasicInputOutput", "[rawvolumeio]") {
-    using namespace openspace::volume;
+    using namespace openspace;
 
     const glm::uvec3 dims = glm::uvec3(2, 4, 8);
     auto value = [dims](const glm::uvec3& v) {

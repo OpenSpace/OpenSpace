@@ -44,7 +44,7 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     bool createGeometry() override;

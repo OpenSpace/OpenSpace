@@ -47,49 +47,48 @@
 using namespace TUIO;
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "TouchModule";
 
-    constexpr openspace::properties::Property::PropertyInfo TuioPortInfo = {
+    constexpr Property::PropertyInfo TuioPortInfo = {
         "TuioPort",
         "TUIO Port",
         "TUIO UDP port, by default 3333. The port cannot be changed after startup.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableTouchInfo = {
+    constexpr Property::PropertyInfo EnableTouchInfo = {
         "EnableTouchInteraction",
         "Enable touch interaction",
         "Use this property to turn on/off touch input navigation in the 3D scene. "
         "Disabling will reset all current touch inputs to the navigation.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EventsInfo = {
+    constexpr Property::PropertyInfo EventsInfo = {
         "DetectedTouchEvent",
         "Detected touch event",
         "True when there is an active touch event.",
-        openspace::properties::Property::Visibility::Hidden
+        Property::Visibility::Hidden
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DefaultDirectTouchRenderableTypesInfo =
-    {
+    constexpr Property::PropertyInfo DefaultDirectTouchRenderableTypesInfo = {
         "DefaultDirectTouchRenderableTypes",
         "Default direct touch renderable types",
         "A list of renderable types that will automatically use the \'direct "
         "manipulation\' scheme when interacted with, keeping the finger on a static "
         "position on the interaction sphere of the object when touching. Good for "
         "relatively spherical objects.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(TouchModule)]] Parameters {
         // [[codegen::verbatim(TuioPortInfo.description)]]
         std::optional<int> tuioPort [[codegen::inrange(1, 65535)]];
     };
-
-    #include "touchmodule_codegen.cpp"
 } // namespace
+#include "touchmodule_codegen.cpp"
 
 namespace openspace {
 

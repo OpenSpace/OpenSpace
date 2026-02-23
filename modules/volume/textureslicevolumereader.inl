@@ -27,7 +27,7 @@
 #include <ghoul/opengl/texture.h>
 #include <utility>
 
-namespace openspace::volume {
+namespace openspace {
 
 template <typename VoxelType>
 TextureSliceVolumeReader<VoxelType>::TextureSliceVolumeReader(
@@ -94,4 +94,4 @@ TextureSliceVolumeReader<VoxelType>::getSlice(int sliceIndex) const
     return *_cache.get(sliceIndex).get();
 }
 
-} // namespace openspace::volume
+} // namespace openspace

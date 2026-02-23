@@ -49,7 +49,7 @@ namespace {
     }
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 GeodeticPatch::GeodeticPatch(double centerLat, double centerLon, double halfSizeLat,
                              double halfSizeLon)
@@ -251,4 +251,4 @@ Geodetic2 GeodeticPatch::closestPoint(const Geodetic2& p) const {
     return Geodetic2{ clampedLat, clampedLon };
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

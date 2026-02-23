@@ -38,8 +38,8 @@ namespace {
 
 namespace openspace {
 
-documentation::Documentation RenderableTextureCygnet::Documentation() {
-    documentation::Documentation doc = RenderableIswaCygnet::Documentation();
+Documentation RenderableTextureCygnet::Documentation() {
+    openspace::Documentation doc = RenderableIswaCygnet::Documentation();
     doc.name = "RenderableTextureCygnet";
     doc.id = "iswa_renderable_texturecygnet";
     return doc;
@@ -116,4 +116,4 @@ bool RenderableTextureCygnet::readyToRender() const {
     return isReady() && ((!_textures.empty()) && _textures[0]);
 }
 
-} //namespace openspace
+} // namespace openspace

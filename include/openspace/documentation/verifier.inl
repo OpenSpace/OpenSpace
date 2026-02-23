@@ -32,7 +32,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace openspace::documentation {
+namespace openspace {
 
 // Workaround for macOS libc++ std::format with std::vector<bool>
 namespace detail {
@@ -711,4 +711,4 @@ std::string AnnotationVerifier<T>::documentation() const {
     return annotation;
 }
 
-} // namespace openspace::documentation
+} // namespace openspace

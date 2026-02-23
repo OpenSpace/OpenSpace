@@ -29,7 +29,7 @@
 #include <utility>
 #include <vector>
 
-namespace openspace::volume {
+namespace openspace {
 
 template <typename ValueType>
 class LinearLruCache {
@@ -53,7 +53,7 @@ private:
     size_t _capacity;
 };
 
-} // namespace openspace::volume
+} // namespace openspace
 
 #include "linearlrucache.inl"
 

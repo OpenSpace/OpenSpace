@@ -50,7 +50,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     struct Vertex {
@@ -59,10 +59,10 @@ protected:
 
     ghoul::opengl::ProgramObject* _gridProgram;
 
-    properties::Vec3Property _color;
-    properties::IntProperty _longSegments;
-    properties::IntProperty _latSegments;
-    properties::FloatProperty _lineWidth;
+    Vec3Property _color;
+    IntProperty _longSegments;
+    IntProperty _latSegments;
+    FloatProperty _lineWidth;
 
     GLuint _vao = 0;
     GLuint _vbo = 0;

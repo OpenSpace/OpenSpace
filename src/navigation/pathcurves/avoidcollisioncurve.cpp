@@ -48,7 +48,7 @@ namespace {
     constexpr double Epsilon = 1e-5;
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 AvoidCollisionCurve::AvoidCollisionCurve(const Waypoint& start, const Waypoint& end)
     : _relevantNodes(global::navigationHandler->pathNavigator().relevantNodes())
@@ -146,8 +146,6 @@ void AvoidCollisionCurve::removeCollisions(int step) {
         }
 
         for (SceneGraphNode* node : _relevantNodes) {
-            using namespace collision;
-
             // Do collision check in relative coordinates, to avoid huge numbers
             const glm::dmat4 modelTransform = node->modelTransform();
             const glm::dvec3 p1 =
@@ -230,4 +228,4 @@ void AvoidCollisionCurve::removeCollisions(int step) {
     }
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

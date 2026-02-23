@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace openspace::scripting {
+namespace openspace {
 
 bool LuaLibrary::operator<(const LuaLibrary& rhs) const {
     return name < rhs.name;
@@ -83,4 +83,4 @@ void LuaLibrary::merge(LuaLibrary rhs) {
     }
 }
 
-} // namespace openspace::scripting
+} // namespace openspace

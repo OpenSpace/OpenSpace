@@ -147,7 +147,7 @@ void main() {
 
 } // namespace
 
-namespace openspace::rendering::helper {
+namespace openspace::rendering {
 
 namespace detail {
 

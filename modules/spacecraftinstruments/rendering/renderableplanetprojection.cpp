@@ -44,102 +44,104 @@
 #include <variant>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view NoImageText = "No Image";
 
-    constexpr openspace::properties::Property::PropertyInfo ColorTexturePathsInfo = {
+    constexpr Property::PropertyInfo ColorTexturePathsInfo = {
         "ColorTexturePaths",
         "Color texture",
         "The texture path selected in this property is used as the base texture that is "
         "applied to the planet prior to any image projections. This menu always contains "
         "an empty option for not using a color map. If this value is specified in an "
         "asset, the last texture is used.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AddColorTextureInfo = {
+    constexpr Property::PropertyInfo AddColorTextureInfo = {
         "AddColorTexture",
         "Add color base texture",
         "Adds a new base color texture to the list of selectable base maps used prior to "
         "any image projection.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HeightTexturePathsInfo = {
+    constexpr Property::PropertyInfo HeightTexturePathsInfo = {
         "HeightTexturePaths",
         "Heightmap texture",
         "The texture path selected in this property is used as the height map on the "
         "planet. This menu always contains an empty option for not using a heightmap. If "
         "this value is specified in an asset, the last texture is used.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AddHeightTextureInfo = {
+    constexpr Property::PropertyInfo AddHeightTextureInfo = {
         "AddHeightTexture",
         "Add heightmap texture",
         "Adds a new height map texture to the list of selectable height maps used.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HeightExaggerationInfo = {
+    constexpr Property::PropertyInfo HeightExaggerationInfo = {
         "HeightExaggeration",
         "Height exaggeration",
         "This value determines the level of height exaggeration that is applied to a "
         "potential height field. A value of '0' inhibits the height field, whereas a "
         "value of '1' uses the measured height field.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MeridianShiftInfo = {
+    constexpr Property::PropertyInfo MeridianShiftInfo = {
         "MeridianShift",
         "Meridian shift",
         "If this value is enabled, a shift of the meridian by 180 degrees is performed. "
         "This is a fix especially for Pluto height maps, where the definition of the "
         "meridian has changed through the New Horizons mission and this requires this "
         "shift.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AmbientBrightnessInfo = {
+    constexpr Property::PropertyInfo AmbientBrightnessInfo = {
         "AmbientBrightness",
         "Ambient brightness",
         "This value determines the ambient brightness of the dark side of the planet.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxProjectionsPerFrameInfo = {
+    constexpr Property::PropertyInfo MaxProjectionsPerFrameInfo = {
         "MaxProjectionsPerFrame",
         "Max projections per frame",
         "The maximum number of image projections to perform per frame. Useful to avoid "
         "freezing the system for large delta times.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ProjectionsInBufferInfo = {
+    constexpr Property::PropertyInfo ProjectionsInBufferInfo = {
         "ProjectionsInBuffer",
         "Projections in buffer",
         "(Read only) The number of images that are currently waiting to be projected.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ClearProjectionBufferInfo = {
+    constexpr Property::PropertyInfo ClearProjectionBufferInfo = {
         "ClearProjectionBuffer",
         "Clear projection buffer",
         "Remove all pending projections from the buffer.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
+    constexpr Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
         "This value specifies the radius of this sphere in meters.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    constexpr Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
         "This value specifies the number of segments that this sphere is split into.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This Renderable serves as a potential target for images projected from a
@@ -177,12 +179,12 @@ namespace {
         // [[codegen::verbatim(SegmentsInfo.description)]]
         int segments;
     };
-#include "renderableplanetprojection_codegen.cpp"
 } // namespace
+#include "renderableplanetprojection_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePlanetProjection::Documentation() {
+Documentation RenderablePlanetProjection::Documentation() {
     return codegen::doc<Parameters>("spacecraftinstruments_renderableplanetprojection");
 }
 
@@ -674,4 +676,4 @@ void RenderablePlanetProjection::createSphere() {
     _sphere->initialize();
 }
 
-}  // namespace openspace
+} // namespace openspace

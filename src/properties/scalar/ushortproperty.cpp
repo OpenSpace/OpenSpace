@@ -26,7 +26,7 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 UShortProperty::UShortProperty(Property::PropertyInfo info, unsigned short value,
                                unsigned short minValue, unsigned short maxValue,
@@ -60,5 +60,4 @@ std::string UShortProperty::stringValue() const {
     return formatJson(_value);
 }
 
-
-} // namespace openspace::properties
+} // namespace openspace

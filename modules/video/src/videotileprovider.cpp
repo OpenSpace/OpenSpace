@@ -46,17 +46,15 @@ namespace {
     // Note that, unless playback is mapped to simulation time, the video must be started
     // manually via the user interface.
     struct [[codegen::Dictionary(VideoTileProvider)]] Parameters {};
-#include "videotileprovider_codegen.cpp"
 } // namespace
+#include "videotileprovider_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation VideoTileProvider::Documentation() {
-     documentation::Documentation doc = codegen::doc<Parameters>(
-         "video_videotileprovider"
-     );
+Documentation VideoTileProvider::Documentation() {
+    openspace::Documentation doc = codegen::doc<Parameters>("video_videotileprovider");
 
-    documentation::Documentation vp = VideoPlayer::Documentation();
+    openspace::Documentation vp = VideoPlayer::Documentation();
     doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
 
     return doc;
@@ -69,7 +67,7 @@ VideoTileProvider::VideoTileProvider(const ghoul::Dictionary& dictionary)
     addPropertySubOwner(_videoPlayer);
 }
 
-globebrowsing::Tile VideoTileProvider::tile(const globebrowsing::TileIndex& tileIndex) {
+Tile VideoTileProvider::tile(const TileIndex& tileIndex) {
     ZoneScoped;
 
     if (!_videoPlayer.isInitialized()) {
@@ -162,4 +160,4 @@ void VideoTileProvider::internalDeinitialize() {
     _videoPlayer.destroy();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

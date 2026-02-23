@@ -38,21 +38,23 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TimeInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TimeInfo = {
         "Time",
         "Time",
         "The time (in J2000 seconds) that is used to calculate transformations and the "
         "renderable's data."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CameraPositionInfo = {
+    constexpr Property::PropertyInfo CameraPositionInfo = {
         "CameraPosition",
         "Camera position",
         "Specifies the location of the virtual camera that is showing the renderable "
         "class. This position is provided in meters."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CameraCenterInfo = {
+    constexpr Property::PropertyInfo CameraCenterInfo = {
         "CameraCenter",
         "Camera center",
         "The location of the camera's focal point. The camera's view direction will "
@@ -60,20 +62,20 @@ namespace {
         "in meters."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CameraUpInfo = {
+    constexpr Property::PropertyInfo CameraUpInfo = {
         "CameraUp",
         "Camera up",
         "The direction that is 'up' for the provided camera. This value does not have "
         "any units."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CameraFovInfo = {
+    constexpr Property::PropertyInfo CameraFovInfo = {
         "CameraFov",
         "Camera field of view",
         "The camera's field of view in degrees."
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo TransformInfo = {
+    const PropertyOwner::PropertyOwnerInfo TransformInfo = {
         "Transform",
         "Transform",
         "The Translation, Rotation, and Scale that are applied to the rendered "
@@ -141,12 +143,12 @@ namespace {
         // [[codegen::verbatim(CameraFovInfo.description)]]
         std::optional<float> cameraFov;
     };
-#include "screenspacerenderablerenderable_codegen.cpp"
 } // namespace
+#include "screenspacerenderablerenderable_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceRenderableRenderable::Documentation() {
+Documentation ScreenSpaceRenderableRenderable::Documentation() {
     return codegen::doc<Parameters>(
         "base_screenspace_renderable",
         ScreenSpaceRenderableFramebuffer::Documentation()
@@ -195,8 +197,8 @@ ScreenSpaceRenderableRenderable::ScreenSpaceRenderableRenderable(
     _renderable = Renderable::createFromDictionary(p.renderable);
     addPropertySubOwner(_renderable.get());
 
-    _transform.parent = ghoul::mm_unique_ptr<properties::PropertyOwner>(
-        new properties::PropertyOwner(TransformInfo)
+    _transform.parent = ghoul::mm_unique_ptr<PropertyOwner>(
+        new PropertyOwner(TransformInfo)
     );
     addPropertySubOwner(_transform.parent.get());
 

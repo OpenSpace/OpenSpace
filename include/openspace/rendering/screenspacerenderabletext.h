@@ -47,7 +47,7 @@ public:
     void update() override;
     void render(const RenderData& renderData) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     std::string _buffer;
@@ -56,8 +56,8 @@ private:
     void updateFramebuffer();
     void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
-    properties::StringProperty _fontName;
-    properties::FloatProperty _fontSize;
+    StringProperty _fontName;
+    FloatProperty _fontSize;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
     std::unique_ptr<ghoul::fontrendering::FontRenderer> _fontRenderer;
@@ -66,6 +66,6 @@ private:
     std::unique_ptr<ghoul::opengl::Texture> _texture;
 };
 
-} //namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SCREENSPACERENDERABLETEXT___H__

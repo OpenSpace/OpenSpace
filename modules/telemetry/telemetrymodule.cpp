@@ -48,35 +48,37 @@
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     // The default Open Sound Control receiver is SuperCollider with these default values.
     // However, the user can define any receiver in the openspace.cfg file as the
     // ModuleConfiguration for the Telemetry module.
     constexpr std::string_view DefaultSuperColliderIp = "127.0.0.1";
     constexpr int DefaultSuperColliderPort = 57120;
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Enable or disable all gathering of telemetry information.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IpAddressInfo = {
+    constexpr Property::PropertyInfo IpAddressInfo = {
         "IpAddress",
         "IP address",
         "The network IP address that the telemetry Open Sound Control messages is sent "
         "to.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PortInfo = {
+    constexpr Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The network port that the telemetry Open Sound Control messages are sent to.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AngleCalculationModeInfo = {
+    constexpr Property::PropertyInfo AngleCalculationModeInfo = {
         "AngleCalculationMode",
         "Angle calculation mode",
         "This setting changes the method used to calculate any angles in the "
@@ -85,10 +87,10 @@ namespace {
         "for centered fisheye displays or omnidirectional immersive environments. For "
         "more information, see the pages \"Angle Calculations\" and \"Surround Sound "
         "Configurations\"on the OpenSpace documentation page.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IncludeElevationAngleInfo = {
+    constexpr Property::PropertyInfo IncludeElevationAngleInfo = {
         "IncludeElevationAngle",
         "Include elevation angle",
         "This setting determines if an additional elevation angle should be calculated "
@@ -98,7 +100,7 @@ namespace {
         "method used for this calculation also depends on the angle calculation mode. "
         "For more information, see the page \"Angle Calculations\" on the OpenSpace "
         "documentation page.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(TelemetryModule)]] Parameters {
@@ -121,8 +123,8 @@ namespace {
         // [[codegen::verbatim(IncludeElevationAngleInfo.description)]]
         std::optional<bool> includeElevationAngle;
     };
-#include "telemetrymodule_codegen.cpp"
 } // namespace
+#include "telemetrymodule_codegen.cpp"
 
 namespace openspace {
 
@@ -313,7 +315,7 @@ void TelemetryModule::update(std::atomic<bool>& isRunning) {
     }
 }
 
-std::vector<scripting::LuaLibrary> TelemetryModule::luaLibraries() const {
+std::vector<LuaLibrary> TelemetryModule::luaLibraries() const {
     return {
         NodesTelemetry::luaLibrary(),
         PlanetsSonification::luaLibrary()

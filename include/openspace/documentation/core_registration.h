@@ -27,11 +27,11 @@
 
 namespace openspace {
 
-namespace documentation { class DocumentationEngine; }
-namespace scripting { class ScriptEngine; }
+class DocumentationEngine;
+class ScriptEngine;
 
-void registerCoreClasses(documentation::DocumentationEngine& engine);
-void registerCoreClasses(scripting::ScriptEngine& engine);
+void registerCoreClasses(DocumentationEngine& engine);
+void registerCoreClasses(ScriptEngine& engine);
 
 } // namespace openspace
 

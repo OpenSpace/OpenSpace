@@ -33,13 +33,15 @@
 #include <functional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TimeFramesInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TimeFramesInfo = {
         "TimeFrames",
         "Time frames",
         "A vector of time frames to combine into one. The time frame is active when any "
         "of the contained time frames are, but not in gaps between contained time "
         "frames.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `TimeFrame` class will accept the union of all passed-in TimeFrames. This
@@ -53,12 +55,12 @@ namespace {
         std::vector<ghoul::Dictionary> timeFrames
             [[codegen::reference("core_time_frame")]];
     };
-#include "timeframeunion_codegen.cpp"
 } // namespace
+#include "timeframeunion_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation TimeFrameUnion::Documentation() {
+Documentation TimeFrameUnion::Documentation() {
     return codegen::doc<Parameters>("base_timeframe_union");
 }
 

@@ -40,14 +40,15 @@
 #include <variant>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "TimeFrameKernel";
     constexpr unsigned SpiceErrorBufferSize = 1841;
 
-    std::vector<openspace::TimeRange> extractTimeFramesSPK(
+    std::vector<TimeRange> extractTimeFramesSPK(
                                         const std::vector<std::filesystem::path>& kernels,
                                              const std::variant<std::string, int>& object)
     {
-        using namespace openspace;
         std::vector<TimeRange> res;
 
         // Load the kernel to be able to resolve the provided object name
@@ -174,11 +175,10 @@ namespace {
         return res;
     }
 
-    std::vector<openspace::TimeRange> extractTimeFramesCK(
+    std::vector<TimeRange> extractTimeFramesCK(
                                         const std::vector<std::filesystem::path>& kernels,
                                              const std::variant<std::string, int>& object)
     {
-        using namespace openspace;
         std::vector<TimeRange> res;
 
         std::filesystem::path lsk = SpiceManager::leapSecondKernel();
@@ -311,9 +311,7 @@ namespace {
         return res;
     }
 
-    void normalizeTimeRanges(std::vector<openspace::TimeRange>& ranges) {
-        using namespace openspace;
-
+    void normalizeTimeRanges(std::vector<TimeRange>& ranges) {
         if (ranges.size() <= 1) {
             // Nothing to do here if there is 0 or 1 elements in the vector
             return;
@@ -407,12 +405,12 @@ namespace {
         };
         std::optional<CK> ck [[codegen::key("CK")]];
     };
-#include "timeframekernel_codegen.cpp"
 } // namespace
+#include "timeframekernel_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation TimeFrameKernel::Documentation() {
+Documentation TimeFrameKernel::Documentation() {
     return codegen::doc<Parameters>("space_time_frame_kernel");
 }
 

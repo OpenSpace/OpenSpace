@@ -46,8 +46,8 @@ namespace ghoul {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
 class Camera;
+struct Documentation;
 class Ellipsoid;
 struct RenderData;
 struct RendererTasks;
@@ -61,7 +61,7 @@ struct RenderableSettings {
     bool shouldUpdateIfDisabled = false;
 };
 
-class Renderable : public properties::PropertyOwner, public Fadeable {
+class Renderable : public PropertyOwner, public Fadeable {
 public:
     enum class RenderBin : int {
         Background = 1,
@@ -119,12 +119,12 @@ public:
 
     void onEnabledChange(std::function<void(bool)> callback);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    properties::BoolProperty _enabled;
-    properties::StringProperty _renderableType;
-    properties::BoolProperty _dimInAtmosphere;
+    BoolProperty _enabled;
+    StringProperty _renderableType;
+    BoolProperty _dimInAtmosphere;
 
     void setBoundingSphere(double boundingSphere);
     void setInteractionSphere(double interactionSphere);

@@ -63,11 +63,11 @@ private:
     std::vector<Line> generateFieldlines();
     std::vector<Line> generateFieldlinesVolumeKameleon();
 
-    properties::FloatProperty _stepSize;
-    properties::BoolProperty _classification;
-    properties::Vec4Property _fieldlineColor;
-    properties::OptionProperty _seedPointSource;
-    properties::StringProperty _seedPointSourceFile;
+    FloatProperty _stepSize;
+    BoolProperty _classification;
+    Vec4Property _fieldlineColor;
+    OptionProperty _seedPointSource;
+    StringProperty _seedPointSourceFile;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
 

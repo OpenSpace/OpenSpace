@@ -58,7 +58,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     enum MeshType {
@@ -102,16 +102,16 @@ private:
     bool _textColorIsDirty = true;
     bool _hasLabel = false;
 
-    properties::Vec3Property _textColor;
-    properties::FloatProperty _textOpacity;
-    properties::FloatProperty _textSize;
-    properties::BoolProperty _drawElements;
-    properties::BoolProperty _drawLabels;
-    properties::IVec2Property _textMinMaxSize;
-    properties::FloatProperty _lineWidth;
+    Vec3Property _textColor;
+    FloatProperty _textOpacity;
+    FloatProperty _textSize;
+    BoolProperty _drawElements;
+    BoolProperty _drawLabels;
+    IVec2Property _textMinMaxSize;
+    FloatProperty _lineWidth;
 
     // DEBUG:
-    properties::OptionProperty _renderOption;
+    OptionProperty _renderOption;
 
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, alphaValue,

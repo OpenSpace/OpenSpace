@@ -39,10 +39,10 @@ public:
     void update() override;
     void render(glm::vec2& penPosition) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::FloatProperty _spacing;
+    FloatProperty _spacing;
 };
 
 } // namespace openspace

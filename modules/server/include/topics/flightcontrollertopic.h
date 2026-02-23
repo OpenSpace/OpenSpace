@@ -63,8 +63,8 @@ private:
     nlohmann::json _allNodes;
     nlohmann::json _interestingTimes;
 
-    openspace::interaction::WebsocketInputStates _inputStates;
-    openspace::interaction::WebsocketInputState _inputState;
+    WebsocketInputStates _inputStates;
+    WebsocketInputState _inputState;
 };
 
 } // namespace openspace

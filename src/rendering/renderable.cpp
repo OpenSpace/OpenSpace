@@ -42,37 +42,38 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view KeyType = "Type";
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Determines whether this object will be visible or not.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderableTypeInfo = {
+    constexpr Property::PropertyInfo RenderableTypeInfo = {
         "Type",
         "Renderable type",
         "The type of the renderable.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderableRenderBinModeInfo =
-    {
+    constexpr Property::PropertyInfo RenderableRenderBinModeInfo = {
         "RenderBinMode",
         "Render bin mode",
         "A value that specifies if the renderable should be rendered in the Background, "
         "Opaque, Pre-/PostDeferredTransparency, Overlay, or Sticker rendering step.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DimInAtmosphereInfo = {
+    constexpr Property::PropertyInfo DimInAtmosphereInfo = {
         "DimInAtmosphere",
         "Dim in atmosphere",
         "Decides if the object should be dimmed (i.e. faded out) when the camera is in "
         "the sunny part of an atmosphere.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This is the base class for all `Renderable` types. These objects are responsible
@@ -117,12 +118,12 @@ namespace {
         // [[codegen::verbatim(DimInAtmosphereInfo.description)]]
         std::optional<bool> dimInAtmosphere;
     };
-#include "renderable_codegen.cpp"
 } // namespace
+#include "renderable_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation Renderable::Documentation() {
+Documentation Renderable::Documentation() {
     return codegen::doc<Parameters>("renderable");
 }
 
@@ -136,7 +137,7 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
     }
 
     // This should be done in the constructor instead with noexhaustive
-    documentation::testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
+    testSpecificationAndThrow(Documentation(), dictionary, "Renderable");
 
     const std::string renderableType = dictionary.value<std::string>(KeyType);
     ghoul::TemplateFactory<Renderable>* factory =
@@ -152,7 +153,7 @@ ghoul::mm_unique_ptr<Renderable> Renderable::createFromDictionary(
 }
 
 Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings settings)
-    : properties::PropertyOwner({ "Renderable" })
+    : PropertyOwner({ "Renderable" })
     , _enabled(EnabledInfo, true)
     , _renderableType(RenderableTypeInfo, "Renderable")
     , _dimInAtmosphere(DimInAtmosphereInfo, false)
@@ -192,10 +193,10 @@ Renderable::Renderable(const ghoul::Dictionary& dictionary, RenderableSettings s
     addProperty(_enabled);
     _enabled.onChange([this]() {
         if (isEnabled()) {
-            global::eventEngine->publishEvent<events::EventRenderableEnabled>(_parent);
+            global::eventEngine->publishEvent<EventRenderableEnabled>(_parent);
         }
         else {
-            global::eventEngine->publishEvent<events::EventRenderableDisabled>(_parent);
+            global::eventEngine->publishEvent<EventRenderableDisabled>(_parent);
         }
     });
 
@@ -398,4 +399,4 @@ std::tuple<glm::dmat4, glm::dmat4, glm::dmat4> Renderable::calcAllTransforms(
     };
 }
 
-}  // namespace openspace
+} // namespace openspace

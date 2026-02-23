@@ -25,6 +25,8 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <ghoul/lua/lua_helper.h>
 
+using namespace openspace;
+
 namespace {
 
 /**
@@ -32,7 +34,6 @@ namespace {
  * node.
  */
 [[codegen::luawrap]] void setRelativeMinDistance(float multiplier) {
-    using namespace openspace;
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
     if (!node) {
         throw ghoul::lua::LuaError("Could not determine current focus node");
@@ -49,7 +50,6 @@ namespace {
  * node.
  */
 [[codegen::luawrap]] void setRelativeMaxDistance(float multiplier) {
-    using namespace openspace;
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
     if (!node) {
         throw ghoul::lua::LuaError("Could not determine current focus node");
@@ -61,6 +61,6 @@ namespace {
     );
 }
 
-#include "orbitalnavigator_lua_codegen.cpp"
-
 } // namespace
+
+#include "orbitalnavigator_lua_codegen.cpp"

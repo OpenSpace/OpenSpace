@@ -48,12 +48,12 @@ namespace {
         // A user readable name of this synchronization
         std::string name;
     };
-#include "resourcesynchronization_codegen.cpp"
 } // namespace
+#include "resourcesynchronization_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ResourceSynchronization::Documentation() {
+Documentation ResourceSynchronization::Documentation() {
     return codegen::doc<Parameters>("resourceSynchronization");
 }
 

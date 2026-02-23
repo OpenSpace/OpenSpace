@@ -31,7 +31,7 @@
 #include <filesystem>
 #include <fstream>
 
-namespace openspace::exoplanets {
+namespace openspace {
 
 class ExoplanetsDataPreparationTask : public Task {
 public:
@@ -46,7 +46,7 @@ public:
 
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
-    static documentation::Documentation documentation();
+    static Documentation documentation();
 
     /**
      * The exoplanet file includes a set of commented lines in the beginning. This
@@ -103,6 +103,6 @@ private:
     static float bvFromTeff(float teff, const std::filesystem::path& conversionFile);
 };
 
-} // namespace openspace::exoplanets
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_EXOPLANETS___EXOPLANETSDATAPREPARATIONTASK___H__

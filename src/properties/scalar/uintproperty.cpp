@@ -26,7 +26,7 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 UIntProperty::UIntProperty(Property::PropertyInfo info, unsigned int value,
                            unsigned int minValue, unsigned int maxValue,
@@ -68,4 +68,4 @@ std::string UIntProperty::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

@@ -31,14 +31,14 @@
 #include <ghoul/logging/logmanager.h>
 #include <string_view>
 
+using nlohmann::json;
+
 namespace {
     constexpr std::string_view _loggerCat = "SubscriptionTopic";
 
     constexpr std::string_view StartSubscription = "start_subscription";
     constexpr std::string_view StopSubscription = "stop_subscription";
 } // namespace
-
-using nlohmann::json;
 
 namespace openspace {
 

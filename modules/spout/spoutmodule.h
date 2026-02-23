@@ -37,7 +37,7 @@ public:
 
     void internalInitialize(const ghoul::Dictionary&) override;
 
-    std::vector<documentation::Documentation> documentations() const override;
+    std::vector<openspace::Documentation> documentations() const override;
 };
 
 } // namespace openspace

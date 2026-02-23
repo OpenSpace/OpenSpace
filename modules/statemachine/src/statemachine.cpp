@@ -47,12 +47,12 @@ namespace {
         // The initial state of the state machine. Defaults to the first in the list
         std::optional<std::string> startState;
     };
-#include "statemachine_codegen.cpp"
 } // namespace
+#include "statemachine_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation StateMachine::Documentation() {
+Documentation StateMachine::Documentation() {
     return codegen::doc<Parameters>("statemachine_statemachine");
 }
 

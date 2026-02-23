@@ -66,7 +66,7 @@ void StateMachineModule::initializeStateMachine(const ghoul::Dictionary& states,
             "State machine was created with start state: {}", currentState()
         ));
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         LERROR(std::format("Error loading state machine: {}", e.what()));
         logError(e);
     }
@@ -142,7 +142,7 @@ void StateMachineModule::saveToFile(const std::string& filename,
     _machine->saveToDotFile(outputFile);
 }
 
-scripting::LuaLibrary StateMachineModule::luaLibrary() const {
+LuaLibrary StateMachineModule::luaLibrary() const {
     return {
         "statemachine",
         {
@@ -159,7 +159,7 @@ scripting::LuaLibrary StateMachineModule::luaLibrary() const {
     };
 }
 
-std::vector<documentation::Documentation> StateMachineModule::documentations() const {
+std::vector<Documentation> StateMachineModule::documentations() const {
     return {
         State::Documentation(),
         StateMachine::Documentation(),

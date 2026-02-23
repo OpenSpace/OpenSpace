@@ -36,13 +36,11 @@
 #include <ghoul/misc/assert.h>
 
 namespace {
+    using namespace openspace;
+
     const ImVec2 Size = ImVec2(350, 500);
 
-    void renderSceneGraphNode(const openspace::SceneGraphNode& node,
-                              const openspace::Time& time)
-    {
-        using namespace openspace;
-
+    void renderSceneGraphNode(const SceneGraphNode& node, const Time& time) {
         if (ImGui::TreeNode(node.identifier().c_str())) {
             const std::vector<SceneGraphNode*> children = node.children();
             for (SceneGraphNode* c : children) {
@@ -91,7 +89,7 @@ namespace {
     }
 } // namespace
 
-namespace openspace::gui {
+namespace openspace {
 
 GuiSceneComponent::GuiSceneComponent() : GuiComponent("SceneView", "Scene View") {}
 
@@ -110,4 +108,4 @@ void GuiSceneComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace::gui
+} // namespace openspace

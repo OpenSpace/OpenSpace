@@ -31,8 +31,10 @@
 using namespace TUIO;
 
 namespace {
-    openspace::TouchInput touchInput(TuioCursor* tcur) {
-        return openspace::TouchInput(
+    using namespace openspace;
+
+    TouchInput touchInput(TuioCursor* tcur) {
+        return TouchInput(
             static_cast<size_t>(tcur->getTuioSourceID()),
             static_cast<size_t>(tcur->getCursorID()),
             tcur->getX(),

@@ -48,36 +48,34 @@
 #include <variant>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "TimeManager";
 
     // Properties for time interpolation
     // These are used when setting the time from lua time interpolation functions,
     // when called without arguments.
 
-    constexpr openspace::properties::Property::PropertyInfo
-    DefaultTimeInterpolationDurationInfo = {
+    constexpr Property::PropertyInfo DefaultTimeInterpolationDurationInfo = {
         "DefaultTimeInterpolationDuration",
         "Default time interpolation duration",
         "The default duration taken to interpolate between times."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-    DefaultDeltaTimeInterpolationDurationInfo = {
+    constexpr Property::PropertyInfo DefaultDeltaTimeInterpolationDurationInfo = {
         "DefaultDeltaTimeInterpolationDuration",
         "Default delta time interpolation duration",
         "The default duration taken to interpolate between delta times."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DefaultPauseInterpolationDurationInfo = {
+    constexpr Property::PropertyInfo DefaultPauseInterpolationDurationInfo = {
         "DefaultPauseInterpolationDuration",
         "Default pause interpolation duration",
         "The default duration taken to transition to the paused state, when "
         "interpolating."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DefaultUnpauseInterpolationDurationInfo = {
+    constexpr Property::PropertyInfo DefaultUnpauseInterpolationDurationInfo = {
         "DefaultUnpauseInterpolationDuration",
         "Default unpause interpolation duration",
         "The default duration taken to transition to the unpaused state, when "
@@ -85,33 +83,27 @@ namespace {
     };
 
     constexpr std::string_view DeltaTimeStepsGuiPath = "/Time/Simulation Speed/Steps";
-
     constexpr std::string_view DeltaTimeActionPrefix = "core.time.delta_time";
 
     bool isPlayingBackSessionRecording() {
-        using namespace openspace;
-
         return (global::openSpaceEngine->currentMode() ==
                 OpenSpaceEngine::Mode::SessionRecordingPlayback);
     }
 
     double currentApplicationTimeForInterpolation() {
-        using namespace openspace;
-
         if (global::sessionRecordingHandler->isSavingFramesDuringPlayback()) {
             return global::sessionRecordingHandler->currentApplicationInterpolationTime();
         }
         else {
             return global::windowDelegate->applicationTime();
+        }
     }
-}
-
 } // namespace
 
 namespace openspace {
 
 TimeManager::TimeManager()
-    : properties::PropertyOwner({ "TimeManager", "Time Manager" })
+    : PropertyOwner({ "TimeManager", "Time Manager" })
     , _defaultTimeInterpolationDuration(
         DefaultTimeInterpolationDurationInfo,
         2.f,
@@ -533,7 +525,7 @@ void TimeManager::addDeltaTimesKeybindings() {
         const std::string s = std::format("{:.0f}", step);
 
         std::string identifier = std::format("{}.{}", DeltaTimeActionPrefix, s);
-        interaction::Action action;
+        Action action;
         action.identifier = identifier;
         action.command = std::format("openspace.time.interpolateDeltaTime({})", s);
         action.documentation = std::format(
@@ -541,7 +533,7 @@ void TimeManager::addDeltaTimesKeybindings() {
         );
         action.name = std::format("Set: {}", s);
         action.guiPath = DeltaTimeStepsGuiPath;
-        action.isLocal = interaction::Action::IsLocal::Yes;
+        action.isLocal = Action::IsLocal::Yes;
         global::actionManager->registerAction(std::move(action));
         global::keybindingManager->bindKey(key, mod, std::move(identifier));
         _deltaTimeStepKeybindings.push_back(KeyWithModifier{ key, mod });
@@ -585,8 +577,8 @@ void TimeManager::addDeltaTimesKeybindings() {
 void TimeManager::clearDeltaTimesKeybindings() {
     // Iterate over all of the registered actions with the common prefix that we created
     // in the addDeltaTimesKeybindings function
-    const std::vector<interaction::Action> actions = global::actionManager->actions();
-    for (const interaction::Action& action : actions) {
+    const std::vector<Action> actions = global::actionManager->actions();
+    for (const Action& action : actions) {
         if (action.identifier.starts_with(DeltaTimeActionPrefix)) {
             global::actionManager->removeAction(action.identifier);
         }

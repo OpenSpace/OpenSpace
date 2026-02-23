@@ -198,7 +198,7 @@ std::string Time::advancedTime(const std::string& base, std::string change) {
     return std::string(ret);
 }
 
-scripting::LuaLibrary Time::luaLibrary() {
+LuaLibrary Time::luaLibrary() {
     return {
         "time",
         {

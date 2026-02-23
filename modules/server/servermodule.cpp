@@ -44,12 +44,12 @@ namespace {
         std::optional<std::vector<std::string>> allowAddresses;
         std::optional<int> skyBrowserUpdateTime;
     };
-#include "servermodule_codegen.cpp"
 } // namespace
+#include "servermodule_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ServerModule::Documentation() {
+Documentation ServerModule::Documentation() {
     return codegen::doc<Parameters>("module_server");
 }
 

@@ -54,7 +54,7 @@ public:
 
     ThreadPool& threadPool();
 
-    std::vector<documentation::Documentation> documentations() const override;
+    std::vector<openspace::Documentation> documentations() const override;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;
@@ -71,20 +71,20 @@ private:
     int _width = 0;
     int _height = 0;
 
-    struct SSAO : public properties::PropertyOwner {
+    struct SSAO : public PropertyOwner {
         explicit SSAO(PropertyOwnerInfo info);
 
-        properties::BoolProperty enabled;
-        properties::FloatProperty intensity;
-        properties::FloatProperty radius;
-        properties::FloatProperty horizonBias;
-        properties::FloatProperty normalBias;
+        BoolProperty enabled;
+        FloatProperty intensity;
+        FloatProperty radius;
+        FloatProperty horizonBias;
+        FloatProperty normalBias;
     };
 
     SSAO _ssao;
     SSAO _ssao2;
 
-    properties::FloatProperty _exposure;
+    FloatProperty _exposure;
 
     ThreadPool _threadPool;
 };

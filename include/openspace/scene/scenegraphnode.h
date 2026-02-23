@@ -51,8 +51,8 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
 class Camera;
+struct Documentation;
 class Renderable;
 struct RenderData;
 struct RendererTasks;
@@ -65,7 +65,7 @@ class TimeFrame;
 class Translation;
 struct UpdateData;
 
-class SceneGraphNode : public properties::PropertyOwner {
+class SceneGraphNode : public PropertyOwner {
 public:
     enum class State : int {
         Loaded,
@@ -150,7 +150,7 @@ public:
     bool hasGuiHintHidden() const;
     void setGuiHintHidden(bool value);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void traversePreOrder(const std::function<void(SceneGraphNode*)>& fn);
@@ -179,14 +179,14 @@ private:
 
     // If this value is 'true' GUIs are asked to hide this node from collections, as it
     // might be a node that is not very interesting (for example barycenters)
-    properties::BoolProperty _guiHidden;
+    BoolProperty _guiHidden;
 
-    properties::StringProperty _guiPath;
-    properties::StringProperty _guiDisplayName;
-    properties::StringProperty _guiDescription;
-    properties::BoolProperty _useGuiOrdering;
-    properties::BoolProperty _guiFocusable;
-    properties::FloatProperty _guiOrderingNumber;
+    StringProperty _guiPath;
+    StringProperty _guiDisplayName;
+    StringProperty _guiDescription;
+    BoolProperty _useGuiOrdering;
+    BoolProperty _guiFocusable;
+    FloatProperty _guiOrderingNumber;
 
     // Transformation defined by translation, rotation and scale
     struct {
@@ -204,25 +204,25 @@ private:
 
     glm::dmat4 _modelTransformCached = glm::dmat4(1.0);
 
-    properties::DoubleProperty _boundingSphere;
-    properties::DoubleProperty _evaluatedBoundingSphere;
-    properties::DoubleProperty _interactionSphere;
-    properties::DoubleProperty _evaluatedInteractionSphere;
-    properties::DoubleProperty _approachFactor;
-    properties::DoubleProperty _reachFactor;
-    properties::BoolProperty _computeScreenSpaceValues;
-    properties::IVec2Property _screenSpacePosition;
-    properties::BoolProperty _screenVisibility;
-    properties::DoubleProperty _distFromCamToNode;
-    properties::DoubleProperty _screenSizeRadius;
-    properties::FloatProperty _visibilityDistance;
-    properties::BoolProperty _supportsDirectInteraction;
+    DoubleProperty _boundingSphere;
+    DoubleProperty _evaluatedBoundingSphere;
+    DoubleProperty _interactionSphere;
+    DoubleProperty _evaluatedInteractionSphere;
+    DoubleProperty _approachFactor;
+    DoubleProperty _reachFactor;
+    BoolProperty _computeScreenSpaceValues;
+    IVec2Property _screenSpacePosition;
+    BoolProperty _screenVisibility;
+    DoubleProperty _distFromCamToNode;
+    DoubleProperty _screenSizeRadius;
+    FloatProperty _visibilityDistance;
+    BoolProperty _supportsDirectInteraction;
 
     // This variable is used for the rate-limiting of the screenspace positions (if they
     // are calculated when _computeScreenSpaceValues is true)
     std::chrono::high_resolution_clock::time_point _lastScreenSpaceUpdateTime;
 
-    properties::BoolProperty _showDebugSphere;
+    BoolProperty _showDebugSphere;
     static ghoul::opengl::ProgramObject* _debugSphereProgram;
 
     std::optional<double> _overrideBoundingSphere;

@@ -43,7 +43,7 @@ namespace ghoul {
 
 namespace openspace {
 
-class LuaConsole : public properties::PropertyOwner {
+class LuaConsole : public PropertyOwner {
 public:
     LuaConsole();
     ~LuaConsole() override = default;
@@ -78,14 +78,14 @@ private:
     void cycleSuggestion();
     void applySuggestion();
 
-    properties::BoolProperty _isVisible;
-    properties::BoolProperty _shouldBeSynchronized;
-    properties::BoolProperty _shouldSendToRemote;
+    BoolProperty _isVisible;
+    BoolProperty _shouldBeSynchronized;
+    BoolProperty _shouldSendToRemote;
 
-    properties::Vec4Property _backgroundColor;
-    properties::Vec4Property _entryTextColor;
-    properties::Vec4Property _historyTextColor;
-    properties::IntProperty _historyLength;
+    Vec4Property _backgroundColor;
+    Vec4Property _entryTextColor;
+    Vec4Property _historyTextColor;
+    IntProperty _historyLength;
 
     Key _commandInputButton = Key::GraveAccent;
 

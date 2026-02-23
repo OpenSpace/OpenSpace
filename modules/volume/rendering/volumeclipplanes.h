@@ -33,9 +33,9 @@
 
 namespace ghoul { class Dictionary; }
 
-namespace openspace::volume {
+namespace openspace {
 
-class VolumeClipPlanes : public properties::PropertyOwner {
+class VolumeClipPlanes : public PropertyOwner {
 public:
     explicit VolumeClipPlanes(const ghoul::Dictionary& dictionary);
     ~VolumeClipPlanes() override = default;
@@ -46,10 +46,10 @@ public:
     std::vector<glm::vec2> offsets();
 
 private:
-    properties::IntProperty _nClipPlanes;
+    IntProperty _nClipPlanes;
     std::vector<VolumeClipPlane> _clipPlanes;
 };
 
-} // namespace openspace::volume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___VOLUMECLIPPLANES___H__

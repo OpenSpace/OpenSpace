@@ -76,12 +76,12 @@ namespace {
         // while constructing Octree later.
         std::optional<ghoul::Dictionary> filterColumnNames;
     };
-#include "readfitstask_codegen.cpp"
 } // namespace
+#include "readfitstask_codegen.cpp"
 
 namespace openspace {
-    
-documentation::Documentation ReadFitsTask::Documentation() {
+
+Documentation ReadFitsTask::Documentation() {
     return codegen::doc<Parameters>("gaiamission_fitsfiletorawdata");
 }
 
@@ -254,7 +254,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
         allInputFiles.erase(allInputFiles.end() - 1);
 
         // Add reading of file to jobmanager, which will distribute it to our threadpool
-        auto readFileJob = std::make_shared<gaia::ReadFileJob>(
+        auto readFileJob = std::make_shared<ReadFileJob>(
             fileToRead,
             _allColumnNames,
             _firstRow,

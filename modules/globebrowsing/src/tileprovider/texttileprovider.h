@@ -35,9 +35,9 @@ namespace ghoul::fontrendering {
     class FontRenderer;
 } // namespace ghoul::fontrendering
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-namespace cache { class MemoryAwareTileCache; }
+class MemoryAwareTileCache;
 
 class TextTileProvider : public TileProvider {
 public:
@@ -59,13 +59,13 @@ protected:
 
     GLuint fbo = 0;
 
-    cache::MemoryAwareTileCache* tileCache;
+    MemoryAwareTileCache* tileCache;
 
 private:
     void internalInitialize() override final;
     void internalDeinitialize() override final;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__TEXTTILEPROVIDER___H__

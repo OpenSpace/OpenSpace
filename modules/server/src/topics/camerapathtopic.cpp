@@ -37,11 +37,11 @@
 #include <cmath>
 #include <string_view>
 
+using nlohmann::json;
+
 namespace {
     constexpr std::string_view SubscribeEvent = "start_subscription";
 } // namespace
-
-using nlohmann::json;
 
 namespace openspace {
 
@@ -86,10 +86,9 @@ bool CameraPathTopic::isDone() const {
 }
 
 void CameraPathTopic::sendCameraPathData() {
-    const interaction::PathNavigator& pathNavigator =
-        global::navigationHandler->pathNavigator();
+    const PathNavigator& pathNavigator = global::navigationHandler->pathNavigator();
 
-    const interaction::Path* path = pathNavigator.currentPath();
+    const Path* path = pathNavigator.currentPath();
 
     if (!path) {
         ghoul_assert(path, "Path must exist");

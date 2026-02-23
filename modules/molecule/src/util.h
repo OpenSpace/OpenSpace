@@ -33,7 +33,7 @@ struct md_gl_representation_t;
 struct md_molecule_t;
 struct md_trajectory_i;
 
-namespace molecule::util {
+namespace molecule {
 
 enum class InterpolationType {
     Nearest,
@@ -52,6 +52,6 @@ void updateRepColor(md_gl_representation_t& rep, const md_molecule_t& mol,
 void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
     InterpolationType interp, double frame, bool ensurePbc = false);
 
-} // namespace molecule::util
+} // namespace molecule
 
 #endif // __OPENSPACE_MODULE_MOLECULE___UTIL___H__
