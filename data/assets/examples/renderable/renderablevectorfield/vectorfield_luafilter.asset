@@ -24,12 +24,15 @@ local Node = {
   Identifier = "RenderableVectorField_Example_LuaFilter",
   Renderable = {
     Type = "RenderableVectorField",
-    VolumeFile = volume .. "vectorfield_16x16x16.bin",
-
-    MinDomain = { -5000.0, -5000.0, -5000.0 },
-    MaxDomain = { 5000.0, 5000.0, 5000.0 },
-    Dimensions = { 16, 16, 16 },
+    Mode = "Volume",
     VectorFieldScale = 8.0,
+
+    Volume = {
+      VolumeFile = volume .. "vectorfield_16x16x16.bin",
+      MinDomain = { -5000.0, -5000.0, -5000.0 },
+      MaxDomain = { 5000.0, 5000.0, 5000.0 },
+      Dimensions = { 16, 16, 16 },
+    },
 
     FilterByLua = true,
     Script = asset.resource("script/filter.lua")
