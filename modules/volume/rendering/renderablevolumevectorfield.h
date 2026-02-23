@@ -28,11 +28,13 @@
 #include <openspace/rendering/renderable.h>
 
 #include <modules/volume/rawvolume.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/dvec3property.h>
 #include <openspace/properties/vector/vec2property.h>
+#include <openspace/properties/vector/vec4property.h>
 #include <openspace/properties/vector/uvec3property.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -81,19 +83,25 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program;
     UniformCache(
-        modelViewProjection, arrowScale, filterOutOfRange, dataRangeFilter, colorByMag,
-        magDomain, colorTexture, opacity
+        modelViewProjection, arrowScale, filterOutOfRange, dataRangeFilter, colorMode,
+        magDomain, colorTexture, opacity, fixedColor
     ) _uniformCache;
+
+    struct ColorSettings : properties::PropertyOwner {
+        explicit ColorSettings(const ghoul::Dictionary& dictionary);
+        properties::OptionProperty colorModeOption;
+        properties::StringProperty colorTexturePath;
+        properties::Vec2Property colorMagnitudeDomain;
+        properties::Vec4Property fixedColor;
+    };
+    ColorSettings _colorSettings;
 
     properties::Vec2Property _dataRange;
     properties::BoolProperty _filterOutOfRange;
-    properties::Vec2Property _magnitudeDomain;
 
     properties::IntProperty _stride;
     properties::FloatProperty _vectorFieldScale;
     properties::FloatProperty _lineWidth;
-    properties::BoolProperty _colorByMagnitude;
-    properties::StringProperty _colorTexturePath;
     bool _computeMagnitudeRange = true;
 
     properties::BoolProperty _filterByLua;

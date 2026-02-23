@@ -33,9 +33,14 @@ out vec4 outColor;
 uniform float opacity;
 uniform vec2 dataRangeFilter;
 uniform bool filterOutOfRange;
-uniform bool colorByMag;
+uniform int colorMode;
 uniform vec2 magDomain;
 uniform sampler1D colorTexture;
+uniform vec4 fixedColor;
+
+const int ColorModeFixed = 0;
+const int ColorModeMagnitude = 1;
+const int ColorModeDirection = 2;
 
 Fragment getFragment() {
   Fragment frag;
@@ -46,20 +51,26 @@ Fragment getFragment() {
 
   bool magnitudeOutOfRange =
     gs_magnitude < dataRangeFilter.x || gs_magnitude > dataRangeFilter.y;
+
   if (filterOutOfRange && magnitudeOutOfRange) {
     discard;
   }
 
-  if (colorByMag) {
+  // vec4 fixedColor = vec4(1.0, 0.0, 0.0, 1.0);
+  if (colorMode == ColorModeFixed) {
+    frag.color = fixedColor;
+  }
+  else if (colorMode == ColorModeMagnitude) {
     float t = (gs_magnitude - magDomain.x) / (magDomain.y - magDomain.x);
     t = clamp(t, 0.0, 1.0);
     frag.color = texture(colorTexture, t);
   }
-  else {
+  else { // colorMode == ColorModeDirection
     vec3 dir = normalize(gs_direction);
     vec3 color = 0.5 * (dir + vec3(1.0)); // remaps [-1, 1] -> [0, 1]
     frag.color = vec4(color, 1.0);
   }
+
   frag.color.a *= opacity;
   frag.depth = gs_positionDepth;
   return frag;

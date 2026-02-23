@@ -42,12 +42,38 @@
 namespace {
     constexpr std::string_view _loggerCat = "RenderableVectorField";
 
+    enum ColorMode {
+        Fixed = 0,
+        Magnitude,
+        Direction
+    };
+
     constexpr openspace::properties::Property::PropertyInfo StrideInfo = {
         "Stride",
         "Stride",
         "Controls how densely vectors are sampled from the volume. A stride of 1 renders "
         "every vector.",
         openspace::properties::Property::Visibility::AdvancedUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo FixedColorInfo = {
+        "FixedColor",
+        "Fixed color",
+        "The color of the vectors, when no color map is used.",
+        openspace::properties::Property::Visibility::NoviceUser
+    };
+
+    constexpr openspace::properties::Property::PropertyInfo ColorModeOptionInfo = {
+        "ColorModeOption",
+        "Color mode option",
+        "Controls how the vectors are colored. \"Fixed\" color all vectors with the same "
+        "static color. \"Magnitude\" color the vector field based on the min and max "
+        "magnitudes defined in the volume. \"Direction\" colors the vector based on "
+        "their direction, as follows:"
+        "+X -> Red, -X -> Cyan"
+        "+Y -> Green, -Y -> Magenta"
+        "+Z -> Blue, -Z -> Yellow",
+        openspace::properties::Property::Visibility::User
     };
 
     constexpr openspace::properties::Property::PropertyInfo VectorFieldScaleInfo = {
@@ -77,14 +103,6 @@ namespace {
         "Filter data range",
         "The data range to use when filtering by data value. Magnitudes outside this "
         "range will be filtered out.",
-        openspace::properties::Property::Visibility::User
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ColorByMagnitudeInfo = {
-        "ColorByMagnitude",
-        "Color by magnitude",
-        "If enabled, color the vector field based on the min and max magnitudes defined"
-        "in the volume.",
         openspace::properties::Property::Visibility::User
     };
 
@@ -121,7 +139,6 @@ namespace {
         openspace::properties::Property::Visibility::AdvancedUser
     };
 
-
     // A RenderableVectorField can be used to render vectors from a given 3D volumetric
     // dataset, optionally including color mapping and custom filtering via Lua script.
     //
@@ -151,6 +168,29 @@ namespace {
         // The dimensions of the volume data.
         glm::ivec3 dimensions;
 
+        struct ColorSettings {
+            enum class [[codegen::map(ColorMode)]] ColorMode {
+                Fixed [[codegen::key("Fixed")]],
+                Magnitude [[codegen::key("Magnitude")]],
+                Direction [[codegen::key("Direction")]]
+            };
+
+            // [[codegen::verbatim(ColorModeOptionInfo.description)]]
+            ColorMode colorMode;
+            // [[codegen::verbatim(FixedColorInfo.description)]]
+            std::optional<glm::vec4> fixedColor [[codegen::color()]];
+
+            // [[codgen::verbatim(ColorTextureInfo.description)]]
+            std::optional<std::filesystem::path> colorMapFile;
+
+            // [[codegen::verbatim(ColorMappingDataRangeInfo.description)]]
+            std::optional<glm::vec2> colorMappingRange;
+        };
+
+        // Settings related to the coloring of the vectors, such as a fixed color,
+        // color map, etc.
+        std::optional<ColorSettings> coloring;
+
         // [[codegen::verbatim(VectorFieldScaleInfo.description)]]
         std::optional<float> vectorFieldScale [[codegen::greater(1.f)]];
 
@@ -162,15 +202,6 @@ namespace {
 
         // [[codegen::verbatim(FilterDataRangeInfo.description)]]
         std::optional<glm::vec2> dataRange;
-
-        // [[codgen::verbatim(ColorByMagnitudeInfo.description)]]
-        std::optional<bool> colorByMagnitude;
-
-        // [[codgen::verbatim(ColorTextureInfo.description)]]
-        std::optional<std::filesystem::path> colorMapFile;
-
-        // [[codegen::verbatim(ColorMappingDataRangeInfo.description)]]
-        std::optional<glm::vec2> colorMappingRange;
 
         // [[codegen::verbatim(FilterByLuaInfo.description)]]
         std::optional<bool> filterByLua;
@@ -187,17 +218,11 @@ documentation::Documentation RenderableVectorField::Documentation() {
     return codegen::doc<Parameters>("volume_renderable_vectorfield");
 }
 
-RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary)
-    : Renderable(dictionary)
-    , _dataRange(
-        FilterDataRangeInfo,
-        glm::vec2(0.f, 1.f),
-        glm::vec2(0.f),
-        glm::vec2(1500.f),
-        glm::vec2(1.f)
-    )
-    , _filterOutOfRange(FilterOutOfRangeInfo, false)
-    , _magnitudeDomain(
+RenderableVectorField::ColorSettings::ColorSettings(const ghoul::Dictionary& dictionary)
+    : properties::PropertyOwner({ "Coloring", "Coloring", "" })
+    , colorModeOption(ColorModeOptionInfo)
+    , colorTexturePath(ColorTextureInfo)
+    , colorMagnitudeDomain(
         ColorMappingDataRangeInfo,
         glm::vec2(
             std::numeric_limits<float>::max(),
@@ -207,23 +232,80 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
         glm::vec2(1500.f),
         glm::vec2(1.f)
     )
+    , fixedColor(FixedColorInfo, glm::vec4(1.f), glm::vec4(0.f), glm::vec4(1.f))
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    colorModeOption.addOption(ColorMode::Fixed, "Fixed");
+    colorModeOption.addOption(ColorMode::Magnitude, "Magnitude");
+    colorModeOption.addOption(ColorMode::Direction, "Direction");
+
+    colorModeOption = ColorMode::Fixed;
+    addProperty(colorModeOption);
+    fixedColor.setViewOption(properties::Property::ViewOptions::Color);
+    addProperty(fixedColor);
+    addProperty(colorTexturePath);
+    addProperty(colorMagnitudeDomain);
+
+    const bool hasColoring = p.coloring.has_value();
+    if (hasColoring) {
+        const Parameters::ColorSettings settings = *p.coloring;
+
+        colorModeOption = codegen::map<ColorMode>(settings.colorMode);
+        fixedColor = settings.fixedColor.value_or(fixedColor);
+        if (settings.colorMapFile.has_value()) {
+            colorTexturePath = settings.colorMapFile->string();
+
+        }
+        colorMagnitudeDomain = settings.colorMappingRange.value_or(
+            colorMagnitudeDomain
+        );
+    }
+}
+
+RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary)
+    , _colorSettings(dictionary)
+    , _dataRange(
+        FilterDataRangeInfo,
+        glm::vec2(0.f, 1.f),
+        glm::vec2(0.f),
+        glm::vec2(1500.f),
+        glm::vec2(1.f)
+    )
+    , _filterOutOfRange(FilterOutOfRangeInfo, false)
     , _stride(StrideInfo, 1, 1, 16)
     , _vectorFieldScale(VectorFieldScaleInfo, 1.f, 1.f, 100.f)
     , _lineWidth(LineWidthInfo, 1.f, 1.f, 10.f)
-    , _colorByMagnitude(ColorByMagnitudeInfo, false)
-    , _colorTexturePath(ColorTextureInfo)
     , _filterByLua(FilterByLuaInfo, false)
     , _luaScriptFile(FilterScriptInfo)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     addProperty(Fadeable::_opacity);
-    //addProperty(Fadeable::_fade);
 
     _sourceFile = p.volumeFile;
     _minDomain = p.minDomain;
     _maxDomain = p.maxDomain;
     _dimensions = p.dimensions;
+
+    addPropertySubOwner(_colorSettings);
+
+    _colorSettings.colorTexturePath.onChange([this]() {
+        if (std::filesystem::exists(_colorSettings.colorTexturePath.value())) {
+            _textureIsDirty = true;
+        }
+        else {
+            LWARNING(std::format("File not found: '{}'",
+                _colorSettings.colorTexturePath.value()
+            ));
+        }
+    });
+
+    const bool hasColoring = p.coloring.has_value();
+    if (hasColoring) {
+        _computeMagnitudeRange = !p.coloring.value().colorMappingRange.has_value();
+    }
 
     _stride = p.stride.value_or(_stride);
     _stride.onChange([this]() {
@@ -239,27 +321,6 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
-
-    _colorTexturePath.onChange([this]() {
-        if (std::filesystem::exists(_colorTexturePath.value())) {
-            _textureIsDirty = true;
-        }
-        else {
-            LWARNING(std::format("File not found: '{}'", _colorTexturePath.value()));
-        }
-    });
-
-    if (p.colorMapFile.has_value()) {
-        _colorTexturePath = p.colorMapFile->string();
-    }
-    addProperty(_colorTexturePath);
-
-    _colorByMagnitude = p.colorByMagnitude.value_or(_colorByMagnitude);
-    addProperty(_colorByMagnitude);
-
-    _magnitudeDomain = p.colorMappingRange.value_or(_magnitudeDomain);
-    _computeMagnitudeRange = !p.colorMappingRange.has_value();
-    addProperty(_magnitudeDomain);
 
     _filterByLua = p.filterByLua.value_or(_filterByLua) && p.script.has_value();
     _filterByLua.onChange([this]() {
@@ -312,8 +373,8 @@ void RenderableVectorField::initialize() {
         _volumeData->forEachVoxel(
             [this](const glm::uvec3&, const VelocityData& data) {
                 float magnitude = glm::length(glm::vec3(data.vx, data.vy, data.vz));
-                const glm::vec2& mag = _magnitudeDomain;
-                _magnitudeDomain = glm::vec2(
+                const glm::vec2& mag = _colorSettings.colorMagnitudeDomain;
+                _colorSettings.colorMagnitudeDomain = glm::vec2(
                     std::min(mag.x, magnitude),
                     std::max(mag.y, magnitude)
                 );
@@ -392,8 +453,6 @@ void RenderableVectorField::deinitializeGL() {
     _vao = 0;
     glDeleteBuffers(1, &_vectorFieldVbo);
     _vectorFieldVbo = 0;
-    //glDeleteBuffers(1, &_arrowVbo);
-    //_arrowVbo = 0;
 
     _colorTexture = nullptr;
 
@@ -423,8 +482,9 @@ void RenderableVectorField::render(const RenderData& data, RendererTasks&) {
     _program->setUniform(_uniformCache.arrowScale, _vectorFieldScale);
     _program->setUniform(_uniformCache.filterOutOfRange, _filterOutOfRange);
     _program->setUniform(_uniformCache.dataRangeFilter, _dataRange);
-    _program->setUniform(_uniformCache.colorByMag, _colorByMagnitude);
-    _program->setUniform(_uniformCache.magDomain, _magnitudeDomain);
+    _program->setUniform(_uniformCache.colorMode, _colorSettings.colorModeOption);
+    _program->setUniform(_uniformCache.fixedColor, _colorSettings.fixedColor);
+    _program->setUniform(_uniformCache.magDomain, _colorSettings.colorMagnitudeDomain);
 
     ghoul::opengl::TextureUnit colorUnit;
     if (_colorTexture) {
@@ -463,14 +523,16 @@ void RenderableVectorField::update(const UpdateData&) {
     if (_textureIsDirty) [[unlikely]] {
         _colorTexture = nullptr;
 
-        if (!_colorTexturePath.value().empty()) {
+        if (!_colorSettings.colorTexturePath.value().empty()) {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorTexturePath),
+                absPath(_colorSettings.colorTexturePath),
                 1
             );
 
             if (_colorTexture) {
-                LDEBUG(std::format("Loaded texture '{}'", _colorTexturePath.value()));
+                LDEBUG(std::format("Loaded texture '{}'",
+                    _colorSettings.colorTexturePath.value()
+                ));
                 _colorTexture->setFilter(
                     ghoul::opengl::Texture::FilterMode::Nearest
                 );
