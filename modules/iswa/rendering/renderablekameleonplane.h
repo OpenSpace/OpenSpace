@@ -53,8 +53,8 @@ public:
     static openspace::Documentation Documentation();
 
 private:
-    bool createGeometry() override;
-    bool destroyGeometry() override;
+    void createGeometry() override;
+    void destroyGeometry() override;
     bool updateTextureResource() override;
     void renderGeometry() const override;
     void setUniforms() override;

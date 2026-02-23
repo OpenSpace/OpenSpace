@@ -37,7 +37,7 @@ public:
     Sphere(const Sphere& cpy);
     ~Sphere();
 
-    bool initialize();
+    void initialize();
 
     void render() const;
 

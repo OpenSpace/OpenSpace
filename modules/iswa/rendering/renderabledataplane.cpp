@@ -88,7 +88,7 @@ void RenderableDataPlane::deinitializeGL() {
     RenderableDataCygnet::deinitializeGL();
 }
 
-bool RenderableDataPlane::createGeometry() {
+void RenderableDataPlane::createGeometry() {
     struct Vertex {
         GLfloat x;
         GLfloat y;
@@ -124,15 +124,11 @@ bool RenderableDataPlane::createGeometry() {
     glEnableVertexArrayAttrib(_vao, 1);
     glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4);
     glVertexArrayAttribBinding(_vao, 1, 0);
-
-    return true;
 }
 
-bool RenderableDataPlane::destroyGeometry() {
+void RenderableDataPlane::destroyGeometry() {
     glDeleteVertexArrays(1, &_vao);
     glDeleteBuffers(1, &_vbo);
-
-    return true;
 }
 
 void RenderableDataPlane::renderGeometry() const {

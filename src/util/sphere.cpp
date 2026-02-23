@@ -135,7 +135,7 @@ Sphere::~Sphere() {
     glDeleteVertexArrays(1, &_vao);
 }
 
-bool Sphere::initialize() {
+void Sphere::initialize() {
     glCreateBuffers(1, &_vbo);
     glNamedBufferStorage(_vbo, _vsize * sizeof(Vertex), _varray, GL_NONE_BIT);
 
@@ -158,8 +158,6 @@ bool Sphere::initialize() {
     glEnableVertexArrayAttrib(_vao, 2);
     glVertexArrayAttribFormat(_vao, 2, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, normal));
     glVertexArrayAttribBinding(_vao, 2, 0);
-
-    return true;
 }
 
 void Sphere::render() const {

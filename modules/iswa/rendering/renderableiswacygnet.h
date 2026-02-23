@@ -85,8 +85,8 @@ protected:
 
     // Subclass interface
     // ==================
-    virtual bool createGeometry() = 0;
-    virtual bool destroyGeometry() = 0;
+    virtual void createGeometry() = 0;
+    virtual void destroyGeometry() = 0;
     virtual void renderGeometry() const = 0;
 
     /**

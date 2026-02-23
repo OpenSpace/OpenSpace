@@ -227,7 +227,7 @@ void RenderableKameleonPlane::initializeGL() {
     updateTextureResource();
 }
 
-bool RenderableKameleonPlane::createGeometry() {
+void RenderableKameleonPlane::createGeometry() {
     struct Vertex {
         glm::vec4 position;
         glm::vec2 texCoords;
@@ -259,15 +259,11 @@ bool RenderableKameleonPlane::createGeometry() {
     glEnableVertexArrayAttrib(_vao, 1);
     glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4);
     glVertexArrayAttribBinding(_vao, 1, 0);
-
-    return true;
 }
 
-bool RenderableKameleonPlane::destroyGeometry() {
+void RenderableKameleonPlane::destroyGeometry() {
     glDeleteVertexArrays(1, &_vao);
     glDeleteBuffers(1, &_vbo);
-
-    return true;
 }
 
 void RenderableKameleonPlane::renderGeometry() const {
