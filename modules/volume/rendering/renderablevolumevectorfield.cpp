@@ -49,22 +49,22 @@ namespace {
         Direction
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StrideInfo = {
+    constexpr openspace::Property::PropertyInfo StrideInfo = {
         "Stride",
         "Stride",
         "Controls how densely vectors are sampled from the volume. A stride of 1 renders "
         "every vector.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FixedColorInfo = {
+    constexpr openspace::Property::PropertyInfo FixedColorInfo = {
         "FixedColor",
         "Fixed color",
         "The color of the vectors, when no color map is used.",
-        openspace::properties::Property::Visibility::NoviceUser
+        openspace::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorModeOptionInfo = {
+    constexpr openspace::Property::PropertyInfo ColorModeOptionInfo = {
         "ColorModeOption",
         "Color mode option",
         "Controls how the vectors are colored. \"Fixed\" color all vectors with the same "
@@ -74,46 +74,46 @@ namespace {
         "+X -> Red, -X -> Cyan"
         "+Y -> Green, -Y -> Magenta"
         "+Z -> Blue, -Z -> Yellow",
-        openspace::properties::Property::Visibility::User
+        openspace::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo VectorFieldScaleInfo = {
+    constexpr openspace::Property::PropertyInfo VectorFieldScaleInfo = {
         "VectorFieldScale",
         "Vector field scale",
         "Scales the vector field lines using an exponential scale.",
-        openspace::properties::Property::Visibility::User
+        openspace::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr openspace::Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the vector lines.",
-        openspace::properties::Property::Visibility::NoviceUser
+        openspace::Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorTextureInfo = {
+    constexpr openspace::Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "Color texture",
         "The path to the texture used to color the vector field.",
-        openspace::properties::Property::Visibility::User
+        openspace::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorMappingDataRangeInfo = {
+    constexpr openspace::Property::PropertyInfo ColorMappingDataRangeInfo = {
         "ColorMappingDataRange",
         "Color mapping data range",
         "The magnitude data range used to normalize the magnitude value for color "
         "lookup. Computed from the volume data if unspecified.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterByLuaInfo = {
+    constexpr openspace::Property::PropertyInfo FilterByLuaInfo = {
         "FilterByLua",
         "Filter by Lua script",
         "If enabled, the vector field is filtered by the provided custom Lua script.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterScriptInfo = {
+    constexpr openspace::Property::PropertyInfo FilterScriptInfo = {
         "FilterScript",
         "Filter script",
         "This value is the path to the Lua script that will be executed to compute the "
@@ -121,7 +121,7 @@ namespace {
         "current voxel position (x, y, z) given in galactic coordinates, and the "
         "velocity vector (vx, vy, vz). The function should return true/false if "
         "the voxel should be visualized or discarded, respectively.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::Property::Visibility::AdvancedUser
     };
 
     // A RenderableVectorField can be used to render vectors from a given 3D volumetric
@@ -237,17 +237,17 @@ namespace {
         // [[codegen::verbatim(FilterScriptInfo.description)]]
         std::optional<std::filesystem::path> script;
     };
-#include "renderablevolumevectorfield_codegen.cpp"
 } // namespace
+#include "renderablevolumevectorfield_codegen.cpp"
 
-namespace openspace::volume {
+namespace openspace {
 
-documentation::Documentation RenderableVectorField::Documentation() {
+Documentation RenderableVectorField::Documentation() {
     return codegen::doc<Parameters>("volume_renderable_vectorfield");
 }
 
 RenderableVectorField::ColorSettings::ColorSettings(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "Coloring", "Coloring", "" })
+    : PropertyOwner({ "Coloring", "Coloring", "" })
     , colorModeOption(ColorModeOptionInfo)
     , colorTexturePath(ColorTextureInfo)
     , colorMagnitudeDomain(
@@ -270,7 +270,7 @@ RenderableVectorField::ColorSettings::ColorSettings(const ghoul::Dictionary& dic
 
     colorModeOption = ColorMode::Fixed;
     addProperty(colorModeOption);
-    fixedColor.setViewOption(properties::Property::ViewOptions::Color);
+    fixedColor.setViewOption(Property::ViewOptions::Color);
     addProperty(fixedColor);
     addProperty(colorTexturePath);
     addProperty(colorMagnitudeDomain);
@@ -429,57 +429,53 @@ void RenderableVectorField::initializeGL() {
         absPath("${MODULE_VOLUME}/shaders/vectorfield_gs.glsl")
     );
 
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vectorFieldVbo);
-
-    glBindVertexArray(_vao);
+    glCreateVertexArrays(1, &_vao);
+    glCreateBuffers(1, &_vectorFieldVbo);
+    glVertexArrayVertexBuffer(_vao, 0, _vectorFieldVbo, 0, sizeof(ArrowInstance));
 
     static_assert(sizeof(ArrowInstance) == 7 * sizeof(float),
         "Vertex layout is not tightly packed!"
     );
 
-    glBindBuffer(GL_ARRAY_BUFFER, _vectorFieldVbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vectorFieldVbo,
         _instances.size() * sizeof(ArrowInstance),
         _instances.data(),
         GL_DYNAMIC_DRAW
     );
 
     // Position
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(ArrowInstance),
-        reinterpret_cast<void*>(offsetof(ArrowInstance, position))
-    );
+    GLuint posAttribLocation = 0;
+    glEnableVertexArrayAttrib(_vao, posAttribLocation);
+    glVertexArrayAttribFormat(_vao, posAttribLocation, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, posAttribLocation, 0);
 
     // Direction
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
+    GLuint dirAttribLocation = 1;
+    glEnableVertexArrayAttrib(_vao, dirAttribLocation);
+    glVertexArrayAttribFormat(
+        _vao,
+        dirAttribLocation,
         3,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(ArrowInstance),
-        reinterpret_cast<void*>(offsetof(ArrowInstance, direction))
+        offsetof(ArrowInstance, direction)
     );
+    glVertexArrayAttribBinding(_vao, dirAttribLocation, 0);
 
     // Magnitude
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(
-        2,
+    GLuint magAttribLocation = 2;
+    glEnableVertexArrayAttrib(_vao, magAttribLocation);
+    glVertexArrayAttribFormat(
+        _vao,
+        magAttribLocation,
         1,
         GL_FLOAT,
         GL_FALSE,
-        sizeof(ArrowInstance),
-        reinterpret_cast<void*>(offsetof(ArrowInstance, magnitude))
+        offsetof(ArrowInstance, magnitude)
     );
+    glVertexArrayAttribBinding(_vao, magAttribLocation, 0);
 
-    glBindVertexArray(0);
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 }
 
@@ -521,8 +517,7 @@ void RenderableVectorField::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit colorUnit;
     if (_colorTexture) {
-        colorUnit.activate();
-        _colorTexture->bind();
+        colorUnit.bind(*_colorTexture);
         _program->setUniform(_uniformCache.colorTexture, colorUnit);
     }
 
@@ -547,9 +542,8 @@ void RenderableVectorField::update(const UpdateData&) {
         }
         applyLuaFilter();
 
-        glBindBuffer(GL_ARRAY_BUFFER, _vectorFieldVbo);
-        glBufferData(
-            GL_ARRAY_BUFFER,
+        glNamedBufferData(
+            _vectorFieldVbo,
             _instances.size() * sizeof(ArrowInstance),
             _instances.data(),
             GL_DYNAMIC_DRAW
@@ -567,22 +561,20 @@ void RenderableVectorField::update(const UpdateData&) {
         _colorTexture = nullptr;
 
         if (!_colorSettings.colorTexturePath.value().empty()) {
+
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_colorSettings.colorTexturePath),
-                1
+                1,
+                ghoul::opengl::Texture::SamplerInit{
+                    .filter = ghoul::opengl::Texture::FilterMode::Nearest,
+                    .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                }
             );
 
             if (_colorTexture) {
                 LDEBUG(std::format("Loaded texture '{}'",
                     _colorSettings.colorTexturePath.value()
                 ));
-                _colorTexture->setFilter(
-                    ghoul::opengl::Texture::FilterMode::Nearest
-                );
-                _colorTexture->setWrapping(
-                    ghoul::opengl::Texture::WrappingMode::ClampToEdge
-                );
-                _colorTexture->uploadTexture();
             }
         }
 
@@ -922,4 +914,4 @@ void RenderableVectorField::loadCSVData(const std::filesystem::path& path) {
     }
 }
 
-} // namespace openspace::volume
+} // namespace openspace

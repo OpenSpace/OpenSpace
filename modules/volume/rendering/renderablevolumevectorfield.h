@@ -40,14 +40,13 @@
 #include <ghoul/opengl/uniformcache.h>
 #include <filesystem>
 
-namespace openspace::documentation { struct Documentation; }
-
 namespace ghoul::opengl {
     class ProgramObject;
     class Texture;
 } // namespace ghoul::opengl
 
-namespace openspace::volume {
+namespace openspace {
+struct Documentation;
 
 class RenderableVectorField : public Renderable {
 public:
@@ -64,7 +63,7 @@ public:
    void render(const RenderData& data, RendererTasks& renderTask) override;
    void update(const UpdateData& data) override;
 
-   static documentation::Documentation Documentation();
+   static openspace::Documentation Documentation();
 
 private:
     enum class Mode {
@@ -120,22 +119,22 @@ private:
         fixedColor
     ) _uniformCache;
 
-    struct ColorSettings : properties::PropertyOwner {
+    struct ColorSettings : PropertyOwner {
         explicit ColorSettings(const ghoul::Dictionary& dictionary);
-        properties::OptionProperty colorModeOption;
-        properties::StringProperty colorTexturePath;
-        properties::Vec2Property colorMagnitudeDomain;
-        properties::Vec4Property fixedColor;
+        OptionProperty colorModeOption;
+        StringProperty colorTexturePath;
+        Vec2Property colorMagnitudeDomain;
+        Vec4Property fixedColor;
         bool computeMagnitudeRange = true;
     };
     ColorSettings _colorSettings;
 
-    properties::IntProperty _stride;
-    properties::FloatProperty _vectorFieldScale;
-    properties::FloatProperty _lineWidth;
+    IntProperty _stride;
+    FloatProperty _vectorFieldScale;
+    FloatProperty _lineWidth;
 
-    properties::BoolProperty _filterByLua;
-    properties::StringProperty _luaScriptFile;
+    BoolProperty _filterByLua;
+    StringProperty _luaScriptFile;
     std::unique_ptr<ghoul::filesystem::File> _luaScriptFileHandle;
 
     ghoul::lua::LuaState _state;
@@ -151,6 +150,6 @@ private:
     bool _textureIsDirty = true;
 };
 
-} // namespace openspace::volume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME_RENDERABLEVECTORFIELD___H__
