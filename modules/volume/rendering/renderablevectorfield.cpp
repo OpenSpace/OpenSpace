@@ -571,11 +571,9 @@ void RenderableVectorField::update(const UpdateData&) {
                 }
             );
 
-            if (_colorTexture) {
-                LDEBUG(std::format("Loaded texture '{}'",
-                    _colorSettings.colorTexturePath.value()
-                ));
-            }
+            LDEBUG(std::format("Loaded texture '{}'",
+                _colorSettings.colorTexturePath.value()
+            ));
         }
 
         _textureIsDirty = false;
