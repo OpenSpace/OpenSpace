@@ -25,7 +25,7 @@
 #include <modules/volume/volumemodule.h>
 
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
-#include <modules/volume/rendering/renderablevolumevectorfield.h>
+#include <modules/volume/rendering/renderablevectorfield.h>
 #include <modules/volume/tasks/generaterawvolumetask.h>
 #include <modules/volume/tasks/generaterawvolumefromfiletask.h>
 #include <openspace/documentation/documentation.h>

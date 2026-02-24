@@ -42,7 +42,7 @@ set(HEADER_FILES
   volumesampler.inl
   volumeutils.h
   rendering/renderabletimevaryingvolume.h
-  rendering/renderablevolumevectorfield.h
+  rendering/renderablevectorfield.h
   rendering/basicvolumeraycaster.h
   rendering/volumeclipplane.h
   rendering/volumeclipplanes.h
@@ -62,7 +62,7 @@ set(SOURCE_FILES
   volumegridtype.cpp
   volumeutils.cpp
   rendering/renderabletimevaryingvolume.cpp
-  rendering/renderablevolumevectorfield.cpp
+  rendering/renderablevectorfield.cpp
   rendering/basicvolumeraycaster.cpp
   rendering/volumeclipplane.cpp
   rendering/volumeclipplanes.cpp

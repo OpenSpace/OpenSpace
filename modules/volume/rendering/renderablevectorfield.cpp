@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/rendering/renderablevolumevectorfield.h>
+#include <modules/volume/rendering/renderablevectorfield.h>
 
 #include <modules/volume/rawvolumereader.h>
 #include <openspace/documentation/documentation.h>
@@ -238,7 +238,7 @@ namespace {
         std::optional<std::filesystem::path> script;
     };
 } // namespace
-#include "renderablevolumevectorfield_codegen.cpp"
+#include "renderablevectorfield_codegen.cpp"
 
 namespace openspace {
 
