@@ -656,11 +656,12 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
 
     if (p.fadeInDistances.has_value()) {
         _fadeInDistances = *p.fadeInDistances;
-        _enableFadeInDistance = true;
         _fadeInDistances.setViewOption(Property::ViewOptions::MinMaxRange);
         addProperty(_fadeInDistances);
-        addProperty(_enableFadeInDistance);
     }
+
+    _enableFadeInDistance = p.enableFadeIn.value_or(_enableFadeInDistance);
+    addProperty(_enableFadeInDistance);
 
     _queuedOtherData = p.otherData.value_or(_queuedOtherData);
     _staticFilterValue = p.staticFilter;
