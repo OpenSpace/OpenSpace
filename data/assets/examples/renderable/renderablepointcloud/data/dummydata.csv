@@ -1,3 +1,6 @@
+# A dummy dataset with an xyz position and velocity components (vx vy vz) plus some random
+# data columns. The last two columns has data values with either missing values or Nan
+# values (which can be handled seprately when color mapping).
 x,y,z,vx,vy,vz,a,b,normaldist_withMissing,number_withNan
 -13629320,-44412301,-24435893,-377.269505,-161.047656,282.848273,-96.934827,15.859936,,nan
 10993567,30395576,-33872508,-2.150578,217.111173,-176.276536,-38.387900,145.607739,0.015114,22
