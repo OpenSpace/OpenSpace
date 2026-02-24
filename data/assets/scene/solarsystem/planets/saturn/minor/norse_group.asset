@@ -2557,94 +2557,6 @@ local FornjotLabel = {
   }
 }
 
-local Skadi = {
-  Identifier = "Skadi",
-  Parent = transforms.SaturnBarycenter.Identifier,
-  Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = kernels454.ID.Skadi,
-      Observer = coreKernels.ID.SaturnBarycenter
-    }
-  },
-  Renderable = {
-    Type = "RenderableGlobe",
-    Radii = { 8000, 8000, 8000 }
-  },
-  Tag = {
-    "moon_solarSystem",
-    "moon_giants",
-    "moon_saturn",
-    "moon_norse",
-    "moon_minor",
-    "moon_minor_saturn"
-  },
-  GUI = {
-    Name = "Skadi",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skadi"
-  }
-}
-
-local SkadiTrail = {
-  Identifier = "SkadiTrail",
-  Parent = transforms.SaturnBarycenter.Identifier,
-  Renderable = {
-    Type = "RenderableTrailOrbit",
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = kernels454.ID.Skadi,
-      Observer = coreKernels.ID.SaturnBarycenter
-    },
-    Color = { 0.5, 0.3, 0.3 },
-    Period = 728.2,
-    Resolution = 1000
-  },
-  Tag = {
-    "moonTrail_solarSystem",
-    "moonTrail_giants",
-    "moonTrail_saturn",
-    "moonTrail_norse",
-    "moonTrail_minor",
-    "moonTrail_minor_saturn"
-  },
-  GUI = {
-    Name = "Skadi Trail",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skadi",
-    Focusable = false
-  }
-}
-
-local SkadiLabel = {
-  Identifier = "SkadiLabel",
-  Parent = Skadi.Identifier,
-  Renderable = {
-    Type = "RenderableLabel",
-    Enabled = false,
-    Text = "Skadi",
-    FontSize = 70.0,
-    Size = 7.1,
-    MinMaxSize = { 1, 25 },
-    OrientationOption = "Camera View Direction",
-    BlendMode = "Additive",
-    EnableFading = true,
-    FadeUnit = "Gm",
-    FadeDistances = { 1.25, 90.0 },
-    FadeWidths = { 0.25, 90.0 }
-  },
-  Tag = {
-    "solarsystem_labels",
-    "moon_labels",
-    "minor_moon_labels",
-    "minor_moon_labels_saturn",
-    "minor_moon_labels_norse"
-  },
-  GUI = {
-    Name = "Skadi Label",
-    Path = "/Solar System/Planets/Saturn/Minor Moons/Norse Group/Skadi",
-    Focusable = false
-  }
-}
-
 local Gridr = {
   Identifier = "Gridr",
   Parent = transforms.SaturnBarycenter.Identifier,
@@ -4259,10 +4171,6 @@ asset.onInitialize(function()
   openspace.addSceneGraphNode(FornjotTrail)
   openspace.addSceneGraphNode(FornjotLabel)
 
-  openspace.addSceneGraphNode(Skadi)
-  openspace.addSceneGraphNode(SkadiTrail)
-  openspace.addSceneGraphNode(SkadiLabel)
-
   openspace.addSceneGraphNode(Gridr)
   openspace.addSceneGraphNode(GridrTrail)
   openspace.addSceneGraphNode(GridrLabel)
@@ -4400,10 +4308,6 @@ asset.onDeinitialize(function()
   openspace.removeSceneGraphNode(GridrLabel)
   openspace.removeSceneGraphNode(GridrTrail)
   openspace.removeSceneGraphNode(Gridr)
-
-  openspace.removeSceneGraphNode(SkadiLabel)
-  openspace.removeSceneGraphNode(SkadiTrail)
-  openspace.removeSceneGraphNode(Skadi)
 
   openspace.removeSceneGraphNode(FornjotLabel)
   openspace.removeSceneGraphNode(FornjotTrail)
@@ -4637,10 +4541,6 @@ asset.export(LogeLabel)
 asset.export(Fornjot)
 asset.export(FornjotTrail)
 asset.export(FornjotLabel)
-
-asset.export(Skadi)
-asset.export(SkadiTrail)
-asset.export(SkadiLabel)
 
 asset.export(Gridr)
 asset.export(GridrTrail)
