@@ -79,12 +79,6 @@ void PropertyTreeTopic::handleJson(const nlohmann::json& json) {
     const std::string& event = json.at("event").get<std::string>();
 
     if (event == StartSubscription) {
-        nlohmann::json data = {
-            { "event", "root" },
-            { "payload", global::rootPropertyOwner }
-        };
-
-        _connection->sendJson(wrappedPayload(data));
         _isSubscribedTo = true;
         _requestedResourceIsSubscribable = true;
     }
