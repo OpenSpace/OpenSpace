@@ -33,63 +33,65 @@
 #include <filesystem>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ColorMapping";
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Color map enabled",
         "Decides if the color mapping should be used or not.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FileInfo = {
+    constexpr Property::PropertyInfo FileInfo = {
         "File",
         "Color map file",
         "The path to the color map file to use. Should be a .cmap file",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ParameterInfo = {
+    constexpr Property::PropertyInfo ParameterInfo = {
         "Parameter",
         "Parameter",
         "The paramenter in the dataset to use for the color mapping. On change, the "
         "value range to used for the mapping will also be changed.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RangeInfo = {
+    constexpr Property::PropertyInfo RangeInfo = {
         "ValueRange",
         "Value range",
         "The range of values to use in the color mapping. The lowest value will be "
         "mapped to the first color in the color map.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SetRangeFromDataInfo = {
+    constexpr Property::PropertyInfo SetRangeFromDataInfo = {
         "SetRangeFromData",
         "Set data range from data",
         "Set the data range for the color mapping based on the available data for the "
         "curently selected data column.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HideOutsideInfo = {
+    constexpr Property::PropertyInfo HideOutsideInfo = {
         "HideValuesOutsideRange",
         "Hide values outside range",
         "If true, points with values outside the provided range for the coloring will be "
         "hidden, i.e. not rendered at all.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseNoDataColorInfo = {
+    constexpr Property::PropertyInfo UseNoDataColorInfo = {
         "ShowMissingData",
         "Show missing data",
         "If true, use a separate color (see NoDataColor) for items with values "
         "corresponding to missing data values.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NoDataColorInfo = {
+    constexpr Property::PropertyInfo NoDataColorInfo = {
         "NoDataColor",
         "No data color",
         "The color to use for items with values corresponding to missing data values, "
@@ -97,20 +99,20 @@ namespace {
         "value overrides any value in the color map. If a color value for the below "
         "range values is provided, the ShowMissingData property will automatically be "
         "set to true.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseAboveRangeColorInfo = {
+    constexpr Property::PropertyInfo UseAboveRangeColorInfo = {
         "UseAboveRangeColor",
         "Use above range color",
         "If true, use a separate color (see AboveRangeColor) for items with values "
         "larger than the one in the provided data range. Otherwise, the values will "
         "be clamped to use the color at the upper limit of the color map. If a color is "
         "provided in the color map, this value will automatically be set to true.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AboveRangeColorInfo = {
+    constexpr Property::PropertyInfo AboveRangeColorInfo = {
         "AboveRangeColor",
         "Above range color",
         "The color to use for items with values larger than the one in the provided "
@@ -118,20 +120,20 @@ namespace {
         "setting this value overrides any value in the color map. If a color value for "
         "the above range values is provided, the UseAboveRangeColor property will "
         "automatically be set to true.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseBelowRangeColorInfo = {
+    constexpr Property::PropertyInfo UseBelowRangeColorInfo = {
         "UseBelowRangeColor",
         "Use below range color",
         "If true, use a separate color (see BelowRangeColor) for items with values "
         "smaller than the one in the provided data range. Otherwise, the values will "
         "be clamped to use the color at the lower limit of the color map. If a color is "
         "provided in the color map, this value will automatically be set to true.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BelowRangeColorInfo = {
+    constexpr Property::PropertyInfo BelowRangeColorInfo = {
         "BelowRangeColor",
         "Below range color",
         "The color to use for items with values smaller than the one in the provided "
@@ -139,14 +141,14 @@ namespace {
         "setting this value overrides any value in the color map. If a color value for "
         "the below range values is provided, the UseBelowRangeColor property will "
         "automatically be set to true.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InvertColorMapInfo = {
+    constexpr Property::PropertyInfo InvertColorMapInfo = {
         "Invert",
         "Invert color map",
         "If true, the colors of the color map will be read in the inverse order.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This component handles settings for dynamic color mapping of data points based on
@@ -227,17 +229,17 @@ namespace {
         // [[codegen::verbatim(InvertColorMapInfo.description)]]
         std::optional<bool> invert;
     };
+} // namespace
 #include "colormappingcomponent_codegen.cpp"
-}  // namespace
 
 namespace openspace {
 
-documentation::Documentation ColorMappingComponent::Documentation() {
+Documentation ColorMappingComponent::Documentation() {
     return codegen::doc<Parameters>("colormappingcomponent");
 }
 
 ColorMappingComponent::ColorMappingComponent()
-    : properties::PropertyOwner({ "ColorMapping", "Color Mapping", "" })
+    : PropertyOwner({ "ColorMapping", "Color Mapping", "" })
     , enabled(EnabledInfo, true)
     , invert(InvertColorMapInfo, false)
     , dataColumn(ParameterInfo)
@@ -281,15 +283,15 @@ ColorMappingComponent::ColorMappingComponent()
 
     addProperty(hideOutsideRange);
     addProperty(useNanColor);
-    nanColor.setViewOption(properties::Property::ViewOptions::Color);
+    nanColor.setViewOption(Property::ViewOptions::Color);
     addProperty(nanColor);
 
     addProperty(useAboveRangeColor);
-    aboveRangeColor.setViewOption(properties::Property::ViewOptions::Color);
+    aboveRangeColor.setViewOption(Property::ViewOptions::Color);
     addProperty(aboveRangeColor);
 
     addProperty(useBelowRangeColor);
-    belowRangeColor.setViewOption(properties::Property::ViewOptions::Color);
+    belowRangeColor.setViewOption(Property::ViewOptions::Color);
     addProperty(belowRangeColor);
 }
 
@@ -390,32 +392,31 @@ void ColorMappingComponent::initializeTexture() {
     const unsigned int width = static_cast<unsigned int>(_colorMap.entries.size());
     const unsigned int height = 1;
     const unsigned int size = width * height;
-    std::vector<GLubyte> img;
+    std::vector<std::byte> img;
     img.reserve(size * 4);
 
     for (const glm::vec4& c : _colorMap.entries) {
-        img.push_back(static_cast<GLubyte>(255 * c.r));
-        img.push_back(static_cast<GLubyte>(255 * c.g));
-        img.push_back(static_cast<GLubyte>(255 * c.b));
-        img.push_back(static_cast<GLubyte>(255 * c.a));
+        img.push_back(static_cast<std::byte>(255 * c.r));
+        img.push_back(static_cast<std::byte>(255 * c.g));
+        img.push_back(static_cast<std::byte>(255 * c.b));
+        img.push_back(static_cast<std::byte>(255 * c.a));
     }
 
-    _texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(width, height, 1),
-        GL_TEXTURE_1D,
-        ghoul::opengl::Texture::Format::RGBA
-
-    );
-
     // TODO: update this for linear mapping?
-    _texture->setFilter(ghoul::opengl::Texture::FilterMode::Nearest);
-    _texture->setWrapping(ghoul::opengl::Texture::WrappingMode::ClampToEdge);
-    _texture->setPixelData(
-        reinterpret_cast<char*>(img.data()),
-        ghoul::opengl::Texture::TakeOwnership::No
+    _texture = std::make_unique<ghoul::opengl::Texture>(
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(width, height, 1),
+            // @TODO (2026-02-18, abock): This was 1D before. Is this correct?
+            .type = GL_TEXTURE_1D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_UNSIGNED_BYTE
+        },
+        ghoul::opengl::Texture::SamplerInit{
+            .filter = ghoul::opengl::Texture::FilterMode::Nearest,
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+        },
+        img.data()
     );
-
-    _texture->uploadTexture();
 }
 
 void ColorMappingComponent::update(const dataloader::Dataset& dataset, bool useCaching) {
@@ -466,7 +467,7 @@ void ColorMappingComponent::initializeParameterData(const dataloader::Dataset& d
     }
 
     // Initialize empty ranges based on values in the dataset
-    for (const properties::OptionProperty::Option& option : dataColumn.options()) {
+    for (const OptionProperty::Option& option : dataColumn.options()) {
         const int optionIndex = option.value;
         const int colorParameterIndex = dataset.index(option.description);
 

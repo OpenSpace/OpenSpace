@@ -27,7 +27,7 @@
 
 #include <string>
 
-namespace openspace::fls { // (F)ield(L)ines(S)equence
+namespace openspace { // (F)ield(L)ines(S)equence
 
 enum class Model : int {
     Batsrus = 0,
@@ -43,6 +43,6 @@ constexpr float AuToMeter = 149597870700.f; // Astronomical Units
 constexpr float ReToMeter = 6371000.f; // Earth radius
 constexpr float RsToMeter = 695700000.f; // Sun radius
 
-} // namespace openspace::fls
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_FIELDLINESSEQUENCE___COMMONS___H__

@@ -24,22 +24,28 @@
 
 #version __CONTEXT__
 
-in vec3 in_position;
-in vec3 in_bvLumAbsMag;
-in vec3 in_velocity;
-in float in_speed;
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec3 in_bvLumAbsMag;
+layout(location = 2) in vec3 in_velocity;
+layout(location = 3) in float in_speed;
+layout(location = 4) in float in_otherData;
 
-out vec3 vs_bvLumAbsMag;
-out vec3 vs_velocity;
-out float vs_speed;
+out Data {
+  vec3 bvLumAbsMag;
+  vec3 velocity;
+  float speed;
+  float otherData;
+} out_data;
 
 uniform int useProperMotion;
 uniform float diffTime;
 
+
 void main() {
-  vs_bvLumAbsMag = in_bvLumAbsMag;
-  vs_velocity = in_velocity;
-  vs_speed = in_speed;
+  out_data.bvLumAbsMag = in_bvLumAbsMag;
+  out_data.velocity = in_velocity;
+  out_data.speed = in_speed;
+  out_data.otherData = in_otherData;
 
   if (useProperMotion == 1) {
     // 1000 to get from km/s to m/s
@@ -50,5 +56,4 @@ void main() {
   else {
     gl_Position = vec4(in_position, 1.0);
   }
-
 }

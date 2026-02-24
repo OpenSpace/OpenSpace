@@ -33,7 +33,7 @@
 
 namespace ghoul::opengl { class Texture; }
 
-namespace openspace::volume {
+namespace openspace {
 
 template <typename Type>
 class TextureSliceVolumeReader {
@@ -58,7 +58,7 @@ private:
     bool _isInitialized = false;
 };
 
-} // namespace openspace::volume
+} // namespace openspace
 
 #include "textureslicevolumereader.inl"
 

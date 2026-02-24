@@ -37,7 +37,7 @@ public:
 
     void update(const UpdateData& data) override;
     glm::dvec3 position(const UpdateData& data) const override;
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     std::vector<ghoul::mm_unique_ptr<Translation>> _translations;

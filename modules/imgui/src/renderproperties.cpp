@@ -64,7 +64,9 @@
 #include <vector>
 
 namespace {
-    void renderTooltip(openspace::properties::Property* prop, float delay) {
+    using namespace openspace;
+
+    void renderTooltip(Property* prop, float delay) {
         if (ImGui::IsItemHovered() && (GImGui->HoveredIdTimer > delay)) {
             ImGui::BeginTooltip();
             if (!prop->description().empty()) {
@@ -78,15 +80,13 @@ namespace {
     }
 
     void executeSetPropertyScript(std::string_view id, const std::string& value) {
-        openspace::global::scriptEngine->queueScript(
+        global::scriptEngine->queueScript(
             std::format("openspace.setPropertyValueSingle('{}', {});", id, value)
         );
     }
 } // namespace
 
 namespace openspace {
-
-using namespace properties;
 
 void renderBoolProperty(Property* prop, const std::string& ownerName,
                         ShowToolTip showTooltip, float tooltipDelay)
@@ -314,7 +314,7 @@ void renderStringListProperty(Property* prop, const std::string& ownerName,
     ImGui::PopID();
 }
 
-void renderDoubleProperty(properties::Property* prop, const std::string& ownerName,
+void renderDoubleProperty(Property* prop, const std::string& ownerName,
                           ShowToolTip showTooltip, float tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");

@@ -38,59 +38,61 @@
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "GlobeRotation";
 
-    constexpr openspace::properties::Property::PropertyInfo GlobeInfo = {
+    constexpr Property::PropertyInfo GlobeInfo = {
         "Globe",
         "Attached globe",
         "The node on which the longitude/latitude is specified. If the node is a globe, "
         "the correct height information for the globe is used. Otherwise, the position "
         "is specified based on the longitude and latitude on the node's interaction "
         "sphere",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LatitudeInfo = {
+    constexpr Property::PropertyInfo LatitudeInfo = {
         "Latitude",
         "Latitude",
         "The latitude of the location on the globe's surface. The value can range from "
         "-90 to 90, with negative values representing the southern hemisphere of the "
         "globe.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LongitudeInfo = {
+    constexpr Property::PropertyInfo LongitudeInfo = {
         "Longitude",
         "Longitude",
         "The longitude of the location on the globe's surface. The value can range from "
         "-180 to 180, with negative values representing the western hemisphere of the "
         "globe.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AngleInfo = {
+    constexpr Property::PropertyInfo AngleInfo = {
         "Angle",
         "Angle",
         "A rotation angle (in degrees) that can be used to rotate the object around its "
         "own y-axis, which will be pointing out of the globe's surface.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseHeightmapInfo = {
+    constexpr Property::PropertyInfo UseHeightmapInfo = {
         "UseHeightmap",
         "Use heightmap",
         "If set to true, the heightmap will be used when computing the surface normal. "
         "This means that the object will be rotated to lay flat on the surface at the "
         "given coordinate and follow the shape of the landscape.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseCameraInfo = {
+    constexpr Property::PropertyInfo UseCameraInfo = {
         "UseCamera",
         "Use camera",
         "If this value is 'true', the latitute and longitude are updated each frame "
         "to match the location of the camera.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `Rotation` orients the scene graph node in such a way that the y-axis points
@@ -117,12 +119,12 @@ namespace {
         // [[codegen::verbatim(UseCameraInfo.description)]]
         std::optional<bool> useCamera;
     };
-#include "globerotation_codegen.cpp"
 } // namespace
+#include "globerotation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation GlobeRotation::Documentation() {
+Documentation GlobeRotation::Documentation() {
     return codegen::doc<Parameters>("base_rotation_globerotation");
 }
 
@@ -275,4 +277,4 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
     return _matrix;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

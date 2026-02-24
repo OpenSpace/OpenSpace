@@ -24,78 +24,75 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 layout(lines_adjacency) in;
-in vec4 vs_color[];
+in Data {
+  vec4 color;
+} in_data[];
 
 layout(triangle_strip, max_vertices = 4) out;
-out vec4 gs_color;
-out vec4 gs_position;
-out vec3 gs_normal;
+out Data {
+  vec4 position;
+  vec4 color;
+  vec3 normal;
+} out_data;
 
 uniform mat4 modelViewProjection;
 uniform mat4 modelTransform;
 uniform vec3 cameraViewDir;
 
 
-
 // Calculate the correct powerscaled position and depth for the ABuffer
-void ABufferEmitVertex(vec4 pos) {
-  // calculate psc position
-  vec4 tmp = pos;
-  vec4 position = pscTransform(tmp, modelTransform);
-  gs_position = tmp;
-
-  // project the position to view space
-  position =  modelViewProjection*position;
-  gl_Position = z_normalization(position);
+void emitVertex(vec4 pos) {
+  vec4 position = pscTransform(pos, modelTransform);
+  out_data.position = pos;
+  gl_Position = z_normalization(modelViewProjection * position);
   EmitVertex();
 }
 
 
 // Original code from http://prideout.net/blog/?p=61
 void main() {
-  gs_color = vs_color[0];
+  out_data.color = in_data[0].color;
 
   // Get the current and adjacent vertex positions and calculate help vectors u and v
-  vec3 p0, p1, p2, p3;
-  p0 = gl_in[0].gl_Position.xyz; p1 = gl_in[1].gl_Position.xyz;
-  p2 = gl_in[2].gl_Position.xyz; p3 = gl_in[3].gl_Position.xyz;
+  vec3 p0 = gl_in[0].gl_Position.xyz;
+  vec3 p1 = gl_in[1].gl_Position.xyz;
+  vec3 p2 = gl_in[2].gl_Position.xyz;
+  vec3 p3 = gl_in[3].gl_Position.xyz;
   vec3 n0 = normalize(p1 - p0);
   vec3 n1 = normalize(p2 - p1);
   vec3 n2 = normalize(p3 - p2);
   vec3 u = normalize(n0 + n1);
   vec3 v = normalize(n1 + n2);
 
-  float EARTH_RADIUS = 6371000.0;
-  float width = 0.1 * EARTH_RADIUS;
+  const float EarthRadius = 6371000.0;
+  float width = 0.1 * EarthRadius;
 
   // Calculate normals for all 4 new vertices
-  vec3 normals[4];
-  normals[0] = normalize(cross(cameraViewDir,u));
-  normals[1] = -normals[0];
-  normals[3] = normalize(cross(cameraViewDir,v));
-  normals[2] = -normals[3];
+  vec3 normals0 = normalize(cross(cameraViewDir, u));
+  vec3 normals1 = -normals0;
+  vec3 normals3 = normalize(cross(cameraViewDir, v));
+  vec3 normals2 = -normals3;
 
   // Calculate positions for the new vertices
-  vec4 prismoid[4];
-  prismoid[0] = vec4(p1 + normals[0] * width, 0.0);
-  prismoid[1] = vec4(p1 + normals[1] * width, 0.0);
-  prismoid[2] = vec4(p2 + normals[2] * width, 0.0);
-  prismoid[3] = vec4(p2 + normals[3] * width, 0.0);
+  vec4 prismoid0 = vec4(p1 + normals0 * width, 0.0);
+  vec4 prismoid1 = vec4(p1 + normals1 * width, 0.0);
+  vec4 prismoid2 = vec4(p2 + normals2 * width, 0.0);
+  vec4 prismoid3 = vec4(p2 + normals3 * width, 0.0);
 
   // Send normals and verticies to fragment shader
-  gs_normal = normals[0];
-  ABufferEmitVertex(prismoid[0]);
+  out_data.normal = normals0;
+  emitVertex(prismoid0);
 
-  gs_normal = normals[1];
-  ABufferEmitVertex(prismoid[1]);
+  out_data.normal = normals1;
+  emitVertex(prismoid1);
 
-  gs_normal = normals[3];
-  ABufferEmitVertex(prismoid[3]);
+  out_data.normal = normals3;
+  emitVertex(prismoid3);
 
-  gs_normal = normals[2];
-  ABufferEmitVertex(prismoid[2]);
+  out_data.normal = normals2;
+  emitVertex(prismoid2);
   EndPrimitive();
 }

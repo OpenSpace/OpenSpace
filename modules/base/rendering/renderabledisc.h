@@ -49,7 +49,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     virtual void initializeShader();
@@ -57,9 +57,9 @@ protected:
 
     virtual float planeSize() const;
 
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::FloatProperty _width;
+    StringProperty _texturePath;
+    FloatProperty _size;
+    FloatProperty _width;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
 

@@ -33,7 +33,7 @@
 #include <string>
 #include <string_view>
 
-namespace openspace::interaction {
+namespace openspace {
 
 /**
  * Actions that any button of a websocket can have. Each button must be in one of these
@@ -70,13 +70,13 @@ struct WebsocketInputState {
     int nAxes = 0;
     /// The values for each axis. Each value is in the range [-1, 1]. Only the first
     /// `nAxes` values are defined values, the rest are undefined
-    std::array<float, MaxAxes> axes;
+    std::array<float, MaxAxes> axes = {};
 
     /// The number of buttons that this websocket possesses
     int nButtons = 0;
     /// The status of each button. Only the first `nButtons` values are defined, the rest
     /// are undefined
-    std::array<WebsocketAction, MaxButtons> buttons;
+    std::array<WebsocketAction, MaxButtons> buttons = {};
 };
 
 /// The maximum number of websockets that are supported by this system. This number is
@@ -112,28 +112,27 @@ struct WebsocketInputStates : public std::unordered_map<size_t, WebsocketInputSt
     bool button(int button, WebsocketAction action) const;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 namespace ghoul {
 
 template <>
-inline std::string to_string(const openspace::interaction::WebsocketAction& action) {
+inline std::string to_string(const openspace::WebsocketAction& action) {
     switch (action) {
-        case openspace::interaction::WebsocketAction::Idle:    return "Idle";
-        case openspace::interaction::WebsocketAction::Press:   return "Press";
-        case openspace::interaction::WebsocketAction::Repeat:  return "Repeat";
-        case openspace::interaction::WebsocketAction::Release: return "Release";
-        default:                                             throw MissingCaseException();
+        case openspace::WebsocketAction::Idle:    return "Idle";
+        case openspace::WebsocketAction::Press:   return "Press";
+        case openspace::WebsocketAction::Repeat:  return "Repeat";
+        case openspace::WebsocketAction::Release: return "Release";
+        default:                                  throw MissingCaseException();
     }
 }
 
 template <>
-constexpr openspace::interaction::WebsocketAction from_string(std::string_view string) {
-    if (string == "Idle") { return openspace::interaction::WebsocketAction::Idle; }
-    if (string == "Press") { return openspace::interaction::WebsocketAction::Press; }
-    if (string == "Repeat") { return openspace::interaction::WebsocketAction::Repeat; }
-    if (string == "Release") { return openspace::interaction::WebsocketAction::Release; }
-
+constexpr openspace::WebsocketAction from_string(std::string_view string) {
+    if (string == "Idle") { return openspace::WebsocketAction::Idle; }
+    else if (string == "Press") { return openspace::WebsocketAction::Press; }
+    else if (string == "Repeat") { return openspace::WebsocketAction::Repeat; }
+    else if (string == "Release") { return openspace::WebsocketAction::Release; }
     throw RuntimeError("Unknown action '" + std::string(string) + "'");
 }
 

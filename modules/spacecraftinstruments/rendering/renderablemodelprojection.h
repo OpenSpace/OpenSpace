@@ -51,7 +51,7 @@ public:
 
     ghoul::opengl::Texture& baseTexture() const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     glm::mat4 attitudeParameters(double time, const glm::vec3& up);
@@ -66,11 +66,11 @@ private:
         projectionTexture) _mainUniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _fboProgramObject;
-    UniformCache(projectionTexture, depthTexture, needShadowMap, ProjectorMatrix,
-        ModelTransform, boresight) _fboUniformCache;
+    UniformCache(projectionTexture, depthTexture, needShadowMap, projectorMatrix,
+        modelTransform, boresight) _fboUniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _depthFboProgramObject;
-    UniformCache(ProjectorMatrix, ModelTransform) _depthFboUniformCache;
+    UniformCache(projectorMatrix, modelTransform) _depthFboUniformCache;
 
     std::unique_ptr<ghoul::modelgeometry::ModelGeometry> _geometry;
     double _modelScale = 1.0;
@@ -87,7 +87,7 @@ private:
     bool _shouldCapture = false;
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
-    properties::BoolProperty _performShading;
+    BoolProperty _performShading;
 };
 
 } // namespace openspace

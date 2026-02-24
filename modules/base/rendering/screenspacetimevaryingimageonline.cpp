@@ -35,20 +35,23 @@
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <fstream>
 #include <iterator>
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ScreenSpaceTimeVaryingImageOnline";
 
-    constexpr openspace::properties::Property::PropertyInfo FileInfo = {
+    constexpr Property::PropertyInfo FileInfo = {
         "FilePath",
         "File path",
         "The file path to the data containing information about when to display which "
         "image.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `ScreenSpaceRenderable` displays an image based on the current in-game
@@ -67,12 +70,12 @@ namespace {
         // [[codegen::verbatim(FileInfo.description)]]
         std::filesystem::path filePath;
     };
-#include "screenspacetimevaryingimageonline_codegen.cpp"
 } // namespace
+#include "screenspacetimevaryingimageonline_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
+Documentation ScreenSpaceTimeVaryingImageOnline::Documentation() {
     return codegen::doc<Parameters>("base_screenspace_time_varying_image_online");
 }
 
@@ -180,28 +183,26 @@ void ScreenSpaceTimeVaryingImageOnline::update() {
         }
 
         try {
-            std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::TextureReader::ref().loadTexture(
-                    reinterpret_cast<void*>(imageFile.buffer),
-                    imageFile.size,
-                    2,
-                    imageFile.format
-                );
+            // @TODO (2026-02-18, abock): This code was settings the swizzle mask only if
+            //                            the returned image was having a single Red
+            //                            channel. This can't currently be expressed
+            //                            unfortunately
+            ghoul::opengl::Texture::SamplerInit samplerInit = {
+                // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+                //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
+                .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
+                //.swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
+            };
 
-            if (texture) {
-                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            _texture = ghoul::io::TextureReader::ref().loadTexture(
+                reinterpret_cast<void*>(imageFile.buffer),
+                imageFile.size,
+                2,
+                samplerInit,
+                imageFile.format
+            );
 
-                if (texture->format() == ghoul::opengl::Texture::Format::Red) {
-                    texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
-                }
-
-                texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                texture->purgeFromRAM();
-
-                _texture = std::move(texture);
-                _objectSize = _texture->dimensions();
-            }
+            _objectSize = _texture->dimensions();
         }
         catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
             LERRORC(e.component, e.message);
@@ -240,9 +241,9 @@ void ScreenSpaceTimeVaryingImageOnline::loadImage(const std::string& imageUrl) {
     );
 }
 
-void ScreenSpaceTimeVaryingImageOnline::bindTexture() {
+void ScreenSpaceTimeVaryingImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture) [[likely]] {
-        _texture->bind();
+        unit.bind(*_texture);
     }
 }
 

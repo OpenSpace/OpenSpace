@@ -39,55 +39,57 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
         "The number of segments the shape of the prism should have.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LinesInfo = {
+    constexpr Property::PropertyInfo LinesInfo = {
         "NumLines",
         "Number of lines",
         "The number of lines connecting the two shapes of the prism. They will be evenly "
         "distributed around the bounding circle that makes up the shape of the prism.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
+    constexpr Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
         "The radius of the prism's shape in meters.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BaseRadiusInfo = {
+    constexpr Property::PropertyInfo BaseRadiusInfo = {
         "BaseRadius",
         "Base radius",
         "The radius of the base of the prism's shape, in meters. By default it is given "
         "the same radius as the outer shape.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the lines. The larger number, the thicker the lines.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+    constexpr Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "The RGB color of the line.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LengthInfo = {
+    constexpr Property::PropertyInfo LengthInfo = {
         "Length",
         "Length",
         "The length of the prism in meters.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderablePrism)]] Parameters {
@@ -112,12 +114,12 @@ namespace {
         // [[codegen::verbatim(LengthInfo.description)]]
         std::optional<float> length;
     };
-#include "renderableprism_codegen.cpp"
 } // namespace
+#include "renderableprism_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePrism::Documentation() {
+Documentation RenderablePrism::Documentation() {
     return codegen::doc<Parameters>("base_renderable_prism");
 }
 
@@ -155,7 +157,7 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
-    _lineColor.setViewOption(properties::Property::ViewOptions::Color);
+    _lineColor.setViewOption(Property::ViewOptions::Color);
     _lineColor = p.color.value_or(_lineColor);
     addProperty(_lineColor);
 
@@ -171,10 +173,6 @@ bool RenderablePrism::isReady() const {
     return _shader != nullptr;
 }
 
-void RenderablePrism::initialize() {
-    updateVertexData();
-}
-
 void RenderablePrism::initializeGL() {
     _shader = global::renderEngine->buildRenderProgram(
         "PrismProgram",
@@ -183,38 +181,27 @@ void RenderablePrism::initializeGL() {
     );
     ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 
-    glGenVertexArrays(1, &_vaoId);
-    glGenBuffers(1, &_vboId);
-    glGenBuffers(1, &_iboId);
+    glCreateVertexArrays(1, &_vao);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
-    glBindVertexArray(_vaoId);
-
-    updateBufferData();
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glBindVertexArray(0);
+    updateVertexData();
 }
 
 void RenderablePrism::deinitializeGL() {
     global::renderEngine->removeRenderProgram(_shader.get());
     _shader = nullptr;
 
-    glDeleteVertexArrays(1, &_vaoId);
-    _vaoId = 0;
-
-    glDeleteBuffers(1, &_vboId);
-    _vboId = 0;
-
-    glDeleteBuffers(1, &_iboId);
-    _iboId = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
+    glDeleteBuffers(1, &_ibo);
 }
 
 void RenderablePrism::updateVertexData() {
-    _vertexArray.clear();
-    _indexArray.clear();
+    using namespace rendering;
 
-    using namespace rendering::helper;
+    std::vector<float> vertexArray;
 
     // Get unit circle vertices on the XY-plane
     std::vector<VertexXYZ> unitVertices = createRingXYZ(_nShapeSegments, 1.f);
@@ -222,51 +209,51 @@ void RenderablePrism::updateVertexData() {
 
     // Put base vertices into array
     for (int j = 0; j < _nShapeSegments; j++) {
-        const float ux = unitVertices[j].xyz[0];
-        const float uy = unitVertices[j].xyz[1];
+        const float ux = unitVertices[j].position.x;
+        const float uy = unitVertices[j].position.y;
 
-        _vertexArray.push_back(ux * _baseRadius); // x
-        _vertexArray.push_back(uy * _baseRadius); // y
-        _vertexArray.push_back(0.f);              // z
+        vertexArray.push_back(ux * _baseRadius); // x
+        vertexArray.push_back(uy * _baseRadius); // y
+        vertexArray.push_back(0.f);              // z
     }
 
     // Put top shape vertices into array
     for (int j = 0; j < _nShapeSegments; j++) {
-        const float ux = unitVertices[j].xyz[0];
-        const float uy = unitVertices[j].xyz[1];
+        const float ux = unitVertices[j].position.x;
+        const float uy = unitVertices[j].position.y;
 
-        _vertexArray.push_back(ux * _radius); // x
-        _vertexArray.push_back(uy * _radius); // y
-        _vertexArray.push_back(_length);      // z
+        vertexArray.push_back(ux * _radius); // x
+        vertexArray.push_back(uy * _radius); // y
+        vertexArray.push_back(_length);      // z
     }
 
     // Put the vertices for the connecting lines into array
     if (_nLines == 1) {
         // In the case of just one line then connect the center points instead
         // Center for base shape
-        _vertexArray.push_back(0.f);
-        _vertexArray.push_back(0.f);
-        _vertexArray.push_back(0.f);
+        vertexArray.push_back(0.f);
+        vertexArray.push_back(0.f);
+        vertexArray.push_back(0.f);
 
         // Center for top shape
-        _vertexArray.push_back(0.f);
-        _vertexArray.push_back(0.f);
-        _vertexArray.push_back(_length);
+        vertexArray.push_back(0.f);
+        vertexArray.push_back(0.f);
+        vertexArray.push_back(_length);
     }
     else {
         for (int j = 0; j < _nLines; j++) {
-            const float ux = unitVerticesLines[j].xyz[0];
-            const float uy = unitVerticesLines[j].xyz[1];
+            const float ux = unitVerticesLines[j].position.x;
+            const float uy = unitVerticesLines[j].position.y;
 
             // Base
-            _vertexArray.push_back(ux * _baseRadius); // x
-            _vertexArray.push_back(uy * _baseRadius); // y
-            _vertexArray.push_back(0.f);              // z
+            vertexArray.push_back(ux * _baseRadius); // x
+            vertexArray.push_back(uy * _baseRadius); // y
+            vertexArray.push_back(0.f);              // z
 
             // Top
-            _vertexArray.push_back(ux * _radius); // x
-            _vertexArray.push_back(uy * _radius); // y
-            _vertexArray.push_back(_length);      // z
+            vertexArray.push_back(ux * _radius); // x
+            vertexArray.push_back(uy * _radius); // y
+            vertexArray.push_back(_length);      // z
         }
     }
 
@@ -275,44 +262,50 @@ void RenderablePrism::updateVertexData() {
         _nShapeSegments.value() <= std::numeric_limits<uint8_t>::max(),
         "Too many shape segments"
     );
+    std::vector<uint8_t> indexArray;
+
     for (uint8_t i = 0; i < _nShapeSegments; i++) {
-        _indexArray.push_back(i);
+        indexArray.push_back(i);
     }
 
     // Reset
-    _indexArray.push_back(255);
+    indexArray.push_back(255);
 
     // Indices for Top shape
     for (int i = _nShapeSegments; i < 2 * _nShapeSegments; i++) {
-        _indexArray.push_back(static_cast<uint8_t>(i));
+        indexArray.push_back(static_cast<uint8_t>(i));
     }
 
     // Indices for connecting lines
     for (int i = 0, k = 0; i < _nLines; i++, k += 2) {
         // Reset
-        _indexArray.push_back(255);
+        indexArray.push_back(255);
 
-        _indexArray.push_back(static_cast<uint8_t>(2 * _nShapeSegments + k));
-        _indexArray.push_back(static_cast<uint8_t>(2 * _nShapeSegments + k + 1));
+        indexArray.push_back(static_cast<uint8_t>(2 * _nShapeSegments + k));
+        indexArray.push_back(static_cast<uint8_t>(2 * _nShapeSegments + k + 1));
     }
-}
 
-void RenderablePrism::updateBufferData() {
-    glBindBuffer(GL_ARRAY_BUFFER, _vboId);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _vertexArray.size() * sizeof(float),
-        _vertexArray.data(),
-        GL_STREAM_DRAW
+    glDeleteBuffers(1, &_vbo);
+    glCreateBuffers(1, &_vbo);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
+    glNamedBufferStorage(
+        _vbo,
+        vertexArray.size() * sizeof(float),
+        vertexArray.data(),
+        GL_NONE_BIT
     );
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _iboId);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER,
-        _indexArray.size() * sizeof(uint8_t),
-        _indexArray.data(),
-        GL_STREAM_DRAW
+    glDeleteBuffers(1, &_ibo);
+    glCreateBuffers(1, &_ibo);
+    glVertexArrayElementBuffer(_vao, _ibo);
+    glNamedBufferStorage(
+        _ibo,
+        indexArray.size() * sizeof(uint8_t),
+        indexArray.data(),
+        GL_NONE_BIT
     );
+
+    _count = static_cast<GLsizei>(indexArray.size());
 }
 
 void RenderablePrism::render(const RenderData& data, RendererTasks&) {
@@ -333,14 +326,9 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(255);
     glLineWidth(_lineWidth);
-    glBindVertexArray(_vaoId);
+    glBindVertexArray(_vao);
 
-    glDrawElements(
-        GL_LINE_LOOP,
-        static_cast<GLsizei>(_indexArray.size()),
-        GL_UNSIGNED_BYTE,
-        nullptr
-    );
+    glDrawElements(GL_LINE_LOOP, _count, GL_UNSIGNED_BYTE, nullptr);
 
     glBindVertexArray(0);
     global::renderEngine->openglStateCache().resetLineState();
@@ -357,7 +345,6 @@ void RenderablePrism::update(const UpdateData& data) {
 
     if (_prismIsDirty) [[unlikely]] {
         updateVertexData();
-        updateBufferData();
         setBoundingSphere(_length * glm::compMax(data.modelTransform.scale));
         _prismIsDirty = false;
     }

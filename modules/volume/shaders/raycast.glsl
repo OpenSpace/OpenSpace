@@ -47,16 +47,16 @@ uniform float rUpperBound_#{id} = 1.0;
 void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
                  inout vec3 accumulatedAlpha, inout float stepSize)
 {
-  vec3 transformedPos = samplePos;
+  vec3 pos = samplePos;
   if (gridType_#{id} == 1) {
-    transformedPos = volume_cartesianToSpherical(samplePos);
-    if (abs(transformedPos.r) > 1.0) {
+    pos = cartesianToSpherical(samplePos);
+    if (abs(pos.r) > 1.0) {
       return;
     }
   }
 
   float clipAlpha = 1.0;
-  vec3 centerToPos = transformedPos - vec3(0.5);
+  vec3 centerToPos = pos - vec3(0.5);
 
   for (int i = 0; i < nClips_#{id} && i < 8; i++) {
     vec3 clipNormal = clipNormals_#{id}[i];
@@ -65,13 +65,13 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
     clipAlpha *= smoothstep(clipBegin, clipEnd, dot(centerToPos, clipNormal));
   }
 
-  clipAlpha *= 1.0 - smoothstep(rUpperBound_#{id} - 0.01, rUpperBound_#{id} + 0.01, transformedPos.x);
+  clipAlpha *= 1.0 - smoothstep(rUpperBound_#{id} - 0.01, rUpperBound_#{id} + 0.01, pos.x);
 
   if (clipAlpha > 0) {
-    float val = texture(volumeTexture_#{id}, transformedPos).r;
+    float val = texture(volumeTexture_#{id}, pos).r;
 
     if (rNormalization_#{id} > 0 && gridType_#{id} == 1) {
-      val *= pow(transformedPos.x, rNormalization_#{id});
+      val *= pow(pos.x, rNormalization_#{id});
     }
 
     vec4 color = texture(transferFunction_#{id}, val);
@@ -79,8 +79,10 @@ void sample#{id}(vec3 samplePos, vec3 dir, inout vec3 accumulatedColor,
     vec3 backColor = color.rgb;
     vec3 backAlpha = color.aaa;
 
-    backColor *= stepSize * brightness_#{id} * SamplingIntervalReferenceFactor * clipAlpha;
-    backAlpha *= stepSize * brightness_#{id} * SamplingIntervalReferenceFactor * clipAlpha;
+    backColor *=
+      stepSize * brightness_#{id} * SamplingIntervalReferenceFactor * clipAlpha;
+    backAlpha *=
+      stepSize * brightness_#{id} * SamplingIntervalReferenceFactor * clipAlpha;
 
     backColor = clamp(backColor, 0.0, 1.0);
     backAlpha = clamp(backAlpha, 0.0, 1.0);

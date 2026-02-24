@@ -38,7 +38,7 @@
 #include <sstream>
 #include <utility>
 
-namespace openspace::documentation {
+namespace openspace {
 
 // The explicit template instantiations for many of the commonly used template values
 // This cuts down on the compilation time by only compiling these once
@@ -921,4 +921,4 @@ std::string OrVerifier::documentation() const {
     return ghoul::join(documentations, ", ");
 }
 
-} // namespace openspace::documentation
+} // namespace openspace

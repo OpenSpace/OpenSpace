@@ -50,7 +50,6 @@ public:
     void updateAtlas(BufferIndex bufferIndex, std::vector<int>& brickIndices);
     void addToAtlas(int firstBrickIndex, int lastBrickIndex, float* mappedBuffer);
     void removeFromAtlas(int brickIndex);
-    bool initialize();
     const std::vector<unsigned int>& atlasMap() const;
     unsigned int atlasMapBuffer() const;
 
@@ -70,18 +69,12 @@ private:
     unsigned int _pboHandle[2];
     unsigned int _atlasMapBuffer;
 
-    std::vector<unsigned int> _atlasMap;
-    std::map<unsigned int, unsigned int> _brickMap;
-    std::vector<unsigned int> _freeAtlasCoords;
-    std::set<unsigned int> _requiredBricks;
-    std::set<unsigned int> _prevRequiredBricks;
-
-    ghoul::opengl::Texture* _textureAtlas;
+    ghoul::opengl::Texture* _textureAtlas = nullptr;
 
     // Stats
-    unsigned int _nUsedBricks;
-    unsigned int _nStreamedBricks;
-    unsigned int _nDiskReads;
+    unsigned int _nUsedBricks = 0;
+    unsigned int _nStreamedBricks = 0;
+    unsigned int _nDiskReads = 0;
 
     unsigned int _nBricksPerDim;
     unsigned int _nOtLeaves;
@@ -94,6 +87,12 @@ private:
     unsigned int _nBricksInAtlas;
     unsigned int _nBricksInMap;
     unsigned int _atlasDim;
+
+    std::vector<unsigned int> _atlasMap;
+    std::map<unsigned int, unsigned int> _brickMap;
+    std::vector<unsigned int> _freeAtlasCoords;
+    std::set<unsigned int> _requiredBricks;
+    std::set<unsigned int> _prevRequiredBricks;
 
     void fillVolume(float* in, float* out, unsigned int linearAtlasCoords);
 };

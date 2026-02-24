@@ -22,11 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "PowerScaling/powerScaling_fs.hglsl"
+#include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
 
-in vec2 vs_st;
-in vec4 vs_position;
+in Data {
+  vec4 position;
+  vec2 texCoords;
+} in_data;
 
 uniform float time;
 uniform sampler2D texture1;
@@ -34,12 +36,12 @@ uniform float transparency;
 
 
 Fragment getFragment() {
-  vec4 position = vs_position;
-  float depth = pscDepth(position);
-  vec4 diffuse = texture(texture1, vs_st);
+  float depth = pscDepth(in_data.position);
+  vec4 diffuse = texture(texture1, in_data.texCoords);
+  diffuse.a *= transparency;
 
   Fragment frag;
-  frag.color = diffuse * vec4(1.0, 1.0, 1.0, transparency);
+  frag.color = diffuse;
   frag.depth = depth;
   return frag;
 }

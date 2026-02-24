@@ -55,7 +55,7 @@ void SpoutModule::internalInitialize(const ghoul::Dictionary&) {
 #endif // WIN32
 }
 
-std::vector<documentation::Documentation> SpoutModule::documentations() const {
+std::vector<Documentation> SpoutModule::documentations() const {
     return {
         ScreenSpaceSpout::Documentation(),
         RenderablePlaneSpout::Documentation(),

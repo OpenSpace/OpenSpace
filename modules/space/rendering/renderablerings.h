@@ -51,17 +51,17 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void loadTexture();
     void createPlane();
 
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::Vec2Property _offset;
-    properties::FloatProperty _nightFactor;
-    properties::FloatProperty _colorFilter;
+    StringProperty _texturePath;
+    FloatProperty _size;
+    Vec2Property _offset;
+    FloatProperty _nightFactor;
+    FloatProperty _colorFilter;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     UniformCache(modelViewProjection, textureOffset, colorFilterValue, nightFactor,
@@ -70,8 +70,8 @@ private:
     std::unique_ptr<ghoul::filesystem::File> _textureFile;
 
     bool _textureIsDirty = false;
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
     bool _planeIsDirty = false;
 
     glm::vec3 _sunPosition = glm::vec3(0.f);

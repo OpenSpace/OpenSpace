@@ -31,18 +31,21 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <cstdlib>
 #include <limits>
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "Sets the URL of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // A `RenderablePlaneImageOnline` creates a textured 3D plane, where the texture image
@@ -51,12 +54,12 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
     };
-#include "renderableplaneimageonline_codegen.cpp"
 } // namespace
+#include "renderableplaneimageonline_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePlaneImageOnline::Documentation() {
+Documentation RenderablePlaneImageOnline::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderable_plane_image_online",
         RenderablePlane::Documentation()
@@ -105,12 +108,9 @@ void RenderablePlaneImageOnline::deinitializeGL() {
     RenderablePlane::deinitializeGL();
 }
 
-void RenderablePlaneImageOnline::bindTexture() {
+void RenderablePlaneImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture) {
-        _texture->bind();
-    }
-    else {
-        glBindTexture(GL_TEXTURE_2D, 0);
+        unit.bind(*_texture);
     }
 }
 
@@ -142,47 +142,38 @@ void RenderablePlaneImageOnline::update(const UpdateData& data) {
         }
 
         try {
-            std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::TextureReader::ref().loadTexture(
-                    reinterpret_cast<void*>(imageFile.buffer),
-                    imageFile.size,
-                    2,
-                    imageFile.format
-                );
+            _texture = ghoul::io::TextureReader::ref().loadTexture(
+                reinterpret_cast<void*>(imageFile.buffer),
+                imageFile.size,
+                2,
+                {
+                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                },
+                imageFile.format
+            );
 
-            if (texture) {
-                // Images don't need to start on 4-byte boundaries, for example if the
-                // image is only RGB
-                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+            _textureIsDirty = false;
 
-                texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                texture->purgeFromRAM();
+            if (!_autoScale) {
+                return;
+            }
 
-                _texture = std::move(texture);
-                _textureIsDirty = false;
+            // Shape the plane based on the aspect ration of the image
+            const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
+            if (_textureDimensions != textureDim) {
+                const float aspectRatio = textureDim.x / textureDim.y;
+                const float planeAspectRatio = _size.value().x / _size.value().y;
 
-                if (!_autoScale) {
-                    return;
+                if (std::abs(planeAspectRatio - aspectRatio) >
+                    std::numeric_limits<float>::epsilon())
+                {
+                    _size =
+                        aspectRatio > 0.f ?
+                        glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
+                        glm::vec2(_size.value().x, _size.value().y * aspectRatio);
                 }
 
-                // Shape the plane based on the aspect ration of the image
-                const glm::vec2 textureDim = glm::vec2(_texture->dimensions());
-                if (_textureDimensions != textureDim) {
-                    const float aspectRatio = textureDim.x / textureDim.y;
-                    const float planeAspectRatio = _size.value().x / _size.value().y;
-
-                    if (std::abs(planeAspectRatio - aspectRatio) >
-                        std::numeric_limits<float>::epsilon())
-                    {
-                        _size =
-                            aspectRatio > 0.f ?
-                            glm::vec2(_size.value().x * aspectRatio, _size.value().y) :
-                            glm::vec2(_size.value().x, _size.value().y * aspectRatio);
-                    }
-
-                    _textureDimensions = textureDim;
-                }
+                _textureDimensions = textureDim;
             }
         }
         catch (const ghoul::io::TextureReader::InvalidLoadException& e) {

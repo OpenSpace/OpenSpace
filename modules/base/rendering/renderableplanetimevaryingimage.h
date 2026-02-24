@@ -45,10 +45,10 @@ public:
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks&) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    virtual void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
 private:
     ghoul::opengl::Texture* loadTexture() const;
@@ -62,7 +62,7 @@ private:
     std::vector<std::filesystem::path> _sourceFiles;
     std::vector<double> _startTimes;
     int _activeTriggerTimeIndex = 0;
-    properties::StringProperty _sourceFolder;
+    StringProperty _sourceFolder;
     ghoul::opengl::Texture* _texture = nullptr;
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textureFiles;
     bool _isLoadingLazily = false;

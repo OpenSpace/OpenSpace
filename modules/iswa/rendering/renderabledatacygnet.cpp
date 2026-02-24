@@ -46,63 +46,65 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "DataCygnet";
     constexpr int MaxTextures = 6;
 
-    constexpr openspace::properties::Property::PropertyInfo DataOptionsInfo = {
+    constexpr Property::PropertyInfo DataOptionsInfo = {
         "DataOptions",
         "Data options",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseLogInfo = {
+    constexpr Property::PropertyInfo UseLogInfo = {
         "UseLog",
         "Use logarithm",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseHistogramInfo = {
+    constexpr Property::PropertyInfo UseHistogramInfo = {
         "UseHistogram",
         "Auto contrast",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AutoFilterInfo = {
+    constexpr Property::PropertyInfo AutoFilterInfo = {
         "AutoFilter",
         "Auto filter",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NormalizeValuesInfo = {
+    constexpr Property::PropertyInfo NormalizeValuesInfo = {
         "NormValues",
         "Normalize values",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
+    constexpr Property::PropertyInfo BackgroundInfo = {
         "BackgroundValues",
         "Background values",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransferFunctionsFile = {
+    constexpr Property::PropertyInfo TransferFunctionsFile = {
         "Transferfunctions",
         "Transfer functions",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableDataCygnet::Documentation() {
-    documentation::Documentation doc = RenderableIswaCygnet::Documentation();
+Documentation RenderableDataCygnet::Documentation() {
+    openspace::Documentation doc = RenderableIswaCygnet::Documentation();
     doc.name = "RenderableDataCygnet";
     doc.id = "iswa_renderable_datacygnet";
     return doc;
@@ -156,23 +158,23 @@ bool RenderableDataCygnet::updateTexture() {
 
         if (!_textures[option]) {
             auto texture = std::make_unique<ghoul::opengl::Texture>(
-                values,
-                _textureDimensions,
-                GL_TEXTURE_2D,
-                ghoul::opengl::Texture::Format::Red,
-                GL_RED,
-                GL_FLOAT,
-                ghoul::opengl::Texture::FilterMode::Linear,
-                ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                ghoul::opengl::Texture::FormatInit{
+                    .dimensions = _textureDimensions,
+                    .type = GL_TEXTURE_2D,
+                    .format = ghoul::opengl::Texture::Format::Red,
+                    .dataType = GL_FLOAT
+                },
+                ghoul::opengl::Texture::SamplerInit{
+                    .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
+                    .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+                },
+                reinterpret_cast<std::byte*>(values)
             );
 
-            texture->uploadTexture();
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
             _textures[option] = std::move(texture);
         }
         else {
-            _textures[option]->setPixelData(values);
-            _textures[option]->uploadTexture();
+            _textures[option]->setPixelData(reinterpret_cast<std::byte*>(values));
         }
         texturesReady = true;
     }
@@ -241,8 +243,7 @@ void RenderableDataCygnet::setTextureUniforms() {
     int j = 0;
     for (int option : selectedOptionsIndices) {
         if (_textures[option]) {
-            txUnits[j].activate();
-            _textures[option]->bind();
+            txUnits[j].bind(*_textures[option]);
             _shader->setUniform("textures[" + std::to_string(j) + "]", txUnits[j]);
 
             j++;
@@ -263,15 +264,13 @@ void RenderableDataCygnet::setTextureUniforms() {
     j = 0;
 
     if (activeTransferfunctions == 1) {
-        tfUnits[0].activate();
-        _transferFunctions[0].bind();
+        tfUnits[0].bind(_transferFunctions[0].texture());
         _shader->setUniform("transferFunctions[0]", tfUnits[0]);
     }
     else {
         for (int option : selectedOptionsIndices) {
             if (static_cast<int>(_transferFunctions.size()) >= option) {
-                tfUnits[j].activate();
-                _transferFunctions[option].bind();
+                tfUnits[j].bind(_transferFunctions[option].texture());
                 _shader->setUniform(
                     "transferFunctions[" + std::to_string(j) + "]",
                     tfUnits[j]
@@ -452,4 +451,4 @@ void RenderableDataCygnet::subscribeToGroup() {
     );
 }
 
-} //namespace openspace
+} // namespace openspace

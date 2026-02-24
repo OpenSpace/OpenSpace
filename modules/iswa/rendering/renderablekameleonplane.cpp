@@ -50,27 +50,29 @@
 #include <set>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "KameleonPlane";
 
-    constexpr openspace::properties::Property::PropertyInfo FieldLineSeedsInfo = {
+    constexpr Property::PropertyInfo FieldLineSeedsInfo = {
         "FieldlineSeedsIndexFile",
         "Fieldline seedpoints",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
+    constexpr Property::PropertyInfo ResolutionInfo = {
         "Resolution",
         "Resolution%",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SliceInfo = {
+    constexpr Property::PropertyInfo SliceInfo = {
         "Slice",
         "Slice",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableKameleonPlane)]] Parameters {
@@ -85,12 +87,12 @@ namespace {
         };
         std::optional<AxisCut> axisCut [[codegen::key("axisCut")]];
     };
-#include "renderablekameleonplane_codegen.cpp"
 } // namespace
+#include "renderablekameleonplane_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableKameleonPlane::Documentation() {
+Documentation RenderableKameleonPlane::Documentation() {
     return codegen::doc<Parameters>(
         "iswa_renderable_kameleonplane",
         RenderableDataCygnet::Documentation()
@@ -180,12 +182,12 @@ void RenderableKameleonPlane::initializeGL() {
             // and unregister backgroundvalues property.
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();
-                _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
+                _backgroundValues.setVisibility(Property::Visibility::Hidden);
                 //_backgroundValues.setVisible(false);
             // else if autofilter is turned off, register backgroundValues
             }
             else {
-                _backgroundValues.setVisibility(properties::Property::Visibility::Always);
+                _backgroundValues.setVisibility(Property::Visibility::Always);
                 //_backgroundValues.setVisible(true);
             }
         });
@@ -225,60 +227,47 @@ void RenderableKameleonPlane::initializeGL() {
     updateTextureResource();
 }
 
-bool RenderableKameleonPlane::createGeometry() {
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+void RenderableKameleonPlane::createGeometry() {
+    struct Vertex {
+        glm::vec4 position;
+        glm::vec2 texCoords;
+    };
 
-    // ============================
-    //         GEOMETRY (quad)
-    // ============================
-    // GLfloat x,y, z;
+    glCreateBuffers(1, &_vbo);
     float s = _data.spatialScale.x;
     const GLfloat x = s * _data.scale.x / 2.f;
     const GLfloat y = s * _data.scale.y / 2.f;
     const GLfloat z = s * _data.scale.z / 2.f;
     const GLfloat w = _data.spatialScale.w;
-
-    const GLfloat vertex_data[] = { // square of two triangles (sigh)
-        //      x      y     z     w     s     t
-        -x, -y,             -z,  w, 0, 1,
-         x,  y,              z,  w, 1, 0,
-        -x,  ((x>0)?y:-y),   z,  w, 0, 0,
-        -x, -y,             -z,  w, 0, 1,
-         x,  ((x>0)?-y:y),  -z,  w, 1, 1,
-         x,  y,              z,  w, 1, 0,
+    const Vertex VertexData[] = {
+        { glm::vec4(-x, -y,                  -z,  w), glm::vec2(0.f, 1.f) },
+        { glm::vec4( x,  y,                   z,  w), glm::vec2(1.f, 0.f) },
+        { glm::vec4(-x, ((x > 0) ? y : -y),   z,  w), glm::vec2(0.f, 0.f) },
+        { glm::vec4(-x, -y,                  -z,  w), glm::vec2(0.f, 1.f) },
+        { glm::vec4( x,  ((x > 0) ? -y : y), -z,  w), glm::vec2(1.f, 1.f) },
+        { glm::vec4( x,  y,                   z,  w), glm::vec2(1.f, 0.f) }
     };
+    glNamedBufferStorage(_vbo, sizeof(VertexData), VertexData, GL_NONE_BIT);
 
-    glBindVertexArray(_quad); // bind array
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer); // bind buffer
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
-    );
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
-    return true;
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4);
+    glVertexArrayAttribBinding(_vao, 1, 0);
 }
 
-bool RenderableKameleonPlane::destroyGeometry() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
-
-    return true;
+void RenderableKameleonPlane::destroyGeometry() {
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 }
 
 void RenderableKameleonPlane::renderGeometry() const {
-    glBindVertexArray(_quad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
@@ -443,4 +432,4 @@ void RenderableKameleonPlane::changeKwPath(std::string kwPath) {
     _kwPath = std::move(kwPath);
 }
 
-}// namespace openspace
+} // namespace openspace

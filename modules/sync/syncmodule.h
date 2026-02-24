@@ -39,9 +39,9 @@ public:
 
     std::filesystem::path synchronizationRoot() const;
 
-    std::vector<documentation::Documentation> documentations() const override;
-    scripting::LuaLibrary luaLibrary() const override;
-    static documentation::Documentation Documentation();
+    std::vector<openspace::Documentation> documentations() const override;
+    LuaLibrary luaLibrary() const override;
+    static openspace::Documentation Documentation();
 
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;

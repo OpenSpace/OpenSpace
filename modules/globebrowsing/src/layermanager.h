@@ -33,17 +33,17 @@
 #include <memory>
 
 namespace ghoul { class Dictionary; }
-namespace openspace::documentation { struct Documentation; }
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
+struct Documentation;
 class Layer;
 struct LayerGroup;
 
 /**
  * Manages multiple LayerGroups.
  */
-class LayerManager : public properties::PropertyOwner {
+class LayerManager : public PropertyOwner {
 public:
     constexpr static size_t NumLayerGroups = layers::Groups.size();
 
@@ -72,6 +72,6 @@ private:
     std::array<std::unique_ptr<LayerGroup>, NumLayerGroups> _layerGroups;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERMANAGER___H__

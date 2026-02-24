@@ -73,13 +73,13 @@ public:
     void update() override;
     bool isReady() const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    properties::UVec2Property _dimensions;
+    UVec2Property _dimensions;
     std::unique_ptr<BrowserInstance> _browserInstance;
     bool _isDimensionsDirty = false;
-    properties::TriggerProperty _reload;
+    TriggerProperty _reload;
 
 private:
     class ScreenSpaceRenderHandler : public WebRenderHandler {
@@ -93,9 +93,9 @@ private:
     CefRefPtr<ScreenSpaceRenderHandler> _renderHandler;
 
 private:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
-    properties::StringProperty _url;
+    StringProperty _url;
 
     CefRefPtr<WebKeyboardHandler> _keyboardHandler;
 

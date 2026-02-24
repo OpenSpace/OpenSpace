@@ -32,7 +32,7 @@
 #include <ratio>
 #include <type_traits>
 
-namespace openspace::skybrowser {
+namespace openspace {
 
 // Constants
 constexpr double ScreenSpaceZ = -2.1;
@@ -239,7 +239,7 @@ public:
             return _start + diff;
         }
         else if constexpr (std::is_same_v<T, glm::dvec3>) {
-            const glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
+            const glm::dmat4 rotMat = incrementalAnimationMatrix(
                 glm::normalize(_start),
                 glm::normalize(_goal),
                 ghoul::exponentialEaseOut(percentageSpent())
@@ -261,7 +261,7 @@ public:
         const double increment = percentage - _lastPercentage;
         _lastPercentage = percentage;
 
-        glm::dmat4 rotMat = skybrowser::incrementalAnimationMatrix(
+        glm::dmat4 rotMat = incrementalAnimationMatrix(
             glm::normalize(_start),
             glm::normalize(_goal),
             increment
@@ -289,6 +289,6 @@ private:
     std::chrono::system_clock::time_point _startTime;
 };
 
-} // namespace openspace::skybrowser
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SKYBROWSER___UTILITY___H__

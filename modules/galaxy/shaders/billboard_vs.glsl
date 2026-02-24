@@ -27,10 +27,12 @@
 layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_color;
 
-out vec3 vs_color;
+out Data {
+  vec3 color;
+} out_data;
 
 
 void main() {
-  vs_color = in_color;
+  out_data.color = in_color;
   gl_Position = vec4(in_position, 1.0);
 }

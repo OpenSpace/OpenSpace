@@ -38,7 +38,7 @@
 namespace openspace::datamessagestructures {
 
 CameraKeyframe generateCameraKeyframe() {
-    interaction::NavigationHandler& navHandler = *global::navigationHandler;
+    NavigationHandler& navHandler = *global::navigationHandler;
     CameraKeyframe kf;
     const SceneGraphNode* focusNode = navHandler.orbitalNavigator().anchorNode();
 

@@ -71,7 +71,7 @@ public:
 
     glm::dvec3 position(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct CacheKeyframe {
@@ -84,7 +84,7 @@ private:
     bool loadCachedFile(const std::filesystem::path& file);
     void saveCachedFile(const std::filesystem::path& file) const;
 
-    properties::StringListProperty _horizonsFiles;
+    StringListProperty _horizonsFiles;
     ghoul::lua::LuaState _state;
     Timeline<glm::dvec3> _timeline;
 };

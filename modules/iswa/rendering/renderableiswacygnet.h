@@ -53,7 +53,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     struct Metadata {
@@ -85,8 +85,8 @@ protected:
 
     // Subclass interface
     // ==================
-    virtual bool createGeometry() = 0;
-    virtual bool destroyGeometry() = 0;
+    virtual void createGeometry() = 0;
+    virtual void destroyGeometry() = 0;
     virtual void renderGeometry() const = 0;
 
     /**
@@ -120,8 +120,8 @@ protected:
      */
     virtual void setUniforms() = 0;
 
-    properties::FloatProperty _alpha;
-    properties::TriggerProperty _delete;
+    FloatProperty _alpha;
+    TriggerProperty _delete;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::vector<std::unique_ptr<ghoul::opengl::Texture>> _textures;
@@ -143,11 +143,11 @@ private:
     double _openSpaceTime = 0.0;
     double _lastUpdateOpenSpaceTime = 0.0;
 
-    std::chrono::milliseconds _realTime;
-    std::chrono::milliseconds _lastUpdateRealTime;
-    int _minRealTimeUpdateInterval;
+    std::chrono::milliseconds _realTime = std::chrono::milliseconds(0);
+    std::chrono::milliseconds _lastUpdateRealTime = std::chrono::milliseconds(0);
+    int _minRealTimeUpdateInterval = 0;
 };
 
-} //namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ISWA___RENDERABLEISWACYGNET___H__

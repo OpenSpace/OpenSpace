@@ -29,7 +29,7 @@
 
 #include <ghoul/misc/easing.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 template <typename T>
 class NumericalProperty : public TemplateProperty<T> {
@@ -69,7 +69,7 @@ protected:
     T _interpolationEnd = T(0);
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #include "openspace/properties/numericalproperty.inl"
 

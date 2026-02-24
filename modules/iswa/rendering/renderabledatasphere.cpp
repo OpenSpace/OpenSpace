@@ -40,12 +40,12 @@ namespace {
     struct [[codegen::Dictionary(RenderableDataSphere)]] Parameters {
         float radius;
     };
-#include "renderabledatasphere_codegen.cpp"
 } // namespace
+#include "renderabledatasphere_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableDataSphere::Documentation() {
+Documentation RenderableDataSphere::Documentation() {
     return codegen::doc<Parameters>(
         "iswa_renderable_datasphere",
         RenderableDataCygnet::Documentation()
@@ -87,12 +87,12 @@ void RenderableDataSphere::initializeGL() {
             // and unregister backgroundvalues property.
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();
-                _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
+                _backgroundValues.setVisibility(Property::Visibility::Hidden);
                 //_backgroundValues.setVisible(false);
             // else if autofilter is turned off, register backgroundValues
             }
             else {
-                _backgroundValues.setVisibility(properties::Property::Visibility::Always);
+                _backgroundValues.setVisibility(Property::Visibility::Always);
                 //_backgroundValues.setVisible(true);
             }
         });
@@ -111,17 +111,15 @@ void RenderableDataSphere::deinitializeGL() {
     RenderableDataCygnet::deinitializeGL();
 }
 
-bool RenderableDataSphere::createGeometry() {
+void RenderableDataSphere::createGeometry() {
     const float radius = 6.371f * _radius * glm::pow(10.f, 6.f);
     int segments = 100;
     _sphere = std::make_unique<Sphere>(radius, segments);
     _sphere->initialize();
-    return true;
 }
 
-bool RenderableDataSphere::destroyGeometry() {
+void RenderableDataSphere::destroyGeometry() {
     _sphere = nullptr;
-    return true;
 }
 
 void RenderableDataSphere::renderGeometry() const {
@@ -158,4 +156,4 @@ void RenderableDataSphere::setUniforms() {
     _shader->setUniform("transparency", _alpha);
 }
 
-} //namespace openspace
+} // namespace openspace

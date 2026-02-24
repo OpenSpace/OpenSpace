@@ -28,6 +28,7 @@
 #include <type_traits>
 
 namespace {
+    using namespace openspace;
 
     size_t numberOfRasters(ghoul::opengl::Texture::Format format) {
         switch (format) {
@@ -75,8 +76,7 @@ namespace {
         }
     }
 
-    openspace::globebrowsing::TileTextureInitData::HashKey calculateHashKey(
-                                                             const glm::ivec3& dimensions,
+    TileTextureInitData::HashKey calculateHashKey(const glm::ivec3& dimensions,
                                              const ghoul::opengl::Texture::Format& format,
                                                                      const GLenum& glType)
     {
@@ -88,7 +88,7 @@ namespace {
         const unsigned int formatId = uniqueIdForTextureFormat(format);
         ghoul_assert(formatId < 256, "Incorrect format");
 
-        openspace::globebrowsing::TileTextureInitData::HashKey res = 0ULL;
+        TileTextureInitData::HashKey res = 0ULL;
 
         res |= dimensions.x;
         res |= dimensions.y << 10;
@@ -99,7 +99,7 @@ namespace {
     }
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 TileTextureInitData tileTextureInitData(layers::Group::ID id,
                                         size_t preferredTileSize)
@@ -187,4 +187,4 @@ TileTextureInitData& TileTextureInitData::operator=(TileTextureInitData&& rhs) n
     return *this;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

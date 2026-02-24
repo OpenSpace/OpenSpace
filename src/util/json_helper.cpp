@@ -163,4 +163,4 @@ ghoul::Dictionary jsonToDictionary(const nlohmann::json& json) {
     return result;
 }
 
-}  // namespace openspace
+} // namespace openspace

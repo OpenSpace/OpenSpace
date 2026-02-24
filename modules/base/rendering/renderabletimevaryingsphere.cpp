@@ -30,11 +30,14 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <iterator>
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     // Extract J2000 time from file names
     // Requires files to be named as such: 'YYYY-MM-DDTHH-MM-SS-XXX.png'
     double extractTriggerTimeFromFileName(const std::filesystem::path& filePath) {
@@ -51,24 +54,24 @@ namespace {
         return openspace::Time::convertTime(timeString);
     }
 
-    constexpr openspace::properties::Property::PropertyInfo TextureSourceInfo = {
+    constexpr Property::PropertyInfo TextureSourceInfo = {
         "TextureSource",
         "Texture source",
         "A directory containing images that are loaded from disk and used for texturing "
         "the sphere. The images are expected to be equirectangular projections.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingSphere)]] Parameters {
         // [[codegen::verbatim(TextureSourceInfo.description)]]
         std::filesystem::path textureSource [[codegen::directory()]];
     };
-#include "renderabletimevaryingsphere_codegen.cpp"
 } // namespace
+#include "renderabletimevaryingsphere_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableTimeVaryingSphere::Documentation() {
+Documentation RenderableTimeVaryingSphere::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderable_time_varying_sphere",
         RenderableSphere::Documentation()
@@ -120,12 +123,6 @@ void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
         const double time = extractTriggerTimeFromFileName(filePath);
         std::unique_ptr<ghoul::opengl::Texture> t =
             ghoul::io::TextureReader::ref().loadTexture(filePath, 2);
-
-        t->setInternalFormat(GL_COMPRESSED_RGBA);
-        t->uploadTexture();
-        t->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-        t->purgeFromRAM();
-
         _files.push_back({ std::move(filePath), time, std::move(t) });
     }
 
@@ -178,12 +175,9 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
     }
 }
 
-void RenderableTimeVaryingSphere::bindTexture() {
-    if (_texture) {
-        _texture->bind();
-    }
-    else {
-        unbindTexture();
+void RenderableTimeVaryingSphere::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    if (_texture) [[likely]] {
+        unit.bind(*_texture);
     }
 }
 

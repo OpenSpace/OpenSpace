@@ -24,14 +24,14 @@
 
 #include <openspace/engine/globals.h>
 
+using namespace openspace;
+
 namespace {
 
 /**
  * Checks whether the passed OpenSpaceModule is loaded.
  */
 [[codegen::luawrap]] bool isLoaded(std::string moduleName) {
-    using namespace openspace;
-
     for (OpenSpaceModule* module : global::moduleEngine->modules()) {
         if (module->identifier() == moduleName) {
             return true;
@@ -40,6 +40,6 @@ namespace {
     return false;
 }
 
-#include "moduleengine_lua_codegen.cpp"
-
 } // namespace
+
+#include "moduleengine_lua_codegen.cpp"

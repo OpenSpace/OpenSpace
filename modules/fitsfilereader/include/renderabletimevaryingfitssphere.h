@@ -53,10 +53,10 @@ public:
     void update(const UpdateData& data) override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
 private:
     struct File {
@@ -83,12 +83,12 @@ private:
     void computeSequenceEndTime();
     void updateDynamicDownloading(double currentTime, double deltaTime);
 
-    properties::OptionProperty _fitsLayerName;
+    OptionProperty _fitsLayerName;
     // An option to keep or delete the downloads from dynamic downloader on shutdown
     // Deletes on default
-    properties::BoolProperty _saveDownloadsOnShutdown;
-    properties::OptionProperty _textureFilterProperty;
-    properties::StringProperty _textureSource;
+    BoolProperty _saveDownloadsOnShutdown;
+    OptionProperty _textureFilterProperty;
+    StringProperty _textureSource;
 
     // If there's just one state it should never disappear!
     double _sequenceEndTime = std::numeric_limits<double>::max();

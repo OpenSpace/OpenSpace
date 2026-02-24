@@ -36,7 +36,7 @@
 #include <set>
 #include <utility>
 
-namespace openspace::gui {
+namespace openspace {
 
 GuiActionComponent::GuiActionComponent()
     : GuiComponent("Actions", "Actions")
@@ -62,8 +62,8 @@ void GuiActionComponent::render() {
             global::actionManager->triggerAction(
                 p.second,
                 ghoul::Dictionary(),
-                interaction::ActionManager::ShouldBeSynchronized::Yes,
-                interaction::ActionManager::ShouldBeLogged::Yes
+                ActionManager::ShouldBeSynchronized::Yes,
+                ActionManager::ShouldBeLogged::Yes
             );
         }
         ImGui::SameLine();
@@ -71,7 +71,7 @@ void GuiActionComponent::render() {
         // Poor mans table layout
         ImGui::SetCursorPosX(125.f);
 
-        const interaction::Action& a = global::actionManager->action(p.second);
+        const openspace::Action& a = global::actionManager->action(p.second);
         ImGui::Text("%s", a.documentation.c_str());
         if (a.isLocal) {
             ImGui::SameLine();
@@ -80,7 +80,7 @@ void GuiActionComponent::render() {
     }
 
     CaptionText("Other Actions");
-    for (const interaction::Action& action : global::actionManager->actions()) {
+    for (const openspace::Action& action : global::actionManager->actions()) {
         // We only show all of the other actions that are not currently bound to keys here
         if (boundActions.find(action.identifier) != boundActions.end()) {
             continue;
@@ -90,8 +90,8 @@ void GuiActionComponent::render() {
             global::actionManager->triggerAction(
                 action.command,
                 ghoul::Dictionary(),
-                interaction::ActionManager::ShouldBeSynchronized::Yes,
-                interaction::ActionManager::ShouldBeLogged::Yes
+                ActionManager::ShouldBeSynchronized::Yes,
+                ActionManager::ShouldBeLogged::Yes
             );
         }
         ImGui::SameLine();
@@ -108,4 +108,4 @@ void GuiActionComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace::gui
+} // namespace openspace

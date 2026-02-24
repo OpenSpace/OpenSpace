@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::volume {
+namespace openspace {
 
 template <typename Key, typename Value, template <typename...> class Container>
 LruCache<Key, Value, Container>::LruCache(size_t capacity) {
@@ -82,4 +82,4 @@ void LruCache<Key, Value, Container>::insert(const Key& key, const Value& value)
     _cache[key] = std::make_pair(value, iter);
 };
 
-} // namespace openspace::volume
+} // namespace openspace

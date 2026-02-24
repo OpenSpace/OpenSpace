@@ -66,23 +66,23 @@ class RenderableTrail : public Renderable {
 public:
     const double DISTANCE_CULLING_RADII = 800.0;
 
-    struct Appearance : properties::PropertyOwner {
+    struct Appearance : PropertyOwner {
         Appearance();
 
         /// Specifies the base color of the line before fading
-        properties::Vec3Property lineColor;
+        Vec3Property lineColor;
         /// Settings that enables or disables the line fading
-        properties::BoolProperty useLineFade;
+        BoolProperty useLineFade;
         /// Line width for the line rendering part
-        properties::FloatProperty lineWidth;
+        FloatProperty lineWidth;
         /// Point size for the point rendering part
-        properties::IntProperty pointSize;
+        IntProperty pointSize;
         /// The option determining which rendering method to use
-        properties::OptionProperty renderingModes;
+        OptionProperty renderingModes;
         /// Specifies how much of the orbit should have a trail
-        properties::FloatProperty lineLength;
+        FloatProperty lineLength;
         /// Specifies how much of the trail should be faded
-        properties::FloatProperty lineFadeAmount;
+        FloatProperty lineFadeAmount;
     };
 
     ~RenderableTrail() override = default;
@@ -115,7 +115,7 @@ protected:
      */
     glm::dvec3 translationPosition(Time time) const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     /// The layout of the VBOs (use float if sending as positions to shader)
     template <typename T>
@@ -160,11 +160,11 @@ protected:
         glm::dmat4 _localTransform = glm::dmat4(1.0);
 
         /// The vertex array object for this RenderInformation
-        GLuint _vaoID = 0;
+        GLuint _vao = 0;
         /// The main vertex buffer object
-        GLuint _vBufferID = 0;
+        GLuint _vbo = 0;
         /// The optional index buffer object
-        GLuint _iBufferID = 0;
+        GLuint _ibo = 0;
     };
 
     /// Primary set of information about the main rendering parts
@@ -193,18 +193,11 @@ private:
 
     /// Program object used to render the data stored in RenderInformation
     ghoul::opengl::ProgramObject* _programObject = nullptr;
-#ifdef __APPLE__
-    UniformCache(opacity, modelViewTransform, projectionTransform, color, useLineFade,
-        lineLength, lineFadeAmount, vertexSortingMethod, idOffset, nVertices, stride,
-        pointSize, renderPhase, useSplitRenderMode, floatingOffset, numberOfUniqueVertices
-    ) _uniformCache;
-#else
     UniformCache(opacity, modelViewTransform, projectionTransform, color, useLineFade,
         lineLength, lineFadeAmount, vertexSortingMethod, idOffset, nVertices, stride,
         pointSize, renderPhase, viewport, lineWidth, floatingOffset, useSplitRenderMode,
         numberOfUniqueVertices
     ) _uniformCache;
-#endif
 };
 
 } // namespace openspace

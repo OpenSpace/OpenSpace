@@ -39,7 +39,7 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
-class TouchMarker : public properties::PropertyOwner {
+class TouchMarker : public PropertyOwner {
 public:
     TouchMarker();
     virtual ~TouchMarker();
@@ -52,20 +52,20 @@ public:
 private:
     void createVertexList(const std::vector<TouchInputHolder>& list);
 
-    properties::BoolProperty _visible;
-    properties::FloatProperty _radiusSize;
-    properties::FloatProperty _opacity;
-    properties::FloatProperty _thickness;
-    properties::Vec3Property _color;
+    BoolProperty _visible;
+    FloatProperty _radiusSize;
+    FloatProperty _opacity;
+    FloatProperty _thickness;
+    Vec3Property _color;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     UniformCache(radius, opacity, thickness, color) _uniformCache;
 
-    std::vector<GLfloat> _vertexData;
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLsizei _count = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
-} // openspace namespace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_TOUCH___TOUCH_MARKER___H__

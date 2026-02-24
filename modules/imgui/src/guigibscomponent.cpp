@@ -35,7 +35,7 @@ namespace {
     const ImVec2 WindowSize = ImVec2(350, 500);
 } // namespace
 
-namespace openspace::gui {
+namespace openspace {
 
 GuiGIBSComponent::GuiGIBSComponent()
     : GuiComponent("GIBS", "GIBS")
@@ -153,4 +153,4 @@ void GuiGIBSComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace::gui
+} // namespace openspace

@@ -39,11 +39,11 @@ public:
     void update() override;
     void render(glm::vec2& penPosition) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::Vec3Property _activeColor;
-    properties::Vec3Property _activeFlash;
+    Vec3Property _activeColor;
+    Vec3Property _activeFlash;
 };
 
 } // namespace openspace

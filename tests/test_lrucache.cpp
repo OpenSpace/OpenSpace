@@ -27,6 +27,8 @@
 #include <modules/globebrowsing/src/lrucache.h>
 #include <glm/glm.hpp>
 
+using namespace openspace;
+
 namespace {
     struct DefaultHasher {
         unsigned long long operator()(int var) const {
@@ -55,14 +57,14 @@ namespace {
 } // namespace
 
 TEST_CASE("LRUCache: Get", "[lrucache]") {
-    openspace::globebrowsing::cache::LRUCache<int, std::string, DefaultHasher> lru(4);
+    LRUCache<int, std::string, DefaultHasher> lru(4);
     lru.put(1, "hej");
     lru.put(12, "san");
     CHECK(lru.get(1) == "hej");
 }
 
 TEST_CASE("LRUCache: CleaningCache", "[lrucache]") {
-    openspace::globebrowsing::cache::LRUCache<int, double, DefaultHasher> lru(4);
+    LRUCache<int, double, DefaultHasher> lru(4);
     lru.put(1, 1.2);
     lru.put(12, 2.3);
     lru.put(123, 33.4);
@@ -73,9 +75,7 @@ TEST_CASE("LRUCache: CleaningCache", "[lrucache]") {
 }
 
 TEST_CASE("LRUCache: StructKey", "[lrucache]") {
-    openspace::globebrowsing::cache::LRUCache<
-        MyKey, std::string, DefaultHasherMyKey
-    > lru(4);
+    LRUCache<MyKey, std::string, DefaultHasherMyKey> lru(4);
 
     // These two custom keys should be treated as equal
     MyKey key1 = { 2, 3 };

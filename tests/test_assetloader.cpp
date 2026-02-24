@@ -39,9 +39,9 @@
 #include <exception>
 #include <memory>
 
-TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
-    using namespace openspace;
+using namespace openspace;
 
+TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
     const Scene scene = Scene(std::make_unique<SceneInitializer>());
     ghoul::lua::LuaState* state = global::scriptEngine->luaState();
     AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
@@ -51,8 +51,6 @@ TEST_CASE("AssetLoader: Assertion", "[assetloader]") {
 }
 
 TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
-    using namespace openspace;
-
     Scene scene = Scene(std::make_unique<SceneInitializer>());
     ghoul::lua::LuaState* state = global::scriptEngine->luaState();
     AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));
@@ -61,8 +59,6 @@ TEST_CASE("AssetLoader: Basic Export Import", "[assetloader]") {
 }
 
 TEST_CASE("AssetLoader: Asset Functions", "[assetloader]") {
-    using namespace openspace;
-
     const Scene scene = Scene(std::make_unique<SceneInitializer>(1u));
     ghoul::lua::LuaState* state = global::scriptEngine->luaState();
     AssetManager assetLoader(state, absPath("${TESTDIR}/AssetLoaderTest/"));

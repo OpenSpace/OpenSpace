@@ -39,93 +39,95 @@
 #include <memory>
 
 namespace {
+    using namespace openspace;
+
     struct VBOLayout {
         float x = 0.f;
         float y = 0.f;
         float z = 0.f;
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
+    constexpr Property::PropertyInfo NumberPointsInfo = {
         "NumberOfPoints",
         "Points",
         "The number of control points used for constructing the shadow geometry. The "
         "higher this number, the more detailed the shadow is. However, it will have a "
         "negative impact on the performance. Also note that rendering errors will occur "
         "if this value is an even number.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
+    constexpr Property::PropertyInfo ShadowLengthInfo = {
         "ShadowLength",
         "Shadow length",
         "A factor that controls the length of the rendered shadow cone. The total length "
         "will be the distance from the shadower to the shadowee multiplied by this "
         "value.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowUmbralShadowInfo = {
+    constexpr Property::PropertyInfo ShowUmbralShadowInfo = {
         "ShowUmbralShadow",
         "Show umbral shadow",
         "Decides whether the umbral portion of the shadow should be shown.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UmbralShadowColorInfo = {
+    constexpr Property::PropertyInfo UmbralShadowColorInfo = {
         "UmbralShadowColor",
         "Umbral shadow color",
         "The color for the shadow cylinder that represents the umbral shadow.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowPenumbralShadowInfo = {
+    constexpr Property::PropertyInfo ShowPenumbralShadowInfo = {
         "ShowPenumbralShadow",
         "Show penumbral shadow",
         "Decides whether the penumbral portion of the shadow should be shown.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PenumbralShadowColorInfo = {
+    constexpr Property::PropertyInfo PenumbralShadowColorInfo = {
         "PenumbralShadowColor",
         "Penumbral shadow color",
         "The color for the shadow cylinder that represents the penumbral shadow.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LightSourceInfo = {
+    constexpr Property::PropertyInfo LightSourceInfo = {
         "LightSource",
         "Light source",
         "The SPICE name of the object that is used as the illuminator when computing the "
         "shadow cylinder.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LightSourceFrameInfo = {
+    constexpr Property::PropertyInfo LightSourceFrameInfo = {
         "LightSourceFrame",
         "Light source frame",
         "The SPICE name of the body-fixed reference frame for the light source.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShadowerInfo = {
+    constexpr Property::PropertyInfo ShadowerInfo = {
         "Shadower",
         "Shadower",
         "The SPICE name of the object that is casting the shadow on the shadowee.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShadowerFrameInfo = {
+    constexpr Property::PropertyInfo ShadowerFrameInfo = {
         "ShadowerFrame",
         "Shadower frame",
         "The SPICE name of the body-fixed reference frame for the shadower.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShadoweeInfo = {
+    constexpr Property::PropertyInfo ShadoweeInfo = {
         "Shadowee",
         "Shadowee",
         "The SPICE name of object that is receiving the shadow from the shadower.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     std::vector<VBOLayout> calculateShadowPoints(
@@ -196,12 +198,12 @@ namespace {
         // [[codegen::verbatim(ShadoweeInfo.description)]]
         std::string shadowee;
     };
-#include "renderableeclipsecone_codegen.cpp"
 } // namespace
+#include "renderableeclipsecone_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableEclipseCone::Documentation() {
+Documentation RenderableEclipseCone::Documentation() {
     return codegen::doc<Parameters>("space_renderableeclipsecone");
 }
 
@@ -243,13 +245,13 @@ RenderableEclipseCone::RenderableEclipseCone(const ghoul::Dictionary& dictionary
     _showUmbralShadow = p.showUmbralShadow.value_or(_showUmbralShadow);
     addProperty(_showUmbralShadow);
     _umbralShadowColor = p.umbralShadowColor.value_or(_umbralShadowColor);
-    _umbralShadowColor.setViewOption(properties::Property::ViewOptions::Color);
+    _umbralShadowColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_umbralShadowColor);
 
     _showPenumbralShadow = p.showPenumbralShadow.value_or(_showPenumbralShadow);
     addProperty(_showPenumbralShadow);
     _penumbralShadowColor = p.penumbralShadowColor.value_or(_penumbralShadowColor);
-    _penumbralShadowColor.setViewOption(properties::Property::ViewOptions::Color);
+    _penumbralShadowColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_penumbralShadowColor);
 
     _lightSource = p.lightSource;
@@ -262,8 +264,13 @@ RenderableEclipseCone::RenderableEclipseCone(const ghoul::Dictionary& dictionary
 }
 
 void RenderableEclipseCone::initializeGL() {
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
+    glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(VBOLayout));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     _shader = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         "ShadowCylinderProgram",
@@ -289,9 +296,7 @@ void RenderableEclipseCone::deinitializeGL() {
     _shader = nullptr;
 
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
     glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
 }
 
 bool RenderableEclipseCone::isReady() const {
@@ -511,18 +516,12 @@ void RenderableEclipseCone::createCone(double et) {
         _nVertices = static_cast<int>(umbralVertices.size());
     }
 
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vbo,
         vertices.size() * sizeof(VBOLayout),
         vertices.data(),
         GL_DYNAMIC_DRAW
     );
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-    glBindVertexArray(0);
 }
 
 } // namespace openspace

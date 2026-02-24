@@ -37,6 +37,41 @@
 #include <limits>
 #include <numeric>
 
+namespace {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo PeriodInfo = {
+        "Period",
+        "Period (in days)",
+        "The objects period, i.e. the length of its orbit around the parent object given "
+        "in (Earth) days. In the case of Earth, this would be a sidereal year "
+        "(=365.242 days). If this values is specified as multiples of the period, it is "
+        "possible to show the effects of precession.",
+        Property::Visibility::User
+    };
+
+    constexpr Property::PropertyInfo ResolutionInfo = {
+        "Resolution",
+        "Number of samples along the orbit",
+        "The number of samples along the orbit. This determines the resolution of the "
+        "trail; the tradeoff being that a higher resolution is able to resolve more "
+        "detail, but will take more resources while rendering, too. The higher, the "
+        "smoother the trail, but also more memory will be used.",
+        Property::Visibility::AdvancedUser
+    };
+
+    struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {
+        // [[codegen::verbatim(PeriodInfo.description)]]
+        double period;
+
+        // [[codegen::verbatim(ResolutionInfo.description)]]
+        int resolution;
+    };
+} // namespace
+#include "renderabletrailorbit_codegen.cpp"
+
+namespace openspace {
+
 // This class is using a VBO ring buffer + a constantly updated point as follows:
 // Structure of the array with a _resolution of 16. FF denotes the floating position that
 // is updated every frame:
@@ -84,40 +119,7 @@
 // NB: This method was implemented without a ring buffer before by manually shifting the
 // items in memory as was shown to be much slower than the current system.   ---abock
 
-namespace {
-    constexpr openspace::properties::Property::PropertyInfo PeriodInfo = {
-        "Period",
-        "Period (in days)",
-        "The objects period, i.e. the length of its orbit around the parent object given "
-        "in (Earth) days. In the case of Earth, this would be a sidereal year "
-        "(=365.242 days). If this values is specified as multiples of the period, it is "
-        "possible to show the effects of precession.",
-        openspace::properties::Property::Visibility::User
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
-        "Resolution",
-        "Number of samples along the orbit",
-        "The number of samples along the orbit. This determines the resolution of the "
-        "trail; the tradeoff being that a higher resolution is able to resolve more "
-        "detail, but will take more resources while rendering, too. The higher, the "
-        "smoother the trail, but also more memory will be used.",
-        openspace::properties::Property::Visibility::AdvancedUser
-    };
-
-    struct [[codegen::Dictionary(RenderableTrailOrbit)]] Parameters {
-        // [[codegen::verbatim(PeriodInfo.description)]]
-        double period;
-
-        // [[codegen::verbatim(ResolutionInfo.description)]]
-        int resolution;
-    };
-#include "renderabletrailorbit_codegen.cpp"
-} // namespace
-
-namespace openspace {
-
-documentation::Documentation RenderableTrailOrbit::Documentation() {
+Documentation RenderableTrailOrbit::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderable_renderabletrailorbit",
         RenderableTrail::Documentation()
@@ -151,15 +153,37 @@ RenderableTrailOrbit::RenderableTrailOrbit(const ghoul::Dictionary& dictionary)
 void RenderableTrailOrbit::initializeGL() {
     RenderableTrail::initializeGL();
 
-    glGenVertexArrays(1, &_primaryRenderInformation._vaoID);
-    glGenBuffers(1, &_primaryRenderInformation._vBufferID);
-    glGenBuffers(1, &_primaryRenderInformation._iBufferID);
+    glCreateBuffers(1, &_primaryRenderInformation._vbo);
+    glCreateBuffers(1, &_primaryRenderInformation._ibo);
+    glCreateVertexArrays(1, &_primaryRenderInformation._vao);
+    glVertexArrayVertexBuffer(
+        _primaryRenderInformation._vao,
+        0,
+        _primaryRenderInformation._vbo,
+        0,
+        sizeof(TrailVBOLayout<float>)
+    );
+    glVertexArrayElementBuffer(
+        _primaryRenderInformation._vao,
+        _primaryRenderInformation._ibo
+    );
+
+    glEnableVertexArrayAttrib(_primaryRenderInformation._vao, 0);
+    glVertexArrayAttribFormat(
+        _primaryRenderInformation._vao,
+        0,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        0
+    );
+    glVertexArrayAttribBinding(_primaryRenderInformation._vao, 0, 0);
 }
 
 void RenderableTrailOrbit::deinitializeGL() {
-    glDeleteVertexArrays(1, &_primaryRenderInformation._vaoID);
-    glDeleteBuffers(1, &_primaryRenderInformation._vBufferID);
-    glDeleteBuffers(1, &_primaryRenderInformation._iBufferID);
+    glDeleteVertexArrays(1, &_primaryRenderInformation._vao);
+    glDeleteBuffers(1, &_primaryRenderInformation._vbo);
+    glDeleteBuffers(1, &_primaryRenderInformation._ibo);
 
     RenderableTrail::deinitializeGL();
 }
@@ -186,16 +210,13 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     const glm::vec3 p = translationPosition(data.time);
     _vertexArray[_primaryRenderInformation.first] = { p.x, p.y, p.z };
 
-    glBindVertexArray(_primaryRenderInformation._vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _primaryRenderInformation._vBufferID);
-
     // 3
     if (!report.permanentPointsNeedUpdate) {
         if (report.floatingPointNeedsUpdate) {
             // If no other values have been touched, we only need to upload the
             // floating value
-            glBufferSubData(
-                GL_ARRAY_BUFFER,
+            glNamedBufferSubData(
+                _primaryRenderInformation._vbo,
                 _primaryRenderInformation.first * sizeof(TrailVBOLayout<float>),
                 sizeof(TrailVBOLayout<float>),
                 _vertexArray.data() + _primaryRenderInformation.first
@@ -207,8 +228,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
         if (report.nUpdated == UpdateReport::All) {
             // If all of the values have been invalidated, we need to upload the entire
             // array
-            glBufferData(
-                GL_ARRAY_BUFFER,
+            glNamedBufferData(
+                _primaryRenderInformation._vbo,
                 _vertexArray.size() * sizeof(TrailVBOLayout<float>),
                 _vertexArray.data(),
                 GL_STREAM_DRAW
@@ -217,12 +238,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             if (_indexBufferDirty) {
                 // We only need to upload the index buffer if it has been invalidated
                 // by changing the number of values we want to represent
-                glBindBuffer(
-                    GL_ELEMENT_ARRAY_BUFFER,
-                    _primaryRenderInformation._iBufferID
-                );
-                glBufferData(
-                    GL_ELEMENT_ARRAY_BUFFER,
+                glNamedBufferData(
+                    _primaryRenderInformation._ibo,
                     _indexArray.size() * sizeof(unsigned int),
                     _indexArray.data(),
                     GL_STATIC_DRAW
@@ -234,8 +251,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             // The lambda expression that will upload parts of the array starting at
             // begin and containing length number of elements
             auto upload = [this](int begin, int length) {
-                glBufferSubData(
-                    GL_ARRAY_BUFFER,
+                glNamedBufferSubData(
+                    _primaryRenderInformation._vbo,
                     begin * sizeof(TrailVBOLayout<float>),
                     sizeof(TrailVBOLayout<float>) * length,
                     _vertexArray.data() + begin
@@ -298,11 +315,6 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             }
         }
     }
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glBindVertexArray(0);
 }
 
 RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(

@@ -45,10 +45,10 @@ namespace ghoul {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 struct RenderData;
 
-class LabelsComponent : public properties::PropertyOwner, public Fadeable {
+class LabelsComponent : public PropertyOwner, public Fadeable {
 public:
     explicit LabelsComponent(const ghoul::Dictionary& dictionary);
 
@@ -80,7 +80,7 @@ public:
         const glm::vec3& orthoRight, const glm::vec3& orthoUp,
         float fadeInVariable = 1.f);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     std::filesystem::path _labelFile;
@@ -95,12 +95,12 @@ private:
 
     bool _createdFromDataset = false;
 
-    properties::BoolProperty _enabled;
-    properties::Vec3Property _color;
-    properties::FloatProperty _size;
-    properties::FloatProperty _fontSize;
-    properties::IVec2Property _minMaxSize;
-    properties::BoolProperty _faceCamera;
+    BoolProperty _enabled;
+    Vec3Property _color;
+    FloatProperty _size;
+    FloatProperty _fontSize;
+    IVec2Property _minMaxSize;
+    BoolProperty _faceCamera;
 };
 
 } // namespace openspace

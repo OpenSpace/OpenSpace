@@ -49,6 +49,8 @@
 #include "planetssonification_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "PlanetsSonification";
 
     // Number of data items for planets and moons, which is used to calculate the total
@@ -75,162 +77,160 @@ namespace {
     constexpr int MoonsIndex = 4;
     constexpr int RingsIndex = 5;
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        PlanetsSonificationInfo =
-    {
+    static const PropertyOwner::PropertyOwnerInfo PlanetsSonificationInfo = {
         "PlanetsSonification",
         "Planets Sonification",
         "Sonification of the planets in the solar system."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ToggleAllInfo = {
+    constexpr Property::PropertyInfo ToggleAllInfo = {
         "ToggleAll",
         "Toggle all",
         "Toggle all sonifications for all planets.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo MercuryInfo = {
+    static const PropertyOwner::PropertyOwnerInfo MercuryInfo = {
         "Mercury",
         "Mercury",
         "Settings for the sonification of Mercury."
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo VenusInfo = {
+    static const PropertyOwner::PropertyOwnerInfo VenusInfo = {
         "Venus",
         "Venus",
         "Settings for the sonification of Venus."
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo EarthInfo = {
+    static const PropertyOwner::PropertyOwnerInfo EarthInfo = {
         "Earth",
         "Earth",
         "Settings for the sonification of Earth."
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo MarsInfo = {
+    static const PropertyOwner::PropertyOwnerInfo MarsInfo = {
         "Mars",
         "Mars",
         "Settings for the sonification of Mars."
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo JupiterInfo = {
+    static const PropertyOwner::PropertyOwnerInfo JupiterInfo = {
         "Jupiter",
         "Jupiter",
         "Settings for the sonification of Jupiter."
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo SaturnInfo = {
+    static const PropertyOwner::PropertyOwnerInfo SaturnInfo = {
         "Saturn",
         "Saturn",
         "Settings for the sonification of Saturn."
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo UranusInfo = {
+    static const PropertyOwner::PropertyOwnerInfo UranusInfo = {
         "Uranus",
         "Uranus",
         "Settings for the sonification of Uranus."
     };
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo NeptuneInfo = {
+    static const PropertyOwner::PropertyOwnerInfo NeptuneInfo = {
         "Neptune",
         "Neptune",
         "Settings for the sonification of Neptune."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PlanetToggleAllInfo = {
+    constexpr Property::PropertyInfo PlanetToggleAllInfo = {
         "ToggleAll",
         "Toggle All",
         "Toggle all sonifications for the planet.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeDayInfo = {
+    constexpr Property::PropertyInfo SizeDayInfo = {
         "SizeDay",
         "Size/Day",
         "Toggle the size/day sonification for the planet.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GravityInfo = {
+    constexpr Property::PropertyInfo GravityInfo = {
         "Gravity",
         "Gravity",
         "Toggle the gravity sonification for the planet.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TemperatureInfo = {
+    constexpr Property::PropertyInfo TemperatureInfo = {
         "Temperature",
         "Temperature",
         "Toggle the temperature sonification for the planet.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AtmosphereInfo = {
+    constexpr Property::PropertyInfo AtmosphereInfo = {
         "Atmosphere",
         "Atmosphere",
         "Toggle the atmosphere sonification for the planet.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MoonsInfo = {
+    constexpr Property::PropertyInfo MoonsInfo = {
         "Moons",
         "Moons",
         "Toggle the moons sonification for the planet.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RingsInfo = {
+    constexpr Property::PropertyInfo RingsInfo = {
         "Rings",
         "Rings",
         "Toggle the rings sonification for the planet.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
+    const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
         "Precision",
         "Precision",
         "Settings for the distance and angle precision of the planets sonification."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LowDistancePrecisionInfo = {
+    constexpr Property::PropertyInfo LowDistancePrecisionInfo = {
         "LowDistancePrecision",
         "Distance precision (low)",
         "The precision in meters used to determine when to send updated distance data "
         "to the Open Sound Control receiver. This is the low precision value (low level "
         "of detail) that is used for objects that are not the current focus, saving "
         "performance.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HighDistancePrecisionInfo = {
+    constexpr Property::PropertyInfo HighDistancePrecisionInfo = {
         "HighDistancePrecision",
         "Distance Precision (high)",
         "The precision in meters used to determine when to send updated distance data "
         "to the Open Sound Control receiver. This is the high precision value (high "
         "level of detail) that is used when the monitored object is the current focus, "
         "providing more accurate data.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LowAnglePrecisionInfo = {
+    constexpr Property::PropertyInfo LowAnglePrecisionInfo = {
         "LowAnglePrecision",
         "Angle precision (low)",
         "The precision in radians used to determine when to send updated angle data "
         "to the Open Sound Control receiver. This is the low precision value (low level "
         "of detail) that is used for objects that are not the current focus, saving "
         "performance.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HighAnglePrecisionInfo = {
+    constexpr Property::PropertyInfo HighAnglePrecisionInfo = {
         "HighAnglePrecision",
         "Angle precision (high)",
         "The precision in radians used to determine when to send updated angle data "
         "to the Open Sound Control receiver. This is the high precision value (high "
         "level of detail) that is used when the monitored object is the current focus, "
         "providing more accurate data.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(PlanetsSonification)]] Parameters {
@@ -240,8 +240,8 @@ namespace {
         // Names of the moons for the planet
         std::optional<std::vector<std::string>> moons;
     };
-#include "planetssonification_codegen.cpp"
 } // namespace
+#include "planetssonification_codegen.cpp"
 
 namespace openspace {
 
@@ -351,8 +351,8 @@ PlanetsSonification::DataBody::DataBody(std::string inName)
 {}
 
 PlanetsSonification::PlanetProperties::PlanetProperties(
-                                  properties::PropertyOwner::PropertyOwnerInfo planetInfo)
-    : properties::PropertyOwner(planetInfo)
+                                              PropertyOwner::PropertyOwnerInfo planetInfo)
+    : PropertyOwner(planetInfo)
     , toggleAll(PlanetToggleAllInfo, false)
     , sizeDayEnabled(SizeDayInfo, false)
     , gravityEnabled(GravityInfo, false)
@@ -386,8 +386,8 @@ PlanetsSonification::PlanetProperties::PlanetProperties(
 }
 
 PlanetsSonification::PrecisionProperties::PrecisionProperties(
-                               properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
-    : properties::PropertyOwner(precisionInfo)
+                                           PropertyOwner::PropertyOwnerInfo precisionInfo)
+    : PropertyOwner(precisionInfo)
     , lowDistancePrecision(LowDistancePrecisionInfo, 10000.0, 0.0, 1.0e+25)
     , highDistancePrecision(HighDistancePrecisionInfo, 1000.0, 0.0, 1.0e+25)
     , lowAnglePrecision(LowAnglePrecisionInfo, 0.1, 0.0, 10.0)
@@ -474,7 +474,7 @@ void PlanetsSonification::addPlanet(const ghoul::Dictionary& dict) {
 
     if (p.moons.has_value()) {
         for (const std::string& moon : *p.moons) {
-            planet.moons.push_back(moon);
+            planet.moons.push_back(DataBody(moon));
         }
     }
 
@@ -818,7 +818,7 @@ void PlanetsSonification::onNeptuneSettingChanged() {
     sendData(NeptuneIndex);
 }
 
-scripting::LuaLibrary PlanetsSonification::luaLibrary() {
+LuaLibrary PlanetsSonification::luaLibrary() {
     return {
         "sonification",
         {

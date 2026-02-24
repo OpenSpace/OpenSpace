@@ -31,28 +31,42 @@
 #include <variant>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
 
 /**
  * Binds a key to Lua command to both execute locally and broadcast to all clients if this
  * node is hosting a parallel connection.
  */
-[[codegen::luawrap]] void bindKey(std::string key, std::string action) {
-    using namespace openspace;
+[[codegen::luawrap]] void bindKey(std::string key,
+                                  std::variant<std::string, ghoul::Dictionary> action)
+{
+    std::string identifier;
+    if (std::holds_alternative<ghoul::Dictionary>(action)) {
+        const ghoul::Dictionary& d = std::get<ghoul::Dictionary>(action);
+        if (!d.hasValue<std::string>("Identifier")) {
+            throw ghoul::lua::LuaError("Provided action table must have an Identifer");
+        }
+        identifier = d.value<std::string>("Identifier");
+    }
+    else {
+        identifier = std::get<std::string>(action);
+    }
 
-    if (action.empty()) {
+    if (identifier.empty()) {
         throw ghoul::lua::LuaError("Action must not be empty");
     }
-    if (!global::actionManager->hasAction(action)) {
-        throw ghoul::lua::LuaError(std::format("Action '{}' does not exist", action));
+    if (!global::actionManager->hasAction(identifier)) {
+        throw ghoul::lua::LuaError(std::format("Action '{}' does not exist", identifier));
     }
 
-    openspace::KeyWithModifier iKey = openspace::stringToKey(key);
-    if (iKey.key == openspace::Key::Unknown) {
+    KeyWithModifier iKey = stringToKey(key);
+    if (iKey.key == Key::Unknown) {
         throw ghoul::lua::LuaError(std::format("Could not find key '{}'", key));
     }
 
-    global::keybindingManager->bindKey(iKey.key, iKey.modifier, std::move(action));
+    global::keybindingManager->bindKey(iKey.key, iKey.modifier, std::move(identifier));
 }
 
 /**
@@ -65,8 +79,6 @@ namespace {
  */
 [[codegen::luawrap]] std::vector<std::string> keyBindings(std::optional<std::string> key)
 {
-    using namespace openspace;
-
     std::vector<std::string> res;
     if (key.has_value()) {
         using K = KeyWithModifier;
@@ -100,8 +112,6 @@ namespace {
  * multiple keys, this function returns a list of all keys
  */
 [[codegen::luawrap]] std::vector<std::string> keyBindingsForAction(std::string action) {
-    using namespace openspace;
-
     const std::multimap<KeyWithModifier, std::string>& keybinds =
         global::keybindingManager->keyBindings();
 
@@ -121,8 +131,6 @@ namespace {
 [[codegen::luawrap]] void clearKey(
                                   std::variant<std::string, std::vector<std::string>> key)
 {
-    using namespace openspace;
-
     if (std::holds_alternative<std::string>(key)) {
         KeyWithModifier k = stringToKey(std::get<std::string>(key));
         global::keybindingManager->removeKeyBinding(k);
@@ -136,9 +144,9 @@ namespace {
 
 // Clear all key bindings
 [[codegen::luawrap]] void clearKeys() {
-    openspace::global::keybindingManager->resetKeyBindings();
+    global::keybindingManager->resetKeyBindings();
 }
 
-#include "keybindingmanager_lua_codegen.cpp"
-
 } // namespace
+
+#include "keybindingmanager_lua_codegen.cpp"

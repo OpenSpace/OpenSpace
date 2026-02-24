@@ -45,6 +45,8 @@
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableSphere";
     constexpr int DefaultBlending = 0;
     constexpr int AdditiveBlending = 1;
@@ -58,18 +60,18 @@ namespace {
         { "Color Adding", ColorAddingBlending }
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Size (in meters)",
         "The radius of the sphere in meters.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    constexpr Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of segments",
         "The number of segments that the sphere is split into.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     enum class Orientation {
@@ -78,19 +80,19 @@ namespace {
         Both
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OrientationInfo = {
+    constexpr Property::PropertyInfo OrientationInfo = {
         "Orientation",
         "Orientation",
         "Specifies whether the texture is applied to the inside of the sphere, the "
         "outside of the sphere, or both.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MirrorTextureInfo = {
+    constexpr Property::PropertyInfo MirrorTextureInfo = {
         "MirrorTexture",
         "Mirror texture",
         "If true, mirror the texture along the x-axis.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     enum class TextureProjection {
@@ -98,70 +100,70 @@ namespace {
         AngularFisheye
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextureProjectionInfo = {
+    constexpr Property::PropertyInfo TextureProjectionInfo = {
         "TextureProjection",
         "Texture Projection",
         "Specifies the projection mapping to use for any texture loaded onto the sphere "
         "(assumes Equirectangular per default). Note that for \"Angular Fisheye\" only "
         "half the sphere will be textured - the hemisphere centered around the z-axis.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableFadeInOutInfo = {
+    constexpr Property::PropertyInfo DisableFadeInOutInfo = {
         "DisableFadeInOut",
         "Disable fade-in/fade-out effects",
         "Enables/Disables the fade in and out effects.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeInThresholdInfo = {
+    constexpr Property::PropertyInfo FadeInThresholdInfo = {
         "FadeInThreshold",
         "Fade-in threshold",
         "The distance from the center of the Milky Way at which the sphere should start "
         "to fade in, given as a percentage of the size of the object. A value of zero "
         "means that no fading in will happen.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeOutThresholdInfo = {
+    constexpr Property::PropertyInfo FadeOutThresholdInfo = {
         "FadeOutThreshold",
         "Fade-out threshold",
         "A threshold for when the sphere should start fading out, given as a percentage "
         "of how much of the sphere that is visible before the fading should start. A "
         "value of zero means that no fading out will happen.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseColorMapInfo = {
+    constexpr Property::PropertyInfo UseColorMapInfo = {
         "UseColorMap",
         "Use color map",
         "Used to toggle color map on or off for the sphere. Mainly used to transform "
         "grayscale textures from data into color images.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorMapInfo = {
+    constexpr Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
         "Transfer function (color map) path",
         "Color map / Transfer function to use if `UseColorMap` is enabled.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
+    constexpr Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending options",
         "Controls the blending function used to calculate the colors of the sphere with "
         "respect to the opacity.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableDepthInfo = {
+    constexpr Property::PropertyInfo DisableDepthInfo = {
         "DisableDepth",
         "Disable depth",
         "If disabled, no depth values are taken into account for this sphere, meaning "
         "that depth values are neither written or tested against during the rendering. "
         "This can be useful for spheres that represent a background image.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `Renderable` represents a simple sphere with an image. Per default, the
@@ -217,12 +219,12 @@ namespace {
         // [[codegen::verbatim(DisableDepthInfo.description)]]
         std::optional<bool> disableDepth;
     };
-#include "renderablesphere_codegen.cpp"
 } // namespace
+#include "renderablesphere_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableSphere::Documentation() {
+Documentation RenderableSphere::Documentation() {
     return codegen::doc<Parameters>("base_renderable_sphere");
 }
 
@@ -464,16 +466,14 @@ void RenderableSphere::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform("transferFunction", transferFunctionUnit);
     _shader->setUniform("dataMinMaxValues", _dataMinMaxValues);
     if (_useColorMap) {
-        transferFunctionUnit.activate();
-        _transferFunction->bind();
+        transferFunctionUnit.bind(_transferFunction->texture());
     }
 
     _shader->setUniform(_uniformCache.opacity, adjustedOpacity);
     _shader->setUniform(_uniformCache.mirrorTexture, _mirrorTexture.value());
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    bindTexture();
+    bindTexture(unit);
     defer{ unbindTexture(); };
     _shader->setUniform(_uniformCache.colorTexture, unit);
 
@@ -546,8 +546,6 @@ void RenderableSphere::update(const UpdateData&) {
     }
 }
 
-void RenderableSphere::unbindTexture() {
-    glBindTexture(GL_TEXTURE_2D, 0);
-}
+void RenderableSphere::unbindTexture() {}
 
 } // namespace openspace

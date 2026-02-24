@@ -43,13 +43,12 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    void bindTexture() override;
-    void unbindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
-    spout::SpoutReceiverPropertyProxy _spoutReceiver;
+    SpoutReceiverPropertyProxy _spoutReceiver;
 };
 
 } // namespace openspace

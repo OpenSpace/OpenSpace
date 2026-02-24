@@ -10,7 +10,7 @@ local models = asset.resource({
   Name = "Apollo Models",
   Type = "HttpSynchronization",
   Identifier = "apollo_models",
-  Version = 4
+  Version = 5
 })
 
 

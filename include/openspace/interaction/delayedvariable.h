@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_CORE___DELAYEDVARIABLE___H__
 #define __OPENSPACE_CORE___DELAYEDVARIABLE___H__
 
-namespace openspace::interaction {
+namespace openspace {
 
 /**
  * Class that acts as a smoothing filter to a variable. The filter has a step response on
@@ -51,7 +51,7 @@ private:
     T _currentValue = T(0);
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #include "delayedvariable.inl"
 

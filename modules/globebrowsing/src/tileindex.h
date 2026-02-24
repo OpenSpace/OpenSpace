@@ -29,7 +29,7 @@
 #include <ghoul/glm.h>
 #include <cstdint>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 struct TileIndex {
     using TileHashKey = uint64_t;
@@ -48,6 +48,6 @@ struct TileIndex {
 
 bool operator==(const TileIndex& lhs, const TileIndex& rhs);
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILE_INDEX___H__

@@ -24,20 +24,24 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "powerscaling/powerscalingmath.glsl"
 
 layout(points) in;
-flat in float textureLayer[];
-flat in float colorParameter[];
-flat in float scalingParameter[];
-flat in vec4 orientation[]; // quaternion
+in Data {
+  flat float textureLayer;
+  flat float colorParameter;
+  flat float scalingParameter;
+  flat vec4 orientation; // quaternion
+} in_data[];
 
 layout(triangle_strip, max_vertices = 4) out;
-flat out float gs_colorParameter;
-out vec2 texCoord;
-flat out int layer;
-flat out float vs_screenSpaceDepth;
-flat out vec4 vs_positionViewSpace;
+out Data {
+  flat int textureLayer;
+  flat float colorParameter;
+  vec2 texCoords;
+  flat float screenSpaceDepth;
+  flat vec4 positionViewSpace;
+} out_data;
 
 // General settings
 uniform float scaleExponent;
@@ -65,7 +69,7 @@ uniform float maxAngularSize;
 
 uniform vec2 aspectRatioScale;
 
-const vec2 corners[4] = vec2[4](
+const vec2 Corners[4] = vec2[4](
   vec2(0.0, 0.0),
   vec2(1.0, 0.0),
   vec2(1.0, 1.0),
@@ -76,9 +80,9 @@ const int RenderOptionCameraViewDirection = 0;
 const int RenderOptionCameraPositionNormal = 1;
 const int RenderOptionFixedRotation = 2;
 
+
 // Quaternion math code from:
 // https://gist.github.com/mattatz/40a91588d5fb38240403f198a938a593
-
 vec4 quatMult(vec4 q1, vec4 q2) {
   return vec4(
     q2.xyz * q1.w + q1.xyz * q2.w + cross(q1.xyz, q2.xyz),
@@ -88,21 +92,21 @@ vec4 quatMult(vec4 q1, vec4 q2) {
 
 // Vector rotation with a quaternion
 // http://mathworld.wolfram.com/Quaternion.html
-vec3 rotate_vector(vec3 v, vec4 q) {
-  vec4 q_conjugate = q * vec4(-1.0, -1.0, -1.0, 1.0);
-  return quatMult(q, quatMult(vec4(v, 0.0), q_conjugate)).xyz;
+vec3 rotateVector(vec3 v, vec4 q) {
+  vec4 qConjugate = q * vec4(-1.0, -1.0, -1.0, 1.0);
+  return quatMult(q, quatMult(vec4(v, 0.0), qConjugate)).xyz;
 }
 
-void main() {
-  vec4 pos = gl_in[0].gl_Position;
-  layer = int(textureLayer[0]);
-  gs_colorParameter = colorParameter[0];
 
-  dvec4 dpos = modelMatrix * dvec4(dvec3(pos.xyz), 1.0);
+void main() {
+  out_data.textureLayer = int(in_data[0].textureLayer);
+  out_data.colorParameter = in_data[0].colorParameter;
+
+  dvec4 dpos = modelMatrix * dvec4(dvec3(gl_in[0].gl_Position.xyz), 1.0);
 
   float scaleMultiply = pow(10.0, scaleExponent);
   if (hasDvarScaling) {
-    scaleMultiply *= scalingParameter[0] * dvarScaleFactor;
+    scaleMultiply *= in_data[0].scalingParameter * dvarScaleFactor;
   }
 
   vec3 scaledRight = vec3(1.0, 0.0, 0.0);
@@ -122,11 +126,10 @@ void main() {
   }
   else if (renderOption == RenderOptionFixedRotation) {
     if (useOrientationData) {
-        vec4 quat = orientation[0];
-        scaledRight = normalize(rotate_vector(scaledRight, quat));
-        scaledUp =  normalize(rotate_vector(scaledUp, quat));
+      vec4 quat = in_data[0].orientation;
+      scaledRight = normalize(rotateVector(scaledRight, quat));
+      scaledUp = normalize(rotateVector(scaledUp, quat));
     }
-    // Else use default
   }
 
   scaledRight *= scaleMultiply * 0.5;
@@ -144,7 +147,8 @@ void main() {
     float angle = atan(float(pointSize / distanceToCamera));
 
     if ((angle > desiredAngleRadians) && (distanceToCamera > 0.0)) {
-      float correctionScaleFactor = float(distanceToCamera) * tan(desiredAngleRadians) / float(pointSize);
+      float correctionScaleFactor =
+        float(distanceToCamera) * tan(desiredAngleRadians) / float(pointSize);
       scaledRight *= correctionScaleFactor;
       scaledUp *= correctionScaleFactor;
     }
@@ -158,30 +162,26 @@ void main() {
   vec4 scaledUpClip = scaleFactor * aspectRatioScale.y *
     vec4(cameraViewProjectionMatrix * dvec4(scaledUp, 0.0));
 
-  vec4 dposViewSpace= vec4(cameraViewMatrix * dpos);
-  vs_positionViewSpace = dposViewSpace;
+  out_data.positionViewSpace = vec4(cameraViewMatrix * dpos);
 
   vec4 initialPosition = z_normalization(dposClip - scaledRightClip - scaledUpClip);
-  vs_screenSpaceDepth = initialPosition.w;
-  vec4 secondPosition = z_normalization(dposClip + scaledRightClip - scaledUpClip);
-  vec4 crossCorner = z_normalization(dposClip + scaledUpClip + scaledRightClip);
-  vec4 thirdPosition = z_normalization(dposClip + scaledUpClip - scaledRightClip);
+  out_data.screenSpaceDepth = initialPosition.w;
 
   // Build primitive
-  texCoord = corners[0];
+  out_data.texCoords = Corners[0];
   gl_Position = initialPosition;
   EmitVertex();
 
-  texCoord = corners[1];
-  gl_Position = secondPosition;
+  out_data.texCoords = Corners[1];
+  gl_Position = z_normalization(dposClip + scaledRightClip - scaledUpClip);
   EmitVertex();
 
-  texCoord = corners[3];
-  gl_Position = thirdPosition;
+  out_data.texCoords = Corners[3];
+  gl_Position = z_normalization(dposClip + scaledUpClip - scaledRightClip);
   EmitVertex();
 
-  texCoord = corners[2];
-  gl_Position = crossCorner;
+  out_data.texCoords = Corners[2];
+  gl_Position = z_normalization(dposClip + scaledUpClip + scaledRightClip);
   EmitVertex();
 
   EndPrimitive();

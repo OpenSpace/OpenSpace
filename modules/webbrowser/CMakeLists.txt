@@ -279,7 +279,7 @@ create_new_module(
   ${WEBBROWSER_MODULE_NAME}
   webbrowser_module
   STATIC
-  ${HEADER_FILES} ${SOURCE_FILES}
+  ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
 target_precompile_headers(${webbrowser_module} PRIVATE

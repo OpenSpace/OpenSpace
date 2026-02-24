@@ -110,13 +110,11 @@
 #include "Psapi.h"
 #endif // WIN32
 
-#ifdef __APPLE__
-#include <openspace/interaction/touchbar.h>
-#endif // __APPLE__
-
 #include "openspaceengine_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     // Helper structs for the visitor pattern of the std::variant
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
@@ -129,8 +127,8 @@ namespace {
     PDH_HCOUNTER vramCounter;
 #endif // WIN32
 
-    constexpr std::string_view stringify(openspace::OpenSpaceEngine::Mode m) {
-        using Mode = openspace::OpenSpaceEngine::Mode;
+    constexpr std::string_view stringify(OpenSpaceEngine::Mode m) {
+        using Mode = OpenSpaceEngine::Mode;
         switch (m) {
             case Mode::UserControl: return "UserControl";
             case Mode::CameraPath: return "CameraPath";
@@ -139,55 +137,51 @@ namespace {
         throw ghoul::MissingCaseException();
     }
 
-    constexpr openspace::properties::Property::PropertyInfo PrintEventsInfo = {
+    constexpr Property::PropertyInfo PrintEventsInfo = {
         "PrintEvents",
         "Print events",
         "If this is enabled, all events that are propagated through the system are "
         "printed to the log.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo VisibilityInfo = {
+    constexpr Property::PropertyInfo VisibilityInfo = {
         "PropertyVisibility",
         "Property visibility",
         "Hides or displays different settings in the GUI depending on how advanced they "
         "are.",
-        openspace::properties::Property::Visibility::Always
+        Property::Visibility::Always
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeDurationInfo = {
+    constexpr Property::PropertyInfo FadeDurationInfo = {
         "FadeDuration",
         "Fade duration (seconds)",
         "Controls how long time the fading in/out takes when enabling/disabling an "
         "object through a checkbox in the UI. Holding SHIFT while clicking the "
         "checkbox will enable/disable the renderable without fading, as will setting "
         "this value to zero.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
+    constexpr Property::PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInputs",
         "Disable all mouse inputs",
         "Disables all mouse inputs. Useful when using touch interaction, to prevent "
         "double inputs on touch (from both touch input and inserted mouse inputs).",
-        openspace::properties::Property::Visibility::User,
-        openspace::properties::Property::NeedsConfirmation::Yes
+        Property::Visibility::User,
+        Property::NeedsConfirmation::Yes
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        ShowPropertyConfirmationDialogInfo =
-    {
+    constexpr Property::PropertyInfo ShowPropertyConfirmationDialogInfo = {
         "ShowPropertyConfirmation",
         "Show property confirmation",
         "Controls whether confirmation dialogs are shown when making changes to certain "
         "properties. If checked, the dialogs will be shown for properties that require "
         "it. If unchecked, no dialogs will be shown.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     void viewportChanged() {
-        using namespace openspace;
-
         // Needs to be updated since each render call potentially targets a different
         // window and/or viewport
         using FR = ghoul::fontrendering::FontRenderer;
@@ -198,20 +192,16 @@ namespace {
         );
     }
 
-    void resetPropertyChangeFlagsOfSubowners(openspace::properties::PropertyOwner* po) {
-        using namespace openspace;
-
-        for (properties::PropertyOwner* subOwner : po->propertySubOwners()) {
+    void resetPropertyChangeFlagsOfSubowners(PropertyOwner* po) {
+        for (PropertyOwner* subOwner : po->propertySubOwners()) {
             resetPropertyChangeFlagsOfSubowners(subOwner);
         }
-        for (properties::Property* p : po->properties()) {
+        for (Property* p : po->properties()) {
             p->resetToUnchanged();
         }
     }
 
     void resetPropertyChangeFlags() {
-        using namespace openspace;
-
         ZoneScoped;
 
         Scene* scene = global::renderEngine->scene();
@@ -224,7 +214,6 @@ namespace {
             resetPropertyChangeFlagsOfSubowners(n);
         }
     }
-
 } // namespace
 
 namespace openspace {
@@ -232,7 +221,7 @@ namespace openspace {
 class Scene;
 
 OpenSpaceEngine::OpenSpaceEngine()
-    : properties::PropertyOwner({ "OpenSpaceEngine", "OpenSpace Engine" })
+    : PropertyOwner({ "OpenSpaceEngine", "OpenSpace Engine" })
     , _printEvents(PrintEventsInfo, false)
     , _visibility(VisibilityInfo)
     , _showPropertyConfirmationDialog(ShowPropertyConfirmationDialogInfo, true)
@@ -245,13 +234,12 @@ OpenSpaceEngine::OpenSpaceEngine()
 
     addProperty(_printEvents);
 
-    using Visibility = openspace::properties::Property::Visibility;
     _visibility.addOptions({
-        { static_cast<int>(Visibility::NoviceUser), "Novice User" },
-        { static_cast<int>(Visibility::User), "User" },
-        { static_cast<int>(Visibility::AdvancedUser), "Advanced User" },
-        { static_cast<int>(Visibility::Developer), "Developer" },
-        { static_cast<int>(Visibility::Hidden), "Everything" },
+        { static_cast<int>(Property::Visibility::NoviceUser), "Novice User" },
+        { static_cast<int>(Property::Visibility::User), "User" },
+        { static_cast<int>(Property::Visibility::AdvancedUser), "Advanced User" },
+        { static_cast<int>(Property::Visibility::Developer), "Developer" },
+        { static_cast<int>(Property::Visibility::Hidden), "Everything" },
     });
     addProperty(_visibility);
 
@@ -263,7 +251,7 @@ OpenSpaceEngine::OpenSpaceEngine()
 
     ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
     ghoul_assert(fTask, "No task factory existed");
-    fTask->registerClass<interaction::ConvertRecFormatTask>("ConvertRecFormatTask");
+    fTask->registerClass<ConvertRecFormatTask>("ConvertRecFormatTask");
 
 #ifdef WIN32
     PDH_STATUS status = PdhOpenQueryA(nullptr, 0, &vramQuery);
@@ -375,7 +363,7 @@ void OpenSpaceEngine::initialize() {
         try {
             LogMgr.addLog(createLog(log));
         }
-        catch (const documentation::SpecificationError& e) {
+        catch (const SpecificationError& e) {
             LERROR("Failed loading of log");
             logError(e);
             throw;
@@ -439,11 +427,11 @@ void OpenSpaceEngine::initialize() {
 
     // After registering the modules, the documentations for the available classes
     // can be added as well
-    for (documentation::Documentation d : global::moduleEngine->moduleDocumentations()) {
+    for (Documentation d : global::moduleEngine->moduleDocumentations()) {
         DocEng.addDocumentation(std::move(d));
     }
     for (OpenSpaceModule* m : global::moduleEngine->modules()) {
-        for (const documentation::Documentation& doc : m->documentations()) {
+        for (const Documentation& doc : m->documentations()) {
             DocEng.addDocumentation(doc);
         }
     }
@@ -458,7 +446,7 @@ void OpenSpaceEngine::initialize() {
         // @TODO (2024-08-07, abock) It's not pretty, but doing it differently would
         // require a bigger rewrite of how we handle the ScriptEngine
         global::scriptEngine->~ScriptEngine();
-        global::scriptEngine = new (global::scriptEngine) scripting::ScriptEngine(
+        global::scriptEngine = new (global::scriptEngine) ScriptEngine(
             global::configuration->sandboxedLua
         );
     }
@@ -510,7 +498,7 @@ void OpenSpaceEngine::initialize() {
     for (OpenSpaceModule* module : global::moduleEngine->modules()) {
         global::scriptEngine->addLibrary(module->luaLibrary());
 
-        for (const scripting::LuaLibrary& l : module->luaLibraries()) {
+        for (const LuaLibrary& l : module->luaLibraries()) {
             global::scriptEngine->addLibrary(l);
         }
     }
@@ -590,7 +578,7 @@ void OpenSpaceEngine::initializeGL() {
         }
     }
 
-    rendering::helper::initialize();
+    rendering::initialize();
 
     loadFonts();
 
@@ -634,7 +622,7 @@ void OpenSpaceEngine::initializeGL() {
     }
 
     if (debugActive) {
-        using namespace ghoul::opengl::debug;
+        using namespace ghoul::opengl;
 
         const bool synchronous = global::configuration->openGLDebugContext.isSynchronous;
         setDebugOutput(DebugOutput(debugActive), SynchronousOutput(synchronous));
@@ -662,7 +650,7 @@ void OpenSpaceEngine::initializeGL() {
             );
         }
 
-        ghoul::opengl::debug::setDebugCallback(
+        setDebugCallback(
             [](Source source, Type type, Severity severity, unsigned int id,
                 const std::string& message)
             {
@@ -884,14 +872,10 @@ void OpenSpaceEngine::loadAssets() {
         global::syncEngine->addSyncables(_scene->camera()->syncables());
     }
 
-#ifdef __APPLE__
-    showTouchbar();
-#endif // APPLE
-
     runGlobalCustomizationScripts();
 
     _writeDocumentationTask = std::async(
-        &documentation::DocumentationEngine::writeJavascriptDocumentation,
+        &DocumentationEngine::writeJavascriptDocumentation,
         DocEng
     );
 
@@ -907,7 +891,7 @@ void OpenSpaceEngine::deinitialize() {
         // We are storing the `hasStartedBefore` setting here instead of in the
         // intialization phase as otherwise we'd always think that OpenSpace had been
         // started before
-        openspace::Settings settings = loadSettings();
+        Settings settings = loadSettings();
 
         settings.hasStartedBefore = true;
         const date::year_month_day now = date::year_month_day(
@@ -950,8 +934,8 @@ void OpenSpaceEngine::deinitialize() {
     SpiceManager::deinitialize();
 
     if (_printEvents) {
-        events::Event* e = global::eventEngine->firstEvent();
-        events::logAllEvents(e);
+        Event* e = global::eventEngine->firstEvent();
+        logAllEvents(e);
     }
 
     ghoul::fontrendering::FontRenderer::deinitialize();
@@ -985,7 +969,7 @@ void OpenSpaceEngine::deinitializeGL() {
 
     global::deinitializeGL();
 
-    rendering::helper::deinitialize();
+    rendering::deinitialize();
 
     LTRACE("OpenSpaceEngine::deinitializeGL(end)");
 }
@@ -1156,9 +1140,7 @@ void OpenSpaceEngine::preSynchronization() {
 
             global::scriptEngine->queueScript(script);
 
-            global::eventEngine->publishEvent<events::EventScheduledScriptExecuted>(
-                script
-            );
+            global::eventEngine->publishEvent<EventScheduledScriptExecuted>(script);
         }
 
         global::renderEngine->updateScene();
@@ -1217,8 +1199,8 @@ void OpenSpaceEngine::postSynchronizationPreDraw() {
 
     if (_shutdown.inShutdown) {
         if (_shutdown.timer <= 0.f) {
-            global::eventEngine->publishEvent<events::EventApplicationShutdown>(
-                events::EventApplicationShutdown::State::Finished
+            global::eventEngine->publishEvent<EventApplicationShutdown>(
+                EventApplicationShutdown::State::Finished
             );
             global::windowDelegate->terminate();
             return;
@@ -1371,9 +1353,9 @@ void OpenSpaceEngine::postDraw() {
     //
     // Handle events
     //
-    const events::Event* e = global::eventEngine->firstEvent();
+    const Event* e = global::eventEngine->firstEvent();
     if (_printEvents) {
-        events::logAllEvents(e);
+        logAllEvents(e);
     }
     global::eventEngine->triggerActions();
     global::eventEngine->triggerTopics();
@@ -1405,8 +1387,8 @@ void OpenSpaceEngine::keyboardCallback(Key key, KeyModifier mod, KeyAction actio
     // shutdown, the 'Release' in some frame later would cancel it immediately again
     if (action == KeyAction::Press && _shutdown.inShutdown) {
         _shutdown.inShutdown = false;
-        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
-            events::EventApplicationShutdown::State::Aborted
+        global::eventEngine->publishEvent<EventApplicationShutdown>(
+            EventApplicationShutdown::State::Aborted
         );
         return;
     }
@@ -1451,8 +1433,8 @@ void OpenSpaceEngine::charCallback(unsigned int codepoint, KeyModifier modifier,
 
     if (_shutdown.inShutdown) {
         _shutdown.inShutdown = false;
-        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
-            events::EventApplicationShutdown::State::Aborted
+        global::eventEngine->publishEvent<EventApplicationShutdown>(
+            EventApplicationShutdown::State::Aborted
         );
     }
 }
@@ -1511,8 +1493,8 @@ void OpenSpaceEngine::mouseButtonCallback(MouseButton button, MouseAction action
 
     if (_shutdown.inShutdown) {
         _shutdown.inShutdown = false;
-        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
-            events::EventApplicationShutdown::State::Aborted
+        global::eventEngine->publishEvent<EventApplicationShutdown>(
+            EventApplicationShutdown::State::Aborted
         );
     }
 }
@@ -1686,24 +1668,24 @@ void OpenSpaceEngine::decode(std::vector<std::byte> data) {
     global::syncEngine->decodeSyncables(std::move(data));
 }
 
-properties::Property::Visibility OpenSpaceEngine::visibility() const {
-    return static_cast<properties::Property::Visibility>(_visibility.value());
+Property::Visibility OpenSpaceEngine::visibility() const {
+    return static_cast<Property::Visibility>(_visibility.value());
 }
 
 void OpenSpaceEngine::toggleShutdownMode() {
     if (_shutdown.inShutdown) {
         // If we are already in shutdown mode, we want to disable it
         _shutdown.inShutdown = false;
-        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
-            events::EventApplicationShutdown::State::Aborted
+        global::eventEngine->publishEvent<EventApplicationShutdown>(
+            EventApplicationShutdown::State::Aborted
         );
     }
     else {
         // Else, we have to enable it
         _shutdown.timer = _shutdown.waitTime;
         _shutdown.inShutdown = true;
-        global::eventEngine->publishEvent<events::EventApplicationShutdown>(
-            events::EventApplicationShutdown::State::Started
+        global::eventEngine->publishEvent<EventApplicationShutdown>(
+            EventApplicationShutdown::State::Started
         );
     }
 }
@@ -1766,7 +1748,7 @@ void OpenSpaceEngine::removeModeChangeCallback(CallbackHandle handle) {
     _modeChangeCallbacks.erase(it);
 }
 
-scripting::LuaLibrary OpenSpaceEngine::luaLibrary() {
+LuaLibrary OpenSpaceEngine::luaLibrary() {
     return {
         "",
         {
@@ -1808,7 +1790,7 @@ void OpenSpaceEngine::invalidatePropertyOwnerCache() {
     _isAllPropertyOwnersCacheDirty = true;
 }
 
-const std::vector<properties::Property*>& OpenSpaceEngine::allProperties() const {
+const std::vector<Property*>& OpenSpaceEngine::allProperties() const {
     if (_isAllPropertiesCacheDirty) {
         _allPropertiesCache = global::rootPropertyOwner->propertiesRecursive();
         _isAllPropertiesCacheDirty = false;
@@ -1817,8 +1799,7 @@ const std::vector<properties::Property*>& OpenSpaceEngine::allProperties() const
     return _allPropertiesCache;
 }
 
-const std::vector<properties::PropertyOwner*>& OpenSpaceEngine::allPropertyOwners() const
-{
+const std::vector<PropertyOwner*>& OpenSpaceEngine::allPropertyOwners() const {
     if (_isAllPropertyOwnersCacheDirty) {
         _allPropertyOwnersCache = global::rootPropertyOwner->subownersRecursive();
         _isAllPropertyOwnersCacheDirty = false;
@@ -1835,7 +1816,7 @@ AssetManager& OpenSpaceEngine::assetManager() {
 void setCameraFromProfile(const Profile& p) {
     if (!p.camera.has_value()) {
         // If the camera is not specified, we want to set it to a sensible default value
-        interaction::NavigationState nav;
+        NavigationState nav;
         nav.anchor = "Root";
         nav.referenceFrame = "Root";
         global::navigationHandler->setNavigationStateNextFrame(nav);
@@ -1853,7 +1834,7 @@ void setCameraFromProfile(const Profile& p) {
     std::visit(
         overloaded {
             [&checkNodeExists](const Profile::CameraNavState& navStateProfile) {
-                interaction::NavigationState nav;
+                NavigationState nav;
                 nav.anchor = navStateProfile.anchor;
                 checkNodeExists(nav.anchor);
                 if (navStateProfile.aim.has_value() && !(*navStateProfile.aim).empty()) {
@@ -1901,8 +1882,6 @@ void setCameraFromProfile(const Profile& p) {
                 global::scriptEngine->queueScript(geoScript);
             },
             [&checkNodeExists](const Profile::CameraGoToNode& node) {
-                using namespace interaction;
-
                 checkNodeExists(node.anchor);
 
                 NodeCameraStateSpec spc = {
@@ -1952,13 +1931,13 @@ void setActionsFromProfile(const Profile& p) {
                 "Identifier '{}' does not provide a Lua command to execute", a.identifier
             ));
         }
-        interaction::Action action;
+        Action action;
         action.identifier = a.identifier;
         action.command = a.script;
         action.name = a.name;
         action.documentation = a.documentation;
         action.guiPath = a.guiPath;
-        action.isLocal = interaction::Action::IsLocal(a.isLocal);
+        action.isLocal = Action::IsLocal(a.isLocal);
         global::actionManager->registerAction(std::move(action));
     }
 }
@@ -1971,7 +1950,7 @@ void setKeybindingsFromProfile(const Profile& p) {
         if (!global::actionManager->hasAction(k.action)) {
             LERROR(std::format("Action '{}' does not exist", k.action));
         }
-        if (k.key.key == openspace::Key::Unknown) {
+        if (k.key.key == Key::Unknown) {
             LERROR(std::format(
                 "Could not find key '{}'",
                 std::to_string(static_cast<uint16_t>(k.key.key))
@@ -1996,4 +1975,4 @@ void setAdditionalScriptsFromProfile(const Profile& p) {
     }
 }
 
-}  // namespace openspace
+} // namespace openspace

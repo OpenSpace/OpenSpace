@@ -1,0 +1,148 @@
+local earth = asset.require("scene/solarsystem/planets/earth/earth")
+
+
+
+local moleculeN2 = asset.resource({
+  Name = "Molecule N2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_n2",
+  Version = 1
+})
+
+local moleculeO2 = asset.resource({
+  Name = "Molecule O2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_o2",
+  Version = 1
+})
+
+local moleculeH2O = asset.resource({
+  Name = "Molecule H2O",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_h2o",
+  Version = 1
+})
+
+
+local Latitude = 58.5877
+local Longitude = 16.1924
+
+-- Troposphere
+local EarthMoleculesTroposphere = {
+  Identifier = "EarthMoleculesTroposphere",
+  Parent = earth.Earth.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 10000.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    Molecules = {
+      -- There are roughly 2700 molecules per 100*100*100 ångström at atmospheric pressure
+      -- see https://en.wikipedia.org/wiki/Density_of_air
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 0.78 * 2700
+      },
+      {
+        MoleculeFile = moleculeO2 .. "o2.arc",
+        TrajectoryFile = moleculeO2 .. "o2.arc",
+        Count = 0.21 * 2700
+      },
+      {
+        MoleculeFile = moleculeH2O .. "h2o.arc",
+        TrajectoryFile = moleculeH2O .. "h2o.arc",
+        Count = 0.03 * 2700
+      }
+    },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100
+  },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
+  GUI = {
+    Name = "Earth Troposphere",
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes Earth's atmosphere at a height of approximately 10km into
+      the troposphere. Only the three dominant constituents of the atmosphere (N2, O2,
+      and Water molecules) are rendered in their correct density.]]
+  }
+}
+
+-- Thermosphere
+local EarthMoleculesThermosphere = {
+  Identifier = "EarthMoleculesThermosphere",
+  Parent = earth.Earth.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = earth.Earth.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 100000.0
+    },
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    Molecules = {
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 5
+      },
+      {
+        MoleculeFile = moleculeO2 .. "o2.arc",
+        TrajectoryFile = moleculeO2 .. "o2.arc",
+        Count = 5
+      }
+    },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 4.0,
+    AnimationSpeed = 100
+  },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
+  GUI = {
+    Name = "Earth Thermosphere",
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes Earth's atmosphere at a height of approximately 100km into
+      the thermosphere. Only the three dominant constituents of the atmosphere (N2, O2,
+      and Water molecules) are rendered in an approximate density.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(EarthMoleculesTroposphere)
+  openspace.addSceneGraphNode(EarthMoleculesThermosphere)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(EarthMoleculesThermosphere)
+  openspace.removeSceneGraphNode(EarthMoleculesTroposphere)
+end)
+
+asset.export(EarthMoleculesTroposphere)
+asset.export(EarthMoleculesThermosphere)
+
+
+
+asset.meta = {
+  Name = "Earth Atmosphere",
+  Description = [[Visualizes Earth's atmosphere at the molecular scale at the height of
+    the troposphere and the thermosphere. In the troposphere, Nitrogen, Oxygen, and
+    water are shown in correct proportions. In the thermosphere, the proportions are
+    reduced to represent the atmospheric thinning at those altitudes.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

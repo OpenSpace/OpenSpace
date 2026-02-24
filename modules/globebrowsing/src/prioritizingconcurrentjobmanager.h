@@ -31,9 +31,9 @@
 #include <mutex>
 #include <vector>
 
-namespace openspace { template <typename T> struct Job; }
+namespace openspace {
 
-namespace openspace::globebrowsing {
+template <typename T> struct Job;
 
 /**
  * Concurrent job manager which prioritizes which jobs to work on depending on which ones
@@ -91,7 +91,7 @@ private:
     LRUThreadPool<KeyType> _threadPool;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #include "prioritizingconcurrentjobmanager.inl"
 

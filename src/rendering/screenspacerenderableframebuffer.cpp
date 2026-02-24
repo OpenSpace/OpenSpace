@@ -29,24 +29,27 @@
 #include <openspace/engine/windowdelegate.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 #include <array>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "This value explicitly specifies the size of the screen space plane.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceRenderableFramebuffer::Documentation() {
-    using namespace documentation;
+Documentation ScreenSpaceRenderableFramebuffer::Documentation() {
     return {
         "ScreenSpaceRenderableFramebuffer",
-        "screenspace_framebuffer"
+        "screenspace_framebuffer",
+        ""
     };
 }
 
@@ -55,11 +58,7 @@ ScreenSpaceRenderableFramebuffer::ScreenSpaceRenderableFramebuffer(
     : ScreenSpaceRenderable(dictionary)
     , _size(SizeInfo, glm::vec2(16), glm::vec2(16), glm::vec2(16384))
 {
-    documentation::testSpecificationAndThrow(
-        Documentation(),
-        dictionary,
-        "ScreenSpaceFramebuffer"
-    );
+    testSpecificationAndThrow(Documentation(), dictionary, "ScreenSpaceFramebuffer");
 
     if (_identifier.empty()) {
         int idCounter = id();
@@ -146,14 +145,15 @@ void ScreenSpaceRenderableFramebuffer::createFramebuffer() {
     _framebuffer = std::make_unique<ghoul::opengl::FramebufferObject>();
     _framebuffer->activate();
     _texture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(resolution.x, resolution.y, 1),
-        GL_TEXTURE_2D
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(resolution.x, resolution.y, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::Red,
+            .dataType = GL_UNSIGNED_BYTE
+        },
+        ghoul::opengl::Texture::SamplerInit{}
     );
     _objectSize = glm::ivec2(resolution);
-
-    _texture->uploadTexture();
-    _texture->setFilter(ghoul::opengl::Texture::FilterMode::Linear);
-    _texture->purgeFromRAM();
     _framebuffer->attachTexture(_texture.get(), GL_COLOR_ATTACHMENT0);
     ghoul::opengl::FramebufferObject::deactivate();
 }
@@ -163,8 +163,8 @@ int ScreenSpaceRenderableFramebuffer::id() {
     return id++;
 }
 
-void ScreenSpaceRenderableFramebuffer::bindTexture() {
-    _texture->bind();
+void ScreenSpaceRenderableFramebuffer::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_texture);
 }
 
-} //namespace openspace
+} // namespace openspace

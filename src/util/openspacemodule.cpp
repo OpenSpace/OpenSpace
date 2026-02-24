@@ -43,7 +43,7 @@ namespace {
 namespace openspace {
 
 OpenSpaceModule::OpenSpaceModule(std::string name)
-    : properties::PropertyOwner({ std::move(name) })
+    : PropertyOwner({ std::move(name) })
 {}
 
 void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
@@ -85,19 +85,19 @@ void OpenSpaceModule::deinitializeGL() {
     internalDeinitializeGL();
 }
 
-std::vector<documentation::Documentation> OpenSpaceModule::documentations() const {
+std::vector<Documentation> OpenSpaceModule::documentations() const {
     return {};
 }
 
-documentation::Documentation OpenSpaceModule::Documentation() {
+Documentation OpenSpaceModule::Documentation() {
     return {};
 }
 
-scripting::LuaLibrary OpenSpaceModule::luaLibrary() const {
+LuaLibrary OpenSpaceModule::luaLibrary() const {
     return {};
 }
 
-std::vector<scripting::LuaLibrary> OpenSpaceModule::luaLibraries() const {
+std::vector<LuaLibrary> OpenSpaceModule::luaLibraries() const {
     return {};
 }
 

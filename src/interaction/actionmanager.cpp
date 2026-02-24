@@ -41,7 +41,7 @@
 
 #include "actionmanager_lua.inl"
 
-namespace openspace::interaction {
+namespace openspace {
 
 bool ActionManager::hasAction(const std::string& identifier) const {
     ghoul_assert(!identifier.empty(), "Identifier must not be empty");
@@ -56,9 +56,7 @@ void ActionManager::registerAction(Action action) {
     ghoul_assert(!hasAction(action.identifier), "Identifier already existed");
 
     const unsigned int hash = ghoul::hashCRC32(action.identifier);
-    global::eventEngine->publishEvent<events::EventActionAdded>(
-        action.identifier
-    );
+    global::eventEngine->publishEvent<EventActionAdded>(action.identifier);
     _actions[hash] = std::move(action);
 }
 
@@ -68,9 +66,7 @@ void ActionManager::removeAction(const std::string& identifier) {
 
     const unsigned int hash = ghoul::hashCRC32(identifier);
     const auto it = _actions.find(hash);
-    global::eventEngine->publishEvent<events::EventActionRemoved>(
-        identifier
-    );
+    global::eventEngine->publishEvent<EventActionRemoved>(identifier);
     _actions.erase(it);
 }
 
@@ -116,20 +112,20 @@ void ActionManager::triggerAction(const std::string& identifier,
     if (!shouldBeSynchronized || a.isLocal) {
         global::scriptEngine->queueScript({
             .code = std::move(script),
-            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
-            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No,
-            .addToLog = scripting::ScriptEngine::Script::ShouldBeLogged(shouldBeLogged)
+            .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = ScriptEngine::Script::ShouldSendToRemote::No,
+            .addToLog = ScriptEngine::Script::ShouldBeLogged(shouldBeLogged)
         });
     }
     else {
         global::scriptEngine->queueScript({
             .code = std::move(script),
-            .addToLog = scripting::ScriptEngine::Script::ShouldBeLogged(shouldBeLogged)
+            .addToLog = ScriptEngine::Script::ShouldBeLogged(shouldBeLogged)
         });
     }
 }
 
-scripting::LuaLibrary ActionManager::luaLibrary() {
+LuaLibrary ActionManager::luaLibrary() {
     return {
         "action",
         {
@@ -143,4 +139,4 @@ scripting::LuaLibrary ActionManager::luaLibrary() {
     };
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

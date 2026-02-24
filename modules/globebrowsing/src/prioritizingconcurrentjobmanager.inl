@@ -25,7 +25,7 @@
 #include <ghoul/misc/assert.h>
 #include <modules/globebrowsing/src/prioritizingconcurrentjobmanager.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 template <typename P, typename KeyType>
 PrioritizingConcurrentJobManager<P, KeyType>::PrioritizingConcurrentJobManager(
@@ -80,4 +80,4 @@ size_t PrioritizingConcurrentJobManager<P, KeyType>::numFinishedJobs() const {
     return _finishedJobs.size();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

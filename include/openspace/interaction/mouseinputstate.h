@@ -29,7 +29,7 @@
 #include <ghoul/glm.h>
 #include <vector>
 
-namespace openspace::interaction {
+namespace openspace {
 
 // This class represents the global input state of interaction devices
 class MouseInputState {
@@ -52,6 +52,6 @@ private:
     double _mouseScrollDelta = 0.0;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___MOUSEINPUTSTATE___H__

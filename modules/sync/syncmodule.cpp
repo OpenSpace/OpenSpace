@@ -50,12 +50,12 @@ namespace {
         // The folder where all of the synchronizations are stored
         std::string synchronizationRoot;
     };
-#include "syncmodule_codegen.cpp"
 } // namespace
+#include "syncmodule_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation SyncModule::Documentation() {
+Documentation SyncModule::Documentation() {
     return codegen::doc<Parameters>("module_sync");
 }
 
@@ -113,14 +113,14 @@ std::filesystem::path SyncModule::synchronizationRoot() const {
     return _synchronizationRoot;
 }
 
-std::vector<documentation::Documentation> SyncModule::documentations() const {
+std::vector<Documentation> SyncModule::documentations() const {
     return {
         HttpSynchronization::Documentation(),
         UrlSynchronization::Documentation()
     };
 }
 
-scripting::LuaLibrary SyncModule::luaLibrary() const {
+LuaLibrary SyncModule::luaLibrary() const {
     return {
         "sync",
         {

@@ -1,0 +1,211 @@
+local titan = asset.require("scene/solarsystem/planets/saturn/titan/titan")
+
+
+
+local moleculeN2 = asset.resource({
+  Name = "Molecule N2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_n2",
+  Version = 1
+})
+
+local moleculeCH4 = asset.resource({
+  Name = "Molecule CH4",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_ch4",
+  Version = 1
+})
+
+local moleculeH2 = asset.resource({
+  Name = "Molecule CH2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_h2",
+  Version = 1
+})
+
+local moleculeC2H6 = asset.resource({
+  Name = "Molecule C2H6",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_c2h6",
+  Version = 1
+})
+
+
+local Latitude = 58.5877
+local Longitude = 16.1924
+
+local TitanMolecules1km = {
+  Identifier = "TitanMolecules1km",
+  Parent = titan.Titan.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = titan.Titan.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 1000.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    Molecules = {
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 108
+      },
+      {
+        MoleculeFile = moleculeCH4 .. "ch4.arc",
+        TrajectoryFile = moleculeCH4 .. "ch4.arc",
+        Count = 6
+      },
+      {
+        MoleculeFile = moleculeH2 .. "h2.arc",
+        TrajectoryFile = moleculeH2 .. "h2.arc",
+        Count = 1
+      }
+    },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100
+  },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
+  GUI = {
+    Name = "Titan 1km",
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes Titan's atmosphere at a height of approximately 1km above
+      the surface. The three major constituents of the atmosphere (N2, Methane, and
+      Hydrogen) are shown in approximate relative density.]]
+  }
+}
+
+local TitanMoleculesMethaneCloud = {
+  Identifier = "TitanMoleculesMethaneCloud20km",
+  Parent = titan.Titan.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = titan.Titan.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 20000.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    Molecules = {
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 40
+      },
+      {
+        MoleculeFile = moleculeCH4 .. "ch4.arc",
+        TrajectoryFile = moleculeCH4 .. "ch4.arc",
+        Count = 300
+      },
+      {
+        MoleculeFile = moleculeH2 .. "h2.arc",
+        TrajectoryFile = moleculeH2 .. "h2.arc",
+        Count = 1
+      }
+    },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100
+  },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
+  GUI = {
+    Name = "Titan Methane Cloud 20km",
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes a simulated cloud of methane in Titan's atmosphere at a
+      height of approximately 20km above the surface. The three major constituents of the
+      atmosphere (N2, Methane, and Hydrogen) are shown in approximate relative density as
+      they would be found in such a cloud.]]
+  }
+}
+
+local TitanMoleculesEthaneCloud = {
+  Identifier = "TitanMoleculesEthaneCloud45km",
+  Parent = titan.Titan.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = titan.Titan.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 45000.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    Molecules = {
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 4
+      },
+      {
+        MoleculeFile = moleculeCH4 .. "ch4.arc",
+        TrajectoryFile = moleculeCH4 .. "ch4.arc",
+        Count = 50
+      },
+      {
+        MoleculeFile = moleculeC2H6 .. "c2h6.arc",
+        TrajectoryFile = moleculeC2H6 .. "c2h6.arc",
+        Count = 250
+      },
+      {
+        MoleculeFile = moleculeH2 .. "h2.arc",
+        TrajectoryFile = moleculeH2 .. "h2.arc",
+        Count = 1
+      }
+    },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100
+  },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
+  GUI = {
+    Name = "Titan Ethane Cloud 45km",
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes a simulated cloud of ethane in Titan's atmosphere at a
+      height of approximately 45km above the surface. The four major constituents of the
+      atmosphere (N2, Methane, Ethane, and Hydrogen) are shown in approximate relative
+      density as they would be found in such an ethane cloud.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(TitanMolecules1km)
+  openspace.addSceneGraphNode(TitanMoleculesMethaneCloud)
+  openspace.addSceneGraphNode(TitanMoleculesEthaneCloud)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(TitanMoleculesEthaneCloud)
+  openspace.removeSceneGraphNode(TitanMoleculesMethaneCloud)
+  openspace.removeSceneGraphNode(TitanMolecules1km)
+end)
+
+asset.export(TitanMolecules1km)
+asset.export(TitanMoleculesMethaneCloud)
+asset.export(TitanMoleculesEthaneCloud)
+
+
+
+asset.meta = {
+  Name = "Titan Atmosphere",
+  Description = [[Visualizes Titan's atmosphere at the molecular scale as well as showing
+    a methane cloud at 20km altitude and an ethane cloud at 45km altitude.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

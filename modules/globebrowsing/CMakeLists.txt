@@ -125,24 +125,26 @@ set(SHADER_FILES
   shaders/advanced_rings_vs.glsl
   shaders/advanced_rings_fs.glsl
   shaders/blending.glsl
+  shaders/ellipsoid.glsl
   shaders/geojson_fs.glsl
   shaders/geojson_points_fs.glsl
   shaders/geojson_points_gs.glsl
   shaders/geojson_points_vs.glsl
   shaders/geojson_vs.glsl
   shaders/globalrenderer_vs.glsl
+  shaders/interpolate_fs.glsl
+  shaders/interpolate_vs.glsl
   shaders/localrenderer_vs.glsl
   shaders/renderer_fs.glsl
-  shaders/rings_vs.glsl
   shaders/rings_fs.glsl
-  shaders/rings_geom_vs.glsl
   shaders/rings_geom_fs.glsl
+  shaders/rings_geom_vs.glsl
+  shaders/rings_vs.glsl
   shaders/texturetilemapping.glsl
   shaders/tile.glsl
   shaders/tileheight.glsl
   shaders/tilevertexskirt.glsl
 )
-
 source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(

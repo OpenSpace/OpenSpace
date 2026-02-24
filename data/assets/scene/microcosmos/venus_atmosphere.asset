@@ -1,0 +1,201 @@
+local venus = asset.require("scene/solarsystem/planets/venus/venus")
+
+
+
+local moleculeN2 = asset.resource({
+  Name = "Molecule N2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_n2",
+  Version = 1
+})
+
+local moleculeCO2 = asset.resource({
+  Name = "Molecule CO2",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_co2",
+  Version = 1
+})
+
+local moleculeH2SO4 = asset.resource({
+  Name = "Molecule H2SO4",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_h2so4",
+  Version = 1
+})
+
+local moleculeH2O = asset.resource({
+  Name = "Molecule H2O",
+  Type = "HttpSynchronization",
+  Identifier = "molecule_dynamics_h2o",
+  Version = 1
+})
+
+
+local Latitude = 58.5877
+local Longitude = 16.1924
+
+local VenusMolecules10km = {
+  Identifier = "VenusMolecules10km",
+  Parent = venus.Venus.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = venus.Venus.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 10000.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    Molecules = {
+      {
+        MoleculeFile = moleculeCO2 .. "co2.arc",
+        TrajectoryFile = moleculeCO2 .. "co2.arc",
+        Count = 887
+      },
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 32
+      }
+    },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100
+  },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
+  GUI = {
+    Name = "Venus 10km",
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes Venus' atmosphere at an altitude of approximately 10km
+      above the surface. The two major constituents of the atmosphere (CO2 and N2) are
+      shown in approximate relative density for this altitude.]]
+  }
+}
+
+local VenusMolecules50km = {
+  Identifier = "VenusMolecules50km",
+  Parent = venus.Venus.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = venus.Venus.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 30000.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    Molecules = {
+      {
+        MoleculeFile = moleculeCO2 .. "co2.arc",
+        TrajectoryFile = moleculeCO2 .. "co2.arc",
+        Count = 22
+      },
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 1
+      }
+    },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100
+  },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
+  GUI = {
+    Name = "Venus 50km",
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes Venus' atmosphere at an altitude of approximately 50km
+      above the surface. The two major constituents of the atmosphere (CO2 and N2) are
+      shown in approximate relative density for this altitude.]]
+  }
+}
+
+local VenusMolecules50kmCloud = {
+  Identifier = "VenusMolecules50kmCloud",
+  Parent = venus.Venus.Identifier,
+  Transform = {
+    Translation = {
+      Type = "GlobeTranslation",
+      Globe = venus.Venus.Identifier,
+      Latitude = Latitude,
+      Longitude = Longitude,
+      Altitude = 50000.0
+    }
+  },
+  Renderable = {
+    Type = "RenderableSimulationBox",
+    Molecules = {
+      {
+        MoleculeFile = moleculeCO2 .. "co2.arc",
+        TrajectoryFile = moleculeCO2 .. "co2.arc",
+        Count = 22
+      },
+      {
+        MoleculeFile = moleculeN2 .. "n2.arc",
+        TrajectoryFile = moleculeN2 .. "n2.arc",
+        Count = 1
+      },
+      {
+        MoleculeFile = moleculeH2SO4 .. "h2so4.arc",
+        TrajectoryFile = moleculeH2SO4 .. "h2so4.arc",
+        Count = 300
+      },
+      {
+        MoleculeFile = moleculeH2O .. "h2o.arc",
+        TrajectoryFile = moleculeH2O .. "h2o.arc",
+        Count = 200
+      }
+    },
+    LinearVelocity = 10.0,
+    AngularVelocity = math.rad(60.0),
+    SimulationBox = { 100.0, 100.0, 100.0 },
+    CollisionRadius = 2.0,
+    AnimationSpeed = 100
+  },
+  Tag = { "molecule_visualization", "molecule_atmosphere" },
+  GUI = {
+    Name = "Venus 50km Cloud",
+    Path = "/Microcosmos/Atmosphere",
+    Description = [[Visualizes Venus' atmosphere at an altitude of approximately 50km
+      above the surface. At this altitude, the atmosphere not only consists of the primary
+      constituents (CO2 and N2), but also contains Sulfuric Acid (H2SO4) and water. These
+      four molecules are shown in their approximate relative density found at this
+      altitude above the Venusian surface.]]
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(VenusMolecules10km)
+  openspace.addSceneGraphNode(VenusMolecules50km)
+  openspace.addSceneGraphNode(VenusMolecules50kmCloud)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(VenusMolecules50kmCloud)
+  openspace.removeSceneGraphNode(VenusMolecules50km)
+  openspace.removeSceneGraphNode(VenusMolecules10km)
+end)
+
+asset.export(VenusMolecules10km)
+asset.export(VenusMolecules50km)
+asset.export(VenusMolecules50kmCloud)
+
+
+
+asset.meta = {
+  Name = "Venus Atmosphere",
+  Description = [[Visualizes Venus' atmosphere at the molecular scale at the surface
+    level and at 50km altitude. Additional visualizes a cloud of sulfuric acid.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

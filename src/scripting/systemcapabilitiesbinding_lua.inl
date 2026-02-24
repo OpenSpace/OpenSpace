@@ -232,6 +232,6 @@ namespace {
     return bindings;
 }
 
-#include "systemcapabilitiesbinding_lua_codegen.cpp"
-
 } // namespace
+
+#include "systemcapabilitiesbinding_lua_codegen.cpp"

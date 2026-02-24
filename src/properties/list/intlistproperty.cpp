@@ -27,7 +27,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 IntListProperty::IntListProperty(Property::PropertyInfo info, std::vector<int> values)
     : ListProperty(std::move(info), std::move(values))
@@ -54,4 +54,4 @@ std::string IntListProperty::stringValue() const {
     return json.dump();
 }
 
-} // namespace openspace::properties
+} // namespace openspace

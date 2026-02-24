@@ -40,11 +40,11 @@ public:
 
     void render(glm::vec2& penPosition) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    properties::StringProperty _fontName;
-    properties::FloatProperty _fontSize;
+    StringProperty _fontName;
+    FloatProperty _fontSize;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
     std::string _buffer;

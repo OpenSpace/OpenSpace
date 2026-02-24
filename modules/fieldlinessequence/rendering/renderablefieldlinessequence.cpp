@@ -41,6 +41,7 @@
 #include <ghoul/misc/exception.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <filesystem>
@@ -49,6 +50,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableFieldlinesSequence";
 
     double extractTriggerTimeFromFilename(const std::filesystem::path& filePath) {
@@ -62,175 +65,175 @@ namespace {
         fileName.replace(13, 1, ":");
         fileName.replace(16, 1, ":");
         fileName.replace(19, 1, ".");
-        return openspace::Time::convertTime(fileName);
+        return Time::convertTime(fileName);
     }
 
-    constexpr openspace::properties::Property::PropertyInfo ColorMethodInfo = {
+    constexpr Property::PropertyInfo ColorMethodInfo = {
         "ColorMethod",
         "Color method",
         "Color lines uniformly or using color tables based on extra quantities like, for "
         "examples, temperature or particle density.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorQuantityInfo = {
+    constexpr Property::PropertyInfo ColorQuantityInfo = {
         "ColorQuantity",
         "Quantity to color by",
         "Quantity used to color lines if the 'By Quantity' color method is selected.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorMinMaxInfo = {
+    constexpr Property::PropertyInfo ColorMinMaxInfo = {
         "ColorMinMaxRange",
         "Color min max range",
         "A min-max range for what the lowest and highest values of the color table can "
         "be set to.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
+    constexpr Property::PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
         "Path to color table",
         "Color Table/Transfer Function to use for 'By Quantity' coloring.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorUniformInfo = {
+    constexpr Property::PropertyInfo ColorUniformInfo = {
         "Color",
         "Uniform line color",
         "The uniform color of lines shown when 'Color Method' is set to 'Uniform'.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorUseABlendingInfo = {
+    constexpr Property::PropertyInfo ColorUseABlendingInfo = {
         "ABlendingEnabled",
         "Additive blending",
         "Activate/deactivate additive blending.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DomainEnabledInfo = {
+    constexpr Property::PropertyInfo DomainEnabledInfo = {
         "DomainEnabled",
         "Domain limits",
         "Enable/Disable domain limits.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DomainXInfo = {
+    constexpr Property::PropertyInfo DomainXInfo = {
         "LimitsX",
         "X-limits",
         "Valid range along the X-axis. [Min, Max].",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DomainYInfo = {
+    constexpr Property::PropertyInfo DomainYInfo = {
         "LimitsY",
         "Y-limits",
         "Valid range along the Y-axis. [Min, Max].",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DomainZInfo = {
+    constexpr Property::PropertyInfo DomainZInfo = {
         "LimitsZ",
         "Z-limits",
         "Valid range along the Z-axis. [Min, Max].",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DomainRInfo = {
+    constexpr Property::PropertyInfo DomainRInfo = {
         "LimitsR",
         "Radial limits",
         "Valid radial range. [Min, Max].",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FlowEnabledInfo = {
+    constexpr Property::PropertyInfo FlowEnabledInfo = {
         "FlowEnabled",
         "Flow enabled",
         "Toggles the rendering of moving particles along the lines. Can, for example, "
         "illustrate magnetic flow.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FlowColorInfo = {
+    constexpr Property::PropertyInfo FlowColorInfo = {
         "FlowColor",
         "Flow color",
         "Color of particles flow direction indication.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FlowReversedInfo = {
+    constexpr Property::PropertyInfo FlowReversedInfo = {
         "ReversedFlow",
         "Reversed flow",
         "Toggle to make the flow move in the opposite direction.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FlowParticleSizeInfo = {
+    constexpr Property::PropertyInfo FlowParticleSizeInfo = {
         "ParticleSize",
         "Particle size",
         "Size of the particles.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FlowParticleSpacingInfo = {
+    constexpr Property::PropertyInfo FlowParticleSpacingInfo = {
         "ParticleSpacing",
         "Particle spacing",
         "Spacing inbetween particles.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FlowSpeedInfo = {
+    constexpr Property::PropertyInfo FlowSpeedInfo = {
         "FlowSpeed",
         "Speed",
         "Speed of the flow.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaskingEnabledInfo = {
+    constexpr Property::PropertyInfo MaskingEnabledInfo = {
         "MaskingEnabled",
         "Masking enabled",
         "Enable/disable masking. Use masking to show lines where a given quantity is "
         "within a given range, for example, if you only want to see where the "
         "temperature is between 10 and 20 degrees. Also used for masking out line "
         "topologies like solar wind & closed lines.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaskingMinMaxInfo = {
+    constexpr Property::PropertyInfo MaskingMinMaxInfo = {
         "MaskingMinLimit",
         "Lower limit",
         "Lower and upper limit of the valid masking range.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaskingQuantityInfo = {
+    constexpr Property::PropertyInfo MaskingQuantityInfo = {
         "MaskingQuantity",
         "Quantity used for masking",
         "Quantity used for masking.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "This value specifies the line width of the fieldlines.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TimeJumpButtonInfo = {
+    constexpr Property::PropertyInfo TimeJumpButtonInfo = {
         "TimeJumpToStart",
         "Jump to start of sequence",
         "Performs a time jump to the start of the sequence.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SaveDownloadsOnShutdown = {
+    constexpr Property::PropertyInfo SaveDownloadsOnShutdown = {
         "SaveDownloadsOnShutdown",
         "Save downloads on shutdown",
         "This is an option for if dynamically downloaded should be saved between runs "
         "or not.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `Renderable` visualizes field lines, mainly a sequence of time steps but works
@@ -334,7 +337,7 @@ namespace {
         // ManuelTimeOffset will be added to trigger time.
         std::optional<float> manualTimeOffset;
 
-        enum class [[codegen::map(openspace::fls::Model)]] Model {
+        enum class [[codegen::map(openspace::Model)]] Model {
             Batsrus,
             Enlil,
             Pfss
@@ -408,12 +411,12 @@ namespace {
         // is shut down. Set to true to save all the downloaded files.
         std::optional<bool> cacheData;
     };
-#include "renderablefieldlinessequence_codegen.cpp"
 } // namespace
+#include "renderablefieldlinessequence_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableFieldlinesSequence::Documentation() {
+Documentation RenderableFieldlinesSequence::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_renderablefieldlinessequence");
 }
 
@@ -495,10 +498,10 @@ RenderableFieldlinesSequence::RenderableFieldlinesSequence(
     }
 
     if (p.simulationModel.has_value()) {
-        _model = codegen::map<openspace::fls::Model>(*p.simulationModel);
+        _model = codegen::map<Model>(*p.simulationModel);
     }
     else {
-        _model = fls::Model::Invalid;
+        _model = Model::Invalid;
     }
 
     setModelDependentConstants();
@@ -729,13 +732,13 @@ void RenderableFieldlinesSequence::staticallyLoadFiles(
                     throw ghoul::RuntimeError("No tracing variable specified");
                 }
                 std::vector<std::string> extraMagVars =
-                    fls::extractMagnitudeVarsFromStrings(_extraVars);
+                    extractMagnitudeVarsFromStrings(_extraVars);
                 std::unordered_map<std::string, std::vector<glm::vec3>> seedsPerFiles =
-                    fls::extractSeedPointsFromFiles(_seedPointDirectory);
+                    extractSeedPointsFromFiles(_seedPointDirectory);
                 if (seedsPerFiles.empty()) {
                     throw ghoul::RuntimeError("No seed files found");
                 }
-                fls::convertCdfToFieldlinesState(
+                convertCdfToFieldlinesState(
                     file.state,
                     file.path.string(),
                     seedsPerFiles,
@@ -782,10 +785,20 @@ void RenderableFieldlinesSequence::initializeGL() {
         absPath("${MODULE_FIELDLINESSEQUENCE}/shaders/fieldlinessequence_fs.glsl")
     );
 
-    glGenVertexArrays(1, &_vertexArrayObject);
-    glGenBuffers(1, &_vertexPositionBuffer);
-    glGenBuffers(1, &_vertexColorBuffer);
-    glGenBuffers(1, &_vertexMaskingBuffer);
+
+    glCreateVertexArrays(1, &_vao);
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+
+    glDisableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 1, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 1, 1);
+
+    glDisableVertexArrayAttrib(_vao, 2);
+    glVertexArrayAttribFormat(_vao, 2, 1, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 2, 2);
 
     // Needed for additive blending
     setRenderBin(Renderable::RenderBin::Overlay);
@@ -802,11 +815,11 @@ void RenderableFieldlinesSequence::setupProperties() {
     addPropertySubOwner(_flowGroup);
     addPropertySubOwner(_maskingGroup);
 
-    _colorUniform.setViewOption(properties::Property::ViewOptions::Color);
+    _colorUniform.setViewOption(Property::ViewOptions::Color);
     _colorGroup.addProperty(_colorUniform);
     _colorGroup.addProperty(_colorMethod);
     _colorGroup.addProperty(_colorQuantity);
-    _selectedColorRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _selectedColorRange.setViewOption(Property::ViewOptions::MinMaxRange);
     _colorGroup.addProperty(_selectedColorRange);
     _colorGroup.addProperty(_colorTablePath);
 
@@ -818,7 +831,7 @@ void RenderableFieldlinesSequence::setupProperties() {
 
     _flowGroup.addProperty(_flowEnabled);
     _flowGroup.addProperty(_flowReversed);
-    _flowColor.setViewOption(properties::Property::ViewOptions::Color);
+    _flowColor.setViewOption(Property::ViewOptions::Color);
     _flowGroup.addProperty(_flowColor);
     _flowGroup.addProperty(_flowParticleSize);
     _flowGroup.addProperty(_flowParticleSpacing);
@@ -826,7 +839,7 @@ void RenderableFieldlinesSequence::setupProperties() {
 
     _maskingGroup.addProperty(_maskingEnabled);
     _maskingGroup.addProperty(_maskingQuantity);
-    _selectedMaskingRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _selectedMaskingRange.setViewOption(Property::ViewOptions::MinMaxRange);
     _maskingGroup.addProperty(_selectedMaskingRange);
 
     addProperty(_saveDownloadsOnShutdown);
@@ -835,17 +848,17 @@ void RenderableFieldlinesSequence::setupProperties() {
 void RenderableFieldlinesSequence::setModelDependentConstants() {
     float limit = 100.f; // Just used as a default value.
     switch (_model) {
-        case fls::Model::Batsrus:
-            _scalingFactor = fls::ReToMeter;
+        case Model::Batsrus:
+            _scalingFactor = ReToMeter;
             limit = 300.f; // Should include a long magnetotail
             break;
-        case fls::Model::Enlil:
+        case Model::Enlil:
             _flowReversed = true;
-            _scalingFactor = fls::AuToMeter;
+            _scalingFactor = AuToMeter;
             limit = 50.f; // Should include Plutos furthest distance from the Sun
             break;
-        case fls::Model::Pfss:
-            _scalingFactor = fls::RsToMeter;
+        case Model::Pfss:
+            _scalingFactor = RsToMeter;
             limit = 100.f; // Just a default value far away from the solar surface
             break;
         default:
@@ -872,17 +885,10 @@ void RenderableFieldlinesSequence::setModelDependentConstants() {
 }
 
 void RenderableFieldlinesSequence::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vertexArrayObject);
-    _vertexArrayObject = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
-
-    glDeleteBuffers(1, &_vertexColorBuffer);
-    _vertexColorBuffer = 0;
-
-    glDeleteBuffers(1, &_vertexMaskingBuffer);
-    _vertexMaskingBuffer = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vboPosition);
+    glDeleteBuffers(1, &_vboColor);
+    glDeleteBuffers(1, &_vboMasking);
 
     if (_shaderProgram) {
         global::renderEngine->removeRenderProgram(_shaderProgram.get());
@@ -931,7 +937,7 @@ void RenderableFieldlinesSequence::loadFile(File& file) {
         else if (_inputFileType == SourceFileType::Json) {
             file.state.loadStateFromJson(
                 file.path.string(),
-                fls::Model::Invalid,
+                Model::Invalid,
                 _scalingFactor
             );
         }
@@ -1154,17 +1160,74 @@ void RenderableFieldlinesSequence::update(const UpdateData& data) {
 
     // Update all buffers together to maintain consistency
     if (needsBufferUpdate) {
-        updateVertexPositionBuffer();
+        const FieldlinesState& state = _files[_activeIndex].state;
+        const std::vector<glm::vec3>& vertPos = state.vertexPositions();
+
+        glDeleteBuffers(1, &_vboPosition);
+        glCreateBuffers(1, &_vboPosition);
+        glVertexArrayVertexBuffer(_vao, 0, _vboPosition, 0, 3 * sizeof(float));
+        glNamedBufferStorage(
+            _vboPosition,
+            vertPos.size() * sizeof(glm::vec3),
+            vertPos.data(),
+            GL_NONE_BIT
+        );
+
         _shouldUpdateColorBuffer = true;
         _shouldUpdateMaskingBuffer = true;
     }
 
     if (_shouldUpdateColorBuffer) {
-        updateVertexColorBuffer();
+        const FieldlinesState& state = _files[_activeIndex].state;
+        bool success = false;
+        const std::vector<float>& quantities =
+            state.extraQuantity(_colorQuantity, success);
+
+        if (success) {
+            glEnableVertexArrayAttrib(_vao, 1);
+
+            glDeleteBuffers(1, &_vboColor);
+            glCreateBuffers(1, &_vboColor);
+            glVertexArrayVertexBuffer(_vao, 1, _vboColor, 0, sizeof(float));
+            glNamedBufferStorage(
+                _vboColor,
+                quantities.size() * sizeof(float),
+                quantities.data(),
+                GL_NONE_BIT
+            );
+
+            _shouldUpdateColorBuffer = false;
+        }
+        else {
+            glDisableVertexArrayAttrib(_vao, 1);
+        }
     }
 
     if (_shouldUpdateMaskingBuffer) {
-        updateVertexMaskingBuffer();
+        const FieldlinesState& state = _files[_activeIndex].state;
+        bool success = false;
+        const std::vector<float>& quantities =
+            state.extraQuantity(_maskingQuantity, success);
+
+        if (success) {
+            glEnableVertexArrayAttrib(_vao, 2);
+
+            glDeleteBuffers(1, &_vboMasking);
+            glCreateBuffers(1, &_vboMasking);
+            glVertexArrayVertexBuffer(_vao, 2, _vboMasking, 0, sizeof(float));
+
+            glNamedBufferStorage(
+                _vboMasking,
+                quantities.size() * sizeof(float),
+                quantities.data(),
+                GL_NONE_BIT
+            );
+
+            _shouldUpdateMaskingBuffer = false;
+        }
+        else {
+            glDisableVertexArrayAttrib(_vao, 2);
+        }
     }
 }
 
@@ -1197,9 +1260,9 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
     _shaderProgram->setUniform("usingMasking", _maskingEnabled);
 
     if (_colorMethod == static_cast<int>(ColorMethod::ByQuantity)) {
+        _transferFunction->update();
         ghoul::opengl::TextureUnit textureUnit;
-        textureUnit.activate();
-        _transferFunction->bind();
+        textureUnit.bind(_transferFunction->texture());
         _shaderProgram->setUniform("transferFunction", textureUnit);
         _shaderProgram->setUniform("selectedColorRange", _selectedColorRange);
     }
@@ -1233,12 +1296,8 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     }
 
-    glBindVertexArray(_vertexArrayObject);
-#ifndef __APPLE__
+    glBindVertexArray(_vao);
     glLineWidth(_lineWidth);
-#else
-    glLineWidth(1.f);
-#endif
 
     int loadedIndex = _activeIndex;
     if (loadedIndex == -1) {
@@ -1267,80 +1326,6 @@ void RenderableFieldlinesSequence::render(const RenderData& data, RendererTasks&
         // Restores OpenGL Rendering State
         global::renderEngine->openglStateCache().resetBlendState();
         global::renderEngine->openglStateCache().resetDepthState();
-    }
-}
-
-// Unbind buffers and arrays
-void unbindGL() {
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-}
-
-void RenderableFieldlinesSequence::updateVertexPositionBuffer() {
-    glBindVertexArray(_vertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-
-    const FieldlinesState& state = _files[_activeIndex].state;
-    const std::vector<glm::vec3>& vertPos = state.vertexPositions();
-
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        vertPos.size() * sizeof(glm::vec3),
-        vertPos.data(),
-        GL_STATIC_DRAW
-    );
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    unbindGL();
-}
-
-void RenderableFieldlinesSequence::updateVertexColorBuffer() {
-    glBindVertexArray(_vertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
-
-    const FieldlinesState& state = _files[_activeIndex].state;
-    bool success = false;
-    const std::vector<float>& quantities = state.extraQuantity(_colorQuantity, success);
-
-    if (success) {
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            quantities.size() * sizeof(float),
-            quantities.data(),
-            GL_STATIC_DRAW
-        );
-
-        glEnableVertexAttribArray(1);
-        glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        _shouldUpdateColorBuffer = false;
-    }
-    unbindGL();
-}
-
-void RenderableFieldlinesSequence::updateVertexMaskingBuffer() {
-    glBindVertexArray(_vertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexMaskingBuffer);
-
-    const FieldlinesState& state = _files[_activeIndex].state;
-    bool success = false;
-    const std::vector<float>& quantities = state.extraQuantity(_maskingQuantity, success);
-
-    if (success) {
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            quantities.size() * sizeof(float),
-            quantities.data(),
-            GL_STATIC_DRAW
-        );
-
-        glEnableVertexAttribArray(2);
-        glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        unbindGL();
-        _shouldUpdateMaskingBuffer = false;
     }
 }
 

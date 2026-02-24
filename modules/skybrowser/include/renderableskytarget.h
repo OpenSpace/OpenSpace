@@ -40,7 +40,6 @@ public:
 
     void initializeGL() override;
     void render(const RenderData& data, RendererTasks& rendererTask) override;
-    void bindTexture() override;
 
     glm::ivec3 borderColor() const;
 
@@ -53,18 +52,18 @@ public:
     void highlight(const glm::ivec3& addition);
     void removeHighlight(const glm::ivec3& removal);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     void applyRoll();
     glm::dvec3 rightVector() const;
     glm::dvec3 upVector() const;
 
 private:
-    properties::FloatProperty _crossHairSize;
-    properties::FloatProperty _showRectangleThreshold;
-    properties::FloatProperty _lineWidth;
-    properties::DoubleProperty _verticalFov;
-    properties::BoolProperty _applyRoll;
+    FloatProperty _crossHairSize;
+    FloatProperty _showRectangleThreshold;
+    FloatProperty _lineWidth;
+    DoubleProperty _verticalFov;
+    BoolProperty _applyRoll;
 
     bool _isInitialized = false;
     double _borderRadius = 0.0;

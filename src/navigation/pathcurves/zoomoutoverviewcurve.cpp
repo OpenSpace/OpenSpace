@@ -34,7 +34,7 @@ namespace {
     constexpr std::string_view _loggerCat = "ZoomOutOverviewCurve";
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 // Go far out to get a view of both tagets, aimed to match lookAt orientation
 ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint& end) {
@@ -106,4 +106,4 @@ ZoomOutOverviewCurve::ZoomOutOverviewCurve(const Waypoint& start, const Waypoint
     initializeParameterData();
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

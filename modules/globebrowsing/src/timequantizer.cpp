@@ -45,8 +45,6 @@
 //       operate on Time objects rather than date strings and the DateTime likewise (if
 //       this class needs to exist at all)
 
-namespace openspace::globebrowsing {
-
 namespace {
     // returns the number of days in a given month and year (takes leap year into account)
     constexpr int monthSize(int month_, int year_) {
@@ -96,8 +94,9 @@ namespace {
         val = 1;
         return false;
     }
-
 } // namespace
+
+namespace openspace {
 
 RangedTime::RangedTime(std::string start, std::string end)
     : _start(std::move(start))
@@ -653,4 +652,4 @@ std::vector<std::string> TimeQuantizer::quantized(Time& start, Time& end) {
     return result;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

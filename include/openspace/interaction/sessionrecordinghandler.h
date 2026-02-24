@@ -40,11 +40,11 @@
 #include <utility>
 #include <vector>
 
-namespace openspace::properties { class Property; }
+namespace openspace {
 
-namespace openspace::interaction {
+class Property;
 
-class SessionRecordingHandler : public properties::PropertyOwner {
+class SessionRecordingHandler : public PropertyOwner {
 public:
     enum class SessionState {
         Idle = 0,
@@ -210,7 +210,7 @@ public:
      * \return The Lua library that contains all Lua functions available to affect the
      *         interaction
      */
-    static openspace::scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
     /**
      * Used to request a callback for notification of playback state change.
@@ -244,7 +244,7 @@ public:
      *
      * \param prop The property being set
      */
-    void savePropertyBaseline(properties::Property& prop);
+    void savePropertyBaseline(Property& prop);
 
 private:
     void tickPlayback(double dt);
@@ -257,9 +257,9 @@ private:
     void checkIfScriptUsesScenegraphNode(std::string_view script) const;
 
 
-    properties::BoolProperty _renderPlaybackInformation;
-    properties::BoolProperty _ignoreRecordedScale;
-    properties::BoolProperty _addModelMatrixinAscii;
+    BoolProperty _renderPlaybackInformation;
+    BoolProperty _ignoreRecordedScale;
+    BoolProperty _addModelMatrixinAscii;
 
     struct {
         double elapsedTime = 0.0;
@@ -293,6 +293,6 @@ private:
     std::vector<std::pair<CallbackHandle, StateChangeCallback>> _stateChangeCallbacks;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SESSIONRECORDINGHANDLER___H__

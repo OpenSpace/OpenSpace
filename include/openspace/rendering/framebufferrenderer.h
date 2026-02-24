@@ -183,7 +183,7 @@ public:
         const SceneGraphNode* lightSource, const SceneGraphNode* target);
     void removeShadowCaster(const std::string& shadowGroup, const SceneGraphNode* target);
 
-    shadowmapping::ShadowInfo shadowInformation(const std::string& shadowGroup) const;
+    ShadowInfo shadowInformation(const std::string& shadowGroup) const;
     std::vector<std::string> shadowGroups() const;
 
 private:
@@ -216,54 +216,54 @@ private:
     std::unique_ptr<ghoul::opengl::ProgramObject> _downscaledVolumeProgram;
 
     UniformCache(hdrFeedingTexture, blackoutFactor, hdrExposure, gamma,
-        Hue, Saturation, Value, Viewport, Resolution) _hdrUniformCache;
-    UniformCache(renderedTexture, inverseScreenSize, Viewport,
-        Resolution) _fxaaUniformCache;
+        hue, saturation, value, viewport, resolution) _hdrUniformCache;
+    UniformCache(renderedTexture, inverseScreenSize, viewport,
+        resolution) _fxaaUniformCache;
     UniformCache(downscaledRenderedVolume, downscaledRenderedVolumeDepth, viewport,
         resolution) _writeDownscaledVolumeUniformCache;
 
     GLint _defaultFBO = 0;
-    GLuint _screenQuad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
     GLuint _exitColorTexture = 0;
     GLuint _exitDepthTexture = 0;
     GLuint _exitFramebuffer = 0;
 
     struct {
-        GLuint colorTexture;
-        GLuint positionTexture;
-        GLuint normalTexture;
-        GLuint depthTexture;
-        GLuint framebuffer;
+        GLuint colorTexture = 0;
+        GLuint positionTexture = 0;
+        GLuint normalTexture = 0;
+        GLuint depthTexture = 0;
+        GLuint framebuffer = 0;
     } _gBuffers;
 
     struct {
-        GLuint framebuffer;
-        GLuint colorTexture[2];
+        GLuint framebuffer = 0;
+        GLuint colorTexture[2] = { 0, 0 };
     } _pingPongBuffers;
 
     struct {
-        GLuint fxaaFramebuffer;
-        GLuint fxaaTexture;
+        GLuint fxaaFramebuffer = 0;
+        GLuint fxaaTexture = 0;
     } _fxaaBuffers;
 
     struct {
-        GLuint framebuffer;
-        GLuint colorTexture;
-        GLuint depthbuffer;
+        GLuint framebuffer = 0;
+        GLuint colorTexture = 0;
+        GLuint depthbuffer = 0;
         float currentDownscaleFactor  = 1.f;
     } _downscaleVolumeRendering;
 
-    std::map<std::string, shadowmapping::ShadowInfo> _shadowMaps;
+    std::map<std::string, ShadowInfo> _shadowMaps;
 
     unsigned int _pingPongIndex = 0u;
 
-    bool _dirtyDeferredcastData;
-    bool _dirtyRaycastData;
-    bool _dirtyResolution;
+    bool _dirtyDeferredcastData = false;
+    bool _dirtyRaycastData = false;
+    bool _dirtyResolution = false;
 
     glm::ivec2 _resolution = glm::ivec2(0);
-    int _nAaSamples;
+    int _nAaSamples = 1;
     bool _enableFXAA = true;
     bool _disableHDR = false;
 

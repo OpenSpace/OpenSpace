@@ -57,25 +57,47 @@
 #include <sstream>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view TimePlaceholder = "${OpenSpaceTimeId}";
 
-    constexpr openspace::properties::Property::PropertyInfo UseFixedTimeInfo = {
+    constexpr Property::PropertyInfo UseFixedTimeInfo = {
         "UseFixedTime",
         "Use fixed time",
         "If this value is enabled, the time-varying timevarying dataset will always use "
         "the time that is specified in the 'FixedTime' property, rather than using the "
         "actual time from OpenSpace.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FixedTimeInfo = {
+    constexpr Property::PropertyInfo FixedTimeInfo = {
         "FixedTime",
         "Fixed time",
         "If the 'UseFixedTime' is enabled, this time will be used instead of the actual "
         "time taken from OpenSpace for the displayed tiles.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
+    std::string_view timeStringify(const std::string& format, const Time& t) {
+        ZoneScoped;
+
+        constexpr int BufferSize = 64;
+        ghoul_assert(format.size() < BufferSize, "Format string too long");
+
+        char FormatBuf[BufferSize];
+        std::memset(FormatBuf, '\0', BufferSize);
+        std::memcpy(FormatBuf, format.c_str(), format.size());
+
+        char* OutBuf = reinterpret_cast<char*>(
+            global::memoryManager->TemporaryMemory.allocate(BufferSize)
+        );
+        std::memset(OutBuf, '\0', BufferSize);
+
+        const double time = t.j2000Seconds();
+        SpiceManager::ref().dateFromEphemerisTime(time, OutBuf, BufferSize, FormatBuf);
+        return std::string_view(OutBuf, format.size());
+    }
+    
     struct [[codegen::Dictionary(TemporalTileProvider)]] Parameters {
         // [[codegen::verbatim(UseFixedTimeInfo.description)]]
         std::optional<bool> useFixedTime;
@@ -144,34 +166,13 @@ namespace {
         // image to color
         std::optional<std::string> colormap;
     };
+
+} // namespace
 #include "temporaltileprovider_codegen.cpp"
 
-    std::string_view timeStringify(const std::string& format, const openspace::Time& t) {
-        ZoneScoped;
+namespace openspace {
 
-        constexpr int BufferSize = 64;
-        ghoul_assert(format.size() < BufferSize, "Format string too long");
-
-        using namespace openspace;
-
-        char FormatBuf[BufferSize];
-        std::memset(FormatBuf, '\0', BufferSize);
-        std::memcpy(FormatBuf, format.c_str(), format.size());
-
-        char* OutBuf = reinterpret_cast<char*>(
-            global::memoryManager->TemporaryMemory.allocate(BufferSize)
-        );
-        std::memset(OutBuf, '\0', BufferSize);
-
-        const double time = t.j2000Seconds();
-        SpiceManager::ref().dateFromEphemerisTime(time, OutBuf, BufferSize, FormatBuf);
-        return std::string_view(OutBuf, format.size());
-    }
-} // namespace
-
-namespace openspace::globebrowsing {
-
-documentation::Documentation TemporalTileProvider::Documentation() {
+Documentation TemporalTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_temporaltileprovider");
 }
 
@@ -318,11 +319,10 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
     if (_isInterpolating) {
         _interpolateTileProvider = std::make_unique<InterpolateTileProvider>(dictionary);
         _interpolateTileProvider->initialize();
-        _interpolateTileProvider->colormap =
-            ghoul::io::TextureReader::ref().loadTexture(_colormap, 1);
-        _interpolateTileProvider->colormap->uploadTexture();
-        _interpolateTileProvider->colormap->setFilter(
-            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap
+        _interpolateTileProvider->colormap = ghoul::io::TextureReader::ref().loadTexture(
+            _colormap,
+            1,
+            { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
         );
     }
 }
@@ -682,11 +682,9 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
 {
     ZoneScoped;
 
-    glGenFramebuffers(1, &fbo);
-    glGenVertexArrays(1, &vaoQuad);
-    glGenBuffers(1, &vboQuad);
-    glBindVertexArray(vaoQuad);
-    glBindBuffer(GL_ARRAY_BUFFER, vboQuad);
+    glCreateFramebuffers(1, &fbo);
+
+    glCreateBuffers(1, &vboQuad);
     // Quad for fullscreen with vertex (xy) and texture coordinates (uv)
     constexpr std::array<GLfloat, 24> VertexData = {
         // x    y    u    v
@@ -697,22 +695,19 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
          1.f, -1.f, 1.f, 0.f,
          1.f,  1.f, 1.f, 1.f
     };
-    glBufferData(GL_ARRAY_BUFFER, sizeof(VertexData), VertexData.data(), GL_STATIC_DRAW);
-    // vertex coordinates at location 0
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(0);
-    // texture coords at location 1
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        4 * sizeof(GLfloat),
-        reinterpret_cast<void*>(2 * sizeof(GLfloat))
-    );
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    glNamedBufferStorage(vboQuad, sizeof(VertexData), VertexData.data(), GL_NONE_BIT);
+
+    glCreateVertexArrays(1, &vaoQuad);
+    glVertexArrayVertexBuffer(vaoQuad, 0, vboQuad, 0, 4 * sizeof(GLfloat));
+
+    glEnableVertexArrayAttrib(vaoQuad, 0);
+    glVertexArrayAttribFormat(vaoQuad, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vaoQuad, 0, 0);
+
+    glEnableVertexArrayAttrib(vaoQuad, 1);
+    glVertexArrayAttribFormat(vaoQuad, 1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat));
+    glVertexArrayAttribBinding(vaoQuad, 1, 0);
+
     shaderProgram = global::renderEngine->buildRenderProgram(
         "InterpolatingProgram",
         absPath("${MODULE_GLOBEBROWSING}/shaders/interpolate_vs.glsl"),
@@ -740,7 +735,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     // return tile here, we just want to trigger the load already
     before->tile(tileIndex);
     future->tile(tileIndex);
-    const cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
+    const ProviderTileKey key = { tileIndex, uniqueIdentifier };
 
     if (!prev.texture || !next.texture) {
         return Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
@@ -760,7 +755,7 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     Tile ourTile;
     // The texture that will contain the interpolated image
     ghoul::opengl::Texture* writeTexture = nullptr;
-    cache::MemoryAwareTileCache* tileCache =
+    MemoryAwareTileCache* tileCache =
         global::moduleEngine->module<GlobeBrowsingModule>()->tileCache();
     if (tileCache->exist(key)) {
         ourTile = tileCache->get(key);
@@ -779,16 +774,17 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &currentFBO);
     global::renderEngine->openglStateCache().viewport(viewport.data());
     // Bind render texture to FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, *writeTexture, 0);
+    glNamedFramebufferTexture(fbo, GL_COLOR_ATTACHMENT0, *writeTexture, 0);
     glDisable(GL_BLEND);
     const GLenum textureBuffers = GL_COLOR_ATTACHMENT0;
-    glDrawBuffers(1, &textureBuffers);
+    glNamedFramebufferDrawBuffers(fbo, 1, &textureBuffers);
+
 
     // Setup our own viewport settings
-    const GLsizei w = static_cast<GLsizei>(writeTexture->width());
-    const GLsizei h = static_cast<GLsizei>(writeTexture->height());
+    const GLsizei w = static_cast<GLsizei>(writeTexture->dimensions().x);
+    const GLsizei h = static_cast<GLsizei>(writeTexture->dimensions().y);
     glViewport(0, 0, w, h);
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT);
     GLint id = 0;
@@ -799,18 +795,15 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
 
     // The texture that will give the color for the interpolated texture
     ghoul::opengl::TextureUnit colormapUnit;
-    colormapUnit.activate();
-    colormap->bind();
+    colormapUnit.bind(*colormap);
     shaderProgram->setUniform("colormapTexture", colormapUnit);
 
     ghoul::opengl::TextureUnit prevUnit;
-    prevUnit.activate();
-    prev.texture->bind();
+    prevUnit.bind(*prev.texture);
     shaderProgram->setUniform("prevTexture", prevUnit);
 
     ghoul::opengl::TextureUnit nextUnit;
-    nextUnit.activate();
-    next.texture->bind();
+    nextUnit.bind(*next.texture);
     shaderProgram->setUniform("nextTexture", nextUnit);
 
     // Render to the texture
@@ -868,4 +861,4 @@ float TemporalTileProvider::InterpolateTileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

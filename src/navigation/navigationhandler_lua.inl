@@ -42,6 +42,8 @@
 #include <utility>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
 
 /**
@@ -61,10 +63,7 @@ namespace {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
 
-    openspace::global::navigationHandler->loadNavigationState(
-        filePath,
-        useTimeStamp
-    );
+    global::navigationHandler->loadNavigationState(filePath, useTimeStamp);
 }
 
 /**
@@ -82,9 +81,7 @@ namespace {
 [[codegen::luawrap]] ghoul::Dictionary getNavigationState(
                                                          std::optional<std::string> frame)
 {
-    using namespace openspace;
-
-    interaction::NavigationState state;
+    NavigationState state;
     if (frame.has_value()) {
         const SceneGraphNode* referenceFrame = sceneGraphNode(*frame);
         if (!referenceFrame) {
@@ -111,10 +108,7 @@ namespace {
 [[codegen::luawrap]] void setNavigationState(ghoul::Dictionary navigationState,
                                              bool useTimeStamp = false)
 {
-    using namespace openspace;
-
-    interaction::NavigationState ns = interaction::NavigationState(navigationState);
-
+    NavigationState ns = NavigationState(navigationState);
     global::navigationHandler->setNavigationStateNextFrame(ns);
 
     if (useTimeStamp && ns.timestamp.has_value()) {
@@ -139,21 +133,21 @@ namespace {
     if (path.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
-    openspace::global::navigationHandler->saveNavigationState(path, frame);
+    global::navigationHandler->saveNavigationState(path, frame);
 }
 
 /**
  * Reset the camera direction to point at the anchor node.
  */
 [[codegen::luawrap]] void retargetAnchor() {
-    openspace::global::navigationHandler->orbitalNavigator().startRetargetAnchor();
+    global::navigationHandler->orbitalNavigator().startRetargetAnchor();
 }
 
 /**
  * Reset the camera direction to point at the aim node.
  */
 [[codegen::luawrap]] void retargetAim() {
-    openspace::global::navigationHandler->orbitalNavigator().startRetargetAim();
+    global::navigationHandler->orbitalNavigator().startRetargetAim();
 }
 
 /**
@@ -162,7 +156,6 @@ namespace {
  * selected.
  */
 [[codegen::luawrap]] void targetNextInterestingAnchor() {
-    using namespace openspace;
     if (global::profile->markNodes.empty()) {
         LWARNINGC(
             "targetNextInterestingAnchor",
@@ -195,7 +188,6 @@ namespace {
  * selected.
  */
 [[codegen::luawrap]] void targetPreviousInterestingAnchor() {
-    using namespace openspace;
     if (global::profile->markNodes.empty()) {
         LWARNINGC(
             "targetPreviousInterestingAnchor",
@@ -242,7 +234,6 @@ namespace {
 [[codegen::luawrap]] void setFocus(std::string identifier, bool shouldRetarget = true,
                                    bool shouldResetVelocities = true)
 {
-    using namespace openspace;
     SceneGraphNode* node = sceneGraphNode(identifier);
     if (!node) {
         throw ghoul::lua::LuaError("Unknown node: " + identifier);
@@ -282,8 +273,6 @@ namespace {
                                            bool shouldFlip = false,
                                            double sensitivity = 0.0)
 {
-    using namespace openspace;
-    using JoystickCameraStates = interaction::JoystickCameraStates;
     global::navigationHandler->setJoystickAxisMapping(
         std::move(joystickName),
         axis,
@@ -320,8 +309,6 @@ namespace {
                                                    bool shouldInvert = false,
                                                    bool isRemote = true)
 {
-    using namespace openspace;
-    using JoystickCameraStates = interaction::JoystickCameraStates;
     global::navigationHandler->setJoystickAxisMappingProperty(
         std::move(joystickName),
         axis,
@@ -386,9 +373,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * \return an object with information about the joystick axis
  */
 [[codegen::luawrap]] ghoul::Dictionary joystickAxis(std::string joystickName, int axis) {
-    using namespace openspace;
-
-    interaction::JoystickCameraStates::AxisInformation info =
+    JoystickCameraStates::AxisInformation info =
         global::navigationHandler->joystickAxisMapping(joystickName, axis);
 
     ghoul::Dictionary dict;
@@ -423,7 +408,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
                                                                                  int axis,
                                                                            float deadzone)
 {
-    using namespace openspace;
     global::navigationHandler->setJoystickAxisDeadzone(joystickName, axis, deadzone);
 }
 
@@ -439,10 +423,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 [[codegen::luawrap("axisDeadzone")]] float joystickAxisDeadzone(std::string joystickName,
                                                                 int axis)
 {
-    float deadzone = openspace::global::navigationHandler->joystickAxisDeadzone(
-        joystickName,
-        axis
-    );
+    float deadzone = global::navigationHandler->joystickAxisDeadzone(joystickName, axis);
     return deadzone;
 }
 
@@ -468,16 +449,14 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
                                              std::string action = "Press",
                                              bool isRemote = true)
 {
-    using namespace openspace;
-    interaction::JoystickAction act =
-        ghoul::from_string<interaction::JoystickAction>(action);
+    JoystickAction act = ghoul::from_string<JoystickAction>(action);
 
     global::navigationHandler->bindJoystickButtonCommand(
         joystickName,
         button,
         command,
         act,
-        interaction::JoystickCameraStates::ButtonCommandRemote(isRemote),
+        JoystickCameraStates::ButtonCommandRemote(isRemote),
         documentation
     );
 }
@@ -490,10 +469,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * \param button the button for which to clear the commands
  */
 [[codegen::luawrap]] void clearJoystickButton(std::string joystickName, int button) {
-    openspace::global::navigationHandler->clearJoystickButtonCommand(
-        joystickName,
-        button
-    );
+    global::navigationHandler->clearJoystickButtonCommand(joystickName, button);
 }
 
 /**
@@ -506,7 +482,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * \return the currently bound Lua script
  */
 [[codegen::luawrap]] std::string joystickButton(std::string joystickName, int button) {
-    using namespace openspace;
     const std::vector<std::string>& cmds =
         global::navigationHandler->joystickButtonCommand(joystickName, button);
 
@@ -535,7 +510,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  *                 upwards and a negative value downwards)
  */
 [[codegen::luawrap]] void addGlobalRotation(double horizontal, double vertical) {
-    using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRotation(
         glm::dvec2(horizontal, vertical)
     );
@@ -555,7 +529,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  *                 camera upwards and a negative value downwards)
  */
 [[codegen::luawrap]] void addLocalRotation(double horizontal, double vertical) {
-    using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addLocalRotation(
         glm::dvec2(horizontal, vertical)
     );
@@ -573,7 +546,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  *              value moves the camera further away.
  */
 [[codegen::luawrap]] void addTruckMovement(double value) {
-    using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addTruckMovement(value);
 }
 
@@ -589,7 +561,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  *              the camera to the right
  */
 [[codegen::luawrap]] void addLocalRoll(double value) {
-    using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addLocalRoll(value);
 }
 
@@ -607,7 +578,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  *              the camera to the right
  */
 [[codegen::luawrap]] void addGlobalRoll(double value) {
-    using namespace openspace;
     global::navigationHandler->orbitalNavigator().scriptStates().addGlobalRoll(value);
 }
 
@@ -616,7 +586,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * set to default in the OrbitalNavigator.
  */
 [[codegen::luawrap]] void triggerIdleBehavior(std::string choice = "") {
-    using namespace openspace;
     try {
         global::navigationHandler->orbitalNavigator().triggerIdleBehavior(choice);
     }
@@ -631,7 +600,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * \return a list of joystick names
  */
 [[codegen::luawrap]] std::vector<std::string> listAllJoysticks() {
-    using namespace openspace;
     return global::navigationHandler->listAllJoysticks();
 }
 
@@ -641,8 +609,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * \return the distance, in meters
  */
 [[codegen::luawrap]] double distanceToFocus() {
-    using namespace openspace;
-
     const SceneGraphNode* focus = global::navigationHandler->anchorNode();
     Camera* camera = global::navigationHandler->camera();
 
@@ -655,8 +621,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * \return the distance, in meters
  */
 [[codegen::luawrap]] double distanceToFocusBoundingSphere() {
-    using namespace openspace;
-
     const SceneGraphNode* focus = global::navigationHandler->anchorNode();
     Camera* camera = global::navigationHandler->camera();
 
@@ -671,8 +635,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
  * \return the distance, in meters
  */
 [[codegen::luawrap]] double distanceToFocusInteractionSphere() {
-    using namespace openspace;
-
     const SceneGraphNode* focus = global::navigationHandler->anchorNode();
     Camera* camera = global::navigationHandler->camera();
 
@@ -704,8 +666,6 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
                                     std::optional<double> altitude,
                                     std::optional<double> fadeDuration)
 {
-    using namespace openspace;
-
     std::string script;
 
     if (altitude.has_value()) {
@@ -736,8 +696,6 @@ void flyToGeoInternal(std::string node, double latitude, double longitude,
                       std::optional<double> altitude, std::optional<double> duration,
                       std::optional<bool> shouldUseUpVector)
 {
-    using namespace openspace;
-
     const SceneGraphNode* n;
     if (!node.empty()) {
         n = sceneGraphNode(node);
@@ -821,8 +779,6 @@ void flyToGeoInternal(std::string node, double latitude, double longitude,
                                     std::optional<double> duration,
                                     std::optional<bool> shouldUseUpVector)
 {
-    using namespace openspace;
-
     std::optional<double> altitude;
     if (useCurrentDistance.has_value() && *useCurrentDistance) {
         altitude = std::nullopt;
@@ -885,8 +841,6 @@ std::tuple<double, double, double>
 localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitude,
                      double altitude)
 {
-    using namespace openspace;
-
     SceneGraphNode* n = sceneGraphNode(nodeIdentifier);
     if (!n) {
         throw ghoul::lua::LuaError("Unknown globe identifier: " + nodeIdentifier);
@@ -902,7 +856,6 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  * \return Whether a camera path is currently active, or not
  */
 [[codegen::luawrap]] bool isFlying() {
-    using namespace openspace;
     return global::openSpaceEngine->currentMode() == OpenSpaceEngine::Mode::CameraPath;
 }
 
@@ -925,7 +878,6 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
                       std::optional<std::variant<bool, double>> useUpFromTargetOrDuration,
                                                            std::optional<double> duration)
 {
-    using namespace openspace;
     if (useUpFromTargetOrDuration.has_value() &&
         std::holds_alternative<double>(*useUpFromTargetOrDuration) &&
         duration.has_value())
@@ -993,7 +945,6 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
                       std::optional<std::variant<bool, double>> useUpFromTargetOrDuration,
                                                            std::optional<double> duration)
 {
-    using namespace openspace;
     if (!sceneGraphNode(nodeIdentifier)) {
         throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
     }
@@ -1044,15 +995,14 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
 [[codegen::luawrap]] void flyToNavigationState(ghoul::Dictionary navigationState,
                                                std::optional<double> duration)
 {
-    using namespace openspace;
     try {
-        documentation::testSpecificationAndThrow(
-            interaction::NavigationState::Documentation(),
+        testSpecificationAndThrow(
+            NavigationState::Documentation(),
             navigationState,
             "NavigationState"
         );
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         logError(e, "flyToNavigationState");
         throw ghoul::lua::LuaError(std::format("Unable to create a path: {}", e.what()));
     }
@@ -1083,7 +1033,6 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  *                 a value of 5 means "zoom in over 5 seconds"
  */
 [[codegen::luawrap]] void zoomToFocus(std::optional<double> duration) {
-    using namespace openspace;
     const SceneGraphNode* node = global::navigationHandler->anchorNode();
     if (!node) {
         throw ghoul::lua::LuaError("Could not determine current focus node");
@@ -1117,7 +1066,6 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
  */
 [[codegen::luawrap]] void zoomToDistance(double distance, std::optional<double> duration)
 {
-    using namespace openspace;
     if (distance <= 0.0) {
         throw ghoul::lua::LuaError("The distance must be larger than zero");
     }
@@ -1161,7 +1109,6 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
 [[codegen::luawrap]] void zoomToDistanceRelative(double distance,
                                                  std::optional<double> duration)
 {
-    using namespace openspace;
     if (distance <= 0.0) {
         throw ghoul::lua::LuaError("The distance must be larger than zero");
     }
@@ -1208,15 +1155,14 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
                                                 std::optional<bool> useTimeStamp,
                                                 std::optional<double> fadeDuration)
 {
-    using namespace openspace;
     try {
-        documentation::testSpecificationAndThrow(
-            interaction::NavigationState::Documentation(),
+        testSpecificationAndThrow(
+            NavigationState::Documentation(),
             navigationState,
             "NavigationState"
         );
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         logError(e, "jumpToNavigationState");
         throw ghoul::lua::LuaError(std::format(
             "Unable to jump to navigation state: {}", e.what()
@@ -1228,7 +1174,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
     // dictionary directly, due to the number keys for arrays. We solve this by first
     // creating an object of the correct datatype
     // (@TODO emmbr 2024-04-03, This formatting problem should probably be fixed)
-    interaction::NavigationState ns = interaction::NavigationState(navigationState);
+    NavigationState ns = NavigationState(navigationState);
 
     bool setTime = (ns.timestamp.has_value() && useTimeStamp.value_or(false));
 
@@ -1259,7 +1205,6 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
 [[codegen::luawrap]] void jumpTo(std::string nodeIdentifier,
                                  std::optional<double> fadeDuration)
 {
-    using namespace openspace;
     if (SceneGraphNode* n = sceneGraphNode(nodeIdentifier);  !n) {
         throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
     }
@@ -1279,6 +1224,6 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
     }
 }
 
-#include "navigationhandler_lua_codegen.cpp"
-
 } // namespace
+
+#include "navigationhandler_lua_codegen.cpp"

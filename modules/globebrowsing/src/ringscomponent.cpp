@@ -48,111 +48,119 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RingsComponent";
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    struct Vertex {
+        glm::vec2 position;
+        glm::vec2 texCoords;
+        glm::vec3 normal;
+    };
+
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Enable/Disable Rings.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    constexpr Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for these rings.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextureFwrdInfo = {
+    constexpr Property::PropertyInfo TextureFwrdInfo = {
         "TextureFwrd",
         "Texture forward",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for forward scattering light in these rings.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextureBckwrdInfo = {
+    constexpr Property::PropertyInfo TextureBckwrdInfo = {
         "TextureBckwrd",
         "Texture backward",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for backward scattering light in these rings.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextureUnlitInfo = {
+    constexpr Property::PropertyInfo TextureUnlitInfo = {
         "TextureUnlit",
         "Texture unlit",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture which is used for unlit part in these rings.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextureColorInfo = {
+    constexpr Property::PropertyInfo TextureColorInfo = {
         "TextureColor",
         "Texture color",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture color which is used for unlit part in these rings.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextureTransparencyInfo = {
+    constexpr Property::PropertyInfo TextureTransparencyInfo = {
         "TextureTransparency",
         "Texture transparency",
         "This value is the path to a texture on disk that contains a one-dimensional "
         "texture transparency which is used for unlit part in these rings.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "This value specifies the radius of the rings in meters.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OffsetInfo = {
+    constexpr Property::PropertyInfo OffsetInfo = {
         "Offset",
         "Offset",
         "This value is used to limit the width of the rings. Each of the two values is "
         "a value between 0 and 1, where 0 is the center of the ring and 1 is the "
         "maximum extent at the radius. For example, if the value is {0.5, 1.0}, the "
         "ring is only shown between radius/2 and radius. It defaults to {0.0, 1.0}.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NightFactorInfo = {
+    constexpr Property::PropertyInfo NightFactorInfo = {
         "NightFactor",
         "Night factor",
         "This value is a multiplicative factor that is applied to the side of the rings "
         "that is facing away from the Sun. If this value is equal to '1', no darkening "
         "of the night side occurs.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorFilterInfo = {
+    constexpr Property::PropertyInfo ColorFilterInfo = {
         "ColorFilter",
         "Color filter",
         "This value affects the filtering out of part of the rings depending on the "
         "color values of the texture. The higher value, the more rings are filtered out.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ZFightingPercentageInfo = {
+    constexpr Property::PropertyInfo ZFightingPercentageInfo = {
         "ZFightingPercentage",
         "Z-fighting percentage",
         "The percentage of the correct distance to the surface being shadowed. "
         "Possible values: [0.0, 1.0].",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NumberShadowSamplesInfo = {
+    constexpr Property::PropertyInfo NumberShadowSamplesInfo = {
         "NumberShadowSamples",
         "Number of shadow samples",
         "The number of samples used during shadow mapping calculation "
         "(Percentage Closer Filtering).",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(RingsComponent)]] Parameters {
@@ -198,17 +206,17 @@ namespace {
         // [[codegen::verbatim(NumberShadowSamplesInfo.description)]]
         std::optional<int> numberShadowSamples;
     };
-#include "ringscomponent_codegen.cpp"
 } // namespace
+#include "ringscomponent_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RingsComponent::Documentation() {
+Documentation RingsComponent::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_rings_component");
 }
 
 RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "Rings" })
+    : PropertyOwner({ "Rings" })
     , _texturePath(TextureInfo)
     , _textureFwrdPath(TextureFwrdInfo)
     , _textureBckwrdPath(TextureBckwrdInfo)
@@ -302,7 +310,7 @@ void RingsComponent::initialize() {
     }
 
     _offset = p.offset.value_or(_offset);
-    _offset.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _offset.setViewOption(Property::ViewOptions::MinMaxRange);
     addProperty(_offset);
 
     _nightFactor = p.nightFactor.value_or(_nightFactor);
@@ -344,21 +352,34 @@ void RingsComponent::initializeGL() {
         LERROR(e.message);
     }
 
-    glGenVertexArrays(1, &_quad);
-    glGenBuffers(1, &_vertexPositionBuffer);
+    glCreateVertexArrays(1, &_vao);
 
-    createPlane();
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(
+        _vao,
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        offsetof(Vertex, texCoords)
+    );
+    glVertexArrayAttribBinding(_vao, 1, 0);
+
+    glEnableVertexArrayAttrib(_vao, 2);
+    glVertexArrayAttribFormat(_vao, 2, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, normal));
+    glVertexArrayAttribBinding(_vao, 2, 0);
 
     // Check if readiness state has changed after shader compilation
     checkAndNotifyReadinessChange();
 }
 
 void RingsComponent::deinitializeGL() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     _textureFile = nullptr;
     _texture = nullptr;
@@ -421,36 +442,31 @@ void RingsComponent::draw(const RenderData& data,
             modelViewProjectionTransform
         );
 
-        ringTextureFwrdUnit.activate();
-        _textureForwards->bind();
+        ringTextureFwrdUnit.bind(*_textureForwards);
         _shader->setUniform(
             _uniformCacheAdvancedRings.textureForwards,
             ringTextureFwrdUnit
         );
 
-        ringTextureBckwrdUnit.activate();
-        _textureBackwards->bind();
+        ringTextureBckwrdUnit.bind(*_textureBackwards);
         _shader->setUniform(
             _uniformCacheAdvancedRings.textureBackwards,
             ringTextureBckwrdUnit
         );
 
-        ringTextureUnlitUnit.activate();
-        _textureUnlit->bind();
+        ringTextureUnlitUnit.bind(*_textureUnlit);
         _shader->setUniform(
             _uniformCacheAdvancedRings.textureUnlit,
             ringTextureUnlitUnit
         );
 
-        ringTextureColorUnit.activate();
-        _textureColor->bind();
+        ringTextureColorUnit.bind(*_textureColor);
         _shader->setUniform(
             _uniformCacheAdvancedRings.textureColor,
             ringTextureColorUnit
         );
 
-        ringTextureTransparencyUnit.activate();
-        _textureTransparency->bind();
+        ringTextureTransparencyUnit.bind(*_textureTransparency);
         _shader->setUniform(
             _uniformCacheAdvancedRings.textureTransparency,
             ringTextureTransparencyUnit
@@ -494,8 +510,7 @@ void RingsComponent::draw(const RenderData& data,
         _shader->setUniform(_uniformCache.opacity, opacity());
         _shader->setUniform(_uniformCache.ellipsoidRadii, _ellipsoidRadii);
 
-        ringTextureUnit.activate();
-        _texture->bind();
+        ringTextureUnit.bind(*_texture);
         _shader->setUniform(_uniformCache.ringTexture, ringTextureUnit);
     }
 
@@ -506,7 +521,7 @@ void RingsComponent::draw(const RenderData& data,
     glEnable(GL_DEPTH_TEST);
     glDisable(GL_CULL_FACE);
 
-    glBindVertexArray(_quad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     glEnable(GL_CULL_FACE);
@@ -528,7 +543,21 @@ void RingsComponent::update(const UpdateData& data) {
     }
 
     if (_planeIsDirty) [[unlikely]] {
-        createPlane();
+        const GLfloat s = _size;
+
+        const std::array<Vertex, 6> vertices = {
+            Vertex { glm::vec2(-s, -s), glm::vec2(0.f, 0.f), glm::vec3(0.f, 0.f, 1.f) },
+            Vertex { glm::vec2( s,  s), glm::vec2(1.f, 1.f), glm::vec3(0.f, 0.f, 1.f) },
+            Vertex { glm::vec2(-s,  s), glm::vec2(0.f, 1.f), glm::vec3(0.f, 0.f, 1.f) },
+            Vertex { glm::vec2(-s, -s), glm::vec2(0.f, 0.f), glm::vec3(0.f, 0.f, 1.f) },
+            Vertex { glm::vec2( s, -s), glm::vec2(1.f, 0.f), glm::vec3(0.f, 0.f, 1.f) },
+            Vertex { glm::vec2( s,  s), glm::vec2(1.f, 1.f), glm::vec3(0.f, 0.f, 1.f) }
+        };
+
+        glDeleteBuffers(1, &_vbo);
+        glCreateBuffers(1, &_vbo);
+        glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+        glNamedBufferStorage(_vbo, 6 * sizeof(Vertex), vertices.data(), GL_NONE_BIT);
         _planeIsDirty = false;
     }
 
@@ -556,195 +585,111 @@ void RingsComponent::loadTexture() {
     using namespace ghoul::opengl;
 
     if (!_texturePath.value().empty()) {
-        std::unique_ptr<Texture> texture = TextureReader::ref().loadTexture(
+        _texture = TextureReader::ref().loadTexture(
             absPath(_texturePath),
-            1
+            1,
+            { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
         );
 
-        if (texture) {
-            LDEBUG(std::format("Loaded texture from '{}'", absPath(_texturePath)));
-            _texture = std::move(texture);
+        LDEBUG(std::format("Loaded texture from '{}'", absPath(_texturePath)));
 
-            _texture->uploadTexture();
-            _texture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFile = std::make_unique<ghoul::filesystem::File>(
-                _texturePath.value()
-            );
-            _textureFile->setCallback([this]() { _textureIsDirty = true; });
-        }
+        _textureFile = std::make_unique<ghoul::filesystem::File>(
+            _texturePath.value()
+        );
+        _textureFile->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (!_textureFwrdPath.value().empty()) {
-        std::unique_ptr<Texture> textureForwards = TextureReader::ref().loadTexture(
+        _textureForwards = TextureReader::ref().loadTexture(
             absPath(_textureFwrdPath),
-            1
+            1,
+            { .filter = Texture::FilterMode::AnisotropicMipMap }
         );
 
-        if (textureForwards) {
-            LDEBUG(std::format(
-                "Loaded forwards scattering texture from '{}'",
-                absPath(_textureFwrdPath)
-            ));
-            _textureForwards = std::move(textureForwards);
+        LDEBUG(std::format(
+            "Loaded forwards scattering texture from '{}'",
+            absPath(_textureFwrdPath)
+        ));
 
-            _textureForwards->uploadTexture();
-            _textureForwards->setFilter(Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFileForwards = std::make_unique<ghoul::filesystem::File>(
-                _textureFwrdPath.value()
-            );
-            _textureFileForwards->setCallback([this]() { _textureIsDirty = true; });
-        }
+        _textureFileForwards = std::make_unique<ghoul::filesystem::File>(
+            _textureFwrdPath.value()
+        );
+        _textureFileForwards->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (!_textureBckwrdPath.value().empty()) {
-        std::unique_ptr<Texture> textureBackwards = TextureReader::ref().loadTexture(
+        _textureBackwards = TextureReader::ref().loadTexture(
             absPath(_textureBckwrdPath),
-            1
+            1,
+            { .filter = Texture::FilterMode::AnisotropicMipMap }
         );
 
-        if (textureBackwards) {
-            LDEBUG(std::format(
-                "Loaded backwards scattering texture from '{}'",
-                absPath(_textureBckwrdPath)
-            ));
-            _textureBackwards = std::move(textureBackwards);
+        LDEBUG(std::format(
+            "Loaded backwards scattering texture from '{}'",
+            absPath(_textureBckwrdPath)
+        ));
 
-            _textureBackwards->uploadTexture();
-            _textureBackwards->setFilter(Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFileBackwards = std::make_unique<ghoul::filesystem::File>(
-                _textureBckwrdPath.value()
-            );
-            _textureFileBackwards->setCallback([this]() { _textureIsDirty = true; });
-        }
+        _textureFileBackwards = std::make_unique<ghoul::filesystem::File>(
+            _textureBckwrdPath.value()
+        );
+        _textureFileBackwards->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (!_textureUnlitPath.value().empty()) {
-        std::unique_ptr<Texture> textureUnlit = TextureReader::ref().loadTexture(
+        _textureUnlit = TextureReader::ref().loadTexture(
             absPath(_textureUnlitPath),
-            1
+            1,
+            { . filter = Texture::FilterMode::AnisotropicMipMap }
         );
 
-        if (textureUnlit) {
-            LDEBUG(std::format(
-                "Loaded unlit texture from '{}'", absPath(_textureUnlitPath)
-            ));
-            _textureUnlit = std::move(textureUnlit);
+        LDEBUG(std::format(
+            "Loaded unlit texture from '{}'", absPath(_textureUnlitPath)
+        ));
 
-            _textureUnlit->uploadTexture();
-            _textureUnlit->setFilter(Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFileUnlit = std::make_unique<ghoul::filesystem::File>(
-                _textureUnlitPath.value()
-            );
-            _textureFileUnlit->setCallback([this]() { _textureIsDirty = true; });
-        }
+        _textureFileUnlit = std::make_unique<ghoul::filesystem::File>(
+            _textureUnlitPath.value()
+        );
+        _textureFileUnlit->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (!_textureColorPath.value().empty()) {
-        std::unique_ptr<Texture> textureColor = TextureReader::ref().loadTexture(
+        _textureColor = TextureReader::ref().loadTexture(
             absPath(_textureColorPath),
-            1
+            1,
+            { .filter = Texture::FilterMode::AnisotropicMipMap }
         );
 
-        if (textureColor) {
-            LDEBUG(
-                std::format("Loaded color texture from '{}'", absPath(_textureColorPath))
-            );
-            _textureColor = std::move(textureColor);
+        LDEBUG(
+            std::format("Loaded color texture from '{}'", absPath(_textureColorPath))
+        );
 
-            _textureColor->uploadTexture();
-            _textureColor->setFilter(Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFileColor = std::make_unique<ghoul::filesystem::File>(
-                _textureColorPath.value()
-            );
-            _textureFileColor->setCallback([this]() { _textureIsDirty = true; });
-        }
+        _textureFileColor = std::make_unique<ghoul::filesystem::File>(
+            _textureColorPath.value()
+        );
+        _textureFileColor->setCallback([this]() { _textureIsDirty = true; });
     }
 
     if (!_textureTransparencyPath.value().empty()) {
-        std::unique_ptr<Texture> textureTransparency = TextureReader::ref().loadTexture(
+        _textureTransparency = TextureReader::ref().loadTexture(
             absPath(_textureTransparencyPath),
-            1
+            1,
+            { .filter = Texture::FilterMode::AnisotropicMipMap }
         );
 
-        if (textureTransparency) {
-            LDEBUG(std::format(
-                "Loaded transparency texture from '{}'", absPath(_textureTransparencyPath)
-            ));
-            _textureTransparency = std::move(textureTransparency);
+        LDEBUG(std::format(
+            "Loaded transparency texture from '{}'", absPath(_textureTransparencyPath)
+        ));
 
-            _textureTransparency->uploadTexture();
-            _textureTransparency->setFilter(Texture::FilterMode::AnisotropicMipMap);
-
-            _textureFileTransparency = std::make_unique<ghoul::filesystem::File>(
-                _textureTransparencyPath.value()
-            );
-            _textureFileTransparency->setCallback([this]() { _textureIsDirty = true; });
-        }
+        _textureFileTransparency = std::make_unique<ghoul::filesystem::File>(
+            _textureTransparencyPath.value()
+        );
+        _textureFileTransparency->setCallback([this]() { _textureIsDirty = true; });
     }
 
     _isAdvancedTextureEnabled = _textureForwards && _textureBackwards && _textureUnlit;
 
     // Check if readiness state has changed after loading textures
     checkAndNotifyReadinessChange();
-}
-
-void RingsComponent::createPlane() {
-    const GLfloat size = _size;
-
-    struct VertexData {
-        GLfloat x;
-        GLfloat y;
-        GLfloat s;
-        GLfloat t;
-        GLfloat nx;
-        GLfloat ny;
-        GLfloat nz;
-    };
-
-    const std::array<VertexData, 6> vertices = {
-        VertexData{ -size, -size, 0.f, 0.f, 0.f, 0.f, 1.f },
-        VertexData{  size,  size, 1.f, 1.f, 0.f, 0.f, 1.f },
-        VertexData{ -size,  size, 0.f, 1.f, 0.f, 0.f, 1.f },
-        VertexData{ -size, -size, 0.f, 0.f, 0.f, 0.f, 1.f },
-        VertexData{  size, -size, 1.f, 0.f, 0.f, 0.f, 1.f },
-        VertexData{  size,  size, 1.f, 1.f, 0.f, 0.f, 1.f },
-    };
-
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(VertexData),
-        nullptr
-    );
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(VertexData),
-        reinterpret_cast<void*>(offsetof(VertexData, s))
-    );
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(
-        2,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(VertexData),
-        reinterpret_cast<void*>(offsetof(VertexData, nx))
-    );
 }
 
 void RingsComponent::compileShadowShader() {

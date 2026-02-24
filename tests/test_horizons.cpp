@@ -120,7 +120,7 @@ namespace {
 
         // Initialize SpiceManager and load leap second kernel
         SpiceManager::initialize();
-        openspace::SpiceManager::ref().loadKernel(kernel);
+        SpiceManager::ref().loadKernel(kernel);
 
         // Read the file
         HorizonsResult result = readHorizonsFile(filePath);
@@ -150,8 +150,8 @@ namespace {
         CHECK(data[2].position.z == Catch::Approx(z2));
 
         // Clean up
-        openspace::SpiceManager::ref().unloadKernel(kernel);
-        openspace::SpiceManager::deinitialize();
+        SpiceManager::ref().unloadKernel(kernel);
+        SpiceManager::deinitialize();
     }
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 }

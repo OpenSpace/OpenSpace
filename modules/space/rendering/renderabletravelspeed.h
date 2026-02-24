@@ -41,7 +41,7 @@ class RenderableTravelSpeed : public Renderable {
 public:
     explicit RenderableTravelSpeed(const ghoul::Dictionary& dictionary);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
     void initializeGL() override;
     void initialize() override;
     void deinitializeGL() override;
@@ -52,26 +52,18 @@ public:
     void update(const UpdateData& data) override;
 
 private:
-    void calculateVerticesPositions();
     void updateVertexData();
     void reinitiateTravel();
 
     UniformCache(lineColor, opacity) _uniformCache;
 
-    properties::StringProperty _targetIdentifier;
+    StringProperty _targetIdentifier;
     SceneGraphNode* _targetNode = nullptr;
-    properties::DoubleProperty _travelSpeed;
-    properties::FloatProperty _indicatorLength;
-    properties::FloatProperty _fadeLength;
-    properties::FloatProperty _lineWidth;
-    properties::Vec3Property _lineColor;
-
-    struct VertexPositions {
-        glm::vec3 endOfFade;
-        glm::vec3 betweenLightAndFade;
-        glm::vec3 headOfLight;
-    };
-    VertexPositions _vertexPositions;
+    DoubleProperty _travelSpeed;
+    FloatProperty _indicatorLength;
+    FloatProperty _fadeLength;
+    FloatProperty _lineWidth;
+    Vec3Property _lineColor;
 
     double _travelTime = 0.0;
     glm::dvec3 _directionVector;
@@ -82,8 +74,8 @@ private:
     ghoul::opengl::ProgramObject* _shaderProgram = nullptr;
     // The vertex attribute location for position must correlate to layout location in
     // vertex shader
-    GLuint _vaoId = 0;
-    GLuint _vBufferId = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 } // namespace openspace

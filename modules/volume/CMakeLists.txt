@@ -32,9 +32,6 @@ set(HEADER_FILES
   rawvolumewriter.h
   textureslicevolumereader.h
   textureslicevolumereader.inl
-  transferfunction.h
-  transferfunctionhandler.h
-  transferfunctionproperty.h
   rawvolumemetadata.h
   lrucache.h
   lrucache.inl
@@ -60,9 +57,6 @@ set(SOURCE_FILES
   rawvolumereader.inl
   rawvolumewriter.inl
   textureslicevolumereader.inl
-  transferfunction.cpp
-  transferfunctionhandler.cpp
-  transferfunctionproperty.cpp
   volumesampler.inl
   volumegridtype.cpp
   volumeutils.cpp
@@ -73,8 +67,15 @@ set(SOURCE_FILES
   tasks/generaterawvolumetask.cpp
   tasks/generaterawvolumefromfiletask.cpp
 )
-
 source_group("Source Files" FILES ${SOURCE_FILES})
+
+set(SHADER_FILES
+  shaders/bounds_fs.glsl
+  shaders/bounds_vs.glsl
+  shaders/helper.glsl
+  shaders/raycast.glsl
+)
+source_group("Shader Files" FILES ${SHADER_FILES})
 
 create_new_module(
   "Volume"

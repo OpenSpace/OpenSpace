@@ -50,11 +50,11 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    bool createGeometry() override;
-    bool destroyGeometry() override;
+    void createGeometry() override;
+    void destroyGeometry() override;
     bool updateTextureResource() override;
     void renderGeometry() const override;
     void setUniforms() override;
@@ -79,9 +79,9 @@ private:
 
     void changeKwPath(std::string path);
 
-    properties::SelectionProperty _fieldlines;
-    properties::FloatProperty _resolution;
-    properties::FloatProperty _slice;
+    SelectionProperty _fieldlines;
+    FloatProperty _resolution;
+    FloatProperty _slice;
 
     std::string _kwPath;
 
@@ -108,8 +108,8 @@ private:
     };
     Cut _cut;
 
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 };
 
 } // namespace openspace

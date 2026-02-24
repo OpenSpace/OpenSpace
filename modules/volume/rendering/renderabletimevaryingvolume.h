@@ -37,11 +37,10 @@
 #include <filesystem>
 #include <memory>
 
-namespace openspace { class Histogram; }
-
-namespace openspace::volume {
+namespace openspace {
 
 class BasicVolumeRaycaster;
+class Histogram;
 template <typename T> class RawVolume;
 class VolumeClipPlanes;
 
@@ -56,13 +55,13 @@ public:
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct Timestep {
         std::filesystem::path baseName;
-        bool inRam;
-        bool onGpu;
+        bool inRam = false;
+        bool onGpu = false;
         RawVolumeMetadata metadata;
         std::shared_ptr<RawVolume<float>> rawVolume;
         std::shared_ptr<ghoul::opengl::Texture> texture;
@@ -76,28 +75,28 @@ private:
 
     void loadTimestepMetadata(const std::filesystem::path& path);
 
-    properties::OptionProperty _gridType;
+    OptionProperty _gridType;
     std::shared_ptr<VolumeClipPlanes> _clipPlanes;
 
-    properties::FloatProperty _stepSize;
-    properties::FloatProperty _brightness;
-    properties::FloatProperty _rNormalization;
-    properties::FloatProperty _rUpperBound;
-    properties::FloatProperty _secondsBefore;
-    properties::FloatProperty _secondsAfter;
-    properties::StringProperty _sourceDirectory;
-    properties::StringProperty _transferFunctionPath;
+    FloatProperty _stepSize;
+    FloatProperty _brightness;
+    FloatProperty _rNormalization;
+    FloatProperty _rUpperBound;
+    FloatProperty _secondsBefore;
+    FloatProperty _secondsAfter;
+    StringProperty _sourceDirectory;
+    StringProperty _transferFunctionPath;
 
-    properties::TriggerProperty _triggerTimeJump;
-    properties::IntProperty _jumpToTimestep;
+    TriggerProperty _triggerTimeJump;
+    IntProperty _jumpToTimestep;
 
     std::map<double, Timestep> _volumeTimesteps;
     std::unique_ptr<BasicVolumeRaycaster> _raycaster;
     bool _invertDataAtZ;
 
-    std::shared_ptr<openspace::TransferFunction> _transferFunction;
+    std::shared_ptr<TransferFunction> _transferFunction;
 };
 
-} // namespace openspace::volume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___RENDERABLETIMEVARYINGVOLUME___H__

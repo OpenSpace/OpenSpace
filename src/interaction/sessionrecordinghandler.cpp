@@ -64,6 +64,8 @@
 #include "sessionrecordinghandler_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "SessionRecording";
 
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
@@ -75,38 +77,38 @@ namespace {
         {}
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderPlaybackInfo = {
+    constexpr Property::PropertyInfo RenderPlaybackInfo = {
         "RenderInfo",
         "Render playback information",
         "If enabled, information about a currently played back session recording is "
         "rendering to screen.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IgnoreRecordedScaleInfo = {
+    constexpr Property::PropertyInfo IgnoreRecordedScaleInfo = {
         "IgnoreRecordedScale",
         "Ignore recorded scale",
         "If this value is enabled, the scale value from a recording is ignored and the "
         "computed values are used instead.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AddModelMatrixinAsciiInfo = {
+    constexpr Property::PropertyInfo AddModelMatrixinAsciiInfo = {
         "AddModelMatrixinAscii",
         "Add model matrix in ASCII recording",
         "If this is 'true', the model matrix is written into the ASCII recording format "
         "in the line before each camera keyframe. The model matrix is the full matrix "
         "that converts the position into a J2000+Galactic reference frame.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
     constexpr std::string_view ScriptReturnPrefix = "return ";
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 SessionRecordingHandler::SessionRecordingHandler()
-    : properties::PropertyOwner({ "SessionRecording", "Session Recording" })
+    : PropertyOwner({ "SessionRecording", "Session Recording" })
     , _renderPlaybackInformation(RenderPlaybackInfo, false)
     , _ignoreRecordedScale(IgnoreRecordedScaleInfo, false)
     , _addModelMatrixinAscii(AddModelMatrixinAsciiInfo, false)
@@ -221,7 +223,7 @@ void SessionRecordingHandler::tickPlayback(double dt) {
         1.0
     );
 
-    interaction::KeyframeNavigator::updateCamera(
+    KeyframeNavigator::updateCamera(
         global::navigationHandler->camera(),
         prevPose,
         nextPose,
@@ -426,8 +428,8 @@ void SessionRecordingHandler::startPlayback(SessionRecording timeline, bool loop
     global::navigationHandler->orbitalNavigator().updateOnCameraInteraction();
 
     LINFO("Playback session started");
-    global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
-        events::EventSessionRecordingPlayback::State::Started
+    global::eventEngine->publishEvent<EventSessionRecordingPlayback>(
+        EventSessionRecordingPlayback::State::Started
     );
 }
 
@@ -484,8 +486,8 @@ void SessionRecordingHandler::setPlaybackPause(bool pause) {
             global::timeManager->setPause(true);
         }
         _state = SessionState::PlaybackPaused;
-        global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
-            events::EventSessionRecordingPlayback::State::Paused
+        global::eventEngine->publishEvent<EventSessionRecordingPlayback>(
+            EventSessionRecordingPlayback::State::Paused
         );
     }
     else if (!pause && _state == SessionState::PlaybackPaused) {
@@ -493,8 +495,8 @@ void SessionRecordingHandler::setPlaybackPause(bool pause) {
             global::timeManager->setPause(false);
         }
         _state = SessionState::Playback;
-        global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
-            events::EventSessionRecordingPlayback::State::Resumed
+        global::eventEngine->publishEvent<EventSessionRecordingPlayback>(
+            EventSessionRecordingPlayback::State::Resumed
         );
     }
 }
@@ -507,8 +509,8 @@ void SessionRecordingHandler::stopPlayback() {
     LINFO("Session playback finished");
     _state = SessionState::Idle;
     cleanUpTimelinesAndKeyframes();
-    global::eventEngine->publishEvent<events::EventSessionRecordingPlayback>(
-        events::EventSessionRecordingPlayback::State::Finished
+    global::eventEngine->publishEvent<EventSessionRecordingPlayback>(
+        EventSessionRecordingPlayback::State::Finished
     );
     global::openSpaceEngine->resetMode();
     global::navigationHandler->resetNavigationUpdateVariables();
@@ -582,7 +584,7 @@ void SessionRecordingHandler::saveScriptKeyframeToTimeline(std::string script) {
     );
 }
 
-void SessionRecordingHandler::savePropertyBaseline(properties::Property& prop) {
+void SessionRecordingHandler::savePropertyBaseline(Property& prop) {
     constexpr std::array<std::string_view, 4> PropertyBaselineRejects{
         "NavigationHandler.OrbitalNavigator.Anchor",
         "NavigationHandler.OrbitalNavigator.Aim",
@@ -730,7 +732,7 @@ void SessionRecordingHandler::checkIfScriptUsesScenegraphNode(
 
         std::string_view found = extractScenegraphNodeFromScene(subjectOfSetProp);
         if (!found.empty()) {
-            const std::vector<properties::Property*> matchHits =
+            const std::vector<Property*> matchHits =
                 sceneGraph()->propertiesMatchingRegex(subjectOfSetProp);
             if (matchHits.empty()) {
                 LWARNING(std::format(
@@ -793,7 +795,7 @@ std::vector<std::string> SessionRecordingHandler::playbackList() const {
     return fileList;
 }
 
-scripting::LuaLibrary SessionRecordingHandler::luaLibrary() {
+LuaLibrary SessionRecordingHandler::luaLibrary() {
     return {
         "sessionRecording",
         {

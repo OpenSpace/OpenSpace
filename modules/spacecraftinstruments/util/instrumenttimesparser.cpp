@@ -48,8 +48,8 @@ namespace {
         std::string target;
         std::map<std::string, ghoul::Dictionary> instruments;
     };
-#include "instrumenttimesparser_codegen.cpp"
 } // namespace
+#include "instrumenttimesparser_codegen.cpp"
 
 namespace openspace {
 

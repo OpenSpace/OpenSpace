@@ -31,7 +31,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 struct TimeRange {
     /**
@@ -73,7 +73,7 @@ struct TimeRange {
 
     bool includes(const TimeRange& o) const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     double start = std::numeric_limits<double>::max();
     double end = -std::numeric_limits<double>::max();

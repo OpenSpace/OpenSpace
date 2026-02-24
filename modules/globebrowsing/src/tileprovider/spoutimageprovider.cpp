@@ -45,12 +45,12 @@ namespace {
     struct [[codegen::Dictionary(SpoutImageProvider)]] Parameters {
         std::optional<std::string> spoutName;
     };
-#include "spoutimageprovider_codegen.cpp"
 } // namespace
+#include "spoutimageprovider_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation SpoutImageProvider::Documentation() {
+Documentation SpoutImageProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_spoutimageprovider");
 }
 
@@ -60,33 +60,26 @@ SpoutImageProvider::SpoutImageProvider(
     ZoneScoped;
 
 #ifdef OPENSPACE_HAS_SPOUT
-    spoutReceiver = std::make_unique<spout::SpoutReceiverPropertyProxy>(
-        *this,
-        dictionary
-    );
+    spoutReceiver = std::make_unique<SpoutReceiverPropertyProxy>(*this, dictionary);
 
     spoutReceiver->onUpdateTexture([this](int width, int height) {
         for (int i = 0; i < 2; i++) {
             if (!fbo[i]) {
-                glGenFramebuffers(1, &fbo[i]);
+                glCreateFramebuffers(1, &fbo[i]);
             }
-            tileTexture[i].release();
             tileTexture[i] = std::make_unique<ghoul::opengl::Texture>(
-                glm::uvec3(width / 2, height, 1),
-                GL_TEXTURE_2D,
-                ghoul::opengl::Texture::Format::RGBA,
-                GL_RGBA,
-                GL_UNSIGNED_BYTE,
-                ghoul::opengl::Texture::FilterMode::Linear,
-                ghoul::opengl::Texture::WrappingMode::Repeat,
-                ghoul::opengl::Texture::AllocateData::No,
-                ghoul::opengl::Texture::TakeOwnership::No
+                ghoul::opengl::Texture::FormatInit{
+                    .dimensions = glm::uvec3(width / 2, height, 1),
+                    .type = GL_TEXTURE_2D,
+                    .format = ghoul::opengl::Texture::Format::RGBA,
+                    .dataType = GL_UNSIGNED_BYTE
+                },
+                ghoul::opengl::Texture::SamplerInit{}
             );
 
             if (!tileTexture[i]) {
                 return false;
             }
-            tileTexture[i]->uploadTexture();
             tiles[i] = Tile{ tileTexture[i].get(), std::nullopt, Tile::Status::OK };
         }
         return true;
@@ -104,28 +97,14 @@ SpoutImageProvider::SpoutImageProvider(
     });
 
 
-    spoutReceiver->onUpdateReceiver([this](int width, int height, unsigned int texture) {
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo[0]);
-        glFramebufferTexture2D(
-            GL_READ_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT0,
-            GL_TEXTURE_2D,
-            static_cast<GLuint>(texture),
-            0
-        );
-        glReadBuffer(GL_COLOR_ATTACHMENT0);
-
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, fbo[1]);
-        glFramebufferTexture2D(
-            GL_DRAW_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT1,
-            GL_TEXTURE_2D,
-            static_cast<GLuint>(*tileTexture[0]),
-            0
-        );
-        glDrawBuffer(GL_COLOR_ATTACHMENT1);
-
-        glBlitFramebuffer(
+    spoutReceiver->onUpdateReceiver([this](int width, int height, GLuint texture) {
+        glNamedFramebufferTexture(fbo[0], GL_COLOR_ATTACHMENT0, texture, 0);
+        glNamedFramebufferReadBuffer(fbo[0], GL_COLOR_ATTACHMENT0);
+        glNamedFramebufferTexture(fbo[1], GL_COLOR_ATTACHMENT1, *tileTexture[0], 0);
+        glNamedFramebufferDrawBuffer(fbo[1], GL_COLOR_ATTACHMENT1);
+        glBlitNamedFramebuffer(
+            fbo[0],
+            fbo[1],
             width / 2,
             0,
             width,
@@ -137,14 +116,11 @@ SpoutImageProvider::SpoutImageProvider(
             GL_COLOR_BUFFER_BIT,
             GL_NEAREST
         );
-        glFramebufferTexture2D(
-            GL_DRAW_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT1,
-            GL_TEXTURE_2D,
-            static_cast<GLuint>(*tileTexture[1]),
-            0
-        );
-        glBlitFramebuffer(
+
+        glNamedFramebufferTexture(fbo[1], GL_COLOR_ATTACHMENT1, *tileTexture[1], 0);
+        glBlitNamedFramebuffer(
+            fbo[0],
+            fbo[1],
             0,
             0,
             width / 2,
@@ -227,4 +203,4 @@ float SpoutImageProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

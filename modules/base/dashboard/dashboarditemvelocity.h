@@ -39,11 +39,11 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::BoolProperty _doSimplification;
-    properties::OptionProperty _requestedUnit;
+    BoolProperty _doSimplification;
+    OptionProperty _requestedUnit;
 
     glm::dvec3 _prevPosition = glm::dvec3(0.0);
 };

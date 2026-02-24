@@ -43,56 +43,64 @@
 #include <memory>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableTravelSpeed";
 
-    constexpr openspace::properties::Property::PropertyInfo SpeedInfo = {
+    struct VertexPositions {
+        glm::vec3 endOfFade;
+        glm::vec3 betweenLightAndFade;
+        glm::vec3 headOfLight;
+    };
+
+    constexpr Property::PropertyInfo SpeedInfo = {
         "TravelSpeed",
         "Speed of travel",
         "A value for how fast the speed indicator should travel, in meters per second. "
         "The default value is the speed of light.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TargetInfo = {
+    constexpr Property::PropertyInfo TargetInfo = {
         "TargetNode",
         "Target object",
         "The identifier of the scene graph node to target with the speed indicator. The "
         "speed indicator will travel from the parent node to this scene graph node.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+    constexpr Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "An RGB color for the line.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "This value specifies the line width.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo IndicatorLengthInfo = {
+    constexpr Property::PropertyInfo IndicatorLengthInfo = {
         "IndicatorLength",
         "Indicator length",
         "The length of the speed indicator line, given in seconds. The length will be "
         "computed as the speed times this value. For example, a value of 1 will make it "
         "as long as the distance it would travel over one second with the specified "
         "speed.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeLengthInfo = {
+    constexpr Property::PropertyInfo FadeLengthInfo = {
         "FadeLength",
         "Fade length",
         "The length of the faded tail of the speed indicator, given in seconds. The "
         "length of the tail will be computed as the speed times this value. For example, "
         "a value of 1 will make it as long as the distance it would travel over one "
         "second. A linear fade will be applied over this distance to create the tail.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `Renderable` can be used to visualize a certain travel speed using a line that
@@ -128,12 +136,12 @@ namespace {
         // [[codegen::verbatim(FadeLengthInfo.description)]]
         std::optional<float> fadeLength [[codegen::greater(0.f)]];
     };
-#include "renderabletravelspeed_codegen.cpp"
 } // namespace
+#include "renderabletravelspeed_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableTravelSpeed::Documentation() {
+Documentation RenderableTravelSpeed::Documentation() {
     return codegen::doc<Parameters>("base_renderable_renderabletravelspeed");
 }
 
@@ -157,7 +165,7 @@ RenderableTravelSpeed::RenderableTravelSpeed(const ghoul::Dictionary& dictionary
     setRenderBin(RenderBin::Overlay);
 
     _lineColor = p.color.value_or(_lineColor);
-    _lineColor.setViewOption(properties::Property::ViewOptions::Color);
+    _lineColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_lineColor);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
@@ -209,8 +217,15 @@ void RenderableTravelSpeed::initializeGL() {
         }
     );
 
-    glGenVertexArrays(1, &_vaoId);
-    glGenBuffers(1, &_vBufferId);
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, sizeof(VertexPositions), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(glm::vec3));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
 }
@@ -222,47 +237,35 @@ void RenderableTravelSpeed::deinitializeGL() {
             global::renderEngine->removeRenderProgram(p);
         }
     );
-    glDeleteVertexArrays(1, &_vaoId);
-    glDeleteBuffers(1, &_vBufferId);
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 }
 
-void RenderableTravelSpeed::calculateVerticesPositions() {
+void RenderableTravelSpeed::updateVertexData() {
+    VertexPositions positions;
+
     // 3: start of light, 2: start of fade, 1: end of fade
-    _vertexPositions.headOfLight = _travelSpeed * _timeSinceStart * _directionVector;
+    positions.headOfLight = _travelSpeed * _timeSinceStart * _directionVector;
 
     // This if statment is there to not start the line from behind the source node
     if (_timeSinceStart < _indicatorLength) {
-        _vertexPositions.betweenLightAndFade = glm::vec3(0.0, 0.0, 0.0); // = source node
+        positions.betweenLightAndFade = glm::vec3(0.0, 0.0, 0.0); // = source node
     }
     else {
-        _vertexPositions.betweenLightAndFade =
+        positions.betweenLightAndFade =
             _travelSpeed * (_timeSinceStart - _indicatorLength) * _directionVector;
     }
 
     // This if statment is there to not start the line from behind the source node
     if (_timeSinceStart < (_indicatorLength + _fadeLength)) {
-        _vertexPositions.endOfFade = glm::vec3(0.0, 0.0, 0.0); // = source node
+        positions.endOfFade = glm::vec3(0.0, 0.0, 0.0); // = source node
     }
     else {
-        _vertexPositions.endOfFade = _travelSpeed *
+        positions.endOfFade = _travelSpeed *
             (_timeSinceStart - _indicatorLength - _fadeLength) * _directionVector;
     }
-}
 
-void RenderableTravelSpeed::updateVertexData() {
-    calculateVerticesPositions();
-
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        sizeof(VertexPositions),
-        &_vertexPositions,
-        GL_DYNAMIC_DRAW
-    );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
-    glBindVertexArray(0);
+    glNamedBufferSubData(_vbo, 0, sizeof(positions), &positions);
 }
 
 void RenderableTravelSpeed::reinitiateTravel() {
@@ -318,13 +321,8 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("lineColor", _lineColor);
     _shaderProgram->setUniform("opacity", opacity());
 
-#ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
-    glLineWidth(1.f);
-#endif // __APPLE__
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_LINE_STRIP, 0, 3);
     glBindVertexArray(0);
 

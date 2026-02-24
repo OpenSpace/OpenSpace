@@ -29,11 +29,13 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextInfo = {
         "Text",
         "Text",
         "The text to be displayed.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `ScreenSpaceRenderable` shows a static text that can be changed via a
@@ -42,12 +44,12 @@ namespace {
         // [[codegen::verbatim(TextInfo.description)]]
         std::optional<std::string> text;
     };
-#include "screenspacetext_codegen.cpp"
 } // namespace
+#include "screenspacetext_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceText::Documentation() {
+Documentation ScreenSpaceText::Documentation() {
     return codegen::doc<Parameters>(
         "base_screenspace_text",
         ScreenSpaceRenderableText::Documentation()

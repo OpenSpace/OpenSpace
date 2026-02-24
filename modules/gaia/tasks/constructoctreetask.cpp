@@ -44,173 +44,177 @@ namespace {
     struct [[codegen::Dictionary(ConstructOctreeTask)]] Parameters {
         // If SingleFileInput is set to true then this specifies the path to a single BIN
         // file containing a full dataset. Otherwise this specifies the path to a folder
-        // with multiple BIN files containing subsets of sorted star data
+        // with multiple BIN files containing subsets of sorted star data.
         std::string inFileOrFolderPath;
 
         // If SingleFileInput is set to true then this specifies the output file name
         // (including full path). Otherwise this specifies the path to the folder which to
-        // save all files
+        // save all files.
         std::string outFileOrFolderPath;
 
-        // If set it determines what MAX_DIST to use when creating Octree
+        // If set it determines what MAX_DIST to use when creating Octree.
         std::optional<int> maxDist;
 
-        // If set it determines what MAX_STAR_PER_NODE to use when creating Octree
+        // If set it determines what MAX_STAR_PER_NODE to use when creating Octree.
         std::optional<int> maxStarsPerNode;
 
         // If true then task will read from a single file and output a single binary file
         // with the full Octree. If false then task will read all files in specified
-        // folder and output multiple files for the Octree
+        // folder and output multiple files for the Octree.
         std::optional<bool> singleFileInput;
 
         // If defined then only stars with Position X values between [min, max] will be
         // inserted into Octree (if min is set to 0.0 it is read as -Inf, if max is set to
         // 0.0 it is read as +Inf). If min = max then all values equal min|max will be
-        // filtered away
+        // filtered away.
         std::optional<glm::vec2> filterPosX;
 
         // If defined then only stars with Position Y values between [min, max] will be
         // inserted into Octree (if min is set to 0.0 it is read as -Inf, if max is set to
         // 0.0 it is read as +Inf). If min = max then all values equal min|max will be
-        // filtered away
+        // filtered away.
         std::optional<glm::vec2> filterPosY;
 
         // If defined then only stars with Position Z values between [min, max] will be
         // inserted into Octree (if min is set to 0.0 it is read as -Inf, if max is set to
         // 0.0 it is read as +Inf). If min = max then all values equal min|max will be
-        // filtered away
+        // filtered away.
         std::optional<glm::vec2> filterPosZ;
 
         // If defined then only stars with G mean magnitude values between [min, max] will
         // be inserted into Octree (if min is set to 20.0 it is read as -Inf, if max is
         // set to 20.0 it is read as +Inf). If min = max then all values equal min|max
-        // will be filtered away. Default GMag = 20.0 if no value existed
+        // will be filtered away. Default GMag = 20.0 if no value existed.
         std::optional<glm::vec2> filterGMag;
 
         // If defined then only stars with Bp-Rp color values between [min, max] will be
         // inserted into Octree (if min is set to 0.0 it is read as -Inf, if max is set to
         // 0.0 it is read as +Inf). If min = max then all values equal min|max will be
-        // filtered away
+        // filtered away.
         std::optional<glm::vec2> filterBpRp;
 
         // If defined then only stars with Velocity X values between [min, max] will be
         // inserted into Octree (if min is set to 0.0 it is read as -Inf, if max is set to
         // 0.0 it is read as +Inf). If min = max then all values equal min|max will be
-        // filtered away
+        // filtered away.
         std::optional<glm::vec2> filterVelX;
 
         // If defined then only stars with Velocity Y values between [min, max] will be
         // inserted into Octree (if min is set to 0.0 it is read as -Inf, if max is set to
         // 0.0 it is read as +Inf). If min = max then all values equal min|max will be
-        // filtered away
+        // filtered away.
         std::optional<glm::vec2> filterVelY;
 
         // If defined then only stars with Velocity Z values between [min, max] will be
         // inserted into Octree (if min is set to 0.0 it is read as -Inf, if max is set to
         // 0.0 it is read as +Inf). If min = max then all values equal min|max will be
-        // filtered away
+        // filtered away.
         std::optional<glm::vec2> filterVelZ;
 
         // If defined then only stars with Bp mean magnitude values between [min, max]
         // will be inserted into Octree (if min is set to 20.0 it is read as -Inf, if max
         // is set to 20.0 it is read as +Inf). If min = max then all values equal min|max
-        // will be filtered away. Default BpMag = 20.0 if no value existed
+        // will be filtered away. Default BpMag = 20.0 if no value existed.
         std::optional<glm::vec2> filterBpMag;
 
         // If defined then only stars with Rp mean magnitude values between [min, max]
         // will be inserted into Octree (if min is set to 20.0 it is read as -Inf, if max
         // is set to 20.0 it is read as +Inf). If min = max then all values equal min|max
-        // will be filtered away. Default RpMag = 20.0 if no value existed
+        // will be filtered away. Default RpMag = 20.0 if no value existed.
         std::optional<glm::vec2> filterRpMag;
 
         // If defined then only stars with Bp-G color values between [min, max] will be
         // inserted into Octree (if min is set to 0.0 it is read as -Inf, if max is set to
         // 0.0 it is read as +Inf). If min = max then all values equal min|max will be
-        // filtered away
+        // filtered away.
         std::optional<glm::vec2> filterBpG;
 
         // If defined then only stars with G-Rp color values between [min, max] will be
         // inserted into Octree (if min is set to 0.0 it is read as -Inf, if max is set to
         // 0.0 it is read as +Inf). If min = max then all values equal min|max will be
-        // filtered away
+        // filtered away.
         std::optional<glm::vec2> filterGRp;
 
         // If defined then only stars with RA values between [min, max] will be inserted
         // into Octree (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it
         // is read as +Inf). If min = max then all values equal min|max will be filtered
-        // away
+        // away.
         std::optional<glm::vec2> filterRa;
 
         // If defined then only stars with RA Error values between [min, max] will be
         // inserted into Octree (if min is set to 0.0 it is read as -Inf, if max is set to
         // 0.0 it is read as +Inf). If min = max then all values equal min|max will be
-        // filtered away
+        // filtered away.
         std::optional<glm::vec2> filterRaError;
 
         // If defined then only stars with DEC values between [min, max] will be inserted
         // into Octree (if min is set to 0.0 it is read as -Inf, if max is set to 0.0 it
         // is read as +Inf). If min = max then all values equal min|max will be filtered
-        // away
+        // away.
         std::optional<glm::vec2> filterDec;
 
         // If defined then only stars with DEC Error values between [min, max] will be
         // inserted into Octree (if min is set to 0.0 it is read as -Inf, if max is set to
         // 0.0 it is read as +Inf). If min = max then all values equal min|max will be
-        // filtered away
+        // filtered away.
         std::optional<glm::vec2> filterDecError;
 
         // If defined then only stars with Parallax values between [min, max] will be
         // inserted into Octree (if min is set to 0.0 it is read as -Inf, if max is set to
         // 0.0 it is read as +Inf). If min = max then all values equal min|max will be
-        // filtered away
+        // filtered away.
         std::optional<glm::vec2> filterParallax;
 
         // If defined then only stars with Parallax Error values between [min, max] will
         // be inserted into Octree (if min is set to 0.0 it is read as -Inf, if max is set
         // to 0.0 it is read as +Inf). If min = max then all values equal min|max will be
-        // filtered away
+        // filtered away.
         std::optional<glm::vec2> filterParallaxError;
 
         // If defined then only stars with Proper Motion RA values between [min, max] will
         // be inserted into Octree (if min is set to 0.0 it is read as -Inf, if max is set
         // to 0.0 it is read as +Inf). If min = max then all values equal min|max will be
-        // filtered away
+        // filtered away.
         std::optional<glm::vec2> filterPmra;
 
         // If defined then only stars with Proper Motion RA Error values between
         // [min, max] will be inserted into Octree (if min is set to 0.0 it is read as
         // -Inf, if max is set to 0.0 it is read as +Inf). If min = max then all values
-        // equal min|max will be filtered away
+        // equal min|max will be filtered away.
         std::optional<glm::vec2> filterPmraError;
 
         // If defined then only stars with Proper Motion DEC values between [min, max]
         // will be inserted into Octree (if min is set to 0.0 it is read as -Inf, if max
         // is set to 0.0 it is read as +Inf). If min = max then all values equal min|max
-        // will be filtered away
+        // will be filtered away.
         std::optional<glm::vec2> filterPmdec;
 
         // If defined then only stars with Proper Motion DEC Error values between
         // [min, max] will be inserted into Octree (if min is set to 0.0 it is read as
         // -Inf, if max is set to 0.0 it is read as +Inf). If min = max then all values
-        // equal min|max will be filtered away
+        // equal min|max will be filtered away.
         std::optional<glm::vec2> filterPmdecError;
 
         // If defined then only stars with Radial Velocity values between [min, max] will
         // be inserted into Octree (if min is set to 0.0 it is read as -Inf, if max is set
         // to 0.0 it is read as +Inf). If min = max then all values equal min|max will be
-        // filtered away
+        // filtered away.
         std::optional<glm::vec2> filterRv;
 
         // If defined then only stars with Radial Velocity Error values between [min, max]
         // will be inserted into Octree (if min is set to 0.0 it is read as -Inf, if max
         // is set to 0.0 it is read as +Inf). If min = max then all values equal min|max
-        // will be filtered away
+        // will be filtered away.
         std::optional<glm::vec2> filterRvError;
     };
-#include "constructoctreetask_codegen.cpp"
 } // namespace
+#include "constructoctreetask_codegen.cpp"
 
 namespace openspace {
+
+Documentation ConstructOctreeTask::Documentation() {
+    return codegen::doc<Parameters>("gaia_constructoctreefrombin");
+}
 
 ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -223,7 +227,6 @@ ConstructOctreeTask::ConstructOctreeTask(const ghoul::Dictionary& dictionary) {
 
     _octreeManager = std::make_shared<OctreeManager>();
     _indexOctreeManager = std::make_shared<OctreeManager>();
-
 
     _posX = p.filterPosX.value_or(_posX);
     _filterPosX = p.filterPosX.has_value();
@@ -336,61 +339,19 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         _octreeManager->maxDist(), _octreeManager->maxStarsPerNode()
     ));
 
-    // Use to generate a synthetic dataset
-    /*for (float z = -1.0; z < 1.0; z += 0.05) {
-        for (float y = -1.0; y < 1.0; y += 0.05) {
-            for (float x = -1.0; x < 1.0; x += 0.05) {
-                float r = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-                std::vector<float> renderValues(8);
-                renderValues[0] = x; // + x * r;
-                renderValues[2] = z; // + y * r;
-                renderValues[1] = y; // + z * r;
-                renderValues[3] = 5.0; // + 10 * r;
-                renderValues[4] = 2.0; // + 10 * r;
-                renderValues[5] = r;
-                renderValues[6] = r;
-                renderValues[7] = r;
-                _octreeManager->insert(renderValues);
-                nTotalStars++;
-                nValues+=8;
-            }
-        }
-    }
-
-   for (float phi = -180.0; phi < 180.0; phi += 10.0) {
-        for (float theta = -90.0; theta <= 90.0; theta += 10.0) {
-            float r = 1.0;
-            std::vector<float> renderValues(8);
-            renderValues[0] = r * sin(glm::radians(theta)) * cos(glm::radians(phi));
-            renderValues[2] = r * sin(glm::radians(theta)) * sin(glm::radians(phi));
-            renderValues[1] = r * cos(glm::radians(theta));
-            renderValues[3] = 5.0;
-            renderValues[4] = 2.0;
-            renderValues[5] = r;
-            renderValues[6] = r;
-            renderValues[7] = r;
-            _octreeManager->insert(renderValues);
-            nTotalStars++;
-            nValues += 8;
-        }
-    }*/
-
-    std::ifstream inFileStream(_inFileOrFolderPath, std::ifstream::binary);
-    if (inFileStream.good()) {
-        inFileStream.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
-        inFileStream.read(reinterpret_cast<char*>(&nValuesPerStar), sizeof(int32_t));
+    std::ifstream inFile = std::ifstream(_inFileOrFolderPath, std::ifstream::binary);
+    if (inFile.good()) {
+        inFile.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+        inFile.read(reinterpret_cast<char*>(&nValuesPerStar), sizeof(int32_t));
 
         fullData.resize(nValues);
-        inFileStream.read(
-            reinterpret_cast<char*>(fullData.data()),
-            nValues * sizeof(fullData[0])
-        );
+        inFile.read(reinterpret_cast<char*>(fullData.data()), nValues * sizeof(float));
         nTotalStars = nValues / nValuesPerStar;
 
         progressCallback(0.3f);
         LINFO("Constructing Octree");
 
-        // Insert star into octree. We assume the data already is in correct order.
+        // Insert star into octree. We assume the data already is in correct order
         for (size_t i = 0; i < fullData.size(); i += nValuesPerStar) {
             auto first = fullData.begin() + i;
             auto last = fullData.begin() + i + nValuesPerStar;
@@ -403,10 +364,10 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
                 continue;
             }
 
-            // If all filters passed then insert render values into Octree.
+            // If all filters passed then insert render values into Octree
             _octreeManager->insert(renderValues);
         }
-        inFileStream.close();
+        inFile.close();
     }
     else {
         LERROR(std::format(
@@ -415,18 +376,18 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
     }
     LINFO(std::format("{} of {} read stars were filtered", nFilteredStars, nTotalStars));
 
-    // Slice LOD data before writing to files.
+    // Slice LOD data before writing to files
     _octreeManager->sliceLodData();
 
     LINFO(std::format("Writing octree to '{}'", _outFileOrFolderPath));
-    std::ofstream outFileStream(_outFileOrFolderPath, std::ofstream::binary);
-    if (outFileStream.good()) {
+    std::ofstream outFile = std::ofstream(_outFileOrFolderPath, std::ofstream::binary);
+    if (outFile.good()) {
         if (nValues == 0) {
             LERROR("Error writing file - No values were read from file");
         }
-        _octreeManager->writeToFile(outFileStream, true);
+        _octreeManager->writeToFile(outFile, true);
 
-        outFileStream.close();
+        outFile.close();
     }
     else {
         LERROR(std::format(
@@ -441,21 +402,6 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     int32_t nStars = 0;
     int32_t nValuesPerStar = 0;
     size_t nFilteredStars = 0;
-    //float maxRadius = 0.0;
-    //int starsOutside10 = 0;
-    //int starsOutside25 = 0;
-    //int starsOutside50 = 0;
-    //int starsOutside75 = 0;
-    //int starsOutside100 = 0;
-    //int starsOutside200 = 0;
-    //int starsOutside300 = 0;
-    //int starsOutside400 = 0;
-    //int starsOutside500 = 0;
-    //int starsOutside750 = 0;
-    //int starsOutside1000 = 0;
-    //int starsOutside1500 = 0;
-    //int starsOutside2000 = 0;
-    //int starsOutside5000 = 0;
 
     std::vector<std::filesystem::path> allInputFiles;
     if (std::filesystem::is_directory(_inFileOrFolderPath)) {
@@ -468,7 +414,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     }
 
     std::vector<float> filterValues;
-    auto writeThreads = std::vector<std::thread>(8);
+    std::vector<std::thread> writeThreads = std::vector<std::thread>(8);
 
     _indexOctreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
@@ -485,7 +431,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
 
         LINFO(std::format("Reading data file '{}'", inFilePath));
 
-        std::ifstream inFileStream(inFilePath, std::ifstream::binary);
+        std::ifstream inFileStream = std::ifstream(inFilePath, std::ifstream::binary);
         if (inFileStream.good()) {
             inFileStream.read(reinterpret_cast<char*>(&nValuesPerStar), sizeof(int32_t));
             filterValues.resize(nValuesPerStar, 0.f);
@@ -501,13 +447,6 @@ void ConstructOctreeTask::constructOctreeFromFolder(
                     continue;
                 }
                 // Generate a 50/12,5 dataset (gMag <=13/>13).
-                //if ((filterStar(glm::vec2(20.0), filterValues[3], 20.f)) ||
-                //    (filterStar(glm::vec2(0.0), filterValues[16])) ||
-                //    (filterValues[3] > 13.0 && filterValues[17] > 0.125) ||
-                //    (filterValues[3] <= 13.0 && filterValues[17] > 0.5)) {
-                //    nFilteredStars++;
-                //    continue;
-                //}
 
                 // If all filters passed then insert render values into Octree.
                 const std::vector<float> renderValues(
@@ -517,25 +456,6 @@ void ConstructOctreeTask::constructOctreeFromFolder(
 
                 _indexOctreeManager->insert(renderValues);
                 nStarsInfile++;
-
-                //float maxVal = fmax(fmax(fabs(renderValues[0]), fabs(renderValues[1])),
-                //    fabs(renderValues[2]));
-                //if (maxVal > maxRadius) maxRadius = maxVal;
-                //// Calculate how many stars are outside of different thresholds.
-                //if (maxVal > 10) starsOutside10++;
-                //if (maxVal > 25) starsOutside25++;
-                //if (maxVal > 50) starsOutside50++;
-                //if (maxVal > 75) starsOutside75++;
-                //if (maxVal > 100) starsOutside100++;
-                //if (maxVal > 200) starsOutside200++;
-                //if (maxVal > 300) starsOutside300++;
-                //if (maxVal > 400) starsOutside400++;
-                //if (maxVal > 500) starsOutside500++;
-                //if (maxVal > 750) starsOutside750++;
-                //if (maxVal > 1000) starsOutside1000++;
-                //if (maxVal > 1500) starsOutside1500++;
-                //if (maxVal > 2000) starsOutside2000++;
-                //if (maxVal > 5000) starsOutside5000++;
             }
             inFileStream.close();
         }
@@ -575,24 +495,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         "A total of {} stars were read from files and distributed into {} total nodes",
         nStars, _indexOctreeManager->totalNodes()
     ));
-    LINFO(std::to_string(nFilteredStars) + " stars were filtered");
-
-    //LINFO("Max radius of dataset is: " + std::to_string(maxRadius) +
-    //    "\n Number of stars outside of:" +
-    //    " - 10kPc is " + std::to_string(starsOutside10) + "\n" +
-    //    " - 25kPc is " + std::to_string(starsOutside25) + "\n" +
-    //    " - 50kPc is " + std::to_string(starsOutside50) + "\n" +
-    //    " - 75kPc is " + std::to_string(starsOutside75) + "\n" +
-    //    " - 100kPc is " + std::to_string(starsOutside100) + "\n" +
-    //    " - 200kPc is " + std::to_string(starsOutside200) + "\n" +
-    //    " - 300kPc is " + std::to_string(starsOutside300) + "\n" +
-    //    " - 400kPc is " + std::to_string(starsOutside400) + "\n" +
-    //    " - 500kPc is " + std::to_string(starsOutside500) + "\n" +
-    //    " - 750kPc is " + std::to_string(starsOutside750) + "\n" +
-    //    " - 1000kPc is " + std::to_string(starsOutside1000) + "\n" +
-    //    " - 1500kPc is " + std::to_string(starsOutside1500) + "\n" +
-    //    " - 2000kPc is " + std::to_string(starsOutside2000) + "\n" +
-    //    " - 5000kPc is " + std::to_string(starsOutside5000));
+    LINFO(std::format("{} stars were filtered", nFilteredStars));
 
     // Write index file of Octree structure.
     std::filesystem::path indexFileOutPath = _outFileOrFolderPath / "index.bin";
@@ -647,16 +550,12 @@ bool ConstructOctreeTask::filterStar(const glm::vec2& range, float filterValue,
                                      float normValue)
 {
     // Return true if star should be filtered away, i.e. if min = max = filterValue or
-    // if filterValue < min (when min != 0.0) or filterValue > max (when max != 0.0).
+    // if filterValue < min (when min != 0.0) or filterValue > max (when max != 0.0)
     constexpr float eps = std::numeric_limits<float>::epsilon();
     return (std::abs(range.x - range.y) < eps &&
         std::abs(range.x - filterValue) < eps) ||
         (std::abs(range.x - normValue) > eps && filterValue < range.x) ||
         (std::abs(range.y - normValue) > eps && filterValue > range.y);
-}
-
-documentation::Documentation ConstructOctreeTask::Documentation() {
-    return codegen::doc<Parameters>("gaiamission_constructoctreefrombin");
 }
 
 } // namespace openspace

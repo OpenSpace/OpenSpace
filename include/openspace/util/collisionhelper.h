@@ -27,7 +27,7 @@
 
 #include <ghoul/glm.h>
 
-namespace openspace::collision {
+namespace openspace {
 
 /**
  * Calculate the intersection of a line segment and a sphere. The line segment is defined
@@ -54,6 +54,6 @@ bool lineSphereIntersection(const glm::dvec3& p1, const glm::dvec3& p2,
  */
 bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r);
 
-} // namespace openspace::collision
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___COLLISIONHELPER___H__

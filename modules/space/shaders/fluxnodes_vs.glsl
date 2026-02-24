@@ -24,120 +24,120 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "powerscaling/powerscalingmath.glsl"
 
 layout(location = 0) in vec3 in_position; // in meters
-layout(location = 1) in float fluxValue; // the extra value used to color lines
-layout(location = 2) in float rValue; // the extra value used to mask out parts of lines
+layout(location = 1) in float in_fluxValue; // the extra value used to color lines
+layout(location = 2) in float in_rValue; // the extra value used to mask parts of lines
 
-out vec4    vs_color;
-out float   vs_depth;
-out vec2    vs_st;
-out float   vs_closeToEarth;
+out Data {
+  vec4 color;
+  vec2 texCoords;
+  float depth;
+  float closeToEarth;
+} out_data;
+
+// General Uniforms that's always needed
+uniform mat4 modelViewProjection;
+
+// Uniforms needed to color by quantity
+uniform int colorMode;
+uniform sampler1D colorTable;
+uniform vec2 colorTableRange;
+uniform vec2 domainLimZ;
+
+// Fluxnodes specific uniforms
+uniform float nodeSize;
+uniform vec4 streamColor;
+uniform float thresholdFlux;
+uniform float filterLower;
+uniform float filterUpper;
+uniform int scalingMode;
+uniform int nodeSkipMethod;
+uniform int nodeSkip;
+uniform int nodeSkipDefault;
+uniform int nodeSkipEarth;
+uniform float nodeSkipFluxThreshold;
+uniform float nodeSkipRadiusThreshold;
+uniform float fluxColorAlpha;
+uniform vec3 earthPos;
+uniform float distanceThreshold;
+uniform float proximityNodesSize;
+uniform double time;
+
+// Specific uniforms for cameraperspective
+uniform float maxNodeDistanceSize;
+
+uniform vec3 cameraPos;
+//uniform vec2 screenSize;
+uniform bool usingCameraPerspective;
+uniform float perspectiveDistanceFactor;
+
+uniform vec2 minMaxNodeSize;
+uniform bool usingPulse;
 
 // These should correspond to the enum 'ColorMode'
-const int colorByFluxValue = 0;
-const int uniformColor = 1;
+const int ColorModeColorByFluxValue = 0;
+const int ColorModeUniformColor = 1;
 
-const int uniformskip = 0;
-const int fluxSkip = 1;
-const int radiusSkip = 2;
+const int NodeSkipUniform = 0;
+const int NodeSkipFlux = 1;
+const int NodeSkipRadius = 2;
 
-const int fluxMode = 0;
-const int RFlux = 1;
-const int R2Flux = 2;
-const int log10RFlux = 3;
-const int lnRFlux = 4;
+const int ScalingModeFlux = 0;
+const int ScalingModeRFlux = 1;
+const int ScalingModeR2Flux = 2;
+const int ScalingModeLog10RFlux = 3;
+const int ScalingModeLnRFlux = 4;
 
 const float AUtoMeter = 149597871000.0;
 
-// General Uniforms that's always needed
-uniform mat4      modelViewProjection;
 
-// Uniforms needed to color by quantity
-uniform int       colorMode;
-uniform sampler1D colorTable;
-uniform vec2      colorTableRange;
-uniform vec2      domainLimZ;
-
-// Fluxnodes specific uniforms
-uniform float   nodeSize;
-uniform vec4    streamColor;
-uniform float   thresholdFlux;
-uniform float   filterLower;
-uniform float   filterUpper;
-uniform int     scalingMode;
-uniform int     nodeSkipMethod;
-uniform int     nodeSkip;
-uniform int     nodeSkipDefault;
-uniform int     nodeSkipEarth;
-uniform float   nodeSkipFluxThreshold;
-uniform float   nodeSkipRadiusThreshold;
-uniform float   fluxColorAlpha;
-uniform vec3    earthPos;
-uniform float   distanceThreshold;
-uniform float   proximityNodesSize;
-uniform double  time;
-
-// Speicific uniforms for cameraperspective
-uniform float maxNodeDistanceSize;
-
-uniform vec3    cameraPos;
-//uniform vec2 screenSize;
-uniform bool    usingCameraPerspective;
-uniform float   perspectiveDistanceFactor;
-
-uniform vec2    minMaxNodeSize;
-uniform bool    usingPulse;
-
-
-vec4 getTransferFunctionColor(sampler1D inColorTable) {
+vec4 transferFunctionColor(sampler1D inColorTable) {
   // Remap the color scalar to a [0,1] range
   float scaleValue = 0.0;
-  if (scalingMode == fluxMode) {
-    scaleValue = fluxValue;
+  if (scalingMode == ScalingModeFlux) {
+    scaleValue = in_fluxValue;
   }
-  else if (scalingMode == RFlux) {
-    scaleValue = rValue * fluxValue;
+  else if (scalingMode == ScalingModeRFlux) {
+    scaleValue = in_rValue * in_fluxValue;
   }
-  else if (scalingMode == log10RFlux) {
+  else if (scalingMode == ScalingModeLog10RFlux) {
     // conversion from logbase e to log10 since glsl does not support log10.
-    float logtoTen = log(rValue) / log(10.0);
-    scaleValue = logtoTen * fluxValue;
+    float logToTen = log(in_rValue) / log(10.0);
+    scaleValue = logToTen * in_fluxValue;
   }
-  else if (scalingMode == lnRFlux) {
-    scaleValue = log(rValue) * fluxValue;
+  else if (scalingMode == ScalingModeLnRFlux) {
+    scaleValue = log(in_rValue) * in_fluxValue;
   }
-  else if (scalingMode == R2Flux) {
-    scaleValue = rValue * rValue * fluxValue;
+  else if (scalingMode == ScalingModeR2Flux) {
+    scaleValue = in_rValue * in_rValue * in_fluxValue;
   }
-  float lookUpVal =
-    (scaleValue - colorTableRange.x) / (colorTableRange.y - colorTableRange.x);
-
-  return texture(inColorTable, lookUpVal);
+  float val = (scaleValue - colorTableRange.x) / (colorTableRange.y - colorTableRange.x);
+  return texture(inColorTable, val);
 }
 
 bool checkIfSkipVertex() {
   int nodeIndex = gl_VertexID;
 
-  if (nodeSkipMethod == uniformskip) {
+  if (nodeSkipMethod == NodeSkipUniform) {
     if (mod(nodeIndex, nodeSkip) == 0) {
       return true;
     }
   }
-  else if (nodeSkipMethod == fluxSkip) {
-    if (fluxValue > nodeSkipFluxThreshold && mod(nodeIndex, nodeSkip) == 0) {
+  else if (nodeSkipMethod == NodeSkipFlux) {
+    if (in_fluxValue > nodeSkipFluxThreshold && mod(nodeIndex, nodeSkip) == 0) {
       return true;
     }
-    if (fluxValue < nodeSkipFluxThreshold && mod(nodeIndex, nodeSkipDefault) == 0) {
+    if (in_fluxValue < nodeSkipFluxThreshold && mod(nodeIndex, nodeSkipDefault) == 0) {
       return true;
     }
   }
-  else if (nodeSkipMethod == radiusSkip) {
-    if (rValue < nodeSkipRadiusThreshold && mod(nodeIndex, nodeSkip) == 0) {
+  else if (nodeSkipMethod == NodeSkipRadius) {
+    if (in_rValue < nodeSkipRadiusThreshold && mod(nodeIndex, nodeSkip) == 0) {
       return true;
     }
-    if (rValue > nodeSkipRadiusThreshold && mod(nodeIndex, nodeSkipDefault) == 0) {
+    if (in_rValue > nodeSkipRadiusThreshold && mod(nodeIndex, nodeSkipDefault) == 0) {
       return true;
     }
   }
@@ -145,31 +145,26 @@ bool checkIfSkipVertex() {
 }
 
 void setEarthProximitySettings() {
-  float distancevec = distance(earthPos, in_position.xyz);
-  vs_closeToEarth = 0.0;
+  float distancevec = distance(earthPos, in_position);
+  out_data.closeToEarth = 0.0;
 
   if (distancevec < AUtoMeter * distanceThreshold) {
     if (usingPulse) {
-      int speed = 2;
-      int modulusResult = int(speed * time) % 2;
-      if (fluxValue > thresholdFlux) {
-        if (modulusResult == 1) {
-          vs_color.a = 0.01;
-        }
-        else {
-          vs_color.a = 1.0;
-        }
+      const int Speed = 2;
+      int modulusResult = int(Speed * time) % 2;
+      if (in_fluxValue > thresholdFlux) {
+        out_data.color.a = modulusResult == 1 ? 0.01 : 1.0;
       }
       else {
-        vs_color.a = 0.0;
+        out_data.color.a = 0.0;
       }
     }
-    vs_closeToEarth = 1.0;
+    out_data.closeToEarth = 1.0;
     if (mod(gl_VertexID, nodeSkipEarth) == 0) {
       gl_PointSize = proximityNodesSize;
     }
     else {
-      vs_color = vec4(0.0);
+      out_data.color = vec4(0.0);
     }
   }
 }
@@ -183,42 +178,39 @@ void main() {
   // by using modulus.
   if ((checkIfSkipVertex() ||
       distance(earthPos, in_position) < (distanceThreshold * AUtoMeter)) &&
-      filterLower < rValue / AUtoMeter &&
-      filterUpper > rValue / AUtoMeter &&
+      filterLower < in_rValue / AUtoMeter && filterUpper > in_rValue / AUtoMeter &&
       in_position.z > (domainLimZ.x * AUtoMeter) &&
       in_position.z < (domainLimZ.y * AUtoMeter))
   {
-    vs_color =  getTransferFunctionColor(colorTable);
-    if (colorMode == colorByFluxValue) {
-      if (fluxValue > thresholdFlux) {
-        vs_color =  getTransferFunctionColor(colorTable);
-        vs_color.a = fluxColorAlpha;
+    out_data.color = transferFunctionColor(colorTable);
+    if (colorMode == ColorModeColorByFluxValue) {
+      if (in_fluxValue > thresholdFlux) {
+        out_data.color = transferFunctionColor(colorTable);
+        out_data.color.a = fluxColorAlpha;
         gl_PointSize = nodeSize;
       }
       else {
-        vs_color.a = 0.0;
+        out_data.color.a = 0.0;
       }
     }
-    else if (colorMode == uniformColor) {
-      vs_color = streamColor;
+    else if (colorMode == ColorModeUniformColor) {
+      out_data.color = streamColor;
     }
     setEarthProximitySettings();
   }
   else {
-    vs_color = vec4(0.0);
+    out_data.color = vec4(0.0);
   }
 
   if (usingCameraPerspective) {
-    float rtemp = min(rValue, 1.0);
-
+    float distanceVec = distance(cameraPos, in_position);
     float maxDistance = 100000000000.0 * perspectiveDistanceFactor;
-    float distanceVec = distance(cameraPos, in_position.xyz);
 
     if (distanceVec < maxDistance) {
       float distScale = 1.0 - smoothstep(0.0, maxDistance, distanceVec);
       float factorS = pow(distScale, 9.0) * 500.0;
-      if (distance(earthPos, in_position.xyz) < (distanceThreshold * AUtoMeter)) {
-        gl_PointSize =  proximityNodesSize;
+      if (distance(earthPos, in_position) < (distanceThreshold * AUtoMeter)) {
+        gl_PointSize = proximityNodesSize;
       }
       else {
         gl_PointSize = factorS * maxNodeDistanceSize;
@@ -234,9 +226,7 @@ void main() {
     }
   }
 
-  vec4 position_in_meters = vec4(in_position, 1.0);
-  vec4 positionClipSpace = modelViewProjection * position_in_meters;
-
+  vec4 positionClipSpace = modelViewProjection * vec4(in_position, 1.0);
   gl_Position = vec4(positionClipSpace.xy, 0.0, positionClipSpace.w);
-  vs_depth = gl_Position.w;
+  out_data.depth = gl_Position.w;
 }

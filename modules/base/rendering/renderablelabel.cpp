@@ -40,6 +40,8 @@
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view MeterUnit = "m";
     constexpr std::string_view KilometerUnit = "Km";
     constexpr std::string_view MegameterUnit = "Mm";
@@ -80,71 +82,71 @@ namespace {
 
     constexpr double PARSEC = 0.308567756E17;
 
-    constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
+    constexpr Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending mode",
         "This determines the blending mode that is applied to the renderable.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The label text color.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
+    constexpr Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font size",
         "The font size (in points) for the label.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "Scales the size of the label, exponentially. The value is used as the exponent "
         "in a 10^x computation to scale the label size.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TextInfo = {
+    constexpr Property::PropertyInfo TextInfo = {
         "Text",
         "Text",
         "The text that will be displayed on screen.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
+    constexpr Property::PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
         "Min and max size",
         "The minimum and maximum size (in pixels) of the label.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
+    constexpr Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation matrix",
         "Transformation matrix to be applied to the label.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OrientationOptionInfo = {
+    constexpr Property::PropertyInfo OrientationOptionInfo = {
         "OrientationOption",
         "Orientation option",
         "Label orientation rendering mode.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableFadingEffectInfo = {
+    constexpr Property::PropertyInfo EnableFadingEffectInfo = {
         "EnableFading",
         "Enable/disable fade-in effect",
         "Enable/Disable the Fade-in effect.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeWidthsInfo = {
+    constexpr Property::PropertyInfo FadeWidthsInfo = {
         "FadeWidths",
         "Fade widths",
         "The distances over which the fading takes place, given in the specified unit. "
@@ -152,22 +154,22 @@ namespace {
         "the one after the furthest distance. For example, with the unit Parsec (pc), "
         "a value of {1, 2} will make the label being fully faded out 1 Parsec before "
         "the closest distance and 2 Parsec away from the furthest distance.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeDistancesInfo = {
+    constexpr Property::PropertyInfo FadeDistancesInfo = {
         "FadeDistances",
         "Fade distances",
         "The distance range in which the labels should be fully opaque, specified in "
         "the chosen unit. The distance from the position of the label to the camera.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeUnitOptionInfo = {
+    constexpr Property::PropertyInfo FadeUnitOptionInfo = {
         "FadeUnit",
         "Fade distance Unit",
         "Distance unit for fade-in/-out distance calculations. Defaults to \"au\".",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableLabel)]] Parameters {
@@ -232,12 +234,12 @@ namespace {
         // [[codegen::verbatim(FadeWidthsInfo.description)]]
         std::optional<glm::vec2> fadeWidths;
     };
-#include "renderablelabel_codegen.cpp"
 } // namespace
+#include "renderablelabel_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableLabel::Documentation() {
+Documentation RenderableLabel::Documentation() {
     return codegen::doc<Parameters>("base_renderable_labels");
 }
 
@@ -293,7 +295,7 @@ RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
     addProperty(_text);
 
     _color = p.color.value_or(_color);
-    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color.setViewOption(Property::ViewOptions::Color);
     addProperty(_color);
 
     _fontSize = p.fontSize.value_or(_fontSize);
@@ -315,7 +317,7 @@ RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
     addProperty(_size);
 
     _minMaxSize = p.minMaxSize.value_or(_minMaxSize);
-    _minMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _minMaxSize.setViewOption(Property::ViewOptions::MinMaxRange);
     addProperty(_minMaxSize);
 
     _transformationMatrix = p.transformationMatrix.value_or(_transformationMatrix);
@@ -345,7 +347,7 @@ RenderableLabel::RenderableLabel(const ghoul::Dictionary& dictionary)
     addProperty(_fadeUnitOption);
 
     _fadeDistances = p.fadeDistances.value_or(_fadeDistances);
-    _fadeDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _fadeDistances.setViewOption(Property::ViewOptions::MinMaxRange);
     addProperty(_fadeDistances);
 
     _fadeWidths = p.fadeWidths.value_or(_fadeWidths);

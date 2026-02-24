@@ -112,7 +112,7 @@ namespace {
         std::optional<ghoul::Dictionary> startState
             [[codegen::reference("core_navigation_state")]];
 
-        enum class [[codegen::map(openspace::interaction::Path::Type)]] PathType {
+        enum class [[codegen::map(openspace::Path::Type)]] PathType {
             AvoidCollision,
             ZoomOutOverview,
             Linear,
@@ -121,12 +121,12 @@ namespace {
         // The type of the created path. Affects the shape of the resulting path
         std::optional<PathType> pathType;
     };
-#include "path_codegen.cpp"
 } // namespace
+#include "path_codegen.cpp"
 
-namespace openspace::interaction {
+namespace openspace {
 
-documentation::Documentation Path::Documentation() {
+Documentation Path::Documentation() {
     return codegen::doc<Parameters>("core_path_instruction");
 }
 
@@ -341,7 +341,7 @@ glm::dquat Path::interpolateRotation(double t) const {
 }
 
 glm::dquat Path::easedSlerpRotation(double t) const {
-    double tScaled = helpers::shiftAndScale(t, 0.1, 0.9);
+    double tScaled = shiftAndScale(t, 0.1, 0.9);
     tScaled = ghoul::sineEaseInOut(tScaled);
     return glm::slerp(_start.rotation(), _end.rotation(), tScaled);
 }
@@ -526,9 +526,8 @@ double Path::speedAlongPath(double traveledDistance) const {
 
 void checkVisibilityAndShowMessage(const SceneGraphNode* node) {
     auto isEnabled = [](const Renderable* r) {
-        properties::Property* prop = r->property("Enabled");
-        properties::BoolProperty* boolProp =
-            dynamic_cast<properties::BoolProperty*>(prop);
+        Property* prop = r->property("Enabled");
+        BoolProperty* boolProp = dynamic_cast<BoolProperty*>(prop);
         ghoul_assert(boolProp, "Enabled is not a boolean property");
         return boolProp;
     };
@@ -576,7 +575,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     const bool hasStart = p.startState.has_value();
     const Waypoint startPoint = hasStart ?
         Waypoint(NavigationState(p.startState.value())) :
-        interaction::waypointFromCamera();
+        waypointFromCamera();
 
     std::vector<Waypoint> waypoints;
     switch (p.targetType) {
@@ -613,7 +612,7 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
                 ));
             }
 
-            const interaction::NodeCameraStateSpec info {
+            const NodeCameraStateSpec info {
                 nodeIdentifier,
                 p.position,
                 p.height,
@@ -680,4 +679,4 @@ Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     }
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

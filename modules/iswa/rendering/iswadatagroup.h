@@ -47,15 +47,15 @@ protected:
     void registerProperties();
     void createDataProcessor();
 
-    properties::BoolProperty _useLog;
-    properties::BoolProperty _useHistogram;
-    properties::BoolProperty _autoFilter;
-    properties::Vec2Property _normValues;
-    properties::Vec2Property _backgroundValues;
-    properties::StringProperty _transferFunctionsFile;
-    properties::SelectionProperty _dataOptions;
+    BoolProperty _useLog;
+    BoolProperty _useHistogram;
+    BoolProperty _autoFilter;
+    Vec2Property _normValues;
+    Vec2Property _backgroundValues;
+    StringProperty _transferFunctionsFile;
+    SelectionProperty _dataOptions;
 };
 
-} //namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ISWA___ISWADATAGROUP___H__

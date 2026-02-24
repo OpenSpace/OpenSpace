@@ -25,52 +25,51 @@
 #version __CONTEXT__
 
 #include "floatoperations.glsl"
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "powerscaling/powerscalingmath.glsl"
 
 layout(points) in;
-in vec4 vs_gPosition[];
-in vec3 vs_color[];
+in Data {
+  vec3 color;
+} in_data[];
 
 layout(triangle_strip, max_vertices = 4) out;
-out vec4 vs_position;
-out vec2 psfCoords;
-flat out vec3 ge_color;
-flat out float ge_screenSpaceDepth;
+out Data {
+  vec4 position;
+  vec2 psfCoords;
+  flat vec3 color;
+  flat float screenSpaceDepth;
+} out_data;
 
 uniform dvec3 eyePosition;
 uniform dvec3 cameraUp;
 uniform dmat4 viewProjectionMatrix;
 uniform dmat4 modelMatrix;
 
-const double PARSEC = 3.08567756E16;
+const double Parsec = 3.08567756E16;
 
 
 void main() {
-  vs_position = gl_in[0].gl_Position;
-  ge_color = vs_color[0];
+  out_data.position = gl_in[0].gl_Position;
+  out_data.color = in_data[0].color;
 
-  double scaleMultiply = 8.0;
-
-  dvec4 dpos = dvec4(vs_position);
-  dpos.xyz *= scaleMultiply;
+  dvec4 dpos = dvec4(out_data.position);
+  dpos.xyz *= 8.0;
   dpos = modelMatrix * dpos;
-  dpos /= PARSEC;
+  dpos /= Parsec;
   // It lies about 8 kpc from the center on the Orion Arm of the Milky Way
-  dpos.x += 8000;
-
-  scaleMultiply *= 4.0;
+  dpos.x += 8000.0;
 
   dvec3 normal = normalize(eyePosition - dpos.xyz);
   dvec3 newRight = normalize(cross(cameraUp, normal));
   dvec3 newUp = cross(normal, newRight);
-  dvec3 scaledRight = scaleMultiply * newRight;
-  dvec3 scaledUp = scaleMultiply * newUp;
+  dvec3 scaledRight = 32.0 * newRight;
+  dvec3 scaledUp = 32.0 * newUp;
 
   vec4 bottomLeftVertex = z_normalization(
     vec4(viewProjectionMatrix * dvec4(dpos.xyz - scaledRight - scaledUp, dpos.w))
   );
 
-  ge_screenSpaceDepth  = bottomLeftVertex.w;
+  out_data.screenSpaceDepth = bottomLeftVertex.w;
 
   vec4 topRightVertex = z_normalization(
     vec4(viewProjectionMatrix * dvec4(dpos.xyz + scaledUp + scaledRight, dpos.w))
@@ -85,16 +84,20 @@ void main() {
 
   // Build primitive
   gl_Position = topLeftVertex;
-  psfCoords = vec2(-1.0, 1.0);
+  out_data.psfCoords = vec2(-1.0, 1.0);
   EmitVertex();
+
   gl_Position = bottomLeftVertex;
-  psfCoords = vec2(-1.0, -1.0);
+  out_data.psfCoords = vec2(-1.0, -1.0);
   EmitVertex();
+
   gl_Position = topRightVertex;
-  psfCoords = vec2(1.0, 1.0);
+  out_data.psfCoords = vec2(1.0, 1.0);
   EmitVertex();
+
   gl_Position = bottomRightVertex;
-  psfCoords = vec2(1.0, -1.0);
+  out_data.psfCoords = vec2(1.0, -1.0);
   EmitVertex();
+
   EndPrimitive();
 }

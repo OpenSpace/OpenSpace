@@ -94,7 +94,7 @@ std::vector<std::unique_ptr<Task>> TaskLoader::tasksFromFile(const std::string& 
     try {
         return tasksFromDictionary(tasksDictionary);
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         LERROR(std::format("Could not load tasks file '{}': {}", absTasksFile, e.what()));
         logError(e);
 

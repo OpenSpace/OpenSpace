@@ -30,6 +30,7 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/format.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 
 namespace {
     // This `Renderable` type can be used to render a plane with a texture that is
@@ -37,15 +38,15 @@ namespace {
     // Note: The Spout library is only available on Windows.
     struct [[codegen::Dictionary(RenderablePlaneSpout)]] Parameters {
     };
-#include "renderableplanespout_codegen.cpp"
 } // namespace
+#include "renderableplanespout_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePlaneSpout::Documentation() {
+Documentation RenderablePlaneSpout::Documentation() {
     return codegen::doc<Parameters>(
         "spout_renderableplanespout",
-        spout::SpoutReceiverPropertyProxy::Documentation()
+        SpoutReceiverPropertyProxy::Documentation()
     );
 }
 
@@ -86,22 +87,9 @@ void RenderablePlaneSpout::update(const UpdateData& data) {
     _spoutReceiver.updateReceiver();
 }
 
-void RenderablePlaneSpout::bindTexture() {
+void RenderablePlaneSpout::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_spoutReceiver.isReceiving()) {
-        _spoutReceiver.saveGLTextureState();
-        glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(_spoutReceiver.spoutTexture()));
-    }
-    else {
-        RenderablePlane::bindTexture();
-    }
-}
-
-void RenderablePlaneSpout::unbindTexture() {
-    if (_spoutReceiver.isReceiving()) {
-        _spoutReceiver.restoreGLTextureState();
-    }
-    else {
-        RenderablePlane::unbindTexture();
+        unit.bind(_spoutReceiver.spoutTexture());
     }
 }
 

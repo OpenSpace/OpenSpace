@@ -58,12 +58,12 @@ namespace {
     // includes information about the currently active mission phase, the next phase, and
     // all subphases of the currently active phase.
     struct [[codegen::Dictionary(DashboardItemMission)]] Parameters {};
-#include "dashboarditemmission_codegen.cpp"
 } // namespace
+#include "dashboarditemmission_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemMission::Documentation() {
+Documentation DashboardItemMission::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_mission",
         DashboardTextItem::Documentation()

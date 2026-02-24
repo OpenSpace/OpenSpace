@@ -47,8 +47,8 @@ DebugRenderer* DebugRenderer::_reference = nullptr;
 DebugRenderer::DebugRenderer()  {
     _programObject = global::renderEngine->buildRenderProgram(
         "BasicDebugShader",
-        absPath("${MODULE_DEBUGGING}/rendering/debugshader_vs.glsl"),
-        absPath("${MODULE_DEBUGGING}/rendering/debugshader_fs.glsl")
+        absPath("${MODULE_DEBUGGING}/shaders/debugshader_vs.glsl"),
+        absPath("${MODULE_DEBUGGING}/shaders/debugshader_fs.glsl")
     );
 }
 
@@ -77,46 +77,34 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
         return;
     }
 
-    // Generate a vao, vertex array object (keeping track of pointers to vbo)
-    GLuint _vaoID = 0;
-    glGenVertexArrays(1, &_vaoID);
-    ghoul_assert(_vaoID != 0, "Could not generate vertex arrays");
+    GLuint vbo = 0;
+    glCreateBuffers(1, &vbo);
+    glNamedBufferStorage(
+        vbo,
+        clippingSpacePoints.size() * sizeof(Vertices::value_type),
+        clippingSpacePoints.data(),
+        GL_NONE_BIT
+    );
 
-    // Generate a vbo, vertex buffer object (storeing actual data)
-    GLuint _vertexBufferID = 0;
-    glGenBuffers(1, &_vertexBufferID);
-    ghoul_assert(_vertexBufferID != 0, "Could not create vertex buffer");
+    GLuint vao = 0;
+    glCreateVertexArrays(1, &vao);
+    glVertexArrayVertexBuffer(vao, 0, vbo, 0, sizeof(Vertices::value_type));
+
+    glEnableVertexArrayAttrib(vao, 0);
+    glVertexArrayAttribFormat(vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vao, 0, 0);
 
     // Activate the shader program and set the uniform color within the shader
     _programObject->activate();
     _programObject->setUniform("color", color);
 
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexBufferID);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        clippingSpacePoints.size() * sizeof(clippingSpacePoints[0]),
-        clippingSpacePoints.data(),
-        GL_STATIC_DRAW);
-
-
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(clippingSpacePoints[0]),
-        nullptr
-    );
-
     // Draw the vertices
+    glBindVertexArray(vao);
     glDrawArrays(mode, 0, static_cast<GLsizei>(clippingSpacePoints.size()));
-
-    // Clean up after the draw call was made
     glBindVertexArray(0);
-    glDeleteVertexArrays(1, &_vaoID);
-    glDeleteBuffers(1, &_vertexBufferID);
+
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vbo);
     _programObject->deactivate();
 }
 

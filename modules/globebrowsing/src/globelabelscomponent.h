@@ -46,21 +46,20 @@ namespace ghoul {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-namespace globebrowsing { class RenderableGlobe; }
+struct Documentation;
+class RenderableGlobe;
 struct RenderData;
 
-class GlobeLabelsComponent : public properties::PropertyOwner, public Fadeable {
+class GlobeLabelsComponent : public PropertyOwner, public Fadeable {
 public:
     GlobeLabelsComponent();
     ~GlobeLabelsComponent() override = default;
 
-    void initialize(const ghoul::Dictionary& dictionary,
-        globebrowsing::RenderableGlobe* globe);
+    void initialize(const ghoul::Dictionary& dictionary, RenderableGlobe* globe);
 
     void initializeFonts();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     void draw(const RenderData& data);
 
@@ -86,18 +85,18 @@ private:
         std::vector<LabelEntry> labelsArray;
     };
 
-    properties::BoolProperty _enabled;
-    properties::Vec3Property _color;
-    properties::FloatProperty _fontSize;
-    properties::FloatProperty _size;
-    properties::IVec2Property _minMaxSize;
-    properties::FloatProperty _heightOffset;
-    properties::Vec2Property _fadeDistances;
-    properties::BoolProperty _fadeInEnabled;
-    properties::BoolProperty _fadeOutEnabled;
-    properties::BoolProperty _disableCulling;
-    properties::FloatProperty _distanceEPS;
-    properties::OptionProperty _alignmentOption;
+    BoolProperty _enabled;
+    Vec3Property _color;
+    FloatProperty _fontSize;
+    FloatProperty _size;
+    IVec2Property _minMaxSize;
+    FloatProperty _heightOffset;
+    Vec2Property _fadeDistances;
+    BoolProperty _fadeInEnabled;
+    BoolProperty _fadeOutEnabled;
+    BoolProperty _disableCulling;
+    FloatProperty _distanceEPS;
+    OptionProperty _alignmentOption;
 
     Labels _labels;
 
@@ -105,7 +104,7 @@ private:
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 
     // Globe
-    globebrowsing::RenderableGlobe* _globe = nullptr;
+    RenderableGlobe* _globe = nullptr;
 };
 
 } // namespace openspace

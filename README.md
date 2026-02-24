@@ -15,7 +15,7 @@
 </p>
 
 
-[OpenSpace](http://openspaceproject.com) is an open source, non-commercial, and freely available interactive data visualization software designed to visualize the entire known universe and portray our ongoing efforts to investigate the cosmos. Bringing the latest techniques from data visualization research to the general public, OpenSpace supports interactive presentation of dynamic data from observations, simulations, and space mission planning and operations. The software works on multiple operating systems (Windows, Linux, MacOS) with an extensible architecture capable of powering both personal computers and also high resolution tiled displays and planetarium domes. In addition, OpenSpace enables simultaneous connections across the globe creating opportunity for shared experiences among audiences worldwide. The target audience of the software reaches from the general public who wishes to explore our universe, enthusiasts interested in hacking the underlying components in OpenSpace to create unique experiences, informal science institutions wishing to create a low-cost, yet powerful exhibition piece, but also scientists desiring to visualize their datasets in a contextualized, powerful software.
+[OpenSpace](http://openspaceproject.com) is an open source, non-commercial, and freely available interactive data visualization software designed to visualize the entire known universe and portray our ongoing efforts to investigate the cosmos. Bringing the latest techniques from data visualization research to the general public, OpenSpace supports interactive presentation of dynamic data from observations, simulations, and space mission planning and operations. The software works on multiple operating systems (Windows and Linux) with an extensible architecture capable of powering both personal computers and also high resolution tiled displays and planetarium domes. In addition, OpenSpace enables simultaneous connections across the globe creating opportunity for shared experiences among audiences worldwide. The target audience of the software reaches from the general public who wishes to explore our universe, enthusiasts interested in hacking the underlying components in OpenSpace to create unique experiences, informal science institutions wishing to create a low-cost, yet powerful exhibition piece, but also scientists desiring to visualize their datasets in a contextualized, powerful software.
 
 
 [![System Paper](https://img.shields.io/badge/System%20Paper-10.1109%2FTVCG.2019.2934259-blue?style=flat-square)](https://doi.org/10.1109/TVCG.2019.2934259)
@@ -45,18 +45,18 @@ Some of the high-level features supported in OpenSpace are:
   - Native support to export an interactive sessions as individual frames for video export
   - much much more (see our [Changelog](https://github.com/OpenSpace/OpenSpace/releases/))
 
-OpenSpace requires at least support for [OpenGL](https://www.opengl.org/) version 3.3, some custom components require at least version 4.2.
+OpenSpace requires support for [OpenGL](https://www.opengl.org/) version 4.6.
 
 ![Image](https://docs.openspaceproject.com/latest/_static/images/display-systems.jpg)
 
 
 <h1 align="center">Getting Started</h1>
-This repository contains the source code and example profiles for OpenSpace, but does not contain any data. To build and install the application, please check out the <a href="https://docs.openspaceproject.com">Documentation</a>. Here, you will find the build instructions for all operating systems. Please note that the Apple Silicon series of chips do not support OpenGL natively and Metal 2 does not support `double` precision accuracy (see the <a href="https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf">specification</a> Section 2.1), therefore only the Intel processors for MacOS are supported and maintained.
+This repository contains the source code and example profiles for OpenSpace, but does not contain any data. To build and install the application, please check out the <a href="https://docs.openspaceproject.com">Documentation</a>. Here, you will find the build instructions for all operating systems. Please note that the Apple Silicon series of chips do not support OpenGL natively and Metal 2 does not support `double` precision accuracy (see the <a href="https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf">specification</a> Section 2.1), therefore MacOS is unfortunately not supported.
 
 Requirements for compiling are:
 
-  - CMake version 3.25 or above
-  - C++ compiler supporting C++20/C++23 (Visual Studio 2022 17.11, GCC13, Clang17, AppleClang 15.0.0)
+  - CMake version 4.0 or above
+  - C++ compiler supporting C++20/C++23 (Visual Studio 2026 18, GCC13, Clang17)
   - <a href="https://www.qt.io/download">Qt</a>
 
 

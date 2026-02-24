@@ -25,7 +25,7 @@
 #include <modules/volume/volumeutils.h>
 #include <functional>
 
-namespace openspace::volume {
+namespace openspace {
 
 template <typename VoxelType>
 RawVolume<VoxelType>::RawVolume(const glm::uvec3& dimensions)
@@ -85,12 +85,12 @@ void RawVolume<VoxelType>::forEachVoxel(
 
 template <typename VoxelType>
 size_t RawVolume<VoxelType>::coordsToIndex(const glm::uvec3& cartesian) const {
-    return volume::coordsToIndex(cartesian, dimensions());
+    return openspace::coordsToIndex(cartesian, dimensions());
 }
 
 template <typename VoxelType>
 glm::uvec3 RawVolume<VoxelType>::indexToCoords(size_t linear) const {
-    return volume::indexToCoords(linear, dimensions());
+    return openspace::indexToCoords(linear, dimensions());
 }
 
 template <typename VoxelType>
@@ -103,4 +103,4 @@ const VoxelType* RawVolume<VoxelType>::data() const {
     return _data.data();
 }
 
-} // namespace openspace::volume
+} // namespace openspace

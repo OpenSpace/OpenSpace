@@ -31,22 +31,22 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
         "A URL to an image to use as a texture for this sphere. The image is expected "
         "to be an equirectangular projection.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    std::future<openspace::DownloadManager::MemoryFile> downloadImageToMemory(
-                                                                   const std::string& url)
+    std::future<DownloadManager::MemoryFile> downloadImageToMemory(const std::string& url)
     {
-        using namespace openspace;
-
         return global::downloadManager->fetchFile(
             url,
             [url](const DownloadManager::MemoryFile&) {
@@ -76,12 +76,12 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::string url [[codegen::key("URL")]];
     };
-#include "renderablesphereimageonline_codegen.cpp"
 } // namespace
+#include "renderablesphereimageonline_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableSphereImageOnline::Documentation() {
+Documentation RenderableSphereImageOnline::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderable_sphere_image_online",
         RenderableSphere::Documentation()
@@ -136,26 +136,15 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
         }
 
         try {
-            std::unique_ptr<ghoul::opengl::Texture> texture =
-                ghoul::io::TextureReader::ref().loadTexture(
-                    reinterpret_cast<void*>(imageFile.buffer),
-                    imageFile.size,
-                    2,
-                    imageFile.format
-                );
+            _texture = ghoul::io::TextureReader::ref().loadTexture(
+                reinterpret_cast<void*>(imageFile.buffer),
+                imageFile.size,
+                2,
+                { .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap },
+                imageFile.format
+            );
 
-            if (texture) {
-                // Images don't need to start on 4-byte boundaries, for example if the
-                // image is only RGB
-                glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-                texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                texture->purgeFromRAM();
-
-                _texture = std::move(texture);
-                _textureIsDirty = false;
-            }
+            _textureIsDirty = false;
         }
         catch (const ghoul::io::TextureReader::InvalidLoadException& e) {
             _textureIsDirty = false;
@@ -164,12 +153,9 @@ void RenderableSphereImageOnline::update(const UpdateData& data) {
     }
 }
 
-void RenderableSphereImageOnline::bindTexture() {
+void RenderableSphereImageOnline::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture) {
-        _texture->bind();
-    }
-    else {
-        unbindTexture();
+        unit.bind(*_texture);
     }
 }
 

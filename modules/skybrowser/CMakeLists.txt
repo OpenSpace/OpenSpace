@@ -48,8 +48,8 @@ set(SOURCE_FILES
 source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
-    shaders/target_fs.glsl
-    shaders/target_vs.glsl
+  shaders/target_fs.glsl
+  shaders/target_vs.glsl
 )
 source_group("Shader Files" FILES ${SHADER_FILES})
 

@@ -31,19 +31,22 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <filesystem>
 #include <optional>
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TexturePathInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TexturePathInfo = {
         "TexturePath",
         "Texture path",
         "Sets the path of the texture that is displayed on this screen space plane. If "
         "this value is changed, the image at the new path will automatically be loaded "
         "and displayed. The size of the image will also automatically set the default "
         "size of this plane.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `ScreenSpaceRenderable` can be used to display an image from a local file on
@@ -57,12 +60,12 @@ namespace {
         // [[codegen::verbatim(TexturePathInfo.description)]]
         std::optional<std::filesystem::path> texturePath;
     };
-#include "screenspaceimagelocal_codegen.cpp"
 } // namespace
+#include "screenspaceimagelocal_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceImageLocal::Documentation() {
+Documentation ScreenSpaceImageLocal::Documentation() {
     return codegen::doc<Parameters>("base_screenspace_image_local");
 }
 
@@ -103,32 +106,29 @@ void ScreenSpaceImageLocal::deinitializeGL() {
 
 void ScreenSpaceImageLocal::update() {
     if (_textureIsDirty && !_texturePath.value().empty()) [[unlikely]] {
-        std::unique_ptr<ghoul::opengl::Texture> texture =
-            ghoul::io::TextureReader::ref().loadTexture(absPath(_texturePath), 2);
+        // @TODO (2026-02-18, abock): This code was settings the swizzle mask only if the
+        //                            returned image was having a single Red channel. This
+        //                            can't currently be expressed unfortunately
+        ghoul::opengl::Texture::SamplerInit samplerInit = {
+            // TODO: AnisotropicMipMap crashes on ATI cards ---abock
+            //.filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap,
+            .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
+            //.swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
+        };
 
-        if (texture) {
-            // Images don't need to start on 4-byte boundaries, for example if the
-            // image is only RGB
-            glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-            if (texture->format() == ghoul::opengl::Texture::Format::Red) {
-                texture->setSwizzleMask({ GL_RED, GL_RED, GL_RED, GL_ONE });
-            }
-
-            texture->uploadTexture();
-            texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-            texture->purgeFromRAM();
-
-            _texture = std::move(texture);
-            _objectSize = _texture->dimensions();
-            _textureIsDirty = false;
-        }
+        _texture = ghoul::io::TextureReader::ref().loadTexture(
+            absPath(_texturePath),
+            2,
+            samplerInit
+        );
+        _objectSize = _texture->dimensions();
+        _textureIsDirty = false;
     }
 }
 
-void ScreenSpaceImageLocal::bindTexture() {
+void ScreenSpaceImageLocal::bindTexture(ghoul::opengl::TextureUnit& unit) {
     if (_texture) [[likely]] {
-        _texture->bind();
+        unit.bind(*_texture);
     }
 }
 

@@ -36,7 +36,7 @@
 #include <ghoul/opengl/texture.h>
 #include <string>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                              const LayerGroup& layerGroup, const TileIndex& tileIndex)
@@ -92,9 +92,8 @@ void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                     ghoul_assert(ctp[j].has_value(), "Wrong ChunkTiles number in pile");
                     const ChunkTile& ct = *ctp[j];
 
-                    t.texUnit.activate();
                     if (ct.tile.texture) {
-                        ct.tile.texture->bind();
+                        t.texUnit.bind(*ct.tile.texture);
                     }
                     program.setUniform(t.uniformCache.texture, t.texUnit);
 
@@ -183,9 +182,9 @@ void GPULayerGroup::bind(ghoul::opengl::ProgramObject& p, const LayerGroup& laye
 void GPULayerGroup::deactivate() {
     for (GPULayer& gal : _gpuActiveLayers) {
         for (GPULayer::GPUChunkTile& t : gal.gpuChunkTiles) {
-            t.texUnit.deactivate();
+            t.texUnit.unassign();
         }
     }
 }
 
-}  // namespace openspace::globebrowsing
+} // namespace openspace

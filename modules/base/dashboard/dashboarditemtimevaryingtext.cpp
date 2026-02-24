@@ -39,20 +39,22 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo FormatStringInfo = {
         "FormatString",
         "Format string",
         "The format text describing how this dashboard item renders its text. This text "
         "must contain exactly one {} which is a placeholder that will be replaced "
         "with the values read from the file provided in `DataFile`",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DataFileInfo = {
+    constexpr Property::PropertyInfo DataFileInfo = {
         "DataFile",
         "Data file path",
         "The file path to the JSON data.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `DashboardItem` displays text based on the content of a provided data file.
@@ -67,12 +69,12 @@ namespace {
         // [[codegen::verbatim(DataFileInfo.description)]]
         std::filesystem::path dataFile;
     };
-#include "dashboarditemtimevaryingtext_codegen.cpp"
 } // namespace
+#include "dashboarditemtimevaryingtext_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemTimeVaryingText::Documentation() {
+Documentation DashboardItemTimeVaryingText::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_timevaryingtext",
         DashboardTextItem::Documentation()
@@ -237,4 +239,5 @@ int DashboardItemTimeVaryingText::updateActiveTriggerTimeIndex(double currentTim
     }
     return static_cast<int>(_startTimes.size()) - 1;
 }
-}// namespace openspace
+
+} // namespace openspace

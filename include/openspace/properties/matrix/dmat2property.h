@@ -30,7 +30,7 @@
 #include <ghoul/glm.h>
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 class DMat2Property : public NumericalProperty<glm::dmat2x2> {
 public:
@@ -54,6 +54,6 @@ private:
     glm::dmat2x2 toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___DMAT2PROPERTY___H__

@@ -29,7 +29,7 @@
 
 #include <filesystem>
 
-namespace openspace::kameleonvolume {
+namespace openspace {
 
 class KameleonMetadataToJsonTask : public Task {
 public:
@@ -38,13 +38,13 @@ public:
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
 
-    static documentation::Documentation documentation();
+    static Documentation documentation();
 
 private:
     std::filesystem::path _inputPath;
     std::filesystem::path _outputPath;
 };
 
-} // namespace openspace::kameleonvolume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONMETADATATOJSONTASK___H__

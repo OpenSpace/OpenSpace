@@ -73,7 +73,7 @@ private:
     LMstat _lmstat;
 };
 
-} // openspace namespace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_TOUCH___DIRECTINPUT_SOLVER___H__
 

@@ -804,17 +804,17 @@ TEST_CASE("Removing non-exisiting asset (ignored)", "[profile]") {
 // Save settings to profile
 //
 TEST_CASE("Save settings to profile", "[profile]") {
-    properties::PropertyOwner owner({ "base" });
+    PropertyOwner owner({ "base" });
     global::rootPropertyOwner->addPropertySubOwner(owner);
-    properties::FloatProperty p1(properties::Property::PropertyInfo("p1", "a", "b"), 1.f);
+    FloatProperty p1(Property::PropertyInfo("p1", "a", "b"), 1.f);
     owner.addProperty(p1);
-    properties::StringProperty p2(properties::Property::PropertyInfo("p2", "c", "d"));
+    StringProperty p2(Property::PropertyInfo("p2", "c", "d"));
     owner.addProperty(p2);
 
     p1 = 2.f;
     p2 = "test-string";
 
-    interaction::NavigationState state;
+    NavigationState state;
     state.anchor = "anchor";
     state.aim = "aim";
     state.referenceFrame = "refFrame";

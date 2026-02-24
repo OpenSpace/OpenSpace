@@ -29,34 +29,36 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "IswaBaseGroup";
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AlphaInfo = {
+    constexpr Property::PropertyInfo AlphaInfo = {
         "Alpha",
         "Alpha",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
+    constexpr Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 } // namespace
 
 namespace openspace {
 
 IswaBaseGroup::IswaBaseGroup(std::string name, std::string type)
-    : properties::PropertyOwner({ std::move(name) })
+    : PropertyOwner({ std::move(name) })
     , _enabled(EnabledInfo, true)
     , _alpha(AlphaInfo, 0.9f, 0.f, 1.f)
     , _delete(DeleteInfo)
@@ -119,4 +121,4 @@ void IswaBaseGroup::unregisterProperties() {
     _registered = false;
 }
 
-} //namespace openspace
+} // namespace openspace

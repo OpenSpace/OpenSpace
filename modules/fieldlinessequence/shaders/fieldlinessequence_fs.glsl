@@ -24,33 +24,28 @@
 
 #include "fragment.glsl"
 
-in vec4 vs_color;
-in float vs_depth;
+in Data {
+  vec4 color;
+  float depth;
+} in_data;
 
 uniform bool usingAdditiveBlending;
 uniform float opacity;
 
+
 Fragment getFragment() {
-  if (vs_color.a == 0) {
+  if (in_data.color.a * opacity == 0.0) {
     discard;
   }
 
-  vec4 fragColor = vs_color;
-
   Fragment frag;
-  frag.depth = vs_depth;
-  frag.color = fragColor;
+  frag.depth = in_data.depth;
+  frag.color = in_data.color;
   frag.color.a *= opacity;
-
-  // G-Buffer
-  frag.gPosition  = vec4(0.0);//vs_gPosition;
-  // There is no normal here
-  // TODO: Add the correct normal if necessary (JCC)
-  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
-
   if (usingAdditiveBlending) {
-    frag.blend = BLEND_MODE_ADDITIVE;
+    frag.blend = BlendModeAdditive;
   }
-
+  frag.gPosition = vec4(0.0);
+  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
   return frag;
 }

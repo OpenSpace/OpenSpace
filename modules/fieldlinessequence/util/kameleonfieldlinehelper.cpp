@@ -70,7 +70,7 @@ namespace {
     constexpr float ToKelvin = 72429735.6984f;
 } // namespace
 
-namespace openspace::fls {
+namespace openspace {
 
 // -------------------- DECLARE FUNCTIONS USED (ONLY) IN THIS FILE -------------------- //
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
@@ -88,14 +88,14 @@ namespace openspace::fls {
  * Returns `false` if it fails to create a valid state. Requires the kameleon module to
  * be activated!
  *
- * \param state, FieldlineState which should hold the extracted data
- * \param cdfPath, std::string of the absolute path to a .cdf file
- * \param seedPoints, vector of seed points from which to trace field lines
- * \param tracingVar, which quantity to trace lines from. Typically "b" for magnetic field
+ * \param state FieldlineState which should hold the extracted data
+ * \param cdfPath std::string of the absolute path to a .cdf file
+ * \param seedPoints vector of seed points from which to trace field lines
+ * \param tracingVar which quantity to trace lines from. Typically "b" for magnetic field
  *        lines and "u" for velocity flow lines
- * \param extraVars, extra scalar quantities to be stored in the FieldlinesState; e.g. "T"
+ * \param extraVars extra scalar quantities to be stored in the FieldlinesState; e.g. "T"
  *        for temperature, "rho" for density or "P" for pressure
- * \param extraMagVars, variables which should be used for extracting magnitudes, must be
+ * \param extraMagVars variables which should be used for extracting magnitudes, must be
  *        a multiple of 3; e.g. "ux", "uy" & "uz" to get the magnitude of the velocity
  *        vector at each line vertex
  */
@@ -112,12 +112,10 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
     return false;
 #else // OPENSPACE_MODULE_KAMELEON_ENABLED
     // Create Kameleon object and open CDF file!
-    std::unique_ptr<ccmc::Kameleon> kameleon = kameleonhelper::createKameleonObject(
-        cdfPath
-    );
+    std::unique_ptr<ccmc::Kameleon> kameleon = createKameleonObject(cdfPath);
 
-    state.setModel(fls::stringToModel(kameleon->getModelName()));
-    double cdfDoubleTime = kameleonhelper::getTime(kameleon.get(), manualTimeOffset);
+    state.setModel(stringToModel(kameleon->getModelName()));
+    double cdfDoubleTime = getTime(kameleon.get(), manualTimeOffset);
     state.setTriggerTime(cdfDoubleTime);
 
     // get time as string.
@@ -134,11 +132,11 @@ bool convertCdfToFieldlinesState(FieldlinesState& state, const std::string& cdfP
         // the extraQuantites, as the iterpolator needs the unaltered positions
         addExtraQuantities(kameleon.get(), extraVars, extraMagVars, state);
         switch (state.model()) {
-            case fls::Model::Batsrus:
-                state.scalePositions(fls::ReToMeter);
+            case Model::Batsrus:
+                state.scalePositions(ReToMeter);
                 break;
-            case fls::Model::Enlil:
-                state.convertLatLonToCartesian(fls::AuToMeter);
+            case Model::Enlil:
+                state.convertLatLonToCartesian(AuToMeter);
                 break;
             default:
                 break;
@@ -248,11 +246,9 @@ bool traceFromListOfPoints(FieldlinesState& state, const std::string& cdfPath,
     return false;
 #else // OPENSPACE_MODULE_KAMELEON_ENABLED
     // Create Kameleon object and open CDF file!
-    std::unique_ptr<ccmc::Kameleon> kameleon = kameleonhelper::createKameleonObject(
-        cdfPath
-    );
+    std::unique_ptr<ccmc::Kameleon> kameleon = createKameleonObject(cdfPath);
 
-    state.setModel(fls::stringToModel(kameleon->getModelName()));
+    state.setModel(stringToModel(kameleon->getModelName()));
 
 
     // Only difference is not to use time as string for picking seedpoints from seedmap
@@ -263,14 +259,14 @@ bool traceFromListOfPoints(FieldlinesState& state, const std::string& cdfPath,
         // the extraQuantites, as the iterpolator needs the unaltered positions
         addExtraQuantities(kameleon.get(), extraVars, extraMagVars, state);
         switch (state.model()) {
-        case fls::Model::Batsrus:
-            state.scalePositions(fls::ReToMeter);
-            break;
-        case fls::Model::Enlil:
-            state.convertLatLonToCartesian(fls::AuToMeter);
-            break;
-        default:
-            break;
+            case Model::Batsrus:
+                state.scalePositions(ReToMeter);
+                break;
+            case Model::Enlil:
+                state.convertLatLonToCartesian(AuToMeter);
+                break;
+            default:
+                break;
         }
 
         return true;
@@ -294,10 +290,10 @@ bool addLinesToState(ccmc::Kameleon* kameleon, const std::vector<glm::vec3>& see
     float innerBoundaryLimit;
 
     switch (state.model()) {
-        case fls::Model::Batsrus:
+        case Model::Batsrus:
             innerBoundaryLimit = 0.f;  // TODO (2025-06-10 Elon) specify in Lua?
             break;
-        case fls::Model::Enlil:
+        case Model::Enlil:
             innerBoundaryLimit = 0.11f;
             break;
         default:
@@ -400,8 +396,8 @@ void addExtraQuantities(ccmc::Kameleon* kameleon,
                 val = interpolator->interpolate(extraScalarVars[i], p.x, p.y, p.z);
 
                 // When measuring density in ENLIL CCMC multiply by the radius^2
-                if (extraScalarVars[i] == "rho" && state.model() == fls::Model::Enlil) {
-                    val *= std::pow(p.x * fls::AuToMeter, 2.0f);
+                if (extraScalarVars[i] == "rho" && state.model() == Model::Enlil) {
+                    val *= std::pow(p.x * AuToMeter, 2.0f);
                 }
             }
             state.appendToExtra(i, val);
@@ -453,7 +449,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
                                       FieldlinesState& state)
 {
     std::vector<std::string> extraQuantityNames;
-    fls::Model model = fls::stringToModel(kameleon->getModelName());
+    Model model = stringToModel(kameleon->getModelName());
 
     // Load the existing SCALAR variables into kameleon.
     // Remove non-existing variables from vector
@@ -461,9 +457,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
         std::string& str = extraScalarVars[i];
         bool success = kameleon->doesVariableExist(str) && kameleon->loadVariable(str);
         if (!success &&
-            (model == fls::Model::Batsrus &&
-                (str == TAsPOverRho || str == "T" || str == "t"))
-            )
+            (model == Model::Batsrus && (str == TAsPOverRho || str == "T" || str == "t")))
         {
             LDEBUG(
                 "BATSRUS doesn't contain variable T for temperature. Trying to calculate "
@@ -499,7 +493,7 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
                            kameleon->loadVariable(s2) &&
                            kameleon->loadVariable(s3);
             std::string name = "Magnitude of (" + s1 + ", " + s2 + ", " + s3 + ")";
-            if (success && model == fls::Model::Batsrus &&
+            if (success && model == Model::Batsrus &&
                 s1 == "jx" && s2 == "jy" && s3 == "jz")
             {
                 // CCMC isn't really interested in the magnitude of current, but by the
@@ -543,4 +537,4 @@ void prepareStateAndKameleonForExtras(ccmc::Kameleon* kameleon,
 }
 #endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
-} // namespace openspace::fls
+} // namespace openspace

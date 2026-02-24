@@ -39,6 +39,7 @@
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/stringhelper.h>
 #include <ghoul/opengl/programobject.h>
+#include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <algorithm>
 #include <array>
@@ -48,6 +49,8 @@
 #include <sstream>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableFluxNodes";
 
     constexpr std::array<const char*, 29> UniformNames = {
@@ -61,216 +64,213 @@ namespace {
         "usingGaussianPulse"
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GoesEnergyBinsInfo = {
+    constexpr Property::PropertyInfo GoesEnergyBinsInfo = {
         "GoesEnergy",
         "GOES energy",
         "Select which energy bin you want to show. GOES = Geostationary Operational "
         "Environmental Satellites. Emin01 is values > 10 MeV, Default is Emin03 where "
         "values > 100 MeV.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorModeInfo = {
+    constexpr Property::PropertyInfo ColorModeInfo = {
         "ColorMode",
         "Color mode",
         "Color lines uniformly or using color tables based on specific values on nodes, "
         "for examples flux values.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorTablePathInfo = {
+    constexpr Property::PropertyInfo ColorTablePathInfo = {
         "ColorTablePath",
         "Path to color table",
         "Color Table/Transfer Function to use for 'By Flux Value' coloring.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StreamColorInfo = {
+    constexpr Property::PropertyInfo StreamColorInfo = {
         "Color",
         "Color",
         "Color of particles.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NodeSizeInfo = {
+    constexpr Property::PropertyInfo NodeSizeInfo = {
        "NodeSize",
        "Size of nodes",
        "Change the size of the rendered points of the nodes.",
-       openspace::properties::Property::Visibility::User
+       Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ThresholdFluxInfo = {
+    constexpr Property::PropertyInfo ThresholdFluxInfo = {
        "ThresholdFlux",
        "Threshold flux value",
        "This value specifies the threshold that will be changed with the flux value.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilteringInfo = {
+    constexpr Property::PropertyInfo FilteringInfo = {
         "FilterLower",
         "Filtering lower value in AU",
         "Use filtering to show nodes within a given range.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilteringUpperInfo = {
+    constexpr Property::PropertyInfo FilteringUpperInfo = {
         "FilterUpper",
         "Filtering upper value in AU",
         "Use filtering to show nodes within a given range.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AmountofNodesInfo = {
+    constexpr Property::PropertyInfo AmountofNodesInfo = {
         "AmountOfNodes",
         "Every nth node to render in",
         "Show only every nth node.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DefaultNodeSkipInfo = {
+    constexpr Property::PropertyInfo DefaultNodeSkipInfo = {
         "NodeSkip",
         "Every nth node to render default",
         "Show only every nth node outside of skippingmethod.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EarthNodeSkipInfo = {
+    constexpr Property::PropertyInfo EarthNodeSkipInfo = {
         "NodeSkipEarth",
         "Every nth node to render close to Earth",
         "Show only every nth node outside of skippingmethod.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScalingmethodInfo = {
+    constexpr Property::PropertyInfo ScalingmethodInfo = {
         "ScalingFlux",
         "Scale the flux value with color table",
         "Use scaling to color nodes with a given method.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NodeskipMethodInfo = {
+    constexpr Property::PropertyInfo NodeskipMethodInfo = {
         "SkippingNodes",
         "How to select nodes to skip",
         "Methods to select nodes to skip.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo colorTableRangeInfo = {
+    constexpr Property::PropertyInfo colorTableRangeInfo = {
         "ColorTableRange",
         "Color table range",
         "Valid range for the color table as the exponent, with base 10, of flux values. "
         "[Min, Max].",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DomainZInfo = {
+    constexpr Property::PropertyInfo DomainZInfo = {
         "ZLimit",
         "Z-limits",
         "Valid range along the Z-axis. [Min, Max].",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FluxColorAlphaInfo = {
+    constexpr Property::PropertyInfo FluxColorAlphaInfo = {
         "FluxColorAlpha",
         "Flux color alpha",
         "The value of alpha for the flux color mode.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FluxNodeskipThresholdInfo = {
+    constexpr Property::PropertyInfo FluxNodeskipThresholdInfo = {
         "SkippingNodesByFlux",
         "Skipping nodes by flux",
         "Select nodes to skip depending on flux value.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-                                                           RadiusNodeSkipThresholdInfo = {
+    constexpr Property::PropertyInfo RadiusNodeSkipThresholdInfo = {
         "SkippingNodesByRadius",
         "Skipping nodes by radius",
         "Select nodes to skip depending on Radius.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
+    constexpr Property::PropertyInfo DistanceThresholdInfo = {
         "DistancePlanetThreshold",
         "Threshold for distance between planet",
         "Changes threshold distance for highlighting nodes close to earth.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ProximityNodesSizeInfo = {
+    constexpr Property::PropertyInfo ProximityNodesSizeInfo = {
         "ProximityNodesSize",
         "Earths proximity nodes size",
         "Changes size of nodes only close to earth.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxNodeDistanceSizeInfo = {
+    constexpr Property::PropertyInfo MaxNodeDistanceSizeInfo = {
         "MaxNodeDistanceSize",
         "Max node distance size",
         "The maximum size of the nodes at a certin distance.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-                                                          CameraPerspectiveEnabledInfo = {
+    constexpr Property::PropertyInfo CameraPerspectiveEnabledInfo = {
         "CameraPerspectiveEnabled",
         "Use camera perspective",
         "Camera perspective changes the size of the nodes dependent on the distance from "
         "camera.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawingCirclesInfo = {
+    constexpr Property::PropertyInfo DrawingCirclesInfo = {
         "RenderingCircles",
         "Render as circles",
         "Using fragment shader to draw nodes as circles instead of squares.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DrawingHollowInfo = {
+    constexpr Property::PropertyInfo DrawingHollowInfo = {
         "RenderingHollowCircles",
         "Render as hollow circles",
         "Using fragment shader to draw nodes as hollow circles.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GaussiandAlphaFilterInfo = {
+    constexpr Property::PropertyInfo GaussiandAlphaFilterInfo = {
         "RenderingGaussianAlphaFilter",
         "Alpha by gaussian",
         "Using fragment shader to draw nodes with Gaussian filter for alpha value.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-                                                         PerspectiveDistanceFactorInfo = {
+    constexpr Property::PropertyInfo PerspectiveDistanceFactorInfo = {
         "PerspectiveDistanceFactor",
         "Perspective distance factor",
         "This value decides how far away the camera must be to start impacting the node "
         "size.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MinMaxNodeSizeInfo = {
+    constexpr Property::PropertyInfo MinMaxNodeSizeInfo = {
         "MinMaxNodeSize",
         "Min & max node size",
         "The minimum and maximum node size.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo pulseEnabledInfo = {
+    constexpr Property::PropertyInfo pulseEnabledInfo = {
         "PulseEnabled",
         "Nodes close to Earth pulsate",
         "Toggles the pulse for nodes close to Earth.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo gaussianPulseEnabledInfo = {
+    constexpr Property::PropertyInfo gaussianPulseEnabledInfo = {
         "GaussianPulseEnabled",
         "Nodes close to Earth pulsate with alpha by gaussian",
         "Toggles the pulse with alpha by gaussian for nodes close to Earth.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableFluxNodes)]] Parameters {
@@ -286,13 +286,12 @@ namespace {
         // [[codegen::verbatim(colorTableRangeInfo.description)]]
         std::optional<glm::vec2> colorTableRange;
     };
-#include "renderablefluxnodes_codegen.cpp"
-
 } // namespace
+#include "renderablefluxnodes_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableFluxNodes::Documentation() {
+Documentation RenderableFluxNodes::Documentation() {
     return codegen::doc<Parameters>("space_renderable_flux_nodes");
 }
 
@@ -415,10 +414,25 @@ void RenderableFluxNodes::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
 
-    glGenVertexArrays(1, &_vertexArrayObject);
-    glGenBuffers(1, &_vertexPositionBuffer);
-    glGenBuffers(1, &_vertexColorBuffer);
-    glGenBuffers(1, &_vertexFilteringBuffer);
+    glCreateBuffers(1, &_vboPosition);
+    glCreateBuffers(1, &_vboColor);
+    glCreateBuffers(1, &_vboFilter);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vboPosition, 0, sizeof(glm::vec3));
+    glVertexArrayVertexBuffer(_vao, 1, _vboColor, 0, sizeof(float));
+    glVertexArrayVertexBuffer(_vao, 2, _vboFilter, 0, sizeof(float));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 1, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 1, 1);
+
+    glEnableVertexArrayAttrib(_vao, 2);
+    glVertexArrayAttribFormat(_vao, 2, 1, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 2, 2);
 
     // Needed for alpha transparency
     setRenderBin(Renderable::RenderBin::PreDeferredTransparent);
@@ -525,7 +539,7 @@ void RenderableFluxNodes::setupProperties() {
 
     _cameraPerspectiveGroup.addProperty(_cameraPerspectiveEnabled);
     _cameraPerspectiveGroup.addProperty(_perspectiveDistanceFactor);
-    _minMaxNodeSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _minMaxNodeSize.setViewOption(Property::ViewOptions::MinMaxRange);
     _cameraPerspectiveGroup.addProperty(_minMaxNodeSize);
 
     _earthdistGroup.addProperty(_distanceThreshold);
@@ -552,7 +566,7 @@ void RenderableFluxNodes::setupProperties() {
     _styleGroup.addProperty(_gaussianAlphaFilter);
     _styleGroup.addProperty(_colorMode);
     _styleGroup.addProperty(_scalingMethod);
-    _colorTableRange.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _colorTableRange.setViewOption(Property::ViewOptions::MinMaxRange);
     _styleGroup.addProperty(_colorTableRange);
     _styleGroup.addProperty(_colorTablePath);
     _styleGroup.addProperty(_streamColor);
@@ -562,17 +576,10 @@ void RenderableFluxNodes::setupProperties() {
 }
 
 void RenderableFluxNodes::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vertexArrayObject);
-    _vertexArrayObject = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
-
-    glDeleteBuffers(1, &_vertexColorBuffer);
-    _vertexColorBuffer = 0;
-
-    glDeleteBuffers(1, &_vertexFilteringBuffer);
-    _vertexFilteringBuffer = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vboPosition);
+    glDeleteBuffers(1, &_vboColor);
+    glDeleteBuffers(1, &_vboFilter);
 
     if (_shaderProgram) {
         global::renderEngine->removeRenderProgram(_shaderProgram.get());
@@ -670,6 +677,7 @@ void RenderableFluxNodes::updateActiveTriggerTimeIndex(double currentTime) {
         _activeTriggerTimeIndex = static_cast<int>(_nStates) - 1;
     }
 }
+
 void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     if (_activeTriggerTimeIndex == -1) {
         return;
@@ -691,6 +699,7 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     SceneGraphNode* earthNode = sceneGraphNode("Earth");
     if (!earthNode) {
         LWARNING("Could not find scene graph node 'Earth'");
+        return;
     }
     const glm::vec3 earthPos = glm::vec3(
         earthNode->worldPosition() * data.modelTransform.rotation
@@ -754,20 +763,16 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     _shaderProgram->setUniform("cameraPos", cameraPos);
 
     if (_colorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
+        _transferFunction->update();
         ghoul::opengl::TextureUnit textureUnit;
-        textureUnit.activate();
-        _transferFunction->bind(); // Calls update internally
+        textureUnit.bind(_transferFunction->texture());
         _shaderProgram->setUniform("colorTable", textureUnit);
     }
 
-    glBindVertexArray(_vertexArrayObject);
+    glEnable(GL_PROGRAM_POINT_SIZE);
 
-    glDrawArrays(
-        GL_POINTS,
-        0,
-        static_cast<GLsizei>(_vertexPositions.size())
-    );
-
+    glBindVertexArray(_vao);
+    glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_vertexPositions.size()));
     glBindVertexArray(0);
     _shaderProgram->deactivate();
 }
@@ -840,57 +845,30 @@ void RenderableFluxNodes::update(const UpdateData& data) {
 }
 
 void RenderableFluxNodes::updatePositionBuffer() {
-    glBindVertexArray(_vertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vboPosition,
         _vertexPositions.size() * sizeof(glm::vec3),
         _vertexPositions.data(),
         GL_STATIC_DRAW
     );
-
-    glEnableVertexAttribArray(0);
-    glEnable(GL_PROGRAM_POINT_SIZE);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }
 
 void RenderableFluxNodes::updateVertexColorBuffer() {
-    glBindVertexArray(_vertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexColorBuffer);
-
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vboColor,
         _vertexColor.size() * sizeof(float),
         _vertexColor.data(),
         GL_STATIC_DRAW
     );
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }
 
 void RenderableFluxNodes::updateVertexFilteringBuffer() {
-    glBindVertexArray(_vertexArrayObject);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexFilteringBuffer);
-
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glNamedBufferData(
+        _vboFilter,
         _vertexRadius.size() * sizeof(float),
         _vertexRadius.data(),
         GL_STATIC_DRAW
     );
-
-    glEnableVertexAttribArray(2);
-    glVertexAttribPointer(2, 1, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
 }
+
 } // namespace openspace

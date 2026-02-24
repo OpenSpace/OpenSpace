@@ -40,14 +40,14 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::StringProperty _formatString;
-    properties::StringProperty _referenceTime;
+    StringProperty _formatString;
+    StringProperty _referenceTime;
     double _referenceJ2000 = 0.0;
-    properties::BoolProperty _simplifyTime;
-    properties::OptionProperty _lowestTimeUnit;
+    BoolProperty _simplifyTime;
+    OptionProperty _lowestTimeUnit;
 };
 
 } // namespace openspace

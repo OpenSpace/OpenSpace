@@ -47,6 +47,13 @@
 #include <variant>
 
 namespace {
+    using namespace openspace;
+
+    struct Vertex {
+        glm::vec4 position;
+        glm::vec2 texCoords;
+    };
+
     enum RenderOption {
         ViewDirection = 0,
         PositionNormal,
@@ -58,8 +65,7 @@ namespace {
         Additive
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OrientationRenderOptionInfo =
-    {
+    constexpr Property::PropertyInfo OrientationRenderOptionInfo = {
         "OrientationRenderOption",
         "Orientation render option",
         "Controls how the plane will be oriented. \"Camera View Direction\" rotates the "
@@ -70,79 +76,77 @@ namespace {
         "slightly different way. In contrast, \"Fixed Rotation\" does not rotate the "
         "plane at all based on the camera and should be used the plane should be "
         "oriented in a fixed way.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MirrorBacksideInfo = {
+    constexpr Property::PropertyInfo MirrorBacksideInfo = {
         "MirrorBackside",
         "Mirror backside of image plane",
         "If false, the image plane will not be mirrored when viewed from the backside. "
         "This is usually desirable when the image shows data at a specific location, but "
         "not if it is displaying text for example.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "The size of the plane in meters.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AutoScaleInfo = {
+    constexpr Property::PropertyInfo AutoScaleInfo = {
         "AutoScale",
         "Auto scale",
         "Decides whether the plane should automatically adjust in size to match the "
         "aspect ratio of the content. Otherwise it will remain in the given size."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceInfo = {
+    constexpr Property::PropertyInfo ScaleByDistanceInfo = {
         "ScaleByDistance",
         "Scale by distance",
         "Decides whether the plane should automatically adjust in size to based on "
         "the distance to the camera. Otherwise it will remain in the given size.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ApparentSizeMultiplierInfo = {
+    constexpr Property::PropertyInfo ApparentSizeMultiplierInfo = {
         "ApparentSizeMultiplier",
         "Apparent size multiplier",
         "Value that controls the visual size of the object when using distance scaling."
         "A value of 1.0 results in a natural angular size based on camera distance and "
-        "field of view. Smaller values (e.g., 0.01) make the object appear smaller, while"
-        " larger values make it appear bigger.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        "field of view. Smaller values (e.g., 0.01) make the object appear smaller, "
+        "while larger values make it appear bigger.",
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceMaxHeightInfo =
-    {
+    constexpr Property::PropertyInfo ScaleByDistanceMaxHeightInfo = {
         "ScaleByDistanceMaxHeight",
         "Scale by distance max height",
         "The maximum height in meters a plane can get when using distance scaling.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScaleByDistanceMinHeightInfo =
-    {
+    constexpr Property::PropertyInfo ScaleByDistanceMinHeightInfo = {
         "ScaleByDistanceMinHeight",
         "Scale by distance min height",
         "The minimum height in meters a plane can get when using distance scaling.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
+    constexpr Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blending mode",
         "Determines the blending mode that is applied to this plane.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MultiplyColorInfo = {
+    constexpr Property::PropertyInfo MultiplyColorInfo = {
         "MultiplyColor",
         "Multiply color",
         "An RGB color to multiply with the plane's texture. Useful for applying "
         "a color to grayscale images.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // A `RenderablePlane` is a renderable that will shows some form of contents projected
@@ -206,18 +210,18 @@ namespace {
         // [[codegen::verbatim(MultiplyColorInfo.description)]]
         std::optional<glm::vec3> multiplyColor [[codegen::color()]];
     };
-#include "renderableplane_codegen.cpp"
 } // namespace
+#include "renderableplane_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePlane::Documentation() {
+Documentation RenderablePlane::Documentation() {
     return codegen::doc<Parameters>("base_renderable_plane");
 }
 
 RenderablePlane::DistanceScalingSettings::DistanceScalingSettings(
     const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "DistanceScaling", "Distance Scaling", "" })
+    : PropertyOwner({ "DistanceScaling", "Distance Scaling", "" })
     , scaleByDistance(ScaleByDistanceInfo, false)
     , apparentSizeMultiplier(ApparentSizeMultiplierInfo, 1.f)
     , scaleByDistanceMaxHeight(ScaleByDistanceMaxHeightInfo, 2000.f)
@@ -329,7 +333,7 @@ RenderablePlane::RenderablePlane(const ghoul::Dictionary& dictionary)
     addProperty(_autoScale);
 
     _multiplyColor = p.multiplyColor.value_or(_multiplyColor);
-    _multiplyColor.setViewOption(properties::Property::ViewOptions::Color);
+    _multiplyColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_multiplyColor);
 
     setBoundingSphere(glm::compMax(_size.value()));
@@ -342,8 +346,27 @@ bool RenderablePlane::isReady() const {
 void RenderablePlane::initializeGL() {
     ZoneScoped;
 
-    glGenVertexArrays(1, &_quad); // generate array
-    glGenBuffers(1, &_vertexPositionBuffer); // generate buffer
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, 6 * sizeof(Vertex), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(
+        _vao,
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        offsetof(Vertex, texCoords)
+    );
+    glVertexArrayAttribBinding(_vao, 1, 0);
+
     createPlane();
 
     _shader = BaseModule::ProgramObjectManager.request(
@@ -363,11 +386,8 @@ void RenderablePlane::initializeGL() {
 void RenderablePlane::deinitializeGL() {
     ZoneScoped;
 
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-
-    glDeleteBuffers(1, &_vertexPositionBuffer);
-    _vertexPositionBuffer = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     BaseModule::ProgramObjectManager.release(
         "Plane",
@@ -436,8 +456,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
 
     ghoul::opengl::TextureUnit unit;
-    unit.activate();
-    bindTexture();
+    bindTexture(unit);
     defer { unbindTexture(); };
 
     _shader->setUniform(_uniformCache.colorTexture, unit);
@@ -451,7 +470,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     }
     glDisable(GL_CULL_FACE);
 
-    glBindVertexArray(_quad);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 
@@ -463,7 +482,7 @@ void RenderablePlane::render(const RenderData& data, RendererTasks&) {
     _shader->deactivate();
 }
 
-void RenderablePlane::bindTexture() {}
+void RenderablePlane::bindTexture(ghoul::opengl::TextureUnit&) {}
 
 void RenderablePlane::unbindTexture() {}
 
@@ -483,32 +502,17 @@ void RenderablePlane::update(const UpdateData&) {
 void RenderablePlane::createPlane() {
     const GLfloat sizeX = _size.value().x;
     const GLfloat sizeY = _size.value().y;
-    const std::array<GLfloat, 36> vertexData = {
-        //   x       y    z    w    s    t
-        -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
-         sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f,
-        -sizeX,  sizeY, 0.f, 0.f, 0.f, 1.f,
-        -sizeX, -sizeY, 0.f, 0.f, 0.f, 0.f,
-         sizeX, -sizeY, 0.f, 0.f, 1.f, 0.f,
-         sizeX,  sizeY, 0.f, 0.f, 1.f, 1.f
+
+    const std::array<Vertex, 6> vertexData = {
+        Vertex{ glm::vec4(-sizeX, -sizeY, 0.f, 0.f), glm::vec2(0.f, 0.f) },
+        Vertex{ glm::vec4( sizeX,  sizeY, 0.f, 0.f), glm::vec2(1.f, 1.f) },
+        Vertex{ glm::vec4(-sizeX,  sizeY, 0.f, 0.f), glm::vec2(0.f, 1.f) },
+        Vertex{ glm::vec4(-sizeX, -sizeY, 0.f, 0.f), glm::vec2(0.f, 0.f) },
+        Vertex{ glm::vec4( sizeX, -sizeY, 0.f, 0.f), glm::vec2(1.f, 0.f) },
+        Vertex{ glm::vec4( sizeX,  sizeY, 0.f, 0.f), glm::vec2(1.f, 1.f) }
     };
 
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 6, nullptr);
-
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
-    );
-    glBindVertexArray(0);
+    glNamedBufferSubData(_vbo, 0, sizeof(vertexData), vertexData.data());
 }
 
 glm::dmat4 RenderablePlane::rotationMatrix(const RenderData& data) const {

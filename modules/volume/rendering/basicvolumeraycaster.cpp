@@ -45,11 +45,11 @@ namespace {
     constexpr std::string_view GlslBoundsFs = "${MODULE_VOLUME}/shaders/bounds_fs.glsl";
 } // namespace
 
-namespace openspace::volume {
+namespace openspace {
 
 BasicVolumeRaycaster::BasicVolumeRaycaster(
                                     std::shared_ptr<ghoul::opengl::Texture> volumeTexture,
-                            std::shared_ptr<openspace::TransferFunction> transferFunction,
+                                       std::shared_ptr<TransferFunction> transferFunction,
                                              std::shared_ptr<VolumeClipPlanes> clipPlanes)
     : _clipPlanes(std::move(clipPlanes))
     , _volumeTexture(std::move(volumeTexture))
@@ -120,14 +120,12 @@ void BasicVolumeRaycaster::preRaycast(const RaycastData& data,
 
     _transferFunction->update();
     _tfUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _tfUnit->activate();
-    _transferFunction->texture().bind();
-    program.setUniform("transferFunction_" + id, _tfUnit->unitNumber());
+    _tfUnit->bind(_transferFunction->texture());
+    program.setUniform("transferFunction_" + id, *_tfUnit);
 
     _textureUnit = std::make_unique<ghoul::opengl::TextureUnit>();
-    _textureUnit->activate();
-    _volumeTexture->bind();
-    program.setUniform("volumeTexture_" + id, _textureUnit->unitNumber());
+    _textureUnit->bind(*_volumeTexture);
+    program.setUniform("volumeTexture_" + id, *_textureUnit);
 
     program.setUniform("gridType_" + id, static_cast<int>(_gridType));
 
@@ -179,7 +177,7 @@ std::filesystem::path BasicVolumeRaycaster::helperPath() const {
 }
 
 void BasicVolumeRaycaster::setTransferFunction(
-                            std::shared_ptr<openspace::TransferFunction> transferFunction)
+                                       std::shared_ptr<TransferFunction> transferFunction)
 {
     _transferFunction = std::move(transferFunction);
 }
@@ -234,4 +232,4 @@ void BasicVolumeRaycaster::setModelTransform(glm::mat4 transform) {
     _modelTransform = std::move(transform);
 }
 
-} // namespace openspace::volume
+} // namespace openspace

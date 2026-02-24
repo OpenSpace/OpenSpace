@@ -43,13 +43,12 @@ namespace {
         };
         DataMode outputMode;
     };
-
-#include "convertrecformattask_codegen.cpp"
 } // namespace
+#include "convertrecformattask_codegen.cpp"
 
-namespace openspace::interaction {
+namespace openspace {
 
-documentation::Documentation ConvertRecFormatTask::documentation() {
+Documentation ConvertRecFormatTask::documentation() {
     return codegen::doc<Parameters>("convert_format_task");
 }
 
@@ -82,4 +81,4 @@ void ConvertRecFormatTask::perform(const Task::ProgressCallback&) {
     saveSessionRecording(_outFilePath, sessionRecording, _dataMode);
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

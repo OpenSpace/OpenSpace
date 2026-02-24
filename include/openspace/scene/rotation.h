@@ -36,7 +36,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 struct UpdateData;
 
 /**
@@ -55,7 +55,7 @@ struct UpdateData;
  * matrix(const UpdateDate&) verison needs to be implemented as this base class will
  * handle the caching.
  */
-class Rotation : public properties::PropertyOwner {
+class Rotation : public PropertyOwner {
 public:
     static ghoul::mm_unique_ptr<Rotation> createFromDictionary(
         const ghoul::Dictionary& dictionary);
@@ -69,7 +69,7 @@ public:
     const glm::dmat3& matrix() const;
     virtual glm::dmat3 matrix(const UpdateData& time) const = 0;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     void requireUpdate();
@@ -81,6 +81,6 @@ private:
     glm::dmat3 _cachedMatrix = glm::dmat3(1.0);
 };
 
-}  // namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___ROTATION___H__

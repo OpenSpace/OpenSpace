@@ -39,13 +39,13 @@ public:
 
     glm::dmat3 matrix(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::StringProperty _sourceFrame;
-    properties::StringProperty _destinationFrame;
-    properties::StringProperty _fixedDate;
-    properties::FloatProperty _timeOffset;
+    StringProperty _sourceFrame;
+    StringProperty _destinationFrame;
+    StringProperty _fixedDate;
+    FloatProperty _timeOffset;
 
     std::optional<double> _fixedEphemerisTime;
 };

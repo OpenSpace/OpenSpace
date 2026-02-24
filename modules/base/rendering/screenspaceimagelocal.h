@@ -41,12 +41,12 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
-    properties::StringProperty _texturePath;
+    StringProperty _texturePath;
 
     std::unique_ptr<ghoul::opengl::Texture> _texture;
     bool _textureIsDirty = false;
