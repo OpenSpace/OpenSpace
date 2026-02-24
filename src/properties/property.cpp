@@ -260,7 +260,6 @@ void Property::notifyChangeListeners() {
         { "value", nlohmann::json::parse(jsonValue()) }
     };
     global::topicManager->passDataToTopic("propertyTree", payload);
-
 }
 
 void Property::notifyMetaDataChangeListeners() {

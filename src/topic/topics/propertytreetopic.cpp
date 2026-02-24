@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2025                                                               *
+ * Copyright (c) 2014-2026                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -58,19 +58,19 @@ std::string PropertyTreeTopic::type() const {
 }
 
 void PropertyTreeTopic::resetCallbacks() {
-    if (!_prop) {
+    if (!_property) {
         return;
     }
     if (_onChangeHandle != UnsetCallbackHandle) {
-        _prop->removeOnChange(_onChangeHandle);
+        _property->removeOnChange(_onChangeHandle);
         _onChangeHandle = UnsetCallbackHandle;
     }
     if (_onMetaDataChangeHandle != UnsetCallbackHandle) {
-        _prop->removeOnMetaDataChange(_onMetaDataChangeHandle);
+        _property->removeOnMetaDataChange(_onMetaDataChangeHandle);
         _onMetaDataChangeHandle = UnsetCallbackHandle;
     }
     if (_onDeleteHandle != UnsetCallbackHandle) {
-        _prop->removeOnDelete(_onDeleteHandle);
+        _property->removeOnDelete(_onDeleteHandle);
         _onDeleteHandle = UnsetCallbackHandle;
     }
 }
@@ -94,7 +94,6 @@ void PropertyTreeTopic::handleJson(const nlohmann::json& json) {
     }
     if (event == PropertyChanged) {
         const nlohmann::json& payload = json.at("payload").get<nlohmann::json>();
-
         _connection->sendJson(wrappedPayload(payload));
     }
 }

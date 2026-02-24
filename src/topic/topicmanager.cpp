@@ -25,13 +25,13 @@
 #include <openspace/topic/topicmanager.h>
 
 #include <modules/globebrowsing/globebrowsingmodule.h>
-#include <openspace/topic/serverinterface.h>
-#include <openspace/topic/connection.h>
-#include <openspace/topic/topics/topic.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/globals.h>
+#include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/topic/connection.h>
+#include <openspace/topic/serverinterface.h>
+#include <openspace/topic/topics/topic.h>
 #include <ghoul/format.h>
 #include <ghoul/io/socket/socket.h>
 #include <ghoul/io/socket/tcpsocketserver.h>
@@ -42,7 +42,7 @@
 #include <ghoul/misc/templatefactory.h>
 
 namespace {
-    struct [[codegen::Dictionary(ServerModule)]] Parameters {
+    struct [[codegen::Dictionary(TopicManager)]] Parameters {
         std::optional<ghoul::Dictionary> interfaces;
         std::optional<std::vector<std::string>> allowAddresses;
         std::optional<int> skyBrowserUpdateTime;
@@ -263,7 +263,8 @@ void TopicManager::removePreSyncCallback(CallbackHandle handle) {
 }
 
 void TopicManager::passDataToTopic(const std::string& topicType,
-                                   const nlohmann::json& jsonData) {
+                                   const nlohmann::json& jsonData)
+{
     for (const ConnectionData& connectionData : _connections) {
         if (auto topic = connectionData.connection->findTopicByType(topicType)) {
             topic->handleJson(jsonData);

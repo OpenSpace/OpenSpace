@@ -24,9 +24,9 @@
 
 #include "openspace/topic/topics/enginemodetopic.h"
 
-#include <openspace/topic/connection.h>
 #include <openspace/engine/globals.h>
 #include <openspace/query/query.h>
+#include <openspace/topic/connection.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {

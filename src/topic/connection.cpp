@@ -24,7 +24,10 @@
 
 #include <openspace/topic/connection.h>
 
+#include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
 #include <openspace/topic/topics/authorizationtopic.h>
+#include <openspace/topic/topics/actionkeybindtopic.h>
 #include <openspace/topic/topics/bouncetopic.h>
 #include <openspace/topic/topics/camerapathtopic.h>
 #include <openspace/topic/topics/cameratopic.h>
@@ -38,18 +41,15 @@
 #include <openspace/topic/topics/luascripttopic.h>
 #include <openspace/topic/topics/missiontopic.h>
 #include <openspace/topic/topics/profiletopic.h>
+#include <openspace/topic/topics/propertytreetopic.h>
 #include <openspace/topic/topics/sessionrecordingtopic.h>
 #include <openspace/topic/topics/setpropertytopic.h>
-#include <openspace/topic/topics/actionkeybindtopic.h>
 #include <openspace/topic/topics/skybrowsertopic.h>
-#include <openspace/topic/topics/propertytreetopic.h>
 #include <openspace/topic/topics/subscriptiontopic.h>
 #include <openspace/topic/topics/timetopic.h>
 #include <openspace/topic/topics/topic.h>
 #include <openspace/topic/topics/triggerpropertytopic.h>
 #include <openspace/topic/topics/versiontopic.h>
-#include <openspace/engine/configuration.h>
-#include <openspace/engine/globals.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/socket/socket.h>
@@ -253,7 +253,6 @@ Topic* Connection::findTopicByType(const std::string& type) {
         _topics.begin(),
         _topics.end(),
         [&type](const auto& pair) {
-            //LINFO(pair.second->type());
             return pair.second->type() == type;
         });
 

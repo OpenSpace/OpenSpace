@@ -24,8 +24,8 @@
 
 #include <openspace/topic/topics/errorlogtopic.h>
 
-#include <openspace/topic/notificationlog.h>
 #include <openspace/topic/connection.h>
+#include <openspace/topic/notificationlog.h>
 #include <ghoul/logging/logmanager.h>
 
 namespace {
