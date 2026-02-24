@@ -24,39 +24,35 @@
 
 #include "fragment.glsl"
 
-flat in float vs_screenSpaceDepth;
-in vec4 vs_positionViewSpace;
-flat in vec3 vs_normal; // TODO: not needed for shading, remove somehow
-in vec2 texCoord;
+in Data {
+  vec4 positionViewSpace;
+  vec2 texCoords;
+  flat float screenSpaceDepth;
+} in_data;
 
 uniform sampler2D pointTexture;
-uniform bool hasTexture;
 uniform vec3 color;
 uniform float opacity;
 
 // Can be used to preserve the whites in a point texture
-bool preserveWhite = true;
+const bool PreserveWhite = true;
+
 
 Fragment getFragment() {
   Fragment frag;
 
-  if (hasTexture) {
-    frag.color = texture(pointTexture, texCoord);
-    if (!preserveWhite || frag.color.r * frag.color.g * frag.color.b < 0.95) {
-      frag.color.rgb *= color;
-    }
-    frag.color.a *= opacity;
+  frag.color = texture(pointTexture, in_data.texCoords);
+  if (!PreserveWhite || frag.color.r * frag.color.g * frag.color.b < 0.95) {
+    frag.color.rgb *= color;
   }
-  else {
-    frag.color = vec4(color * vs_normal, opacity);
-  }
+  frag.color.a *= opacity;
 
   if (frag.color.a < 0.01) {
     discard;
   }
 
-  frag.depth = vs_screenSpaceDepth;
-  frag.gPosition = vs_positionViewSpace;
+  frag.depth = in_data.screenSpaceDepth;
+  frag.gPosition = in_data.positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   return frag;
 }

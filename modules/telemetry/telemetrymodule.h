@@ -78,10 +78,10 @@ public:
      *
      * \return The Lua libraries for all telemetries available in the telemetry module
      */
-    std::vector<scripting::LuaLibrary> luaLibraries() const override;
+    std::vector<LuaLibrary> luaLibraries() const override;
 
-    virtual void internalInitialize(const ghoul::Dictionary& dictionary) override;
-    virtual void internalDeinitialize() override;
+    void internalInitialize(const ghoul::Dictionary& dictionary) override;
+    void internalDeinitialize() override;
 
     /**
      * Get the list of telemetries that are currently registered in the module.
@@ -141,10 +141,10 @@ private:
     std::mutex mutexLock;
     std::condition_variable syncToMain;
 
-    properties::BoolProperty _enabled;
-    properties::StringProperty _ipAddress;
-    properties::IntProperty _port;
-    properties::OptionProperty _modeOptions;
+    BoolProperty _enabled;
+    StringProperty _ipAddress;
+    IntProperty _port;
+    OptionProperty _modeOptions;
 
     /**
      * This setting only affects telemetries that send angle information. For example, the
@@ -157,7 +157,7 @@ private:
      * `false`: The elevation angle sent to the Open Sound Control receiver is always set
      *          to 0.0
     */
-    properties::BoolProperty _includeElevationAngle;
+    BoolProperty _includeElevationAngle;
 
     std::thread _updateThread;
     std::atomic<bool> _isRunning = false;

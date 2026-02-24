@@ -24,22 +24,23 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_st;
+layout(location = 1) in vec2 in_texCoords;
 
-out vec2 vs_st;
-out vec4 vs_position;
+out Data {
+  vec4 position;
+  vec2 texCoords;
+} out_data;
 
 uniform mat4 modelViewProjectionTransform;
 
 
 void main() {
-  vs_st = in_st;
-
-  vs_position = z_normalization(
-    modelViewProjectionTransform * vec4(in_position.xy, 0.0, 1.0)
+  out_data.texCoords = in_texCoords;
+  out_data.position = z_normalization(
+    modelViewProjectionTransform * vec4(in_position, 0.0, 1.0)
   );
-  gl_Position = vs_position;
+  gl_Position = out_data.position;
 }

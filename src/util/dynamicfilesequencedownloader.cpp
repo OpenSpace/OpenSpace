@@ -45,6 +45,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "DynamicFileSequenceDownloader";
 
     void trackFinishedDownloads(const std::filesystem::path& syncFilePath,
@@ -84,8 +86,8 @@ namespace {
         // days in seconds      : 86400
         // 30 days in seconds   : 2592000
         // 1 year in seconds    : 31556926
-        std::string_view min = openspace::Time(minTime).ISO8601();
-        std::string_view max = openspace::Time(maxTime).ISO8601();
+        std::string_view min = Time(minTime).ISO8601();
+        std::string_view max = Time(maxTime).ISO8601();
 
         return std::format("{}{}&time.min={}&time.max={}", baseUrl, dataID, min, max);
     }
@@ -651,4 +653,4 @@ DynamicFileSequenceDownloader::downloadedFiles() const
     return _downloadedFiles;
 }
 
-} // openspace namespace
+} // namespace openspace

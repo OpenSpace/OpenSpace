@@ -52,14 +52,14 @@ public:
 
     void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     void setLabelText(const std::string & newText);
 
 protected:
-    properties::OptionProperty _blendMode;
+    OptionProperty _blendMode;
 
-    properties::StringProperty _text;
+    StringProperty _text;
 
     float unit(int unit) const;
 
@@ -75,17 +75,17 @@ private:
 
     float computeFadeFactor(float distanceNodeToCamera) const;
 
-    properties::Vec3Property _color;
-    properties::FloatProperty _fontSize;
-    properties::FloatProperty _size;
-    properties::IVec2Property _minMaxSize;
+    Vec3Property _color;
+    FloatProperty _fontSize;
+    FloatProperty _size;
+    IVec2Property _minMaxSize;
 
-    properties::BoolProperty _enableFadingEffect;
-    properties::Vec2Property _fadeWidths;
-    properties::Vec2Property _fadeDistances;
-    properties::OptionProperty _fadeUnitOption;
+    BoolProperty _enableFadingEffect;
+    Vec2Property _fadeWidths;
+    Vec2Property _fadeDistances;
+    OptionProperty _fadeUnitOption;
 
-    properties::OptionProperty _orientationOption;
+    OptionProperty _orientationOption;
 
     std::shared_ptr<ghoul::fontrendering::Font> _font;
 

@@ -64,9 +64,9 @@
 #pragma warning (pop)
 #endif // _MSC_VER
 
-namespace openspace::globebrowsing {
-
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RawTileDataReader";
 
     enum class Side {
@@ -229,6 +229,8 @@ namespace {
         }
     }
 } // namespace
+
+namespace openspace {
 
 RawTileDataReader::RawTileDataReader(std::string filePath, TileTextureInitData initData,
                                      TileCacheProperties cacheProperties,
@@ -722,4 +724,4 @@ float RawTileDataReader::noDataValueAsFloat() const {
     return _noDataValue;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

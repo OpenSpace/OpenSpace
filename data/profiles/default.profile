@@ -36,20 +36,6 @@
     315360000.0,
     630720000.0
   ],
-  "keybindings": [
-    {
-      "action": "os.solarsystem.ToggleSatelliteTrails",
-      "key": "S"
-    },
-    {
-      "action": "os.solarsystem.FocusIss",
-      "key": "I"
-    },
-    {
-      "action": "os.solarsystem.FocusEarth",
-      "key": "HOME"
-    }
-  ],
   "mark_nodes": [
     "Earth",
     "Mars",

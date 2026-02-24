@@ -30,11 +30,10 @@
 #include <optional>
 #include <string>
 
-namespace openspace { class SceneGraphNode; }
-
-namespace openspace::interaction {
+namespace openspace {
 
 struct NavigationState;
+class SceneGraphNode;
 
 class Waypoint {
 public:
@@ -94,6 +93,6 @@ struct NodeCameraStateSpec {
 Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
     const std::optional<Waypoint>& startPoint = std::nullopt, bool useLinear = false);
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___WAYPOINT___H__

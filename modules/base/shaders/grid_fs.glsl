@@ -24,8 +24,10 @@
 
 #include "fragment.glsl"
 
-in float vs_depthClipSpace;
-in vec4 vs_positionViewSpace;
+in Data {
+  vec4 positionViewSpace;
+  float depthClipSpace;
+} in_data;
 
 uniform vec3 gridColor;
 uniform float opacity;
@@ -33,13 +35,9 @@ uniform float opacity;
 
 Fragment getFragment() {
   Fragment frag;
-  frag.color.rgb = gridColor;
-  frag.color.a = opacity;
-  frag.depth = vs_depthClipSpace;
-  frag.gPosition = vs_positionViewSpace;
-
-  // There is no normal here
-  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0);
-
+  frag.color = vec4(gridColor, opacity);
+  frag.depth = in_data.depthClipSpace;
+  frag.gPosition = in_data.positionViewSpace;
+  frag.gNormal = vec4(0.0, 0.0, -1.0, 1.0); // There is no normal here
   return frag;
 }

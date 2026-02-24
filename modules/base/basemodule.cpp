@@ -261,7 +261,7 @@ void BaseModule::internalDeinitializeGL() {
     TextureManager.releaseAll(ghoul::opengl::TextureManager::Warnings::Yes);
 }
 
-std::vector<documentation::Documentation> BaseModule::documentations() const {
+std::vector<Documentation> BaseModule::documentations() const {
     return {
         DashboardItemAngle::Documentation(),
         DashboardItemCameraOrientation::Documentation(),
@@ -346,7 +346,7 @@ std::vector<documentation::Documentation> BaseModule::documentations() const {
     };
 }
 
-std::vector<scripting::LuaLibrary> BaseModule::luaLibraries() const {
+std::vector<LuaLibrary> BaseModule::luaLibraries() const {
     return {
         ScreenSpaceDashboard::luaLibrary()
     };

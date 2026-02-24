@@ -24,9 +24,11 @@
 
 #include "fragment.glsl"
 
-in float vs_depth;
-flat in vec3 vs_normal;
-in vec4 vs_positionViewSpace;
+in Data {
+  vec4 positionViewSpace;
+  vec3 normal;
+  float depth;
+} in_data;
 
 uniform vec3 color;
 uniform float opacity;
@@ -41,36 +43,32 @@ uniform float lightIntensities[8];
 
 const vec3 LightColor = vec3(1.0);
 
-Fragment getFragment() {
-  Fragment frag;
 
+Fragment getFragment() {
   if (opacity == 0.0) {
     discard;
   }
+
+  Fragment frag;
   frag.color = vec4(color, opacity);
 
   // Simple diffuse phong shading based on light sources
   if (performShading && nLightSources > 0) {
     // @TODO: Fix faulty triangle normals. This should not have to be inverted
-    vec3 n = -normalize(vs_normal);
+    vec3 n = -normalize(in_data.normal);
 
     // Ambient color
-    vec3 shadedColor = ambientIntensity  * color;
+    frag.color.xyz = ambientIntensity * color;
 
     for (int i = 0; i < nLightSources; i++) {
       vec3 l = lightDirectionsViewSpace[i];
-
-      // Diffuse
-      vec3 diffuseColor = diffuseIntensity * max(dot(n,l), 0.0) * color;
-
-      // Light contribution
-      shadedColor += lightIntensities[i] * (LightColor * diffuseColor);
+      vec3 diffuseColor = diffuseIntensity * max(dot(n, l), 0.0) * color;
+      frag.color.xyz += lightIntensities[i] * (LightColor * diffuseColor);
     }
-    frag.color.xyz = shadedColor;
   }
 
-  frag.depth = vs_depth;
-  frag.gPosition = vs_positionViewSpace;
+  frag.depth = in_data.depth;
+  frag.gPosition = in_data.positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
   return frag;
 }

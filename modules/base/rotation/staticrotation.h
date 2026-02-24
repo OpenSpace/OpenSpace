@@ -37,10 +37,10 @@ public:
 
     glm::dmat3 matrix(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::Vec3Property _eulerRotation;
+    Vec3Property _eulerRotation;
     mutable glm::dmat3 _cachedMatrix = glm::dmat3(1.0);
     mutable bool _matrixIsDirty = true;
 };

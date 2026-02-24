@@ -42,7 +42,7 @@
 
 struct lua_State;
 
-namespace openspace::properties {
+namespace openspace {
 
 class PropertyOwner;
 
@@ -547,7 +547,7 @@ protected:
         std::optional<std::string> group;
         Visibility visibility = Visibility::Default;
         std::optional<bool> readOnly;
-        bool needsConfirmation;
+        bool needsConfirmation = false;
         std::unordered_map<std::string, bool> viewOptions;
     } _metaData;
 
@@ -580,6 +580,6 @@ private:
 #endif
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___PROPERTY___H__

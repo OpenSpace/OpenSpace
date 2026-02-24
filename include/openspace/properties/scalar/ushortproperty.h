@@ -29,10 +29,10 @@
 
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * This class is a concrete implementation of TemplateProperty with
  * the type `unsigned short`.
  */
 class UShortProperty : public NumericalProperty<unsigned short> {
@@ -54,6 +54,6 @@ private:
     unsigned short toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___USHORTPROPERTY___H__

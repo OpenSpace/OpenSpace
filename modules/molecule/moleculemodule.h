@@ -1,0 +1,94 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#ifndef __OPENSPACE_MODULE_MOLECULE___MOLECULEMODULE___H__
+#define __OPENSPACE_MODULE_MOLECULE___MOLECULEMODULE___H__
+
+#include <openspace/util/openspacemodule.h>
+
+#include <openspace/properties/scalar/boolproperty.h>
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/util/threadpool.h>
+#include <ghoul/glm.h>
+#include <ghoul/opengl/texture.h>
+
+struct md_gl_shaders_t;
+
+namespace openspace {
+
+class MoleculeModule : public OpenSpaceModule {
+public:
+    constexpr static const char* Name = "Molecule";
+
+    MoleculeModule();
+
+    void internalDeinitializeGL() final;
+
+    void initializeShaders();
+    void deinitializeShaders();
+
+    GLuint fbo() const;
+
+    const md_gl_shaders_t& shaders() const;
+
+    ThreadPool& threadPool();
+
+    std::vector<openspace::Documentation> documentations() const override;
+
+private:
+    void internalInitialize(const ghoul::Dictionary&) override;
+    void preDraw();
+    void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
+        const glm::mat4& projectionMatrix);
+
+    inline static int _initializeCounter = 0;
+
+    GLuint _fbo = 0;
+    std::unique_ptr<ghoul::opengl::Texture> _colorTex;
+    std::unique_ptr<ghoul::opengl::Texture> _normalTex;
+    std::unique_ptr<ghoul::opengl::Texture> _depthTex;
+    int _width = 0;
+    int _height = 0;
+
+    struct SSAO : public PropertyOwner {
+        explicit SSAO(PropertyOwnerInfo info);
+
+        BoolProperty enabled;
+        FloatProperty intensity;
+        FloatProperty radius;
+        FloatProperty horizonBias;
+        FloatProperty normalBias;
+    };
+
+    SSAO _ssao;
+    SSAO _ssao2;
+
+    FloatProperty _exposure;
+
+    ThreadPool _threadPool;
+};
+
+} // namespace openspace
+
+#endif // __OPENSPACE_MODULE_MOLECULE___MOLECULEMODULE___H__

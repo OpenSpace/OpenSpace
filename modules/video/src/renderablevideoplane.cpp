@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 #include <cstdlib>
 #include <limits>
 
@@ -41,18 +42,18 @@ namespace {
     // Note that, unless playback is mapped to simulation time, the video must be started
     // manually via the user interface.
     struct [[codegen::Dictionary(RenderableVideoPlane)]] Parameters {};
-#include "renderablevideoplane_codegen.cpp"
 } // namespace
+#include "renderablevideoplane_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableVideoPlane::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>(
+Documentation RenderableVideoPlane::Documentation() {
+    openspace::Documentation doc = codegen::doc<Parameters>(
         "video_renderablevideoplane",
         RenderablePlane::Documentation()
     );
 
-    documentation::Documentation vp = VideoPlayer::Documentation();
+    openspace::Documentation vp = VideoPlayer::Documentation();
     doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
 
     return doc;
@@ -113,8 +114,8 @@ void RenderableVideoPlane::update(const UpdateData& data) {
     RenderablePlane::update(data);
 }
 
-void RenderableVideoPlane::bindTexture() {
-    _videoPlayer.frameTexture()->bind();
+void RenderableVideoPlane::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_videoPlayer.frameTexture());
 }
 
 } // namespace openspace

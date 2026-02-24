@@ -37,16 +37,16 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 struct UpdateData;
 
-class Translation : public properties::PropertyOwner {
+class Translation : public PropertyOwner {
 public:
     static ghoul::mm_unique_ptr<Translation> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     explicit Translation(const ghoul::Dictionary& dictionary);
-    virtual ~Translation() override = default;
+    ~Translation() override = default;
 
     virtual void initialize();
 
@@ -59,7 +59,7 @@ public:
     // invalidates potentially stored points, for example in trails
     void onParameterChange(std::function<void()> callback);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     void notifyObservers() const;

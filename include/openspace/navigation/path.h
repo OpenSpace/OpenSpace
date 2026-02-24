@@ -33,12 +33,11 @@
 #include <vector>
 
 namespace ghoul { class Dictionary; }
-namespace openspace {
-    namespace documentation { struct Documentation; }
-    struct CameraPose;
-} // namespace openspace
 
-namespace openspace::interaction {
+namespace openspace {
+
+struct CameraPose;
+struct Documentation;
 
 class Path {
 public:
@@ -128,7 +127,7 @@ public:
      */
     void resetPlaybackVariables();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     /**
@@ -209,6 +208,6 @@ private:
 Path createPathFromDictionary(const ghoul::Dictionary& dictionary,
     std::optional<Path::Type> forceType = std::nullopt);
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___PATH___H__

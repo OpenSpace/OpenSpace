@@ -45,10 +45,10 @@ public:
 
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
 private:
     struct FileData {
@@ -67,7 +67,7 @@ private:
     std::vector<FileData> _files;
     int _activeTriggerTimeIndex = 0;
 
-    properties::StringProperty _textureSourcePath;
+    StringProperty _textureSourcePath;
     ghoul::opengl::Texture* _texture = nullptr;
     bool _textureIsDirty = false;
 };

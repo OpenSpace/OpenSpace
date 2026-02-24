@@ -31,19 +31,17 @@
 #include <memory>
 
 namespace ghoul { class Dictionary; }
+
 namespace openspace {
-    namespace documentation { struct Documentation; }
-    struct RenderData;
-} // namespace openspace
 
-namespace openspace::globebrowsing {
-
+struct Documentation;
+struct RenderData;
 class RenderableGlobe;
 
 /**
  * Manages multiple GeoJSON objects of a globe.
  */
-class GeoJsonManager : public properties::PropertyOwner {
+class GeoJsonManager : public PropertyOwner {
 public:
     GeoJsonManager();
 
@@ -63,6 +61,6 @@ private:
     RenderableGlobe* _parentGlobe = nullptr;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GEOJSONMANAGER___H__

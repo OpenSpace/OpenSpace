@@ -44,24 +44,24 @@
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "WebBrowser";
 
-    constexpr openspace::properties::Property::PropertyInfo
-        UpdateBrowserBetweenRenderablesInfo =
-    {
+    constexpr Property::PropertyInfo UpdateBrowserBetweenRenderablesInfo = {
         "UpdateBrowserBetweenRenderables",
         "Update browser between renderables",
         "Run the message loop of the browser between calls to render individual "
         "renderables. When disabled, the browser message loop only runs once per frame.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BrowserUpdateIntervalInfo = {
+    constexpr Property::PropertyInfo BrowserUpdateIntervalInfo = {
         "BrowserUpdateInterval",
         "Browser update interval",
         "The time in microseconds between running the message loop of the browser. Only "
         "used if UpdateBrowserBetweenRenderables is true.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
     /**
@@ -73,12 +73,9 @@ namespace {
     std::filesystem::path findHelperExecutable() {
 #ifdef WIN32
         constexpr std::string_view SubprocessPath = "OpenSpace_Helper.exe";
-#elif defined(__APPLE__)
-        constexpr std::string_view SubprocessPath =
-            "../Frameworks/OpenSpace Helper.app/Contents/MacOS/OpenSpace Helper";
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
         constexpr std::string_view SubprocessPath = "OpenSpace_Helper";
-#endif
+#endif // WIN32
 
         const std::filesystem::path execLocation = absPath(std::format(
             "${{BIN}}/{}", SubprocessPath
@@ -110,12 +107,12 @@ namespace {
         // fatal crash that is caused by the accelerated rendering.
         std::optional<bool> disableAcceleratedRendering;
     };
-#include "webbrowsermodule_codegen.cpp"
 } // namespace
+#include "webbrowsermodule_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation WebBrowserModule::Documentation() {
+Documentation WebBrowserModule::Documentation() {
     return codegen::doc<Parameters>("module_webbrowser");
 }
 
@@ -245,7 +242,7 @@ bool WebBrowserModule::isEnabled() const {
 }
 
 bool WebBrowserModule::canUseAcceleratedRendering() {
-// Linux doesn't have a problem with the rendering, Apple doesn't support OpenGL 4.5
+// Linux doesn't have a problem with the rendering
 #ifdef WIN32
     ghoul::systemcapabilities::Version acceleratedVersion = {
         .major = 4, .minor = 5, .release = 0
@@ -267,7 +264,7 @@ bool WebBrowserModule::canUseAcceleratedRendering() {
 #endif // WIN32
 }
 
-std::vector<documentation::Documentation> WebBrowserModule::documentations() const {
+std::vector<Documentation> WebBrowserModule::documentations() const {
     return {
         ScreenSpaceBrowser::Documentation()
     };

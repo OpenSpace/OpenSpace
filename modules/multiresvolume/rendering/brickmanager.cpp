@@ -145,22 +145,23 @@ bool BrickManager::initialize() {
     dims.push_back(_atlasDim);
     dims.push_back(_atlasDim);
     _textureAtlas = new ghoul::opengl::Texture(
-        glm::size3_t(_atlasDim, _atlasDim, _atlasDim),
-        GL_TEXTURE_3D,
-        ghoul::opengl::Texture::Format::RGBA,
-        GL_RGBA,
-        GL_FLOAT
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(_atlasDim, _atlasDim, _atlasDim),
+            .type = GL_TEXTURE_3D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_FLOAT
+        },
+        ghoul::opengl::Texture::SamplerInit{}
     );
-    _textureAtlas->uploadTexture();
 
     _atlasInitialized = true;
 
-    glGenBuffers(2, _pboHandle);
+    glCreateBuffers(2, _pboHandle);
 
     return true;
 }
 
-bool BrickManager::buildBrickList(BufferIndex bufferIndex, std::vector<int>& brickRequest)
+void BrickManager::buildBrickList(BufferIndex bufferIndex, std::vector<int>& brickRequest)
 {
     // Keep track of number bricks used and number of bricks cached
     // (for benchmarking)
@@ -223,12 +224,10 @@ bool BrickManager::buildBrickList(BufferIndex bufferIndex, std::vector<int>& bri
 
     // Brick list is build, reset coordinate list
     std::fill(_usedCoords[bufferIndex].begin(), _usedCoords[bufferIndex].end(), false);
-
-    return true;
 }
 
-bool BrickManager::fillVolume(float* in, float* out, unsigned int x, unsigned int y,
-                              unsigned int z)
+void BrickManager::fillVolume(float* in, float* out, unsigned int x, unsigned int y,
+                              unsigned int z) const
 {
 
     //timer_.start();
@@ -252,7 +251,6 @@ bool BrickManager::fillVolume(float* in, float* out, unsigned int x, unsigned in
             }
         }
     }
-    return true;
 }
 
 void BrickManager::incrementCoordinates() {
@@ -271,7 +269,7 @@ void BrickManager::incrementCoordinates() {
     }
 }
 
-unsigned int BrickManager::linearCoordinates(int x, int y, int z) {
+unsigned int BrickManager::linearCoordinates(int x, int y, int z) const {
     return x + y * _header.xNumBricks + z * _header.xNumBricks * _header.yNumBricks;
 }
 
@@ -285,10 +283,9 @@ void BrickManager::coordinatesFromLinear(int idx, int& x, int& y, int& z) {
 
 bool BrickManager::diskToPBO(BufferIndex pboIndex) {
     // Map PBO
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[pboIndex]);
-    glBufferData(GL_PIXEL_UNPACK_BUFFER, _volumeSize, nullptr, GL_STREAM_DRAW);
+    glNamedBufferData(_pboHandle[pboIndex], _volumeSize, nullptr, GL_STREAM_DRAW);
     float* mappedBuffer = reinterpret_cast<float*>(
-        glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY)
+        glMapNamedBuffer(_pboHandle[pboIndex], GL_WRITE_ONLY)
     );
 
     if (!mappedBuffer) {
@@ -402,18 +399,15 @@ bool BrickManager::diskToPBO(BufferIndex pboIndex) {
         delete[] seqBuffer;
     }
 
-    glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
+    glUnmapNamedBuffer(_pboHandle[pboIndex]);
     return true;
 }
 
-bool BrickManager::pboToAtlas(BufferIndex pboIndex) {
+void BrickManager::pboToAtlas(BufferIndex pboIndex) {
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, _pboHandle[pboIndex]);
     glm::size3_t dim = _textureAtlas->dimensions();
-    glBindTexture(GL_TEXTURE_3D, *_textureAtlas);
-    glTexSubImage3D(
-        GL_TEXTURE_3D,
+    glTextureSubImage3D(
+        *_textureAtlas,
         0,
         0,
         0,
@@ -425,10 +419,7 @@ bool BrickManager::pboToAtlas(BufferIndex pboIndex) {
         GL_FLOAT,
         nullptr
     );
-    glBindTexture(GL_TEXTURE_3D, 0);
     glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-
-    return true;
 }
 
 ghoul::opengl::Texture* BrickManager::textureAtlas() {

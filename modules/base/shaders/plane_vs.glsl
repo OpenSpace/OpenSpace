@@ -24,31 +24,29 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
 layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
+layout(location = 1) in vec2 in_texCoords;
 
-out vec4 vs_gPosition;
-out vec3 vs_gNormal;
-out float vs_screenSpaceDepth;
-out vec2 vs_st;
+out Data {
+  vec4 gPosition;
+  vec2 texCoords;
+  vec3 gNormal;
+  float screenSpaceDepth;
+} out_data;
 
 uniform mat4 modelViewProjection;
 uniform mat4 modelViewTransform;
 
 
 void main() {
-  vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
-  vec4 positionClipSpace = modelViewProjection * position;
-  vec4 positionScreenSpace = z_normalization(positionClipSpace);
+  vec4 position = vec4(in_position.xyz * pow(10.0, in_position.w), 1.0);
 
-  gl_Position = positionScreenSpace;
+  gl_Position = z_normalization(modelViewProjection * position);
 
-  // G-Buffer
-  vs_gNormal = vec3(0.0);
-  vs_gPosition = modelViewTransform * position; // Must be in SGCT eye space;
-
-  vs_st = in_st;
-  vs_screenSpaceDepth = positionScreenSpace.w;
+  out_data.gPosition = modelViewTransform * position;
+  out_data.gNormal = vec3(0.0);
+  out_data.texCoords = in_texCoords;
+  out_data.screenSpaceDepth = gl_Position.w;
 }

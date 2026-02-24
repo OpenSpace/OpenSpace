@@ -45,6 +45,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     // We can't use ${SCRIPTS} here as that hasn't been defined by this point
     constexpr std::string_view InitialConfigHelper =
         "${BASE}/scripts/configuration_helper.lua";
@@ -70,9 +72,7 @@ namespace {
         // global rebinding of keys from the default
         std::optional<std::vector<std::string>> globalCustomizationScripts;
 
-        enum class [[codegen::map(openspace::properties::Property::Visibility)]]
-        Visibility
-        {
+        enum class [[codegen::map(Property::Visibility)]] Visibility {
             NoviceUser = 0,
             User,
             AdvancedUser,
@@ -342,8 +342,8 @@ namespace {
         // displayed while the scene graph is created and initialized
         std::optional<LoadingScreen> loadingScreen;
     };
-#include "configuration_codegen.cpp"
 } // namespace
+#include "configuration_codegen.cpp"
 
 namespace openspace {
 
@@ -534,8 +534,8 @@ void parseLuaState(Configuration& configuration) {
 
     // We go through all of the entries and lift them from global scope into the table on
     // the stack so that we can create a ghoul::Dictionary from this new table
-    const documentation::Documentation doc = Configuration::Documentation();
-    for (const documentation::DocumentationEntry& e : doc.entries) {
+    const Documentation doc = Configuration::Documentation();
+    for (const DocumentationEntry& e : doc.entries) {
         lua_pushstring(s, e.key.c_str());
         lua_getglobal(s, e.key.c_str());
         lua_settable(s, -3);
@@ -554,9 +554,7 @@ void parseLuaState(Configuration& configuration) {
         p.globalCustomizationScripts.value_or(c.globalCustomizationScripts);
 
     if (p.propertyVisibility.has_value()) {
-        c.propertyVisibility = codegen::map<properties::Property::Visibility>(
-            *p.propertyVisibility
-        );
+        c.propertyVisibility = codegen::map<Property::Visibility>(*p.propertyVisibility);
     }
 
     c.showPropertyConfirmation = p.showPropertyConfirmation.value_or(true);
@@ -710,10 +708,8 @@ void patchConfiguration(Configuration& configuration, const Settings& settings) 
     }
 }
 
-documentation::Documentation Configuration::Documentation() {
-    using namespace documentation;
-
-    documentation::Documentation doc = codegen::doc<Parameters>("core_configuration");
+Documentation Configuration::Documentation() {
+    openspace::Documentation doc = codegen::doc<Parameters>("core_configuration");
 
     auto moduleConfiguration = std::make_shared<TableVerifier>();
     for (OpenSpaceModule* mod : global::moduleEngine->modules()) {
@@ -823,8 +819,8 @@ Configuration loadConfigurationFromFile(const std::filesystem::path& configurati
     return result;
 }
 
-openspace::Configuration::LayerServer stringToLayerServer(std::string_view server) {
-    using Server = openspace::Configuration::LayerServer;
+Configuration::LayerServer stringToLayerServer(std::string_view server) {
+    using Server = Configuration::LayerServer;
     if (server == "All") { return Server::All; }
     else if (server == "NewYork") { return Server::NewYork; }
     else if (server == "Sweden") { return Server::Sweden; }
@@ -833,8 +829,8 @@ openspace::Configuration::LayerServer stringToLayerServer(std::string_view serve
     else { throw ghoul::MissingCaseException(); }
 }
 
-std::string layerServerToString(openspace::Configuration::LayerServer server) {
-    using Server = openspace::Configuration::LayerServer;
+std::string layerServerToString(Configuration::LayerServer server) {
+    using Server = Configuration::LayerServer;
     switch (server) {
         case Server::All: return "All";
         case Server::NewYork: return "NewYork";

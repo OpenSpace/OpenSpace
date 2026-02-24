@@ -38,12 +38,10 @@
 #include <utility>
 #include <vector>
 
-namespace openspace::globebrowsing {
-    struct RawTile;
-    class Tile;
-} // namespace openspace::globebrowsing
+namespace openspace {
 
-namespace openspace::globebrowsing::cache {
+struct RawTile;
+class Tile;
 
 struct ProviderTileKey {
     TileIndex tileIndex;
@@ -84,7 +82,7 @@ struct ProviderTileHasher {
     }
 };
 
-class MemoryAwareTileCache : public properties::PropertyOwner {
+class MemoryAwareTileCache : public PropertyOwner {
 public:
     explicit MemoryAwareTileCache(int tileCacheSize = 1024);
 
@@ -160,13 +158,13 @@ private:
     size_t _numTextureBytesAllocatedOnCPU;
 
     // Properties
-    properties::IntProperty _cpuAllocatedTileData;
-    properties::IntProperty _gpuAllocatedTileData;
-    properties::IntProperty _tileCacheSize;
-    properties::TriggerProperty _applyTileCacheSize;
-    properties::TriggerProperty _clearTileCache;
+    IntProperty _cpuAllocatedTileData;
+    IntProperty _gpuAllocatedTileData;
+    IntProperty _tileCacheSize;
+    TriggerProperty _applyTileCacheSize;
+    TriggerProperty _clearTileCache;
 };
 
-} // namespace openspace::globebrowsing::cache
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___MEMORYAWARETILECACHE___H__

@@ -48,21 +48,18 @@
 #include <variant>
 
 namespace openspace {
-    namespace scripting { struct LuaLibrary; }
-    class Camera;
-    class SceneGraphNode;
-} // namespace openspace
 
-namespace openspace::interaction {
-
+class Camera;
 struct JoystickInputStates;
+struct LuaLibrary;
 struct NodeCameraStateSpec;
+class SceneGraphNode;
 struct WebsocketInputStates;
 
-class NavigationHandler : public properties::PropertyOwner {
+class NavigationHandler : public PropertyOwner {
 public:
     NavigationHandler();
-    virtual ~NavigationHandler() override;
+    ~NavigationHandler() override;
 
     void initialize();
     void deinitialize();
@@ -185,7 +182,7 @@ public:
      * \return The Lua library that contains all Lua functions available to affect the
      *         interaction
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     void applyPendingState();
@@ -207,16 +204,16 @@ private:
 
     std::optional<std::variant<NodeCameraStateSpec, NavigationState>> _pendingState;
 
-    properties::BoolProperty _disableKeybindings;
-    properties::BoolProperty _disableMouseInputs;
-    properties::BoolProperty _disableJoystickInputs;
-    properties::BoolProperty _useKeyFrameInteraction;
-    properties::FloatProperty _jumpToFadeDuration;
+    BoolProperty _disableKeybindings;
+    BoolProperty _disableMouseInputs;
+    BoolProperty _disableJoystickInputs;
+    BoolProperty _useKeyFrameInteraction;
+    FloatProperty _jumpToFadeDuration;
 
     struct {
-        properties::PropertyOwner owner;
-        properties::BoolProperty enable;
-        properties::Vec4Property color;
+        PropertyOwner owner;
+        BoolProperty enable;
+        Vec4Property color;
 
         bool isMouseFirstPress = false;
         bool isMousePressed = false;
@@ -225,6 +222,6 @@ private:
     } _mouseVisualizer;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___NAVIGATIONHANDLER___H__

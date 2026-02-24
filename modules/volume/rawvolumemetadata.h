@@ -30,13 +30,14 @@
 #include <string>
 
 namespace ghoul { class Dictionary; }
-namespace openspace::documentation { struct Documentation; }
 
-namespace openspace::volume {
+namespace openspace {
+
+struct Documentation;
 
 struct RawVolumeMetadata {
     static RawVolumeMetadata createFromDictionary(const ghoul::Dictionary& dictionary);
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     ghoul::Dictionary dictionary() const;
 
@@ -59,6 +60,6 @@ struct RawVolumeMetadata {
     std::string domainUnit;
 };
 
-} // namespace openspace::volume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_VOLUME___RAWVOLUMEMETADATA___H__

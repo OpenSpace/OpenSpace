@@ -33,6 +33,8 @@
 #include <limits>
 
 namespace {
+    using namespace openspace;
+
     // Indices for data items
     constexpr int NumDataItems = 9;
     constexpr int CameraPosXIndex = 0;
@@ -45,52 +47,49 @@ namespace {
     constexpr int CameraSpeedIndex = 7;
     constexpr int CameraSpeedUnitIndex = 8;
 
-    static const openspace::properties::PropertyOwner::PropertyOwnerInfo
-        CameraTelemetryInfo =
-    {
+    static const PropertyOwner::PropertyOwnerInfo CameraTelemetryInfo = {
         "CameraTelemetryInfo",
         "Camera Telemetry",
         "Telemetry that sends out camera information to the Open Sound Control receiver."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CameraSpeedDistanceUnitInfo =
-    {
+    constexpr Property::PropertyInfo CameraSpeedDistanceUnitInfo = {
         "CameraSpeedDistanceUnit",
         "Camera speed unit (distance)",
         "Choose a distance unit that is used for the camera speed. "
         "For example, if the distacne unit 'Kilometer' is chosen, then the unit used for "
         "the camera speed will be kilometers per second.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
+    const PropertyOwner::PropertyOwnerInfo PrecisionInfo = {
         "Precision",
         "Precision",
         "Settings for the precision of the camera telemetry information."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PositionPrecisionInfo = {
+    constexpr Property::PropertyInfo PositionPrecisionInfo = {
         "PositionPrecision",
         "Position precision",
         "The precision in meters used to determin when to send updated camera positional "
         "data to the Open Sound Control receiver.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RotationPrecisionInfo = {
+    constexpr Property::PropertyInfo RotationPrecisionInfo = {
         "RotationPrecision",
         "Rotation precision",
         "The precision used to determin when to send updated camera rotational "
         "data to the Open Sound Control receiver.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SpeedPrecisionInfo = {
+    constexpr Property::PropertyInfo SpeedPrecisionInfo = {
         "SpeedPrecision",
         "Speed precision",
         "The precision in meters per second used to determin when to send updated camera "
         "speed data to the Open Sound Control receiver.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 } // namespace
 
@@ -112,8 +111,8 @@ CameraTelemetry::CameraTelemetry(const std::string& ip, int port)
 }
 
 CameraTelemetry::PrecisionProperties::PrecisionProperties(
-                               properties::PropertyOwner::PropertyOwnerInfo precisionInfo)
-    : properties::PropertyOwner(precisionInfo)
+                               PropertyOwner::PropertyOwnerInfo precisionInfo)
+    : PropertyOwner(precisionInfo)
     , positionPrecision(PositionPrecisionInfo, 1000.0, 0.0, 1.0e+25)
     , rotationPrecision(RotationPrecisionInfo, 0.05, 0.0, 10.0)
     , speedPrecision(SpeedPrecisionInfo, 1000.0, 0.0, std::numeric_limits<double>::max())

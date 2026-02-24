@@ -127,7 +127,7 @@ bool TSP::readHeader() {
     LDEBUG(std::format("Num total nodes: {}", _numTotalNodes));
 
     // Allocate space for TSP structure
-    _data.resize(_numTotalNodes*NUM_DATA);
+    _data.resize(_numTotalNodes * NUM_DATA);
     LDEBUG(std::format("Data size: {}",  _data.size()));
 
     return true;
@@ -204,15 +204,11 @@ bool TSP::construct() {
 
 bool TSP::initalizeSSO() {
     if (!_dataSSBO) {
-        glGenBuffers(1, &_dataSSBO);
+        glCreateBuffers(1, &_dataSSBO);
     }
 
     const size_t size = sizeof(GLint)*_data.size();
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, _dataSSBO);
-    //glBufferData(GL_SHADER_STORAGE_BUFFER, size, _data.data(), GL_DYNAMIC_READ);
-    glBufferData(GL_SHADER_STORAGE_BUFFER, size, _data.data(), GL_STATIC_DRAW);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-    glFinish();
+    glNamedBufferData(_dataSSBO, size, _data.data(), GL_STATIC_DRAW);
     return true;
 }
 

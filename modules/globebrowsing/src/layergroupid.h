@@ -31,7 +31,7 @@
 #include <array>
 #include <string_view>
 
-namespace openspace::globebrowsing::layers {
+namespace openspace::layers {
 
 struct Group {
     enum class ID {
@@ -181,39 +181,41 @@ struct Blend {
     enum class ID {
         Normal = 0,
         Multiply = 1,
-        Add = 2,
-        Subtract = 3,
-        Color = 4,
+        MultiplyMix = 2,
+        Add = 3,
+        Subtract = 4,
+        Color = 5,
     };
 
     ID id;
     std::string_view identifier;
 };
 
-constexpr std::array<Blend, 5> Blends = {
+constexpr std::array<Blend, 6> Blends = {
     Blend { .id = Blend::ID::Normal, .identifier = "Normal" },
     Blend { .id = Blend::ID::Multiply, .identifier = "Multiply" },
+    Blend { .id = Blend::ID::MultiplyMix, .identifier = "Multiply and Mix" },
     Blend { .id = Blend::ID::Add, .identifier = "Add" },
     Blend { .id = Blend::ID::Subtract, .identifier = "Subtract" },
     Blend { .id = Blend::ID::Color, .identifier = "Color" }
 };
 
-} // namespace openspace::globebrowsing::layers
+} // namespace openspace::layers
 
 namespace ghoul {
 
 template <>
-constexpr openspace::globebrowsing::layers::Layer::ID from_string(std::string_view string)
+constexpr openspace::layers::Layer::ID from_string(std::string_view string)
 {
     auto it = std::find_if(
-        openspace::globebrowsing::layers::Layers.begin(),
-        openspace::globebrowsing::layers::Layers.end(),
-        [&string](const openspace::globebrowsing::layers::Layer& li) {
+        openspace::layers::Layers.begin(),
+        openspace::layers::Layers.end(),
+        [&string](const openspace::layers::Layer& li) {
             return li.identifier == string;
         }
     );
 
-    if (it != openspace::globebrowsing::layers::Layers.end()) {
+    if (it != openspace::layers::Layers.end()) {
         return it->id;
     }
     else {
@@ -224,17 +226,17 @@ constexpr openspace::globebrowsing::layers::Layer::ID from_string(std::string_vi
 }
 
 template <>
-constexpr openspace::globebrowsing::layers::Group::ID from_string(std::string_view string)
+constexpr openspace::layers::Group::ID from_string(std::string_view string)
 {
     auto it = std::find_if(
-        openspace::globebrowsing::layers::Groups.begin(),
-        openspace::globebrowsing::layers::Groups.end(),
-        [&string](const openspace::globebrowsing::layers::Group& gi) {
+        openspace::layers::Groups.begin(),
+        openspace::layers::Groups.end(),
+        [&string](const openspace::layers::Group& gi) {
             return gi.identifier == string;
         }
     );
 
-    if (it != openspace::globebrowsing::layers::Groups.end()) {
+    if (it != openspace::layers::Groups.end()) {
         return it->id;
     }
     else {
@@ -245,34 +247,31 @@ constexpr openspace::globebrowsing::layers::Group::ID from_string(std::string_vi
 }
 
 template <>
-constexpr openspace::globebrowsing::layers::Adjustment::ID from_string(
-                                                                  std::string_view string)
-{
+constexpr openspace::layers::Adjustment::ID from_string(std::string_view string) {
     auto it = std::find_if(
-        openspace::globebrowsing::layers::Adjustments.begin(),
-        openspace::globebrowsing::layers::Adjustments.end(),
-        [&string](const openspace::globebrowsing::layers::Adjustment& ai) {
+        openspace::layers::Adjustments.begin(),
+        openspace::layers::Adjustments.end(),
+        [&string](const openspace::layers::Adjustment& ai) {
             return ai.identifier == string;
         }
     );
-    return it != openspace::globebrowsing::layers::Adjustments.end() ?
+    return it != openspace::layers::Adjustments.end() ?
         it->id :
-        openspace::globebrowsing::layers::Adjustment::ID::None;
+        openspace::layers::Adjustment::ID::None;
 }
 
 template <>
-constexpr openspace::globebrowsing::layers::Blend::ID from_string(std::string_view string)
-{
+constexpr openspace::layers::Blend::ID from_string(std::string_view string) {
     auto it = std::find_if(
-        openspace::globebrowsing::layers::Blends.begin(),
-        openspace::globebrowsing::layers::Blends.end(),
-        [&string](const openspace::globebrowsing::layers::Blend& bi) {
+        openspace::layers::Blends.begin(),
+        openspace::layers::Blends.end(),
+        [&string](const openspace::layers::Blend& bi) {
             return bi.identifier == string;
         }
     );
-    return it != openspace::globebrowsing::layers::Blends.end() ?
+    return it != openspace::layers::Blends.end() ?
         it->id :
-        openspace::globebrowsing::layers::Blend::ID::Normal;
+        openspace::layers::Blend::ID::Normal;
 }
 
 } // ghoul

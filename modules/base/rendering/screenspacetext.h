@@ -37,10 +37,10 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::StringProperty _text;
+    StringProperty _text;
 };
 
 } // namespace openspace

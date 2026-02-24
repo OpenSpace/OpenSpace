@@ -30,16 +30,17 @@
 #include <openspace/rendering/transferfunction.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/opengl/texture.h>
 #include <algorithm>
 #include <cmath>
 #include <string_view>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "SimpleTfBrickSelector";
 
-    bool compareSplitPoints(const openspace::BrickSelection& a,
-                            const openspace::BrickSelection& b)
-    {
+    bool compareSplitPoints(const BrickSelection& a, const BrickSelection& b) {
         return a.splitPoints < b.splitPoints;
     }
 } // namespace
@@ -364,6 +365,7 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
             return false;
         }
 
+        _transferFunction->texture().downloadTexture();
         float dotProduct = 0;
         for (size_t i = 0; i < _transferFunction->width(); i++) {
             float x = static_cast<float>(i) / static_cast<float>(tfWidth);
@@ -372,6 +374,7 @@ bool SimpleTfBrickSelector::calculateBrickImportances() {
             ghoul_assert(sample >= 0, "@MISSING");
             dotProduct += sample * _transferFunction->sample(i).w;
         }
+        _transferFunction->texture().clearDownloadedTexture();
         _brickImportances[brickIndex] = dotProduct;
     }
 

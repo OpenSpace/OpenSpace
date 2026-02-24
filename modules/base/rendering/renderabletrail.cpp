@@ -44,21 +44,14 @@
 #include <optional>
 
 namespace {
-#ifdef __APPLE__
-    constexpr std::array<const char*, 16> UniformNames = {
-        "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
-        "lineLength", "lineFadeAmount", "vertexSortingMethod", "idOffset", "nVertices",
-        "stride", "pointSize", "renderPhase", "useSplitRenderMode", "floatingOffset",
-        "numberOfUniqueVertices"
-    };
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
+    using namespace openspace;
+
     constexpr std::array<const char*, 18> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineLength", "lineFadeAmount", "vertexSortingMethod", "idOffset", "nVertices",
         "stride", "pointSize", "renderPhase", "viewport", "lineWidth", "floatingOffset",
         "useSplitRenderMode", "numberOfUniqueVertices"
     };
-#endif // __APPLE__
 
     // The possible values for the _renderingModes property
     enum RenderingMode {
@@ -75,33 +68,33 @@ namespace {
         { "Points+Lines", RenderingModeLinesPoints }
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+    constexpr Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "This value determines the RGB main color for the lines and points of the trail.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableFadeInfo = {
+    constexpr Property::PropertyInfo EnableFadeInfo = {
         "EnableFade",
         "Enable line fading of old points",
         "Toggles whether the trail should fade older points out. If this value is "
         "true, the 'Fade' parameter determines the speed of fading. If this value is "
         "false, the entire trail is rendered at full opacity and color.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineLengthInfo = {
+    constexpr Property::PropertyInfo LineLengthInfo = {
         "LineLength",
         "Line length",
         "The extent of the rendered trail. A value of 0 will result in no trail and a "
         "value of 1 will result in a trail that covers the entire extent. The setting "
         "only applies if 'EnableFade' is true. If it is false, this setting has "
         "no effect.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineFadeAmountInfo = {
+    constexpr Property::PropertyInfo LineFadeAmountInfo = {
         "LineFadeAmount",
         "Line fade amount",
         "The amount of the trail that should be faded. If the value is 0 then the "
@@ -112,34 +105,34 @@ namespace {
         "will result in a trail that starts fading immediately, becoming fully "
         "transparent by the end of the trail. This setting only applies if the "
         "'EnableFade' value is true. If it is false, this setting has no effect.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "Specifies the line width of the trail lines, if the selected rendering method "
         "includes lines. If the rendering mode is Points, this value is ignored.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
+    constexpr Property::PropertyInfo PointSizeInfo = {
         "PointSize",
         "Point size",
         "Specifies the base size of the points along the line, if the selected rendering "
         "method includes points. If the rendering mode is Lines, this value is ignored. "
         "If a subsampling of the values is performed, the subsampled values are half "
         "this size.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
+    constexpr Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering mode",
         "Determines how the trail should be rendered. If 'Lines' is selected, only the "
         "line part is visible, if 'Points' is selected, only the corresponding points "
         "(and subpoints) are shown. 'Lines+Points' shows both parts.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
@@ -174,17 +167,17 @@ namespace {
         // [[codegen::verbatim(RenderingModeInfo.description)]]
         std::optional<RenderingMode> renderingMode [[codegen::key("Rendering")]];
     };
-#include "renderabletrail_codegen.cpp"
 } // namespace
+#include "renderabletrail_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableTrail::Documentation() {
+Documentation RenderableTrail::Documentation() {
     return codegen::doc<Parameters>("base_renderable_renderabletrail");
 }
 
 RenderableTrail::Appearance::Appearance()
-    : properties::PropertyOwner({
+    : PropertyOwner({
         "Appearance",
         "Appearance",
         "The appearance of the trail"
@@ -203,7 +196,7 @@ RenderableTrail::Appearance::Appearance()
         { RenderingModeLinesPoints, "Lines+Points" }
     });
 
-    lineColor.setViewOption(properties::Property::ViewOptions::Color);
+    lineColor.setViewOption(Property::ViewOptions::Color);
     addProperty(lineColor);
     addProperty(lineWidth);
     addProperty(pointSize);
@@ -259,18 +252,6 @@ void RenderableTrail::initialize() {
 void RenderableTrail::initializeGL() {
     ZoneScoped;
 
-#ifdef __APPLE__
-    _programObject = BaseModule::ProgramObjectManager.request(
-        "EphemerisProgram",
-        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-            return global::renderEngine->buildRenderProgram(
-                "EphemerisProgram",
-                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_vs.glsl"),
-                absPath("${MODULE_BASE}/shaders/renderabletrail_apple_fs.glsl")
-            );
-        }
-    );
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
     _programObject = BaseModule::ProgramObjectManager.request(
         "EphemerisProgram",
         []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
@@ -281,7 +262,6 @@ void RenderableTrail::initializeGL() {
             );
         }
     );
-#endif // __APPLE__
 
     ghoul::opengl::updateUniformLocations(*_programObject, _uniformCache, UniformNames);
 }
@@ -353,7 +333,6 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
     _programObject->setUniform(_uniformCache.numberOfUniqueVertices,
         numberOfUniqueVertices);
 
-#ifndef __APPLE__
     std::array<GLint, 4> viewport;
     global::renderEngine->openglStateCache().viewport(viewport.data());
     _programObject->setUniform(
@@ -367,7 +346,6 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         _uniformCache.lineWidth,
         std::ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f))
     );
-#endif // __APPLE__
 
     if (renderPoints) {
         // The stride parameter determines the distance between larger points and
@@ -382,13 +360,13 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         RenderPhasePoints
     };
 
-    glBindVertexArray(info._vaoID);
+    glBindVertexArray(info._vao);
     if (renderLines) {
         _programObject->setUniform(_uniformCache.renderPhase, RenderPhaseLines);
         // Subclasses of this renderer might be using the index array or might now be
         // so we check if there is data available and if there isn't, we use the
         // glDrawArrays draw call; otherwise the glDrawElements
-        if (info._iBufferID == 0) {
+        if (info._ibo == 0) {
             glDrawArrays(
                 GL_LINE_STRIP,
                 info.first,
@@ -409,7 +387,7 @@ void RenderableTrail::internalRender(bool renderLines, bool renderPoints,
         // so we check if there is data available and if there isn't, we use the
         // glDrawArrays draw call; otherwise the glDrawElements
         _programObject->setUniform(_uniformCache.renderPhase, RenderPhasePoints);
-        if (info._iBufferID == 0) {
+        if (info._ibo == 0) {
             glDrawArrays(GL_POINTS, info.first, info.count);
         }
         else {
@@ -460,11 +438,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
                               (_appearance.renderingModes == RenderingModeLinesPoints);
 
     if (renderLines) {
-#ifdef __APPLE__
-        glLineWidth(1);
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
         glLineWidth(std::ceil((2.f * 1.f + _appearance.lineWidth) * std::sqrt(2.f)));
-#endif // __APPLE__
     }
     if (renderPoints) {
         glEnable(GL_PROGRAM_POINT_SIZE);
@@ -476,7 +450,7 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
 
     // The primary information might use an index buffer, so we might need to start at an
     // offset
-    const int primaryOffset = (_primaryRenderInformation._iBufferID == 0) ?
+    const int primaryOffset = (_primaryRenderInformation._ibo == 0) ?
         0 :
         _primaryRenderInformation.first;
 
@@ -552,8 +526,8 @@ void RenderableTrail::render(const RenderData& data, RendererTasks&) {
         );
 
         // The secondary batch is optional. We need to check whether we have any data
-        if (_floatingRenderInformation._vaoID != 0 &&
-            _floatingRenderInformation.count != 0) {
+        if (_floatingRenderInformation._vao != 0 && _floatingRenderInformation.count != 0)
+        {
             internalRender(
                 renderLines,
                 renderPoints,

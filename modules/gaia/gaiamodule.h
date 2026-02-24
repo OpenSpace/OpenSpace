@@ -36,8 +36,8 @@ public:
     GaiaModule();
     ~GaiaModule() override = default;
 
-    std::vector<documentation::Documentation> documentations() const override;
-    scripting::LuaLibrary luaLibrary() const override;
+    std::vector<openspace::Documentation> documentations() const override;
+    LuaLibrary luaLibrary() const override;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;

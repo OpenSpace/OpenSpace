@@ -1,4 +1,5 @@
 local coreKernels = asset.require("spice/core")
+local plutoKernels = asset.require("scene/solarsystem/dwarf_planets/pluto/kernels")
 
 
 
@@ -49,8 +50,8 @@ local PlutoKernels = {
 local ID = {
   NewHorizons = "NEW HORIZONS",
   Rex = "NH_REX",
-  PlutoBarycenter = coreKernels.ID.PlutoBarycenter,
-  Pluto = coreKernels.ID.Pluto,
+  PlutoBarycenter = plutoKernels.ID.PlutoBarycenter,
+  Pluto = plutoKernels.ID.Pluto,
   Charon = "CHARON",
   Nix = "NIX",
   Hydra = "HYDRA",

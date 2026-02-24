@@ -85,7 +85,7 @@ std::vector<std::string> DataProcessorText::readMetadata(const std::string& data
 }
 
 void DataProcessorText::addDataValues(const std::string& data,
-                                      properties::SelectionProperty& dataOptions)
+                                      SelectionProperty& dataOptions)
 {
     int numOptions = static_cast<int>(dataOptions.options().size());
     initializeVectors(numOptions);
@@ -143,8 +143,8 @@ void DataProcessorText::addDataValues(const std::string& data,
 }
 
 std::vector<float*> DataProcessorText::processData(const std::string& data,
-                                                   properties::SelectionProperty& options,
-                                                                 glm::size3_t& dimensions)
+                                                   SelectionProperty& options,
+                                                   glm::size3_t& dimensions)
 {
     // The update of the selection properties broke this and we don't have the data to
     // actually test whether this update works. So if you are getting a crash around here
@@ -210,4 +210,4 @@ std::vector<float*> DataProcessorText::processData(const std::string& data,
 //#endif
 }
 
-} //namespace openspace
+} // namespace openspace

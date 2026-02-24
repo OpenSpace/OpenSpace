@@ -44,7 +44,7 @@ namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsModule";
 } // namespace
 
-namespace openspace::exoplanets {
+namespace openspace {
 
 bool isValidPosition(const glm::vec3& pos) {
     return !glm::any(glm::isnan(pos));
@@ -181,4 +181,4 @@ void updateStarDataFromNewPlanet(StarData& starData, const ExoplanetDataEntry& p
     }
 }
 
-} // namespace openspace::exoplanets
+} // namespace openspace

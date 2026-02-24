@@ -26,7 +26,7 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 DMat4Property::DMat4Property(Property::PropertyInfo info, glm::dmat4x4 value,
                              glm::dmat4x4 minValue, glm::dmat4x4 maxValue,
@@ -60,4 +60,4 @@ std::string DMat4Property::stringValue() const {
     return formatJson(_value);
 }
 
-}  // namespace openspace::properties
+} // namespace openspace

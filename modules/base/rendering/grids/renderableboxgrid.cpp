@@ -37,25 +37,27 @@
 #include <memory>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color used for the grid lines.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Grid size",
         "The size of each dimension of the box, in meters.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // A RenderableBoxGrid creates a 3D box that is rendered using grid lines.
@@ -72,12 +74,12 @@ namespace {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<glm::vec3> size;
     };
-#include "renderableboxgrid_codegen.cpp"
 } // namespace
+#include "renderableboxgrid_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableBoxGrid::Documentation() {
+Documentation RenderableBoxGrid::Documentation() {
     return codegen::doc<Parameters>("base_renderable_boxgrid");
 }
 
@@ -92,7 +94,7 @@ RenderableBoxGrid::RenderableBoxGrid(const ghoul::Dictionary& dictionary)
     addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
-    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color.setViewOption(Property::ViewOptions::Color);
     addProperty(_color);
 
     _lineWidth = p.lineWidth.value_or(_lineWidth);
@@ -119,21 +121,20 @@ void RenderableBoxGrid::initializeGL() {
         }
     );
 
-    glGenVertexArrays(1, &_vaoID);
-    glGenBuffers(1, &_vBufferID);
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, 16 * sizeof(Vertex), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 }
 
 void RenderableBoxGrid::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vaoID);
-    _vaoID = 0;
-
-    glDeleteBuffers(1, &_vBufferID);
-    _vBufferID = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
@@ -150,24 +151,20 @@ void RenderableBoxGrid::render(const RenderData& data, RendererTasks&) {
     auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
         calcAllTransforms(data);
 
-    _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform("MVPTransform", modelViewProjectionTransform);
+    _gridProgram->setUniform("modelView", modelViewTransform);
+    _gridProgram->setUniform("modelViewProjection", modelViewProjectionTransform);
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
     // Change GL state:
-#ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
-    glLineWidth(1.f);
-#endif // __APPLE__
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnablei(GL_BLEND, 0);
     glEnable(GL_LINE_SMOOTH);
     glDepthMask(false);
 
-    glBindVertexArray(_vaoID);
-    glDrawArrays(_mode, 0, static_cast<GLsizei>(_varray.size()));
+    glBindVertexArray(_vao);
+    glDrawArrays(_mode, 0, 16);
     glBindVertexArray(0);
 
     _gridProgram->deactivate();
@@ -182,6 +179,7 @@ void RenderableBoxGrid::update(const UpdateData&) {
     if (_gridIsDirty) [[unlikely]] {
         const glm::vec3 llf = -_size.value() / 2.f;
         const glm::vec3 urb =  _size.value() / 2.f;
+        setBoundingSphere(glm::length(glm::dvec3(urb)));
 
         //     7
         //      --------------------  6
@@ -212,40 +210,25 @@ void RenderableBoxGrid::update(const UpdateData&) {
         const glm::vec3 v6 = glm::vec3(urb.x, urb.y, urb.z);
         const glm::vec3 v7 = glm::vec3(llf.x, urb.y, urb.z);
 
-        _varray.clear();
-        _varray.reserve(16);
-
-        // First add the bounds
-        _varray.push_back({ v0.x, v0.y, v0.z });
-        _varray.push_back({ v1.x, v1.y, v1.z });
-        _varray.push_back({ v2.x, v2.y, v2.z });
-        _varray.push_back({ v3.x, v3.y, v3.z });
-        _varray.push_back({ v0.x, v0.y, v0.z });
-        _varray.push_back({ v4.x, v4.y, v4.z });
-        _varray.push_back({ v5.x, v5.y, v5.z });
-        _varray.push_back({ v6.x, v6.y, v6.z });
-        _varray.push_back({ v7.x, v7.y, v7.z });
-        _varray.push_back({ v4.x, v4.y, v4.z });
-        _varray.push_back({ v5.x, v5.y, v5.z });
-        _varray.push_back({ v1.x, v1.y, v1.z });
-        _varray.push_back({ v2.x, v2.y, v2.z });
-        _varray.push_back({ v6.x, v6.y, v6.z });
-        _varray.push_back({ v7.x, v7.y, v7.z });
-        _varray.push_back({ v3.x, v3.y, v3.z });
-
-        setBoundingSphere(glm::length(glm::dvec3(urb)));
-
-        glBindVertexArray(_vaoID);
-        glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-        glBufferData(
-            GL_ARRAY_BUFFER,
-            _varray.size() * sizeof(Vertex),
-            _varray.data(),
-            GL_STATIC_DRAW
-        );
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), nullptr);
-        glBindVertexArray(0);
+        std::array<Vertex, 16> arr = {
+            Vertex{ v0.x, v0.y, v0.z },
+            Vertex{ v1.x, v1.y, v1.z },
+            Vertex{ v2.x, v2.y, v2.z },
+            Vertex{ v3.x, v3.y, v3.z },
+            Vertex{ v0.x, v0.y, v0.z },
+            Vertex{ v4.x, v4.y, v4.z },
+            Vertex{ v5.x, v5.y, v5.z },
+            Vertex{ v6.x, v6.y, v6.z },
+            Vertex{ v7.x, v7.y, v7.z },
+            Vertex{ v4.x, v4.y, v4.z },
+            Vertex{ v5.x, v5.y, v5.z },
+            Vertex{ v1.x, v1.y, v1.z },
+            Vertex{ v2.x, v2.y, v2.z },
+            Vertex{ v6.x, v6.y, v6.z },
+            Vertex{ v7.x, v7.y, v7.z },
+            Vertex{ v3.x, v3.y, v3.z }
+        };
+        glNamedBufferSubData(_vbo, 0, arr.size() * sizeof(Vertex), arr.data());
 
         _gridIsDirty = false;
     }

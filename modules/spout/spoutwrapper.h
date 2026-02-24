@@ -42,9 +42,10 @@ namespace ghoul {
     namespace opengl { class Texture; }
     class Dictionary;
 } // namespace ghoul
-namespace openspace::documentation { struct Documentation; }
 
-namespace openspace::spout {
+namespace openspace {
+
+struct Documentation;
 
 // @TODO(abock, 2022-03-02)  This class should probably be outsourced into a stand-alone
 //                           library that the SGCT version of this class then can also use
@@ -58,16 +59,8 @@ public:
     void saveGLState();
     void restoreGLState();
 
-    void saveGLTextureState();
-    void restoreGLTextureState();
-
 protected:
-    unsigned int _defaultTexture;
-    unsigned int _defaultFBO;
-    unsigned int _defaultReadFBO;
-    unsigned int _defaultDrawFBO;
-    unsigned int _defaultReadBuffer;
-    unsigned int _defaultDrawBuffer[1] = { 0 };
+    unsigned int _defaultFBO = 0;
 
     SPOUTHANDLE _spoutHandle = nullptr;
 
@@ -119,23 +112,23 @@ private:
 
 class SpoutReceiverPropertyProxy : public SpoutReceiver {
 public:
-    static const properties::Property::PropertyInfo& NameInfoProperty();
-    static const properties::Property::PropertyInfo& SelectionInfoProperty();
-    static const properties::Property::PropertyInfo& UpdateInfoProperty();
+    static const Property::PropertyInfo& NameInfoProperty();
+    static const Property::PropertyInfo& SelectionInfoProperty();
+    static const Property::PropertyInfo& UpdateInfoProperty();
 
-    SpoutReceiverPropertyProxy(properties::PropertyOwner& owner,
+    SpoutReceiverPropertyProxy(PropertyOwner& owner,
         const ghoul::Dictionary& dictionary);
     virtual ~SpoutReceiverPropertyProxy();
 
     bool updateReceiver() override;
     void releaseReceiver() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::StringProperty _spoutName;
-    properties::OptionProperty _spoutSelection;
-    properties::TriggerProperty _updateSelection;
+    StringProperty _spoutName;
+    OptionProperty _spoutSelection;
+    TriggerProperty _updateSelection;
 
     bool _isSpoutDirty = true;
     bool _isSelectAny = false;
@@ -179,23 +172,23 @@ private:
 
 class SpoutSenderPropertyProxy : public SpoutSender {
 public:
-    static const properties::Property::PropertyInfo& NameInfoProperty();
+    static const Property::PropertyInfo& NameInfoProperty();
 
-    SpoutSenderPropertyProxy(properties::PropertyOwner& owner,
+    SpoutSenderPropertyProxy(PropertyOwner& owner,
         const ghoul::Dictionary& dictionary);
     virtual ~SpoutSenderPropertyProxy();
 
     bool updateSender(unsigned int texture, unsigned int textureType) override;
     void releaseSender() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::StringProperty _spoutName;
+    StringProperty _spoutName;
 
     bool _isSpoutDirty = true;
 };
 
-} // namespace openspace::spout
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPOUT___SPOUTWRAPPER___H__

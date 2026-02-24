@@ -39,19 +39,21 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo DisplayFormatInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo DisplayFormatInfo = {
         "DisplayFormat",
         "Display format",
         "Choosing the format in which the camera location is displayed.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SignificantDigitsInfo = {
+    constexpr Property::PropertyInfo SignificantDigitsInfo = {
         "SignificantDigits",
         "Significant digits",
         "Determines the number of significant digits that are shown in the location "
         "text.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `DashboardItem` shows the longitude/latitude location of the camera and its
@@ -72,12 +74,12 @@ namespace {
         // [[codegen::verbatim(SignificantDigitsInfo.description)]]
         std::optional<int> significantDigits;
     };
-#include "dashboarditemglobelocation_codegen.cpp"
 } // namespace
+#include "dashboarditemglobelocation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemGlobeLocation::Documentation() {
+Documentation DashboardItemGlobeLocation::Documentation() {
     return codegen::doc<Parameters>(
         "globebrowsing_dashboarditem_globelocation",
         DashboardTextItem::Documentation()

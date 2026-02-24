@@ -40,11 +40,11 @@
 #include <limits>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableInterpolatedPoints";
 
     void triggerInterpolation(std::string_view identifier, float v, float d) {
-        using namespace openspace;
-
         std::string script = std::format(
             "openspace.setPropertyValueSingle(\"{}\", {}, {})",
             identifier, v, d
@@ -53,90 +53,90 @@ namespace {
         // based on an already synced script)
         global::scriptEngine->queueScript({
             .code = script,
-            .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
-            .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+            .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
+            .sendToRemote = ScriptEngine::Script::ShouldSendToRemote::No
         });
     }
 
-    constexpr openspace::properties::Property::PropertyInfo InterpolationValueInfo = {
+    constexpr Property::PropertyInfo InterpolationValueInfo = {
         "Value",
         "Value",
         "The value used for interpolation. The max value is set from the number of "
         "steps in the dataset, so a step of one corresponds to one step in the dataset "
         "and values in-between will be determined using interpolation.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StepsInfo = {
+    constexpr Property::PropertyInfo StepsInfo = {
         "NumberOfSteps",
         "Number of steps",
         "The number of steps available in the dataset, including the initial positions.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo JumpToNextInfo = {
+    constexpr Property::PropertyInfo JumpToNextInfo = {
         "JumpToNext",
         "Jump to next",
         "Immediately set the interpolation value to correspond to the next set of point "
         "positions compared to the current.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo JumpToPrevInfo = {
+    constexpr Property::PropertyInfo JumpToPrevInfo = {
         "JumpToPrevious",
         "Jump to previous",
         "Immediately set the interpolation value to correspond to the previous set of "
         "point positions compared to the current.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InterpolateToNextInfo = {
+    constexpr Property::PropertyInfo InterpolateToNextInfo = {
         "InterpolateToNext",
         "Interpolate to next",
         "Trigger an interpolation to the next set of point positions. The duration of "
         "the interpolation is set based on the Interpolaton Speed property.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InterpolateToPrevInfo = {
+    constexpr Property::PropertyInfo InterpolateToPrevInfo = {
         "InterpolateToPrevious",
         "Interpolate to previous",
         "Trigger an interpolation to the previous set of point positions. The duration "
         "of the interpolation is set based on the Interpolaton Speed property.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InterpolateToEndInfo = {
+    constexpr Property::PropertyInfo InterpolateToEndInfo = {
         "InterpolateToEnd",
         "Interpolate to end",
         "Trigger an interpolation all the way to the final set of positions. The "
         "duration of the interpolation is set based on the Interpolaton Speed property.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InterpolateToStartInfo = {
+    constexpr Property::PropertyInfo InterpolateToStartInfo = {
         "InterpolateToStart",
         "Interpolate to start",
         "Trigger an inverted interpolation to the initial set of positions. The duration "
         "of the interpolation is set based on the Interpolaton Speed property.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InterpolationSpeedInfo = {
+    constexpr Property::PropertyInfo InterpolationSpeedInfo = {
         "Speed",
         "Interpolation speed",
         "Affects how long the interpolation takes when triggered using one of the "
         "trigger properties. A value of 1 means that a step takes 1 second.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseSplineInfo = {
+    constexpr Property::PropertyInfo UseSplineInfo = {
         "UseSplineInterpolation",
         "Use spline interpolation",
         "If true, the points will be interpolated using a Catmull-Rom spline instead of "
         "linearly. This leads to a smoother transition at the breakpoints, i.e. between "
         "each step.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // RenderableInterpolatedPoints is a version of the RenderablePointCloud class, where
@@ -170,13 +170,12 @@ namespace {
         // Initial settings for the interpolation.
         std::optional<Interpolation> interpolation;
     };
-
+} // namespace
 #include "renderableinterpolatedpoints_codegen.cpp"
-}  // namespace
 
 namespace openspace {
 
-documentation::Documentation RenderableInterpolatedPoints::Documentation() {
+Documentation RenderableInterpolatedPoints::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderableinterpolatedpoints",
         RenderablePointCloud::Documentation()
@@ -184,7 +183,7 @@ documentation::Documentation RenderableInterpolatedPoints::Documentation() {
 }
 
 RenderableInterpolatedPoints::Interpolation::Interpolation()
-    : properties::PropertyOwner({ "Interpolation", "Interpolation", "" })
+    : PropertyOwner({ "Interpolation", "Interpolation", "" })
     , value(InterpolationValueInfo, 0.f, 0.f, 1.f)
     , nSteps(StepsInfo, 1)
     , goToNextStep(JumpToNextInfo)
@@ -480,11 +479,11 @@ void RenderableInterpolatedPoints::addOrientationDataForPoint(unsigned int index
 
 void RenderableInterpolatedPoints::initializeBufferData() {
     if (_vao == 0) {
-        glGenVertexArrays(1, &_vao);
+        glCreateVertexArrays(1, &_vao);
         LDEBUG(std::format("Generating Vertex Array id '{}'", _vao));
     }
     if (_vbo == 0) {
-        glGenBuffers(1, &_vbo);
+        glCreateBuffers(1, &_vbo);
         LDEBUG(std::format("Generating Vertex Buffer Object id '{}'", _vbo));
     }
 
@@ -494,7 +493,7 @@ void RenderableInterpolatedPoints::initializeBufferData() {
     // Allocate the memory for the buffer (we will want to upload the data quite often)
     glBindVertexArray(_vao);
     glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, bufferSize, nullptr, GL_DYNAMIC_DRAW);
+    glNamedBufferData(_vbo, bufferSize, nullptr, GL_DYNAMIC_DRAW);
 
     int offset = 0;
 
@@ -502,8 +501,8 @@ void RenderableInterpolatedPoints::initializeBufferData() {
     offset = bufferVertexAttribute("in_position1", 3, attibsPerPoint, offset);
 
     if (useSplineInterpolation()) {
-        offset = bufferVertexAttribute("in_position_before", 3, attibsPerPoint, offset);
-        offset = bufferVertexAttribute("in_position_after", 3, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_positionBefore", 3, attibsPerPoint, offset);
+        offset = bufferVertexAttribute("in_positionAfter", 3, attibsPerPoint, offset);
     }
 
     if (hasColorData()) {
@@ -539,12 +538,7 @@ void RenderableInterpolatedPoints::updateBufferData() {
 
     // Regenerate data and update buffer
     std::vector<float> slice = createDataSlice();
-
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, slice.size() * sizeof(float), slice.data());
-
-    glBindVertexArray(0);
+    glNamedBufferSubData(_vbo, 0, slice.size() * sizeof(float), slice.data());
 
     _dataIsDirty = false;
 }

@@ -27,6 +27,7 @@
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <filesystem>
 
 namespace {
@@ -40,15 +41,15 @@ namespace {
     // Note that, unless playback is mapped to simulation time, the video must be started
     // manually via the user interface.
     struct [[codegen::Dictionary(ScreenSpaceVideo)]] Parameters {};
-#include "screenspacevideo_codegen.cpp"
 } // namespace
+#include "screenspacevideo_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceVideo::Documentation() {
-    documentation::Documentation doc = codegen::doc<Parameters>("video_screenspacevideo");
+Documentation ScreenSpaceVideo::Documentation() {
+    openspace::Documentation doc = codegen::doc<Parameters>("video_screenspacevideo");
 
-    documentation::Documentation vp = VideoPlayer::Documentation();
+    openspace::Documentation vp = VideoPlayer::Documentation();
     doc.entries.insert(doc.entries.end(), vp.entries.begin(), vp.entries.end());
 
     return doc;
@@ -103,8 +104,8 @@ void ScreenSpaceVideo::deinitializeGL() {
     ScreenSpaceRenderable::deinitializeGL();
 }
 
-void ScreenSpaceVideo::bindTexture() {
-    _videoPlayer.frameTexture()->bind();
+void ScreenSpaceVideo::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(*_videoPlayer.frameTexture());
 }
 
 } // namespace openspace

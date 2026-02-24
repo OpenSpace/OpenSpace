@@ -38,12 +38,12 @@ namespace {
         std::vector<ghoul::Dictionary> scales
             [[codegen::reference("core_transform_scale")]];
     };
-#include "multiscale_codegen.cpp"
 } // namespace
+#include "multiscale_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation MultiScale::Documentation() {
+Documentation MultiScale::Documentation() {
     return codegen::doc<Parameters>("base_transform_scale_multi");
 }
 

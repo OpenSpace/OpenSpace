@@ -36,7 +36,7 @@ namespace {
     constexpr std::string_view _loggerCat = "ReadFileJob";
 } // namespace
 
-namespace openspace::gaia {
+namespace openspace {
 
 ReadFileJob::ReadFileJob(std::filesystem::path filePath,
                          std::vector<std::string> allColumns, int firstRow, int lastRow,
@@ -81,8 +81,6 @@ void ReadFileJob::execute() {
     std::unordered_map<std::string, std::vector<float>>& tableContent = table->contents;
 
     // Default columns parameters.
-    //std::vector<float> l_longitude = std::move(tableContent[_allColumns[0]]);
-    //std::vector<float> b_latitude = std::move(tableContent[_allColumns[1]]);
     std::vector<float> ra = std::move(tableContent[_allColumns[0]]);
     std::vector<float> ra_err = std::move(tableContent[_allColumns[1]]);
     std::vector<float> dec = std::move(tableContent[_allColumns[2]]);
@@ -132,15 +130,6 @@ void ReadFileJob::execute() {
             //LINFO("Parallax: " + std::to_string(parallax[i]));
             radiusInKiloParsec = 1.f / parallax[i];
         }
-        /*// Convert to Galactic Coordinates from Galactic Lon & Lat.
-        // https://gea.esac.esa.int/archive/documentation/GDR2/Data_processing/
-        // chap_cu3ast/sec_cu3ast_intro/ssec_cu3ast_intro_tansforms.html#SSS1
-        values[idx++] = radiusInKiloParsec * cos(glm::radians(b_latitude[i])) *
-            cos(glm::radians(l_longitude[i])); // Pos X
-        values[idx++] = radiusInKiloParsec * cos(glm::radians(b_latitude[i])) *
-            sin(glm::radians(l_longitude[i])); // Pos Y
-        values[idx++] = radiusInKiloParsec * sin(glm::radians(b_latitude[i])); // Pos Z
-        */
 
         // Convert ICRS Equatorial Ra and Dec to Galactic latitude and longitude.
         const glm::mat3 aPrimG = glm::mat3(
@@ -161,13 +150,6 @@ void ReadFileJob::execute() {
         values[idx++] = radiusInKiloParsec * rGal.y; // Pos Y
         values[idx++] = radiusInKiloParsec * rGal.z; // Pos Z
 
-        /*if (abs(rGal.x - values[0]) > 1e-5 || abs(rGal.y - values[1]) > 1e-5 ||
-        abs(rGal.z - values[2]) > 1e-5) {
-        LINFO("rGal: " + std::to_string(rGal) +
-        " - LB: [" + std::to_string(values[0]) + ", " + std::to_string(values[1]) +
-        ", " + std::to_string(values[2]) + "]");
-        }*/
-
         // Store magnitude render value. (Set default to high mag = low brightness)
         values[idx++] = std::isnan(meanMagG[i]) ? 20.f : meanMagG[i]; // Mean G-band Mag
 
@@ -183,7 +165,7 @@ void ReadFileJob::execute() {
             pmdec[i] = 0.f;
         }
 
-        // Convert Proper Motion from ICRS [Ra,Dec] to Galactic Tanget Vector [l,b].
+        // Convert Proper Motion from ICRS [Ra,Dec] to Galactic Tanget Vector [l,b]
         const glm::vec3 uICRS = glm::vec3(
             -std::sin(glm::radians(ra[i])) * pmra[i] -
                 std::cos(glm::radians(ra[i])) * std::sin(glm::radians(dec[i])) * pmdec[i],
@@ -201,12 +183,12 @@ void ReadFileJob::execute() {
         // Calculate True Space Velocity [m/s] if we have the radial velocity
         if (!std::isnan(radial_vel[i])) {
             // Calculate Radial Velocity in the direction of the star.
-            // radial_vel is given in [km/s] -> convert to [m/s].
+            // radial_vel is given in [km/s] -> convert to [m/s]
             const float radVelX = 1000.f * radial_vel[i] * rGal.x;
             const float radVelY = 1000.f * radial_vel[i] * rGal.y;
             const float radVelZ = 1000.f * radial_vel[i] * rGal.z;
 
-            // Use Pythagoras theorem for the final Space Velocity [m/s].
+            // Use Pythagoras theorem for the final Space Velocity [m/s]
             values[idx++] = static_cast<float>(
                 std::sqrt(std::pow(radVelX, 2) + std::pow(tanVelX, 2)) // Vel X [U]
             );
@@ -217,7 +199,7 @@ void ReadFileJob::execute() {
                 std::sqrt(std::pow(radVelZ, 2) + std::pow(tanVelZ, 2)) // Vel Z [W]
             );
         }
-        // Otherwise use the vector [m/s] we got from proper motion.
+        // Otherwise use the vector [m/s] we got from proper motion
         else {
             radial_vel[i] = 0.f;
             values[idx++] = tanVelX; // Vel X [U]
@@ -225,7 +207,7 @@ void ReadFileJob::execute() {
             values[idx++] = tanVelZ; // Vel Z [W]
         }
 
-        // Store additional parameters to filter by.
+        // Store additional parameters to filter by
         values[idx++] = std::isnan(meanMagBp[i]) ? 20.f : meanMagBp[i];
         values[idx++] = std::isnan(meanMagRp[i]) ? 20.f : meanMagRp[i];
         values[idx++] = std::isnan(bp_g[i]) ? 0.f : bp_g[i];
@@ -243,7 +225,7 @@ void ReadFileJob::execute() {
         values[idx++] = radial_vel[i];
         values[idx++] = std::isnan(radial_vel_err[i]) ? 0.f : radial_vel_err[i];
 
-        // Read extra columns, if any. This will slow down the sorting tremendously!
+        // Read extra columns, if any. This will slow down the sorting tremendously
         for (size_t col = _nDefaultCols; col < nColumnsRead; col++) {
             std::vector<float> vecData = std::move(tableContent[_allColumns[col]]);
             values[idx++] = std::isnan(vecData[col]) ? 0.f : vecData[col];
@@ -268,4 +250,4 @@ std::vector<std::vector<float>> ReadFileJob::product() {
     return _octants;
 }
 
-} // namespace openspace::gaia
+} // namespace openspace

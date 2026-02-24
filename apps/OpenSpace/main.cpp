@@ -22,12 +22,6 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-// Explicitly including OpenGL for APPLE
-#ifdef __APPLE__
-#define GLFW_INCLUDE_NONE
-#include <OpenGL/gl3.h>
-#endif // __APPLE__
-
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/configuration.h>
 #include <openspace/engine/globals.h>
@@ -141,10 +135,10 @@ std::optional<std::string> taskToRun;
  */
 struct SpoutWindow {
     /// The left framebuffer (or main, if there is no stereo rendering)
-    openspace::spout::SpoutSender leftOrMain;
+    SpoutSender leftOrMain;
 
     /// The right framebuffer
-    openspace::spout::SpoutSender right;
+    SpoutSender right;
 
     /// The window ID of this windows
     size_t windowId = size_t(-1);
@@ -242,8 +236,6 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
 #endif // WIN32
 
 void checkJoystickStatus() {
-    using namespace interaction;
-
     for (int i = GLFW_JOYSTICK_1; i <= GLFW_JOYSTICK_LAST; i++) {
         ZoneScopedN("Joystick state");
 
@@ -335,8 +327,6 @@ void mainInitFunc(GLFWwindow*) {
     global::openSpaceEngine->initialize();
     LDEBUG("Initializing OpenSpace Engine finished");
 
-#ifndef __APPLE__
-    // Apparently: "Cocoa: Regular windows do not have icons on macOS"
     {
         const std::filesystem::path path = absPath("${DATA}/openspace-icon.png");
         int x = 0;
@@ -356,7 +346,6 @@ void mainInitFunc(GLFWwindow*) {
 
         stbi_image_free(icon.pixels);
     }
-#endif // __APPLE__
 
     currentWindow = Engine::instance().windows().front().get();
     currentViewport = currentWindow->viewports().front().get();
@@ -1385,19 +1374,19 @@ int main(int argc, char* argv[]) {
         if (commandlineArguments.propertyVisibility.has_value()) {
             if (commandlineArguments.propertyVisibility == "NoviceUser") {
                 global::configuration->propertyVisibility =
-                    properties::Property::Visibility::NoviceUser;
+                    Property::Visibility::NoviceUser;
             }
             else if (commandlineArguments.propertyVisibility == "User") {
                 global::configuration->propertyVisibility =
-                    properties::Property::Visibility::User;
+                    Property::Visibility::User;
             }
             else if (commandlineArguments.propertyVisibility == "AdvancedUser") {
                 global::configuration->propertyVisibility =
-                    properties::Property::Visibility::AdvancedUser;
+                    Property::Visibility::AdvancedUser;
             }
             else if (commandlineArguments.propertyVisibility == "Developer") {
                 global::configuration->propertyVisibility =
-                    properties::Property::Visibility::Developer;
+                    Property::Visibility::Developer;
             }
             else {
                 throw ghoul::RuntimeError(std::format(
@@ -1412,7 +1401,7 @@ int main(int argc, char* argv[]) {
 
         windowConfiguration = global::configuration->windowConfiguration;
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         LFATALC("main", "Loading of configuration file failed");
         logError(e);
         ghoul::deinitialize();
@@ -1448,22 +1437,10 @@ int main(int argc, char* argv[]) {
 
     global::openSpaceEngine->createUserDirectoriesIfNecessary();
 
-    // (abock, 2020-12-07)  For some reason on Apple the keyboard handler in CEF will call
-    // the Qt one even if the QApplication was destroyed, leading to invalid memory
-    // access.  The only way we could fix this for the release was to keep the
-    // QApplication object around until the end of the program.  Even though the Qt
-    // keyboard handler gets called, it doesn't do anything so everything still works.
-#ifdef __APPLE__
-    int qac = 0;
-    QApplication app(qac, nullptr);
-#endif // __APPLE__
-
     if (!global::configuration->bypassLauncher) {
 #ifdef OPENSPACE_HAS_LAUNCHER
-#ifndef __APPLE__
         int qac = 0;
         QApplication app(qac, nullptr);
-#endif // __APPLE__
 
         std::string pwd = std::filesystem::current_path().string();
         if (const size_t it = pwd.find_first_of("'\"[]");  it != std::string::npos) {
@@ -1566,7 +1543,7 @@ int main(int argc, char* argv[]) {
 
 
     {
-        openspace::Settings settings = loadSettings();
+        Settings settings = loadSettings();
 
         const std::filesystem::path profile = global::configuration->profile;
 
@@ -1613,10 +1590,6 @@ int main(int argc, char* argv[]) {
     Log::instance().setShowTime(false);
     Log::instance().setShowLogLevel(false);
     Log::instance().setLogCallback(mainLogCallback);
-
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_STENCIL_BITS, 8);
-#endif
 
     std::filesystem::path winConf =
         commandlineArguments.windowConfig.has_value() ?
@@ -1683,30 +1656,6 @@ int main(int argc, char* argv[]) {
         Engine::destroy();
         throw;
     }
-
-#ifdef __APPLE__
-    // Workaround for OpenGL bug that Apple introduced in 10.14 Mojave that prevents an
-    // OpenGL context to display anything until it is first moved or resized in dark
-    // mode. So we are going through all windows here and resize them a bit larger and
-    // then back to the desired resolution. Resizing the window to the same size doesn't
-    // work as GLFW probably has a check for setting the current values.
-    // This can be removed once the OpenGL bug is fixed.
-    // In order to check, comment out the following lines and start OpenSpace on a 10.14
-    // machine. If the loading screen shows up without doing anything to the window, it
-    // is fixed. With the bug, the rendering stays gray even well after the main render
-    // loop has started     -- 2018-10-28   abock
-    for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
-        GLFWwindow* w = window->windowHandle();
-        int x, y;
-        glfwGetWindowPos(w, &x, &y);
-        glfwSetWindowPos(w, x + 1, y + 1);
-        glfwSwapBuffers(w);
-        glfwPollEvents();
-        glfwSetWindowPos(w, x, y);
-        glfwSwapBuffers(w);
-        glfwPollEvents();
-    }
-#endif // __APPLE__
 
     LINFO("Starting rendering loop");
     Engine::instance().exec();

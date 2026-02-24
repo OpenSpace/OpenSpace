@@ -36,16 +36,16 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 struct UpdateData;
 
-class Scale : public properties::PropertyOwner {
+class Scale : public PropertyOwner {
 public:
     static ghoul::mm_unique_ptr<Scale> createFromDictionary(
         const ghoul::Dictionary& dictionary);
 
     explicit Scale(const ghoul::Dictionary& dictionary);
-    virtual ~Scale() override = default;
+    ~Scale() override = default;
 
     virtual void initialize();
 
@@ -53,7 +53,7 @@ public:
     glm::dvec3 scaleValue() const;
     virtual glm::dvec3 scaleValue(const UpdateData& data) const = 0;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     void requireUpdate();
@@ -65,6 +65,6 @@ private:
     glm::dvec3 _cachedScale = glm::dvec3(1.0);
 };
 
-}  // namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SCALE___H__

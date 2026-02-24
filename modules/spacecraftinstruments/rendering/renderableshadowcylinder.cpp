@@ -38,75 +38,77 @@
 #include <memory>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo NumberPointsInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo NumberPointsInfo = {
         "NumberOfPoints",
         "Points",
         "The number of control points used for constructing the shadow geometry. The "
         "higher this number, the more detailed the shadow is, but it will have a "
         "negative impact on the performance.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShadowLengthInfo = {
+    constexpr Property::PropertyInfo ShadowLengthInfo = {
         "ShadowLength",
         "Shadow length",
         "A factor that controls the length of the shadow that is cast by the target "
         "object. The total length of the shadow is equal to the distance from the "
         "target to the light source multiplied with this value.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShadowColorInfo = {
+    constexpr Property::PropertyInfo ShadowColorInfo = {
         "ShadowColor",
         "Shadow color",
         "The color used for the shadow cylinder.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TerminatorTypeInfo = {
+    constexpr Property::PropertyInfo TerminatorTypeInfo = {
         "TerminatorType",
         "Terminator type",
         "Determines the type of terminator to use for calculating the shadow eclipse.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LightSourceInfo = {
+    constexpr Property::PropertyInfo LightSourceInfo = {
         "LightSource",
         "Light source",
         "The SPICE name of the object that is used as the illuminator for computing the "
         "shadow cylinder.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ObserverInfo = {
+    constexpr Property::PropertyInfo ObserverInfo = {
         "Observer",
         "Observer",
         "The SPICE name of the object that is the observer.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BodyInfo = {
+    constexpr Property::PropertyInfo BodyInfo = {
         "Body",
         "Target body",
         "The SPICE name of target body that is used as the shadow caster.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BodyFrameInfo = {
+    constexpr Property::PropertyInfo BodyFrameInfo = {
         "BodyFrame",
         "Body frame",
         "The SPICE name of the reference frame in which the shadow cylinder is "
         "expressed.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AberrationInfo = {
+    constexpr Property::PropertyInfo AberrationInfo = {
         "Aberration",
         "Aberration",
         "The aberration method that is used for computing the shadow cylinder. The "
         "options are \"NONE\", \"LT\" (Light Time), \"LT + S\" (Light Time Stellar), "
         "\"CN\" (Converged Newtonian), and \"CN + S\" (Converged Newtonian Stellar).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This Renderable displays the shadow cylinder behind a planetary body. Given the
@@ -147,12 +149,12 @@ namespace {
         // [[codegen::verbatim(AberrationInfo.description)]]
         std::string aberration [[codegen::inlist("NONE", "LT", "LT+S", "CN", "CN+S")]];
     };
-#include "renderableshadowcylinder_codegen.cpp"
 } // namespace
+#include "renderableshadowcylinder_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableShadowCylinder::Documentation() {
+Documentation RenderableShadowCylinder::Documentation() {
     return codegen::doc<Parameters>("spacecraftinstruments_renderableshadowcylinder");
 }
 
@@ -179,7 +181,7 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
     addProperty(_shadowLength);
 
     _shadowColor = p.shadowColor.value_or(_shadowColor);
-    _shadowColor.setViewOption(properties::Property::ViewOptions::Color);
+    _shadowColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_shadowColor);
 
     _terminatorType.addOptions({
@@ -221,8 +223,13 @@ RenderableShadowCylinder::RenderableShadowCylinder(const ghoul::Dictionary& dict
 }
 
 void RenderableShadowCylinder::initializeGL() {
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
+    glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(CylinderVBOLayout));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
     _shader = SpacecraftInstrumentsModule::ProgramObjectManager.request(
         "ShadowCylinderProgram",
@@ -252,9 +259,7 @@ void RenderableShadowCylinder::deinitializeGL() {
     _shader = nullptr;
 
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
     glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
 }
 
 bool RenderableShadowCylinder::isReady() const {
@@ -277,7 +282,7 @@ void RenderableShadowCylinder::render(const RenderData& data, RendererTasks&) {
     _shader->setUniform(_uniformCache.opacity, opacity());
 
     glBindVertexArray(_vao);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(_vertices.size()));
+    glDrawArrays(GL_TRIANGLE_STRIP, 0, _count);
     glBindVertexArray(0);
 
     _shader->deactivate();
@@ -297,6 +302,7 @@ void RenderableShadowCylinder::update(const UpdateData& data) {
         _shader->rebuildFromFile();
         ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
     }
+
     createCylinder(data.time.j2000Seconds());
 }
 
@@ -339,34 +345,26 @@ void RenderableShadowCylinder::createCylinder(double time) {
     vecLightSource = glm::inverse(_stateMatrix) * vecLightSource;
 
     vecLightSource *= _shadowLength.value();
-    _vertices.clear();
+
+    std::vector<CylinderVBOLayout> vertices;
+    vertices.reserve(terminatorPoints.size() * 2 + 2);
 
     for (const glm::vec3& v : terminatorPoints) {
-        _vertices.push_back({ v[0], v[1], v[2], 0.f });
+        vertices.push_back({ v[0], v[1], v[2], 0.f });
         glm::vec3 f = v + glm::vec3(vecLightSource);
-        _vertices.push_back({ f[0], f[1], f[2], 0.f });
+        vertices.push_back({ f[0], f[1], f[2], 0.f });
     }
-    _vertices.push_back(_vertices[0]);
-    _vertices.push_back(_vertices[1]);
+    vertices.push_back(vertices[0]);
+    vertices.push_back(vertices[1]);
 
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _vertices.size() * sizeof(CylinderVBOLayout),
-        nullptr,
+    glNamedBufferData(
+        _vbo,
+        vertices.size() * sizeof(CylinderVBOLayout),
+        vertices.data(),
         GL_DYNAMIC_DRAW
     );
-    glBufferSubData(
-        GL_ARRAY_BUFFER,
-        0,
-        _vertices.size() * sizeof(CylinderVBOLayout),
-        _vertices.data()
-    );
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, nullptr);
-    glBindVertexArray(0);
+    _count = static_cast<GLsizei>(vertices.size());
 }
 
 } // namespace openspace

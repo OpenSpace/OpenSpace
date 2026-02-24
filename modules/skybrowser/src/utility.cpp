@@ -47,7 +47,7 @@ namespace {
     );
 } // namespace
 
-namespace openspace::skybrowser {
+namespace openspace {
 
 // Converts from spherical coordinates in the unit of degrees to cartesian coordianates
 glm::dvec3 sphericalToCartesian(const glm::dvec2& coords) {
@@ -234,4 +234,4 @@ double sizeFromFov(double fov, const glm::dvec3& worldPosition) {
     return opposite;
 }
 
-} // namespace openspace::skybrowser
+} // namespace openspace

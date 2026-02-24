@@ -41,7 +41,7 @@ public:
 
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     const int RENDER_VALUES = 8;

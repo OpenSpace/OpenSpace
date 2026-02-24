@@ -31,7 +31,7 @@
 
 namespace openspace {
 
-namespace properties { class Property; }
+class Property;
 
 class DashboardItemPropertyValue : public DashboardTextItem {
 public:
@@ -40,14 +40,14 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::Property* _property = nullptr;
+    Property* _property = nullptr;
     bool _propertyIsDirty = true;
 
-    properties::StringProperty _propertyUri;
-    properties::StringProperty _displayString;
+    StringProperty _propertyUri;
+    StringProperty _displayString;
 };
 
 } // namespace openspace

@@ -25,32 +25,32 @@
 #include "fragment.glsl"
 #include "floatoperations.glsl"
 
-in vec4 vs_position;
-in vec3 vs_color;
-in float vs_screenSpaceDepth;
-in float vs_starBrightness;
+in Data {
+  vec4 position;
+  vec3 color;
+  float screenSpaceDepth;
+  float starBrightness;
+} in_data;
 
 uniform float opacityCoefficient;
 
 
 Fragment getFragment() {
-  Fragment frag;
-
   float multipliedOpacityCoefficient = opacityCoefficient * opacityCoefficient;
-  vec3 extinction = exp(vec3(0.6, 0.2, 0.3) - vs_color);
+  vec3 extinction = exp(vec3(0.6, 0.2, 0.3) - in_data.color);
 
   // We use the star brightness as the alpha value here to dim the stars as the camera
   // moves further away.  Otherwise they would occlude the main milkway image even though
   // they themselves nolonger have any color contribution left
   vec4 fullColor = vec4(
-    vs_color * extinction * vs_starBrightness * multipliedOpacityCoefficient,
-    vs_starBrightness
+    in_data.color * extinction * in_data.starBrightness * multipliedOpacityCoefficient,
+    in_data.starBrightness
   );
+
+  Fragment frag;
   frag.color = fullColor;
-
-  frag.depth = vs_screenSpaceDepth;
-  frag.gPosition = vs_position;
+  frag.depth = in_data.screenSpaceDepth;
+  frag.gPosition = in_data.position;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-
   return frag;
 }

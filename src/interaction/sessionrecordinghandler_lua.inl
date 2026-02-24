@@ -30,6 +30,8 @@
 #include <string>
 #include <utility>
 
+using namespace openspace;
+
 namespace {
 
 /**
@@ -37,7 +39,7 @@ namespace {
  * the recorded keyframes are saved.
  */
 [[codegen::luawrap]] void startRecording() {
-    openspace::global::sessionRecordingHandler->startRecording();
+    global::sessionRecordingHandler->startRecording();
 }
 
 /**
@@ -56,8 +58,7 @@ namespace {
         throw ghoul::lua::LuaError(std::format("Invalid data mode {}", dataMode));
     }
 
-    using DataMode = openspace::interaction::DataMode;
-    openspace::global::sessionRecordingHandler->stopRecording(
+    global::sessionRecordingHandler->stopRecording(
         recordFilePath,
         dataMode == "Ascii" ? DataMode::Ascii : DataMode::Binary,
         overwrite.value_or(false)
@@ -76,8 +77,6 @@ namespace {
                                         bool shouldWaitForTiles = true,
                                         std::optional<int> screenshotFps = std::nullopt)
 {
-    using namespace openspace;
-
     if (file.empty()) {
         throw ghoul::lua::LuaError("Filepath string is empty");
     }
@@ -88,7 +87,7 @@ namespace {
         ));
     }
 
-    interaction::SessionRecording timeline = interaction::loadSessionRecording(file);
+    SessionRecording timeline = loadSessionRecording(file);
     global::sessionRecordingHandler->startPlayback(
         std::move(timeline),
         loop,
@@ -99,12 +98,12 @@ namespace {
 
 // Stops a playback session before playback of all keyframes is complete.
 [[codegen::luawrap]] void stopPlayback() {
-    openspace::global::sessionRecordingHandler->stopPlayback();
+    global::sessionRecordingHandler->stopPlayback();
 }
 
 // Pauses or resumes the playback progression through keyframes.
 [[codegen::luawrap]] void setPlaybackPause(bool pause) {
-    openspace::global::sessionRecordingHandler->setPlaybackPause(pause);
+    global::sessionRecordingHandler->setPlaybackPause(pause);
 }
 
 /**
@@ -112,22 +111,20 @@ namespace {
  * it afterwards.
  */
 [[codegen::luawrap]] void togglePlaybackPause() {
-    using namespace openspace;
-
     bool isPlaybackPaused = global::sessionRecordingHandler->isPlaybackPaused();
     global::sessionRecordingHandler->setPlaybackPause(!isPlaybackPaused);
 }
 
 // Returns true if session recording is currently playing back a recording.
 [[codegen::luawrap]] bool isPlayingBack() {
-    return openspace::global::sessionRecordingHandler->isPlayingBack();
+    return global::sessionRecordingHandler->isPlayingBack();
 }
 
 // Returns true if session recording is currently recording a recording.
 [[codegen::luawrap]] bool isRecording() {
-    return openspace::global::sessionRecordingHandler->isRecording();
+    return global::sessionRecordingHandler->isRecording();
 }
 
-#include "sessionrecordinghandler_lua_codegen.cpp"
-
 } // namespace
+
+#include "sessionrecordinghandler_lua_codegen.cpp"

@@ -48,16 +48,15 @@
 #define ENABLE_DIRECTMSG
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "win32_touch";
     HHOOK gTouchHook = nullptr;
     std::thread* gMouseHookThread = nullptr;
     HHOOK gMouseHook = nullptr;
     bool gStarted = false;
     std::chrono::microseconds gStartTime = std::chrono::microseconds(0);
-    std::unordered_map<
-        UINT32,
-        std::unique_ptr<openspace::TouchInputHolder>
-    > gTouchInputsMap;
+    std::unordered_map<UINT32, std::unique_ptr<TouchInputHolder>> gTouchInputsMap;
 
 #ifdef ENABLE_TUIOMESSAGES
     TUIO::TuioServer* gTuioServer = nullptr;

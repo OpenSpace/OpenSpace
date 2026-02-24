@@ -24,21 +24,21 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScalingMath.hglsl"
+#include "powerscaling/powerscalingmath.glsl"
 
-layout(location = 0) in vec4 vertPosition;
+layout(location = 0) in vec4 in_position;
 
-out vec3 modelPosition;
-out vec4 viewPosition;
+out Data {
+  vec3 modelPosition;
+  vec4 viewPosition;
+} out_data;
 
 uniform mat4 projectionTransform;
 uniform dmat4 modelViewTransform;
 
 
 void main() {
-  modelPosition = vertPosition.xyz;
-  dvec4 vp = modelViewTransform * vertPosition;
-  viewPosition = vec4(vp);
-
-  gl_Position = z_normalization(vec4(projectionTransform * viewPosition));
+  out_data.viewPosition = vec4(modelViewTransform * in_position);
+  out_data.modelPosition = in_position.xyz;
+  gl_Position = z_normalization(vec4(projectionTransform * out_data.viewPosition));
 }

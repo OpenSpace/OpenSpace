@@ -25,7 +25,7 @@
 #ifndef __OPENSPACE_MODULE_GAIA___GAIAOPTIONS___H__
 #define __OPENSPACE_MODULE_GAIA___GAIAOPTIONS___H__
 
-namespace openspace::gaia {
+namespace openspace {
 
 enum RenderMode {
     Static = 0,
@@ -49,6 +49,6 @@ enum ShaderOption {
     BillboardSSBONoFBO
 };
 
-} // namespace openspace::gaiamission
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GAIA___GAIAOPTIONS___H__

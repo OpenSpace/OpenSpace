@@ -29,21 +29,20 @@
 
 namespace openspace {
 
-namespace properties { class SelectionProperty; }
+class SelectionProperty;
 
 class DataProcessorText : public DataProcessor {
 public:
     DataProcessorText();
     virtual ~DataProcessorText();
 
-    virtual std::vector<std::string> readMetadata(const std::string& data,
+    std::vector<std::string> readMetadata(const std::string& data,
         glm::size3_t& dimensions) override;
 
-    virtual void addDataValues(const std::string& data,
-        properties::SelectionProperty& dataOptions) override;
+    void addDataValues(const std::string& data, SelectionProperty& dataOptions) override;
 
-    virtual std::vector<float*> processData(const std::string& data,
-        properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
+    std::vector<float*> processData(const std::string& data,
+        SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
 };
 
 } // namespace openspace

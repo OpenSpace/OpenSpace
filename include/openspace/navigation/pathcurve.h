@@ -30,7 +30,7 @@
 #include <string>
 #include <vector>
 
-namespace openspace::interaction {
+namespace openspace {
 
 class Waypoint;
 
@@ -117,6 +117,6 @@ public:
     glm::dvec3 interpolate(double u) const override;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___PATHCURVE___H__

@@ -39,7 +39,7 @@ public:
     explicit RenderableTextureCygnet(const ghoul::Dictionary& dictionary);
     ~RenderableTextureCygnet() = default;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     bool updateTexture() override;
@@ -50,6 +50,7 @@ protected:
 private:
     DownloadManager::MemoryFile _imageFile;
 };
-} //namespace openspace
+
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ISWA___RENDERABLETEXTURECYGNET___H__

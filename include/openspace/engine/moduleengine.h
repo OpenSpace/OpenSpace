@@ -37,8 +37,8 @@ namespace ghoul {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-namespace scripting { struct LuaLibrary; }
+struct Documentation;
+struct LuaLibrary;
 class OpenSpaceModule;
 
 /**
@@ -49,7 +49,7 @@ class OpenSpaceModule;
  * OpenSpaceModule%s can be registered with the #registerModule function, which will
  * internally call the OpenSpaceModule::initialize method.
  */
-class ModuleEngine : public properties::PropertyOwner {
+class ModuleEngine : public PropertyOwner {
 public:
     ModuleEngine();
 
@@ -120,16 +120,16 @@ public:
      * Returns the Lua library that contains all Lua functions available to affect the
      * modules.
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
     /**
      * Returns the list of all documentations for all modules.
      */
-    std::vector<documentation::Documentation> moduleDocumentations() const;
+    std::vector<Documentation> moduleDocumentations() const;
 
 private:
     /// The list of all names of all registered OpenSpaceModules
-    properties::StringListProperty _allModules;
+    StringListProperty _allModules;
 
     /// The list of all registered OpenSpaceModules
     std::vector<std::unique_ptr<OpenSpaceModule>> _modules;

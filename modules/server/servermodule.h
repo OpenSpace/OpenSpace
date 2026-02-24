@@ -49,7 +49,7 @@ public:
     using CallbackFunction = std::function<void()>;
 
     ServerModule();
-    virtual ~ServerModule() override;
+    ~ServerModule() override;
 
     ServerInterface* serverInterfaceByIdentifier(const std::string& identifier);
 
@@ -58,7 +58,7 @@ public:
     CallbackHandle addPreSyncCallback(CallbackFunction cb);
     void removePreSyncCallback(CallbackHandle handle);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     void internalInitialize(const ghoul::Dictionary& configuration) override;
@@ -85,7 +85,7 @@ private:
 
     std::vector<ConnectionData> _connections;
     std::vector<std::unique_ptr<ServerInterface>> _interfaces;
-    properties::PropertyOwner _interfaceOwner;
+    PropertyOwner _interfaceOwner;
     int _skyBrowserUpdateTime = 100;
 
     // Callbacks for tiggering topic

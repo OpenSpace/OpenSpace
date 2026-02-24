@@ -1,6 +1,7 @@
 asset.require("./trail")
 local transforms = asset.require("./transforms")
 local coreKernels = asset.require("spice/core")
+local uranusKernels = asset.require("./kernels")
 
 
 
@@ -10,7 +11,7 @@ local Uranus = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = coreKernels.ID.Uranus,
+      Target = uranusKernels.ID.Uranus,
       Observer = coreKernels.ID.UranusBarycenter
     },
     Rotation = {

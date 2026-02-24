@@ -58,6 +58,8 @@
 #include <variant>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableModel";
     constexpr std::string_view ProgramName = "ModelProgram";
 
@@ -77,131 +79,131 @@ namespace {
 
     constexpr glm::vec4 PosBufferClearVal = glm::vec4(1e32, 1e32, 1e32, 1.f);
 
-    constexpr openspace::properties::Property::PropertyInfo EnableAnimationInfo = {
+    constexpr Property::PropertyInfo EnableAnimationInfo = {
         "EnableAnimation",
         "Enable animation",
         "Enable or disable the animation for the model if it has any.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AmbientIntensityInfo = {
+    constexpr Property::PropertyInfo AmbientIntensityInfo = {
         "AmbientIntensity",
         "Ambient intensity",
         "A multiplier for ambient lighting.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DiffuseIntensityInfo = {
+    constexpr Property::PropertyInfo DiffuseIntensityInfo = {
         "DiffuseIntensity",
         "Diffuse intensity",
         "A multiplier for diffuse lighting.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SpecularIntensityInfo = {
+    constexpr Property::PropertyInfo SpecularIntensityInfo = {
         "SpecularIntensity",
         "Specular intensity",
         "A multiplier for specular lighting.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SpecularPowerInfo = {
+    constexpr Property::PropertyInfo SpecularPowerInfo = {
         "SpecularPower",
         "Specular Power",
         "Power factor for specular component, higher value gives narrower specularity",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShadingInfo = {
+    constexpr Property::PropertyInfo ShadingInfo = {
         "PerformShading",
         "Perform shading",
         "Determines whether shading should be applied to this model, based on the "
         "provided list of light sources. If false, the model will be fully illuminated.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableFaceCullingInfo = {
+    constexpr Property::PropertyInfo EnableFaceCullingInfo = {
         "EnableFaceCulling",
         "Enable face culling",
         "Enable OpenGL automatic face culling optimization.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ModelTransformInfo = {
+    constexpr Property::PropertyInfo ModelTransformInfo = {
         "ModelTransform",
         "Model transform",
         "An extra model transform matrix that is applied to the model before all other "
         "transformations are applied.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PivotInfo = {
+    constexpr Property::PropertyInfo PivotInfo = {
         "Pivot",
         "Pivot",
         "A vector that moves the place of origin for the model.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ModelScaleInfo = {
+    constexpr Property::PropertyInfo ModelScaleInfo = {
         "ModelScale",
         "Model scale",
         "The scale of the model. If a numeric value is provided in the asset file, the "
         "scale will be that exact value. If instead a unit name is provided, this is the "
         "value that that name represents. For example 'Centimeter' becomes 0.01.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RotationVecInfo = {
+    constexpr Property::PropertyInfo RotationVecInfo = {
         "RotationVector",
         "Rotation vector",
         "A rotation vector with Euler angles, specified in degrees.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LightSourcesInfo = {
+    constexpr Property::PropertyInfo LightSourcesInfo = {
         "LightSources",
         "Light sources",
         "A list of light sources that this model should accept light from.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableDepthTestInfo = {
+    constexpr Property::PropertyInfo EnableDepthTestInfo = {
         "EnableDepthTest",
         "Enable depth test",
         "If true, depth testing is enabled for the model. This means that parts of the "
         "model that are occluded by other parts will not be rendered. If disabled, the "
         "depth of the model part will not be taken into account in rendering and some "
         "parts that should be hidden behind a model might be rendered in front.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderWireframeInfo = {
+    constexpr Property::PropertyInfo RenderWireframeInfo = {
         "RenderWireframe",
         "Enable Wireframe Rendering",
         "Enable Wireframe rendering for the Model",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BlendingOptionInfo = {
+    constexpr Property::PropertyInfo BlendingOptionInfo = {
         "BlendingOption",
         "Blending options",
         "Controls the blending function used to calculate the colors of the model with "
         "respect to the opacity.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseOverrideColorInfo = {
+    constexpr Property::PropertyInfo UseOverrideColorInfo = {
         "UseOverrideColor",
         "Use Override Color",
         "Whether or not to render model with a single color.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo OverrideColorInfo = {
+    constexpr Property::PropertyInfo OverrideColorInfo = {
         "OverrideColor",
         "Override Color",
         "The single color to use for entire model (RGBA).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `Renderable` shows a three-dimensional model. The provided model may contain
@@ -311,15 +313,15 @@ namespace {
         // [[codegen::verbatim(OverrideColorInfo.description)]]
         std::optional<glm::vec4> overrideColor;
     };
-#include "renderablemodel_codegen.cpp"
 } // namespace
+#include "renderablemodel_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableModel::Documentation() {
-    documentation::Documentation docs = codegen::doc<Parameters>("base_renderable_model");
+Documentation RenderableModel::Documentation() {
+    openspace::Documentation docs = codegen::doc<Parameters>("base_renderable_model");
 
-    documentation::Documentation d = Shadower::Documentation();
+    openspace::Documentation d = Shadower::Documentation();
     docs.entries.insert(docs.entries.end(), d.entries.begin(), d.entries.end());
 
     return docs;
@@ -504,7 +506,7 @@ RenderableModel::RenderableModel(const ghoul::Dictionary& dictionary)
     addProperty(_pivot);
     addProperty(_rotationVec);
     addProperty(_useOverrideColor);
-    _overrideColor.setViewOption(properties::Property::ViewOptions::Color);
+    _overrideColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_overrideColor);
 
     addProperty(_modelScale);
@@ -689,9 +691,9 @@ void RenderableModel::initializeGL() {
         "ModelOpacityProgram",
         [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             const std::filesystem::path vs =
-                absPath("${MODULE_BASE}/shaders/modelOpacity_vs.glsl");
+                absPath("${MODULE_BASE}/shaders/modelopacity_vs.glsl");
             const std::filesystem::path fs =
-                absPath("${MODULE_BASE}/shaders/modelOpacity_fs.glsl");
+                absPath("${MODULE_BASE}/shaders/modelopacity_fs.glsl");
 
             return global::renderEngine->buildRenderProgram(
                 "ModelOpacityProgram",
@@ -703,75 +705,67 @@ void RenderableModel::initializeGL() {
     ghoul::opengl::updateUniformLocations(*_quadProgram, _uniformOpacityCache);
 
     // Screen quad VAO
-    constexpr std::array<GLfloat, 24> QuadVtx = {
-        // x     y     s     t
-        -1.f, -1.f,  0.f,  0.f,
-         1.f,  1.f,  1.f,  1.f,
-        -1.f,  1.f,  0.f,  1.f,
-        -1.f, -1.f,  0.f,  0.f,
-         1.f, -1.f,  1.f,  0.f,
-         1.f,  1.f,  1.f,  1.f
+    glCreateBuffers(1, &_vbo);
+    struct Vertex {
+        float x;
+        float y;
+        float s;
+        float t;
     };
+    constexpr std::array<Vertex, 6> QuadVtx = {
+        Vertex{ -1.f, -1.f,  0.f,  0.f },
+        Vertex{  1.f,  1.f,  1.f,  1.f },
+        Vertex{ -1.f,  1.f,  0.f,  1.f },
+        Vertex{ -1.f, -1.f,  0.f,  0.f },
+        Vertex{  1.f, -1.f,  1.f,  0.f },
+        Vertex{  1.f,  1.f,  1.f,  1.f }
+    };
+    glNamedBufferStorage(_vbo, sizeof(QuadVtx), QuadVtx.data(), GL_NONE_BIT);
 
-    glGenVertexArrays(1, &_quadVao);
-    glBindVertexArray(_quadVao);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
-    glGenBuffers(1, &_quadVbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _quadVbo);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
-    glBufferData(GL_ARRAY_BUFFER, sizeof(QuadVtx), QuadVtx.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        4 * sizeof(GLfloat),
-        reinterpret_cast<void*>(2 * sizeof(GLfloat))
-    );
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, s));
+    glVertexArrayAttribBinding(_vao, 1, 0);
 
     // Generate textures and the frame buffer
-    glGenFramebuffers(1, &_framebuffer);
+    glCreateFramebuffers(1, &_framebuffer);
+    glObjectLabel(GL_FRAMEBUFFER, _framebuffer, -1, "RenderableModel Framebuffer");
 
-    // Bind textures to the framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _framebuffer,
         GL_COLOR_ATTACHMENT0,
         global::renderEngine->renderer().additionalColorTexture1(),
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _framebuffer,
         GL_COLOR_ATTACHMENT1,
         global::renderEngine->renderer().additionalColorTexture2(),
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _framebuffer,
         GL_COLOR_ATTACHMENT2,
         global::renderEngine->renderer().additionalColorTexture3(),
         0
     );
-    glFramebufferTexture(
-        GL_FRAMEBUFFER,
+    glNamedFramebufferTexture(
+        _framebuffer,
         GL_DEPTH_ATTACHMENT,
         global::renderEngine->renderer().additionalDepthTexture(),
         0
     );
 
-    if (glbinding::Binding::ObjectLabel.isResolved()) {
-        glObjectLabel(GL_FRAMEBUFFER, _framebuffer, -1, "RenderableModel Framebuffer");
-    }
-
-    // Check status
-    const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+    const GLenum status = glCheckNamedFramebufferStatus(_framebuffer, GL_FRAMEBUFFER);
     if (status != GL_FRAMEBUFFER_COMPLETE) {
         LERROR("Framebuffer is not complete");
     }
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     // Initialize geometry
     _geometry->initialize();
@@ -802,8 +796,8 @@ void RenderableModel::deinitializeGL() {
 
     glDeleteFramebuffers(1, &_framebuffer);
 
-    glDeleteBuffers(1, &_quadVbo);
-    glDeleteVertexArrays(1, &_quadVao);
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 
     std::string program = std::string(ProgramName);
     if (!_vertexShaderPath.empty()) {
@@ -979,14 +973,12 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
     ghoul::opengl::TextureUnit shadowUnit;
     if (_castShadow && _lightSource) {
-        shadowmapping::ShadowInfo sm =
-            global::renderEngine->renderer().shadowInformation(_shadowGroup);
+        ShadowInfo sm = global::renderEngine->renderer().shadowInformation(_shadowGroup);
 
         _program->setUniform(_uniformCache.model, modelTransform);
         _program->setUniform(_uniformCache.light_vp, sm.viewProjectionMatrix);
 
-        shadowUnit.activate();
-        glBindTexture(GL_TEXTURE_2D, sm.depthMap.texture);
+        shadowUnit.bind(sm.depthMap.texture);
         _program->setUniform(_uniformCache.shadow_depth_map, shadowUnit);
     }
 
@@ -1021,18 +1013,17 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
     else {
         // Prepare framebuffer
         const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
-        glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
 
         // Re-bind first texture to use the currently not used Ping-Pong texture in the
         // FramebufferRenderer
-        glFramebufferTexture(
-            GL_FRAMEBUFFER,
+        glNamedFramebufferTexture(
+            _framebuffer,
             GL_COLOR_ATTACHMENT0,
             global::renderEngine->renderer().additionalColorTexture1(),
             0
         );
         // Check status
-        const GLenum status = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        const GLenum status = glCheckNamedFramebufferStatus(_framebuffer, GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             LERROR("Framebuffer is not complete");
         }
@@ -1042,10 +1033,18 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
            GL_COLOR_ATTACHMENT1,
            GL_COLOR_ATTACHMENT2,
         };
-        glDrawBuffers(3, ColorAttachmentArray.data());
+        glNamedFramebufferDrawBuffers(_framebuffer, 3, ColorAttachmentArray.data());
+
+        glBindFramebuffer(GL_FRAMEBUFFER, _framebuffer);
+
         glClearColor(0.f, 0.f, 0.f, 0.f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearBufferfv(GL_COLOR, 1, glm::value_ptr(PosBufferClearVal));
+        glClearNamedFramebufferfv(
+            _framebuffer,
+            GL_COLOR,
+            1,
+            glm::value_ptr(PosBufferClearVal)
+        );
 
         // Use a manuel depth test to make the models aware of the rest of the scene
         _program->setUniform(_uniformCache.performManualDepthTest, _enableDepthTest);
@@ -1053,9 +1052,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         // Bind the G-buffer depth texture for a manual depth test towards the rest
         // of the scene
         ghoul::opengl::TextureUnit gBufferDepthTextureUnit;
-        gBufferDepthTextureUnit.activate();
-        glBindTexture(
-            GL_TEXTURE_2D,
+        gBufferDepthTextureUnit.bind(
             global::renderEngine->renderer().gBufferDepthTexture()
         );
         _program->setUniform(_uniformCache.gBufferDepthTexture, gBufferDepthTextureUnit);
@@ -1098,19 +1095,11 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
         // Bind textures
         ghoul::opengl::TextureUnit colorTextureUnit;
-        colorTextureUnit.activate();
-        glBindTexture(
-            GL_TEXTURE_2D,
-            global::renderEngine->renderer().additionalColorTexture1()
-        );
+        colorTextureUnit.bind(global::renderEngine->renderer().additionalColorTexture1());
         _quadProgram->setUniform(_uniformOpacityCache.colorTexture, colorTextureUnit);
 
         ghoul::opengl::TextureUnit depthTextureUnit;
-        depthTextureUnit.activate();
-        glBindTexture(
-            GL_TEXTURE_2D,
-            global::renderEngine->renderer().additionalDepthTexture()
-        );
+        depthTextureUnit.bind(global::renderEngine->renderer().additionalDepthTexture());
         _quadProgram->setUniform(_uniformOpacityCache.depthTexture, depthTextureUnit);
 
         // Will also need the resolution and viewport to get a texture coordinate
@@ -1131,7 +1120,7 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
         );
 
         // Draw
-        glBindVertexArray(_quadVao);
+        glBindVertexArray(_vao);
         glDrawArrays(GL_TRIANGLES, 0, 6);
         _quadProgram->deactivate();
     }
@@ -1147,7 +1136,6 @@ void RenderableModel::render(const RenderData& data, RendererTasks&) {
 
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
-    glActiveTexture(GL_TEXTURE0);
 }
 
 void RenderableModel::update(const UpdateData& data) {
@@ -1275,4 +1263,4 @@ glm::dvec3 RenderableModel::center() const {
     return model * glm::dvec4(0.0, 0.0, 0.0, 1.0);
 }
 
-}  // namespace openspace
+} // namespace openspace

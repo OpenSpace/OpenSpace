@@ -30,9 +30,9 @@
 #include <openspace/events/event.h>
 #include <unordered_map>
 
-namespace openspace::properties { class Property; }
-
 namespace openspace {
+
+class Property;
 
 class EventTopic : public Topic {
 public:
@@ -46,7 +46,7 @@ private:
     // Returns true if there is at least one subscription active, false otherwise
     bool isSubscribed() const;
 
-    std::unordered_map<events::Event::Type, bool> _subscribedEvents;
+    std::unordered_map<Event::Type, bool> _subscribedEvents;
 };
 
 } // namespace openspace

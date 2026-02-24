@@ -38,7 +38,7 @@
 #include <optional>
 #include <utility>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 TextTileProvider::TextTileProvider(TileTextureInitData initData_, size_t fontSize_)
     : initData(std::move(initData_))
@@ -54,7 +54,7 @@ void TextTileProvider::internalInitialize() {
     font = global::fontManager->font("Mono", static_cast<float>(fontSize));
     fontRenderer = ghoul::fontrendering::FontRenderer::createDefault();
     fontRenderer->setFramebufferSize(glm::vec2(initData.dimensions));
-    glGenFramebuffers(1, &fbo);
+    glCreateFramebuffers(1, &fbo);
 }
 
 void TextTileProvider::internalDeinitialize() {
@@ -68,7 +68,7 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
     ZoneScoped;
     TracyGpuZone("tile");
 
-    const cache::ProviderTileKey key = { tileIndex, uniqueIdentifier };
+    const ProviderTileKey key = { tileIndex, uniqueIdentifier };
     Tile tile = tileCache->get(key);
     if (!tile.texture) {
         ghoul::opengl::Texture* texture = tileCache->texture(initData);
@@ -79,19 +79,13 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &prevFBO);
 
         // Render to texture
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-        glFramebufferTexture2D(
-            GL_FRAMEBUFFER,
-            GL_COLOR_ATTACHMENT0,
-            GL_TEXTURE_2D,
-            *texture,
-            0
-        );
+        glNamedFramebufferTexture(fbo, GL_COLOR_ATTACHMENT0, *texture, 0);
 
-        const GLsizei w = static_cast<GLsizei>(texture->width());
-        const GLsizei h = static_cast<GLsizei>(texture->height());
+        const GLsizei w = static_cast<GLsizei>(texture->dimensions().x);
+        const GLsizei h = static_cast<GLsizei>(texture->dimensions().y);
         global::renderEngine->openglStateCache().loadCurrentGLState();
         glViewport(0, 0, w, h);
+        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
         glClearColor(
             backgroundColor.r,
             backgroundColor.g,
@@ -101,8 +95,6 @@ Tile TextTileProvider::renderTile(const TileIndex& tileIndex, const std::string&
         glClear(GL_COLOR_BUFFER_BIT);
 
         fontRenderer->render(*font, position, text, color);
-
-        texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
 
         tile = Tile{ texture, std::nullopt, Tile::Status::OK };
         tileCache->put(key, initData.hashKey, tile);
@@ -121,4 +113,4 @@ void TextTileProvider::reset() {
     tileCache->clear();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

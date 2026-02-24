@@ -39,7 +39,7 @@ public:
     IswaKameleonGroup(std::string name, std::string type);
     virtual ~IswaKameleonGroup();
 
-    virtual void clearGroup() override;
+    void clearGroup() override;
 
     std::set<std::string> fieldlineValue() const;
     void setFieldlineInfo(std::filesystem::path fieldlineIndexFile,
@@ -53,14 +53,14 @@ protected:
     void updateFieldlineSeeds();
     void clearFieldlines();
 
-    properties::FloatProperty _resolution;
-    properties::SelectionProperty _fieldlines;
+    FloatProperty _resolution;
+    SelectionProperty _fieldlines;
 
     std::filesystem::path _fieldlineIndexFile;
     std::filesystem::path _kameleonPath;
     std::map<int, std::tuple<std::string, std::string, bool>> _fieldlineState;
 };
 
-} //namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ISWA___ISWAKAMELEONGROUP___H__

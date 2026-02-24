@@ -55,15 +55,15 @@ private:
      */
     void sendData() override;
 
-    struct PrecisionProperties : properties::PropertyOwner {
-        PrecisionProperties(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
+    struct PrecisionProperties : PropertyOwner {
+        PrecisionProperties(PropertyOwner::PropertyOwnerInfo precisionInfo);
 
-        properties::DoubleProperty positionPrecision;
-        properties::DoubleProperty rotationPrecision;
-        properties::DoubleProperty speedPrecision;
+        DoubleProperty positionPrecision;
+        DoubleProperty rotationPrecision;
+        DoubleProperty speedPrecision;
     };
 
-    properties::OptionProperty _cameraSpeedDistanceUnitOption;
+    OptionProperty _cameraSpeedDistanceUnitOption;
     PrecisionProperties _precisionProperties;
 
     glm::dvec3 _cameraPosition = glm::dvec3(0.0);

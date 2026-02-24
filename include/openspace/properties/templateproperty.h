@@ -27,7 +27,7 @@
 
 #include <openspace/properties/property.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
  * This subclass of Property handles a single parameter value that is of type `T`. It
@@ -72,7 +72,7 @@ public:
      *
      * \return The type info object describing the template parameter `T`
      */
-    virtual const std::type_info& type() const override;
+    const std::type_info& type() const override;
 
     /**
      * This operator allows the TemplateProperty to be used almost transparently as if it
@@ -129,7 +129,7 @@ protected:
     T _value;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #include "openspace/properties/templateproperty.inl"
 

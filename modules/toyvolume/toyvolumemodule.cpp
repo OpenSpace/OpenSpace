@@ -43,7 +43,7 @@ void ToyVolumeModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableToyVolume>("RenderableToyVolume");
 }
 
-std::vector<documentation::Documentation> ToyVolumeModule::documentations() const {
+std::vector<Documentation> ToyVolumeModule::documentations() const {
     return {
         RenderableToyVolume::Documentation()
     };

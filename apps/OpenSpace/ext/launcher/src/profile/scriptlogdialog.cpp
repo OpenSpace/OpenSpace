@@ -42,9 +42,11 @@
 #include <new>
 #include <utility>
 
+using namespace openspace;
+
 ScriptLogDialog::ScriptLogDialog(QWidget* parent, std::string filter)
     : QDialog(parent)
-    , _scriptLogFile(openspace::global::configuration->scriptLog)
+    , _scriptLogFile(global::configuration->scriptLog)
     , _fixedFilter(std::move(filter))
 {
     setWindowTitle("Scriptlog");

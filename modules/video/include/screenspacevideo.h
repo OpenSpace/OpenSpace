@@ -41,10 +41,10 @@ public:
     void update() override;
     void render(const RenderData& renderData) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
     VideoPlayer _videoPlayer;
 };

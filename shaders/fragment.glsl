@@ -22,11 +22,11 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef _FRAGMENT_GLSL_
-#define _FRAGMENT_GLSL_
+#ifndef _FRAGMENT___GLSL_
+#define _FRAGMENT___GLSL_
 
-#define BLEND_MODE_NORMAL 0u
-#define BLEND_MODE_ADDITIVE 1u
+const uint BlendModeNormal = 0;
+const uint BlendModeAdditive = 1;
 
 struct Fragment {
   vec4 color;
@@ -39,4 +39,4 @@ struct Fragment {
   bool disableDepthNormalization;
 };
 
-#endif
+#endif // _FRAGMENT___GLSL_

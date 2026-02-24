@@ -34,7 +34,10 @@
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/uniformcache.h>
 
-namespace ghoul::filesystem { class File; }
+namespace ghoul {
+    namespace filesystem { class File; }
+    namespace opengl { class TextureUnit; }
+} // namespace ghoul
 
 namespace openspace {
 
@@ -50,7 +53,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     enum OrientationOption {
@@ -59,33 +62,33 @@ protected:
         FixedRotation
     };
 
-    virtual void bindTexture();
+    virtual void bindTexture(ghoul::opengl::TextureUnit& unit);
     virtual void unbindTexture();
     void createPlane();
     glm::dmat4 rotationMatrix(const RenderData& data) const;
 
-    properties::OptionProperty _blendMode;
-    properties::OptionProperty _renderOption;
-    properties::BoolProperty _mirrorBackside;
-    properties::Vec2Property _size;
-    properties::BoolProperty _autoScale;
-    properties::Vec3Property _multiplyColor;
+    OptionProperty _blendMode;
+    OptionProperty _renderOption;
+    BoolProperty _mirrorBackside;
+    Vec2Property _size;
+    BoolProperty _autoScale;
+    Vec3Property _multiplyColor;
 
-    struct DistanceScalingSettings : properties::PropertyOwner {
+    struct DistanceScalingSettings : PropertyOwner {
         explicit DistanceScalingSettings(const ghoul::Dictionary& dictionary);
 
-        properties::BoolProperty scaleByDistance;
-        properties::FloatProperty apparentSizeMultiplier;
-        properties::FloatProperty scaleByDistanceMaxHeight;
-        properties::FloatProperty scaleByDistanceMinHeight;
+        BoolProperty scaleByDistance;
+        FloatProperty apparentSizeMultiplier;
+        FloatProperty scaleByDistanceMaxHeight;
+        FloatProperty scaleByDistanceMinHeight;
     };
 
     DistanceScalingSettings _distanceScalingSettings;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
 
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
 
 private:
     bool _planeIsDirty = false;

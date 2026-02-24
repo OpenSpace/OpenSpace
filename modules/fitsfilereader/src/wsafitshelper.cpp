@@ -25,7 +25,6 @@
 #include <modules/fitsfilereader/include/wsafitshelper.h>
 
 #include <ghoul/opengl/texture.h>
-#include <ghoul/opengl/textureconversion.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <CCfits>
@@ -34,11 +33,11 @@
 #include <string_view>
 #include <vector>
 
+using namespace CCfits;
+
 namespace {
     constexpr std::string_view _loggerCat = "RenderableTimeVaryingSphere";
 } // namespace
-
-using namespace CCfits;
 
 namespace openspace {
 
@@ -51,9 +50,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
         readFitsHeader(path);
         std::unique_ptr<FITS> file = std::make_unique<FITS>(path.string(), Read, true);
         if (!file.get()) {
-            LERROR(std::format(
-                "Failed to open, therefore removing file {}", path.string()
-            ));
+            LERROR(std::format("Failed to open, therefore removing file {}", path));
             std::filesystem::remove(path);
             return nullptr;
         }
@@ -76,9 +73,7 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
             fitsValues->contents[std::slice(layerIndex*layerSize, layerSize, 1)];
 
         if (layerValues.size() == 0) {
-            LERROR(std::format(
-                "Failed to load {} as no layers were available", path.string()
-            ));
+            LERROR(std::format("Failed to load {} as no layers were available", path));
             return nullptr;
         }
 
@@ -97,22 +92,19 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
 
         // Create texture from imagedata
         auto texture = std::make_unique<ghoul::opengl::Texture>(
-            imageData,
-            glm::uvec3(fitsValues->width, fitsValues->height, 1),
-            GL_TEXTURE_2D,
-            ghoul::opengl::Texture::Format::Red,
-            GL_RED,
-            GL_FLOAT
+            ghoul::opengl::Texture::FormatInit{
+                .dimensions = glm::uvec3(fitsValues->width, fitsValues->height, 1),
+                .type = GL_TEXTURE_2D,
+                .format = ghoul::opengl::Texture::Format::Red,
+                .dataType = GL_FLOAT
+            },
+            ghoul::opengl::Texture::SamplerInit{},
+            reinterpret_cast<std::byte*>(imageData)
         );
-        // Tell it to use the single color channel as grayscale
-        convertTextureFormat(*texture, ghoul::opengl::Texture::Format::RGB);
-        texture->uploadTexture();
         return texture;
     }
     catch (const CCfits::FitsException& e) {
-        LERROR(std::format(
-            "Failed to open fits file '{}'. '{}'", path.string(), e.message()
-        ));
+        LERROR(std::format("Failed to open fits file '{}'. '{}'", path, e.message()));
         std::filesystem::remove(path);
         return nullptr;
     }

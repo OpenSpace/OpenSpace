@@ -41,15 +41,15 @@ public:
 
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    virtual void bindTexture() override;
+    void bindTexture(ghoul::opengl::TextureUnit& unit) override;
 
 private:
     void loadTexture();
 
-    properties::StringProperty _texturePath;
+    StringProperty _texturePath;
     ghoul::opengl::Texture* _texture = nullptr;
     glm::vec2 _textureDimensions = glm::vec2(0.f);
     std::unique_ptr<ghoul::filesystem::File> _textureFile;

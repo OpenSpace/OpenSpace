@@ -57,7 +57,7 @@
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
+struct LuaLibrary;
 
 void throwSpiceError(const std::string& errorMessage);
 
@@ -1038,7 +1038,7 @@ public:
      */
     static std::filesystem::path leapSecondKernel();
 
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     /**

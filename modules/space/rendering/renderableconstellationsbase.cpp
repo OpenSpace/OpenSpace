@@ -39,32 +39,34 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableConstellationsBase";
 
-    constexpr openspace::properties::Property::PropertyInfo NamesFileInfo = {
+    constexpr Property::PropertyInfo NamesFileInfo = {
         "NamesFile",
         "Constellation names file path",
         "Specifies the file that contains the mapping between constellation "
         "abbreviations and full names of the constellations. If this value is empty, the "
         "abbreviations are used as the full names.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The line width used for the constellation shape.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
+    constexpr Property::PropertyInfo SelectionInfo = {
         "ConstellationSelection",
         "Constellation selection",
         "The selected constellations are displayed on the celestial sphere.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the constellations."
@@ -85,12 +87,12 @@ namespace {
         std::optional<ghoul::Dictionary> labels
             [[codegen::reference("labelscomponent")]];
     };
-#include "renderableconstellationsbase_codegen.cpp"
 } // namespace
+#include "renderableconstellationsbase_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableConstellationsBase::Documentation() {
+Documentation RenderableConstellationsBase::Documentation() {
     return codegen::doc<Parameters>("space_renderable_constellationsbase");
 }
 

@@ -79,10 +79,10 @@ private:
     std::vector<TouchInput> _deferredRemovals;
     std::vector<TouchInput> _lastTouchInputs;
 
-    properties::IntProperty _tuioPort;
-    properties::BoolProperty _touchIsEnabled;
-    properties::BoolProperty _hasActiveTouchEvent;
-    properties::StringListProperty _defaultDirectTouchRenderableTypes;
+    IntProperty _tuioPort;
+    BoolProperty _touchIsEnabled;
+    BoolProperty _hasActiveTouchEvent;
+    StringListProperty _defaultDirectTouchRenderableTypes;
 
     // A sorted version of the list in the property
     std::set<std::string> _sortedDefaultRenderableTypes;

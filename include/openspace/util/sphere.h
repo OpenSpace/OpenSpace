@@ -37,7 +37,7 @@ public:
     Sphere(const Sphere& cpy);
     ~Sphere();
 
-    bool initialize();
+    void initialize();
 
     void render() const;
 
@@ -48,9 +48,9 @@ public:
         GLfloat normal[3];
     };
 
-    GLuint _vaoID = 0;
-    GLuint _vBufferID = 0;
-    GLuint _iBufferID = 0;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
+    GLuint _ibo = 0;
 
     unsigned int _isize;
     unsigned int _vsize;

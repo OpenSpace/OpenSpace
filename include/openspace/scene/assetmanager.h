@@ -37,8 +37,8 @@ namespace ghoul::lua { class LuaState; }
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
 class Asset;
+struct LuaLibrary;
 class ResourceSynchronization;
 
 /**
@@ -99,7 +99,7 @@ public:
      */
     void update();
 
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
     /**
      * Returns all assets that have been loaded by the AssetManager. The order of the

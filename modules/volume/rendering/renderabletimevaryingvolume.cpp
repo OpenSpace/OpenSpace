@@ -49,86 +49,88 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableTimeVaryingVolume";
 
     constexpr float SecondsInOneDay = 60 * 60 * 24;
 
-    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    constexpr Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step size",
         "Specifies how often to sample during raycasting. Lower step size leads to "
         "higher resolution.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GridTypeInfo = {
+    constexpr Property::PropertyInfo GridTypeInfo = {
         "GridType",
         "Grid type",
         "The grid type to use for the volume.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SecondsBeforeInfo = {
+    constexpr Property::PropertyInfo SecondsBeforeInfo = {
         "SecondsBefore",
         "Seconds before",
         "The number of seconds to show the first timestep before its actual time.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SecondsAfterInfo = {
+    constexpr Property::PropertyInfo SecondsAfterInfo = {
         "SecondsAfter",
         "Seconds after",
         "The number of seconds to show the the last timestep after its actual time.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SourceDirectoryInfo = {
+    constexpr Property::PropertyInfo SourceDirectoryInfo = {
         "SourceDirectory",
         "Source directory",
         "A directory from where to load the data files for the different time steps.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+    constexpr Property::PropertyInfo TransferFunctionInfo = {
         "TransferFunctionPath",
         "Transfer function path",
         "The path to the transfer function file.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TriggerTimeJumpInfo = {
+    constexpr Property::PropertyInfo TriggerTimeJumpInfo = {
         "TriggerTimeJump",
         "Jump",
         "Sets the time to be the first time of the volume sequence.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo JumpToTimestepInfo = {
+    constexpr Property::PropertyInfo JumpToTimestepInfo = {
         "JumpToTimestep",
         "Jump to timestep",
         "Setting this value lets you scrub through the sequence's time steps.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BrightnessInfo = {
+    constexpr Property::PropertyInfo BrightnessInfo = {
         "Brightness",
         "Brightness",
         "A value that affects the general brightness of the volume rendering.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo rNormalizationInfo = {
+    constexpr Property::PropertyInfo rNormalizationInfo = {
         "RNormalization",
         "Radius normalization",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo rUpperBoundInfo = {
+    constexpr Property::PropertyInfo rUpperBoundInfo = {
         "RUpperBound",
         "Radius upper bound",
         "Limit the volume's radius.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {
@@ -159,12 +161,12 @@ namespace {
         // @TODO Missing documentation
         std::optional<ghoul::Dictionary> clipPlanes;
     };
-#include "renderabletimevaryingvolume_codegen.cpp"
 } // namespace
+#include "renderabletimevaryingvolume_codegen.cpp"
 
-namespace openspace::volume {
+namespace openspace {
 
-documentation::Documentation RenderableTimeVaryingVolume::Documentation() {
+Documentation RenderableTimeVaryingVolume::Documentation() {
     return codegen::doc<Parameters>("volume_renderable_timevaryingvolume");
 }
 
@@ -188,18 +190,18 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 
     _sourceDirectory = absPath(p.sourceDirectory).string();
     _transferFunctionPath = absPath(p.transferFunction).string();
-    _transferFunction = std::make_shared<openspace::TransferFunction>(
+    _transferFunction = std::make_shared<TransferFunction>(
         _transferFunctionPath.value(),
-        [](const openspace::TransferFunction&) {}
+        [](const TransferFunction&) {}
     );
 
     _invertDataAtZ = p.invertDataAtZ.value_or(_invertDataAtZ);
 
     _gridType.addOptions({
-        { static_cast<int>(volume::VolumeGridType::Cartesian), "Cartesian" },
-        { static_cast<int>(volume::VolumeGridType::Spherical), "Spherical" }
+        { static_cast<int>(VolumeGridType::Cartesian), "Cartesian" },
+        { static_cast<int>(VolumeGridType::Spherical), "Spherical" }
     });
-    _gridType = static_cast<int>(volume::VolumeGridType::Cartesian);
+    _gridType = static_cast<int>(VolumeGridType::Cartesian);
 
     _stepSize = p.stepSize.value_or(_stepSize);
 
@@ -208,12 +210,12 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _secondsAfter = p.secondsAfter;
 
     const ghoul::Dictionary clipPlanesDict = p.clipPlanes.value_or(ghoul::Dictionary());
-    _clipPlanes = std::make_shared<volume::VolumeClipPlanes>(clipPlanesDict);
+    _clipPlanes = std::make_shared<VolumeClipPlanes>(clipPlanesDict);
     _clipPlanes->setIdentifier("clipPlanes");
     _clipPlanes->setGuiName("Clip Planes");
 
     if (p.gridType.has_value()) {
-        const VolumeGridType gridType = volume::parseGridType(*p.gridType);
+        const VolumeGridType gridType = parseGridType(*p.gridType);
         _gridType = static_cast<std::underlying_type_t<VolumeGridType>>(gridType);
     }
 
@@ -261,25 +263,22 @@ void RenderableTimeVaryingVolume::initializeGL() {
         // TODO: handle normalization properly for different timesteps + transfer function
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
-            t.metadata.dimensions,
-            GL_TEXTURE_3D,
-            ghoul::opengl::Texture::Format::Red,
-            GL_RED,
-            GL_FLOAT,
-            ghoul::opengl::Texture::FilterMode::Linear,
-            ghoul::opengl::Texture::WrappingMode::Clamp
+            ghoul::opengl::Texture::FormatInit{
+                .dimensions = t.metadata.dimensions,
+                .type = GL_TEXTURE_3D,
+                .format = ghoul::opengl::Texture::Format::Red,
+                .dataType = GL_FLOAT
+            },
+            ghoul::opengl::Texture::SamplerInit{
+                .wrapping = ghoul::opengl::Texture::WrappingMode::Clamp
+            },
+            reinterpret_cast<std::byte*>(data)
         );
-
-        t.texture->setPixelData(
-            reinterpret_cast<void*>(data),
-            ghoul::opengl::Texture::TakeOwnership::No
-        );
-        t.texture->uploadTexture();
     }
 
     _clipPlanes->initialize();
 
-    _raycaster = std::make_unique<volume::BasicVolumeRaycaster>(
+    _raycaster = std::make_unique<BasicVolumeRaycaster>(
         nullptr,
         _transferFunction,
         _clipPlanes
@@ -322,7 +321,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
     });
 
     _transferFunctionPath.onChange([this] {
-        _transferFunction = std::make_shared<openspace::TransferFunction>(
+        _transferFunction = std::make_shared<TransferFunction>(
             _transferFunctionPath.value()
         );
         _raycaster->setTransferFunction(_transferFunction);
@@ -433,7 +432,7 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
         // The original data cube is a unit cube centered in 0
         // ie with lower bound from (-0.5, -0.5, -0.5) and upper bound (0.5, 0.5, 0.5)
         if (t && t->texture) {
-            if (_raycaster->gridType() == volume::VolumeGridType::Cartesian) {
+            if (_raycaster->gridType() == VolumeGridType::Cartesian) {
                 const glm::dvec3 scale =
                     t->metadata.upperDomainBound - t->metadata.lowerDomainBound;
                 const glm::dvec3 translation =
@@ -483,4 +482,4 @@ void RenderableTimeVaryingVolume::deinitializeGL() {
     }
 }
 
-} // namespace openspace::volume
+} // namespace openspace

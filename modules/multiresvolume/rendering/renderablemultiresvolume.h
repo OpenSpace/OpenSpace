@@ -68,28 +68,28 @@ public:
 
     bool isReady() const override;
 
-    virtual void update(const UpdateData& data) override;
-    virtual void render(const RenderData& data, RendererTasks& tasks) override;
+    void update(const UpdateData& data) override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
 
 private:
-    properties::BoolProperty _useGlobalTime;
-    properties::BoolProperty _loop;
+    BoolProperty _useGlobalTime;
+    BoolProperty _loop;
     // used to vary time, if not using global time nor looping
-    properties::IntProperty _currentTime;
-    properties::IntProperty _memoryBudget;
-    properties::IntProperty _streamingBudget;
-    properties::FloatProperty _stepSizeCoefficient;
-    properties::StringProperty _selectorName;
-    properties::BoolProperty _statsToFile;
-    properties::StringProperty _statsToFileName;
-    properties::IntProperty _scalingExponent;
-    properties::Vec3Property _translation;
-    properties::Vec3Property _rotation;
-    properties::Vec3Property _scaling;
+    IntProperty _currentTime;
+    IntProperty _memoryBudget;
+    IntProperty _streamingBudget;
+    FloatProperty _stepSizeCoefficient;
+    StringProperty _selectorName;
+    BoolProperty _statsToFile;
+    StringProperty _statsToFileName;
+    IntProperty _scalingExponent;
+    Vec3Property _translation;
+    Vec3Property _rotation;
+    Vec3Property _scaling;
 
-    double _time;
-    double _startTime;
-    double _endTime;
+    double _time = 0.0;
+    double _startTime = 0.0;
+    double _endTime = 0.0;
 
     // Stats timers
     std::string _statsFileName;
@@ -97,9 +97,9 @@ private:
     std::chrono::system_clock::time_point _frameStart;
     std::chrono::duration<double> _selectionDuration;
     std::chrono::duration<double> _uploadDuration;
-    unsigned int _nDiskReads;
-    unsigned int _nUsedBricks;
-    unsigned int _nStreamedBricks;
+    unsigned int _nDiskReads = 0;
+    unsigned int _nUsedBricks = 0;
+    unsigned int _nStreamedBricks = 0;
 
     int _timestep = 0;
 

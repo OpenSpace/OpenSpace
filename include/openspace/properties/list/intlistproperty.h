@@ -27,7 +27,7 @@
 
 #include <openspace/properties/misc/listproperty.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 class IntListProperty : public ListProperty<int> {
 public:
@@ -47,6 +47,6 @@ private:
     std::vector<int> toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___INTLISTPROPERTY___H__

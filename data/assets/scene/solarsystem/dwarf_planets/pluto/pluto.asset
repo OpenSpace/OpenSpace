@@ -1,5 +1,6 @@
 local transforms = asset.require("./transforms")
 local coreKernels = asset.require("spice/core")
+local plutoKernels = asset.require("./kernels")
 asset.require("./trail")
 
 
@@ -18,8 +19,8 @@ local Pluto = {
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
-      Target = coreKernels.ID.Pluto,
-      Observer = coreKernels.ID.PlutoBarycenter
+      Target = plutoKernels.ID.Pluto,
+      Observer = plutoKernels.ID.PlutoBarycenter
     },
     Rotation = {
       Type = "SpiceRotation",

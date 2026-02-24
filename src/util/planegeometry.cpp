@@ -28,6 +28,15 @@
 #include <cstddef>
 #include <utility>
 
+namespace {
+    struct Vertex {
+        GLfloat x;
+        GLfloat y;
+        GLfloat s;
+        GLfloat t;
+    };
+} // namespace
+
 namespace openspace {
 
 PlaneGeometry::PlaneGeometry(glm::vec2 size) : _size(std::move(size)) {}
@@ -35,21 +44,28 @@ PlaneGeometry::PlaneGeometry(glm::vec2 size) : _size(std::move(size)) {}
 PlaneGeometry::PlaneGeometry(float size) : PlaneGeometry(glm::vec2(size, size)) {}
 
 void PlaneGeometry::initialize() {
-    glGenVertexArrays(1, &_vaoId);
-    glGenBuffers(1, &_vBufferId);
+    glCreateBuffers(1, &_vbo);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
+
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
+
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, s));
+    glVertexArrayAttribBinding(_vao, 1, 0);
+
     updateGeometry();
 }
 
 void PlaneGeometry::deinitialize() {
-    glDeleteVertexArrays(1, &_vaoId);
-    _vaoId = 0;
-
-    glDeleteBuffers(1, &_vBufferId);
-    _vBufferId = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteBuffers(1, &_vbo);
 }
 
 void PlaneGeometry::render() const {
-    glBindVertexArray(_vaoId);
+    glBindVertexArray(_vao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
     glBindVertexArray(0);
 }
@@ -65,36 +81,16 @@ void PlaneGeometry::updateSize(float size) {
 
 void PlaneGeometry::updateGeometry() const {
     const glm::vec2 size = _size;
-    struct VertexData {
-        GLfloat x;
-        GLfloat y;
-        GLfloat s;
-        GLfloat t;
+    const std::array<Vertex, 6> vertices = {
+        Vertex { -size.x, -size.y, 0.f, 0.f },
+        Vertex {  size.x,  size.y, 1.f, 1.f },
+        Vertex { -size.x,  size.y, 0.f, 1.f },
+        Vertex { -size.x, -size.y, 0.f, 0.f },
+        Vertex {  size.x, -size.y, 1.f, 0.f },
+        Vertex {  size.x,  size.y, 1.f, 1.f }
     };
 
-    const std::array<VertexData, 6> vertices = {
-        VertexData{ -size.x, -size.y, 0.f, 0.f },
-        VertexData{  size.x,  size.y, 1.f, 1.f },
-        VertexData{ -size.x,  size.y, 0.f, 1.f },
-        VertexData{ -size.x, -size.y, 0.f, 0.f },
-        VertexData{  size.x, -size.y, 1.f, 0.f },
-        VertexData{  size.x,  size.y, 1.f, 1.f }
-    };
-
-    glBindVertexArray(_vaoId);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferId);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(VertexData), nullptr);
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(VertexData),
-        reinterpret_cast<void*>(offsetof(VertexData, s))
-    );
+    glNamedBufferData(_vbo, sizeof(vertices), vertices.data(), GL_STATIC_DRAW);
 }
 
 } // namespace openspace

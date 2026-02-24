@@ -24,13 +24,15 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
-layout(location = 0) in vec3 in_point_position;
-layout (location = 1) in int colorInformation;
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in int in_color;
 
-out vec4 vs_color;
-out float vs_depth;
+out Data {
+  vec4 color;
+  float depth;
+} out_data;
 
 uniform mat4 modelViewProjectionTransform;
 uniform vec3 colorStart;
@@ -53,45 +55,45 @@ const int VertexColorTypeSquare = 6;
 
 
 void main() {
-  vec4 positionClipSpace = modelViewProjectionTransform * vec4(in_point_position, 1.0);
+  vec4 positionClipSpace = modelViewProjectionTransform * vec4(in_position, 1.0);
 
   vec4 pos = z_normalization(positionClipSpace);
-  vs_depth = pos.w;
+  out_data.depth = pos.w;
   gl_Position = pos;
 
   vec3 color;
-  switch (colorInformation) {
+  switch (in_color) {
     case VertexColorTypeDefaultStart:
-      vs_color = vec4(colorStart, 1.0);
+      out_data.color = vec4(colorStart, 1.0);
       break;
     case VertexColorTypeDefaultEnd:
-      vs_color = vec4(colorEnd, 1.0);
+      out_data.color = vec4(colorEnd, 1.0);
       break;
     case VertexColorTypeInFieldOfView:
-      vs_color = vec4(
+      out_data.color = vec4(
         activeColor * interpolation + targetInFieldOfViewColor * (1.0 - interpolation),
         1.0
       );
       break;
     case VertexColorTypeActive:
-      vs_color = vec4(activeColor, 1.0);
+      out_data.color = vec4(activeColor, 1.0);
       break;
     case VertexColorTypeIntersectionStart:
-      vs_color = vec4(intersectionStartColor, 1.0);
+      out_data.color = vec4(intersectionStartColor, 1.0);
       break;
     case VertexColorTypeIntersectionEnd:
-      vs_color = vec4(
+      out_data.color = vec4(
         activeColor * interpolation + intersectionEndColor * (1.0 - interpolation),
         1.0
       );
       break;
     case VertexColorTypeSquare:
-      vs_color = vec4(
+      out_data.color = vec4(
         activeColor * interpolation + squareColor * (1.0 - interpolation),
         1.0
       );
       break;
     default:
-      vs_color = vec4(1.0, 0.0, 1.0, 1.0);
+      out_data.color = vec4(1.0, 0.0, 1.0, 1.0);
   }
 }

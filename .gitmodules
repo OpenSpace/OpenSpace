@@ -32,6 +32,9 @@
 [submodule "support/coding/codegen"]
 	path = support/coding/codegen
 	url = https://github.com/OpenSpace/codegen
+[submodule "modules/molecule/ext/mold"]
+	path = modules/molecule/ext/mold
+	url = https://github.com/scanberg/mdlib
 [submodule "modules/globebrowsing/ext/geos"]
 	path = modules/globebrowsing/ext/geos
 	url = https://github.com/OpenSpace/geos.git

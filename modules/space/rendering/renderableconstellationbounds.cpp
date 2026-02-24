@@ -45,6 +45,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableConstellationBounds";
 
     constexpr float convertHrsToRadians(float rightAscension) {
@@ -52,19 +54,19 @@ namespace {
         return glm::radians(rightAscension * 15);
     }
 
-    constexpr openspace::properties::Property::PropertyInfo VertexInfo = {
+    constexpr Property::PropertyInfo VertexInfo = {
         "File",
         "Vertex file path",
         "A file that contains the vertex locations of the constellations bounds, as RA "
         "Dec coordinates on the celestial sphere.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color of the lines.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     // This `Renderable` type can be used to draw bounding shapes on the night sky, where
@@ -100,12 +102,12 @@ namespace {
         // [[codegen::verbatim(ColorInfo.description)]]
         std::optional<glm::vec3> color [[codegen::color()]];
     };
-#include "renderableconstellationbounds_codegen.cpp"
 } // namespace
+#include "renderableconstellationbounds_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableConstellationBounds::Documentation() {
+Documentation RenderableConstellationBounds::Documentation() {
     return codegen::doc<Parameters>(
         "space_renderable_constellationbounds",
         RenderableConstellationsBase::Documentation()
@@ -125,7 +127,7 @@ RenderableConstellationBounds::RenderableConstellationBounds(
     _vertexFilename.onChange([this](){ loadData(); });
     addProperty(_vertexFilename);
 
-    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color.setViewOption(Property::ViewOptions::Color);
     _color = p.color.value_or(_color);
     addProperty(_color);
 }
@@ -176,30 +178,29 @@ void RenderableConstellationBounds::initializeGL() {
 
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
-    glGenVertexArrays(1, &_vao);
-    glBindVertexArray(_vao);
-
-    glGenBuffers(1, &_vbo);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(
+        _vbo,
         _vertexValues.size() * 3 * sizeof(float),
         _vertexValues.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
 
-    const GLint positionAttrib = _program->attributeLocation("in_position");
-    glEnableVertexAttribArray(positionAttrib);
-    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
+    // We don't need the data anymore and can remove it
+    _vertexValues.clear();
 
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(float));
+
+    const GLint positionAttrib = _program->attributeLocation("in_position");
+    glEnableVertexArrayAttrib(_vao, positionAttrib);
+    glVertexArrayAttribFormat(_vao, positionAttrib, 3, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 }
 
 void RenderableConstellationBounds::deinitializeGL() {
     glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
 
     if (_program) {
         global::renderEngine->removeRenderProgram(_program.get());
@@ -237,10 +238,10 @@ void RenderableConstellationBounds::render(const RenderData& data, RendererTasks
     const glm::dmat4 modelTransform = calcModelTransform(data);
 
     _program->setUniform(
-        _uniformCache.ViewProjection,
+        _uniformCache.viewProjection,
         data.camera.viewProjectionMatrix()
     );
-    _program->setUniform(_uniformCache.ModelTransform, glm::mat4(modelTransform));
+    _program->setUniform(_uniformCache.modelTransform, glm::mat4(modelTransform));
     _program->setUniform(_uniformCache.color, _color);
     _program->setUniform(_uniformCache.opacity, opacity());
 

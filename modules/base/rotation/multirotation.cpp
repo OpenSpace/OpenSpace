@@ -39,12 +39,12 @@ namespace {
         std::vector<ghoul::Dictionary> rotations
             [[codegen::reference("core_transform_rotation")]];
     };
-#include "multirotation_codegen.cpp"
 } // namespace
+#include "multirotation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation MultiRotation::Documentation() {
+Documentation MultiRotation::Documentation() {
     return codegen::doc<Parameters>("base_transform_rotation_multi");
 }
 

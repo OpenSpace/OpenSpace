@@ -27,6 +27,8 @@
 #include <variant>
 #include <utility>
 
+using namespace openspace;
+
 namespace {
 
 /**
@@ -36,7 +38,7 @@ namespace {
     if (identifier.empty()) {
         throw ghoul::lua::LuaError("Identifier must not be empty");
     }
-    const bool res = openspace::global::actionManager->hasAction(identifier);
+    const bool res = global::actionManager->hasAction(identifier);
     return res;
 }
 
@@ -48,8 +50,6 @@ namespace {
 [[codegen::luawrap]] void removeAction(
                                       std::variant<std::string, ghoul::Dictionary> action)
 {
-    using namespace openspace;
-
     std::string identifier;
     if (std::holds_alternative<std::string>(action)) {
         identifier = std::get<std::string>(action);
@@ -118,15 +118,13 @@ struct [[codegen::Dictionary(Action)]] Action {
  * default).
  */
 [[codegen::luawrap]] void registerAction(Action action) {
-    using namespace openspace;
-
     if (global::actionManager->hasAction(action.identifier)) {
         throw ghoul::lua::LuaError(std::format(
             "Identifier '{}' for action already registered", action.identifier
         ));
     }
 
-    interaction::Action a;
+    openspace::Action a;
     a.identifier = std::move(action.identifier);
     a.command = std::move(action.command);
     a.name = action.name.value_or(a.name);
@@ -142,7 +140,7 @@ struct [[codegen::Dictionary(Action)]] Action {
         ));
     }
     if (action.isLocal.has_value()) {
-        a.isLocal = interaction::Action::IsLocal(*action.isLocal);
+        a.isLocal = openspace::Action::IsLocal(*action.isLocal);
     }
     global::actionManager->registerAction(std::move(a));
 }
@@ -152,8 +150,6 @@ struct [[codegen::Dictionary(Action)]] Action {
  * 'Name', 'Documentation', 'GuiPath', and 'Synchronization'.
  */
 [[codegen::luawrap]] ghoul::Dictionary action(std::string identifier) {
-    using namespace openspace;
-
     if (identifier.empty()) {
         throw ghoul::lua::LuaError("Identifier must not be empty");
     }
@@ -163,7 +159,7 @@ struct [[codegen::Dictionary(Action)]] Action {
         );
     }
 
-    const interaction::Action& action = global::actionManager->action(identifier);
+    const openspace::Action& action = global::actionManager->action(identifier);
     ghoul::Dictionary res;
     res.setValue("Identifier", action.identifier);
     res.setValue("Command", action.command);
@@ -176,7 +172,7 @@ struct [[codegen::Dictionary(Action)]] Action {
         res.setValue("TextColor", glm::dvec4(*action.textColor));
     }
     res.setValue("GuiPath", action.guiPath);
-    res.setValue("IsLocal", action.isLocal == interaction::Action::IsLocal::Yes);
+    res.setValue("IsLocal", action.isLocal == openspace::Action::IsLocal::Yes);
     return res;
 }
 
@@ -186,11 +182,9 @@ struct [[codegen::Dictionary(Action)]] Action {
  * 'Synchronization'.
  */
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> actions() {
-    using namespace openspace;
-
     std::vector<ghoul::Dictionary> res;
-    const std::vector<interaction::Action>& actions = global::actionManager->actions();
-    for (const interaction::Action& a : actions) {
+    const std::vector<openspace::Action>& actions = global::actionManager->actions();
+    for (const openspace::Action& a : actions) {
         ghoul::Dictionary d;
         d.setValue("Identifier", a.identifier);
         d.setValue("Command", a.command);
@@ -203,7 +197,7 @@ struct [[codegen::Dictionary(Action)]] Action {
             d.setValue("TextColor", glm::dvec4(*a.textColor));
         }
         d.setValue("GuiPath", a.guiPath);
-        d.setValue("IsLocal", a.isLocal == interaction::Action::IsLocal::Yes);
+        d.setValue("IsLocal", a.isLocal == openspace::Action::IsLocal::Yes);
         res.push_back(d);
     }
     return res;
@@ -215,8 +209,6 @@ struct [[codegen::Dictionary(Action)]] Action {
 [[codegen::luawrap]] void triggerAction(std::string id,
                                         ghoul::Dictionary arg = ghoul::Dictionary())
 {
-    using namespace openspace;
-
     if (id.empty()) {
         throw ghoul::lua::LuaError("Identifier must not be empty");
     }
@@ -229,10 +221,10 @@ struct [[codegen::Dictionary(Action)]] Action {
     global::actionManager->triggerAction(
         id,
         arg,
-        interaction::ActionManager::ShouldBeSynchronized::No
+        ActionManager::ShouldBeSynchronized::No
     );
 }
 
-#include "actionmanager_lua_codegen.cpp"
-
 } // namespace
+
+#include "actionmanager_lua_codegen.cpp"

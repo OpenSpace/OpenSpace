@@ -29,6 +29,8 @@
 #include <openspace/util/json_helper.h>
 #include <vector>
 
+using namespace openspace;
+
 // Note: Dictionary formatting is tested in Ghoul
 
 TEMPLATE_TEST_CASE("FormatJson", "[formatjson]", glm::vec2, glm::vec3,
@@ -42,7 +44,7 @@ TEMPLATE_TEST_CASE("FormatJson", "[formatjson]", glm::vec2, glm::vec3,
 
     const T val(1);
 
-    std::string json = openspace::formatJson(val);
+    std::string json = formatJson(val);
 
     // Compare with Ghoul's Lua conversions. Note that Lua uses '{' for arrays,
     // while we here expect '[' for all glm types
@@ -56,13 +58,13 @@ TEST_CASE("FormatJson - Bool", "[formatjson]") {
     constexpr bool TrueVal = true;
     constexpr bool FalseVal = false;
 
-    CHECK(openspace::formatJson(TrueVal) == "true");
-    CHECK(openspace::formatJson(FalseVal) == "false");
+    CHECK(formatJson(TrueVal) == "true");
+    CHECK(formatJson(FalseVal) == "false");
 }
 
 TEST_CASE("FormatJson - Infinity & Nan", "[formatjson]") {
-    CHECK(openspace::formatJson(std::numeric_limits<double>::infinity()) == "null");
-    CHECK(openspace::formatJson(std::numeric_limits<double>::quiet_NaN()) == "null");
+    CHECK(formatJson(std::numeric_limits<double>::infinity()) == "null");
+    CHECK(formatJson(std::numeric_limits<double>::quiet_NaN()) == "null");
 }
 
 // @TODO(emmbr 2021-04-29) Add more tests at some point, if we find it necessary

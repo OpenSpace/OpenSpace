@@ -26,14 +26,17 @@
 
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/textureunit.h>
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "The OpenGL name of the texture that is displayed on this plane.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `ScreenSpaceRenderable` can be used for debugging OpenGL textures. It renders
@@ -42,12 +45,12 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::optional<int> texture;
     };
-#include "screenspacedebugplane_codegen.cpp"
 } // namespace
+#include "screenspacedebugplane_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceDebugPlane::Documentation() {
+Documentation ScreenSpaceDebugPlane::Documentation() {
     return codegen::doc<Parameters>("debugging_screenspace_debugplane");
 }
 
@@ -63,8 +66,8 @@ ScreenSpaceDebugPlane::ScreenSpaceDebugPlane(const ghoul::Dictionary& dictionary
     _objectSize = glm::ivec2(256);
 }
 
-void ScreenSpaceDebugPlane::bindTexture() {
-    glBindTexture(GL_TEXTURE_2D, _texture);
+void ScreenSpaceDebugPlane::bindTexture(ghoul::opengl::TextureUnit& unit) {
+    unit.bind(_texture);
 }
 
 } // namespace openspace

@@ -36,9 +36,9 @@ public:
     explicit ScreenSpaceCygnet(const ghoul::Dictionary& dictionary);
     ~ScreenSpaceCygnet() = default;
 
-    virtual void update() override;
+    void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     int _cygnetId;

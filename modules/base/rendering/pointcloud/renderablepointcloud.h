@@ -79,7 +79,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     enum class TextureInputMode {
@@ -144,7 +144,8 @@ protected:
         glm::uvec2 resolution, size_t nLayers, bool useAlpha);
 
     void fillAndUploadTextureLayer(unsigned int arrayindex, unsigned int layer,
-        size_t textureIndex, glm::uvec2 resolution, bool useAlpha, const void* pixelData);
+        size_t textureIndex, glm::uvec2 resolution, bool useAlpha,
+        const std::vector<std::byte>& pixelData);
 
     void generateArrayTextures();
 
@@ -166,56 +167,56 @@ protected:
     bool _hasDatavarSize = false;
     bool _hasLabels = false;
 
-    struct SizeSettings : properties::PropertyOwner {
+    struct SizeSettings : PropertyOwner {
         explicit SizeSettings(const ghoul::Dictionary& dictionary);
 
         std::unique_ptr<SizeMappingComponent> sizeMapping;
 
-        properties::FloatProperty scaleExponent;
-        properties::FloatProperty scaleFactor;
+        FloatProperty scaleExponent;
+        FloatProperty scaleFactor;
 
-        properties::BoolProperty useMaxSizeControl;
-        properties::FloatProperty maxAngularSize;
+        BoolProperty useMaxSizeControl;
+        FloatProperty maxAngularSize;
     };
     SizeSettings _sizeSettings;
 
-    struct ColorSettings : properties::PropertyOwner {
+    struct ColorSettings : PropertyOwner {
         explicit ColorSettings(const ghoul::Dictionary& dictionary);
-        properties::Vec3Property pointColor;
+        Vec3Property pointColor;
         std::unique_ptr<ColorMappingComponent> colorMapping;
-        properties::BoolProperty enableOutline;
-        properties::Vec3Property outlineColor;
-        properties::FloatProperty outlineWidth;
-        properties::OptionProperty outlineStyle;
-        properties::BoolProperty applyCmapToOutline;
+        BoolProperty enableOutline;
+        Vec3Property outlineColor;
+        FloatProperty outlineWidth;
+        OptionProperty outlineStyle;
+        BoolProperty applyCmapToOutline;
     };
     ColorSettings _colorSettings;
 
-    struct Fading : properties::PropertyOwner {
+    struct Fading : PropertyOwner {
         explicit Fading(const ghoul::Dictionary& dictionary);
-        properties::Vec2Property fadeInDistances;
-        properties::BoolProperty enabled;
-        properties::BoolProperty invert;
+        Vec2Property fadeInDistances;
+        BoolProperty enabled;
+        BoolProperty invert;
     };
     Fading _fading;
 
-    properties::BoolProperty _useAdditiveBlending;
-    properties::BoolProperty _useRotation;
+    BoolProperty _useAdditiveBlending;
+    BoolProperty _useRotation;
 
-    properties::BoolProperty _drawElements;
-    properties::OptionProperty _renderOption;
+    BoolProperty _drawElements;
+    OptionProperty _renderOption;
 
-    properties::UIntProperty _nDataPoints;
-    properties::BoolProperty _hasOrientationData;
+    UIntProperty _nDataPoints;
+    BoolProperty _hasOrientationData;
 
-    struct Texture : properties::PropertyOwner {
+    struct Texture : PropertyOwner {
         Texture();
 
-        properties::BoolProperty enabled;
-        properties::BoolProperty allowCompression;
-        properties::BoolProperty useAlphaChannel;
-        properties::StringProperty spriteTexturePath;
-        properties::StringProperty inputMode;
+        BoolProperty enabled;
+        BoolProperty allowCompression;
+        BoolProperty useAlphaChannel;
+        StringProperty spriteTexturePath;
+        StringProperty inputMode;
     };
     Texture _texture;
     TextureInputMode _textureMode = TextureInputMode::Single;

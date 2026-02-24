@@ -38,20 +38,22 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "IswaDataGroup";
 
-    constexpr openspace::properties::Property::PropertyInfo ResolutionInfo = {
+    constexpr Property::PropertyInfo ResolutionInfo = {
         "Resolution",
         "Resolution",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FieldlineSeedInfo = {
+    constexpr Property::PropertyInfo FieldlineSeedInfo = {
         "FieldlineSeedsIndexFile",
         "Fieldline seedpoints",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 } // namespace
 
@@ -207,4 +209,4 @@ void IswaKameleonGroup::changeCdf(std::string path) {
     _groupEvent.publish("cdfChanged", d);
 }
 
-} //namespace openspace
+} // namespace openspace

@@ -37,9 +37,8 @@ namespace ccmc { class Kameleon; }
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
-
 class IswaBaseGroup;
+struct LuaLibrary;
 
 struct CdfInfo {
     std::string name;
@@ -52,21 +51,21 @@ struct CdfInfo {
 struct CygnetInfo {
     std::string name;
     std::string description;
-    int updateInterval;
-    bool selected;
+    int updateInterval = 0;
+    bool selected = false;
 };
 
 struct MetadataFuture {
-    int id;
+    int id = 0;
     std::string group;
     std::string name;
     std::string json;
-    int type;
-    int geom;
-    bool isFinished;
+    int type = 0;
+    int geom = 0;
+    bool isFinished = false;
 };
 
-class IswaManager : public properties::PropertyOwner {
+class IswaManager : public PropertyOwner {
 public:
     enum CygnetType { Texture, Data, Kameleon, NoType };
     enum CygnetGeometry { Plane, Sphere };
@@ -95,7 +94,7 @@ public:
     std::map<std::string, std::shared_ptr<IswaBaseGroup>>& groups();
     std::map<std::string, std::vector<CdfInfo>>& cdfInformation();
 
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
     ghoul::Event<>& iswaEvent();
 
@@ -132,6 +131,6 @@ private:
     static IswaManager* _instance;
 };
 
-} //namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ISWA___ISWAMANAGER___H__

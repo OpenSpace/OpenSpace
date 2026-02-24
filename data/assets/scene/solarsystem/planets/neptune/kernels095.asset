@@ -16,8 +16,11 @@ local ID = {
   Hippocamp = 814,
   Larissa = "LARISSA",
   Naiad = "NAIAD",
+  Neptune = "NEPTUNE",
+  Nereid = "NEREID",
   Proteus = "PROTEUS",
-  Thalassa = "THALASSA"
+  Thalassa = "THALASSA",
+  Triton = "TRITON"
 }
 
 local Frame = {

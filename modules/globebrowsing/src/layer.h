@@ -41,15 +41,15 @@
 #include <memory>
 
 namespace ghoul { class Dictionary; }
-namespace openspace::documentation { struct Documentation; }
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
+struct Documentation;
 struct LayerGroup;
 struct TileIndex;
 struct TileProvider;
 
-class Layer : public properties::PropertyOwner, public Fadeable {
+class Layer : public PropertyOwner, public Fadeable {
 public:
     Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGroup& parent);
 
@@ -80,7 +80,7 @@ public:
     glm::vec2 tileUvToTextureSamplePosition(const TileUvTransform& uvTransform,
         const glm::vec2& tileUV);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void initializeBasedOnType(layers::Layer::ID typeId, ghoul::Dictionary initDict);
@@ -88,16 +88,16 @@ private:
 
     LayerGroup& _parent;
 
-    properties::OptionProperty _typeOption;
-    properties::OptionProperty _blendModeOption;
-    properties::BoolProperty _enabled;
-    properties::TriggerProperty _reset;
-    properties::TriggerProperty _remove;
-    properties::StringProperty _guiDescription;
+    OptionProperty _typeOption;
+    OptionProperty _blendModeOption;
+    BoolProperty _enabled;
+    TriggerProperty _reset;
+    TriggerProperty _remove;
+    StringProperty _guiDescription;
 
     layers::Layer::ID _typeId;
     std::unique_ptr<TileProvider> _tileProvider;
-    properties::Vec3Property _solidColor;
+    Vec3Property _solidColor;
     LayerRenderSettings _renderSettings;
     LayerAdjustment _layerAdjustment;
 
@@ -110,6 +110,6 @@ private:
     bool _hasManualZIndex = false;
   };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYER___H__

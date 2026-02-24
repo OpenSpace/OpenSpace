@@ -45,7 +45,7 @@ public:
     bool loadStateFromOsfls(const std::string& pathToOsflsFile);
     void saveStateToOsfls(const std::string& pathToOsflsFile);
 
-    bool loadStateFromJson(const std::string& pathToJsonFile, fls::Model model,
+    bool loadStateFromJson(const std::string& pathToJsonFile, Model model,
         float coordToMeters);
     void saveStateToJson(const std::string& pathToJsonFile);
 
@@ -56,7 +56,7 @@ public:
     const std::vector<GLsizei>& lineCount() const;
     const std::vector<GLint>& lineStart() const;
 
-    fls::Model model() const;
+    Model model() const;
     size_t nExtraQuantities() const;
     double triggerTime() const;
     const std::vector<glm::vec3>& vertexPositions() const;
@@ -64,7 +64,7 @@ public:
     // Special getter. Returns extraQuantities[index].
     std::vector<float> extraQuantity(size_t index, bool& isSuccesful) const;
 
-    void setModel(fls::Model m);
+    void setModel(Model m);
     void setTriggerTime(double t);
     void setExtraQuantityNames(std::vector<std::string> names);
 
@@ -74,7 +74,7 @@ public:
 private:
     uint8_t _isMorphable = 0;
     double _triggerTime = -1.0;
-    fls::Model _model = fls::Model::Invalid;
+    Model _model = Model::Invalid;
 
     std::vector<std::vector<float>> _extraQuantities;
     std::vector<std::string> _extraQuantityNames;

@@ -24,11 +24,13 @@
 
 #include "fragment.glsl"
 
-flat in float gs_colorParameter;
-flat in float vs_screenSpaceDepth;
-flat in vec4 vs_positionViewSpace;
-in vec2 texCoord;
-flat in int layer;
+in Data {
+  flat int textureLayer;
+  flat float colorParameter;
+  vec2 texCoords;
+  flat float screenSpaceDepth;
+  flat vec4 positionViewSpace;
+} in_data;
 
 uniform float opacity;
 uniform vec3 color;
@@ -63,28 +65,30 @@ const int OutlineStyleRound = 0;
 const int OutlineStyleSquare = 1;
 const int OutlineStyleBottom = 2;
 
+
 vec4 sampleColorMap(float dataValue) {
-    if (useNanColor && isnan(dataValue)) {
-        return nanColor;
-    }
+  if (useNanColor && isnan(dataValue)) {
+    return nanColor;
+  }
 
-    bool isOutside = dataValue < cmapRangeMin || dataValue > cmapRangeMax;
-    if (isnan(dataValue) || (hideOutsideRange && isOutside)) {
-        discard;
-    }
+  bool isOutside = dataValue < cmapRangeMin || dataValue > cmapRangeMax;
+  if (isnan(dataValue) || (hideOutsideRange && isOutside)) {
+    discard;
+  }
 
-    if (useBelowRangeColor && dataValue < cmapRangeMin) {
-        return belowRangeColor;
-    }
+  if (useBelowRangeColor && dataValue < cmapRangeMin) {
+    return belowRangeColor;
+  }
 
-    if (useAboveRangeColor && dataValue > cmapRangeMax) {
-        return aboveRangeColor;
-    }
+  if (useAboveRangeColor && dataValue > cmapRangeMax) {
+    return aboveRangeColor;
+  }
 
-    float t = (dataValue - cmapRangeMin) / (cmapRangeMax - cmapRangeMin);
-    t = clamp(t, 0.0, 1.0);
-    return texture(colorMapTexture, t);
+  float t = (dataValue - cmapRangeMin) / (cmapRangeMax - cmapRangeMin);
+  t = clamp(t, 0.0, 1.0);
+  return texture(colorMapTexture, t);
 }
+
 
 Fragment getFragment() {
   if (fadeInValue == 0.0 || opacity == 0.0) {
@@ -92,7 +96,7 @@ Fragment getFragment() {
   }
 
   // Moving the origin to the center and calculating the length
-  vec2 centeredTexCoords = (texCoord - vec2(0.5)) * 2.0;
+  vec2 centeredTexCoords = (in_data.texCoords - vec2(0.5)) * 2.0;
   float lengthFromCenter = length(centeredTexCoords);
 
   bool shouldBeRound = (!hasSpriteTexture && !enableOutline) ||
@@ -105,15 +109,14 @@ Fragment getFragment() {
   vec4 fullColor = vec4(color, 1.0);
   vec4 cmapColor = vec4(1.0);
   if (useColorMap) {
-    cmapColor = sampleColorMap(gs_colorParameter);
+    cmapColor = sampleColorMap(in_data.colorParameter);
     if (!useCmapOutline) {
       fullColor = cmapColor;
     }
   }
 
-  vec4 textureColor = vec4(1.0);
   if (hasSpriteTexture) {
-    fullColor *= texture(spriteTexture, vec3(texCoord, layer));
+    fullColor *= texture(spriteTexture, vec3(in_data.texCoords, in_data.textureLayer));
   }
 
   // Border
@@ -128,25 +131,19 @@ Fragment getFragment() {
       pixelIsOutline = isOutsideY || isOutsideX;
     }
     else if (outlineStyle == OutlineStyleBottom) {
-      pixelIsOutline = texCoord.y < 0.5 * outlineWeight;
+      pixelIsOutline = in_data.texCoords.y < 0.5 * outlineWeight;
     }
 
     if (pixelIsOutline) {
-      vec4 theOutlineColor = vec4(outlineColor, 1.0);
-      if (useColorMap && useCmapOutline) {
-        theOutlineColor = cmapColor;
-      }
-      fullColor = theOutlineColor;
+      fullColor = useColorMap && useCmapOutline ? cmapColor : vec4(outlineColor, 1.0);
     }
   }
 
-  fullColor.a *= opacity * fadeInValue;
-
   Fragment frag;
   frag.color = fullColor;
-  frag.depth = vs_screenSpaceDepth;
-  frag.gPosition = vs_positionViewSpace;
+  frag.color.a *= opacity * fadeInValue;
+  frag.depth = in_data.screenSpaceDepth;
+  frag.gPosition = in_data.positionViewSpace;
   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-
   return frag;
 }

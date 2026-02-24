@@ -46,11 +46,11 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 struct RenderData;
 struct UpdateData;
 
-class RingsComponent : public properties::PropertyOwner, public Fadeable {
+class RingsComponent : public PropertyOwner, public Fadeable {
 public:
     // Callback for when readiness state changes
     using ReadinessChangeCallback = std::function<void()>;
@@ -69,7 +69,7 @@ public:
     void update(const UpdateData& data);
     bool isEnabled() const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
     double size() const;
 
     // Readiness change callback
@@ -89,23 +89,22 @@ public:
 
 private:
     void loadTexture();
-    void createPlane();
     void compileShadowShader();
     void checkAndNotifyReadinessChange();
 
-    properties::StringProperty _texturePath;
-    properties::StringProperty _textureFwrdPath;
-    properties::StringProperty _textureBckwrdPath;
-    properties::StringProperty _textureUnlitPath;
-    properties::StringProperty _textureColorPath;
-    properties::StringProperty _textureTransparencyPath;
-    properties::FloatProperty _size;
-    properties::Vec2Property _offset;
-    properties::FloatProperty _nightFactor;
-    properties::FloatProperty _colorFilter;
-    properties::BoolProperty _enabled;
-    properties::FloatProperty _zFightingPercentage;
-    properties::IntProperty _nShadowSamples;
+    StringProperty _texturePath;
+    StringProperty _textureFwrdPath;
+    StringProperty _textureBckwrdPath;
+    StringProperty _textureUnlitPath;
+    StringProperty _textureColorPath;
+    StringProperty _textureTransparencyPath;
+    FloatProperty _size;
+    Vec2Property _offset;
+    FloatProperty _nightFactor;
+    FloatProperty _colorFilter;
+    BoolProperty _enabled;
+    FloatProperty _zFightingPercentage;
+    IntProperty _nShadowSamples;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     std::unique_ptr<ghoul::opengl::ProgramObject> _geometryOnlyShader;
@@ -136,9 +135,9 @@ private:
     ghoul::Dictionary _ringsDictionary;
     bool _textureIsDirty = false;
     bool _isAdvancedTextureEnabled = false;
-    GLuint _quad = 0;
-    GLuint _vertexPositionBuffer = 0;
-    bool _planeIsDirty = false;
+    GLuint _vao = 0;
+    GLuint _vbo = 0;
+    bool _planeIsDirty = true;
 
     glm::vec3 _sunPosition = glm::vec3(0.f);
     glm::vec3 _camPositionObjectSpace = glm::vec3(0.f);

@@ -40,10 +40,10 @@ namespace {
     constexpr std::string_view _loggerCat = "GeoJsonManager";
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 GeoJsonManager::GeoJsonManager()
-    : properties::PropertyOwner({ "GeographicOverlays", "Geographic Overlays" })
+    : PropertyOwner({ "GeographicOverlays", "Geographic Overlays" })
 {}
 
 void GeoJsonManager::initialize(RenderableGlobe* globe) {
@@ -85,7 +85,7 @@ void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
         _geoJsonObjects.push_back(std::move(geo));
         addPropertySubOwner(ptr);
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         logError(e);
     }
     catch (const ghoul::RuntimeError& e) {
@@ -128,4 +128,4 @@ void GeoJsonManager::render(const RenderData& data) {
     }
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

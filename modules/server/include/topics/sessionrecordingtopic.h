@@ -42,14 +42,14 @@ public:
 private:
     static constexpr int UnsetOnChangeHandle = -1;
 
-    bool _sendState;
-    bool _sendFiles;
+    bool _sendState = false;
+    bool _sendFiles = false;
 
     // Provides the idle/recording/playback state int value in json message
     void sendJsonData();
 
-    interaction::SessionRecordingHandler::SessionState _lastState =
-        interaction::SessionRecordingHandler::SessionState::Idle;
+    SessionRecordingHandler::SessionState _lastState =
+        SessionRecordingHandler::SessionState::Idle;
     int _stateCallbackHandle = UnsetOnChangeHandle;
     bool _isDone = false;
 };

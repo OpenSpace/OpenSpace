@@ -43,12 +43,12 @@ namespace {
         // is triggered
         std::optional<std::string> action;
     };
-#include "transition_codegen.cpp"
 } // namespace
+#include "transition_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation Transition::Documentation() {
+Documentation Transition::Documentation() {
     return codegen::doc<Parameters>("statemachine_transition");
 }
 

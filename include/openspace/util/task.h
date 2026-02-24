@@ -33,7 +33,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 class Task {
 public:
@@ -47,7 +47,7 @@ public:
     virtual void perform(const ProgressCallback& onProgress) = 0;
     virtual std::string description() = 0;
 
-    static documentation::Documentation documentation();
+    static Documentation documentation();
 };
 
 } // namespace openspace

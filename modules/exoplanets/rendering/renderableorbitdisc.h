@@ -51,7 +51,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     /**
@@ -59,11 +59,11 @@ private:
      */
     float planeSize() const;
 
-    properties::StringProperty _texturePath;
-    properties::FloatProperty _size;
-    properties::FloatProperty _eccentricity;
-    properties::Vec2Property _offset;
-    properties::Vec3Property _multiplyColor;
+    StringProperty _texturePath;
+    FloatProperty _size;
+    FloatProperty _eccentricity;
+    Vec2Property _offset;
+    Vec3Property _multiplyColor;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader = nullptr;
     UniformCache(modelViewProjectionTransform, offset, opacity, discTexture,

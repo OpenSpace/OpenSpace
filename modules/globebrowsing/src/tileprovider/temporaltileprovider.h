@@ -41,9 +41,9 @@ namespace ghoul::opengl {
     class Texture;
 } // namespace ghoul::opengl
 
-namespace openspace { class Time; }
+namespace openspace {
 
-namespace openspace::globebrowsing {
+class Time;
 
 /**
  * Provide `Tile`s from web map services that have temporal resolution.
@@ -69,7 +69,7 @@ public:
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     enum class Mode {
@@ -130,8 +130,8 @@ private:
     } _folder;
 
     ghoul::Dictionary _initDict;
-    properties::BoolProperty _useFixedTime;
-    properties::StringProperty _fixedTime;
+    BoolProperty _useFixedTime;
+    StringProperty _fixedTime;
     bool _fixedTimeDirty = true;
 
     TileProvider* _currentTileProvider = nullptr;
@@ -143,6 +143,6 @@ private:
     std::unique_ptr<InterpolateTileProvider> _interpolateTileProvider;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__TEMPORALTILEPROVIDER___H__

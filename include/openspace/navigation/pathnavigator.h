@@ -36,20 +36,17 @@
 #include <memory>
 
 namespace openspace {
-    namespace scripting { struct LuaLibrary; }
-    class Camera;
-    struct CameraPose;
-    class SceneGraphNode;
-} // namespace openspace
 
-namespace openspace::interaction {
-
+class Camera;
+struct CameraPose;
+struct LuaLibrary;
 class Path;
+class SceneGraphNode;
 
-class PathNavigator : public properties::PropertyOwner {
+class PathNavigator : public PropertyOwner {
 public:
     PathNavigator();
-    virtual ~PathNavigator() override;
+    ~PathNavigator() override;
 
     // Accessors
     Camera* camera() const;
@@ -95,7 +92,7 @@ public:
      * \return The Lua library that contains all Lua functions available to affect the
      *         path navigation
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     void handlePathEnd();
@@ -113,19 +110,19 @@ private:
 
     bool _setCameraToEndNextFrame = false;
 
-    properties::OptionProperty _defaultPathType;
-    properties::BoolProperty _includeRoll;
-    properties::FloatProperty _speedScale;
-    properties::BoolProperty _applyIdleBehaviorOnFinish;
-    properties::DoubleProperty _arrivalDistanceFactor;
-    properties::FloatProperty _linearRotationSpeedFactor;
-    properties::DoubleProperty _minValidBoundingSphere;
-    properties::StringListProperty _relevantNodeTags;
+    OptionProperty _defaultPathType;
+    BoolProperty _includeRoll;
+    FloatProperty _speedScale;
+    BoolProperty _applyIdleBehaviorOnFinish;
+    DoubleProperty _arrivalDistanceFactor;
+    FloatProperty _linearRotationSpeedFactor;
+    DoubleProperty _minValidBoundingSphere;
+    StringListProperty _relevantNodeTags;
 
     std::vector<SceneGraphNode*> _relevantNodes;
     bool _hasInitializedRelevantNodes = false;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___PATHNAVIGATOR___H__

@@ -44,12 +44,12 @@ namespace {
         std::optional<ghoul::Dictionary> timeFrame
             [[codegen::reference("core_time_frame")]];
     };
-#include "scale_codegen.cpp"
 } // namespace
+#include "scale_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation Scale::Documentation() {
+Documentation Scale::Documentation() {
     return codegen::doc<Parameters>("core_transform_scale");
 }
 
@@ -72,7 +72,7 @@ ghoul::mm_unique_ptr<Scale> Scale::createFromDictionary(
 }
 
 Scale::Scale(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "Scale" })
+    : PropertyOwner({ "Scale" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

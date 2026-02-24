@@ -28,14 +28,11 @@ namespace openspace {
 
 BrickCover::BrickCover() {}
 
-BrickCover::BrickCover(int numBricks) {
-    lowX = 0;
-    lowY = 0;
-    lowZ = 0;
-    highX = numBricks;
-    highY = numBricks;
-    highZ = numBricks;
-}
+BrickCover::BrickCover(int numBricks)
+    : highX(numBricks)
+    , highY(numBricks)
+    , highZ(numBricks)
+{}
 
 BrickCover BrickCover::split(bool x, bool y, bool z) const {
     BrickCover child;

@@ -34,18 +34,20 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo IntensityInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo IntensityInfo = {
         "Intensity",
         "Intensity",
         "The intensity of this light source.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NodeInfo = {
+    constexpr Property::PropertyInfo NodeInfo = {
         "Node",
         "Node",
         "The identifier of the scene graph node to follow.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `LightSource` type represents a light source placed at the position of a
@@ -63,12 +65,12 @@ namespace {
         // [[codegen::verbatim(NodeInfo.description)]]
         std::string node [[codegen::identifier()]];
     };
-#include "scenegraphlightsource_codegen.cpp"
 } // namespace
+#include "scenegraphlightsource_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation SceneGraphLightSource::Documentation() {
+Documentation SceneGraphLightSource::Documentation() {
     return codegen::doc<Parameters>("base_scene_graph_light_source");
 }
 

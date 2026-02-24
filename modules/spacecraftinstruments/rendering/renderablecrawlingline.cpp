@@ -37,6 +37,10 @@
 #include <cmath>
 #include <cstddef>
 
+// @TODO:  This class is not properly working anymore and needs to be substantially
+//         rewritten. When doing so, make sure that any color property uses three
+//         values, not four. The opacity should be handled separately
+
 namespace {
     struct VBOData {
         std::array<float, 3> position;
@@ -64,16 +68,12 @@ namespace {
         // the line and one at the end.
         Color color;
     };
-#include "renderablecrawlingline_codegen.cpp"
 } // namespace
-
-// @TODO:  This class is not properly working anymore and needs to be substantially
-//         rewritten. When doing so, make sure that any color property uses three
-//         values, not four. The opacity should be handled separately
+#include "renderablecrawlingline_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableCrawlingLine::Documentation() {
+Documentation RenderableCrawlingLine::Documentation() {
     return codegen::doc<Parameters>("spacecraftinstruments_renderablecrawlingline");
 }
 
@@ -100,34 +100,24 @@ void RenderableCrawlingLine::initializeGL() {
         absPath("${MODULE_SPACECRAFTINSTRUMENTS}/shaders/crawlingline_fs.glsl")
     );
 
-    glGenVertexArrays(1, &_vao);
-    glGenBuffers(1, &_vbo);
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(_vbo, 2 * sizeof(VBOData), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
-    glBindVertexArray(_vao);
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferData(GL_ARRAY_BUFFER, 2 * sizeof(VBOData), nullptr, GL_DYNAMIC_DRAW);
+    glCreateVertexArrays(1, &_vao);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, 3 * sizeof(VBOData));
 
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(VBOData), nullptr);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(VBOData),
-        reinterpret_cast<void*>(offsetof(VBOData, color))
-    );
-
-    glBindVertexArray(0);
+    glEnableVertexArrayAttrib(_vao, 1);
+    glVertexArrayAttribFormat(_vao, 1, 4, GL_FLOAT, GL_FALSE, offsetof(VBOData, color));
+    glVertexArrayAttribBinding(_vao, 1, 0);
 }
 
 void RenderableCrawlingLine::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
     glDeleteBuffers(1, &_vbo);
-    _vbo = 0;
 
     if (_program) {
         global::renderEngine->removeRenderProgram(_program.get());
@@ -191,9 +181,7 @@ void RenderableCrawlingLine::update(const UpdateData& data) {
         }
     };
 
-
-    glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, 2 * sizeof(VBOData), vboData.data());
+    glNamedBufferSubData(_vbo, 0, 2 * sizeof(VBOData), vboData.data());
 
     if (ImageSequencer::ref().isReady()) {
         const float imageSequenceTime = ImageSequencer::ref().instrumentActiveTime(

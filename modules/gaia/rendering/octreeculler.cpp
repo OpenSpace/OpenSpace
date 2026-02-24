@@ -27,22 +27,24 @@
 #include <ghoul/glm.h>
 #include <utility>
 
-namespace openspace {
-
 namespace {
-    bool intersects(const globebrowsing::AABB3& bb, const globebrowsing::AABB3& o) {
+    using namespace openspace;
+
+    bool intersects(const AABB3& bb, const AABB3& o) {
         return (bb.min.x <= o.max.x) && (o.min.x <= bb.max.x)
             && (bb.min.y <= o.max.y) && (o.min.y <= bb.max.y)
             && (bb.min.z <= o.max.z) && (o.min.z <= bb.max.z);
     }
 
-    void expand(globebrowsing::AABB3& bb, const glm::vec3& p) {
+    void expand(AABB3& bb, const glm::vec3& p) {
         bb.min = glm::min(bb.min, p);
         bb.max = glm::max(bb.max, p);
     }
 } // namespace
 
-OctreeCuller::OctreeCuller(globebrowsing::AABB3 viewFrustum)
+namespace openspace {
+
+OctreeCuller::OctreeCuller(AABB3 viewFrustum)
     : _viewFrustum(std::move(viewFrustum))
 {}
 
@@ -70,7 +72,7 @@ void OctreeCuller::createNodeBounds(const std::vector<glm::dvec4>& corners,
                                     const glm::dmat4& mvp)
 {
     // Create a bounding box in clipping space from node boundaries.
-    _nodeBounds = globebrowsing::AABB3();
+    _nodeBounds = AABB3();
 
     for (size_t i = 0; i < 8; i++) {
         const glm::dvec4 cornerClippingSpace = mvp * corners[i];

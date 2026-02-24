@@ -30,11 +30,9 @@
 
 namespace openspace {
 
-namespace properties {
-    class Property;
-    class PropertyOwner;
-} // namespace properties
 class IswaGroup;
+class Property;
+class PropertyOwner;
 class Renderable;
 class Scene;
 class SceneGraphNode;
@@ -43,10 +41,10 @@ class ScreenSpaceRenderable;
 Scene* sceneGraph();
 SceneGraphNode* sceneGraphNode(std::string_view name);
 const Renderable* renderable(std::string_view name);
-properties::Property* property(std::string_view uri);
-properties::PropertyOwner* propertyOwner(std::string_view uri);
-const std::vector<properties::Property*>& allProperties();
-const std::vector<properties::PropertyOwner*>& allPropertyOwners();
+Property* property(std::string_view uri);
+PropertyOwner* propertyOwner(std::string_view uri);
+const std::vector<Property*>& allProperties();
+const std::vector<PropertyOwner*>& allPropertyOwners();
 
 } // namespace openspace
 

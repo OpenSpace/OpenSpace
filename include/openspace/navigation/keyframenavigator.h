@@ -31,12 +31,10 @@
 #include <string>
 
 namespace openspace {
-    namespace datamessagestructures { struct CameraKeyframe; }
-    class Camera;
-    class TimeManager;
-} // namespace openspace
 
-namespace openspace::interaction {
+namespace datamessagestructures { struct CameraKeyframe; }
+class Camera;
+class TimeManager;
 
 class KeyframeNavigator {
 public:
@@ -80,6 +78,6 @@ private:
     double _referenceTimestamp = 0.0;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___KEYFRAMENAVIGATOR___H__

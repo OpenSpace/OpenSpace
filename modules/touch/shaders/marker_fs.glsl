@@ -22,10 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "PowerScaling/powerScaling_fs.hglsl"
+#include "powerscaling/powerscaling_fs.glsl"
 #include "fragment.glsl"
-
-in vec2 out_position;
 
 uniform float opacity;
 uniform float thickness;
@@ -42,7 +40,7 @@ Fragment getFragment() {
   float w = 0.1; // wdith for smoothing
   if (mag > 1.0 - w) {
     // Kill pixels outside circle. Do a smoothstep for soft border
-    float t = (mag - (1.0-w)) / w;
+    float t = (mag - (1.0 - w)) / w;
     edgeSmoothing = smoothstep(1.0, 0.0, t);
     if (edgeSmoothing <= 0.0) {
         discard;

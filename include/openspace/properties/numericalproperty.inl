@@ -31,7 +31,7 @@ namespace {
     constexpr std::string_view ExponentValueKey = "exponent";
 } // namespace
 
-namespace openspace::properties {
+namespace openspace {
 
 template <typename T>
 NumericalProperty<T>::NumericalProperty(Property::PropertyInfo info, T value,
@@ -166,4 +166,4 @@ void NumericalProperty<T>::interpolateValue(float t,
     ));
 }
 
-} // namespace openspace::properties
+} // namespace openspace

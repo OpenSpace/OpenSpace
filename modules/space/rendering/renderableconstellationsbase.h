@@ -42,15 +42,15 @@ class RenderableConstellationsBase : public Renderable {
 public:
     virtual ~RenderableConstellationsBase() override = default;
 
-    virtual void initialize() override;
-    virtual void initializeGL() override = 0;
-    virtual void deinitializeGL() override = 0;
+    void initialize() override;
+    void initializeGL() override = 0;
+    void deinitializeGL() override = 0;
 
-    virtual bool isReady() const override;
+    bool isReady() const override;
 
-    virtual void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     explicit RenderableConstellationsBase(const ghoul::Dictionary& dictionary);
@@ -66,10 +66,10 @@ protected:
     std::string constellationFullName(const std::string& identifier) const;
 
     /// Width for the rendered lines
-    properties::FloatProperty _lineWidth;
+    FloatProperty _lineWidth;
 
     /// Property that stores all constellations chosen by the user to be drawn
-    properties::SelectionProperty _selection;
+    SelectionProperty _selection;
 
     /// Temporary storage of which constellations should be rendered as stated in the
     /// asset file
@@ -97,7 +97,7 @@ private:
     void fillSelectionProperty();
 
     /// The file containing constellation names and abbreviations
-    properties::StringProperty _namesFilename;
+    StringProperty _namesFilename;
 };
 
 } // namespace openspace

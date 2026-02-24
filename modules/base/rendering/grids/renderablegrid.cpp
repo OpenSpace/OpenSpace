@@ -37,59 +37,61 @@
 #include <cmath>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color of the grid lines.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HighlightColorInfo = {
+    constexpr Property::PropertyInfo HighlightColorInfo = {
         "HighlightColor",
         "Highlight color",
         "The color of the highlighted lines in the grid.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    constexpr Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Number of segments",
         "The number of segments to split the grid into, in each direction (x and y).",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HighlightRateInfo = {
+    constexpr Property::PropertyInfo HighlightRateInfo = {
         "HighlightRate",
         "Highlight rate",
         "The rate that the columns and rows are highlighted, counted with respect to the "
         "center of the grid. If the number of segments in the grid is odd, the "
         "highlighting might be offset from the center.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the grid lines. The larger number, the thicker the lines.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HighlightLineWidthInfo = {
+    constexpr Property::PropertyInfo HighlightLineWidthInfo = {
         "HighlightLineWidth",
         "Highlight line width",
         "The width of the highlighted grid lines. The larger number, the thicker the "
         "lines.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Grid size",
         "The size of the grid (in the x and y direction), given in meters.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo LabelsInfo = {
+    const PropertyOwner::PropertyOwnerInfo LabelsInfo = {
         "Labels",
         "Labels",
         "The labels for the grid."
@@ -126,12 +128,12 @@ namespace {
         // [[codegen::verbatim(LabelsInfo.description)]]
         std::optional<ghoul::Dictionary> labels [[codegen::reference("labelscomponent")]];
     };
-#include "renderablegrid_codegen.cpp"
 } // namespace
+#include "renderablegrid_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableGrid::Documentation() {
+Documentation RenderableGrid::Documentation() {
     return codegen::doc<Parameters>("base_renderable_grid");
 }
 
@@ -150,12 +152,12 @@ RenderableGrid::RenderableGrid(const ghoul::Dictionary& dictionary)
     addProperty(Fadeable::_opacity);
 
     _color = p.color.value_or(_color);
-    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color.setViewOption(Property::ViewOptions::Color);
     addProperty(_color);
 
     // If no highlight color is specified then use the base color
     _highlightColor = p.highlightColor.value_or(_color);
-    _highlightColor.setViewOption(properties::Property::ViewOptions::Color);
+    _highlightColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_highlightColor);
 
     _segments = p.segments.value_or(_segments);
@@ -209,30 +211,23 @@ void RenderableGrid::initializeGL() {
         }
     );
 
-    glGenVertexArrays(1, &_vaoID);
-    glGenBuffers(1, &_vBufferID);
-    glGenVertexArrays(1, &_highlightVaoID);
-    glGenBuffers(1, &_highlightVBufferID);
+    glCreateVertexArrays(1, &_vao);
+    glEnableVertexArrayAttrib(_vao, 0);
+    glVertexArrayAttribFormat(_vao, 0, 3, GL_DOUBLE, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_vao, 0, 0);
 
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBindVertexArray(_highlightVaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _highlightVBufferID);
-
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
+    glCreateVertexArrays(1, &_highlightVao);
+    glEnableVertexArrayAttrib(_highlightVao, 0);
+    glVertexArrayAttribFormat(_highlightVao, 0, 3, GL_DOUBLE, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_highlightVao, 0, 0);
 }
 
 void RenderableGrid::deinitializeGL() {
-    glDeleteVertexArrays(1, &_vaoID);
-    _vaoID = 0;
-    glDeleteVertexArrays(1, &_highlightVaoID);
-    _highlightVaoID = 0;
+    glDeleteVertexArrays(1, &_vao);
+    glDeleteVertexArrays(1, &_highlightVao);
 
-    glDeleteBuffers(1, &_vBufferID);
-    _vBufferID = 0;
-    glDeleteBuffers(1, &_highlightVBufferID);
-    _highlightVBufferID = 0;
+    glDeleteBuffers(1, &_vbo);
+    glDeleteBuffers(1, &_highlightVbo);
 
     BaseModule::ProgramObjectManager.release(
         "GridProgram",
@@ -271,35 +266,27 @@ void RenderableGrid::render(const RenderData& data, RendererTasks&) {
         );
     }
 
-    _gridProgram->setUniform("modelViewTransform", modelViewTransform);
-    _gridProgram->setUniform("MVPTransform", modelViewProjectionMatrix);
+    _gridProgram->setUniform("modelView", modelViewTransform);
+    _gridProgram->setUniform("modelViewProjection", modelViewProjectionMatrix);
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
     // Change GL state:
-#ifndef __APPLE__
     glLineWidth(_lineWidth);
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
-    glLineWidth(1.f);
-#endif // __APPLE__
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_LINE_SMOOTH);
     glEnable(GL_DEPTH_TEST);
 
     // Render minor grid
-    glBindVertexArray(_vaoID);
+    glBindVertexArray(_vao);
     glDrawArrays(_mode, 0, static_cast<GLsizei>(_varray.size()));
 
     // Render major grid
-#ifndef __APPLE__
     glLineWidth(_highlightLineWidth);
-#else // ^^^^ __APPLE__ // !__APPLE__ vvvv
-    glLineWidth(1.f);
-#endif // __APPLE__
     _gridProgram->setUniform("gridColor", _highlightColor);
 
-    glBindVertexArray(_highlightVaoID);
+    glBindVertexArray(_highlightVao);
     glDrawArrays(_mode, 0, static_cast<GLsizei>(_highlightArray.size()));
 
     // Restore GL State
@@ -431,32 +418,27 @@ void RenderableGrid::update(const UpdateData&) {
 
     setBoundingSphere(glm::length(glm::dvec2(halfSize)));
 
-    // Minor grid
-    glBindVertexArray(_vaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _vBufferID);
-    glBufferData(
-        GL_ARRAY_BUFFER,
+    glDeleteBuffers(1, &_vbo);
+    glCreateBuffers(1, &_vbo);
+    glNamedBufferStorage(
+        _vbo,
         _varray.size() * sizeof(Vertex),
         _varray.data(),
-        GL_STATIC_DRAW
+        GL_NONE_BIT
     );
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, sizeof(Vertex), nullptr);
+    glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));
 
-    // Major grid
-    glBindVertexArray(_highlightVaoID);
-    glBindBuffer(GL_ARRAY_BUFFER, _highlightVBufferID);
-    glBufferData(
-        GL_ARRAY_BUFFER,
-        _highlightArray.size() * sizeof(Vertex),
-        _highlightArray.data(),
-        GL_STATIC_DRAW
-    );
-    glVertexAttribPointer(0, 3, GL_DOUBLE, GL_FALSE, sizeof(Vertex), nullptr);
-
-    glBindVertexArray(0);
-
-    _gridIsDirty = false;
+    glDeleteBuffers(1, &_highlightVbo);
+    if (!_highlightArray.empty()) {
+        glCreateBuffers(1, &_highlightVbo);
+        glNamedBufferStorage(
+            _highlightVbo,
+            _highlightArray.size() * sizeof(Vertex),
+            _highlightArray.data(),
+            GL_NONE_BIT
+        );
+        glVertexArrayVertexBuffer(_highlightVao, 0, _highlightVbo, 0, sizeof(Vertex));
+    }
 }
 
 } // namespace openspace

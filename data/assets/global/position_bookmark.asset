@@ -1,0 +1,105 @@
+local function loadBookmarks(guiPath, bookmarkfile)
+  local genBookmarks = {}
+  local PARSEC_CONSTANT = 3.0856776E16
+
+  local extract_first_line = false
+  local contents = openspace.readCSVFile(bookmarkfile, extract_first_line)
+
+  for _,v in ipairs(contents) do
+    local group = v[1]
+    local name = v[2]
+    local x = v[3]
+    local y = v[4]
+    local z = v[5]
+    local scale = (v[6] == "" and 75000) or v[6]
+    local linewidth = (v[7] == "" and 2.0) or v[7]
+
+    local identifier = openspace.makeIdentifier(guiPath .. "-" .. name)
+
+    local path = "/" .. guiPath
+    if (group ~= "") then
+      path = path .. "/" .. group
+    end
+
+    local sgn = {
+      Identifier = identifier,
+      Transform = {
+        Translation = {
+          Type = "StaticTranslation",
+          Position = {
+            tonumber(x) * PARSEC_CONSTANT,
+            tonumber(y) * PARSEC_CONSTANT,
+            tonumber(z) * PARSEC_CONSTANT
+          }
+        },
+        Rotation = {
+          Type = "StaticRotation",
+          Rotation = {
+            -0.05487554,  0.4941095, -0.8676661,
+            -0.9938214 , -0.1109906, -0.0003515167,
+            -0.09647644,  0.8622859,  0.4971472
+          }
+        },
+        Scale = {
+          Type = "StaticScale",
+          Scale = tonumber(scale)
+        }
+      },
+      Renderable = {
+        Type = "RenderableSphericalGrid",
+        Enabled = false,
+        Opacity = 0.3,
+        Color = { 0.3, 0.84, 1.0 },
+        LineWidth = linewidth
+      },
+      GUI = {
+        Name = name,
+        Path = "/" .. guiPath
+      }
+    }
+
+    table.insert(genBookmarks, sgn)
+  end
+  return genBookmarks
+end
+
+
+local localBookmarks = openspace.absPath("${USER}/bookmarks/position_bookmarks.csv")
+local bookmarksDirectory = openspace.absPath("${USER}/bookmarks")
+
+if not openspace.directoryExists(bookmarksDirectory) then
+  openspace.createDirectory(bookmarksDirectory)
+end
+
+-- Create bookmarks file if it does not exist
+if not openspace.fileExists(localBookmarks) then
+  openspace.downloadFile(
+    "http://liu-se.cdn.openspaceproject.com/files/misc/position_bookmarks.csv",
+    localBookmarks,
+    true
+  )
+end
+
+local nodes = loadBookmarks("Local Bookmarks", localBookmarks)
+
+
+asset.onInitialize(function()
+  for _, n in ipairs(nodes) do
+    local success, error = pcall(openspace.addSceneGraphNode, n)
+    if not success then
+      openspace.printError(error)
+    end
+  end
+end)
+
+asset.onDeinitialize(function()
+  for _, n in ipairs(nodes) do
+    if openspace.hasSceneGraphNode(n.Identifier) then
+      openspace.removeSceneGraphNode(n)
+    end
+  end
+end)
+
+for _, n in ipairs(nodes) do
+  asset.export(n)
+end

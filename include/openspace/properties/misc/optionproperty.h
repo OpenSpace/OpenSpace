@@ -27,7 +27,7 @@
 
 #include <openspace/properties/numericalproperty.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
  * The OptionProperty is a property that provides a number of predefined (using the
@@ -146,6 +146,6 @@ private:
     std::vector<Option> _options;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___OPTIONPROPERTY___H__

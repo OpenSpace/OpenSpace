@@ -22,21 +22,21 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
- #include "fragment.glsl"
- #include "floatoperations.glsl"
+#include "fragment.glsl"
+#include "floatoperations.glsl"
 
- in float vs_depth;
- in vec4 finalColor;
- in vec4 vs_positionViewSpace;
+in Data {
+   vec4 positionViewSpace;
+   vec4 finalColor;
+   float depth;
+} in_data;
 
 
- Fragment getFragment() {
-    Fragment frag;
-
-    frag.color = finalColor;
-    frag.depth = vs_depth;
-    frag.gPosition = vs_positionViewSpace;
-    frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
-
-    return frag;
- }
+Fragment getFragment() {
+   Fragment frag;
+   frag.color = in_data.finalColor;
+   frag.depth = in_data.depth;
+   frag.gPosition = in_data.positionViewSpace;
+   frag.gNormal = vec4(0.0, 0.0, 0.0, 1.0);
+   return frag;
+}

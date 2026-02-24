@@ -36,67 +36,69 @@
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "LabelsComponent";
 
     constexpr int RenderOptionFaceCamera = 0;
     constexpr int RenderOptionPositionNormal = 1;
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether the labels will be visible or not. They are "
         "disabled per default.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FileInfo = {
+    constexpr Property::PropertyInfo FileInfo = {
         "File",
         "File",
         "The speck label file with the data for the labels.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The color of the labels.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "The size of the labels in pixels.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
+    constexpr Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font size",
         "Font size for the labels. This is different from the text size.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MinMaxInfo = {
+    constexpr Property::PropertyInfo MinMaxInfo = {
         "MinMaxSize",
         "Min/max size",
         "The minimum and maximum size (in pixels) of the labels.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FaceCameraInfo = {
+    constexpr Property::PropertyInfo FaceCameraInfo = {
         "FaceCamera",
         "Face camera",
         "If enabled, the labels will be rotated to face the camera. For non-linear "
         "display rendering (for example fisheye) this should be set to false.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransformationMatrixInfo = {
+    constexpr Property::PropertyInfo TransformationMatrixInfo = {
         "TransformationMatrix",
         "Transformation matrix",
         "Transformation matrix to be applied to the labels.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(LabelsComponent)]] Parameters {
@@ -144,17 +146,17 @@ namespace {
         // [[codegen::verbatim(TransformationMatrixInfo.description)]]
         std::optional<glm::dmat4x4> transformationMatrix;
     };
-#include "labelscomponent_codegen.cpp"
 } // namespace
+#include "labelscomponent_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation LabelsComponent::Documentation() {
+Documentation LabelsComponent::Documentation() {
     return codegen::doc<Parameters>("labelscomponent");
 }
 
 LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "Labels" })
+    : PropertyOwner({ "Labels" })
     , _enabled(EnabledInfo, false)
     , _color(ColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _size(SizeInfo, 8.f, 0.5f, 24.f)
@@ -188,7 +190,7 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
     addProperty(Fadeable::_fade);
 
     _color = p.color.value_or(_color);
-    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color.setViewOption(Property::ViewOptions::Color);
     addProperty(_color);
 
     _size = p.size.value_or(_size);
@@ -202,7 +204,7 @@ LabelsComponent::LabelsComponent(const ghoul::Dictionary& dictionary)
     _fontSize.setReadOnly(true);
 
     _minMaxSize = p.minMaxSize.value_or(_minMaxSize);
-    _minMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _minMaxSize.setViewOption(Property::ViewOptions::MinMaxRange);
     addProperty(_minMaxSize);
 
     if (p.faceCamera.has_value()) {

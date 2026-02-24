@@ -24,23 +24,22 @@
 
 #version __CONTEXT__
 
-#include "PowerScaling/powerScaling_vs.hglsl"
+#include "powerscaling/powerscaling_vs.glsl"
 
-layout(location = 0) in vec4 vertPosition;
+layout(location = 0) in vec4 in_position;
 
-out vec3 vPosition;
-out vec4 worldPosition;
+out Data {
+  vec3 vertexPosition;
+  vec4 worldPosition;
+} out_data;
 
 uniform mat4 viewProjection;
 uniform mat4 modelTransform;
 
 
 void main() {
-    vPosition = vertPosition.xyz;
-
-    worldPosition = vec4(vertPosition.xyz, 0.0);
-    vec4 position = pscTransform(worldPosition, modelTransform);
-
-    // project the position to view space
-    gl_Position =  z_normalization(viewProjection * position);
+  out_data.worldPosition = vec4(in_position.xyz, 0.0);
+  out_data.vertexPosition = in_position.xyz;
+  vec4 position = pscTransform(out_data.worldPosition, modelTransform);
+  gl_Position = z_normalization(viewProjection * position);
 }
