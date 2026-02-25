@@ -52,13 +52,22 @@ out Data {
 
 uniform dmat4 modelMatrix;
 uniform dmat4 cameraViewProjectionMatrix;
-uniform float size; // Pixels
-uniform vec2 screenSize; // Pixels
-uniform float maxBillboardSize; // Pixels
-uniform float minBillboardSize; // Pixels
+uniform float size;
 uniform bool onTop;
 uniform bool useFixedRingWidth;
 
+uniform int renderOption;
+
+// RenderOption: CameraViewDirection
+uniform vec3 up;
+uniform vec3 right;
+
+// RenderOption: CameraPositionNormal
+uniform dvec3 cameraPosition;
+uniform vec3 cameraLookUp;
+
+const int RenderOptionCameraViewDirection = 0;
+const int RenderOptionCameraPositionNormal = 1;
 
 const vec2 Corners[4] = vec2[4](
   vec2(-1.0, -1.0),
@@ -73,54 +82,48 @@ void main() {
   out_data.nColors = in_data[0].nColors;
   out_data.glyphIndex = in_data[0].glyphIndex;
 
-  dvec4 dposClip = cameraViewProjectionMatrix * in_data[0].dposWorld;
+  dvec4 dpos = in_data[0].dposWorld;
 
-  double scale = double(size);
-  double screenRatio = double(screenSize.x) / double(screenSize.y);
+  vec3 scaledRight = vec3(1.0, 0.0, 0.0);
+  vec3 scaledUp = vec3(0.0, 1.0, 0.0);
 
-  // TODO: make billboarding optional
-  dvec4 scaledRightClip = scale * dvec4(1.0, 0.0, 0.0, 0.0);
-  dvec4 scaledUpClip = scale * screenRatio * dvec4(0.0, 1.0, 0.0, 0.0);
-
-  // TODO: make it work in dome
-
-  // Limit size of billboards based on pixel size
-  dvec2 halfViewSize = dvec2(screenSize) * 0.5;
-  vec4 lowerLeft =  z_normalization(vec4(dposClip - scaledRightClip - scaledUpClip));
-  vec4 upperRight = z_normalization(vec4(dposClip + scaledUpClip + scaledRightClip));
-
-  dvec2 topRight = dvec2(upperRight.xy / upperRight.w);
-  dvec2 bottomLeft = dvec2(lowerLeft.xy / lowerLeft.w);
-
-  dvec2 sizes = abs(halfViewSize * (topRight.xy - bottomLeft.xy));
-  double diagonalSize = length(sizes);
-
-  // @TODO: OBS! This leads to the rings disappearing when flying close to a
-  // star or planet. Why? Precision error?
-  double correctionScale = 1.0;
-  if (diagonalSize > maxBillboardSize && diagonalSize > 0) {
-    correctionScale = double(maxBillboardSize) / diagonalSize;
+  if (renderOption == RenderOptionCameraViewDirection) {
+    scaledRight = right;
+    scaledUp = up;
   }
-  else if (diagonalSize < minBillboardSize && diagonalSize > 0) {
-    correctionScale = double(minBillboardSize) / diagonalSize;
+  else if (renderOption == RenderOptionCameraPositionNormal) {
+    vec3 normal = vec3(normalize(cameraPosition - dpos.xyz));
+    vec3 newRight = normalize(cross(cameraLookUp, normal));
+    vec3 newUp = cross(normal, newRight);
+
+    scaledRight = newRight;
+    scaledUp = newUp;
   }
 
-  // Clamp to a valid range
-  correctionScale = clamp(correctionScale, 0.0, 1.0);
+  // Limit the max size of the points, as the angle in "FOV" that the point is allowed
+  // to take up. Note that the max size is for the diameter, and we need the radius
+  const float DesiredAngleRadians = radians(0.5);
 
-  scaledRightClip *= correctionScale;
-  scaledUpClip *= correctionScale;
+  double distanceToCamera = length(dpos.xyz - cameraPosition);
+  float pointSize = length(scaledRight);
+  float currentAngle = atan(float(pointSize / distanceToCamera));
+
+  // Calculate correction scale to achieve desired angle
+  float correctionScale = DesiredAngleRadians / currentAngle;
+
+  scaledRight *= correctionScale * size;
+  scaledUp *= correctionScale * size;
 
   // Apply component scaling lastly, to get comparable sizes
   float comp = in_data[0].component;
 
-  double sizeFactor = double(comp);
+  out_data.sizeFactor = comp;
   if (!useFixedRingWidth) {
     // Same area:
 //    sizeFactor = sqrt(2.0 * comp);
 
     // Ish 90% width of previous ring
-    sizeFactor = 1.0;
+    double sizeFactor = 1.0;
     for (int i = 1; i < int(comp); i++) {
       // This computation is not completely logical.
       // But it makes the result look ok. based on
@@ -130,14 +133,14 @@ void main() {
     }
     out_data.sizeFactor = float(sizeFactor);
   }
-  else {
-    out_data.sizeFactor = 1.0;
-  }
 
-  scaledRightClip *= sizeFactor;
-  scaledUpClip *= sizeFactor;
+  vec4 scaledRightClip = out_data.sizeFactor *
+    vec4(cameraViewProjectionMatrix * dvec4(scaledRight, 0.0));
+  vec4 scaledUpClip = out_data.sizeFactor *
+    vec4(cameraViewProjectionMatrix * dvec4(scaledUp, 0.0));
 
-  lowerLeft = vec4(dposClip - scaledRightClip - scaledUpClip);
+  dvec4 dposClip = cameraViewProjectionMatrix * dpos;
+  vec4 lowerLeft = vec4(dposClip - scaledRightClip - scaledUpClip);
   out_data.depthClipSpace = lowerLeft.w * (1 - int(onTop));
 
   // Lower left

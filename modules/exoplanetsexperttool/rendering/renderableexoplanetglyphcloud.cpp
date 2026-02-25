@@ -44,22 +44,21 @@
 namespace {
     constexpr std::string_view _loggerCat = "ExoplanetGlyphCloud";
 
+    enum RenderOption {
+        ViewDirection = 0,
+        PositionNormal
+    };
+
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
-        "The size of the points."
+        "A scale value controlling the size of the glyphs."
     };
 
     constexpr openspace::properties::Property::PropertyInfo SelectionInfo = {
         "Selection",
         "Selection",
         "A list of indices of selected points to be highlighted."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo BillboardMinMaxSizeInfo = {
-        "BillboardMinMaxSize",
-        "Billboard Min/Max Size in Pixels",
-        "The minimum and maximum size (in pixels) for the glyph billboard."
     };
 
     constexpr openspace::properties::Property::PropertyInfo UseFixedWidthInfo = {
@@ -75,6 +74,19 @@ namespace {
         "The index of the currently hovered planet. Is -1 if no planet is being hovered."
     };
 
+    constexpr openspace::properties::Property::PropertyInfo OrientationRenderOptionInfo =
+    {
+        "OrientationRenderOption",
+        "Orientation render option",
+        "Controls how the planes for the points will be oriented. \"Camera View "
+        "Direction\" rotates the points so that the plane is orthogonal to the viewing "
+        "direction of the camera (useful for planar displays), and \"Camera Position "
+        "Normal\" rotates the points towards the position of the camera (useful for "
+        "spherical displays, like dome theaters). In both these cases the points will "
+        "be billboarded towards the camera.",
+        openspace::properties::Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableExoplanetGlyphCloud)]] Parameters {
         // [[codegen::verbatim(SizeInfo.description)]]
         std::optional<float> size;
@@ -82,14 +94,20 @@ namespace {
         // [[codegen::verbatim(SelectionInfo.description)]]
         std::optional<std::vector<int>> selection;
 
-        // [[codegen::verbatim(BillboardMinMaxSizeInfo.description)]]
-        std::optional<glm::vec2> billboardMinMaxSize;
-
         // The file to read the point data from
         std::filesystem::path dataFile;
 
         // [[codegen::verbatim(UseFixedWidthInfo.description)]]
         std::optional<bool> useFixedWidth;
+
+        enum class [[codegen::map(RenderOption)]] RenderOption {
+            ViewDirection [[codegen::key("Camera View Direction")]],
+            PositionNormal [[codegen::key("Camera Position Normal")]]
+        };
+
+        // The billboard orientation to use for rendering the points.
+        // This can be either "Camera View Direction" or "Camera Position Normal".
+        std::optional<RenderOption> billboard;
     };
 #include "renderableexoplanetglyphcloud_codegen.cpp"
 } // namespace
@@ -105,15 +123,10 @@ documentation::Documentation RenderableExoplanetGlyphCloud::Documentation() {
 RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
                                                      const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _size(SizeInfo, 100.f, 0.f, 500.f)
+    , _size(SizeInfo, 1.f, 0.f, 10.f)
     , _selectedIndices(SelectionInfo)
-    , _billboardMinMaxSize(
-        BillboardMinMaxSizeInfo,
-        glm::vec2(0.f, 400.f),
-        glm::vec2(0.f),
-        glm::vec2(1000.f)
-    )
     , _useFixedRingWidth(UseFixedWidthInfo, true)
+    , _renderOption(OrientationRenderOptionInfo)
     , _currentlyHoveredIndex(CurrentIndexInfo, -1)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -128,12 +141,19 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     _selectedIndices.setReadOnly(true);
     addProperty(_selectedIndices);
 
-    _billboardMinMaxSize = p.billboardMinMaxSize.value_or(_billboardMinMaxSize);
-    _billboardMinMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
-    addProperty(_billboardMinMaxSize);
-
     _useFixedRingWidth = p.useFixedWidth.value_or(_useFixedRingWidth);
     addProperty(_useFixedRingWidth);
+
+    _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
+    _renderOption.addOption(RenderOption::PositionNormal, "Camera Position Normal");
+
+    if (p.billboard.has_value()) {
+        _renderOption = codegen::map<RenderOption>(*p.billboard);
+    }
+    else {
+        _renderOption = RenderOption::ViewDirection;
+    }
+    addProperty(_renderOption);
 
     _dataFile = std::make_unique<ghoul::filesystem::File>(p.dataFile);
     _dataFile->setCallback([&]() { _dataFileIsDirty = true; });
@@ -274,16 +294,37 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     _program->setUniform(_uniformCache.maxIndex, _maxIndex);
     _program->setUniform(_uniformCache.currentIndex, _currentlyHoveredIndex + 1); // Plus one to map offset in shader
 
-    const float minBillboardSize = _billboardMinMaxSize.value().x; // in pixels
-    const float maxBillboardSize = _billboardMinMaxSize.value().y; // in pixels
-    _program->setUniform(_uniformCache.minBillboardSize, minBillboardSize);
-    _program->setUniform(_uniformCache.maxBillboardSize, maxBillboardSize);
-
     _program->setUniform(_uniformCache.useFixedRingWidth, _useFixedRingWidth);
 
+    _program->setUniform(_uniformCache.renderOption, _renderOption.value());
+
+    glm::dvec3 cameraViewDirectionWorld = -data.camera.viewDirectionWorldSpace();
+    glm::dvec3 cameraUpDirectionWorld = data.camera.lookUpVectorWorldSpace();
+    glm::dvec3 orthoRight = glm::normalize(
+        glm::cross(cameraUpDirectionWorld, cameraViewDirectionWorld)
+    );
+    if (orthoRight == glm::dvec3(0.0)) {
+        glm::dvec3 otherVector = glm::vec3(
+            cameraUpDirectionWorld.y,
+            cameraUpDirectionWorld.x,
+            cameraUpDirectionWorld.z
+        );
+        orthoRight = glm::normalize(glm::cross(otherVector, cameraViewDirectionWorld));
+    }
+    glm::dvec3 orthoUp = glm::normalize(glm::cross(cameraViewDirectionWorld, orthoRight));
+
+    _program->setUniform(_uniformCache.up, glm::vec3(orthoUp));
+    _program->setUniform(_uniformCache.right, glm::vec3(orthoRight));
+
+    _program->setUniform(_uniformCache.cameraPosition, data.camera.positionVec3());
+    _program->setUniform(
+        _uniformCache.cameraLookUp,
+        glm::vec3(data.camera.lookUpVectorWorldSpace())
+    );
+
+    // Start by getting the viewport size
     GLint viewport[4];
     glGetIntegerv(GL_VIEWPORT, viewport);
-    _program->setUniform(_uniformCache.screenSize, glm::vec2(viewport[2], viewport[3]));
 
     // 1st rendering pass: render the glyphs normally, with correct color
     {

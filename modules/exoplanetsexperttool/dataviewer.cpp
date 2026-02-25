@@ -74,6 +74,8 @@ namespace {
 
     constexpr std::string_view WebpagePath = "${MODULE_EXOPLANETSEXPERTTOOL}/webpage/index.html";
 
+    constexpr float DefaultGlyphScale = 0.8;
+
     constexpr std::string_view AboutTheTool =
         "This is a research tool under development and we are currently \n"
         "looking for feedback from users. This feedback will be included \n"
@@ -95,7 +97,6 @@ namespace {
     };
 
     const ImVec2 DefaultWindowSize = ImVec2(350, 350);
-    constexpr const float DefaultGlyphSize = 22.f;
 
     // @TODO this could be a templated helper function for lists. Used a lot
     std::string formatIndicesList(const std::vector<size_t>& indices) {
@@ -425,8 +426,7 @@ void DataViewer::initializeRenderables() {
 
     ghoul::Dictionary renderable;
     renderable.setValue("Type", "RenderableExoplanetGlyphCloud"s);
-    renderable.setValue("Size", 100.0);
-    renderable.setValue("BillboardMinMaxSize", glm::dvec2(DefaultGlyphSize));
+    renderable.setValue("Size", static_cast<double>(DefaultGlyphScale));
     renderable.setValue("UseFixedWidth", false);
     renderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
     renderable.setValue("DataFile", dataFilePath.string());;
@@ -1317,7 +1317,7 @@ void DataViewer::renderSettingsMenuContent() {
     {
         const float MIN_GLYPH_SCALE = 0.3f;
         const float MAX_GLYPH_SCALE = 2.0f;
-        static float glyphSizeScale = 1.0;
+        static float glyphSizeScale = DefaultGlyphScale;
         ImGui::SetNextItemWidth(dragWidth);
         bool changed = ImGui::DragFloat(
             "Glyph scale", &glyphSizeScale, 0.005f,
@@ -1326,9 +1326,8 @@ void DataViewer::renderSettingsMenuContent() {
 
         if (changed) {
             global::scriptEngine->queueScript(std::format(
-                "openspace.setPropertyValueSingle('Scene.{}.Renderable.BillboardMinMaxSize', {})",
-                ExoplanetsExpertToolModule::GlyphCloudIdentifier,
-                ghoul::to_string(glm::dvec2(DefaultGlyphSize * glyphSizeScale))
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.Size', {})",
+                ExoplanetsExpertToolModule::GlyphCloudIdentifier, glyphSizeScale
             ));
         }
     }

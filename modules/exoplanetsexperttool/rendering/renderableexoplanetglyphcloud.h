@@ -28,11 +28,10 @@
 #include <openspace/rendering/renderable.h>
 
 #include <openspace/properties/list/intlistproperty.h>
+#include <openspace/properties/misc/optionproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
-#include <openspace/properties/vector/vec2property.h>
-#include <openspace/properties/vector/vec3property.h>
 #include <openspace/rendering/labelscomponent.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
@@ -73,14 +72,15 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
     UniformCache(modelMatrix, cameraViewProjectionMatrix, onTop, useFixedRingWidth,
-        opacity, size, screenSize, minBillboardSize, maxBillboardSize, maxIndex,
-        currentIndex, isRenderIndexStep
+        opacity, size, maxIndex, currentIndex, isRenderIndexStep, renderOption, up, right,
+        cameraPosition, cameraLookUp
     ) _uniformCache;
 
     properties::FloatProperty _size;
     properties::IntListProperty _selectedIndices;
-    properties::Vec2Property _billboardMinMaxSize;
     properties::BoolProperty _useFixedRingWidth;
+
+    properties::OptionProperty _renderOption;
 
     std::unique_ptr<ghoul::filesystem::File> _dataFile;
     bool _dataFileIsDirty = false;
