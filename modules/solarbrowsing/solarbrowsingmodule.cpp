@@ -55,7 +55,7 @@ void SolarBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
     fTask->registerClass<HelioviewerDownloadTask>("HelioviewerDownloadTask");
 }
 
-std::vector<documentation::Documentation> SolarBrowsingModule::documentations() const {
+std::vector<openspace::Documentation> SolarBrowsingModule::documentations() const {
     return {
         RenderableSolarImagery::Documentation(),
         RenderableSolarImageryProjection::Documentation(),

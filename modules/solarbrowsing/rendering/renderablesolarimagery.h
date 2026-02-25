@@ -40,8 +40,6 @@ namespace ghoul::opengl { class Texture; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-
 class TransferFunction;
 
 namespace solarbrowsing {
@@ -69,7 +67,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     TransferFunction* transferFunction();
     const std::unique_ptr<ghoul::opengl::Texture>& imageryTexture() const;
@@ -92,17 +90,17 @@ private:
     void createPlane() const;
     void createFrustum() const;
 
-    properties::OptionProperty _activeInstruments;
-    properties::FloatProperty _contrastValue;
-    properties::BoolProperty _enableBorder;
-    properties::BoolProperty _enableFrustum;
-    properties::FloatProperty _gammaValue;
-    properties::DoubleProperty _moveFactor;
-    properties::IntProperty _downsamplingLevel;
+    OptionProperty _activeInstruments;
+    FloatProperty _contrastValue;
+    BoolProperty _enableBorder;
+    BoolProperty _enableFrustum;
+    FloatProperty _gammaValue;
+    DoubleProperty _moveFactor;
+    IntProperty _downsamplingLevel;
 
-    properties::BoolProperty _verboseMode;
-    properties::IntProperty _predictFramesAfter;
-    properties::IntProperty _predictFramesBefore;
+    BoolProperty _verboseMode;
+    IntProperty _predictFramesAfter;
+    IntProperty _predictFramesBefore;
 
     // The decoded image texture
     std::unique_ptr<ghoul::opengl::Texture> _imageryTexture;
@@ -133,9 +131,9 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _frustumShader;
     std::unique_ptr<ghoul::opengl::ProgramObject> _planeShader;
-    GLuint _frustum = 0;
+    GLuint _frustumVao = 0;
     GLuint _frustumPositionBuffer = 0;
-    GLuint _quad = 0;
+    GLuint _quadVao = 0;
     GLuint _vertexPositionBuffer = 0;
     double _gaussianMoveFactor = 0.0;
     float _size = 0.f;

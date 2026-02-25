@@ -51,74 +51,74 @@ namespace {
     constexpr double SUN_RADIUS = (1391600000.0 * 0.5);
     constexpr unsigned int DefaultTextureSize = 32;
 
-    constexpr openspace::properties::Property::PropertyInfo ActiveInstrumentsInfo = {
+    constexpr openspace::Property::PropertyInfo ActiveInstrumentsInfo = {
         "ActiveInstrument",
         "Active instrument",
         "The active instrument of the current spacecraft imagery.",
-        openspace::properties::Property::Visibility::User
+        openspace::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableBorderInfo = {
+    constexpr openspace::Property::PropertyInfo EnableBorderInfo = {
         "EnableBorder",
         "Enable border",
         "Enables border around the current spacecraft imagery.",
-        openspace::properties::Property::Visibility::User
+        openspace::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableFrustumInfo = {
+    constexpr openspace::Property::PropertyInfo EnableFrustumInfo = {
         "EnableFrustum",
         "Enable frustum",
         "Enables frustum around the current spacecraft imagery.",
-        openspace::properties::Property::Visibility::User
+        openspace::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MoveFactorInfo = {
+    constexpr openspace::Property::PropertyInfo MoveFactorInfo = {
         "MoveFactor",
         "Move factor",
         "How close to the Sun to render the imagery.",
-        openspace::properties::Property::Visibility::User
+        openspace::Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DownsamplingLevelInfo = {
+    constexpr openspace::Property::PropertyInfo DownsamplingLevelInfo = {
         "DownsamplingLevel",
         "Downsampling level",
         "How much to downsample the original data. 0 is original resolution.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ContrastValueInfo = {
+    constexpr openspace::Property::PropertyInfo ContrastValueInfo = {
         "ContrastValue",
         "Contrast",
         "Contrast of the current spacecraft imagery.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GammaValueInfo = {
+    constexpr openspace::Property::PropertyInfo GammaValueInfo = {
         "GammaValue",
         "Gamma",
         "Gamma of the current spacecraft imagery.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo VerboseModeInfo = {
+    constexpr openspace::Property::PropertyInfo VerboseModeInfo = {
         "VerboseMode",
         "Verbose mode",
         "Output information about image decoding.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PredictFramesAfterInfo = {
+    constexpr openspace::Property::PropertyInfo PredictFramesAfterInfo = {
         "PredictFramesAfter",
         "Predict frames after",
         "Determines how many images to pre-fetch after the current image frame.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PredictFramesBeforeInfo = {
+    constexpr openspace::Property::PropertyInfo PredictFramesBeforeInfo = {
         "PredictFramesBefore",
         "Predict frames before",
         "Determines how many images to pre-fetch before the current image frame.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        openspace::Property::Visibility::AdvancedUser
     };
 
     // A RenderableSolarImagery renders time-sequenced solar observations from spacecraft
@@ -176,12 +176,12 @@ namespace {
         // [[codegen::verbatim(PredictFramesBeforeInfo.description)]]
         std::optional<int> predictFramesBefore;
     };
-#include "renderablesolarimagery_codegen.cpp"
 } // namespace
+#include "renderablesolarimagery_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableSolarImagery::Documentation() {
+openspace::Documentation RenderableSolarImagery::Documentation() {
     return codegen::doc<Parameters>("renderablesolarimegary");
 }
 
@@ -224,13 +224,13 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     if (p.startInstrument.has_value()) {
         _currentActiveInstrument = p.startInstrument.value();
         // Update the option property to show the correct label
-        const std::vector<properties::OptionProperty::Option>& options =
+        const std::vector<OptionProperty::Option>& options =
             _activeInstruments.options();
 
         auto it = std::find_if(
             options.begin(),
             options.end(),
-            [this](const properties::OptionProperty::Option& option) {
+            [this](const OptionProperty::Option& option) {
                 return option.description == _currentActiveInstrument;
             }
         );
@@ -296,12 +296,6 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
 }
 
 void RenderableSolarImagery::initializeGL() {
-    // Initialize plane buffer
-    glGenVertexArrays(1, &_quad);
-    glGenBuffers(1, &_vertexPositionBuffer);
-    // Initialize frustum buffer
-    glGenVertexArrays(1, &_frustum);
-    glGenBuffers(1, &_frustumPositionBuffer);
     if (!_planeShader) {
         _planeShader = global::renderEngine->buildRenderProgram("SpacecraftImagePlaneProgram",
             absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_vs.glsl"),
@@ -322,30 +316,58 @@ void RenderableSolarImagery::initializeGL() {
         }
     }
 
+    // Initialize plane buffer
+    glCreateVertexArrays(1, &_quadVao);
+    glCreateBuffers(1, &_vertexPositionBuffer);
+    glVertexArrayVertexBuffer(_quadVao, 0, _vertexPositionBuffer, 0, sizeof(GLfloat) * 6);
+
+    // Position @TODO (anden88 2026-02-24): Check if we really need the w components
+    glEnableVertexArrayAttrib(_quadVao, 0);
+    glVertexArrayAttribFormat(_quadVao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_quadVao, 0, 0);
+    // ST coordinates
+    glEnableVertexArrayAttrib(_quadVao, 1);
+    glVertexArrayAttribFormat(_quadVao, 1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4);
+    glVertexArrayAttribBinding(_quadVao, 1, 0);
+
+    // Initialize frustum buffer
+    glCreateVertexArrays(1, &_frustumVao);
+    glCreateBuffers(1, &_frustumPositionBuffer);
+    glVertexArrayVertexBuffer(
+        _frustumVao,
+        0,
+        _frustumPositionBuffer,
+        0,
+        sizeof(GLfloat) * 4
+    );
+
+    // Position
+    glEnableVertexArrayAttrib(_frustumVao, 0);
+    glVertexArrayAttribFormat(_frustumVao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_frustumVao, 0, 0);
+
     ghoul::opengl::updateUniformLocations(*_planeShader, _uniformCachePlane);
     ghoul::opengl::updateUniformLocations(*_frustumShader, _uniformCacheFrustum);
     createPlaneAndFrustum(_moveFactor);
 
     _imageryTexture = std::make_unique<ghoul::opengl::Texture>(
-        glm::uvec3(DefaultTextureSize, DefaultTextureSize, 1),
-        GL_TEXTURE_2D,
-        ghoul::opengl::Texture::Format::Red,
-        GL_R8,
-        GL_UNSIGNED_BYTE,
-        ghoul::opengl::Texture::FilterMode::Linear,
-        ghoul::opengl::Texture::WrappingMode::ClampToEdge,
-        ghoul::opengl::Texture::AllocateData::Yes,
-        ghoul::opengl::Texture::TakeOwnership::No
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(DefaultTextureSize, DefaultTextureSize, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::Red,
+            .dataType = GL_UNSIGNED_BYTE,
+        },
+        ghoul::opengl::Texture::SamplerInit{
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge,
+        }
     );
 
     updateImageryTexture();
 }
 
 void RenderableSolarImagery::deinitializeGL() {
-    glDeleteVertexArrays(1, &_quad);
-    _quad = 0;
-    glDeleteVertexArrays(1, &_frustum);
-    _frustum = 0;
+    glDeleteVertexArrays(1, &_quadVao);
+    glDeleteVertexArrays(1, &_frustumVao);
 
     if (_planeShader) {
         global::renderEngine->removeRenderProgram(_planeShader.get());
@@ -356,6 +378,8 @@ void RenderableSolarImagery::deinitializeGL() {
         global::renderEngine->removeRenderProgram(_frustumShader.get());
         _frustumShader = nullptr;
     }
+
+    _imageryTexture = nullptr;
 }
 
 bool RenderableSolarImagery::isReady() const {
@@ -428,8 +452,7 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
 
     _planeShader->activate();
     ghoul::opengl::TextureUnit imageUnit;
-    imageUnit.activate();
-    _imageryTexture->bind();
+    imageUnit.bind(*_imageryTexture);
 
     _planeShader->setUniform(_uniformCachePlane.isCoronaGraph, _isCoronaGraph);
     _planeShader->setUniform(_uniformCachePlane.scale, _currentScale);
@@ -444,10 +467,9 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     );
 
     ghoul::opengl::TextureUnit tfUnit;
-    tfUnit.activate();
     TransferFunction* lut = _tfMap[_currentActiveInstrument].get();
     if (lut) {
-        lut->bind();
+        tfUnit.bind(lut->texture());
         _planeShader->setUniform(_uniformCachePlane.hasLut, true);
     }
     else {
@@ -456,7 +478,7 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
     // Must bind all sampler2D, otherwise undefined behaviour
     _planeShader->setUniform(_uniformCachePlane.lut, tfUnit);
 
-    glBindVertexArray(_quad);
+    glBindVertexArray(_quadVao);
     glDrawArrays(GL_TRIANGLES, 0, 6);
 
     _planeShader->deactivate();
@@ -474,7 +496,7 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
         projectionMatrix * glm::mat4(modelViewTransform)
     );
 
-    glBindVertexArray(_frustum);
+    glBindVertexArray(_frustumVao);
 
     if (_enableBorder && _enableFrustum) {
         glDrawArrays(GL_LINES, 0, 16);
@@ -558,14 +580,12 @@ void RenderableSolarImagery::updateImageryTexture() {
             buffer.resize(static_cast<size_t>(DefaultTextureSize) * DefaultTextureSize *
                 sizeof(ImagePrecision)
             );
-            _imageryTexture->setDimensions(
+            _imageryTexture->resize(
                 glm::uvec3(DefaultTextureSize, DefaultTextureSize, 1)
             );
             _imageryTexture->setPixelData(
-                buffer.data(),
-                ghoul::opengl::Texture::TakeOwnership::No
+                reinterpret_cast<std::byte*>(buffer.data())
             );
-            _imageryTexture->uploadTexture();
         }
         return;
     }
@@ -601,12 +621,10 @@ void RenderableSolarImagery::updateImageryTexture() {
         _currentCenterPixel = data.metadata.centerPixel;
         _currentKeyframe = keyframe->id;
 
-        _imageryTexture->setDimensions(glm::uvec3(data.imageSize, data.imageSize, 1));
+        _imageryTexture->resize(glm::uvec3(data.imageSize, data.imageSize, 1));
         _imageryTexture->setPixelData(
-            data.buffer.data(),
-            ghoul::opengl::Texture::TakeOwnership::No
+            reinterpret_cast<std::byte*>(data.buffer.data())
         );
-        _imageryTexture->uploadTexture();
     }
 }
 
@@ -726,37 +744,21 @@ void RenderableSolarImagery::createPlaneAndFrustum(double moveDistance) {
 }
 
 void RenderableSolarImagery::createPlane() const {
-    const GLfloat size = _size;
-    const GLfloat vertex_data[] = {
+    const GLfloat vertexData[] = {
         // x      y     z     w     s     t
-        -size, -size, 0.f, 0.f, 0.f, 0.f,
-         size,  size, 0.f, 0.f, 1.f, 1.f,
-        -size,  size, 0.f, 0.f, 0.f, 1.f,
-        -size, -size, 0.f, 0.f, 0.f, 0.f,
-         size, -size, 0.f, 0.f, 1.f, 0.f,
-         size,  size, 0.f, 0.f, 1.f, 1.f,
+        -_size, -_size, 0.f, 0.f, 0.f, 0.f,
+         _size,  _size, 0.f, 0.f, 1.f, 1.f,
+        -_size,  _size, 0.f, 0.f, 0.f, 1.f,
+        -_size, -_size, 0.f, 0.f, 0.f, 0.f,
+         _size, -_size, 0.f, 0.f, 1.f, 0.f,
+         _size,  _size, 0.f, 0.f, 1.f, 1.f,
     };
 
-    glBindVertexArray(_quad);
-    glBindBuffer(GL_ARRAY_BUFFER, _vertexPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(
-        0,
-        4,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(0)
-    );
-    glEnableVertexAttribArray(1);
-    glVertexAttribPointer(
-        1,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        sizeof(GLfloat) * 6,
-        reinterpret_cast<void*>(sizeof(GLfloat) * 4)
+    glNamedBufferData(
+        _vertexPositionBuffer,
+        sizeof(vertexData),
+        vertexData,
+        GL_STATIC_DRAW
     );
 }
 
@@ -764,7 +766,7 @@ void RenderableSolarImagery::createFrustum() const {
     // Vertex orders x, y, z, w
     // Where w indicates if vertex should be drawn in spacecraft or planes coordinate
     // system
-    const GLfloat vertex_data[] = {
+    const GLfloat vertexData[] = {
         0.f,    0.f,    0.f, 0.0,
         _size,  _size,  0.f, 1.0,
         0.f,    0.f,    0.f, 0.0,
@@ -787,11 +789,13 @@ void RenderableSolarImagery::createFrustum() const {
         _size,  -_size, 0.f, 1.0,
         -_size, -_size, 0.f, 1.0,
     };
-    glBindVertexArray(_frustum);
-    glBindBuffer(GL_ARRAY_BUFFER, _frustumPositionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_data), vertex_data, GL_STATIC_DRAW);
-    glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, reinterpret_cast<void*>(0));
+
+    glNamedBufferData(
+        _frustumPositionBuffer,
+        sizeof(vertexData),
+        vertexData,
+        GL_STATIC_DRAW
+    );
 }
 
 const glm::vec3& RenderableSolarImagery::planeNormal() const {

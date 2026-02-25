@@ -84,12 +84,12 @@ namespace {
         // be shorter than this value. Useful for temporal downsampling.
         double timeStep;
     };
-#include "helioviewerdownloadtask_codegen.cpp"
 } // namespace
+#include "helioviewerdownloadtask_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation HelioviewerDownloadTask::documentation() {
+openspace::Documentation HelioviewerDownloadTask::documentation() {
     return codegen::doc<Parameters>("helio_viewer_download_task");
 }
 

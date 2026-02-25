@@ -36,7 +36,6 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
 
 class SceneGraphNode;
 
@@ -58,7 +57,7 @@ public:
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
     Sphere _sphere;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void loadTexture();

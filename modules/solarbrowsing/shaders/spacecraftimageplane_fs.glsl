@@ -71,7 +71,7 @@ Fragment getFragment() {
   frag.depth = vs_positionScreenSpace.w;
 
   if (additiveBlending) {
-    frag.blend = BLEND_MODE_ADDITIVE;
+    frag.blend = BlendModeAdditive;
   }
   return frag;
 }

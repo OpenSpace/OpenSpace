@@ -86,7 +86,8 @@ Fragment getFragment() {
       if (outColor == vec4(0)) {
           float factor2 = smoothstep(0.5, uv.x, uv.z);
           outColor = mix(res, res, factor2);
-      } else {
+      }
+      else {
           // Blend between
           float factor = smoothstep(0.5, 1.0 - uv.x, uv.z);
           float factor2 = smoothstep(0.5, uv.x, uv.z);

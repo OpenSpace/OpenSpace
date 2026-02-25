@@ -55,12 +55,12 @@ namespace {
         //std::optional<float> radius;
     };
 
-#include "renderablesolarimageryprojection_codegen.cpp"
 } // namespace
+#include "renderablesolarimageryprojection_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableSolarImageryProjection::Documentation() {
+openspace::Documentation RenderableSolarImageryProjection::Documentation() {
     return codegen::doc<Parameters>("renderablesolarimageryprojection");
 }
 
@@ -185,17 +185,15 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
         );
 
         // Imagery texture
-        textureImageryUnits[i].activate();
-        solarImagery->imageryTexture()->bind();
+        textureImageryUnits[i].bind(*solarImagery->imageryTexture());
         _shader->setUniform(
             "imageryTexture[" + std::to_string(i) + "]",
             textureImageryUnits[i]
         );
         // Transfer function texture
-        transferFunctionUnits[i].activate();
         TransferFunction* transferFunction = solarImagery->transferFunction();
         if (transferFunction && solarImageryEnabled) {
-            transferFunction->bind();
+            transferFunctionUnits[i].bind(transferFunction->texture());
             _shader->setUniform("hasLut[" + std::to_string(i) + "]", true);
         } else {
             _shader->setUniform("hasLut[" + std::to_string(i) + "]", false);
@@ -208,12 +206,10 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
 
     // Set the rest of the texture units for well defined behaviour
     for (int i = solarImageryCount; i < MaxSpacecraftObservatories; ++i) {
-        textureImageryUnits[i].activate();
         _shader->setUniform(
             "imageryTexture[" + std::to_string(i) + "]",
             textureImageryUnits[i]
         );
-        transferFunctionUnits[i].activate();
         _shader->setUniform("lut[" + std::to_string(i) + "]", transferFunctionUnits[i]);
     }
 
