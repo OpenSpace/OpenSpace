@@ -28,15 +28,19 @@
 
 // The shader expands a single point vertex into an arrow originally pointing along +X
 // direction, it is then rotated to match the direction of the incomming vector.
- layout (points) in;
- in vec3 vs_position[];
- in vec3 vs_direction[];
- in float vs_magnitude[];
+layout (points) in;
+in Data {
+  vec3 vs_position;
+  vec3 vs_direction;
+  float vs_magnitude;
+} in_data[];
 
- layout (line_strip, max_vertices = 6) out;
- flat out vec3 gs_direction;
- flat out float gs_magnitude;
- out float gs_positionDepth;
+layout (line_strip, max_vertices = 6) out;
+out Data {
+  flat vec3 direction;
+  flat float magnitude;
+  float positionDepth;
+} out_data;
 
 uniform mat4 modelViewProjection;
 uniform float arrowScale;
@@ -63,18 +67,18 @@ float exponentialScale(float sliderValue, float minExp, float maxExp) {
 
 void emitWorldVertex(vec3 worldPos) {
   vec4 positionClipSpace = modelViewProjection * vec4(worldPos, 1.0);
-  gs_positionDepth = positionClipSpace.w;
+  out_data.positionDepth = positionClipSpace.w;
   gl_Position = z_normalization(positionClipSpace);
   EmitVertex();
 }
 
 void main() {
-  vec3 origin = vs_position[0];
-  vec3 direction = vs_direction[0];
-  float magnitude = vs_magnitude[0];
+  vec3 origin = in_data[0].position;
+  vec3 direction = in_data[0].direction;
+  float magnitude = in_data[0].magnitude;
 
-  gs_direction = direction;
-  gs_magnitude = magnitude;
+  out_data.direction = direction;
+  out_data.magnitude = magnitude;
 
   // The min and max exponents are arbitrarily chosen, going from 1m resolution to ~3Mpc
   float scale = exponentialScale(arrowScale, 1, 23.0);

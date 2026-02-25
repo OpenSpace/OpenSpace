@@ -12,9 +12,8 @@ local Node = {
     Type = "RenderableVectorField",
     Mode = "Sparse",
     VectorFieldScale = 15.0,
-
     Sparse = {
-      FilePath = asset.resource("../renderablepointcloud/data/dummydata.csv"),
+      FilePath = asset.resource("../renderablepointcloud/data/dummydata.csv")
     }
   },
   GUI = {

@@ -31,16 +31,18 @@
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/csvreader.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/logging/logmanager.h>
 #include <algorithm>
 #include <array>
 #include <execution>
 #include <numeric>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableVectorField";
 
     enum ColorMode {
@@ -49,22 +51,22 @@ namespace {
         Direction
     };
 
-    constexpr openspace::Property::PropertyInfo StrideInfo = {
+    constexpr Property::PropertyInfo StrideInfo = {
         "Stride",
         "Stride",
         "Controls how densely vectors are sampled from the volume. A stride of 1 renders "
         "every vector.",
-        openspace::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::Property::PropertyInfo FixedColorInfo = {
+    constexpr Property::PropertyInfo FixedColorInfo = {
         "FixedColor",
         "Fixed color",
         "The color of the vectors, when no color map is used.",
-        openspace::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::Property::PropertyInfo ColorModeOptionInfo = {
+    constexpr Property::PropertyInfo ColorModeOptionInfo = {
         "ColorModeOption",
         "Color mode option",
         "Controls how the vectors are colored. \"Fixed\" color all vectors with the same "
@@ -74,46 +76,46 @@ namespace {
         "+X -> Red, -X -> Cyan"
         "+Y -> Green, -Y -> Magenta"
         "+Z -> Blue, -Z -> Yellow",
-        openspace::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::Property::PropertyInfo VectorFieldScaleInfo = {
+    constexpr Property::PropertyInfo VectorFieldScaleInfo = {
         "VectorFieldScale",
         "Vector field scale",
         "Scales the vector field lines using an exponential scale.",
-        openspace::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the vector lines.",
-        openspace::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::Property::PropertyInfo ColorTextureInfo = {
+    constexpr Property::PropertyInfo ColorTextureInfo = {
         "ColorMap",
         "Color texture",
         "The path to the texture used to color the vector field.",
-        openspace::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::Property::PropertyInfo ColorMappingDataRangeInfo = {
+    constexpr Property::PropertyInfo ColorMappingDataRangeInfo = {
         "ColorMappingDataRange",
         "Color mapping data range",
         "The magnitude data range used to normalize the magnitude value for color "
         "lookup. Computed from the volume data if unspecified.",
-        openspace::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::Property::PropertyInfo FilterByLuaInfo = {
+    constexpr Property::PropertyInfo FilterByLuaInfo = {
         "FilterByLua",
         "Filter by Lua script",
         "If enabled, the vector field is filtered by the provided custom Lua script.",
-        openspace::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::Property::PropertyInfo FilterScriptInfo = {
+    constexpr Property::PropertyInfo FilterScriptInfo = {
         "FilterScript",
         "Filter script",
         "This value is the path to the Lua script that will be executed to compute the "
@@ -121,7 +123,7 @@ namespace {
         "current voxel position (x, y, z) given in galactic coordinates, and the "
         "velocity vector (vx, vy, vz). The function should return true/false if "
         "the voxel should be visualized or discarded, respectively.",
-        openspace::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // A RenderableVectorField can be used to render vectors from a given 3D volumetric
@@ -247,7 +249,7 @@ Documentation RenderableVectorField::Documentation() {
 }
 
 RenderableVectorField::ColorSettings::ColorSettings(const ghoul::Dictionary& dictionary)
-    : PropertyOwner({ "Coloring", "Coloring", "" })
+    : PropertyOwner({ "Coloring", "Coloring" })
     , colorModeOption(ColorModeOptionInfo)
     , colorTexturePath(ColorTextureInfo)
     , colorMagnitudeDomain(
@@ -283,12 +285,11 @@ RenderableVectorField::ColorSettings::ColorSettings(const ghoul::Dictionary& dic
         fixedColor = settings.fixedColor.value_or(fixedColor);
         if (settings.colorMapFile.has_value()) {
             colorTexturePath = settings.colorMapFile->string();
-
         }
         colorMagnitudeDomain = settings.colorMappingRange.value_or(
             colorMagnitudeDomain
         );
-        computeMagnitudeRange = !p.coloring.value().colorMappingRange.has_value();
+        computeMagnitudeRange = !p.coloring->colorMappingRange.has_value();
     }
 }
 
@@ -420,10 +421,9 @@ void RenderableVectorField::initialize() {
     _vectorFieldIsDirty = false;
 }
 
-
 void RenderableVectorField::initializeGL() {
     _program = global::renderEngine->buildRenderProgram(
-        "vectorfield",
+        "Vectorfield",
         absPath("${MODULE_VOLUME}/shaders/vectorfield_vs.glsl"),
         absPath("${MODULE_VOLUME}/shaders/vectorfield_fs.glsl"),
         absPath("${MODULE_VOLUME}/shaders/vectorfield_gs.glsl")
@@ -481,9 +481,7 @@ void RenderableVectorField::initializeGL() {
 
 void RenderableVectorField::deinitializeGL() {
     glDeleteVertexArrays(1, &_vao);
-    _vao = 0;
     glDeleteBuffers(1, &_vectorFieldVbo);
-    _vectorFieldVbo = 0;
 
     _colorTexture = nullptr;
 
@@ -561,7 +559,6 @@ void RenderableVectorField::update(const UpdateData&) {
         _colorTexture = nullptr;
 
         if (!_colorSettings.colorTexturePath.value().empty()) {
-
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_colorSettings.colorTexturePath),
                 1,
@@ -571,7 +568,8 @@ void RenderableVectorField::update(const UpdateData&) {
                 }
             );
 
-            LDEBUG(std::format("Loaded texture '{}'",
+            LDEBUG(std::format(
+                "Loaded texture '{}'",
                 _colorSettings.colorTexturePath.value()
             ));
         }
@@ -581,53 +579,53 @@ void RenderableVectorField::update(const UpdateData&) {
 }
 
 void RenderableVectorField::applyLuaFilter() {
-    if (_filterByLua) {
-        std::filesystem::path path = _luaScriptFile.value();
-        if (path.empty()) {
-            LERROR(std::format(
-                "Trying to filter data using an empty script file '{}'", path
-            ));
-            return;
-        }
-
-        // Load the Lua script
-        ghoul::lua::runScriptFile(_state, path);
-        // Get the filter function
-        lua_getglobal(_state, "filter");
-        const bool isFunction = lua_isfunction(_state, -1);
-        if (!isFunction) {
-            LERROR(std::format("Script '{}' does not have a function 'filter'", path));
-            return;
-        }
-
-        _instances.erase(
-            std::remove_if(
-                _instances.begin(),
-                _instances.end(),
-                [&state = _state](const ArrowInstance& i) {
-            // Get the filter function
-            lua_getglobal(state, "filter");
-            // First argument (x,y,z) is the averaged position of the arrow
-            ghoul::lua::push(state, i.position);
-            // Second argument (vx, vy, vz) is the averaged direction vector
-            ghoul::lua::push(state, i.direction);
-
-            const int success = lua_pcall(state, 2, 1, 0);
-
-            if (success != 0) {
-                LERROR(std::format(
-                    "Error executing 'filter': {}", lua_tostring(state, -1)
-                ));
-            }
-
-            // The Lua function returns true for the values that should be kept
-            const bool filter = ghoul::lua::value<bool>(state);
-            return !filter;
-        }
-            ),
-            _instances.end()
-        );
+    if (!_filterByLua) {
+        return;
     }
+    std::filesystem::path path = _luaScriptFile.value();
+    if (path.empty()) {
+        LERROR(std::format(
+            "Trying to filter data using an empty script file '{}'", path
+        ));
+        return;
+    }
+
+    // Load the Lua script
+    ghoul::lua::runScriptFile(_state, path);
+    // Get the filter function
+    lua_getglobal(_state, "filter");
+    const bool isFunction = lua_isfunction(_state, -1);
+    if (!isFunction) {
+        LERROR(std::format("Script '{}' does not have a function 'filter'", path));
+        return;
+    }
+
+    _instances.erase(
+        std::remove_if(
+            _instances.begin(),
+            _instances.end(),
+            [&state = _state](const ArrowInstance& i) {
+                // Get the filter function
+                lua_getglobal(state, "filter");
+                // First argument (x,y,z) is the averaged position of the arrow
+                ghoul::lua::push(state, i.position);
+                // Second argument (vx, vy, vz) is the averaged direction vector
+                ghoul::lua::push(state, i.direction);
+
+                const int success = lua_pcall(state, 2, 1, 0);
+
+                if (success != 0) {
+                    LERROR(std::format(
+                        "Error executing 'filter': {}", lua_tostring(state, -1)
+                    ));
+                }
+
+                const bool shouldBeKept = ghoul::lua::value<bool>(state);
+                return !shouldBeKept;
+            }
+        ),
+        _instances.end()
+    );
 }
 
 void RenderableVectorField::computeVolumeFieldLines() {
@@ -842,7 +840,8 @@ void RenderableVectorField::loadCSVData(const std::filesystem::path& path) {
     }
 
     if (!xColumn.has_value() || !yColumn.has_value() || !zColumn.has_value() ||
-        !vxColumn.has_value() || !vyColumn.has_value() || !vzColumn.has_value()) {
+        !vxColumn.has_value() || !vyColumn.has_value() || !vzColumn.has_value())
+    {
         throw ghoul::RuntimeError(std::format(
             "Error loading data file '{}'. Missing position or direction column", path
         ));

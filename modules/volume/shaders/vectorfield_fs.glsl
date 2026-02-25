@@ -24,11 +24,12 @@
 
 #include "fragment.glsl"
 
-flat in vec3 gs_direction;
-flat in float gs_magnitude;
-in float gs_positionDepth;
+in Data {
+  flat vec3 direction;
+  flat float magnitude;
+  float positionDepth;
+} in_data;
 
-out vec4 outColor;
 
 uniform float opacity;
 uniform vec2 dataRangeFilter;
@@ -53,12 +54,12 @@ Fragment getFragment() {
     frag.color = fixedColor;
   }
   else if (colorMode == ColorModeMagnitude) {
-    float t = (gs_magnitude - magDomain.x) / (magDomain.y - magDomain.x);
+    float t = (in_data.magnitude - magDomain.x) / (magDomain.y - magDomain.x);
     t = clamp(t, 0.0, 1.0);
     frag.color = texture(colorTexture, t);
   }
   else { // colorMode == ColorModeDirection
-    vec3 dir = normalize(gs_direction);
+    vec3 dir = normalize(in_data.direction);
     vec3 color = 0.5 * (dir + vec3(1.0)); // remaps [-1, 1] -> [0, 1]
     frag.color = vec4(color, 1.0);
   }

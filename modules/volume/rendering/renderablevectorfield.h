@@ -33,9 +33,9 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/dvec3property.h>
+#include <openspace/properties/vector/uvec3property.h>
 #include <openspace/properties/vector/vec2property.h>
 #include <openspace/properties/vector/vec4property.h>
-#include <openspace/properties/vector/uvec3property.h>
 #include <ghoul/lua/luastate.h>
 #include <ghoul/opengl/uniformcache.h>
 #include <filesystem>
@@ -46,6 +46,7 @@ namespace ghoul::opengl {
 } // namespace ghoul::opengl
 
 namespace openspace {
+
 struct Documentation;
 
 class RenderableVectorField : public Renderable {

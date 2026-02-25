@@ -28,12 +28,14 @@ layout(location = 0) in vec3 in_position;
 layout(location = 1) in vec3 in_direction;
 layout(location = 2) in float in_magnitude;
 
-out vec3 vs_position;
-out vec3 vs_direction;
-out float vs_magnitude;
+out Data {
+  vec3 position;
+  vec3 direction;
+  float magnitude;
+} out_data;
 
 void main() {
-  vs_position = in_position;
-  vs_direction = in_direction;
-  vs_magnitude = in_magnitude;
+  out_data.position = in_position;
+  out_data.direction = in_direction;
+  out_data.magnitude = in_magnitude;
 }

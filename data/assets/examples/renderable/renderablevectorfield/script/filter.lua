@@ -18,6 +18,6 @@
 
 -- Visibility filter function called for each vector
 function filter(pos, dir)
-    local distance = math.sqrt(pos[1] * pos[1] + pos[2] * pos[2] + pos[3] * pos[3])
-    return distance < 5000
+  local distance = math.sqrt(pos[1] * pos[1] + pos[2] * pos[2] + pos[3] * pos[3])
+  return distance < 5000
 end
