@@ -74,7 +74,7 @@ namespace {
 
     constexpr std::string_view WebpagePath = "${MODULE_EXOPLANETSEXPERTTOOL}/webpage/index.html";
 
-    constexpr float DefaultGlyphScale = 0.8;
+    constexpr float DefaultGlyphScale = 1.0;
 
     constexpr std::string_view AboutTheTool =
         "This is a research tool under development and we are currently \n"
@@ -426,7 +426,7 @@ void DataViewer::initializeRenderables() {
 
     ghoul::Dictionary renderable;
     renderable.setValue("Type", "RenderableExoplanetGlyphCloud"s);
-    renderable.setValue("Size", static_cast<double>(DefaultGlyphScale));
+    renderable.setValue("Scale", static_cast<double>(DefaultGlyphScale));
     renderable.setValue("UseFixedWidth", false);
     renderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
     renderable.setValue("DataFile", dataFilePath.string());;
@@ -1326,7 +1326,7 @@ void DataViewer::renderSettingsMenuContent() {
 
         if (changed) {
             global::scriptEngine->queueScript(std::format(
-                "openspace.setPropertyValueSingle('Scene.{}.Renderable.Size', {})",
+                "openspace.setPropertyValueSingle('Scene.{}.Renderable.Scale', {})",
                 ExoplanetsExpertToolModule::GlyphCloudIdentifier, glyphSizeScale
             ));
         }

@@ -72,11 +72,11 @@ private:
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _program = nullptr;
     UniformCache(modelMatrix, cameraViewProjectionMatrix, onTop, useFixedRingWidth,
-        opacity, size, maxIndex, currentIndex, isRenderIndexStep, renderOption, up, right,
-        cameraPosition, cameraLookUp
+        opacity, scale, maxIndex, currentIndex, isRenderIndexStep,
+        renderOption, up, right, cameraPosition, cameraLookUp
     ) _uniformCache;
 
-    properties::FloatProperty _size;
+    properties::FloatProperty _scale;
     properties::IntListProperty _selectedIndices;
     properties::BoolProperty _useFixedRingWidth;
 

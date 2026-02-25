@@ -52,7 +52,7 @@ out Data {
 
 uniform dmat4 modelMatrix;
 uniform dmat4 cameraViewProjectionMatrix;
-uniform float size;
+uniform float scale;
 uniform bool onTop;
 uniform bool useFixedRingWidth;
 
@@ -102,7 +102,7 @@ void main() {
 
   // Limit the max size of the points, as the angle in "FOV" that the point is allowed
   // to take up. Note that the max size is for the diameter, and we need the radius
-  const float DesiredAngleRadians = radians(0.5);
+  const float DesiredAngleRadians = radians(0.4);
 
   double distanceToCamera = length(dpos.xyz - cameraPosition);
   float pointSize = length(scaledRight);
@@ -111,8 +111,8 @@ void main() {
   // Calculate correction scale to achieve desired angle
   float correctionScale = DesiredAngleRadians / currentAngle;
 
-  scaledRight *= correctionScale * size;
-  scaledUp *= correctionScale * size;
+  scaledRight *= correctionScale * scale;
+  scaledUp *= correctionScale * scale;
 
   // Apply component scaling lastly, to get comparable sizes
   float comp = in_data[0].component;

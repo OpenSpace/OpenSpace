@@ -49,9 +49,9 @@ namespace {
         PositionNormal
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
-        "Size",
-        "Size",
+    constexpr openspace::properties::Property::PropertyInfo ScaleInfo = {
+        "Scale",
+        "Scale",
         "A scale value controlling the size of the glyphs."
     };
 
@@ -63,14 +63,14 @@ namespace {
 
     constexpr openspace::properties::Property::PropertyInfo UseFixedWidthInfo = {
         "UseFixedWidth",
-        "Use Fixed Width",
+        "Use fixed width",
         "If true, all the rings representing the planets will have the very same width. "
         "Otherwise, the width of each ring decreases a bit as the radius gets larger."
     };
 
     constexpr openspace::properties::Property::PropertyInfo CurrentIndexInfo = {
         "CurrentlyHoveredIndex",
-        "Currently Hovered Index",
+        "Currently hovered index",
         "The index of the currently hovered planet. Is -1 if no planet is being hovered."
     };
 
@@ -88,8 +88,8 @@ namespace {
     };
 
     struct [[codegen::Dictionary(RenderableExoplanetGlyphCloud)]] Parameters {
-        // [[codegen::verbatim(SizeInfo.description)]]
-        std::optional<float> size;
+        // [[codegen::verbatim(ScaleInfo.description)]]
+        std::optional<float> scale;
 
         // [[codegen::verbatim(SelectionInfo.description)]]
         std::optional<std::vector<int>> selection;
@@ -123,7 +123,7 @@ documentation::Documentation RenderableExoplanetGlyphCloud::Documentation() {
 RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
                                                      const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _size(SizeInfo, 1.f, 0.f, 10.f)
+    , _scale(ScaleInfo, 1.f, 0.f, 10.f)
     , _selectedIndices(SelectionInfo)
     , _useFixedRingWidth(UseFixedWidthInfo, true)
     , _renderOption(OrientationRenderOptionInfo)
@@ -131,10 +131,10 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
-    _size = p.size.value_or(_size);
-    addProperty(_size);
-
     addProperty(Fadeable::_opacity);
+
+    _scale = p.scale.value_or(_scale);
+    addProperty(_scale);
 
     _selectedIndices = p.selection.value_or(_selectedIndices);
     _selectedIndices.onChange([this]() { _selectionChanged = true; });
@@ -288,7 +288,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     );
 
     _program->setUniform(_uniformCache.opacity, opacity());
-    _program->setUniform(_uniformCache.size, _size);
+    _program->setUniform(_uniformCache.scale, _scale);
     _program->setUniform(_uniformCache.onTop, false);
     _program->setUniform(_uniformCache.isRenderIndexStep, false);
     _program->setUniform(_uniformCache.maxIndex, _maxIndex);
