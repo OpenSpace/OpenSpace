@@ -1,22 +1,15 @@
-asset.require('scene/solarsystem/missions/stereo/stereo_a')
+local stereo_a = asset.require('scene/solarsystem/missions/stereo/stereo_a')
 local coreKernels = asset.require("spice/core")
 local kernels = asset.require("scene/solarsystem/missions/stereo/kernels")
-local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
-
-
+print(stereo_a)
 -- We use the Stereo position with an added rotation to stabilize the image and remove
--- any wobble effect since we don't have the ck kernels.
+-- any wobble effect since we don't have the CK kernels
 local StereoPosition = {
-  Identifier = "StereoA_Position_Ecliptic",
-  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Identifier = "STEREO_A_Position_Ecliptic",
+  Parent = stereo_a.Position.Identifier,
   Transform = {
-    Translation = {
-      Type = "SpiceTranslation",
-      Target = kernels.ID.STEREO_A,
-      Observer = coreKernels.ID.SolarSystemBarycenter,
-    },
-    -- This rotation removes tiny wobbles and fixes the frame in place.
+    -- This rotation removes tiny wobbles and fixes the frame in place
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = coreKernels.Frame.EclipJ2000,
@@ -24,23 +17,28 @@ local StereoPosition = {
     }
   },
   GUI = {
-    Name = "STEREO_A Position",
-    Path = "/Solar System/Missions/STEREO_A",
+    Name = "STEREO A Position",
+    Path = "/Solar System/Missions/STEREO A",
     Hidden = true,
     Focusable = false
   }
 }
 
 local SolarImagery = {
-  Identifier = "SolarImagery_STEREO-A_EUV",
+  Identifier = "SolarImagery_STEREO_A",
   Parent = StereoPosition.Identifier,
+    TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = stereo_a.MissionBegin,
+    End = stereo_a.MissionEnd
+  },
   Renderable = {
     Type = "RenderableSolarImagery",
     ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing/stereo"),
     TransferfunctionDir = asset.resource("colortables")
   },
   GUI = {
-    Name = "STEREO_A EUV-I-A Imagery",
+    Name = "STEREO A Imagery",
     Path = "/Solar System/Solar Imagery"
   }
 }

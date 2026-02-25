@@ -25,9 +25,10 @@
 #ifndef __OPENSPACE_MODULE_SOLARBROWSING___J2KCODEC___H__
 #define __OPENSPACE_MODULE_SOLARBROWSING___J2KCODEC___H__
 
-#include <memory>
 #include <openjpeg.h>
+#include <memory>
 #include <string>
+#include <filesystem>
 
 namespace openspace {
 
@@ -52,9 +53,6 @@ struct ImageData {
     uint32_t h;
 };
 
-// @TODO (anden88: 2026-02-13): This decoder has some experimental code and a lot of
-// unused variables. I can't say for certain what they are all about or what the goal was.
-// Should this be left as is, or should we clean it all out?
 class J2kCodec {
 public:
     static constexpr const int ALL_THREADS = 0;
@@ -63,26 +61,19 @@ public:
     ~J2kCodec();
 
     // Decode into a client allocated buffer
-    void decodeIntoBuffer(const std::string& path, unsigned char* buffer,
-        int resolutionLevel, int numQualityLayers = 1, int x0 = -1, int y0 = -1,
-        int x1 = -1, int y1 = -1, int numThreads = ALL_THREADS);
-
-    // Experimental and not used at the moment
-    //void encodeAsTiles(const char* outfile, const int32_t* data, unsigned int imageWidth,
-    //    unsigned int imageHeight, unsigned int tileWidth, unsigned int tileHeight,
-    //    unsigned int numComps, unsigned int compPrec);
+    void decodeIntoBuffer(const std::filesystem::path& path, unsigned char* buffer,
+        int resolutionLevel);
 
 private:
     void destroy();
-    void createInfileStream(std::string filename);
-    void setupDecoder(int resolutionLevel, int numQualityLayers, int x0, int x1, int y0,
-        int y1, int nThreads);
+    void createInfileStream(const std::filesystem::path& path);
+    void setupDecoder(int resolutionLevel);
 
     opj_codec_t* _decoder = nullptr;
     opj_dparameters_t _decoderParams;
     opj_image_t* _image = nullptr;
 
-    std::string _infileName;
+    std::filesystem::path _filePath;
     opj_stream_t* _infileStream = nullptr;
     bool _verboseMode = false;
 };

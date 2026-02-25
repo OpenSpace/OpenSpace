@@ -32,23 +32,22 @@
 #include <filesystem>
 #include <functional>
 #include <mutex>
-#include <unordered_map>
-#include <thread>
-#include <vector>
 #include <queue>
+#include <thread>
+#include <unordered_map>
+#include <vector>
 
 // Implementation based on http://progsch.net/wordpress/?p=81
 
-namespace openspace::solarbrowsing {
+namespace openspace {
 
 /**
- * An asynchronous image decoding utility that processes image decode requests
- * on a dedicated pool of worker threads.
+ * An asynchronous image decoding utility that processes image decode requests on a
+ * dedicated pool of worker threads.
  *
- * The AsyncImageDecoder manages a set of background threads that process
- * DecodeRequest objects submitted through requestDecode(). Each request
- * decodes a specific image at a given downsampling level and delivers the
- * resulting data through a callback function.
+ * The AsyncImageDecoder manages a set of background threads that process DecodeRequest
+ * objects submitted through requestDecode(). Each request decodes a specific image at a
+ * given downsampling level and delivers the resulting data through a callback function.
  *
  * Each decode operation is uniquely identified by the combination of image file path and
  * downsampling level. If multiple identical requests are issued while one is already
@@ -105,7 +104,8 @@ private:
      */
     void decodeRequest(const DecodeRequest& request);
 
-    bool _verbose;
+    bool _verbose = false;
+
     // Thread management
     std::vector<std::thread> _workers;
     std::atomic<bool> _stopRequest = false;
@@ -117,6 +117,6 @@ private:
     std::unordered_map<std::filesystem::path, bool> _activeRequests;
 };
 
-} //namespace openspace::solarbrowsing
+} //namespace openspace
 
 #endif // !__OPENSPACE_MODULE_SOLARBROWSING___ASYNCIMAGEDECODER___H__

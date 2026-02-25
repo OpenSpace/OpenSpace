@@ -26,30 +26,28 @@
 
 #include "powerScaling/powerScaling_vs.glsl"
 
-layout(location = 0) in vec4 in_position;
-layout(location = 1) in vec2 in_st;
+layout(location = 0) in vec2 in_position;
+layout(location = 1) in vec2 in_texCoords;
 
-out vec2 vs_st;
-out vec4 vs_positionScreenSpace;
-out float s;
+out Data {
+  vec2 textCoords;
+  float depth;
+} out_data;
 
 uniform mat4 modelViewProjectionTransform;
 uniform float scale;
 uniform vec2 centerPixel;
 
-float HALF_SUN_RADIUS = 696701000.0; //(1391600000.0 * 0.50);
-float R_SUN = 995.90523 / 1.5877740;
-
 void main() {
-  // Transform the damn psc to homogenous coordinate
-  vec4 position = vec4(in_position.xyz * pow(10, in_position.w), 1);
+  out_data.textCoords = in_texCoords;
+
+  vec2 position = in_position;
   position.x += centerPixel.x;
   position.y += centerPixel.y;
   position.xy *= 1.0 / scale;
 
-  vec4 positionClipSpace = modelViewProjectionTransform * position;
-  vs_positionScreenSpace = z_normalization(positionClipSpace);
-  gl_Position = vs_positionScreenSpace;
-
-  vs_st = in_st;
+  vec4 positionClipSpace = modelViewProjectionTransform * vec4(position, 0.0, 1.0);
+  vec4 positionScreenSpace = z_normalization(positionClipSpace);
+  out_data.depth = positionScreenSpace.w;
+  gl_Position = positionScreenSpace;
 }

@@ -25,12 +25,12 @@
 #include <modules/solarbrowsing/solarbrowsingmodule.h>
 
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
-#include <modules/solarbrowsing/tasks/helioviewerdownloadtask.h>
 #include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
+#include <modules/solarbrowsing/tasks/helioviewerdownloadtask.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>
-#include <openspace/util/task.h>
 #include <openspace/util/factorymanager.h>
+#include <openspace/util/task.h>
 #include <ghoul/misc/assert.h>
 
 namespace openspace {
@@ -42,9 +42,7 @@ void SolarBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "No renderable factory existed");
 
-    fRenderable->registerClass<RenderableSolarImagery>(
-        "RenderableSolarImagery"
-    );
+    fRenderable->registerClass<RenderableSolarImagery>("RenderableSolarImagery");
     fRenderable->registerClass<RenderableSolarImageryProjection>(
         "RenderableSolarImageryProjection"
     );

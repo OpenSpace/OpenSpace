@@ -40,10 +40,11 @@
 #include <string_view>
 #include <iostream>
 
-
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "SolarBrowsingHelper";
-    constexpr double SUN_RADIUS = 1391600000.0 * 0.5;
+    constexpr double SunRadius = 1391600000.0 * 0.5;
     using IsValidCacheFile = bool;
 
     bool isValidJ2000ImageFile(const std::filesystem::path& path) {
@@ -58,10 +59,10 @@ namespace {
     // this implementation should be improved in order not to search the entire buffer for
     // XML data. There is an issue here:
     // (https://github.com/uclouvain/openjpeg/issues/929)
-    std::optional<openspace::ImageMetadata> parseJ2kMetadata(
-        const std::filesystem::path& filePath)
+    std::optional<ImageMetadata> parseJ2kMetadata(
+                                                    const std::filesystem::path& filePath)
     {
-        openspace::ImageMetadata im;
+        ImageMetadata im;
         im.filePath = filePath;
 
         std::ifstream stream(filePath, std::ios::binary | std::ios::ate);
@@ -90,7 +91,6 @@ namespace {
 
             if (begin == view.end()) {
                 return std::nullopt;
-                ;
             }
 
             const auto afterBeginTag = begin + startTag.size();
@@ -116,20 +116,14 @@ namespace {
             return std::nullopt;
         }
 
-        std::optional<std::string_view> telescop = extractInnerXml(
-            metaData.value(),
-            "TELESCOP"
-        );
+        std::optional<std::string_view> telescop = extractInnerXml(*metaData, "TELESCOP");
 
         if (!telescop.has_value()) {
             LERROR(std::format("Could not find TELESCOP tag {}", filePath));
             return std::nullopt;
         }
 
-        std::optional<std::string_view> naxis = extractInnerXml(
-            metaData.value(),
-            "NAXIS1"
-        );
+        std::optional<std::string_view> naxis = extractInnerXml(*metaData, "NAXIS1");
 
         if (!naxis.has_value()) {
             LERROR(std::format("Could not find NAXIS1 tag {}", filePath));
@@ -156,19 +150,20 @@ namespace {
             return std::nullopt;
         }
 
-        im.fullResolution = std::stoi(std::string(naxis.value()));
+        im.fullResolution = std::stoi(std::string(*naxis));
         const float halfRes = im.fullResolution / 2.f;
 
-        glm::vec2 centerPixel;
-        centerPixel.x = std::stof(std::string(centerPixelX.value()));
-        centerPixel.y = std::stof(std::string(centerPixelY.value()));
+        glm::vec2 centerPixel = glm::vec2(
+            std::stof(std::string(*centerPixelX)),
+            std::stof(std::string(*centerPixelY))
+        );
         const glm::vec2 offset =
-            ((halfRes - centerPixel) / halfRes) * glm::vec2(SUN_RADIUS);
+            ((halfRes - centerPixel) / halfRes) * glm::vec2(SunRadius);
         im.centerPixel = offset;
 
-        if (telescop.value() == "SOHO") {
+        if (*telescop == "SOHO") {
             std::optional<std::string_view> plateScl = extractInnerXml(
-                metaData.value(),
+                *metaData,
                 "PLATESCL"
             );
 
@@ -177,11 +172,11 @@ namespace {
                 return std::nullopt;
             }
 
-            const float plateScale = std::stof(std::string(plateScl.value()));
+            const float plateScale = std::stof(std::string(*plateScl));
             im.scale = 1.f / (plateScale / 2.f);
             im.isCoronaGraph = true;
         }
-        else if (telescop.value() == "SDO") {
+        else if (*telescop == "SDO") {
             std::optional<std::string_view> rsunObs = extractInnerXml(
                 bufferView,
                 "RSUN_OBS"
@@ -200,12 +195,12 @@ namespace {
                 return std::nullopt;
             }
 
-            const float rSunObsValue = std::stof(std::string(rsunObs.value()));
-            const float cDelt1Value = std::stof(std::string(cDelt1.value()));
+            const float rSunObsValue = std::stof(std::string(*rsunObs));
+            const float cDelt1Value = std::stof(std::string(*cDelt1));
             im.scale = (rSunObsValue / cDelt1Value) / (im.fullResolution / 2.f);
             im.isCoronaGraph = false;
         }
-        else if (telescop.value() == "STEREO") {
+        else if (*telescop == "STEREO") {
             std::optional<std::string_view> rsun = extractInnerXml(bufferView, "RSUN");
             std::optional<std::string_view> cDelt1 = extractInnerXml(
                 bufferView,
@@ -221,8 +216,8 @@ namespace {
                 return std::nullopt;
             }
 
-            const float rSunvalue = std::stof(std::string(rsun.value()));
-            const float cDelt1Value = std::stof(std::string(cDelt1.value()));
+            const float rSunvalue = std::stof(std::string(*rsun));
+            const float cDelt1Value = std::stof(std::string(*cDelt1));
             im.scale = (rSunvalue / cDelt1Value) / (im.fullResolution / 2.f);
             im.isCoronaGraph = false;
 
@@ -232,19 +227,16 @@ namespace {
             );
 
             if (detector.has_value()) {
-                im.isCoronaGraph =
-                    detector.value() == "COR1" || detector.value() == "COR2";
+                im.isCoronaGraph = *detector == "COR1" || *detector == "COR2";
             }
             else {
-                LWARNING(std::format(
-                    "Could not find DETECTOR tag {}", filePath
-                ));
+                LWARNING(std::format("Could not find DETECTOR tag {}", filePath));
             }
         }
         else {
-            LERROR(std::format("Recieved unknown spacecraft image '{}'. Supported "
-                "spacecrafts are {}, {}, {}",
-                telescop.value(), "SOHO", "SDO", "STEREO"
+            LERROR(std::format(
+                "Recieved unknown spacecraft image '{}'. Supported spacecrafts are {}, "
+                "{}, {}", *telescop, "SOHO", "SDO", "STEREO"
             ));
             return std::nullopt;
         }
@@ -256,19 +248,19 @@ namespace {
         std::string month = datetime.substr(5, 3);
 
         std::string MM = "";
-        if (month == "JAN") MM = "01";
-        else if (month == "FEB") MM = "02";
-        else if (month == "MAR") MM = "03";
-        else if (month == "APR") MM = "04";
-        else if (month == "MAY") MM = "05";
-        else if (month == "JUN") MM = "06";
-        else if (month == "JUL") MM = "07";
-        else if (month == "AUG") MM = "08";
-        else if (month == "SEP") MM = "09";
-        else if (month == "OCT") MM = "10";
-        else if (month == "NOV") MM = "11";
-        else if (month == "DEC") MM = "12";
-        else ghoul_assert(false, "Bad month");
+        if (month == "JAN") { MM = "01"; }
+        else if (month == "FEB") { MM = "02"; }
+        else if (month == "MAR") { MM = "03"; }
+        else if (month == "APR") { MM = "04"; }
+        else if (month == "MAY") { MM = "05"; }
+        else if (month == "JUN") { MM = "06"; }
+        else if (month == "JUL") { MM = "07"; }
+        else if (month == "AUG") { MM = "08"; }
+        else if (month == "SEP") { MM = "09"; }
+        else if (month == "OCT") { MM = "10"; }
+        else if (month == "NOV") { MM = "11"; }
+        else if (month == "DEC") { MM = "12"; }
+        else { ghoul_assert(false, "Bad month") };
 
         datetime.replace(4, 5, "-" + MM + "-");
         return datetime;
@@ -296,7 +288,7 @@ namespace {
      */
     std::unordered_map<std::filesystem::path, IsValidCacheFile> loadMetadataFromDisk(
                                                      const std::filesystem::path& rootDir,
-                                            openspace::ImageMetadataMap& imageMetadataMap)
+                                                       ImageMetadataMap& imageMetadataMap)
     {
         if (!std::filesystem::is_directory(rootDir)) {
             throw ghoul::RuntimeError(std::format(
@@ -311,7 +303,7 @@ namespace {
                 ghoul::filesystem::Sorted::No,
                 [](const std::filesystem::path& path) {
                     return std::filesystem::is_directory(path);
-            }
+                }
         );
 
         std::unordered_map<std::filesystem::path, IsValidCacheFile> subDirectoriesMap;
@@ -342,7 +334,6 @@ namespace {
             std::ifstream myfile(cacheFile);
             if (!myfile.is_open()) {
                 LERROR(std::format("Failed to open metadata file '{}'", cacheFile));
-                //subDirectoriesMap[subDirectory] = false; -- Implicit default
                 continue;
             }
 
@@ -375,7 +366,7 @@ namespace {
             }
 
             for (int i = 0; i < numStates; i++) {
-                openspace::ImageMetadata im;
+                ImageMetadata im;
 
                 myfile >> std::ws; // Skip the rest of the line
                 std::string date;
@@ -390,7 +381,7 @@ namespace {
                 }
 
                 double timeObserved =
-                    openspace::SpiceManager::ref().ephemerisTimeFromDate(ISO8601(date));
+                    SpiceManager::ref().ephemerisTimeFromDate(ISO8601(date));
 
                 std::string relPath;
                 myfile >> relPath;
@@ -458,7 +449,7 @@ namespace {
     }
 
     void saveMetadataToDisk(const std::filesystem::path& rootPath,
-        const openspace::ImageMetadataMap& imageMetadataMap)
+                            const ImageMetadataMap& imageMetadataMap)
     {
         for (const auto& [instrument, sequence] : imageMetadataMap) {
             const std::filesystem::path cacheFile =
@@ -474,13 +465,11 @@ namespace {
 
             bool isFirstWrite = true;
 
-            using Metadata = openspace::Keyframe<openspace::ImageMetadata>;
-            for (const Metadata& metadata : sequence.keyframes()) {
-                const std::string date =
-                    openspace::SpiceManager::ref().dateFromEphemerisTime(
+            for (const Keyframe<ImageMetadata>& metadata : sequence.keyframes()) {
+                const std::string date = SpiceManager::ref().dateFromEphemerisTime(
                         metadata.timestamp
                 );
-                const openspace::ImageMetadata& im = metadata.data;
+                const ImageMetadata& im = metadata.data;
                 const std::filesystem::path relativePath = std::filesystem::relative(
                     im.filePath,
                     rootPath
@@ -502,13 +491,12 @@ namespace {
                     static_cast<int>(im.isCoronaGraph) // Output bool as 0/1
                 );
             }
-            ofs.close();
         }
     }
 } // namespace
 
+namespace openspace {
 
-namespace openspace::solarbrowsing {
 std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferFunctions(
                                                      const std::filesystem::path& rootDir,
                                                  const ImageMetadataMap& imageMetadataMap)
@@ -568,7 +556,8 @@ ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir) {
 
     // There might be cache files that are outdated due to new images or if a new
     // directory of images have been added. Remove the cache files that were validated
-    std::erase_if(cacheFilesValidityMap,
+    std::erase_if(
+        cacheFilesValidityMap,
         [](const std::pair<std::filesystem::path, bool>& entry) {
             return entry.second;
         }
@@ -631,8 +620,6 @@ ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir) {
 
         // Name
         size_t posSatelliteNameEnd = satelliteInfo.find_first_of("_");
-        // e.g., SDO
-        //std::string satelliteName = satelliteInfo.substr(0, posSatelliteNameEnd);
 
         // Instrument
         size_t posInstrumentNameStart = posSatelliteNameEnd + 1;
@@ -659,19 +646,18 @@ ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir) {
                 std::lock_guard lock(spiceAndPushMutex);
                 result[instrumentName].addKeyframe(
                     global::timeManager->time().convertTime(dateTime),
-                    std::move(im.value())
+                    std::move(*im)
                 );
             }
             else {
                 LERROR(std::format(
-                    "Failed to parse J2K metadata from file '{}'",
-                    seqPath
+                    "Failed to parse J2K metadata from file '{}'", seqPath
                 ));
             }
         }
         else {
-            LERROR(std::format("Failed to parse date '{}' from file '{}'",
-                fileName, seqPath
+            LERROR(std::format(
+                "Failed to parse date '{}' from file '{}'", fileName, seqPath
             ));
         }
 
@@ -707,14 +693,14 @@ DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
             metadata.filePath,
             std::format("{}x{}", imageSize, imageSize)
         );
-        throw ghoul::RuntimeError(std::format("Error, could not open cache file '{}'",
-            path
+        throw ghoul::RuntimeError(std::format(
+            "Error, could not open cache file '{}'", path
         ));
     }
 
     size_t nEntries = 0;
     file.read(reinterpret_cast<char*>(&nEntries), sizeof(nEntries));
-    solarbrowsing::DecodedImageData data;
+    DecodedImageData data;
     data.imageSize = imageSize;
     data.metadata = metadata;
     data.buffer.resize(nEntries);
@@ -726,8 +712,8 @@ DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
             metadata.filePath,
             std::format("{}x{}", imageSize, imageSize)
         );
-        throw ghoul::RuntimeError(std::format("Failed to read image data from cache '{}'",
-            path
+        throw ghoul::RuntimeError(std::format(
+            "Failed to read image data from cache '{}'", path
         ));
     }
 
@@ -750,4 +736,4 @@ void saveDecodedDataToCache(const std::filesystem::path& path,
     file.close();
 }
 
-} // namespace openspace::solarbrowsing
+} // namespace openspace

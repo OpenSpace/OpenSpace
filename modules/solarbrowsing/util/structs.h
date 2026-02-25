@@ -46,8 +46,6 @@ using InstrumentName = std::string;
 using ImageMetadataMap = std::unordered_map<InstrumentName, Timeline<ImageMetadata>>;
 using ImagePrecision = unsigned char;
 
-namespace solarbrowsing {
-
 struct DecodedImageData {
     std::vector<uint8_t> buffer;
     ImageMetadata metadata;
@@ -62,8 +60,6 @@ struct DecodeRequest {
     // Synchronous callback assumed, can lead to race conditions if async
     DecodeCompleteCallback callback;
 };
-
-} // namespace openspace::solarbrowsing
 
 } // namespace openspace
 

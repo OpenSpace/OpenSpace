@@ -45,11 +45,7 @@ void ProgressBar::print(int current) {
     const float progress = static_cast<float>(current) / static_cast<float>(_end);
     const int iprogress = static_cast<int>(progress * 100.f);
     if (iprogress != _previous) {
-        const int pos = std::clamp(
-            static_cast<int>(_width * progress),
-            0,
-            _width - 1
-        );
+        const int pos = std::clamp(static_cast<int>(_width * progress), 0, _width - 1);
 
         _stream << std::format("[{}>{}] {:3>}% \r",
             std::string(pos, '='),
@@ -61,10 +57,10 @@ void ProgressBar::print(int current) {
 }
 
 void ProgressBar::finish() {
-    if (!finished) {
+    if (!isFinished) {
         print(_end);
         _stream << '\n';
-        finished = true;
+        isFinished = true;
     }
 }
 

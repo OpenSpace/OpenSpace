@@ -22,8 +22,8 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_SPACE___HELIOVIEWERDOWNLOADTASK___H__
-#define __OPENSPACE_MODULE_SPACE___HELIOVIEWERDOWNLOADTASK___H__
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___HELIOVIEWERDOWNLOADTASK___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___HELIOVIEWERDOWNLOADTASK___H__
 
 #include <openspace/util/task.h>
 
@@ -42,8 +42,8 @@ public:
 
 private:
     std::filesystem::path _outputFolder;
-    double _timeStep;
-    int _sourceId;
+    double _timeStep = 0.0;
+    int _sourceId = 0;
     std::string _name;
     std::string _instrument;
     std::string _startTime;
@@ -54,4 +54,4 @@ private:
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_SPACE___HELIOVIEWERDOWNLOADTASK___H__
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___HELIOVIEWERDOWNLOADTASK___H__

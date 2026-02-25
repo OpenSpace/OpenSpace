@@ -4,7 +4,8 @@ local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 
 
 
---Model from https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/Solar%20TErrestrial%20RElations%20Observatory%20(STEREO)
+-- Model from https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/
+-- Solar%20TErrestrial%20RElations%20Observatory%20(STEREO)
 local models = asset.resource({
   Name = "STEREO_A Models",
   Type = "HttpSynchronization",
@@ -16,76 +17,79 @@ local MissionBegin = "2006 OCT 26 00:01:06"
 local MissionEnd = "2026 FEB 11 19:51:09"
 
 local StereoPosition = {
-  Identifier = "StereoA_Position",
+  Identifier = "STEREO_A_Position",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
   Transform = {
     Translation = {
       Type = "SpiceTranslation",
       Target = kernels.ID.STEREO_A,
-      Observer = coreKernels.ID.SolarSystemBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     }
   },
   GUI = {
-    Name = "STEREO_A Position",
-    Path = "/Solar System/Missions/STEREO_A",
+    Name = "STEREO A Position",
+    Path = "/Solar System/Missions/STEREO A",
     Hidden = true,
     Focusable = false
   }
 }
 
 local StereoA = {
-  Identifier = "StereoA_Model",
+  Identifier = "STEREO_A_Model",
   Parent = StereoPosition.Identifier,
-  Transform = {
-    Rotation = {
-      Type = "FixedRotation",
-      Attached = "StereoA_Model",
-      YAxis = sunTransforms.SunCenter.Identifier,
-      ZAxis = { 0.0, 1.0, 0.0 },
-      ZAxisOrthogonal = true,
-    }
-  },
   TimeFrame = {
     Type = "TimeFrameInterval",
     Start = MissionBegin,
     End = MissionEnd
   },
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "STEREO_A_Model",
+      YAxis = sunTransforms.SunCenter.Identifier,
+      ZAxis = { 0.0, 1.0, 0.0 },
+      ZAxisOrthogonal = true
+    }
+  },
   Renderable = {
     Type = "RenderableModel",
-    Body = "StereoA_Model",
     GeometryFile = models .. "STEREO.fbx",
-    RotationVector = { 0, 260, 0 },
-    LightSources = {sunTransforms.LightSource},
+    -- Arbitrarily chose 260 degree as it results in slightly better visuals when rolling
+    RotationVector = { 0, 260.0, 0 },
+    LightSources = { sunTransforms.LightSource },
     AmbientIntensity = 0.2,
     SpecularIntensity = 0.0,
-    ModelScale = 1
   },
   GUI = {
-    Name = "STEREO_A",
-    Path = "/Solar System/Missions/STEREO_A"
+    Name = "STEREO A",
+    Path = "/Solar System/Missions/STEREO A"
   }
 }
 
 local StereoTrail = {
-  Identifier = "StereoA_Trail",
+  Identifier = "STEREO_A_Trail",
   Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = MissionBegin,
+    End = MissionEnd
+  },
   Renderable = {
     Type = "RenderableTrailOrbit",
     Translation = {
       Type = "SpiceTranslation",
       Target = kernels.ID.STEREO_A,
-      Observer = coreKernels.ID.SolarSystemBarycenter,
+      Observer = coreKernels.ID.SolarSystemBarycenter
     },
-    Color = {0.33, 0.75, 0.52 },
-    Period = 346,
+    Color = { 0.33, 0.75, 0.52 },
+    Period = 346.0,
     Resolution = 5000,
     EnableFade = true,
-    StartTime = MissionBegin,
-    EndTime = MissionEnd,
   },
+
   GUI = {
-    Name = "STEREO_A Trail",
-    Path = "/Solar System/Missions/STEREO_A"
+    Name = "STEREO A Trail",
+    Path = "/Solar System/Missions/STEREO A"
   }
 }
 
@@ -106,7 +110,8 @@ end)
 asset.export("Position", StereoPosition)
 asset.export("StereoA", StereoA)
 asset.export("Trail", StereoTrail)
-
+asset.export("MissionBegin", MissionBegin)
+asset.export("MissionEnd", MissionEnd)
 
 
 

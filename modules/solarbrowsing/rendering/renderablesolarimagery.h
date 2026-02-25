@@ -41,10 +41,7 @@ namespace ghoul::opengl { class Texture; }
 namespace openspace {
 
 class TransferFunction;
-
-namespace solarbrowsing {
-    class AsyncImageDecoder;
-} // namespace solarbrowsing
+class AsyncImageDecoder;
 
 // @TODO (anden88 2026-02-04): Steps for streaming new image data from HelioViewer
 // 1. Check if image exists in cache (since this will be at runtime we check the ram
@@ -56,7 +53,7 @@ namespace solarbrowsing {
 
 class RenderableSolarImagery : public Renderable {
 public:
-    RenderableSolarImagery(const ghoul::Dictionary& dictionary);
+    explicit RenderableSolarImagery(const ghoul::Dictionary& dictionary);
     ~RenderableSolarImagery() override = default;
 
     void initializeGL() override;
@@ -75,12 +72,23 @@ public:
     float gammaValue() const;
     float scale() const;
     bool isCoronaGraph() const;
-    glm::vec2 getCenterPixel() const;
+    glm::vec2 centerPixel() const;
     const glm::vec3& planeNormal() const;
     const glm::dvec3& planeWorldPosition() const;
     const glm::dmat4& planeWorldRotation() const;
 
 private:
+    constexpr static inline size_t NoActiveKeyframe = std::numeric_limits<size_t>::max();
+
+    struct PlaneVertex {
+        glm::vec2 position;
+        glm::vec2 texCoords;
+    };
+
+    struct FrustumVertex {
+        glm::vec4 position;
+    };
+
     void updateImageryTexture();
     void requestPredictiveFrames(const Keyframe<ImageMetadata>* keyframe,
         const UpdateData& data
@@ -104,10 +112,9 @@ private:
 
     // The decoded image texture
     std::unique_ptr<ghoul::opengl::Texture> _imageryTexture;
-    const size_t NoActiveKeyframe = std::numeric_limits<size_t>::max();
     size_t _currentKeyframe = NoActiveKeyframe;
     // Data for the currently shown image
-    float _currentScale = 0;
+    float _currentScale = 0.f;
     bool _isCoronaGraph = false;
     glm::vec2 _currentCenterPixel = glm::vec2(2.f);
 
@@ -117,7 +124,7 @@ private:
     std::unordered_map<InstrumentName, std::shared_ptr<TransferFunction>> _tfMap;
 
     // Decoder
-    std::unique_ptr<solarbrowsing::AsyncImageDecoder> _asyncDecoder;
+    std::unique_ptr<AsyncImageDecoder> _asyncDecoder;
     size_t _lastPredictedKeyframe = NoActiveKeyframe;
     bool _predictionIsDirty = true;
 
@@ -129,8 +136,8 @@ private:
     UniformCache(planeOpacity, modelViewProjectionTransform,
         modelViewProjectionTransformPlane, scale, centerPixel) _uniformCacheFrustum;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _frustumShader;
-    std::unique_ptr<ghoul::opengl::ProgramObject> _planeShader;
+    ghoul::opengl::ProgramObject* _frustumShader = nullptr;
+    ghoul::opengl::ProgramObject* _planeShader = nullptr;
     GLuint _frustumVao = 0;
     GLuint _frustumPositionBuffer = 0;
     GLuint _quadVao = 0;

@@ -26,7 +26,7 @@
 
 #include <modules/solarbrowsing/util/j2kcodec.h>
 
-namespace openspace::solarbrowsing {
+namespace openspace {
 
 AsyncImageDecoder::AsyncImageDecoder(size_t numThreads, bool verbose)
     : _verbose(verbose)
@@ -110,7 +110,7 @@ void AsyncImageDecoder::decodeRequest(const DecodeRequest& request) {
 
     J2kCodec j2c(_verbose);
     j2c.decodeIntoBuffer(
-        request.metadata.filePath.string(),
+        request.metadata.filePath,
         decodedData.buffer.data(),
         request.downsamplingLevel
     );
@@ -132,4 +132,4 @@ void AsyncImageDecoder::setVerboseFlag(bool verbose) {
     _verbose = verbose;
 }
 
-} // namespace openspace::solarbrowsing
+} // namespace openspace

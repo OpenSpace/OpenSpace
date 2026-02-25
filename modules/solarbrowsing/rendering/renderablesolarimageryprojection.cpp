@@ -24,6 +24,7 @@
 
 #include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
 
+#include <modules/base/basemodule.h>
 #include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
@@ -33,10 +34,10 @@
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/programobject.h>
-#include <ghoul/logging/logmanager.h>
 #include <format>
 #include <fstream>
 #include <limits>
@@ -46,28 +47,26 @@ namespace {
     constexpr char* _loggerCat = "RendearbleSpacecraftCameraSphere";
     // This number MUST match the constant specified in the shader
     constexpr int MaxSpacecraftObservatories = 7;
+    constexpr float SunRadius = 1391600000.0 * 0.5;
 
     struct [[codegen::Dictionary(RenderableSolarImageryProjection)]] Parameters {
         // List of spacecraft identifiers that will be projected on the sphere (Sun)
         // surface.
         std::vector<std::string> dependentNodes;
-
-        //std::optional<float> radius;
     };
-
 } // namespace
 #include "renderablesolarimageryprojection_codegen.cpp"
 
 namespace openspace {
 
 openspace::Documentation RenderableSolarImageryProjection::Documentation() {
-    return codegen::doc<Parameters>("renderablesolarimageryprojection");
+    return codegen::doc<Parameters>("solarbrowsing_renderablesolarimageryprojection");
 }
 
 RenderableSolarImageryProjection::RenderableSolarImageryProjection(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
-    , _sphere(6.96701E8f, 100)
+    , _sphere(SunRadius * 1.001f, 100)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -76,20 +75,18 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
             global::renderEngine->scene()->sceneGraphNode(nodeName);
 
         if (!dependentNode) {
-            LWARNING(std::format(
+            throw ghoul::RuntimeError(std::format(
                 "Specified dependent node '{}' did not exist", nodeName
             ));
-            continue;
         }
         Renderable* dependentRenderable = dependentNode->renderable();
         RenderableSolarImagery* renderableSolarImagery =
             dynamic_cast<RenderableSolarImagery*>(dependentRenderable);
         if (!renderableSolarImagery) {
-            LWARNING(std::format(
+            throw ghoul::RuntimeError(std::format(
                 "Specified dependent node '{}' that was not a RenderableSolarImagery",
                 nodeName
             ));
-            continue;
         }
         _solarImageryDependencies.push_back(dependentNode);
     }
@@ -102,21 +99,32 @@ void RenderableSolarImageryProjection::initialize() {
 }
 
 void RenderableSolarImageryProjection::initializeGL() {
-    if (!_shader) {
-        _shader = global::renderEngine->buildRenderProgram("SpacecraftImageSphereProgram",
-            absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageprojection_vs.glsl"),
-            absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageprojection_fs.glsl")
-        );
-    }
+    std::filesystem::path vertexShader =
+        absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageprojection_vs.glsl");
+    std::filesystem::path fragmentShader =
+        absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageprojection_fs.glsl");
+    _shader = BaseModule::ProgramObjectManager.request(
+        "SpacecraftImageSphereProgram",
+        [&]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return global::renderEngine->buildRenderProgram(
+                "SpacecraftImageSphereProgram",
+                vertexShader,
+                fragmentShader
+            );
+        }
+    );
 
     _sphere.initialize();
 }
 
 void RenderableSolarImageryProjection::deinitializeGL() {
-    if (_shader) {
-        global::renderEngine->removeRenderProgram(_shader.get());
-        _shader = nullptr;
+    BaseModule::ProgramObjectManager.release(
+        "SpacecraftImageSphereProgram",
+        [](ghoul::opengl::ProgramObject* p) {
+        global::renderEngine->removeRenderProgram(p);
     }
+    );
+    _shader = nullptr;
 }
 
 bool RenderableSolarImageryProjection::isReady() const {
@@ -146,13 +154,14 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
     ghoul::opengl::TextureUnit textureImageryUnits[MaxSpacecraftObservatories];
     ghoul::opengl::TextureUnit transferFunctionUnits[MaxSpacecraftObservatories];
 
-    for (int i = 0; i < numPlanes && i < MaxSpacecraftObservatories; ++i) {
+    for (int i = 0; i < numPlanes && i < MaxSpacecraftObservatories; i++) {
         RenderableSolarImagery* solarImagery = static_cast<RenderableSolarImagery*>(
             _solarImageryDependencies[i]->renderable()
         );
 
         const bool isCoronaGraph = solarImagery->isCoronaGraph();
-        const bool solarImageryEnabled = solarImagery->isEnabled();
+        const bool solarImageryEnabled = solarImagery->isEnabled() &&
+            _solarImageryDependencies[i]->isTimeFrameActive();
 
         const glm::dvec3 planePos = solarImagery->planeWorldPosition();
         const glm::dmat4 planeRot = glm::inverse(solarImagery->planeWorldRotation());
@@ -181,7 +190,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
         );
         _shader->setUniform(
             "centerPixel[" + std::to_string(i) + "]",
-            solarImagery->getCenterPixel()
+            solarImagery->centerPixel()
         );
 
         // Imagery texture
@@ -205,7 +214,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
     }
 
     // Set the rest of the texture units for well defined behaviour
-    for (int i = solarImageryCount; i < MaxSpacecraftObservatories; ++i) {
+    for (int i = solarImageryCount; i < MaxSpacecraftObservatories; i++) {
         _shader->setUniform(
             "imageryTexture[" + std::to_string(i) + "]",
             textureImageryUnits[i]

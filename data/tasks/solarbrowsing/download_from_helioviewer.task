@@ -15,8 +15,8 @@ return {{
 	Instrument = "AIA-171",
 	ColorMap = "${ASSETS}/scene/solarsystem/heliosphere/solarbrowsing/colortables/AIA-171.txt",
 	-- ColorMap = SavePath,
-	StartTime = "2018-10-15T00:00:00.000Z",
-	EndTime = "2018-10-16T00:00:00.000Z",
+	StartTime = "2024-05-06T00:00:00.000Z",
+	EndTime = "2024-05-14T00:00:00.000Z",
 	TimeStep = 60*60, -- Download an image every hour
-	OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/sdo/aia-171",
+	OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/sdo/aia-171"
 }}

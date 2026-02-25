@@ -39,7 +39,7 @@
 #include <mutex>
 
 namespace {
-    constexpr const char* _loggerCat = "HelioviewerDownloadTask";
+    constexpr std::string_view _loggerCat = "HelioviewerDownloadTask";
 
     // This task downloads solar image data from the Helioviewer API and stores the
     // resulting JP2 files on disk for use in OpenSpace.
@@ -90,7 +90,7 @@ namespace {
 namespace openspace {
 
 openspace::Documentation HelioviewerDownloadTask::documentation() {
-    return codegen::doc<Parameters>("helio_viewer_download_task");
+    return codegen::doc<Parameters>("solarbrowsing_helioviewerdownload_task");
 }
 
 HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictionary) {
@@ -207,7 +207,6 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
         epochAsIsoString.begin(),
         epochAsIsoString.end(),
         [&](const std::string& formattedDate) {
-
             const std::string imageUrl = std::format(
                 "http://api.helioviewer.org/v2/getJP2Image/?date={}Z&sourceId={}",
                 formattedDate,

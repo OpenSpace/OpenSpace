@@ -42,7 +42,7 @@ private:
     int _width;
     int _previous = -1;
     int _end;
-    bool finished = false;
+    bool isFinished = false;
 
     std::ostream& _stream;
 };

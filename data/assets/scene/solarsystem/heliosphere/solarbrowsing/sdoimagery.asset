@@ -1,13 +1,12 @@
-asset.require("scene/solarsystem/missions/sdo/sdo")
+local sdo = asset.require("scene/solarsystem/missions/sdo/sdo")
 local coreKernels = asset.require("spice/core")
 local kernels = asset.require("scene/solarsystem/missions/sdo/kernels")
 local earthTransform = asset.require("scene/solarsystem/planets/earth/transforms")
 
 
-
--- We use the Sdo position relative to the inertial to get less wobbly image. Adding
+-- We use the SDO position relative to the inertial to get less wobbly image. Adding
 -- the rotation further removes any small variations visible when increasing the
--- simulation time.
+-- simulation time
 local SdoPosition = {
   Identifier = "SDO_Position_Inertial",
   Parent = earthTransform.EarthInertial.Identifier,
@@ -18,7 +17,7 @@ local SdoPosition = {
       Observer = coreKernels.ID.Earth,
       Frame = coreKernels.Frame.J2000
     },
-    -- This rotation removes tiny wobbles and fixes the frame in place.
+    -- This rotation removes tiny wobbles and fixes the frame in place
     Rotation = {
       Type = "SpiceRotation",
       SourceFrame = coreKernels.Frame.EclipJ2000,
@@ -34,8 +33,13 @@ local SdoPosition = {
 }
 
 local SolarImagery = {
-  Identifier = "SolarImagery_SDO_AIA",
+  Identifier = "SolarImagery_SDO",
   Parent = SdoPosition.Identifier,
+    TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = sdo.MissionBegin,
+    End = sdo.MissionEnd
+  },
   Renderable = {
     Type = "RenderableSolarImagery",
     ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing/sdo")

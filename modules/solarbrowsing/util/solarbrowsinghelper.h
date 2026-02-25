@@ -28,9 +28,7 @@
 #include <modules/solarbrowsing/util/structs.h>
 
 namespace openspace {
-    class TransferFunction;
-
-namespace solarbrowsing {
+class TransferFunction;
 
 /**
  * Loads transfer functions for the instruments represented in \p imageMetadataMap.
@@ -45,38 +43,29 @@ namespace solarbrowsing {
  * \return A map from instrument name to loaded TransferFunction instances
  */
 std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferFunctions(
-    const std::filesystem::path& rootDir, const ImageMetadataMap& imageMetadataMap
-);
+    const std::filesystem::path& rootDir, const ImageMetadataMap& imageMetadataMap);
 
 /**
- * Loads image metadata from all image sequence directories contained in
- * \p rootDir.
+ * Loads image metadata from all image sequence directories contained in \p rootDir.
  *
  * Reuse previously generated cache files where possible. Any directory without a valid
  * cache is processed directly and its metadata is reconstructed from the contained image
  * files. Newly generated metadata is written back to disk for future runs.
  *
- * The resulting metadata is grouped by instrument and inserted into
- * \p imageMetadataMap.
+ * The resulting metadata is grouped by instrument and inserted into \p imageMetadataMap.
  *
  * \param rootDir The root directory containing image sequence subdirectories
- *
  * \return The metadata map that will be populated with all discovered image metadata
  */
 ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir);
 
 
 DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
-    const ImageMetadata& metadata, unsigned int imageSize
-);
+    const ImageMetadata& metadata, unsigned int imageSize);
 
 void saveDecodedDataToCache(const std::filesystem::path& path,
-    const DecodedImageData& data, bool verboseMode
-);
+    const DecodedImageData& data, bool verboseMode);
 
-
-} //namespace openspace
-
-} // namespace openspace::solarbrowsing
+} // namespace openspace
 
 #endif // !__OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGHELPER___H__

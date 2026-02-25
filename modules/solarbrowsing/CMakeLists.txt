@@ -25,12 +25,8 @@
 include(${PROJECT_SOURCE_DIR}/support/cmake/module_definition.cmake)
 
 set(OPENJPEG_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/openjpeg/")
-#set(H264_ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/ext/libde265/")
-#add_subdirectory(${OPENJPEG_ROOT_DIR})
-#add_subdirectory(${H264_ROOT_DIR})
 
 set(HEADER_FILES
-  # Other
   rendering/renderablesolarimagery.h
   rendering/renderablesolarimageryprojection.h
   tasks/helioviewerdownloadtask.h
@@ -68,11 +64,9 @@ create_new_module(
     ${HEADER_FILES} ${SOURCE_FILES} ${SHADER_FILES}
 )
 
-# include_external_library(openspace-module-solarbrowsing PRIVATE openjp2 ${OPENJPEG_ROOT_DIR})
 add_subdirectory(${OPENJPEG_ROOT_DIR} SYSTEM)
 set_target_properties(openjp2 PROPERTIES FOLDER "External")
 target_link_libraries(openspace-module-solarbrowsing PRIVATE openjp2)
-# target_include
 
 target_include_directories(openspace-module-solarbrowsing SYSTEM PUBLIC ${HEADER_FILES})
 

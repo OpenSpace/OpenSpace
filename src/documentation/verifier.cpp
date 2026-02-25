@@ -368,11 +368,7 @@ TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
     // Format 3
     if (!valid) {
         // The format might be of the type "YYYY-MM-DDThh:mm:ss.xxx"
-        auto r = scn::scan<int, int, int, int, int, int, int>(
-            dateTime,
-            format3
-        );
-
+        auto r = scn::scan<int, int, int, int, int, int, int>(dateTime,format3);
         valid = static_cast<bool>(r);
     }
 

@@ -26,10 +26,11 @@
 
 const int MaxSpacecraftObservatories = 7;
 
-in vec4 vs_positionScreenSpace;
-in vec4 clipSpace;
-in vec3 vUv[MaxSpacecraftObservatories];
-in vec3 vs_positionModelSpace;
+in Data {
+  vec4 positionScreenSpace;
+  vec3 vUv[MaxSpacecraftObservatories];
+  vec3 positionModelSpace;
+} in_data;
 
 uniform int numSpacecraftCameraPlanes;
 uniform dvec3 planePositionSpacecraft[MaxSpacecraftObservatories];
@@ -48,11 +49,14 @@ uniform vec2 centerPixel[MaxSpacecraftObservatories];
 const float HalfSunRadius = 1391600000 * 0.5;
 
 float contrast(float intensity, int i) {
-  return min(clamp(0.5 + (intensity - 0.5) * (1 + contrastValue[i]/10.0), 0.0, 1.0), sqrt(intensity) + intensity);
+  return min(
+    clamp(0.5 + (intensity - 0.5) * (1.0 + contrastValue[i] / 10.0), 0.0, 1.0),
+    sqrt(intensity) + intensity
+  );
 }
 
 Fragment getFragment() {
-  vec4 outColor = vec4(0);
+  vec4 outColor = vec4(0.0);
   bool renderSurface = true;
 
   for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
@@ -60,13 +64,13 @@ Fragment getFragment() {
       continue;
     }
 
-    if (planePositionSpacecraft[i].z < vUv[i].z) {
-      vec3 uv = vUv[i].xyz;
-      uv /= ( (HalfSunRadius / scale[i]) * 2);
+    if (planePositionSpacecraft[i].z < in_data.vUv[i].z) {
+      vec3 uv = in_data.vUv[i].xyz;
+      uv /= (HalfSunRadius / scale[i]) * 2.0;
       uv += 0.5;
 
-      uv.x += ((centerPixel[i].x) / HalfSunRadius) / 2.0;
-      uv.y -= ((centerPixel[i].y) /  HalfSunRadius) / 2.0;
+      uv.x += (centerPixel[i].x / HalfSunRadius) / 2.0;
+      uv.y -= (centerPixel[i].y /  HalfSunRadius) / 2.0;
 
       float intensityOrg = texture(imageryTexture[i], vec2(uv.x, 1.0 - uv.y)).r;
       intensityOrg = contrast(intensityOrg, i);
@@ -74,7 +78,8 @@ Fragment getFragment() {
       vec4 res;
       if (hasLut[i]) {
           res = texture(lut[i], intensityOrg);
-      } else {
+      }
+      else {
           res = vec4(intensityOrg, intensityOrg, intensityOrg, 1.0);
       }
 
@@ -83,7 +88,7 @@ Fragment getFragment() {
       res.b = pow(res.b, gammaValue[i]);
 
       // Not initialized
-      if (outColor == vec4(0)) {
+      if (outColor == vec4(0.0)) {
           float factor2 = smoothstep(0.5, uv.x, uv.z);
           outColor = mix(res, res, factor2);
       }
@@ -99,13 +104,12 @@ Fragment getFragment() {
 
   if (renderSurface) {
     // Arbitrary default shading
-    vec3 diffuse = vec3((vs_positionModelSpace.y) / HalfSunRadius) * 0.18;
+    vec3 diffuse = vec3((in_data.positionModelSpace.y) / HalfSunRadius) * 0.18;
     outColor = vec4(clamp(diffuse, vec3(-1.0), vec3(1.0)) + vec3(0.2, 0.21, 0.22), 1.0);
   }
 
   Fragment frag;
   frag.color = outColor;
-  frag.depth = vs_positionScreenSpace.w;
-
+  frag.depth = in_data.positionScreenSpace.w;
   return frag;
 }

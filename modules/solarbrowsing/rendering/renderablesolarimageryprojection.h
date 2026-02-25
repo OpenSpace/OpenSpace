@@ -54,15 +54,14 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    std::unique_ptr<ghoul::opengl::ProgramObject> _shader;
-    Sphere _sphere;
-
     static openspace::Documentation Documentation();
 
 private:
     void loadTexture();
 
     std::vector<SceneGraphNode*> _solarImageryDependencies;
+    ghoul::opengl::ProgramObject* _shader;
+    Sphere _sphere;
 };
 
 } // namespace openspace

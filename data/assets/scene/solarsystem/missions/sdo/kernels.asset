@@ -5,7 +5,7 @@ local sdo = asset.resource({
   Version = 1
 })
 
--- bsp kernels from:
+-- SPK kernels from:
 -- https://soho.nascom.nasa.gov/solarsoft/packages/sunspice/sdo/data/
 local SdoKernels = {
   sdo .. "sdo.bsp",
@@ -15,7 +15,7 @@ local SdoKernels = {
   sdo .. "SDO_EPHEM_2025005_2025255_00.bsp",
   sdo .. "SDO_EPHEM_2025089_2025339_00.bsp",
   sdo .. "SDO_EPHEM_2025180_2026065_00.bsp",
-  sdo .. "SDO_EPHEM_2025278_2026163_00.bsp",
+  sdo .. "SDO_EPHEM_2025278_2026163_00.bsp"
 }
 
 local ID = {
