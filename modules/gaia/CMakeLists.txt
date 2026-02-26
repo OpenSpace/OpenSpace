@@ -51,7 +51,7 @@ source_group("Source Files" FILES ${SOURCE_FILES})
 
 set(SHADER_FILES
   shaders/gaia_point_fs.glsl
-  shaders/gaia_point_ge.glsl
+  shaders/gaia_point_gs.glsl
   shaders/gaia_ssbo_vs.glsl
   shaders/gaia_tonemapping_point_fs.glsl
   shaders/gaia_tonemapping_vs.glsl

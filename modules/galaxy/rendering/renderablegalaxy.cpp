@@ -425,7 +425,7 @@ void RenderableGalaxy::initializeGL() {
         "Galaxy billboard",
         absPath("${MODULE_GALAXY}/shaders/billboard_vs.glsl"),
         absPath("${MODULE_GALAXY}/shaders/billboard_fs.glsl"),
-        absPath("${MODULE_GALAXY}/shaders/billboard_ge.glsl")
+        absPath("${MODULE_GALAXY}/shaders/billboard_gs.glsl")
     );
 
     if (!_pointSpreadFunctionTexturePath.empty()) {

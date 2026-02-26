@@ -551,7 +551,7 @@ void RenderableGaiaStars::initializeGL() {
         "GaiaStar",
         absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
         absPath("${MODULE_GAIA}/shaders/gaia_point_fs.glsl"),
-        absPath("${MODULE_GAIA}/shaders/gaia_point_ge.glsl")
+        absPath("${MODULE_GAIA}/shaders/gaia_point_gs.glsl")
     );
     ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
 
@@ -856,7 +856,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
             "GaiaStar",
             absPath("${MODULE_GAIA}/shaders/gaia_ssbo_vs.glsl"),
             absPath("${MODULE_GAIA}/shaders/gaia_point_fs.glsl"),
-            absPath("${MODULE_GAIA}/shaders/gaia_point_ge.glsl")
+            absPath("${MODULE_GAIA}/shaders/gaia_point_gs.glsl")
         );
 
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache);

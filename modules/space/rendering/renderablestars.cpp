@@ -678,7 +678,7 @@ void RenderableStars::initializeGL() {
         "Star",
         absPath("${MODULE_SPACE}/shaders/star_vs.glsl"),
         absPath("${MODULE_SPACE}/shaders/star_fs.glsl"),
-        absPath("${MODULE_SPACE}/shaders/star_ge.glsl")
+        absPath("${MODULE_SPACE}/shaders/star_gs.glsl")
     );
 
     glCreateBuffers(1, &_baseVbo);
