@@ -27,6 +27,7 @@
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/syncengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/util/distanceconstants.h>
@@ -66,12 +67,6 @@ namespace {
         "Use fixed width",
         "If true, all the rings representing the planets will have the very same width. "
         "Otherwise, the width of each ring decreases a bit as the radius gets larger."
-    };
-
-    constexpr openspace::properties::Property::PropertyInfo CurrentIndexInfo = {
-        "CurrentlyHoveredIndex",
-        "Currently hovered index",
-        "The index of the currently hovered planet. Is -1 if no planet is being hovered."
     };
 
     constexpr openspace::properties::Property::PropertyInfo OrientationRenderOptionInfo =
@@ -127,7 +122,6 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     , _selectedIndices(SelectionInfo)
     , _useFixedRingWidth(UseFixedWidthInfo, true)
     , _renderOption(OrientationRenderOptionInfo)
-    , _currentlyHoveredIndex(CurrentIndexInfo, -1)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
@@ -160,7 +154,15 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
 
     updateDataFromFile();
 
-    // Picking callbacks
+    initializeSelectionCallbacks();
+}
+
+void RenderableExoplanetGlyphCloud::initializeSelectionCallbacks() {
+    // Only initialize callbacks for the master instance
+    if (!global::windowDelegate->isMaster()) {
+        return;
+    }
+
     global::callback::keyboard->emplace_back(
         [&](Key key, KeyModifier, KeyAction action, bool) -> bool {
             if (!_enabled) {
@@ -180,6 +182,7 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
             return false;
         }
     );
+
     global::callback::mousePosition->emplace_back(
         [&](double x, double y, bool) {
             if (!_enabled || !_isInSelectionMode) {
@@ -209,16 +212,19 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
             }
         }
     );
+}
 
-    _currentlyHoveredIndex.setReadOnly(true);
-    addProperty(_currentlyHoveredIndex);
+int RenderableExoplanetGlyphCloud::hoveredIndex() const {
+    return _currentlyHoveredIndex;
 }
 
 bool RenderableExoplanetGlyphCloud::isReady() const {
     return _program != nullptr;
 }
 
-void RenderableExoplanetGlyphCloud::initialize() {}
+void RenderableExoplanetGlyphCloud::initialize() {
+    global::syncEngine->addSyncable({ &_currentlyHoveredIndex });
+}
 
 void RenderableExoplanetGlyphCloud::initializeGL() {
     _program = global::renderEngine->buildRenderProgram(
@@ -249,6 +255,10 @@ void RenderableExoplanetGlyphCloud::initializeGL() {
 
     glCreateVertexArrays(1, &_selectedVao);
     glCreateBuffers(1, &_selectedVbo);
+}
+
+void RenderableExoplanetGlyphCloud::deinitialize() {
+    global::syncEngine->removeSyncable({ &_currentlyHoveredIndex });
 }
 
 void RenderableExoplanetGlyphCloud::deinitializeGL() {
@@ -337,8 +347,8 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
     }
 
     // 2nd rendering pass: Render IDs to a separate texture every frame as well
-    // To use for picking
-    {
+    // To use for picking. We only need to do this on the master node
+    if (global::windowDelegate->isMaster()) {
         _program->setUniform(_uniformCache.isRenderIndexStep, true);
         GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
 

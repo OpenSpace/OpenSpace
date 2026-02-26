@@ -1046,9 +1046,7 @@ int DataViewer::getHoveredPlanetIndex() const {
        return -1;
    }
 
-   properties::Property* p = cloud->property("CurrentlyHoveredIndex");
-   properties::IntProperty* index = dynamic_cast<properties::IntProperty*>(p);
-   return index ? *index : -1;
+   return cloud->hoveredIndex();
 }
 
 void DataViewer::renderPlanetTooltip(int index) const {

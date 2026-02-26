@@ -33,6 +33,7 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 #include <openspace/rendering/labelscomponent.h>
+#include <openspace/util/syncdata.h>
 #include <ghoul/opengl/ghoul_gl.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/uniformcache.h>
@@ -50,9 +51,17 @@ class RenderableExoplanetGlyphCloud : public Renderable {
 public:
     RenderableExoplanetGlyphCloud(const ghoul::Dictionary& dictionary);
 
+    /**
+     * Return the index of the currently hovered glyph, or -1 if none is hovered
+     */
+    int hoveredIndex() const;
+
     void initialize() override;
     void initializeGL() override;
+    void deinitialize() override;
     void deinitializeGL() override;
+
+    void initializeSelectionCallbacks();
 
     bool isReady() const override;
 
@@ -96,7 +105,9 @@ private:
     std::vector<GlyphData> _fullGlyphData;
     std::vector<size_t> _glyphIndices; // indices of the points in the dataviewer
     int _maxIndex = -1;
-    properties::IntProperty _currentlyHoveredIndex;
+
+    // Hovered index, set from interaction on master node and synced to other nodes
+    SyncData<int> _currentlyHoveredIndex;
 
     bool _isInSelectionMode = false;
 
