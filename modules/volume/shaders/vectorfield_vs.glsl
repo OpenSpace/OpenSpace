@@ -22,45 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/volumemodule.h>
+#version __CONTEXT__
 
-#include <modules/volume/rendering/renderabletimevaryingvolume.h>
-#include <modules/volume/rendering/renderablevectorfield.h>
-#include <modules/volume/tasks/generaterawvolumetask.h>
-#include <modules/volume/tasks/generaterawvolumefromfiletask.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec3 in_direction;
+layout(location = 2) in float in_magnitude;
 
-namespace openspace {
+out Data {
+  vec3 position;
+  vec3 direction;
+  float magnitude;
+} out_data;
 
-VolumeModule::VolumeModule() : OpenSpaceModule(Name) {}
-
-void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* rFactory =
-        FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(rFactory, "No renderable factory existed");
-    rFactory->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");
-    rFactory->registerClass<RenderableVectorField>("RenderableVectorField");
-
-    ghoul::TemplateFactory<Task>* tFactory = FactoryManager::ref().factory<Task>();
-    ghoul_assert(tFactory, "No task factory existed");
-    tFactory->registerClass<GenerateRawVolumeTask>("GenerateRawVolumeTask");
-    tFactory->registerClass<GenerateRawVolumeFromFileTask>(
-        "GenerateRawVolumeFromFileTask"
-    );
+void main() {
+  out_data.position = in_position;
+  out_data.direction = in_direction;
+  out_data.magnitude = in_magnitude;
 }
-
-std::vector<Documentation> VolumeModule::documentations() const {
-    return {
-        RenderableTimeVaryingVolume::Documentation(),
-        RenderableVectorField::Documentation(),
-        GenerateRawVolumeTask::Documentation()
-    };
-}
-
-} // namespace openspace

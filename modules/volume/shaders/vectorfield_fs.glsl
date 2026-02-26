@@ -22,45 +22,49 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/volume/volumemodule.h>
+#include "fragment.glsl"
 
-#include <modules/volume/rendering/renderabletimevaryingvolume.h>
-#include <modules/volume/rendering/renderablevectorfield.h>
-#include <modules/volume/tasks/generaterawvolumetask.h>
-#include <modules/volume/tasks/generaterawvolumefromfiletask.h>
-#include <openspace/documentation/documentation.h>
-#include <openspace/rendering/renderable.h>
-#include <openspace/util/factorymanager.h>
-#include <openspace/util/task.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/templatefactory.h>
+in Data {
+  flat vec3 direction;
+  flat float magnitude;
+  float depth;
+} in_data;
 
-namespace openspace {
 
-VolumeModule::VolumeModule() : OpenSpaceModule(Name) {}
+uniform float opacity;
+uniform vec2 dataRangeFilter;
+uniform int colorMode;
+uniform vec2 magDomain;
+uniform sampler1D colorTexture;
+uniform vec4 fixedColor;
 
-void VolumeModule::internalInitialize(const ghoul::Dictionary&) {
-    ghoul::TemplateFactory<Renderable>* rFactory =
-        FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(rFactory, "No renderable factory existed");
-    rFactory->registerClass<RenderableTimeVaryingVolume>("RenderableTimeVaryingVolume");
-    rFactory->registerClass<RenderableVectorField>("RenderableVectorField");
+const int ColorModeFixed = 0;
+const int ColorModeMagnitude = 1;
+const int ColorModeDirection = 2;
 
-    ghoul::TemplateFactory<Task>* tFactory = FactoryManager::ref().factory<Task>();
-    ghoul_assert(tFactory, "No task factory existed");
-    tFactory->registerClass<GenerateRawVolumeTask>("GenerateRawVolumeTask");
-    tFactory->registerClass<GenerateRawVolumeFromFileTask>(
-        "GenerateRawVolumeFromFileTask"
-    );
+Fragment getFragment() {
+  Fragment frag;
+
+  if (opacity == 0.0) {
+      discard;
+  }
+
+  // vec4 fixedColor = vec4(1.0, 0.0, 0.0, 1.0);
+  if (colorMode == ColorModeFixed) {
+    frag.color = fixedColor;
+  }
+  else if (colorMode == ColorModeMagnitude) {
+    float t = (in_data.magnitude - magDomain.x) / (magDomain.y - magDomain.x);
+    t = clamp(t, 0.0, 1.0);
+    frag.color = texture(colorTexture, t);
+  }
+  else { // colorMode == ColorModeDirection
+    vec3 dir = normalize(in_data.direction);
+    vec3 color = 0.5 * (dir + vec3(1.0)); // remaps [-1, 1] -> [0, 1]
+    frag.color = vec4(color, 1.0);
+  }
+
+  frag.color.a *= opacity;
+  frag.depth = in_data.depth;
+  return frag;
 }
-
-std::vector<Documentation> VolumeModule::documentations() const {
-    return {
-        RenderableTimeVaryingVolume::Documentation(),
-        RenderableVectorField::Documentation(),
-        GenerateRawVolumeTask::Documentation()
-    };
-}
-
-} // namespace openspace

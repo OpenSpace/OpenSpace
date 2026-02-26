@@ -1,0 +1,37 @@
+-- Basic
+-- This example creates a basic vector field visualization from a volumetric data file.
+
+-- Load the volume data from OpenSpace servers
+local volume = asset.resource({
+  Name = "Vector Field - Example",
+  Type = "HttpSynchronization",
+  Identifier = "vectorfield_volume",
+  Version = 1
+})
+
+local Node = {
+  Identifier = "RenderableVectorField_Example",
+  Renderable = {
+    Type = "RenderableVectorField",
+    Mode = "Volume",
+    VectorFieldScale = 8.0,
+    Volume = {
+      VolumeFile = volume .. "vectorfield_16x16x16.bin",
+      MinDomain = { -5000.0, -5000.0, -5000.0 },
+      MaxDomain = { 5000.0, 5000.0, 5000.0 },
+      Dimensions = { 16, 16, 16 }
+    }
+  },
+  GUI = {
+    Name = "RenderableVectorField - Basic",
+    Path = "/Examples"
+  }
+}
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(Node)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(Node)
+end)
