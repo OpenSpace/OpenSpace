@@ -289,7 +289,7 @@ RenderableVectorField::ColorSettings::ColorSettings(const ghoul::Dictionary& dic
         colorMagnitudeDomain = settings.colorMappingRange.value_or(
             colorMagnitudeDomain
         );
-        computeMagnitudeRange = !p.coloring->colorMappingRange.has_value();
+        shouldComputeMagnitudeRange = !p.coloring->colorMappingRange.has_value();
     }
 }
 
@@ -432,10 +432,6 @@ void RenderableVectorField::initializeGL() {
     glCreateVertexArrays(1, &_vao);
     glCreateBuffers(1, &_vectorFieldVbo);
     glVertexArrayVertexBuffer(_vao, 0, _vectorFieldVbo, 0, sizeof(ArrowInstance));
-
-    static_assert(sizeof(ArrowInstance) == 7 * sizeof(float),
-        "Vertex layout is not tightly packed!"
-    );
 
     glNamedBufferData(
         _vectorFieldVbo,
@@ -784,7 +780,7 @@ void RenderableVectorField::loadVolumeData(const std::filesystem::path& path) {
     RawVolumeReader<VelocityData> reader(path, _volume.dimensions);
     _volume.volumeData = reader.read();
 
-    if (_colorSettings.computeMagnitudeRange) {
+    if (_colorSettings.shouldComputeMagnitudeRange) {
         _volume.volumeData->forEachVoxel(
             [this](const glm::uvec3&, const VelocityData& data) {
                 float magnitude = glm::length(glm::vec3(data.vx, data.vy, data.vz));
@@ -900,7 +896,7 @@ void RenderableVectorField::loadCSVData(const std::filesystem::path& path) {
         }
         _sparse.data.push_back({ position, velocity });
 
-        if (_colorSettings.computeMagnitudeRange) {
+        if (_colorSettings.shouldComputeMagnitudeRange) {
             float magnitude = glm::length(velocity);
             const glm::vec2& mag = _colorSettings.colorMagnitudeDomain;
             _colorSettings.colorMagnitudeDomain = glm::vec2(

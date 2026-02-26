@@ -126,7 +126,7 @@ private:
         StringProperty colorTexturePath;
         Vec2Property colorMagnitudeDomain;
         Vec4Property fixedColor;
-        bool computeMagnitudeRange = true;
+        bool shouldComputeMagnitudeRange = true;
     };
     ColorSettings _colorSettings;
 

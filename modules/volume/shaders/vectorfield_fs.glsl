@@ -27,7 +27,7 @@
 in Data {
   flat vec3 direction;
   flat float magnitude;
-  float positionDepth;
+  float depth;
 } in_data;
 
 
@@ -65,6 +65,6 @@ Fragment getFragment() {
   }
 
   frag.color.a *= opacity;
-  frag.depth = gs_positionDepth;
+  frag.depth = in_data.depth;
   return frag;
 }

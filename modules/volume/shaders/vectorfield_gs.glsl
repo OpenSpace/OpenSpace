@@ -30,16 +30,16 @@
 // direction, it is then rotated to match the direction of the incomming vector.
 layout (points) in;
 in Data {
-  vec3 vs_position;
-  vec3 vs_direction;
-  float vs_magnitude;
+  vec3 position;
+  vec3 direction;
+  float magnitude;
 } in_data[];
 
 layout (line_strip, max_vertices = 6) out;
 out Data {
   flat vec3 direction;
   flat float magnitude;
-  float positionDepth;
+  float depth;
 } out_data;
 
 uniform mat4 modelViewProjection;
@@ -67,7 +67,7 @@ float exponentialScale(float sliderValue, float minExp, float maxExp) {
 
 void emitWorldVertex(vec3 worldPos) {
   vec4 positionClipSpace = modelViewProjection * vec4(worldPos, 1.0);
-  out_data.positionDepth = positionClipSpace.w;
+  out_data.depth = positionClipSpace.w;
   gl_Position = z_normalization(positionClipSpace);
   EmitVertex();
 }

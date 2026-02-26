@@ -77,7 +77,7 @@ set(SHADER_FILES
   shaders/helper.glsl
   shaders/raycast.glsl
   shaders/vectorfield_fs.glsl
-  shaders/vectorfield_ge.glsl
+  shaders/vectorfield_gs.glsl
   shaders/vectorfield_vs.glsl
 )
 
