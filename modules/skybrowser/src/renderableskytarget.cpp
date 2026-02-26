@@ -141,8 +141,8 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
 }
 
 void RenderableSkyTarget::initializeGL() {
-    glCreateVertexArrays(1, &_vao);
-    glCreateBuffers(1, &_vbo);
+    RenderablePlane::initializeGL();
+
     createPlane();
 
     std::string ProgramName = identifier() + "Shader";

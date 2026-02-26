@@ -296,13 +296,11 @@ void RenderableRadialGrid::update(const UpdateData&) {
     }
 
     // Lines
-    const int nLines = _gridSegments.value()[1];
-    const int nVertices = 2 * nLines;
+    if (const int nLines = _gridSegments.value()[1];  nLines > 1) {
+        std::vector<rendering::VertexXYZ> data;
+        const int nVertices = 2 * nLines;
+        data.reserve(nVertices);
 
-    std::vector<rendering::VertexXYZ> data;
-    data.reserve(nVertices);
-
-    if (nLines > 1) {
         std::vector<rendering::Vertex> outerVertices =
             rendering::createRing(nLines, outerRadius);
 
@@ -319,8 +317,8 @@ void RenderableRadialGrid::update(const UpdateData&) {
             data.push_back(vOut);
             data.push_back(vIn);
         }
+        _lines.update(data);
     }
-    _lines.update(data);
 
     setBoundingSphere(static_cast<double>(outerRadius));
 

@@ -512,7 +512,7 @@ void RenderablePlane::createPlane() {
         Vertex{ glm::vec4( sizeX,  sizeY, 0.f, 0.f), glm::vec2(1.f, 1.f) }
     };
 
-    glNamedBufferSubData(_vbo, 0, sizeof(vertexData), vertexData.data());
+    glNamedBufferSubData(_vbo, 0, vertexData.size() * sizeof(Vertex), vertexData.data());
 }
 
 glm::dmat4 RenderablePlane::rotationMatrix(const RenderData& data) const {
