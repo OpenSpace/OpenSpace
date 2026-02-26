@@ -172,6 +172,28 @@ Path::Path(Waypoint start, Waypoint end, Type type, std::optional<float> duratio
             estimatedDuration = 0.f;
         }
     }
+
+    // For linear paths, limit how fast the camera can rotate, to avoid really fast
+    // rotations for short paths. Unless of course someone specified a duration,
+    // then use that one.
+    if (_type == Type::Linear && !duration.has_value()) {
+        const glm::dvec3 a = ghoul::viewDirection(_start.rotation());
+        const glm::dvec3 b = ghoul::viewDirection(_end.rotation());
+        const float angle = static_cast<float>(std::acos(glm::dot(a, b)));
+
+        // Seconds per pi angles. Per default, it takes 5 seconds to turn 90 degrees
+        constexpr float BaseFactor = 5.f / glm::half_pi<float>();
+        float factor = BaseFactor *
+            global::navigationHandler->pathNavigator().linearRotationSpeedFactor();
+
+        // Always at least 1 second
+        const float minTurnDuration = std::max(angle * factor, 1.f);
+        const float turnDuration = std::max(minTurnDuration, estimatedDuration);
+
+        _speedFactorFromDuration = estimatedDuration / turnDuration;
+        estimatedDuration = turnDuration;
+    }
+
     _expectedDuration = estimatedDuration;
 }
 
@@ -221,7 +243,7 @@ CameraPose Path::traversePath(double dt, float speedScale) {
     if (_type == Type::Linear) {
         // Special handling of linear paths, so that it can be used when we are
         // traversing very large distances without introducing precision problems
-        newPose = linearInterpolatedPose(_traveledDistance, displacement);
+        newPose = linearInterpolatedPose(_traveledDistance, displacement, speedScale);
     }
     else {
         if (std::abs(prevDistance - _traveledDistance) < LengthEpsilon) {
@@ -275,7 +297,9 @@ void Path::resetPlaybackVariables() {
     _shouldQuit = false;
 }
 
-CameraPose Path::linearInterpolatedPose(double distance, double displacement) {
+CameraPose Path::linearInterpolatedPose(double distance, double displacement,
+                                        double speedScale)
+{
     ghoul_assert(_type == Type::Linear, "Path type must be linear");
     const double relativeDistance = distance / pathLength();
 
@@ -305,7 +329,12 @@ CameraPose Path::linearInterpolatedPose(double distance, double displacement) {
         }
     }
 
-    pose.rotation = linearPathRotation(relativeDistance);
+
+    // Interpolate rotation based on time instead of distance, to avoid precision
+    // problems for long paths
+    double time = static_cast<double>(_progressedTime * speedScale / _expectedDuration);
+    time = glm::clamp(time, 0.0, 1.0);
+    pose.rotation = easedSlerpRotation(time);
 
     if (glm::any(glm::isnan(pose.rotation)) || glm::any(glm::isnan(pose.position))) {
         // This should not happen, but guard for it anyways
@@ -331,7 +360,10 @@ glm::dquat Path::interpolateRotation(double t) const {
         case Type::Linear:
             // @TODO (2022-03-29, emmbr) Fix so that rendering the rotation of linear
             // paths works again. I.e. openspace.debugging.renderCameraPath
-            return linearPathRotation(t);
+
+            // Note that this code is never run. Instead, linear paths are handled
+            // separately in `linearInterpolatedPose´
+            return easedSlerpRotation(t);
         case Type::ZoomOutOverview:
         case Type::AvoidCollisionWithLookAt:
             return lookAtTargetsRotation(t);
@@ -344,67 +376,6 @@ glm::dquat Path::easedSlerpRotation(double t) const {
     double tScaled = shiftAndScale(t, 0.1, 0.9);
     tScaled = ghoul::sineEaseInOut(tScaled);
     return glm::slerp(_start.rotation(), _end.rotation(), tScaled);
-}
-
-glm::dquat Path::linearPathRotation(double) const {
-    const glm::dvec3 a = ghoul::viewDirection(_start.rotation());
-    const glm::dvec3 b = ghoul::viewDirection(_end.rotation());
-    const double angle = std::acos(glm::dot(a, b)); // assumes length 1.0 for a & b
-
-    // Seconds per pi angles. Per default, it takes 5 seconds to turn 90 degrees
-    double factor = 5.0 / glm::half_pi<double>();
-    factor *= global::navigationHandler->pathNavigator().linearRotationSpeedFactor();
-
-    const double turnDuration = std::max(angle * factor, 1.0); // Always at least 1 second
-    const double time = glm::clamp(_progressedTime / turnDuration, 0.0, 1.0);
-    return easedSlerpRotation(time);
-
-    // @TODO (2022-03-18, emmbr) Leaving this for now, as something similar might have to
-    // be implemented for navigation states. But should be removed/reimplemented
-
-    //const glm::dvec3 endNodePos = _end.node()->worldPosition();
-    //const glm::dvec3 endUp = _end.rotation() * glm::dvec3(0.0, 1.0, 0.0);
-
-    //const double tHalf = 0.5;
-    //if (t < tHalf) {
-    //    // Interpolate to look at target
-    //    const glm::dvec3 halfWayPos = _curve->positionAt(tHalf);
-    //    const glm::dquat q = ghoul::lookAtQuaternion(halfWayPos, endNodePos, endUp);
-
-    //    const double tScaled = ghoul::sineEaseInOut(t / tHalf);
-    //    return glm::slerp(_start.rotation(), q, tScaled);
-    //}
-
-    //// This distance is guaranteed to be strictly decreasing for linear paths
-    //const double distanceToEnd = glm::distance(_prevPose.position, _end.position());
-
-    //// Determine the distance at which to start interpolating to the target rotation.
-    //// The magic numbers here are just randomly picked constants, set to make the
-    //// resulting rotation look ok-ish
-    //double closingUpDistance = 10.0 * _end.validBoundingSphere();
-    //if (pathLength() < 2.0 * closingUpDistance) {
-    //    closingUpDistance = 0.2 * pathLength();
-    //}
-
-    //if (distanceToEnd < closingUpDistance) {
-    //    // Interpolate to target rotation
-    //    const double tScaled =
-    //        ghoul::sineEaseInOut(1.0 - distanceToEnd / closingUpDistance);
-
-    //    // Compute a position in front of the camera at the end orientation
-    //    const double inFrontDistance = glm::distance(_end.position(), endNodePos);
-    //    const glm::dvec3 viewDir = ghoul::viewDirection(_end.rotation());
-    //    const glm::dvec3 inFrontOfEnd = _end.position() + inFrontDistance * viewDir;
-    //    const glm::dvec3 lookAtPos = ghoul::interpolateLinear(
-    //        tScaled,
-    //        endNodePos,
-    //        inFrontOfEnd
-    //    );
-    //    return ghoul::lookAtQuaternion(_prevPose.position, lookAtPos, endUp);
-    //}
-
-    //// Keep looking at the end node
-    //return ghoul::lookAtQuaternion(_prevPose.position, endNodePos, endUp);
 }
 
 glm::dquat Path::lookAtTargetsRotation(double t) const {

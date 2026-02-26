@@ -115,7 +115,8 @@ public:
      * path. Note that the linear path is a special case, to avoid risks of precision
      * problems for long paths.
      */
-    CameraPose linearInterpolatedPose(double distance, double displacement);
+    CameraPose linearInterpolatedPose(double distance, double displacement,
+        double speedScale);
 
     /**
      * Compute the interpolated camera pose at a certain distance along the path.
@@ -148,18 +149,6 @@ private:
      *        relative traveled distance, in [0, 1]
      */
     glm::dquat easedSlerpRotation(double t) const;
-
-    /**
-     * Compute the interpolated rotation quaternion using a method that is customized for
-     * linear paths. The camera will first interpoalte to look at the targetted node, and
-     * keep doing so for most of the path. At the end, when within a certain distance from
-     * the target, the rotation is interpolated so that the camera ends up in the target
-     * pose at the end of the path.
-     *
-     * \param t The interpolation variable for the rotatation interpolation. Should be the
-     *        relative traveled distance, in [0, 1]
-     */
-    glm::dquat linearPathRotation(double t) const;
 
     /**
      * Compute the interpolated rotation quaternion using an approach that first
