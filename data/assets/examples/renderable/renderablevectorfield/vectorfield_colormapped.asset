@@ -5,14 +5,12 @@
 -- The color mapping is applied to the magnitude of each vector, which is computed
 -- internally from the vector components. The color mapping range is automatically
 -- computed from the minimum and maximum magnitude values present in the dataset.
---
+
 -- Note that the color map is loaded from another asset. This is a utility asset that
 -- includes some common color maps for general usage.
-
 local colormaps = asset.require("util/default_colormaps")
 
 -- Load the volume data from OpenSpace servers
-
 local volume = asset.resource({
   Name = "Vector Field - Example",
   Type = "HttpSynchronization",
@@ -34,7 +32,7 @@ local Node = {
     },
     Coloring = {
       ColorMode = "Magnitude";
-      ColorMapFile = colormaps.Uniform.Viridis,
+      ColorMap = colormaps.Uniform.Viridis,
       FixedColor = { 1.0, 0.7, 0.5, 1.0 }
     }
   },

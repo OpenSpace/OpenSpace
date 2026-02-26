@@ -66,16 +66,14 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ColorModeOptionInfo = {
-        "ColorModeOption",
-        "Color mode option",
+    constexpr Property::PropertyInfo ColorModeInfo = {
+        "ColorMode",
+        "Color mode",
         "Controls how the vectors are colored. \"Fixed\" color all vectors with the same "
         "static color. \"Magnitude\" color the vector field based on the min and max "
         "magnitudes defined in the volume. \"Direction\" colors the vector based on "
-        "their direction, as follows:"
-        "+X -> Red, -X -> Cyan"
-        "+Y -> Green, -Y -> Magenta"
-        "+Z -> Blue, -Z -> Yellow",
+        "their direction, as follows: +X -> Red, -X -> Cyan, +Y -> Green, -Y -> Magenta, "
+        "+Z -> Blue, -Z -> Yellow.",
         Property::Visibility::User
     };
 
@@ -93,10 +91,10 @@ namespace {
         Property::Visibility::NoviceUser
     };
 
-    constexpr Property::PropertyInfo ColorTextureInfo = {
+    constexpr Property::PropertyInfo ColorMapInfo = {
         "ColorMap",
-        "Color texture",
-        "The path to the texture used to color the vector field.",
+        "Color map",
+        "The path to the color map file used for coloring the vector field.",
         Property::Visibility::User
     };
 
@@ -130,20 +128,20 @@ namespace {
     // dataset or a sparse point-like dataset, optionally including color mapping and
     // custom filtering via Lua script.
     //
-    // If `mode` is set to `Volume` the vector field is defined on a regular 3D grid
+    // If `mode` is set to `Volume`, the vector field is defined on a regular 3D grid
     // specified by `Dimensions`, and occupies the spatial domain defined by `MinDomain`
     // and `MaxDomain`.
     //
-    // If `mode` is set to `Sparse` the vector field is defined by the position given by
-    // the carteesian coordinates and direction (e.g., velocity).
+    // If `mode` is set to `Sparse`, the vector field is defined by the position given by
+    // the Cartesian coordinates and direction (e.g., velocity).
     //
     // The `Stride` parameter controls how densely vectors are sampled from the volume
     // (a stride of 1 renders every vector).
     //
-    // There are several coloring methods to choose from. By default the vectors are
-    // colored with a fixed color. Other options includes using a color map to coloring
-    // the vectors by the direction magnitude. And lastly color by direction, similar to a
-    // 3D model normal map as follows:
+    // There are several coloring methods to choose from. By default, the vectors are
+    // colored with a fixed color. Other options include using a color map to color the
+    // vectors by the direction magnitude. And lastly, color by direction, similar to a 3D
+    // model normal map as follows:
     // +X -> Red, -X -> Cyan
     // +Y -> Green, -Y -> Magenta
     // +Z -> Blue, -Z -> Yellow
@@ -153,9 +151,9 @@ namespace {
             Sparse
         };
 
-        // The mode determines the type of vectorfield data that is loaded. In `volume`
-        // mode, the vectorfield is computed from a 3D volume data file, the volume is
-        // mapped to the domain [min, max]. In `sparse` mode the vectorfield is computed
+        // The mode determines the type of vector field data that is loaded. In `volume`
+        // mode, the vector field is computed from a 3D volume data file, the volume is
+        // mapped to the domain [min, max]. In `sparse` mode, the vector field is computed
         // given the specified position and velocity components from a CSV file.
         Mode mode;
 
@@ -173,6 +171,7 @@ namespace {
             glm::ivec3 dimensions;
         };
 
+        // Settings related to using a volumetric dataset.
         std::optional<Volume> volume;
 
         struct Sparse {
@@ -198,6 +197,7 @@ namespace {
             std::optional<std::string> vz;
         };
 
+        // Settings related to using a sparse dataset.
         std::optional<Sparse> sparse;
 
         // [[codegen::verbatim(StrideInfo.description)]]
@@ -210,17 +210,17 @@ namespace {
                 Direction [[codegen::key("Direction")]]
             };
 
-            // [[codegen::verbatim(ColorModeOptionInfo.description)]]
+            // [[codegen::verbatim(ColorModeInfo.description)]]
             ColorMode colorMode;
 
             // [[codegen::verbatim(FixedColorInfo.description)]]
             std::optional<glm::vec4> fixedColor [[codegen::color()]];
 
-            // [[codgen::verbatim(ColorTextureInfo.description)]]
-            std::optional<std::filesystem::path> colorMapFile;
+            // [[codegen::verbatim(ColorMapInfo.description)]]
+            std::optional<std::filesystem::path> colorMap;
 
             // [[codegen::verbatim(ColorMappingDataRangeInfo.description)]]
-            std::optional<glm::vec2> colorMappingRange;
+            std::optional<glm::vec2> colorMappingDataRange;
         };
 
         // Settings related to the coloring of the vectors, such as a fixed color,
@@ -250,8 +250,8 @@ Documentation RenderableVectorField::Documentation() {
 
 RenderableVectorField::ColorSettings::ColorSettings(const ghoul::Dictionary& dictionary)
     : PropertyOwner({ "Coloring", "Coloring" })
-    , colorModeOption(ColorModeOptionInfo)
-    , colorTexturePath(ColorTextureInfo)
+    , colorModeOption(ColorModeInfo)
+    , colorMap(ColorMapInfo)
     , colorMagnitudeDomain(
         ColorMappingDataRangeInfo,
         glm::vec2(
@@ -269,27 +269,35 @@ RenderableVectorField::ColorSettings::ColorSettings(const ghoul::Dictionary& dic
     colorModeOption.addOption(ColorMode::Fixed, "Fixed");
     colorModeOption.addOption(ColorMode::Magnitude, "Magnitude");
     colorModeOption.addOption(ColorMode::Direction, "Direction");
-
     colorModeOption = ColorMode::Fixed;
+    colorModeOption.onChange([this]() {
+        if (colorModeOption == ColorMode::Magnitude && colorMap.value().empty()) {
+            LWARNING("Color mode set to 'Magnitude' but no colormap was specified, add a "
+                "color map file first."
+            );
+        }
+    });
     addProperty(colorModeOption);
+
     fixedColor.setViewOption(Property::ViewOptions::Color);
     addProperty(fixedColor);
-    addProperty(colorTexturePath);
+
+    addProperty(colorMap);
     addProperty(colorMagnitudeDomain);
 
     const bool hasColoring = p.coloring.has_value();
     if (hasColoring) {
         const Parameters::ColorSettings settings = *p.coloring;
 
-        colorModeOption = codegen::map<ColorMode>(settings.colorMode);
         fixedColor = settings.fixedColor.value_or(fixedColor);
-        if (settings.colorMapFile.has_value()) {
-            colorTexturePath = settings.colorMapFile->string();
+        if (settings.colorMap.has_value()) {
+            colorMap = settings.colorMap->string();
         }
-        colorMagnitudeDomain = settings.colorMappingRange.value_or(
+        colorModeOption = codegen::map<ColorMode>(settings.colorMode);
+        colorMagnitudeDomain = settings.colorMappingDataRange.value_or(
             colorMagnitudeDomain
         );
-        shouldComputeMagnitudeRange = !p.coloring->colorMappingRange.has_value();
+        shouldComputeMagnitudeRange = !p.coloring->colorMappingDataRange.has_value();
     }
 }
 
@@ -340,14 +348,12 @@ RenderableVectorField::RenderableVectorField(const ghoul::Dictionary& dictionary
 
     addPropertySubOwner(_colorSettings);
 
-    _colorSettings.colorTexturePath.onChange([this]() {
-        if (std::filesystem::exists(_colorSettings.colorTexturePath.value())) {
+    _colorSettings.colorMap.onChange([this]() {
+        if (std::filesystem::exists(_colorSettings.colorMap.value())) {
             _textureIsDirty = true;
         }
         else {
-            LWARNING(std::format("File not found: '{}'",
-                _colorSettings.colorTexturePath.value()
-            ));
+            LWARNING(std::format("File not found: '{}'",_colorSettings.colorMap.value()));
         }
     });
 
@@ -554,9 +560,9 @@ void RenderableVectorField::update(const UpdateData&) {
     if (_textureIsDirty) [[unlikely]] {
         _colorTexture = nullptr;
 
-        if (!_colorSettings.colorTexturePath.value().empty()) {
+        if (!_colorSettings.colorMap.value().empty()) {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
-                absPath(_colorSettings.colorTexturePath),
+                absPath(_colorSettings.colorMap),
                 1,
                 ghoul::opengl::Texture::SamplerInit{
                     .filter = ghoul::opengl::Texture::FilterMode::Nearest,
@@ -564,10 +570,7 @@ void RenderableVectorField::update(const UpdateData&) {
                 }
             );
 
-            LDEBUG(std::format(
-                "Loaded texture '{}'",
-                _colorSettings.colorTexturePath.value()
-            ));
+            LDEBUG(std::format("Loaded texture '{}'",_colorSettings.colorMap.value()));
         }
 
         _textureIsDirty = false;
@@ -588,7 +591,7 @@ void RenderableVectorField::applyLuaFilter() {
 
     // Load the Lua script
     ghoul::lua::runScriptFile(_state, path);
-    // Get the filter function
+    // Check if a filter function was provided
     lua_getglobal(_state, "filter");
     const bool isFunction = lua_isfunction(_state, -1);
     if (!isFunction) {
@@ -732,10 +735,8 @@ void RenderableVectorField::computeSparseFieldLines() {
     _instances.clear();
     _instances.resize(totalInstances);
 
-
     std::vector<size_t> indices(totalInstances);
     std::iota(indices.begin(), indices.end(), 0);
-
 
     auto computeArrowInstance = [this](size_t instanceIdx) {
         const size_t dataIdx = instanceIdx * _stride;

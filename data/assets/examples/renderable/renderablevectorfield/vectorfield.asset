@@ -1,8 +1,7 @@
 -- Basic
 -- This example creates a basic vector field visualization from a volumetric data file.
---
--- Load the volume data from OpenSpace servers
 
+-- Load the volume data from OpenSpace servers
 local volume = asset.resource({
   Name = "Vector Field - Example",
   Type = "HttpSynchronization",

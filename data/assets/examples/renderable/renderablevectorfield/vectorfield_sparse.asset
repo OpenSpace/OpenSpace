@@ -1,10 +1,10 @@
 -- Sparse
--- This example creates a basic vector field visualization from a csv data file.
+-- This example creates a vector field visualization from a sparse point-cloud datase,
+-- provided in a CSV data file with one row per vector.
 --
--- Optionally one can specify the column names for the position and direction. Otherwise
--- x, y, z and vx, vy, vz is assumed as the position and direction columns respectivelly.
---
--- Load the data from OpenSpace servers
+-- Optionally, one can specify the column names for the position and direction. Otherwise,
+-- x, y, z, and vx, vy, vz are assumed as the position and direction columns,
+-- respectively.
 
 local Node = {
   Identifier = "RenderableVectorField_Example_Sparse",

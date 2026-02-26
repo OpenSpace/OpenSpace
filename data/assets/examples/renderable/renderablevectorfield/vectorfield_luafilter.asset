@@ -10,9 +10,8 @@
 --
 -- The filter is provided as a separate Lua script asset. The script is executed
 -- at runtime and changes to the filter logic are applied by updating that asset.
---
--- Load the volume data from OpenSpace servers
 
+-- Load the volume data from OpenSpace servers
 local volume = asset.resource({
   Name = "Vector Field - Example",
   Type = "HttpSynchronization",

@@ -123,7 +123,7 @@ private:
     struct ColorSettings : PropertyOwner {
         explicit ColorSettings(const ghoul::Dictionary& dictionary);
         OptionProperty colorModeOption;
-        StringProperty colorTexturePath;
+        StringProperty colorMap;
         Vec2Property colorMagnitudeDomain;
         Vec4Property fixedColor;
         bool shouldComputeMagnitudeRange = true;
