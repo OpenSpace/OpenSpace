@@ -212,9 +212,9 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
     static std::array<char, BufferSize> buffer;
 #ifdef _MSC_VER
     strcpy_s(buffer.data(), value.length() + 1, value.c_str());
-#else
+#else // ^^^^ _MSC_VER // !_MSC_VER vvvv
     strcpy(buffer.data(), value.c_str());
-#endif
+#endif // _MSC_VER
     const bool hasNewValue = ImGui::InputText(name.c_str(), buffer.data(), BufferSize);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -240,9 +240,9 @@ void renderListProperty(const std::string& name, std::string_view fullIdentifier
     static std::array<char, BufferSize> buffer;
 #ifdef _MSC_VER
     strcpy_s(buffer.data(), value.length() + 1, value.c_str());
-#else
+#else // ^^^^ _MSC_VER // !_MSC_VER vvvv
     strcpy(buffer.data(), value.c_str());
-#endif
+#endif // _MSC_VER
 
     const bool hasNewValue = ImGui::InputText(name.c_str(), buffer.data(), BufferSize);
     if (hasNewValue) {

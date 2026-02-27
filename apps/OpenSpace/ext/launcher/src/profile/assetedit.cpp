@@ -59,7 +59,7 @@ void AssetEdit::createWidgets() {
         generateButton->setToolTip(
             "Cannot generate Horizons file without the space module enabled"
         );
-#else
+#else // ^^^^ OPENSPACE_MODULE_SPACE_ENABLED // !OPENSPACE_MODULE_SPACE_ENABLED vvvv
         generateButton->setCursor(Qt::PointingHandCursor);
 #endif // OPENSPACE_MODULE_SPACE_ENABLED
 

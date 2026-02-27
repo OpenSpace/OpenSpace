@@ -310,9 +310,9 @@ void ImGUIModule::internalInitializeGL() {
 
 #ifdef WIN32
     strcpy_s(_iniFileBuffer.data(), file.string().size() + 1, file.string().c_str());
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
     strcpy(_iniFileBuffer.data(), file.c_str());
-#endif
+#endif // WIN32
 
     const size_t nWindows = global::windowDelegate->nWindows();
     _contexts.resize(nWindows);
@@ -553,7 +553,7 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
        ImGui::ShowMetricsWindow();
        ImGui::End();
    }
-#endif
+#endif // SHOW_IMGUI_HELPERS
 
    ImGui::End();
 

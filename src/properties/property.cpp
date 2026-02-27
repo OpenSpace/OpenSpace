@@ -38,7 +38,7 @@ const char* Property::ViewOptions::MinMaxRange = "MinMaxRange";
 
 #ifdef _DEBUG
 uint64_t Property::Identifier = 0;
-#endif
+#endif // _DEBUG
 
 Property::Property(PropertyInfo info)
     : _identifier(info.identifier)
@@ -46,7 +46,7 @@ Property::Property(PropertyInfo info)
     , _description(info.description)
 #ifdef _DEBUG
     , _id(Identifier++)
-#endif
+#endif // _DEBUG
 {
     ghoul_assert(!_identifier.empty(), "Identifier must not be empty");
     ghoul_assert(!_guiName.empty(), "guiName must not be empty");

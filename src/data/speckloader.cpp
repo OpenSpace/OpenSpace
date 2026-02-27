@@ -365,7 +365,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             );
         }
     }
-#endif
+#endif // _DEBUG
 
     return res;
 }

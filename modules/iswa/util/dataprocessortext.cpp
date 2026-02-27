@@ -207,7 +207,6 @@ std::vector<float*> DataProcessorText::processData(const std::string& data,
     calculateFilterValues(selectedOptionsIndices);
 
     return dataOptions;
-//#endif
 }
 
 } // namespace openspace

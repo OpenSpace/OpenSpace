@@ -783,7 +783,7 @@ std::vector<std::string> SessionRecordingHandler::playbackList() const {
 #ifdef WIN32
         DWORD attributes = GetFileAttributes(e.path().string().c_str());
         bool isHidden = attributes & FILE_ATTRIBUTE_HIDDEN;
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
         const bool isHidden = filename.find('.') == 0;
 #endif // WIN32
         if (!isHidden) {

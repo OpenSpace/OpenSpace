@@ -39,7 +39,7 @@
 #define NOMINMAX
 #endif // NOMINMAX
 #include <modules/spout/spoutwrapper.h>
-#endif
+#endif // OPENSPACE_HAS_SPOUT
 
 namespace {
     struct [[codegen::Dictionary(SpoutImageProvider)]] Parameters {
@@ -134,7 +134,7 @@ SpoutImageProvider::SpoutImageProvider(
         );
         return true;
     });
-#endif
+#endif // OPENSPACE_HAS_SPOUT
 
     reset();
 }

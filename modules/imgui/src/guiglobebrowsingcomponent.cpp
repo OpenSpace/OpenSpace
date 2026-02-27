@@ -371,7 +371,7 @@ void GuiGlobeBrowsingComponent::render() {
         ImGui::PopID();
     }
     ImGui::Columns(1);
-#else
+#else // ^^^^ OPENSPACE_MODULE_GLOBEBROWSING_ENABLED vvvv
     ImGui::Text("%s", "OpenSpace compiled without GlobeBrowsing support");
 #endif // OPENSPACE_MODULE_GLOBEBROWSING_ENABLED
 }

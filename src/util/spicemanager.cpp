@@ -1089,7 +1089,7 @@ void SpiceManager::findCkCoverage(const std::filesystem::path& path) {
 #elif defined __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif
+#endif // __clang__
 
     SPICEINT_CELL(ids, MaxObj);
     SPICEDOUBLE_CELL(cover, WinSiz);
@@ -1107,7 +1107,7 @@ void SpiceManager::findCkCoverage(const std::filesystem::path& path) {
 #pragma clang diagnostic pop
 #elif defined __GNUC__
 #pragma GCC diagnostic pop
-#endif
+#endif // __clang__
 
         scard_c(0, &cover);
         ckcov_c(p.c_str(), frame, SPICEFALSE, "SEGMENT", 0.0, "TDB", &cover);
@@ -1150,7 +1150,7 @@ void SpiceManager::findSpkCoverage(const std::filesystem::path &path) {
 #elif defined __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif
+#endif // __clang__
 
     SPICEINT_CELL(ids, MaxObj);
     SPICEDOUBLE_CELL(cover, WinSiz);
@@ -1168,7 +1168,7 @@ void SpiceManager::findSpkCoverage(const std::filesystem::path &path) {
 #pragma clang diagnostic pop
 #elif defined __GNUC__
 #pragma GCC diagnostic pop
-#endif
+#endif // __clang__
 
         scard_c(0, &cover);
         spkcov_c(p.c_str(), obj, &cover);

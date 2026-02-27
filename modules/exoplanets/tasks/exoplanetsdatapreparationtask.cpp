@@ -247,10 +247,10 @@ ExoplanetsDataPreparationTask::parseDataRow(const std::string& row,
             return result;
         }
         return std::numeric_limits<float>::quiet_NaN();
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
         // clang is missing float support for std::from_chars
         return !str.empty() ? std::stof(str, nullptr) : NAN;
-#endif
+#endif // WIN32
 };
 
     auto readDoubleData = [](const std::string& str) -> double {
@@ -261,10 +261,10 @@ ExoplanetsDataPreparationTask::parseDataRow(const std::string& row,
             return result;
         }
         return std::numeric_limits<double>::quiet_NaN();
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
         // clang is missing double support for std::from_chars
         return !str.empty() ? std::stod(str, nullptr) : NAN;
-#endif
+#endif // WIN32
     };
 
     auto readIntegerData = [](const std::string& str) -> int {

@@ -42,7 +42,7 @@ class TuioEar;
 
 #ifdef WIN32
 class Win32TouchHook;
-#endif //WIN32
+#endif // WIN32
 
 class TouchModule : public OpenSpaceModule {
 public:

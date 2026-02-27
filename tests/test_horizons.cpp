@@ -161,7 +161,7 @@ TEST_CASE("HorizonsFile: Space module", "[horizonsfile]") {
 #ifdef OPENSPACE_MODULE_SPACE_ENABLED
     CHECK(true);
     LINFOC("test_horizons", "Downloading Horizons test data ...");
-#else
+#else // ^^^^ OPENSPACE_MODULE_SPACE_ENABLED // !OPENSPACE_MODULE_SPACE_ENABLED vvvv
     LERRORC("test_horizons", "These tests requires the Space module to be enabled");
     CHECK(false);
 #endif // OPENSPACE_MODULE_SPACE_ENABLED

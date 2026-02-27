@@ -149,7 +149,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     if (error != 0) {
         LERROR(std::format("Could not open/create file: {}. Errno: {}", file, errno));
     }
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
     const std::string f = file.string();
     FILE* fp = fopen(f.c_str(), "wb"); // write binary
 #endif // WIN32
@@ -185,7 +185,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
             // progress will not be shown for downloads on the splash screen
             curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
             curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p);
-            #endif
+            #endif // LIBCURL_VERSION_NUM >= 0x072000
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
             const CURLcode res = curl_easy_perform(curl);

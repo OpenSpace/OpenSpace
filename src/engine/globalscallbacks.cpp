@@ -69,7 +69,7 @@ void create() {
     initialize = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(initialize, "No initialize");
     currentPos += sizeof(std::vector<std::function<void()>>);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     initialize = new std::vector<std::function<void()>>();
 #endif // WIN32
 
@@ -77,7 +77,7 @@ void create() {
     deinitialize = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(deinitialize, "No deinitialize");
     currentPos += sizeof(std::vector<std::function<void()>>);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     deinitialize = new std::vector<std::function<void()>>();
 #endif // WIN32
 
@@ -85,7 +85,7 @@ void create() {
     initializeGL = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(initializeGL, "No initializeGL");
     currentPos += sizeof(std::vector<std::function<void()>>);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     initializeGL = new std::vector<std::function<void()>>();
 #endif // WIN32
 
@@ -93,7 +93,7 @@ void create() {
     deinitializeGL = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(deinitializeGL, "No deinitializeGL");
     currentPos += sizeof(std::vector<std::function<void()>>);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     deinitializeGL = new std::vector<std::function<void()>>();
 #endif // WIN32
 
@@ -101,7 +101,7 @@ void create() {
     preSync = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(preSync, "No preSync");
     currentPos += sizeof(std::vector<std::function<void()>>);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     preSync = new std::vector<std::function<void()>>();
 #endif // WIN32
 
@@ -109,7 +109,7 @@ void create() {
     postSyncPreDraw = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(postSyncPreDraw, "No postSyncPreDraw");
     currentPos += sizeof(std::vector<std::function<void()>>);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     postSyncPreDraw = new std::vector<std::function<void()>>();
 #endif // WIN32
 
@@ -121,7 +121,7 @@ void create() {
     currentPos += sizeof(std::vector<
         std::function<void(const glm::mat4&, const glm::mat4&, const glm::mat4&)>
     >);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     render = new std::vector<
         std::function<void(const glm::mat4&, const glm::mat4&, const glm::mat4&)>
     >();
@@ -131,7 +131,7 @@ void create() {
     draw2D = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(draw2D, "No draw2D");
     currentPos += sizeof(std::vector<std::function<void()>>);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     draw2D = new std::vector<std::function<void()>>();
 #endif // WIN32
 
@@ -139,7 +139,7 @@ void create() {
     postDraw = new (currentPos) std::vector<std::function<void()>>();
     ghoul_assert(postDraw, "No postDraw");
     currentPos += sizeof(std::vector<std::function<void()>>);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     postDraw = new std::vector<std::function<void()>>();
 #endif // WIN32
 
@@ -147,7 +147,7 @@ void create() {
     keyboard = new (currentPos) std::vector<KeyboardCallback>();
     ghoul_assert(keyboard, "No keyboard");
     currentPos += sizeof(std::vector<KeyboardCallback>);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     keyboard = new std::vector<KeyboardCallback>();
 #endif // WIN32
 
@@ -155,7 +155,7 @@ void create() {
     character = new (currentPos) std::vector<CharacterCallback>();
     ghoul_assert(character, "No character");
     currentPos += sizeof(std::vector<CharacterCallback>);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     character = new std::vector<CharacterCallback>();
 #endif // WIN32
 
@@ -163,7 +163,7 @@ void create() {
     mouseButton = new (currentPos) std::vector<MouseButtonCallback>();
     ghoul_assert(mouseButton, "No mouseButton");
     currentPos += sizeof(std::vector<MouseButtonCallback>);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     mouseButton = new std::vector<MouseButtonCallback>();
 #endif // WIN32
 
@@ -172,7 +172,7 @@ void create() {
         new (currentPos) std::vector<MousePositionCallback>();
     ghoul_assert(mousePosition, "No mousePosition");
     currentPos += sizeof(std::vector<MousePositionCallback>);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     mousePosition = new std::vector<MousePositionCallback>();
 #endif // WIN32
 
@@ -188,7 +188,7 @@ void create() {
     touchDetected = new (currentPos) std::vector<std::function<bool(TouchInput)>>();
     ghoul_assert(touchDetected, "No touchDetected");
     currentPos += sizeof(std::vector<std::function<bool(TouchInput)>>);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     touchDetected = new std::vector<std::function<bool(TouchInput)>>();
 #endif // WIN32
 
@@ -196,7 +196,7 @@ void create() {
     touchUpdated = new (currentPos) std::vector<std::function<bool(TouchInput)>>();
     ghoul_assert(touchUpdated, "No touchUpdated");
     currentPos += sizeof(std::vector<std::function<bool(TouchInput)>>);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     touchUpdated = new std::vector<std::function<bool(TouchInput)>>();
 #endif // WIN32
 
@@ -204,7 +204,7 @@ void create() {
     touchExit = new (currentPos) std::vector<std::function<void(TouchInput)>>();
     ghoul_assert(touchExit, "No touchExit");
     //currentPos += sizeof(std::vector<std::function<void(TouchInput)>>);
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     touchExit = new std::vector<std::function<void(TouchInput)>>();
 #endif // WIN32
 }
@@ -212,103 +212,103 @@ void create() {
 void destroy() {
 #ifdef WIN32
     touchExit->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete touchExit;
 #endif // WIN32
 
 #ifdef WIN32
     touchUpdated->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete touchUpdated;
 #endif // WIN32
 
 #ifdef WIN32
     touchDetected->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete touchDetected;
 #endif // WIN32
 
 #ifdef WIN32
     mouseScrollWheel->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete mouseScrollWheel;
 #endif // WIN32
 
 #ifdef WIN32
     mousePosition->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete mousePosition;
 #endif // WIN32
 
 #ifdef WIN32
     mouseButton->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete mouseButton;
 #endif // WIN32
 
 #ifdef WIN32
     character->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete character;
 #endif // WIN32
 
 #ifdef WIN32
     keyboard->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete keyboard;
 #endif // WIN32
 
 #ifdef WIN32
     postDraw->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete postDraw;
 #endif // WIN32
 
 #ifdef WIN32
     draw2D->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete draw2D;
 #endif // WIN32
 
 #ifdef WIN32
     render->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete render;
 #endif // WIN32
 
 #ifdef WIN32
     postSyncPreDraw->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete postSyncPreDraw;
 #endif // WIN32
 
 #ifdef WIN32
     preSync->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete preSync;
 #endif // WIN32
 
 #ifdef WIN32
     deinitializeGL->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete deinitializeGL;
 #endif // WIN32
 
 #ifdef WIN32
     initializeGL->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete initializeGL;
 #endif // WIN32
 
 #ifdef WIN32
     deinitialize->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete deinitialize;
 #endif // WIN32
 
 #ifdef WIN32
     initialize->~vector();
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     delete initialize;
 #endif // WIN32
 }

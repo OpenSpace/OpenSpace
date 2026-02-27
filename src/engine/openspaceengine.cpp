@@ -1008,7 +1008,7 @@ uint64_t OpenSpaceEngine::ramInUse() const {
 #else // ^^^^ WIN32 // !WIN32 vvvv
     LWARNING("Unsupported operating");
     return 0;
-#endif
+#endif // WIN32
 }
 
 uint64_t OpenSpaceEngine::vramInUse() const {
@@ -1035,7 +1035,7 @@ uint64_t OpenSpaceEngine::vramInUse() const {
 #else // ^^^^ WIN32 // !WIN32 vvvv
     LWARNING("Unsupported operating");
     return 0;
-#endif
+#endif // WIN32
 }
 
 void OpenSpaceEngine::runGlobalCustomizationScripts() {

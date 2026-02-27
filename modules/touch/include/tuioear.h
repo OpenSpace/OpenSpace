@@ -31,7 +31,7 @@
 #elif defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif
+#endif // __clang__
 
 #include <TuioClient.h>
 #include <TuioListener.h>
@@ -41,7 +41,7 @@
 #pragma clang diagnostic pop
 #elif defined(__GNUC__)
 #pragma GCC diagnostic pop
-#endif
+#endif // __clang__
 
 #include <openspace/util/touch.h>
 #include <mutex>

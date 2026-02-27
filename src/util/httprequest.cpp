@@ -315,7 +315,7 @@ bool HttpFileDownload::setup() {
         std::format("Cannot open file '{}': {}", _destination, message)
     );
     return false;
-#else // ^^^ WIN32 / !WIN32 vvv
+#else // ^^^^ WIN32 / !WIN32 vvvv
     if (errno) {
 #ifdef __unix__
         std::array<char, 256> buffer;
@@ -328,7 +328,7 @@ bool HttpFileDownload::setup() {
             )
         );
         return false;
-#else // ^^^ __unix__ / !__unix__ vvv
+#else // ^^^^ __unix__ / !__unix__ vvvv
         LERRORC(
             "HttpFileDownload",
             std::format(

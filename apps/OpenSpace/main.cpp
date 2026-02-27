@@ -116,7 +116,7 @@ glm::ivec2 currentDrawResolution;
 
 #ifdef OPENVR_SUPPORT
 Window* FirstOpenVRWindow = nullptr;
-#endif
+#endif // OPENVR_SUPPORT
 
 // This value is specified from the commandline options and kept around to be run after
 // everything has been initialized. It's going to be std::nullopt unless a user wants to
@@ -368,9 +368,9 @@ void mainInitFunc(GLFWwindow*) {
                 Engine::instance().nearClippingPlane(),
                 Engine::instance().farClippingPlane()
             );
-#else
+#else // ^^^^ OPENVR_SUPPORT // !OPENVR_SUPPORT vvvv
             LWARNING("OpenVR was requested, but program was compiled without VR support");
-#endif
+#endif // OPENVR_SUPPORT
 
             break;
         }
@@ -411,7 +411,7 @@ void mainInitFunc(GLFWwindow*) {
         if (retValue) {
             SpoutWindows.push_back(std::move(w));
         }
-#else
+#else // ^^^^ OPENSPACE_HAS_SPOUT // !OPENSPACE_HAS_SPOUT vvvv
         LWARNING("Spout was requested, but program was compiled without Spout support");
 #endif // OPENSPACE_HAS_SPOUT
     }
@@ -531,7 +531,7 @@ void mainRenderFunc(const sgct::RenderData& data) {
             SgctEngine->getCurrentFrustumMode()
         );
     }
-#endif
+#endif // OPENVR_SUPPORT
 
     try {
         glm::mat4 modelMatrix;
@@ -1186,7 +1186,7 @@ int main(int argc, char* argv[]) {
 
     std::string exeFolder = std::filesystem::path(argv[0]).parent_path().string();
     _putenv_s("_NT_SYMBOL_PATH", exeFolder.c_str());
-#endif //WIN32
+#endif // WIN32
 
     std::setlocale(LC_ALL, "C");
 
@@ -1674,7 +1674,7 @@ int main(int argc, char* argv[]) {
 #ifdef OPENVR_SUPPORT
     // Clean up OpenVR
     sgct::SGCTOpenVR::shutdown();
-#endif
+#endif // OPENVR_SUPPORT
 
 #ifdef OPENSPACE_HAS_SPOUT
     for (SpoutWindow& w : SpoutWindows) {

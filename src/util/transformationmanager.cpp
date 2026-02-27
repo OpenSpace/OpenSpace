@@ -39,7 +39,7 @@
 #ifdef WIN32
 #pragma warning (pop)
 #endif // WIN32
-#endif
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 
 namespace openspace {
 
@@ -48,12 +48,12 @@ TransformationManager* TransformationManager::_instance = nullptr;
 TransformationManager::TransformationManager() {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     _kameleon = std::make_shared<ccmc::Kameleon>();
-#else
+#else // ^^^^ OPENSPACE_MODULE_KAMELEON_ENABLED // !OPENSPACE_MODULE_KAMELEON_ENABLED vvvv
     LWARNINGC(
         "TransformationManager",
         "Kameleon module needed for transformations with dynamic frames"
     );
-#endif
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
     _kameleonFrames = {
         "J2000", "GEI", "GEO", "MAG", "GSE", "GSM", "SM", "RTN", "GSEQ", // geocentric
         "HEE", "HAE", "HEEQ"                                             // heliocentric
@@ -63,7 +63,7 @@ TransformationManager::TransformationManager() {
 TransformationManager::~TransformationManager() {
 #ifdef OPENSPACE_MODULE_KAMELEON_ENABLED
     _kameleon = nullptr;
-#endif
+#endif // OPENSPACE_MODULE_KAMELEON_ENABLED
 }
 
 void TransformationManager::initialize() {

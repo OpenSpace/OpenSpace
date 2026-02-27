@@ -68,21 +68,6 @@ bool TSP::load() {
             LERROR("Could not construct");
             return false;
         }
-
-#if 0
-        if (!calculateSpatialError()) {
-            LERROR("Could not calculate spatial error");
-            return false;
-        }
-        if (!calculateTemporalError()) {
-            LERROR("Could not calculate temporal error");
-            return false;
-        }
-        if (!writeCache()) {
-            LERROR("Could not write cache");
-            return false;
-        }
-#endif
     }
     initalizeSSO();
 
