@@ -22,31 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PROGRESSBAR___H__
-#define __OPENSPACE_CORE___PROGRESSBAR___H__
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___STRUCTS___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___STRUCTS___H__
 
-#include <iostream>
+#include <openspace/util/timeline.h>
+#include <ghoul/glm.h>
+#include <filesystem>
+#include <memory>
+#include <string>
 
 namespace openspace {
 
-class ProgressBar {
-public:
-    explicit ProgressBar(int end, int width = 70, std::ostream& stream = std::cout);
-    ~ProgressBar();
+// Assume everything in arcsec to minimize metadata
+struct ImageMetadata {
+    std::filesystem::path filePath;
+    int fullResolution = 0;
+    float scale = 0;;
+    glm::vec2 centerPixel;
+    bool isCoronaGraph = false;
+};
 
-    ProgressBar& operator=(const ProgressBar& rhs) = delete;
+using InstrumentName = std::string;
+using ImageMetadataMap = std::unordered_map<InstrumentName, Timeline<ImageMetadata>>;
+using ImagePrecision = unsigned char;
 
-    void print(int current);
-    void finish();
-private:
-    int _width;
-    int _previous = -1;
-    int _end;
-    bool isFinished = false;
+struct DecodedImageData {
+    std::vector<uint8_t> buffer;
+    ImageMetadata metadata;
+    unsigned int imageSize = 0;
+};
 
-    std::ostream& _stream;
+using DecodeCompleteCallback = std::function<void(DecodedImageData&&)>;
+
+struct DecodeRequest {
+    ImageMetadata metadata;
+    int downsamplingLevel = 0;
+    // Synchronous callback assumed, can lead to race conditions if async
+    DecodeCompleteCallback callback;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___PROGRESSBAR___H__
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___STRUCTS___H__

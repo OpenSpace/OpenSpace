@@ -22,31 +22,67 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PROGRESSBAR___H__
-#define __OPENSPACE_CORE___PROGRESSBAR___H__
+#include "fragment.glsl"
 
-#include <iostream>
+in Data {
+  vec2 textCoords;
+  float depth;
+} in_data;
 
-namespace openspace {
+uniform sampler2D imageryTexture;
+uniform sampler1D lut;
+uniform bool additiveBlending;
 
-class ProgressBar {
-public:
-    explicit ProgressBar(int end, int width = 70, std::ostream& stream = std::cout);
-    ~ProgressBar();
+uniform float contrastValue;
+uniform float gammaValue;
+uniform float planeOpacity;
+uniform bool hasLut;
+uniform bool isCoronaGraph;
 
-    ProgressBar& operator=(const ProgressBar& rhs) = delete;
+float contrast(float intensity) {
+  return min(
+    clamp(0.5 + (intensity - 0.5) * (1.0 + contrastValue / 10.0), 0.0, 1.0),
+    sqrt(intensity) + intensity
+  );
+}
 
-    void print(int current);
-    void finish();
-private:
-    int _width;
-    int _previous = -1;
-    int _end;
-    bool isFinished = false;
+Fragment getFragment() {
+  float intensityOrg = texture(
+    imageryTexture,
+    vec2(in_data.textCoords.s, 1.0 - in_data.textCoords.t)
+  ).r;
+  intensityOrg = contrast(intensityOrg);
 
-    std::ostream& _stream;
-};
+  vec4 outColor;
+  if (hasLut) {
+    outColor = texture(lut, intensityOrg);
+  }
+  else {
+    outColor = vec4(intensityOrg, intensityOrg, intensityOrg, 1.0);
+  }
 
-} // namespace openspace
+  outColor.r = pow(outColor.r, gammaValue);
+  outColor.g = pow(outColor.g, gammaValue);
+  outColor.b = pow(outColor.b, gammaValue);
 
-#endif // __OPENSPACE_CORE___PROGRESSBAR___H__
+  if (planeOpacity == 0.0) {
+    discard;
+  }
+
+  float absx = abs(0.5 - in_data.textCoords.s);
+  float absy = abs(0.5 - in_data.textCoords.t);
+
+  if (isCoronaGraph && length(outColor.xyz) < 0.10 &&
+     ((absy * absy + absx * absx) > 0.25))
+  {
+    discard;
+  }
+
+  Fragment frag;
+  frag.color = vec4(outColor.xyz, planeOpacity);
+  frag.depth = in_data.depth;
+  if (additiveBlending) {
+    frag.blend = BlendModeAdditive;
+  }
+  return frag;
+}

@@ -22,31 +22,37 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PROGRESSBAR___H__
-#define __OPENSPACE_CORE___PROGRESSBAR___H__
+#version __CONTEXT__
 
-#include <iostream>
+#include "powerScaling/powerScaling_vs.glsl"
 
-namespace openspace {
+layout(location = 0) in vec4 in_position;
 
-class ProgressBar {
-public:
-    explicit ProgressBar(int end, int width = 70, std::ostream& stream = std::cout);
-    ~ProgressBar();
+out Data {
+  float depth;
+} out_data;
 
-    ProgressBar& operator=(const ProgressBar& rhs) = delete;
+uniform mat4 modelViewProjectionTransform;
+uniform mat4 modelViewProjectionTransformPlane;
 
-    void print(int current);
-    void finish();
-private:
-    int _width;
-    int _previous = -1;
-    int _end;
-    bool isFinished = false;
+uniform float scale;
+uniform vec2 centerPixel;
 
-    std::ostream& _stream;
-};
-
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___PROGRESSBAR___H__
+void main() {
+  // Transform in either planes or spacecraft coordinate system
+  vec4 positionScreenSpace = vec4(0.0);
+  if (in_position.w == 1.0) {
+    vec4 position = in_position;
+    position.x += centerPixel.x;
+    position.y += centerPixel.y;
+    position.xy *= 1.0 / scale;
+    vec4 positionClipSpace = modelViewProjectionTransformPlane * vec4(position.xyz, 1.0);
+    positionScreenSpace = z_normalization(positionClipSpace);
+  }
+  else {
+    vec4 positionClipSpace = modelViewProjectionTransform * vec4(in_position.xyz, 1.0);
+    positionScreenSpace = z_normalization(positionClipSpace);
+  }
+  out_data.depth = positionScreenSpace.w;
+  gl_Position = positionScreenSpace;
+}

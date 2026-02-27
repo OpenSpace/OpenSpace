@@ -1,0 +1,268 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include <modules/solarbrowsing/tasks/helioviewerdownloadtask.h>
+
+#include <openspace/documentation/documentation.h>
+#include <openspace/json.h>
+#include <openspace/util/httprequest.h>
+#include <openspace/util/spicemanager.h>
+#include <openspace/util/time.h>
+#include <ghoul/filesystem/filesystem.h>
+#include <ghoul/logging/logmanager.h>
+#include <scn/scan.h>
+#include <atomic>
+#include <ctime>
+#include <execution>
+#include <format>
+#include <mutex>
+
+namespace {
+    constexpr std::string_view _loggerCat = "HelioviewerDownloadTask";
+
+    // This task downloads solar image data from the Helioviewer API and stores the
+    // resulting JP2 files on disk for use in OpenSpace.
+    //
+    // All available images within the given interval are retrieved at the requested
+    // temporal cadence and stored locally as JP2 files. The filenames are formatted
+    // according to the OpenSpace solar browsing convention,encoding timestamp, spacecraft
+    // name, and instrument identifier. The instrument string must match the local
+    // colormap naming convention (hyphen-separated, e.g., "AIA-193") so that the correct
+    // colormap can be resolved at runtime. Existing files are not re-downloaded.
+    //
+    // The actual temporal spacing of the downloaded images depends on data availability
+    // from Helioviewer, but will never be shorter than the requested cadence.
+    struct [[codegen::Dictionary(HelioviewerDownloadTask)]] Parameters {
+        // Directory where the downloaded JP2 images will be stored.
+        std::string outputFolder [[codegen::annotation("A valid directory")]];
+
+        // Name of the spacecraft or telescope.
+        std::string name;
+
+        // The unique identifier as specified in the Helioviewer documentation:
+        // https://api.helioviewer.org/docs/v2/appendix/data_sources.html
+        int sourceId;
+
+        // Instrument identifier (e.g., "AIA-171").
+        std::string instrument;
+
+        // The path to the colormap that will be used for this spacecraft and instrument.
+        // Note, the colormap is copied into the output folder.
+        std::string colorMap [[codegen::annotation("A valid path")]];
+
+        // The beginning of the time interval to extract data from. Format:
+        // YYYY-MM-DDTHH:MM:SS
+        std::string startTime [[codegen::datetime()]];
+
+        // The end of the time interval to extract data from. Format YYYY-MM-DDTHH:MM:SS
+        std::string endTime [[codegen::datetime()]];
+
+        // Desired temporal sampling interval in seconds.
+        // The system will attempt to retrieve images spaced at approximately this
+        // interval, depending on data availability. The actual interval will never
+        // be shorter than this value. Useful for temporal downsampling.
+        double timeStep;
+    };
+} // namespace
+#include "helioviewerdownloadtask_codegen.cpp"
+
+namespace openspace {
+
+openspace::Documentation HelioviewerDownloadTask::documentation() {
+    return codegen::doc<Parameters>("solarbrowsing_helioviewerdownload_task");
+}
+
+HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictionary) {
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    _startTime = p.startTime;
+    _endTime = p.endTime;
+    _timeStep = p.timeStep;
+    _sourceId = p.sourceId;
+    _name = p.name;
+    _instrument = p.instrument;
+    _outputFolder = absPath(p.outputFolder);
+    _colorMapPath = absPath(p.colorMap);
+}
+
+std::string HelioviewerDownloadTask::description() {
+    return "Download data from helioviewer.";
+}
+
+void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCallback) {
+    if (!std::filesystem::is_directory(_outputFolder)) {
+        std::filesystem::create_directories(_outputFolder);
+    }
+
+    const std::string jpxRequest = std::format(
+        "http://api.helioviewer.org/v2/getJPX/?startTime={}&endTime={}"
+        "&sourceId={}&verbose=true&cadence=true&cadence={}",
+        _startTime,
+        _endTime,
+        _sourceId,
+        _timeStep
+    );
+
+    LDEBUG("Fetching Helioviewer JPX data");
+    LINFO(std::format("Requesting {}", jpxRequest));
+
+    HttpMemoryDownload fileListing(jpxRequest);
+    fileListing.start();
+    fileListing.wait();
+
+    if (!fileListing.hasSucceeded()) {
+        throw ghoul::RuntimeError(std::format("Request to Helioviewer API failed."));
+    }
+
+    const std::vector<char>& listingData = fileListing.downloadedData();
+    const std::string listingString(listingData.begin(), listingData.end());
+
+    std::vector<double> frames;
+    try {
+        nlohmann::json json = nlohmann::json::parse(listingString.c_str());
+        frames = json["frames"].get<std::vector<double>>();
+
+        if (frames.empty()) {
+            LERROR(std::format("Failed to acquire frames"));
+        }
+
+        // Display the optional message from HelioViewer which contains important
+        // regarding the settings used for the request.
+        std::string* message = json["message"].get_ptr<std::string*>();
+        if (message && !message->empty()) {
+            LWARNING(*message);
+        }
+    }
+    catch (...) {
+        LERROR(std::format("Failed to parse json response: {}", listingString));
+        return;
+    }
+
+
+    LDEBUG("Processing frames");
+    std::vector<std::string> epochAsIsoString;
+    epochAsIsoString.reserve(frames.size());
+
+    size_t count = 0;
+    for (double unixTimestamp : frames) {
+        // @TODO (anden88 2026-02-23): Previously used SPICE to convert the timestamp we
+        // got back from HelioViewer, but, this produced an offset of ~12 hours
+        //const double j2000InEpoch = 946684800.0;
+        //const Time time(unixTimestamp - j2000InEpoch);
+        //epochAsIsoString.emplace_back(time.ISO8601());
+
+        std::time_t timestamp = static_cast<std::time_t>(unixTimestamp);
+        std::tm* utcTime = std::gmtime(&timestamp);
+        std::string utcTimeString = std::format(
+            "{:04d}-{:02d}-{:02d}T{:02d}:{:02d}:{:02d}",
+            utcTime->tm_year + 1900,
+            utcTime->tm_mon + 1,
+            utcTime->tm_mday,
+            utcTime->tm_hour,
+            utcTime->tm_min,
+            utcTime->tm_sec
+        );
+        const Time time = Time(utcTimeString);
+
+        epochAsIsoString.emplace_back(time.ISO8601());
+        count++;
+        progressCallback(static_cast<float>(count) / static_cast<float>(frames.size()));
+    }
+
+    std::atomic<size_t> i = 0;
+    std::mutex progressMutex;
+    const size_t totalFrames = epochAsIsoString.size();
+
+    // Make a copy of the colormap into the output folder
+    std::filesystem::copy(
+        _colorMapPath,
+        _outputFolder / std::format("{}.txt", _instrument),
+        std::filesystem::copy_options::skip_existing
+    );
+
+    LDEBUG("\nDownloading image data from Helioviewer");
+    std::for_each(
+        std::execution::par,
+        epochAsIsoString.begin(),
+        epochAsIsoString.end(),
+        [&](const std::string& formattedDate) {
+            const std::string imageUrl = std::format(
+                "http://api.helioviewer.org/v2/getJP2Image/?date={}Z&sourceId={}",
+                formattedDate,
+                _sourceId
+            );
+
+            // Format file name according to solarbrowsing convention. Since we cannot
+            // save files with ':' we have to destruct the ISO string and reconstruct it
+            // when loading the image
+            auto r = scn::scan<int, int, int, int, int, int, int>(
+                std::string(formattedDate),
+                "{}-{}-{}T{}:{}:{}.{}"
+            );
+            ghoul_assert(r, "Invalid date");
+            auto& [year, month, day, hour, minute, second, millisecond] = r->values();
+
+            const std::string outFilename = std::format(
+                "{}/{:04}_{:02}_{:02}__{:02}_{:02}_{:02}_{:03}__{}_{}.jp2",
+                _outputFolder,
+                year,
+                month,
+                day,
+                hour,
+                minute,
+                second,
+                millisecond,
+                _name,
+                _instrument
+            );
+
+            // Skip existing files
+            if (std::filesystem::exists(outFilename)) {
+                size_t done = ++i;
+                {
+                    std::lock_guard lock(progressMutex);
+                    progressCallback(done / static_cast<float>(totalFrames));
+                }
+                return;
+            }
+
+            HttpFileDownload imageDownload(imageUrl, absPath(outFilename));
+            imageDownload.start();
+            imageDownload.wait();
+
+            if (!imageDownload.hasSucceeded()) {
+                LERROR(std::format("Request to image {} failed.", imageUrl));
+                return;
+            }
+
+            size_t done = ++i;
+            {
+                std::lock_guard lock(progressMutex);
+                progressCallback(done / static_cast<float>(totalFrames));
+            }
+        }
+    );
+}
+
+} // namespace openspace

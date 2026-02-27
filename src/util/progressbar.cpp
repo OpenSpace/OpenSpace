@@ -38,22 +38,30 @@ ProgressBar::ProgressBar(int end, int width, std::ostream& stream)
 }
 
 ProgressBar::~ProgressBar() {
-    _stream << "\n";
+    finish();
 }
 
 void ProgressBar::print(int current) {
     const float progress = static_cast<float>(current) / static_cast<float>(_end);
     const int iprogress = static_cast<int>(progress * 100.f);
     if (iprogress != _previous) {
-        const int pos = static_cast<int>(static_cast<float>(_width)* progress);
-        const int eqWidth = pos + 1;
-        const int spWidth = _width - pos + 2;
-        _stream << "[" << std::setfill('=') << std::setw(eqWidth)
-                << ">" << std::setfill(' ') << std::setw(spWidth)
-                << "] " << std::setfill(' ') << std::setw(3) << iprogress << " %  \r"
-                << std::flush;
+        const int pos = std::clamp(static_cast<int>(_width * progress), 0, _width - 1);
+
+        _stream << std::format("[{}>{}] {:3>}% \r",
+            std::string(pos, '='),
+            std::string(_width - pos - 1, ' '),
+            iprogress
+        ) << std::flush;
     }
     _previous = iprogress;
+}
+
+void ProgressBar::finish() {
+    if (!isFinished) {
+        print(_end);
+        _stream << '\n';
+        isFinished = true;
+    }
 }
 
 } // namespace openspace

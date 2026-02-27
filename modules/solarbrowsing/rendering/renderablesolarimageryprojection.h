@@ -22,31 +22,48 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PROGRESSBAR___H__
-#define __OPENSPACE_CORE___PROGRESSBAR___H__
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___RENDERABLESOLARIMAGERYPROJECTION___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___RENDERABLESOLARIMAGERYPROJECTION___H__
 
-#include <iostream>
+#include <openspace/rendering/renderable.h>
+
+#include <openspace/util/sphere.h>
+#include <memory>
+#include <string>
+#include <vector>
+
+namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace {
 
-class ProgressBar {
+
+class SceneGraphNode;
+
+class RenderableSolarImageryProjection : public Renderable {
 public:
-    explicit ProgressBar(int end, int width = 70, std::ostream& stream = std::cout);
-    ~ProgressBar();
+    RenderableSolarImageryProjection(const ghoul::Dictionary& dictionary);
+    ~RenderableSolarImageryProjection() override = default;
 
-    ProgressBar& operator=(const ProgressBar& rhs) = delete;
+    void initialize() override;
 
-    void print(int current);
-    void finish();
+    void initializeGL() override;
+    void deinitializeGL() override;
+
+    bool isReady() const override;
+
+    void render(const RenderData& data, RendererTasks& rendererTask) override;
+    void update(const UpdateData& data) override;
+
+    static openspace::Documentation Documentation();
+
 private:
-    int _width;
-    int _previous = -1;
-    int _end;
-    bool isFinished = false;
+    void loadTexture();
 
-    std::ostream& _stream;
+    std::vector<SceneGraphNode*> _solarImageryDependencies;
+    ghoul::opengl::ProgramObject* _shader;
+    Sphere _sphere;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___PROGRESSBAR___H__
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___RENDERABLESOLARIMAGERYPROJECTION___H__

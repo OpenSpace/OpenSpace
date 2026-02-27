@@ -22,31 +22,36 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PROGRESSBAR___H__
-#define __OPENSPACE_CORE___PROGRESSBAR___H__
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___HELIOVIEWERDOWNLOADTASK___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___HELIOVIEWERDOWNLOADTASK___H__
 
-#include <iostream>
+#include <openspace/util/task.h>
+
+#include <filesystem>
+#include <string>
 
 namespace openspace {
 
-class ProgressBar {
+class HelioviewerDownloadTask : public Task {
 public:
-    explicit ProgressBar(int end, int width = 70, std::ostream& stream = std::cout);
-    ~ProgressBar();
+    explicit HelioviewerDownloadTask(const ghoul::Dictionary& dictionary);
 
-    ProgressBar& operator=(const ProgressBar& rhs) = delete;
+    std::string description() override;
+    void perform(const Task::ProgressCallback& progressCallback) override;
+    static openspace::Documentation documentation();
 
-    void print(int current);
-    void finish();
 private:
-    int _width;
-    int _previous = -1;
-    int _end;
-    bool isFinished = false;
-
-    std::ostream& _stream;
+    std::filesystem::path _outputFolder;
+    double _timeStep = 0.0;
+    int _sourceId = 0;
+    std::string _name;
+    std::string _instrument;
+    std::string _startTime;
+    std::string _endTime;
+    std::filesystem::path _timeKernelPath;
+    std::filesystem::path _colorMapPath;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___PROGRESSBAR___H__
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___HELIOVIEWERDOWNLOADTASK___H__

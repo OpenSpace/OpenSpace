@@ -22,31 +22,62 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PROGRESSBAR___H__
-#define __OPENSPACE_CORE___PROGRESSBAR___H__
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___J2KCODEC___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___J2KCODEC___H__
 
-#include <iostream>
+#include <openjpeg.h>
+#include <memory>
+#include <string>
+#include <filesystem>
 
 namespace openspace {
 
-class ProgressBar {
+/**
+ * TODO(mnoven): A simple wrapper around openjpeg. As of 08/24/17 openjpeg has 3 major
+ * bottlenecks which are listed below:
+ *
+ * 1. We can't perform decoding on multiple threads, this feature is not stable and
+ *    results in a segmentation fault. (anden88 2026-02-13) We can however let each thread
+ *    have its own instance of the `J2KCodec` class.
+ * 2. We want to be able to decode directly into our buffer without having to go through
+ *    the opj_image_t object.
+ *    See: https://github.com/uclouvain/openjpeg/issues/837
+ * 3. Decoding precison is always 32-bits integers, meaning conversion has to be done if
+ *    8-bytes are preferred.
+ *    See: https://github.com/uclouvain/openjpeg/issues/836
+ */
+
+struct ImageData {
+    int32_t* data;
+    uint32_t w;
+    uint32_t h;
+};
+
+class J2kCodec {
 public:
-    explicit ProgressBar(int end, int width = 70, std::ostream& stream = std::cout);
-    ~ProgressBar();
+    static constexpr const int ALL_THREADS = 0;
 
-    ProgressBar& operator=(const ProgressBar& rhs) = delete;
+    explicit J2kCodec(bool verboseMode = false);
+    ~J2kCodec();
 
-    void print(int current);
-    void finish();
+    // Decode into a client allocated buffer
+    void decodeIntoBuffer(const std::filesystem::path& path, unsigned char* buffer,
+        int resolutionLevel);
+
 private:
-    int _width;
-    int _previous = -1;
-    int _end;
-    bool isFinished = false;
+    void destroy();
+    void createInfileStream(const std::filesystem::path& path);
+    void setupDecoder(int resolutionLevel);
 
-    std::ostream& _stream;
+    opj_codec_t* _decoder = nullptr;
+    opj_dparameters_t _decoderParams;
+    opj_image_t* _image = nullptr;
+
+    std::filesystem::path _filePath;
+    opj_stream_t* _infileStream = nullptr;
+    bool _verboseMode = false;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___PROGRESSBAR___H__
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___J2KCODEC___H__

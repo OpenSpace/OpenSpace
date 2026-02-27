@@ -29,6 +29,7 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/stringhelper.h>
+#include <scn/scan.h>
 #include <algorithm>
 #include <cmath>
 #include <ctime>
@@ -342,30 +343,49 @@ TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
     const std::string dateTime = dict.value<std::string>(key);
     const std::string format = "%Y %b %d %H:%M:%S"; // YYYY MMM DD hh:mm:ss
     const std::string format2 = "%Y %m %d %H:%M:%S"; // YYYY MM DD hh:mm:ss
+    constexpr std::string_view format3 = "{}-{}-{}T{}:{}:{}.{}"; // YYYY-MM-DDThh:mm:ss.xxx
 
-    std::tm t = {};
-    std::istringstream ss(dateTime);
-    ss >> std::get_time(&t, format.c_str());
+    // It fails if it is neither of the formats
+    bool valid = false;
+
+    // Format 1
+    {
+        std::tm t = {};
+        std::istringstream ss(dateTime);
+        ss >> std::get_time(&t, format.c_str());
+        valid = !ss.fail();
+    }
+
+    // Format 2
+    if (!valid) {
+        // The format might be of the type "YYYY MM DD hh:mm:ss"
+        std::tm t = {};
+        std::istringstream ss(dateTime);
+        ss >> std::get_time(&t, format2.c_str());
+        valid = !ss.fail();
+    }
+
+    // Format 3
+    if (!valid) {
+        // The format might be of the type "YYYY-MM-DDThh:mm:ss.xxx"
+        auto r = scn::scan<int, int, int, int, int, int, int>(dateTime,format3);
+        valid = static_cast<bool>(r);
+    }
+
+    if (!valid) {
+        res.success = false;
+        TestResult::Offense o = {
+            .offender = key,
+            .reason = TestResult::Offense::Reason::Verification,
+            .explanation =
+                "Not a valid format, should be: "
+                "YYYY MM DD hh:mm:ss, YYYY MMM DD hh:mm:ss or "
+                "YYYY - MM - DDThh:mm:ss.xxx"
+        };
+        res.offenses.push_back(std::move(o));
+    }
 
     // first check format (automatically checks if valid time)
-    if (ss.fail()) {
-        // The format might be of the type "YYYY MM DD hh:mm:ss"
-        std::istringstream ss2(dateTime);
-        ss2 >> std::get_time(&t, format2.c_str());
-
-        if (ss2.fail()) {
-            // It fails if it is neither of the two formats
-            res.success = false;
-            TestResult::Offense o = {
-                .offender = key,
-                .reason = TestResult::Offense::Reason::Verification,
-                .explanation =
-                    "Not a valid format, should be: "
-                    "YYYY MM DD hh:mm:ss or YYYY MMM DD hh:mm:ss"
-            };
-            res.offenses.push_back(std::move(o));
-        }
-    }
     return res;
 }
 

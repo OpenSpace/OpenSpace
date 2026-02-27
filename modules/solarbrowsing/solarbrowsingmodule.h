@@ -22,31 +22,25 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PROGRESSBAR___H__
-#define __OPENSPACE_CORE___PROGRESSBAR___H__
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGMODULE___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGMODULE___H__
 
-#include <iostream>
+#include <openspace/util/openspacemodule.h>
 
 namespace openspace {
 
-class ProgressBar {
+class SolarBrowsingModule : public OpenSpaceModule {
 public:
-    explicit ProgressBar(int end, int width = 70, std::ostream& stream = std::cout);
-    ~ProgressBar();
+    constexpr static const char* Name = "SolarBrowsing";
 
-    ProgressBar& operator=(const ProgressBar& rhs) = delete;
+    SolarBrowsingModule();
+    ~SolarBrowsingModule() override = default;
+    std::vector<openspace::Documentation> documentations() const override;
 
-    void print(int current);
-    void finish();
-private:
-    int _width;
-    int _previous = -1;
-    int _end;
-    bool isFinished = false;
-
-    std::ostream& _stream;
+protected:
+    void internalInitialize(const ghoul::Dictionary& dictionary) override;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___PROGRESSBAR___H__
+#endif // __OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGMODULE___H__

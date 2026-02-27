@@ -22,31 +22,41 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PROGRESSBAR___H__
-#define __OPENSPACE_CORE___PROGRESSBAR___H__
+#version __CONTEXT__
 
-#include <iostream>
+#include "powerScaling/powerScaling_vs.glsl"
 
-namespace openspace {
+const int MaxSpacecraftObservatories = 7;
 
-class ProgressBar {
-public:
-    explicit ProgressBar(int end, int width = 70, std::ostream& stream = std::cout);
-    ~ProgressBar();
+layout(location = 0) in vec4 in_position;
+layout(location = 1) in vec2 in_st;
 
-    ProgressBar& operator=(const ProgressBar& rhs) = delete;
+out Data {
+  vec4 positionScreenSpace;
+  vec3 vUv[MaxSpacecraftObservatories];
+  vec3 positionModelSpace;
+} out_data;
 
-    void print(int current);
-    void finish();
-private:
-    int _width;
-    int _previous = -1;
-    int _end;
-    bool isFinished = false;
+uniform mat4 modelViewProjectionTransform;
+uniform bool isCoronaGraph[MaxSpacecraftObservatories];
+uniform bool isEnabled[MaxSpacecraftObservatories];
+uniform dmat4 sunToSpacecraftReferenceFrame[MaxSpacecraftObservatories];
+uniform int numSpacecraftCameraPlanes;
 
-    std::ostream& _stream;
-};
+void main() {
+  vec4 position = vec4(in_position.xyz, 1.0);
+  out_data.positionModelSpace = position.xyz;
 
-} // namespace openspace
+  // Transform the positions to the reference frame of the spacecraft to get tex coords
+  for (int i = 0; i < numSpacecraftCameraPlanes; i++) {
+    out_data.vUv[i] = vec3(0.0);
+    if (isCoronaGraph[i] || !isEnabled[i])  {
+      continue;
+    };
+    out_data.vUv[i] = vec3(sunToSpacecraftReferenceFrame[i] * dvec4(position)).xyz;
+  }
 
-#endif // __OPENSPACE_CORE___PROGRESSBAR___H__
+  vec4 positionClipSpace = modelViewProjectionTransform * position;
+  out_data.positionScreenSpace = z_normalization(positionClipSpace);
+  gl_Position = out_data.positionScreenSpace;
+}
