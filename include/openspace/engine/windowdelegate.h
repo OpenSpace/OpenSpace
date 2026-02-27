@@ -63,6 +63,8 @@ struct WindowDelegate {
 
     glm::ivec2 (*currentDrawBufferResolution)() = []() { return glm::ivec2(0); };
 
+    glm::ivec2 (*maxDrawBufferResolution)() = []() { return glm::ivec2(0); };
+
     glm::ivec2 (*currentViewportSize)() = []() { return glm::ivec2(0); };
 
     glm::ivec2(*currentViewportResolution)() = []() { return glm::ivec2(0); };
@@ -101,6 +103,8 @@ struct WindowDelegate {
     int (*firstWindowId)() = []() { return 0; };
 
     std::string (*nameForWindow)(size_t windowIdx) = [](size_t) { return std::string(); };
+
+    glm::ivec2 (*resolutionForWindow)(size_t windowIdx) = [](size_t) { return glm::ivec2(0, 0); };
 
     float (*horizFieldOfView)(size_t windowIdx) = [](size_t) { return 0.f; };
 

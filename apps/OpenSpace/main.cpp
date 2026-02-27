@@ -841,6 +841,20 @@ void setSgctDelegateFunctions() {
             return currentDrawResolution;
         }
     };
+    sgctDelegate.maxDrawBufferResolution = []() {
+        glm::ivec2 max = glm::ivec2(0, 0);
+        for (size_t i = 0; i < Engine::instance().windows().size(); i++) {
+            int x = Engine::instance().windows()[i]->framebufferResolution().x;
+            int y = Engine::instance().windows()[i]->framebufferResolution().y;
+            if (x > max.x) {
+                max.x = x;
+            }
+            if (y > max.y) {
+                max.y = y;
+            }
+        }
+        return max;
+    };
     sgctDelegate.currentViewportSize = []() {
         ZoneScoped;
 
@@ -995,6 +1009,15 @@ void setSgctDelegateFunctions() {
             "Invalid window index"
         );
         return Engine::instance().windows()[windowIdx]->name();
+    };
+    sgctDelegate.resolutionForWindow = [](size_t windowIdx) {
+        ZoneScoped;
+
+        ghoul_assert(
+            windowIdx < Engine::instance().windows().size(),
+            "Invalid window index"
+        );
+        return glm::ivec2(Engine::instance().windows()[windowIdx]->framebufferResolution().x, Engine::instance().windows()[windowIdx]->framebufferResolution().y);
     };
     sgctDelegate.openGLProcedureAddress = [](const char* func) {
         ZoneScoped;
