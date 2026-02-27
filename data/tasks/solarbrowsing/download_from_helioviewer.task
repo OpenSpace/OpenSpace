@@ -19,4 +19,15 @@ return {{
 	EndTime = "2024-05-14T00:00:00.000Z",
 	TimeStep = 60*60, -- Download an image every hour
 	OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/sdo/aia-171"
+},
+{
+	Type = "HelioviewerDownloadTask",
+	Name = "STEREO",
+	SourceId = 20,
+	Instrument = "EUVI-A 171",
+	ColorMap = "${ASSETS}/scene/solarsystem/heliosphere/solarbrowsing/colortables/EUVI-A-171.txt",
+	StartTime = "2024-05-06T00:00:00.000Z",
+	EndTime = "2024-05-14T00:00:00.000Z",
+	TimeStep = 60*60, -- Download an image every hour
+	OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/stereo/euvia-a-171"
 }}
