@@ -113,14 +113,14 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
     // TODO: Renderables are initialized even if modules is disabled
 
     global::callback::initialize->emplace_back([&]() {
-        global::syncEngine->addSyncable({ &_glyphRenderData });
+        global::syncEngine->addSyncable(this);
 
         LDEBUG("Initializing Exoplanets Expert Tool GUI");
         _gui.initialize();
     });
 
     global::callback::deinitialize->emplace_back([&]() {
-        global::syncEngine->removeSyncable({ &_glyphRenderData });
+        global::syncEngine->removeSyncable(this);
 
         LDEBUG("Deinitialize Exoplanets Expert Tool GUI");
         _gui.deinitialize();
@@ -138,7 +138,7 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
 
     global::callback::preSync->emplace_back([&]() {
         // Before updating, reset the dataset updated flag
-        _glyphRenderData.data().wasUpdated = false;
+        _dataWasUpdated = false;
     });
 
     global::callback::draw2D->emplace_back([&]() {
@@ -225,6 +225,8 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
             return _gui.mouseWheelCallback(posY);
         }
     );
+
+    _dataWasUpdated = false;
 }
 
 bool ExoplanetsExpertToolModule::enabled() const {
@@ -240,7 +242,7 @@ std::filesystem::path ExoplanetsExpertToolModule::dataConfigFile() const {
 }
 
 bool ExoplanetsExpertToolModule::dataWasUpdated() const {
-    return _glyphRenderData.data().wasUpdated;
+    return _dataWasUpdated;
 }
 
 const ExoplanetsExpertToolModule::GlyphRenderData&
@@ -250,7 +252,64 @@ ExoplanetsExpertToolModule::glyphRenderData() const {
 
 void ExoplanetsExpertToolModule::updateGlyphRenderData(GlyphRenderData data) {
     _glyphRenderData = std::move(data);
-    _glyphRenderData.data().wasUpdated = true;
+    _dataWasUpdated = true;
+}
+
+void ExoplanetsExpertToolModule::encode(SyncBuffer* syncBuffer) {
+    std::lock_guard guard(_syncMutex);
+    size_t nItems = _glyphRenderData.items.size();
+    syncBuffer->encode(nItems);
+
+    for (const GlyphRenderData::Item& item : _glyphRenderData.items) {
+        syncBuffer->encode(item.index);
+        syncBuffer->encode(item.component);
+
+        syncBuffer->encode(item.position.x);
+        syncBuffer->encode(item.position.y);
+        syncBuffer->encode(item.position.z);
+
+        size_t nColors = item.colors.size();
+        syncBuffer->encode(nColors);
+        for (const glm::vec4& color : item.colors) {
+            syncBuffer->encode(color.r);
+            syncBuffer->encode(color.g);
+            syncBuffer->encode(color.b);
+            syncBuffer->encode(color.a);
+        }
+    }
+
+    syncBuffer->encode(_dataWasUpdated);
+}
+
+void ExoplanetsExpertToolModule::decode(SyncBuffer* syncBuffer) {
+    std::lock_guard guard(_syncMutex);
+    size_t nItems;
+    syncBuffer->decode(nItems);
+
+    _glyphRenderData.items.clear();
+    _glyphRenderData.items.reserve(nItems);
+
+    for (size_t i = 0; i < nItems; i++) {
+        GlyphRenderData::Item item;
+        syncBuffer->decode(item.index);
+        syncBuffer->decode(item.component);
+        syncBuffer->decode(item.position.x);
+        syncBuffer->decode(item.position.y);
+        syncBuffer->decode(item.position.z);
+        size_t nColors;
+        syncBuffer->decode(nColors);
+        for (size_t j = 0; j < nColors; j++) {
+            glm::vec4 color;
+            syncBuffer->decode(color.r);
+            syncBuffer->decode(color.g);
+            syncBuffer->decode(color.b);
+            syncBuffer->decode(color.a);
+            item.colors.push_back(color);
+        }
+        _glyphRenderData.items.push_back(std::move(item));
+    }
+
+    syncBuffer->decode(_dataWasUpdated);
 }
 
 void ExoplanetsExpertToolModule::internalInitialize(const ghoul::Dictionary& dict) {

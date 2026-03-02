@@ -26,27 +26,26 @@
 #define __OPENSPACE_MODULE_EXOPLANETSEXPERTTOOL___EXOPLANETSEXPERTTOOLMODULE___H__
 
 #include <openspace/util/openspacemodule.h>
+#include <openspace/util/syncable.h>
 
 #include <modules/exoplanetsexperttool/gui.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
-#include <openspace/util/syncdata.h>
+#include <mutex>
 #include <string_view>
 
 namespace openspace {
 
-class ExoplanetsExpertToolModule : public OpenSpaceModule {
+class ExoplanetsExpertToolModule : public OpenSpaceModule, public Syncable {
 public:
     constexpr static const char* Name = "ExoplanetsExpertTool";
 
     // The identifier used for the glyph cloud renderable throughout the module
     constexpr static std::string_view GlyphCloudIdentifier = "ExoplanetDataPoints";
 
-    struct GlyphRenderData {
-        bool wasUpdated = false;
-
+    struct GlyphRenderData  {
         // One item per planet glyph
         struct Item {
             size_t index; // Index in dataset, used for selection and hover
@@ -69,6 +68,12 @@ public:
     const GlyphRenderData& glyphRenderData() const;
     void updateGlyphRenderData(GlyphRenderData data);
 
+    // Encode the data that should be synced to the other nodes
+    void encode(SyncBuffer* syncBuffer) override;
+
+    // Decode the data that should be synced to the other nodes
+    void decode(SyncBuffer* syncBuffer) override;
+
     std::vector<documentation::Documentation> documentations() const override;
 
 protected:
@@ -86,7 +91,12 @@ protected:
     bool _cameraWasWithinGalaxy = false;
 
     // These are set from master only, but should be synced to all the nodes
-    SyncData<GlyphRenderData> _glyphRenderData;
+    GlyphRenderData _glyphRenderData;
+    bool _dataWasUpdated;
+
+    // Synced data are mutex protected since decode and rendering may happen
+    // asynchronously
+    std::mutex _syncMutex;
 };
 
 } // namespace openspace
