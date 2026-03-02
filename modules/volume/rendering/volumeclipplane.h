@@ -31,8 +31,6 @@
 #include <openspace/properties/vector/vec3property.h>
 #include <ghoul/glm.h>
 
-namespace ghoul { class Dictionary; }
-
 namespace openspace {
 
 class VolumeClipPlane : public PropertyOwner {
@@ -41,6 +39,8 @@ public:
 
     glm::vec3 normal() const;
     glm::vec2 offsets() const;
+
+    //static openspace::Documentation Documentation();
 
 private:
     Vec3Property _normal;

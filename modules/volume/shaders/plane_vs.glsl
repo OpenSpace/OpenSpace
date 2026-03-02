@@ -22,40 +22,39 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___RAWVOLUMEWRITER___H__
-#define __OPENSPACE_MODULE_VOLUME___RAWVOLUMEWRITER___H__
+#version __CONTEXT__
 
-#include <ghoul/glm.h>
-#include <filesystem>
-#include <functional>
+#include "powerscaling/powerscaling_vs.glsl"
 
-namespace openspace {
+layout(location = 0) in vec2 in_position;
 
-template <typename T> class RawVolume;
+out vec3 texCoord;
+out vec4 positionCameraSpace;
 
-template <typename VoxelType>
-class RawVolumeWriter {
-public:
-    explicit RawVolumeWriter(std::filesystem::path path, size_t bufferSize = 1024);
+uniform vec3 normal;
+uniform float offset;
+uniform mat3 basis;
 
-    glm::uvec3 dimensions() const;
-    void setDimensions(glm::uvec3 dimensions);
-    void write(const std::function<VoxelType(const glm::uvec3&)>& fn,
-        const std::function<void(float)>& onProgress = [](float) {});
-    void write(const RawVolume<VoxelType>& volume);
-    void write(const std::vector<VoxelType>& data) const;
+uniform mat4 modelViewProjection;
+uniform mat4 modelViewTransform;
+uniform mat4 modelTransform;
 
-    size_t coordsToIndex(const glm::uvec3& coords) const;
-    glm::ivec3 indexToCoords(size_t linear) const;
+void main() {
+    // The quad is covers -1.0 to 1.0 while the volume is defined for -0.5 to 0.5
+    vec2 pos = in_position * 0.5; // map quad to the range -0.5 to 0.5
+    // Scale plane so that it will cover entire volume on the diagonal
+    float quadScale = 1.42;
+    pos *= quadScale;
+    vec3 sliceCenter = normalize(normal) * offset;
+    // Convert 2D quad coordinates into 3D slice position
+    vec3 localPos = sliceCenter + basis * vec3(pos, 0.0);
+    // Remap texture coordinates to the range 0 to 1
+    texCoord = localPos + 0.5;
 
-private:
-    glm::ivec3 _dimensions = glm::ivec3(0);
-    std::filesystem::path _path;
-    size_t _bufferSize = 0;
-};
+    positionCameraSpace = modelViewTransform * modelTransform * vec4(localPos, 1.0);
 
-} // namespace openspace
+    vec4 positionClipSpace = modelViewProjection * modelTransform * vec4(localPos, 1.0);
+    vec4 positionScreenSpace = z_normalization(positionClipSpace);
 
-#include "rawvolumewriter.inl"
-
-#endif // __OPENSPACE_MODULE_VOLUME___RAWVOLUMEWRITER___H__
+    gl_Position =  positionScreenSpace;
+}

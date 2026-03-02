@@ -24,14 +24,17 @@
 
 #include <modules/volume/rendering/renderabletimevaryingvolume.h>
 
+#include <modules/base/basemodule.h>
 #include <modules/volume/rendering/basicvolumeraycaster.h>
 #include <modules/volume/rendering/volumeclipplanes.h>
 #include <modules/volume/rawvolume.h>
 #include <modules/volume/rawvolumereader.h>
 #include <modules/volume/volumegridtype.h>
+#include <modules/volume/rawvolumewriter.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/raycastermanager.h>
+#include <openspace/rendering/renderengine.h>
 #include <openspace/util/histogram.h>
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/time.h>
@@ -39,14 +42,20 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
+#include <ghoul/filesystem/cachemanager.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/lua/lua_helper.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
+#include <ghoul/opengl/textureunit.h>
 #include <optional>
 #include <type_traits>
 #include <utility>
+
+#include <modules/volume/xmlreader.h>
+
 
 namespace {
     using namespace openspace;
@@ -133,6 +142,44 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
+    constexpr Property::PropertyInfo VolumeSliceNormalInfo = {
+        "VolumeSliceNormal",
+        "Slice Plane Normal",
+        "Normal of the volume slice plane.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo VolumeSliceOffsetInfo = {
+        "VolumeSliceOffset",
+        "Slice Plane Offset",
+        "Offset of the volume slice plane in the volume.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo ShowVolumeSliceInfo = {
+        "Enabled",
+        "Show Volume Slice",
+        "Determine whether the volume slice plane should be visualized or not.",
+        Property::Visibility::AdvancedUser
+    };
+
+    constexpr Property::PropertyInfo RangeInfo = {
+        "ValueRange",
+        "Value Range",
+        "The range of values to use in the color mapping. The lowest value will be "
+        "mapped to the first color in the color map.",
+        Property::Visibility::AdvancedUser
+
+    };
+
+    constexpr Property::PropertyInfo HideOutsideInfo = {
+        "HideValuesOutsideRange",
+        "Hide values outside range",
+        "If ture, density values outside the provided range will be hidden, i.e., not "
+        "rendered at all.",
+        Property::Visibility::AdvancedUser
+    };
+
     struct [[codegen::Dictionary(RenderableTimeVaryingVolume)]] Parameters {
         // [[codegen::verbatim(SourceDirectoryInfo.description)]]
         std::filesystem::path sourceDirectory [[codegen::directory()]];
@@ -158,8 +205,31 @@ namespace {
         // [[codegen::verbatim(GridTypeInfo.description)]]
         std::optional<std::string> gridType [[codegen::inlist("Spherical", "Cartesian")]];
 
-        // @TODO Missing documentation
-        std::optional<ghoul::Dictionary> clipPlanes;
+        std::optional<std::vector<ghoul::Dictionary>> clipPlanes [[codegen::reference("volume_volumeclipplane")]];
+
+        // [[codegen::verbatim(VolumeSliceNormalInfo.description)]]
+        std::optional<glm::vec3> planeSliceNormal
+            [[codegen::inrange(glm::vec3(-1.f), glm::vec3(1.f))]];
+
+        // [[codegen::verbatim(VolumeSliceOffsetInfo.description)]]
+        std::optional<float> planeSliceOffset [[codegen::inrange(-0.5f, 0.5f)]];
+
+        // [[codegen::verbatim(ShowVolumeSliceInfo.description)]]
+        std::optional<bool> showVolumeSlice;
+
+        // [[codegen::verbatim(RangeInfo.description)]]
+        std::optional<glm::vec2> valueRange;
+
+        // [[codegen::verbatim(HideOutsideInfo.description)]]
+        std::optional<bool> hideValuesOutsideRange;
+
+        // If true (default), the loaded dataset and color map will be cached so that they
+        // can be loaded faster at a later time. This does however mean that any updates
+        // to the values in the dataset will not lead to changes in the rendering without
+        // first removing the cached file. Set it to false to disable caching. This can be
+        // useful for example when working on importing a new dataset or when making
+        // changes to the color map.
+        std::optional<bool> useCaching;
     };
 } // namespace
 #include "renderabletimevaryingvolume_codegen.cpp"
@@ -170,11 +240,26 @@ Documentation RenderableTimeVaryingVolume::Documentation() {
     return codegen::doc<Parameters>("volume_renderable_timevaryingvolume");
 }
 
+RenderableTimeVaryingVolume::VolumeSliceSettings::VolumeSliceSettings()
+    : PropertyOwner({
+        "SliceSettings",
+        "Slice Settings",
+        "Settings for the volume slice plane."
+    })
+    , normal(VolumeSliceNormalInfo, glm::vec3{ 1.f, 0.f, 0.f })
+    , offset(VolumeSliceOffsetInfo, 0, -0.5f, 0.5f)
+    , shouldRenderSlice(ShowVolumeSliceInfo, false)
+{
+    addProperty(shouldRenderSlice);
+    addProperty(normal);
+    addProperty(offset);
+}
+
 RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
                                                       const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _gridType(GridTypeInfo)
-    , _stepSize(StepSizeInfo, 0.02f, 0.001f, 0.1f)
+    , _stepSize(StepSizeInfo, 0.01f, 0.001f, 0.001f)
     , _brightness(BrightnessInfo, 0.33f, 0.f, 1.f)
     , _rNormalization(rNormalizationInfo, 0.f, 0.f, 2.f)
     , _rUpperBound(rUpperBoundInfo, 1.f, 0.f, 2.f)
@@ -184,6 +269,11 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     , _transferFunctionPath(TransferFunctionInfo)
     , _triggerTimeJump(TriggerTimeJumpInfo)
     , _jumpToTimestep(JumpToTimestepInfo, 0, 0, 256)
+    , _valueRange(
+        RangeInfo,
+        glm::vec2(std::numeric_limits<float>::lowest(),std::numeric_limits<float>::max())
+    )
+    , _hideOutsideRange(HideOutsideInfo, false)
     , _invertDataAtZ(false)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -209,10 +299,10 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
     _secondsBefore = p.secondsBefore.value_or(_secondsBefore);
     _secondsAfter = p.secondsAfter;
 
-    const ghoul::Dictionary clipPlanesDict = p.clipPlanes.value_or(ghoul::Dictionary());
-    _clipPlanes = std::make_shared<VolumeClipPlanes>(clipPlanesDict);
-    _clipPlanes->setIdentifier("clipPlanes");
-    _clipPlanes->setGuiName("Clip Planes");
+    const std::vector<ghoul::Dictionary> clipPlanes = p.clipPlanes.value_or(
+        std::vector<ghoul::Dictionary>()
+    );
+    _clipPlanes = std::make_shared<VolumeClipPlanes>(clipPlanes);
 
     if (p.gridType.has_value()) {
         const VolumeGridType gridType = parseGridType(*p.gridType);
@@ -221,6 +311,29 @@ RenderableTimeVaryingVolume::RenderableTimeVaryingVolume(
 
     addProperty(_brightness);
     addProperty(Fadeable::_opacity);
+
+
+    _volumeSlice.normal = p.planeSliceNormal.value_or(_volumeSlice.normal);
+    _volumeSlice.offset = p.planeSliceOffset.value_or(_volumeSlice.offset);
+    _volumeSlice.shouldRenderSlice = p.showVolumeSlice.value_or(
+        _volumeSlice.shouldRenderSlice
+    );
+
+    _volumeSlice.normal.onChange([this]() {
+        _slicePlaneIsDirty = true;
+    });
+    _volumeSlice.offset.onChange([this]() {
+        _slicePlaneIsDirty = true;
+    });
+
+    addPropertySubOwner(_volumeSlice);
+
+    _valueRange = p.valueRange.value_or(_valueRange);
+    _hideOutsideRange = p.hideValuesOutsideRange.value_or(_hideOutsideRange);
+    _useCaching = p.useCaching.value_or(_useCaching);
+
+    addProperty(_valueRange);
+    addProperty(_hideOutsideRange);
 }
 
 RenderableTimeVaryingVolume::~RenderableTimeVaryingVolume() {}
@@ -234,46 +347,140 @@ void RenderableTimeVaryingVolume::initializeGL() {
     }
 
     namespace fs = std::filesystem;
-    for (const fs::directory_entry& e : fs::recursive_directory_iterator(sequenceDir)) {
-        if (e.is_regular_file() && e.path().extension() == ".dictionary") {
-            loadTimestepMetadata(e.path());
+    // TODO refactor into datareader
+    int step = 0;
+    double deltaTimeStep = 0.0;
+    double startTime = 0.0;
+    RawVolumeMetadata metadata;
+
+
+    // VTI specific metadata
+    std::filesystem::path metaDataPath = sequenceDir / ".metadata";
+    if (std::filesystem::is_regular_file(metaDataPath)) {
+        const ghoul::Dictionary dictionary = ghoul::lua::loadDictionaryFromFile(metaDataPath);
+        const double nVtiSamples = dictionary.value<double>("TimeSamples");
+        const std::string start = dictionary.value<std::string>("Start");
+        const std::string end = dictionary.value<std::string>("End");
+
+        startTime = Time::convertTime(start);
+        const double endTime = Time::convertTime(end);
+        const double simulationTime = endTime - startTime;
+
+        deltaTimeStep = simulationTime / nVtiSamples;
+
+        glm::ivec3 minExtent = dictionary.value<glm::dvec3>("MinExtent");
+        glm::ivec3 maxExtent = dictionary.value<glm::dvec3>("MaxExtent");
+        metadata.dimensions = 1 + static_cast<glm::ivec3>(maxExtent - minExtent);
+
+        metadata.hasDomainBounds = true;
+        metadata.lowerDomainBound =
+            static_cast<glm::vec3>(dictionary.value<glm::dvec3>("MinDomain"));
+        metadata.upperDomainBound =
+            static_cast<glm::vec3>(dictionary.value<glm::dvec3>("MaxDomain"));
+
+        metadata.hasValueRange = true;
+        metadata.minValue = static_cast<float>(dictionary.value<double>("MinValue"));
+        metadata.maxValue = static_cast<float>(dictionary.value<double>("MaxValue"));
+        metadata.hasTime = true;
+    }
+
+    float globalMin = std::numeric_limits<float>::max();
+    float globalMax = std::numeric_limits<float>::lowest();
+
+    const std::vector<std::filesystem::path> paths = ghoul::filesystem::walkDirectory(
+        sequenceDir,
+        ghoul::filesystem::Recursive::Yes,
+        ghoul::filesystem::Sorted::Yes,
+        [](const fs::path& p) { return fs::is_regular_file(p); }
+    );
+
+    for (const std::filesystem::path& path : paths) {
+        if (path.extension() == ".dictionary") {
+            loadTimestepMetadata(path, globalMin, globalMax);
+        }
+        if (path.extension() == ".vti") {
+            Timestep t;
+            double timestep = startTime + deltaTimeStep * step++;
+
+            std::filesystem::path cached =
+                FileSys.cacheManager()->cachedFilename(path);
+            if (_useCaching) {
+
+                // Load caching data if it exists, otherwise we'll load normally and store a
+                // cache for next time
+                if (std::filesystem::exists(cached)) {
+                    LINFO(std::format("Cached file {} used for file {}", cached, path));
+                    loadVtiFromCache(cached, timestep, metadata, t, globalMin, globalMax);
+                }
+                else {
+                    loadVti(path, timestep, t, globalMin, globalMax, metadata);
+                    saveVtiCache(cached, t.rawData);
+                }
+            }
+            else {
+                loadVti(path, timestep, t, globalMin, globalMax, metadata);
+                saveVtiCache(cached, t.rawData);
+            }
+
+            t.baseName = "";
+            t.inRam = false;
+            t.onGpu = false;
+            _volumeTimesteps[t.metadata.time] = std::move(t);
         }
     }
 
     // TODO: defer loading of data to later (separate thread or at least not when loading)
     for (std::pair<const double, Timestep>& p : _volumeTimesteps) {
         Timestep& t = p.second;
-        const std::string path = std::format(
-            "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
-        );
-        RawVolumeReader<float> reader(path, t.metadata.dimensions);
-        t.rawVolume = reader.read(_invertDataAtZ);
-
-        const float min = t.metadata.minValue;
-        const float diff = t.metadata.maxValue - t.metadata.minValue;
-        float* data = t.rawVolume->data();
-        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-            data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
+        // Read volume from file if it exists
+        if (t.baseName != "") {
+            const std::string path = std::format(
+                "{}/{}.rawvolume", _sourceDirectory.value(), t.baseName
+            );
+            RawVolumeReader<float> reader(path, t.metadata.dimensions);
+            t.rawVolume = reader.read(_invertDataAtZ);
+            const unsigned length = t.metadata.dimensions.x * t.metadata.dimensions.y *
+                t.metadata.dimensions.z;
+            for (size_t i = 0; i < length; i++) {
+                float d = t.rawVolume->data()[i];
+                if (!std::isinf(d) && !std::isnan(d)) {
+                    globalMin = std::min(globalMin, d);
+                    globalMax = std::max(globalMax, d);
+                }
+            }
         }
 
-        t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
-        for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-            t.histogram->add(data[i]);
+        float* data;
+        // We've read data from binary file
+        if (t.rawVolume) {
+            data = t.rawVolume->data();
         }
-        // TODO: handle normalization properly for different timesteps + transfer function
+        // Data came from xml file
+        else {
+            data = t.rawData.data();
+        }
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
             ghoul::opengl::Texture::FormatInit{
                 .dimensions = t.metadata.dimensions,
                 .type = GL_TEXTURE_3D,
                 .format = ghoul::opengl::Texture::Format::Red,
-                .dataType = GL_FLOAT
+                .dataType = GL_FLOAT,
+                .internalFormat = GL_R32F
             },
             ghoul::opengl::Texture::SamplerInit{
                 .wrapping = ghoul::opengl::Texture::WrappingMode::Clamp
             },
             reinterpret_cast<std::byte*>(data)
         );
+    }
+
+    // Data range was not set by user,  set it based on min and max values of the data
+    if (_valueRange.value().x == std::numeric_limits<float>::lowest()) {
+        _valueRange = glm::vec2(globalMin, _valueRange.value().y);
+    }
+    if (_valueRange.value().y == std::numeric_limits<float>::max()) {
+        _valueRange = glm::vec2(_valueRange.value().x, globalMax);
     }
 
     _clipPlanes->initialize();
@@ -326,9 +533,24 @@ void RenderableTimeVaryingVolume::initializeGL() {
         );
         _raycaster->setTransferFunction(_transferFunction);
     });
+
+
+    createPlane();
+    _shader = BaseModule::ProgramObjectManager.request(
+        "SlicePlane",
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        return global::renderEngine->buildRenderProgram(
+                "SlicePlane",
+                absPath("${MODULE_VOLUME}/shaders/plane_vs.glsl"),
+                absPath("${MODULE_VOLUME}/shaders/plane_fs.glsl")
+            );
+        }
+    );
+    ghoul::opengl::updateUniformLocations(*_shader, _uniformCache);
 }
 
-void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::filesystem::path& path)
+void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::filesystem::path& path,
+                                                       float& globalMin, float& globalMax)
 {
     RawVolumeMetadata metadata;
 
@@ -349,6 +571,9 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::filesystem::pa
     t.baseName = path.stem();
     t.inRam = false;
     t.onGpu = false;
+
+    globalMin = std::min(t.metadata.minValue, globalMin);
+    globalMax = std::max(t.metadata.maxValue, globalMax);
 
     _volumeTimesteps[t.metadata.time] = std::move(t);
 }
@@ -428,20 +653,11 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
     if (_raycaster) {
         Timestep* t = currentTimestep();
 
-        // Set scale and translation matrices:
-        // The original data cube is a unit cube centered in 0
-        // ie with lower bound from (-0.5, -0.5, -0.5) and upper bound (0.5, 0.5, 0.5)
+        // Set scale matrix: The original data cube is a unit cube centered in 0, i.e.,
+        // with lower bound from (-0.5, -0.5, -0.5) and upper bound (0.5, 0.5, 0.5)
         if (t && t->texture) {
             if (_raycaster->gridType() == VolumeGridType::Cartesian) {
-                const glm::dvec3 scale =
-                    t->metadata.upperDomainBound - t->metadata.lowerDomainBound;
-                const glm::dvec3 translation =
-                    (t->metadata.lowerDomainBound + t->metadata.upperDomainBound) * 0.5f;
-
-                glm::dmat4 modelTransform = glm::translate(glm::dmat4(1.0), translation);
-                const glm::dmat4 scaleMatrix = glm::scale(glm::dmat4(1.0), scale);
-                modelTransform = modelTransform * scaleMatrix;
-                _raycaster->setModelTransform(glm::mat4(modelTransform));
+                _raycaster->setModelTransform(calculateModelTransform());
             }
             else {
                 // The diameter is two times the maximum radius.
@@ -462,12 +678,18 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
         _raycaster->setBrightness(_brightness * opacity());
         _raycaster->setRNormalization(_rNormalization);
         _raycaster->setRUpperBound(_rUpperBound);
+        _raycaster->setValueRange(_valueRange);
+        _raycaster->setHideOutsideRange(_hideOutsideRange);
     }
 }
 
 void RenderableTimeVaryingVolume::render(const RenderData& data, RendererTasks& tasks) {
     if (_raycaster && _raycaster->volumeTexture()) {
         tasks.raycasterTasks.push_back({ _raycaster.get(), data });
+    }
+
+    if (_volumeSlice.shouldRenderSlice) {
+        renderVolumeSlice(data);
     }
 }
 
@@ -480,6 +702,166 @@ void RenderableTimeVaryingVolume::deinitializeGL() {
         global::raycasterManager->detachRaycaster(*_raycaster);
         _raycaster = nullptr;
     }
+
+    glDeleteVertexArrays(1, &_quad);
+    glDeleteBuffers(1, &_vertexPositionBuffer);
+    BaseModule::ProgramObjectManager.release(
+        "PlaneSlice",
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine->removeRenderProgram(p);
+        }
+    );
+    _shader = nullptr;
+}
+
+glm::mat4 RenderableTimeVaryingVolume::calculateModelTransform() {
+    Timestep* t = currentTimestep();
+
+    if (!t) {
+        return glm::mat4(1.0f);
+    }
+
+    const glm::dvec3 scale =
+        t->metadata.upperDomainBound - t->metadata.lowerDomainBound;
+    const glm::dvec3 translation =
+        (t->metadata.lowerDomainBound + t->metadata.upperDomainBound) * 0.5f;
+
+    glm::dmat4 translationMatrix = glm::translate(glm::dmat4(1.0), translation);
+    const glm::dmat4 scaleMatrix = glm::scale(glm::dmat4(1.0), scale);
+    glm::dmat4 modelTransform = translationMatrix * scaleMatrix;
+    return glm::mat4(modelTransform);
+}
+
+void RenderableTimeVaryingVolume::createPlane() {
+    const std::array<GLfloat, 36> vertexData = {
+        //   x     y
+            -1.f, -1.f,
+             1.f,  1.f,
+            -1.f,  1.f,
+            -1.f, -1.f,
+             1.f, -1.f,
+             1.f,  1.f,
+    };
+    glCreateVertexArrays(1, &_quad);
+    glCreateBuffers(1, &_vertexPositionBuffer);
+    glVertexArrayVertexBuffer(_quad, 0, _vertexPositionBuffer, 0, sizeof(GL_FLOAT) * 2);
+
+    glEnableVertexArrayAttrib(_quad, 0);
+    glVertexArrayAttribFormat(_quad, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_quad, 0, 0);
+
+    glNamedBufferData(
+        _vertexPositionBuffer,
+        sizeof(vertexData),
+        vertexData.data(),
+        GL_STATIC_DRAW
+    );
+}
+
+void RenderableTimeVaryingVolume::renderVolumeSlice(const RenderData& data) {
+    Timestep* t = currentTimestep();
+
+    if (!t || !t->texture) {
+        return;
+    }
+
+    _shader->activate();
+    _shader->setUniform(_uniformCache.offset, _volumeSlice.offset);
+    _shader->setUniform(_uniformCache.normal, _volumeSlice.normal);
+
+    _shader->setUniform(_uniformCache.modelTransform,
+        glm::mat4(calculateModelTransform())
+    );
+
+    auto [modelTransform, modelViewTransform, modelViewProjectionTransform] =
+        calcAllTransforms(data);
+
+    _shader->setUniform(_uniformCache.modelViewProjection,
+        glm::mat4(modelViewProjectionTransform)
+    );
+    _shader->setUniform(_uniformCache.modelViewTransform, glm::mat4(modelViewTransform));
+
+    _shader->setUniform(_uniformCache.volumeResolution,
+        glm::vec3(t->metadata.dimensions)
+    );
+
+    // Upload volume texture
+    ghoul::opengl::TextureUnit textureUnit;
+    textureUnit.bind(*t->texture);
+    _shader->setUniform(_uniformCache.volumeTexture, textureUnit);
+    // Upload transfer function texture
+    ghoul::opengl::TextureUnit transferFunctionUnit;
+    transferFunctionUnit.bind(_transferFunction->texture());
+    _shader->setUniform(_uniformCache.transferFunction, transferFunctionUnit);
+
+    if (_slicePlaneIsDirty) {
+        // Create basis to convert points on the 2D plane into volume 3D coordinates
+        glm::vec3 n = glm::normalize(_volumeSlice.normal.value());
+
+        glm::vec3 up = glm::abs(n.z) < 0.999f ? glm::vec3(0.f, 0.f, 1.f)
+            : glm::vec3(1.f, 0.f, 0.f);
+
+        glm::vec3 tangent = glm::normalize(glm::cross(up, n));
+        glm::vec3 bitangent = glm::normalize(glm::cross(n, tangent));
+
+        _basisTransform = glm::mat3(tangent, bitangent, n);
+    }
+
+    _shader->setUniform(_uniformCache.basis, _basisTransform);
+
+    glDisable(GL_CULL_FACE);
+    glBindVertexArray(_quad);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+    glBindVertexArray(0);
+    glEnable(GL_CULL_FACE);
+    _shader->deactivate();
+}
+
+void RenderableTimeVaryingVolume::loadVtiFromCache(const std::filesystem::path& cached,
+    double timestep,
+    RawVolumeMetadata& metadata,
+    Timestep& t, float& globalMin,
+    float& globalMax)
+{
+    metadata.time = timestep;
+    t.metadata = metadata;
+
+    RawVolumeReader<float> reader(cached, metadata.dimensions);
+    t.rawVolume = reader.read(_invertDataAtZ);
+    const unsigned length = metadata.dimensions.x * metadata.dimensions.y *
+        metadata.dimensions.z;
+    // If the metadata contain the min max this is unnecessary
+    for (size_t i = 0; i < length; i++) {
+        float d = t.rawVolume->data()[i];
+        if (!std::isinf(d) && !std::isnan(d)) {
+            globalMin = std::min(globalMin, d);
+            globalMax = std::max(globalMax, d);
+        }
+    }
+}
+
+void RenderableTimeVaryingVolume::loadVti(const std::filesystem::path& path,
+    double timestep, Timestep& t, float& globalMin,
+    float& globalMax,
+    const RawVolumeMetadata& metadata)
+{
+    const auto [m, scalars] = readVTIFile(path, timestep);
+    // TODO: this will now ignore any metadata in the VTI file and only use the 1 .metadata
+    // file supplied. The time is set specifically since the metadata file determines the
+    // shown time for each timestep.
+    t.metadata = metadata;
+    t.metadata.time = timestep;
+    t.rawData = scalars;
+
+    globalMin = std::min(globalMin, m.minValue);
+    globalMax = std::max(globalMax, m.maxValue);
+}
+
+void RenderableTimeVaryingVolume::saveVtiCache(const std::filesystem::path& cached,
+    const std::vector<float>& scalars)
+{
+    RawVolumeWriter<float> writer(cached);
+    writer.write(scalars);
 }
 
 } // namespace openspace

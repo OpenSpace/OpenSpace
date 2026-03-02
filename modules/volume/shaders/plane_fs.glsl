@@ -21,41 +21,41 @@
  * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
+#include "fragment.glsl"
 
-#ifndef __OPENSPACE_MODULE_VOLUME___RAWVOLUMEWRITER___H__
-#define __OPENSPACE_MODULE_VOLUME___RAWVOLUMEWRITER___H__
+in vec3 texCoord;
+in vec4 positionCameraSpace;
+out vec4 outColor;
 
-#include <ghoul/glm.h>
-#include <filesystem>
-#include <functional>
+uniform sampler3D volumeTexture;
+uniform sampler1D transferFunction;
+uniform vec3 volumeResolution;
 
-namespace openspace {
+Fragment getFragment() {
+    // Discard fragments that lie outside the volume bounds
+    if (any(lessThan(texCoord, vec3(0.0))) || any(greaterThan(texCoord, vec3(1.0)))) {
+        discard;
+    }
 
-template <typename T> class RawVolume;
+    // Fixes color artifact at the edges, TODO come up with a better solution that allows
+    // lookup of texture coordinates at the extremes (0,1)
+    vec3 texelSize = 1.0 / volumeResolution;
+    vec3 coords = clamp(texCoord, texelSize, 1.0 - texelSize );
 
-template <typename VoxelType>
-class RawVolumeWriter {
-public:
-    explicit RawVolumeWriter(std::filesystem::path path, size_t bufferSize = 1024);
+    Fragment frag;
+    vec4 value = texture(volumeTexture, coords);
+    frag.color = texture(transferFunction, value.r);
 
-    glm::uvec3 dimensions() const;
-    void setDimensions(glm::uvec3 dimensions);
-    void write(const std::function<VoxelType(const glm::uvec3&)>& fn,
-        const std::function<void(float)>& onProgress = [](float) {});
-    void write(const RawVolume<VoxelType>& volume);
-    void write(const std::vector<VoxelType>& data) const;
+    vec4 position = positionCameraSpace;
+    frag.depth = -position.z;
+    // TODO: ask alex about wether or not to pre multiply alpha values and what
+    // that means in terms of the interpretation of the values
 
-    size_t coordsToIndex(const glm::uvec3& coords) const;
-    glm::ivec3 indexToCoords(size_t linear) const;
+    // TODO: Enable this as a property to show/hide background. Must also fix depth values
+    // so that the entire background is shown. Right now trails for example are not shown.
+    // Also need to fix so that the volume is shown behind the cut plane as well.
+    frag.color.rgb *= frag.color.a;
+    frag.color.a = 1.0;
 
-private:
-    glm::ivec3 _dimensions = glm::ivec3(0);
-    std::filesystem::path _path;
-    size_t _bufferSize = 0;
-};
-
-} // namespace openspace
-
-#include "rawvolumewriter.inl"
-
-#endif // __OPENSPACE_MODULE_VOLUME___RAWVOLUMEWRITER___H__
+    return frag;
+}

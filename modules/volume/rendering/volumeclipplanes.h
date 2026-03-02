@@ -37,7 +37,7 @@ namespace openspace {
 
 class VolumeClipPlanes : public PropertyOwner {
 public:
-    explicit VolumeClipPlanes(const ghoul::Dictionary& dictionary);
+    explicit VolumeClipPlanes(const std::vector<ghoul::Dictionary>& planes);
     ~VolumeClipPlanes() override = default;
 
     void initialize();
@@ -47,7 +47,7 @@ public:
 
 private:
     IntProperty _nClipPlanes;
-    std::vector<VolumeClipPlane> _clipPlanes;
+    std::vector<std::unique_ptr<VolumeClipPlane>> _clipPlanes;
 };
 
 } // namespace openspace

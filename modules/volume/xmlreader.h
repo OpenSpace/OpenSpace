@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2026                                                               *
+ * Copyright (c) 2014-2025                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,40 +22,13 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___RAWVOLUMEWRITER___H__
-#define __OPENSPACE_MODULE_VOLUME___RAWVOLUMEWRITER___H__
+#include <ghoul/filesystem/filesystem.h>
+#include <modules/volume/rawvolumemetadata.h>
 
-#include <ghoul/glm.h>
-#include <filesystem>
-#include <functional>
-
-namespace openspace {
-
-template <typename T> class RawVolume;
-
-template <typename VoxelType>
-class RawVolumeWriter {
-public:
-    explicit RawVolumeWriter(std::filesystem::path path, size_t bufferSize = 1024);
-
-    glm::uvec3 dimensions() const;
-    void setDimensions(glm::uvec3 dimensions);
-    void write(const std::function<VoxelType(const glm::uvec3&)>& fn,
-        const std::function<void(float)>& onProgress = [](float) {});
-    void write(const RawVolume<VoxelType>& volume);
-    void write(const std::vector<VoxelType>& data) const;
-
-    size_t coordsToIndex(const glm::uvec3& coords) const;
-    glm::ivec3 indexToCoords(size_t linear) const;
-
-private:
-    glm::ivec3 _dimensions = glm::ivec3(0);
-    std::filesystem::path _path;
-    size_t _bufferSize = 0;
-};
+namespace openspace
+{
+    std::pair<RawVolumeMetadata, std::vector<float>> readVTIFile(
+                                                        const std::filesystem::path &path,
+                                                                         double timestep);
 
 } // namespace openspace
-
-#include "rawvolumewriter.inl"
-
-#endif // __OPENSPACE_MODULE_VOLUME___RAWVOLUMEWRITER___H__
