@@ -99,7 +99,7 @@ private:
         glm::vec4 colors[MaxNumberColors];
     };
 
-    std::vector<GlyphData> _fullGlyphData;
+    std::vector<GlyphData> _glyphData;
     std::vector<size_t> _glyphIndices; // indices of the points in the dataviewer
     int _maxIndex = -1;
 

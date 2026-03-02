@@ -148,6 +148,8 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     updateDataIfChanged();
 
     initializeSelectionCallbacks();
+
+    _currentlyHoveredIndex = -1;
 }
 
 void RenderableExoplanetGlyphCloud::initializeSelectionCallbacks() {
@@ -268,7 +270,7 @@ void RenderableExoplanetGlyphCloud::deinitializeGL() {
 }
 
 void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks&) {
-    if (_fullGlyphData.empty()) {
+    if (_glyphData.empty()) {
         return;
     }
 
@@ -336,7 +338,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glBindVertexArray(_pointsVao);
-        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_fullGlyphData.size()));
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_glyphData.size()));
     }
 
     // 2nd rendering pass: Render IDs to a separate texture every frame as well
@@ -366,7 +368,7 @@ void RenderableExoplanetGlyphCloud::render(const RenderData& data, RendererTasks
 
         // Draw again! And specify viewport size
         glViewport(viewport[0], viewport[1], textureDim.x, textureDim.y);
-        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_fullGlyphData.size()));
+        glDrawArrays(GL_POINTS, 0, static_cast<GLsizei>(_glyphData.size()));
 
         // Reset index rendering, viewport size and frame buffer
         glBindFramebuffer(GL_FRAMEBUFFER, defaultFBO);
@@ -406,8 +408,8 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
     if (_renderDataIsDirty) {
         glNamedBufferData(
             _pointsVbo,
-            _fullGlyphData.size() * sizeof(GlyphData),
-            _fullGlyphData.data(),
+            _glyphData.size() * sizeof(GlyphData),
+            _glyphData.data(),
             GL_STATIC_DRAW
         );
         mapVertexAttributes(_pointsVao);
@@ -428,7 +430,7 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
 
             if (pos != _glyphIndices.end()) {
                 const int index = static_cast<int>(pos - _glyphIndices.begin());
-                const GlyphData& p = _fullGlyphData.at(index);
+                const GlyphData& p = _glyphData.at(index);
                 selectedPoints.push_back(p);
                 newIndices.push_back(i);
             }
@@ -561,13 +563,13 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
     using GlyphRenderData = ExoplanetsExpertToolModule::GlyphRenderData;
     GlyphRenderData syncedData = mod->glyphRenderData();
 
-    _fullGlyphData.clear();
+    _glyphData.clear();
     _glyphIndices.clear();
 
     // Read number of data points
     size_t nPoints = syncedData.items.size();
 
-    _fullGlyphData.reserve(nPoints);
+    _glyphData.reserve(nPoints);
     _glyphIndices.reserve(nPoints);
 
     int maxIndex = -1;
@@ -596,7 +598,7 @@ void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
             maxIndex = static_cast<int>(d.index);
         }
 
-        _fullGlyphData.push_back(std::move(d));
+        _glyphData.push_back(std::move(d));
         _glyphIndices.push_back(item.index);
     }
 
