@@ -79,7 +79,6 @@
 #include "renderengine_lua.inl"
 #include <thread>
 
-
 namespace {
     constexpr std::string_view _loggerCat = "RenderEngine";
 
@@ -1133,7 +1132,7 @@ scripting::LuaLibrary RenderEngine::luaLibrary() {
             codegen::lua::RemoveScreenSpaceRenderable,
             codegen::lua::TakeScreenshot,
             codegen::lua::DpiScaling,
-            codegen::lua::ResetScreenshotNumber,
+            codegen::lua::ResetScreenshotNumber
         }
     };
 }
@@ -1205,7 +1204,6 @@ ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(std::string_view iden
         return nullptr;
     }
 }
-
 
 std::vector<ScreenSpaceRenderable*> RenderEngine::screenSpaceRenderables() const {
     std::vector<ScreenSpaceRenderable*> res(global::screenSpaceRenderables->size());
