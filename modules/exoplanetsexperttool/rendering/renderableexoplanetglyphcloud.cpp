@@ -24,9 +24,11 @@
 
 #include <modules/exoplanetsexperttool/rendering/renderableexoplanetglyphcloud.h>
 
+#include <modules/exoplanetsexperttool/exoplanetsexperttoolmodule.h>
 #include <openspace/documentation/verifier.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/syncengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/rendering/renderengine.h>
@@ -89,9 +91,6 @@ namespace {
         // [[codegen::verbatim(SelectionInfo.description)]]
         std::optional<std::vector<int>> selection;
 
-        // The file to read the point data from
-        std::filesystem::path dataFile;
-
         // [[codegen::verbatim(UseFixedWidthInfo.description)]]
         std::optional<bool> useFixedWidth;
 
@@ -141,18 +140,12 @@ RenderableExoplanetGlyphCloud::RenderableExoplanetGlyphCloud(
     _renderOption.addOption(RenderOption::ViewDirection, "Camera View Direction");
     _renderOption.addOption(RenderOption::PositionNormal, "Camera Position Normal");
 
-    if (p.billboard.has_value()) {
-        _renderOption = codegen::map<RenderOption>(*p.billboard);
-    }
-    else {
-        _renderOption = RenderOption::ViewDirection;
-    }
+    _renderOption = p.billboard.has_value() ?
+        codegen::map<RenderOption>(*p.billboard) : RenderOption::ViewDirection;
+
     addProperty(_renderOption);
 
-    _dataFile = std::make_unique<ghoul::filesystem::File>(p.dataFile);
-    _dataFile->setCallback([&]() { _dataFileIsDirty = true; });
-
-    updateDataFromFile();
+    updateDataIfChanged();
 
     initializeSelectionCallbacks();
 }
@@ -408,9 +401,7 @@ void RenderableExoplanetGlyphCloud::update(const UpdateData&) {
         ghoul::opengl::updateUniformLocations(*_program, _uniformCache);
     }
 
-    if (_dataFileIsDirty) {
-        updateDataFromFile();
-    }
+    updateDataIfChanged();
 
     if (_renderDataIsDirty) {
         glNamedBufferData(
@@ -560,74 +551,57 @@ void RenderableExoplanetGlyphCloud::mapVertexAttributes(GLuint vao) {
     }
 }
 
-void RenderableExoplanetGlyphCloud::updateDataFromFile() {
-    LDEBUG(std::format("Updating point data from file: {}", _dataFile->path()));
+void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
+    auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
 
-    std::ifstream file(_dataFile->path(), std::ios::binary);
-    if (!file) {
-        LERROR(std::format("Could not open file for reading: {}", _dataFile->path()));
+    if (!mod->dataWasUpdated()) {
         return;
     }
+
+    using GlyphRenderData = ExoplanetsExpertToolModule::GlyphRenderData;
+    GlyphRenderData syncedData = mod->glyphRenderData();
 
     _fullGlyphData.clear();
     _glyphIndices.clear();
 
     // Read number of data points
-    size_t nPoints;
-    file.read(reinterpret_cast<char*>(&nPoints), sizeof(size_t));
+    size_t nPoints = syncedData.items.size();
 
     _fullGlyphData.reserve(nPoints);
     _glyphIndices.reserve(nPoints);
 
     int maxIndex = -1;
 
-    // OBS: this reading must match the writing in the dataviewer
-    for (size_t i = 0; i < nPoints; i++) {
+    for (const GlyphRenderData::Item& item : syncedData.items) {
         GlyphData d;
 
-        size_t index;
-        file.read(reinterpret_cast<char*>(&index), sizeof(size_t));
+        // Position is given in parsec
+        d.position = glm::vec3(item.position * distanceconstants::Parsec);
 
-        size_t nColors;
-        file.read(reinterpret_cast<char*>(&nColors), sizeof(size_t));
+        d.component = static_cast<float>(item.component);
+
+        size_t nColors = item.colors.size();
         d.nColors = static_cast<int>(nColors);
 
-        glm::dvec3 position;
-        file.read(reinterpret_cast<char*>(&position.x), sizeof(double));
-        file.read(reinterpret_cast<char*>(&position.y), sizeof(double));
-        file.read(reinterpret_cast<char*>(&position.z), sizeof(double));
-        const glm::vec3 scaledPos = glm::vec3(position * distanceconstants::Parsec);
-
-        d.position = scaledPos;
-
-        size_t temp = nColors > MaxNumberColors ? MaxNumberColors : nColors;
-
+        // Limit the number of colors to the maximum supported by the shader
+        size_t temp = std::min(nColors, MaxNumberColors);
         for (size_t j = 0; j < temp; j++) {
-            glm::vec4 color;
-            file.read(reinterpret_cast<char*>(&color.r), sizeof(float));
-            file.read(reinterpret_cast<char*>(&color.g), sizeof(float));
-            file.read(reinterpret_cast<char*>(&color.b), sizeof(float));
-            file.read(reinterpret_cast<char*>(&color.a), sizeof(float));
-            d.colors[j] = color;
+            d.colors[j] = item.colors[j];
         }
 
-        int indexInSystem;
-        file.read(reinterpret_cast<char*>(&indexInSystem), sizeof(int));
-        d.component = static_cast<float>(indexInSystem + 1);
-
-        d.index = index + 1;
+        // @TODO: Why do we increase by one here?
+        d.index = item.index + 1;
 
         if (static_cast<int>(d.index) > maxIndex) {
             maxIndex = static_cast<int>(d.index);
         }
 
         _fullGlyphData.push_back(std::move(d));
-        _glyphIndices.push_back(index);
+        _glyphIndices.push_back(item.index);
     }
 
     _maxIndex = maxIndex;
 
-    _dataFileIsDirty = false;
     _renderDataIsDirty = true;
 }
 

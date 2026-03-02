@@ -28,6 +28,7 @@
 #include <openspace/camera/camera.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
+#include <openspace/engine/moduleengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scene.h>
@@ -130,6 +131,11 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
         _gui.deinitializeGL();
     });
 
+    global::callback::preSync->emplace_back([&]() {
+        // Before updating, reset the flag
+        _dataWasUpdated = false;
+    });
+
     global::callback::draw2D->emplace_back([&]() {
         if (!_enabled) {
             return;
@@ -226,6 +232,20 @@ bool ExoplanetsExpertToolModule::showInfoWindowAtStartup() const {
 
 std::filesystem::path ExoplanetsExpertToolModule::dataConfigFile() const {
     return std::filesystem::path(_dataConfigFile.value());
+}
+
+bool ExoplanetsExpertToolModule::dataWasUpdated() const {
+    return _dataWasUpdated;
+}
+
+const ExoplanetsExpertToolModule::GlyphRenderData&
+ExoplanetsExpertToolModule::glyphRenderData() const {
+    return _glyphRenderData;
+}
+
+void ExoplanetsExpertToolModule::updateGlyphRenderData(GlyphRenderData data) {
+    _glyphRenderData = std::move(data);
+    _dataWasUpdated = true;
 }
 
 void ExoplanetsExpertToolModule::internalInitialize(const ghoul::Dictionary& dict) {

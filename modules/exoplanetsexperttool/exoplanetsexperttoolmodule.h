@@ -43,12 +43,28 @@ public:
     // The identifier used for the glyph cloud renderable throughout the module
     constexpr static std::string_view GlyphCloudIdentifier = "ExoplanetDataPoints";
 
+    struct GlyphRenderData { // TODO: Make syncable
+        // One item per planet glyph
+        struct Item {
+            size_t index; // Index in dataset, used for selection and hover
+            size_t component; // Index in system
+            glm::dvec3 position;
+            std::vector<glm::vec4> colors;
+        };
+        std::vector<Item> items;
+    };
+
     ExoplanetsExpertToolModule();
     virtual ~ExoplanetsExpertToolModule() = default;
 
     bool enabled() const;
     bool showInfoWindowAtStartup() const;
     std::filesystem::path dataConfigFile() const;
+
+    bool dataWasUpdated() const;
+
+    const GlyphRenderData& glyphRenderData() const;
+    void updateGlyphRenderData(GlyphRenderData data);
 
     std::vector<documentation::Documentation> documentations() const override;
 
@@ -65,6 +81,9 @@ protected:
     uint32_t _mouseButtons = 0;
 
     bool _cameraWasWithinGalaxy = false;
+    bool _dataWasUpdated = false;
+
+    GlyphRenderData _glyphRenderData;
 };
 
 } // namespace openspace

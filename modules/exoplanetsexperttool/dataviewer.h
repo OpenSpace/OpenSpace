@@ -127,7 +127,7 @@ private:
     void renderSettingsMenuContent();
 
     // Write the information about the rendered points to a file
-    void writeRenderDataToFile();
+    void updateGlyphRenderData();
 
     void updateSelectionInRenderable();
 

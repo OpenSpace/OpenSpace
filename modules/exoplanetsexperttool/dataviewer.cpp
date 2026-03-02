@@ -70,8 +70,6 @@
 namespace {
     constexpr std::string_view _loggerCat = "ExoplanetsDataViewer";
 
-    constexpr std::string_view RenderDataFile = "${TEMPORARY}/pointrenderdata.dat";
-
     constexpr std::string_view WebpagePath = "${MODULE_EXOPLANETSEXPERTTOOL}/webpage/index.html";
 
     constexpr float DefaultGlyphScale = 1.0;
@@ -411,14 +409,7 @@ void DataViewer::renderStartupInfo() {
 void DataViewer::initializeRenderables() {
     using namespace std::string_literals;
 
-    writeRenderDataToFile();
-
-    std::filesystem::path dataFilePath = absPath(RenderDataFile);
-
-    if (!std::filesystem::is_regular_file(dataFilePath)) {
-        LWARNING("Count not find data file for points rendering");
-        return;
-    }
+    updateGlyphRenderData();
 
     ghoul::Dictionary gui;
     gui.setValue("Name", "All Exoplanets"s);
@@ -429,7 +420,6 @@ void DataViewer::initializeRenderables() {
     renderable.setValue("Scale", static_cast<double>(DefaultGlyphScale));
     renderable.setValue("UseFixedWidth", false);
     renderable.setValue("RenderBinMode", "PreDeferredTransparent"s);
-    renderable.setValue("DataFile", dataFilePath.string());;
 
     ghoul::Dictionary node;
     node.setValue("Identifier", std::string(ExoplanetsExpertToolModule::GlyphCloudIdentifier));
@@ -627,7 +617,7 @@ void DataViewer::render() {
     // Update linked views, if needed
 
     if (_filterChanged || _colormapWasChanged) {
-        writeRenderDataToFile();
+        updateGlyphRenderData();
         _colormapWasChanged = false;
         _filterChanged = false;
     }
@@ -1331,48 +1321,30 @@ void DataViewer::renderSettingsMenuContent() {
     }
 }
 
-void DataViewer::writeRenderDataToFile() {
-    std::ofstream file(absPath(RenderDataFile), std::ios::binary);
-    if (!file) {
-        LERROR(std::format("Cannot open file '{}' for writing", RenderDataFile));
-        return;
-    }
-
-    LDEBUG("Writing render data to file");
-
-    std::vector<size_t> indicesWithPositions;
-    indicesWithPositions.reserve(_filteredData.size());
+void DataViewer::updateGlyphRenderData() {
+    LDEBUG("Updating glyph render data");
 
     // For now, only write the filtered data. Later on we might want to render the
     // filtered out points somehow and then we should write out the full dataset
 
+    using GlyphRenderData = ExoplanetsExpertToolModule::GlyphRenderData;
+
+    GlyphRenderData data;
+    data.items.reserve(_filteredData.size());
+
     for (size_t index : _filteredData) {
         const ExoplanetItem& item = _data[index];
-        if (item.position.has_value()) {
-            indicesWithPositions.push_back(index);
+        if (!item.position.has_value()) {
+            // Skip items without position, since they can't be rendered
+            continue;
         }
-    }
-    indicesWithPositions.shrink_to_fit();
 
-    std::vector<std::string_view> hosts;
-    hosts.reserve(_filteredData.size());
-
-    // Write number of points
-    size_t nPoints = indicesWithPositions.size();
-    file.write(reinterpret_cast<const char*>(&nPoints), sizeof(size_t));
-
-    for (size_t index : indicesWithPositions) {
-        const ExoplanetItem& item = _data[index];
-
-        file.write(reinterpret_cast<const char*>(&index), sizeof(size_t));
+        GlyphRenderData::Item renderItem;
+        renderItem.index = index;
+        renderItem.position = *item.position;
+        renderItem.component = item.indexInSystem;
 
         size_t nVariables = _colorMappingView->colorMapperVariables().size();
-        file.write(reinterpret_cast<const char*>(&nVariables), sizeof(size_t));
-
-        const glm::dvec3 position = *item.position;
-        file.write(reinterpret_cast<const char*>(&position.x), sizeof(double));
-        file.write(reinterpret_cast<const char*>(&position.y), sizeof(double));
-        file.write(reinterpret_cast<const char*>(&position.z), sizeof(double));
 
         for (int i = 0; i < nVariables; ++i) {
             const ImVec4 color = view::helper::toImVec4(
@@ -1381,17 +1353,19 @@ void DataViewer::writeRenderDataToFile() {
                     _colorMappingView->colorMapperVariables()[i]
                 )
             );
-            file.write(reinterpret_cast<const char*>(&color.x), sizeof(float));
-            file.write(reinterpret_cast<const char*>(&color.y), sizeof(float));
-            file.write(reinterpret_cast<const char*>(&color.z), sizeof(float));
-            file.write(reinterpret_cast<const char*>(&color.w), sizeof(float));
+            renderItem.colors.push_back(
+                _colorMappingView->colorFromColormap(
+                    item,
+                    _colorMappingView->colorMapperVariables()[i]
+                )
+            );
         }
-
-        // Get a number for the planet's index in system
-        file.write(reinterpret_cast<const char*>(&item.indexInSystem), sizeof(int));
+        data.items.push_back(renderItem);
     }
+    data.items.shrink_to_fit();
 
-    file.close();
+    auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
+    mod->updateGlyphRenderData(data);
 }
 
 void DataViewer::updateSelectionInRenderable() {

@@ -45,7 +45,7 @@ namespace ghoul::opengl { class ProgramObject; }
 
 namespace openspace::exoplanets {
 
-constexpr const int MaxNumberColors = 8;
+constexpr size_t MaxNumberColors = 8;
 
 class RenderableExoplanetGlyphCloud : public Renderable {
 public:
@@ -68,7 +68,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    void updateDataFromFile();
+    void updateDataIfChanged();
 
     static documentation::Documentation Documentation();
 
@@ -90,9 +90,6 @@ private:
     properties::BoolProperty _useFixedRingWidth;
 
     properties::OptionProperty _renderOption;
-
-    std::unique_ptr<ghoul::filesystem::File> _dataFile;
-    bool _dataFileIsDirty = false;
 
     struct GlyphData {
         glm::vec3 position;
