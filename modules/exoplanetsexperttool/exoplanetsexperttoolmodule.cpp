@@ -29,6 +29,7 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/globalscallbacks.h>
 #include <openspace/engine/moduleengine.h>
+#include <openspace/engine/syncengine.h>
 #include <openspace/engine/windowdelegate.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/scene/scene.h>
@@ -112,11 +113,15 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
     // TODO: Renderables are initialized even if modules is disabled
 
     global::callback::initialize->emplace_back([&]() {
+        global::syncEngine->addSyncable({ &_glyphRenderData });
+
         LDEBUG("Initializing Exoplanets Expert Tool GUI");
         _gui.initialize();
     });
 
     global::callback::deinitialize->emplace_back([&]() {
+        global::syncEngine->removeSyncable({ &_glyphRenderData });
+
         LDEBUG("Deinitialize Exoplanets Expert Tool GUI");
         _gui.deinitialize();
     });
@@ -132,8 +137,8 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
     });
 
     global::callback::preSync->emplace_back([&]() {
-        // Before updating, reset the flag
-        _dataWasUpdated = false;
+        // Before updating, reset the dataset updated flag
+        _glyphRenderData.data().wasUpdated = false;
     });
 
     global::callback::draw2D->emplace_back([&]() {
@@ -235,7 +240,7 @@ std::filesystem::path ExoplanetsExpertToolModule::dataConfigFile() const {
 }
 
 bool ExoplanetsExpertToolModule::dataWasUpdated() const {
-    return _dataWasUpdated;
+    return _glyphRenderData.data().wasUpdated;
 }
 
 const ExoplanetsExpertToolModule::GlyphRenderData&
@@ -245,7 +250,7 @@ ExoplanetsExpertToolModule::glyphRenderData() const {
 
 void ExoplanetsExpertToolModule::updateGlyphRenderData(GlyphRenderData data) {
     _glyphRenderData = std::move(data);
-    _dataWasUpdated = true;
+    _glyphRenderData.data().wasUpdated = true;
 }
 
 void ExoplanetsExpertToolModule::internalInitialize(const ghoul::Dictionary& dict) {

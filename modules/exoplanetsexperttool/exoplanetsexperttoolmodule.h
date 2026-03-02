@@ -32,6 +32,7 @@
 #include <openspace/properties/list/intlistproperty.h>
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/misc/stringproperty.h>
+#include <openspace/util/syncdata.h>
 #include <string_view>
 
 namespace openspace {
@@ -43,7 +44,9 @@ public:
     // The identifier used for the glyph cloud renderable throughout the module
     constexpr static std::string_view GlyphCloudIdentifier = "ExoplanetDataPoints";
 
-    struct GlyphRenderData { // TODO: Make syncable
+    struct GlyphRenderData {
+        bool wasUpdated = false;
+
         // One item per planet glyph
         struct Item {
             size_t index; // Index in dataset, used for selection and hover
@@ -81,9 +84,9 @@ protected:
     uint32_t _mouseButtons = 0;
 
     bool _cameraWasWithinGalaxy = false;
-    bool _dataWasUpdated = false;
 
-    GlyphRenderData _glyphRenderData;
+    // These are set from master only, but should be synced to all the nodes
+    SyncData<GlyphRenderData> _glyphRenderData;
 };
 
 } // namespace openspace
