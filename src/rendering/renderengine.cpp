@@ -52,7 +52,6 @@
 #include <ghoul/font/font.h>
 #include <ghoul/font/fontmanager.h>
 #include <ghoul/font/fontrenderer.h>
-#include <ghoul/io/model/modelgeometry.h>
 #include <ghoul/io/model/modelreader.h>
 #include <ghoul/io/model/modelreaderassimp.h>
 #include <ghoul/io/model/modelreaderbinary.h>
@@ -1207,12 +1206,6 @@ ScreenSpaceRenderable* RenderEngine::screenSpaceRenderable(std::string_view iden
     }
 }
 
-void RenderEngine::loadCameraFBX(const std::filesystem::path& path) {
-    ghoul::io::ModelReader::ref().loadCameraPath(
-        path
-    );
-    //const auto& nodes = geometry->nodes();
-}
 
 std::vector<ScreenSpaceRenderable*> RenderEngine::screenSpaceRenderables() const {
     std::vector<ScreenSpaceRenderable*> res(global::screenSpaceRenderables->size());

@@ -33,6 +33,7 @@
 #include <openspace/scripting/lualibrary.h>
 #include <openspace/util/timemanager.h>
 #include <ghoul/format.h>
+#include <ghoul/io/camera/camerareader.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 #include <algorithm>
@@ -152,6 +153,13 @@ std::vector<ghoul::Dictionary> KeyframeRecordingHandler::keyframes() const {
     return sessionRecordingToDictionary(_timeline);
 }
 
+void KeyframeRecordingHandler::loadCameraFBX(const std::filesystem::path& path) {
+    ghoul::io::CameraReader::loadCameraPath(
+        path
+    );
+    //const auto& nodes = geometry->nodes();
+}
+
 scripting::LuaLibrary KeyframeRecordingHandler::luaLibrary() {
     return {
         "keyframeRecording",
@@ -166,7 +174,8 @@ scripting::LuaLibrary KeyframeRecordingHandler::luaLibrary() {
             codegen::lua::LoadSequence,
             codegen::lua::Play,
             codegen::lua::Pause,
-            codegen::lua::Keyframes
+            codegen::lua::Keyframes,
+            codegen::lua::LoadCameraFBX
         }
     };
 }

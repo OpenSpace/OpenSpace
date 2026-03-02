@@ -104,6 +104,11 @@ namespace {
     return global::keyframeRecording->keyframes();
 }
 
+[[codegen::luawrap]] void loadCameraFBX(std::filesystem::path filename) {
+    using namespace openspace;
+    global::keyframeRecording->loadCameraFBX(std::move(filename));
+}
+
 #include "keyframerecordinghandler_lua_codegen.cpp"
 
 } // namespace

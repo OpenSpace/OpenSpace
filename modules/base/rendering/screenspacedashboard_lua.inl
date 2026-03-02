@@ -67,10 +67,6 @@ namespace {
     dash->dashboard().clearDashboardItems();
 }
 
-[[codegen::luawrap]] void loadCameraFBX(std::filesystem::path file) {
-    openspace::global::renderEngine->loadCameraFBX(file);
-}
-
 #include "screenspacedashboard_lua_codegen.cpp"
 
 } // namespace
