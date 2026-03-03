@@ -29,9 +29,9 @@
 #include <string_view>
 #include <vector>
 
-namespace openspace { class Time; }
+namespace openspace {
 
-namespace openspace::globebrowsing {
+class Time;
 
 /**
  * RangedTime class is used to define an acceptable time range. Functionality includes
@@ -101,8 +101,8 @@ public:
 private:
     std::string _start;
     std::string _end;
-    double _startJ2000;
-    double _endJ2000;
+    double _startJ2000 = 0.0;
+    double _endJ2000 = 0.0;
 };
 
 /**
@@ -373,6 +373,6 @@ private:
     RangedTime _timerange;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TIMEQUANTIZER___H__

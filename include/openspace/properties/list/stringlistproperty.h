@@ -27,7 +27,7 @@
 
 #include <openspace/properties/misc/listproperty.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 class StringListProperty : public ListProperty<std::string> {
 public:
@@ -47,6 +47,6 @@ private:
     std::vector< std::string> toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___STRINGLISTPROPERTY___H__

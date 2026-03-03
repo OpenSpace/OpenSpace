@@ -37,7 +37,7 @@ namespace {
     constexpr std::string_view _loggerCat = "JoystickCameraStates";
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 JoystickCameraStates::JoystickCameraStates(double sensitivity, double velocityScaleFactor)
     : CameraInteractionStates(sensitivity, velocityScaleFactor)
@@ -167,7 +167,7 @@ void JoystickCameraStates::updateStateFromInput(
                         t.propertyUri, value
                     );
 
-                    using Script = scripting::ScriptEngine::Script;
+                    using Script = ScriptEngine::Script;
                     global::scriptEngine->queueScript({
                         .code = script,
                         .synchronized = Script::ShouldBeSynchronized(t.isRemote),
@@ -188,7 +188,7 @@ void JoystickCameraStates::updateStateFromInput(
                 );
 
                 if (active) {
-                    using Script = scripting::ScriptEngine::Script;
+                    using Script = ScriptEngine::Script;
                     global::scriptEngine->queueScript({
                         .code = it->second.command,
                         .synchronized = Script::ShouldBeSynchronized(
@@ -448,5 +448,4 @@ JoystickCameraStates::findOrAddJoystickCameraState(const std::string& joystickNa
     return joystick;
 }
 
-
-} // namespace openspace::interaction
+} // namespace openspace

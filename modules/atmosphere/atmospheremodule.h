@@ -35,7 +35,7 @@ public:
 
     AtmosphereModule();
 
-    std::vector<documentation::Documentation> documentations() const override;
+    std::vector<openspace::Documentation> documentations() const override;
 
 private:
     void internalInitialize(const ghoul::Dictionary&) override;

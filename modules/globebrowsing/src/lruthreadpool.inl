@@ -25,7 +25,7 @@
 #include <modules/globebrowsing/src/lruthreadpool.h>
 #include <utility>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 template <typename KeyType>
 LRUThreadPoolWorker<KeyType>::LRUThreadPoolWorker(LRUThreadPool<KeyType>& pool)
@@ -144,4 +144,4 @@ void LRUThreadPool<KeyType>::clearEnqueuedTasks() {
     _queuedTasks.clear();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

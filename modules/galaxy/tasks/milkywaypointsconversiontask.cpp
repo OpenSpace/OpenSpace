@@ -32,8 +32,8 @@
 #include <vector>
 
 namespace openspace {
-    
-documentation::Documentation MilkywayPointsConversionTask::Documentation() {
+
+Documentation MilkywayPointsConversionTask::Documentation() {
     return {
         "MilkywayPointsConversionTask",
         "galaxy_milkywaypointsconversiontask",

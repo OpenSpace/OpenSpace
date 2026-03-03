@@ -66,7 +66,7 @@ std::vector<std::string> DataProcessorKameleon::readMetadata(const std::string& 
 }
 
 void DataProcessorKameleon::addDataValues(const std::string& path,
-                                          properties::SelectionProperty& dataOptions)
+                                          SelectionProperty& dataOptions)
 {
     int numOptions = static_cast<int>(dataOptions.options().size());
     initializeVectors(numOptions);
@@ -107,8 +107,8 @@ void DataProcessorKameleon::addDataValues(const std::string& path,
 }
 
 std::vector<float*> DataProcessorKameleon::processData(const std::string& path,
-                                                properties::SelectionProperty& optionProp,
-                                                                 glm::size3_t& dimensions)
+                                                       SelectionProperty& optionProp,
+                                                       glm::size3_t& dimensions)
 {
     const int numOptions = static_cast<int>(optionProp.options().size());
 
@@ -170,4 +170,4 @@ void DataProcessorKameleon::initializeKameleonWrapper(std::string path) {
     }
 }
 
-} //namespace openspace
+} // namespace openspace

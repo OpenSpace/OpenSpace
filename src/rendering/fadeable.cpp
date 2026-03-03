@@ -25,22 +25,24 @@
 #include <openspace/rendering/fadeable.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo OpacityInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
         "This value determines the opacity of this object. A value of 0 means "
         "completely transparent.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeInfo = {
+    constexpr Property::PropertyInfo FadeInfo = {
         "Fade",
         "Fade",
         "This value is used by the system to be able to fade out objects "
         "independently from the Opacity value selected by the user. This value should "
         "not be directly manipulated through a user interface, but instead used by other "
         "components of the system programmatically.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 } // namespace
 
@@ -81,4 +83,4 @@ float Fadeable::opacity() const noexcept {
     return _opacity * _fade * fadeFromParent;
 }
 
-}  // namespace openspace
+} // namespace openspace

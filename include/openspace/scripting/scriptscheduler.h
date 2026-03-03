@@ -34,17 +34,17 @@
 #include <vector>
 
 namespace ghoul { class Dictionary; }
-namespace openspace::documentation { struct Documentation; }
 
-namespace openspace::scripting {
+namespace openspace {
 
+struct Documentation;
 struct LuaLibrary;
 
 /**
  * Maintains an ordered list of `ScheduledScript`s and provides a simple interface for
  * retrieveing scheduled scripts.
  */
-class ScriptScheduler : public properties::PropertyOwner {
+class ScriptScheduler : public PropertyOwner {
 public:
     ScriptScheduler();
 
@@ -118,17 +118,17 @@ public:
 
     static LuaLibrary luaLibrary();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::BoolProperty _enabled;
-    properties::BoolProperty _shouldRunAllTimeJump;
+    BoolProperty _enabled;
+    BoolProperty _shouldRunAllTimeJump;
     std::vector<ScheduledScript> _scripts;
 
     int _currentIndex = 0;
     double _currentTime = 0;
 };
 
-} // namespace openspace::scripting
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SCRIPTSCHEDULER___H__

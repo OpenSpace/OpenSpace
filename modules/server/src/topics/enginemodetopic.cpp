@@ -29,6 +29,8 @@
 #include <ghoul/logging/logmanager.h>
 #include <string_view>
 
+using nlohmann::json;
+
 namespace {
     constexpr std::string_view _loggerCat = "EngineModeTopic";
 
@@ -36,8 +38,6 @@ namespace {
     constexpr std::string_view UnsubscribeEvent = "stop_subscription";
     constexpr std::string_view RefreshEvent = "refresh";
 } // namespace
-
-using nlohmann::json;
 
 namespace openspace {
 

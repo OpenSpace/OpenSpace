@@ -44,19 +44,21 @@
 #include <cstdlib>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "IswaCygnet";
 
-    constexpr openspace::properties::Property::PropertyInfo DeleteInfo = {
+    constexpr Property::PropertyInfo DeleteInfo = {
         "Delete",
         "Delete",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
-    constexpr openspace::properties::Property::PropertyInfo AlphaInfo = {
+    constexpr Property::PropertyInfo AlphaInfo = {
         "Alpha",
         "Alpha",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderableIswaCygnet)]] Parameters {
@@ -71,12 +73,12 @@ namespace {
 
         std::optional<double> xOffset;
     };
-#include "renderableiswacygnet_codegen.cpp"
 } // namespace
+#include "renderableiswacygnet_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableIswaCygnet::Documentation() {
+Documentation RenderableIswaCygnet::Documentation() {
     return codegen::doc<Parameters>("iswa_renderable_iswacygnet");
 }
 
@@ -309,4 +311,4 @@ void RenderableIswaCygnet::initializeGroup() {
     );
 }
 
-} //namespace openspace
+} // namespace openspace

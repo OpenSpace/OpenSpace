@@ -55,12 +55,12 @@ namespace {
         // The HTML file to write documentation to
         std::string output [[codegen::annotation("A valid filepath")]];
     };
-#include "kameleondocumentationtask_codegen.cpp"
 } // namespace
+#include "kameleondocumentationtask_codegen.cpp"
 
-namespace openspace::kameleonvolume {
+namespace openspace {
 
-documentation::Documentation KameleonDocumentationTask::documentation() {
+Documentation KameleonDocumentationTask::documentation() {
     return codegen::doc<Parameters>("kameleon_task_documentation");
 }
 
@@ -161,4 +161,4 @@ void KameleonDocumentationTask::perform(const Task::ProgressCallback & progressC
     progressCallback(1.f);
 }
 
-} // namespace openspace::kameleonvolume
+} // namespace openspace

@@ -48,13 +48,12 @@ namespace {
         // audio subsystem. If this value is not specified, it defaults to 128.
         std::optional<int> maxNumberOfChannels [[codegen::greater(0)]];
     };
-
-#include "audiomodule_codegen.cpp"
 } // namespace
+#include "audiomodule_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation AudioModule::Documentation() {
+Documentation AudioModule::Documentation() {
     return codegen::doc<Parameters>("module_audio");
 }
 
@@ -388,12 +387,12 @@ glm::vec3 AudioModule::speakerPosition(int channel) const {
     return glm::vec3(x, y, z);
 }
 
-std::vector<documentation::Documentation> AudioModule::documentations() const {
+std::vector<Documentation> AudioModule::documentations() const {
     return {
     };
 }
 
-scripting::LuaLibrary AudioModule::luaLibrary() const {
+LuaLibrary AudioModule::luaLibrary() const {
     return {
         "audio",
         {

@@ -207,12 +207,12 @@ namespace {
         // will be filtered away.
         std::optional<glm::vec2> filterRvError;
     };
-#include "constructoctreetask_codegen.cpp"
 } // namespace
+#include "constructoctreetask_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ConstructOctreeTask::Documentation() {
+Documentation ConstructOctreeTask::Documentation() {
     return codegen::doc<Parameters>("gaia_constructoctreefrombin");
 }
 

@@ -49,12 +49,12 @@ namespace {
         // time of the next provider
         std::map<std::string, ghoul::Dictionary> providers;
     };
-#include "tileproviderbydate_codegen.cpp"
 } // namespace
+#include "tileproviderbydate_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation TileProviderByDate::Documentation() {
+Documentation TileProviderByDate::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileproviderbydate");
 }
 
@@ -182,4 +182,4 @@ float TileProviderByDate::noDataValueAsFloat() {
     return _currentTileProvider ? _currentTileProvider->noDataValueAsFloat() : 1;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

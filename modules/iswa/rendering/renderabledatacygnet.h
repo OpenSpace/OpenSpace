@@ -47,7 +47,7 @@ public:
     explicit RenderableDataCygnet(const ghoul::Dictionary& dictionary);
     ~RenderableDataCygnet();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     bool updateTexture() override;
@@ -84,13 +84,13 @@ protected:
 
     virtual std::vector<float*> textureData() = 0;
 
-    properties::SelectionProperty _dataOptions;
-    properties::StringProperty _transferFunctionsFile;
-    properties::Vec2Property _backgroundValues;
-    properties::Vec2Property _normValues;
-    properties::BoolProperty _useLog;
-    properties::BoolProperty _useHistogram;
-    properties::BoolProperty _autoFilter;
+    SelectionProperty _dataOptions;
+    StringProperty _transferFunctionsFile;
+    Vec2Property _backgroundValues;
+    Vec2Property _normValues;
+    BoolProperty _useLog;
+    BoolProperty _useHistogram;
+    BoolProperty _autoFilter;
 
     std::shared_ptr<DataProcessor> _dataProcessor;
     std::string _dataBuffer;
@@ -101,6 +101,6 @@ private:
     bool downloadTextureResource(double timestamp) override;
 };
 
-} //namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ISWA___RENDERABLEDATACYGNET___H__

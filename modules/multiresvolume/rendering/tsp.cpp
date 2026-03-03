@@ -68,21 +68,6 @@ bool TSP::load() {
             LERROR("Could not construct");
             return false;
         }
-
-#if 0
-        if (!calculateSpatialError()) {
-            LERROR("Could not calculate spatial error");
-            return false;
-        }
-        if (!calculateTemporalError()) {
-            LERROR("Could not calculate temporal error");
-            return false;
-        }
-        if (!writeCache()) {
-            LERROR("Could not write cache");
-            return false;
-        }
-#endif
     }
     initalizeSSO();
 
@@ -127,7 +112,7 @@ bool TSP::readHeader() {
     LDEBUG(std::format("Num total nodes: {}", _numTotalNodes));
 
     // Allocate space for TSP structure
-    _data.resize(_numTotalNodes*NUM_DATA);
+    _data.resize(_numTotalNodes * NUM_DATA);
     LDEBUG(std::format("Data size: {}",  _data.size()));
 
     return true;

@@ -56,10 +56,10 @@ namespace {
         // Specifies the maximum value stored in the volume
         std::optional<float> maxValue;
    };
-#include "rawvolumemetadata_codegen.cpp"
 } // namespace
+#include "rawvolumemetadata_codegen.cpp"
 
-namespace openspace::volume {
+namespace openspace {
 
 RawVolumeMetadata RawVolumeMetadata::createFromDictionary(
                                                       const ghoul::Dictionary& dictionary)
@@ -132,8 +132,8 @@ ghoul::Dictionary RawVolumeMetadata::dictionary() const {
     return dict;
 }
 
-documentation::Documentation RawVolumeMetadata::Documentation() {
+Documentation RawVolumeMetadata::Documentation() {
     return codegen::doc<Parameters>("volume_rawvolumemetadata");
 }
 
-} // namespace openspace::volume
+} // namespace openspace

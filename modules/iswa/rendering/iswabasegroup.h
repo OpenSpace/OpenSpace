@@ -39,7 +39,7 @@ namespace openspace {
 
 class DataProcessor;
 
-class IswaBaseGroup : public properties::PropertyOwner {
+class IswaBaseGroup : public PropertyOwner {
 public:
     IswaBaseGroup(std::string name, std::string type);
     ~IswaBaseGroup();
@@ -56,9 +56,9 @@ protected:
     void registerProperties();
     void unregisterProperties();
 
-    properties::BoolProperty _enabled;
-    properties::FloatProperty _alpha;
-    properties::TriggerProperty _delete;
+    BoolProperty _enabled;
+    FloatProperty _alpha;
+    TriggerProperty _delete;
 
     ghoul::Event<ghoul::Dictionary> _groupEvent;
     std::shared_ptr<DataProcessor> _dataProcessor;
@@ -69,6 +69,6 @@ private:
     std::string _iswaType;
 };
 
-} //namespace openspace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_ISWA___ISWABASEGROUP___H__

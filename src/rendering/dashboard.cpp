@@ -34,35 +34,37 @@
 #include "dashboard_lua.inl"
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo EnabledInfo = {
         "IsEnabled",
         "Enabled",
         "If this value is 'false', this dashboard will be invisible, regardless of the "
         "state of the individual components.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StartPositionOffsetInfo = {
+    constexpr Property::PropertyInfo StartPositionOffsetInfo = {
         "StartPositionOffset",
         "Start position offset",
         "A 2D vector controlling where the dashboard rendering starts. Adding an offset "
         "in x and y-direction on screen.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RefreshRateInfo = {
+    constexpr Property::PropertyInfo RefreshRateInfo = {
         "RefreshRate",
         "Refresh rate (in ms)",
         "The number of milliseconds between refreshes of the dashboard items. If the "
         "value is 0 the dashboard is refreshed at the same rate as the main rendering.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
 namespace openspace {
 
 Dashboard::Dashboard()
-    : properties::PropertyOwner({ "Dashboard" })
+    : PropertyOwner({ "Dashboard" })
     , _isEnabled(EnabledInfo, true)
     , _startPositionOffset(
         StartPositionOffsetInfo,
@@ -182,7 +184,7 @@ std::vector<DashboardItem*> Dashboard::dashboardItems() const {
     return result;
 }
 
-scripting::LuaLibrary Dashboard::luaLibrary() {
+LuaLibrary Dashboard::luaLibrary() {
     return {
         "dashboard",
         {

@@ -34,7 +34,7 @@
 
 namespace ghoul { class Dictionary; }
 
-namespace openspace::interaction {
+namespace openspace {
 
 enum class DataMode {
     Ascii = 0,
@@ -82,6 +82,6 @@ void saveSessionRecording(const std::filesystem::path& filename,
 std::vector<ghoul::Dictionary> sessionRecordingToDictionary(
     const SessionRecording& recording);
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SESSIONRECORDING___H__

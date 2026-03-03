@@ -56,7 +56,7 @@ void GaiaModule::internalInitialize(const ghoul::Dictionary&) {
     fTask->registerClass<ConstructOctreeTask>("ConstructOctreeTask");
 }
 
-std::vector<documentation::Documentation> GaiaModule::documentations() const {
+std::vector<Documentation> GaiaModule::documentations() const {
     return {
         RenderableGaiaStars::Documentation(),
         ReadFitsTask::Documentation(),
@@ -65,7 +65,7 @@ std::vector<documentation::Documentation> GaiaModule::documentations() const {
     };
 }
 
-scripting::LuaLibrary GaiaModule::luaLibrary() const {
+LuaLibrary GaiaModule::luaLibrary() const {
     return {
         .name = "gaia",
         .scripts = {

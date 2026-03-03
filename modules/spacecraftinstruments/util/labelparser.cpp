@@ -80,9 +80,7 @@ LabelParser::LabelParser(std::filesystem::path fileName,
             }
         }
         if (decoderStr == "Target") {
-            if (!typeDict.hasValue<Dictionary>(KeySpecs) ||
-                !typeDict.hasValue<Dictionary>(KeySpecs))
-            {
+            if (!typeDict.hasValue<Dictionary>(KeySpecs)) {
                 continue;
             }
 

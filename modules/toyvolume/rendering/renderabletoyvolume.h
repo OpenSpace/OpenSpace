@@ -45,16 +45,16 @@ public:
     void render(const RenderData& data, RendererTasks& tasks) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::Vec3Property _size;
-    properties::IntProperty _scalingExponent;
-    properties::FloatProperty _stepSize;
-    properties::Vec3Property _translation;
-    properties::Vec3Property _rotation;
-    properties::Vec3Property _color;
-    properties::FloatProperty _downScaleVolumeRendering;
+    Vec3Property _size;
+    IntProperty _scalingExponent;
+    FloatProperty _stepSize;
+    Vec3Property _translation;
+    Vec3Property _rotation;
+    Vec3Property _color;
+    FloatProperty _downScaleVolumeRendering;
 
     std::unique_ptr<ToyVolumeRaycaster> _raycaster;
 

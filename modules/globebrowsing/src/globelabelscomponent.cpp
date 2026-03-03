@@ -50,6 +50,8 @@
 #include <sstream>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "GlobeLabels";
 
     constexpr double LabelFadeOutLimitAltitudeMeters = 25000.0;
@@ -62,93 +64,93 @@ namespace {
 
     constexpr int8_t CurrentCacheVersion = 1;
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Enables and disables labels' rendering.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FontSizeInfo = {
+    constexpr Property::PropertyInfo FontSizeInfo = {
         "FontSize",
         "Font size",
         "Font size for the rendering labels. This is different fromt text size.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MinMaxSizeInfo = {
+    constexpr Property::PropertyInfo MinMaxSizeInfo = {
         "MinMaxSize",
         "Min/max text size",
         "Minimum and maximum label size, in pixels.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    constexpr Property::PropertyInfo SizeInfo = {
         "LabelsSize",
         "Labels size",
         "This value affects the size scale of the labels.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HeightOffsetInfo = {
+    constexpr Property::PropertyInfo HeightOffsetInfo = {
         "HeightOffset",
         "Height offset",
         "This value moves the label away from the globe surface by the specified "
         "distance (in meters).",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "The text color of the labels.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeDistancesInfo = {
+    constexpr Property::PropertyInfo FadeDistancesInfo = {
         "FadeDistances",
         "Fade-in distances",
         "The distances above the globe's surface at which the labels start fading in or "
         "out, given in meters. The final distances are also adjusted by the specified "
         "height offset.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeInEnabledInfo = {
+    constexpr Property::PropertyInfo FadeInEnabledInfo = {
         "FadeInEnabled",
         "Fade-in enabled",
         "Sets whether the labels fade in when approaching the globe from a distance. If "
         "false, no fading happens and the labels immediately has full opacity.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FadeOutEnabledInfo = {
+    constexpr Property::PropertyInfo FadeOutEnabledInfo = {
         "FadeOutEnabled",
         "Fade-out enabled",
         "Sets whether the labels fade out when approaching the surface of the globe. If "
         "false, no fading happens and the labels stays in full opacity.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableCullingInfo = {
+    constexpr Property::PropertyInfo DisableCullingInfo = {
         "DisableCulling",
         "Culling disabled",
         "Labels culling disabled.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DistanceEPSInfo = {
+    constexpr Property::PropertyInfo DistanceEPSInfo = {
         "DistanceEPS",
         "Culling distance",
         "Labels culling distance from globe's center.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AlignmentOptionInfo = {
+    constexpr Property::PropertyInfo AlignmentOptionInfo = {
         "AlignmentOption",
         "Alignment option",
         "Labels are aligned horizontally or circularly related to the planet.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     bool isLabelInFrustum(const glm::dmat4& MVMatrix, const glm::dvec3& position) {
@@ -254,17 +256,17 @@ namespace {
         // [[codegen::verbatim(AlignmentOptionInfo.description)]]
         std::optional<Alignment> alignmentOption;
     };
-#include "globelabelscomponent_codegen.cpp"
 } // namespace
+#include "globelabelscomponent_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation GlobeLabelsComponent::Documentation() {
+Documentation GlobeLabelsComponent::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_globelabelscomponent");
 }
 
 GlobeLabelsComponent::GlobeLabelsComponent()
-    : properties::PropertyOwner({ "Labels" })
+    : PropertyOwner({ "Labels" })
     , _enabled(EnabledInfo, false)
     , _color(ColorInfo, glm::vec3(1.f, 1.f, 0.f), glm::vec3(0.f), glm::vec3(1.f))
     , _fontSize(FontSizeInfo, 30.f, 1.f, 300.f)
@@ -285,16 +287,16 @@ GlobeLabelsComponent::GlobeLabelsComponent()
 {
     addProperty(_enabled);
     addProperty(_color);
-    _color.setViewOption(properties::Property::ViewOptions::Color);
+    _color.setViewOption(Property::ViewOptions::Color);
 
     addProperty(Fadeable::_opacity);
     addProperty(Fadeable::_fade);
 
     addProperty(_fontSize);
     addProperty(_size);
-    _minMaxSize.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _minMaxSize.setViewOption(Property::ViewOptions::MinMaxRange);
     addProperty(_minMaxSize);
-    _fadeDistances.setViewOption(properties::Property::ViewOptions::MinMaxRange);
+    _fadeDistances.setViewOption(Property::ViewOptions::MinMaxRange);
     _fadeDistances.setExponent(3.f);
     addProperty(_fadeDistances);
     addProperty(_fadeInEnabled);
@@ -310,7 +312,7 @@ GlobeLabelsComponent::GlobeLabelsComponent()
 }
 
 void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
-                                      globebrowsing::RenderableGlobe* globe)
+                                      RenderableGlobe* globe)
 {
     ZoneScoped;
     _globe = globe;
@@ -354,7 +356,7 @@ void GlobeLabelsComponent::initialize(const ghoul::Dictionary& dictionary,
 }
 
 void GlobeLabelsComponent::initializeFonts() {
-    _font = openspace::global::fontManager->font(
+    _font = global::fontManager->font(
         "Mono",
         static_cast<float>(_fontSize),
         ghoul::fontrendering::FontManager::Outline::Yes,

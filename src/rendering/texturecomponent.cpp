@@ -65,54 +65,32 @@ void TextureComponent::setShouldWatchFileForChanges(bool value) {
     _shouldWatchFile = value;
 }
 
-void TextureComponent::setShouldPurgeFromRAM(bool value) {
-    _shouldPurgeFromRAM = value;
-}
-
-void TextureComponent::uploadToGpu() {
-    if (!_texture) {
-        LERROR("Could not upload texture to GPU. Texture not loaded");
-        return;
-    }
-    _texture->uploadTexture();
-    _texture->setFilter(_filterMode);
-    _texture->setWrapping(_wrappingMode);
-    if (_shouldPurgeFromRAM) {
-        _texture->purgeFromRAM();
-    }
-}
-
 void TextureComponent::loadFromFile(const std::filesystem::path& path) {
     if (path.empty()) {
         return;
     }
 
-    using namespace ghoul::io;
-    using namespace ghoul::opengl;
-
-    std::unique_ptr<Texture> tex = TextureReader::ref().loadTexture(path, _nDimensions);
-    if (tex) {
-        LDEBUG(std::format("Loaded texture from '{}'", path));
-        _texture = std::move(tex);
-
-        _textureFile = std::make_unique<ghoul::filesystem::File>(path);
-        if (_shouldWatchFile) {
-            _textureFile->setCallback([this]() { _fileIsDirty = true; });
+    _texture = ghoul::io::TextureReader::ref().loadTexture(
+        path,
+        _nDimensions,
+        ghoul::opengl::Texture::SamplerInit{
+            .filter = _filterMode,
+            .wrapping = _wrappingMode
         }
+    );
+    LDEBUG(std::format("Loaded texture from '{}'", path));
 
-        _fileIsDirty = false;
-        _textureIsDirty = true;
+    _textureFile = std::make_unique<ghoul::filesystem::File>(path);
+    if (_shouldWatchFile) {
+        _textureFile->setCallback([this]() { _fileIsDirty = true; });
     }
+
+    _fileIsDirty = false;
 }
 
 void TextureComponent::update() {
     if (_fileIsDirty) {
         loadFromFile(_textureFile->path());
-    }
-
-    if (_textureIsDirty) {
-        uploadToGpu();
-        _textureIsDirty = false;
     }
 }
 } // namespace openspace

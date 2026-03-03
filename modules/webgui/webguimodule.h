@@ -52,7 +52,7 @@ public:
     CallbackHandle addEndpointChangeCallback(EndpointCallback cb);
     void removeEndpointChangeCallback(CallbackHandle);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     void internalInitialize(const ghoul::Dictionary&) override;
@@ -63,17 +63,17 @@ private:
     void notifyEndpointListeners(const std::string& endpoint, bool exists);
 
     std::unique_ptr<ghoul::Process> _process;
-    properties::BoolProperty _enabled;
-    properties::StringProperty _entryPoint;
-    properties::StringListProperty _directories;
-    properties::StringListProperty _servedDirectories;
-    properties::StringProperty _defaultEndpoint;
+    BoolProperty _enabled;
+    StringProperty _entryPoint;
+    StringListProperty _directories;
+    StringListProperty _servedDirectories;
+    StringProperty _defaultEndpoint;
 
     std::unordered_map<std::string, std::string> _endpoints;
 
-    properties::IntProperty _port;
-    properties::StringProperty _address;
-    properties::StringProperty _webSocketInterface;
+    IntProperty _port;
+    StringProperty _address;
+    StringProperty _webSocketInterface;
 
     std::vector<std::pair<CallbackHandle, EndpointCallback>> _endpointChangeCallbacks;
     int _nextCallbackHandle = 0;

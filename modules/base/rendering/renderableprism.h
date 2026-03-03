@@ -49,20 +49,20 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void updateVertexData();
     void updateBufferData();
 
     // Properties
-    properties::IntProperty _nShapeSegments;
-    properties::IntProperty _nLines;
-    properties::FloatProperty _radius;
-    properties::FloatProperty _baseRadius;
-    properties::FloatProperty _lineWidth;
-    properties::Vec3Property _lineColor;
-    properties::FloatProperty _length;
+    IntProperty _nShapeSegments;
+    IntProperty _nLines;
+    FloatProperty _radius;
+    FloatProperty _baseRadius;
+    FloatProperty _lineWidth;
+    Vec3Property _lineColor;
+    FloatProperty _length;
     UniformCache(modelViewProjectionTransform, color) _uniformCache;
 
     std::unique_ptr<ghoul::opengl::ProgramObject> _shader;

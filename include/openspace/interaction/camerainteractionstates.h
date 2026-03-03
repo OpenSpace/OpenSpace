@@ -28,7 +28,7 @@
 #include <openspace/interaction/delayedvariable.h>
 #include <ghoul/glm.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 class CameraInteractionStates {
 public:
@@ -80,6 +80,6 @@ protected:
     InteractionState<double> _globalRollState;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___CAMERAINTERACTIONSTATES___H__

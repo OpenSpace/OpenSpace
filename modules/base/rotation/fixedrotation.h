@@ -45,7 +45,7 @@ public:
     void update(const UpdateData& data) override;
     glm::dmat3 matrix(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     glm::vec3 xAxis() const;
@@ -61,22 +61,22 @@ private:
             CoordinateSystemCompletion
         };
 
-        properties::OptionProperty type;
-        properties::StringProperty object;
-        properties::BoolProperty invertObject;
-        properties::Vec3Property vector;
-        properties::BoolProperty isOrthogonal;
+        OptionProperty type;
+        StringProperty object;
+        BoolProperty invertObject;
+        Vec3Property vector;
+        BoolProperty isOrthogonal;
 
         SceneGraphNode* node;
     };
 
-    properties::BoolProperty _enabled;
+    BoolProperty _enabled;
 
     Axis _xAxis;
     Axis _yAxis;
     Axis _zAxis;
 
-    properties::StringProperty _attachedObject;
+    StringProperty _attachedObject;
     SceneGraphNode* _attachedNode = nullptr;
 
     ghoul::Dictionary _constructorDictionary;

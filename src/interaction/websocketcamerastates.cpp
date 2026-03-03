@@ -28,7 +28,7 @@
 #include <cmath>
 #include <utility>
 
-namespace openspace::interaction {
+namespace openspace {
 
 WebsocketCameraStates::WebsocketCameraStates(double sensitivity,
                                              double velocityScaleFactor)
@@ -209,4 +209,4 @@ std::vector<std::string> WebsocketCameraStates::buttonCommand(int button) const 
     return result;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

@@ -68,12 +68,12 @@ namespace {
         // A vector representing the upper bound of the domain
         glm::dvec3 upperDomainBound;
     };
-#include "generaterawvolumetask_codegen.cpp"
 } // namespace
+#include "generaterawvolumetask_codegen.cpp"
 
-namespace openspace::volume {
+namespace openspace {
 
-documentation::Documentation GenerateRawVolumeTask::Documentation() {
+Documentation GenerateRawVolumeTask::Documentation() {
     return codegen::doc<Parameters>("generate_raw_volume_task");
 }
 
@@ -113,7 +113,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
         SpiceManager::ref().unloadKernel(kernel);
     };
 
-    volume::RawVolume<float> rawVolume(_dimensions);
+    RawVolume<float> rawVolume(_dimensions);
     progressCallback(0.1f);
 
     ghoul::lua::LuaState state;
@@ -156,7 +156,7 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
         std::filesystem::create_directories(directory);
     }
 
-    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
+    RawVolumeWriter<float> writer(_rawVolumeOutputPath);
     writer.write(rawVolume);
 
     progressCallback(0.9f);
@@ -185,4 +185,4 @@ void GenerateRawVolumeTask::perform(const Task::ProgressCallback& progressCallba
     progressCallback(1.f);
 }
 
-} // namespace openspace::volume
+} // namespace openspace

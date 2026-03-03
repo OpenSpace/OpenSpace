@@ -71,12 +71,12 @@ namespace {
         // A list of vector variables to extract along the fieldlines
         std::optional<std::vector<std::string>> extraVars;
     };
-#include "kameleonvolumetofieldlinestask_codegen.cpp"
 } // namespace
+#include "kameleonvolumetofieldlinestask_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation KameleonVolumeToFieldlinesTask::Documentation() {
+Documentation KameleonVolumeToFieldlinesTask::Documentation() {
     return codegen::doc<Parameters>("fieldlinessequence_task_kameleonvolumetofieldlines");
 }
 
@@ -127,11 +127,10 @@ std::string KameleonVolumeToFieldlinesTask::description() {
 void KameleonVolumeToFieldlinesTask::perform(
                                            const Task::ProgressCallback& progressCallback)
 {
-    std::vector<std::string> extraMagVars =
-        fls::extractMagnitudeVarsFromStrings(_extraVars);
+    std::vector<std::string> extraMagVars = extractMagnitudeVarsFromStrings(_extraVars);
 
     std::unordered_map<std::string, std::vector<glm::vec3>> seedPoints =
-        fls::extractSeedPointsFromFiles(_seedpointsPath);
+        extractSeedPointsFromFiles(_seedpointsPath);
 
     if (seedPoints.empty()) {
         LERROR("Falied to read seedpoints");
@@ -140,7 +139,7 @@ void KameleonVolumeToFieldlinesTask::perform(
 
     for (const std::string& cdfPath : _sourceFiles) {
         FieldlinesState newState;
-        bool isSuccessful = fls::convertCdfToFieldlinesState(
+        bool isSuccessful = convertCdfToFieldlinesState(
             newState,
             cdfPath,
             seedPoints,

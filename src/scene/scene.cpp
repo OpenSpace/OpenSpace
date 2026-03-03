@@ -58,6 +58,8 @@
 #include "scene_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "Scene";
     constexpr std::string_view KeyIdentifier = "Identifier";
     constexpr std::string_view KeyParent = "Parent";
@@ -91,9 +93,8 @@ namespace {
 #endif // TRACY_ENABLE
 
     std::chrono::steady_clock::time_point currentTimeForInterpolation() {
-        using namespace openspace::global;
-        if (sessionRecordingHandler->isSavingFramesDuringPlayback()) {
-            return sessionRecordingHandler->currentPlaybackInterpolationTime();
+        if (global::sessionRecordingHandler->isSavingFramesDuringPlayback()) {
+            return global::sessionRecordingHandler->currentPlaybackInterpolationTime();
         }
         else {
             return std::chrono::steady_clock::now();
@@ -101,7 +102,7 @@ namespace {
     }
 
     using ProfilePropertyLua = std::variant<bool, float, std::string, ghoul::lua::nil_t>;
-    openspace::PropertyValueType propertyValueType(const std::string& value);
+    PropertyValueType propertyValueType(const std::string& value);
     void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value,
         bool& isTableValue, std::string_view propertyName);
     ProfilePropertyLua propertyProcessValue(ghoul::lua::LuaState& L,
@@ -119,7 +120,7 @@ namespace {
      *
      * \param value String representation of the value with which to set property
      */
-    openspace::PropertyValueType propertyValueType(const std::string& value) {
+    PropertyValueType propertyValueType(const std::string& value) {
         auto isFloatValue = [](const std::string& s) {
             try {
                 float converted = std::numeric_limits<float>::min();
@@ -132,19 +133,19 @@ namespace {
         };
 
         if (value == "true" || value == "false") {
-            return openspace::PropertyValueType::Boolean;
+            return PropertyValueType::Boolean;
         }
         else if (isFloatValue(value)) {
-            return openspace::PropertyValueType::Float;
+            return PropertyValueType::Float;
         }
         else if (value == "nil") {
-            return openspace::PropertyValueType::Nil;
+            return PropertyValueType::Nil;
         }
         else if ((value.front() == '{') && (value.back() == '}')) {
-            return openspace::PropertyValueType::Table;
+            return PropertyValueType::Table;
         }
         else {
-            return openspace::PropertyValueType::String;
+            return PropertyValueType::String;
         }
     }
 
@@ -158,7 +159,7 @@ namespace {
     void handlePropertyLuaTableEntry(ghoul::lua::LuaState& L, const std::string& value,
                                      bool& isTableValue, std::string_view propertyName)
     {
-        openspace::PropertyValueType enclosedType = openspace::PropertyValueType::Nil;
+        PropertyValueType enclosedType = PropertyValueType::Nil;
         const size_t commaPos = value.find(',', 0);
         if (commaPos != std::string::npos) {
             enclosedType = propertyValueType(value.substr(0, commaPos));
@@ -168,13 +169,13 @@ namespace {
         }
 
         switch (enclosedType) {
-            case openspace::PropertyValueType::Boolean:
+            case PropertyValueType::Boolean:
                 LERROR(std::format(
                     "A Lua table of bool values is not supported. (processing "
                     "property '{}')", propertyName
                 ));
                 break;
-            case openspace::PropertyValueType::Float:
+            case PropertyValueType::Float:
             {
                 std::vector<float> vals;
                 processPropertyValueTableEntries(
@@ -187,7 +188,7 @@ namespace {
                 ghoul::lua::push(L, vals);
             }
             break;
-            case openspace::PropertyValueType::String:
+            case PropertyValueType::String:
             {
                 std::vector<std::string> vals;
                 processPropertyValueTableEntries(
@@ -200,7 +201,7 @@ namespace {
                 ghoul::lua::push(L, vals);
             }
             break;
-            case openspace::PropertyValueType::Table:
+            case PropertyValueType::Table:
             default:
                 LERROR(std::format(
                     "Table-within-a-table values are not supported for profile a "
@@ -224,19 +225,19 @@ namespace {
                                             std::string_view propertyName)
     {
         ProfilePropertyLua result;
-        const openspace::PropertyValueType pType = propertyValueType(value);
+        const PropertyValueType pType = propertyValueType(value);
 
         switch (pType) {
-            case openspace::PropertyValueType::Boolean:
+            case PropertyValueType::Boolean:
                 result = (value == "true");
                 break;
-            case openspace::PropertyValueType::Float:
+            case PropertyValueType::Float:
                 result = std::stof(value);
                 break;
-            case openspace::PropertyValueType::Nil:
+            case PropertyValueType::Nil:
                 result = ghoul::lua::nil_t();
                 break;
-            case openspace::PropertyValueType::Table: {
+            case PropertyValueType::Table: {
                 std::string val = value;
                 ghoul::trimSurroundingCharacters(val, '{');
                 ghoul::trimSurroundingCharacters(val, '}');
@@ -244,7 +245,7 @@ namespace {
                 valueIsTable = true;
                 break;
             }
-            case openspace::PropertyValueType::String:
+            case PropertyValueType::String:
             default: {
                 std::string val = value;
                 ghoul::trimSurroundingCharacters(val, '\"');
@@ -310,7 +311,7 @@ namespace {
 namespace openspace {
 
 Scene::Scene(std::unique_ptr<SceneInitializer> initializer)
-    : properties::PropertyOwner({"Scene", "Scene"})
+    : PropertyOwner({ "Scene", "Scene" })
     , _camera(std::make_unique<Camera>())
     , _initializer(std::move(initializer))
 {
@@ -380,7 +381,7 @@ void Scene::unregisterNode(SceneGraphNode* node) {
     _nodesByIdentifier.erase(node->identifier());
     // Just try to remove all properties; if the property doesn't exist, the
     // removeInterpolation will not do anything
-    for (properties::Property* p : node->properties()) {
+    for (Property* p : node->properties()) {
         removePropertyInterpolation(p);
     }
     removePropertySubOwner(node);
@@ -645,7 +646,7 @@ SceneGraphNode* Scene::loadNode(const ghoul::Dictionary& nodeDictionary) {
     return rawNodePointer;
 }
 
-void Scene::addPropertyInterpolation(properties::Property* prop, float durationSeconds,
+void Scene::addPropertyInterpolation(Property* prop, float durationSeconds,
                                      std::string postScript,
                                      ghoul::EasingFunction easingFunction)
 {
@@ -691,7 +692,7 @@ void Scene::addPropertyInterpolation(properties::Property* prop, float durationS
     _propertyInterpolationInfos.push_back(std::move(i));
 }
 
-void Scene::removePropertyInterpolation(properties::Property* prop) {
+void Scene::removePropertyInterpolation(Property* prop) {
     ghoul_precondition(prop != nullptr, "prop must not be nullptr");
     ghoul_postcondition(
         std::find_if(
@@ -748,7 +749,7 @@ void Scene::updateInterpolations() {
                 // triggered when the interpolation of the property was triggered,
                 // therefore it has already been synced and sent to the connected nodes
                 // and peers
-                using Script = scripting::ScriptEngine::Script;
+                using Script = ScriptEngine::Script;
                 global::scriptEngine->queueScript({
                     .code = std::move(i.postScript),
                     .synchronized = Script::ShouldBeSynchronized::No,
@@ -756,7 +757,7 @@ void Scene::updateInterpolations() {
                 });
             }
 
-            global::eventEngine->publishEvent<events::EventInterpolationFinished>(i.prop);
+            global::eventEngine->publishEvent<EventInterpolationFinished>(i.prop);
         }
     }
 
@@ -834,9 +835,7 @@ void Scene::propertyPushProfileValueToLua(ghoul::lua::LuaState& L,
     }
 }
 
-std::vector<properties::Property*> Scene::propertiesMatchingRegex(
-                                                          std::string_view propertyString)
-{
+std::vector<Property*> Scene::propertiesMatchingRegex(std::string_view propertyString) {
     return findMatchesInAllProperties(propertyString, "");
 }
 
@@ -854,7 +853,7 @@ void Scene::setGuiTreeOrder(const std::string& guiPath,
                             const std::vector<std::string>& list)
 {
     _guiTreeOrderMap[guiPath] = list;
-    global::eventEngine->publishEvent<events::EventGuiTreeUpdated>();
+    global::eventEngine->publishEvent<EventGuiTreeUpdated>();
 }
 
 ghoul::Dictionary Scene::guiTreeOrder() const {
@@ -865,7 +864,7 @@ ghoul::Dictionary Scene::guiTreeOrder() const {
     return dict;
 }
 
-scripting::LuaLibrary Scene::luaLibrary() {
+LuaLibrary Scene::luaLibrary() {
     return {
         "",
         {
@@ -1029,4 +1028,4 @@ std::string makeIdentifier(std::string str) {
     return str;
 }
 
-}  // namespace openspace
+} // namespace openspace

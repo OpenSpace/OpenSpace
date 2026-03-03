@@ -91,8 +91,8 @@ enum class HorizonsType {
 };
 
 struct HorizonsKeyframe {
-    double time;            // J2000 seconds
-    glm::dvec3 position;    // GALACTIC cartesian coordinates in meters
+    double time = 0.0;   // J2000 seconds
+    glm::dvec3 position; // GALACTIC cartesian coordinates in meters
 };
 
 struct HorizonsResult {

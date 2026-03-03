@@ -7,7 +7,7 @@ local modelFolder = asset.resource({
   Name = "Scale Model Arc de Triomphe",
   Type = "HttpSynchronization",
   Identifier = "scale_model_arc_de_triomphe",
-  Version = 1
+  Version = 2
 })
 
 

@@ -56,39 +56,41 @@
 // #define SHOW_IMGUI_HELPERS
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "GUI";
     constexpr std::string_view GuiFont = "${FONTS}/arimo/Arimo-Regular.ttf";
     constexpr float FontSize = 14.f;
 
     ImFont* captionFont = nullptr;
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether this object will be visible or not.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CollapsedInfo = {
+    constexpr Property::PropertyInfo CollapsedInfo = {
         "Collapsed",
         "Is collapsed",
         "This setting determines whether this window is collapsed or not.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowHelpInfo = {
+    constexpr Property::PropertyInfo ShowHelpInfo = {
         "ShowHelpText",
         "Show tooltip help",
         "If this value is enabled these kinds of tooltips are shown for most properties "
         "explaining what impact they have on the visuals.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HelpTextDelayInfo = {
+    constexpr Property::PropertyInfo HelpTextDelayInfo = {
         "HelpTextDelay",
         "Tooltip delay (in s)",
         "This value determines the delay in seconds after which the tooltip is shown.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 } // namespace
 
@@ -104,7 +106,7 @@ ImGUIModule::ImGUIModule()
     : OpenSpaceModule(Name)
     , _isEnabled(EnabledInfo, false)
     , _isCollapsed(CollapsedInfo, false)
-    , _sceneProperty("Scene", "Scene", gui::GuiPropertyComponent::UseTreeLayout::Yes)
+    , _sceneProperty("Scene", "Scene", GuiPropertyComponent::UseTreeLayout::Yes)
     , _property("Settings", "Settings")
     , _showHelpText(ShowHelpInfo, true)
     , _helpTextDelay(HelpTextDelayInfo, 1.f, 0.f, 10.f)
@@ -112,14 +114,14 @@ ImGUIModule::ImGUIModule()
     addProperty(_isEnabled);
     addProperty(_isCollapsed);
 
-    for (gui::GuiComponent* comp : _components) {
+    for (GuiComponent* comp : _components) {
         addPropertySubOwner(comp);
     }
     _spaceTime.setEnabled(true);
 
     {
         auto showHelpTextFunc = [this]() {
-            for (gui::GuiComponent* comp : _components) {
+            for (GuiComponent* comp : _components) {
                 comp->setShowHelpTooltip(_showHelpText);
             }
         };
@@ -130,7 +132,7 @@ ImGUIModule::ImGUIModule()
 
     {
         auto helpTextDelayFunc = [this]() {
-            for (gui::GuiComponent* comp : _components) {
+            for (GuiComponent* comp : _components) {
                 comp->setShowHelpTooltipDelay(_helpTextDelay);
             }
         };
@@ -271,7 +273,7 @@ void ImGUIModule::internalInitialize(const ghoul::Dictionary&) {
                 scene->allSceneGraphNodes() :
                 std::vector<SceneGraphNode*>();
 
-            return std::vector<properties::PropertyOwner*>(nodes.begin(), nodes.end());
+            return std::vector<PropertyOwner*>(nodes.begin(), nodes.end());
         }
     );
 
@@ -293,7 +295,7 @@ void ImGUIModule::internalDeinitialize() {
         ImGui::DestroyContext(ctx);
     }
 
-    for (gui::GuiComponent* comp : _components) {
+    for (GuiComponent* comp : _components) {
         comp->deinitialize();
     }
 
@@ -308,9 +310,9 @@ void ImGUIModule::internalInitializeGL() {
 
 #ifdef WIN32
     strcpy_s(_iniFileBuffer.data(), file.string().size() + 1, file.string().c_str());
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
     strcpy(_iniFileBuffer.data(), file.c_str());
-#endif
+#endif // WIN32
 
     const size_t nWindows = global::windowDelegate->nWindows();
     _contexts.resize(nWindows);
@@ -403,7 +405,7 @@ void ImGUIModule::internalInitializeGL() {
 
     _hasContext = true;
 
-    for (gui::GuiComponent* comp : _components) {
+    for (GuiComponent* comp : _components) {
         comp->initialize();
     }
 
@@ -423,14 +425,18 @@ void ImGUIModule::internalInitializeGL() {
 
             ImGui::GetIO().Fonts->GetTexDataAsRGBA32(&texData, &texSize.x, &texSize.y);
         }
+
         _fontTexture = std::make_unique<ghoul::opengl::Texture>(
-            texData,
-            glm::uvec3(texSize.x, texSize.y, 1),
-            GL_TEXTURE_2D
+            ghoul::opengl::Texture::FormatInit{
+                .dimensions = glm::uvec3(texSize.x, texSize.y, 1),
+                .type = GL_TEXTURE_2D,
+                .format = ghoul::opengl::Texture::Format::RGBA,
+                .dataType = GL_UNSIGNED_BYTE
+            },
+            ghoul::opengl::Texture::SamplerInit{},
+            reinterpret_cast<std::byte*>(texData)
         );
-        _fontTexture->setName("Gui Text");
-        _fontTexture->setDataOwnership(ghoul::opengl::Texture::TakeOwnership::No);
-        _fontTexture->uploadTexture();
+        _fontTexture->setName("GUI Text");
     }
     for (size_t i = 0; i < nWindows; i++) {
         const uintptr_t texture = static_cast<GLuint>(*_fontTexture);
@@ -476,7 +482,7 @@ void ImGUIModule::internalInitializeGL() {
     );
     glVertexArrayAttribBinding(vao, colorAttrib, 0);
 
-    for (gui::GuiComponent* comp : _components) {
+    for (GuiComponent* comp : _components) {
         comp->initializeGL();
     }
 }
@@ -489,7 +495,7 @@ void ImGUIModule::internalDeinitializeGL() {
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &vboElements);
 
-    for (gui::GuiComponent* comp : _components) {
+    for (GuiComponent* comp : _components) {
         comp->deinitializeGL();
     }
 }
@@ -526,7 +532,7 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
 
    _isCollapsed = ImGui::IsWindowCollapsed();
 
-   for (gui::GuiComponent* comp : _components) {
+   for (GuiComponent* comp : _components) {
        bool enabled = comp->isEnabled();
        ImGui::Checkbox(comp->guiName().c_str(), &enabled);
        comp->setEnabled(enabled);
@@ -547,12 +553,12 @@ void ImGUIModule::renderFrame(float deltaTime, const glm::vec2& windowSize,
        ImGui::ShowMetricsWindow();
        ImGui::End();
    }
-#endif
+#endif // SHOW_IMGUI_HELPERS
 
    ImGui::End();
 
 
-    for (gui::GuiComponent* comp : _components) {
+    for (GuiComponent* comp : _components) {
         if (comp->isEnabled()) {
             comp->render();
         }

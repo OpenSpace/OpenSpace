@@ -41,12 +41,14 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "DownloadManager";
 
     struct ProgressInformation {
-        std::shared_ptr<openspace::DownloadManager::FileFuture> future;
+        std::shared_ptr<DownloadManager::FileFuture> future;
         std::chrono::system_clock::time_point startTime;
-        const openspace::DownloadManager::DownloadProgressCallback* callback;
+        const DownloadManager::DownloadProgressCallback* callback;
     };
 
     size_t writeData(void* ptr, size_t size, size_t nmemb, FILE* stream) {
@@ -56,7 +58,7 @@ namespace {
 
     size_t writeMemoryCallback(void* contents, size_t size, size_t nmemb, void* userp) {
         const size_t realsize = size * nmemb;
-        auto* mem = static_cast<openspace::DownloadManager::MemoryFile*>(userp);
+        auto* mem = static_cast<DownloadManager::MemoryFile*>(userp);
 
         // @TODO(abock): Remove this and replace mem->buffer with std::vector<char>
         mem->buffer = reinterpret_cast<char*>(
@@ -147,7 +149,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
     if (error != 0) {
         LERROR(std::format("Could not open/create file: {}. Errno: {}", file, errno));
     }
-#else
+#else // ^^^^ WIN32 // !WIN32 vvvv
     const std::string f = file.string();
     FILE* fp = fopen(f.c_str(), "wb"); // write binary
 #endif // WIN32
@@ -183,7 +185,7 @@ std::shared_ptr<DownloadManager::FileFuture> DownloadManager::downloadFile(
             // progress will not be shown for downloads on the splash screen
             curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, xferinfo);
             curl_easy_setopt(curl, CURLOPT_XFERINFODATA, &p);
-            #endif
+            #endif // LIBCURL_VERSION_NUM >= 0x072000
             curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
             const CURLcode res = curl_easy_perform(curl);

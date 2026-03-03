@@ -37,6 +37,10 @@
 #include <cmath>
 #include <cstddef>
 
+// @TODO:  This class is not properly working anymore and needs to be substantially
+//         rewritten. When doing so, make sure that any color property uses three
+//         values, not four. The opacity should be handled separately
+
 namespace {
     struct VBOData {
         std::array<float, 3> position;
@@ -64,16 +68,12 @@ namespace {
         // the line and one at the end.
         Color color;
     };
-#include "renderablecrawlingline_codegen.cpp"
 } // namespace
-
-// @TODO:  This class is not properly working anymore and needs to be substantially
-//         rewritten. When doing so, make sure that any color property uses three
-//         values, not four. The opacity should be handled separately
+#include "renderablecrawlingline_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableCrawlingLine::Documentation() {
+Documentation RenderableCrawlingLine::Documentation() {
     return codegen::doc<Parameters>("spacecraftinstruments_renderablecrawlingline");
 }
 

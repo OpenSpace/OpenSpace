@@ -60,7 +60,7 @@ private:
     int _index = 0;
 };
 
-class TouchInteraction : public properties::PropertyOwner {
+class TouchInteraction : public PropertyOwner {
 public:
     enum class InteractionType {
         ROTATION = 0,
@@ -173,42 +173,42 @@ private:
     Camera* _camera = nullptr;
 
     // Property variables
-    properties::BoolProperty _unitTest;
-    properties::BoolProperty _disableZoom;
-    properties::BoolProperty _disableRoll;
-    properties::TriggerProperty _reset;
-    properties::IntProperty _maxTapTime;
-    properties::IntProperty _deceleratesPerSecond;
-    properties::FloatProperty _touchScreenSize;
-    properties::FloatProperty _tapZoomFactor;
-    properties::FloatProperty _pinchZoomFactor;
-    properties::FloatProperty _rollAngleThreshold;
-    properties::FloatProperty _zoomSensitivityExponential;
-    properties::FloatProperty _zoomSensitivityProportionalDist;
-    properties::FloatProperty _zoomSensitivityDistanceThreshold;
-    properties::FloatProperty _zoomInBoundarySphereMultiplier;
-    properties::FloatProperty _zoomOutBoundarySphereMultiplier;
-    properties::DoubleProperty _zoomInLimit;
-    properties::DoubleProperty _zoomOutLimit;
-    properties::FloatProperty _inputStillThreshold;
-    properties::FloatProperty _centroidStillThreshold;
-    properties::BoolProperty  _panEnabled;
-    properties::FloatProperty _interpretPan;
-    properties::Vec4Property _friction;
-    properties::FloatProperty _constTimeDecay_secs;
+    BoolProperty _unitTest;
+    BoolProperty _disableZoom;
+    BoolProperty _disableRoll;
+    TriggerProperty _reset;
+    IntProperty _maxTapTime;
+    IntProperty _deceleratesPerSecond;
+    FloatProperty _touchScreenSize;
+    FloatProperty _tapZoomFactor;
+    FloatProperty _pinchZoomFactor;
+    FloatProperty _rollAngleThreshold;
+    FloatProperty _zoomSensitivityExponential;
+    FloatProperty _zoomSensitivityProportionalDist;
+    FloatProperty _zoomSensitivityDistanceThreshold;
+    FloatProperty _zoomInBoundarySphereMultiplier;
+    FloatProperty _zoomOutBoundarySphereMultiplier;
+    DoubleProperty _zoomInLimit;
+    DoubleProperty _zoomOutLimit;
+    FloatProperty _inputStillThreshold;
+    FloatProperty _centroidStillThreshold;
+    BoolProperty  _panEnabled;
+    FloatProperty _interpretPan;
+    Vec4Property _friction;
+    FloatProperty _constTimeDecay_secs;
 
-    properties::BoolProperty _enableDirectManipulation;
-    properties::FloatProperty _directTouchDistanceThreshold;
+    BoolProperty _enableDirectManipulation;
+    FloatProperty _directTouchDistanceThreshold;
 
 #ifdef TOUCH_DEBUG_PROPERTIES
     struct DebugProperties : PropertyOwner {
         DebugProperties();
-        properties::StringProperty interactionMode;
-        properties::IntProperty nFingers;
-        properties::StringProperty interpretedInteraction;
-        properties::FloatProperty normalizedCentroidDistance;
-        properties::FloatProperty minDiff;
-        properties::FloatProperty rollOn;
+        StringProperty interactionMode;
+        IntProperty nFingers;
+        StringProperty interpretedInteraction;
+        FloatProperty normalizedCentroidDistance;
+        FloatProperty minDiff;
+        FloatProperty rollOn;
     } _debugProperties;
 
     int pinchConsecCt = 0;
@@ -246,6 +246,6 @@ private:
     ConstantTimeDecayCoefficients _constTimeDecayCoeff;
 };
 
-} // openspace namespace
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_TOUCH___TOUCH_INTERACTION___H__

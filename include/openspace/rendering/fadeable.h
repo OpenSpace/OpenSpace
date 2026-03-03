@@ -51,8 +51,8 @@ public:
     virtual float opacity() const noexcept;
 
 protected:
-    properties::FloatProperty _opacity;
-    properties::FloatProperty _fade;
+    FloatProperty _opacity;
+    FloatProperty _fade;
 
     Fadeable* _parentFadeable = nullptr;
 };

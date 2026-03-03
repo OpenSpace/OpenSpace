@@ -26,7 +26,7 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 Mat2Property::Mat2Property(Property::PropertyInfo info, glm::mat2x2 value,
                            glm::mat2x2 minValue, glm::mat2x2 maxValue,
@@ -60,4 +60,4 @@ std::string Mat2Property::stringValue() const {
     return formatJson(_value);
 }
 
-}  // namespace openspace::properties
+} // namespace openspace

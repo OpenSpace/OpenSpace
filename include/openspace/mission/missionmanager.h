@@ -31,7 +31,7 @@
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
+struct LuaLibrary;
 
 /**
  * Class keeping track of space missions.
@@ -92,7 +92,7 @@ public:
      */
     const std::map<std::string, Mission>& missionMap();
 
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     std::map<std::string, Mission> _missionMap;

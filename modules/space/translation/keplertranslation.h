@@ -68,7 +68,7 @@ public:
      * \return The openspace::Documentation that describes the ghoul::Dicitonary that can
      *         be passed to the constructor
      */
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     /**
      * Sets the internal values for the Keplerian elements and the epoch as a string of
@@ -133,22 +133,22 @@ public:
 
 private:
     /// The eccentricity of the orbit in [0, 1)
-    properties::DoubleProperty _eccentricity;
+    DoubleProperty _eccentricity;
     /// The semi-major axis in km
-    properties::DoubleProperty _semiMajorAxis;
+    DoubleProperty _semiMajorAxis;
     /// The inclination of the orbit in [0, 360]
-    properties::DoubleProperty _inclination;
+    DoubleProperty _inclination;
     /// The right ascension of the ascending node in [0, 360]
-    properties::DoubleProperty _ascendingNode;
+    DoubleProperty _ascendingNode;
     /// The argument of periapsis in [0, 360]
-    properties::DoubleProperty _argumentOfPeriapsis;
+    DoubleProperty _argumentOfPeriapsis;
     /// The mean anomaly at the epoch in [0, 360]
-    properties::DoubleProperty _meanAnomalyAtEpoch;
+    DoubleProperty _meanAnomalyAtEpoch;
 
     /// The epoch in seconds relative to the J2000 epoch
-    properties::DoubleProperty _epoch;
+    DoubleProperty _epoch;
     /// The period of the orbit in seconds
-    properties::DoubleProperty _period;
+    DoubleProperty _period;
 
     /// Dirty flag for the _orbitPlaneRotation parameters
     mutable bool _orbitPlaneDirty = true;

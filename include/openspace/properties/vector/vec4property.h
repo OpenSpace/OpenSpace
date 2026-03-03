@@ -30,7 +30,7 @@
 #include <ghoul/glm.h>
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 class Vec4Property : public NumericalProperty<glm::vec4> {
 public:
@@ -52,6 +52,6 @@ private:
     glm::vec4 toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___VEC4PROPERTY___H__

@@ -27,7 +27,7 @@
 
 #include <modules/imgui/include/guipropertycomponent.h>
 
-namespace openspace::gui {
+namespace openspace {
 
 class GuiGlobeBrowsingComponent : public GuiPropertyComponent {
 public:
@@ -40,6 +40,6 @@ private:
     std::string _currentServer;
 };
 
-} // namespace openspace::gui
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_IMGUI___GUIGLOBEBROWSINGCOMPONENT___H__

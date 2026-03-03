@@ -49,7 +49,7 @@ uint32_t EventEngine::nextRegisteredEventId = 0;
 uint64_t EventEngine::nEvents = 0;
 #endif // _DEBUG
 
-events::Event* EventEngine::firstEvent() const {
+Event* EventEngine::firstEvent() const {
     return _firstEvent;
 }
 
@@ -62,7 +62,7 @@ void EventEngine::postFrameCleanup() {
 #endif // _DEBUG
 }
 
-void EventEngine::registerEventAction(events::Event::Type type, std::string identifier,
+void EventEngine::registerEventAction(Event::Type type, std::string identifier,
                                       std::optional<ghoul::Dictionary> filter)
 {
     ActionInfo ai;
@@ -82,7 +82,7 @@ void EventEngine::registerEventAction(events::Event::Type type, std::string iden
     nextRegisteredEventId++;
 }
 
-void EventEngine::registerEventTopic(size_t topicId, events::Event::Type type,
+void EventEngine::registerEventTopic(size_t topicId, Event::Type type,
                                      ScriptCallback callback)
 {
     TopicInfo ti;
@@ -92,8 +92,7 @@ void EventEngine::registerEventTopic(size_t topicId, events::Event::Type type,
     _eventTopics[type].push_back(ti);
 }
 
-void EventEngine::unregisterEventAction(events::Event::Type type,
-                                        const std::string& identifier,
+void EventEngine::unregisterEventAction(Event::Type type, const std::string& identifier,
                                         const std::optional<ghoul::Dictionary>& filter)
 {
     const auto it = _eventActions.find(type);
@@ -136,7 +135,7 @@ void EventEngine::unregisterEventAction(uint32_t identifier) {
     ));
 }
 
-void EventEngine::unregisterEventTopic(size_t topicId, events::Event::Type type) {
+void EventEngine::unregisterEventTopic(size_t topicId, Event::Type type) {
     const auto it = _eventTopics.find(type);
     if (it != _eventTopics.end()) {
         const auto jt = std::find_if(
@@ -155,36 +154,35 @@ void EventEngine::unregisterEventTopic(size_t topicId, events::Event::Type type)
             }
         }
         else {
-            LWARNING(std::format("Could not find registered event '{}' with topicId: {}",
-                events::toString(type), topicId)
+            LWARNING(std::format(
+                "Could not find registered event '{}' with topicId: {}",
+                toString(type), topicId)
             );
         }
     }
     else {
-        LWARNING(std::format("Could not find registered event '{}'",
-            events::toString(type))
-        );
+        LWARNING(std::format("Could not find registered event '{}'", toString(type)));
     }
 }
 
 std::vector<EventEngine::ActionInfo> EventEngine::registeredActions() const {
     std::vector<EventEngine::ActionInfo> result;
     result.reserve(_eventActions.size());
-    using Type = events::Event::Type;
+    using Type = Event::Type;
     for (const std::pair<const Type, std::vector<ActionInfo>>& p : _eventActions) {
         result.insert(result.end(), p.second.begin(), p.second.end());
     }
     return result;
 }
 
-const std::unordered_map<events::Event::Type, std::vector<EventEngine::ActionInfo>>&
+const std::unordered_map<Event::Type, std::vector<EventEngine::ActionInfo>>&
 EventEngine::eventActions() const
 {
     return _eventActions;
 }
 
 void EventEngine::enableEvent(uint32_t identifier) {
-    using Type = events::Event::Type;
+    using Type = Event::Type;
     for (std::pair<const Type, std::vector<ActionInfo>>& p : _eventActions) {
         for (ActionInfo& ai : p.second) {
             if (ai.id == identifier) {
@@ -196,7 +194,7 @@ void EventEngine::enableEvent(uint32_t identifier) {
 }
 
 void EventEngine::disableEvent(uint32_t identifier) {
-    using Type = events::Event::Type;
+    using Type = Event::Type;
     for (std::pair<const Type, std::vector<ActionInfo>>& p : _eventActions) {
         for (ActionInfo& ai : p.second) {
             if (ai.id == identifier) {
@@ -213,7 +211,7 @@ void EventEngine::triggerActions() const {
         return;
     }
 
-    const events::Event* e = _firstEvent;
+    const Event* e = _firstEvent;
     while (e) {
         const auto it = _eventActions.find(e->type);
         if (it != _eventActions.end()) {
@@ -227,7 +225,7 @@ void EventEngine::triggerActions() const {
                     global::actionManager->triggerAction(
                         ai.action,
                         params,
-                        interaction::ActionManager::ShouldBeSynchronized::No
+                        ActionManager::ShouldBeSynchronized::No
                     );
                 }
             }
@@ -243,7 +241,7 @@ void EventEngine::triggerTopics() const {
         return;
     }
 
-    const events::Event* e = _firstEvent;
+    const Event* e = _firstEvent;
     while (e) {
         const auto it = _eventTopics.find(e->type);
 
@@ -258,7 +256,7 @@ void EventEngine::triggerTopics() const {
     }
 }
 
-scripting::LuaLibrary EventEngine::luaLibrary() {
+LuaLibrary EventEngine::luaLibrary() {
     return {
         "event",
         {

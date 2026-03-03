@@ -34,7 +34,7 @@
 #include <set>
 #include <string>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 struct RawTile;
 
@@ -113,6 +113,6 @@ private:
     bool _shouldBeDeleted = false;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___ASYNC_TILE_DATAPROVIDER___H__

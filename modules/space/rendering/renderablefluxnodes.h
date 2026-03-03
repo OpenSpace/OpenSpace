@@ -56,7 +56,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void definePropertyCallbackFunctions();
@@ -155,70 +155,70 @@ private:
     std::vector<std::vector<float>> _statesRadius;
 
     // Group to hold properties regarding distance to earth
-    properties::PropertyOwner _earthdistGroup;
+    PropertyOwner _earthdistGroup;
 
     // Property to show different energybins
-    properties::OptionProperty _goesEnergyBins;
+    OptionProperty _goesEnergyBins;
     // Group to hold the color properties
-    properties::PropertyOwner _styleGroup;
+    PropertyOwner _styleGroup;
     // Uniform/transfer function
-    properties::OptionProperty _colorMode;
+    OptionProperty _colorMode;
     // Uniform stream Color
-    properties::Vec4Property _streamColor;
+    Vec4Property _streamColor;
     // Path to transferfunction
-    properties::StringProperty _colorTablePath;
+    StringProperty _colorTablePath;
     // Valid range for the color table
-    properties::Vec2Property _colorTableRange;
+    Vec2Property _colorTableRange;
     // The value of alpha for the flux color mode
-    properties::FloatProperty _fluxColorAlpha;
+    FloatProperty _fluxColorAlpha;
     // Group to hold the particle properties
-    properties::PropertyOwner _streamGroup;
+    PropertyOwner _streamGroup;
     // Scaling options
-    properties::OptionProperty _scalingMethod;
+    OptionProperty _scalingMethod;
     // Group for how many nodes to render dependent on radius and flux
-    properties::PropertyOwner _nodesAmountGroup;
+    PropertyOwner _nodesAmountGroup;
     // Size of simulated node particles
-    properties::FloatProperty _nodeSize;
+    FloatProperty _nodeSize;
     // Threshold from earth to decide the distance for which the nodeSize gets larger
-    properties::FloatProperty _distanceThreshold;
+    FloatProperty _distanceThreshold;
     // Change size of nodes close to earth
-    properties::FloatProperty _proximityNodesSize;
+    FloatProperty _proximityNodesSize;
     // Maximum size of nodes at a certin distance
-    properties::FloatProperty _maxNodeDistanceSize;
+    FloatProperty _maxNodeDistanceSize;
 
-    properties::Vec2Property _minMaxNodeSize;
+    Vec2Property _minMaxNodeSize;
 
     // Valid range along the Z-axis
-    properties::Vec2Property _domainZ;
+    Vec2Property _domainZ;
     // Threshold flux value
-    properties::FloatProperty _thresholdFlux;
+    FloatProperty _thresholdFlux;
     // Filtering nodes within a range
-    properties::FloatProperty _filteringLower;
+    FloatProperty _filteringLower;
     // Filtering nodes with a upper range
-    properties::FloatProperty _filteringUpper;
+    FloatProperty _filteringUpper;
     // Amount of nodes to show
-    properties::IntProperty _amountofNodes;
+    IntProperty _amountofNodes;
     // Nodeskipping options
-    properties::OptionProperty _nodeskipMethod;
+    OptionProperty _nodeskipMethod;
     // amount of nodes to show outside of filterrange
-    properties::IntProperty _defaultNodeSkip;
+    IntProperty _defaultNodeSkip;
     // The Flux threshold to decide the line between
     //_pDefaultNodeSkip and _pAmountofNodes
-    properties::FloatProperty _fluxNodeskipThreshold;
+    FloatProperty _fluxNodeskipThreshold;
     //The nodeskip for values within the range of the radius threshold to Earth
-    properties::IntProperty _earthNodeSkip;
+    IntProperty _earthNodeSkip;
     // The Radius threshold to decide the line between
     //_pDefaultNodeSkip and _pAmountofNodes
-    properties::FloatProperty _radiusNodeSkipThreshold;
+    FloatProperty _radiusNodeSkipThreshold;
 
-    properties::PropertyOwner _cameraPerspectiveGroup;
-    properties::BoolProperty _cameraPerspectiveEnabled;
-    properties::BoolProperty _drawingCircles;
-    properties::BoolProperty _drawingHollow;
-    properties::BoolProperty _gaussianAlphaFilter;
-    properties::FloatProperty _perspectiveDistanceFactor;
-    properties::BoolProperty _pulseEnabled;
-    properties::BoolProperty _gaussianPulseEnabled;
+    PropertyOwner _cameraPerspectiveGroup;
+    BoolProperty _cameraPerspectiveEnabled;
+    BoolProperty _drawingCircles;
+    BoolProperty _drawingHollow;
+    BoolProperty _gaussianAlphaFilter;
+    FloatProperty _perspectiveDistanceFactor;
+    BoolProperty _pulseEnabled;
+    BoolProperty _gaussianPulseEnabled;
 };
 
 } // namespace openspace

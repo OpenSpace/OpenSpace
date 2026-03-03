@@ -37,10 +37,10 @@ public:
 
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::DVec3Property _scaleValue;
+    DVec3Property _scaleValue;
 };
 
 } // namespace openspace

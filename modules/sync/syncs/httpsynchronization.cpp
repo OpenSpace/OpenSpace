@@ -71,12 +71,12 @@ namespace {
         // will be performed
         std::optional<std::string> unzipFilesDestination;
     };
-#include "httpsynchronization_codegen.cpp"
 } // namespace
+#include "httpsynchronization_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation HttpSynchronization::Documentation() {
+Documentation HttpSynchronization::Documentation() {
     return codegen::doc<Parameters>("http_synchronization");
 }
 

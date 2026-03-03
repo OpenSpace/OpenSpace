@@ -39,55 +39,57 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo SegmentsInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo SegmentsInfo = {
         "Segments",
         "Segments",
         "The number of segments the shape of the prism should have.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LinesInfo = {
+    constexpr Property::PropertyInfo LinesInfo = {
         "NumLines",
         "Number of lines",
         "The number of lines connecting the two shapes of the prism. They will be evenly "
         "distributed around the bounding circle that makes up the shape of the prism.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RadiusInfo = {
+    constexpr Property::PropertyInfo RadiusInfo = {
         "Radius",
         "Radius",
         "The radius of the prism's shape in meters.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BaseRadiusInfo = {
+    constexpr Property::PropertyInfo BaseRadiusInfo = {
         "BaseRadius",
         "Base radius",
         "The radius of the base of the prism's shape, in meters. By default it is given "
         "the same radius as the outer shape.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "The width of the lines. The larger number, the thicker the lines.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+    constexpr Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "The RGB color of the line.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LengthInfo = {
+    constexpr Property::PropertyInfo LengthInfo = {
         "Length",
         "Length",
         "The length of the prism in meters.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(RenderablePrism)]] Parameters {
@@ -112,12 +114,12 @@ namespace {
         // [[codegen::verbatim(LengthInfo.description)]]
         std::optional<float> length;
     };
-#include "renderableprism_codegen.cpp"
 } // namespace
+#include "renderableprism_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePrism::Documentation() {
+Documentation RenderablePrism::Documentation() {
     return codegen::doc<Parameters>("base_renderable_prism");
 }
 
@@ -155,7 +157,7 @@ RenderablePrism::RenderablePrism(const ghoul::Dictionary& dictionary)
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
-    _lineColor.setViewOption(properties::Property::ViewOptions::Color);
+    _lineColor.setViewOption(Property::ViewOptions::Color);
     _lineColor = p.color.value_or(_lineColor);
     addProperty(_lineColor);
 
@@ -197,7 +199,7 @@ void RenderablePrism::deinitializeGL() {
 }
 
 void RenderablePrism::updateVertexData() {
-    using namespace rendering::helper;
+    using namespace rendering;
 
     std::vector<float> vertexArray;
 

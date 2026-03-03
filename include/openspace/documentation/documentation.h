@@ -34,7 +34,7 @@
 
 namespace ghoul { class Dictionary; }
 
-namespace openspace::documentation {
+namespace openspace {
 
 class Verifier;
 
@@ -250,7 +250,7 @@ struct Documentation {
     /// A general description for the entire documented entity
     std::string description;
     /// A list of specifications that are describing this Documentation
-    std::vector<documentation::DocumentationEntry> entries;
+    std::vector<DocumentationEntry> entries;
 };
 
 /**
@@ -287,7 +287,7 @@ TestResult testSpecification(const Documentation& documentation,
 void testSpecificationAndThrow(const Documentation& documentation,
     const ghoul::Dictionary& dictionary, std::string component);
 
-} // namespace openspace::documentation
+} // namespace openspace
 
 // Make the overload for std::to_string available for the Offense::Reason for easier
 // error logging
@@ -295,19 +295,19 @@ void testSpecificationAndThrow(const Documentation& documentation,
 namespace ghoul {
 
 template <>
-std::string to_string(const openspace::documentation::TestResult& value);
+std::string to_string(const openspace::TestResult& value);
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Offense& value);
+std::string to_string(const openspace::TestResult::Offense& value);
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Offense::Reason& value);
+std::string to_string(const openspace::TestResult::Offense::Reason& value);
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Warning& value);
+std::string to_string(const openspace::TestResult::Warning& value);
 
 template <>
-std::string to_string(const openspace::documentation::TestResult::Warning::Reason& value);
+std::string to_string(const openspace::TestResult::Warning::Reason& value);
 
 } // namespace ghoul
 

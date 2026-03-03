@@ -39,7 +39,7 @@ public:
 
     std::string description() override;
     void perform(const Task::ProgressCallback& onProgress) override;
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     const size_t MAX_SIZE_BEFORE_WRITE = 48000000; // ~183MB -> 2M stars with 24 values

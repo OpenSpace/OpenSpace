@@ -64,7 +64,9 @@
 #include <vector>
 
 namespace {
-    void renderTooltip(openspace::properties::Property* prop, float delay) {
+    using namespace openspace;
+
+    void renderTooltip(Property* prop, float delay) {
         if (ImGui::IsItemHovered() && (GImGui->HoveredIdTimer > delay)) {
             ImGui::BeginTooltip();
             if (!prop->description().empty()) {
@@ -78,15 +80,13 @@ namespace {
     }
 
     void executeSetPropertyScript(std::string_view id, const std::string& value) {
-        openspace::global::scriptEngine->queueScript(
+        global::scriptEngine->queueScript(
             std::format("openspace.setPropertyValueSingle('{}', {});", id, value)
         );
     }
 } // namespace
 
 namespace openspace {
-
-using namespace properties;
 
 void renderBoolProperty(Property* prop, const std::string& ownerName,
                         ShowToolTip showTooltip, float tooltipDelay)
@@ -212,9 +212,9 @@ void renderStringProperty(Property* prop, const std::string& ownerName,
     static std::array<char, BufferSize> buffer;
 #ifdef _MSC_VER
     strcpy_s(buffer.data(), value.length() + 1, value.c_str());
-#else
+#else // ^^^^ _MSC_VER // !_MSC_VER vvvv
     strcpy(buffer.data(), value.c_str());
-#endif
+#endif // _MSC_VER
     const bool hasNewValue = ImGui::InputText(name.c_str(), buffer.data(), BufferSize);
     if (showTooltip) {
         renderTooltip(prop, tooltipDelay);
@@ -240,9 +240,9 @@ void renderListProperty(const std::string& name, std::string_view fullIdentifier
     static std::array<char, BufferSize> buffer;
 #ifdef _MSC_VER
     strcpy_s(buffer.data(), value.length() + 1, value.c_str());
-#else
+#else // ^^^^ _MSC_VER // !_MSC_VER vvvv
     strcpy(buffer.data(), value.c_str());
-#endif
+#endif // _MSC_VER
 
     const bool hasNewValue = ImGui::InputText(name.c_str(), buffer.data(), BufferSize);
     if (hasNewValue) {
@@ -314,7 +314,7 @@ void renderStringListProperty(Property* prop, const std::string& ownerName,
     ImGui::PopID();
 }
 
-void renderDoubleProperty(properties::Property* prop, const std::string& ownerName,
+void renderDoubleProperty(Property* prop, const std::string& ownerName,
                           ShowToolTip showTooltip, float tooltipDelay)
 {
     ghoul_assert(prop, "prop must not be nullptr");

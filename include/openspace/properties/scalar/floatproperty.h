@@ -29,10 +29,10 @@
 
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
- * This class is a concrete implementation of openspace::properties::TemplateProperty with
+ * This class is a concrete implementation of TemplateProperty with
  * the type `float`.
  */
 class FloatProperty : public NumericalProperty<float> {
@@ -53,6 +53,6 @@ private:
     float toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___FLOATPROPERTY___H__

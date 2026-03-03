@@ -40,11 +40,13 @@
 #include <limits>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "A path to an image file to use as a texture for the plane.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // A `RenderablePlaneImageLocal` creates a textured 3D plane, where the texture is
@@ -58,12 +60,12 @@ namespace {
         // plane is hidden, the image will automatically be unloaded.
         std::optional<bool> lazyLoading;
     };
-#include "renderableplaneimagelocal_codegen.cpp"
 } // namespace
+#include "renderableplaneimagelocal_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePlaneImageLocal::Documentation() {
+Documentation RenderablePlaneImageLocal::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderable_plane_image_local",
         RenderablePlane::Documentation()
@@ -164,16 +166,18 @@ void RenderablePlaneImageLocal::loadTexture() {
             std::to_string(hash),
             [path = _texturePath.value()]() -> std::unique_ptr<ghoul::opengl::Texture> {
                 std::unique_ptr<ghoul::opengl::Texture> texture =
-                    ghoul::io::TextureReader::ref().loadTexture(absPath(path), 2);
+                    ghoul::io::TextureReader::ref().loadTexture(
+                        absPath(path),
+                        2,
+                        ghoul::opengl::Texture::SamplerInit{
+                            .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+                        }
+                    );
 
                 LDEBUGC(
                     "RenderablePlaneImageLocal",
                     std::format("Loaded texture from '{}'", absPath(path))
                 );
-                texture->uploadTexture();
-                texture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
-                texture->purgeFromRAM();
-
                 return texture;
             }
         );

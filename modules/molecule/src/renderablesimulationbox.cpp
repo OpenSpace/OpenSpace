@@ -55,81 +55,83 @@
 #include <string_view>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableSimulationBox";
 
-    constexpr openspace::properties::Property::PropertyInfo RepresentationInfo = {
+    constexpr Property::PropertyInfo RepresentationInfo = {
         "Representation",
         "Representation type",
         "The visual representation type to use for the molecule."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColoringInfo = {
+    constexpr Property::PropertyInfo ColoringInfo = {
         "Coloring",
         "Coloring",
         "The color mapping for the atoms."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RepScaleInfo = {
+    constexpr Property::PropertyInfo RepScaleInfo = {
         "RepScale",
         "Representation scale",
         "Thickness of the atoms when using the Space Fill or Licorice representations."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AnimationSpeedInfo = {
+    constexpr Property::PropertyInfo AnimationSpeedInfo = {
         "AnimationSpeed",
         "Animation speed",
         "Playback speed of the animation (in frames per second)."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SimulationSpeedInfo = {
+    constexpr Property::PropertyInfo SimulationSpeedInfo = {
         "SimulationSpeed",
         "Simulation speed",
         "Adjust the speed of the simulation (seconds per second)."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LinearVelocityInfo = {
+    constexpr Property::PropertyInfo LinearVelocityInfo = {
         "LinearVelocity",
         "Linear velocity",
         "Average linear velocity at the start of the simulation (m/s)."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AngularVelocityInfo = {
+    constexpr Property::PropertyInfo AngularVelocityInfo = {
         "AngularVelocity",
         "Angular velocity",
         "Average angular velocity at the start of the simulation (radians/s)."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SimulationBoxInfo = {
+    constexpr Property::PropertyInfo SimulationBoxInfo = {
         "SimulationBox",
         "Simulation box",
         "Size of the periodic simulation box."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CollisionRadiusInfo = {
+    constexpr Property::PropertyInfo CollisionRadiusInfo = {
         "CollisionRadius",
         "Collision radius",
         "Radius of the collision sphere around molecules."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FilterInfo = {
+    constexpr Property::PropertyInfo FilterInfo = {
         "Filter",
         "Filter",
         "The filter used to remove parts of the dataset."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CircleColorInfo = {
+    constexpr Property::PropertyInfo CircleColorInfo = {
         "CircleColor",
         "Circle color",
         "Color of the circle outlining the simulation."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CircleWidthInfo = {
+    constexpr Property::PropertyInfo CircleWidthInfo = {
         "CircleWidth",
         "Circle width",
         "Width of the circle outlining the simulation."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CircleFalloffInfo = {
+    constexpr Property::PropertyInfo CircleFalloffInfo = {
         "CircleFalloff",
         "Circle falloff",
         "Falloff exponent of the circle outlining the simulation."
@@ -220,13 +222,12 @@ namespace {
         // [[codegen::verbatim(CircleFalloffInfo.description)]]
         std::optional<float> circleFalloff;
     };
-
-#include "renderablesimulationbox_codegen.cpp"
 } // namespace
+#include "renderablesimulationbox_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableSimulationBox::Documentation() {
+Documentation RenderableSimulationBox::Documentation() {
     return codegen::doc<Parameters>("molecule_renderablesimulationbox");
 }
 
@@ -257,7 +258,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
         for (Molecules& mol : _molecules) {
             const molecule::rep::Type t =
                 static_cast<molecule::rep::Type>(_representation.value());
-            molecule::util::updateRepType(mol.data.drawRep, t, _repScale);
+            molecule::updateRepType(mol.data.drawRep, t, _repScale);
         }
     };
 
@@ -291,10 +292,10 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
 
             const molecule::rep::Type t =
                 static_cast<molecule::rep::Type>(_representation.value());
-            molecule::util::updateRepType(mol.data.drawRep, t, _repScale);
+            molecule::updateRepType(mol.data.drawRep, t, _repScale);
             const molecule::rep::Color c =
                 static_cast<molecule::rep::Color>(_coloring.value());
-            molecule::util::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
+            molecule::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
         }
     };
 
@@ -357,7 +358,7 @@ RenderableSimulationBox::RenderableSimulationBox(const ghoul::Dictionary& dictio
     addProperty(_filter);
 
     _circleColor = p.circleColor.value_or(_circleColor);
-    _circleColor.setViewOption(properties::Property::ViewOptions::Color);
+    _circleColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_circleColor);
 
     _circleWidth = p.circleWidth.value_or(_circleWidth);
@@ -434,10 +435,10 @@ void RenderableSimulationBox::initializeGL() {
 
         const molecule::rep::Type t =
             static_cast<molecule::rep::Type>(_representation.value());
-        molecule::util::updateRepType(mol.data.drawRep, t, _repScale);
+        molecule::updateRepType(mol.data.drawRep, t, _repScale);
         const molecule::rep::Color c =
             static_cast<molecule::rep::Color>(_coloring.value());
-        molecule::util::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
+        molecule::updateRepColor(mol.data.drawRep, mol.data.molecule, c, mask);
     }
 }
 
@@ -474,10 +475,10 @@ void RenderableSimulationBox::update(const UpdateData& data) {
                 frame = 2.0 * numFrames - frame;
             }
 
-            molecule::util::interpolateFrame(
+            molecule::interpolateFrame(
                 mol.data.molecule,
                 mol.data.trajectory,
-                molecule::util::InterpolationType::Cubic,
+                molecule::InterpolationType::Cubic,
                 frame
             );
             md_gl_molecule_set_atom_position(

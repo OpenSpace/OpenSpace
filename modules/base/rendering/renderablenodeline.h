@@ -44,7 +44,7 @@ public:
     explicit RenderableNodeLine(const ghoul::Dictionary& dictionary);
     ~RenderableNodeLine() override = default;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     // Get the distance between the start and end node
     double distance() const;
@@ -67,13 +67,13 @@ private:
     glm::dvec3 _startPos = glm::dvec3(0.0);
     glm::dvec3 _endPos = glm::dvec3(0.0);
 
-    properties::StringProperty _start;
-    properties::StringProperty _end;
-    properties::Vec3Property _lineColor;
-    properties::FloatProperty _lineWidth;
-    properties::FloatProperty _startOffset;
-    properties::FloatProperty _endOffset;
-    properties::BoolProperty _useRelativeOffsets;
+    StringProperty _start;
+    StringProperty _end;
+    Vec3Property _lineColor;
+    FloatProperty _lineWidth;
+    FloatProperty _startOffset;
+    FloatProperty _endOffset;
+    BoolProperty _useRelativeOffsets;
 };
 
 } // namespace openspace

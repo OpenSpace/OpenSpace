@@ -24,34 +24,36 @@
 
 #include <ghoul/misc/dictionary.h>
 
+using namespace openspace;
+
 namespace {
 
 /**
  * Continue playing a paused camera path.
  */
 [[codegen::luawrap]] void continuePath() {
-    openspace::global::navigationHandler->pathNavigator().continuePath();
+    global::navigationHandler->pathNavigator().continuePath();
 }
 
 /**
  * Pause a playing camera path.
  */
 [[codegen::luawrap]] void pausePath() {
-    openspace::global::navigationHandler->pathNavigator().pausePath();
+    global::navigationHandler->pathNavigator().pausePath();
 }
 
 /**
  * Stops a path, if one is being played.
  */
 [[codegen::luawrap]] void stopPath() {
-    openspace::global::navigationHandler->pathNavigator().abortPath();
+    global::navigationHandler->pathNavigator().abortPath();
 }
 
 /**
  * Immediately skips to the end of the current camera path, if one is being played.
  */
 [[codegen::luawrap]] void skipToEnd() {
-    openspace::global::navigationHandler->pathNavigator().skipToEnd();
+    global::navigationHandler->pathNavigator().skipToEnd();
 }
 
 /**
@@ -62,13 +64,12 @@ namespace {
  *                        camera path to be created
  */
 [[codegen::luawrap]] void createPath(ghoul::Dictionary pathInstruction) {
-    using namespace openspace;
     global::navigationHandler->pathNavigator().createPath(pathInstruction);
     if (global::navigationHandler->pathNavigator().hasCurrentPath()) {
         global::navigationHandler->pathNavigator().startPath();
     }
 }
 
-#include "pathnavigator_lua_codegen.cpp"
-
 } // namespace
+
+#include "pathnavigator_lua_codegen.cpp"

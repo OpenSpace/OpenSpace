@@ -31,10 +31,9 @@
 #include <ghoul/misc/dictionary.h>
 #include <limits>
 
-TEST_CASE("ScriptScheduler: Simple Forward", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
+using namespace openspace;
 
+TEST_CASE("ScriptScheduler: Simple Forward", "[scriptscheduler]") {
     SpiceManager::initialize();
 
     ScriptScheduler scheduler;
@@ -62,9 +61,6 @@ TEST_CASE("ScriptScheduler: Simple Forward", "[scriptscheduler]") {
 }
 
 TEST_CASE("ScriptScheduler: Multiple Forward Single Jump", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
-
     SpiceManager::initialize();
 
     std::vector<ScriptScheduler::ScheduledScript> scripts;
@@ -101,8 +97,6 @@ TEST_CASE("ScriptScheduler: Multiple Forward Single Jump", "[scriptscheduler]") 
 }
 
 TEST_CASE("ScriptScheduler: Multiple Forward Ordering", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -138,8 +132,6 @@ TEST_CASE("ScriptScheduler: Multiple Forward Ordering", "[scriptscheduler]") {
 }
 
 TEST_CASE("ScriptScheduler: Simple Backward", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -164,12 +156,10 @@ TEST_CASE("ScriptScheduler: Simple Backward", "[scriptscheduler]") {
     REQUIRE(res.size() == 1);
     CHECK(res[0] == "BackwardScript1");
 
-    openspace::SpiceManager::deinitialize();
+    SpiceManager::deinitialize();
 }
 
 TEST_CASE("ScriptScheduler: Multiple Backward Single Jump", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -208,8 +198,6 @@ TEST_CASE("ScriptScheduler: Multiple Backward Single Jump", "[scriptscheduler]")
 }
 
 TEST_CASE("ScriptScheduler: Multiple Backward Ordering", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -245,9 +233,6 @@ TEST_CASE("ScriptScheduler: Multiple Backward Ordering", "[scriptscheduler]") {
 }
 
 TEST_CASE("ScriptScheduler: Empty", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
-
     SpiceManager::initialize();
 
     static const std::vector<double> TestTimes = {
@@ -273,8 +258,6 @@ TEST_CASE("ScriptScheduler: Empty", "[scriptscheduler]") {
 }
 
 TEST_CASE("ScriptScheduler: Forward Backwards", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -317,8 +300,6 @@ TEST_CASE("ScriptScheduler: Forward Backwards", "[scriptscheduler]") {
 }
 
 TEST_CASE("ScriptScheduler: Rewind", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -355,9 +336,6 @@ TEST_CASE("ScriptScheduler: Rewind", "[scriptscheduler]") {
 }
 
 TEST_CASE("ScriptScheduler: CurrentTime", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
-
     SpiceManager::initialize();
 
     static const std::vector<double> TestValues = {
@@ -375,8 +353,6 @@ TEST_CASE("ScriptScheduler: CurrentTime", "[scriptscheduler]") {
 }
 
 TEST_CASE("ScriptScheduler: All Scripts", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -415,8 +391,6 @@ TEST_CASE("ScriptScheduler: All Scripts", "[scriptscheduler]") {
 }
 
 TEST_CASE("ScriptScheduler: Jump Equal", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -452,8 +426,6 @@ TEST_CASE("ScriptScheduler: Jump Equal", "[scriptscheduler]") {
 }
 
 TEST_CASE("ScriptScheduler: Same Time", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -482,8 +454,6 @@ TEST_CASE("ScriptScheduler: Same Time", "[scriptscheduler]") {
 }
 
 TEST_CASE("ScriptScheduler: Multi Inner Jump", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -521,8 +491,6 @@ TEST_CASE(
     "ScriptScheduler: Multiple Forward Single Jump Multiple Load",
     "[scriptscheduler]")
 {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -559,8 +527,6 @@ TEST_CASE(
 
 TEST_CASE("ScriptScheduler: Multiple Forward Ordering Multiple Load" "[scriptscheduler]")
 {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -595,8 +561,6 @@ TEST_CASE(
     "ScriptScheduler: Multiple Backward Single Jump Multiple Load",
     "[scriptscheduler]")
 {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -634,8 +598,6 @@ TEST_CASE(
     "ScriptScheduler: Multiple Backward Ordering Multiple Load",
     "[scriptscheduler]")
 {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -668,8 +630,6 @@ TEST_CASE(
 }
 
 TEST_CASE("ScriptScheduler: Forward Backwards Multiple Load", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -708,8 +668,6 @@ TEST_CASE("ScriptScheduler: Forward Backwards Multiple Load", "[scriptscheduler]
 }
 
 TEST_CASE("ScriptScheduler: Rewind Multiple Load", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -742,8 +700,6 @@ TEST_CASE("ScriptScheduler: Rewind Multiple Load", "[scriptscheduler]") {
 }
 
 TEST_CASE("ScriptScheduler: All Scripts Multiple Load", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();
@@ -778,8 +734,6 @@ TEST_CASE("ScriptScheduler: All Scripts Multiple Load", "[scriptscheduler]") {
 }
 
 TEST_CASE("ScriptScheduler: All Scripts Mixed Load", "[scriptscheduler]") {
-    using namespace openspace;
-    using namespace openspace::scripting;
     using namespace std::string_literals;
 
     SpiceManager::initialize();

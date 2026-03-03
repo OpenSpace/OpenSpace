@@ -27,7 +27,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 StringListProperty::StringListProperty(Property::PropertyInfo info,
                                        std::vector<std::string> values)
@@ -55,4 +55,4 @@ std::string StringListProperty::stringValue() const {
     return json.dump();
 }
 
-} // namespace openspace::properties
+} // namespace openspace

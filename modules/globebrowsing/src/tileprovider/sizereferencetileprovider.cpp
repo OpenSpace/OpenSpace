@@ -41,12 +41,12 @@ namespace {
     struct [[codegen::Dictionary(SizeReferenceTileProvider)]] Parameters {
         std::optional<std::variant<glm::dvec3, double>> radii;
     };
-#include "sizereferencetileprovider_codegen.cpp"
 } // namespace
+#include "sizereferencetileprovider_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation SizeReferenceTileProvider::Documentation() {
+Documentation SizeReferenceTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_sizereferencetileprovider");
 }
 
@@ -132,4 +132,4 @@ float SizeReferenceTileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

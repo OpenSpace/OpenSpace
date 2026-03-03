@@ -77,7 +77,7 @@ public:
     void firstUpdate();
     void computeSequenceEndTime();
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     struct File {
         enum class FileStatus {
@@ -145,7 +145,7 @@ private:
     // In setup it is used to scale JSON coordinates. During runtime it is used to scale
     // domain limits.
     float _scalingFactor = 1.f;
-    fls::Model _model = fls::Model::Invalid;
+    Model _model = Model::Invalid;
     bool _shouldUpdateMaskingBuffer = false;
     bool _shouldUpdateColorBuffer = false;
     int _activeIndex = -1;
@@ -169,67 +169,67 @@ private:
     GLuint _vboPosition = 0;
 
     // Group to hold the color properties
-    properties::PropertyOwner _colorGroup;
+    PropertyOwner _colorGroup;
     // Uniform/transfer function/topology?
-    properties::OptionProperty _colorMethod;
+    OptionProperty _colorMethod;
     // Index of the extra quantity to color lines by
-    properties::OptionProperty _colorQuantity;
+    OptionProperty _colorQuantity;
     // Used to save property for later initialization, because firstUpdate needs to run
     // first, to populate _colorQuantity with options
     int _colorQuantityTemp;
     std::vector<glm::vec2> _colorTableRanges;
     // Color table/transfer function selected min and max range
-    properties::Vec2Property _selectedColorRange;
+    Vec2Property _selectedColorRange;
     // Paths to color tables. One for each 'extraQuantity'
     std::vector<std::filesystem::path> _colorTablePaths;
     // Color table/transfer function for "By Quantity" coloring
-    properties::StringProperty _colorTablePath;
+    StringProperty _colorTablePath;
     // Uniform Field Line Color
-    properties::Vec4Property _colorUniform;
+    Vec4Property _colorUniform;
     // Whether or not to use additive blending
-    properties::BoolProperty _colorABlendEnabled;
+    BoolProperty _colorABlendEnabled;
 
     // Whether or not to use Domain limits
-    properties::BoolProperty _domainEnabled;
+    BoolProperty _domainEnabled;
     // Group to hold the Domain properties
-    properties::PropertyOwner _domainGroup;
-    properties::Vec2Property _domainX;
-    properties::Vec2Property _domainY;
-    properties::Vec2Property _domainZ;
-    properties::Vec2Property _domainR;
+    PropertyOwner _domainGroup;
+    Vec2Property _domainX;
+    Vec2Property _domainY;
+    Vec2Property _domainZ;
+    Vec2Property _domainR;
 
     // Toggle flow [ON/OFF]
-    properties::BoolProperty _flowEnabled;
+    BoolProperty _flowEnabled;
     // Group to hold the flow/particle properties
-    properties::PropertyOwner _flowGroup;
+    PropertyOwner _flowGroup;
     // Simulated particles' color
-    properties::Vec4Property _flowColor;
+    Vec4Property _flowColor;
     // Size of simulated flow particles
-    properties::IntProperty _flowParticleSize;
+    IntProperty _flowParticleSize;
     // Size of simulated flow particles
-    properties::IntProperty _flowParticleSpacing;
+    IntProperty _flowParticleSpacing;
     // Toggle flow direction [FORWARDS/BACKWARDS]
-    properties::BoolProperty _flowReversed;
+    BoolProperty _flowReversed;
     // Speed of simulated flow
-    properties::IntProperty _flowSpeed;
+    IntProperty _flowSpeed;
 
     // Whether or not to use masking
-    properties::BoolProperty _maskingEnabled;
+    BoolProperty _maskingEnabled;
     // Group to hold the masking properties
-    properties::PropertyOwner _maskingGroup;
+    PropertyOwner _maskingGroup;
     std::vector<glm::vec2> _maskingRanges;
     // Selected lower and upper range limits for masking
-    properties::Vec2Property _selectedMaskingRange;
+    Vec2Property _selectedMaskingRange;
     // Index of the extra quantity to use for masking
-    properties::OptionProperty _maskingQuantity;
+    OptionProperty _maskingQuantity;
     // used to save property for later initialization
     int _maskingQuantityTemp = 0;
 
     // Line width for the line rendering part
-    properties::FloatProperty _lineWidth;
+    FloatProperty _lineWidth;
     // Button which executes a time jump to start of sequence
-    properties::TriggerProperty _jumpToStart;
-    properties::BoolProperty _saveDownloadsOnShutdown;
+    TriggerProperty _jumpToStart;
+    BoolProperty _saveDownloadsOnShutdown;
 
     bool _isFirstLoad = true;
 };

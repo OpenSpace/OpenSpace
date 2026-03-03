@@ -31,11 +31,12 @@
 #include <filesystem>
 
 namespace ghoul { class Dictionary; }
-namespace openspace::scripting { struct LuaLibrary; }
 
-namespace openspace::interaction {
+namespace openspace {
 
-class KeyframeRecordingHandler : public properties::PropertyOwner {
+struct LuaLibrary;
+
+class KeyframeRecordingHandler : public PropertyOwner {
 public:
     KeyframeRecordingHandler();
 
@@ -53,7 +54,7 @@ public:
     void loadCameraFBX(const std::filesystem::path& path, const std::string& focusNode,
         double sequenceTime, double scale);
 
-    static openspace::scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     SessionRecording _timeline;

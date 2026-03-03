@@ -27,7 +27,7 @@
 
 #include <modules/imgui/include/guicomponent.h>
 
-namespace openspace::gui {
+namespace openspace {
 
 class GuiSceneComponent : public GuiComponent {
 public:
@@ -36,6 +36,6 @@ public:
     void render() override;
 };
 
-} // namespace openspace::gui
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_IMGUI___GUISCENECOMPONENT___H__

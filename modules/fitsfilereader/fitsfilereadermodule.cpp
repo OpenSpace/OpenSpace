@@ -44,7 +44,7 @@ void FitsFileReaderModule::internalInitialize(const ghoul::Dictionary&) {
     );
 }
 
-std::vector<documentation::Documentation> FitsFileReaderModule::documentations() const {
+std::vector<Documentation> FitsFileReaderModule::documentations() const {
     return {
         FitsFileReaderModule::Documentation(),
         RenderableTimeVaryingFitsSphere::Documentation()

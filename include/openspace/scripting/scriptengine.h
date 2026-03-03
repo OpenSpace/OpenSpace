@@ -39,10 +39,11 @@
 #include <vector>
 
 namespace ghoul { class Dictionary; }
-namespace openspace { class SyncBuffer; }
 struct lua_State;
 
-namespace openspace::scripting {
+namespace openspace {
+
+class SyncBuffer;
 
 /**
  * The ScriptEngine is responsible for handling the execution of custom Lua functions and
@@ -184,6 +185,6 @@ private:
     std::filesystem::path _logFilename;
 };
 
-} // namespace openspace::scripting
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SCRIPTENGINE___H__

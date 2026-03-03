@@ -45,7 +45,7 @@ void goToGeodetic2(const SceneGraphNode& globe, Geodetic2 geo) {
 void goToGeodetic3(const SceneGraphNode& sgn, Geodetic3 geo) {
     const glm::dvec3 positionModelSpace = sgn.ellipsoid().cartesianPosition(geo);
 
-    interaction::NavigationState state;
+    NavigationState state;
     state.anchor = sgn.identifier();
     state.referenceFrame = sgn.identifier();
     state.position = positionModelSpace;

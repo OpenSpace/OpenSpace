@@ -27,7 +27,7 @@
 
 #include <functional>
 
-namespace openspace::interaction {
+namespace openspace {
 
 /**
  * Interpolates a typename T using a transfer function.
@@ -56,7 +56,7 @@ private:
     float _scaledDeltaTime = 0.f;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #include "interpolator.inl"
 

@@ -42,11 +42,11 @@
 #include <string_view>
 #include <utility>
 
-namespace openspace {
-
 namespace {
     constexpr std::string_view _loggerCat = "Asset";
 } // namespace
+
+namespace openspace {
 
 Asset::Asset(AssetManager& manager, std::filesystem::path assetPath,
              std::optional<bool> explicitEnabled)
@@ -300,9 +300,9 @@ void Asset::initialize() {
     }
     LDEBUG(std::format("Initializing asset '{}'", _assetPath));
 
-    global::eventEngine->publishEvent<events::EventAssetLoading>(
+    global::eventEngine->publishEvent<EventAssetLoading>(
         _assetPath.string(),
-        events::EventAssetLoading::State::Loading
+        EventAssetLoading::State::Loading
     );
     // 1. Initialize requirements
     for (Asset* child : _requiredAssets) {
@@ -313,9 +313,9 @@ void Asset::initialize() {
     try {
         _manager.callOnInitialize(this);
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         LERROR(std::format("Failed to initialize asset '{}'", path()));
-        documentation::logError(e);
+        logError(e);
         setState(State::InitializationFailed);
         return;
     }
@@ -328,9 +328,9 @@ void Asset::initialize() {
 
     // 3. Update state
     setState(State::Initialized);
-    global::eventEngine->publishEvent<events::EventAssetLoading>(
+    global::eventEngine->publishEvent<EventAssetLoading>(
         _assetPath.string(),
-        events::EventAssetLoading::State::Loaded
+        EventAssetLoading::State::Loaded
     );
 }
 

@@ -44,12 +44,12 @@ namespace {
         // is exited, i.e on a transition to another state
         std::optional<std::string> exit;
     };
-#include "state_codegen.cpp"
 } // namespace
+#include "state_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation State::Documentation() {
+Documentation State::Documentation() {
     return codegen::doc<Parameters>("statemachine_state");
 }
 

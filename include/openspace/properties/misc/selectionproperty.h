@@ -29,7 +29,7 @@
 
 #include <set>
 
-namespace openspace::properties {
+namespace openspace {
 
 class SelectionProperty : public TemplateProperty<std::set<std::string>> {
 
@@ -127,6 +127,6 @@ private:
     std::vector<std::string> _options;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SELECTIONPROPERTY___H__

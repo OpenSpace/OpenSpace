@@ -34,8 +34,8 @@
 
 namespace openspace {
 
-documentation::Documentation RenderableDataPlane::Documentation() {
-    documentation::Documentation doc = RenderableDataCygnet::Documentation();
+Documentation RenderableDataPlane::Documentation() {
+    openspace::Documentation doc = RenderableDataCygnet::Documentation();
     doc.name = "RenderableDataPlane";
     doc.id = "iswa_renderable_dataplane";
     return doc;
@@ -69,11 +69,11 @@ void RenderableDataPlane::initializeGL() {
             // and unregister backgroundvalues property.
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();
-                _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
+                _backgroundValues.setVisibility(Property::Visibility::Hidden);
             // else if autofilter is turned off, register backgroundValues
             }
             else {
-                _backgroundValues.setVisibility(properties::Property::Visibility::Always);
+                _backgroundValues.setVisibility(Property::Visibility::Always);
             }
         });
     }
@@ -88,7 +88,7 @@ void RenderableDataPlane::deinitializeGL() {
     RenderableDataCygnet::deinitializeGL();
 }
 
-bool RenderableDataPlane::createGeometry() {
+void RenderableDataPlane::createGeometry() {
     struct Vertex {
         GLfloat x;
         GLfloat y;
@@ -124,15 +124,11 @@ bool RenderableDataPlane::createGeometry() {
     glEnableVertexArrayAttrib(_vao, 1);
     glVertexArrayAttribFormat(_vao, 1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 4);
     glVertexArrayAttribBinding(_vao, 1, 0);
-
-    return true;
 }
 
-bool RenderableDataPlane::destroyGeometry() {
+void RenderableDataPlane::destroyGeometry() {
     glDeleteVertexArrays(1, &_vao);
     glDeleteBuffers(1, &_vbo);
-
-    return true;
 }
 
 void RenderableDataPlane::renderGeometry() const {

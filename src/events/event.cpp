@@ -37,13 +37,13 @@
 #include <filesystem>
 #include <string_view>
 
+using namespace std::string_literals;
+
 namespace {
     constexpr std::string_view _loggerCat = "EventInfo";
 } // namespace
 
-using namespace std::string_literals;
-
-namespace openspace::events {
+namespace openspace {
 
 static void log(int i, const EventParallelConnection& e) {
     ghoul_assert(e.type == EventParallelConnection::Type, "Wrong type");
@@ -714,8 +714,7 @@ EventPlanetEclipsed::EventPlanetEclipsed(const SceneGraphNode* eclipsee_,
     , eclipser(temporaryString(eclipser_->identifier()))
 {}
 
-EventInterpolationFinished::EventInterpolationFinished(
-                                                    const properties::Property* property_)
+EventInterpolationFinished::EventInterpolationFinished(const Property* property_)
     : Event(Type)
     , property(temporaryString(property_->uri()))
 {}
@@ -804,4 +803,4 @@ CustomEvent::CustomEvent(std::string_view subtype_, std::string_view payload_)
     , payload(payload_)
 {}
 
-} // namespace openspace::events
+} // namespace openspace

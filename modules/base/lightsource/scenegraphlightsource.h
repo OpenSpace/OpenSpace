@@ -38,15 +38,15 @@ class SceneGraphLightSource : public LightSource {
 public:
     explicit SceneGraphLightSource(const ghoul::Dictionary& dictionary);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     bool initialize() override;
     glm::vec3 directionViewSpace(const RenderData& renderData) const override;
     float intensity() const override;
 
 private:
-    properties::FloatProperty _intensity;
-    properties::StringProperty _sceneGraphNodeReference;
+    FloatProperty _intensity;
+    StringProperty _sceneGraphNodeReference;
 
     SceneGraphNode* _sceneGraphNode = nullptr;
 };

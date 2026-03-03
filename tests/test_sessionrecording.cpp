@@ -29,7 +29,7 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <filesystem>
 
-using namespace openspace::interaction;
+using namespace openspace;
 
 namespace {
     std::filesystem::path test(std::string_view file) {

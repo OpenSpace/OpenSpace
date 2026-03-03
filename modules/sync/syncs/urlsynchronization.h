@@ -79,7 +79,7 @@ public:
 
     std::string generateUid() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     /**

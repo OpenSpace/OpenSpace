@@ -31,7 +31,7 @@
 
 namespace ghoul::opengl { class ProgramObject; }
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 struct LayerGroup;
 struct TileIndex;
@@ -78,6 +78,6 @@ private:
     std::vector<GPULayer> _gpuActiveLayers;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GPULAYERGROUP___H__

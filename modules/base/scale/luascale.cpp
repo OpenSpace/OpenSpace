@@ -38,7 +38,9 @@
 #include <filesystem>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo ScriptInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo ScriptInfo = {
         "Script",
         "Script",
         "This value is the path to the Lua script that will be executed to compute the "
@@ -48,7 +50,7 @@ namespace {
         "the last frame as the second argument, and the current wall time as "
         "milliseconds past the J2000 epoch the third argument and computes the three "
         "scaling factors returned as a table.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `Scale` type generates the scale values for the attached scene graph node by
@@ -59,12 +61,12 @@ namespace {
         // [[codegen::verbatim(ScriptInfo.description)]]
         std::filesystem::path script;
     };
-#include "luascale_codegen.cpp"
 } // namespace
+#include "luascale_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation LuaScale::Documentation() {
+Documentation LuaScale::Documentation() {
     return codegen::doc<Parameters>("base_transform_scale_lua");
 }
 

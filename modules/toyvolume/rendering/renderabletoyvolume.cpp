@@ -34,54 +34,55 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
+    constexpr Property::PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
         "Scaling exponent",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StepSizeInfo = {
+    constexpr Property::PropertyInfo StepSizeInfo = {
         "StepSize",
         "Step size",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
+    constexpr Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
+    constexpr Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DownscaleVolumeRenderingInfo =
-    {
+    constexpr Property::PropertyInfo DownscaleVolumeRenderingInfo = {
         "Downscale",
         "Downscale factor volume rendering",
         "The downscaling factor used when rendering the current volume.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableToyVolume)]] Parameters {
@@ -109,12 +110,12 @@ namespace {
         // [[codegen::verbatim(DownscaleVolumeRenderingInfo.description)]]
         std::optional<float> downscale;
     };
-#include "renderabletoyvolume_codegen.cpp"
 } // namespace
+#include "renderabletoyvolume_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableToyVolume::Documentation() {
+Documentation RenderableToyVolume::Documentation() {
     return codegen::doc<Parameters>("toyvolume_renderabletoyvolume");
 }
 
@@ -143,7 +144,7 @@ RenderableToyVolume::RenderableToyVolume(const ghoul::Dictionary& dictionary)
     _stepSize = p.stepSize.value_or(_stepSize);
     _rayCastSteps = p.steps.value_or(_rayCastSteps);
 
-    _downScaleVolumeRendering.setVisibility(properties::Property::Visibility::Developer);
+    _downScaleVolumeRendering.setVisibility(Property::Visibility::Developer);
     _downScaleVolumeRendering = p.downscale.value_or(_downScaleVolumeRendering);
 }
 

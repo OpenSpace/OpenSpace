@@ -56,201 +56,193 @@
 #endif // WIN32
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "TouchInteraction";
 
-    constexpr openspace::properties::Property::PropertyInfo UnitTestInfo = {
+    constexpr Property::PropertyInfo UnitTestInfo = {
         "UnitTest",
         "Take a unit test saving the LM data into file",
         "LM - least-squares minimization using Levenberg-Marquardt algorithm."
         "Used to find a new camera state from touch points when doing direct "
         "manipulation.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableZoomInfo = {
+    constexpr Property::PropertyInfo DisableZoomInfo = {
         "DisableZoom",
         "Disable zoom navigation",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableRollInfo = {
+    constexpr Property::PropertyInfo DisableRollInfo = {
         "DisableRoll",
         "Disable roll navigation",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SetDefaultInfo = {
+    constexpr Property::PropertyInfo SetDefaultInfo = {
         "SetDefault",
         "Reset all properties to default",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MaxTapTimeInfo = {
+    constexpr Property::PropertyInfo MaxTapTimeInfo = {
         "MaxTapTime",
         "Max tap delay (in ms) for double tap",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DecelatesPerSecondInfo = {
+    constexpr Property::PropertyInfo DecelatesPerSecondInfo = {
         "DeceleratesPerSecond",
         "Number of times velocity is decelerated per second",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TouchScreenSizeInfo = {
+    constexpr Property::PropertyInfo TouchScreenSizeInfo = {
         "TouchScreenSize",
         "Touch screen size in inches",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TapZoomFactorInfo = {
+    constexpr Property::PropertyInfo TapZoomFactorInfo = {
         "TapZoomFactor",
         "Scaling distance travelled on tap",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PinchZoomFactorInfo = {
+    constexpr Property::PropertyInfo PinchZoomFactorInfo = {
         "PinchZoomFactor",
         "Scaling distance travelled on pinch",
         "This value is used to reduce the amount of pinching needed. A linear kind of "
         "sensitivity that will alter the pinch-zoom speed.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RollThresholdInfo = {
+    constexpr Property::PropertyInfo RollThresholdInfo = {
         "RollThreshold",
         "Threshold for min angle for roll interpret",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ZoomSensitivityExpInfo = {
+    constexpr Property::PropertyInfo ZoomSensitivityExpInfo = {
         "ZoomSensitivityExp",
         "Sensitivity of exponential zooming in relation to distance from focus node",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ZoomSensitivityPropInfo = {
+    constexpr Property::PropertyInfo ZoomSensitivityPropInfo = {
         "ZoomSensitivityProp",
         "Sensitivity of zooming proportional to distance from focus node",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        ZoomSensitivityDistanceThresholdInfo =
-    {
+    constexpr Property::PropertyInfo ZoomSensitivityDistanceThresholdInfo = {
         "ZoomSensitivityDistanceThreshold",
         "Threshold of distance to target node for whether or not to use exponential "
         "zooming",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        ZoomInBoundarySphereMultiplierInfo =
-    {
+    constexpr Property::PropertyInfo ZoomInBoundarySphereMultiplierInfo = {
         "ZoomInBoundarySphereMultiplier",
         "Multiplies a node's boundary sphere by this in order to limit zoom in & prevent "
         "surface collision.",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        ZoomOutBoundarySphereMultiplierInfo =
-    {
+    constexpr Property::PropertyInfo ZoomOutBoundarySphereMultiplierInfo = {
         "ZoomOutBoundarySphereMultiplier",
         "Multiplies a node's boundary sphere by this in order to limit zoom out",
         "" // @TODO Missing documentation
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ConstantTimeDecaySecsInfo = {
+    constexpr Property::PropertyInfo ConstantTimeDecaySecsInfo = {
         "ConstantTimeDecaySecs",
         "Time duration that a pitch/roll/zoom/pan should take to decay to zero (seconds)",
         "",  // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo InputSensitivityInfo = {
+    constexpr Property::PropertyInfo InputSensitivityInfo = {
         "InputSensitivity",
         "Threshold for interpreting input as still",
         "",  // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StationaryCentroidInfo = {
+    constexpr Property::PropertyInfo StationaryCentroidInfo = {
         "CentroidStationary",
         "Threshold for stationary centroid",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PanModeInfo = {
+    constexpr Property::PropertyInfo PanModeInfo = {
         "PanMode",
         "Allow panning gesture",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PanDeltaDistanceInfo = {
+    constexpr Property::PropertyInfo PanDeltaDistanceInfo = {
         "PanDeltaDistance",
         "Delta distance between fingers allowed for interpreting pan interaction",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FrictionInfo = {
+    constexpr Property::PropertyInfo FrictionInfo = {
         "Friction",
         "Friction for different interactions (orbit, zoom, roll, pan)",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ZoomOutLimitInfo = {
+    constexpr Property::PropertyInfo ZoomOutLimitInfo = {
         "ZoomOutLimit",
         "Zoom out Limit",
         "The maximum distance you are allowed to navigate away from the anchor. "
         "This should always be larger than the zoom in value if you want to be able "
         "to zoom. Defaults to maximum allowed double.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ZoomInLimitInfo = {
+    constexpr Property::PropertyInfo ZoomInLimitInfo = {
         "ZoomInLimit",
         "Zoom in Limit",
         "The minimum distance from the anchor that you are allowed to navigate to. "
         "Its purpose is to limit zooming in on a node. If this value is not set it "
         "defaults to the surface of the current anchor.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        EnableDirectManipulationInfo =
-    {
+    constexpr Property::PropertyInfo EnableDirectManipulationInfo = {
         "EnableDirectManipulation",
         "Enable direct manipulation",
         "Decides whether the direct manipulation mode should be enabled or not.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DirectManipulationThresholdInfo =
-    {
+    constexpr Property::PropertyInfo DirectManipulationThresholdInfo = {
         "DirectManipulationThreshold",
         "Direct manipulation threshold",
         "This threshold affects the distance from the interaction sphere at which the "
         "direct manipulation interaction mode starts being active. The value is given "
         "as a factor times the interaction sphere.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // Compute coefficient of decay based on current frametime; if frametime has been
@@ -269,7 +261,7 @@ namespace {
 namespace openspace {
 
 TouchInteraction::TouchInteraction()
-    : properties::PropertyOwner({ "TouchInteraction", "Touch Interaction" })
+    : PropertyOwner({ "TouchInteraction", "Touch Interaction" })
     , _unitTest(UnitTestInfo, false)
     , _disableZoom(DisableZoomInfo, false)
     , _disableRoll(DisableRollInfo, false)
@@ -1078,7 +1070,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
         // should make the touch interaction tap into the orbitalnavigator and let that
         // do the updating of the camera, instead of handling them separately. Then we
         // would keep them in sync and avoid duplicated camera updating code.
-        interaction::OrbitalNavigator& orbitalNavigator =
+        OrbitalNavigator& orbitalNavigator =
             global::navigationHandler->orbitalNavigator();
         camPos = orbitalNavigator.pushToSurfaceOfAnchor(camPos);
 
@@ -1221,7 +1213,7 @@ double FrameTimeAverage::averageFrameTime() const {
 
 #ifdef TOUCH_DEBUG_PROPERTIES
 TouchInteraction::DebugProperties::DebugProperties()
-    : properties::PropertyOwner({ "TouchDebugProperties", "Touch Debug Properties"})
+    : PropertyOwner({ "TouchDebugProperties", "Touch Debug Properties"})
     , interactionMode(
         { "interactionMode", "Current interaction mode", "" },
         "Unknown"
@@ -1256,4 +1248,4 @@ TouchInteraction::DebugProperties::DebugProperties()
 }
 #endif // TOUCH_DEBUG_PROPERTIES
 
-} // openspace namespace
+} // namespace openspace

@@ -62,9 +62,8 @@ namespace {
     }
 } // namespace
 
-ActionDialog::ActionDialog(QWidget* parent,
-                           std::vector<openspace::Profile::Action>* actions,
-                           std::vector<openspace::Profile::Keybinding>* keybindings)
+ActionDialog::ActionDialog(QWidget* parent, std::vector<Profile::Action>* actions,
+                           std::vector<Profile::Keybinding>* keybindings)
     : QDialog(parent)
     , _actions(actions)
     , _actionData(*_actions)
@@ -460,7 +459,7 @@ void ActionDialog::actionAdd() {
 }
 
 void ActionDialog::actionRemove() {
-    const openspace::Profile::Action* action = selectedAction();
+    const Profile::Action* action = selectedAction();
     ghoul_assert(action, "An action must exist at this point");
 
     ghoul_assert(
@@ -524,14 +523,14 @@ void ActionDialog::actionRemove() {
 }
 
 void ActionDialog::actionDuplicate() {
-    const openspace::Profile::Action* action = selectedAction();
+    const Profile::Action* action = selectedAction();
     ghoul_assert(action, "An action must exist at this point");
 
     ghoul_assert(
         _actionWidgets.list->count() == static_cast<int>(_actionData.size()),
         "Action list and data has desynced"
     );
-    const openspace::Profile::Action act = *action;
+    const Profile::Action act = *action;
 
     _actionData.push_back(act);
     _actionWidgets.list->addItem("");

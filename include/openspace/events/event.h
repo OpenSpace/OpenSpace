@@ -33,17 +33,15 @@
 #include <string_view>
 
 namespace openspace {
-    namespace properties { class Property; }
-    class Camera;
-    class Layer;
-    class Profile;
-    class Renderable;
-    class SceneGraphNode;
-    class ScreenSpaceRenderable;
-    class Time;
-} // namespace openspace
 
-namespace openspace::events {
+class Camera;
+class Layer;
+class Profile;
+class Property;
+class Renderable;
+class SceneGraphNode;
+class ScreenSpaceRenderable;
+class Time;
 
 struct Event {
     // Steps to add a new event type:
@@ -354,7 +352,7 @@ struct EventInterpolationFinished : public Event {
      *
      * \pre property_ must not be nullptr
      */
-    EventInterpolationFinished(const properties::Property* property_);
+    EventInterpolationFinished(const Property* property_);
     const tstring property;
 };
 
@@ -640,6 +638,6 @@ struct CustomEvent : public Event {
     const tstring payload;
 };
 
-} // namespace openspace::events
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___EVENT___H__

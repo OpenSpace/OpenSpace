@@ -27,7 +27,7 @@
 
 #include <openspace/properties/templateproperty.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 class StringProperty : public TemplateProperty<std::string> {
 public:
@@ -49,6 +49,6 @@ private:
     std::string toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___STRINGPROPERTY___H__

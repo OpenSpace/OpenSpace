@@ -38,43 +38,45 @@
 #include <string_view>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "MemoryAwareTileCache";
 
-    constexpr openspace::properties::Property::PropertyInfo CpuAllocatedDataInfo = {
+    constexpr Property::PropertyInfo CpuAllocatedDataInfo = {
         "CpuAllocatedTileData",
         "CPU allocated tile data (MB)",
         "This value denotes the amount of RAM memory (in MB) that this tile cache is "
         "utilizing.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GpuAllocatedDataInfo = {
+    constexpr Property::PropertyInfo GpuAllocatedDataInfo = {
         "GpuAllocatedTileData",
         "GPU allocated tile data (MB)",
         "This value denotes the amount of GPU memory (in MB) that this tile cache is "
         "utilizing.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
+    constexpr Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile cache size",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ApplyTileCacheInfo = {
+    constexpr Property::PropertyInfo ApplyTileCacheInfo = {
         "ApplyTileCacheSize",
         "Apply tile cache size",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ClearTileCacheInfo = {
+    constexpr Property::PropertyInfo ClearTileCacheInfo = {
         "ClearTileCache",
         "Clear tile cache",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     GLenum toGlTextureFormat(GLenum glType, ghoul::opengl::Texture::Format format) {
@@ -192,11 +194,9 @@ namespace {
                 throw ghoul::MissingCaseException();
         }
     }
-
-
 } // namespace
 
-namespace openspace::globebrowsing::cache {
+namespace openspace {
 
 //
 // TextureContainer
@@ -230,21 +230,21 @@ void MemoryAwareTileCache::TextureContainer::reset() {
 
         using namespace ghoul::opengl;
 
+        GLenum internalFormat =
+            toGlTextureFormat(_initData.glType, _initData.ghoulTextureFormat);
         std::unique_ptr<Texture> tex = std::make_unique<Texture>(
-            _initData.dimensions,
-            GL_TEXTURE_2D,
-            _initData.ghoulTextureFormat,
-            toGlTextureFormat(_initData.glType, _initData.ghoulTextureFormat),
-            _initData.glType,
-            mode,
-            Texture::WrappingMode::ClampToEdge,
-            Texture::AllocateData(_initData.shouldAllocateDataOnCPU)
+            ghoul::opengl::Texture::FormatInit{
+                .dimensions = _initData.dimensions,
+                .type = GL_TEXTURE_2D,
+                .format = _initData.ghoulTextureFormat,
+                .dataType = _initData.glType,
+                .internalFormat = internalFormat
+            },
+            ghoul::opengl::Texture::SamplerInit{
+                .filter = mode,
+                .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
+            }
         );
-
-        tex->setDataOwnership(Texture::TakeOwnership::Yes);
-        tex->setFilter(mode);
-        tex->uploadTexture();
-
         _textures.push_back(std::move(tex));
     }
 }
@@ -457,52 +457,26 @@ void MemoryAwareTileCache::createTileAndPut(ProviderTileKey key, RawTile rawTile
     if (rawTile.error != RawTile::ReadError::None) {
         return;
     }
-    else {
-        const TileTextureInitData& initData = *rawTile.textureInitData;
-        Texture* tex = texture(initData);
 
-        // Re-upload texture, either using PBO or by using RAM data
-        if (rawTile.pbo != 0) {
-            tex->reUploadTextureFromPBO(rawTile.pbo);
-            if (initData.shouldAllocateDataOnCPU) {
-                if (!tex->dataOwnership()) {
-                    _numTextureBytesAllocatedOnCPU += initData.totalNumBytes;
-                }
-                tex->setPixelData(
-                    rawTile.imageData.release(),
-                    Texture::TakeOwnership::Yes
-                );
-                rawTile.imageData = nullptr;
-            }
-        }
-        else {
-            const size_t previousExpectedDataSize = tex->expectedPixelDataSize();
-            ghoul_assert(
-                tex->dataOwnership(),
-                "Texture must have ownership of old data to avoid leaks"
-            );
-            tex->setPixelData(rawTile.imageData.release(), Texture::TakeOwnership::Yes);
-            rawTile.imageData = nullptr;
-            [[maybe_unused]] const size_t expectedSize = tex->expectedPixelDataSize();
-            const size_t numBytes = rawTile.textureInitData->totalNumBytes;
-            ghoul_assert(expectedSize == numBytes, "Pixel data size is incorrect");
-            _numTextureBytesAllocatedOnCPU += numBytes - previousExpectedDataSize;
-            tex->reUploadTexture();
-        }
-        // Hi there, I know someone will be tempted to change this to a Linear filtering
-        // mode at some point. This will introduce rendering artifacts when looking at the
-        // globe at oblique angles (see #2752)
-        using namespace ghoul::systemcapabilities;
-        const ghoul::opengl::Texture::FilterMode mode =
-            OpenGLCap.gpuVendor() == OpenGLCapabilitiesComponent::Vendor::AmdATI ?
-            ghoul::opengl::Texture::FilterMode::Linear :
-            ghoul::opengl::Texture::FilterMode::AnisotropicMipMap;
+    const TileTextureInitData& initData = *rawTile.textureInitData;
+    Texture* tex = texture(initData);
 
-        tex->setFilter(mode);
-        Tile tile{ tex, std::move(rawTile.tileMetaData), Tile::Status::OK };
-        const TileTextureInitData::HashKey initDataKey = initData.hashKey;
-        _textureContainerMap[initDataKey].second->put(std::move(key), std::move(tile));
-    }
+    const size_t previousExpectedDataSize = tex->expectedPixelDataSize();
+    tex->setPixelData(
+        rawTile.imageData.get(),
+        1,
+        initData.shouldAllocateDataOnCPU ?
+            Texture::KeepMemory::Yes :
+            Texture::KeepMemory::No
+    );
+    rawTile.imageData = nullptr;
+    [[maybe_unused]] const size_t expectedSize = tex->expectedPixelDataSize();
+    const size_t numBytes = rawTile.textureInitData->totalNumBytes;
+    ghoul_assert(expectedSize == numBytes, "Pixel data size is incorrect");
+    _numTextureBytesAllocatedOnCPU += numBytes - previousExpectedDataSize;
+    Tile tile{ tex, std::move(rawTile.tileMetaData), Tile::Status::OK };
+    const TileTextureInitData::HashKey initDataKey = initData.hashKey;
+    _textureContainerMap[initDataKey].second->put(std::move(key), std::move(tile));
 }
 
 void MemoryAwareTileCache::put(const ProviderTileKey& key,
@@ -557,4 +531,4 @@ size_t MemoryAwareTileCache::cpuAllocatedDataSize() const {
     return dataSize + _numTextureBytesAllocatedOnCPU;
 }
 
-} // namespace openspace::globebrowsing::cache
+} // namespace openspace

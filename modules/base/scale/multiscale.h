@@ -38,7 +38,7 @@ public:
     void update(const UpdateData& data) override;
     glm::dvec3 scaleValue(const UpdateData& data) const override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     std::vector<ghoul::mm_unique_ptr<Scale>> _scales;

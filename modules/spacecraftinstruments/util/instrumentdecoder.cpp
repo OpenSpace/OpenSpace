@@ -38,8 +38,8 @@ namespace {
         std::optional<std::string> stopCommand;
         std::vector<std::string> spice;
     };
-#include "instrumentdecoder_codegen.cpp"
 } // namespace
+#include "instrumentdecoder_codegen.cpp"
 
 namespace openspace {
 

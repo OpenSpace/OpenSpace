@@ -36,7 +36,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation {  struct Documentation; }
+struct Documentation;
 
 struct Milestone {
     std::string name;
@@ -156,7 +156,7 @@ public:
      *
      * \return The Documentation that describes the required structure for a Dictionary
      */
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     /**

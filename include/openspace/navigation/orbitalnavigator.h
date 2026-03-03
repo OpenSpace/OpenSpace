@@ -43,22 +43,19 @@
 #include <utility>
 
 namespace openspace {
-    namespace scripting { struct LuaLibrary; }
-    class Camera;
-    struct CameraPose;
-    class SceneGraphNode;
-    struct SurfacePositionHandle;
-    class Syncable;
-} // namespace
 
-namespace openspace::interaction {
-
-class MouseInputState;
+class Camera;
+struct CameraPose;
 class KeyboardInputState;
+struct LuaLibrary;
+class MouseInputState;
+class SceneGraphNode;
+struct SurfacePositionHandle;
+class Syncable;
 
-class OrbitalNavigator : public properties::PropertyOwner {
+class OrbitalNavigator : public PropertyOwner {
 public:
-    struct IdleBehavior : public properties::PropertyOwner {
+    struct IdleBehavior : public PropertyOwner {
         enum class Behavior {
             Orbit = 0,
             OrbitAtConstantLat,
@@ -67,15 +64,15 @@ public:
 
         IdleBehavior();
 
-        properties::BoolProperty apply;
-        properties::BoolProperty shouldTriggerWhenIdle;
-        properties::FloatProperty idleWaitTime;
-        properties::BoolProperty abortOnCameraInteraction;
-        properties::BoolProperty invert;
-        properties::FloatProperty speedScaleFactor;
-        properties::FloatProperty dampenInterpolationTime;
+        BoolProperty apply;
+        BoolProperty shouldTriggerWhenIdle;
+        FloatProperty idleWaitTime;
+        BoolProperty abortOnCameraInteraction;
+        BoolProperty invert;
+        FloatProperty speedScaleFactor;
+        FloatProperty dampenInterpolationTime;
 
-        properties::OptionProperty defaultBehavior;
+        OptionProperty defaultBehavior;
         std::optional<Behavior> chosenBehavior;
     };
 
@@ -154,7 +151,7 @@ public:
      * \return The Lua library that contains all Lua functions available to affect the
      *         OrbitalNavigator
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     struct CameraRotationDecomposition {
@@ -164,14 +161,14 @@ private:
 
     using Displacement = std::pair<glm::dvec3, glm::dvec3>;
 
-    struct Friction : public properties::PropertyOwner {
+    struct Friction : public PropertyOwner {
         Friction();
 
-        properties::BoolProperty roll;
-        properties::BoolProperty rotational;
-        properties::BoolProperty zoom;
+        BoolProperty roll;
+        BoolProperty rotational;
+        BoolProperty zoom;
 
-        properties::FloatProperty friction;
+        FloatProperty friction;
     };
 
     void updateAnchorNode(const SceneGraphNode* anchorNode);
@@ -185,60 +182,60 @@ private:
     Friction _friction;
 
     /// Anchor: Node to follow and orbit
-    properties::StringProperty _anchor;
+    StringProperty _anchor;
 
     /// Aim: Node to look at (when camera direction is reset), empty string means same as
     /// anchor. If these are the same node we call it the `focus` node
-    properties::StringProperty _aim;
+    StringProperty _aim;
 
     // Reset camera direction to the anchor node.
-    properties::TriggerProperty _retargetAnchor;
+    TriggerProperty _retargetAnchor;
     // Reset camera direction to the aim node.
-    properties::TriggerProperty _retargetAim;
+    TriggerProperty _retargetAim;
 
-    properties::BoolProperty _followAnchorNodeRotation;
-    properties::FloatProperty _followAnchorNodeRotationDistance;
+    BoolProperty _followAnchorNodeRotation;
+    FloatProperty _followAnchorNodeRotationDistance;
 
 
-    struct LimitZoom : public properties::PropertyOwner {
+    struct LimitZoom : public PropertyOwner {
         LimitZoom();
 
-        properties::BoolProperty enableZoomInLimit;
-        properties::FloatProperty minimumAllowedDistance;
+        BoolProperty enableZoomInLimit;
+        FloatProperty minimumAllowedDistance;
 
-        properties::BoolProperty enableZoomOutLimit;
-        properties::FloatProperty maximumAllowedDistance;
+        BoolProperty enableZoomOutLimit;
+        FloatProperty maximumAllowedDistance;
     };
 
     LimitZoom _limitZoom;
 
-    properties::BoolProperty _disableZoom;
-    properties::BoolProperty _disableRoll;
+    BoolProperty _disableZoom;
+    BoolProperty _disableRoll;
 
-    properties::FloatProperty _mouseSensitivity;
-    properties::FloatProperty _joystickSensitivity;
-    properties::FloatProperty _websocketSensitivity;
+    FloatProperty _mouseSensitivity;
+    FloatProperty _joystickSensitivity;
+    FloatProperty _websocketSensitivity;
 
-    properties::BoolProperty _useAdaptiveStereoscopicDepth;
-    properties::FloatProperty _stereoscopicDepthOfFocusSurface;
-    properties::FloatProperty _staticViewScaleExponent;
+    BoolProperty _useAdaptiveStereoscopicDepth;
+    FloatProperty _stereoscopicDepthOfFocusSurface;
+    FloatProperty _staticViewScaleExponent;
 
-    properties::BoolProperty _constantVelocityFlight;
+    BoolProperty _constantVelocityFlight;
 
-    properties::FloatProperty _retargetInterpolationTime;
-    properties::FloatProperty _stereoInterpolationTime;
-    properties::FloatProperty _followRotationInterpolationTime;
+    FloatProperty _retargetInterpolationTime;
+    FloatProperty _stereoInterpolationTime;
+    FloatProperty _followRotationInterpolationTime;
 
-    properties::BoolProperty _invertMouseButtons;
+    BoolProperty _invertMouseButtons;
 
-    properties::BoolProperty _shouldRotateAroundUp;
+    BoolProperty _shouldRotateAroundUp;
 
     enum class UpDirectionChoice {
         XAxis = 0,
         YAxis,
         ZAxis
     };
-    properties::OptionProperty _upToUseForRotation;
+    OptionProperty _upToUseForRotation;
 
     MouseCameraStates _mouseStates;
     JoystickCameraStates _joystickStates;
@@ -456,6 +453,6 @@ private:
         const SurfacePositionHandle& positionHandle) const;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___ORBITALNAVIGATOR___H__

@@ -88,12 +88,12 @@ namespace {
         // The log level for this specific text-based log
         std::optional<LogLevel> logLevel;
     };
-#include "logfactory_codegen.cpp"
 } // namespace
+#include "logfactory_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation LogFactoryDocumentation() {
+Documentation LogFactoryDocumentation() {
     return codegen::doc<Parameters>("core_logfactory");
 }
 

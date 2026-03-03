@@ -30,14 +30,14 @@
 #include <openspace/properties/scalar/boolproperty.h>
 #include <openspace/properties/scalar/floatproperty.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 /**
  * The class InteractionMonitor keeps track of user interactions during an OpenSpace
  * session. It keeps track of when the latest interaction was made and of when the state
  * changes to idle.
  */
-class InteractionMonitor : public properties::PropertyOwner {
+class InteractionMonitor : public PropertyOwner {
 public:
     InteractionMonitor();
 
@@ -58,13 +58,13 @@ public:
 
 private:
     double _lastInteractionTime = 0;
-    properties::BoolProperty _isInActiveState;
-    properties::FloatProperty _idleTime; // in seconds
+    BoolProperty _isInActiveState;
+    FloatProperty _idleTime; // in seconds
 
     // @TODO (lovisa) make a list of interactions to listen for
     // and only allow registering updates from those interactions
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___INTERACTIONMONITOR___H__

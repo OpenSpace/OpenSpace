@@ -46,6 +46,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr int8_t DataCacheFileVersion = 13;
     constexpr int8_t LabelCacheFileVersion = 11;
     constexpr int8_t ColorCacheFileVersion = 11;
@@ -65,27 +67,27 @@ namespace {
 
     template <typename T>
     using LoadDataFunc = std::function<T(
-        std::filesystem::path, std::optional<openspace::dataloader::DataMapping> specs
+        std::filesystem::path, std::optional<dataloader::DataMapping> specs
     )>;
 
     template <typename T>
     T internalLoadFileWithCache(std::filesystem::path filePath,
-                                std::optional<openspace::dataloader::DataMapping> specs,
+                                std::optional<dataloader::DataMapping> specs,
                                 LoadDataFunc<T> loadFunction,
                                 LoadCacheFunc<T> loadCacheFunction,
                                 SaveCacheFunc<T> saveCacheFunction)
     {
         static_assert(
-            std::is_same_v<T, openspace::dataloader::Dataset> ||
-            std::is_same_v<T, openspace::dataloader::Labelset> ||
-            std::is_same_v<T, openspace::dataloader::ColorMap>
+            std::is_same_v<T, dataloader::Dataset> ||
+            std::is_same_v<T, dataloader::Labelset> ||
+            std::is_same_v<T, dataloader::ColorMap>
         );
 
         ZoneScoped;
 
         std::string info;
         if (specs.has_value()) {
-            info = openspace::dataloader::generateHashString(*specs);
+            info = dataloader::generateHashString(*specs);
         }
         std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
             filePath,

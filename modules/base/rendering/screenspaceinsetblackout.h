@@ -45,23 +45,23 @@ public:
     void deinitializeGL() override;
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    class BlackoutShape : public properties::PropertyOwner {
+    class BlackoutShape : public PropertyOwner {
     public:
         struct Point {
             Point(glm::vec2& inData, std::string identifier, std::string guiName);
 
             void updateData();
 
-            std::unique_ptr<properties::Property::PropertyInfo> propInfo = nullptr;
-            std::unique_ptr<properties::Vec2Property> prop = nullptr;
+            std::unique_ptr<Property::PropertyInfo> propInfo = nullptr;
+            std::unique_ptr<Vec2Property> prop = nullptr;
             /// Pointer to data used when user modifies the point position
             glm::vec2* dataptr;
         };
 
-        class Spline : public properties::PropertyOwner {
+        class Spline : public PropertyOwner {
         public:
             Spline(std::vector<glm::vec2>& inData, std::string baseString);
 
@@ -79,18 +79,18 @@ private:
             /// Control points for the spline
             std::vector<std::unique_ptr<Point>> points;
             /// Position for the new point used when adding a new point to a spline
-            properties::Vec2Property newPointPosition;
+            Vec2Property newPointPosition;
             /// Selects which place in the list where the new point should be inserted
-            properties::OptionProperty addSelector;
+            OptionProperty addSelector;
             /// Adds a new point based on given position and place in the list
-            properties::TriggerProperty addButton;
+            TriggerProperty addButton;
             /// Selects which point to remove
-            properties::OptionProperty removeSelector;
+            OptionProperty removeSelector;
             /// Removes a point
-            properties::TriggerProperty removeButton;
+            TriggerProperty removeButton;
         };
 
-        class Corners : public properties::PropertyOwner {
+        class Corners : public PropertyOwner {
         public:
             explicit Corners(std::vector<glm::vec2>& inData);
 
@@ -119,13 +119,13 @@ private:
          * Enables a brighted color for the shape which makes it easier to see the
          * boundaries of the shape during setup
          **/
-        properties::BoolProperty enableCalibrationColor;
+        BoolProperty enableCalibrationColor;
 
         /**
          * Enables a calibration texture instead of the shape which can be used to check
          * which position values to use during shape setup
          **/
-        properties::BoolProperty enableCalibrationPattern;
+        BoolProperty enableCalibrationPattern;
 
     private:
         std::unique_ptr<Corners> corners;
@@ -134,8 +134,8 @@ private:
         std::unique_ptr<Spline> bottomSpline;
         std::unique_ptr<Spline> leftSpline;
         bool textureTypeHasChanged = false;
-        properties::StringProperty calibrationTexturePath;
-        properties::TriggerProperty copyToClipboardTrigger;
+        StringProperty calibrationTexturePath;
+        TriggerProperty copyToClipboardTrigger;
     };
 
     void bindTexture(ghoul::opengl::TextureUnit& unit) override;

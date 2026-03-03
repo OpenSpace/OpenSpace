@@ -556,7 +556,7 @@ double* mapDensityToVoxels(double* densityArray, std::vector<glm::dvec3> positio
 
 GenerateDebrisVolumeTask::GenerateDebrisVolumeTask(const ghoul::Dictionary& dictionary)
 {
-    openspace::documentation::testSpecificationAndThrow(
+    openspace::testSpecificationAndThrow(
         documentation(),
         dictionary,
         "GenerateDebrisVolumeTask"
@@ -786,7 +786,7 @@ void GenerateDebrisVolumeTask::perform(const Task::ProgressCallback& progressCal
     }
 }
 
-documentation::Documentation GenerateDebrisVolumeTask::documentation() {
+Documentation GenerateDebrisVolumeTask::documentation() {
     using namespace documentation;
     return {
         "GenerateDebrisVolumeTask",

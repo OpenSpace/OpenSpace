@@ -161,7 +161,7 @@ bool FieldlinesState::loadStateFromOsfls(const std::string& pathToOsflsFile) {
 }
 
 bool FieldlinesState::loadStateFromJson(const std::string& pathToJsonFile,
-                                        fls::Model Model, float coordToMeters)
+                                        Model Model, float coordToMeters)
 {
     // --------------------- ENSURE FILE IS VALID, THEN PARSE IT --------------------- //
     std::ifstream ifs(pathToJsonFile);
@@ -408,7 +408,7 @@ void FieldlinesState::saveStateToJson(const std::string& absPath) {
 void FieldlinesState::clear() {
     _isMorphable = 0;
     _triggerTime = -1.0;
-    _model = fls::Model::Invalid;
+    _model = Model::Invalid;
 
     _extraQuantities.clear();
     _extraQuantityNames.clear();
@@ -417,7 +417,7 @@ void FieldlinesState::clear() {
     _vertexPositions.clear();
 }
 
-void FieldlinesState::setModel(fls::Model m) {
+void FieldlinesState::setModel(Model m) {
     _model = m;
 }
 
@@ -481,7 +481,7 @@ const std::vector<GLint>& FieldlinesState::lineStart() const {
     return _lineStart;
 }
 
-fls::Model FieldlinesState::FieldlinesState::model() const {
+Model FieldlinesState::FieldlinesState::model() const {
     return _model;
 }
 

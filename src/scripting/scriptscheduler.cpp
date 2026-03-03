@@ -37,22 +37,24 @@
 #include "scriptscheduler_lua.inl"
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This enables or disables the ScriptScheduler. If disabled, no scheduled scripts "
         "will be executed. If enabled, scheduled scripts will be executed at their given "
         "time as normal.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShouldRunAllTimeJumpInfo = {
+    constexpr Property::PropertyInfo ShouldRunAllTimeJumpInfo = {
         "ShouldRunAllTimeJump",
         "Should run all time jump",
         "If 'true': In a time jump, all scheduled scripts between the old time and the "
         "new time is executed. If 'false': In a time jump, no scripts scheduled between "
         "the new time and the old time is executed.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ScheduledScript)]] Parameters {
@@ -78,13 +80,12 @@ namespace {
         // The group that this script belongs to, default group is 0
         std::optional<int> group;
     };
-
-#include "scriptscheduler_codegen.cpp"
 } // namespace
+#include "scriptscheduler_codegen.cpp"
 
-namespace openspace::scripting {
+namespace openspace {
 
-documentation::Documentation ScriptScheduler::Documentation() {
+Documentation ScriptScheduler::Documentation() {
     // @TODO (abock, 2021-03-25)  This is not really correct. This function currently
     // returns the documentation for the ScheduledScript, not for the ScriptScheduler
     // itself. This should be cleaned up a bit
@@ -92,7 +93,7 @@ documentation::Documentation ScriptScheduler::Documentation() {
 }
 
 ScriptScheduler::ScriptScheduler()
-    : properties::PropertyOwner({ "ScriptScheduler" })
+    : PropertyOwner({ "ScriptScheduler" })
     , _enabled(EnabledInfo, true)
     , _shouldRunAllTimeJump(ShouldRunAllTimeJumpInfo, true)
 {
@@ -287,4 +288,4 @@ LuaLibrary ScriptScheduler::luaLibrary() {
     };
 }
 
-} // namespace openspace::scripting
+} // namespace openspace

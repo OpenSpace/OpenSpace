@@ -53,14 +53,16 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo PropertyUriInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo PropertyUriInfo = {
         "URI",
         "Property URI",
         "The URI of the property that is displayed in this dashboard item.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisplayStringInfo = {
+    constexpr Property::PropertyInfo DisplayStringInfo = {
         "DisplayString",
         "Display string",
         "The String that is being displayed. It must either be empty (in which case only "
@@ -71,7 +73,7 @@ namespace {
         "vector, for example two {} for vec2 types, three for vec3 types, etc. For more "
         "information on how to structure the formatting string, see the documentation at "
         "https://en.cppreference.com/w/cpp/utility/format/spec.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `DashboardItem` will show the value of the provided property. Depending on the
@@ -84,12 +86,12 @@ namespace {
         // [[codegen::verbatim(DisplayStringInfo.description)]]
         std::optional<std::string> displayString;
     };
-#include "dashboarditempropertyvalue_codegen.cpp"
 } // namespace
+#include "dashboarditempropertyvalue_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemPropertyValue::Documentation() {
+Documentation DashboardItemPropertyValue::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_propertyvalue",
         DashboardTextItem::Documentation()
@@ -116,7 +118,7 @@ void DashboardItemPropertyValue::update() {
     ZoneScoped;
 
     if (_propertyIsDirty) [[unlikely]] {
-        _property = openspace::property(_propertyUri);
+        _property = property(_propertyUri);
         _propertyIsDirty = false;
     }
 
@@ -125,52 +127,52 @@ void DashboardItemPropertyValue::update() {
     }
     const std::string_view type = _property->className();
     if (type == "DoubleProperty") {
-        double value = static_cast<properties::DoubleProperty*>(_property)->value();
+        double value = static_cast<DoubleProperty*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(_displayString.value(), std::make_format_args(value));
     }
     else if (type == "FloatProperty") {
-        float value = static_cast<properties::FloatProperty*>(_property)->value();
+        float value = static_cast<FloatProperty*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(_displayString.value(), std::make_format_args(value));
     }
     else if (type == "IntProperty") {
-        int value = static_cast<properties::IntProperty*>(_property)->value();
+        int value = static_cast<IntProperty*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(_displayString.value(), std::make_format_args(value));
     }
     else if (type == "LongProperty") {
-        long value = static_cast<properties::LongProperty*>(_property)->value();
+        long value = static_cast<LongProperty*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(_displayString.value(), std::make_format_args(value));
     }
     else if (type == "ShortProperty") {
-        short value = static_cast<properties::ShortProperty*>(_property)->value();
+        short value = static_cast<ShortProperty*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(_displayString.value(), std::make_format_args(value));
     }
     else if (type == "UIntProperty") {
-        unsigned int v = static_cast<properties::UIntProperty*>(_property)->value();
+        unsigned int v = static_cast<UIntProperty*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(_displayString.value(), std::make_format_args(v));
     }
     else if (type == "ULongProperty") {
-        unsigned long v = static_cast<properties::ULongProperty*>(_property)->value();
+        unsigned long v = static_cast<ULongProperty*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(_displayString.value(), std::make_format_args(v));
     }
     else if (type == "UShortProperty") {
-        unsigned short v = static_cast<properties::UShortProperty*>(_property)->value();
+        unsigned short v = static_cast<UShortProperty*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(_displayString.value(), std::make_format_args(v));
     }
     else if (type == "DVec2Property") {
-        glm::dvec2 v = static_cast<properties::DVec2Property*>(_property)->value();
+        glm::dvec2 v = static_cast<DVec2Property*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(_displayString.value(), std::make_format_args(v.x, v.y));
     }
     else if (type == "DVec3Property") {
-        glm::dvec3 v = static_cast<properties::DVec3Property*>(_property)->value();
+        glm::dvec3 v = static_cast<DVec3Property*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(
             _displayString.value(),
@@ -178,7 +180,7 @@ void DashboardItemPropertyValue::update() {
         );
     }
     else if (type == "DVec4Property") {
-        glm::dvec4 v = static_cast<properties::DVec4Property*>(_property)->value();
+        glm::dvec4 v = static_cast<DVec4Property*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(
             _displayString.value(),
@@ -186,12 +188,12 @@ void DashboardItemPropertyValue::update() {
         );
     }
     else if (type == "IVec2Property") {
-        glm::ivec2 v = static_cast<properties::IVec2Property*>(_property)->value();
+        glm::ivec2 v = static_cast<IVec2Property*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(_displayString.value(), std::make_format_args(v.x, v.y));
     }
     else if (type == "IVec3Property") {
-        glm::ivec3 v = static_cast<properties::IVec3Property*>(_property)->value();
+        glm::ivec3 v = static_cast<IVec3Property*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(
             _displayString.value(),
@@ -199,7 +201,7 @@ void DashboardItemPropertyValue::update() {
         );
     }
     else if (type == "IVec4Property") {
-        glm::ivec4 v = static_cast<properties::IVec4Property*>(_property)->value();
+        glm::ivec4 v = static_cast<IVec4Property*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(
             _displayString.value(),
@@ -207,12 +209,12 @@ void DashboardItemPropertyValue::update() {
         );
     }
     else if (type == "UVec2Property") {
-        glm::uvec2 v = static_cast<properties::UVec2Property*>(_property)->value();
+        glm::uvec2 v = static_cast<UVec2Property*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(_displayString.value(), std::make_format_args(v.x, v.y));
     }
     else if (type == "UVec3Property") {
-        glm::uvec3 v = static_cast<properties::UVec3Property*>(_property)->value();
+        glm::uvec3 v = static_cast<UVec3Property*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(
             _displayString.value(),
@@ -220,7 +222,7 @@ void DashboardItemPropertyValue::update() {
         );
     }
     else if (type == "UVec4Property") {
-        glm::uvec4 v = static_cast<properties::UVec4Property*>(_property)->value();
+        glm::uvec4 v = static_cast<UVec4Property*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(
             _displayString.value(),
@@ -228,12 +230,12 @@ void DashboardItemPropertyValue::update() {
         );
     }
     else if (type == "Vec2Property") {
-        glm::vec2 v = static_cast<properties::Vec2Property*>(_property)->value();
+        glm::vec2 v = static_cast<Vec2Property*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(_displayString.value(), std::make_format_args(v.x, v.y));
     }
     else if (type == "Vec3Property") {
-        glm::vec3 v = static_cast<properties::Vec3Property*>(_property)->value();
+        glm::vec3 v = static_cast<Vec3Property*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(
             _displayString.value(),
@@ -241,7 +243,7 @@ void DashboardItemPropertyValue::update() {
         );
     }
     else if (type == "Vec4Property") {
-        glm::vec4 v = static_cast<properties::Vec4Property*>(_property)->value();
+        glm::vec4 v = static_cast<Vec4Property*>(_property)->value();
         // @CPP26(abock): This can be replaced with std::runtime_format
         _buffer = std::vformat(
             _displayString.value(),

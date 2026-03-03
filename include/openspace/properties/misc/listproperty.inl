@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::properties {
+namespace openspace {
 
 template <typename T>
 ListProperty<T>::ListProperty(Property::PropertyInfo info, std::vector<T> values)
@@ -32,5 +32,5 @@ ListProperty<T>::ListProperty(Property::PropertyInfo info, std::vector<T> values
 template <typename T>
 ListProperty<T>::~ListProperty() {}
 
-} // namespace openspace::properties
+} // namespace openspace
 

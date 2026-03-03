@@ -43,7 +43,7 @@ void AtmosphereModule::internalInitialize(const ghoul::Dictionary&) {
     fRenderable->registerClass<RenderableAtmosphere>("RenderableAtmosphere");
 }
 
-std::vector<documentation::Documentation> AtmosphereModule::documentations() const {
+std::vector<Documentation> AtmosphereModule::documentations() const {
     return {
         RenderableAtmosphere::Documentation()
     };

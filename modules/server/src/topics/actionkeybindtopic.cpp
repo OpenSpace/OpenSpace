@@ -57,7 +57,7 @@ bool ActionKeybindTopic::isDone() const {
 }
 
 nlohmann::json jsonKeybind(const KeyWithModifier& k, std::string identifier) {
-    const interaction::Action& action = global::actionManager->action(identifier);
+    const openspace::Action& action = global::actionManager->action(identifier);
 
     return {
         { "key", ghoul::to_string(k.key) },
@@ -75,11 +75,11 @@ nlohmann::json jsonKeybind(const KeyWithModifier& k, std::string identifier) {
 
 nlohmann::json ActionKeybindTopic::allActionsKeybinds() const {
     nlohmann::json json = {};
-    std::vector<interaction::Action> actions = global::actionManager->actions();
+    std::vector<openspace::Action> actions = global::actionManager->actions();
     std::sort(
         actions.begin(),
         actions.end(),
-        [](const interaction::Action& lhs, const interaction::Action& rhs) {
+        [](const openspace::Action& lhs, const openspace::Action& rhs) {
             if (!lhs.name.empty() && !rhs.name.empty()) {
                 return lhs.name < rhs.name;
             }
@@ -89,7 +89,7 @@ nlohmann::json ActionKeybindTopic::allActionsKeybinds() const {
         }
     );
 
-    for (const interaction::Action& action : actions) {
+    for (const openspace::Action& action : actions) {
         json["actions"].push_back(action);
     }
 
@@ -110,12 +110,12 @@ nlohmann::json ActionKeybindTopic::allActionsKeybinds() const {
 }
 
 nlohmann::json ActionKeybindTopic::action(const std::string& identifier) const {
-    std::vector<interaction::Action> actions = global::actionManager->actions();
+    std::vector<openspace::Action> actions = global::actionManager->actions();
 
     auto found = std::find_if(
         actions.begin(),
         actions.end(),
-        [&identifier](const interaction::Action& action) {
+        [&identifier](const openspace::Action& action) {
             return action.identifier == identifier;
         }
     );
@@ -123,8 +123,7 @@ nlohmann::json ActionKeybindTopic::action(const std::string& identifier) const {
     if (found == actions.end()) {
         return {};
     }
-    interaction::Action action = *found;
-
+    openspace::Action action = *found;
     return action;
 }
 

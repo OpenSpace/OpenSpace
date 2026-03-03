@@ -37,24 +37,26 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo SimplificationInfo = {
         "Simplification",
         "Do time simplification",
         "If this value is enabled, the time is displayed in nuanced units, such as "
         "minutes, hours, days, years, etc. If this value is disabled, it is always "
         "displayed in seconds.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
+    constexpr Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested unit",
         "If the simplification is disabled, this time unit is used as a destination to "
         "convert the seconds into.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransitionFormatInfo = {
+    constexpr Property::PropertyInfo TransitionFormatInfo = {
         "TransitionFormat",
         "Transition format",
         "Format string used to format the text used while in a delta time transition, "
@@ -65,10 +67,10 @@ namespace {
         "current delta time unit. More information about how to make use of the format "
         "string, see the documentation at "
         "https://en.cppreference.com/w/cpp/utility/format/spec.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RegularFormatInfo = {
+    constexpr Property::PropertyInfo RegularFormatInfo = {
         "RegularFormat",
         "Regular format",
         "The format string used to format the text if the target delta time is the same "
@@ -77,18 +79,16 @@ namespace {
         "delta time is paused or the empty string otherwise. More information about how "
         "to make use of the format string, see the documentation at "
         "https://en.cppreference.com/w/cpp/utility/format/spec.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     std::vector<std::string> unitList() {
-        std::vector<std::string> res(openspace::TimeUnits.size());
+        std::vector<std::string> res(TimeUnits.size());
         std::transform(
-            openspace::TimeUnits.begin(),
-            openspace::TimeUnits.end(),
+            TimeUnits.begin(),
+            TimeUnits.end(),
             res.begin(),
-            [](openspace::TimeUnit unit) -> std::string {
-                return std::string(nameForTimeUnit(unit));
-            }
+            [](TimeUnit unit) { return std::string(nameForTimeUnit(unit)); }
         );
         return res;
     }
@@ -110,12 +110,12 @@ namespace {
         // [[codegen::verbatim(RegularFormatInfo.description)]]
         std::optional<std::string> regularFormat;
     };
-#include "dashboarditemsimulationincrement_codegen.cpp"
 } // namespace
+#include "dashboarditemsimulationincrement_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemSimulationIncrement::Documentation() {
+Documentation DashboardItemSimulationIncrement::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_simulationincrement",
         DashboardTextItem::Documentation()
@@ -138,9 +138,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
     _doSimplification = p.simplification.value_or(_doSimplification);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(
-            _doSimplification ?
-            properties::Property::Visibility::Hidden :
-            properties::Property::Visibility::User
+            _doSimplification ? Property::Visibility::Hidden : Property::Visibility::User
         );
     });
     addProperty(_doSimplification);
@@ -155,9 +153,7 @@ DashboardItemSimulationIncrement::DashboardItemSimulationIncrement(
         _doSimplification = false;
     }
     _requestedUnit.setVisibility(
-        _doSimplification ?
-        properties::Property::Visibility::Hidden :
-        properties::Property::Visibility::User
+        _doSimplification ? Property::Visibility::Hidden : Property::Visibility::User
     );
     addProperty(_requestedUnit);
 

@@ -44,12 +44,12 @@ public:
     void initializeGL() override;
     void deinitializeGL() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    bool createGeometry() override;
+    void createGeometry() override;
+    void destroyGeometry() override;
     void setUniforms() override;
-    bool destroyGeometry() override;
     void renderGeometry() const override;
 
     GLuint _vao = 0;

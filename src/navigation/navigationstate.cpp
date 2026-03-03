@@ -86,10 +86,10 @@ namespace {
         // 'YYYY MM DD HH:mm:ss.xxx'
         std::optional<std::variant<double, std::string>> timestamp;
     };
-#include "navigationstate_codegen.cpp"
 } // namespace
+#include "navigationstate_codegen.cpp"
 
-namespace openspace::interaction {
+namespace openspace {
 
 NavigationState::NavigationState(const ghoul::Dictionary& dictionary) {
     const Parameters p = codegen::bake<Parameters>(dictionary);
@@ -306,8 +306,8 @@ nlohmann::json NavigationState::toJson() const {
     return result;
 }
 
-documentation::Documentation NavigationState::Documentation() {
+Documentation NavigationState::Documentation() {
     return codegen::doc<Parameters>("core_navigation_state");
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

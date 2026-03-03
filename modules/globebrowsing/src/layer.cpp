@@ -37,6 +37,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "Layer";
 
     constexpr std::string_view KeyIdentifier = "Identifier";
@@ -44,70 +46,70 @@ namespace {
     constexpr std::string_view KeyDesc = "Description";
     constexpr std::string_view KeyLayerGroupID = "LayerGroupID";
 
-    constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
+    constexpr Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
         "The type of this Layer. This value is a read-only property and thus cannot be "
         "changed.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BlendModeInfo = {
+    constexpr Property::PropertyInfo BlendModeInfo = {
         "BlendMode",
         "Blend mode",
         "This value specifies the blend mode that is applied to this layer. The blend "
         "mode determines how this layer is added to the underlying layers beneath.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "If this value is enabled, the layer will be used for the final composition of "
         "the planet. If this value is disabled, the layer will be ignored in the "
         "composition.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ResetInfo = {
+    constexpr Property::PropertyInfo ResetInfo = {
         "Reset",
         "Reset",
         "If this value is triggered, this layer will be reset. This will delete the "
         "local cache for this layer and will trigger a fresh load of all tiles.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RemoveInfo = {
+    constexpr Property::PropertyInfo RemoveInfo = {
         "Remove",
         "Remove",
         "If this value is triggered, a script will be executed that will remove this "
         "layer before the next frame.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ColorInfo = {
+    constexpr Property::PropertyInfo ColorInfo = {
         "Color",
         "Color",
         "If the 'Type' of this layer is a solid color, this value determines what this "
         "solid color is.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ZIndexInfo = {
+    constexpr Property::PropertyInfo ZIndexInfo = {
         "ZIndex",
         "Z-Index",
         "Determines where the layer is placed in the list of available layers. Layers "
         "are applied in the order of their Z indices, with higher indices obscuring "
         "layers with lower values.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GuiDescriptionInfo = {
+    constexpr Property::PropertyInfo GuiDescriptionInfo = {
         "GuiDescription",
         "Gui description",
         "This is the description for the scene graph node to be shown in the gui "
         "example: Earth is a special place.",
-        openspace::properties::Property::Visibility::Hidden
+        Property::Visibility::Hidden
     };
 
     struct [[codegen::Dictionary(Layer), codegen::noexhaustive()]] Parameters {
@@ -172,17 +174,17 @@ namespace {
         // layers on top of this
         std::optional<BlendMode> blendMode;
     };
-#include "layer_codegen.cpp"
 } // namespace
+#include "layer_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation Layer::Documentation() {
+Documentation Layer::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_layer");
 }
 
 Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGroup& parent)
-    : properties::PropertyOwner({
+    : PropertyOwner({
         layerDict.value<std::string>(KeyIdentifier),
         layerDict.hasKey(KeyName) ? layerDict.value<std::string>(KeyName) : "",
         layerDict.hasKey(KeyDesc) ? layerDict.value<std::string>(KeyDesc) : ""
@@ -371,7 +373,7 @@ Layer::Layer(layers::Group::ID id, const ghoul::Dictionary& layerDict, LayerGrou
     addProperty(_reset);
     addProperty(_remove);
 
-    _solidColor.setViewOption(properties::Property::ViewOptions::Color);
+    _solidColor.setViewOption(Property::ViewOptions::Color);
 
     addVisibleProperties();
 
@@ -549,4 +551,4 @@ void Layer::addVisibleProperties() {
     }
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

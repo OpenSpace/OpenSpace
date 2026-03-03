@@ -59,60 +59,62 @@
 #include "navigationhandler_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     // Helper structs for the visitor pattern of the std::variant
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
     constexpr std::string_view _loggerCat = "NavigationHandler";
 
-    constexpr openspace::properties::Property::PropertyInfo DisableKeybindingsInfo = {
+    constexpr Property::PropertyInfo DisableKeybindingsInfo = {
         "DisableKeybindings",
         "Disable all keybindings",
         "Disables all keybindings without removing them. Please note that this does not "
         "apply to the key to open the console.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableMouseInputInfo = {
+    constexpr Property::PropertyInfo DisableMouseInputInfo = {
         "DisableMouseInputs",
         "Disable all mouse inputs",
         "Disables all mouse inputs and prevents them from affecting the camera.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DisableJoystickInputInfo = {
+    constexpr Property::PropertyInfo DisableJoystickInputInfo = {
         "DisableJoystickInputs",
         "Disable all joystick inputs",
         "Disables all joystick inputs and prevents them from affecting the camera.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FrameInfo = {
+    constexpr Property::PropertyInfo FrameInfo = {
         "UseKeyFrameInteraction",
         "Use keyframe interaction",
         "If this is set to 'true' the entire interaction is based off key frames rather "
         "than using the mouse interaction.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo JumpToFadeDurationInfo = {
+    constexpr Property::PropertyInfo JumpToFadeDurationInfo = {
         "JumpToFadeDuration",
         "Jump to fade duration",
         "The number of seconds the fading of the rendering should take per default when "
         "navigating through a 'jump' transition. This is when the rendering is first "
         "faded to black, then the camera is moved, and then the rendering fades in "
         "again.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    const openspace::properties::PropertyOwner::PropertyOwnerInfo MouseVisualizerInfo = {
+    const PropertyOwner::PropertyOwnerInfo MouseVisualizerInfo = {
         "MouseInteractionVisualizer",
         "Mouse Interaction Visualizer",
         "The mouse interaction visualizer shows the distance the mouse has been moved "
         "since it was pressed down."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MouseVisualizerEnabledInfo = {
+    constexpr Property::PropertyInfo MouseVisualizerEnabledInfo = {
         "Enabled",
         "Enabled",
         "If this setting is enabled, the mouse interaction will be visualized on the "
@@ -120,26 +122,26 @@ namespace {
         "down."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MouseVisualizerColorInfo = {
+    constexpr Property::PropertyInfo MouseVisualizerColorInfo = {
         "Color",
         "Color",
         "The color used to render the line showing the mouse visualizer."
     };
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 NavigationHandler::NavigationHandler()
-    : properties::PropertyOwner({ "NavigationHandler", "Navigation Handler" })
+    : PropertyOwner({ "NavigationHandler", "Navigation Handler" })
     , _disableKeybindings(DisableKeybindingsInfo, false)
     , _disableMouseInputs(DisableMouseInputInfo, false)
     , _disableJoystickInputs(DisableJoystickInputInfo, false)
     , _useKeyFrameInteraction(FrameInfo, false)
     , _jumpToFadeDuration(JumpToFadeDurationInfo, 1.f, 0.f, 10.f)
     , _mouseVisualizer({
-        properties::PropertyOwner(MouseVisualizerInfo),
-        properties::BoolProperty(MouseVisualizerEnabledInfo, false),
-        properties::Vec4Property(
+        PropertyOwner(MouseVisualizerInfo),
+        BoolProperty(MouseVisualizerEnabledInfo, false),
+        Vec4Property(
             MouseVisualizerColorInfo,
             glm::vec4(1.f),
             glm::vec4(0.f),
@@ -162,7 +164,7 @@ NavigationHandler::NavigationHandler()
 
     addPropertySubOwner(_mouseVisualizer.owner);
     _mouseVisualizer.owner.addProperty(_mouseVisualizer.enable);
-    _mouseVisualizer.color.setViewOption(properties::Property::ViewOptions::Color);
+    _mouseVisualizer.color.setViewOption(Property::ViewOptions::Color);
     _mouseVisualizer.owner.addProperty(_mouseVisualizer.color);
 }
 
@@ -264,8 +266,8 @@ void NavigationHandler::triggerFadeToTransition(std::string transitionScript,
     // No syncing, as this was called from a script that should have been synced already
     global::scriptEngine->queueScript({
         .code = std::move(script),
-        .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
-        .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+        .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
+        .sendToRemote = ScriptEngine::Script::ShouldSendToRemote::No
     });
 }
 
@@ -385,15 +387,15 @@ void NavigationHandler::updateCameraTransitions() {
                 global::actionManager->triggerAction(
                     action,
                     dict,
-                    interaction::ActionManager::ShouldBeSynchronized::No
+                    ActionManager::ShouldBeSynchronized::No
                 );
             }
         }
 
-        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
+        global::eventEngine->publishEvent<EventCameraFocusTransition>(
             _camera,
             node,
-            events::EventCameraFocusTransition::Transition::Approaching
+            EventCameraFocusTransition::Transition::Approaching
         );
     };
 
@@ -409,15 +411,15 @@ void NavigationHandler::updateCameraTransitions() {
                 global::actionManager->triggerAction(
                     action,
                     dict,
-                    interaction::ActionManager::ShouldBeSynchronized::No
+                    ActionManager::ShouldBeSynchronized::No
                 );
             }
         }
 
-        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
+        global::eventEngine->publishEvent<EventCameraFocusTransition>(
             _camera,
             node,
-            events::EventCameraFocusTransition::Transition::Reaching
+            EventCameraFocusTransition::Transition::Reaching
         );
      };
 
@@ -433,15 +435,15 @@ void NavigationHandler::updateCameraTransitions() {
                 global::actionManager->triggerAction(
                     action,
                     dict,
-                    interaction::ActionManager::ShouldBeSynchronized::No
+                    ActionManager::ShouldBeSynchronized::No
                 );
             }
         }
 
-        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
+        global::eventEngine->publishEvent<EventCameraFocusTransition>(
             _camera,
             node,
-            events::EventCameraFocusTransition::Transition::Receding
+            EventCameraFocusTransition::Transition::Receding
         );
     };
 
@@ -457,15 +459,15 @@ void NavigationHandler::updateCameraTransitions() {
                 global::actionManager->triggerAction(
                     action,
                     dict,
-                    interaction::ActionManager::ShouldBeSynchronized::No
+                    ActionManager::ShouldBeSynchronized::No
                 );
             }
         }
 
-        global::eventEngine->publishEvent<events::EventCameraFocusTransition>(
+        global::eventEngine->publishEvent<EventCameraFocusTransition>(
             _camera,
             node,
-            events::EventCameraFocusTransition::Transition::Exiting
+            EventCameraFocusTransition::Transition::Exiting
         );
     };
 
@@ -585,7 +587,7 @@ void NavigationHandler::keyboardCallback(Key key, KeyModifier modifier, KeyActio
 void NavigationHandler::renderOverlay() const {
     if (_mouseVisualizer.enable && _mouseVisualizer.isMousePressed) {
         constexpr glm::vec4 StartColor = glm::vec4(0.4f, 0.4f, 0.4f, 0.25f);
-        rendering::helper::renderLine(
+        rendering::renderLine(
             _mouseVisualizer.clickPosition,
             _mouseVisualizer.currentPosition,
             global::windowDelegate->currentWindowSize(),
@@ -858,7 +860,7 @@ void NavigationHandler::clearGlobalJoystickStates() {
     );
 }
 
-scripting::LuaLibrary NavigationHandler::luaLibrary() {
+LuaLibrary NavigationHandler::luaLibrary() {
     return {
         "navigation",
         {
@@ -906,4 +908,4 @@ scripting::LuaLibrary NavigationHandler::luaLibrary() {
     };
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

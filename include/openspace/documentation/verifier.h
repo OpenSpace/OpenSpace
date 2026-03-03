@@ -38,7 +38,7 @@
 
 namespace ghoul { class Dictionary; }
 
-namespace openspace::documentation {
+namespace openspace {
 
 /**
  * The base class of all Verifier%s. Each object must have an Verifier::operator()
@@ -1349,7 +1349,7 @@ extern template class AnnotationVerifier<DoubleVector3Verifier>;
 extern template class AnnotationVerifier<IntVector4Verifier>;
 extern template class AnnotationVerifier<DoubleVector4Verifier>;
 
-} // namespace openspace::documentation
+} // namespace openspace
 
 #include "verifier.inl"
 

@@ -34,21 +34,21 @@
 #include <cstdlib>
 
 namespace {
+    using namespace openspace;
+
     // Used in the LM algorithm
     struct FunctionData {
         std::vector<glm::dvec3> selectedPoints;
         std::vector<glm::dvec2> screenPoints;
         int nDOF;
-        const openspace::Camera* camera;
-        openspace::SceneGraphNode* node;
+        const Camera* camera;
+        SceneGraphNode* node;
         LMstat stats;
     };
 
     // project back a 3D point in model view to clip space [-1,1] coordinates on the view
     // plane
-    glm::dvec2 castToNDC(const glm::dvec3& vec, openspace::Camera& camera,
-                         openspace::SceneGraphNode* node)
-    {
+    glm::dvec2 castToNDC(const glm::dvec3& vec, Camera& camera, SceneGraphNode* node) {
         glm::dvec3 posInCamSpace = glm::inverse(camera.rotationQuaternion()) *
             (node->worldRotationMatrix() * vec +
                 (node->worldPosition() - camera.positionVec3()));
@@ -128,7 +128,7 @@ namespace {
             camPos += directionToCenter * q[2];
         }
         // Update the camera state
-        openspace::Camera cam = *(ptr->camera);
+        Camera cam = *(ptr->camera);
         cam.setPositionVec3(camPos);
         cam.setRotation(globalCamRot * localCamRot);
 
@@ -280,5 +280,5 @@ void DirectInputSolver::setLevMarqVerbosity(bool verbose) {
     _lmstat.verbose = verbose;
 }
 
-} // openspace namespace
+} // namespace openspace
 

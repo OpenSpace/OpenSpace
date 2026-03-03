@@ -45,12 +45,12 @@ namespace {
         // The path to the file to export raw VBO data to.
         std::filesystem::path outFilePath;
     };
-#include "readspecktask_codegen.cpp"
 } // namespace
+#include "readspecktask_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ReadSpeckTask::Documentation() {
+Documentation ReadSpeckTask::Documentation() {
     return codegen::doc<Parameters>("gaiamission_speckfiletorawdata");
 }
 

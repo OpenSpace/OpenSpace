@@ -30,13 +30,14 @@
 #include <openspace/rendering/transferfunction.h>
 #include <openspace/util/histogram.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/opengl/texture.h>
 #include <algorithm>
 #include <cmath>
 
 namespace {
-    bool compareSplitPoints(const openspace::BrickSelection& a,
-                            const openspace::BrickSelection& b)
-    {
+    using namespace openspace;
+
+    bool compareSplitPoints(const BrickSelection& a, const BrickSelection& b) {
         return a.splitPoints < b.splitPoints;
     }
 } // namespace
@@ -349,6 +350,7 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
 
     size_t tfWidth = tf->width();
 
+    tf->texture().downloadTexture();
     std::vector<float> gradients(tfWidth - 1);
     for (size_t offset = 0; offset < tfWidth - 1; offset++) {
         const glm::vec4 prevRgba = tf->sample(offset);
@@ -357,8 +359,10 @@ bool LocalTfBrickSelector::calculateBrickErrors() {
         const float colorDifference = glm::distance(prevRgba, nextRgba);
         const float alpha = (prevRgba.w + nextRgba.w) * 0.5f;
 
-        gradients[offset] = colorDifference*alpha;
+        gradients[offset] = colorDifference * alpha;
     }
+    tf->texture().clearDownloadedTexture();
+
 
     const unsigned int nHistograms = _tsp->numTotalNodes();
     _brickErrors = std::vector<Error>(nHistograms);

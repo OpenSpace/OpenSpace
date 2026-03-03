@@ -26,13 +26,15 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/lua/lua_helper.h>
 
+using namespace openspace;
+
 namespace {
 
 /**
  * Returns the name of the profile with which OpenSpace was started.
  */
 [[codegen::luawrap]] std::string profileName() {
-    std::string p = openspace::global::configuration->profile;
+    std::string p = global::configuration->profile;
     const std::string builtInPath = absPath("${PROFILES}").string();
     const std::string userPath = absPath("${USER_PROFILES}").string();
 
@@ -51,7 +53,7 @@ namespace {
 * Returns the full path of the profile with which OpenSpace was started.
 */
 [[codegen::luawrap]] std::filesystem::path profilePath() {
-    return openspace::global::configuration->profile;
+    return global::configuration->profile;
 }
 
 /**
@@ -66,8 +68,6 @@ namespace {
 [[codegen::luawrap]] void saveSettingsToProfile(std::optional<std::string> saveFilePath,
                                                 bool overwrite = true)
 {
-    using namespace openspace;
-
     if (!saveFilePath.has_value()) {
         std::time_t t = std::time(nullptr);
         std::tm* utcTime = std::gmtime(&t);
@@ -108,9 +108,9 @@ namespace {
         throw ghoul::lua::LuaError("Save filepath string is empty");
     }
 
-    const properties::PropertyOwner& root = *global::rootPropertyOwner;
+    const PropertyOwner& root = *global::rootPropertyOwner;
     std::string currentTime = std::string(global::timeManager->time().ISO8601());
-    interaction::NavigationState navState = global::navigationHandler->navigationState();
+    NavigationState navState = global::navigationHandler->navigationState();
     global::profile->saveCurrentSettingsToProfile(root, currentTime, navState);
     global::configuration->profile = *saveFilePath;
 
@@ -165,6 +165,6 @@ namespace {
     }
 }
 
-#include "profile_lua_codegen.cpp"
-
 } // namespace
+
+#include "profile_lua_codegen.cpp"

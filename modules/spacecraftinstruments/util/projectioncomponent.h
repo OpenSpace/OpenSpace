@@ -44,9 +44,9 @@ namespace ghoul::opengl {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
-class ProjectionComponent : public properties::PropertyOwner {
+class ProjectionComponent : public PropertyOwner {
 public:
     ProjectionComponent();
 
@@ -94,19 +94,19 @@ public:
     float fieldOfViewY() const;
     float aspectRatio() const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     bool generateProjectionLayerTexture(const glm::ivec2& size);
     bool generateDepthTexture(const glm::ivec2& size);
 
 protected:
-    properties::BoolProperty _performProjection;
-    properties::TriggerProperty _clearAllProjections;
-    properties::FloatProperty _projectionFading;
+    BoolProperty _performProjection;
+    TriggerProperty _clearAllProjections;
+    FloatProperty _projectionFading;
 
-    properties::IVec2Property _textureSize;
-    properties::TriggerProperty _applyTextureSize;
+    IVec2Property _textureSize;
+    TriggerProperty _applyTextureSize;
     bool _textureSizeDirty = false;
     bool _mipMapDirty = false;
 

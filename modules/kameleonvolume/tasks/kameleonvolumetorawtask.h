@@ -30,7 +30,7 @@
 #include <ghoul/glm.h>
 #include <filesystem>
 
-namespace openspace::kameleonvolume {
+namespace openspace {
 
 class KameleonVolumeToRawTask : public Task {
 public:
@@ -39,7 +39,7 @@ public:
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
 
-    static documentation::Documentation documentation();
+    static Documentation documentation();
 
 private:
     std::filesystem::path _inputPath;
@@ -57,6 +57,6 @@ private:
     glm::vec3 _upperDomainBound = glm::vec3(0.f);
 };
 
-} // namespace openspace::kameleon
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_KAMELEONVOLUME___KAMELEONVOLUMETORAWTASK___H__

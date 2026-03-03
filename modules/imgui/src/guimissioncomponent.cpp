@@ -34,16 +34,18 @@
 #include <openspace/util/timerange.h>
 
 namespace {
+    using namespace openspace;
+
     const ImVec2 Size = ImVec2(350, 500);
 
-    void renderMission(const openspace::Mission& mission) {
+    void renderMission(const Mission& mission) {
         // The hashname is necessary since ImGui computes a hash based off the name of the
         // elements.  This does not play well with using %s as the name
         const std::string missionHashname = "##" + mission.name();
 
 
-        const double currentTime = openspace::global::timeManager->time().j2000Seconds();
-        const openspace::MissionPhase::Trace t = mission.phaseTrace(currentTime, 0);
+        const double currentTime = global::timeManager->time().j2000Seconds();
+        const MissionPhase::Trace t = mission.phaseTrace(currentTime, 0);
 
         const int treeOption = t.empty() ? 0 : ImGuiTreeNodeFlags_DefaultOpen;
         if (ImGui::TreeNodeEx(
@@ -57,11 +59,11 @@ namespace {
                 ImGui::Text("%s", mission.description().c_str());
             }
 
-            const openspace::TimeRange range = mission.timeRange();
-            const openspace::Time startTime = openspace::Time(range.start);
-            const openspace::Time endTime  = openspace::Time(range.end);
+            const TimeRange range = mission.timeRange();
+            const Time startTime = Time(range.start);
+            const Time endTime = Time(range.end);
 
-            openspace::CaptionText("Mission Progress");
+            CaptionText("Mission Progress");
 
             ImGui::Text("%s", std::string(startTime.UTC()).c_str());
             ImGui::SameLine();
@@ -74,24 +76,23 @@ namespace {
                 &v,
                 s,
                 e,
-                std::string(openspace::global::timeManager->time().UTC()).c_str()
+                std::string(global::timeManager->time().UTC()).c_str()
             );
             ImGui::SameLine();
             ImGui::Text("%s", std::string(endTime.UTC()).c_str());
 
-            openspace::CaptionText("Phases");
+            CaptionText("Phases");
 
-            for (const openspace::Mission& m : mission.phases()) {
+            for (const Mission& m : mission.phases()) {
                 renderMission(m);
             }
 
             ImGui::TreePop();
         }
     }
-
 } // namespace
 
-namespace openspace::gui {
+namespace openspace {
 
 GuiMissionComponent::GuiMissionComponent()
     : GuiComponent("Missions", "Mission Information")
@@ -120,4 +121,4 @@ void GuiMissionComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace::gui
+} // namespace openspace

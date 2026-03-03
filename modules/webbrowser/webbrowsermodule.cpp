@@ -44,24 +44,24 @@
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "WebBrowser";
 
-    constexpr openspace::properties::Property::PropertyInfo
-        UpdateBrowserBetweenRenderablesInfo =
-    {
+    constexpr Property::PropertyInfo UpdateBrowserBetweenRenderablesInfo = {
         "UpdateBrowserBetweenRenderables",
         "Update browser between renderables",
         "Run the message loop of the browser between calls to render individual "
         "renderables. When disabled, the browser message loop only runs once per frame.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BrowserUpdateIntervalInfo = {
+    constexpr Property::PropertyInfo BrowserUpdateIntervalInfo = {
         "BrowserUpdateInterval",
         "Browser update interval",
         "The time in microseconds between running the message loop of the browser. Only "
         "used if UpdateBrowserBetweenRenderables is true.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
     /**
@@ -107,12 +107,12 @@ namespace {
         // fatal crash that is caused by the accelerated rendering.
         std::optional<bool> disableAcceleratedRendering;
     };
-#include "webbrowsermodule_codegen.cpp"
 } // namespace
+#include "webbrowsermodule_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation WebBrowserModule::Documentation() {
+Documentation WebBrowserModule::Documentation() {
     return codegen::doc<Parameters>("module_webbrowser");
 }
 
@@ -264,7 +264,7 @@ bool WebBrowserModule::canUseAcceleratedRendering() {
 #endif // WIN32
 }
 
-std::vector<documentation::Documentation> WebBrowserModule::documentations() const {
+std::vector<Documentation> WebBrowserModule::documentations() const {
     return {
         ScreenSpaceBrowser::Documentation()
     };

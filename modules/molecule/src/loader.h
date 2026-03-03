@@ -35,7 +35,7 @@ struct md_trajectory_i;
 struct md_trajectory_api;
 struct md_bitfield_t;
 
-namespace molecule::load {
+namespace molecule {
 
 md_molecule_api* moleculeApi(std::filesystem::path filename);
 
@@ -49,6 +49,6 @@ bool setRecenterTarget(md_trajectory_i* traj, const md_bitfield_t* atom_mask);
 bool clearCache(md_trajectory_i* traj);
 int64_t numCacheFrames(md_trajectory_i* traj);
 
-} // namespace molecule::load
+} // namespace molecule
 
 #endif // __OPENSPACE_MODULE_MOLECULE___LOADER___H__

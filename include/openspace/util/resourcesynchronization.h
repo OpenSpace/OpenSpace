@@ -34,7 +34,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 /**
  * The ResourceSynchronization class handles the download of persistent datasets, meaning
@@ -173,7 +173,7 @@ public:
      */
     bool isRejected() const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     /**

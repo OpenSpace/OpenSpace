@@ -26,7 +26,7 @@
 
 #include <iterator>
 
-namespace openspace::globebrowsing::layers {
+namespace openspace::layers {
 
 // The order and values of these enums are implicitly used in many places in the code and
 // in the shaders, so we need to ensure that the order is not messed with
@@ -166,4 +166,4 @@ static_assert(
     )
 );
 
-} // namespace openspace::globebrowsing::layers
+} // namespace openspace::layers

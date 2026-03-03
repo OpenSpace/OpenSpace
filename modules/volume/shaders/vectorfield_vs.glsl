@@ -22,45 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_VOLUME___TRANSFERFUNCTION___H__
-#define __OPENSPACE_MODULE_VOLUME___TRANSFERFUNCTION___H__
+#version __CONTEXT__
 
-#include <modules/volume/envelope.h>
-#include <string>
-#include <vector>
+layout(location = 0) in vec3 in_position;
+layout(location = 1) in vec3 in_direction;
+layout(location = 2) in float in_magnitude;
 
-namespace ghoul {
-    namespace opengl { class Texture; }
-    class Dictionary;
-} // namespace ghoul
-struct lua_State;
+out Data {
+  vec3 position;
+  vec3 direction;
+  float magnitude;
+} out_data;
 
-namespace openspace::volume {
-
-class TransferFunction {
-public:
-    TransferFunction() = default;
-    explicit TransferFunction(const std::string& string);
-
-    void envelopesToLua(lua_State* state) const;
-
-    bool setEnvelopesFromString(const std::string& s);
-    bool setEnvelopesFromLua(lua_State* state);
-
-    void loadEnvelopesFromFile(const std::string& path);
-    void saveEnvelopesToFile(const std::string& path) const;
-
-    bool operator!=(const TransferFunction& tf);
-    bool hasEnvelopes() const;
-
-    bool createTexture(ghoul::opengl::Texture& ptr);
-    std::string serializedToString() const;
-
-private:
-    std::string _loadableFilePath;
-    std::vector<Envelope> _envelopes;
-};
-
-} // namespace openspace::volume
-
-#endif // __OPENSPACE_MODULE_VOLUME___TRANSFERFUNCTION___H__
+void main() {
+  out_data.position = in_position;
+  out_data.direction = in_direction;
+  out_data.magnitude = in_magnitude;
+}

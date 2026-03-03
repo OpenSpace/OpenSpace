@@ -38,7 +38,7 @@ namespace {
     constexpr double LengthEpsilon = 100.0 * std::numeric_limits<double>::epsilon();
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 PathCurve::InsufficientPrecisionError::InsufficientPrecisionError(std::string error)
     : ghoul::RuntimeError(std::move(error), "PathCurve")
@@ -295,4 +295,4 @@ glm::dvec3 LinearCurve::interpolate(double u) const {
     return ghoul::interpolateLinear(u, _points.front(), _points.back());
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

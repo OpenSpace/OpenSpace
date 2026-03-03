@@ -27,7 +27,7 @@
 #include <ghoul/lua/ghoul_lua.h>
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 BoolProperty::BoolProperty(Property::PropertyInfo info, bool value)
     : TemplateProperty<bool>(std::move(info), value)
@@ -53,4 +53,4 @@ std::string BoolProperty::stringValue() const {
     return _value ? "true" : "false";
 }
 
-} // namespace openspace::properties
+} // namespace openspace

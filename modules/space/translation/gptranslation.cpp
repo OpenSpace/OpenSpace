@@ -52,11 +52,13 @@ namespace {
         // provides multiple general pertubation elements. Defaults to 1.
         std::optional<int> element [[codegen::greater(0)]];
     };
+} // namespace
 #include "gptranslation_codegen.cpp"
 
-    ghoul::Dictionary gpDictionaryToKepler(const ghoul::Dictionary& dictionary) {
-        using namespace openspace;
+namespace {
+    using namespace openspace;
 
+    ghoul::Dictionary gpDictionaryToKepler(const ghoul::Dictionary& dictionary) {
         const Parameters p = codegen::bake<Parameters>(dictionary);
         if (!std::filesystem::is_regular_file(p.file)) {
             throw ghoul::RuntimeError("The provided TLE file must exist");
@@ -95,7 +97,7 @@ namespace {
 
 namespace openspace {
 
-documentation::Documentation GPTranslation::Documentation() {
+Documentation GPTranslation::Documentation() {
     return codegen::doc<Parameters>("space_translation_gp");
 }
 

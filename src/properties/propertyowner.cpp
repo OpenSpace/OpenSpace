@@ -39,6 +39,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "PropertyOwner";
 
     // The URIs have to be validated because it is not known in what order things are
@@ -48,23 +50,19 @@ namespace {
     // been added to the property tree so URI will be invalid and not sent. But the parent
     // will be added later, which will include the child in it's subowners
     void publishPropertyTreeUpdatedEvent(std::string_view uri) {
-        using namespace openspace;
-
         if (!uri.empty()) {
-            global::eventEngine->publishEvent<events::EventPropertyTreeUpdated>(uri);
+            global::eventEngine->publishEvent<EventPropertyTreeUpdated>(uri);
         }
     }
 
     void publishPropertyTreePrunedEvent(std::string_view uri) {
-        using namespace openspace;
-
         if (!uri.empty()) {
-            global::eventEngine->publishEvent<events::EventPropertyTreePruned>(uri);
+            global::eventEngine->publishEvent<EventPropertyTreePruned>(uri);
         }
     }
 } // namespace
 
-namespace openspace::properties {
+namespace openspace {
 
 PropertyOwner::PropertyOwner(PropertyOwnerInfo info)
     : _identifier(std::move(info.identifier))
@@ -292,7 +290,7 @@ void PropertyOwner::addProperty(Property& prop) {
     addProperty(&prop);
 }
 
-void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* owner) {
+void PropertyOwner::addPropertySubOwner(PropertyOwner* owner) {
     ZoneScoped;
 
     ghoul_precondition(owner != nullptr, "owner must not be nullptr");
@@ -344,7 +342,7 @@ void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner* ow
     }
 }
 
-void PropertyOwner::addPropertySubOwner(openspace::properties::PropertyOwner& owner) {
+void PropertyOwner::addPropertySubOwner(PropertyOwner& owner) {
     addPropertySubOwner(&owner);
 }
 
@@ -380,7 +378,7 @@ void PropertyOwner::removeProperty(Property& prop) {
     removeProperty(&prop);
 }
 
-void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner* owner) {
+void PropertyOwner::removePropertySubOwner(PropertyOwner* owner) {
     ghoul_precondition(owner != nullptr, "owner must not be nullptr");
 
     // See if we can find the name of the propertyowner to add
@@ -417,7 +415,7 @@ void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner*
     }
 }
 
-void PropertyOwner::removePropertySubOwner(openspace::properties::PropertyOwner& owner) {
+void PropertyOwner::removePropertySubOwner(PropertyOwner& owner) {
     removePropertySubOwner(&owner);
 }
 
@@ -473,4 +471,4 @@ void PropertyOwner::updateUriCaches() {
     }
 }
 
-} // namespace openspace::properties
+} // namespace openspace

@@ -34,24 +34,26 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo FilePathInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo FilePathInfo = {
         "FilePath",
         "File path",
         "The file path that is used for this image provider. The file must point to an "
         "image that is then loaded and used for all tiles.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     struct [[codegen::Dictionary(SingleImageProvider)]] Parameters {
         // [[codegen::verbatim(FilePathInfo.description)]]
         std::string filePath;
     };
-#include "singleimagetileprovider_codegen.cpp"
 } // namespace
+#include "singleimagetileprovider_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation SingleImageProvider::Documentation() {
+Documentation SingleImageProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_singleimageprovider");
 }
 
@@ -87,15 +89,17 @@ void SingleImageProvider::reset() {
         return;
     }
 
-    _tileTexture = ghoul::io::TextureReader::ref().loadTexture(_filePath.value(), 2);
+    _tileTexture = ghoul::io::TextureReader::ref().loadTexture(
+        _filePath.value(),
+        2,
+        { .filter = ghoul::opengl::Texture::FilterMode::AnisotropicMipMap }
+    );
     if (!_tileTexture) {
         throw ghoul::RuntimeError(std::format(
             "Unable to load texture '{}'", _filePath.value()
         ));
     }
 
-    _tileTexture->uploadTexture();
-    _tileTexture->setFilter(ghoul::opengl::Texture::FilterMode::AnisotropicMipMap);
     _tile = Tile{ _tileTexture.get(), std::nullopt, Tile::Status::OK };
 }
 
@@ -111,4 +115,4 @@ float SingleImageProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

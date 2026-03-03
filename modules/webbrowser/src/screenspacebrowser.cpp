@@ -36,27 +36,29 @@
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ScreenSpaceBrowser";
 
-    constexpr openspace::properties::Property::PropertyInfo DimensionsInfo = {
+    constexpr Property::PropertyInfo DimensionsInfo = {
         "Dimensions",
         "Browser dimensions",
         "The dimensions of the web browser window in pixels.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UrlInfo = {
+    constexpr Property::PropertyInfo UrlInfo = {
         "Url",
         "URL",
         "The URL to load.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ReloadInfo = {
+    constexpr Property::PropertyInfo ReloadInfo = {
         "Reload",
         "Reload",
         "Reload the web browser.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     // This `ScreenSpaceRenderable` can be used to render a webpage in front of the
@@ -75,9 +77,8 @@ namespace {
         // [[codegen::verbatim(DimensionsInfo.description)]]
         std::optional<glm::vec2> dimensions [[codegen::greater({ 0, 0 })]];
     };
-#include "screenspacebrowser_codegen.cpp"
-
 } // namespace
+#include "screenspacebrowser_codegen.cpp"
 
 namespace openspace {
 
@@ -89,7 +90,7 @@ void ScreenSpaceBrowser::ScreenSpaceRenderHandler::setTexture(GLuint t) {
     _texture = t;
 }
 
-documentation::Documentation ScreenSpaceBrowser::Documentation() {
+Documentation ScreenSpaceBrowser::Documentation() {
     return codegen::doc<Parameters>("core_screenspace_browser");
 }
 

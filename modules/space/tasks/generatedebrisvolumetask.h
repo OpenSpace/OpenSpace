@@ -35,14 +35,14 @@
 #include <string>
 #include <vector>
 
-namespace openspace::volume {
+namespace openspace {
 
 class GenerateDebrisVolumeTask : public Task {
 public:
     GenerateDebrisVolumeTask(const ghoul::Dictionary& dictionary);
     std::string description() override;
     void perform(const Task::ProgressCallback& progressCallback) override;
-    static documentation::Documentation documentation();
+    static Documentation documentation();
 
     std::string _gridType;
 
@@ -63,6 +63,6 @@ private:
     float _maxApogee;
 };
 
-} // namespace openspace::volume
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_SPACE___GENERATEDEBRISVOLUMETASK___H__

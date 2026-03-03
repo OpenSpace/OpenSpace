@@ -30,7 +30,7 @@
 
 #include <modules/globebrowsing/src/tileindex.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 class RawTileDataReader;
 
@@ -69,6 +69,6 @@ protected:
     bool _hasTile = false;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILELOADJOB___H__

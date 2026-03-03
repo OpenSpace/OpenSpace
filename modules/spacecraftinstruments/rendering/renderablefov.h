@@ -52,7 +52,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     /**
@@ -71,9 +71,9 @@ private:
     glm::dvec3 orthogonalProjection(const glm::dvec3& vecFov, double time,
         const std::string& target) const;
 
-    properties::FloatProperty _lineWidth;
-    properties::DoubleProperty _standOffDistance;
-    properties::BoolProperty _alwaysDrawFov;
+    FloatProperty _lineWidth;
+    DoubleProperty _standOffDistance;
+    BoolProperty _alwaysDrawFov;
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewProjectionTransform, colorStart, colorEnd,
         activeColor, targetInFieldOfViewColor, intersectionStartColor,
@@ -125,22 +125,22 @@ private:
     RenderInformation _fieldOfViewBounds;
 
     struct {
-        properties::PropertyOwner container;
+        PropertyOwner container;
 
         /// Start color for uninteresting times
-        properties::Vec3Property defaultStart;
+        Vec3Property defaultStart;
         /// End color for uninteresting times
-        properties::Vec3Property defaultEnd;
+        Vec3Property defaultEnd;
         /// Color use when a field-of-view is projecting
-        properties::Vec3Property active;
+        Vec3Property active;
         /// Color to use for target in fov
-        properties::Vec3Property targetInFieldOfView;
+        Vec3Property targetInFieldOfView;
         /// Color at the start of intersection
-        properties::Vec3Property intersectionStart;
+        Vec3Property intersectionStart;
         /// Color at the end of intersection
-        properties::Vec3Property intersectionEnd;
+        Vec3Property intersectionEnd;
         /// Color for the orthogonal square
-        properties::Vec3Property square;
+        Vec3Property square;
     } _colors;
 };
 

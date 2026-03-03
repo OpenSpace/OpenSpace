@@ -27,7 +27,7 @@
 
 #include <ghoul/opengl/ghoul_gl.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 /**
  * This grid is a regular grid with skirts around its edges. The areas covered by the
@@ -65,6 +65,6 @@ private:
     const GLsizei _elementSize;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___SKIRTEDGRID___H__

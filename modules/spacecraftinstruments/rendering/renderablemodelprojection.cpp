@@ -47,12 +47,14 @@
 #include <variant>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo PerformShadingInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo PerformShadingInfo = {
         "PerformShading",
         "Perform shading",
         "If true, the model will be shaded based on the location of the Sun. If false, "
         "shading is disabled and the model is fully illuminated.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     // Similarly to the
@@ -102,12 +104,12 @@ namespace {
         // [[codegen::verbatim(PerformShadingInfo.description)]]
         std::optional<bool> performShading;
     };
-#include "renderablemodelprojection_codegen.cpp"
 } // namespace
+#include "renderablemodelprojection_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableModelProjection::Documentation() {
+Documentation RenderableModelProjection::Documentation() {
     return codegen::doc<Parameters>("spacecraftinstruments_renderablemodelprojection");
 }
 
@@ -438,4 +440,4 @@ glm::mat4 RenderableModelProjection::attitudeParameters(double time, const glm::
     );
 }
 
-}  // namespace openspace
+} // namespace openspace

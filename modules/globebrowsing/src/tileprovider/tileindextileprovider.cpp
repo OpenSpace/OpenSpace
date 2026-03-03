@@ -33,23 +33,25 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo UniqueBackgroundColors = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo UniqueBackgroundColors = {
         "UniqueBackgroundColor",
         "Unique background color",
         "If 'true' each index tile will have a unique background color assigned to it.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(TileIndexTileProvider)]] Parameters {
         // [[codegen::verbatim(UniqueBackgroundColors.description)]]
         std::optional<bool> uniqueBackgroundColors;
     };
-#include "tileindextileprovider_codegen.cpp"
 } // namespace
+#include "tileindextileprovider_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation TileIndexTileProvider::Documentation() {
+Documentation TileIndexTileProvider::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileindextileprovider");
 }
 
@@ -130,4 +132,4 @@ float TileIndexTileProvider::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

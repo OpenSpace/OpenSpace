@@ -35,7 +35,7 @@
 
 namespace openspace {
 
-namespace properties { class SelectionProperty; }
+class SelectionProperty;
 
 class DataProcessor {
 public:
@@ -46,10 +46,10 @@ public:
         glm::size3_t& dimensions) = 0;
 
     virtual void addDataValues(const std::string& data,
-        properties::SelectionProperty& dataOptions) = 0;
+        SelectionProperty& dataOptions) = 0;
 
     virtual std::vector<float*> processData(const std::string& data,
-        properties::SelectionProperty& dataOptions, glm::size3_t& dimensions) = 0;
+        SelectionProperty& dataOptions, glm::size3_t& dimensions) = 0;
 
     void useLog(bool useLog);
     void useHistogram(bool useHistogram);

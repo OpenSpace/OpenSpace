@@ -24,7 +24,7 @@
 
 #include <modules/fieldlinessequence/util/commons.h>
 
-namespace openspace::fls {
+namespace openspace {
 
 Model stringToModel(const std::string& s) {
     if (s == "batsrus") {
@@ -42,4 +42,4 @@ Model stringToModel(const std::string& s) {
     return Model::Invalid;
 }
 
-} // namespace openspace::fls
+} // namespace openspace

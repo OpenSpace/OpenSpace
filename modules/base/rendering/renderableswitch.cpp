@@ -32,11 +32,13 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo DistanceThresholdInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo DistanceThresholdInfo = {
         "DistanceThreshold",
         "Distance threshold",
         "Threshold in meters for when the switch happens between the two renderables.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // A RenderableSwitch can be used to render one of two renderables depending on the
@@ -61,12 +63,12 @@ namespace {
         // [[codegen::verbatim(DistanceThresholdInfo.description)]]
         std::optional<double> distanceThreshold [[codegen::greater(0.f)]];
     };
-#include "renderableswitch_codegen.cpp"
 } // namespace
+#include "renderableswitch_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableSwitch::Documentation() {
+Documentation RenderableSwitch::Documentation() {
     return codegen::doc<Parameters>(
         "base_renderable_switch"
     );

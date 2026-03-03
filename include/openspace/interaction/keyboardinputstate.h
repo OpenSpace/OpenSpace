@@ -29,7 +29,7 @@
 #include <utility>
 #include <vector>
 
-namespace openspace::interaction {
+namespace openspace {
 
 // This class represents the global input state of interaction devices
 class KeyboardInputState {
@@ -47,6 +47,6 @@ private:
     std::vector<std::pair<Key, KeyModifier>> _keysDown;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___KEYBOARDINPUTSTATE___H__

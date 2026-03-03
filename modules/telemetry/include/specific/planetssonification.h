@@ -36,7 +36,7 @@ namespace osc { struct Blob; }
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
+struct LuaLibrary;
 
 class PlanetsSonification : public TelemetryBase {
 public:
@@ -72,14 +72,14 @@ public:
      * \return The Lua library that contains all Lua functions available to change the
      *         planets sonification
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     // To hold all the data for a planet or a moon, including a list of data for the
     // moons of the planet. However, in the case of a moon, then the list of moons
     // is empty
     struct DataBody {
-        DataBody(std::string inName);
+        explicit DataBody(std::string inName);
 
         std::string name;
         double distance = 0.0;
@@ -162,23 +162,23 @@ private:
     void onNeptuneAllChanged();
     void onNeptuneSettingChanged();
 
-    struct PlanetProperties : properties::PropertyOwner {
-        PlanetProperties(properties::PropertyOwner::PropertyOwnerInfo planetInfo);
+    struct PlanetProperties : PropertyOwner {
+        explicit PlanetProperties(PropertyOwner::PropertyOwnerInfo planetInfo);
 
         // All planets have these settings
-        properties::BoolProperty toggleAll;
-        properties::BoolProperty sizeDayEnabled;
-        properties::BoolProperty gravityEnabled;
-        properties::BoolProperty temperatureEnabled;
+        BoolProperty toggleAll;
+        BoolProperty sizeDayEnabled;
+        BoolProperty gravityEnabled;
+        BoolProperty temperatureEnabled;
 
         // Only some planets have some of these settings
-        properties::BoolProperty atmosphereEnabled;
-        properties::BoolProperty moonsEnabled;
-        properties::BoolProperty ringsEnabled;
+        BoolProperty atmosphereEnabled;
+        BoolProperty moonsEnabled;
+        BoolProperty ringsEnabled;
     };
 
-    struct PrecisionProperties : properties::PropertyOwner {
-        PrecisionProperties(properties::PropertyOwner::PropertyOwnerInfo precisionInfo);
+    struct PrecisionProperties : PropertyOwner {
+        explicit PrecisionProperties(PropertyOwner::PropertyOwnerInfo precisionInfo);
 
         // The low and high precision values are used in different situations. When the
         // planet is the current focus node, then the high precision value is used. This
@@ -186,13 +186,13 @@ private:
         // therefore have better precision. If the planet is not the current focus node,
         // then the low precision value is used to save performance, both on the
         // OpenSpace side and the receiving side.
-        properties::DoubleProperty lowDistancePrecision;
-        properties::DoubleProperty highDistancePrecision;
-        properties::DoubleProperty lowAnglePrecision;
-        properties::DoubleProperty highAnglePrecision;
+        DoubleProperty lowDistancePrecision;
+        DoubleProperty highDistancePrecision;
+        DoubleProperty lowAnglePrecision;
+        DoubleProperty highAnglePrecision;
     };
 
-    properties::BoolProperty _toggleAll;
+    BoolProperty _toggleAll;
     PlanetProperties _mercuryProperty;
     PlanetProperties _venusProperty;
     PlanetProperties _earthProperty;

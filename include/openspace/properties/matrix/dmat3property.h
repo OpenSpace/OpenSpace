@@ -30,7 +30,7 @@
 #include <ghoul/glm.h>
 #include <limits>
 
-namespace openspace::properties {
+namespace openspace {
 
 class DMat3Property : public NumericalProperty<glm::dmat3x3> {
 public:
@@ -54,6 +54,6 @@ private:
     glm::dmat3x3 toValue(lua_State* state) const override final;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___DMAT3PROPERTY___H__

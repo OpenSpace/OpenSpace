@@ -30,62 +30,63 @@
 #include <ghoul/io/socket/websocketserver.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether this server interface is enabled or not.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TypeInfo = {
+    constexpr Property::PropertyInfo TypeInfo = {
         "Type",
         "Type",
         "Whether the interface is using a Socket or a WebSocket.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PortInfo = {
+    constexpr Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The network port to use for this sevrer interface.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DefaultAccessInfo = {
+    constexpr Property::PropertyInfo DefaultAccessInfo = {
         "DefaultAccess",
         "Default access",
         "Sets the default access policy: Allow, RequirePassword or Deny.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AllowAddressesInfo = {
+    constexpr Property::PropertyInfo AllowAddressesInfo = {
         "AllowAddresses",
         "Allow addresses",
         "IP addresses or domains that should always be allowed access to this interface.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        RequirePasswordAddressesInfo = {
+    constexpr Property::PropertyInfo RequirePasswordAddressesInfo = {
         "RequirePasswordAddresses",
         "Require password addresses",
         "IP addresses or domains that should be allowed access if they provide a "
         "password.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DenyAddressesInfo = {
+    constexpr Property::PropertyInfo DenyAddressesInfo = {
         "DenyAddresses",
         "Deny addresses",
         "IP addresses or domains that should never be allowed access to this interface.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PasswordInfo = {
+    constexpr Property::PropertyInfo PasswordInfo = {
         "Password",
         "Password",
         "Password for connecting to this interface.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(ServerInterface)]] Parameters {
@@ -125,8 +126,8 @@ namespace {
         // [[codegen::verbatim(EnabledInfo.description)]]
         bool enabled;
     };
-#include "serverinterface_codegen.cpp"
 } // namespace
+#include "serverinterface_codegen.cpp"
 
 namespace openspace {
 
@@ -139,7 +140,7 @@ std::unique_ptr<ServerInterface> ServerInterface::createFromDictionary(
 }
 
 ServerInterface::ServerInterface(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "", "", "" })
+    : PropertyOwner({ "", "", "" })
     , _socketType(TypeInfo)
     , _port(PortInfo, 0)
     , _enabled(EnabledInfo)

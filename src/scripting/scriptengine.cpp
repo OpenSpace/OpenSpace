@@ -47,6 +47,8 @@
 #include "scriptengine_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ScriptEngine";
 
     constexpr int TableOffset = -3; // top-first argument-second argument
@@ -58,11 +60,7 @@ namespace {
         std::optional<std::string> documentation;
     };
 
-    std::vector<std::string> luaFunctions(const openspace::scripting::LuaLibrary& library,
-                                          std::string prefix)
-    {
-        using namespace openspace::scripting;
-
+    std::vector<std::string> luaFunctions(const LuaLibrary& library, std::string prefix) {
         std::vector<std::string> result;
 
         std::string total = prefix;
@@ -85,10 +83,10 @@ namespace {
 
         return result;
     }
-#include "scriptengine_codegen.cpp"
 } // namespace
+#include "scriptengine_codegen.cpp"
 
-namespace openspace::scripting {
+namespace openspace {
 
 ScriptEngine::ScriptEngine(bool sandboxedLua)
     : _state(ghoul::lua::LuaState::Sandboxed(sandboxedLua))
@@ -226,9 +224,9 @@ bool ScriptEngine::runScript(const Script& script) {
         }
         return false;
     }
-    catch (const documentation::SpecificationError& e) {
+    catch (const SpecificationError& e) {
         LERRORC(e.component, e.message);
-        documentation::logError(e, e.component);
+        logError(e, e.component);
         if (script.callback) {
             script.callback(ghoul::Dictionary());
         }
@@ -371,7 +369,7 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
                 func.helpText = p.documentation.value_or(func.helpText);
                 library.documentations.push_back(std::move(func));
             }
-            catch (const documentation::SpecificationError& e) {
+            catch (const SpecificationError& e) {
                 logError(e);
             }
             lua_pop(state, 1);
@@ -664,7 +662,7 @@ void ScriptEngine::addBaseLibrary() {
         .functions = {
             {
                 "printTrace",
-                &luascriptfunctions::printTrace,
+                &printTrace,
                 { { "", "*" } },
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
@@ -674,7 +672,7 @@ void ScriptEngine::addBaseLibrary() {
             },
             {
                 "printDebug",
-                &luascriptfunctions::printDebug,
+                &printDebug,
                 { { "", "*" } },
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
@@ -684,7 +682,7 @@ void ScriptEngine::addBaseLibrary() {
             },
             {
                 "printInfo",
-                &luascriptfunctions::printInfo,
+                &printInfo,
                 { { "", "*" } },
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
@@ -694,7 +692,7 @@ void ScriptEngine::addBaseLibrary() {
             },
             {
                 "printWarning",
-                &luascriptfunctions::printWarning,
+                &printWarning,
                 { { "", "*" } },
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
@@ -704,7 +702,7 @@ void ScriptEngine::addBaseLibrary() {
             },
             {
                 "printError",
-                &luascriptfunctions::printError,
+                &printError,
                 { { "", "*" } },
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
@@ -714,7 +712,7 @@ void ScriptEngine::addBaseLibrary() {
             },
             {
                 "printFatal",
-                &luascriptfunctions::printFatal,
+                &printFatal,
                 { { "", "*" } },
                 "",
                 "Logs the passed value to the installed LogManager with a LogLevel of "
@@ -742,4 +740,4 @@ void ScriptEngine::addBaseLibrary() {
     addLibrary(lib);
 }
 
-} // namespace openspace::scripting
+} // namespace openspace

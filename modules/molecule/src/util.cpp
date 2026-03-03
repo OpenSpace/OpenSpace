@@ -65,7 +65,7 @@ namespace {
     }
 } // namespace
 
-namespace molecule::util {
+namespace molecule {
 
 void updateRepType(md_gl_representation_t& rep, rep::Type type, float scale) {
     md_gl_representation_args_t repArgs = {};
@@ -110,28 +110,28 @@ void updateRepColor(md_gl_representation_t& rep, const md_molecule_t& mol,
 
     switch (color) {
         case rep::Color::Cpk:
-            color::atoms::cpk(colors, count, mol);
+            cpk(colors, count, mol);
             break;
         case rep::Color::AtomIndex:
-            color::atoms::idx(colors, count, mol);
+            idx(colors, count, mol);
             break;
         case rep::Color::ResId:
-            color::atoms::residueId(colors, count, mol);
+            residueId(colors, count, mol);
             break;
         case rep::Color::ResIndex:
-            color::atoms::residueIndex(colors, count, mol);
+            residueIndex(colors, count, mol);
             break;
         case rep::Color::ChainId:
-            color::atoms::chainId(colors, count, mol);
+            chainId(colors, count, mol);
             break;
         case rep::Color::ChainIndex:
-            color::atoms::chainIndex(colors, count, mol);
+            chainIndex(colors, count, mol);
             break;
         case rep::Color::SecondaryStructure:
-            color::atoms::secondaryStructure(colors, count, mol);
+            secondaryStructure(colors, count, mol);
             break;
         case rep::Color::Uniform:
-            color::atoms::uniform(colors, count, convertColor(uniformColor));
+            uniform(colors, count, convertColor(uniformColor));
             break;
     }
 
@@ -305,4 +305,4 @@ void interpolateFrame(md_molecule_t& mol, const md_trajectory_i* traj,
     }
 }
 
-} // namespace molecule::util
+} // namespace molecule

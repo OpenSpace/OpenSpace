@@ -308,7 +308,7 @@ TEST_CASE("SpiceManager: Get Position Transform Matrix", "[spicemanager]") {
 #elif defined __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif
+#endif // __clang__
 
     // transform reference position into new frame
     std::array<double, 3> stateTransformed;
@@ -318,7 +318,7 @@ TEST_CASE("SpiceManager: Get Position Transform Matrix", "[spicemanager]") {
 #pragma clang diagnostic pop
 #elif defined __GNUC__
 #pragma GCC diagnostic pop
-#endif
+#endif // __clang__
 
     position = positionMatrix * position;
     // check transformed values match

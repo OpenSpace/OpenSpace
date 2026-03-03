@@ -34,11 +34,11 @@
 #include <string>
 
 namespace ghoul { class Dictionary; }
-namespace openspace { struct Documentation; }
 struct CPLXMLNode;
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
+struct Documentation;
 struct TileIndex;
 
 // If you add a new type, also add it to shaders/texturetilemapping.glsl
@@ -55,7 +55,7 @@ enum class Type {
     FfmpegTileProvider
 };
 
-struct TileProvider : public properties::PropertyOwner {
+struct TileProvider : public PropertyOwner {
     static unsigned int NumTileProviders;
 
     static std::unique_ptr<TileProvider> createFromDictionary(
@@ -133,6 +133,6 @@ private:
     virtual void internalDeinitialize();
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__TILEPROVIDER___H__

@@ -39,35 +39,33 @@
 //#define Debugging_ImGui_TreeNode_Indices
 
 namespace {
+    using namespace openspace;
+
     const ImVec2 Size = ImVec2(350, 500);
 
-    constexpr openspace::properties::Property::PropertyInfo UseTreeInfo = {
+    constexpr Property::PropertyInfo UseTreeInfo = {
         "TreeLayout",
         "Use tree layout",
         "If this value is checked, this component will display the properties using a "
         "tree layout, rather than using a flat map. This value should only be set on "
         "property windows that display SceneGraphNodes, or the application might crash.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    int nVisibleProperties(const std::vector<openspace::properties::Property*>& props)
-    {
-        using namespace openspace;
-        using Visibility = properties::Property::Visibility;
-        const Visibility visibilityFilter = global::openSpaceEngine->visibility();
-
+    int nVisibleProperties(const std::vector<Property*>& props) {
         return static_cast<int>(std::count_if(
             props.begin(),
             props.end(),
-            [visibilityFilter](properties::Property* p) {
-                using V = properties::Property::Visibility;
-                return static_cast<std::underlying_type_t<V>>(visibilityFilter) >=
+            [](Property* p) {
+                using V = Property::Visibility;
+                const V visFilter = global::openSpaceEngine->visibility();
+                return static_cast<std::underlying_type_t<V>>(visFilter) >=
                        static_cast<std::underlying_type_t<V>>(p->visibility());
             }
         ));
     }
 
-    void renderTooltip(openspace::properties::PropertyOwner* propOwner) {
+    void renderTooltip(PropertyOwner* propOwner) {
         const bool shouldDisplay = ImGui::IsItemHovered() &&
                                    (!propOwner->description().empty());
 
@@ -86,7 +84,7 @@ namespace {
 
         std::string path;
         std::vector<std::unique_ptr<TreeNode>> children;
-        std::vector<openspace::SceneGraphNode*> nodes;
+        std::vector<SceneGraphNode*> nodes;
 #ifdef Debugging_ImGui_TreeNode_Indices
         int index = 0;
         static int nextIndex;
@@ -101,7 +99,7 @@ namespace {
 #endif // Debugging_ImGui_TreeNode_Indices
 
     void addPathToTree(TreeNode& node, const std::vector<std::string>& path,
-                       openspace::SceneGraphNode* owner)
+                       SceneGraphNode* owner)
     {
         if (path.empty()) {
             // No more path, so we have reached a leaf
@@ -156,14 +154,14 @@ namespace {
     }
 
     void renderTree(const TreeNode& node,
-            const std::function<void (openspace::properties::PropertyOwner*)>& renderFunc)
+            const std::function<void (PropertyOwner*)>& renderFunc)
     {
         if (node.path.empty() || ImGui::TreeNode(node.path.c_str())) {
             for (const std::unique_ptr<TreeNode>& c : node.children) {
                 renderTree(*c, renderFunc);
             }
 
-            for (openspace::SceneGraphNode* n : node.nodes) {
+            for (SceneGraphNode* n : node.nodes) {
                 renderFunc(n);
             }
 
@@ -174,7 +172,7 @@ namespace {
     }
 } // namespace
 
-namespace openspace::gui {
+namespace openspace {
 
 GuiPropertyComponent::GuiPropertyComponent(std::string identifier, std::string guiName,
                                            UseTreeLayout useTree)
@@ -184,21 +182,17 @@ GuiPropertyComponent::GuiPropertyComponent(std::string identifier, std::string g
     addProperty(_useTreeLayout);
 }
 
-void GuiPropertyComponent::setPropertyOwners(
-                                   std::vector<properties::PropertyOwner*> propertyOwners)
-{
+void GuiPropertyComponent::setPropertyOwners(std::vector<PropertyOwner*> propertyOwners) {
     _propertyOwners = std::move(propertyOwners);
 }
 
 void GuiPropertyComponent::setPropertyOwnerFunction(
-                            std::function<std::vector<properties::PropertyOwner*>()> func)
+                                        std::function<std::vector<PropertyOwner*>()> func)
 {
     _propertyOwnerFunction = std::move(func);
 }
 
-void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner) {
-    using namespace properties;
-
+void GuiPropertyComponent::renderPropertyOwner(PropertyOwner* owner) {
     if (owner->propertiesRecursive().empty()) {
         return;
     }
@@ -232,7 +226,7 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
     std::map<std::string, std::vector<Property*>> propertiesByGroup;
     std::vector<Property*> remainingProperies;
 
-    for (properties::Property* p : owner->properties()) {
+    for (Property* p : owner->properties()) {
         const std::string& group = p->groupIdentifier();
         if (group.empty()) {
             remainingProperies.push_back(p);
@@ -247,7 +241,7 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
     for (const std::pair<const K, V>& p : propertiesByGroup) {
         const std::string& groupName = owner->propertyGroupName(p.first);
         if (ImGui::TreeNode(groupName.c_str())) {
-            for (properties::Property* prop : p.second) {
+            for (Property* prop : p.second) {
                 renderProperty(prop, owner);
             }
             ImGui::TreePop();
@@ -258,7 +252,7 @@ void GuiPropertyComponent::renderPropertyOwner(properties::PropertyOwner* owner)
         ImGui::Spacing();
     }
 
-    for (properties::Property* prop : remainingProperies) {
+    for (Property* prop : remainingProperies) {
         renderProperty(prop, owner);
     }
     ImGui::PopID();
@@ -274,21 +268,20 @@ void GuiPropertyComponent::render() {
     _isEnabled = v;
 
     _isCollapsed = ImGui::IsWindowCollapsed();
-    using namespace properties;
 
-    std::vector<properties::PropertyOwner*> owners =
+    std::vector<PropertyOwner*> owners =
         _propertyOwnerFunction ? _propertyOwnerFunction() : _propertyOwners;
 
     std::sort(
         owners.begin(),
         owners.end(),
-        [](properties::PropertyOwner* lhs, properties::PropertyOwner* rhs) {
+        [](PropertyOwner* lhs, PropertyOwner* rhs) {
             return lhs->guiName() < rhs->guiName();
         }
     );
 
     if (_useTreeLayout) {
-        for (properties::PropertyOwner* owner : owners) {
+        for (PropertyOwner* owner : owners) {
             ghoul_assert(
                 dynamic_cast<SceneGraphNode*>(owner),
                 "When using the tree layout, all owners must be SceneGraphNodes"
@@ -324,7 +317,7 @@ void GuiPropertyComponent::render() {
                              (dynamic_cast<SceneGraphNode*>(*owners.begin()) &&
                        dynamic_cast<SceneGraphNode*>(*owners.begin())->guiPath().empty());
 
-    auto renderProp = [this, owners](properties::PropertyOwner* pOwner) {
+    auto renderProp = [this, owners](PropertyOwner* pOwner) {
         const int count = nVisibleProperties(pOwner->propertiesRecursive());
 
         if (count == 0) {
@@ -359,7 +352,7 @@ void GuiPropertyComponent::render() {
     else { // _useTreeLayout && gui groups exist
         TreeNode root("");
 
-        for (properties::PropertyOwner* pOwner : owners) {
+        for (PropertyOwner* pOwner : owners) {
             // We checked above that pOwner is a SceneGraphNode
             SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
             const std::string gui = nOwner->guiPath();
@@ -378,7 +371,7 @@ void GuiPropertyComponent::render() {
 
         ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
 
-        for (properties::PropertyOwner* pOwner : owners) {
+        for (PropertyOwner* pOwner : owners) {
             // We checked above that pOwner is a SceneGraphNode
             SceneGraphNode* nOwner = static_cast<SceneGraphNode*>(pOwner);
 
@@ -393,12 +386,8 @@ void GuiPropertyComponent::render() {
     ImGui::End();
 }
 
-void GuiPropertyComponent::renderProperty(properties::Property* prop,
-                                          properties::PropertyOwner* owner)
-{
-    using Func = std::function<
-        void(properties::Property*, const std::string&, ShowToolTip, double)
-    >;
+void GuiPropertyComponent::renderProperty(Property* prop, PropertyOwner* owner) {
+    using Func = std::function<void(Property*, const std::string&, ShowToolTip, float)>;
     static const std::map<std::string, Func> FunctionMapping = {
         { "BoolProperty", &renderBoolProperty },
         { "DoubleProperty", &renderDoubleProperty },
@@ -426,11 +415,10 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
     };
 
     // Check if the visibility of the property is high enough to be displayed
-    using V = properties::Property::Visibility;
-    using Visibility = openspace::properties::Property::Visibility;
-    const Visibility visibilityFilter = openspace::global::openSpaceEngine->visibility();
-    const auto v = static_cast<std::underlying_type_t<V>>(visibilityFilter);
-    const auto propV = static_cast<std::underlying_type_t<V>>(prop->visibility());
+    using Vis = Property::Visibility;
+    const Vis visibilityFilter = global::openSpaceEngine->visibility();
+    const auto v = static_cast<std::underlying_type_t<Vis>>(visibilityFilter);
+    const auto propV = static_cast<std::underlying_type_t<Vis>>(prop->visibility());
     if (v >= propV) {
         auto it = FunctionMapping.find(std::string(prop->className()));
         if (it != FunctionMapping.end()) {
@@ -454,4 +442,4 @@ void GuiPropertyComponent::renderProperty(properties::Property* prop,
     }
 }
 
-} // namespace openspace::gui
+} // namespace openspace

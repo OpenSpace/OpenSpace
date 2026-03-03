@@ -38,11 +38,11 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::StringProperty _formatString;
-    properties::StringProperty _timeFormat;
+    StringProperty _formatString;
+    StringProperty _timeFormat;
 };
 
 } // namespace openspace

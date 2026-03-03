@@ -47,7 +47,7 @@ namespace ghoul {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 struct RenderData;
 
 /**
@@ -57,7 +57,7 @@ struct RenderData;
  * Spherical to Cartesian coordinates and back. It also specifies the interface that its
  * children need to implement.
  */
-class ScreenSpaceRenderable : public properties::PropertyOwner, public Fadeable {
+class ScreenSpaceRenderable : public PropertyOwner, public Fadeable {
 public:
     static std::unique_ptr<ScreenSpaceRenderable> createFromDictionary(
         const ghoul::Dictionary& dictionary);
@@ -102,7 +102,7 @@ public:
     void setRaeFromCartesianPosition(const glm::vec3& position);
     glm::vec3 raePosition() const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
     void createShaders(ghoul::Dictionary dict = ghoul::Dictionary());
@@ -128,33 +128,33 @@ protected:
     glm::vec3 sphericalToCartesian(glm::vec3 spherical) const;
     glm::vec3 sanitizeSphericalCoordinates(glm::vec3 spherical) const;
 
-    properties::BoolProperty _enabled;
-    properties::BoolProperty _renderDuringBlackout;
-    properties::BoolProperty _usePerspectiveProjection;
-    properties::BoolProperty _useRadiusAzimuthElevation;
-    properties::BoolProperty _faceCamera;
+    BoolProperty _enabled;
+    BoolProperty _renderDuringBlackout;
+    BoolProperty _usePerspectiveProjection;
+    BoolProperty _useRadiusAzimuthElevation;
+    BoolProperty _faceCamera;
 
     // x, y, z
-    properties::Vec3Property _cartesianPosition;
+    Vec3Property _cartesianPosition;
 
     // Radius, azimuth, elevation,
     // where azimuth is relative to negative y axis and
     // elevation is angle from plane with normal z.
-    properties::Vec3Property _raePosition;
+    Vec3Property _raePosition;
 
     // Local rotation (roll, pitch, yaw)
-    properties::Vec3Property _localRotation;
+    Vec3Property _localRotation;
 
     // Border
-    properties::FloatProperty _borderWidth;
-    properties::Vec3Property _borderColor;
-    properties::BoolProperty _borderFeather;
+    FloatProperty _borderWidth;
+    Vec3Property _borderColor;
+    BoolProperty _borderFeather;
 
-    properties::FloatProperty _scale;
-    properties::FloatProperty _gammaOffset;
-    properties::Vec3Property _multiplyColor;
-    properties::Vec4Property _backgroundColor;
-    properties::TriggerProperty _delete;
+    FloatProperty _scale;
+    FloatProperty _gammaOffset;
+    Vec3Property _multiplyColor;
+    Vec4Property _backgroundColor;
+    TriggerProperty _delete;
 
     glm::ivec2 _objectSize = glm::ivec2(0);
 

@@ -26,7 +26,7 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 IntProperty::IntProperty(Property::PropertyInfo info, int value,
                          int minValue, int maxValue, int stepValue)
@@ -61,4 +61,4 @@ std::string IntProperty::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

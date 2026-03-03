@@ -45,10 +45,10 @@
 
 #include "keyframerecordinghandler_lua.inl"
 
-namespace openspace::interaction {
+namespace openspace {
 
 KeyframeRecordingHandler::KeyframeRecordingHandler()
-    : properties::PropertyOwner({ "KeyframeRecording", "Keyframe Recording" })
+    : PropertyOwner({ "KeyframeRecording", "Keyframe Recording" })
 {}
 
 void KeyframeRecordingHandler::newSequence() {
@@ -223,7 +223,7 @@ void KeyframeRecordingHandler::loadCameraFBX(const std::filesystem::path& path,
     _timeline = std::move(timeline);
 }
 
-scripting::LuaLibrary KeyframeRecordingHandler::luaLibrary() {
+LuaLibrary KeyframeRecordingHandler::luaLibrary() {
     return {
         "keyframeRecording",
         {
@@ -243,4 +243,4 @@ scripting::LuaLibrary KeyframeRecordingHandler::luaLibrary() {
     };
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

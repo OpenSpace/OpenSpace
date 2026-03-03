@@ -48,7 +48,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct CylinderVBOLayout {
@@ -60,15 +60,15 @@ private:
 
     void createCylinder(double time);
 
-    properties::IntProperty _numberOfPoints;
-    properties::FloatProperty _shadowLength;
-    properties::Vec3Property _shadowColor;
-    properties::OptionProperty _terminatorType;
-    properties::StringProperty _lightSource;
-    properties::StringProperty _observer;
-    properties::StringProperty _body;
-    properties::StringProperty _bodyFrame;
-    properties::OptionProperty _aberration;
+    IntProperty _numberOfPoints;
+    FloatProperty _shadowLength;
+    Vec3Property _shadowColor;
+    OptionProperty _terminatorType;
+    StringProperty _lightSource;
+    StringProperty _observer;
+    StringProperty _body;
+    StringProperty _bodyFrame;
+    OptionProperty _aberration;
 
     ghoul::opengl::ProgramObject* _shader = nullptr;
     UniformCache(modelViewProjectionTransform, shadowColor, opacity) _uniformCache;

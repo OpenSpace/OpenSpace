@@ -78,7 +78,7 @@ void FieldlinesSequenceModule::internalInitialize(const ghoul::Dictionary&) {
     fTask->registerClass<FindLastClosedFieldlinesTask>("FindLastClosedFieldlinesTask");
 }
 
-std::vector<documentation::Documentation> FieldlinesSequenceModule::documentations() const
+std::vector<Documentation> FieldlinesSequenceModule::documentations() const
 {
     return {
         FindLastClosedFieldlinesTask::Documentation(),

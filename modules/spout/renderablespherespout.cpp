@@ -38,15 +38,15 @@ namespace {
     // Note: The Spout library is only available on Windows.
     struct [[codegen::Dictionary(RenderableSphereSpout)]] Parameters {
     };
-#include "renderablespherespout_codegen.cpp"
 } // namespace
+#include "renderablespherespout_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableSphereSpout::Documentation() {
+Documentation RenderableSphereSpout::Documentation() {
     return codegen::doc<Parameters>(
         "spout_renderablespherespout",
-        spout::SpoutReceiverPropertyProxy::Documentation()
+        SpoutReceiverPropertyProxy::Documentation()
     );
 }
 

@@ -25,26 +25,26 @@
 #include <modules/telemetry/telemetrymodule.h>
 #include <openspace/engine/moduleengine.h>
 
+using namespace openspace;
+
 namespace {
 
 /**
  * Adds the given list of nodes to the NodesTelemetry's internal list.
  */
 [[codegen::luawrap]] void addNodes(ghoul::Dictionary nodes) {
-    openspace::TelemetryModule* module =
-        openspace::global::moduleEngine->module<openspace::TelemetryModule>();
+    TelemetryModule* module = global::moduleEngine->module<TelemetryModule>();
     if (!module) {
         throw ghoul::lua::LuaError("Could not find the TelemetryModule");
         return;
     }
-    openspace::TelemetryBase* ptr = module->telemetry("NodesTelemetry");
+    TelemetryBase* ptr = module->telemetry("NodesTelemetry");
     if (!ptr) {
         throw ghoul::lua::LuaError("Could not find the NodesTelemetry");
         return;
     }
 
-    openspace::NodesTelemetry* nodesTelemetry =
-        dynamic_cast<openspace::NodesTelemetry*>(ptr);
+    NodesTelemetry* nodesTelemetry = dynamic_cast<NodesTelemetry*>(ptr);
 
     for (const std::string_view& k : nodes.keys()) {
         std::string node = nodes.value<std::string>(k);
@@ -52,6 +52,6 @@ namespace {
     }
 }
 
-#include "nodestelemetry_lua_codegen.cpp"
-
 } // namespace
+
+#include "nodestelemetry_lua_codegen.cpp"

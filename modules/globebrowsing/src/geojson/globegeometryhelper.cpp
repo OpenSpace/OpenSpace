@@ -44,7 +44,7 @@
 #include <memory>
 #include <utility>
 
-namespace openspace::globebrowsing::geometryhelper {
+namespace openspace {
 
 Geodetic3 toGeodetic(const geos::geom::Coordinate& c) {
     Geodetic3 gd;
@@ -76,15 +76,15 @@ coordsToGeodetic(const std::vector<geos::geom::Coordinate>& coords)
 std::vector<Geodetic3> geometryCoordsAsGeoVector(const geos::geom::Geometry* geometry) {
     std::vector<geos::geom::Coordinate> coords;
     geometry->getCoordinates()->toVector(coords);
-    return geometryhelper::coordsToGeodetic(coords);
+    return coordsToGeodetic(coords);
 }
 
 std::vector<Geodetic2> geodetic2FromVertexList(const RenderableGlobe& globe,
-                            const std::vector<rendering::helper::VertexXYZNormal>& verts)
+                                     const std::vector<rendering::VertexXYZNormal>& verts)
 {
     std::vector<Geodetic2> res;
     res.reserve(verts.size());
-    for (const rendering::helper::VertexXYZNormal& v : verts) {
+    for (const rendering::VertexXYZNormal& v : verts) {
         res.push_back(globe.ellipsoid().cartesianToGeodetic2(v.position));
     }
     return res;
@@ -102,10 +102,10 @@ std::vector<float> heightMapHeightsFromGeodetic2List(const RenderableGlobe& glob
     return res;
 }
 
-std::vector<rendering::helper::VertexXYZNormal>
+std::vector<rendering::VertexXYZNormal>
 createExtrudedGeometryVertices(const std::vector<std::vector<glm::vec3>>& edgeVertices)
 {
-    std::vector<rendering::helper::VertexXYZNormal> vertices;
+    std::vector<rendering::VertexXYZNormal> vertices;
 
     size_t nVerts = 0;
     for (const std::vector<glm::vec3>& edge : edgeVertices) {
@@ -223,31 +223,17 @@ std::vector<PosHeightPair> subdivideLine(const glm::dvec3& v0, const glm::dvec3&
     return positions;
 }
 
-std::vector<rendering::helper::VertexXYZNormal>
+std::vector<rendering::VertexXYZNormal>
 subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
                   double h0, double h1, double h2, double maxDistance,
                   const RenderableGlobe& globe)
 {
-    std::vector<rendering::helper::VertexXYZNormal> vertices;
+    std::vector<rendering::VertexXYZNormal> vertices;
 
     // Subdivide edges
-    std::vector<PosHeightPair> edge01 = geometryhelper::subdivideLine(
-        v0, v1,
-        h0, h1,
-        maxDistance
-    );
-
-    std::vector<PosHeightPair> edge02 = geometryhelper::subdivideLine(
-        v0, v2,
-        h0, h2,
-        maxDistance
-    );
-
-    std::vector<PosHeightPair> edge12 = geometryhelper::subdivideLine(
-        v1, v2,
-        h1, h2,
-        maxDistance
-    );
+    std::vector<PosHeightPair> edge01 = subdivideLine(v0, v1, h0, h1, maxDistance);
+    std::vector<PosHeightPair> edge02 = subdivideLine(v0, v2, h0, h2, maxDistance);
+    std::vector<PosHeightPair> edge12 = subdivideLine(v1, v2, h1, h2, maxDistance);
 
     const size_t nSteps01 = edge01.size();
     const size_t nSteps02 = edge02.size();
@@ -283,7 +269,7 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
 
             const Geodetic2 geo2 = ellipsoid.cartesianToGeodetic2(pos);
             const Geodetic3 geo3 = { geo2, height };
-            pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
+            pointCoords.push_back(toGeosCoord(geo3));
         }
     }
 
@@ -292,17 +278,17 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
         if (i < edge01.size() - 1) {
             const Geodetic2 geo2 = ellipsoid.cartesianToGeodetic2(edge01[i].position);
             const Geodetic3 geo3 = { geo2, edge01[i].height };
-            pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
+            pointCoords.push_back(toGeosCoord(geo3));
         }
         if (i < edge02.size() - 1) {
             const Geodetic2 geo2 = ellipsoid.cartesianToGeodetic2(edge02[i].position);
             const Geodetic3 geo3 = { geo2, edge02[i].height };
-            pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
+            pointCoords.push_back(toGeosCoord(geo3));
         }
         if (i < edge12.size() - 1) {
             const Geodetic2 geo2 = ellipsoid.cartesianToGeodetic2(edge12[i].position);
             const Geodetic3 geo3 = { geo2, edge12[i].height };
-            pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
+            pointCoords.push_back(toGeosCoord(geo3));
         }
     }
 
@@ -311,7 +297,7 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     const glm::dvec3 centerToEllipsoidSurface = ellipsoid.geodeticSurfaceProjection(v2);
     const double height = glm::length(glm::dvec3(v2) - centerToEllipsoidSurface);
     const Geodetic3 geo3 = { geo2, height };
-    pointCoords.push_back(geometryhelper::toGeosCoord(geo3));
+    pointCoords.push_back(toGeosCoord(geo3));
 
     pointCoords.shrink_to_fit();
 
@@ -351,12 +337,11 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
             count = 0;
             continue;
         }
-        const Geodetic3 geodetic = geometryhelper::toGeodetic(coord);
+        const Geodetic3 geodetic = toGeodetic(coord);
 
         // Note that offset should already have been applied to the coordinates. Use
         // zero offset => just get model coordinate
-        const glm::vec3 v =
-            geometryhelper::computeOffsetedModelCoordinate(geodetic, globe, 0.f, 0.f);
+        const glm::vec3 v = computeOffsetedModelCoordinate(geodetic, globe, 0.f, 0.f);
 
         vertices.push_back({ { v.x, v.y, v.z }, { 0.f, 0.f, 0.f } });
 
@@ -365,9 +350,9 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
         if (count == 3) {
             // Find previous vertices
             const size_t lastIndex = vertices.size() - 1;
-            rendering::helper::VertexXYZNormal& vert0 = vertices[lastIndex - 2];
-            rendering::helper::VertexXYZNormal& vert1 = vertices[lastIndex - 1];
-            rendering::helper::VertexXYZNormal& vert2 = vertices[lastIndex];
+            rendering::VertexXYZNormal& vert0 = vertices[lastIndex - 2];
+            rendering::VertexXYZNormal& vert1 = vertices[lastIndex - 1];
+            rendering::VertexXYZNormal& vert2 = vertices[lastIndex];
 
             const glm::vec3 v0Pos = vert0.position;
             const glm::vec3 v1Pos = vert1.position;
@@ -391,4 +376,4 @@ subdivideTriangle(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2,
     return vertices;
 }
 
-} // namespace openspace::globebrowsing::geometryhelper
+} // namespace openspace

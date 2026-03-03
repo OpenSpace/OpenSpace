@@ -30,7 +30,7 @@
 #include <string_view>
 #include <vector>
 
-namespace openspace::properties {
+namespace openspace {
 
 class Property;
 
@@ -359,6 +359,6 @@ private:
     void updateUriCaches();
 };
 
-}  // namespace openspace::properties
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___PROPERTYOWNER___H__

@@ -26,7 +26,7 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 DVec4Property::DVec4Property(Property::PropertyInfo info, glm::dvec4 value,
                              glm::dvec4 minValue, glm::dvec4 maxValue,
@@ -60,4 +60,4 @@ std::string DVec4Property::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

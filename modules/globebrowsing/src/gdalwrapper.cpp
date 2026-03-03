@@ -38,41 +38,43 @@
 #include <cstdint>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "GdalWrapper";
 
-    constexpr openspace::properties::Property::PropertyInfo LogGdalErrorInfo = {
+    constexpr Property::PropertyInfo LogGdalErrorInfo = {
         "LogGdalErrors",
         "Log GDAL errors",
         "If this value is enabled, any error that is raised by GDAL will be logged using "
         "the logmanager. If this value is disabled, any error will be ignored.",
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo GdalMaximumCacheInfo = {
+    constexpr Property::PropertyInfo GdalMaximumCacheInfo = {
         "GdalMaximumCacheSize",
         "GDAL maximum cache size",
         "This function sets the maximum amount of RAM memory in MB that GDAL is "
         "permitted to use for caching.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     void gdalErrorHandler(CPLErr eErrClass, int, const char* msg) {
         // No need to try to do this check earlier and only install this method as an
         // error handler if the logging is desired as the default behavior of GDAL is to
         // log errors to stderr.
-        if (openspace::globebrowsing::GdalWrapper::ref().logGdalErrors()) {
+        if (GdalWrapper::ref().logGdalErrors()) {
             switch (eErrClass) {
-                case CE_None: break;
-                case CE_Debug:    LDEBUGC("GDAL", msg); break;
+                case CE_None:                             break;
+                case CE_Debug:    LDEBUGC("GDAL", msg);   break;
                 case CE_Warning:  LWARNINGC("GDAL", msg); break;
-                case CE_Failure:  LERRORC("GDAL", msg); break;
-                case CE_Fatal:    LFATALC("GDAL", msg); break;
+                case CE_Failure:  LERRORC("GDAL", msg);   break;
+                case CE_Fatal:    LFATALC("GDAL", msg);   break;
             }
         }
     }
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 GdalWrapper* GdalWrapper::_singleton = nullptr;
 
@@ -152,4 +154,4 @@ void GdalWrapper::setGdalProxyConfiguration() {
     }
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

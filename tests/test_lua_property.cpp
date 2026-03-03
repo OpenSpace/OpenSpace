@@ -37,7 +37,6 @@
 #include <chrono>
 
 using namespace openspace;
-using namespace properties;
 
 namespace {
     // Offloading this into a separate function as it would otherwise be a lot of

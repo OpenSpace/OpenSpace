@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <numeric>
 
-namespace openspace::interaction {
+namespace openspace {
 
 int JoystickInputStates::numAxes(const std::string& joystickName) const {
     if (joystickName.empty()) {
@@ -125,4 +125,4 @@ bool JoystickInputStates::button(const std::string& joystickName, int button,
     return false;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

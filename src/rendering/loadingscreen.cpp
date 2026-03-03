@@ -156,7 +156,6 @@ LoadingScreen::LoadingScreen(ShowMessage showMessage, ShowNodeNames showNodeName
             absPath("${DATA}/openspace-logo.png"),
             2
         );
-        _logoTexture->uploadTexture();
     }
 }
 
@@ -328,12 +327,12 @@ void LoadingScreen::render() {
     //
     // Render logo
     //
-    rendering::helper::renderBox(
+    rendering::renderBox(
         glm::vec2(1.f) - ((LogoCenter + glm::vec2(1.f)) / 2.f),
         size,
         glm::vec4(1.f),
         *_logoTexture,
-        rendering::helper::Anchor::Center
+        rendering::Anchor::Center
     );
 
     //
@@ -384,11 +383,11 @@ void LoadingScreen::render() {
     glDisable(GL_DEPTH_TEST);
     if (_showLog) {
         constexpr glm::vec4 DarkGray = glm::vec4(glm::vec3(0.04f), 1.f);
-        rendering::helper::renderBox(
+        rendering::renderBox(
             glm::vec2(0.f, 1.f),
             glm::vec2(1.f, LogBackgroundPosition),
             DarkGray,
-            rendering::helper::Anchor::SW
+            rendering::Anchor::SW
         );
     }
 

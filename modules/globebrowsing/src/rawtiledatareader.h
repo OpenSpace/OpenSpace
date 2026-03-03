@@ -40,7 +40,7 @@
 
 class GDALDataset;
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 class RawTileDataReader {
 public:
@@ -105,6 +105,6 @@ private:
     mutable std::mutex _datasetLock;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GDAL_RAW_TILE_DATA_READER___H__

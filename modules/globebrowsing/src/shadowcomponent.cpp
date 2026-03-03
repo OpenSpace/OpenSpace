@@ -41,35 +41,37 @@
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "ShadowComponent";
 
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "Enable/Disable Shadows.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SaveDepthTextureInfo = {
+    constexpr Property::PropertyInfo SaveDepthTextureInfo = {
         "SaveDepthTextureInfo",
         "Save depth texture",
         "Debug.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DistanceFractionInfo = {
+    constexpr Property::PropertyInfo DistanceFractionInfo = {
         "DistanceFraction",
         "Distance fraction",
         "Distance fraction of original distance from light source to the globe to be "
         "considered as the new light source distance.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DepthMapSizeInfo = {
+    constexpr Property::PropertyInfo DepthMapSizeInfo = {
         "DepthMapSize",
         "Depth map size",
         "The depth map size in pixels. You must entry the width and height values.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     constexpr std::array<GLfloat, 4> ShadowBorder = { 1.f, 1.f, 1.f, 1.f };
@@ -81,17 +83,17 @@ namespace {
         // [[codegen::verbatim(DepthMapSizeInfo.description)]]
         std::optional<glm::ivec2> depthMapSize [[codegen::greater({ 1280, 720 })]];
     };
-#include "shadowcomponent_codegen.cpp"
 } // namespace
+#include "shadowcomponent_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ShadowComponent::Documentation() {
+Documentation ShadowComponent::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_shadows_component");
 }
 
 ShadowComponent::ShadowComponent(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "ShadowsComponent" })
+    : PropertyOwner({ "ShadowsComponent" })
     , _saveDepthTexture(SaveDepthTextureInfo)
     , _distanceFraction(DistanceFractionInfo, 20, 1, 10000)
     , _enabled(EnabledInfo, true)

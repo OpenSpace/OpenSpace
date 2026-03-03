@@ -47,12 +47,12 @@ namespace {
         std::optional<ghoul::Dictionary> timeFrame
             [[codegen::reference("core_time_frame")]];
     };
-#include "translation_codegen.cpp"
 } // namespace
+#include "translation_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation Translation::Documentation() {
+Documentation Translation::Documentation() {
     return codegen::doc<Parameters>("core_transform_translation");
 }
 
@@ -73,7 +73,7 @@ ghoul::mm_unique_ptr<Translation> Translation::createFromDictionary(
 }
 
 Translation::Translation(const ghoul::Dictionary& dictionary)
-    : properties::PropertyOwner({ "Translation" })
+    : PropertyOwner({ "Translation" })
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
 

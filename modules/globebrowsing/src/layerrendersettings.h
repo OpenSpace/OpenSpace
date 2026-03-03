@@ -31,15 +31,15 @@
 #include <openspace/properties/scalar/floatproperty.h>
 #include <functional>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-struct LayerRenderSettings : public properties::PropertyOwner {
+struct LayerRenderSettings : public PropertyOwner {
     LayerRenderSettings();
 
-    properties::FloatProperty gamma;
-    properties::FloatProperty multiplier;
-    properties::FloatProperty offset;
-    properties::TriggerProperty setDefault;
+    FloatProperty gamma;
+    FloatProperty multiplier;
+    FloatProperty offset;
+    TriggerProperty setDefault;
 
     void onChange(const std::function<void()>& callback);
 
@@ -54,6 +54,6 @@ struct LayerRenderSettings : public properties::PropertyOwner {
     glm::vec4 performLayerSettings(const glm::vec4& currentValue) const;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERRENDERSETTINGS___H__

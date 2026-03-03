@@ -40,14 +40,14 @@ public:
 
     void update() override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
-    properties::BoolProperty _doSimplification;
-    properties::OptionProperty _requestedUnit;
+    BoolProperty _doSimplification;
+    OptionProperty _requestedUnit;
 
-    properties::StringProperty _transitionFormat;
-    properties::StringProperty _regularFormat;
+    StringProperty _transitionFormat;
+    StringProperty _regularFormat;
 };
 
 } // namespace openspace

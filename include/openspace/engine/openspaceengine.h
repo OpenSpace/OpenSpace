@@ -50,9 +50,9 @@
 
 namespace openspace {
 
-namespace scripting { struct LuaLibrary; }
 class AssetManager;
 class LoadingScreen;
+struct LuaLibrary;
 class Scene;
 
 /**
@@ -79,7 +79,7 @@ struct CommandlineArguments {
     std::optional<std::string> task;
 };
 
-class OpenSpaceEngine : public properties::PropertyOwner {
+class OpenSpaceEngine : public PropertyOwner {
 public:
     /**
      * A mode that specifies which part of the system is currently in control. The mode
@@ -121,7 +121,7 @@ public:
     std::vector<std::byte> encode();
     void decode(std::vector<std::byte> data);
 
-    properties::Property::Visibility visibility() const;
+    Property::Visibility visibility() const;
     void toggleShutdownMode();
 
     Mode currentMode() const;
@@ -140,8 +140,8 @@ public:
 
     void invalidatePropertyCache();
     void invalidatePropertyOwnerCache();
-    const std::vector<properties::Property*>& allProperties() const;
-    const std::vector<properties::PropertyOwner*>& allPropertyOwners() const;
+    const std::vector<Property*>& allProperties() const;
+    const std::vector<PropertyOwner*>& allPropertyOwners() const;
 
     void createUserDirectoriesIfNecessary();
 
@@ -152,7 +152,7 @@ public:
      * Returns the Lua library that contains all Lua functions available to affect the
      * application.
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
 private:
     void loadAssets();
@@ -160,11 +160,11 @@ private:
 
     void runGlobalCustomizationScripts();
 
-    properties::BoolProperty _printEvents;
-    properties::OptionProperty _visibility;
-    properties::BoolProperty _showPropertyConfirmationDialog;
-    properties::FloatProperty _fadeOnEnableDuration;
-    properties::BoolProperty _disableAllMouseInputs;
+    BoolProperty _printEvents;
+    OptionProperty _visibility;
+    BoolProperty _showPropertyConfirmationDialog;
+    FloatProperty _fadeOnEnableDuration;
+    BoolProperty _disableAllMouseInputs;
 
     std::unique_ptr<Scene> _scene;
     std::unique_ptr<AssetManager> _assetManager;
@@ -188,10 +188,10 @@ private:
     std::vector<std::pair<CallbackHandle, ModeChangeCallback>> _modeChangeCallbacks;
 
     mutable bool _isAllPropertiesCacheDirty = true;
-    mutable std::vector<properties::Property*> _allPropertiesCache;
+    mutable std::vector<Property*> _allPropertiesCache;
 
     mutable bool _isAllPropertyOwnersCacheDirty = true;
-    mutable std::vector<properties::PropertyOwner*> _allPropertyOwnersCache;
+    mutable std::vector<PropertyOwner*> _allPropertyOwnersCache;
 };
 
 /**

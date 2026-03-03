@@ -160,10 +160,10 @@ namespace {
         // The distance from this system to our solar system, in light years.
         double distance;
     };
-#include "datastructure_codegen.cpp"
 } // namespace
+#include "datastructure_codegen.cpp"
 
-namespace openspace::exoplanets {
+namespace openspace {
 
 ghoul::Dictionary ExoplanetSystem::toDataDictionary() const {
     ghoul_assert(
@@ -334,8 +334,8 @@ ghoul::Dictionary ExoplanetSystem::toDataDictionary() const {
     return res;
 }
 
-documentation::Documentation ExoplanetSystem::Documentation() {
+Documentation ExoplanetSystem::Documentation() {
     return codegen::doc<Parameters>("exoplanets_exoplanet_system_data");
 }
 
-} // namespace openspace::exoplanets
+} // namespace openspace

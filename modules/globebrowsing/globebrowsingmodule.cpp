@@ -94,43 +94,45 @@
 #include "globebrowsingmodule_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "GlobeBrowsingModule";
 
-    constexpr openspace::properties::Property::PropertyInfo TileCacheSizeInfo = {
+    constexpr Property::PropertyInfo TileCacheSizeInfo = {
         "TileCacheSize",
         "Tile cache size",
         "The maximum size of the MemoryAwareTileCache, on the CPU and GPU.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DefaultGeoPointTextureInfo = {
+    constexpr Property::PropertyInfo DefaultGeoPointTextureInfo = {
         "DefaultGeoPointTexture",
         "Default geo point texture",
         "A path to a texture to use as default for GeoJson points."
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MRFCacheEnabledInfo = {
+    constexpr Property::PropertyInfo MRFCacheEnabledInfo = {
         "MRFCacheEnabled",
         "MRF cache enabled",
         "Determines whether automatic caching of globe browsing data is enabled.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MRFCacheLocationInfo = {
+    constexpr Property::PropertyInfo MRFCacheLocationInfo = {
         "MRFCacheLocation",
         "MRF cache location",
         "The location of the root folder for the MRF cache of globe browsing data.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    openspace::GlobeBrowsingModule::Capabilities
-    parseSubDatasets(char** subDatasets, int nSubdatasets)
+    GlobeBrowsingModule::Capabilities parseSubDatasets(char** subDatasets,
+                                                       int nSubdatasets)
     {
         // Idea: Iterate over the list of sublayers keeping a current layer and identify
         //       it by its number.  If this number changes, we know that we have a new
         //       layer
 
-        using Layer = openspace::GlobeBrowsingModule::Layer;
+        using Layer = GlobeBrowsingModule::Layer;
         std::vector<Layer> result;
 
         int currentLayerNumber = -1;
@@ -192,12 +194,12 @@ namespace {
         // [[codegen::verbatim(MRFCacheLocationInfo.description)]]
         std::optional<std::string> mrfCacheLocation [[codegen::key("MRFCacheLocation")]];
     };
-#include "globebrowsingmodule_codegen.cpp"
 } // namespace
+#include "globebrowsingmodule_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation GlobeBrowsingModule::Documentation() {
+Documentation GlobeBrowsingModule::Documentation() {
     return codegen::doc<Parameters>("module_globebrowsing");
 }
 
@@ -217,8 +219,6 @@ GlobeBrowsingModule::GlobeBrowsingModule()
 }
 
 void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
-    using namespace globebrowsing;
-
     const Parameters p = codegen::bake<Parameters>(dict);
     _tileCacheSizeMB = p.tileCacheSize.value_or(_tileCacheSizeMB);
 
@@ -253,7 +253,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     global::callback::initializeGL->emplace_back([this]() {
         ZoneScopedN("GlobeBrowsingModule");
 
-        _tileCache = std::make_unique<cache::MemoryAwareTileCache>(_tileCacheSizeMB);
+        _tileCache = std::make_unique<MemoryAwareTileCache>(_tileCacheSizeMB);
         addPropertySubOwner(_tileCache.get());
 
         TileProvider::initializeDefaultTile();
@@ -292,7 +292,7 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     ghoul::TemplateFactory<Renderable>* fRenderable =
         FactoryManager::ref().factory<Renderable>();
     ghoul_assert(fRenderable, "Renderable factory was not created");
-    fRenderable->registerClass<globebrowsing::RenderableGlobe>("RenderableGlobe");
+    fRenderable->registerClass<RenderableGlobe>("RenderableGlobe");
 
     FactoryManager::ref().addFactory<TileProvider>("TileProvider");
 
@@ -319,26 +319,26 @@ void GlobeBrowsingModule::internalInitialize(const ghoul::Dictionary& dict) {
     fDashboard->registerClass<DashboardItemGlobeLocation>("DashboardItemGlobeLocation");
 }
 
-globebrowsing::cache::MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {
+MemoryAwareTileCache* GlobeBrowsingModule::tileCache() {
     return _tileCache.get();
 }
 
-std::vector<documentation::Documentation> GlobeBrowsingModule::documentations() const {
+std::vector<Documentation> GlobeBrowsingModule::documentations() const {
     return {
-        globebrowsing::Layer::Documentation(),
-        globebrowsing::LayerAdjustment::Documentation(),
-        globebrowsing::RenderableGlobe::Documentation(),
-        globebrowsing::DefaultTileProvider::Documentation(),
-        globebrowsing::ImageSequenceTileProvider::Documentation(),
-        globebrowsing::SingleImageProvider::Documentation(),
-        globebrowsing::SizeReferenceTileProvider::Documentation(),
-        globebrowsing::TemporalTileProvider::Documentation(),
-        globebrowsing::TileIndexTileProvider::Documentation(),
-        globebrowsing::TileProviderByDate::Documentation(),
-        globebrowsing::TileProviderByIndex::Documentation(),
-        globebrowsing::TileProviderByLevel::Documentation(),
-        globebrowsing::GeoJsonComponent::Documentation(),
-        globebrowsing::GeoJsonProperties::Documentation(),
+        openspace::Layer::Documentation(),
+        LayerAdjustment::Documentation(),
+        RenderableGlobe::Documentation(),
+        DefaultTileProvider::Documentation(),
+        ImageSequenceTileProvider::Documentation(),
+        SingleImageProvider::Documentation(),
+        SizeReferenceTileProvider::Documentation(),
+        TemporalTileProvider::Documentation(),
+        TileIndexTileProvider::Documentation(),
+        TileProviderByDate::Documentation(),
+        TileProviderByIndex::Documentation(),
+        TileProviderByLevel::Documentation(),
+        GeoJsonComponent::Documentation(),
+        GeoJsonProperties::Documentation(),
         GlobeLabelsComponent::Documentation(),
         RingsComponent::Documentation(),
         ShadowComponent::Documentation(),
@@ -350,11 +350,9 @@ void GlobeBrowsingModule::goToChunk(const SceneGraphNode& node,
                                     int x, int y, int level)
 {
     ghoul_assert(level < std::numeric_limits<uint8_t>::max(), "Level way too big");
-    using namespace openspace;
-    using namespace globebrowsing;
 
     const GeodeticPatch patch = GeodeticPatch(
-        globebrowsing::TileIndex(x, y, static_cast<uint8_t>(level))
+        TileIndex(x, y, static_cast<uint8_t>(level))
     );
     const Geodetic2 corner = patch.corner(SOUTH_WEST);
     Geodetic2 positionOnPatch = patch.size();
@@ -370,18 +368,13 @@ void GlobeBrowsingModule::goToChunk(const SceneGraphNode& node,
     goToGeodetic3(node, { pointPosition, altitude });
 }
 
-const globebrowsing::RenderableGlobe*
-GlobeBrowsingModule::castFocusNodeRenderableToGlobe()
-{
-    using namespace globebrowsing;
-
+const RenderableGlobe* GlobeBrowsingModule::castFocusNodeRenderableToGlobe() {
     const Renderable* renderable =
         global::navigationHandler->orbitalNavigator().anchorNode()->renderable();
 
     if (!renderable) {
         return nullptr;
     }
-    using namespace globebrowsing;
     if (const RenderableGlobe* globe = dynamic_cast<const RenderableGlobe*>(renderable)) {
         return globe;
     }
@@ -504,7 +497,7 @@ std::filesystem::path GlobeBrowsingModule::defaultGeoPointTexture() const {
     return _defaultGeoPointTexturePath.value();
 }
 
-scripting::LuaLibrary GlobeBrowsingModule::luaLibrary() const {
+LuaLibrary GlobeBrowsingModule::luaLibrary() const {
     return {
         .name = "globebrowsing",
         .functions = {

@@ -24,7 +24,9 @@
 
 #include <openspace/properties/vector/dvec3property.h>
 
-namespace openspace::properties {
+#include <ghoul/lua/lua_helper.h>
+
+namespace openspace {
 
 DVec3Property::DVec3Property(Property::PropertyInfo info, glm::dvec3 value,
                              glm::dvec3 minValue, glm::dvec3 maxValue,
@@ -58,4 +60,4 @@ std::string DVec3Property::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

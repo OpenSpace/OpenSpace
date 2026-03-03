@@ -25,6 +25,8 @@
 #include <openspace/engine/globals.h>
 #include <openspace/engine/moduleengine.h>
 
+using namespace openspace;
+
 namespace {
 
 /**
@@ -42,8 +44,6 @@ namespace {
 [[codegen::luawrap]] void playAudio(std::filesystem::path path, std::string identifier,
                                     bool shouldLoop = true)
 {
-    using namespace openspace;
-
     global::moduleEngine->module<AudioModule>()->playAudio(
         path,
         std::move(identifier),
@@ -70,8 +70,6 @@ namespace {
 [[codegen::luawrap]] void playAudio3d(std::filesystem::path path, std::string identifier,
                                       glm::vec3 position, bool shouldLoop = true)
 {
-    using namespace openspace;
-
     global::moduleEngine->module<AudioModule>()->playAudio3d(
         path,
         std::move(identifier),
@@ -89,7 +87,6 @@ namespace {
  * \param identifier The identifier to the track that should be stopped
  */
 [[codegen::luawrap]] void stopAudio(std::string identifier) {
-    using namespace openspace;
     global::moduleEngine->module<AudioModule>()->stopAudio(identifier);
 }
 
@@ -100,7 +97,6 @@ namespace {
  * if manually calling #stopAudio on all of the sounds that have been started.
  */
 [[codegen::luawrap]] void stopAll() {
-    using namespace openspace;
     global::moduleEngine->module<AudioModule>()->stopAll();
 }
 
@@ -109,7 +105,6 @@ namespace {
  * same as if calling #pauseAudio on all of the sounds that are currently playing.
  */
 [[codegen::luawrap]] void pauseAll() {
-    using namespace openspace;
     global::moduleEngine->module<AudioModule>()->pauseAll();
 }
 
@@ -119,7 +114,6 @@ namespace {
  * that were paused through the #pauseAll function.
  */
 [[codegen::luawrap]] void resumeAll() {
-    using namespace openspace;
     global::moduleEngine->module<AudioModule>()->resumeAll();
 }
 
@@ -128,7 +122,6 @@ namespace {
  * from their starting points
  */
 [[codegen::luawrap]] void playAllFromStart() {
-    using namespace openspace;
     global::moduleEngine->module<AudioModule>()->playAllFromStart();
 }
 
@@ -141,7 +134,6 @@ namespace {
  * \return `true` if the track is currently playing, `false` otherwise
  */
 [[codegen::luawrap]] bool isPlaying(std::string identifier) {
-    using namespace openspace;
     return global::moduleEngine->module<AudioModule>()->isPlaying(identifier);
 }
 
@@ -154,7 +146,6 @@ namespace {
  * \param identifier The identifier to the track that should be stopped
  */
 [[codegen::luawrap]] void pauseAudio(std::string identifier) {
-    using namespace openspace;
     global::moduleEngine->module<AudioModule>()->pauseAudio(identifier);
 }
 
@@ -169,7 +160,6 @@ namespace {
  * \return `true` if the track is currently paused, `false` if it is playing
  */
 [[codegen::luawrap]] bool isPaused(std::string identifier) {
-    using namespace openspace;
     return global::moduleEngine->module<AudioModule>()->isPaused(identifier);
 }
 
@@ -182,7 +172,6 @@ namespace {
  * \param identifier The identifier to the track that should be stopped
  */
 [[codegen::luawrap]] void resumeAudio(std::string identifier) {
-    using namespace openspace;
     global::moduleEngine->module<AudioModule>()->resumeAudio(identifier);
 }
 
@@ -197,7 +186,6 @@ namespace {
  *        closed or the playing is stopped through the #stopAudio function
  */
 [[codegen::luawrap]] void setLooping(std::string identifier, bool shouldLoop) {
-    using namespace openspace;
     global::moduleEngine->module<AudioModule>()->setLooping(
         identifier,
         AudioModule::ShouldLoop(shouldLoop)
@@ -213,7 +201,6 @@ namespace {
  * \return `Yes` if the track is looping, `No` otherwise
  */
 [[codegen::luawrap]] bool isLooping(std::string identifier) {
-    using namespace openspace;
     return global::moduleEngine->module<AudioModule>()->isLooping(identifier);
 }
 
@@ -231,7 +218,6 @@ namespace {
 [[codegen::luawrap]] void setVolume(std::string identifier, float volume,
                                     float fade = 0.5f)
 {
-    using namespace openspace;
     global::moduleEngine->module<AudioModule>()->setVolume(identifier, volume, fade);
 }
 
@@ -244,7 +230,6 @@ namespace {
  *         greater or equal to 0
  */
 [[codegen::luawrap]] float volume(std::string identifier) {
-    using namespace openspace;
     return global::moduleEngine->module<AudioModule>()->volume(identifier);
 }
 
@@ -261,7 +246,6 @@ namespace {
 [[codegen::luawrap]] void set3dSourcePosition(std::string identifier,
                                               glm::vec3 position)
 {
-    using namespace openspace;
     global::moduleEngine->module<AudioModule>()->set3dSourcePosition(
         identifier,
         position
@@ -274,7 +258,6 @@ namespace {
  * \return The list of all tracks that are currently playing
  */
 [[codegen::luawrap]] std::vector<std::string> currentlyPlaying() {
-    using namespace openspace;
     return global::moduleEngine->module<AudioModule>()->currentlyPlaying();
 }
 
@@ -292,7 +275,6 @@ namespace {
  *        take
  */
 [[codegen::luawrap]] void setGlobalVolume(float volume, float fade = 0.5f) {
-    using namespace openspace;
     global::moduleEngine->module<AudioModule>()->setGlobalVolume(volume, fade);
 }
 
@@ -303,7 +285,6 @@ namespace {
  * \return The global volume
  */
 [[codegen::luawrap]] float globalVolume() {
-    using namespace openspace;
     return global::moduleEngine->module<AudioModule>()->globalVolume();
 }
 
@@ -322,7 +303,6 @@ namespace {
                                                 std::optional<glm::vec3> lookAt,
                                                 std::optional<glm::vec3> up)
 {
-    using namespace openspace;
     global::moduleEngine->module<AudioModule>()->set3dListenerParameters(
         position,
         lookAt,
@@ -339,7 +319,6 @@ namespace {
  * \param position The new position for the speaker
  */
 [[codegen::luawrap]] void setSpeakerPosition(int channel, glm::vec3 position) {
-    using namespace openspace;
     global::moduleEngine->module<AudioModule>()->setSpeakerPosition(channel, position);
 }
 
@@ -350,10 +329,9 @@ namespace {
  * \return The position for the speaker of the provided \p channel
  */
 [[codegen::luawrap]] glm::vec3 speakerPosition(int channel) {
-    using namespace openspace;
     return global::moduleEngine->module<AudioModule>()->speakerPosition(channel);
 }
 
-#include "audiomodule_lua_codegen.cpp"
-
 } // namespace
+
+#include "audiomodule_lua_codegen.cpp"

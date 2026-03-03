@@ -28,33 +28,24 @@
 #include <openspace/json.h>
 #include <ghoul/glm.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 class Property;
 class PropertyOwner;
-
 void to_json(nlohmann::json& j, const Property& p);
 void to_json(nlohmann::json& j, const Property* pP);
 void to_json(nlohmann::json& j, const PropertyOwner& p);
 void to_json(nlohmann::json& j, const PropertyOwner* p);
 
-} // namespace openspace::properties
+struct Action;
+void to_json(nlohmann::json& j, const Action& a);
+void to_json(nlohmann::json& j, const Action* pA);
 
-namespace openspace::interaction {
-    struct Action;
-
-    void to_json(nlohmann::json& j, const Action& a);
-    void to_json(nlohmann::json& j, const Action* pA);
-} // namespace openspace::interaction
-
-namespace openspace {
-
-class Renderable;
 class SceneGraphNode;
-
 void to_json(nlohmann::json& j, const SceneGraphNode& n);
 void to_json(nlohmann::json& j, const SceneGraphNode* pN);
 
+class Renderable;
 void to_json(nlohmann::json& j, const Renderable& r);
 void to_json(nlohmann::json& j, const Renderable* pR);
 

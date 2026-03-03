@@ -34,7 +34,7 @@ namespace {
     constexpr std::string_view OptionsKey = "options";
 } // namespace
 
-namespace openspace::properties {
+namespace openspace {
 
 SelectionProperty::SelectionProperty(Property::PropertyInfo info)
     : TemplateProperty(std::move(info), std::set<std::string>())
@@ -170,4 +170,4 @@ nlohmann::json SelectionProperty::generateAdditionalJsonDescription() const {
     return { { OptionsKey, optionsJson } };
 }
 
-} // namespace openspace::properties
+} // namespace openspace

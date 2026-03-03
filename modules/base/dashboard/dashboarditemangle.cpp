@@ -41,65 +41,64 @@
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     enum Type {
         Node = 0,
         Focus,
         Camera
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
+    constexpr Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
         "Source type",
         "The type of position that is used as the triangle apex used to calculate the "
         "angle.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SourceNodeIdentifierInfo = {
+    constexpr Property::PropertyInfo SourceNodeIdentifierInfo = {
         "SourceNodeIdentifier",
         "Source node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the apex of the triangle used to calculate "
         "the angle. The computed angle is the incident angle to Source in the triangle ("
         "Source, Reference, Destination).",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ReferenceTypeInfo = {
+    constexpr Property::PropertyInfo ReferenceTypeInfo = {
         "ReferenceType",
         "Reference type",
         "The type of position that is used as the destination of the reference line used "
         "to calculate the angle. The computed angle is the incident angle to Source in "
         "the triangle (Source, Reference, Destination).",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ReferenceNodeIdentifierInfo =
-    {
+    constexpr Property::PropertyInfo ReferenceNodeIdentifierInfo = {
         "ReferenceNodeIdentifier",
         "Reference node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the reference direction to compute the angle.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
+    constexpr Property::PropertyInfo DestinationTypeInfo = {
         "DestinationType",
         "Destination type",
         "The type of position that is used as the destination to calculate the angle. "
         "The computed angle is the incident angle to Source in the triangle ("
         "Source, Reference, Destination).",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
-        DestinationNodeIdentifierInfo =
-    {
+    constexpr Property::PropertyInfo DestinationNodeIdentifierInfo = {
         "DestinationNodeIdentifier",
         "Destination node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the destination for computing the angle.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `DashboardItem` shows the angle between the lines `Source`->`Reference` and
@@ -129,12 +128,12 @@ namespace {
         // [[codegen::verbatim(DestinationNodeIdentifierInfo.description)]]
         std::optional<std::string> destinationNodeIdentifier;
     };
-#include "dashboarditemangle_codegen.cpp"
 } // namespace
+#include "dashboarditemangle_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemAngle::Documentation() {
+Documentation DashboardItemAngle::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_angle",
         DashboardTextItem::Documentation()
@@ -144,18 +143,18 @@ documentation::Documentation DashboardItemAngle::Documentation() {
 DashboardItemAngle::DashboardItemAngle(const ghoul::Dictionary& dictionary)
     : DashboardTextItem(dictionary)
     , _source{
-        properties::OptionProperty(SourceTypeInfo),
-        properties::StringProperty(SourceNodeIdentifierInfo),
+        OptionProperty(SourceTypeInfo),
+        StringProperty(SourceNodeIdentifierInfo),
         nullptr
     }
     , _reference{
-        properties::OptionProperty(ReferenceTypeInfo),
-        properties::StringProperty(ReferenceNodeIdentifierInfo),
+        OptionProperty(ReferenceTypeInfo),
+        StringProperty(ReferenceNodeIdentifierInfo),
         nullptr
     }
     , _destination{
-        properties::OptionProperty(DestinationTypeInfo),
-        properties::StringProperty(DestinationNodeIdentifierInfo),
+        OptionProperty(DestinationTypeInfo),
+        StringProperty(DestinationNodeIdentifierInfo),
         nullptr
     }
 {

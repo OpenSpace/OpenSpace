@@ -27,7 +27,7 @@
 
 #include <openspace/interaction/camerainteractionstates.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 class ScriptCameraStates : public CameraInteractionStates {
 public:
@@ -49,6 +49,6 @@ private:
     double _globalRoll = 0.0;
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SCRIPTCAMERASTATES___H__

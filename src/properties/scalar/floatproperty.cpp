@@ -26,7 +26,7 @@
 
 #include <ghoul/lua/lua_helper.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 FloatProperty::FloatProperty(Property::PropertyInfo info, float value,
                              float minValue, float maxValue, float stepValue)
@@ -53,4 +53,4 @@ std::string FloatProperty::stringValue() const {
     return formatJson(_value);
 }
 
-} // namespace openspace::properties
+} // namespace openspace

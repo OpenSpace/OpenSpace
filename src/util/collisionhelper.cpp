@@ -27,7 +27,7 @@
 #include <cmath>
 #include <cstdlib>
 
-namespace openspace::collision {
+namespace openspace {
 
 // Source: http://paulbourke.net/geometry/circlesphere/raysphere.c
 bool lineSphereIntersection(const glm::dvec3& p1, const glm::dvec3& p2,
@@ -73,4 +73,4 @@ bool isPointInsideSphere(const glm::dvec3& p, const glm::dvec3& c, double r) {
     return (squaredDistance <= squaredRadius);
 }
 
-}  // namespace openspace::collision
+} // namespace openspace

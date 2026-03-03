@@ -87,4 +87,4 @@ const std::vector<FactoryManager::FactoryInfo>& FactoryManager::factories() cons
     return _factories;
 }
 
-}  // namespace openspace
+} // namespace openspace

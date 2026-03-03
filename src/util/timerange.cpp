@@ -37,12 +37,12 @@ namespace {
         // The end date of the time range
         std::string end [[codegen::annotation("A string representing a valid date")]];
     };
-#include "timerange_codegen.cpp"
 } // namespace
+#include "timerange_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation TimeRange::Documentation() {
+Documentation TimeRange::Documentation() {
     return codegen::doc<Parameters>("core_util_timerange");
 }
 

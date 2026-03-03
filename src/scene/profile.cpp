@@ -46,22 +46,20 @@
 
 #include "profile_lua.inl"
 
-namespace openspace {
-
 namespace {
+    using namespace openspace;
+
     // Helper structs for the visitor pattern of the std::variant
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
-    std::vector<properties::Property*> changedProperties(
-                                                      const properties::PropertyOwner& po)
-    {
-        std::vector<properties::Property*> res;
-        for (properties::PropertyOwner* subOwner : po.propertySubOwners()) {
-            std::vector<properties::Property*> ps = changedProperties(*subOwner);
+    std::vector<Property*> changedProperties(const PropertyOwner& po) {
+        std::vector<Property*> res;
+        for (PropertyOwner* subOwner : po.propertySubOwners()) {
+            std::vector<Property*> ps = changedProperties(*subOwner);
             res.insert(res.end(), ps.begin(), ps.end());
         }
-        for (properties::Property* p : po.properties()) {
+        for (Property* p : po.properties()) {
             if (p->hasChanged()) {
                 res.push_back(p);
             }
@@ -116,6 +114,8 @@ namespace {
         }
     }
 } // namespace
+
+namespace openspace {
 
 //
 // Current version:
@@ -636,16 +636,16 @@ Profile::ParsingError::ParsingError(Severity severity_, std::string msg)
     , severity(severity_)
 {}
 
-void Profile::saveCurrentSettingsToProfile(const properties::PropertyOwner& rootOwner,
+void Profile::saveCurrentSettingsToProfile(const PropertyOwner& rootOwner,
                                            std::string currentTime,
-                                           interaction::NavigationState navState)
+                                           NavigationState navState)
 {
     version = Profile::CurrentVersion;
 
     // Update properties
-    const std::vector<properties::Property*> ps = changedProperties(rootOwner);
+    const std::vector<openspace::Property*> ps = changedProperties(rootOwner);
 
-    for (properties::Property* prop : ps) {
+    for (openspace::Property* prop : ps) {
         Property p;
         p.setType = Property::SetType::SetPropertyValueSingle;
         p.name = prop->uri();
@@ -853,7 +853,7 @@ Profile::Profile(const std::filesystem::path& path) {
     }
 }
 
-scripting::LuaLibrary Profile::luaLibrary() {
+LuaLibrary Profile::luaLibrary() {
     return {
         "",
         {
@@ -864,4 +864,4 @@ scripting::LuaLibrary Profile::luaLibrary() {
     };
 }
 
-}  // namespace openspace
+} // namespace openspace

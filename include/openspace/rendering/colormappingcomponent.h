@@ -43,7 +43,7 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 /**
  * This is a component that can be used to consistently hold parameters and properties
@@ -55,7 +55,7 @@ namespace documentation { struct Documentation; }
  * use this color mapping. As well as a set of uniforms? Now every renderable needs to
  * handle this separately.  (emmbr, 2023-10-13)
  */
-class ColorMappingComponent : public properties::PropertyOwner {
+class ColorMappingComponent : public PropertyOwner {
 public:
     ColorMappingComponent();
     explicit ColorMappingComponent(const ghoul::Dictionary& dictionary);
@@ -78,26 +78,26 @@ public:
 
     void update(const dataloader::Dataset& dataset, bool useCaching = true);
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
     glm::vec4 colorFromColorMap(float valueToColorFrom) const;
 
-    properties::BoolProperty enabled;
-    properties::BoolProperty invert;
-    properties::OptionProperty dataColumn;
-    properties::StringProperty colorMapFile;
-    properties::Vec2Property valueRange;
-    properties::TriggerProperty setRangeFromData;
+    BoolProperty enabled;
+    BoolProperty invert;
+    OptionProperty dataColumn;
+    StringProperty colorMapFile;
+    Vec2Property valueRange;
+    TriggerProperty setRangeFromData;
 
-    properties::BoolProperty hideOutsideRange;
-    properties::BoolProperty useNanColor;
-    properties::Vec4Property nanColor;
+    BoolProperty hideOutsideRange;
+    BoolProperty useNanColor;
+    Vec4Property nanColor;
 
-    properties::BoolProperty useAboveRangeColor;
-    properties::Vec4Property aboveRangeColor;
+    BoolProperty useAboveRangeColor;
+    Vec4Property aboveRangeColor;
 
-    properties::BoolProperty useBelowRangeColor;
-    properties::Vec4Property belowRangeColor;
+    BoolProperty useBelowRangeColor;
+    Vec4Property belowRangeColor;
 
 private:
     /**

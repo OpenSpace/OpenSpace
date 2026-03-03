@@ -72,12 +72,12 @@ namespace {
         std::optional<std::string> visUnit
             [[codegen::annotation("A valid kameleon unit")]];
     };
-#include "kameleonvolumetorawtask_codegen.cpp"
 } // namespace
+#include "kameleonvolumetorawtask_codegen.cpp"
 
-namespace openspace::kameleonvolume {
+namespace openspace {
 
-documentation::Documentation KameleonVolumeToRawTask::documentation() {
+Documentation KameleonVolumeToRawTask::documentation() {
     return codegen::doc<Parameters>("kameleon_metadata_to_json_task");
 }
 
@@ -145,7 +145,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
 
     float volumeMinValue;
     float volumeMaxValue;
-    std::unique_ptr<volume::RawVolume<float>> rawVolume = reader.readFloatVolume(
+    std::unique_ptr<RawVolume<float>> rawVolume = reader.readFloatVolume(
         _dimensions,
         _variable,
         _lowerDomainBound,
@@ -157,7 +157,7 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
         _innerRadialLimit
     );
 
-    volume::RawVolumeWriter<float> writer(_rawVolumeOutputPath);
+    RawVolumeWriter<float> writer(_rawVolumeOutputPath);
     writer.write(*rawVolume);
 
     ghoul::Dictionary inputMetadata = reader.readMetaData();
@@ -187,4 +187,4 @@ void KameleonVolumeToRawTask::perform(const Task::ProgressCallback& progressCall
     progressCallback(1.f);
 }
 
-} // namespace openspace::kameleonvolume
+} // namespace openspace

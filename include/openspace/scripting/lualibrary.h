@@ -32,7 +32,7 @@
 
 struct lua_State;
 
-namespace openspace::scripting {
+namespace openspace {
 
 /**
  * This structure represents a Lua library, itself consisting of a unique #name and an
@@ -91,6 +91,6 @@ struct LuaLibrary {
     void merge(LuaLibrary rhs);
 };
 
-} // namespace openspace::scripting
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___LUALIBRARY___H__

@@ -46,6 +46,8 @@
 #include "assetmanager_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "AssetManager";
 
     constexpr const char* AssetGlobalVariableName = "asset";
@@ -112,9 +114,8 @@ namespace {
         // to populate the descriptions in the main user interface
         std::optional<std::vector<std::string>> identifiers [[codegen::identifier()]];
     };
-
-#include "assetmanager_codegen.cpp"
 } // namespace
+#include "assetmanager_codegen.cpp"
 
 namespace openspace {
 
@@ -385,9 +386,9 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
     }
     catch (const ghoul::lua::LuaRuntimeException& e) {
         LERROR(std::format("Could not load asset '{}': {}", asset->path(), e.message));
-        global::eventEngine->publishEvent<events::EventAssetLoading>(
+        global::eventEngine->publishEvent<EventAssetLoading>(
             asset->path().string(),
-            events::EventAssetLoading::State::Error
+            EventAssetLoading::State::Error
         );
         return false;
     }
@@ -468,9 +469,9 @@ void AssetManager::unloadAsset(Asset* asset) {
         // might be painful
         _toBeDeleted.push_back(std::move(*it));
         _assets.erase(it);
-        global::eventEngine->publishEvent<events::EventAssetLoading>(
+        global::eventEngine->publishEvent<EventAssetLoading>(
             asset->path().string(),
-            events::EventAssetLoading::State::Unloaded
+            EventAssetLoading::State::Unloaded
         );
     }
 }
@@ -997,9 +998,9 @@ void AssetManager::callOnInitialize(Asset* asset) const {
     for (const int init : it->second) {
         lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, init);
         if (lua_pcall(*_luaState, 0, 0, 0) != LUA_OK) {
-            global::eventEngine->publishEvent<events::EventAssetLoading>(
+            global::eventEngine->publishEvent<EventAssetLoading>(
                 asset->path().string(),
-                events::EventAssetLoading::State::Error
+                EventAssetLoading::State::Error
             );
             throw ghoul::lua::LuaRuntimeException(std::format(
                 "When initializing '{}': {}",
@@ -1085,7 +1086,7 @@ std::filesystem::path AssetManager::generateAssetPath(
     return absPath(fullAssetPath);
 }
 
-scripting::LuaLibrary AssetManager::luaLibrary() {
+LuaLibrary AssetManager::luaLibrary() {
     return {
         "asset",
         {

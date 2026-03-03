@@ -30,11 +30,13 @@
 #include <optional>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo TextureInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo TextureInfo = {
         "Texture",
         "Texture",
         "The OpenGL name of the texture that is displayed on this plane.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `ScreenSpaceRenderable` can be used for debugging OpenGL textures. It renders
@@ -43,12 +45,12 @@ namespace {
         // [[codegen::verbatim(TextureInfo.description)]]
         std::optional<int> texture;
     };
-#include "screenspacedebugplane_codegen.cpp"
 } // namespace
+#include "screenspacedebugplane_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation ScreenSpaceDebugPlane::Documentation() {
+Documentation ScreenSpaceDebugPlane::Documentation() {
     return codegen::doc<Parameters>("debugging_screenspace_debugplane");
 }
 

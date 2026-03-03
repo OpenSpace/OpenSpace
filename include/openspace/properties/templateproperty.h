@@ -27,7 +27,7 @@
 
 #include <openspace/properties/property.h>
 
-namespace openspace::properties {
+namespace openspace {
 
 /**
  * This subclass of Property handles a single parameter value that is of type `T`. It
@@ -129,7 +129,7 @@ protected:
     T _value;
 };
 
-} // namespace openspace::properties
+} // namespace openspace
 
 #include "openspace/properties/templateproperty.inl"
 

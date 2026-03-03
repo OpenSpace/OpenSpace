@@ -36,7 +36,7 @@ namespace {
     constexpr double SensitivityAdjustmentDecrease = 0.5;
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 MouseCameraStates::MouseCameraStates(double sensitivity, double velocityScaleFactor)
     : CameraInteractionStates(sensitivity, velocityScaleFactor)
@@ -174,4 +174,4 @@ void MouseCameraStates::setInvertMouseButton(bool value) {
     _isMouseButtonInverted = value;
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

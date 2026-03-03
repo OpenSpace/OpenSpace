@@ -46,16 +46,16 @@ public:
 
     void internalInitialize(const ghoul::Dictionary& configuration) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     void startOrStopGui();
 
-    properties::BoolProperty _enabled;
-    properties::BoolProperty _visible;
-    properties::TriggerProperty _reload;
-    properties::StringProperty _url;
-    properties::FloatProperty _guiScale;
+    BoolProperty _enabled;
+    BoolProperty _visible;
+    TriggerProperty _reload;
+    StringProperty _url;
+    FloatProperty _guiScale;
     std::unique_ptr<BrowserInstance> _instance;
 
     WebGuiModule::CallbackHandle _endpointCallback = -1;

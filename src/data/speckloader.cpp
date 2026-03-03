@@ -69,7 +69,6 @@ namespace {
             line = line.substr(0, line.size() - 1);
         }
     }
-
 } // namespace
 
 namespace openspace::dataloader::speck {
@@ -366,7 +365,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             );
         }
     }
-#endif
+#endif // _DEBUG
 
     return res;
 }

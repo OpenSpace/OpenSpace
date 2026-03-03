@@ -430,4 +430,4 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
     _hasData = true;
 }
 
-}  // namespace openspace
+} // namespace openspace

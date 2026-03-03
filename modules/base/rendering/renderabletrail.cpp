@@ -44,6 +44,8 @@
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::array<const char*, 18> UniformNames = {
         "opacity", "modelViewTransform", "projectionTransform", "color", "useLineFade",
         "lineLength", "lineFadeAmount", "vertexSortingMethod", "idOffset", "nVertices",
@@ -66,33 +68,33 @@ namespace {
         { "Points+Lines", RenderingModeLinesPoints }
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineColorInfo = {
+    constexpr Property::PropertyInfo LineColorInfo = {
         "Color",
         "Color",
         "This value determines the RGB main color for the lines and points of the trail.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EnableFadeInfo = {
+    constexpr Property::PropertyInfo EnableFadeInfo = {
         "EnableFade",
         "Enable line fading of old points",
         "Toggles whether the trail should fade older points out. If this value is "
         "true, the 'Fade' parameter determines the speed of fading. If this value is "
         "false, the entire trail is rendered at full opacity and color.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineLengthInfo = {
+    constexpr Property::PropertyInfo LineLengthInfo = {
         "LineLength",
         "Line length",
         "The extent of the rendered trail. A value of 0 will result in no trail and a "
         "value of 1 will result in a trail that covers the entire extent. The setting "
         "only applies if 'EnableFade' is true. If it is false, this setting has "
         "no effect.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineFadeAmountInfo = {
+    constexpr Property::PropertyInfo LineFadeAmountInfo = {
         "LineFadeAmount",
         "Line fade amount",
         "The amount of the trail that should be faded. If the value is 0 then the "
@@ -103,34 +105,34 @@ namespace {
         "will result in a trail that starts fading immediately, becoming fully "
         "transparent by the end of the trail. This setting only applies if the "
         "'EnableFade' value is true. If it is false, this setting has no effect.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LineWidthInfo = {
+    constexpr Property::PropertyInfo LineWidthInfo = {
         "LineWidth",
         "Line width",
         "Specifies the line width of the trail lines, if the selected rendering method "
         "includes lines. If the rendering mode is Points, this value is ignored.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PointSizeInfo = {
+    constexpr Property::PropertyInfo PointSizeInfo = {
         "PointSize",
         "Point size",
         "Specifies the base size of the points along the line, if the selected rendering "
         "method includes points. If the rendering mode is Lines, this value is ignored. "
         "If a subsampling of the values is performed, the subsampled values are half "
         "this size.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RenderingModeInfo = {
+    constexpr Property::PropertyInfo RenderingModeInfo = {
         "Rendering",
         "Rendering mode",
         "Determines how the trail should be rendered. If 'Lines' is selected, only the "
         "line part is visible, if 'Points' is selected, only the corresponding points "
         "(and subpoints) are shown. 'Lines+Points' shows both parts.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     struct [[codegen::Dictionary(RenderableTrail)]] Parameters {
@@ -165,17 +167,17 @@ namespace {
         // [[codegen::verbatim(RenderingModeInfo.description)]]
         std::optional<RenderingMode> renderingMode [[codegen::key("Rendering")]];
     };
-#include "renderabletrail_codegen.cpp"
 } // namespace
+#include "renderabletrail_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableTrail::Documentation() {
+Documentation RenderableTrail::Documentation() {
     return codegen::doc<Parameters>("base_renderable_renderabletrail");
 }
 
 RenderableTrail::Appearance::Appearance()
-    : properties::PropertyOwner({
+    : PropertyOwner({
         "Appearance",
         "Appearance",
         "The appearance of the trail"
@@ -194,7 +196,7 @@ RenderableTrail::Appearance::Appearance()
         { RenderingModeLinesPoints, "Lines+Points" }
     });
 
-    lineColor.setViewOption(properties::Property::ViewOptions::Color);
+    lineColor.setViewOption(Property::ViewOptions::Color);
     addProperty(lineColor);
     addProperty(lineWidth);
     addProperty(pointSize);

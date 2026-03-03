@@ -38,21 +38,23 @@
 #include <utility>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo SimplificationInfo = {
         "Simplification",
         "Simplification",
         "If this value is enabled, the velocity is displayed in nuanced units, such as "
         "m/s, AU/s, light years / s etc. If this value is disabled, the unit can be "
         "explicitly requested.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
+    constexpr Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested unit",
         "If the simplification is disabled, this distance unit is used for the velocity "
         "display.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
     // This `DashboardItem` shows the velocity of the camera, that is how fast the camera
@@ -69,12 +71,12 @@ namespace {
         std::optional<std::string> requestedUnit
             [[codegen::inlist(openspace::distanceUnitList())]];
     };
-#include "dashboarditemvelocity_codegen.cpp"
 } // namespace
+#include "dashboarditemvelocity_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemVelocity::Documentation() {
+Documentation DashboardItemVelocity::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_velocity",
         DashboardTextItem::Documentation()
@@ -89,9 +91,7 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
     const Parameters p = codegen::bake<Parameters>(dictionary);
     _doSimplification.onChange([this]() {
         _requestedUnit.setVisibility(
-            _doSimplification ?
-            properties::Property::Visibility::Hidden :
-            properties::Property::Visibility::User
+            _doSimplification ? Property::Visibility::Hidden : Property::Visibility::User
         );
     });
     _doSimplification = p.simplification.value_or(_doSimplification);

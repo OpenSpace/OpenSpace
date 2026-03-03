@@ -28,9 +28,9 @@
 #include <cstdlib>
 
 namespace {
-    std::pair<double, openspace::TimeUnit> extractUnit(double seconds) {
-        using namespace openspace;
+    using namespace openspace;
 
+    std::pair<double, TimeUnit> extractUnit(double seconds) {
         const double secondsVal = std::abs(seconds);
 
         if (secondsVal == 0.0) {

@@ -53,97 +53,99 @@
 #include <fstream>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "RenderableMultiresVolume";
 
-    constexpr openspace::properties::Property::PropertyInfo StepSizeCoefficientInfo = {
+    constexpr Property::PropertyInfo StepSizeCoefficientInfo = {
         "StepSizeCoefficient",
         "Stepsize coefficient",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CurrentTimeInfo = {
+    constexpr Property::PropertyInfo CurrentTimeInfo = {
         "CurrentTime",
         "Current time",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo MemoryBudgetInfo = {
+    constexpr Property::PropertyInfo MemoryBudgetInfo = {
         "MemoryBudget",
         "Memory budget",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StreamingBudgetInfo = {
+    constexpr Property::PropertyInfo StreamingBudgetInfo = {
         "StreamingBudget",
         "Streaming budget",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseGlobalTimeInfo = {
+    constexpr Property::PropertyInfo UseGlobalTimeInfo = {
         "UseGlobalTime",
         "Global time",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo LoopInfo = {
+    constexpr Property::PropertyInfo LoopInfo = {
         "Loop",
         "Loop",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SelectorNameInfo = {
+    constexpr Property::PropertyInfo SelectorNameInfo = {
         "Selector",
         "Brick selector",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StatsToFileInfo = {
+    constexpr Property::PropertyInfo StatsToFileInfo = {
         "PrintStats",
         "Print stats",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StatsToFileNameInfo = {
+    constexpr Property::PropertyInfo StatsToFileNameInfo = {
         "PrintStatsFileName",
         "Stats filename",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScalingExponentInfo = {
+    constexpr Property::PropertyInfo ScalingExponentInfo = {
         "ScalingExponent",
         "Scaling Exponent",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ScalingInfo = {
+    constexpr Property::PropertyInfo ScalingInfo = {
         "Scaling",
         "Scaling",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TranslationInfo = {
+    constexpr Property::PropertyInfo TranslationInfo = {
         "Translation",
         "Translation",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RotationInfo = {
+    constexpr Property::PropertyInfo RotationInfo = {
         "Rotation",
         "Euler rotation",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
     struct [[codegen::Dictionary(RenderableMultiresVolume)]] Parameters {
@@ -162,8 +164,8 @@ namespace {
 
         std::optional<std::string> brickSelector;
     };
-#include "renderablemultiresvolume_codegen.cpp"
 } // namespace
+#include "renderablemultiresvolume_codegen.cpp"
 
 namespace openspace {
 
@@ -212,7 +214,6 @@ RenderableMultiresVolume::RenderableMultiresVolume(const ghoul::Dictionary& dict
     _transferFunction = std::make_shared<TransferFunction>(_transferFunctionPath);
 
     _tsp = std::make_shared<TSP>(_filename);
-    _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
     _selectorName = p.brickSelector.value_or(_selectorName);
 
@@ -353,7 +354,7 @@ void RenderableMultiresVolume::initializeGL() {
         setSelectorType(_selector);
     }
 
-    success &= _atlasManager && _atlasManager->initialize();
+    _atlasManager = std::make_shared<AtlasManager>(_tsp.get());
 
     _transferFunction->update();
 

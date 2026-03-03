@@ -74,10 +74,9 @@ namespace {
 
     constexpr std::string_view RetargetAnchorProperty =
         "NavigationHandler.OrbitalNavigator.RetargetAnchor";
-
 } // namespace
 
-namespace openspace::gui {
+namespace openspace {
 
 GuiSpaceTimeComponent::GuiSpaceTimeComponent()
     : GuiComponent("SpaceTime", "Space/Time")
@@ -318,7 +317,7 @@ void GuiSpaceTimeComponent::render() {
     showTooltip("OBS: A month here equals 30 days", _tooltipDelay);
 
     ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 20.f);
-//
+
     {
         const float dt = static_cast<float>(global::timeManager->targetDeltaTime());
         if (_firstFrame) {
@@ -327,10 +326,10 @@ void GuiSpaceTimeComponent::render() {
             _deltaTimeUnit = timeUnitFromString(dtInfo.second);
 
             _timeUnits = std::accumulate(
-                openspace::TimeUnits.begin(),
-                openspace::TimeUnits.end(),
+                TimeUnits.begin(),
+                TimeUnits.end(),
                 std::string(""),
-                [](const std::string& a, const openspace::TimeUnit& unit) {
+                [](const std::string& a, const TimeUnit& unit) {
                     return std::format(
                         "{}{} / second", a, nameForTimeUnit(unit, true)
                     ) + '\0';
@@ -577,4 +576,4 @@ void GuiSpaceTimeComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace::gui
+} // namespace openspace

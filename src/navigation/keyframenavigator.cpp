@@ -34,7 +34,7 @@
 #include <cmath>
 #include <utility>
 
-namespace openspace::interaction {
+namespace openspace {
 
 KeyframeNavigator::CameraPose::CameraPose(datamessagestructures::CameraKeyframe&& kf)
     : position(std::move(kf._position))
@@ -186,4 +186,4 @@ size_t KeyframeNavigator::nKeyframes() const {
     return _cameraPoseTimeline.nKeyframes();
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

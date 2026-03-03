@@ -58,7 +58,7 @@ public:
     void render(const RenderData& data, RendererTasks& rendererTask) override;
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     enum MeshType {
@@ -69,9 +69,9 @@ private:
     };
 
     struct RenderingMesh {
-        int meshIndex;
-        int colorIndex;
-        int textureIndex;
+        int meshIndex = 0;
+        int colorIndex = 0;
+        int textureIndex = 0;
         // From: Partiview User's Guide
         // Brian Abbott
         // Hayden Planetarium American Museum of Natural History New York, USA
@@ -80,8 +80,8 @@ private:
         // numV will equal the number of points to connect.
         // If you want a square, 4000×4000 grid with lines every 200 units,
         // then numU numV will both equal 21
-        int numU;
-        int numV;
+        int numU = 0;
+        int numV = 0;
         MeshType style;
         std::vector<GLuint> vaoArray;
         std::vector<GLuint> vboArray;
@@ -102,16 +102,16 @@ private:
     bool _textColorIsDirty = true;
     bool _hasLabel = false;
 
-    properties::Vec3Property _textColor;
-    properties::FloatProperty _textOpacity;
-    properties::FloatProperty _textSize;
-    properties::BoolProperty _drawElements;
-    properties::BoolProperty _drawLabels;
-    properties::IVec2Property _textMinMaxSize;
-    properties::FloatProperty _lineWidth;
+    Vec3Property _textColor;
+    FloatProperty _textOpacity;
+    FloatProperty _textSize;
+    BoolProperty _drawElements;
+    BoolProperty _drawLabels;
+    IVec2Property _textMinMaxSize;
+    FloatProperty _lineWidth;
 
     // DEBUG:
-    properties::OptionProperty _renderOption;
+    OptionProperty _renderOption;
 
     ghoul::opengl::ProgramObject* _program = nullptr;
     UniformCache(modelViewTransform, projectionTransform, alphaValue,

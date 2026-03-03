@@ -46,6 +46,8 @@
 #endif // WIN32
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "WebBrowser:EventHandler";
 
     /**
@@ -55,40 +57,40 @@ namespace {
      * \param key The key that we need to make
      * \return The key code, if mapped or the GLFW key code
      */
-    int mapFromGlfwToWindows(openspace::Key key) {
+    int mapFromGlfwToWindows(Key key) {
         switch (key) {
-            case openspace::Key::BackSpace:      return 8;
-            case openspace::Key::Tab:            return 9;
-            case openspace::Key::Enter:          return 13;
-            case openspace::Key::KeypadEnter:    return 13;
-            case openspace::Key::LeftShift:      return 16;
-            case openspace::Key::RightShift:     return 16;
-            case openspace::Key::LeftControl:    return 17;
-            case openspace::Key::RightControl:   return 17;
-            case openspace::Key::LeftAlt:        return 18;
-            case openspace::Key::RightAlt:       return 18;
-            case openspace::Key::Escape:         return 27;
-            case openspace::Key::Left:           return 37;
-            case openspace::Key::Up:             return 38;
-            case openspace::Key::Right:          return 39;
-            case openspace::Key::Down:           return 40;
-            case openspace::Key::Delete:         return 46;
-            case openspace::Key::Keypad0:        return 96;
-            case openspace::Key::Keypad1:        return 97;
-            case openspace::Key::Keypad2:        return 98;
-            case openspace::Key::Keypad3:        return 99;
-            case openspace::Key::Keypad4:        return 100;
-            case openspace::Key::Keypad5:        return 101;
-            case openspace::Key::Keypad6:        return 102;
-            case openspace::Key::Keypad7:        return 103;
-            case openspace::Key::Keypad8:        return 104;
-            case openspace::Key::Keypad9:        return 105;
-            case openspace::Key::KeypadMultiply: return 106;
-            case openspace::Key::KeypadAdd:      return 107;
-            case openspace::Key::KeypadSubtract: return 109;
-            case openspace::Key::KeypadDecimal:  return 110;
-            case openspace::Key::KeypadDivide:   return 111;
-            default:                          return static_cast<int>(key);
+            case Key::BackSpace:      return 8;
+            case Key::Tab:            return 9;
+            case Key::Enter:          return 13;
+            case Key::KeypadEnter:    return 13;
+            case Key::LeftShift:      return 16;
+            case Key::RightShift:     return 16;
+            case Key::LeftControl:    return 17;
+            case Key::RightControl:   return 17;
+            case Key::LeftAlt:        return 18;
+            case Key::RightAlt:       return 18;
+            case Key::Escape:         return 27;
+            case Key::Left:           return 37;
+            case Key::Up:             return 38;
+            case Key::Right:          return 39;
+            case Key::Down:           return 40;
+            case Key::Delete:         return 46;
+            case Key::Keypad0:        return 96;
+            case Key::Keypad1:        return 97;
+            case Key::Keypad2:        return 98;
+            case Key::Keypad3:        return 99;
+            case Key::Keypad4:        return 100;
+            case Key::Keypad5:        return 101;
+            case Key::Keypad6:        return 102;
+            case Key::Keypad7:        return 103;
+            case Key::Keypad8:        return 104;
+            case Key::Keypad9:        return 105;
+            case Key::KeypadMultiply: return 106;
+            case Key::KeypadAdd:      return 107;
+            case Key::KeypadSubtract: return 109;
+            case Key::KeypadDecimal:  return 110;
+            case Key::KeypadDivide:   return 111;
+            default:                  return static_cast<int>(key);
         }
     }
 
@@ -98,57 +100,57 @@ namespace {
     // There is an issue for proper cross-platform key events in CEF:
     // https://bitbucket.org/chromiumembedded/cef/issues/1750
     // For now, the 'important' keys are inserted here manually.
-    int mapFromGlfwToNative(openspace::Key key) {
+    int mapFromGlfwToNative(Key key) {
         switch (key) {
-            case openspace::Key::BackSpace:   return 51;
-            case openspace::Key::LeftControl: return 59;
-            case openspace::Key::LeftSuper:   return 55;
-            case openspace::Key::Enter:       return 36;
-            case openspace::Key::Left:        return 123;
-            case openspace::Key::Right:       return 124;
-            case openspace::Key::Up:          return 126;
-            case openspace::Key::Down:        return 127;
-            case openspace::Key::A:           return 97;
-            case openspace::Key::Num0:        return 82;
-            case openspace::Key::Num1:        return 83;
-            case openspace::Key::Num2:        return 84;
-            case openspace::Key::Num3:        return 85;
-            case openspace::Key::Num4:        return 86;
-            case openspace::Key::Num5:        return 87;
-            case openspace::Key::Num6:        return 88;
-            case openspace::Key::Num7:        return 89;
-            case openspace::Key::Num8:        return 91; // Note: 91, not 90.
-            case openspace::Key::Num9:        return 92;
-            default:                          return static_cast<int>(key);
+            case Key::BackSpace:   return 51;
+            case Key::LeftControl: return 59;
+            case Key::LeftSuper:   return 55;
+            case Key::Enter:       return 36;
+            case Key::Left:        return 123;
+            case Key::Right:       return 124;
+            case Key::Up:          return 126;
+            case Key::Down:        return 127;
+            case Key::A:           return 97;
+            case Key::Num0:        return 82;
+            case Key::Num1:        return 83;
+            case Key::Num2:        return 84;
+            case Key::Num3:        return 85;
+            case Key::Num4:        return 86;
+            case Key::Num5:        return 87;
+            case Key::Num6:        return 88;
+            case Key::Num7:        return 89;
+            case Key::Num8:        return 91; // Note: 91, not 90.
+            case Key::Num9:        return 92;
+            default:               return static_cast<int>(key);
         }
     }
 
-    int16_t mapFromGlfwToCharacter(openspace::Key key) {
+    int16_t mapFromGlfwToCharacter(Key key) {
         return static_cast<int16_t>(key);
     }
 
     // This is needed to avoid the backspace up event to trigger backspace.
-    int16_t mapFromGlfwToUnmodifiedCharacter(openspace::Key key) {
+    int16_t mapFromGlfwToUnmodifiedCharacter(Key key) {
         switch (key) {
-            case openspace::Key::BackSpace:   return 127;
-            case openspace::Key::A:           return 97;
-            default:                          return static_cast<int16_t>(key);
+            case Key::BackSpace:   return 127;
+            case Key::A:           return 97;
+            default:               return static_cast<int16_t>(key);
         }
     }
 
-    uint32_t mapToCefModifiers(openspace::KeyModifier modifiers) {
+    uint32_t mapToCefModifiers(KeyModifier modifiers) {
         uint32_t cefModifiers = 0;
         // Based on cef_event_flags_t in cef_types.h
-        if (hasKeyModifier(modifiers, openspace::KeyModifier::Shift)) {
+        if (hasKeyModifier(modifiers, KeyModifier::Shift)) {
             cefModifiers |= 1 << 1;
         }
-        if (hasKeyModifier(modifiers, openspace::KeyModifier::Control)) {
+        if (hasKeyModifier(modifiers, KeyModifier::Control)) {
             cefModifiers |= 1 << 2;
         }
-        if (hasKeyModifier(modifiers, openspace::KeyModifier::Alt)) {
+        if (hasKeyModifier(modifiers, KeyModifier::Alt)) {
             cefModifiers |= 1 << 3;
         }
-        if (hasKeyModifier(modifiers, openspace::KeyModifier::Super)) {
+        if (hasKeyModifier(modifiers, KeyModifier::Super)) {
             cefModifiers |= 1 << 7;
         }
         return cefModifiers;
@@ -177,7 +179,6 @@ namespace {
         return 4;
 #endif // WIN32
     }
-
 } // namespace
 
 namespace openspace {

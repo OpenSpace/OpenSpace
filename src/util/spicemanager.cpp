@@ -39,6 +39,8 @@
 #include "spicemanager_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "SpiceManager";
 
     // The value comes from
@@ -46,21 +48,19 @@ namespace {
     // as the maximum message length
     constexpr unsigned SpiceErrorBufferSize = 1841;
 
-    const char* toString(openspace::SpiceManager::FieldOfViewMethod m) {
-        using SM = openspace::SpiceManager;
+    const char* toString(SpiceManager::FieldOfViewMethod m) {
         switch (m) {
-            case SM::FieldOfViewMethod::Ellipsoid: return "ELLIPSOID";
-            case SM::FieldOfViewMethod::Point:     return "POINT";
-            default:                               throw ghoul::MissingCaseException();
+            case SpiceManager::FieldOfViewMethod::Ellipsoid: return "ELLIPSOID";
+            case SpiceManager::FieldOfViewMethod::Point:     return "POINT";
+            default:                                  throw ghoul::MissingCaseException();
         }
     }
 
-    const char* toString(openspace::SpiceManager::TerminatorType t) {
-        using SM = openspace::SpiceManager;
+    const char* toString(SpiceManager::TerminatorType t) {
         switch (t) {
-            case SM::TerminatorType::Umbral:    return "UMBRAL";
-            case SM::TerminatorType::Penumbral: return "PENUMBRAL";
-            default:                            throw ghoul::MissingCaseException();
+            case SpiceManager::TerminatorType::Umbral:    return "UMBRAL";
+            case SpiceManager::TerminatorType::Penumbral: return "PENUMBRAL";
+            default:                                  throw ghoul::MissingCaseException();
         }
     }
 
@@ -76,12 +76,11 @@ namespace {
         bodvrd_c(body.c_str(), value.c_str(), size, &n, v);
 
         if (failed_c()) {
-            openspace::throwSpiceError(std::format(
+            throwSpiceError(std::format(
                 "Error getting value '{}' for body '{}'", value, body
             ));
         }
     }
-
 } // namespace
 
 namespace openspace {
@@ -221,12 +220,12 @@ SpiceManager& SpiceManager::ref() {
 // exception with the SPICE error message is thrown
 // If an error occurred, true is returned, otherwise, false
 void throwSpiceError(const std::string& errorMessage) {
-    if (openspace::SpiceManager::ref().exceptionHandling()) {
+    if (SpiceManager::ref().exceptionHandling()) {
         std::string buffer;
         buffer.resize(SpiceErrorBufferSize);
         getmsg_c("LONG", SpiceErrorBufferSize, buffer.data());
         reset_c();
-        throw openspace::SpiceManager::SpiceException(errorMessage + ": " + buffer);
+        throw SpiceManager::SpiceException(errorMessage + ": " + buffer);
     }
     else {
         reset_c();
@@ -1090,7 +1089,7 @@ void SpiceManager::findCkCoverage(const std::filesystem::path& path) {
 #elif defined __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif
+#endif // __clang__
 
     SPICEINT_CELL(ids, MaxObj);
     SPICEDOUBLE_CELL(cover, WinSiz);
@@ -1108,7 +1107,7 @@ void SpiceManager::findCkCoverage(const std::filesystem::path& path) {
 #pragma clang diagnostic pop
 #elif defined __GNUC__
 #pragma GCC diagnostic pop
-#endif
+#endif // __clang__
 
         scard_c(0, &cover);
         ckcov_c(p.c_str(), frame, SPICEFALSE, "SEGMENT", 0.0, "TDB", &cover);
@@ -1151,7 +1150,7 @@ void SpiceManager::findSpkCoverage(const std::filesystem::path &path) {
 #elif defined __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wold-style-cast"
-#endif
+#endif // __clang__
 
     SPICEINT_CELL(ids, MaxObj);
     SPICEDOUBLE_CELL(cover, WinSiz);
@@ -1169,7 +1168,7 @@ void SpiceManager::findSpkCoverage(const std::filesystem::path &path) {
 #pragma clang diagnostic pop
 #elif defined __GNUC__
 #pragma GCC diagnostic pop
-#endif
+#endif // __clang__
 
         scard_c(0, &cover);
         spkcov_c(p.c_str(), obj, &cover);
@@ -1712,7 +1711,7 @@ SpiceManager::UseException SpiceManager::exceptionHandling() const {
     return _useExceptions;
 }
 
-scripting::LuaLibrary SpiceManager::luaLibrary() {
+LuaLibrary SpiceManager::luaLibrary() {
     return {
         "spice",
         {

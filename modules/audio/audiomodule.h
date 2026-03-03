@@ -46,9 +46,9 @@ public:
 
     AudioModule();
     ~AudioModule() override;
-    std::vector<documentation::Documentation> documentations() const override;
+    std::vector<openspace::Documentation> documentations() const override;
 
-    scripting::LuaLibrary luaLibrary() const override;
+    LuaLibrary luaLibrary() const override;
 
     BooleanType(ShouldLoop);
 
@@ -289,7 +289,7 @@ public:
      */
     glm::vec3 speakerPosition(int channel) const;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     struct Info {

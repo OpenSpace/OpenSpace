@@ -38,8 +38,10 @@
 #include <string_view>
 
 namespace {
+    using namespace openspace;
+
     double ephemerisTimeFromMissionElapsedTime(double met, double metReference) {
-        const double referenceET = openspace::SpiceManager::ref().ephemerisTimeFromDate(
+        const double referenceET = SpiceManager::ref().ephemerisTimeFromDate(
             "2015-07-14T11:50:00.00"
         );
 

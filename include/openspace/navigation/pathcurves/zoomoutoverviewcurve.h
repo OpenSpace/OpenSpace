@@ -27,7 +27,7 @@
 
 #include <openspace/navigation/pathcurve.h>
 
-namespace openspace::interaction {
+namespace openspace {
 
 class Waypoint;
 
@@ -36,6 +36,6 @@ public:
     ZoomOutOverviewCurve(const Waypoint& start, const Waypoint& end);
 };
 
-} // namespace openspace::interaction
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___ZOOMOUTOVERVIEWCURVE___H__

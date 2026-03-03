@@ -39,6 +39,8 @@
 #include <string>
 #include <vector>
 
+using namespace openspace;
+
 namespace {
     bool traverseToExpandSelectedItems(QTreeView& tree, AssetTreeModel& model, int rows,
                                        QModelIndex parent)
@@ -127,7 +129,7 @@ namespace {
     }
 } // namespace
 
-AssetsDialog::AssetsDialog(QWidget* parent, openspace::Profile* profile,
+AssetsDialog::AssetsDialog(QWidget* parent, Profile* profile,
                            const std::filesystem::path& assetBasePath,
                            const std::filesystem::path& userAssetBasePath)
     : QDialog(parent)

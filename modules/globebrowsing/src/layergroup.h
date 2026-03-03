@@ -33,14 +33,14 @@
 
 namespace ghoul { class Dictionary; }
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 class Layer;
 
 /**
  * Convenience class for dealing with multiple `Layer`s.
  */
-struct LayerGroup : public properties::PropertyOwner {
+struct LayerGroup : public PropertyOwner {
     explicit LayerGroup(layers::Group group);
 
     void initialize();
@@ -86,10 +86,10 @@ private:
 
     std::vector<std::string> _layersToDelete;
 
-    properties::BoolProperty _levelBlendingEnabled;
+    BoolProperty _levelBlendingEnabled;
     std::function<void(Layer*)> _onChangeCallback;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___LAYERGROUP___H__

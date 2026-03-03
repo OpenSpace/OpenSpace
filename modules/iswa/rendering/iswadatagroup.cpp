@@ -35,59 +35,62 @@
 #include <ghoul/misc/dictionary.h>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "IswaDataGroup";
 
-    constexpr openspace::properties::Property::PropertyInfo UseLogInfo = {
+    constexpr Property::PropertyInfo UseLogInfo = {
         "UseLog",
         "Use logarithm",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo UseHistogramInfo = {
+    constexpr Property::PropertyInfo UseHistogramInfo = {
         "UseHistogram",
         "Auto contrast",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AutoFilterInfo = {
+    constexpr Property::PropertyInfo AutoFilterInfo = {
         "AutoFilter",
         "Auto filter",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NormalizeValues = {
+    constexpr Property::PropertyInfo NormalizeValues = {
         "NormValues",
         "Normalize values",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BackgroundInfo = {
+    constexpr Property::PropertyInfo BackgroundInfo = {
         "BackgroundValues",
         "Background values",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TransferFunctionInfo = {
+    constexpr Property::PropertyInfo TransferFunctionInfo = {
         "Transferfunctions",
         "Transfer functions",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::Developer
+        Property::Visibility::Developer
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DataOptionsInfo = {
+    constexpr Property::PropertyInfo DataOptionsInfo = {
         "DataOptions",
         "Data options",
         "", // @TODO Missing documentation
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
-namespace openspace{
+namespace openspace {
+
 IswaDataGroup::IswaDataGroup(std::string name, std::string type)
     : IswaBaseGroup(name, type)
     , _useLog(UseLogInfo, false)
@@ -134,12 +137,12 @@ void IswaDataGroup::registerProperties() {
         // and unregister backgroundvalues property.
         if (_autoFilter) {
             _backgroundValues = _dataProcessor->filterValues();
-            _backgroundValues.setVisibility(properties::Property::Visibility::Hidden);
+            _backgroundValues.setVisibility(Property::Visibility::Hidden);
             //_backgroundValues.setVisible(false);
         // else if autofilter is turned off, register backgroundValues
         }
         else {
-            _backgroundValues.setVisibility(properties::Property::Visibility::Always);
+            _backgroundValues.setVisibility(Property::Visibility::Always);
             //_backgroundValues.setVisible(true);
         }
         ghoul::Dictionary d;
@@ -207,4 +210,4 @@ std::set<std::string> IswaDataGroup::dataOptionsValue() const {
     return _dataOptions;
 }
 
-} //namespace openspace
+} // namespace openspace

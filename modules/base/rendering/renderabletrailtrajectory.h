@@ -54,7 +54,7 @@ public:
 
     void update(const UpdateData& data) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
 
@@ -69,21 +69,21 @@ private:
     void reset();
 
     /// The start time of the trail
-    properties::StringProperty _startTime;
+    StringProperty _startTime;
     /// The end time of the trail
-    properties::StringProperty _endTime;
+    StringProperty _endTime;
     /// The interval (in seconds) between sample points
-    properties::DoubleProperty _sampleInterval;
+    DoubleProperty _sampleInterval;
     /// The factor that determines the time stamp subsampling, using different sized
     /// points along the trajectory
-    properties::IntProperty _timeStampSubsamplingFactor;
+    IntProperty _timeStampSubsamplingFactor;
     /// Determines whether the full trail should be rendered or the future trail removed
-    properties::BoolProperty _renderFullTrail;
+    BoolProperty _renderFullTrail;
     /// Determines whether accurate trail points are being calculated or not
-    properties::BoolProperty _useAccurateTrail;
+    BoolProperty _useAccurateTrail;
     /// Determines how many vertices around the object that will be
     /// replaced during full trail rendering
-    properties::IntProperty _nReplacementPoints;
+    IntProperty _nReplacementPoints;
 
     /// Dirty flag that determines whether the full vertex buffer needs to be resampled
     bool _needsFullSweep = true;

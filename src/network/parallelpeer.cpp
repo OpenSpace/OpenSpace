@@ -50,88 +50,90 @@
 #include "parallelpeer_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     constexpr size_t MaxLatencyDiffs = 64;
     constexpr std::string_view _loggerCat = "ParallelPeer";
 
-    constexpr openspace::properties::Property::PropertyInfo PasswordInfo = {
+    constexpr Property::PropertyInfo PasswordInfo = {
         "Password",
         "Password",
         "The general password that allows this OpenSpace instance access to the Wormhole "
         "server.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HostPasswordInfo = {
+    constexpr Property::PropertyInfo HostPasswordInfo = {
         "HostPassword",
         "Host password",
         "The password that is required to take control of the joint session and thus "
         "send all commands to connected clients.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo PortInfo = {
+    constexpr Property::PropertyInfo PortInfo = {
         "Port",
         "Port",
         "The port on which the Wormhole server is listening to connections from "
         "OpenSpace.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo AddressInfo = {
+    constexpr Property::PropertyInfo AddressInfo = {
         "Address",
         "Address",
         "The address of the Wormhole server either as a DNS name or an IP address.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo NameInfo = {
+    constexpr Property::PropertyInfo NameInfo = {
         "Name",
         "Connection name",
         "The name of this OpenSpace instance that will be potentially broadcast to other "
         "connected instances.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ServerNameInfo = {
+    constexpr Property::PropertyInfo ServerNameInfo = {
         "ServerName",
         "Server name",
         "The name of the server instance to join.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BufferTimeInfo = {
+    constexpr Property::PropertyInfo BufferTimeInfo = {
         "BufferTime",
         "Buffer time",
         "This is the number of seconds that received keyframes are buffered before they "
         "get applied to the rendering. A higher value leads to smoother rendering, "
         "particularly when the internet connection is unstable, but also leads to higher "
         "delay.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo TimeKeyFrameInfo = {
+    constexpr Property::PropertyInfo TimeKeyFrameInfo = {
         "TimeKeyframeInterval",
         "Time keyframe interval",
         "Determines how often the information about the simulation time is sent (in "
         "seconds). Lower values mean more accurate representation of the time, but also "
         "require higher internet bandwidth.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo CameraKeyFrameInfo = {
+    constexpr Property::PropertyInfo CameraKeyFrameInfo = {
         "CameraKeyframeInterval",
         "Camera keyframe interval",
         "Determines how often the information about the camera position and orientation "
         "is sent (in seconds). Lower values mean more accurate representation of the "
         "time, but also more internet traffic.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
 namespace openspace {
 
 ParallelPeer::ParallelPeer()
-    : properties::PropertyOwner({ "ParallelPeer", "Parallel Peer" })
+    : PropertyOwner({ "ParallelPeer", "Parallel Peer" })
     , _password(PasswordInfo)
     , _hostPassword(HostPasswordInfo)
     , _serverName(ServerNameInfo)
@@ -357,7 +359,7 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
                 convertedTimestamp
             );
 
-            interaction::KeyframeNavigator::CameraPose pose;
+            KeyframeNavigator::CameraPose pose;
             pose.focusNode = kf._focusNode;
             pose.position = kf._position;
             pose.rotation = kf._rotation;
@@ -423,8 +425,8 @@ void ParallelPeer::dataMessageReceived(const std::vector<char>& message) {
             // don't send it back again
             global::scriptEngine->queueScript({
                 .code = sm._script,
-                .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
-                .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+                .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
+                .sendToRemote = ScriptEngine::Script::ShouldSendToRemote::No
             });
             break;
         }
@@ -649,23 +651,23 @@ void ParallelPeer::setStatus(ParallelConnection::Status status) {
 
 
         if (isDisconnected && wasConnected) {
-            ee->publishEvent<events::EventParallelConnection>(
-                events::EventParallelConnection::State::Lost
+            ee->publishEvent<EventParallelConnection>(
+                EventParallelConnection::State::Lost
             );
         }
         if (isConnected && wasDisconnected) {
-            ee->publishEvent<events::EventParallelConnection>(
-                events::EventParallelConnection::State::Established
+            ee->publishEvent<EventParallelConnection>(
+                EventParallelConnection::State::Established
             );
         }
         if (isHost && (wasClient || wasDisconnected)) {
-            ee->publishEvent<events::EventParallelConnection>(
-                events::EventParallelConnection::State::HostshipGained
+            ee->publishEvent<EventParallelConnection>(
+                EventParallelConnection::State::HostshipGained
             );
         }
         if ((isClient || isDisconnected) && wasHost) {
-            ee->publishEvent<events::EventParallelConnection>(
-                events::EventParallelConnection::State::HostshipLost
+            ee->publishEvent<EventParallelConnection>(
+                EventParallelConnection::State::HostshipLost
             );
         }
     }
@@ -720,7 +722,7 @@ const std::string& ParallelPeer::hostName() {
 }
 
 void ParallelPeer::sendCameraKeyframe() {
-    interaction::NavigationHandler& navHandler = *global::navigationHandler;
+    NavigationHandler& navHandler = *global::navigationHandler;
 
     const SceneGraphNode* focusNode =
         navHandler.orbitalNavigator().anchorNode();
@@ -816,7 +818,7 @@ ghoul::Event<>& ParallelPeer::connectionEvent() {
     return *_connectionEvent;
 }
 
-scripting::LuaLibrary ParallelPeer::luaLibrary() {
+LuaLibrary ParallelPeer::luaLibrary() {
     return {
         "parallel",
         {

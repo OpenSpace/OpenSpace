@@ -63,12 +63,12 @@ namespace {
         // not the user.
         int layerGroupID [[codegen::private()]];
     };
-#include "tileproviderbylevel_codegen.cpp"
 } // namespace
+#include "tileproviderbylevel_codegen.cpp"
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
-documentation::Documentation TileProviderByLevel::Documentation() {
+Documentation TileProviderByLevel::Documentation() {
     return codegen::doc<Parameters>("globebrowsing_tileproviderbylevel");
 }
 
@@ -191,4 +191,4 @@ float TileProviderByLevel::noDataValueAsFloat() {
     return std::numeric_limits<float>::min();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

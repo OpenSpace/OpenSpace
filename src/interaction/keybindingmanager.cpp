@@ -34,7 +34,7 @@
 
 #include "keybindingmanager_lua.inl"
 
-namespace openspace::interaction {
+namespace openspace {
 
 void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyAction action)
 {
@@ -51,8 +51,8 @@ void KeybindingManager::keyboardCallback(Key key, KeyModifier modifier, KeyActio
             global::actionManager->triggerAction(
                 it->second,
                 ghoul::Dictionary(),
-                interaction::ActionManager::ShouldBeSynchronized::Yes,
-                interaction::ActionManager::ShouldBeLogged::Yes
+                ActionManager::ShouldBeSynchronized::Yes,
+                ActionManager::ShouldBeLogged::Yes
             );
         }
     }
@@ -112,7 +112,7 @@ const std::multimap<KeyWithModifier, std::string>& KeybindingManager::keyBinding
     return _keyLua;
 }
 
-scripting::LuaLibrary KeybindingManager::luaLibrary() {
+LuaLibrary KeybindingManager::luaLibrary() {
     return {
         "",
         {
@@ -125,4 +125,4 @@ scripting::LuaLibrary KeybindingManager::luaLibrary() {
     };
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

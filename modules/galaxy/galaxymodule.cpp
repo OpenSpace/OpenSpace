@@ -51,7 +51,7 @@ void GalaxyModule::internalInitialize(const ghoul::Dictionary&) {
     fTask->registerClass<MilkywayPointsConversionTask>("MilkywayPointsConversionTask");
 }
 
-std::vector<documentation::Documentation> GalaxyModule::documentations() const {
+std::vector<Documentation> GalaxyModule::documentations() const {
     return {
         RenderableGalaxy::Documentation(),
         MilkywayConversionTask::Documentation(),

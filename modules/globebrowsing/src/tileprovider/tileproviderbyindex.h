@@ -30,7 +30,7 @@
 #include <modules/globebrowsing/src/tileindex.h>
 #include <unordered_map>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 class TileProviderByIndex : public TileProvider {
 public:
@@ -45,13 +45,13 @@ public:
     int maxLevel() override final;
     float noDataValueAsFloat() override final;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     std::unordered_map<TileIndex::TileHashKey, std::unique_ptr<TileProvider>> _providers;
     std::unique_ptr<TileProvider> _defaultTileProvider;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___TILEPROVIDER__TILEPROVIDERBYINDEX___H__

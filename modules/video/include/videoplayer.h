@@ -44,14 +44,14 @@ namespace ghoul { class Dictionary; }
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
+struct Documentation;
 
 enum class PlaybackMode {
     MapToSimulationTime = 0,
     RealTimeLoop
 };
 
-class VideoPlayer : public properties::PropertyOwner, public Syncable {
+class VideoPlayer : public PropertyOwner, public Syncable {
 public:
     BooleanType(PauseAfterSeek);
 
@@ -80,7 +80,7 @@ public:
     void decode(SyncBuffer* syncBuffer) override;
     void postSync(bool isMaster) override;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 private:
     // Libmpv keys
@@ -124,12 +124,12 @@ private:
     void updateFrameDuration();
 
     // Properties for user interaction
-    properties::TriggerProperty _play;
-    properties::TriggerProperty _pause;
-    properties::TriggerProperty _goToStart;
-    properties::TriggerProperty _reload;
-    properties::BoolProperty _playAudio;
-    properties::BoolProperty _loopVideo;
+    TriggerProperty _play;
+    TriggerProperty _pause;
+    TriggerProperty _goToStart;
+    TriggerProperty _reload;
+    BoolProperty _playAudio;
+    BoolProperty _loopVideo;
 
     // Video properties. Try to read all these values from the video
     std::filesystem::path _videoFile;
@@ -163,6 +163,6 @@ private:
     bool _isDestroying = false;
     double _seekThreshold = 1.0; // Threshold to ensure we seek to a different time
 };
-} // namespace video::globebrowsing
+} // namespace video
 
 #endif // __OPENSPACE_MODULE_VIDEO___VIDEOPLAYER___H__

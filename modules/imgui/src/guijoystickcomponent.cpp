@@ -32,15 +32,13 @@ namespace {
     const ImVec2 Size = ImVec2(350, 500);
 } // namespace
 
-namespace openspace::gui {
+namespace openspace {
 
 GuiJoystickComponent::GuiJoystickComponent()
     : GuiComponent("joystick_information", "Joystick Information")
 {}
 
 void GuiJoystickComponent::render() {
-    using namespace interaction;
-
     ImGui::SetNextWindowCollapsed(_isCollapsed);
 
     bool v = _isEnabled;
@@ -109,4 +107,4 @@ void GuiJoystickComponent::render() {
     ImGui::End();
 }
 
-} // namespace openspace::gui
+} // namespace openspace

@@ -38,25 +38,27 @@
 #include <memory>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo XColorInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo XColorInfo = {
         "XColor",
         "X color",
         "The color of the x-axis.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo YColorInfo = {
+    constexpr Property::PropertyInfo YColorInfo = {
         "YColor",
         "Y color",
         "The color of the y-axis.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ZColorInfo = {
+    constexpr Property::PropertyInfo ZColorInfo = {
         "ZColor",
         "Z color",
         "The color of the z-axis.",
-        openspace::properties::Property::Visibility::NoviceUser
+        Property::Visibility::NoviceUser
     };
 
     // The RenderableCartesianAxes can be used to render the local Cartesian coordinate
@@ -79,12 +81,12 @@ namespace {
         // [[codegen::verbatim(ZColorInfo.description)]]
         std::optional<glm::vec3> zColor [[codegen::color()]];
     };
-#include "renderablecartesianaxes_codegen.cpp"
 } // namespace
+#include "renderablecartesianaxes_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderableCartesianAxes::Documentation() {
+Documentation RenderableCartesianAxes::Documentation() {
     return codegen::doc<Parameters>("base_renderable_cartesianaxes");
 }
 
@@ -100,15 +102,15 @@ RenderableCartesianAxes::RenderableCartesianAxes(const ghoul::Dictionary& dictio
     addProperty(Fadeable::_opacity);
 
     _xColor = p.xColor.value_or(_xColor);
-    _xColor.setViewOption(properties::Property::ViewOptions::Color);
+    _xColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_xColor);
 
     _yColor = p.yColor.value_or(_yColor);
-    _yColor.setViewOption(properties::Property::ViewOptions::Color);
+    _yColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_yColor);
 
     _zColor = p.zColor.value_or(_zColor);
-    _zColor.setViewOption(properties::Property::ViewOptions::Color);
+    _zColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_zColor);
 }
 

@@ -32,15 +32,13 @@
 #include <filesystem>
 
 namespace {
+    using namespace openspace;
+
     std::unique_ptr<ghoul::opengl::Texture> DefaultTileTexture;
-    openspace::globebrowsing::Tile DefaultTile = openspace::globebrowsing::Tile {
-        nullptr,
-        std::nullopt,
-        openspace::globebrowsing::Tile::Status::Unavailable
-    };
+    Tile DefaultTile = Tile { nullptr, std::nullopt, Tile::Status::Unavailable };
 } // namespace
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 unsigned int TileProvider::NumTileProviders = 0;
 
@@ -80,15 +78,19 @@ void TileProvider::initializeDefaultTile() {
         Texture::Format::RGBA,
         TileTextureInitData::ShouldAllocateDataOnCPU::Yes
     );
-    char* pixels = new char[initData.totalNumBytes];
-    memset(pixels, 0, initData.totalNumBytes * sizeof(char));
 
     // Create ghoul texture
-    DefaultTileTexture = std::make_unique<Texture>(initData.dimensions, GL_TEXTURE_2D);
-    DefaultTileTexture->setDataOwnership(Texture::TakeOwnership::Yes);
-    DefaultTileTexture->setPixelData(pixels);
-    DefaultTileTexture->uploadTexture();
-    DefaultTileTexture->setFilter(ghoul::opengl::Texture::FilterMode::LinearMipMap);
+    DefaultTileTexture = std::make_unique<Texture>(
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = initData.dimensions,
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::RGBA,
+            .dataType = GL_UNSIGNED_BYTE
+        },
+        ghoul::opengl::Texture::SamplerInit{
+            .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap
+        }
+    );
 
     // Create tile
     DefaultTile = Tile{ DefaultTileTexture.get(), std::nullopt, Tile::Status::OK };
@@ -98,9 +100,7 @@ void TileProvider::deinitializeDefaultTile() {
     DefaultTileTexture = nullptr;
 }
 
-TileProvider::TileProvider()
-    : properties::PropertyOwner({ "TileProvider", "Tile Provider" })
-{}
+TileProvider::TileProvider() : PropertyOwner({ "TileProvider", "Tile Provider" }) {}
 
 void TileProvider::initialize() {
     ZoneScoped;
@@ -230,4 +230,4 @@ ChunkTilePile TileProvider::chunkTilePile(TileIndex tileIndex, int pileSize) {
     return chunkTilePile;
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

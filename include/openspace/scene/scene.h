@@ -50,11 +50,11 @@ namespace ghoul {
 
 namespace openspace {
 
-namespace documentation { struct Documentation; }
-namespace properties { class Property; }
-namespace scripting { struct LuaLibrary; }
 class Camera;
+struct Documentation;
+struct LuaLibrary;
 class Profile;
+class Property;
 struct RenderData;
 struct RendererTasks;
 class SceneInitializer;
@@ -70,7 +70,7 @@ enum class PropertyValueType {
 
 // Notifications:
 // SceneGraphFinishedLoading
-class Scene : public properties::PropertyOwner {
+class Scene : public PropertyOwner {
 public:
     BooleanType(UpdateDependencies);
 
@@ -181,7 +181,7 @@ public:
      * \pre \p durationSeconds must be positive and not 0
      * \post A new interpolation record exists for \p that is not expired
      */
-    void addPropertyInterpolation(properties::Property* prop, float durationSeconds,
+    void addPropertyInterpolation(Property* prop, float durationSeconds,
         std::string postScript = "",
         ghoul::EasingFunction easingFunction = ghoul::EasingFunction::Linear);
 
@@ -194,7 +194,7 @@ public:
      * \pre \p prop must not be nullptr
      * \post No interpolation record exists for \p prop
      */
-    void removePropertyInterpolation(properties::Property* prop);
+    void removePropertyInterpolation(Property* prop);
 
     /**
      * Informs all Property%s with active interpolations about applying a new update tick
@@ -214,7 +214,7 @@ public:
      * \return The Lua library that contains all Lua functions available to change the
      *         scene graph
      */
-    static scripting::LuaLibrary luaLibrary();
+    static LuaLibrary luaLibrary();
 
     /**
      * Sets a property using the 'properties' contents of a profile. The function will
@@ -234,8 +234,7 @@ public:
      *        properties in the currently-available properties
      * \return Vector of Property objs containing property names that matched the regex
      */
-    std::vector<properties::Property*> propertiesMatchingRegex(
-        std::string_view propertyString);
+    std::vector<Property*> propertiesMatchingRegex(std::string_view propertyString);
 
     /**
      * Returns a list of all unique tags that are used in the currently loaded scene.
@@ -298,7 +297,7 @@ private:
     std::vector<std::unique_ptr<ghoul::opengl::ProgramObject>> _programs;
 
     struct PropertyInterpolationInfo {
-        properties::Property* prop;
+        Property* prop;
         std::chrono::time_point<std::chrono::steady_clock> beginTime;
         float durationSeconds;
         std::string postScript;

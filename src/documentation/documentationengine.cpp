@@ -65,6 +65,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "DocumentationEngine";
 
     // General keys
@@ -143,11 +145,7 @@ namespace {
     constexpr std::string_view FiltersKey = "filters";
     constexpr std::string_view ActionsKey = "actions";
 
-    nlohmann::json documentationToJson(
-                             const openspace::documentation::Documentation& documentation)
-    {
-        using namespace openspace::documentation;
-
+    nlohmann::json documentationToJson(const Documentation& documentation) {
         nlohmann::json json;
 
         json[NameKey] = documentation.name;
@@ -200,15 +198,14 @@ namespace {
             }
             json[MembersKey].push_back(entry);
         }
-        openspace::sortJson(json[MembersKey], NameKey);
+        sortJson(json[MembersKey], NameKey);
 
         return json;
     }
 
-    nlohmann::json propertyOwnerToJson(openspace::properties::PropertyOwner* owner) {
+    nlohmann::json propertyOwnerToJson(PropertyOwner* owner) {
         ZoneScoped;
 
-        using namespace openspace;
         nlohmann::json json;
         json[NameKey] =
             !owner->guiName().empty() ? owner->guiName() : owner->identifier();
@@ -219,7 +216,7 @@ namespace {
         json[TypeKey] = owner->type();
         json[TagsKey] = owner->tags();
 
-        for (properties::Property* p : owner->properties()) {
+        for (Property* p : owner->properties()) {
             nlohmann::json propertyJson;
             std::string name = !p->guiName().empty() ? p->guiName() : p->identifier();
             propertyJson[NameKey] = name;
@@ -232,7 +229,7 @@ namespace {
         }
         sortJson(json[PropertiesKeys], NameKey);
 
-        for (properties::PropertyOwner* o : owner->propertySubOwners()) {
+        for (PropertyOwner* o : owner->propertySubOwners()) {
             nlohmann::json propertyOwner;
             json[PropertyOwnersKey].push_back(propertyOwnerToJson(o));
         }
@@ -241,11 +238,9 @@ namespace {
         return json;
     }
 
-    nlohmann::json luaFunctionToJson(const openspace::scripting::LuaLibrary::Function& f,
+    nlohmann::json luaFunctionToJson(const LuaLibrary::Function& f,
                                      bool includeSourceLocation)
     {
-        using namespace openspace::scripting;
-
         nlohmann::json function;
         function[NameKey] = f.name;
         nlohmann::json arguments = nlohmann::json::array();
@@ -284,7 +279,7 @@ namespace {
     }
 } // namespace
 
-namespace openspace::documentation {
+namespace openspace {
 
 DocumentationEngine* DocumentationEngine::_instance = nullptr;
 
@@ -316,7 +311,6 @@ DocumentationEngine& DocumentationEngine::ref() {
 nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
     ZoneScoped;
 
-    using namespace openspace::scripting;
     const std::vector<LuaLibrary> libraries = global::scriptEngine->allLuaLibraries();
     nlohmann::json json;
 
@@ -326,7 +320,7 @@ nlohmann::json DocumentationEngine::generateScriptEngineJson() const {
         // Keep the library key for backwards compatability
         library[LibraryKey] = libraryName;
         library[NameKey] = libraryName;
-        std::string_view os = OpenSpaceScriptingKey;
+        std::string os = std::string(OpenSpaceScriptingKey);
         library[FullNameKey] =
             libraryName.empty() ? os : std::format("{}.{}", os, libraryName);
 
@@ -453,7 +447,7 @@ nlohmann::json DocumentationEngine::generateLicenseListJson() const {
 }
 
 nlohmann::json DocumentationEngine::generateEventJson() const {
-    using Type = events::Event::Type;
+    using Type = Event::Type;
     const std::unordered_map<Type, std::vector<EventEngine::ActionInfo>>& eventActions =
         global::eventEngine->eventActions();
     nlohmann::json events;
@@ -464,7 +458,7 @@ nlohmann::json DocumentationEngine::generateEventJson() const {
     for (const auto& [eventType, actions] : eventActions) {
         nlohmann::json eventJson;
 
-        eventJson[NameKey] = std::string(events::toString(eventType));
+        eventJson[NameKey] = std::string(toString(eventType));
         nlohmann::json actionsJson = nlohmann::json::array();
 
         for (const EventEngine::ActionInfo& action : actions) {
@@ -609,16 +603,15 @@ nlohmann::json DocumentationEngine::generateKeybindingsJson() const {
     return result;
 }
 
-nlohmann::json DocumentationEngine::generatePropertyOwnerJson(
-                                                   properties::PropertyOwner* owner) const
+nlohmann::json DocumentationEngine::generatePropertyOwnerJson(PropertyOwner* owner) const
 {
     ZoneScoped;
 
     ghoul_assert(owner, "Owner must not be nullptr");
 
     nlohmann::json json;
-    std::vector<properties::PropertyOwner*> subOwners = owner->propertySubOwners();
-    for (properties::PropertyOwner* o : subOwners) {
+    std::vector<PropertyOwner*> subOwners = owner->propertySubOwners();
+    for (PropertyOwner* o : subOwners) {
         if (o->identifier() != SceneTitle) {
             nlohmann::json jsonOwner = propertyOwnerToJson(o);
 
@@ -697,8 +690,6 @@ void DocumentationEngine::writeJsonDocumentation() const {
 }
 
 nlohmann::json DocumentationEngine::generateActionJson() const {
-    using namespace interaction;
-
     nlohmann::json res;
     res[NameKey] = ActionTitle;
     res[DataKey] = nlohmann::json::array();
@@ -750,4 +741,4 @@ std::vector<Documentation> DocumentationEngine::documentations() const {
     return _documentations;
 }
 
-} // namespace openspace::documentation
+} // namespace openspace

@@ -45,39 +45,41 @@
 #include "debuggingmodule_lua.inl"
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view KeyFontMono = "Mono";
 
-    constexpr openspace::properties::Property::PropertyInfo ShowStatisticsInfo = {
+    constexpr Property::PropertyInfo ShowStatisticsInfo = {
         "ShowStatistics",
         "Show statistics",
         "Show updating, rendering, and network statistics on all rendering nodes.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StatisticsScaleInfo = {
+    constexpr Property::PropertyInfo StatisticsScaleInfo = {
         "StatisticsScale",
         "Statistics scale",
         "This value is scaling the statistics window by the provided amount. For flat "
         "projections this is rarely necessary, but it is important when using a setup "
         "where the corners of the image are masked out.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo StatisticsOffsetInfo = {
+    constexpr Property::PropertyInfo StatisticsOffsetInfo = {
         "StatisticsOffset",
         "Statistics offset",
         "This value is offsetting the center of the statistics window by the provided "
         "amount. For flat projections this is rarely necessary, but it is important when "
         "using a setup the center of the image is distorted in some form.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShowFrameNumberInfo = {
+    constexpr Property::PropertyInfo ShowFrameNumberInfo = {
         "ShowFrameInformation",
         "Show frame information",
         "If this value is enabled, the current frame number and frame times are rendered "
         "into the window.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 } // namespace
 
@@ -167,13 +169,13 @@ void DebuggingModule::internalInitializeGL() {
     _fontFrameInfo = global::fontManager->font(KeyFontMono, fontSize.frameInfo);
 }
 
-std::vector<documentation::Documentation> DebuggingModule::documentations() const {
+std::vector<Documentation> DebuggingModule::documentations() const {
     return {
         ScreenSpaceDebugPlane::Documentation()
     };
 }
 
-scripting::LuaLibrary DebuggingModule::luaLibrary() const {
+LuaLibrary DebuggingModule::luaLibrary() const {
     return {
         .name = "debugging",
         .functions = {

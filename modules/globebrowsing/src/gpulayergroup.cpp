@@ -36,7 +36,7 @@
 #include <ghoul/opengl/texture.h>
 #include <string>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 void GPULayerGroup::setValue(ghoul::opengl::ProgramObject& program,
                              const LayerGroup& layerGroup, const TileIndex& tileIndex)
@@ -187,4 +187,4 @@ void GPULayerGroup::deactivate() {
     }
 }
 
-}  // namespace openspace::globebrowsing
+} // namespace openspace

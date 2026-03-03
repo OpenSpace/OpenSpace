@@ -38,6 +38,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view _loggerCat = "Waypoint";
 
     constexpr float LengthEpsilon = 1e-5f;
@@ -45,12 +47,9 @@ namespace {
 
     // Compute a target position close to the specified target node, using knowledge of
     // the start point and a desired distance from the node's center
-    glm::dvec3 computeGoodStepDirection(const openspace::SceneGraphNode* targetNode,
-                                       const openspace::interaction::Waypoint& startPoint)
+    glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
+                                        const Waypoint& startPoint)
     {
-        using namespace openspace;
-        using namespace openspace::interaction;
-
         const glm::dvec3 nodePos = targetNode->worldPosition();
         const SceneGraphNode* sun = sceneGraphNode(SunIdentifier);
         const SceneGraphNode* closeNode = PathNavigator::findNodeNearTarget(targetNode);
@@ -101,7 +100,7 @@ namespace {
     }
 } // namespace
 
-namespace openspace::interaction {
+namespace openspace {
 
 Waypoint::Waypoint(const glm::dvec3& pos, const glm::dquat& rot, std::string ref)
     : _nodeIdentifier(std::move(ref))
@@ -247,4 +246,4 @@ Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,
     return Waypoint(cameraPos, targetRot, spec.identifier);
 }
 
-} // namespace openspace::interaction
+} // namespace openspace

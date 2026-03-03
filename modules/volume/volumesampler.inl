@@ -22,7 +22,7 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-namespace openspace::volume {
+namespace openspace {
 
 template <typename VolumeType>
 VolumeSampler<VolumeType>::VolumeSampler(const VolumeType* volume,
@@ -90,4 +90,4 @@ typename VolumeType::VoxelType VolumeSampler<VolumeType>::sample(
     return value;
 }
 
-} // namespace openspace::volume
+} // namespace openspace

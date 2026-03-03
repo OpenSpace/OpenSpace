@@ -34,8 +34,8 @@
 
 namespace openspace {
 
-documentation::Documentation RenderableTexturePlane::Documentation() {
-    documentation::Documentation doc = RenderableTextureCygnet::Documentation();
+Documentation RenderableTexturePlane::Documentation() {
+    openspace::Documentation doc = RenderableTextureCygnet::Documentation();
     doc.name = "RenderableTexturePlane";
     doc.id = "iswa_renderable_textureplane";
     return doc;
@@ -69,7 +69,7 @@ void RenderableTexturePlane::setUniforms() {
     _shader->setUniform("transparency", _alpha.value());
 }
 
-bool RenderableTexturePlane::createGeometry() {
+void RenderableTexturePlane::createGeometry() {
     struct Vertex {
         glm::vec4 position;
         glm::vec2 texCoords;
@@ -108,15 +108,11 @@ bool RenderableTexturePlane::createGeometry() {
         offsetof(Vertex, texCoords)
     );
     glVertexArrayAttribBinding(_vao, 1, 0);
-
-    return true;
 }
 
-bool RenderableTexturePlane::destroyGeometry() {
+void RenderableTexturePlane::destroyGeometry() {
     glDeleteVertexArrays(1, &_vao);
     glDeleteBuffers(1, &_vbo);
-
-    return true;
 }
 
 void RenderableTexturePlane::renderGeometry() const {

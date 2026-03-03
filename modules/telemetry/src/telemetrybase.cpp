@@ -27,19 +27,21 @@
 #include <modules/opensoundcontrol/include/opensoundcontrolconnection.h>
 
 namespace {
-    constexpr openspace::properties::Property::PropertyInfo EnabledInfo = {
+    using namespace openspace;
+
+    constexpr Property::PropertyInfo EnabledInfo = {
         "Enabled",
         "Enabled",
         "This setting determines whether this telemetry gathering is enabled or not.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 } // namespace
 
 namespace openspace {
 
-TelemetryBase::TelemetryBase(properties::PropertyOwner::PropertyOwnerInfo info,
+TelemetryBase::TelemetryBase(PropertyOwner::PropertyOwnerInfo info,
                              const std::string& ip, int port)
-    : properties::PropertyOwner(info)
+    : PropertyOwner(info)
     , _identifier(info.identifier)
     , _enabled(EnabledInfo, false)
     , _connection(new OpenSoundControlConnection(ip, port))

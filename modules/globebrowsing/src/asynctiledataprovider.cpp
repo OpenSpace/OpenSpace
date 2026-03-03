@@ -35,11 +35,11 @@
 #include <utility>
 #include <vector>
 
-namespace openspace::globebrowsing {
-
 namespace {
     constexpr std::string_view _loggerCat = "AsyncTileDataProvider";
 } // namespace
+
+namespace openspace {
 
 AsyncTileDataProvider::AsyncTileDataProvider(std::string name,
                                      std::unique_ptr<RawTileDataReader> rawTileDataReader)
@@ -204,4 +204,4 @@ float AsyncTileDataProvider::noDataValueAsFloat() const {
     return _rawTileDataReader->noDataValueAsFloat();
 }
 
-} // namespace openspace::globebrowsing
+} // namespace openspace

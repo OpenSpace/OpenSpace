@@ -48,6 +48,8 @@
 #include <utility>
 
 namespace {
+    using namespace openspace;
+
     constexpr std::string_view HistoryFile = "ConsoleHistory";
     constexpr std::string_view JumpCharacters = ".,'/()\\";
     constexpr std::string_view PathStartIdentifier = "\"'[";
@@ -72,58 +74,58 @@ namespace {
     // Determines at which speed the console opens.
     constexpr float ConsoleOpenSpeed = 2.5;
 
-    constexpr openspace::properties::Property::PropertyInfo VisibleInfo = {
+    constexpr Property::PropertyInfo VisibleInfo = {
         "IsVisible",
         "Is visible",
         "Determines whether the Lua console is shown on the screen or not. Toggling it "
         "will fade the console in and out.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShouldBeSynchronizedInfo = {
+    constexpr Property::PropertyInfo ShouldBeSynchronizedInfo = {
        "ShouldBeSynchronized",
        "Should be synchronized",
        "Determines whether the entered commands will only be executed locally (if this "
        "is disabled), or whether they will be send to other connected nodes, for "
        "example in a cluster environment.",
-       openspace::properties::Property::Visibility::AdvancedUser
+       Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo ShouldSendToRemoteInfo = {
+    constexpr Property::PropertyInfo ShouldSendToRemoteInfo = {
         "ShouldSendToRemote",
         "Should send to remote",
         "Determines whether the entered commands will only be executed locally (if this "
         "is disabled), or whether they will be send to connected remote instances (other "
         "peers through a parallel connection).",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo BackgroundColorInfo = {
+    constexpr Property::PropertyInfo BackgroundColorInfo = {
         "BackgroundColor",
         "Background color",
         "Sets the background color of the console.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo EntryTextColorInfo = {
+    constexpr Property::PropertyInfo EntryTextColorInfo = {
         "EntryTextColor",
         "Entry text color",
         "Sets the text color of the entry area of the console.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HistoryTextColorInfo = {
+    constexpr Property::PropertyInfo HistoryTextColorInfo = {
         "HistoryTextColor",
         "History text color",
         "Sets the text color of the history area of the console.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo HistoryLengthInfo = {
+    constexpr Property::PropertyInfo HistoryLengthInfo = {
         "HistoryLength",
         "History length",
         "Determines the length of the history in number of lines.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     std::string sanitizeInput(std::string str) {
@@ -161,7 +163,6 @@ namespace {
 
 namespace openspace {
 
-
 LuaConsole::AutoCompleteState::AutoCompleteState()
     : context{ Context::None }
     , isDataDirty{ true }
@@ -174,7 +175,7 @@ LuaConsole::AutoCompleteState::AutoCompleteState()
 {}
 
 LuaConsole::LuaConsole()
-    : properties::PropertyOwner({ "LuaConsole", "Lua Console" })
+    : PropertyOwner({ "LuaConsole", "Lua Console" })
     , _isVisible(VisibleInfo, false)
     , _shouldBeSynchronized(ShouldBeSynchronizedInfo, true)
     , _shouldSendToRemote(ShouldSendToRemoteInfo, false)
@@ -204,13 +205,13 @@ LuaConsole::LuaConsole()
     addProperty(_shouldSendToRemote);
     addProperty(_historyLength);
 
-    _backgroundColor.setViewOption(properties::Property::ViewOptions::Color);
+    _backgroundColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_backgroundColor);
 
-    _entryTextColor.setViewOption(properties::Property::ViewOptions::Color);
+    _entryTextColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_entryTextColor);
 
-    _historyTextColor.setViewOption(properties::Property::ViewOptions::Color);
+    _historyTextColor.setViewOption(Property::ViewOptions::Color);
     addProperty(_historyTextColor);
 }
 
@@ -502,7 +503,7 @@ void LuaConsole::render() {
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDisable(GL_DEPTH_TEST);
 
-    rendering::helper::renderBox(
+    rendering::renderBox(
         glm::vec2(0.f),
         glm::vec2(1.f, _currentHeight / res.y),
         _backgroundColor
@@ -1021,7 +1022,7 @@ void LuaConsole::registerKeyHandlers() {
 
         const std::string cmd = _commands[_activeCommand];
         if (!cmd.empty()) {
-            using Script = scripting::ScriptEngine::Script;
+            using Script = ScriptEngine::Script;
             global::scriptEngine->queueScript({
                 .code = cmd,
                 .synchronized = Script::ShouldBeSynchronized(_shouldBeSynchronized),

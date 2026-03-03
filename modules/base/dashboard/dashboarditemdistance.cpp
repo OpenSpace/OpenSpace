@@ -41,6 +41,8 @@
 #include <optional>
 
 namespace {
+    using namespace openspace;
+
     enum Type {
         Node = 0,
         NodeSurface,
@@ -48,62 +50,62 @@ namespace {
         Camera
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SourceTypeInfo = {
+    constexpr Property::PropertyInfo SourceTypeInfo = {
         "SourceType",
         "Source type",
         "The type of position that is used as the source to calculate the distance.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SourceNodeIdentifierInfo = {
+    constexpr Property::PropertyInfo SourceNodeIdentifierInfo = {
         "SourceNodeIdentifier",
         "Source node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the source for computing the distance.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo DestinationTypeInfo = {
+    constexpr Property::PropertyInfo DestinationTypeInfo = {
         "DestinationType",
         "Destination type",
         "The type of position that is used as the destination to calculate the distance.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo
+    constexpr Property::PropertyInfo
         DestinationNodeIdentifierInfo =
     {
         "DestinationNodeIdentifier",
         "Destination node identifier",
         "If a scene graph node is selected as type, this value specifies the identifier "
         "of the node that is to be used as the destination for computing the distance.",
-        openspace::properties::Property::Visibility::User
+        Property::Visibility::User
     };
 
-    constexpr openspace::properties::Property::PropertyInfo SimplificationInfo = {
+    constexpr Property::PropertyInfo SimplificationInfo = {
         "Simplification",
         "Simplification",
         "If this value is enabled, the distance is displayed in nuanced units, such as "
         "km, AU, light years, parsecs, etc. If this value is disabled, the unit can be "
         "explicitly requested.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo RequestedUnitInfo = {
+    constexpr Property::PropertyInfo RequestedUnitInfo = {
         "RequestedUnit",
         "Requested unit",
         "If the simplification is disabled, this distance unit is used as a destination "
         "to convert the meters into.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
-    constexpr openspace::properties::Property::PropertyInfo FormatStringInfo = {
+    constexpr Property::PropertyInfo FormatStringInfo = {
         "FormatString",
         "Format string",
         "The format string that is used for formatting the distance string.  This format "
         "receives four parameters:  The name of the source, the name of the destination "
         "the value of the distance and the unit of the distance.",
-        openspace::properties::Property::Visibility::AdvancedUser
+        Property::Visibility::AdvancedUser
     };
 
     // This `DashboardItem` displays the distance between two points. The points can be
@@ -144,12 +146,12 @@ namespace {
         // [[codegen::verbatim(FormatStringInfo.description)]]
         std::optional<std::string> formatString;
     };
-#include "dashboarditemdistance_codegen.cpp"
 } // namespace
+#include "dashboarditemdistance_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation DashboardItemDistance::Documentation() {
+Documentation DashboardItemDistance::Documentation() {
     return codegen::doc<Parameters>(
         "base_dashboarditem_distance",
         DashboardTextItem::Documentation()
@@ -162,13 +164,13 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     , _requestedUnit(RequestedUnitInfo)
     , _formatString(FormatStringInfo, "Distance from {} to {}: {:f} {}")
     , _source{
-        properties::OptionProperty(SourceTypeInfo),
-        properties::StringProperty(SourceNodeIdentifierInfo),
+        OptionProperty(SourceTypeInfo),
+        StringProperty(SourceNodeIdentifierInfo),
         nullptr
     }
     , _destination{
-        properties::OptionProperty(DestinationTypeInfo),
-        properties::StringProperty(DestinationNodeIdentifierInfo),
+        OptionProperty(DestinationTypeInfo),
+        StringProperty(DestinationNodeIdentifierInfo),
         nullptr
     }
 {
@@ -182,7 +184,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     });
     _source.type.onChange([this]() {
         _source.nodeIdentifier.setVisibility(
-            properties::Property::Visibility(
+            Property::Visibility(
                 _source.type == Type::Node || _source.type == Type::NodeSurface
             )
         );
@@ -212,7 +214,7 @@ DashboardItemDistance::DashboardItemDistance(const ghoul::Dictionary& dictionary
     });
     _destination.type.onChange([this]() {
         _destination.nodeIdentifier.setVisibility(
-            properties::Property::Visibility(
+            Property::Visibility(
                 _source.type == Type::Node || _source.type == Type::NodeSurface
             )
         );

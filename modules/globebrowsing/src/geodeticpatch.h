@@ -28,7 +28,7 @@
 #include <modules/globebrowsing/src/basictypes.h>
 #include <openspace/util/geodetic.h>
 
-namespace openspace::globebrowsing {
+namespace openspace {
 
 struct TileIndex;
 
@@ -103,6 +103,6 @@ private:
     Geodetic2 _halfSize;
 };
 
-} // namespace openspace::globebrowsing
+} // namespace openspace
 
 #endif // __OPENSPACE_MODULE_GLOBEBROWSING___GEODETICPATCH___H__

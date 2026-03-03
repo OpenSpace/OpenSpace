@@ -61,9 +61,9 @@ public:
     void saveToFile(const std::string& filename,
         std::string directory = "${TEMPORARY}/") const;
 
-    scripting::LuaLibrary luaLibrary() const override;
+    LuaLibrary luaLibrary() const override;
 
-    std::vector<documentation::Documentation> documentations() const override;
+    std::vector<openspace::Documentation> documentations() const override;
 
 private:
     std::unique_ptr<StateMachine> _machine = nullptr;

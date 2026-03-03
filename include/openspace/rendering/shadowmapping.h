@@ -32,12 +32,11 @@
 #include <vector>
 
 namespace ghoul { class Dictionary; }
-namespace openspace {
-    namespace documentation { struct Documentation; }
-    class SceneGraphNode;
-} // namespace openspace
 
-namespace openspace::shadowmapping {
+namespace openspace {
+
+struct Documentation;
+class SceneGraphNode;
 
 struct ShadowInfo {
     const SceneGraphNode* lightSource = nullptr;
@@ -68,14 +67,14 @@ public:
 
     virtual void renderForDepthMap(const glm::dmat4& vp) const = 0;
 
-    static documentation::Documentation Documentation();
+    static openspace::Documentation Documentation();
 
 protected:
-    properties::BoolProperty _castShadow;
+    BoolProperty _castShadow;
     const SceneGraphNode* _lightSource = nullptr;
     std::string _shadowGroup;
 
-    properties::FloatProperty _frustumSize;
+    FloatProperty _frustumSize;
     bool _hasFrustumSize = false;
 };
 
@@ -91,6 +90,6 @@ protected:
     bool _isShadowersDirty = false;
 };
 
-} // namespace openspace::shadowmapping
+} // namespace openspace
 
 #endif // __OPENSPACE_CORE___SHADOWMAPPING___H__

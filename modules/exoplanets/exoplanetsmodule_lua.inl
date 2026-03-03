@@ -37,14 +37,13 @@
 #include <string>
 #include <string_view>
 
+using namespace openspace;
+
 namespace {
 
 constexpr std::string_view _loggerCat = "ExoplanetsModule";
 
-openspace::exoplanets::ExoplanetSystem findSystemInData(std::string_view starName) {
-    using namespace openspace;
-    using namespace exoplanets;
-
+ExoplanetSystem findSystemInData(std::string_view starName) {
     const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
 
     const std::filesystem::path binPath = module->exoplanetsDataPath();
@@ -104,8 +103,6 @@ openspace::exoplanets::ExoplanetSystem findSystemInData(std::string_view starNam
 }
 
 std::vector<std::string> hostStarsWithSufficientData() {
-    using namespace openspace;
-    using namespace exoplanets;
     const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
 
     if (!module->hasDataFiles()) {
@@ -178,9 +175,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
  *         that can be used to create the scene graph nodes for the exoplanet system
  */
 [[codegen::luawrap]] ghoul::Dictionary systemData(std::string starName){
-    using namespace openspace;
-
-    exoplanets::ExoplanetSystem systemData = findSystemInData(starName);
+    ExoplanetSystem systemData = findSystemInData(starName);
 
     if (systemData.planetsData.empty()) {
         throw ghoul::lua::LuaError(std::format(
@@ -197,16 +192,14 @@ std::vector<std::string> hostStarsWithSufficientData() {
  * \param starName The name of the host star for the system to remove
  */
 [[codegen::luawrap]] void removeExoplanetSystem(std::string starName) {
-    using namespace openspace;
-    using namespace exoplanets;
     const std::string starIdentifier = makeIdentifier(std::move(starName));
 
     // No sync or send because this is already inside a Lua script, therefor it has
     // already been synced and sent to the connected nodes and peers
     global::scriptEngine->queueScript({
         .code = "openspace.removeSceneGraphNode('" + starIdentifier + "');",
-        .synchronized = scripting::ScriptEngine::Script::ShouldBeSynchronized::No,
-        .sendToRemote = scripting::ScriptEngine::Script::ShouldSendToRemote::No
+        .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
+        .sendToRemote = ScriptEngine::Script::ShouldSendToRemote::No
     });
 }
 
@@ -260,9 +253,6 @@ std::vector<std::string> hostStarsWithSufficientData() {
 [[codegen::luawrap]] std::vector<ghoul::Dictionary> loadSystemDataFromCsv(
                                                                       std::string csvFile)
 {
-    using namespace openspace;
-    using namespace exoplanets;
-
     using PlanetData = ExoplanetsDataPreparationTask::PlanetData;
 
     std::ifstream inputDataFile(csvFile);
@@ -333,6 +323,6 @@ std::vector<std::string> hostStarsWithSufficientData() {
     return result;
 }
 
-#include "exoplanetsmodule_lua_codegen.cpp"
-
 } // namespace
+
+#include "exoplanetsmodule_lua_codegen.cpp"

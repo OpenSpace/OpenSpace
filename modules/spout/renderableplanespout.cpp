@@ -38,15 +38,15 @@ namespace {
     // Note: The Spout library is only available on Windows.
     struct [[codegen::Dictionary(RenderablePlaneSpout)]] Parameters {
     };
-#include "renderableplanespout_codegen.cpp"
 } // namespace
+#include "renderableplanespout_codegen.cpp"
 
 namespace openspace {
 
-documentation::Documentation RenderablePlaneSpout::Documentation() {
+Documentation RenderablePlaneSpout::Documentation() {
     return codegen::doc<Parameters>(
         "spout_renderableplanespout",
-        spout::SpoutReceiverPropertyProxy::Documentation()
+        SpoutReceiverPropertyProxy::Documentation()
     );
 }
 
