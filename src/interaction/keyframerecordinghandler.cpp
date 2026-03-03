@@ -34,6 +34,8 @@
 #include <openspace/util/timemanager.h>
 #include <ghoul/format.h>
 #include <ghoul/io/camera/camerareader.h>
+#include <ghoul/io/model/modelanimation.h>
+#include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
 #include <algorithm>
@@ -153,11 +155,72 @@ std::vector<ghoul::Dictionary> KeyframeRecordingHandler::keyframes() const {
     return sessionRecordingToDictionary(_timeline);
 }
 
-void KeyframeRecordingHandler::loadCameraFBX(const std::filesystem::path& path) {
-    ghoul::io::CameraReader::loadCameraPath(
+void KeyframeRecordingHandler::loadCameraFBX(const std::filesystem::path& path,
+                                             const std::string& focusNode,
+                                             double sequenceTime, double scale)
+{
+    using namespace ghoul::io;
+    auto [cameraNodes, cameraAnimation] = CameraReader::loadCameraPath(
         path
     );
-    //const auto& nodes = geometry->nodes();
+    ModelAnimation::NodeAnimation cameraPath = cameraAnimation->nodeAnimations()[0];
+    SessionRecording timeline = SessionRecording();
+
+    // It is not certain position, rotation and scale will have the same number of
+    // keyframes
+    const bool hasSameNumberOfKeyframes =
+        cameraPath.positions.size() == cameraPath.rotations.size() &&
+        cameraPath.positions.size() == cameraPath.scales.size();
+
+    const size_t maxSafeIndex = std::min(
+        std::min(cameraPath.positions.size(), cameraPath.rotations.size()),
+        cameraPath.scales.size()
+    );
+
+    const size_t maxIndex = std::max(
+        std::max(cameraPath.positions.size(), cameraPath.rotations.size()),
+        cameraPath.scales.size()
+    );
+    if (!hasSameNumberOfKeyframes) {
+        LWARNINGC("KeyframeRecording", std::format(
+            "Camera path does not have the same nubmer of keyframes for position, "
+            "rotation, and scale. Using {} keyframe(s) from total {} keyframes",
+            maxSafeIndex, maxIndex
+        ));
+    }
+    timeline.entries.reserve(maxSafeIndex);
+
+    // @TODO (anden88 2026-03-03): Unclear if this is needed since the path is baked the
+    // transforms might already be applied
+    //glm::mat4 modelTransform = glm::mat4(1.f);
+    //for (int i = 0; i <= cameraPath.node; i++) {
+    //    const ghoul::io::ModelNode* node = &cameraNodes[i];
+    //    if (cameraNodes[i].hasAnimation()) {
+    //        modelTransform = modelTransform * node->animationTransform();
+    //    }
+    //    else {
+    //        modelTransform = modelTransform * node->transform();
+    //    }
+    //}
+
+    for (size_t i = 0; i < maxSafeIndex; i++) {
+        SessionRecording::Entry entry;
+        entry.timestamp = cameraPath.positions[i].time;
+        entry.simulationTime = sequenceTime + entry.timestamp;
+
+        SessionRecording::Entry::Camera camera;
+        camera.focusNode = focusNode;
+        camera.followFocusNodeRotation = false;
+        camera.position =
+            scale * static_cast<glm::dvec3>(cameraPath.positions[i].position);
+        camera.rotation = cameraPath.rotations[i].rotation;
+        camera.scale = cameraPath.scales[i].scale.x;
+
+        entry.value = camera;
+        timeline.entries.emplace_back(std::move(entry));
+    }
+
+    _timeline = std::move(timeline);
 }
 
 scripting::LuaLibrary KeyframeRecordingHandler::luaLibrary() {

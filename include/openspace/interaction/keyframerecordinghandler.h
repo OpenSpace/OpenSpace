@@ -50,7 +50,8 @@ public:
     void play();
     bool hasKeyframeRecording() const;
     std::vector<ghoul::Dictionary> keyframes() const;
-    void loadCameraFBX(const std::filesystem::path& path);
+    void loadCameraFBX(const std::filesystem::path& path, const std::string& focusNode,
+        double sequenceTime, double scale);
 
     static openspace::scripting::LuaLibrary luaLibrary();
 

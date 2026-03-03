@@ -23,6 +23,8 @@
  ****************************************************************************************/
 
 #include <openspace/engine/globals.h>
+#include <openspace/navigation/navigationhandler.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <optional>
 #include <utility>
 
@@ -104,9 +106,42 @@ namespace {
     return global::keyframeRecording->keyframes();
 }
 
-[[codegen::luawrap]] void loadCameraFBX(std::filesystem::path filename) {
+[[codegen::luawrap]] void loadCameraFBX(std::filesystem::path filename,
+    std::optional<std::string> focusNode, std::optional<std::string> dateTime,
+    std::optional<double> scale) {
     using namespace openspace;
-    global::keyframeRecording->loadCameraFBX(std::move(filename));
+
+    std::string focus;
+    if (focusNode.has_value()) {
+        focus = *focusNode;
+    }
+    else {
+        // Get current focus
+        interaction::NavigationHandler& navHandler = *global::navigationHandler;
+        const SceneGraphNode* anchorNode = navHandler.orbitalNavigator().anchorNode();
+        if (!anchorNode) {
+            return;
+        }
+        focus = anchorNode->identifier();
+    }
+
+    double sequenceTime = 0.0;
+    // Use the specified time otherwise fallback to current simulation time
+    if (dateTime.has_value()) {
+        const Time time = Time(*dateTime);
+        sequenceTime = time.j2000Seconds();
+    }
+    else {
+        sequenceTime = global::timeManager->time().j2000Seconds();
+    }
+
+
+    global::keyframeRecording->loadCameraFBX(
+        std::move(filename),
+        focus,
+        sequenceTime,
+        scale.value_or(1.0)
+    );
 }
 
 #include "keyframerecordinghandler_lua_codegen.cpp"
