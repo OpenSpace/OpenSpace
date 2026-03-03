@@ -153,13 +153,28 @@ void J2kCodec::decodeIntoBuffer(const std::filesystem::path& path, unsigned char
         return;
     }
 
-    // TODO(mnoven): This is a waste. Can't specify decode precision in
-    // openjpeg. See: https://github.com/uclouvain/openjpeg/issues/836)
-    std::copy(
-        _image->comps[0].data,
-        _image->comps[0].data + _image->comps[0].w * _image->comps[0].h,
-        buffer
-    );
+    const opj_image_comp_t& comp = _image->comps[0];
+    const int srcW = static_cast<int>(comp.w);
+    const int srcH = static_cast<int>(comp.h);
+
+    const int dstSize = std::max(srcW, srcH);
+
+    // NOTE: buffer is assumed to be dstSize*dstSize bytes by the caller
+    std::fill(buffer, buffer + (dstSize * dstSize), 0);
+
+    const int padLeft = (dstSize - srcW) / 2;
+    const int padTop = (dstSize - srcH) / 2;
+
+    const int* src = comp.data;
+
+    for (int y = 0; y < srcH; ++y) {
+        const int dstRowStart = (y + padTop) * dstSize + padLeft;
+        std::copy(
+            src + y * srcW,
+            src + (y + 1) * srcW,
+            buffer + dstRowStart
+        );
+    }
 
     auto t2 = std::chrono::high_resolution_clock::now();
     if (_verboseMode) {

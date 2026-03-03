@@ -1,6 +1,9 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local sdoImagery = asset.require("./sdoimagery")
 local stereoImagery = asset.require("./stereoimagery")
+local sohoImagery = asset.require("./goesimagery")
+local goesImagery = asset.require("./sohoimagery")
+local solarOrbiterImagery = asset.require("${USER_ASSETS}/solarorbiter/model.asset")
 
 
 
@@ -11,7 +14,10 @@ local SolarImageryProjection = {
     Type = "RenderableSolarImageryProjection",
     DependentNodes = {
       sdoImagery.Imagery.Identifier,
-      stereoImagery.Imagery.Identifier
+      goesImagery.Imagery.Identifier,
+      sohoImagery.Imagery.Identifier,
+      stereoImagery.Imagery.Identifier,
+      solarOrbiterImagery.Imagery.Identifier
     }
   },
   GUI = {

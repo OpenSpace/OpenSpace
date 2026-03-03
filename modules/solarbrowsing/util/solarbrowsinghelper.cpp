@@ -76,38 +76,134 @@ namespace {
         std::string_view bufferView(buffer.data(), size);
 
         auto extractInnerXml =
-            [](std::string_view view, const std::string& elementName) ->
-                                                           std::optional<std::string_view>
-        {
-            const std::string startTag = std::format("<{}>", elementName);
-            const std::string endTag = std::format("</{}>", elementName);
+            [](std::string_view view, const std::string& elementName)
+            -> std::optional<std::string_view>
+            {
+                // Find "<TAG" (not "<TAG>")
+                const std::string startTagPrefix = std::format("<{}", elementName);
+                const std::string endTag = std::format("</{}>", elementName);
 
-            const auto begin = std::search(
-                view.begin(),
-                view.end(),
-                startTag.begin(),
-                startTag.end()
-            );
+                auto begin = std::search(
+                    view.begin(), view.end(),
+                    startTagPrefix.begin(), startTagPrefix.end()
+                );
+                if (begin == view.end()) {
+                    return std::nullopt;
+                }
 
-            if (begin == view.end()) {
-                return std::nullopt;
+                // Ensure we matched a tag name boundary:
+                // next char must be '>' or whitespace or '/' (just in case)
+                auto afterName = begin + startTagPrefix.size();
+                if (afterName == view.end()) return std::nullopt;
+
+                char c = *afterName;
+                if (!(c == '>' || std::isspace(static_cast<unsigned char>(c)) || c == '/')) {
+                    return std::nullopt;
+                }
+
+                // Find the end of the opening tag '>'
+                auto openEnd = std::find(afterName, view.end(), '>');
+                if (openEnd == view.end()) {
+                    return std::nullopt;
+                }
+
+                auto contentBegin = openEnd + 1;
+
+                // Self-closing tag "<TAG .../>"
+                if (openEnd != view.begin() && *(openEnd - 1) == '/') {
+                    return std::string_view{};
+                }
+
+                // Find "</TAG>"
+                auto end = std::search(
+                    contentBegin, view.end(),
+                    endTag.begin(), endTag.end()
+                );
+                if (end == view.end()) {
+                    return std::nullopt;
+                }
+
+                return std::string_view(&*contentBegin, end - contentBegin);
+            };
+
+        auto iequals = [](std::string_view a, std::string_view b) {
+            if (a.size() != b.size()) return false;
+            for (size_t i = 0; i < a.size(); ++i) {
+                const char ca = static_cast<char>(std::tolower(static_cast<unsigned char>(a[i])));
+                const char cb = static_cast<char>(std::tolower(static_cast<unsigned char>(b[i])));
+                if (ca != cb) return false;
             }
+            return true;
+            };
 
-            const auto afterBeginTag = begin + startTag.size();
+        auto istarts_with = [&](std::string_view s, std::string_view prefix) {
+            return s.size() >= prefix.size() && iequals(s.substr(0, prefix.size()), prefix);
+            };
 
-            const auto end = std::search(
-                afterBeginTag,
-                view.end(),
-                endTag.begin(),
-                endTag.end()
-            );
+        auto getTag = [&](std::string_view primary, std::string_view secondary,
+            const std::string& name) -> std::optional<std::string_view>
+            {
+                if (auto v = extractInnerXml(primary, name); v.has_value()) return v;
+                return extractInnerXml(secondary, name);
+            };
 
-            if (end == view.end()) {
-                return std::nullopt;
-            }
+        auto getFloatTag = [&](std::string_view primary, std::string_view secondary,
+            const std::string& name) -> std::optional<float>
+            {
+                auto v = getTag(primary, secondary, name);
+                if (!v.has_value()) return std::nullopt;
+                try {
+                    return std::stof(std::string(*v));
+                }
+                catch (...) {
+                    return std::nullopt;
+                }
+            };
 
-            return std::string_view(&*afterBeginTag, end - afterBeginTag);
-        };
+        // Interpret CDELT1 with CUNIT1 (arcsec/deg/rad) and return arcsec-per-pixel.
+        // If CUNIT1 is missing, assume arcsec (common in solar FITS WCS).
+        auto arcsecPerPixel = [&](std::string_view primary, std::string_view secondary)
+            -> std::optional<float>
+            {
+                const auto cdelt1 = getFloatTag(primary, secondary, "CDELT1");
+                if (!cdelt1.has_value()) return std::nullopt;
+
+                const auto cunit1sv = getTag(primary, secondary, "CUNIT1");
+                if (!cunit1sv.has_value()) {
+                    return *cdelt1; // assume arcsec / pixel
+                }
+
+                const std::string unit = std::string(*cunit1sv);
+                if (unit == "arcsec" || unit == "ARCSEC") return *cdelt1;
+                if (unit == "deg" || unit == "DEG") return (*cdelt1) * 3600.0f;
+                if (unit == "rad" || unit == "RAD") return (*cdelt1) * (180.0f / 3.14159265358979323846f) * 3600.0f;
+
+                // Unknown unit, fall back (better than failing hard)
+                return *cdelt1;
+            };
+
+        // Derive apparent solar radius (arcsec) from DSUN_OBS (meters) if RSUN_OBS is absent.
+        // Uses solar radius 695700 km.
+        auto rsunObsArcsec = [&](std::string_view primary, std::string_view secondary)
+            -> std::optional<float>
+            {
+                if (auto rs = getFloatTag(primary, secondary, "RSUN_OBS"); rs.has_value()) {
+                    return *rs; // already angular radius in arcsec in many solar FITS headers
+                }
+
+                const auto dsun = getFloatTag(primary, secondary, "DSUN_OBS");
+                if (!dsun.has_value()) return std::nullopt;
+
+                // DSUN_OBS is "distance to the center of sun from the observation platform" (SUVI). :contentReference[oaicite:3]{index=3}
+                // Assume meters. If your files are in km, adjust here.
+                constexpr double R_SUN_M = 695700000.0; // 695700 km
+                const double D_M = static_cast<double>(*dsun);
+
+                // Angular radius (radians) ≈ asin(R/D)
+                const double angRad = std::asin(std::clamp(R_SUN_M / D_M, 0.0, 1.0));
+                const double angArcsec = angRad * (180.0 / 3.14159265358979323846) * 3600.0;
+                return static_cast<float>(angArcsec);
+            };
 
         std::optional<std::string_view> metaData = extractInnerXml(bufferView, "meta");
 
@@ -123,43 +219,102 @@ namespace {
             return std::nullopt;
         }
 
-        std::optional<std::string_view> naxis = extractInnerXml(*metaData, "NAXIS1");
 
-        if (!naxis.has_value()) {
-            LERROR(std::format("Could not find NAXIS1 tag {}", filePath));
+        // Read both dimensions
+        auto naxis1sv = extractInnerXml(*metaData, "NAXIS1");
+        auto naxis2sv = extractInnerXml(*metaData, "NAXIS2");
+        if (!naxis1sv || !naxis2sv) {
+            LERROR(std::format("Could not find NAXIS1/NAXIS2 tag {}", filePath));
             return std::nullopt;
         }
 
-        std::optional<std::string_view> centerPixelX = extractInnerXml(
-            bufferView,
-            "CRPIX1"
-        );
+        const int srcW = std::stoi(std::string(*naxis1sv));
+        const int srcH = std::stoi(std::string(*naxis2sv));
+        const int dstSize = std::max(srcW, srcH);
 
-        if (!centerPixelX.has_value()) {
-            LERROR(std::format("Could not find CRPIX1 tag {}", filePath));
+        // IMPORTANT: store padded size
+        im.fullResolution = dstSize;
+
+        const float dstHalf = dstSize / 2.f;
+        const float padLeft = (dstSize - srcW) / 2.f;
+        const float padTop = (dstSize - srcH) / 2.f;
+
+        // Prefer derived solar center
+        auto cxSv = extractInnerXml(*metaData, "EUXCEN");
+        auto cySv = extractInnerXml(*metaData, "EUYCEN");
+
+        // Fallback to WCS reference pixel
+        if (!cxSv || !cySv) {
+            cxSv = extractInnerXml(*metaData, "CRPIX1");
+            cySv = extractInnerXml(*metaData, "CRPIX2");
+        }
+
+        if (!cxSv || !cySv) {
+            LERROR(std::format("Could not find EUXCEN/EUYCEN nor CRPIX1/CRPIX2 in {}", filePath));
             return std::nullopt;
         }
 
-        std::optional<std::string_view> centerPixelY = extractInnerXml(
-            bufferView,
-            "CRPIX2"
-        );
+        const float cxSrc = std::stof(std::string(*cxSv));
+        const float cySrc = std::stof(std::string(*cySv));
 
-        if (!centerPixelY.has_value()) {
-            LERROR(std::format("Could not find CRPIX2 tag {}", filePath));
-            return std::nullopt;
-        }
+        // Map into padded buffer coordinates
+        const float cxDst = cxSrc + padLeft;
+        const float cyDst = cySrc + padTop;
 
-        im.fullResolution = std::stoi(std::string(*naxis));
-        const float halfRes = im.fullResolution / 2.f;
-
-        glm::vec2 centerPixel = glm::vec2(
-            std::stof(std::string(*centerPixelX)),
-            std::stof(std::string(*centerPixelY))
-        );
-        const glm::vec2 offset =
-            ((halfRes - centerPixel) / halfRes) * glm::vec2(SunRadius);
+        // Compute offset in SunRadius units (same formula you already use)
+        glm::vec2 centerPixel(cxDst, cyDst);
+        glm::vec2 offset = ((dstHalf - centerPixel) / dstHalf) * glm::vec2(SunRadius);
         im.centerPixel = offset;
+        //else
+        //{
+        //    std::optional<std::string_view> centerpixelx = extractinnerxml(bufferview, "crpix1");
+
+        //    if (!centerpixelx.has_value()) {
+        //        lerror(std::format("could not find crpix1 tag {}", filepath));
+        //        return std::nullopt;
+        //    }
+
+        //    std::optional<std::string_view> centerpixely = extractinnerxml(bufferview, "crpix2");
+
+        //    if (!centerpixely.has_value()) {
+        //        lerror(std::format("could not find crpix2 tag {}", filepath));
+        //        return std::nullopt;
+        //    }
+
+        //    std::optional<std::string_view> naxis1sv = extractinnerxml(*metadata, "naxis1");
+        //    std::optional<std::string_view> naxis2sv = extractinnerxml(*metadata, "naxis2");
+
+        //    if (!naxis1sv.has_value()) {
+        //        lerror(std::format("could not find naxis1 tag {}", filepath));
+        //        return std::nullopt;
+        //    }
+        //    if (!naxis2sv.has_value()) {
+        //        lerror(std::format("could not find naxis2 tag {}", filepath));
+        //        return std::nullopt;
+        //    }
+
+        //    const int naxis1 = std::stoi(std::string(*naxis1sv)); // width
+        //    const int naxis2 = std::stoi(std::string(*naxis2sv)); // height
+
+        //    im.fullresolution = std::max(naxis1, naxis2);
+        //    const float halfx = static_cast<float>(naxis1) / 2.f;
+        //    const float halfy = static_cast<float>(naxis2) / 2.f;
+
+        //    glm::vec2 centerpixel(
+        //        std::stof(std::string(*centerpixelx)),
+        //        std::stof(std::string(*centerpixely))
+        //    );
+
+        //     normalize each axis by its own half-size, then map to sunradius
+        //    glm::vec2 offset(
+        //        ((halfx - centerpixel.x) / halfx) * static_cast<float>(sunradius),
+        //        ((halfy - centerpixel.y) / halfy) * static_cast<float>(sunradius)
+        //    );
+
+        //    im.centerpixel = offset;
+        //}
+
+
 
         if (*telescop == "SOHO") {
             std::optional<std::string_view> plateScl = extractInnerXml(
@@ -199,6 +354,43 @@ namespace {
             const float cDelt1Value = std::stof(std::string(*cDelt1));
             im.scale = (rSunObsValue / cDelt1Value) / (im.fullResolution / 2.f);
             im.isCoronaGraph = false;
+        }
+        else if (istarts_with(*telescop, "SOLO/") || iequals(*telescop, "SOLAR ORBITER")) {
+            // For EUI etc we can use RSUN_OBS + CDELT1 just like SDO
+            auto rsunObs = extractInnerXml(bufferView, "RSUN_OBS");
+            auto cdelt1 = extractInnerXml(bufferView, "CDELT1");
+            /*LDEBUG(std::format(
+                "SOLO JP2 dimensions: NAXIS1={} NAXIS2={} fullResolution={}",
+                naxis1, naxis2, im.fullResolution
+            ));*/
+            if (!rsunObs.has_value() || !cdelt1.has_value()) {
+                LERROR(std::format("Solar Orbiter: missing RSUN_OBS or CDELT1 in {}", filePath));
+                return std::nullopt;
+            }
+
+            const float rSunObsValue = std::stof(std::string(*rsunObs)); // arcsec
+            const float cDelt1Value = std::stof(std::string(*cdelt1));  // arcsec/pixel
+            im.scale = (rSunObsValue / cDelt1Value) / (im.fullResolution / 2.f);
+            im.isCoronaGraph = false;
+        }
+        else if (istarts_with(*telescop, "GOES")) {
+            // GOES-R SUVI uses FITS WCS keywords like CRPIXn/CDELTn/CUNITn and also DSUN_OBS. :contentReference[oaicite:4]{index=4}
+
+            const auto rsArcsec = rsunObsArcsec(bufferView, *metaData);
+            const auto cdeltArcsec = arcsecPerPixel(bufferView, *metaData);
+
+            if (!rsArcsec.has_value()) {
+                LERROR(std::format("Could not find RSUN_OBS nor derive from DSUN_OBS in {}", filePath));
+                return std::nullopt;
+            }
+            if (!cdeltArcsec.has_value()) {
+                LERROR(std::format("Could not find CDELT1 (and/or parse CUNIT1) in {}", filePath));
+                return std::nullopt;
+            }
+
+            // Same normalization you use for SDO/STEREO:
+            im.scale = (*rsArcsec / *cdeltArcsec) / (im.fullResolution / 2.f);
+            im.isCoronaGraph = false; // SUVI is an EUV imager (not a coronagraph)
         }
         else if (*telescop == "STEREO") {
             std::optional<std::string_view> rsun = extractInnerXml(bufferView, "RSUN");
@@ -260,7 +452,7 @@ namespace {
         else if (month == "OCT") { MM = "10"; }
         else if (month == "NOV") { MM = "11"; }
         else if (month == "DEC") { MM = "12"; }
-        else { ghoul_assert(false, "Bad month") };
+        else { ghoul_assert(false, "Bad month"); }
 
         datetime.replace(4, 5, "-" + MM + "-");
         return datetime;

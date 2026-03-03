@@ -98,9 +98,12 @@ std::unique_ptr<ghoul::opengl::Texture> loadTextureFromFits(
                 .format = ghoul::opengl::Texture::Format::Red,
                 .dataType = GL_FLOAT
             },
-            ghoul::opengl::Texture::SamplerInit{},
+            ghoul::opengl::Texture::SamplerInit{
+            .swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }
+            },
             reinterpret_cast<std::byte*>(imageData)
         );
+
         return texture;
     }
     catch (const CCfits::FitsException& e) {
