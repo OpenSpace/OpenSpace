@@ -124,7 +124,6 @@ namespace {
         sequenceTime = global::timeManager->time().j2000Seconds();
     }
 
-
     global::keyframeRecording->loadCameraFBX(
         std::move(filename),
         focus,
