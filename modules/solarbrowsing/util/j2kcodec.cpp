@@ -1,0 +1,231 @@
+/*****************************************************************************************
+ *                                                                                       *
+ * OpenSpace                                                                             *
+ *                                                                                       *
+ * Copyright (c) 2014-2026                                                               *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
+ * software and associated documentation files (the "Software"), to deal in the Software *
+ * without restriction, including without limitation the rights to use, copy, modify,    *
+ * merge, publish, distribute, sublicense, and/or sell copies of the Software, and to    *
+ * permit persons to whom the Software is furnished to do so, subject to the following   *
+ * conditions:                                                                           *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all copies *
+ * or substantial portions of the Software.                                              *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,   *
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A         *
+ * PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT    *
+ * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF  *
+ * CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE  *
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
+ ****************************************************************************************/
+
+#include <modules/solarbrowsing/util/j2kcodec.h>
+
+#include <ghoul/logging/logmanager.h>
+#include <chrono>
+#include <cstring>
+#include <format>
+#include <format_defs.h>
+#include <fstream>
+#include <memory>
+#include <vector>
+
+#define JP2_RFC3745_MAGIC "\x00\x00\x00\x0c\x6a\x50\x20\x20\x0d\x0a\x87\x0a"
+#define JP2_MAGIC "\x0d\x0a\x87\x0a"
+#define J2K_CODESTREAM_MAGIC "\xff\x4f\xff\x51"
+
+namespace {
+    constexpr std::string_view _loggerCat = "J2kCodec";
+
+    // (anden88 2026-02-03): This function opens the file, reads some number of bytes from
+    // the metadata header and compares to some specific byte string. Further it compares
+    // that the read bytestring matches the extension. Imo, this is quite verbose, I think
+    // we could get away with only looking at the file extension. Did some measurements
+    // and it is in the ballpark of ~200-300 microseconds of work. Compared to setting up
+    // the `inFileStream` which is ~100ms
+    int infileFormat(const std::string& fileName) {
+        const auto get_file_format = [](const char* filename) {
+            static const char* extension[] = {
+                "pgx", "pnm", "pgm", "ppm", "bmp", "tif", "raw",
+                "tga", "png", "j2k", "jp2", "jpt", "j2c", "jpc"
+            };
+            static const int format[] = {
+                PGX_DFMT, PXM_DFMT, PXM_DFMT, PXM_DFMT, BMP_DFMT, TIF_DFMT, RAW_DFMT,
+                TGA_DFMT, PNG_DFMT, J2K_CFMT, JP2_CFMT, JPT_CFMT, J2K_CFMT, J2K_CFMT
+            };
+
+            const char* ext = strrchr(filename, '.');
+            if (!ext) {
+                return -1;
+            }
+
+            ++ext;
+            if (ext) {
+                for (unsigned int i = 0; i < sizeof(format) / sizeof(*format); i++) {
+                    if (strncmp(ext, extension[i], 3) == 0) {
+                        return format[i];
+                    }
+                }
+            }
+
+            return -1;
+        };
+
+        FILE* reader = fopen(fileName.c_str(), "rb");
+        if (!reader) {
+            return -1;
+        }
+
+        unsigned char buf[12];
+        memset(buf, 0, 12);
+        OPJ_SIZE_T l_nb_read = fread(buf, 1, 12, reader);
+        fclose(reader);
+
+        if (l_nb_read != 12) {
+            return -1;
+        }
+
+        int ext_format = get_file_format(fileName.c_str());
+
+        if (ext_format == JPT_CFMT) {
+            return JPT_CFMT;
+        }
+
+        int magic_format;
+        const char* magic_s;
+        if (memcmp(buf, JP2_RFC3745_MAGIC, 12) == 0 || memcmp(buf, JP2_MAGIC, 4) == 0) {
+            magic_format = JP2_CFMT;
+            magic_s = ".jp2";
+        }
+        else if (memcmp(buf, J2K_CODESTREAM_MAGIC, 4) == 0) {
+            magic_format = J2K_CFMT;
+            magic_s = ".j2k or .jpc or .j2c";
+        }
+        else {
+            return -1;
+        }
+
+        if (magic_format == ext_format) {
+            return ext_format;
+        }
+
+        const char* s = fileName.c_str() + strlen(fileName.c_str()) - 4;
+        LERROR(std::format(
+            "Extension of file is incorrect. Found {} should be {}", s, magic_s
+        ));
+        return magic_format;
+    }
+} // namespace
+
+namespace openspace {
+
+J2kCodec::J2kCodec(bool verboseMode)
+    : _verboseMode(verboseMode)
+{}
+
+J2kCodec::~J2kCodec() {
+    destroy();
+}
+
+void J2kCodec::decodeIntoBuffer(const std::filesystem::path& path, unsigned char* buffer,
+                                int downsamplingLevel)
+{
+    auto t1 = std::chrono::high_resolution_clock::now();
+    createInfileStream(path);
+    setupDecoder(downsamplingLevel);
+
+    // TODO(mnoven): It's a waste of resources having to decode into the image object and
+    // then copy over the data to our buffer. Would be better if we could decode directly
+    // into the buffer
+    // See: https://github.com/uclouvain/openjpeg/issues/837
+    if (!opj_decode(_decoder, _infileStream, _image)) {
+        LERROR("Could not decode image");
+        destroy();
+        return;
+    }
+
+    if (!opj_end_decompress(_decoder, _infileStream)) {
+        LERROR("Could not end decompression");
+        destroy();
+        return;
+    }
+
+    // TODO(mnoven): This is a waste. Can't specify decode precision in
+    // openjpeg. See: https://github.com/uclouvain/openjpeg/issues/836)
+    std::copy(
+        _image->comps[0].data,
+        _image->comps[0].data + _image->comps[0].w * _image->comps[0].h,
+        buffer
+    );
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+    if (_verboseMode) {
+        LINFO(std::format(
+            "Decode time of {}: {} ms",
+            path,
+            std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()
+        ));
+    }
+}
+
+void J2kCodec::destroy() {
+    opj_stream_destroy(_infileStream);
+    opj_destroy_codec(_decoder);
+    opj_image_destroy(_image);
+}
+
+void J2kCodec::createInfileStream(const std::filesystem::path& path) {
+    _filePath = path;
+    _infileStream = opj_stream_create_default_file_stream(path.string().c_str(), OPJ_TRUE);
+    if (!_infileStream) {
+        LERROR(std::format("Failed to create stream from file '{}'", _filePath));
+    }
+}
+
+void J2kCodec::setupDecoder(int downsamplingLevel)
+{
+    opj_set_default_decoder_parameters(&_decoderParams);
+    _decoderParams.decod_format = infileFormat(_filePath.string());
+    _decoderParams.cp_reduce = downsamplingLevel;
+
+    switch (_decoderParams.decod_format) {
+        case J2K_CFMT: {
+            // JPEG-2000 codestream
+            _decoder = opj_create_decompress(OPJ_CODEC_J2K);
+            break;
+        }
+        case JP2_CFMT: {
+            // JPEG 2000 compressed image data
+            _decoder = opj_create_decompress(OPJ_CODEC_JP2);
+            break;
+        }
+        case JPT_CFMT: {
+            // JPEG 2000, JPIP
+            _decoder = opj_create_decompress(OPJ_CODEC_JPT);
+            break;
+        }
+        default:
+            LERROR(std::format(
+                "Unrecognized format for input {}"
+                "[Accept only .j2k (0), .jp2 (1), or .jpc (2), got {}]",
+                _decoderParams.infile, _decoderParams.decod_format
+            ));
+            return;
+    }
+
+    if (!opj_setup_decoder(_decoder, &_decoderParams)) {
+        LERROR("Failed to set up the decoder");
+        return;
+    }
+
+    // Read the main header of the codestream and if necessary the JP2 boxes
+    if (!opj_read_header(_infileStream, _decoder, &_image)) {
+        LERROR("Failed to read the header");
+        return;
+    }
+}
+
+} // namespace openspace

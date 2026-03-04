@@ -22,31 +22,43 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PROGRESSBAR___H__
-#define __OPENSPACE_CORE___PROGRESSBAR___H__
+#include <modules/solarbrowsing/solarbrowsingmodule.h>
 
-#include <iostream>
+#include <modules/solarbrowsing/rendering/renderablesolarimagery.h>
+#include <modules/solarbrowsing/rendering/renderablesolarimageryprojection.h>
+#include <modules/solarbrowsing/tasks/helioviewerdownloadtask.h>
+#include <openspace/documentation/documentation.h>
+#include <openspace/rendering/renderable.h>
+#include <openspace/util/factorymanager.h>
+#include <openspace/util/task.h>
+#include <ghoul/misc/assert.h>
 
 namespace openspace {
 
-class ProgressBar {
-public:
-    explicit ProgressBar(int end, int width = 70, std::ostream& stream = std::cout);
-    ~ProgressBar();
+SolarBrowsingModule::SolarBrowsingModule() : OpenSpaceModule(Name) {}
 
-    ProgressBar& operator=(const ProgressBar& rhs) = delete;
+void SolarBrowsingModule::internalInitialize(const ghoul::Dictionary&) {
+    ghoul::TemplateFactory<Renderable>* fRenderable =
+        FactoryManager::ref().factory<Renderable>();
+    ghoul_assert(fRenderable, "No renderable factory existed");
 
-    void print(int current);
-    void finish();
-private:
-    int _width;
-    int _previous = -1;
-    int _end;
-    bool isFinished = false;
+    fRenderable->registerClass<RenderableSolarImagery>("RenderableSolarImagery");
+    fRenderable->registerClass<RenderableSolarImageryProjection>(
+        "RenderableSolarImageryProjection"
+    );
 
-    std::ostream& _stream;
-};
+    ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();
+    ghoul_assert(fTask, "No task factory existed");
+
+    fTask->registerClass<HelioviewerDownloadTask>("HelioviewerDownloadTask");
+}
+
+std::vector<openspace::Documentation> SolarBrowsingModule::documentations() const {
+    return {
+        RenderableSolarImagery::Documentation(),
+        RenderableSolarImageryProjection::Documentation(),
+        HelioviewerDownloadTask::documentation()
+    };
+}
 
 } // namespace openspace
-
-#endif // __OPENSPACE_CORE___PROGRESSBAR___H__

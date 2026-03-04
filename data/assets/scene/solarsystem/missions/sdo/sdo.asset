@@ -1,0 +1,128 @@
+local coreKernels = asset.require("spice/core")
+local kernels = asset.require("./kernels")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+local earthTransform = asset.require("scene/solarsystem/planets/earth/transforms")
+
+
+
+local models = asset.resource({
+  Name = "SDO Models",
+  Type = "HttpSynchronization",
+  Identifier = "sdo_models",
+  Version = 1
+})
+
+local MissionBegin = "2010 FEB 11 05:02:58"
+local MissionEnd = "2026 JUN 12 07:11:59"
+
+-- Since we're missing CK kernels for the SDO spacecraft we parent the position to
+-- Earth Barycenter instead of Earth Intertial. That way we can at least create a fixed
+-- rotation to rotate the model pointing towards the Sun, however, the roll of the model
+-- will still be off and wobble as time progress
+local SdoPosition = {
+  Identifier = "SDO_Position",
+  Parent = earthTransform.EarthBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.SDO,
+      Observer = coreKernels.ID.EarthBarycenter
+    }
+  },
+  GUI = {
+    Name = "SDO Position",
+    Path = "/Solar System/Missions/SDO",
+    Hidden = true,
+    Focusable = false
+  }
+}
+
+local Sdo = {
+  Identifier = "SDO_Model",
+  Parent = SdoPosition.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = MissionBegin,
+    End = MissionEnd
+  },
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "SDO_Model",
+      YAxis = sunTransforms.SunCenter.Identifier,
+      ZAxis = { 0.0, 0.0, 1.0 },
+      ZAxisOrthogonal = true
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "sdo.glb",
+    RotationVector = { 90.0, 0, 0 },
+    LightSources = { sunTransforms.LightSource },
+    AmbientIntensity = 0.2,
+    SpecularIntensity = 0.0
+  },
+  GUI = {
+    Name = "SDO",
+    Path = "/Solar System/Missions/SDO"
+  }
+}
+
+local SdoTrail = {
+  Identifier = "SDO_Trail",
+  Parent = earthTransform.EarthInertial.Identifier,
+    TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = MissionBegin,
+    End = MissionEnd
+  },
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.SDO,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.J2000,
+    },
+    Color = { 0.51, 0.78, 0.12 },
+    Period = 0.997319,
+    Resolution = 1000,
+    EnableFade = true
+  },
+  GUI = {
+      Name = "SDO Trail",
+      Path = "/Solar System/Missions/SDO"
+  }
+}
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(SdoPosition)
+  openspace.addSceneGraphNode(Sdo)
+  openspace.addSceneGraphNode(SdoTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(SdoTrail)
+  openspace.removeSceneGraphNode(Sdo)
+  openspace.removeSceneGraphNode(SdoPosition)
+end)
+
+asset.export("Position", SdoPosition)
+asset.export("SDO", Sdo)
+asset.export("Trail", SdoTrail)
+asset.export("MissionBegin", MissionBegin)
+asset.export("MissionEnd", MissionEnd)
+
+
+
+asset.meta = {
+  Name = "SDO",
+  Description = [[This asset adds the SDO (Solar Dynamics Observatory) Model,
+    including the trajectory for the entire duration of the SDO mission.
+    Model credits: https://sketchfab.com/3d-models/solar-dynamics-observatory-8a40c426c12f48ff9fef4897283ef1d2
+  ]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

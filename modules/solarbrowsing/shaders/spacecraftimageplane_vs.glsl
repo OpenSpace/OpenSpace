@@ -22,31 +22,32 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PROGRESSBAR___H__
-#define __OPENSPACE_CORE___PROGRESSBAR___H__
+#version __CONTEXT__
 
-#include <iostream>
+#include "powerScaling/powerScaling_vs.glsl"
 
-namespace openspace {
+layout(location = 0) in vec2 in_position;
+layout(location = 1) in vec2 in_texCoords;
 
-class ProgressBar {
-public:
-    explicit ProgressBar(int end, int width = 70, std::ostream& stream = std::cout);
-    ~ProgressBar();
+out Data {
+  vec2 textCoords;
+  float depth;
+} out_data;
 
-    ProgressBar& operator=(const ProgressBar& rhs) = delete;
+uniform mat4 modelViewProjectionTransform;
+uniform float scale;
+uniform vec2 centerPixel;
 
-    void print(int current);
-    void finish();
-private:
-    int _width;
-    int _previous = -1;
-    int _end;
-    bool isFinished = false;
+void main() {
+  out_data.textCoords = in_texCoords;
 
-    std::ostream& _stream;
-};
+  vec2 position = in_position;
+  position.x += centerPixel.x;
+  position.y += centerPixel.y;
+  position.xy *= 1.0 / scale;
 
-} // namespace openspace
-
-#endif // __OPENSPACE_CORE___PROGRESSBAR___H__
+  vec4 positionClipSpace = modelViewProjectionTransform * vec4(position, 0.0, 1.0);
+  vec4 positionScreenSpace = z_normalization(positionClipSpace);
+  out_data.depth = positionScreenSpace.w;
+  gl_Position = positionScreenSpace;
+}

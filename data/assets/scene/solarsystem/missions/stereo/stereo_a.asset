@@ -1,0 +1,125 @@
+local coreKernels = asset.require("spice/core")
+local kernels = asset.require("./kernels")
+local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
+
+
+
+-- Model from https://github.com/nasa/NASA-3D-Resources/tree/master/3D%20Models/
+-- Solar%20TErrestrial%20RElations%20Observatory%20(STEREO)
+local models = asset.resource({
+  Name = "STEREO_A Models",
+  Type = "HttpSynchronization",
+  Identifier = "stereo_a_models",
+  Version = 1
+})
+
+local MissionBegin = "2006 OCT 26 00:01:06"
+local MissionEnd = "2026 FEB 11 19:51:09"
+
+local StereoPosition = {
+  Identifier = "STEREO_A_Position",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.STEREO_A,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    }
+  },
+  GUI = {
+    Name = "STEREO A Position",
+    Path = "/Solar System/Missions/STEREO A",
+    Hidden = true,
+    Focusable = false
+  }
+}
+
+local StereoA = {
+  Identifier = "STEREO_A_Model",
+  Parent = StereoPosition.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = MissionBegin,
+    End = MissionEnd
+  },
+  Transform = {
+    Rotation = {
+      Type = "FixedRotation",
+      Attached = "STEREO_A_Model",
+      YAxis = sunTransforms.SunCenter.Identifier,
+      ZAxis = { 0.0, 1.0, 0.0 },
+      ZAxisOrthogonal = true
+    }
+  },
+  Renderable = {
+    Type = "RenderableModel",
+    GeometryFile = models .. "STEREO.fbx",
+    -- Arbitrarily chose 260 degree as it results in slightly better visuals when rolling
+    RotationVector = { 0, 260.0, 0 },
+    LightSources = { sunTransforms.LightSource },
+    AmbientIntensity = 0.2,
+    SpecularIntensity = 0.0,
+  },
+  GUI = {
+    Name = "STEREO A",
+    Path = "/Solar System/Missions/STEREO A"
+  }
+}
+
+local StereoTrail = {
+  Identifier = "STEREO_A_Trail",
+  Parent = sunTransforms.SolarSystemBarycenter.Identifier,
+    TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = MissionBegin,
+    End = MissionEnd
+  },
+  Renderable = {
+    Type = "RenderableTrailOrbit",
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.STEREO_A,
+      Observer = coreKernels.ID.SolarSystemBarycenter
+    },
+    Color = { 0.33, 0.75, 0.52 },
+    Period = 346.0,
+    Resolution = 5000,
+    EnableFade = true,
+  },
+
+  GUI = {
+    Name = "STEREO A Trail",
+    Path = "/Solar System/Missions/STEREO A"
+  }
+}
+
+
+
+asset.onInitialize(function()
+  openspace.addSceneGraphNode(StereoPosition)
+  openspace.addSceneGraphNode(StereoA)
+  openspace.addSceneGraphNode(StereoTrail)
+end)
+
+asset.onDeinitialize(function()
+  openspace.removeSceneGraphNode(StereoTrail)
+  openspace.removeSceneGraphNode(StereoA)
+  openspace.removeSceneGraphNode(StereoPosition)
+end)
+
+asset.export("Position", StereoPosition)
+asset.export("StereoA", StereoA)
+asset.export("Trail", StereoTrail)
+asset.export("MissionBegin", MissionBegin)
+asset.export("MissionEnd", MissionEnd)
+
+
+
+asset.meta = {
+  Name = "STEREO",
+  Description = [[This asset adds the STEREO (Solar TErrestrial RElations Obervatory)
+    Model, including the trajectory for the entire duration of the STEREO mission.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}

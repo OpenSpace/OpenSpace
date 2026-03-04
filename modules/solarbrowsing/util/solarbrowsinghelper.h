@@ -22,31 +22,50 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PROGRESSBAR___H__
-#define __OPENSPACE_CORE___PROGRESSBAR___H__
+#ifndef __OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGHELPER___H__
+#define __OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGHELPER___H__
 
-#include <iostream>
+#include <modules/solarbrowsing/util/structs.h>
 
 namespace openspace {
+class TransferFunction;
 
-class ProgressBar {
-public:
-    explicit ProgressBar(int end, int width = 70, std::ostream& stream = std::cout);
-    ~ProgressBar();
+/**
+ * Loads transfer functions for the instruments represented in \p imageMetadataMap.
+ *
+ * For each instrument in the provided metadata map, this function attempts to locate and
+ * construct a corresponding TransferFunction from files contained in \p rootDir.
+ *
+ * \param rootDir The directory containing transfer function definitions
+ * \param imageMetadataMap The metadata map whose instruments determine
+ *        which transfer functions are requested
+ *
+ * \return A map from instrument name to loaded TransferFunction instances
+ */
+std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferFunctions(
+    const std::filesystem::path& rootDir, const ImageMetadataMap& imageMetadataMap);
 
-    ProgressBar& operator=(const ProgressBar& rhs) = delete;
+/**
+ * Loads image metadata from all image sequence directories contained in \p rootDir.
+ *
+ * Reuse previously generated cache files where possible. Any directory without a valid
+ * cache is processed directly and its metadata is reconstructed from the contained image
+ * files. Newly generated metadata is written back to disk for future runs.
+ *
+ * The resulting metadata is grouped by instrument and inserted into \p imageMetadataMap.
+ *
+ * \param rootDir The root directory containing image sequence subdirectories
+ * \return The metadata map that will be populated with all discovered image metadata
+ */
+ImageMetadataMap loadImageMetadata(const std::filesystem::path& rootDir);
 
-    void print(int current);
-    void finish();
-private:
-    int _width;
-    int _previous = -1;
-    int _end;
-    bool isFinished = false;
 
-    std::ostream& _stream;
-};
+DecodedImageData loadDecodedDataFromCache(const std::filesystem::path& path,
+    const ImageMetadata& metadata, unsigned int imageSize);
+
+void saveDecodedDataToCache(const std::filesystem::path& path,
+    const DecodedImageData& data, bool verboseMode);
 
 } // namespace openspace
 
-#endif // __OPENSPACE_CORE___PROGRESSBAR___H__
+#endif // !__OPENSPACE_MODULE_SOLARBROWSING___SOLARBROWSINGHELPER___H__

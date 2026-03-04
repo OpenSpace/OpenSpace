@@ -1,0 +1,75 @@
+local sdo = asset.require("scene/solarsystem/missions/sdo/sdo")
+local coreKernels = asset.require("spice/core")
+local kernels = asset.require("scene/solarsystem/missions/sdo/kernels")
+local earthTransform = asset.require("scene/solarsystem/planets/earth/transforms")
+
+
+-- We use the SDO position relative to the inertial to get less wobbly image. Adding
+-- the rotation further removes any small variations visible when increasing the
+-- simulation time
+local SdoPosition = {
+  Identifier = "SDO_Position_Inertial",
+  Parent = earthTransform.EarthInertial.Identifier,
+  Transform = {
+    Translation = {
+      Type = "SpiceTranslation",
+      Target = kernels.ID.SDO,
+      Observer = coreKernels.ID.Earth,
+      Frame = coreKernels.Frame.J2000
+    },
+    -- This rotation removes tiny wobbles and fixes the frame in place
+    Rotation = {
+      Type = "SpiceRotation",
+      SourceFrame = coreKernels.Frame.EclipJ2000,
+      DestinationFrame = coreKernels.Frame.J2000
+    }
+  },
+  GUI = {
+    Name = "SDO Position",
+    Path = "/Solar System/Missions/SDO",
+    Hidden = true,
+    Focusable = false
+  }
+}
+
+local SolarImagery = {
+  Identifier = "SolarImagery_SDO",
+  Parent = SdoPosition.Identifier,
+    TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = sdo.MissionBegin,
+    End = sdo.MissionEnd
+  },
+  Renderable = {
+    Type = "RenderableSolarImagery",
+    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing/sdo")
+  },
+  GUI = {
+    Name = "SDO Imagery",
+    Path = "/Solar System/Solar Imagery"
+  }
+}
+
+
+asset.onInitialize(function ()
+  openspace.addSceneGraphNode(SdoPosition)
+  openspace.addSceneGraphNode(SolarImagery)
+end)
+
+asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(SolarImagery)
+  openspace.removeSceneGraphNode(SdoPosition)
+end)
+
+asset.export("Imagery", SolarImagery)
+
+
+
+asset.meta = {
+  Name = "SDO Solar Imagery",
+  Description = [[The SDO spacecraft imagery, showing images of the Sun in different
+    wavelengths.]],
+  Author = "OpenSpace Team",
+  URL = "http://openspaceproject.com",
+  License = "MIT license"
+}
