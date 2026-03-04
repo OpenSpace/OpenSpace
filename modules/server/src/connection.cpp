@@ -220,7 +220,7 @@ void Connection::handleJson(const nlohmann::json& json) {
 void Connection::sendMessage(const std::string& message) {
     ZoneScoped;
 
-    std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
     _socket->putMessage(message);
 }
 

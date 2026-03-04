@@ -327,7 +327,7 @@ HttpSynchronization::trySyncFromUrl(std::string url) {
                 return !_shouldCancel;
             }
 
-            const std::lock_guard guard(mutex);
+            const std::unique_lock lock(mutex);
 
             sizeData[line] = {
                 .downloadedBytes = downloadedBytes,

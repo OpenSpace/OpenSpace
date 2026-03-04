@@ -234,7 +234,7 @@ bool UrlSynchronization::isEachFileValid() {
 
     if (ossyncVersion == "1.0") {
         // We need to mutex-protect the access to the time conversion for now
-        std::lock_guard guard(_mutex);
+        const std::unique_lock lock(_mutex);
 
         ghoul::getline(file >> std::ws, line);
         const std::string& fileIsValidToDate = line;
@@ -274,7 +274,7 @@ bool UrlSynchronization::isEachFileValid() {
 
 void UrlSynchronization::createSyncFile(bool) const {
     // We need to mutex-protect the access to the time conversion for now
-    std::lock_guard guard(_mutex);
+    const std::unique_lock lock(_mutex);
 
     std::filesystem::path dir = directory();
     std::filesystem::create_directories(dir);
@@ -352,7 +352,7 @@ bool UrlSynchronization::trySyncUrls() {
                     return !_shouldCancel;
                 }
 
-                const std::lock_guard guard(fileSizeMutex);
+                const std::unique_lock lock(fileSizeMutex);
                 sizeData[url] = { downloadedBytes, totalBytes };
 
                 _nTotalBytesKnown = true;

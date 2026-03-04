@@ -151,7 +151,7 @@ std::shared_ptr<TableData<T>> FitsFileReader::readTable(const std::filesystem::p
 {
     // We need to lock reading when using multithreads because CCfits can't handle
     // multiple I/O drivers
-    const std::lock_guard g(_mutex);
+    const std::unique_lock lock(_mutex);
 
     try {
         _infile = std::make_unique<FITS>(path.string(), Read, readAll);

@@ -318,7 +318,7 @@ namespace {
                 );
 
                 if (isMatch) {
-                    std::lock_guard g(mutex);
+                    std::unique_lock lock(mutex);
                     matches.push_back(prop);
                 }
             }
@@ -375,7 +375,7 @@ namespace {
                     }
                 }
 
-                std::lock_guard g(mutex);
+                std::unique_lock lock(mutex);
                 matches.push_back(propOwner);
             }
         );
@@ -729,7 +729,7 @@ namespace {
  * \param uri The URI that identifies the property or properties to get. The URI can
  *            contain 0 or 1 wildcard `*` characters or a tag expression (`{tag}`) that
  *            identifies a property owner.
- * \ return A list of property URIs
+ * \return A list of property URIs
  */
 [[codegen::luawrap]] std::vector<std::string> property(std::string uri) {
     std::string tag = groupTag(uri);

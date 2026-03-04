@@ -270,7 +270,7 @@ HttpFileDownload::HttpFileDownload(std::string url, std::filesystem::path destin
 
 bool HttpFileDownload::setup() {
     {
-        const std::lock_guard g(_directoryCreationMutex);
+        const std::unique_lock lock(_directoryCreationMutex);
         const std::filesystem::path d = _destination.parent_path();
         if (!std::filesystem::is_directory(d)) {
             std::filesystem::create_directories(d);

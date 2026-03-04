@@ -29,19 +29,19 @@
 namespace openspace {
 
 int DownloadEventEngine::subscribe(Callback cb) {
-    std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
     int id = _id++;
     _subscribers[id] = std::move(cb);
     return id;
 }
 
 void DownloadEventEngine::unsubscribe(int id) {
-    std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
     _subscribers.erase(id);
 }
 
 void DownloadEventEngine::publish(const DownloadEvent& event) {
-    std::lock_guard lock(_mutex);
+    const std::unique_lock lock(_mutex);
     for (auto& [_, callback] : _subscribers) {
         callback(event);
     }

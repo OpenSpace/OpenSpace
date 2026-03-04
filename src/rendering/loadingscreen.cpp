@@ -362,7 +362,7 @@ void LoadingScreen::render() {
     glm::vec2 messageLl = glm::vec2(0.f);
     glm::vec2 messageUr = glm::vec2(0.f);
     if (_showMessage) {
-        const std::lock_guard guard(_messageMutex);
+        const std::unique_lock lock(_messageMutex);
 
         const glm::vec2 bboxMessage = _messageFont->boundingBox(_message);
 
@@ -392,7 +392,7 @@ void LoadingScreen::render() {
     }
 
     if (_showNodeNames) {
-        const std::lock_guard guard(_itemsMutex);
+        const std::unique_lock lock(_itemsMutex);
 
         const auto now = std::chrono::system_clock::now();
 
@@ -655,7 +655,7 @@ void LoadingScreen::renderLogMessages() const {
 }
 
 void LoadingScreen::postMessage(std::string message) {
-    const std::lock_guard guard(_messageMutex);
+    const std::unique_lock lock(_messageMutex);
     _message = std::move(message);
 }
 
@@ -692,7 +692,7 @@ void LoadingScreen::updateItem(const std::string& itemIdentifier,
         // also would create any of the text information
         return;
     }
-    const std::lock_guard guard(_itemsMutex);
+    const std::unique_lock lock(_itemsMutex);
 
     auto it = std::find_if(
         _items.begin(),

@@ -474,7 +474,7 @@ void ScriptEngine::writeLog(const std::string& script) {
 void ScriptEngine::preSync(bool isMaster) {
     ZoneScoped;
 
-    std::lock_guard guard(_clientScriptsMutex);
+    const std::unique_lock lock(_clientScriptsMutex);
     if (isMaster) {
         while (!_incomingScripts.empty()) {
             Script item = std::move(_incomingScripts.front());
@@ -522,7 +522,7 @@ void ScriptEngine::encode(SyncBuffer* syncBuffer) {
 void ScriptEngine::decode(SyncBuffer* syncBuffer) {
     ZoneScoped;
 
-    std::lock_guard guard(_clientScriptsMutex);
+    const std::unique_lock lock(_clientScriptsMutex);
     size_t nScripts;
     syncBuffer->decode(nScripts);
 
@@ -550,7 +550,7 @@ void ScriptEngine::postSync(bool isMaster) {
         }
     }
     else {
-        std::lock_guard guard(_clientScriptsMutex);
+        const std::unique_lock lock(_clientScriptsMutex);
         while (!_clientScriptQueue.empty()) {
             try {
                 runScript({ _clientScriptQueue.front() });

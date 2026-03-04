@@ -50,7 +50,7 @@ namespace {
                 luaString += "\\\""; // Replace " with \"
                 break;
             case '\\':
-                luaString += "\\\\"; // Replace \ with \\
+                luaString += "\\\\"; // Replace \ with backslash
                 break;
             case '\n':
                 luaString += "\\\\n"; // Replace newline with \n

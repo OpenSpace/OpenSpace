@@ -939,7 +939,7 @@ void OctreeManager::fetchChildrenNodes(OctreeNode& parentNode,
                                        int additionalLevelsToFetch)
 {
     // Lock node to make sure nobody else are trying to load the same children
-    const std::lock_guard lock(parentNode.loadingLock);
+    const std::unique_lock lock(parentNode.loadingLock);
 
     for (const std::shared_ptr<OctreeNode>& child : parentNode.children) {
         // Fetch node data if we're streaming and it doesn't exist in RAM yet. (As long as
@@ -995,7 +995,7 @@ void OctreeManager::fetchNodeDataFromFile(OctreeNode& node) {
     // Keep track of nodes that are loaded and update CPU RAM budget
     node.isLoaded = true;
     if (!_datasetFitInMemory) {
-        const std::lock_guard g(_leastRecentlyFetchedNodesMutex);
+        const std::unique_lock lock(_leastRecentlyFetchedNodesMutex);
         _leastRecentlyFetchedNodes.push(node.octreePositionIndex);
     }
     _cpuRamBudget -= nBytes;
@@ -1028,7 +1028,7 @@ void OctreeManager::removeNodesFromRam(
 
 void OctreeManager::removeNode(OctreeNode& node) {
     // Lock node to make sure nobody else is trying to access it while removing
-    const std::lock_guard lock(node.loadingLock);
+    const std::unique_lock lock(node.loadingLock);
 
     const int nBytes = static_cast<int>(node.numStars * _valuesPerStar * sizeof(float));
     // Keep track of which nodes that are loaded and update CPU RAM budget
@@ -1324,7 +1324,7 @@ bool OctreeManager::updateBufferIndex(OctreeNode& node) {
     }
 
     // Make sure node isn't loading/unloading as we're checking isLoaded flag
-    const std::lock_guard lock(node.loadingLock);
+    const std::unique_lock lock(node.loadingLock);
 
     // Return false if there are no more spots in our buffer, or if we're streaming and
     // node isn't loaded yet, or if node doesn't have any stars

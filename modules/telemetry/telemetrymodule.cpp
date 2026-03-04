@@ -295,8 +295,8 @@ void TelemetryModule::update(std::atomic<bool>& isRunning) {
 
     while (isRunning) {
         // Wait for the main thread
-        std::unique_lock<std::mutex> lk(mutexLock);
-        syncToMain.wait(lk);
+        std::unique_lock lock(mutexLock);
+        syncToMain.wait(lock);
 
         // No need to update if the module isn't currently enabled
         if (!_enabled) {

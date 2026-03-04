@@ -239,7 +239,7 @@ RawTileDataReader::RawTileDataReader(std::string filePath, TileTextureInitData i
 }
 
 RawTileDataReader::~RawTileDataReader() {
-    const std::lock_guard lockGuard(_datasetLock);
+    const std::unique_lock lock(_datasetLock);
     if (_dataset) {
         GDALClose(_dataset);
         _dataset = nullptr;
@@ -431,7 +431,7 @@ void RawTileDataReader::initialize() {
 }
 
 void RawTileDataReader::reset() {
-    const std::lock_guard lockGuard(_datasetLock);
+    const std::unique_lock lock(_datasetLock);
     _maxChunkLevel = -1;
     if (_dataset) {
         GDALClose(_dataset);
