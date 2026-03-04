@@ -57,7 +57,6 @@ void DownloadEventEngine::publish(const std::string& id, DownloadEvent::Type typ
         .downloadedBytes = downloadedBytes,
         .totalBytes = totalBytes
     };
-
     publish(event);
 }
 

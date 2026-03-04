@@ -318,7 +318,7 @@ namespace {
         }
 
         // 1. Sort time frames based on their beginning time. If the beginning times are
-        // the same, sort by the end date instead
+        //    the same, sort by the end date instead
         std::sort(
             ranges.begin(),
             ranges.end(),
@@ -385,7 +385,7 @@ namespace {
             > kernels;
 
             // The NAIF name of the object for which the positional information should be
-            // extracted
+            // extracted.
             std::variant<std::string, int> object;
         };
         std::optional<SPK> spk [[codegen::key("SPK")]];
@@ -400,7 +400,7 @@ namespace {
             std::vector<std::filesystem::path> kernels;
 
             // The NAIF name of the reference frame for which the times are extacted at
-            // which this reference frame has data in the provided kernels
+            // which this reference frame has data in the provided kernels.
             std::variant<std::string, int> reference;
         };
         std::optional<CK> ck [[codegen::key("CK")]];

@@ -87,9 +87,7 @@ ScreenSpaceTimeVaryingImageOnline::ScreenSpaceTimeVaryingImageOnline(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _jsonFilePath = p.filePath.string();
-    _jsonFilePath.onChange([this]() {
-        loadJsonData(_jsonFilePath.value());
-    });
+    _jsonFilePath.onChange([this]() { loadJsonData(_jsonFilePath.value()); });
     addProperty(_jsonFilePath);
 }
 

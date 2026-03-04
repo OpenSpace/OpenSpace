@@ -72,7 +72,7 @@ void KameleonMetadataToJsonTask::perform(const Task::ProgressCallback& progressC
     progressCallback(0.5f);
 
     std::string json = ghoul::formatJson(dictionary);
-    std::ofstream output(_outputPath);
+    std::ofstream output = std::ofstream(_outputPath);
     output << std::move(json);
     progressCallback(1.f);
 }

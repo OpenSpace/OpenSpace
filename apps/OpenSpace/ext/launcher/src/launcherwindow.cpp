@@ -216,7 +216,7 @@ LauncherWindow::LauncherWindow(bool profileEnabled, const Configuration& globalC
         [](const std::filesystem::path& p) { return p.extension() == ".profile"; },
         [](const std::filesystem::path& p) {
             try {
-                Profile profile(p);
+                Profile profile = Profile(p);
                 if (profile.meta.has_value() && profile.meta->description.has_value()) {
                     return *profile.meta->description;
                 }

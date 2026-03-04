@@ -128,10 +128,11 @@ std::optional<std::string> taskToRun;
 //
 
 #ifdef OPENSPACE_HAS_SPOUT
+
 /**
- * This struct stores all information about a single render window. Depending on the
- * frame setup, each window can be mono or stereo, the information of which is stored in
- * the `leftOrMain` and `right` members respectively.
+ * This struct stores all information about a single render window. Depending on the frame
+ * setup, each window can be mono or stereo, the information of which is stored in the
+ * `leftOrMain` and `right` members respectively.
  */
 struct SpoutWindow {
     /// The left framebuffer (or main, if there is no stereo rendering)
@@ -207,10 +208,11 @@ LONG WINAPI generateMiniDump(EXCEPTION_POINTERS* exceptionPointers) {
         nullptr
     );
 
-    MINIDUMP_EXCEPTION_INFORMATION exceptionParameter;
-    exceptionParameter.ThreadId = GetCurrentThreadId();
-    exceptionParameter.ExceptionPointers = exceptionPointers;
-    exceptionParameter.ClientPointers = TRUE;
+    MINIDUMP_EXCEPTION_INFORMATION exceptionParameter = {
+        .ThreadId = GetCurrentThreadId(),
+        .ExceptionPointers = exceptionPointers,
+        .ClientPointers = TRUE
+    };
 
     BOOL success = MiniDumpWriteDump(
         GetCurrentProcess(),
@@ -335,10 +337,11 @@ void mainInitFunc(GLFWwindow*) {
         const std::string p = path.string();
         unsigned char* data = stbi_load(p.c_str(), &x, &y, &n, 0);
 
-        GLFWimage icon;
-        icon.pixels = data;
-        icon.width = x;
-        icon.height = y;
+        GLFWimage icon = {
+            .width = x,
+            .height = y,
+            .pixels = data
+        };
 
         for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
             glfwSetWindowIcon(window->windowHandle(), 1, &icon);
@@ -357,13 +360,13 @@ void mainInitFunc(GLFWwindow*) {
 
 
     // Find if we have at least one OpenVR window
-    // Save reference to first OpenVR window, which is the one we will copy to the HMD.
+    // Save reference to first OpenVR window, which is the one we will copy to the HMD
     for (const std::unique_ptr<Window>& window : Engine::instance().windows()) {
         if (window->hasTag(OpenVRTag)) {
 #ifdef OPENVR_SUPPORT
             FirstOpenVRWindow = window.get();
 
-            // If we have an OpenVRWindow, initialize OpenVR.
+            // If we have an OpenVRWindow, initialize OpenVR
             sgct::OpenVR::initialize(
                 Engine::instance().nearClippingPlane(),
                 Engine::instance().farClippingPlane()
@@ -1177,10 +1180,10 @@ int main(int argc, char* argv[]) {
 #endif // OPENSPACE_BREAK_ON_FLOATING_POINT_EXCEPTION
 
 #ifdef WIN32
-    // In order to be able to use PDB files to resolve stack traces on _user_ machines,
-    // we need to explicitly tell the operating system where to find the PDB files. We
-    // place them right next to the .exe file and this seems to be the only reliable way
-    // to do it.
+    // In order to be able to use PDB files to resolve stack traces on _user_ machines, we
+    // need to explicitly tell the operating system where to find the PDB files. We place
+    // them right next to the .exe file and this seems to be the only reliable way to do
+    // it.
     // Using SymInitialize and SymSetSearchPath from dbghelp.h didn't work
     // https://learn.microsoft.com/en-us/windows-hardware/drivers/debugger/symbol-path
 
@@ -1212,8 +1215,8 @@ int main(int argc, char* argv[]) {
     ghoul::initialize();
     global::create();
 
-    // Register the path of the executable,
-    // to make it possible to find other files in the same directory.
+    // Register the path of the executable, to make it possible to find other files in the
+    // same directory
     FileSys.registerPathToken(
         "${BIN}",
         std::filesystem::current_path() / std::filesystem::path(argv[0]).parent_path(),
@@ -1237,7 +1240,7 @@ int main(int argc, char* argv[]) {
         "-f",
         "Provides the path to the OpenSpace configuration file. Only the '${TEMPORARY}' "
         "path token is available and any other path has to be specified relative to the "
-        "current working directory"
+        "current working directory."
     ));
     parser.addCommand(std::make_unique<ghoul::cmdparser::SingleCommand<std::string>>(
         commandlineArguments.windowConfig,
@@ -1515,8 +1518,8 @@ int main(int argc, char* argv[]) {
         isGeneratedWindowConfig = false;
         if (!commandlineArguments.windowConfig.has_value()) {
             config = launcher.selectedWindowConfig();
-            if (config.find(labelFromCfgFile) != std::string::npos) {
-                if (config.find("sgct.config") == std::string::npos) {
+            if (config.contains(labelFromCfgFile)) {
+                if (!config.contains("sgct.config")) {
                     config = config.substr(
                         0,
                         config.length() - labelFromCfgFile.length()

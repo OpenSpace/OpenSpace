@@ -88,7 +88,7 @@ public:
      *
      * \return A list of all registered telemetries
      */
-    const std::vector<TelemetryBase*>& telemetries() const;
+    std::vector<TelemetryBase*> telemetries() const;
 
     /**
      * Get a specified telemetry from the list of registered telemetries in the module.
@@ -126,13 +126,6 @@ private:
     void update(std::atomic<bool>& isRunning);
 
     /**
-     * Add a given telemetry to the list of registered telemetries in the module.
-     *
-     * \param telemetry The telemetry to register in the module
-     */
-    void addTelemetry(TelemetryBase* telemetry);
-
-    /**
      * Function that gets called when the angle calculation mode is changed in the GUI.
      */
     void guiOnChangeAngleCalculationMode();
@@ -161,7 +154,7 @@ private:
 
     std::thread _updateThread;
     std::atomic<bool> _isRunning = false;
-    std::vector<TelemetryBase*> _telemetries;
+    std::vector<std::unique_ptr<TelemetryBase>> _telemetries;
     AngleCalculationMode _angleCalculationMode = AngleCalculationMode::Horizontal;
 };
 

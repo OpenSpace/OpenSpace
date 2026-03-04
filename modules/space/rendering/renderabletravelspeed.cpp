@@ -249,7 +249,7 @@ void RenderableTravelSpeed::updateVertexData() {
 
     // This if statment is there to not start the line from behind the source node
     if (_timeSinceStart < _indicatorLength) {
-        positions.betweenLightAndFade = glm::vec3(0.0, 0.0, 0.0); // = source node
+        positions.betweenLightAndFade = glm::vec3(0.0, 0.0, 0.0);
     }
     else {
         positions.betweenLightAndFade =
@@ -258,7 +258,7 @@ void RenderableTravelSpeed::updateVertexData() {
 
     // This if statment is there to not start the line from behind the source node
     if (_timeSinceStart < (_indicatorLength + _fadeLength)) {
-        positions.endOfFade = glm::vec3(0.0, 0.0, 0.0); // = source node
+        positions.endOfFade = glm::vec3(0.0, 0.0, 0.0);
     }
     else {
         positions.endOfFade = _travelSpeed *
@@ -286,7 +286,8 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
     SceneGraphNode* sourceNode = parent();
     ghoul_assert(sourceNode, "Renderable have to be owned by scene graph node");
 
-    // Target position, in the reference frame of the source node (to correctly inherit parent transform)
+    // Target position, in the reference frame of the source node (to correctly inherit
+    // parent transform)
     glm::dvec3 targetPosition = glm::dvec3(
         glm::inverse(sourceNode->modelTransform()) * glm::dvec4(_targetNode->worldPosition(), 1.0)
     );
@@ -301,7 +302,8 @@ void RenderableTravelSpeed::update(const UpdateData& data) {
         _timeSinceStart = currentTime - _initiationTime;
         updateVertexData();
     }
-    else { // in case we've reached the target
+    else {
+        // In case we've reached the target
         reinitiateTravel();
     }
 }
@@ -328,4 +330,5 @@ void RenderableTravelSpeed::render(const RenderData& data, RendererTasks&) {
 
     _shaderProgram->deactivate();
 }
+
 } // namespace openspace

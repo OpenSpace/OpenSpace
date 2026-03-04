@@ -117,10 +117,8 @@ struct VertexObjects {
 };
 
 namespace detail {
-
-Shaders& gShadersConstructor();
-VertexObjects& gVertexObjectsConstructor();
-
+    Shaders& gShadersConstructor();
+    VertexObjects& gVertexObjectsConstructor();
 } // namespace detail
 
 static Shaders& shaders = detail::gShadersConstructor();

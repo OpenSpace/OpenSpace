@@ -68,7 +68,7 @@ Dashboard::Dashboard()
     , _isEnabled(EnabledInfo, true)
     , _startPositionOffset(
         StartPositionOffsetInfo,
-        glm::ivec2(10, 10),
+        glm::ivec2(10),
         glm::ivec2(0),
         glm::ivec2(8192)
     )

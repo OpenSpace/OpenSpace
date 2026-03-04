@@ -47,8 +47,8 @@ namespace {
     // The two renderables are specified separately: `RenderableNear` and `RenderableFar`.
     // These can be any renderable types.
     //
-    // The `DistanceThreshold` property determines which renderable will be shown.
-    // If the camera is closer to the object than the threshold, `RenderableNear` is used,
+    // The `DistanceThreshold` property determines which renderable will be shown. If the
+    // camera is closer to the object than the threshold, `RenderableNear` is used,
     // otherwise, `RenderableFar` is rendered.
     struct [[codegen::Dictionary(RenderableSwitch)]] Parameters {
         // The renderable to show when the camera is closer to the object than the
@@ -172,7 +172,7 @@ void RenderableSwitch::update(const UpdateData& data) {
 }
 
 void RenderableSwitch::render(const RenderData& data, RendererTasks& tasks) {
-    glm::dvec3 cameraPosition = data.camera.positionVec3();
+    glm::dvec3 cameraPosition = data.camera.position();
     glm::dvec3 modelPosition = data.modelTransform.translation;
 
     if (glm::distance(cameraPosition, modelPosition) < _distanceThreshold) {

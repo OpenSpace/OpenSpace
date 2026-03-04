@@ -168,7 +168,7 @@ public:
      * \throw std::out_of_range if \p method is not a valid string
      * \pre \p method must not be empty
      */
-    static FieldOfViewMethod fieldOfViewMethodFromString(const std::string& method);
+    static FieldOfViewMethod fieldOfViewMethodFromString(std::string_view method);
 
     /**
      * The possible values for terminator type method of the terminatorEllipse method.
@@ -188,7 +188,7 @@ public:
      * \throw std::out_of_range if \p type is not a valid string
      * \pre \p type must not be empty
      */
-    static TerminatorType terminatorTypeFromString(const std::string& type);
+    static TerminatorType terminatorTypeFromString(std::string_view type);
 
     static void initialize();
     static void deinitialize();
@@ -322,35 +322,6 @@ public:
     std::vector<std::pair<int, std::string>> spiceBodies(bool builtInFrames) const;
 
     /**
-     * Determines whether values exist for some \p item for any body, identified by its
-     * \p naifId, in the kernel pool by passing it to the `bodfnd_c` function.
-     *
-     * \param naifId NAIF ID code of body
-     * \param item The item to find
-     * \return `true` if the function succeeded, `false` otherwise
-     *
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
-     */
-    bool hasValue(int naifId, const std::string& item) const;
-
-    /**
-     * Determines whether values exist for some \p item for any \p body in the kernel pool
-     * by passing it to the `bodfnd_c` function.
-     *
-     * \param body The name of the body that should be sampled
-     * \param item The item to find in the \p body
-     * \return `true` if the function succeeded, `false` otherwise
-     *
-     * \throw SpiceException If \p body does not name a valid SPICE object
-     * \pre \p body must not be empty
-     * \pre \p item must not be empty
-     *
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodfnd_c.html
-     */
-    bool hasValue(const std::string& body, const std::string& item) const;
-
-    /**
      * Returns the NAIF ID for a specific \p body using the `bods2c_c` function.
      *
      * \param body The body name that should be retrieved
@@ -399,118 +370,6 @@ public:
      * \pre \p frame must not be empty
      */
     bool hasFrameId(const std::string& frame) const;
-
-    /**
-     * Retrieves a single \p value for a certain \p body. This method succeeds iff \p body
-     * is the name of a valid body, \p value is a value associated with the body, and the
-     * value consists of only a single `double` value. If all conditions are true, the
-     * value is retrieved using the method `bodvrd_c` and stored in \p v.
-     *
-     * \param body The name of the body whose value should be retrieved or the NAIF ID of
-     *        this body
-     * \param value The value that should be retrieved, this value is case-sensitive
-     * \param v The destination for the retrieved value
-     *
-     * \throw SpiceException If the \p body does not name a valid body, \p value is not a
-     *        valid item for the \p body or the retrieved value is not a single value
-     * \pre \p body must not be empty
-     * \pre \p value must not be empty
-     *
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
-     */
-    void getValue(const std::string& body, const std::string& value, double& v) const;
-
-    /**
-     * Retrieves a \p value with two components for a certain \p body. This method
-     * succeeds iff \p body is the name of a valid body, \p value is a value associated
-     * with the body, and the value consists of two `double` values. If all conditions
-     * are true, the value is retrieved using the method `bodvrd_c` and stored in \p v.
-     *
-     * \param body The name of the body whose value should be retrieved or the NAIF ID of
-     *        this body
-     * \param value The value that should be retrieved, this value is case-sensitive
-     * \param v The destination for the retrieved value
-     *
-     * \throw SpiceException If the \p body does not name a valid body, \p value is not a
-     *        valid item for the \p body or the retrieved value is not a two-component
-     *        value
-     * \pre \p body must not be empty
-     * \pre \p value must not be empty
-     *
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
-     */
-    void getValue(const std::string& body, const std::string& value, glm::dvec2& v) const;
-
-    /**
-     * Retrieves a \p value with three components for a certain \p body. This method
-     * succeeds iff \p body is the name of a valid body, \p value is a value associated
-     * with the body, and the value consists of three `double` values. If all conditions
-     * are true, the value is retrieved using the method `bodvrd_c` and stored in \p v.
-     *
-     * \param body The name of the body whose value should be retrieved or the NAIF ID of
-     *        this body
-     * \param value The value that should be retrieved, this value is case-sensitive
-     * \param v The destination for the retrieved value
-     *
-     * \throw SpiceException If the \p body does not name a valid body, \p value is not a
-     *        valid item for the \p body or the retrieved value is not a three-component
-     *        value
-     * \pre \p body must not be empty
-     * \pre \p value must not be empty
-     *
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
-     */
-    void getValue(const std::string& body, const std::string& value, glm::dvec3& v) const;
-
-    /**
-     * Retrieves a \p value with four components for a certain \p body. This method
-     * succeeds iff \p body is the name of a valid body, \p value is a value associated
-     * with the body, and the value consists of four `double` values. If all conditions
-     * are true, the value is retrieved using the method `bodvrd_c` and stored in \p v.
-     *
-     * \param body The name of the body whose value should be retrieved or the NAIF ID of
-     *        this body
-     * \param value The value that should be retrieved, this value is case-sensitive
-     * \param v The destination for the retrieved value
-     *
-     * \throw SpiceException If the \p body does not name a valid body, \p value is not a
-     *        valid item for the \p body or the retrieved value is not a four-component
-     *        value
-     * \pre \p body must not be empty.
-     * \pre \p value must not be empty.
-     *
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
-     */
-    void getValue(const std::string& body, const std::string& value, glm::dvec4& v) const;
-
-    /**
-     * Retrieves a \p value with an arbitrary number of components for a certain \p body.
-     * This method succeeds iff \p body is the name of a valid body, \p value is a value
-     * associated with the body, and the value consists of the correct number of `double`
-     * values. If all conditions are true, the value is retrieved using the method
-     * `bodvrd_c` and stored in \p v.
-     *
-     * \param body The name of the body whose value should be retrieved or the NAIF ID of
-     *        this body
-     * \param value The value that should be retrieved, this value is case-sensitive
-     * \param v The destination for the retrieved value. The `vector` must be
-     *          preallocated to the correct size of components that should be retrieved
-     *
-     * \throw SpiceException If the \p body does not name a valid body, \p value is not a
-     *        valid item for the \p body or the retrieved value does not contain the
-     *        correct number of components
-     * \pre \p body must not be empty.
-     * \pre \p value must not be empty.
-     *
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/cspice/bodvrd_c.html
-     * \see http://naif.jpl.nasa.gov/pub/naif/toolkit_docs/C/req/naif_ids.html
-     */
-    void getValue(const std::string& body, const std::string& value,
-        std::vector<double>& v) const;
 
     /**
      * Converts the value \p craftTicks of the internal clock for the spacecraft

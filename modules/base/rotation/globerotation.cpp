@@ -25,8 +25,8 @@
 #include <modules/base/rotation/globerotation.h>
 
 #include <openspace/documentation/documentation.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/ellipsoid.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
@@ -48,7 +48,7 @@ namespace {
         "The node on which the longitude/latitude is specified. If the node is a globe, "
         "the correct height information for the globe is used. Otherwise, the position "
         "is specified based on the longitude and latitude on the node's interaction "
-        "sphere",
+        "sphere.",
         Property::Visibility::User
     };
 
@@ -251,7 +251,7 @@ glm::dmat3 GlobeRotation::matrix(const UpdateData&) const {
         const float latitudeRad = glm::radians(static_cast<float>(lat));
         const float longitudeRad = glm::radians(static_cast<float>(lon));
         yAxis = _attachedNode->ellipsoid().geodeticSurfaceNormal(
-            { latitudeRad, longitudeRad }
+            { .lat = latitudeRad, .lon = longitudeRad }
         );
     }
     yAxis = glm::normalize(yAxis);

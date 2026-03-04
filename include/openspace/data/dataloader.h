@@ -97,7 +97,6 @@ struct ColorMap {
 };
 
 namespace data {
-
     Dataset loadFile(std::filesystem::path path,
         std::optional<DataMapping> specs = std::nullopt);
 
@@ -106,11 +105,9 @@ namespace data {
 
     Dataset loadFileWithCache(std::filesystem::path path,
         std::optional<DataMapping> specs = std::nullopt);
-
 } // namespace data
 
 namespace label {
-
     Labelset loadFile(std::filesystem::path path,
         std::optional<DataMapping> specs = std::nullopt);
 
@@ -123,7 +120,6 @@ namespace label {
 } // namespace label
 
 namespace color {
-
     ColorMap loadFile(std::filesystem::path path,
         std::optional<DataMapping> specs = std::nullopt);
 
@@ -131,7 +127,6 @@ namespace color {
     void saveCachedFile(const ColorMap& colorMap, const std::filesystem::path& path);
 
     ColorMap loadFileWithCache(std::filesystem::path path);
-
 } // namespace color
 
 } // namespace openspace::dataloader

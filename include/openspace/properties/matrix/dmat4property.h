@@ -34,8 +34,7 @@ namespace openspace {
 
 class DMat4Property : public NumericalProperty<glm::dmat4x4> {
 public:
-    explicit DMat4Property(Property::PropertyInfo info,
-        glm::dmat4x4 value = glm::dmat4x4(0.0),
+    explicit DMat4Property(PropertyInfo info, glm::dmat4x4 value = glm::dmat4x4(0.0),
         glm::dmat4x4 minValue =
             ghoul::createFillMat4x4<double>(std::numeric_limits<double>::lowest()),
         glm::dmat4x4 maxValue =

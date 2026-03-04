@@ -123,7 +123,7 @@ public:
      */
     virtual std::filesystem::path helperPath() const = 0;
 
-    void setMaxSteps(int nsteps);
+    void setMaxSteps(int nSteps);
 
     int maxSteps() const;
 

@@ -93,8 +93,8 @@ namespace {
     constexpr Property::PropertyInfo CoordinateOffsetInfo = {
         "CoordinateOffset",
         "Geographic coordinate offset",
-        "A latitude and longitude offset value, in decimal degrees. Can be used to "
-        "move the object on the surface and correct potential mismatches with other "
+        "A latitude and longitude offset value, in decimal degrees. Can be used to move "
+        "the object on the surface and correct potential mismatches with other "
         "renderings. Note that changing it during runtime leads to all positions being "
         "recomputed.",
         Property::Visibility::AdvancedUser
@@ -185,11 +185,11 @@ namespace {
     };
 
     struct [[codegen::Dictionary(GeoJsonComponent)]] Parameters {
-        // The unique identifier for this layer. May not contain '.' or spaces
+        // The unique identifier for this layer. May not contain '.' or spaces.
         std::string identifier;
 
         // A human-readable name for the user interface. If this is omitted, the
-        // identifier is used instead
+        // identifier is used instead.
         std::optional<std::string> name;
 
         // [[codegen::verbatim(EnabledInfo.description)]]
@@ -199,11 +199,11 @@ namespace {
         std::optional<float> opacity [[codegen::inrange(0.0, 1.0)]];
 
         // A human-readable description of the layer to be used in informational texts
-        // presented to the user
+        // presented to the user.
         std::optional<std::string> description;
 
         // If true, ignore any height values that are given in the file. Coordinates with
-        // three values will then be treated as coordinates with only two values
+        // three values will then be treated as coordinates with only two values.
         std::optional<bool> ignoreHeights;
 
         // [[codegen::verbatim(PreventHeightUpdateInfo.description)]]
@@ -241,11 +241,11 @@ namespace {
 
         // These properties will be used as default values for the geoJson rendering,
         // meaning that they will be used when there is no value given for the
-        // individual geoJson features
+        // individual geoJson features.
         std::optional<ghoul::Dictionary> defaultProperties
             [[codegen::reference("globebrowsing_geojsonproperties")]];
 
-        // A list of light sources that this object should accept light from
+        // A list of light sources that this object should accept light from.
         std::optional<std::vector<ghoul::Dictionary>> lightSources
             [[codegen::reference("core_light_source")]];
     };
@@ -402,10 +402,10 @@ GeoJsonComponent::GeoJsonComponent(const ghoul::Dictionary& dictionary,
 
     using PointRenderMode = GlobeGeometryFeature::PointRenderMode;
     _pointRenderModeOption.addOptions({
-        { static_cast<int>(PointRenderMode::AlignToCameraDir), "Camera Direction"},
-        { static_cast<int>(PointRenderMode::AlignToCameraPos), "Camera Position"},
-        { static_cast<int>(PointRenderMode::AlignToGlobeNormal), "Globe Normal"},
-        { static_cast<int>(PointRenderMode::AlignToGlobeSurface), "Globe Surface"}
+        { static_cast<int>(PointRenderMode::AlignToCameraDir), "Camera Direction" },
+        { static_cast<int>(PointRenderMode::AlignToCameraPos), "Camera Position" },
+        { static_cast<int>(PointRenderMode::AlignToGlobeNormal), "Globe Normal" },
+        { static_cast<int>(PointRenderMode::AlignToGlobeSurface), "Globe Surface" }
     });
     if (p.pointRenderMode.has_value()) {
         _pointRenderModeOption =
@@ -518,7 +518,6 @@ void GeoJsonComponent::render(const RenderData& data) {
     // this code should use the same light source as the globe
     _lightsourceRenderData.updateBasedOnLightSources(data, _lightSources);
 
-    // Change GL state:
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
@@ -559,7 +558,6 @@ void GeoJsonComponent::render(const RenderData& data) {
 
     glBindVertexArray(0);
 
-    // Restore GL State
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
@@ -631,7 +629,7 @@ void GeoJsonComponent::readFile() {
         if (_geometryFeatures.empty()) {
             LWARNING(std::format(
                 "No GeoJson features could be successfully created for GeoJson layer "
-                "with identifier '{}'. Disabling layer.", identifier()
+                "with identifier '{}'. Disabling layer", identifier()
             ));
             _enabled = false;
         }
@@ -656,7 +654,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
             "Feature {} in GeoJson file '{}' has invalid geometry (for example due to "
             "self-intersections or other non-simple geometry). If possible, the feature "
             "will be split into separate features with valid geometry. However, note "
-            "that this may introduce artifacts.", indexInFile, _geoJsonFile.value()
+            "that this may introduce artifacts", indexInFile, _geoJsonFile.value()
         ));
     }
     geos::operation::valid::MakeValid makeValid;
@@ -722,7 +720,7 @@ void GeoJsonComponent::parseSingleFeature(const geos::io::GeoJSONFeature& featur
         catch (const ghoul::RuntimeError& error) {
             LERROR(std::format(
                 "Error creating GeoJson layer with identifier '{}'. Problem reading "
-                "feature {} in GeoJson file '{}'.",
+                "feature {} in GeoJson file '{}'",
                 identifier(), indexInFile, _geoJsonFile.value()
             ));
             LERRORC(error.component, error.message);
@@ -735,11 +733,7 @@ void GeoJsonComponent::addMetaPropertiesToFeature(SubFeatureProps& feature, int 
                                                   const geos::geom::Geometry* geometry)
 {
     std::unique_ptr<geos::geom::Point> centroid = geometry->getCentroid();
-    // Using `auto` here as on MacOS `getCoordinate` returns:
-    // geos::geom::Coordinate
-    // but on Windows it returns
-    // geos::geom::CoordinateXY
-    auto centroidCoord = *centroid->getCoordinate();
+    const geos::geom::CoordinateXY centroidCoord = *centroid->getCoordinate();
     const glm::vec2 centroidLatLong = glm::vec2(centroidCoord.y, centroidCoord.x);
     feature.centroidLatLong = centroidLatLong;
 
@@ -757,8 +751,8 @@ void GeoJsonComponent::addMetaPropertiesToFeature(SubFeatureProps& feature, int 
         );
     }
     else {
-        // Invalid boundingbox. Can happen e.g. for single points.
-        // Just add a degree to every direction from the centroid
+        // Invalid boundingbox. Can happen e.g. for single points. Just add a degree to
+        // every direction from the centroid
         boundingboxLatLong = glm::vec4(
             centroidLatLong.x - 1.f,
             centroidLatLong.y - 1.f,
@@ -791,14 +785,14 @@ void GeoJsonComponent::computeMainFeatureMetaPropeties() {
         return;
     }
 
-    glm::vec2 bboxLowerCorner = {
+    glm::vec2 bboxLowerCorner = glm::vec2(
         _features.front()->boundingboxLatLong.value().x,
         _features.front()->boundingboxLatLong.value().y
-    };
-    glm::vec2 bboxUpperCorner = {
+    );
+    glm::vec2 bboxUpperCorner = glm::vec2(
         _features.front()->boundingboxLatLong.value().z,
         _features.front()->boundingboxLatLong.value().w
-    };
+    );
 
     for (const std::unique_ptr<SubFeatureProps>& f : _features) {
         // Update bbox corners
@@ -821,13 +815,13 @@ void GeoJsonComponent::computeMainFeatureMetaPropeties() {
 
     // Compute the diagonal distance (size) of the bounding box
     const Geodetic2 pos0 = {
-        glm::radians(bboxLowerCorner.x),
-        glm::radians(bboxLowerCorner.y)
+        .lat = glm::radians(bboxLowerCorner.x),
+        .lon = glm::radians(bboxLowerCorner.y)
     };
 
     const Geodetic2 pos1 = {
-        glm::radians(bboxUpperCorner.x),
-        glm::radians(bboxUpperCorner.y)
+        .lat = glm::radians(bboxUpperCorner.x),
+        .lon = glm::radians(bboxUpperCorner.y)
     };
     _bboxDiagonalSize = static_cast<float>(
         std::abs(_globeNode.ellipsoid().greatCircleDistance(pos0, pos1))
@@ -847,8 +841,8 @@ void GeoJsonComponent::flyToFeature(std::optional<int> index) const {
         centroidLon = f->centroidLatLong.value().y;
     }
 
-    // Compute a good distance to travel to based on the feature's size.
-    // Assumes 80 degree FOV
+    // Compute a good distance to travel to based on the feature's size. Assumes 80 degree
+    // FOV
     constexpr float Angle = glm::radians(40.f);
     float d = diagonal / glm::tan(Angle);
     d += _heightOffset;

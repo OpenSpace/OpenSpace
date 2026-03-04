@@ -51,7 +51,8 @@ nlohmann::json MissionTopic::missionJson() const {
 
     const ImageSequencer& sequencer = ImageSequencer::ref();
     const std::vector<double>& captureTimes = sequencer.captureProgression();
-    std::vector<std::string> captureTimesString(captureTimes.size());
+    std::vector<std::string> captureTimesString =
+        std::vector<std::string>(captureTimes.size());
 
     for (size_t i = 0; i < captureTimes.size(); i++) {
         std::string str = SpiceManager::ref().dateFromEphemerisTime(

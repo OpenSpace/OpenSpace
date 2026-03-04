@@ -51,7 +51,7 @@ namespace {
     glm::dvec2 castToNDC(const glm::dvec3& vec, Camera& camera, SceneGraphNode* node) {
         glm::dvec3 posInCamSpace = glm::inverse(camera.rotationQuaternion()) *
             (node->worldRotationMatrix() * vec +
-                (node->worldPosition() - camera.positionVec3()));
+                (node->worldPosition() - camera.position()));
 
         glm::dvec4 clipspace = camera.projectionMatrix() * glm::dvec4(posInCamSpace, 1.0);
         return (glm::dvec2(clipspace) / clipspace.w);
@@ -71,7 +71,7 @@ namespace {
 
         using namespace glm;
         // Create variables from current state
-        dvec3 camPos = ptr->camera->positionVec3();
+        dvec3 camPos = ptr->camera->position();
         dvec3 centerPos = ptr->node->worldPosition();
 
         dvec3 directionToCenter = normalize(centerPos - camPos);
@@ -129,7 +129,7 @@ namespace {
         }
         // Update the camera state
         Camera cam = *(ptr->camera);
-        cam.setPositionVec3(camPos);
+        cam.setPosition(camPos);
         cam.setRotation(globalCamRot * localCamRot);
 
         // we now have a new position and orientation of camera, project surfacePoint to
@@ -239,8 +239,8 @@ bool DirectInputSolver::solve(const std::vector<TouchInputHolder>& list,
         const SelectedBody& sb = selectedBodies.at(i);
         selectedPoints.push_back(sb.coordinates);
         screenPoints.emplace_back(
-            2.0 * (list[i].latestInput().x - 0.5),
-            -2.0 * (list[i].latestInput().y - 0.5)
+            2.0 * (list[i].latestInput().pos.x - 0.5),
+            -2.0 * (list[i].latestInput().pos.y - 0.5)
         );
     }
 

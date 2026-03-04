@@ -113,17 +113,17 @@ namespace {
         // a given start and end time, temporal resolution, and perscriptive time format
         // is used to generate the information used by GDAL to access the data. In the
         // `folder` method, a folder and a time format is provided and each file in the
-        // folder is scanned using the time format instead
+        // folder is scanned using the time format instead.
         Mode mode;
 
         struct Prototyped {
             struct Time {
-                // The (inclusive) starting time of the temporal image range
+                // The (inclusive) starting time of the temporal image range.
                 std::string start;
-                // The (inclusive) ending time of the temporal image range
+                // The (inclusive) ending time of the temporal image range.
                 std::string end;
             };
-            // The starting and ending times for the range of values
+            // The starting and ending times for the range of values.
             Time time;
 
             // The temporal resolution between each image
@@ -139,7 +139,7 @@ namespace {
             // the image layer. Any occurance of `${OpenSpaceTimeId}` in this prototype
             // is replaced with the current date according to the remaining information
             // such as the resolution and the format and the resulting text is used to
-            // load the corresponding images
+            // load the corresponding images.
             std::string prototype;
 
         };
@@ -148,7 +148,7 @@ namespace {
         struct Folder {
             // The folder that is parsed for files. Every file in the provided directory
             // is checked against the provided format and added if it adheres to said
-            // format
+            // format.
             std::filesystem::path folder [[codegen::directory()]];
 
             // The format of files that is pared in the provided folder. The format string
@@ -159,14 +159,13 @@ namespace {
         std::optional<Folder> folder;
 
         // Determines whether this tile provider should interpolate between two adjacent
-        // layers
+        // layers.
         std::optional<bool> interpolation;
 
         // If provided, the tile provider will use this color map to convert a greyscale
-        // image to color
+        // image to color.
         std::optional<std::string> colormap;
     };
-
 } // namespace
 #include "temporaltileprovider_codegen.cpp"
 
@@ -215,7 +214,8 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
         Time end = Time::now();
         _prototyped.startTimeJ2000 = start.j2000Seconds();
         if (p.prototyped->time.end == "Yesterday") {
-            end.advanceTime(-60.0 * 60.0 * 24.0); // Go back one day
+            // Go back one day
+            end.advanceTime(-60.0 * 60.0 * 24.0);
         }
         else if (p.prototyped->time.end != "Today") {
             _prototyped.endTimeJ2000 = Time(p.prototyped->time.end).j2000Seconds();
@@ -265,11 +265,11 @@ TemporalTileProvider::TemporalTileProvider(const ghoul::Dictionary& dictionary)
             ss >> std::get_time(&tm, p.folder->format.c_str());
             if (!ss.fail()) {
                 std::string date;
-                if (p.folder->format.find("%j") != std::string::npos) {
+                if (p.folder->format.contains("%j")) {
                     // If the user asked for a day-of-year, the day-of-month and the month
                     // fields will not be set and calls to std::asctime will assert
-                    // unfortunately.  Luckily, Spice understands DOY date formats, so
-                    // we can specify those directly and noone would use a DOY and a DOM
+                    // unfortunately. Luckily, Spice understands DOY date formats, so we
+                    // can specify those directly and noone would use a DOY and a DOM
                     // time string in the same format string, right?  Right?!
                     date = std::format(
                         "{}-{}T{}:{}:{}",
@@ -488,9 +488,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, false>(
         _folder.files.cbegin(),
         _folder.files.cend(),
         time.j2000Seconds(),
-        [](const std::pair<double, std::string>& p, double t) {
-            return p.first < t;
-        }
+        [](const std::pair<double, std::string>& p, double t) { return p.first < t; }
     );
 
     if (it != _folder.files.cbegin()) {
@@ -510,9 +508,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Folder, true>(
         _folder.files.cbegin(),
         _folder.files.cend(),
         time.j2000Seconds(),
-        [](const std::pair<double, std::string>& p, double t) {
-            return p.first < t;
-        }
+        [](const std::pair<double, std::string>& p, double t) { return p.first < t; }
     );
 
     auto curr = next != _folder.files.cbegin() ? next - 1 : next;
@@ -545,7 +541,7 @@ TileProvider*
 TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Prototype, false>(
                                                                          const Time& time)
 {
-    Time tCopy(time);
+    Time tCopy = Time(time);
     if (_prototyped.timeQuantizer.quantize(tCopy, true)) {
         return retrieveTileProvider(tCopy);
     }
@@ -572,36 +568,36 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Prototype, true>(
 
     _interpolateTileProvider->t1 = retrieveTileProvider(tCopy);
 
-    // if the images are for each hour
+    // If the images are for each hour
     if (_prototyped.temporalResolution == "1h") {
         constexpr int Hour = 60 * 60;
-        // the second tile to interpolate between
+        // The second tile to interpolate between
         nextTile.advanceTime(Hour);
-        // the tile after the second tile
+        // The tile after the second tile
         nextNextTile.advanceTime(2 * Hour);
-        // the tile before the first tile
+        // The tile before the first tile
         prevTile.advanceTime(-Hour + 1);
-        // to make sure that an image outside the dataset is not searched for both
-        // ends of the dataset are calculated
+        // To make sure that an image outside the dataset is not searched for both ends of
+        // the dataset are calculated
         secondToLast.advanceTime(-Hour);
         secondToFirst.advanceTime(Hour);
     }
-    // if the images are for each month
+    // If the images are for each month
     if (_prototyped.temporalResolution == "1M") {
         constexpr int Day = 24 * 60 * 60;
 
-        // the second tile to interpolate between
+        // The second tile to interpolate between
         nextTile.advanceTime(32 * Day);
-        // the tile after the second tile
+        // The tile after the second tile
         nextNextTile.advanceTime(64 * Day);
-        // the tile before the first tile
+        // The tile before the first tile
         prevTile.advanceTime(-2 * Day);
-        // to make sure that an image outside the dataset is not searched for both
-        // ends of the dataset are calculated
+        // To make sure that an image outside the dataset is not searched for both ends of
+        // the dataset are calculated
         secondToLast.advanceTime(-2 * Day);
         secondToFirst.advanceTime(32 * Day);
 
-        // since months vary in length the time is set to the first of each month
+        // Since months vary in length the time is set to the first of each month
         auto setToFirstOfMonth = [](Time& t) {
             std::string timeString = std::string(t.ISO8601());
             timeString[8] = '0';
@@ -616,7 +612,7 @@ TemporalTileProvider::tileProvider<TemporalTileProvider::Mode::Prototype, true>(
         setToFirstOfMonth(secondToFirst);
     }
 
-    // the necessary tile providers are loaded if they exist within the timespan
+    // The necessary tile providers are loaded if they exist within the timespan
     if (secondToLast.j2000Seconds() > time.j2000Seconds() &&
         secondToFirst.j2000Seconds() < time.j2000Seconds())
     {
@@ -686,26 +682,36 @@ TemporalTileProvider::InterpolateTileProvider::InterpolateTileProvider(
 
     glCreateBuffers(1, &vboQuad);
     // Quad for fullscreen with vertex (xy) and texture coordinates (uv)
-    constexpr std::array<GLfloat, 24> VertexData = {
-        // x    y    u    v
-        -1.f, -1.f, 0.f, 0.f,
-         1.f,  1.f, 1.f, 1.f,
-        -1.f,  1.f, 0.f, 1.f,
-        -1.f, -1.f, 0.f, 0.f,
-         1.f, -1.f, 1.f, 0.f,
-         1.f,  1.f, 1.f, 1.f
+    struct Vertex {
+        glm::vec2 position;
+        glm::vec2 texCoords;
     };
-    glNamedBufferStorage(vboQuad, sizeof(VertexData), VertexData.data(), GL_NONE_BIT);
+    constexpr std::array<Vertex, 6> VertexData = {
+        Vertex { glm::vec2(-1.f, -1.f), glm::vec2(0.f, 0.f) },
+        Vertex { glm::vec2(1.f,  1.f), glm::vec2(1.f, 1.f) },
+        Vertex { glm::vec2(-1.f,  1.f), glm::vec2(0.f, 1.f) },
+        Vertex { glm::vec2(-1.f, -1.f), glm::vec2(0.f, 0.f) },
+        Vertex { glm::vec2(1.f, -1.f), glm::vec2(1.f, 0.f) },
+        Vertex { glm::vec2(1.f,  1.f), glm::vec2(1.f, 1.f) }
+    };
+    glNamedBufferStorage(vboQuad, 6 * sizeof(VertexData), VertexData.data(), GL_NONE_BIT);
 
     glCreateVertexArrays(1, &vaoQuad);
-    glVertexArrayVertexBuffer(vaoQuad, 0, vboQuad, 0, 4 * sizeof(GLfloat));
+    glVertexArrayVertexBuffer(vaoQuad, 0, vboQuad, 0, sizeof(Vertex));
 
     glEnableVertexArrayAttrib(vaoQuad, 0);
     glVertexArrayAttribFormat(vaoQuad, 0, 2, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(vaoQuad, 0, 0);
 
     glEnableVertexArrayAttrib(vaoQuad, 1);
-    glVertexArrayAttribFormat(vaoQuad, 1, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat));
+    glVertexArrayAttribFormat(
+        vaoQuad,
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        offsetof(Vertex, texCoords)
+    );
     glVertexArrayAttribBinding(vaoQuad, 1, 0);
 
     shaderProgram = global::renderEngine->buildRenderProgram(
@@ -727,10 +733,10 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     ZoneScoped;
     TracyGpuZone("tile");
 
-    // prev and next are the two tiles to interpolate between
+    // Prev and next are the two tiles to interpolate between
     const Tile prev = t1->tile(tileIndex);
     const Tile next = t2->tile(tileIndex);
-    // the tile before and the tile after the interpolation interval are loaded so the
+    // The tile before and the tile after the interpolation interval are loaded so the
     // interpolation goes smoother. It is on purpose that we are not actually storing the
     // return tile here, we just want to trigger the load already
     before->tile(tileIndex);
@@ -738,7 +744,11 @@ Tile TemporalTileProvider::InterpolateTileProvider::tile(const TileIndex& tileIn
     const ProviderTileKey key = { tileIndex, uniqueIdentifier };
 
     if (!prev.texture || !next.texture) {
-        return Tile{ nullptr, std::nullopt, Tile::Status::Unavailable };
+        return {
+            .texture = nullptr,
+            .metaData = std::nullopt,
+            .status = Tile::Status::Unavailable
+        };
     }
 
     // The data for initializing the texture
@@ -850,11 +860,11 @@ void TemporalTileProvider::InterpolateTileProvider::reset() {
 }
 
 int TemporalTileProvider::InterpolateTileProvider::minLevel() {
-    return glm::max(t1->minLevel(), t2->minLevel());
+    return std::max(t1->minLevel(), t2->minLevel());
 }
 
 int TemporalTileProvider::InterpolateTileProvider::maxLevel() {
-    return glm::min(t1->maxLevel(), t2->maxLevel());
+    return std::min(t1->maxLevel(), t2->maxLevel());
 }
 
 float TemporalTileProvider::InterpolateTileProvider::noDataValueAsFloat() {

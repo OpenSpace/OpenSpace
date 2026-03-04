@@ -54,7 +54,7 @@ namespace {
         "SpoutName",
         "Spout receiver name",
         "This value explicitly sets the Spout receiver to use a specific name. If this "
-        "is not a valid name, the first Spout image is used instead",
+        "is not a valid name, the first Spout image is used instead.",
         Property::Visibility::AdvancedUser
     };
 
@@ -151,7 +151,7 @@ bool SpoutReceiver::updateReceiver() {
     std::memcpy(currentSpoutName, _currentSpoutName.data(), _currentSpoutName.size());
     _spoutHandle->CheckReceiver(currentSpoutName, width, height, _isReceiving);
 
-    // if spout is not connected a 10x10 texture is created
+    // If spout is not connected a 10x10 texture is created
     if (updateTexture(width, height) && _isReceiving) {
         saveGLState();
 
@@ -268,13 +268,13 @@ bool SpoutReceiver::updateTexture(unsigned int width, unsigned int height) {
     if (width != _spoutWidth || height != _spoutHeight) {
         releaseTexture();
         _spoutTexture = std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit{
+            ghoul::opengl::Texture::FormatInit {
                 .dimensions = glm::uvec3(width, height, 1),
                 .type = GL_TEXTURE_2D,
                 .format = ghoul::opengl::Texture::Format::RGBA,
                 .dataType = GL_UNSIGNED_BYTE
             },
-            ghoul::opengl::Texture::SamplerInit{}
+            ghoul::opengl::Texture::SamplerInit {}
         );
 
         if (_spoutTexture) {
@@ -504,16 +504,13 @@ bool SpoutSender::updateSenderSize(int width, int height) {
 
     releaseSender();
 
-    if (_onUpdateSenderSizeCallback) {
-        if (!_onUpdateSenderSizeCallback(width, height)) {
-            return false;
-        }
+    if (_onUpdateSenderSizeCallback && !_onUpdateSenderSizeCallback(width, height)) {
+        return false;
     }
 
     _spoutWidth = width;
     _spoutHeight = height;
     _isCreated = true;
-
     return true;
 }
 

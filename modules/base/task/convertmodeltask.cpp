@@ -68,7 +68,7 @@ std::string ConvertModelTask::description() {
         "supported both by OpenSpace and common 3D modelling tools and converts it into "
         "an OpenSpace proprietary format that can be loaded more efficiently, but more "
         "important can be distributed without violating terms of service for various 3D "
-        "model hosting websites";
+        "model hosting websites.";
 }
 
 void ConvertModelTask::perform(const Task::ProgressCallback&) {

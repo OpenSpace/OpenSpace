@@ -37,8 +37,7 @@ namespace {
         return TouchInput(
             static_cast<size_t>(tcur->getTuioSourceID()),
             static_cast<size_t>(tcur->getCursorID()),
-            tcur->getX(),
-            tcur->getY(),
+            glm::vec2(tcur->getX(), tcur->getY()),
             static_cast<double>(tcur->getTuioTime().getTotalMilliseconds()) / 1000.0
         );
     }
@@ -78,19 +77,15 @@ void TuioEar::refresh(TuioTime) {} // about every 15ms
 
 std::vector<TouchInput> TuioEar::takeInputs() {
     std::vector<TouchInput> outputList;
-    {
-        std::lock_guard lock(_mx);
-        outputList.swap(_inputList);
-    }
+    std::lock_guard lock(_mx);
+    outputList.swap(_inputList);
     return outputList;
 }
 
 std::vector<TouchInput> TuioEar::takeRemovals() {
     std::vector<TouchInput> outputList;
-    {
-        std::lock_guard lock(_mx);
-        outputList.swap(_removalList);
-    }
+    std::lock_guard lock(_mx);
+    outputList.swap(_removalList);
     return outputList;
 }
 

@@ -76,7 +76,7 @@ namespace openspace::dataloader::speck {
 Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> specs) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
-    std::ifstream file(path);
+    std::ifstream file = std::ifstream(path);
     if (!file.good()) {
         throw ghoul::RuntimeError(std::format("Failed to open speck file '{}'", path));
     }
@@ -219,7 +219,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
         }
 
         if (startsWith(line, "maxcomment")) {
-            // ignoring this comment as we don't need it
+            // Ignoring this comment as we don't need it
             continue;
         }
 
@@ -259,8 +259,8 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
             continue;
         }
 
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
+        // Guard against wrong line endings (copying files between operating systems)
+        // causes lines to have a final \r
         if (line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
@@ -373,7 +373,7 @@ Dataset loadSpeckFile(std::filesystem::path path, std::optional<DataMapping> spe
 Labelset loadLabelFile(std::filesystem::path path) {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
-    std::ifstream file(path);
+    std::ifstream file = std::ifstream(path);
     if (!file.good()) {
         throw ghoul::RuntimeError(std::format("Failed to open dataset file '{}'", path));
     }
@@ -388,8 +388,8 @@ Labelset loadLabelFile(std::filesystem::path path) {
             continue;
         }
 
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
+        // Guard against wrong line endings (copying files between operating systems)
+        // causes lines to have a final \r
         if (line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
@@ -403,7 +403,7 @@ Labelset loadLabelFile(std::filesystem::path path) {
         }
 
         if (startsWith(line, "textcolor")) {
-            // each textcolor line is following the form:
+            // Each textcolor line is following the form:
             // textcolor <idx>
             // with <idx> being the index of the color into some configuration file (not
             // really sure how these configuration files work, but they don't seem to be
@@ -432,8 +432,8 @@ Labelset loadLabelFile(std::filesystem::path path) {
             continue;
         }
 
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
+        // Guard against wrong line endings (copying files between operating systems)
+        // causes lines to have a final \r
         if (line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
@@ -466,13 +466,13 @@ Labelset loadLabelFile(std::filesystem::path path) {
         strip(rest);
 
         if (startsWith(rest, "id")) {
-            // optional arument with identifier
+            // Optional arument with identifier
             // Remove the 'id' text
             rest = rest.substr(std::string_view("id ").size());
             const size_t index = rest.find("text");
             entry.identifier = rest.substr(0, index - 1);
 
-            // update the rest, remove the identifier
+            // Update the rest, remove the identifier
             rest = rest.substr(index);
         }
         if (!startsWith(rest, "text")) {
@@ -574,11 +574,14 @@ ColorMap loadCmapFile(std::filesystem::path path) {
     res.entries.shrink_to_fit();
 
     if (nColorLines != static_cast<int>(res.entries.size())) {
-        LWARNINGC("SpeckLoader", std::format(
-            "While loading color map '{}', the expected number of color values '{}' was "
-            "different from the actual number of color values '{}'",
-            path, nColorLines, res.entries.size()
-        ));
+        LWARNINGC(
+            "SpeckLoader",
+            std::format(
+                "While loading color map '{}', the expected number of color values '{}' "
+                "was different from the actual number of color values '{}'",
+                path, nColorLines, res.entries.size()
+            )
+        );
     }
 
     return res;

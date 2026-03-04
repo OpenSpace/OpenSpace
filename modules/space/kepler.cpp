@@ -206,7 +206,7 @@ namespace {
 
         // 1,2. Get the full year and days
         std::string e = epoch;
-        if (e.find('.') == std::string::npos) {
+        if (!e.contains('.')) {
             e += ".0";
         }
         if (e.size() <= 2) {
@@ -266,10 +266,10 @@ namespace {
         // 3. Convert the number of days to a number of seconds
         // 4. Get the number of leap seconds since January 1st, 2000 and remove them
         // 5. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
-        // midnight
+        //    midnight
 
         std::string e = epoch;
-        if (e.find('.') == std::string::npos) {
+        if (!e.contains('.')) {
             // No . was found so the epoch was provided as an integer number (see #2551)
             e += ".0";
         }
@@ -297,7 +297,7 @@ namespace {
         // 3
         using namespace std::chrono;
         const int SecondsPerDay = static_cast<int>(seconds(hours(24)).count());
-        //Need to subtract 1 from daysInYear since it is not a zero-based count
+        // Need to subtract 1 from daysInYear since it is not a zero-based count
         const double nSecondsSince2000 = (daysSince2000 + daysInYear - 1) * SecondsPerDay;
 
         // 4
@@ -329,7 +329,7 @@ namespace {
         // 4. Get the number of leap seconds since January 1st, 2000 and remove them
         // 5. Add the hh:mm:ss component
         // 6. Adjust for the fact the epoch starts on 1st January at 12:00:00, not
-        // midnight
+        //    midnight
 
         std::string e = epoch;
         if (e.back() == 'Z') {
@@ -365,7 +365,6 @@ namespace {
 
             auto res = scn::scan<int, int, int, int, double>(
                 epoch, "{:4}-{:3}T{:2}:{:2}:{}"
-                //date.year, date.nDays, date.hours, date.minutes, date.seconds
             );
             if (!res) {
                 throw ghoul::RuntimeError(std::format("Error parsing epoch '{}'", epoch));
@@ -744,17 +743,8 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
                 "Malformed line {}, expected 8 data fields, got {}", line, parts.size()
             ));
         }
-        Parameters p;
 
         ghoul::trimWhitespace(parts[0]);
-        p.name = parts[0];
-
-        p.epoch = epochFromYMDdSubstring(parts[1]);
-        p.eccentricity = std::stod(parts[2]);
-        // AU -> km
-        p.semiMajorAxis =
-            std::stod(parts[3]) * distanceconstants::AstronomicalUnit / 1000.0;
-
         auto importAngleValue = [](const std::string& angle) {
             if (angle.empty()) {
                 return 0.0;
@@ -768,13 +758,19 @@ std::vector<Parameters> readSbdbFile(const std::filesystem::path& file) {
             return output;
         };
 
-        p.inclination = importAngleValue(parts[4]);
-        p.ascendingNode = importAngleValue(parts[5]);
-        p.argumentOfPeriapsis = importAngleValue(parts[6]);
-        p.meanAnomaly = importAngleValue(parts[7]);
-        p.period =
-            std::stod(parts[8]) * std::chrono::seconds(std::chrono::hours(24)).count();
-
+        Parameters p = {
+            .name = parts[0],
+            .inclination = importAngleValue(parts[4]),
+            .semiMajorAxis =
+                std::stod(parts[3]) * distanceconstants::AstronomicalUnit / 1000.0,
+            .ascendingNode = importAngleValue(parts[5]),
+            .eccentricity = std::stod(parts[2]),
+            .argumentOfPeriapsis = importAngleValue(parts[6]),
+            .meanAnomaly = importAngleValue(parts[7]),
+            .epoch = epochFromYMDdSubstring(parts[1]),
+            .period =
+                std::stod(parts[8]) * std::chrono::seconds(std::chrono::hours(24)).count()
+        };
         result.push_back(std::move(p));
     }
     return result;
@@ -785,13 +781,13 @@ std::vector<Parameters> readMpcFile(const std::filesystem::path& file) {
 
     std::ifstream f = std::ifstream(file);
 
-    // Automatically detecting the header in an MPC file is unfortuntely not trivially
-    // The data lines in the MPC file format must be at least 160 character in length and
-    // none of the header lines (with one exception) encountered thus far are less than
-    // these 160 characters long. The exception is a line exactly 160 characters long with
-    // all `-` characters as a delimiter between header and data. Furthermore, the MPC
-    // file format is a fixed-width format where columns are located at specific positions
-    // and with a fixed length. More information about the file format is available at
+    // Automatically detecting the header in an MPC file is unfortuntely not trivial. The
+    // data lines in the MPC file format must be at least 160 character in length and none
+    // of the header lines (with one exception) encountered thus far are less than these
+    // 160 characters long. The exception is a line exactly 160 characters long with all
+    // `-` characters as a delimiter between header and data. Furthermore, the MPC file
+    // format is a fixed-width format where columns are located at specific positions and
+    // with a fixed length. More information about the file format is available at
     // http://www.minorplanetcenter.org/iau/info/MPOrbitFormat.html
     std::vector<Parameters> result;
     std::string line;

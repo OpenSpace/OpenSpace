@@ -81,19 +81,17 @@ void RenderableDataSphere::initializeGL() {
     }
     else {
         _dataProcessor = std::make_shared<DataProcessorJson>();
-        //If autofiler is on, background values property should be hidden
+        // If autofiler is on, background values property should be hidden
         _autoFilter.onChange([this]() {
-            // If autofiler is selected, use _dataProcessor to set backgroundValues
-            // and unregister backgroundvalues property.
+            // If autofiler is selected, use _dataProcessor to set backgroundValues and
+            // unregister backgroundvalues property
             if (_autoFilter) {
                 _backgroundValues = _dataProcessor->filterValues();
                 _backgroundValues.setVisibility(Property::Visibility::Hidden);
-                //_backgroundValues.setVisible(false);
-            // else if autofilter is turned off, register backgroundValues
             }
             else {
+                // If autofilter is turned off, register backgroundValues
                 _backgroundValues.setVisibility(Property::Visibility::Always);
-                //_backgroundValues.setVisible(true);
             }
         });
     }
@@ -112,7 +110,7 @@ void RenderableDataSphere::deinitializeGL() {
 }
 
 void RenderableDataSphere::createGeometry() {
-    const float radius = 6.371f * _radius * glm::pow(10.f, 6.f);
+    const float radius = 6.371f * _radius * std::pow(10.f, 6.f);
     int segments = 100;
     _sphere = std::make_unique<Sphere>(radius, segments);
     _sphere->initialize();
@@ -128,29 +126,29 @@ void RenderableDataSphere::renderGeometry() const {
     _sphere->render();
 }
 
-std::vector<float*> RenderableDataSphere::textureData() {
-    // if the buffer in the datafile is empty, do not proceed
+std::vector<std::vector<float>> RenderableDataSphere::textureData() {
+    // If the buffer in the datafile is empty, do not proceed
     if (_dataBuffer.empty()) {
-        return std::vector<float*>();
+        return std::vector<std::vector<float>>();
     }
 
-    if (!_dataOptions.options().empty()) { // load options for value selection
+    if (!_dataOptions.options().empty()) {
+        // Load options for value selection
         fillOptions(_dataBuffer);
         _dataProcessor->addDataValues(_dataBuffer, _dataOptions);
 
-        // if this datacygnet has added new values then reload texture
-        // for the whole group, including this datacygnet, and return after.
+        // If this datacygnet has added new values then reload texture for the whole
+        // group, including this datacygnet, and return after
         if (_group) {
             _group->updateGroup();
-            return std::vector<float*>();
+            return std::vector<std::vector<float>>();
         }
     }
-    // _textureDimensions = _dataProcessor->setDimensions();
     return _dataProcessor->processData(_dataBuffer, _dataOptions, _textureDimensions);
 }
 
 void RenderableDataSphere::setUniforms() {
-    // set both data texture and transfer function texture
+    // Set both data texture and transfer function texture
     setTextureUniforms();
     _shader->setUniform("backgroundValues", _backgroundValues);
     _shader->setUniform("transparency", _alpha);

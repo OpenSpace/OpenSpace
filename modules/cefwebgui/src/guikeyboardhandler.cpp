@@ -33,14 +33,14 @@ GUIKeyboardHandler::GUIKeyboardHandler() {
     _keyConsumed = false;
 
     global::callback::keyboard->emplace_back(
-        [this](Key, KeyModifier, KeyAction, IsGuiWindow isGuiWindow) -> bool {
+        [this](Key, KeyModifier, KeyAction, IsGuiWindow isGuiWindow) {
             const bool previous = _keyConsumed;
             _keyConsumed = false;
             return isGuiWindow ? previous : false;
         }
     );
     global::callback::character->emplace_back(
-        [this](unsigned int, KeyModifier, IsGuiWindow isGuiWindow) -> bool {
+        [this](unsigned int, KeyModifier, IsGuiWindow isGuiWindow) {
             const bool previous = _keyConsumed;
             _keyConsumed = false;
             return isGuiWindow ? previous : false;

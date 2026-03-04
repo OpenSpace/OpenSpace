@@ -29,8 +29,8 @@
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/navigation/navigationstate.h>
 #include <openspace/navigation/pathnavigator.h>
-#include <openspace/scene/scenegraphnode.h>
 #include <openspace/query/query.h>
+#include <openspace/scene/scenegraphnode.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <cmath>
@@ -43,10 +43,12 @@ namespace {
     constexpr std::string_view _loggerCat = "Waypoint";
 
     constexpr float LengthEpsilon = 1e-5f;
-    constexpr const char* SunIdentifier = "Sun";
+    constexpr std::string_view SunIdentifier = "Sun";
 
-    // Compute a target position close to the specified target node, using knowledge of
-    // the start point and a desired distance from the node's center
+    /**
+     * Compute a target position close to the specified target node, using knowledge of
+     * the start point and a desired distance from the node's center
+     */
     glm::dvec3 computeGoodStepDirection(const SceneGraphNode* targetNode,
                                         const Waypoint& startPoint)
     {
@@ -57,7 +59,7 @@ namespace {
         // @TODO (2021-07-09, emmbr): Not nice to depend on a specific scene graph node,
         // as it might not exist. Ideally, each SGN could know about their preferred
         // direction to be viewed from (their "good side"), and then that could be queried
-        // and used instead.
+        // and used instead
         if (closeNode) {
             // If the node is close to another node in the scene, set the direction in a
             // way that minimizes risk of collision
@@ -90,10 +92,10 @@ namespace {
                 return glm::dvec3(0.0, 0.0, 1.0);
             }
 
-            constexpr float defaultPositionOffsetAngle = -30.f; // degrees
-            constexpr float angle = glm::radians(defaultPositionOffsetAngle);
+            constexpr float DefaultPositionOffsetAngle = -30.f; // in degrees
+            constexpr float Angle = glm::radians(DefaultPositionOffsetAngle);
             const glm::dvec3 axis = glm::normalize(glm::cross(targetToPrev, targetToSun));
-            const glm::dquat offsetRotation = angleAxis(static_cast<double>(angle), axis);
+            const glm::dquat offsetRotation = angleAxis(static_cast<double>(Angle), axis);
 
             return glm::normalize(offsetRotation * targetToSun);
         }
@@ -171,10 +173,10 @@ double Waypoint::validBoundingSphere() const {
 
 Waypoint waypointFromCamera() {
     Camera* camera = global::navigationHandler->camera();
-    const glm::dvec3 pos = camera->positionVec3();
+    const glm::dvec3 pos = camera->position();
     const glm::dquat rot = camera->rotationQuaternion();
     const std::string node = global::navigationHandler->anchorNode()->identifier();
-    return Waypoint{ pos, rot, node };
+    return Waypoint(pos, rot, node);
 }
 
 Waypoint computeWaypointFromNodeInfo(const NodeCameraStateSpec& spec,

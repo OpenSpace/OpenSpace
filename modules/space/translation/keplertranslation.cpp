@@ -352,41 +352,31 @@ void KeplerTranslation::setKeplerElements(double eccentricity, double semiMajorA
     auto isInRange = [](double val, double min, double max) -> bool {
         return val >= min && val <= max;
     };
-    if (isInRange(eccentricity, 0.0, 1.0)) {
-        _eccentricity = eccentricity;
-    }
-    else {
+    if (!isInRange(eccentricity, 0.0, 1.0)) {
         throw RangeError("Eccentricity");
     }
-
+    _eccentricity = eccentricity;
     _semiMajorAxis = semiMajorAxis;
 
-    if (isInRange(inclination, 0.0, 360.0)) {
-        _inclination = inclination;
-    }
-    else {
+    if (!isInRange(inclination, 0.0, 360.0)) {
         throw RangeError("Inclination");
     }
+    _inclination = inclination;
 
-    if (isInRange(_ascendingNode, 0.0, 360.0)) {
-        _ascendingNode = ascendingNode;
-    }
-    else {
+    if (!isInRange(_ascendingNode, 0.0, 360.0)) {
         throw RangeError("Ascending Node");
     }
-    if (isInRange(_argumentOfPeriapsis, 0.0, 360.0)) {
-        _argumentOfPeriapsis = argumentOfPeriapsis;
-    }
-    else {
+    _ascendingNode = ascendingNode;
+
+    if (!isInRange(_argumentOfPeriapsis, 0.0, 360.0)) {
         throw RangeError("Argument of Periapsis");
     }
+    _argumentOfPeriapsis = argumentOfPeriapsis;
 
-    if (isInRange(_meanAnomalyAtEpoch, 0.0, 360.0)) {
-        _meanAnomalyAtEpoch = meanAnomalyAtEpoch;
-    }
-    else {
+    if (!isInRange(_meanAnomalyAtEpoch, 0.0, 360.0)) {
         throw RangeError("Mean anomaly at epoch");
     }
+    _meanAnomalyAtEpoch = meanAnomalyAtEpoch;
 
     _period = orbitalPeriod;
     _epoch = epoch;

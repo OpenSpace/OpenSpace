@@ -227,9 +227,7 @@ DashboardItemFramerate::DashboardItemFramerate(const ghoul::Dictionary& dictiona
     }
     addProperty(_frametimeType);
 
-    _clearCache.onChange([this]() {
-        _shouldClearCache = true;
-    });
+    _clearCache.onChange([this]() { _shouldClearCache = true; });
     addProperty(_clearCache);
     _localBuffer.resize(128);
 }

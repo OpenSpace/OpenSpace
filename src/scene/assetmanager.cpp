@@ -56,10 +56,14 @@ namespace {
     constexpr const char* AssetTableName = "_asset";
 
     enum class PathType {
-        RelativeToAsset, ///< Specified as a path relative to the requiring asset
-        RelativeToAssetRoot, ///< Specified as a path relative to the root folder
-        Absolute,  ///< Specified as an absolute path
-        Tokenized ///< Specified as a path that starts with a token
+        /// Specified as a path relative to the requiring asset
+        RelativeToAsset,
+        /// Specified as a path relative to the root folder
+        RelativeToAssetRoot,
+        /// Specified as an absolute path
+        Absolute,
+        /// Specified as a path that starts with a token
+        Tokenized
     };
 
     PathType classifyPath(const std::string& path) {
@@ -83,26 +87,26 @@ namespace {
 
     struct [[codegen::Dictionary(AssetMeta)]] Parameters {
         // The user-facing name of the asset. It should describe to the user what they can
-        // expect when loading the asset into a profile
+        // expect when loading the asset into a profile.
         std::optional<std::string> name;
 
         // A version number for this specific asset. It is recommended to use SemVer for
         // the versioning. The versioning used here does not have to correspond to any
-        // versioning information provided by OpenSpace
+        // versioning information provided by OpenSpace.
         std::optional<std::string> version;
 
         // A user-facing description of the asset explaining what the contents are, where
         // the data has been acquired from and what a user can do or see with this asset.
         // This might also provide additional URLs for a user to read more details about
-        // the content of this asset
+        // the content of this asset.
         std::optional<std::string> description;
 
-        // The name of the author for this asset file
+        // The name of the author for this asset file.
         std::optional<std::string> author;
 
         // A reprentative URL for this asset as chosen by the asset author. This might be
         // a URL to the research group that provided the data, the personal URL of the
-        // author, or a webpage for the group that is responsible for this asset
+        // author, or a webpage for the group that is responsible for this asset.
         std::optional<std::string> url [[codegen::key("URL")]];
 
         // The license information under which this asset is released. For suggestions on
@@ -111,7 +115,7 @@ namespace {
         std::optional<std::string> license;
 
         // A list of all identifiers that are exposed by this asset. This list is needed
-        // to populate the descriptions in the main user interface
+        // to populate the descriptions in the main user interface.
         std::optional<std::vector<std::string>> identifiers [[codegen::identifier()]];
     };
 } // namespace
@@ -405,14 +409,15 @@ bool AssetManager::loadAsset(Asset* asset, Asset* parent) {
     if (!metaDict.isEmpty()) {
         const Parameters p = codegen::bake<Parameters>(metaDict);
 
-        Asset::MetaInformation meta;
-        meta.name = p.name.value_or(meta.name);
-        meta.version = p.version.value_or(meta.version);
-        meta.description = p.description.value_or(meta.description);
-        meta.author = p.author.value_or(meta.author);
-        meta.url = p.url.value_or(meta.url);
-        meta.license = p.license.value_or(meta.license);
-        meta.identifiers = p.identifiers.value_or(meta.identifiers);
+        Asset::MetaInformation meta = {
+            .name = p.name.value_or(meta.name),
+            .version = p.version.value_or(meta.version),
+            .description = p.description.value_or(meta.description),
+            .author = p.author.value_or(meta.author),
+            .url = p.url.value_or(meta.url),
+            .license = p.license.value_or(meta.license),
+            .identifiers = p.identifiers.value_or(meta.identifiers)
+        };
 
         // We need to do this as the asset might have 'export'ed identifiers before
         // defining the meta table.  Therefore the meta information already contains some
@@ -445,7 +450,7 @@ void AssetManager::unloadAsset(Asset* asset) {
     //
     // Tear down asset lua table
     const int top = lua_gettop(*_luaState);
-    // Push the global table of AssetInfos to the lua stack.
+    // Push the global table of AssetInfos to the lua stack
     lua_rawgeti(*_luaState, LUA_REGISTRYINDEX, _assetsTableRef);
     const int globalTableIndex = lua_gettop(*_luaState);
 
@@ -534,8 +539,9 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
                 std::unique_ptr<ResourceSynchronization> s =
                     ResourceSynchronization::createFromDictionary(d);
 
-                const std::string uid =
-                    d.value<std::string>("Type") + "/" + s->generateUid();
+                const std::string uid = std::format(
+                    "{}/{}", d.value<std::string>("Type"), s->generateUid()
+                );
                 SyncItem* syncItem = nullptr;
                 auto it = manager->_synchronizations.find(uid);
                 if (it == manager->_synchronizations.end()) {
@@ -650,7 +656,6 @@ void AssetManager::setUpAssetLuaTable(Asset* asset) {
         2
     );
     lua_setfield(*_luaState, assetTableIndex, "syncedResource");
-
 
     // Register require function
     // Asset require(string path, bool? explicitEnable = true)
@@ -935,7 +940,7 @@ Asset* AssetManager::retrieveAsset(const std::filesystem::path& path,
     if (it != _assets.end()) {
         Asset* a = it->get();
         // We should warn if an asset is requested twice with different enable settings or
-        // else the resulting status will depend on the order of asset loading.
+        // else the resulting status will depend on the order of asset loading
         if (a->explicitEnabled() != explicitEnable) {
             if (a->firstParent()) {
                 // The first request came from another asset, so we can mention it in the

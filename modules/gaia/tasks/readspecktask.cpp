@@ -70,30 +70,30 @@ std::string ReadSpeckTask::description() {
 void ReadSpeckTask::perform(const Task::ProgressCallback& onProgress) {
     onProgress(0.f);
 
-    int32_t nRenderValues = 0;
 
     FitsFileReader fileReader = FitsFileReader(false);
+    int32_t nRenderValues = 0;
     std::vector<float> fullData = fileReader.readSpeckFile(_inFilePath, nRenderValues);
 
     onProgress(0.9f);
 
-    std::ofstream fileStream(_outFilePath, std::ofstream::binary);
-    if (fileStream.good()) {
-        int32_t nValues = static_cast<int32_t>(fullData.size());
-        LINFO(std::format("nValues: {}", nValues));
-
-        if (nValues == 0) {
-            LERROR("Error writing file - No values were read from file");
-        }
-        fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
-        fileStream.write(reinterpret_cast<const char*>(&nRenderValues), sizeof(int32_t));
-
-        const size_t nBytes = nValues * sizeof(float);
-        fileStream.write(reinterpret_cast<const char*>(fullData.data()), nBytes);
-    }
-    else {
+    std::ofstream fileStream = std::ofstream(_outFilePath, std::ofstream::binary);
+    if (!fileStream.good()) {
         LERROR(std::format("Error opening file '{}' as output data file", _outFilePath));
+        return;
     }
+
+    const int32_t nValues = static_cast<int32_t>(fullData.size());
+    if (nValues == 0) {
+        LERROR("Error writing file - No values were read from file");
+    }
+    LINFO(std::format("nValues: {}", nValues));
+
+    fileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
+    fileStream.write(reinterpret_cast<const char*>(&nRenderValues), sizeof(int32_t));
+
+    const size_t nBytes = nValues * sizeof(float);
+    fileStream.write(reinterpret_cast<const char*>(fullData.data()), nBytes);
 
     onProgress(1.f);
 }

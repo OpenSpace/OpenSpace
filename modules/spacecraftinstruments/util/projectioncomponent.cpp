@@ -37,8 +37,8 @@
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
-#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/framebufferobject.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/systemcapabilities/openglcapabilitiescomponent.h>
@@ -99,19 +99,19 @@ namespace {
     struct [[codegen::Dictionary(ProjectionComponent)]] Parameters {
         // This value specifies one or more directories from which images are being used
         // for image projections. If the sequence type is set to 'playbook', this value is
-        // ignored
+        // ignored.
         std::optional<
            std::variant<std::filesystem::path, std::vector<std::filesystem::path>>
         > sequence [[codegen::directory()]];
 
         struct Instrument {
-            // The instrument that is used to perform the projections
+            // The instrument that is used to perform the projections.
             std::string name [[codegen::annotation("A SPICE name of an instrument")]];
 
-            // The field of view in degrees along the y axis
+            // The field of view in degrees along the y axis.
             float fovy;
 
-            // The aspect ratio of the instrument in relation between x and y axis
+            // The aspect ratio of the instrument in relation between x and y axis.
             float aspect;
         };
         Instrument instrument;
@@ -126,44 +126,44 @@ namespace {
         // This value determines which type of sequencer is used for generating image
         // schedules. The 'playbook' is using a custom format designed by the New Horizons
         // team, the 'image-sequence' uses lbl files from a directory, and the 'hybrid'
-        // uses both methods
+        // uses both methods.
         std::optional<Type> sequenceType;
 
         std::optional<std::filesystem::path> eventFile;
 
-        // The observer that is doing the projection. This has to be a valid SPICE name
-        // or SPICE integer
+        // The observer that is doing the projection. This has to be a valid SPICE name or
+        // SPICE integer.
         std::string observer
             [[codegen::annotation("A SPICE name of the observing object")]];
 
         std::optional<std::string> timesSequence;
 
         // The observed object that is projected on. This has to be a valid SPICE name or
-        // SPICE integer
+        // SPICE integer.
         std::string target [[codegen::annotation("A SPICE name of the observed object")]];
 
         // The aberration correction that is supposed to be used for the projection. The
         // values for the correction correspond to the SPICE definition as described in
-        // ftp://naif.jpl.nasa.gov/pub/naif/toolkit_docs/IDL/cspice/spkezr_c.html
+        // ftp://naif.jpl.nasa.gov/pub/naif/toolkit_docs/IDL/cspice/spkezr_c.html.
         std::string aberration [[codegen::inlist("NONE", "LT", "LT+S", "CN", "CN+S",
             "XLT", "XLT+S", "XCN", "XCN+S")]];
 
-        // The list of potential targets that are involved with the image projection
+        // The list of potential targets that are involved with the image projection.
         std::optional<std::vector<std::string>> potentialTargets;
 
         // Determines whether the object requires a self-shadowing algorithm. This is
         // necessary if the object is concave and might cast a shadow on itself during
-        // presentation. The default value is 'false'
+        // presentation. The default value is 'false'.
         std::optional<bool> textureMap;
 
         // Determines whether the object requires a self-shadowing algorithm. This is
         // necessary if the object is concave and might cast a shadow on itself during
-        // presentation. The default value is 'false'
+        // presentation. The default value is 'false'.
         std::optional<bool> shadowMap;
 
         // Sets the desired aspect ratio of the projected texture. This might be necessary
         // as planets usually have 2x1 aspect ratios, whereas this does not hold for
-        // non-planet objects (comets, asteroids, etc). The default value is '1.0'
+        // non-planet objects (comets, asteroids, etc). The default value is '1.0'.
         std::optional<float> aspectRatio;
 
         std::optional<ghoul::Dictionary> dataInputTranslation;
@@ -216,7 +216,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
     _projectionTextureAspectRatio = p.aspectRatio.value_or(_projectionTextureAspectRatio);
 
     if (!p.sequence.has_value()) {
-        // we are done here, the rest only applies if we do have a sequence
+        // We are done here, the rest only applies if we do have a sequence
         return;
     }
 
@@ -268,7 +268,7 @@ void ProjectionComponent::initialize(const std::string& identifier,
                 );
                 break;
             case Parameters::Type::Hybrid:
-                // first read labels
+                // First read labels
                 parsers.push_back(
                     std::make_unique<LabelParser>(std::move(source), translations)
                 );
@@ -352,7 +352,7 @@ bool ProjectionComponent::initializeGL() {
     _textureSize.setMaxValue(size);
     _textureSize = size / 2;
 
-    // We only want to use half the resolution per default:
+    // We only want to use half the resolution per default
     size /= 2;
 
     bool success = generateProjectionLayerTexture(size);
@@ -425,19 +425,19 @@ void ProjectionComponent::deinitialize() {
 }
 
 bool ProjectionComponent::isReady() const {
-    return (_projectionTexture != nullptr);
+    return _projectionTexture != nullptr;
 }
 
 void ProjectionComponent::imageProjectBegin() {
-    // keep handle to the current bound FBO
+    // Keep handle to the current bound FBO
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
 
     if (_textureSizeDirty) [[unlikely]] {
         glm::ivec2 size = _textureSize;
         LDEBUG(std::format("Changing texture size to ({}, {})", size.x, size.y));
 
-        // If the texture size has changed, we have to allocate new memory and copy
-        // the image texture to the new target
+        // If the texture size has changed, we have to allocate new memory and copy the
+        // image texture to the new target
 
         using ghoul::opengl::Texture;
         using ghoul::opengl::FramebufferObject;
@@ -621,7 +621,7 @@ ghoul::opengl::Texture& ProjectionComponent::depthTexture() const {
 void ProjectionComponent::depthMapRenderBegin() {
     ghoul_assert(_shadowing.isEnabled, "Shadowing is not enabled");
 
-    // keep handle to the current bound FBO
+    // Keep handle to the current bound FBO
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &_defaultFBO);
     glGetIntegerv(GL_VIEWPORT, _viewport);
 
@@ -707,7 +707,7 @@ bool ProjectionComponent::auxiliaryRendertarget() {
             0
         );
 
-        // check FBO status
+        // Check FBO status
         status = glCheckNamedFramebufferStatus(_fboID, GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             LERROR("Main Framebuffer incomplete");
@@ -722,7 +722,7 @@ bool ProjectionComponent::auxiliaryRendertarget() {
             0
         );
 
-        // check FBO status
+        // Check FBO status
         status = glCheckNamedFramebufferStatus(_dilation.fbo, GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             LERROR("Dilation Framebuffer incomplete");
@@ -738,16 +738,16 @@ glm::mat4 ProjectionComponent::computeProjectorMatrix(const glm::vec3& loc,
                                                       const glm::vec3& up,
                                                       const glm::dmat3& instrumentMatrix,
                                                       float fieldOfViewY,
-                                                      float aspectRatio,
-                                                      float nearPlane, float farPlane,
+                                                      float aspectRatio, float nearPlane,
+                                                      float farPlane,
                                                       glm::vec3& boreSight)
 {
 
-    // rotate boresight into correct alignment
+    // Rotate boresight into correct alignment
     boreSight = instrumentMatrix * aim;
     const glm::vec3 uptmp = instrumentMatrix * glm::dvec3(up);
 
-    // create view matrix
+    // Create view matrix
     const glm::vec3 e3 = glm::normalize(-boreSight);
     const glm::vec3 e1 = glm::normalize(glm::cross(uptmp, e3));
     const glm::vec3 e2 = glm::normalize(glm::cross(e3, e1));
@@ -758,7 +758,7 @@ glm::mat4 ProjectionComponent::computeProjectorMatrix(const glm::vec3& loc,
         e1.z, e2.z, e3.z, 0.f,
         glm::dot(e1, -loc), glm::dot(e2, -loc), glm::dot(e3, -loc), 1.f
     );
-    // create perspective projection matrix
+    // Create perspective projection matrix
     const glm::mat4 projProjectionMatrix = glm::perspective(
         glm::radians(fieldOfViewY), aspectRatio, nearPlane, farPlane
     );
@@ -811,13 +811,12 @@ float ProjectionComponent::aspectRatio() const {
 }
 
 void ProjectionComponent::clearAllProjections() {
-    // keep handle to the current bound FBO
+    // Keep handle to the current bound FBO
     GLint defaultFBO = 0;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBO);
 
     std::array<GLint, 4> viewport;
     glGetIntegerv(GL_VIEWPORT, viewport.data());
-    //counter = 0;
     glViewport(
         0,
         0,
@@ -856,7 +855,7 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
         return _placeholderTexture;
     }
 
-    ghoul::opengl::Texture::WrappingModes wrapping = {
+    Texture::WrappingModes wrapping = {
         Texture::WrappingMode::Repeat,
         Texture::WrappingMode::MirroredRepeat
     };
@@ -875,36 +874,35 @@ std::shared_ptr<ghoul::opengl::Texture> ProjectionComponent::loadProjectionTextu
 bool ProjectionComponent::generateProjectionLayerTexture(const glm::ivec2& size) {
     LINFO(std::format("Creating projection texture of size ({}, {})", size.x, size.y));
 
-    using namespace ghoul::opengl;
-    _projectionTexture = std::make_unique<Texture>(
-        ghoul::opengl::Texture::FormatInit{
+    _projectionTexture = std::make_unique<ghoul::opengl::Texture>(
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(size, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit{}
+        ghoul::opengl::Texture::SamplerInit {}
     );
 
     if (_dilation.isEnabled) {
         _dilation.texture = std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit{
+            ghoul::opengl::Texture::FormatInit {
                 .dimensions = glm::uvec3(size, 1),
                 .type = GL_TEXTURE_2D,
                 .format = ghoul::opengl::Texture::Format::RGBA,
                 .dataType = GL_UNSIGNED_BYTE
             },
-            ghoul::opengl::Texture::SamplerInit{}
+            ghoul::opengl::Texture::SamplerInit {}
         );
 
         _dilation.stencilTexture = std::make_unique<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit{
+            ghoul::opengl::Texture::FormatInit {
                 .dimensions = glm::uvec3(size, 1),
                 .type = GL_TEXTURE_2D,
                 .format = ghoul::opengl::Texture::Format::Red,
                 .dataType = GL_UNSIGNED_BYTE
             },
-            ghoul::opengl::Texture::SamplerInit{}
+            ghoul::opengl::Texture::SamplerInit {}
         );
     }
 
@@ -915,13 +913,13 @@ bool ProjectionComponent::generateDepthTexture(const glm::ivec2& size) {
     LINFO(std::format("Creating depth texture of size ({}, {})", size.x, size.y));
 
     _shadowing.texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(size, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::DepthComponent,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit{}
+        ghoul::opengl::Texture::SamplerInit {}
     );
     return _shadowing.texture != nullptr;
 }

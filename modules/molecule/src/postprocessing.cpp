@@ -291,13 +291,13 @@ void initialize(int width, int height) {
     );
 
     glObj.linearDepth.texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::Red,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .filter = ghoul::opengl::Texture::FilterMode::LinearMipMap,
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
@@ -312,52 +312,52 @@ void initialize(int width, int height) {
     );
 
     glObj.targets.texColor[0] = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGB,
             .dataType = GL_FLOAT,
             .internalFormat = GL_R11F_G11F_B10F
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
     glObj.targets.texColor[1] = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGB,
             .dataType = GL_FLOAT,
             .internalFormat = GL_R11F_G11F_B10F
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
     glObj.targets.texTemporalBuffer[0] = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGB,
             .dataType = GL_FLOAT,
             .internalFormat = GL_R11F_G11F_B10F
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
     glObj.targets.texTemporalBuffer[1] = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGB,
             .dataType = GL_FLOAT,
             .internalFormat = GL_R11F_G11F_B10F
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
@@ -520,14 +520,14 @@ void initialize(int width, int height) {
     );
 
     glObj.bokehDof.halfRes.colorCoc = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width / 2, height / 2, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_FLOAT,
             .internalFormat = GL_RGBA16F
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
@@ -575,7 +575,7 @@ void initialize(int width, int height) {
     );
 
     glObj.velocity.texTilemax = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(
                 glObj.texWidth / VelocityTileSize,
                 glObj.texHeight / VelocityTileSize,
@@ -586,13 +586,13 @@ void initialize(int width, int height) {
             .dataType = GL_FLOAT,
             .internalFormat = GL_RG16F
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
     glObj.velocity.texNeighbormax = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(
                 glObj.texWidth / VelocityTileSize,
                 glObj.texHeight / VelocityTileSize,
@@ -603,7 +603,7 @@ void initialize(int width, int height) {
             .dataType = GL_FLOAT,
             .internalFormat = GL_RG16F
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
@@ -660,39 +660,39 @@ void initialize(int width, int height) {
     }
 
     glObj.ssao.texRandom = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(AORandomTexSize, AORandomTexSize, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_SHORT,
             .internalFormat = GL_RGBA16_SNORM
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .filter = ghoul::opengl::Texture::FilterMode::Nearest
         },
         reinterpret_cast<std::byte*>(buffer.data())
     );
 
     glObj.ssao.hbao.texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::Red,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
 
     glObj.ssao.blur.texture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(width, height, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::Red,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit{
+        ghoul::opengl::Texture::SamplerInit {
             .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
         }
     );
@@ -894,7 +894,7 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
         projScl = static_cast<float>(height) / projInfo.y;
     }
 
-    HBAOData data = {
+    const HBAOData data = {
         .radiusToScreen = radius * 0.5f * projScl,
         .negInvR2 = -1.f / (radius * radius),
         .nDotVBias = std::clamp(bias, 0.f, 1.f - std::numeric_limits<float>::epsilon()),
@@ -907,7 +907,6 @@ void applySsao(const ghoul::opengl::Texture& linearDepthTex,
         },
         .projInfo = projInfo
     };
-
     glNamedBufferSubData(glObj.ssao.uboHbaoData, 0, sizeof(HBAOData), &data);
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.ssao.hbao.fbo);
@@ -1053,8 +1052,8 @@ void applyTemporalAa(const ghoul::opengl::Texture& linearDepthTex,
     glGetIntegerv(GL_DRAW_BUFFER, &boundBuffer);
 
     const GLenum drawBuffers[2] = {
-        GL_COLOR_ATTACHMENT2 + dstBuf,   // tex_temporal_buffer[0 or 1]
-        static_cast<GLenum>(boundBuffer) // assume that this is part of the same gbuffer
+        GL_COLOR_ATTACHMENT2 + dstBuf,
+        static_cast<GLenum>(boundBuffer)
     };
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, glObj.targets.fbo);

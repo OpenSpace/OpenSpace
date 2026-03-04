@@ -81,7 +81,7 @@ namespace {
 
 /**
  * Removes a layer from the specified globe.
-
+ *
  * \param globeIdentifier The identifier of the scene graph node of which to remove the
  *                        layer. The renderable of the scene graph node must be a
  *                        [RenderableGlobe](#globebrowsing_renderableglobe)
@@ -294,7 +294,7 @@ namespace {
     }
     Camera* camera = global::navigationHandler->camera();
 
-    glm::dvec3 cameraPosition = camera->positionVec3();
+    glm::dvec3 cameraPosition = camera->position();
 
 
     const SceneGraphNode* anchor =
@@ -304,7 +304,7 @@ namespace {
     glm::dvec3 target;
 
     // @TODO (04-08-2022, micahnyc)
-    // adjust this to use the camera lookat
+    // Adjust this to use the camera lookat
     // once we fix this calculation, then we just add true to the function call in the
     // asset
     if (useEyePosition) {
@@ -454,8 +454,8 @@ namespace {
 
 /**
  * Add a GeoJson layer from the given file name and add it to the current anchor node,
- * if it is a globe. Note that you might have to increase the height offset for the
- * added feature to be visible on the globe, if using a height map.
+ * if it is a globe. Note that you might have to increase the height offset for the added
+ * feature to be visible on the globe, if using a height map.
  *
  * \param filename The path to the GeoJSON file
  * \param name An optional name that the loaded feature will get in the user interface

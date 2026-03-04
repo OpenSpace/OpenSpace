@@ -50,7 +50,7 @@ namespace {
     // `ShouldInterpolate` parameter to `false`.
     struct [[codegen::Dictionary(TimelineTranslation)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
-        // that are valid Translation objects
+        // that are valid Translation objects.
         std::map<std::string, ghoul::Dictionary> keyframes
             [[codegen::reference("core_transform_translation")]];
 

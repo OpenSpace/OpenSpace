@@ -203,10 +203,10 @@ namespace {
     // using the two provided axes. Each axis can be specified either by providing the
     // `Identifier` of another scene graph node, or by providing a direction vector. For
     // the general use-case of this `Rotation`, one of the provided axes usually is an
-    // `Identifier` and the other is a direction vector (see the examples below).
-    // If any of the axes is using the `Identifier` of another scene graph node, the
-    // `Attached` value must be specified and should almost always be the identifier of
-    // the scene graph node to which this `Rotation` belongs.
+    // `Identifier` and the other is a direction vector (see the examples below). If any
+    // of the axes is using the `Identifier` of another scene graph node, the `Attached`
+    // value must be specified and should almost always be the identifier of the scene
+    // graph node to which this `Rotation` belongs.
     //
     // A second use-case for this `Rotation` is to directly specify mappings for the
     // coordinate axes. In this use-case, two or all three axes are specified using
@@ -237,7 +237,7 @@ namespace {
         // specified, it will be computed by completing a right handed coordinate system
         // from the Y and Z axis, which must be specified instead. If this value is a
         // string, it is interpreted as the identifier of another scenegraph node. If this
-        // value is a 3-vector, it is interpreted as a direction vector
+        // value is a 3-vector, it is interpreted as a direction vector.
         std::optional<std::variant<std::string, glm::vec3>> xAxis;
 
         // [[codegen::verbatim(XAxisOrthogonalVectorInfo.description)]]
@@ -250,7 +250,7 @@ namespace {
         // specified, it will be computed by completing a right handed coordinate system
         // from the X and Z axis, which must be specified instead. If this value is a
         // string, it is interpreted as the identifier of another scenegraph node. If this
-        // value is a 3-vector, it is interpreted as a direction vector
+        // value is a 3-vector, it is interpreted as a direction vector.
         std::optional<std::variant<std::string, glm::vec3>> yAxis;
 
         // [[codegen::verbatim(YAxisOrthogonalVectorInfo.description)]]
@@ -263,7 +263,7 @@ namespace {
         // specified, it will be computed by completing a right handed coordinate system
         // from the X and Y axis, which must be specified instead. If this value is a
         // string, it is interpreted as the identifier of another scenegraph node. If this
-        // value is a 3-vector, it is interpreted as a direction vector
+        // value is a 3-vector, it is interpreted as a direction vector.
         std::optional<std::variant<std::string, glm::vec3>> zAxis;
 
         // [[codegen::verbatim(ZAxisOrthogonalVectorInfo.description)]]
@@ -378,8 +378,9 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         { Axis::Type::CoordinateSystemCompletion, "Coordinate System Completion" }
     });
     _xAxis.type.setGroupIdentifier("xAxis");
-    _xAxis.type.onChange(
-        [this, setPropertyVisibility]() { setPropertyVisibility(_xAxis); }
+    _xAxis.type.onChange([this, setPropertyVisibility]() {
+        setPropertyVisibility(_xAxis);
+    }
     );
     addProperty(_xAxis.type);
 
@@ -395,7 +396,6 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
     _xAxis.vector.setGroupIdentifier("xAxis");
     addProperty(_xAxis.vector);
 
-
     _yAxis.type.addOptions({
         { Axis::Type::Object, "Object" },
         { Axis::Type::Vector, "Vector" },
@@ -403,9 +403,9 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         { Axis::Type::CoordinateSystemCompletion, "Coordinate System Completion" }
     });
     _yAxis.type.setGroupIdentifier("yAxis");
-    _yAxis.type.onChange(
-        [this, setPropertyVisibility]() { setPropertyVisibility(_yAxis); }
-    );
+    _yAxis.type.onChange([this, setPropertyVisibility]() {
+        setPropertyVisibility(_yAxis);
+    });
     addProperty(_yAxis.type);
 
     _yAxis.object.setGroupIdentifier("yAxis");
@@ -425,9 +425,9 @@ FixedRotation::FixedRotation(const ghoul::Dictionary& dictionary)
         { Axis::Type::CoordinateSystemCompletion, "Coordinate System Completion" }
     });
     _zAxis.type.setGroupIdentifier("zAxis");
-    _zAxis.type.onChange(
-        [this, setPropertyVisibility]() { setPropertyVisibility(_zAxis); }
-    );
+    _zAxis.type.onChange([this, setPropertyVisibility]() {
+        setPropertyVisibility(_zAxis);
+    });
     addProperty(_zAxis.type);
 
     _zAxis.object.setGroupIdentifier("zAxis");
@@ -535,9 +535,9 @@ void FixedRotation::update(const UpdateData& data) {
         _zAxis.type == Axis::Type::Object
     );
 
-    // @TODO (2024-06-15, abock) None of the following four checks should be necessary
-    //       as the nodes are retrieved whenever the property value is changed, but we
-    //       had an initialization issue and this was the fastest way to fix the bug
+    // @TODO (2024-06-15, abock) None of the following four checks should be necessary as
+    //       the nodes are retrieved whenever the property value is changed, but we had an
+    //       initialization issue and this was the fastest way to fix the bug
     if (!_attachedNode) {
         _attachedNode = sceneGraphNode(_attachedObject);
     }
@@ -569,8 +569,7 @@ glm::dmat3 FixedRotation::matrix(const UpdateData&) const {
 
     constexpr float Epsilon = 1e-3f;
 
-    if (glm::dot(x, y) > 1.f - Epsilon ||
-        glm::dot(y, z) > 1.f - Epsilon ||
+    if (glm::dot(x, y) > 1.f - Epsilon || glm::dot(y, z) > 1.f - Epsilon ||
         glm::dot(x, z) > 1.f - Epsilon) [[unlikely]]
     {
         LWARNING(
@@ -633,14 +632,10 @@ glm::vec3 FixedRotation::xAxis() const {
             }
             else {
                 if (_yAxis.type != Axis::Type::CoordinateSystemCompletion) {
-                    return glm::normalize(
-                        glm::cross(_xAxis.vector.value(), yAxis())
-                    );
+                    return glm::normalize(glm::cross(_xAxis.vector.value(), yAxis()));
                 }
                 else {
-                    return glm::normalize(
-                        glm::cross(_xAxis.vector.value(), zAxis())
-                    );
+                    return glm::normalize(glm::cross(_xAxis.vector.value(), zAxis()));
                 }
             }
         case Axis::Type::CoordinateSystemCompletion:
@@ -691,14 +686,10 @@ glm::vec3 FixedRotation::yAxis() const {
             }
             else {
                 if (_zAxis.type != Axis::Type::CoordinateSystemCompletion) {
-                    return glm::normalize(
-                        glm::cross(_yAxis.vector.value(), zAxis())
-                    );
+                    return glm::normalize(glm::cross(_yAxis.vector.value(), zAxis()));
                 }
                 else {
-                    return glm::normalize(
-                        glm::cross(_yAxis.vector.value(), xAxis())
-                    );
+                    return glm::normalize(glm::cross(_yAxis.vector.value(), xAxis()));
                 }
             }
         case Axis::Type::CoordinateSystemCompletion:
@@ -747,14 +738,10 @@ glm::vec3 FixedRotation::zAxis() const {
             }
             else {
                 if (_xAxis.type != Axis::Type::CoordinateSystemCompletion) {
-                    return glm::normalize(
-                        glm::cross(_zAxis.vector.value(), xAxis())
-                    );
+                    return glm::normalize(glm::cross(_zAxis.vector.value(), xAxis()));
                 }
                 else {
-                    return glm::normalize(
-                        glm::cross(_zAxis.vector.value(), yAxis())
-                    );
+                    return glm::normalize(glm::cross(_zAxis.vector.value(), yAxis()));
                 }
             }
         case Axis::Type::CoordinateSystemCompletion:

@@ -30,9 +30,9 @@
 #include <ghoul/format.h>
 #include <ghoul/glm.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/stringhelper.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/stringhelper.h>
 #include <filesystem>
 #include <fstream>
 #include <sstream>

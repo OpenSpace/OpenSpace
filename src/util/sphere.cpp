@@ -28,6 +28,7 @@
 #include <cstddef>
 #include <cstring>
 #include <string_view>
+#include <vector>
 
 namespace openspace {
 
@@ -35,19 +36,31 @@ Sphere::Sphere(float radius, int segments)
     : Sphere(glm::vec3(radius), segments)
 {}
 
-// Alternative Constructor for using accurate triaxial ellipsoid
 Sphere::Sphere(glm::vec3 radius, int segments)
     : _isize(6 * segments * segments)
     , _vsize((segments + 1) * (segments + 1))
-    , _varray(new Vertex[_vsize])
-    , _iarray(new int[_isize])
-{
-    int nr = 0;
-    const float fsegments = static_cast<float>(segments);
+    , _radius(std::move(radius))
+    , _nSegments(segments)
+{}
 
-    for (int i = 0; i <= segments; i++) {
+Sphere::~Sphere() {
+    glDeleteBuffers(1, &_vbo);
+    glDeleteBuffers(1, &_ibo);
+    glDeleteVertexArrays(1, &_vao);
+}
+
+void Sphere::initialize() {
+    std::vector<Vertex> vertices;
+    vertices.resize(_vsize);
+    std::vector<int> indices;
+    indices.resize(_isize);
+
+    int nr = 0;
+    const float fsegments = static_cast<float>(_nSegments);
+
+    for (int i = 0; i <= _nSegments; i++) {
         // define an extra vertex around the y-axis due to texture mapping
-        for (int j = 0; j <= segments; j++) {
+        for (int j = 0; j <= _nSegments; j++) {
             const float fi = static_cast<float>(i);
             const float fj = static_cast<float>(j);
             // inclination angle (north to south)
@@ -59,88 +72,59 @@ Sphere::Sphere(glm::vec3 radius, int segments)
             // https://en.wikipedia.org/wiki/Spherical_coordinate_system
 
             // Z points towards pole (theta = 0)
-            const float x = radius[0] * std::sin(theta) * std::cos(phi);
-            const float y = radius[1] * std::sin(theta) * std::sin(phi);
-            const float z = radius[2] * std::cos(theta);
+            const float x = _radius[0] * std::sin(theta) * std::cos(phi);
+            const float y = _radius[1] * std::sin(theta) * std::sin(phi);
+            const float z = _radius[2] * std::cos(theta);
 
-            _varray[nr].location[0] = x;
-            _varray[nr].location[1] = y;
-            _varray[nr].location[2] = z;
-            _varray[nr].location[3] = 0.0;
+            vertices[nr].location[0] = x;
+            vertices[nr].location[1] = y;
+            vertices[nr].location[2] = z;
+            vertices[nr].location[3] = 0.0;
 
             glm::vec3 normal = glm::vec3(x, y, z);
             if (x != 0.f || y != 0.f || z != 0.f) {
                 normal = glm::vec3(glm::normalize(glm::dvec3(normal)));
             }
 
-            _varray[nr].normal[0] = normal[0];
-            _varray[nr].normal[1] = normal[1];
-            _varray[nr].normal[2] = normal[2];
+            vertices[nr].normal[0] = normal[0];
+            vertices[nr].normal[1] = normal[1];
+            vertices[nr].normal[2] = normal[2];
 
             const float t1 = fj / fsegments;
             const float t2 = 1.f - (fi / fsegments);
 
-            _varray[nr].tex[0] = t1;
-            _varray[nr].tex[1] = t2;
+            vertices[nr].tex[0] = t1;
+            vertices[nr].tex[1] = t2;
             nr++;
         }
     }
 
     nr = 0;
     // define indices for all triangles
-    for (int i = 1; i <= segments; i++) {
-        for (int j = 0; j < segments; j++) {
-            const int t = segments + 1;
-            _iarray[nr] = t * (i - 1) + j + 0; //1
+    for (int i = 1; i <= _nSegments; i++) {
+        for (int j = 0; j < _nSegments; j++) {
+            const int t = _nSegments + 1;
+            indices[nr] = t * (i - 1) + j + 0; //1
             nr++;
-            _iarray[nr] = t * (i + 0) + j + 0; //2
+            indices[nr] = t * (i + 0) + j + 0; //2
             nr++;
-            _iarray[nr] = t * (i + 0) + j + 1; //3
+            indices[nr] = t * (i + 0) + j + 1; //3
             nr++;
 
-            _iarray[nr] = t * (i - 1) + j + 0; //4
+            indices[nr] = t * (i - 1) + j + 0; //4
             nr++;
-            _iarray[nr] = t * (i + 0) + j + 1; //5
+            indices[nr] = t * (i + 0) + j + 1; //5
             nr++;
-            _iarray[nr] = t * (i - 1) + j + 1; //6
+            indices[nr] = t * (i - 1) + j + 1; //6
             nr++;
         }
     }
-}
 
-Sphere::Sphere(const Sphere& cpy)
-    : _vao(cpy._vao)
-    , _vbo(cpy._vbo)
-    , _ibo(cpy._ibo)
-    , _isize(cpy._isize)
-    , _vsize(cpy._vsize)
-    , _varray(new Vertex[_vsize])
-    , _iarray(new int[_isize])
-{
-    // @TODO This needs to be tested ---abock
-
-    std::memcpy(_varray, cpy._varray, _vsize * sizeof(Vertex));
-    std::memcpy(_iarray, cpy._iarray, _isize * sizeof(int));
-}
-
-Sphere::~Sphere() {
-    delete[] _varray;
-    delete[] _iarray;
-
-    _varray = nullptr;
-    _iarray = nullptr;
-
-    glDeleteBuffers(1, &_vbo);
-    glDeleteBuffers(1, &_ibo);
-    glDeleteVertexArrays(1, &_vao);
-}
-
-void Sphere::initialize() {
     glCreateBuffers(1, &_vbo);
-    glNamedBufferStorage(_vbo, _vsize * sizeof(Vertex), _varray, GL_NONE_BIT);
+    glNamedBufferStorage(_vbo, _vsize * sizeof(Vertex), vertices.data(), GL_NONE_BIT);
 
     glCreateBuffers(1, &_ibo);
-    glNamedBufferStorage(_ibo, _isize * sizeof(int), _iarray, GL_NONE_BIT);
+    glNamedBufferStorage(_ibo, _isize * sizeof(int), indices.data(), GL_NONE_BIT);
 
     glCreateVertexArrays(1, &_vao);
     glVertexArrayVertexBuffer(_vao, 0, _vbo, 0, sizeof(Vertex));

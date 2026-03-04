@@ -41,8 +41,7 @@ ParallelConnection::Message::Message(MessageType t, std::vector<char> c)
 {}
 
 ParallelConnection::DataMessage::DataMessage(datamessagestructures::Type t,
-                                             double time,
-                                             std::vector<char> c)
+                                             double time, std::vector<char> c)
     : type(t)
     , timestamp(time)
     , content(std::move(c))
@@ -169,8 +168,7 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
     if (protocolVersionIn != ProtocolVersion) {
         LERROR(std::format(
             "Protocol versions do not match. Remote version: {}, Local version: {}",
-            protocolVersionIn,
-            ProtocolVersion
+            protocolVersionIn, ProtocolVersion
         ));
         throw ConnectionLostError();
     }
@@ -181,7 +179,6 @@ ParallelConnection::Message ParallelConnection::receiveMessage() {
 
     const uint32_t messageSizeIn =
         *reinterpret_cast<uint32_t*>(headerBuffer.data() + offset);
-    //offset += sizeof(uint32_t);
 
     const size_t messageSize = messageSizeIn;
 

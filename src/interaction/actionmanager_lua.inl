@@ -77,34 +77,34 @@ namespace {
 }
 
 struct [[codegen::Dictionary(Action)]] Action {
-    /// The identifier under which the action is registered
+    /// The identifier under which the action is registered.
     std::string identifier;
 
-    /// The Lua script that is to be executed when the action is triggered
+    /// The Lua script that is to be executed when the action is triggered.
     std::string command;
 
-    /// The user-facing name of the action
+    /// The user-facing name of the action.
     std::optional<std::string> name;
 
-    /// A documentation that explains what the action does
+    /// A documentation that explains what the action does.
     std::optional<std::string> documentation;
 
     /// The path in the GUI under which the action is shown to the user. If the value is
-    /// not provided, the default value is /
+    /// not provided, the default value is /.
     std::optional<std::string> guiPath;
 
     /// This parameter, if specified, will be used as a hint to any potential user
     /// interface as a desired background color. This can be used, for example, to
-    /// visually group similar Actions together
+    /// visually group similar Actions together.
     std::optional<glm::vec4> color [[codegen::color()]];
 
     /// This parameter, if specified, will be used as a hint to any potential user
     /// interface as a desired text color. This can be used, for example, to visually
-    /// group similar Actions together
+    /// group similar Actions together.
     std::optional<glm::vec4> textColor [[codegen::color()]];
 
     /// Determines whether the provided command will be executed locally or will be sent
-    /// to connected computers in a cluster or parallel connection environment
+    /// to connected computers in a cluster or parallel connection environment.
     std::optional<bool> isLocal;
 };
 
@@ -124,24 +124,24 @@ struct [[codegen::Dictionary(Action)]] Action {
         ));
     }
 
-    openspace::Action a;
-    a.identifier = std::move(action.identifier);
-    a.command = std::move(action.command);
-    a.name = action.name.value_or(a.name);
-    a.documentation = action.documentation.value_or(a.documentation);
-    a.color = action.color;
-    a.textColor = action.textColor;
-    a.guiPath = action.guiPath.value_or(a.guiPath);
-    if (!a.guiPath.starts_with('/')) {
+    if (action.guiPath.has_value() && !action.guiPath->starts_with('/')) {
         throw ghoul::RuntimeError(std::format(
-            "Tried to register action: '{}'. The field 'GuiPath' is set to '{}' but "
-            "should be '/{}'",
-            a.name, a.guiPath, a.guiPath
+            "Tried to register action: '{0}'. The field 'GuiPath' is set to '{1}' but "
+            "should be '/{1}'",
+            action.identifier, *action.guiPath
         ));
     }
-    if (action.isLocal.has_value()) {
-        a.isLocal = openspace::Action::IsLocal(*action.isLocal);
-    }
+
+    openspace::Action a = {
+        .identifier = std::move(action.identifier),
+        .command = std::move(action.command),
+        .name = action.name.value_or(a.name),
+        .documentation = action.documentation.value_or(a.documentation),
+        .guiPath = action.guiPath.value_or("/"),
+        .color = action.color,
+        .textColor = action.textColor,
+        .isLocal = openspace::Action::IsLocal(action.isLocal.value_or(false))
+    };
     global::actionManager->registerAction(std::move(a));
 }
 

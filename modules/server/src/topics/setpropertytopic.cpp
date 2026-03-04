@@ -26,8 +26,8 @@
 
 #include <openspace/engine/globals.h>
 #include <openspace/scripting/scriptengine.h>
-#include <openspace/util/timemanager.h>
 #include <openspace/util/time.h>
+#include <openspace/util/timemanager.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
@@ -44,19 +44,19 @@ namespace {
         for (const char& c : str) {
             switch (c) {
             case '\t':
-                luaString += "\\t"; // Replace tab with \t.
+                luaString += "\\t"; // Replace tab with \t
                 break;
             case '"':
-                luaString += "\\\""; // Replace " with \".
+                luaString += "\\\""; // Replace " with \"
                 break;
             case '\\':
-                luaString += "\\\\"; // Replace \ with \\.
+                luaString += "\\\\"; // Replace \ with \\
                 break;
             case '\n':
-                luaString += "\\\\n"; // Replace newline with \n.
+                luaString += "\\\\n"; // Replace newline with \n
                 break;
             case '\r':
-                luaString += "\\r"; // Replace carriage return with \r.
+                luaString += "\\r"; // Replace carriage return with \r
                 break;
             default:
                 luaString += c;

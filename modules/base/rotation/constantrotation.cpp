@@ -91,8 +91,8 @@ glm::dmat3 ConstantRotation::matrix(const UpdateData& data) const {
     }
 
     const double rotPerSec = _rotationRate;
-    const double secPerFrame = data.time.j2000Seconds() -
-                               data.previousFrameTime.j2000Seconds();
+    const double secPerFrame =
+        data.time.j2000Seconds() - data.previousFrameTime.j2000Seconds();
 
     const double rotPerFrame = rotPerSec * secPerFrame;
     const double radPerFrame = rotPerFrame * glm::tau<double>();

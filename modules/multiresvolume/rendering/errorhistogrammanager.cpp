@@ -97,14 +97,13 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
     int numOtNodes = _tsp->numOTNodes();
     unsigned int leafIndex = bstOffset * numOtNodes + octreeOffset;
     std::vector<float> leafValues = readValues(leafIndex);
-//    int numVoxels = leafValues.size();
 
     int bstNode = bstOffset;
     bool bstRightOnly = true;
-    //unsigned int bstLevel = 0;
 
     do {
-        glm::vec3 leafOffset(0.f); // Leaf offset in leaf sized voxels
+        // Leaf offset in leaf sized voxels
+        glm::vec3 leafOffset = glm::vec3(0.f);
         unsigned int octreeLevel = 0;
         unsigned int octreeNode = octreeOffset;
         bool octreeLastOnly = true;
@@ -131,14 +130,15 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
                 float invVoxelScale = 1.f / voxelScale;
 
                 // Calculate leaf offset in ancestor sized voxels
-                glm::vec3 ancestorOffset = (leafOffset * invVoxelScale) +
-                                           glm::vec3(padding - 0.5f);
+                glm::vec3 ancestorOffset =
+                    (leafOffset * invVoxelScale) + glm::vec3(padding - 0.5f);
 
                 for (int z = 0; z < static_cast<int>(brickDim); z++) {
                     for (int y = 0; y < static_cast<int>(brickDim); y++) {
                         for (int x = 0; x < static_cast<int>(brickDim); x++) {
-                            glm::vec3 leafSamplePoint = glm::vec3(x, y, z) +
-                                                   glm::vec3(static_cast<float>(padding));
+                            glm::vec3 leafSamplePoint =
+                                glm::vec3(x, y, z) +
+                                glm::vec3(static_cast<float>(padding));
                             glm::vec3 ancestorSamplePoint = ancestorOffset +
                                 (glm::vec3(x, y, z) + glm::vec3(0.5)) * invVoxelScale;
                             float leafValue = leafValues[linearCoords(leafSamplePoint)];
@@ -172,8 +172,7 @@ bool ErrorHistogramManager::buildFromLeaf(unsigned int bstOffset,
             leafOffset.z += (octreeChild / 4) * childSize;
 
             octreeLevel++;
-        // @TODO(emiax):  This does not make sense? unsigned int check against -1
-        } while (octreeNode != -1);
+        } while (octreeNode != unsigned int(-1));
 
         bstRightOnly &= (bstNode % 2 == 0);
         bstNode = parentOffset(bstNode, 2);
@@ -204,15 +203,13 @@ bool ErrorHistogramManager::loadFromFile(const std::filesystem::path& filename) 
     for (int i = 0; i < static_cast<int>(_numInnerNodes); i++) {
         int offset = i * _numBins;
         float* data = new float[_numBins];
-        memcpy(data, &histogramData[offset], sizeof(float) * _numBins);
+        memcpy(data, &histogramData[offset], _numBins * sizeof(float));
         _histograms[i] = Histogram(_minBin, _maxBin, _numBins, data);
     }
 
     delete[] histogramData;
-    // No need to deallocate histogram data, since histograms take ownership.
     return true;
 }
-
 
 bool ErrorHistogramManager::saveToFile(const std::filesystem::path& filename) {
     std::ofstream file = std::ofstream(filename, std::ios::out | std::ios::binary);
@@ -230,12 +227,11 @@ bool ErrorHistogramManager::saveToFile(const std::filesystem::path& filename) {
 
     for (unsigned int i = 0; i < _numInnerNodes; i++) {
         int offset = i * _numBins;
-        memcpy(&histogramData[offset], _histograms[i].data(), sizeof(float) * _numBins);
+        memcpy(&histogramData[offset], _histograms[i].data(), _numBins * sizeof(float));
     }
 
-    file.write(reinterpret_cast<char*>(histogramData), sizeof(float) * nFloats);
+    file.write(reinterpret_cast<char*>(histogramData), nFloats * sizeof(float));
     delete[] histogramData;
-
     return true;
 }
 
@@ -325,12 +321,12 @@ std::vector<float> ErrorHistogramManager::readValues(unsigned int brickIndex) co
     std::vector<float> voxelValues(numBrickVals);
 
     std::streampos offset = _tsp->dataPosition() +
-        static_cast<long long>(brickIndex*numBrickVals*sizeof(float));
+        static_cast<long long>(brickIndex * numBrickVals * sizeof(float));
     _file->seekg(offset);
 
     _file->read(
         reinterpret_cast<char*>(voxelValues.data()),
-        static_cast<size_t>(numBrickVals)*sizeof(float)
+        static_cast<size_t>(numBrickVals) * sizeof(float)
     );
 
     return voxelValues;
@@ -370,7 +366,8 @@ unsigned int ErrorHistogramManager::innerNodeToBrickIndex(
                                                         unsigned int innerNodeIndex) const
 {
     if (innerNodeIndex >= _numInnerNodes) {
-        return std::numeric_limits<unsigned int>::max(); // Not an inner node
+        // Not an inner node
+        return std::numeric_limits<unsigned int>::max();
     }
 
     const unsigned int numOtNodes = _tsp->numOTNodes();

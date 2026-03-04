@@ -117,7 +117,6 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     , _lineWidth(LineWidthInfo, 13.f, 1.f, 100.f)
     , _verticalFov(VerticalFovInfo, 10.0, 0.00000000001, 70.0)
     , _applyRoll(ApplyRollInfo, true)
-    , _borderColor(220, 220, 220)
 {
     // Handle target dimension property
     _autoScale = false;
@@ -133,7 +132,7 @@ RenderableSkyTarget::RenderableSkyTarget(const ghoul::Dictionary& dictionary)
     _lineWidth = p.lineWidth.value_or(_lineWidth);
     addProperty(_lineWidth);
 
-    _verticalFov= p.verticalFov.value_or(_verticalFov);
+    _verticalFov = p.verticalFov.value_or(_verticalFov);
     _verticalFov.setReadOnly(true);
     addProperty(_verticalFov);
 
@@ -146,10 +145,9 @@ void RenderableSkyTarget::initializeGL() {
     createPlane();
 
     std::string ProgramName = identifier() + "Shader";
-
     _shader = BaseModule::ProgramObjectManager.request(
         ProgramName,
-        [&ProgramName]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+        [ProgramName]() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
             return global::renderEngine->buildRenderProgram(
                 ProgramName,
                 absPath("${MODULE_SKYBROWSER}/shaders/target_vs.glsl"),
@@ -181,7 +179,7 @@ glm::dvec3 RenderableSkyTarget::upVector() const {
 
 void RenderableSkyTarget::applyRoll() {
     Camera* camera = global::navigationHandler->camera();
-    const glm::dvec3 normal = glm::normalize(camera->positionVec3() - _worldPosition);
+    const glm::dvec3 normal = glm::normalize(camera->position() - _worldPosition);
 
     _rightVector = glm::normalize(
         glm::cross(camera->lookUpVectorWorldSpace(), normal)
@@ -211,7 +209,7 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
             data.modelTransform.translation) * glm::dvec4(0.0, 0.0, 0.0, 1.0)
     );
 
-    const glm::dvec3 normal = glm::normalize(data.camera.positionVec3() - _worldPosition);
+    const glm::dvec3 normal = glm::normalize(data.camera.position() - _worldPosition);
     // There are two modes - 1) target rolls to have its up vector parallel to the
     // cameras up vector or 2) it is decoupled from the camera, in which case it needs to
     // be initialized once
@@ -246,7 +244,6 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
     );
 
     _shader->setUniform("modelViewTransform", glm::mat4(modelViewTransform));
-
     _shader->setUniform("multiplyColor", _multiplyColor);
 
     const bool additiveBlending = _blendMode == static_cast<int>(BlendMode::Additive);
@@ -270,8 +267,8 @@ void RenderableSkyTarget::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableSkyTarget::setRatio(float ratio) {
-    // To avoid flooring of the size of the target, multiply by factor of 100
-    // Object size is really the pixel size so this calculation is not exact
+    // To avoid flooring of the size of the target, multiply by factor of 100. Object size
+    // is really the pixel size so this calculation is not exact
     _ratio = ratio;
 }
 

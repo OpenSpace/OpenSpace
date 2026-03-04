@@ -285,7 +285,7 @@ void RenderablePlaneProjection::updatePlane(const Image& img, double currentTime
     }
 
     const std::array<Vertex, 6> VertexData = {
-        // square of two triangles drawn within fov in target coordinates
+        // Square of two triangles drawn within fov in target coordinates
         // Lower left 1
         Vertex { projection[1].x, projection[1].y, projection[1].z, 0.f, 0.f },
         // Upper right 2

@@ -27,19 +27,19 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
-#include <openspace/util/updatestructures.h>
 #include <openspace/util/distanceconstants.h>
+#include <openspace/util/updatestructures.h>
+#include <ghoul/filesystem/file.h>
 #include <ghoul/filesystem/filesystem.h>
+#include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/io/texture/texturereader.h>
+#include <ghoul/misc/dictionary.h>
+#include <ghoul/misc/exception.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/filesystem/file.h>
-#include <ghoul/format.h>
-#include <ghoul/misc/dictionary.h>
-#include <ghoul/misc/exception.h>
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -58,8 +58,6 @@ namespace {
         AbsMagnitude,
         AppMagnitude
     };
-
-    constexpr double PARSEC = 0.308567756E17;
 
     struct BaseVBOLayout {
         float x;
@@ -284,9 +282,8 @@ namespace {
     constexpr Property::PropertyInfo FadeInDistancesInfo = {
         "FadeInDistances",
         "Fade-in start and end distances",
-        "These values determine the initial and final distances from the center of "
-        "our galaxy from which the astronomical object will start and end "
-        "fading-in.",
+        "These values determine the initial and final distances from the center of our "
+        "galaxy from which the astronomical object will start and end fading-in.",
         Property::Visibility::AdvancedUser
     };
 
@@ -430,15 +427,15 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _speckFile(SpeckFileInfo)
     , _colorTexturePath(ColorTextureInfo)
-    , _dataMapping{
-        PropertyOwner({ "DataMapping", "Data Mapping" }),
-        StringProperty(MappingBvInfo),
-        StringProperty(MappingLuminanceInfo),
-        StringProperty(MappingAbsMagnitudeInfo),
-        StringProperty(MappingVxInfo),
-        StringProperty(MappingVyInfo),
-        StringProperty(MappingVzInfo),
-        StringProperty(MappingSpeedInfo)
+    , _dataMapping {
+        .container = PropertyOwner({ "DataMapping", "Data Mapping" }),
+        .bvColor = StringProperty(MappingBvInfo),
+        .luminance = StringProperty(MappingLuminanceInfo),
+        .absoluteMagnitude = StringProperty(MappingAbsMagnitudeInfo),
+        .vx = StringProperty(MappingVxInfo),
+        .vy = StringProperty(MappingVyInfo),
+        .vz = StringProperty(MappingVzInfo),
+        .speed = StringProperty(MappingSpeedInfo)
     }
     , _colorOption(ColorOptionInfo)
     , _otherDataOption(OtherDataOptionInfo)
@@ -452,28 +449,24 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
     , _fixedColor(FixedColorInfo, glm::vec3(1.f), glm::vec3(0.f), glm::vec3(1.f))
     , _filterOutOfRange(FilterOutOfRangeInfo, false)
     , _core {
-        PropertyOwner(CoreOwnerInfo),
-        StringProperty(TextureInfo),
-        FloatProperty(MultiplierInfo, 1.f, 0.f, 20.f),
-        FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
-        FloatProperty(ScaleInfo, 1.f, 0.f, 1.f),
-        nullptr,
-        nullptr
+        .container = PropertyOwner(CoreOwnerInfo),
+        .texturePath = StringProperty(TextureInfo),
+        .multiplier = FloatProperty(MultiplierInfo, 1.f, 0.f, 20.f),
+        .gamma = FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
+        .scale = FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
     }
     , _glare {
-        PropertyOwner(GlareOwnerInfo),
-        StringProperty(TextureInfo),
-        FloatProperty(MultiplierInfo, 1.f, 0.f, 20.f),
-        FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
-        FloatProperty(ScaleInfo, 1.f, 0.f, 1.f),
-        nullptr,
-        nullptr
+        .container = PropertyOwner(GlareOwnerInfo),
+        .texturePath = StringProperty(TextureInfo),
+        .multiplier = FloatProperty(MultiplierInfo, 1.f, 0.f, 20.f),
+        .gamma = FloatProperty(GammaInfo, 1.f, 0.f, 5.f),
+        .scale = FloatProperty(ScaleInfo, 1.f, 0.f, 1.f)
     }
     , _parameters {
-        PropertyOwner(SizeCompositionInfo),
-        OptionProperty(SizeCompositionMethodInfo),
-        FloatProperty(LumPercentInfo, 0.5f, 0.f, 3.f),
-        FloatProperty(RadiusPercentInfo, 0.5f, 0.f, 3.f)
+        .container = PropertyOwner(SizeCompositionInfo),
+        .method = OptionProperty(SizeCompositionMethodInfo),
+        .lumCent = FloatProperty(LumPercentInfo, 0.5f, 0.f, 3.f),
+        .radiusCent = FloatProperty(RadiusPercentInfo, 0.5f, 0.f, 3.f)
     }
     , _magnitudeExponent(MagnitudeExponentInfo, 6.2f, 5.f, 8.f)
     , _fadeInDistances(
@@ -669,10 +662,6 @@ RenderableStars::RenderableStars(const ghoul::Dictionary& dictionary)
         p.staticFilterReplacement.value_or(_staticFilterReplacementValue);
 }
 
-bool RenderableStars::isReady() const {
-    return _program && _glare.texture;
-}
-
 void RenderableStars::initializeGL() {
     _program = global::renderEngine->buildRenderProgram(
         "Star",
@@ -728,9 +717,9 @@ void RenderableStars::initializeGL() {
 
     loadData();
 
-    // We need to wait until after loading the data until we can see if the requested
-    // data value actually exists or not.  Once we determine the index, we no longer
-    // need the value and can clear it
+    // We need to wait until after loading the data until we can see if the requested data
+    // value actually exists or not.  Once we determine the index, we no longer need the
+    // value and can clear it
     if (!_queuedOtherData.empty()) {
         const int idx = _dataset.index(_queuedOtherData);
         if (idx == -1) {
@@ -761,6 +750,10 @@ void RenderableStars::deinitializeGL() {
     }
 }
 
+bool RenderableStars::isReady() const {
+    return _program && _glare.texture;
+}
+
 void RenderableStars::loadPSFTexture() {
     auto markPsfTextureAsDirty = [this]() { _pointSpreadFunctionTextureIsDirty = true; };
     auto loadTexture = [markPsfTextureAsDirty](TextureComponent& component) {
@@ -778,7 +771,7 @@ void RenderableStars::loadPSFTexture() {
             {
                 .filter = Texture::FilterMode::AnisotropicMipMap,
                 .wrapping = Texture::WrappingMode::ClampToBorder,
-                .borderColor = glm::vec4(0.f),
+                .borderColor = glm::vec4(0.f)
             }
         );
 
@@ -841,9 +834,9 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     }
 
     if (_enableFadeInDistance) {
-        const double distCam = glm::length(data.camera.positionVec3());
+        const double distCam = glm::length(data.camera.position());
         const glm::vec2 fadeRange = _fadeInDistances;
-        const double a = 1.f / ((fadeRange.y - fadeRange.x) * PARSEC);
+        const double a = 1.f / ((fadeRange.y - fadeRange.x) * distanceconstants::Parsec);
         const double b = -(fadeRange.x / (fadeRange.y - fadeRange.x));
         const float funcValue = static_cast<float>(a * distCam + b);
         const float fadeInValue = std::min(funcValue, 1.f);
@@ -897,7 +890,6 @@ void RenderableStars::render(const RenderData& data, RendererTasks&) {
     glBindVertexArray(0);
     _program->deactivate();
 
-    // Restores OpenGL blending state
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
 }

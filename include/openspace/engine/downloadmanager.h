@@ -86,7 +86,7 @@ public:
     // Just a helper function to check if a future is ready to ".get()". Not specific
     // to DownloadManager but is useful for anyone using the DownloadManager
     template <typename R>
-    static bool futureReady(std::future<R> const& f) {
+    static bool futureReady(const std::future<R>& f) {
         return f.wait_for(std::chrono::seconds(0)) == std::future_status::ready;
     }
 

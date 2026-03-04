@@ -82,8 +82,8 @@ void TimeTopic::handleJson(const nlohmann::json& json) {
     });
 
     _deltaTimeCallbackHandle = global::timeManager->addDeltaTimeChangeCallback([this]() {
-        // Throttle by last update,
-        // but force update if pause state or target delta changes.
+        // Throttle by last update, but force update if pause state or target delta
+        // changes
 
         const auto now = std::chrono::system_clock::now();
         const double targetDeltaTime = global::timeManager->targetDeltaTime();

@@ -53,8 +53,8 @@ namespace {
     constexpr std::string_view _loggerCat = "TimeManager";
 
     // Properties for time interpolation
-    // These are used when setting the time from lua time interpolation functions,
-    // when called without arguments.
+    // These are used when setting the time from Lua time interpolation functions when
+    // called without arguments
 
     constexpr Property::PropertyInfo DefaultTimeInterpolationDurationInfo = {
         "DefaultTimeInterpolationDuration",
@@ -191,7 +191,7 @@ void TimeManager::preSynchronization(double dt) {
         using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _timeChangeCallbacks) {
-            ZoneScopedN("tcc");
+            ZoneScopedN("time change callback");
             it.second();
         }
     }
@@ -203,7 +203,7 @@ void TimeManager::preSynchronization(double dt) {
         using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _deltaTimeChangeCallbacks) {
-            ZoneScopedN("dtcc");
+            ZoneScopedN("delta time change callback");
             it.second();
         }
     }
@@ -219,7 +219,7 @@ void TimeManager::preSynchronization(double dt) {
         using K = CallbackHandle;
         using V = TimeChangeCallback;
         for (const std::pair<K, V>& it : _timelineChangeCallbacks) {
-            ZoneScopedN("tlcc");
+            ZoneScopedN("timeline change callback");
             it.second();
         }
     }
@@ -266,14 +266,19 @@ TimeManager::TimeKeyframeData TimeManager::interpolate(double applicationTime) {
                 (lastPastKeyframe->data.pause ? 0.0 : lastPastKeyframe->data.delta)
         );
         return TimeKeyframeData {
-            predictedTime,
-            lastPastKeyframe->data.delta,
-            false,
-            false
+            .time = predictedTime,
+            .delta = lastPastKeyframe->data.delta,
+            .pause = false,
+            .jump = false
         };
     }
     // As the last option, fall back on the current time.
-    return TimeKeyframeData { _currentTime, _targetDeltaTime, _timePaused, false };
+    return TimeKeyframeData {
+        .time = _currentTime,
+        .delta = _targetDeltaTime,
+        .pause = _timePaused,
+        .jump = false
+    };
 }
 
 void TimeManager::progressTime(double dt) {
@@ -391,7 +396,7 @@ TimeManager::TimeKeyframeData TimeManager::interpolate(
     const double b = -futureDerivative * deltaAppTime + deltaSimTime;
 
     const double interpolatedTime =
-        (1 - t)*pastSimTime + t * futureSimTime + t * (1 - t)*(a*(1 - t) + b * t);
+        (1 - t) * pastSimTime + t * futureSimTime + t * (1 - t) * (a * (1 - t) + b * t);
 
     // Derivative of interpolated time.
     // Division by deltaAppTime to get appTime derivative
@@ -400,14 +405,12 @@ TimeManager::TimeKeyframeData TimeManager::interpolate(
         (3 * a*t*t - 4 * a*t + a - 3 * b*t*t + 2 * b*t - pastSimTime + futureSimTime) /
         deltaAppTime;
 
-    TimeKeyframeData data {
-        Time(interpolatedTime),
-        interpolatedDeltaTime,
-        past.data.pause,
-        past.data.jump
+    return TimeKeyframeData {
+        .time = Time(interpolatedTime),
+        .delta = interpolatedDeltaTime,
+        .pause = past.data.pause,
+        .jump = past.data.jump
     };
-
-    return data;
 }
 
 void TimeManager::applyKeyframeData(const TimeKeyframeData& keyframe, double dt) {
@@ -525,15 +528,16 @@ void TimeManager::addDeltaTimesKeybindings() {
         const std::string s = std::format("{:.0f}", step);
 
         std::string identifier = std::format("{}.{}", DeltaTimeActionPrefix, s);
-        Action action;
-        action.identifier = identifier;
-        action.command = std::format("openspace.time.interpolateDeltaTime({})", s);
-        action.documentation = std::format(
-            "Setting the simulation speed to {} seconds per realtime second", s
-        );
-        action.name = std::format("Set: {}", s);
-        action.guiPath = DeltaTimeStepsGuiPath;
-        action.isLocal = Action::IsLocal::Yes;
+        Action action = {
+            .identifier = identifier,
+            .command = std::format("openspace.time.interpolateDeltaTime({})", s),
+            .name = std::format("Set: {}", s),
+            .documentation = std::format(
+                "Setting the simulation speed to {} seconds per realtime second", s
+            ),
+            .guiPath = std::string(DeltaTimeStepsGuiPath),
+            .isLocal = Action::IsLocal::Yes
+        };
         global::actionManager->registerAction(std::move(action));
         global::keybindingManager->bindKey(key, mod, std::move(identifier));
         _deltaTimeStepKeybindings.push_back(KeyWithModifier{ key, mod });
@@ -867,11 +871,11 @@ bool TimeManager::hasPreviousDeltaTimeStep() const {
 }
 
 void TimeManager::setNextDeltaTimeStep() {
-    interpolateNextDeltaTimeStep(0);
+    interpolateNextDeltaTimeStep(0.0);
 }
 
 void TimeManager::setPreviousDeltaTimeStep() {
-    interpolatePreviousDeltaTimeStep(0);
+    interpolatePreviousDeltaTimeStep(0.0);
 }
 
 void TimeManager::interpolateNextDeltaTimeStep(double durationSeconds) {
@@ -893,7 +897,7 @@ void TimeManager::interpolatePreviousDeltaTimeStep(double durationSeconds) {
 }
 
 void TimeManager::setPause(bool pause) {
-    interpolatePause(pause, 0);
+    interpolatePause(pause, 0.0);
 }
 
 void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
@@ -931,7 +935,7 @@ void TimeManager::interpolatePause(bool pause, double interpolationDuration) {
         currentApplicationTimeForInterpolation();
 
     clearKeyframes();
-    if (interpolationDuration > 0) {
+    if (interpolationDuration > 0.0) {
         addKeyframe(now, currentKeyframe);
     }
     addKeyframe(now + interpolationDuration, futureKeyframe);
@@ -950,28 +954,27 @@ double TimeManager::previousApplicationTimeForInterpolation() const {
 }
 
 void TimeManager::setTimeFromProfile(const Profile& p) {
-    if (p.time.has_value()) {
-        switch (p.time->type) {
-            case Profile::Time::Type::Relative:
-            {
-                const std::string t = Time::currentWallTime();
-                std::variant<std::string, double> t2 =
-                    Time::advancedTime(t, p.time->value);
-                ghoul_assert(std::holds_alternative<std::string>(t2), "Wrong type");
-                _currentTime.data() = Time(std::get<std::string>(t2));
-                break;
-            }
-            case Profile::Time::Type::Absolute:
-                _currentTime.data() = Time(p.time->value);
-                break;
-        }
-
-        setPause(p.time->startPaused);
-    }
-    else {
+    if (!p.time.has_value()) {
         // No value was specified so we are using 'now' instead
         _currentTime.data() = Time::now();
+        return;
     }
+
+    switch (p.time->type) {
+        case Profile::Time::Type::Relative:
+        {
+            const std::string t = Time::currentWallTime();
+            std::variant<std::string, double> t2 = Time::advancedTime(t, p.time->value);
+            ghoul_assert(std::holds_alternative<std::string>(t2), "Wrong type");
+            _currentTime.data() = Time(std::get<std::string>(t2));
+            break;
+        }
+        case Profile::Time::Type::Absolute:
+            _currentTime.data() = Time(p.time->value);
+            break;
+    }
+
+    setPause(p.time->startPaused);
 }
 
 } // namespace openspace

@@ -33,15 +33,14 @@ class SelectionProperty;
 
 class DataProcessorText : public DataProcessor {
 public:
-    DataProcessorText();
-    virtual ~DataProcessorText();
+    virtual ~DataProcessorText() = default;
 
     std::vector<std::string> readMetadata(const std::string& data,
         glm::size3_t& dimensions) override;
 
     void addDataValues(const std::string& data, SelectionProperty& dataOptions) override;
 
-    std::vector<float*> processData(const std::string& data,
+    std::vector<std::vector<float>> processData(const std::string& data,
         SelectionProperty& dataOptions, glm::size3_t& dimensions) override;
 };
 

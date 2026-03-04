@@ -39,10 +39,10 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/systemcapabilities/generalcapabilitiescomponent.h>
 #include <algorithm>
 #include <array>
 #include <cstdint>
@@ -70,11 +70,11 @@ namespace {
     constexpr Property::PropertyInfo FileReaderOptionInfo = {
         "FileReaderOption",
         "File reader option",
-        "This value tells the renderable what format the input data file has. "
-        "'Fits' will read a FITS file, construct an Octree from it and render full "
-        "data. 'Speck' will read a SPECK file, construct an Octree from it and render "
-        "full data. 'BinaryRaw' will read a preprocessed binary file with ordered star "
-        "data, construct an Octree and render it. 'BinaryOctree' will read a constructed "
+        "This value tells the renderable what format the input data file has. 'Fits' "
+        "will read a FITS file, construct an Octree from it and render full data. "
+        "'Speck' will read a SPECK file, construct an Octree from it and render full "
+        "data. 'BinaryRaw' will read a preprocessed binary file with ordered star data, "
+        "construct an Octree and render it. 'BinaryOctree' will read a constructed "
         "Octree from binary file and render full data. 'StreamOctree' will read an index "
         "file with full Octree structure and then stream nodes during runtime. (This "
         "option is suited for bigger datasets).",
@@ -84,8 +84,8 @@ namespace {
     constexpr Property::PropertyInfo RenderModeInfo = {
         "RenderMode",
         "Render mode",
-        "This value determines which predefined columns to use in rendering. If "
-        "'Static' only the position of the stars is used. 'Color' uses position + color "
+        "This value determines which predefined columns to use in rendering. If 'Static' "
+        "only the position of the stars is used. 'Color' uses position + color "
         "parameters and 'Motion' uses pos, color as well as velocity for the stars.",
         Property::Visibility::AdvancedUser
     };
@@ -361,7 +361,7 @@ namespace {
 namespace openspace {
 
 Documentation RenderableGaiaStars::Documentation() {
-    return codegen::doc<Parameters>("gaiamission_renderablegaiastars");
+    return codegen::doc<Parameters>("gaia_renderablegaiastars");
 }
 
 RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
@@ -474,7 +474,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
             static_cast<long long>(nDedicatedVidMemoryInKB) * 1024
         );
 
-        // TODO: Need to fix what happens if we can't query! For now use 2 GB by default
+        // TODO: Need to fix what happens if we can't query. For now use 2 GB by default
         _gpuMemoryBudgetInBytes = dedicatedVidMem > 0 ?
             static_cast<long long>(dedicatedVidMem * _maxGpuMemoryPercent) :
             2147483648;
@@ -503,7 +503,7 @@ RenderableGaiaStars::RenderableGaiaStars(const ghoul::Dictionary& dictionary)
     _distThreshold = p.filterDist.value_or(_distThreshold);
     addProperty(_distThreshold);
 
-    // Only add properties correlated to fits files if we're reading from a fits file
+    // Only add properties correlated to fits files if we're reading from a FITS file
     if (_fileReaderOption == FileReaderOption::Fits) {
         _firstRow = p.firstRow.value_or(_firstRow);
         _firstRow.onChange([this]() { _dataIsDirty = true; });
@@ -588,13 +588,13 @@ void RenderableGaiaStars::initializeGL() {
     glCreateFramebuffers(1, &_fbo);
     // Generate a new texture and attach it to our FBO
     _fboTexture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(global::renderEngine->renderingResolution(), 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_FLOAT
         },
-        ghoul::opengl::Texture::SamplerInit{}
+        ghoul::opengl::Texture::SamplerInit {}
     );
     glNamedFramebufferTexture(_fbo, GL_COLOR_ATTACHMENT0, *_fboTexture, 0);
     const GLenum textureBuffer = GL_COLOR_ATTACHMENT0;
@@ -620,7 +620,7 @@ void RenderableGaiaStars::initializeGL() {
     const float dedicatedVidMem = static_cast<float>(
         static_cast<long long>(nDedicatedVidMemoryInKB) * 1024
     );
-    // TODO: Need to fix what happens if we can't query! For now use 2 GB by default
+    // TODO: Need to fix what happens if we can't query. For now use 2 GB by default
     _gpuMemoryBudgetInBytes = dedicatedVidMem > 0 ?
         static_cast<long long>(dedicatedVidMem * _maxGpuMemoryPercent) :
         2147483648;
@@ -675,7 +675,7 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
 
     // Update which nodes are stored in memory as the camera moves around (if streaming)
     if (_fileReaderOption == FileReaderOption::StreamOctree) {
-        const glm::dvec3 cameraPos = data.camera.positionVec3();
+        const glm::dvec3 cameraPos = data.camera.position();
         const size_t chunkSizeBytes = _chunkSize * sizeof(GLfloat);
         _octreeManager.fetchSurroundingNodes(cameraPos, chunkSizeBytes, _additionalNodes);
 
@@ -712,8 +712,8 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     for (const auto& [offset, subData] : updateData) {
         if (offset >= static_cast<int>(_accumulatedIndices.size()) - 1) {
             // @TODO(2023-03-08, alebo) We want to redo the whole rendering pipeline
-            // anyway, so right now we just bail out early if we get an invalid index
-            // that would trigger a crash
+            // anyway, so right now we just bail out early if we get an invalid index that
+            // would trigger a crash
             continue;
         }
 
@@ -747,11 +747,10 @@ void RenderableGaiaStars::render(const RenderData& data, RendererTasks&) {
     // Use orphaning strategy for data SSBO
     glNamedBufferData(_ssboData, _maxStreamingBudgetInBytes, nullptr, GL_STREAM_DRAW);
 
-    // Update SSBO with one insert per chunk/node.
-    // The key in map holds the offset index
+    // Update SSBO with one insert per chunk/node. The key in map holds the offset index
     for (const auto& [offset, subData] : updateData) {
-        // We don't need to fill chunk with zeros for SSBOs.
-        // Just check if we have any values to update
+        // We don't need to fill chunk with zeros for SSBOs. Just check if we have any
+        // values to update
         if (!subData.empty()) {
             glNamedBufferSubData(
                 _ssboData,
@@ -850,7 +849,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _buffersAreDirty = true;
     }
 
-    if (_program->isDirty()) {
+    if (_program->isDirty()) [[unlikely]] {
         global::renderEngine->removeRenderProgram(_program.get());
         _program = ghoul::opengl::ProgramObject::Build(
             "GaiaStar",
@@ -865,7 +864,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
         _program->setSsboBinding("ssbo_comb_data", _ssboDataBinding->bindingNumber());
     }
 
-    if (_programTM->isDirty()) {
+    if (_programTM->isDirty()) [[unlikely]] {
         global::renderEngine->removeRenderProgram(_programTM.get());
         _programTM = global::renderEngine->buildRenderProgram(
             "ToneMapping",
@@ -885,11 +884,12 @@ void RenderableGaiaStars::update(const UpdateData&) {
         else if (_renderMode == RenderMode::Color) {
             _nRenderValuesPerStar = PositionSize + ColorSize;
         }
-        else { // (renderOption == RenderOption::Motion)
+        else {
+            // (renderOption == RenderOption::Motion)
             _nRenderValuesPerStar = PositionSize + ColorSize + VelocitySize;
         }
 
-        // Calculate memory budgets.
+        // Calculate memory budgets
         _chunkSize = _octreeManager.maxStarsPerNode() * _nRenderValuesPerStar;
         const long long totalChunkSizeInBytes =
             _octreeManager.totalNodes() * _chunkSize * sizeof(GLfloat);
@@ -897,8 +897,8 @@ void RenderableGaiaStars::update(const UpdateData&) {
             totalChunkSizeInBytes,
             _gpuMemoryBudgetInBytes
         );
-        long long maxNodesInStream = _maxStreamingBudgetInBytes /
-                                     (_chunkSize * sizeof(GLfloat));
+        long long maxNodesInStream =
+            _maxStreamingBudgetInBytes / (_chunkSize * sizeof(GLfloat));
 
         _gpuStreamBudgetProperty.setMaxValue(static_cast<float>(maxNodesInStream));
         const bool datasetFitInMemory =
@@ -909,13 +909,13 @@ void RenderableGaiaStars::update(const UpdateData&) {
             _chunkSize, _maxStreamingBudgetInBytes, maxNodesInStream
         ));
 
-        // Trigger a rebuild of buffer data from octree.
-        // With SSBO we won't fill the chunks
+        // Trigger a rebuild of buffer data from octree. With SSBO we won't fill the
+        // chunks
         _octreeManager.initBufferIndexStack(maxNodesInStream, datasetFitInMemory);
         _nStarsToRender = 0;
 
-        // Bind SSBO blocks to our shader positions
-        // Number of stars per chunk (a.k.a. Index)
+        // Bind SSBO blocks to our shader positions. Number of stars per chunk (a.k.a.
+        // Index)
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, _ssboIdx);
 
         _ssboIdxBinding = std::make_unique<ghoul::opengl::BufferBinding<
@@ -954,11 +954,7 @@ void RenderableGaiaStars::update(const UpdateData&) {
                 absPath(_colorTexturePath),
                 1
             );
-            if (_colorTexture) {
-                LDEBUG(std::format(
-                    "Loaded texture from '{}'", _colorTexturePath.value()
-                ));
-            }
+            LDEBUG(std::format("Loaded texture from '{}'", _colorTexturePath.value()));
 
             _colorTextureFile = std::make_unique<ghoul::filesystem::File>(
                 _colorTexturePath.value()
@@ -979,13 +975,13 @@ void RenderableGaiaStars::update(const UpdateData&) {
 
         if (hasChanged) {
             _fboTexture = std::make_unique<ghoul::opengl::Texture>(
-                ghoul::opengl::Texture::FormatInit{
+                ghoul::opengl::Texture::FormatInit {
                     .dimensions = glm::uvec3(screenSize, 1),
                     .type = GL_TEXTURE_2D,
                     .format = ghoul::opengl::Texture::Format::RGBA,
                     .dataType = GL_FLOAT
                 },
-                ghoul::opengl::Texture::SamplerInit{}
+                ghoul::opengl::Texture::SamplerInit {}
             );
             LDEBUG("Re-Generating Gaia Framebuffer Texture");
 

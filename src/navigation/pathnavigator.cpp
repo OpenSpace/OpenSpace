@@ -57,9 +57,9 @@ namespace {
     constexpr Property::PropertyInfo DefaultCurveOptionInfo = {
         "DefaultPathType",
         "Default path type",
-        "The default path type chosen when generating a path or flying to a target. "
-        "See wiki for alternatives. The shape of the generated path will be different "
-        "depending on the path type.",
+        "The default path type chosen when generating a path or flying to a target. See "
+        "the documentation for alternatives. The shape of the generated path will be "
+        "different depending on the path type.",
         Property::Visibility::AdvancedUser
     };
 
@@ -73,9 +73,9 @@ namespace {
     constexpr Property::PropertyInfo SpeedScaleInfo = {
         "SpeedScale",
         "Speed scale",
-        "Scale factor that the speed will be multiplied with during path traversal. "
-        "Can be used to speed up or slow down the camera motion, depending on if the "
-        "value is larger than or smaller than one.",
+        "Scale factor that the speed will be multiplied with during path traversal. Can "
+        "be used to speed up or slow down the camera motion, depending on if the value "
+        "is larger than or smaller than one.",
         Property::Visibility::User
     };
 
@@ -110,8 +110,8 @@ namespace {
         "MinimalValidBoundingSphere",
         "Minimal valid bounding sphere",
         "The minimal allowed value for a bounding sphere, in meters. Used for "
-        "computation of target positions and path generation, to avoid issues when "
-        "there is no bounding sphere.",
+        "computation of target positions and path generation, to avoid issues when there "
+        "is no bounding sphere.",
         Property::Visibility::AdvancedUser
     };
 
@@ -221,8 +221,8 @@ void PathNavigator::updateCamera(double deltaTime) {
 
     if (!_currentPath->startPoint().node() || !_currentPath->endPoint().node()) {
         LERROR(
-            "One of the scene graph nodes used in an active camera path "
-            "was removed. Aborting path"
+            "One of the scene graph nodes used in an active camera path was removed. "
+            "Aborting path"
         );
         abortPath();
         global::navigationHandler->orbitalNavigator().setFocusNode("Root", false);
@@ -262,7 +262,7 @@ void PathNavigator::updateCamera(double deltaTime) {
     const std::string newAnchor = _currentPath->currentAnchor();
 
     // Set anchor node in orbitalNavigator, to render visible nodes and add activate
-    // navigation when we reach the end.
+    // navigation when we reach the end
     const std::string currentAnchor = anchor()->identifier();
     if (currentAnchor != newAnchor) {
         global::navigationHandler->orbitalNavigator().setFocusNode(newAnchor, false);
@@ -335,12 +335,12 @@ void PathNavigator::startPath() {
     );
     if (!success) {
         LERROR("Could not start camera path");
-        return; // couldn't switch to camera path mode
+        return;
     }
 
-    // Always pause the simulation time when flying, to aovid problem with objects
-    // moving. However, keep track of whether the time was running before the path
-    // was started, so we can reset it on finish
+    // Always pause the simulation time when flying, to aovid problem with objects moving.
+    // However, keep track of whether the time was running before the path was started, so
+    // we can reset it on finish
     if (!global::timeManager->isPaused()) {
         global::scriptEngine->queueScript("openspace.time.setPause(true)");
 
@@ -418,9 +418,9 @@ double PathNavigator::minValidBoundingSphere() const {
 double PathNavigator::findValidBoundingSphere(const SceneGraphNode* node) const {
     ghoul_assert(node != nullptr, "Node must not be nulltpr");
     auto sphere = [](const SceneGraphNode* n) {
-        // Use the biggest of the bounding sphere and interaction sphere,
-        // so we don't accidentally choose a bounding sphere that is much smaller
-        // than the interaction sphere of the node
+        // Use the biggest of the bounding sphere and interaction sphere, so we don't
+        // accidentally choose a bounding sphere that is much smaller than the interaction
+        // sphere of the node
         const double bs = n->boundingSphere();
         const double is = n->interactionSphere();
         return std::max(is, bs);
@@ -504,7 +504,7 @@ void PathNavigator::findRelevantNodes() {
             tags.end()
         );
 
-        // does not match any tags => not interesting
+        // Does not match any tags => not interesting
         if (result == relevantTags.end()) {
             return false;
         }
@@ -530,8 +530,8 @@ SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
 
     for (SceneGraphNode* n : relNodes) {
         bool isSame = (n->identifier() == node->identifier());
-        // If the nodes are in the very same position, they are probably representing
-        // the same object
+        // If the nodes are in the very same position, they are probably representing the
+        // same object
         isSame |=
             glm::distance(n->worldPosition(), node->worldPosition()) < LengthEpsilon;
 
@@ -539,16 +539,16 @@ SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
             continue;
         }
 
-        constexpr float proximityRadiusFactor = 3.f;
+        constexpr float ProximityRadiusFactor = 3.f;
 
         const float bs = static_cast<float>(n->boundingSphere());
-        const float proximityRadius = proximityRadiusFactor * bs;
+        const float proximityRadius = ProximityRadiusFactor * bs;
         const glm::dvec3 posInModelCoords =
             glm::inverse(n->modelTransform()) * glm::dvec4(node->worldPosition(), 1.0);
 
         const bool isClose = isPointInsideSphere(
             posInModelCoords,
-            glm::dvec3(0.0, 0.0, 0.0),
+            glm::dvec3(0.0),
             proximityRadius
         );
 
@@ -561,15 +561,15 @@ SceneGraphNode* PathNavigator::findNodeNearTarget(const SceneGraphNode* node) {
 }
 
 void PathNavigator::removeRollRotation(CameraPose& pose) const {
-    // The actual position for the camera does not really matter. Use the origin,
-    // to avoid precision problems when we have large values for the position
+    // The actual position for the camera does not really matter. Use the origin, to avoid
+    // precision problems when we have large values for the position
     const glm::dvec3 cameraPos = glm::dvec3(0.0);
     const glm::dvec3 cameraDir = glm::normalize(
         pose.rotation * Camera::ViewDirectionCameraSpace
     );
 
-    // The actual distance does not really matter either. Just has to be far
-    // enough away from the camera
+    // The actual distance does not really matter either. Just has to be far enough away
+    // from the camera
     constexpr double NotTooCloseDistance = 10000.0;
 
     const glm::dvec3 lookAtPos = cameraPos + NotTooCloseDistance * cameraDir;

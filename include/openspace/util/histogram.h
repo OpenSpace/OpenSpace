@@ -62,7 +62,6 @@ public:
     std::vector<std::pair<float, float>> getDecimated(int numBins) const;
 
     void normalize();
-    void print() const;
     void generateEqualizer();
     Histogram equalize();
     float equalize(float) const;

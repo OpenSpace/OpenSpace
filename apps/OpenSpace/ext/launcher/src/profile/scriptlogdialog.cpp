@@ -161,9 +161,9 @@ void ScriptLogDialog::updateScriptList() {
     int index = -1;
     _scriptlogList->clear();
     for (const std::string& script : _scripts) {
-        const bool foundDynamic = script.find(filter) != std::string::npos;
+        const bool foundDynamic = script.contains(filter);
         const bool foundStatic =
-            _fixedFilter.empty() ? true : script.find(_fixedFilter) != std::string::npos;
+            _fixedFilter.empty() ? true : script.contains(_fixedFilter);
         if (foundDynamic && foundStatic) {
             if (script == selection && index == -1) {
                 index = _scriptlogList->count();

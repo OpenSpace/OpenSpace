@@ -52,9 +52,9 @@
 #include <openspace/scene/lightsource.h>
 #include <openspace/scene/profile.h>
 #include <openspace/scene/rotation.h>
+#include <openspace/scene/scale.h>
 #include <openspace/scene/scene.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/scene/scale.h>
 #include <openspace/scene/translation.h>
 #include <openspace/scene/timeframe.h>
 #include <openspace/scripting/scriptengine.h>

@@ -213,8 +213,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
     // 3
     if (!report.permanentPointsNeedUpdate) {
         if (report.floatingPointNeedsUpdate) {
-            // If no other values have been touched, we only need to upload the
-            // floating value
+            // If no other values have been touched, we only need to upload the floating
+            // value
             glNamedBufferSubData(
                 _primaryRenderInformation._vbo,
                 _primaryRenderInformation.first * sizeof(TrailVBOLayout<float>),
@@ -236,8 +236,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             );
 
             if (_indexBufferDirty) {
-                // We only need to upload the index buffer if it has been invalidated
-                // by changing the number of values we want to represent
+                // We only need to upload the index buffer if it has been invalidated by
+                // changing the number of values we want to represent
                 glNamedBufferData(
                     _primaryRenderInformation._ibo,
                     _indexArray.size() * sizeof(unsigned int),
@@ -248,8 +248,8 @@ void RenderableTrailOrbit::update(const UpdateData& data) {
             }
         }
         else {
-            // The lambda expression that will upload parts of the array starting at
-            // begin and containing length number of elements
+            // The lambda expression that will upload parts of the array starting at begin
+            // and containing length number of elements
             auto upload = [this](int begin, int length) {
                 glNamedBufferSubData(
                     _primaryRenderInformation._vbo,
@@ -329,7 +329,11 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     constexpr double Epsilon = 1e-7;
     // When time stands still (at the iron hill), we don't need to perform any work
     if (std::abs(data.time.j2000Seconds() - _previousTime) < Epsilon) {
-        return { false, false, 0 };
+        return {
+            .floatingPointNeedsUpdate = false,
+            .permanentPointsNeedUpdate = false,
+            .nUpdated = 0
+        };
     }
 
     using namespace std::chrono;
@@ -346,14 +350,22 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
     // intervals
 
     if (std::abs(delta) < Epsilon) {
-        return { false, false, 0 };
+        return {
+            .floatingPointNeedsUpdate = false,
+            .permanentPointsNeedUpdate = false,
+            .nUpdated = 0
+        };
     }
 
     if (delta > 0.0) {
         // Check whether we need to drop a new permanent point. This is only the case if
         // enough (> secondsPerPoint) time has passed since the last permanent point
         if (std::abs(delta) < secondsPerPoint) {
-            return { true, false, 0 };
+            return {
+                .floatingPointNeedsUpdate = true,
+                .permanentPointsNeedUpdate = false,
+                .nUpdated = 0
+            };
         }
 
         // See how many points we need to drop
@@ -387,7 +399,11 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // future
         _firstPointTime += nNewPoints * secondsPerPoint;
 
-        return { false, true, static_cast<int>(nNewPoints) };
+        return {
+            .floatingPointNeedsUpdate = false,
+            .permanentPointsNeedUpdate = true,
+            .nUpdated = static_cast<int>(nNewPoints)
+        };
     }
     else {
         // See how many new points needs to be generated. Delta is negative, so we need
@@ -399,7 +415,11 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // array, it is faster to regenerate the entire array
         if (nNewPoints >= _resolution) {
             fullSweep(data.time.j2000Seconds());
-            return { false, true, UpdateReport::All };
+            return {
+                .floatingPointNeedsUpdate = false,
+                .permanentPointsNeedUpdate = true,
+                .nUpdated = UpdateReport::All
+            };
         }
 
         for (int i = 0; i < nNewPoints; i++) {
@@ -425,7 +445,11 @@ RenderableTrailOrbit::UpdateReport RenderableTrailOrbit::updateTrails(
         // The previously youngest point has become nNewPoints steps older
         _lastPointTime -= nNewPoints * secondsPerPoint;
 
-        return { false, true, static_cast<int>(-nNewPoints) };
+        return {
+            .floatingPointNeedsUpdate = false,
+            .permanentPointsNeedUpdate = true,
+            .nUpdated = static_cast<int>(-nNewPoints)
+        };
     }
 }
 
@@ -448,7 +472,7 @@ void RenderableTrailOrbit::fullSweep(double time) {
     using namespace std::chrono;
     const double periodSeconds = _period * duration_cast<seconds>(hours(24)).count();
     const double secondsPerPoint = periodSeconds / (_resolution - 1);
-    // starting at 1 because the first position is a floating current one
+    // Starting at 1 because the first position is a floating current one
     for (int i = 1; i < _resolution; i++) {
         const glm::vec3 p = translationPosition(Time(time));
         _vertexArray[i] = { p.x, p.y, p.z };

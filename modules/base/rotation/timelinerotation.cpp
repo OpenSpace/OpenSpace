@@ -49,7 +49,7 @@ namespace {
     // interpolate between two adjacent keyframes.
     struct [[codegen::Dictionary(TimelineRotation)]] Parameters {
         // A table of keyframes, with keys formatted as YYYY-MM-DDTHH:MM:SS and values
-        // that are valid Rotation objects
+        // that are valid Rotation objects.
         std::map<std::string, ghoul::Dictionary> keyframes
             [[codegen::reference("core_transform_rotation")]];
 

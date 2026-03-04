@@ -48,7 +48,7 @@ private:
     struct Component {
         OptionProperty type;
         StringProperty nodeIdentifier;
-        SceneGraphNode* node;
+        SceneGraphNode* node = nullptr;
     };
 
     static std::pair<glm::dvec3, std::string> positionAndLabel(Component& comp);

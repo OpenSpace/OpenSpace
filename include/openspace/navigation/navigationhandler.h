@@ -217,8 +217,8 @@ private:
 
         bool isMouseFirstPress = false;
         bool isMousePressed = false;
-        glm::vec2 clickPosition;
-        glm::vec2 currentPosition;
+        glm::vec2 clickPosition = glm::vec2(0.f);
+        glm::vec2 currentPosition = glm::vec2(0.f);
     } _mouseVisualizer;
 };
 

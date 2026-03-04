@@ -67,11 +67,11 @@
 #include <modules/base/rendering/renderableprism.h>
 #include <modules/base/rendering/renderabletimevaryingsphere.h>
 #include <modules/base/rendering/screenspacedashboard.h>
+#include <modules/base/rendering/screenspacedate.h>
 #include <modules/base/rendering/screenspaceimagelocal.h>
 #include <modules/base/rendering/screenspaceimageonline.h>
 #include <modules/base/rendering/screenspaceinsetblackout.h>
 #include <modules/base/rendering/screenspacerenderablerenderable.h>
-#include <modules/base/rendering/screenspacedate.h>
 #include <modules/base/rendering/screenspacetext.h>
 #include <modules/base/rendering/screenspacetimevaryingimageonline.h>
 #include <modules/base/rotation/constantrotation.h>
@@ -88,11 +88,11 @@
 #include <modules/base/scale/timedependentscale.h>
 #include <modules/base/scale/timelinescale.h>
 #include <modules/base/task/convertmodeltask.h>
-#include <modules/base/translation/timelinetranslation.h>
 #include <modules/base/translation/globetranslation.h>
 #include <modules/base/translation/luatranslation.h>
 #include <modules/base/translation/multitranslation.h>
 #include <modules/base/translation/statictranslation.h>
+#include <modules/base/translation/timelinetranslation.h>
 #include <modules/base/timeframe/timeframeinterval.h>
 #include <modules/base/timeframe/timeframeunion.h>
 #include <openspace/documentation/documentation.h>
@@ -108,7 +108,9 @@ namespace openspace {
 ghoul::opengl::ProgramObjectManager BaseModule::ProgramObjectManager;
 ghoul::opengl::TextureManager BaseModule::TextureManager;
 
-BaseModule::BaseModule() : OpenSpaceModule(BaseModule::Name) {}
+BaseModule::BaseModule()
+    : OpenSpaceModule(BaseModule::Name)
+{}
 
 void BaseModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<ScreenSpaceRenderable>* fSsRenderable =

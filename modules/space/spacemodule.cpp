@@ -34,10 +34,10 @@
 #include <modules/space/rendering/renderablestars.h>
 #include <modules/space/rendering/renderabletravelspeed.h>
 #include <modules/space/timeframe/timeframekernel.h>
-#include <modules/space/translation/keplertranslation.h>
-#include <modules/space/translation/spicetranslation.h>
 #include <modules/space/translation/gptranslation.h>
 #include <modules/space/translation/horizonstranslation.h>
+#include <modules/space/translation/keplertranslation.h>
+#include <modules/space/translation/spicetranslation.h>
 #include <modules/space/rotation/spicerotation.h>
 #include <openspace/documentation/documentation.h>
 #include <openspace/rendering/renderable.h>

@@ -115,7 +115,7 @@ Tile::Status TileIndexTileProvider::tileStatus(const TileIndex&) {
 }
 
 TileDepthTransform TileIndexTileProvider::depthTransform() {
-    return { 0.f, 1.f };
+    return { .scale = 0.f, .offset = 1.f };
 }
 
 void TileIndexTileProvider::update() {}

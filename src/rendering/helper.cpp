@@ -42,124 +42,120 @@
 #include <string_view>
 
 namespace {
+    struct VertexXYUVRGBA {
+        glm::vec2 position;
+        glm::vec2 texCoords;
+        glm::vec4 color;
+    };
 
-struct VertexXYUVRGBA {
-    glm::vec2 position;
-    glm::vec2 texCoords;
-    glm::vec4 color;
-};
+    bool isInitialized = false;
 
-bool isInitialized = false;
+    std::filesystem::path xyuvrgbaVertexFile;
+    std::filesystem::path xyuvrgbaFragmentFile;
 
-std::filesystem::path xyuvrgbaVertexFile;
-std::filesystem::path xyuvrgbaFragmentFile;
+    std::filesystem::path screenFillingVertexFile;
+    std::filesystem::path screenFillingFragmentFile;
 
-std::filesystem::path screenFillingVertexFile;
-std::filesystem::path screenFillingFragmentFile;
+    constexpr std::string_view XyuvrgbaVertexCode = R"(
+    #version __CONTEXT__
 
-constexpr std::string_view XyuvrgbaVertexCode = R"(
-#version __CONTEXT__
+    layout(location = 0) in vec2 in_position;
+    layout(location = 1) in vec2 in_texCoords;
+    layout(location = 2) in vec4 in_color;
 
-layout(location = 0) in vec2 in_position;
-layout(location = 1) in vec2 in_texCoords;
-layout(location = 2) in vec4 in_color;
+    out Data {
+      vec2 position;
+      vec2 texCoords;
+      vec4 color;
+      float depth;
+    } out_data;
 
-out Data {
-  vec2 position;
-  vec2 texCoords;
-  vec4 color;
-  float depth;
-} out_data;
-
-uniform mat4 proj;
-
-
-void main() {
-  out_data.position = in_position;
-  out_data.texCoords = in_texCoords;
-  out_data.color = in_color;
-  gl_Position = proj * vec4(in_position, 0.0, 1.0);
-  out_data.depth = gl_Position.w;
-}
-
-)";
-
-constexpr std::string_view ScreenFillingQuadVertexCode = R"(
-#version __CONTEXT__
-
-out Data {
-  vec2 position;
-  vec2 texCoords;
-  vec4 color;
-  float depth;
-} out_data;
-
-const vec2 positions[6] = vec2[](
-  vec2(-1.0, -1.0), vec2( 1.0, -1.0), vec2( 1.0,  1.0),
-  vec2(-1.0, -1.0), vec2( 1.0,  1.0), vec2(-1.0,  1.0)
-);
+    uniform mat4 proj;
 
 
-void main() {
-  gl_Position = vec4(positions[gl_VertexID], 0.0, 1.0);
-  out_data.texCoords = (positions[gl_VertexID] + 1.0) / 2.0;
-  out_data.color = vec4(1.0);
-}
-
-)";
-
-constexpr std::string_view XyuvrgbaFragmentCode = R"(
-#version __CONTEXT__
-
-#include "fragment.glsl"
-
-in Data {
-  vec2 position;
-  vec2 texCoords;
-  vec4 color;
-  float depth;
-} in_data;
-
-out vec4 out_color;
-
-uniform bool hasTexture = false;
-uniform bvec2 shouldFlipTexture = bvec2(false, false);
-uniform sampler2D tex;
-uniform vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
-
-
-void main() {
-  if (hasTexture) {
-    vec2 texCoords = in_data.texCoords;
-    if (shouldFlipTexture.x) {
-      texCoords.x = 1.0 - texCoords.x;
+    void main() {
+      out_data.position = in_position;
+      out_data.texCoords = in_texCoords;
+      out_data.color = in_color;
+      gl_Position = proj * vec4(in_position, 0.0, 1.0);
+      out_data.depth = gl_Position.w;
     }
-    if (shouldFlipTexture.y) {
-      texCoords.y = 1.0 - texCoords.y;
-    }
-    out_color = in_data.color * color * texture(tex, texCoords);
-  }
-  else {
-    out_color = in_data.color * color;
-  }
-}
-)";
+    )";
 
+    constexpr std::string_view ScreenFillingQuadVertexCode = R"(
+    #version __CONTEXT__
+
+    out Data {
+      vec2 position;
+      vec2 texCoords;
+      vec4 color;
+      float depth;
+    } out_data;
+
+    const vec2 positions[6] = vec2[](
+      vec2(-1.0, -1.0), vec2( 1.0, -1.0), vec2( 1.0,  1.0),
+      vec2(-1.0, -1.0), vec2( 1.0,  1.0), vec2(-1.0,  1.0)
+    );
+
+
+    void main() {
+      gl_Position = vec4(positions[gl_VertexID], 0.0, 1.0);
+      out_data.texCoords = (positions[gl_VertexID] + 1.0) / 2.0;
+      out_data.color = vec4(1.0);
+    }
+    )";
+
+    constexpr std::string_view XyuvrgbaFragmentCode = R"(
+    #version __CONTEXT__
+
+    #include "fragment.glsl"
+
+    in Data {
+      vec2 position;
+      vec2 texCoords;
+      vec4 color;
+      float depth;
+    } in_data;
+
+    out vec4 out_color;
+
+    uniform bool hasTexture = false;
+    uniform bvec2 shouldFlipTexture = bvec2(false, false);
+    uniform sampler2D tex;
+    uniform vec4 color = vec4(1.0, 1.0, 1.0, 1.0);
+
+
+    void main() {
+      if (hasTexture) {
+        vec2 texCoords = in_data.texCoords;
+        if (shouldFlipTexture.x) {
+          texCoords.x = 1.0 - texCoords.x;
+        }
+        if (shouldFlipTexture.y) {
+          texCoords.y = 1.0 - texCoords.y;
+        }
+        out_color = in_data.color * color * texture(tex, texCoords);
+      }
+      else {
+        out_color = in_data.color * color;
+      }
+    }
+    )";
 } // namespace
 
 namespace openspace::rendering {
 
 namespace detail {
 
-Shaders& gShadersConstructor() {
-    static Shaders g;
-    return g;
-}
+    Shaders& gShadersConstructor() {
+        static Shaders g;
+        return g;
+    }
 
-VertexObjects& gVertexObjectsConstructor() {
-    static VertexObjects g;
-    return g;
-}
+    VertexObjects& gVertexObjectsConstructor() {
+        static VertexObjects g;
+        return g;
+    }
 
 } // namespace detail
 
@@ -288,7 +284,9 @@ void initialize() {
     // Sphere vertex array object
     //
     VertexIndexListCombo<Vertex> sphereData = createSphere(
-        64, glm::vec3(1.f, 1.f, 1.f), glm::vec4(1.f, 1.f, 1.f, 1.f)
+        64,
+        glm::vec3(1.f),
+        glm::vec4(1.f)
     );
     glCreateBuffers(1, &vertexObjects.sphere.vbo);
     glNamedBufferStorage(
@@ -627,7 +625,6 @@ void renderLine(const glm::vec2& startPosition, const glm::vec2& endPosition,
     shdr.program->setUniform(shdr.cache.proj, ortho(glm::vec2(0.f), glm::vec2(1.f)));
     shdr.program->setUniform(shdr.cache.hasTexture, 0);
 
-
     // Move the start and end position from a [0,res] range to a [-1, 1] range
     const glm::vec2 start = (startPosition / size) * 2.f - glm::vec2(1.f);
     const glm::vec2 end = (endPosition / size) * 2.f - glm::vec2(1.f);
@@ -720,9 +717,9 @@ VertexIndexListCombo<Vertex> createSphere(int nSegments, glm::vec3 radii,
             const float fj = static_cast<float>(j);
             // inclination angle (north to south)
             // 0 -> PI
-            // azimuth angle (east to west)
             const float theta = fi * glm::pi<float>() / nSegments;
 
+            // azimuth angle (east to west)
             // 0 -> 2*PI
             const float phi = fj * glm::pi<float>() * 2.f / nSegments;
 
@@ -757,7 +754,10 @@ VertexIndexListCombo<Vertex> createSphere(int nSegments, glm::vec3 radii,
         }
     }
 
-    return { vertices, indices };
+    return {
+        .vertices = vertices,
+        .indices = indices
+    };
 }
 
 static VertexIndexListCombo<VertexXYZNormal> createConicalCylinder(unsigned int nSegments,
@@ -893,7 +893,10 @@ static VertexIndexListCombo<VertexXYZNormal> createConicalCylinder(unsigned int 
         indexArray.push_back(v1);
     }
 
-    return { vertices, indexArray };
+    return {
+        .vertices = vertices,
+        .indices = indexArray
+    };
 }
 
 VertexIndexListCombo<VertexXYZNormal> createCylinder(unsigned int nSegments,
@@ -909,7 +912,7 @@ VertexIndexListCombo<VertexXYZNormal> createCone(unsigned int nSegments, float r
 }
 
 void LightSourceRenderData::updateBasedOnLightSources(const RenderData& renderData,
-                                const std::vector<std::unique_ptr<LightSource>>& sources)
+                                 const std::vector<std::unique_ptr<LightSource>>& sources)
 {
     unsigned int nEnabledLightSources = 0;
     intensitiesBuffer.resize(sources.size());

@@ -56,8 +56,7 @@ std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFileP
 
     if (kamStatus != ccmc::FileReader::OK) {
         LERROR(std::format(
-            "Failed to create a Kameleon Object from file '{}'",
-            cdfFilePath
+            "Failed to create a Kameleon Object from file '{}'", cdfFilePath
         ));
        return nullptr;
     }
@@ -73,15 +72,13 @@ std::unique_ptr<ccmc::Kameleon> createKameleonObject(const std::string& cdfFileP
  */
 double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     // Inspiration from 'void KameleonInterpolator::setEphemTime()' which doesn't seem to
-    // exist in the version of Kameleon that is included in OpenSpace. Alterations
-    // done to fit here.
-    // As a new version of Kameleon is included in OpenSpace this function may prove to be
-    // redundant!
+    // exist in the version of Kameleon that is included in OpenSpace. Alterations done to
+    // fit here. As a new version of Kameleon is included in OpenSpace this function may
+    // prove to be redundant
 
     std::string seqStartStr;
     if (kameleon->doesAttributeExist("start_time")) {
-        seqStartStr =
-                kameleon->getGlobalAttribute("start_time").getAttributeString();
+        seqStartStr = kameleon->getGlobalAttribute("start_time").getAttributeString();
     }
     else if (kameleon->doesAttributeExist("tim_rundate_cal")) {
         seqStartStr =
@@ -124,8 +121,8 @@ double getTime(ccmc::Kameleon* kameleon, double manualOffset) {
     }
     else {
         LWARNING(
-            "No starting time attribute could be found in the .cdf file. Starting "
-            "time is set to 01.JAN.2000 12:00"
+            "No starting time attribute could be found in the .cdf file. Starting time "
+            "is set to 01.JAN.2000 12:00"
         );
     }
 

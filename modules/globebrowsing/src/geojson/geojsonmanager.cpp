@@ -71,7 +71,9 @@ void GeoJsonManager::addGeoJsonLayer(const ghoul::Dictionary& layerDict) {
     try {
         const std::string identifier = layerDict.value<std::string>("Identifier");
         if (hasPropertySubOwner(identifier)) {
-            LERROR("GeoJson layer with identifier '" + identifier + "' already exists");
+            LERROR(std::format(
+                "GeoJson layer with identifier '{}' already exists", identifier
+            ));
             return;
         }
 
@@ -98,14 +100,14 @@ void GeoJsonManager::deleteLayer(const std::string& layerIdentifier) {
 
     for (auto it = _geoJsonObjects.begin(); it != _geoJsonObjects.end(); it++) {
         if (it->get()->identifier() == layerIdentifier) {
-            LINFO("Deleting GeoJson layer: " + layerIdentifier);
+            LINFO(std::format("Deleting GeoJson layer: {}", layerIdentifier));
             removePropertySubOwner(it->get());
             (*it)->deinitializeGL();
             _geoJsonObjects.erase(it);
             return;
         }
     }
-    LERROR("Could not find GeoJson layer " + layerIdentifier);
+    LERROR(std::format("Could not find GeoJson layer {}", layerIdentifier));
 }
 
 void GeoJsonManager::update() {

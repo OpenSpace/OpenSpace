@@ -82,7 +82,7 @@ namespace {
 }
 
 /**
- * Returns a list of all loaded kernels
+ * Returns a list of all loaded kernels.
  */
 [[codegen::luawrap]] std::vector<std::filesystem::path> kernels() {
     return SpiceManager::ref().loadedKernels();
@@ -105,6 +105,7 @@ namespace {
 
 /**
  * Returns the rotationMatrix for a given body in a frame of reference at a specific time.
+ *
  * Example:
  * openspace.spice.rotationMatrix('INSIGHT_LANDER_CRUISE','MARS', '2018 NOV 26 19:45:34')
  */
@@ -123,6 +124,7 @@ namespace {
 /**
  * Returns the position for a given body relative to another body, in a given frame of
  * reference, at a specific time.
+ *
  * Example:
  * openspace.spice.position('INSIGHT', 'MARS',' GALACTIC', '2018 NOV 26 19:45:34')
  */
@@ -156,7 +158,7 @@ namespace {
     SpiceInt n = 0;
 
     //
-    // First exact the constants required by a type 10 SPK kernel.
+    // First exact the constants required by a type 10 SPK kernel
     //
 
     std::array<double, 8> constants;
@@ -194,8 +196,8 @@ namespace {
     );
 
     // The TLE files returned by Celestrak are of the 3-line variant where the first line
-    // contains a human-readable name for the spacecraft
-    // files are encoded with Windows line endings (CRLF)
+    // contains a human-readable name for the spacecraft files are encoded with Windows
+    // line endings (CRLF)
 
     std::vector<std::string> lines = ghoul::tokenizeString(contents, '\n');
 
@@ -237,7 +239,7 @@ namespace {
 
     // Convert the Two Line Elements lines to the element sets
     SpiceDouble epoch;
-    std::array<SpiceDouble, 10> elems;
+    std::array<SpiceDouble, 10> elems = {};
     getelm_c(1950, TLEColumnWidth + 1, spiceLines, &epoch, elems.data());
 
     // The size of a type SPK10 spice kernel is not affected by the time validity, so we

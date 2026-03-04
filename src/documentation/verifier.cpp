@@ -113,13 +113,10 @@ template class AnnotationVerifier<IntVerifier>;
 template class AnnotationVerifier<DoubleVerifier>;
 template class AnnotationVerifier<StringVerifier>;
 template class AnnotationVerifier<TableVerifier>;
-//template class AnnotationVerifier<BoolVector2Verifier>;
 template class AnnotationVerifier<IntVector2Verifier>;
 template class AnnotationVerifier<DoubleVector2Verifier>;
-//template class AnnotationVerifier<BoolVector3Verifier>;
 template class AnnotationVerifier<IntVector3Verifier>;
 template class AnnotationVerifier<DoubleVector3Verifier>;
-//template class AnnotationVerifier<BoolVector4Verifier>;
 template class AnnotationVerifier<IntVector4Verifier>;
 template class AnnotationVerifier<DoubleVector4Verifier>;
 
@@ -136,35 +133,23 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
 {
     if (dict.hasValue<int>(key)) {
         // We have a key and the value is int, we are done
-        TestResult res;
-        res.success = true;
-        return res;
+        return {
+            .success = true
+        };
     }
-    else {
-        if (dict.hasKey(key)) {
-            if (dict.hasValue<double>(key)) {
-                // If we have a double value, we need to check if it is integer
-                const double value = dict.value<double>(key);
-                double intPart = 0.0;
-                const bool isInt = std::modf(value, &intPart) == 0.0;
-                if (isInt) {
-                    TestResult res;
-                    res.success = true;
-                    return res;
-                }
-                else {
-                    TestResult res;
-                    res.success = false;
-                    TestResult::Offense o = {
-                        .offender = key,
-                        .reason = TestResult::Offense::Reason::WrongType
-                    };
-                    res.offenses.push_back(std::move(o));
-                    return res;
-                }
+
+    if (dict.hasKey(key)) {
+        if (dict.hasValue<double>(key)) {
+            // If we have a double value, we need to check if it is integer
+            const double value = dict.value<double>(key);
+            double intPart = 0.0;
+            const bool isInt = std::modf(value, &intPart) == 0.0;
+            if (isInt) {
+                return {
+                    .success = true
+                };
             }
             else {
-                // If we don't have a double value, we cannot have an int value
                 TestResult res;
                 res.success = false;
                 TestResult::Offense o = {
@@ -176,15 +161,26 @@ TestResult IntVerifier::operator()(const ghoul::Dictionary& dict,
             }
         }
         else {
+            // If we don't have a double value, we cannot have an int value
             TestResult res;
             res.success = false;
             TestResult::Offense o = {
                 .offender = key,
-                .reason = TestResult::Offense::Reason::MissingKey
+                .reason = TestResult::Offense::Reason::WrongType
             };
             res.offenses.push_back(std::move(o));
             return res;
         }
+    }
+    else {
+        TestResult res;
+        res.success = false;
+        TestResult::Offense o = {
+            .offender = key,
+            .reason = TestResult::Offense::Reason::MissingKey
+        };
+        res.offenses.push_back(std::move(o));
+        return res;
     }
 }
 
@@ -225,7 +221,9 @@ std::string StringVerifier::type() const {
     return "String";
 }
 
-IdentifierVerifier::IdentifierVerifier() : StringVerifier(true) {}
+IdentifierVerifier::IdentifierVerifier()
+    : StringVerifier(true)
+{}
 
 TestResult IdentifierVerifier::operator()(const ghoul::Dictionary& dict,
                                           const std::string& key) const
@@ -329,7 +327,9 @@ bool DirectoryVerifier::mustExist() const {
     return _directoryMustExist;
 }
 
-DateTimeVerifier::DateTimeVerifier() : StringVerifier(true) {}
+DateTimeVerifier::DateTimeVerifier()
+    : StringVerifier(true)
+{}
 
 TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
                                         const std::string& key) const
@@ -347,7 +347,7 @@ TestResult DateTimeVerifier::operator()(const ghoul::Dictionary& dict,
     std::istringstream ss(dateTime);
     ss >> std::get_time(&t, format.c_str());
 
-    // first check format (automatically checks if valid time)
+    // First check format (automatically checks if valid time)
     if (ss.fail()) {
         // The format might be of the type "YYYY MM DD hh:mm:ss"
         std::istringstream ss2(dateTime);
@@ -480,38 +480,28 @@ TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dic
                                                     const std::string& key) const
 {
     if (dict.hasValue<glm::ivec2>(key)) {
-        TestResult res;
-        res.success = true;
-        return res;
+        return {
+            .success = true
+        };
     }
-    else {
-        if (dict.hasKey(key)) {
-            if (dict.hasValue<glm::dvec2>(key)) {
-                const glm::dvec2 value = dict.value<glm::dvec2>(key);
-                glm::dvec2 intPart;
-                const glm::bvec2 isInt = glm::bvec2(
-                    modf(value.x, &intPart.x) == 0.0,
-                    modf(value.y, &intPart.y) == 0.0
-                );
-                if (isInt.x && isInt.y) {
-                    TestResult res;
-                    res.success = true;
-                    return res;
-                }
-                else {
-                    TestResult res;
-                    res.success = false;
-                    TestResult::Offense o = {
-                        .offender = key,
-                        .reason = TestResult::Offense::Reason::WrongType
-                    };
-                    res.offenses.push_back(std::move(o));
-                    return res;
-                }
+
+    if (dict.hasKey(key)) {
+        if (dict.hasValue<glm::dvec2>(key)) {
+            const glm::dvec2 value = dict.value<glm::dvec2>(key);
+            glm::dvec2 intPart;
+            const glm::bvec2 isInt = glm::bvec2(
+                std::modf(value.x, &intPart.x) == 0.0,
+                std::modf(value.y, &intPart.y) == 0.0
+            );
+            if (isInt.x && isInt.y) {
+                return {
+                    .success = true
+                };
             }
             else {
-                TestResult res;
-                res.success = false;
+                TestResult res = {
+                    .success = false
+                };
                 TestResult::Offense o = {
                     .offender = key,
                     .reason = TestResult::Offense::Reason::WrongType
@@ -521,15 +511,27 @@ TestResult TemplateVerifier<glm::ivec2>::operator()(const ghoul::Dictionary& dic
             }
         }
         else {
-            TestResult res;
-            res.success = false;
+            TestResult res = {
+                .success = false
+            };
             TestResult::Offense o = {
                 .offender = key,
-                .reason = TestResult::Offense::Reason::MissingKey
+                .reason = TestResult::Offense::Reason::WrongType
             };
             res.offenses.push_back(std::move(o));
             return res;
         }
+    }
+    else {
+        TestResult res = {
+            .success = false
+        };
+        TestResult::Offense o = {
+            .offender = key,
+            .reason = TestResult::Offense::Reason::MissingKey
+        };
+        res.offenses.push_back(std::move(o));
+        return res;
     }
 }
 
@@ -538,39 +540,29 @@ TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dic
                                                     const std::string& key) const
 {
     if (dict.hasValue<glm::ivec3>(key)) {
-        TestResult res;
-        res.success = true;
-        return res;
+        return {
+            .success = true
+        };
     }
-    else {
-        if (dict.hasKey(key)) {
-            if (dict.hasValue<glm::dvec3>(key)) {
-                const glm::dvec3 value = dict.value<glm::dvec3>(key);
-                glm::dvec3 intPart;
-                const glm::bvec3 isInt = glm::bvec3(
-                    modf(value.x, &intPart.x) == 0.0,
-                    modf(value.y, &intPart.y) == 0.0,
-                    modf(value.z, &intPart.z) == 0.0
-                );
-                if (isInt.x && isInt.y && isInt.z) {
-                    TestResult res;
-                    res.success = true;
-                    return res;
-                }
-                else {
-                    TestResult res;
-                    res.success = false;
-                    TestResult::Offense o = {
-                        .offender = key,
-                        .reason = TestResult::Offense::Reason::WrongType
-                    };
-                    res.offenses.push_back(std::move(o));
-                    return res;
-                }
+
+    if (dict.hasKey(key)) {
+        if (dict.hasValue<glm::dvec3>(key)) {
+            const glm::dvec3 value = dict.value<glm::dvec3>(key);
+            glm::dvec3 intPart;
+            const glm::bvec3 isInt = glm::bvec3(
+                modf(value.x, &intPart.x) == 0.0,
+                modf(value.y, &intPart.y) == 0.0,
+                modf(value.z, &intPart.z) == 0.0
+            );
+            if (isInt.x && isInt.y && isInt.z) {
+                return {
+                    .success = true
+                };
             }
             else {
-                TestResult res;
-                res.success = false;
+                TestResult res = {
+                    .success = false
+                };
                 TestResult::Offense o = {
                     .offender = key,
                     .reason = TestResult::Offense::Reason::WrongType
@@ -580,15 +572,27 @@ TestResult TemplateVerifier<glm::ivec3>::operator()(const ghoul::Dictionary& dic
             }
         }
         else {
-            TestResult res;
-            res.success = false;
+            TestResult res = {
+                .success = false
+            };
             TestResult::Offense o = {
                 .offender = key,
-                .reason = TestResult::Offense::Reason::MissingKey
+                .reason = TestResult::Offense::Reason::WrongType
             };
             res.offenses.push_back(std::move(o));
             return res;
         }
+    }
+    else {
+        TestResult res = {
+            .success = false
+        };
+        TestResult::Offense o = {
+            .offender = key,
+            .reason = TestResult::Offense::Reason::MissingKey
+        };
+        res.offenses.push_back(std::move(o));
+        return res;
     }
 }
 
@@ -597,41 +601,30 @@ TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dic
                                                     const std::string& key) const
 {
     if (dict.hasValue<glm::ivec4>(key)) {
-        TestResult res;
-        res.success = true;
-        return res;
+        return {
+            .success = true
+        };
     }
-    else {
-        if (dict.hasKey(key)) {
-            if (dict.hasValue<glm::dvec4>(key)) {
-                const glm::dvec4 value = dict.value<glm::dvec4>(key);
-                glm::dvec4 intPart;
-                const glm::bvec4 isInt = glm::bvec4(
-                    modf(value.x, &intPart.x) == 0.0,
-                    modf(value.y, &intPart.y) == 0.0,
-                    modf(value.z, &intPart.z) == 0.0,
-                    modf(value.w, &intPart.w) == 0.0
-                );
-                if (isInt.x && isInt.y && isInt.z && isInt.w) {
-                    TestResult res = {
-                        .success = true
-                    };
-                    return res;
-                }
-                else {
-                    TestResult res;
-                    res.success = false;
-                    TestResult::Offense o = {
-                        .offender = key,
-                        .reason = TestResult::Offense::Reason::WrongType
-                    };
-                    res.offenses.push_back(std::move(o));
-                    return res;
-                }
+
+    if (dict.hasKey(key)) {
+        if (dict.hasValue<glm::dvec4>(key)) {
+            const glm::dvec4 value = dict.value<glm::dvec4>(key);
+            glm::dvec4 intPart;
+            const glm::bvec4 isInt = glm::bvec4(
+                std::modf(value.x, &intPart.x) == 0.0,
+                std::modf(value.y, &intPart.y) == 0.0,
+                std::modf(value.z, &intPart.z) == 0.0,
+                std::modf(value.w, &intPart.w) == 0.0
+            );
+            if (isInt.x && isInt.y && isInt.z && isInt.w) {
+                return {
+                    .success = true
+                };
             }
             else {
-                TestResult res;
-                res.success = false;
+                TestResult res = {
+                    .success = false
+                };
                 TestResult::Offense o = {
                     .offender = key,
                     .reason = TestResult::Offense::Reason::WrongType
@@ -641,15 +634,27 @@ TestResult TemplateVerifier<glm::ivec4>::operator()(const ghoul::Dictionary& dic
             }
         }
         else {
-            TestResult res;
-            res.success = false;
+            TestResult res = {
+                .success = false
+            };
             TestResult::Offense o = {
                 .offender = key,
-                .reason = TestResult::Offense::Reason::MissingKey
+                .reason = TestResult::Offense::Reason::WrongType
             };
             res.offenses.push_back(std::move(o));
             return res;
         }
+    }
+    else {
+        TestResult res = {
+            .success = false
+        };
+        TestResult::Offense o = {
+            .offender = key,
+            .reason = TestResult::Offense::Reason::MissingKey
+        };
+        res.offenses.push_back(std::move(o));
+        return res;
     }
 }
 
@@ -692,8 +697,9 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
     }
     else {
         if (dictionary.hasKey(key)) {
-            TestResult res;
-            res.success = false;
+            TestResult res = {
+                .success = false
+            };
             TestResult::Offense o = {
                 .offender = key,
                 .reason = TestResult::Offense::Reason::WrongType
@@ -702,8 +708,9 @@ TestResult TableVerifier::operator()(const ghoul::Dictionary& dictionary,
             return res;
         }
         else {
-            TestResult res;
-            res.success = false;
+            TestResult res = {
+                .success = false
+            };
             TestResult::Offense o = {
                 .offender = key,
                 .reason = TestResult::Offense::Reason::MissingKey
@@ -760,47 +767,46 @@ TestResult ReferencingVerifier::operator()(const ghoul::Dictionary& dictionary,
                                            const std::string& key) const
 {
     TestResult res = TableVerifier::operator()(dictionary, key);
-    if (res.success) {
-        std::vector<Documentation> docs = DocEng.documentations();
-
-        auto it = std::find_if(
-            docs.begin(),
-            docs.end(),
-            [this](const Documentation& doc) { return doc.id == identifier; }
-        );
-
-        if (it == docs.end()) {
-            res.success = false;
-            TestResult::Offense o = {
-                .offender = key,
-                .reason = TestResult::Offense::Reason::UnknownIdentifier
-            };
-            res.offenses.push_back(std::move(o));
-            return res;
-        }
-
-        const ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
-        TestResult r = testSpecification(*it, d);
-
-        // Add the 'key' as a prefix to make the offender a fully qualified identifer
-        for (TestResult::Offense& s : r.offenses) {
-            s.offender = std::format("{}.{}", key, s.offender);
-        }
-
-        // Add the 'key' as a prefix to make the warning a fully qualified identifer
-        for (TestResult::Warning& w : r.warnings) {
-            w.offender = std::format("{}.{}", key, w.offender);
-        }
-
-        return r;
-    }
-    else {
+    if (!res.success) {
         return res;
     }
+
+    std::vector<Documentation> docs = DocEng.documentations();
+
+    auto it = std::find_if(
+        docs.begin(),
+        docs.end(),
+        [this](const Documentation& doc) { return doc.id == identifier; }
+    );
+
+    if (it == docs.end()) {
+        res.success = false;
+        TestResult::Offense o = {
+            .offender = key,
+            .reason = TestResult::Offense::Reason::UnknownIdentifier
+        };
+        res.offenses.push_back(std::move(o));
+        return res;
+    }
+
+    const ghoul::Dictionary d = dictionary.value<ghoul::Dictionary>(key);
+    TestResult r = testSpecification(*it, d);
+
+    // Add the 'key' as a prefix to make the offender a fully qualified identifer
+    for (TestResult::Offense& s : r.offenses) {
+        s.offender = std::format("{}.{}", key, s.offender);
+    }
+
+    // Add the 'key' as a prefix to make the warning a fully qualified identifer
+    for (TestResult::Warning& w : r.warnings) {
+        w.offender = std::format("{}.{}", key, w.offender);
+    }
+
+    return r;
 }
 
 std::string ReferencingVerifier::documentation() const {
-    return "Referencing Documentation: '" + identifier + "'";
+    return std::format("Referencing Documentation: '{}'", identifier);
 }
 
 OrVerifier::OrVerifier(
@@ -837,14 +843,14 @@ TestResult OrVerifier::operator()(const ghoul::Dictionary& dictionary,
     );
 
     if (success) {
-        TestResult r = {
+        return {
             .success = true
         };
-        return r;
     }
     else {
-        TestResult r;
-        r.success = false;
+        TestResult r = {
+            .success = false
+        };
 
         for (const TestResult& r2 : res) {
             for (const TestResult::Offense& o : r2.offenses) {

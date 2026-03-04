@@ -75,7 +75,7 @@ namespace {
 }
 
 /**
- * Adds a Tag to a SceneGraphNode identified by the provided uri.
+ * Adds a Tag to a SceneGraphNode identified by the provided URI.
  */
 [[codegen::luawrap]] void addTag(std::string uri, std::string tag) {
     SceneGraphNode* node = global::renderEngine->scene()->sceneGraphNode(uri);
@@ -123,8 +123,6 @@ namespace {
     }
 }
 
-// Closing the anoynmous namespace here to allow a unit test to access this function
-
 /**
  * Creates a 1 pixel image with a certain color in the cache folder and returns the path
  * to the file. If a cached file with the given name already exists, the path to that file
@@ -168,7 +166,7 @@ namespace {
 
         using Texture = ghoul::opengl::Texture;
 
-        Texture textureFromData = Texture(
+        Texture texture = Texture(
             ghoul::opengl::Texture::FormatInit{
                 .dimensions = glm::uvec3(Width, Height, 1),
                 .type = GL_TEXTURE_2D,
@@ -180,14 +178,7 @@ namespace {
         );
 
         try {
-            ghoul::io::TextureWriter::ref().saveTexture(
-                textureFromData,
-                fileName.string()
-            );
-        }
-        catch (const ghoul::io::TextureWriter::MissingWriterException& e) {
-            // This should not happen, as we know .png is a supported format
-            throw ghoul::lua::LuaError(e.message);
+            ghoul::io::TextureWriter::ref().saveTexture(texture, fileName.string());
         }
         catch (const std::filesystem::filesystem_error& e) {
             LERRORC("Exception: {}", e.what());
@@ -265,7 +256,7 @@ namespace {
  * Loads the CSV file provided as a parameter and returns it as a vector containing the
  * values of the each row. The inner vector has the same number of values as the CSV has
  * columns. The second parameter controls whether the first entry in the returned outer
- * vector is containing the names of the columns
+ * vector is containing the names of the columns.
  */
 [[codegen::luawrap]] std::vector<std::vector<std::string>> readCSVFile(
                                                                std::filesystem::path file,
@@ -280,21 +271,21 @@ namespace {
 }
 
 /**
- * Resets the camera position to the same position where the profile originally started
+ * Resets the camera position to the same position where the profile originally started.
  */
 [[codegen::luawrap]] void resetCamera() {
     setCameraFromProfile(*global::profile);
 }
 
 /**
- * Returns the whole configuration object as a Dictionary
+ * Returns the whole configuration object as a Dictionary.
  */
 [[codegen::luawrap]] ghoul::Dictionary configuration() {
     return global::configuration->createDictionary();
 }
 
 /**
- * Returns the current layer server from the configuration
+ * Returns the current layer server from the configuration.
  */
 [[codegen::luawrap]] std::string layerServer() {
     return layerServerToString(global::configuration->layerServer);

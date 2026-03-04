@@ -63,9 +63,8 @@ namespace {
     constexpr Property::PropertyInfo UnitTestInfo = {
         "UnitTest",
         "Take a unit test saving the LM data into file",
-        "LM - least-squares minimization using Levenberg-Marquardt algorithm."
-        "Used to find a new camera state from touch points when doing direct "
-        "manipulation.",
+        "LM - least-squares minimization using Levenberg-Marquardt algorithm. Used to "
+        "find a new camera state from touch points when doing direct manipulation.",
         Property::Visibility::Developer
     };
 
@@ -214,18 +213,18 @@ namespace {
     constexpr Property::PropertyInfo ZoomOutLimitInfo = {
         "ZoomOutLimit",
         "Zoom out Limit",
-        "The maximum distance you are allowed to navigate away from the anchor. "
-        "This should always be larger than the zoom in value if you want to be able "
-        "to zoom. Defaults to maximum allowed double.",
+        "The maximum distance you are allowed to navigate away from the anchor. This "
+        "should always be larger than the zoom in value if you want to be able to zoom. "
+        "Defaults to maximum allowed double.",
         Property::Visibility::User
     };
 
     constexpr Property::PropertyInfo ZoomInLimitInfo = {
         "ZoomInLimit",
         "Zoom in Limit",
-        "The minimum distance from the anchor that you are allowed to navigate to. "
-        "Its purpose is to limit zooming in on a node. If this value is not set it "
-        "defaults to the surface of the current anchor.",
+        "The minimum distance from the anchor that you are allowed to navigate to. Its "
+        "purpose is to limit zooming in on a node. If this value is not set it defaults "
+        "to the surface of the current anchor.",
         Property::Visibility::User
     };
 
@@ -240,15 +239,15 @@ namespace {
         "DirectManipulationThreshold",
         "Direct manipulation threshold",
         "This threshold affects the distance from the interaction sphere at which the "
-        "direct manipulation interaction mode starts being active. The value is given "
-        "as a factor times the interaction sphere.",
+        "direct manipulation interaction mode starts being active. The value is given as "
+        "a factor times the interaction sphere.",
         Property::Visibility::AdvancedUser
     };
 
     // Compute coefficient of decay based on current frametime; if frametime has been
     // longer than usual then multiple decay steps may be applied to keep the decay
     // relative to user time
-    double computeDecayCoeffFromFrametime(double coeff, int times) {
+    constexpr double computeDecayCoeffFromFrametime(double coeff, int times) {
         if (coeff > 0.00001) {
             return std::pow(coeff, times);
         }
@@ -316,8 +315,8 @@ TouchInteraction::TouchInteraction()
     , _enableDirectManipulation(EnableDirectManipulationInfo, true)
     , _directTouchDistanceThreshold(DirectManipulationThresholdInfo, 5.f, 0.f, 10.f)
     , _pinchInputs({
-        TouchInputHolder(TouchInput(0, 0, 0.f, 0.f, 0.0)),
-        TouchInputHolder(TouchInput(0, 0, 0.f, 0.f, 0.0))
+        TouchInputHolder(TouchInput(0, 0, glm::vec2(0.f), 0.0)),
+        TouchInputHolder(TouchInput(0, 0, glm::vec2(0.f), 0.0))
     })
     , _vel{ glm::dvec2(0.0), 0.0, 0.0, glm::dvec2(0.0) }
     , _sensitivity{ glm::dvec2(0.08, 0.045), 12.0, 2.75, glm::dvec2(0.08, 0.045) }
@@ -422,8 +421,7 @@ void TouchInteraction::updateStateFromInput(const std::vector<TouchInputHolder>&
         resetAfterInput();
     }
 
-    _directTouchMode = _enableDirectManipulation &&
-        _isWithinDirectTouchDistance &&
+    _directTouchMode = _enableDirectManipulation && _isWithinDirectTouchDistance &&
         !_selectedNodeSurfacePoints.empty() &&
         numFingers == _selectedNodeSurfacePoints.size();
 
@@ -514,13 +512,13 @@ void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolde
     }
 
     glm::dquat camToWorldSpace = _camera->rotationQuaternion();
-    glm::dvec3 camPos = _camera->positionVec3();
+    glm::dvec3 camPos = _camera->position();
     std::vector<DirectInputSolver::SelectedBody> surfacePoints;
 
     for (const TouchInputHolder& inputHolder : list) {
         // Normalized -1 to 1 coordinates on screen
-        const double xCo = 2 * (inputHolder.latestInput().x - 0.5);
-        const double yCo = -2 * (inputHolder.latestInput().y - 0.5);
+        const double xCo = 2.f * (inputHolder.latestInput().pos.x - 0.5f);
+        const double yCo = -2.f * (inputHolder.latestInput().pos.y - 0.5f);
         const glm::dvec3 cursorInWorldSpace = camToWorldSpace *
             glm::dvec3(glm::inverse(_camera->projectionMatrix()) *
             glm::dvec4(xCo, yCo, -1.0, 1.0));
@@ -541,11 +539,15 @@ void TouchInteraction::updateNodeSurfacePoints(const std::vector<TouchInputHolde
         if (intersected) {
             glm::dvec3 intersectionPos = camPos + raytrace * intersectionDist;
             glm::dvec3 pointInModelView = glm::inverse(node->worldRotationMatrix()) *
-                                            (intersectionPos - node->worldPosition());
+                                          (intersectionPos - node->worldPosition());
 
             // Note that node is saved as the direct input solver was initially
             // implemented to handle touch contact points on multiple nodes
-            surfacePoints.push_back({ id, node, pointInModelView });
+            surfacePoints.push_back({
+                .id = id,
+                .node = node,
+                .coordinates = pointInModelView
+            });
         }
     }
 
@@ -561,10 +563,7 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
     glm::fvec2 lastCentroid = _centroid;
     _centroid = glm::vec2(0.f, 0.f);
     for (const TouchInputHolder& inputHolder : list) {
-        _centroid += glm::vec2(
-            inputHolder.latestInput().x,
-            inputHolder.latestInput().y
-        );
+        _centroid += inputHolder.latestInput().pos;
     }
     _centroid /= static_cast<float>(list.size());
 
@@ -574,16 +573,12 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
     TouchInput distInput = list[0].latestInput();
     for (const TouchInputHolder& inputHolder : list) {
         const TouchInput& latestInput = inputHolder.latestInput();
-        dist += glm::length(
-            glm::dvec2(latestInput.x, latestInput.y) -
-            glm::dvec2(distInput.x, distInput.y)
-        );
+        dist += glm::length(glm::dvec2(latestInput.pos) - glm::dvec2(distInput.pos));
         distInput = latestInput;
     }
     distInput = lastProcessed[0];
     for (const TouchInput& p : lastProcessed) {
-        lastDist += glm::length(glm::dvec2(p.x, p.y) -
-                    glm::dvec2(distInput.x, distInput.y));
+        lastDist += glm::length(glm::dvec2(p.pos) - glm::dvec2(distInput.pos));
         distInput = p;
     }
     // Find the slowest moving finger - used in roll interpretation
@@ -602,7 +597,8 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
         const TouchInput& latestInput = inputHolder.latestInput();
         const TouchInput& prevInput = *it;
 
-        double diff = latestInput.x - prevInput.x + latestInput.y - prevInput.y;
+        const glm::vec2 d = latestInput.pos - prevInput.pos;
+        const double diff = d.x + d.y;
 
         if (!inputHolder.isMoving()) {
             minDiff = 0.0;
@@ -626,9 +622,9 @@ TouchInteraction::interpretInteraction(const std::vector<TouchInputHolder>& list
             );
 
             double res = 0.0;
-            float lastAngle = lastPoint.angleToPos(_centroid.x, _centroid.y);
+            float lastAngle = lastPoint.angleToPos(_centroid);
             float currentAngle =
-                inputHolder.latestInput().angleToPos(_centroid.x, _centroid.y);
+                inputHolder.latestInput().angleToPos(_centroid);
 
             if (lastAngle > currentAngle + 1.5f * glm::pi<float>()) {
                 res = currentAngle + (2.f * glm::pi<float>() - lastAngle);
@@ -756,14 +752,20 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
             using namespace glm;
             const TouchInput& startFinger0 = _pinchInputs[0].firstInput();
             const TouchInput& startFinger1 = _pinchInputs[1].firstInput();
-            const dvec2 startVec0 = dvec2(startFinger0.x * aspectRatio, startFinger0.y);
-            const dvec2 startVec1 = dvec2(startFinger1.x * aspectRatio, startFinger1.y);
+            const dvec2 startVec0 = dvec2(
+                startFinger0.pos.x * aspectRatio,
+                startFinger0.pos.y
+            );
+            const dvec2 startVec1 = dvec2(
+                startFinger1.pos.x * aspectRatio,
+                startFinger1.pos.y
+            );
             double distToCentroidStart = length(startVec0 - startVec1) / 2.0;
 
             const TouchInput& endFinger0 = _pinchInputs[0].latestInput();
             const TouchInput& endFinger1 = _pinchInputs[1].latestInput();
-            const dvec2 endVec0 = dvec2(endFinger0.x * aspectRatio, endFinger0.y);
-            const dvec2 endVec1 = dvec2(endFinger1.x * aspectRatio, endFinger1.y);
+            const dvec2 endVec0 = dvec2(endFinger0.pos.x * aspectRatio, endFinger0.pos.y);
+            const dvec2 endVec1 = dvec2(endFinger1.pos.x * aspectRatio, endFinger1.pos.y);
             double distToCentroidEnd = length(endVec0 - endVec1) / 2.0;
 
             double zoomFactor = distToCentroidEnd - distToCentroidStart;
@@ -796,11 +798,8 @@ void TouchInteraction::computeVelocities(const std::vector<TouchInputHolder>& li
                         }
                     );
                     double res = diff;
-                    float lastAngle = point.angleToPos(_centroid.x, _centroid.y);
-                    float currentAngle = holder.latestInput().angleToPos(
-                        _centroid.x,
-                        _centroid.y
-                    );
+                    float lastAngle = point.angleToPos(_centroid);
+                    float currentAngle = holder.latestInput().angleToPos(_centroid);
                     // Ifs used to set angles 359 + 1 = 0 and 0 - 1 = 359
                     if (lastAngle > currentAngle + 1.5 * glm::pi<float>()) {
                         res += currentAngle + (2 * glm::pi<float>() - lastAngle);
@@ -860,7 +859,7 @@ double TouchInteraction::computeTapZoomDistance(double zoomGain) {
         return 0.0;
     }
 
-    double dist = glm::distance(_camera->positionVec3(), anchor->worldPosition());
+    double dist = glm::distance(_camera->position(), anchor->worldPosition());
     dist -= anchor->interactionSphere();
 
     double newVelocity = dist * _tapZoomFactor;
@@ -892,7 +891,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
 
     if (anchor && _camera) {
         // Create variables from current state
-        dvec3 camPos = _camera->positionVec3();
+        dvec3 camPos = _camera->position();
         const dvec3 centerPos = anchor->worldPosition();
 
         dvec3 directionToCenter = normalize(centerPos - camPos);
@@ -1079,7 +1078,7 @@ void TouchInteraction::step(double dt, bool directTouch) {
         // OrbitalNavigator is actually needed, and don't have duplicates
 
         // Update the camera state
-        _camera->setPositionVec3(camPos);
+        _camera->setPosition(camPos);
         _camera->setRotation(globalCamRot * localCamRot);
 
         // Mark that a camera interaction happened

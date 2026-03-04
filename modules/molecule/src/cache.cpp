@@ -80,7 +80,6 @@ namespace {
         bool deperiodizeOnLoad;
     };
 
-
     std::unordered_map<size_t, md_molecule_t> molecules;
     std::unordered_map<size_t, md_trajectory_i*> trajectories;
     std::unordered_map<const md_trajectory_i*, SecondaryStructureData> ssTable;
@@ -261,7 +260,8 @@ namespace {
                     frameData->x,
                     frameData->y,
                     frameData->z,
-                    cell, mol
+                    cell,
+                    mol
                 );
             }
         }
@@ -396,7 +396,6 @@ namespace {
         ghoul_assert(traj->inst, "Trajectory has not data");
         ghoul_assert(molecule, "Missing molecular data");
 
-
         if (molecule->backbone.range_count == 0) {
             return;
         }
@@ -439,8 +438,8 @@ namespace {
                     md_free(default_allocator, coords, bytes);
                 };
 
-                // Overwrite the coordinate section, since we will load trajectory
-                // frame data into these
+                // Overwrite the coordinate section, since we will load trajectory frame
+                // data into these
                 mol.atom.x = coords + stride * 0;
                 mol.atom.y = coords + stride * 1;
                 mol.atom.z = coords + stride * 2;

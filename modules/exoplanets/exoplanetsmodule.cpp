@@ -67,8 +67,8 @@ namespace {
     constexpr Property::PropertyInfo StarGlareTextureInfo = {
         "StarGlareTexture",
         "Star glare texture",
-        "The path to a grayscale image that is used for the glare effect of the "
-        "host stars.",
+        "The path to a grayscale image that is used for the glare effect of the host "
+        "stars.",
         Property::Visibility::AdvancedUser
     };
 
@@ -92,16 +92,16 @@ namespace {
     constexpr Property::PropertyInfo OrbitDiscTextureInfo = {
         "OrbitDiscTexture",
         "Orbit disc texture",
-        "A path to a 1-dimensional image used as a transfer function for the "
-        "exoplanets' orbit uncertainty disc.",
+        "A path to a 1-dimensional image used as a transfer function for the exoplanets' "
+        "orbit uncertainty disc.",
         Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo HabitableZoneTextureInfo = {
         "HabitableZoneTexture",
         "Habitable zone texture",
-        "A path to a 1-dimensional image used as a transfer function for the "
-        "habitable zone disc.",
+        "A path to a 1-dimensional image used as a transfer function for the habitable "
+        "zone disc.",
         Property::Visibility::AdvancedUser
     };
 
@@ -165,41 +165,41 @@ namespace {
         // [[codegen::verbatim(BvColorMapInfo.description)]]
         std::optional<std::filesystem::path> bvColormap;
 
-       // [[codegen::verbatim(StarTextureInfo.description)]]
-       std::optional<std::filesystem::path> starTexture;
+        // [[codegen::verbatim(StarTextureInfo.description)]]
+        std::optional<std::filesystem::path> starTexture;
 
-       // [[codegen::verbatim(StarGlareTextureInfo.description)]]
-       std::optional<std::filesystem::path> starGlareTexture;
+        // [[codegen::verbatim(StarGlareTextureInfo.description)]]
+        std::optional<std::filesystem::path> starGlareTexture;
 
-       // [[codegen::verbatim(NoDataTextureInfo.description)]]
-       std::optional<std::filesystem::path> noDataTexture;
+        // [[codegen::verbatim(NoDataTextureInfo.description)]]
+        std::optional<std::filesystem::path> noDataTexture;
 
-       // [[codegen::verbatim(PlanetDefaultTextureInfo.description)]]
-       std::optional<std::filesystem::path> planetDefaultTexture;
+        // [[codegen::verbatim(PlanetDefaultTextureInfo.description)]]
+        std::optional<std::filesystem::path> planetDefaultTexture;
 
-       // [[codegen::verbatim(OrbitDiscTextureInfo.description)]]
-       std::optional<std::filesystem::path> orbitDiscTexture;
+        // [[codegen::verbatim(OrbitDiscTextureInfo.description)]]
+        std::optional<std::filesystem::path> orbitDiscTexture;
 
-       // [[codegen::verbatim(HabitableZoneTextureInfo.description)]]
-       std::optional<std::filesystem::path> habitableZoneTexture;
+        // [[codegen::verbatim(HabitableZoneTextureInfo.description)]]
+        std::optional<std::filesystem::path> habitableZoneTexture;
 
-       // [[codegen::verbatim(ComparisonCircleColorInfo.description)]]
-       std::optional<glm::vec3> comparisonCircleColor [[codegen::color()]];
+        // [[codegen::verbatim(ComparisonCircleColorInfo.description)]]
+        std::optional<glm::vec3> comparisonCircleColor [[codegen::color()]];
 
-       // [[codegen::verbatim(ShowComparisonCircleInfo.description)]]
-       std::optional<bool> showComparisonCircle;
+        // [[codegen::verbatim(ShowComparisonCircleInfo.description)]]
+        std::optional<bool> showComparisonCircle;
 
-       // [[codegen::verbatim(ShowOrbitUncertaintyInfo.description)]]
-       std::optional<bool> showOrbitUncertainty;
+        // [[codegen::verbatim(ShowOrbitUncertaintyInfo.description)]]
+        std::optional<bool> showOrbitUncertainty;
 
-       // [[codegen::verbatim(ShowHabitableZoneInfo.description)]]
-       std::optional<bool> showHabitableZone;
+        // [[codegen::verbatim(ShowHabitableZoneInfo.description)]]
+        std::optional<bool> showHabitableZone;
 
-       // [[codegen::verbatim(UseOptimisticZoneInfo.description)]]
-       std::optional<bool> useOptimisticZone;
+        // [[codegen::verbatim(UseOptimisticZoneInfo.description)]]
+        std::optional<bool> useOptimisticZone;
 
-       // [[codegen::verbatim(HabitableZoneOpacityInfo.description)]]
-       std::optional<float> habitableZoneOpacity [[codegen::inrange(0, 1)]];
+        // [[codegen::verbatim(HabitableZoneOpacityInfo.description)]]
+        std::optional<float> habitableZoneOpacity [[codegen::inrange(0, 1)]];
     };
 } // namespace
 #include "exoplanetsmodule_codegen.cpp"
@@ -250,8 +250,7 @@ ExoplanetsModule::ExoplanetsModule()
             std::filesystem::path f = p.value();
             if (!std::filesystem::is_regular_file(f)) {
                 LERROR(std::format(
-                    "Could not find file: '{}' for module setting '{}'",
-                    f, p.identifier()
+                    "Could not find file: '{}' for module setting '{}'", f, p.identifier()
                 ));
             }
         };
@@ -283,7 +282,6 @@ ExoplanetsModule::ExoplanetsModule()
     addProperty(_showOrbitUncertainty);
     addProperty(_showHabitableZone);
     addProperty(_useOptimisticZone);
-
     addProperty(_habitableZoneOpacity);
 }
 
@@ -294,17 +292,17 @@ bool ExoplanetsModule::hasDataFiles() const {
 std::filesystem::path ExoplanetsModule::exoplanetsDataPath() const {
     ghoul_assert(hasDataFiles(), "Data files not loaded");
 
-    return absPath(
-        std::format("{}/{}", _exoplanetsDataFolder.value(), ExoplanetsDataFileName)
-    );
+    return absPath(std::format(
+        "{}/{}", _exoplanetsDataFolder.value(), ExoplanetsDataFileName
+    ));
 }
 
 std::filesystem::path ExoplanetsModule::lookUpTablePath() const {
     ghoul_assert(hasDataFiles(), "Data files not loaded");
 
-    return absPath(
-        std::format("{}/{}", _exoplanetsDataFolder.value(), LookupTableFileName)
-    );
+    return absPath(std::format(
+        "{}/{}", _exoplanetsDataFolder.value(), LookupTableFileName
+    ));
 }
 
 std::filesystem::path ExoplanetsModule::teffToBvConversionFilePath() const {
@@ -407,7 +405,6 @@ void ExoplanetsModule::internalInitialize(const ghoul::Dictionary& dict) {
     _showOrbitUncertainty = p.showOrbitUncertainty.value_or(_showOrbitUncertainty);
     _showHabitableZone = p.showHabitableZone.value_or(_showHabitableZone);
     _useOptimisticZone = p.useOptimisticZone.value_or(_useOptimisticZone);
-
     _habitableZoneOpacity = p.habitableZoneOpacity.value_or(_habitableZoneOpacity);
 
     ghoul::TemplateFactory<Task>* fTask = FactoryManager::ref().factory<Task>();

@@ -49,8 +49,8 @@ namespace {
             "openspace.setPropertyValueSingle(\"{}\", {}, {})",
             identifier, v, d
         );
-        // No syncing, as this was triggered from a property change (which happened
-        // based on an already synced script)
+        // No syncing, as this was triggered from a property change (which happened based
+        // on an already synced script)
         global::scriptEngine->queueScript({
             .code = script,
             .synchronized = ScriptEngine::Script::ShouldBeSynchronized::No,
@@ -61,9 +61,9 @@ namespace {
     constexpr Property::PropertyInfo InterpolationValueInfo = {
         "Value",
         "Value",
-        "The value used for interpolation. The max value is set from the number of "
-        "steps in the dataset, so a step of one corresponds to one step in the dataset "
-        "and values in-between will be determined using interpolation.",
+        "The value used for interpolation. The max value is set from the number of steps "
+        "in the dataset, so a step of one corresponds to one step in the dataset and "
+        "values in-between will be determined using interpolation.",
         Property::Visibility::NoviceUser
     };
 
@@ -215,16 +215,16 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
     addProperty(interpolateToStart);
 
     interpolateToNextStep.onChange([this]() {
-        const float prevValue = glm::floor(value);
-        const float newValue = glm::min(prevValue + 1.f, value.maxValue());
+        const float prevValue = std::floor(value);
+        const float newValue = std::min(prevValue + 1.f, value.maxValue());
         const float duration = 1.f / speed;
         triggerInterpolation(value.uri(), newValue, duration);
     });
     addProperty(interpolateToNextStep);
 
     interpolateToPrevStep.onChange([this]() {
-        const float prevValue = glm::ceil(value);
-        const float newValue = glm::max(prevValue - 1.f, value.minValue());
+        const float prevValue = std::ceil(value);
+        const float newValue = std::max(prevValue - 1.f, value.minValue());
         const float duration = 1.f / speed;
         triggerInterpolation(value.uri(), newValue, duration);
     });
@@ -233,14 +233,14 @@ RenderableInterpolatedPoints::Interpolation::Interpolation()
     addProperty(speed);
 
     goToNextStep.onChange([this]() {
-        float prevValue = glm::floor(value);
-        value = glm::min(prevValue + 1.f, value.maxValue());
+        float prevValue = std::floor(value);
+        value = std::min(prevValue + 1.f, value.maxValue());
     });
     addProperty(goToNextStep);
 
     goToPrevStep.onChange([this]() {
-        float prevValue = glm::ceil(value);
-        value = glm::max(prevValue - 1.f, value.minValue());
+        float prevValue = std::ceil(value);
+        value = std::max(prevValue - 1.f, value.minValue());
     });
     addProperty(goToPrevStep);
 
@@ -268,7 +268,7 @@ RenderableInterpolatedPoints::RenderableInterpolatedPoints(
 
     _interpolation.value.onChange([this]() {
         bool passedAKnot =
-            glm::ceil(_interpolation.value) != glm::ceil(_prevInterpolationValue);
+            std::ceil(_interpolation.value) != std::ceil(_prevInterpolationValue);
 
         if (passedAKnot) {
             _dataIsDirty = true;
@@ -344,7 +344,7 @@ void RenderableInterpolatedPoints::deinitializeShaders() {
 
 void RenderableInterpolatedPoints::setExtraUniforms() {
     float t0 = computeCurrentLowerValue();
-    float t = glm::clamp(_interpolation.value - t0, 0.f, 1.f);
+    float t = std::clamp(_interpolation.value - t0, 0.f, 1.f);
 
     _program->setUniform("interpolationValue", t);
     _program->setUniform("useSpline", useSplineInterpolation());
@@ -393,8 +393,8 @@ void RenderableInterpolatedPoints::addPositionDataForPoint(unsigned int index,
     glm::dvec3 position0 = transformedPosition(e0);
     glm::dvec3 position1 = transformedPosition(e1);
 
-    const double r = glm::max(glm::length(position0), glm::length(position1));
-    maxRadius = glm::max(maxRadius, r);
+    const double r = std::max(glm::length(position0), glm::length(position1));
+    maxRadius = std::max(maxRadius, r);
 
     for (int j = 0; j < 3; j++) {
         result.push_back(static_cast<float>(position0[j]));
@@ -405,12 +405,12 @@ void RenderableInterpolatedPoints::addPositionDataForPoint(unsigned int index,
     }
 
     if (useSplineInterpolation()) {
-        // Compute the extra positions, before and after the other ones. But make sure
-        // we do not overflow the allowed bound for the current interpolation step
-        int beforeIndex = glm::max(static_cast<int>(firstIndex - _nDataPoints), 0);
+        // Compute the extra positions, before and after the other ones. But make sure we
+        // do not overflow the allowed bound for the current interpolation step
+        int beforeIndex = std::max(static_cast<int>(firstIndex - _nDataPoints), 0);
         int maxT = static_cast<int>(_interpolation.value.maxValue() - 1.f);
         int maxAllowedindex = maxT * _nDataPoints + index;
-        int afterIndex = glm::min(
+        int afterIndex = std::min(
             static_cast<int>(secondIndex + _nDataPoints),
             maxAllowedindex
         );
@@ -445,9 +445,9 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
 
     if (hasSizeData()) {
         const int sizeParamIndex = currentSizeParameterIndex();
-        // @TODO: Consider more detailed control over the scaling. Currently the value
-        // is multiplied with the value as is. Should have similar mapping properties
-        // as the color mapping
+        // @TODO: Consider more detailed control over the scaling. Currently the value is
+        // multiplied with the value as is. Should have similar mapping properties as the
+        // color mapping
 
         // Convert to diameter if data is given as radius
         float multiplier = _sizeSettings.sizeMapping->isRadius ? 2.f : 1.f;
@@ -457,7 +457,7 @@ void RenderableInterpolatedPoints::addColorAndSizeDataForPoint(unsigned int inde
 }
 
 void RenderableInterpolatedPoints::addOrientationDataForPoint(unsigned int index,
-                                                        std::vector<float>& result) const
+                                                         std::vector<float>& result) const
 {
     auto [firstIndex, secondIndex] = interpolationIndices(index);
     const dataloader::Dataset::Entry& e0 = _dataset.entries[firstIndex];
@@ -545,25 +545,25 @@ void RenderableInterpolatedPoints::updateBufferData() {
 
 bool RenderableInterpolatedPoints::isAtKnot() const {
     float v = _interpolation.value;
-    return (v - glm::floor(v)) < std::numeric_limits<float>::epsilon();
+    return (v - std::floor(v)) < std::numeric_limits<float>::epsilon();
 }
 
 float RenderableInterpolatedPoints::computeCurrentLowerValue() const {
-    float t0 = glm::floor(_interpolation.value);
+    float t0 = std::floor(_interpolation.value);
 
     if (isAtKnot()) {
         t0 = t0 - 1.f;
     }
 
     const float maxTValue = _interpolation.value.maxValue();
-    const float maxAllowedT0 = glm::max(maxTValue - 1.f, 0.f);
-    t0 = glm::clamp(t0, 0.f, maxAllowedT0);
+    const float maxAllowedT0 = std::max(maxTValue - 1.f, 0.f);
+    t0 = std::clamp(t0, 0.f, maxAllowedT0);
     return t0;
 }
 
 float RenderableInterpolatedPoints::computeCurrentUpperValue() const {
     const float t0 = computeCurrentLowerValue();
-    const float t1 = glm::clamp(t0 + 1.f, 0.f, _interpolation.value.maxValue());
+    const float t1 = std::clamp(t0 + 1.f, 0.f, _interpolation.value.maxValue());
     return t1;
 }
 
@@ -578,7 +578,7 @@ RenderableInterpolatedPoints::interpolationIndices(unsigned int index) const
     const size_t lower = size_t(t0Index * _nDataPoints + index);
     const size_t upper = size_t(t1Index * _nDataPoints + index);
 
-    return { lower, upper };
+    return std::pair(lower, upper);
 }
 
 } // namespace openspace

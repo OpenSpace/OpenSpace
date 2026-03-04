@@ -133,9 +133,8 @@ void ReadFitsTask::perform(const Task::ProgressCallback& onProgress) {
 }
 
 void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCallback) {
-    int32_t nValuesPerStar = 0;
-
     FitsFileReader fileReader = FitsFileReader(false);
+    int32_t nValuesPerStar = 0;
     std::vector<float> fullData = fileReader.readFitsFile(
         _inFileOrFolderPath,
         nValuesPerStar,
@@ -146,31 +145,26 @@ void ReadFitsTask::readSingleFitsFile(const Task::ProgressCallback& progressCall
 
     progressCallback(0.8f);
 
-    std::ofstream outFileStream(_outFileOrFolderPath, std::ofstream::binary);
-    if (outFileStream.good()) {
-        int32_t nValues = static_cast<int32_t>(fullData.size());
-        LINFO(std::format(
-            "Writing {} values to file '{}'", nValues, _outFileOrFolderPath
-        ));
-        LINFO(std::format("Number of values per star: {}", nValuesPerStar));
-
-        if (nValues == 0) {
-            LERROR("Error writing file - No values were read from file");
-        }
-        outFileStream.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
-        outFileStream.write(
-            reinterpret_cast<const char*>(&nValuesPerStar),
-            sizeof(int32_t)
-        );
-
-        const size_t nBytes = nValues * sizeof(fullData[0]);
-        outFileStream.write(reinterpret_cast<const char*>(fullData.data()), nBytes);
-    }
-    else {
+    std::ofstream outFile = std::ofstream(_outFileOrFolderPath, std::ofstream::binary);
+    if (!outFile.good()) {
         LERROR(std::format(
             "Error opening file '{}' as output data file", _outFileOrFolderPath
         ));
+        return;
     }
+
+    int32_t nValues = static_cast<int32_t>(fullData.size());
+    LINFO(std::format("Writing {} values to file '{}'", nValues, _outFileOrFolderPath));
+    LINFO(std::format("Number of values per star: {}", nValuesPerStar));
+
+    if (nValues == 0) {
+        LERROR("Error writing file - No values were read from file");
+    }
+    outFile.write(reinterpret_cast<const char*>(&nValues), sizeof(int32_t));
+    outFile.write(reinterpret_cast<const char*>(&nValuesPerStar), sizeof(int32_t));
+
+    const size_t nBytes = nValues * sizeof(float);
+    outFile.write(reinterpret_cast<const char*>(fullData.data()), nBytes);
 }
 
 void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
@@ -268,7 +262,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
 
     LINFO("All files added to queue");
 
-    // Check for finished jobs.
+    // Check for finished jobs
     while (finishedJobs < nInputFiles) {
         if (jobManager.numFinishedJobs() > 0) {
             std::vector<std::vector<float>> newOctant =
@@ -277,7 +271,7 @@ void ReadFitsTask::readAllFitsFilesFromFolder(const Task::ProgressCallback&) {
             finishedJobs++;
 
             for (int i = 0; i < 8; i++) {
-                // Add read values to global octant and check if it's time to write!
+                // Add read values to global octant and check if it's time to write
                 octants[i].insert(
                     octants[i].end(),
                     newOctant[i].begin(),

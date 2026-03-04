@@ -132,7 +132,7 @@ int printFatal(lua_State* L) {
 /**
  * Creates a directory at the provided path, returns true if directory was newly created
  * and false otherwise. If `recursive` flag is set to true, it will automatically create
- * any missing parent folder as well
+ * any missing parent folder as well.
  */
 [[codegen::luawrap]] bool createDirectory(std::filesystem::path path,
                                           bool recursive = false)
@@ -211,12 +211,11 @@ int printFatal(lua_State* L) {
         return std::vector<std::filesystem::path>();
     }
 
-    namespace fs = std::filesystem;
     return ghoul::filesystem::walkDirectory(
         path,
         ghoul::filesystem::Recursive(recursive),
         ghoul::filesystem::Sorted(sorted),
-        [](const fs::path& p) { return fs::is_directory(p); }
+        [](const std::filesystem::path& p) { return std::filesystem::is_directory(p); }
     );
 }
 
@@ -292,7 +291,7 @@ int printFatal(lua_State* L) {
 }
 
 /**
- * Removes a previously registered repeated script (see #registerRepeatedScript)
+ * Removes a previously registered repeated script (see #registerRepeatedScript).
  */
 [[codegen::luawrap]] void removeRepeatedScript(std::string identifier) {
     global::scriptEngine->removeRepeatedScript(identifier);

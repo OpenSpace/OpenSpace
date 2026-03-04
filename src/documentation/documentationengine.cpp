@@ -26,9 +26,9 @@
 
 #include <openspace/documentation/core_registration.h>
 #include <openspace/documentation/verifier.h>
-#include <openspace/engine/openspaceengine.h>
-#include <openspace/engine/globals.h>
 #include <openspace/engine/configuration.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/openspaceengine.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/action.h>
@@ -48,11 +48,11 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
-#include <ghoul/misc/profiling.h>
-#include <ghoul/misc/stringhelper.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/exception.h>
+#include <ghoul/misc/profiling.h>
+#include <ghoul/misc/stringhelper.h>
 #include <ghoul/misc/templatefactory.h>
 #include <algorithm>
 #include <fstream>
@@ -538,7 +538,7 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
         // Add documentation about derived classes
         const std::vector<std::string>& registeredClasses = f->registeredClasses();
         for (const std::string& c : registeredClasses) {
-            if (c == "") {
+            if (c.empty()) {
                 LERROR("Factory documentation, derived class, without identifier");
                 continue;
             }
@@ -563,13 +563,14 @@ nlohmann::json DocumentationEngine::generateFactoryManagerJson() const {
         sortJson(factory[ClassesKey], NameKey);
         json.push_back(factory);
     }
+
     // Add all leftover docs
     nlohmann::json leftovers;
     leftovers[NameKey] = OtherName;
     leftovers[IdentifierKey] = OtherIdentifierName;
 
     for (const Documentation& doc : docs) {
-        if (doc.id == "") {
+        if (doc.id.empty()) {
             LERROR("Documentation without identifier");
             continue;
         }
@@ -632,7 +633,7 @@ void DocumentationEngine::writeJavascriptDocumentation() const {
 
     // Write documentation to json files if config file supplies path for doc files
     if (global::configuration->documentation.path.empty()) {
-        // if path was empty, that means that no documentation is requested
+        // If path was empty, that means that no documentation is requested
         return;
     }
 
@@ -666,7 +667,7 @@ void DocumentationEngine::writeJavascriptDocumentation() const {
     nlohmann::json result;
     result[DocumentationKey] = documentation;
 
-    // Make into a javascript variable so that it is possible to open with static html
+    // Make into a JavaScript variable so that it is possible to open with static HTML
     std::ofstream out = std::ofstream(absPath("${DOCUMENTATION}/documentationData.js"));
     out << "var data = " << result.dump();
 }

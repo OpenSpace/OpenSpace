@@ -320,7 +320,7 @@ void RenderableModelProjection::update(const UpdateData& data) {
     const double time = data.time.j2000Seconds();
     const double integrateFromTime = data.previousFrameTime.j2000Seconds();
 
-    // Only project new images if time changed since last update.
+    // Only project new images if time changed since last update
     if (time > integrateFromTime && ImageSequencer::ref().isReady() &&
         _projectionComponent.doesPerformProjection())
     {

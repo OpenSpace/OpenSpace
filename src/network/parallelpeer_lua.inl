@@ -31,7 +31,8 @@ namespace {
 [[codegen::luawrap]] void joinServer(std::string port, std::string address,
                                      std::string serverName, std::string password,
                                      std::string hostpassword = "",
-                                     std::string name = "Anonymous") {
+                                     std::string name = "Anonymous")
+{
     if (global::windowDelegate->isMaster()) {
         ParallelPeer* peer = global::parallelPeer;
         peer->setPort(std::move(port));

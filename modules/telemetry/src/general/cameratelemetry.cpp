@@ -100,8 +100,11 @@ CameraTelemetry::CameraTelemetry(const std::string& ip, int port)
     , _cameraSpeedDistanceUnitOption(CameraSpeedDistanceUnitInfo)
     , _precisionProperties(CameraTelemetry::PrecisionProperties(PrecisionInfo))
 {
-    for (int i = 0; i < DistanceUnitNames.size(); i++) {
-        _cameraSpeedDistanceUnitOption.addOption(i, DistanceUnitNames[i].singular.data());
+    for (size_t i = 0; i < DistanceUnitNames.size(); i++) {
+        _cameraSpeedDistanceUnitOption.addOption(
+            static_cast<int>(i),
+            DistanceUnitNames[i].singular.data()
+        );
     }
 
     _cameraSpeedDistanceUnitOption.setValue(static_cast<int>(DistanceUnit::Kilometer));
@@ -127,7 +130,7 @@ CameraTelemetry::PrecisionProperties::PrecisionProperties(
 }
 
 bool CameraTelemetry::updateData(const Camera* camera) {
-    const glm::dvec3 cameraPosition = camera->positionVec3();
+    const glm::dvec3 cameraPosition = camera->position();
     const double distanceMoved = glm::length(_cameraPosition - cameraPosition);
 
     const glm::dquat cameraRotation = camera->rotationQuaternion();
@@ -179,7 +182,7 @@ bool CameraTelemetry::updateData(const Camera* camera) {
 }
 
 void CameraTelemetry::sendData() {
-    std::string label = "/Camera";
+    constexpr std::string_view Label = "/Camera";
     std::vector<OpenSoundControlDataType> data(NumDataItems);
 
     data[CameraPosXIndex] = _cameraPosition.x;
@@ -196,7 +199,7 @@ void CameraTelemetry::sendData() {
         _cameraSpeedDistanceUnitOption.value()
     );
 
-    _connection->send(label, data);
+    _connection->send(std::string(Label), data);
 }
 
 } // namespace openspace

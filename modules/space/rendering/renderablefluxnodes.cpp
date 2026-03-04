@@ -27,11 +27,11 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/engine/windowdelegate.h>
+#include <openspace/query/query.h>
 #include <openspace/rendering/renderengine.h>
 #include <openspace/scene/scenegraphnode.h>
 #include <openspace/util/time.h>
 #include <openspace/util/updatestructures.h>
-#include <openspace/query/query.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/logging/logmanager.h>
@@ -52,17 +52,6 @@ namespace {
     using namespace openspace;
 
     constexpr std::string_view _loggerCat = "RenderableFluxNodes";
-
-    constexpr std::array<const char*, 29> UniformNames = {
-        "streamColor", "nodeSize", "proximityNodesSize",
-        "thresholdFlux", "colorMode", "filterLower", "filterUpper", "scalingMode",
-        "colorTableRange", "domainLimZ", "nodeSkip", "nodeSkipDefault", "nodeSkipEarth",
-        "nodeSkipMethod", "nodeSkipFluxThreshold", "nodeSkipRadiusThreshold",
-        "fluxColorAlpha", "earthPos", "distanceThreshold", "time", "maxNodeDistanceSize",
-        "usingCameraPerspective", "drawCircles", "drawHollow", "useGaussian",
-        "perspectiveDistanceFactor", "minMaxNodeSize", "usingPulse",
-        "usingGaussianPulse"
-    };
 
     constexpr Property::PropertyInfo GoesEnergyBinsInfo = {
         "GoesEnergy",
@@ -158,7 +147,7 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    constexpr Property::PropertyInfo colorTableRangeInfo = {
+    constexpr Property::PropertyInfo ColorTableRangeInfo = {
         "ColorTableRange",
         "Color table range",
         "Valid range for the color table as the exponent, with base 10, of flux values. "
@@ -197,21 +186,21 @@ namespace {
     constexpr Property::PropertyInfo DistanceThresholdInfo = {
         "DistancePlanetThreshold",
         "Threshold for distance between planet",
-        "Changes threshold distance for highlighting nodes close to earth.",
+        "Changes threshold distance for highlighting nodes close to Earth.",
         Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo ProximityNodesSizeInfo = {
         "ProximityNodesSize",
         "Earths proximity nodes size",
-        "Changes size of nodes only close to earth.",
+        "Changes size of nodes only close to Earth.",
         Property::Visibility::AdvancedUser
     };
 
     constexpr Property::PropertyInfo MaxNodeDistanceSizeInfo = {
         "MaxNodeDistanceSize",
         "Max node distance size",
-        "The maximum size of the nodes at a certin distance.",
+        "The maximum size of the nodes at a certain distance.",
         Property::Visibility::AdvancedUser
     };
 
@@ -283,7 +272,7 @@ namespace {
         // [[codegen::verbatim(GoesEnergyBinsInfo.description)]]
         std::optional<int> energyBin;
 
-        // [[codegen::verbatim(colorTableRangeInfo.description)]]
+        // [[codegen::verbatim(ColorTableRangeInfo.description)]]
         std::optional<glm::vec2> colorTableRange;
     };
 } // namespace
@@ -308,7 +297,12 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
         glm::vec4(1.f)
     )
     , _colorTablePath(ColorTablePathInfo)
-    , _colorTableRange(colorTableRangeInfo, { -2.f, 4.f }, { -8.f, -8.f }, { 8.f, 8.f })
+    , _colorTableRange(
+        ColorTableRangeInfo,
+        glm::vec2(-2.f, 4.f),
+        glm::vec2(-8.f),
+        glm::vec2(8.f)
+    )
     , _fluxColorAlpha(FluxColorAlphaInfo, 1.f, 0.f, 1.f)
     , _streamGroup({ "Streams" })
     , _scalingMethod(ScalingmethodInfo)
@@ -317,15 +311,25 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     , _distanceThreshold(DistanceThresholdInfo, 0.f, 0.f, 1.f)
     , _proximityNodesSize(ProximityNodesSizeInfo, 1.f, 0.f, 100.f)
     , _maxNodeDistanceSize(MaxNodeDistanceSizeInfo, 1.f, 1.f, 10.f)
-    , _minMaxNodeSize(MinMaxNodeSizeInfo, { 2.f, 30.f }, { 1.f, 1.f }, { 10.f, 200.f })
-    , _domainZ(DomainZInfo, { -2.5f, 2.5f }, { -2.5f, -2.5f }, { 2.5f, 2.5f })
+    , _minMaxNodeSize(
+        MinMaxNodeSizeInfo,
+        glm::vec2(2.f, 30.f),
+        glm::vec2(1.f),
+        glm::vec2(10.f, 200.f)
+    )
+    , _domainZ(
+        DomainZInfo,
+        glm::vec2(-2.5f, 2.5f),
+        glm::vec2(-2.5f, -2.5f),
+        glm::vec2(2.5f, 2.5f)
+    )
     , _thresholdFlux(ThresholdFluxInfo, -1.5f, -50.f, 10.f)
     , _filteringLower(FilteringInfo, 0.f, 0.f, 5.f)
     , _filteringUpper(FilteringUpperInfo, 5.f, 0.f, 5.f)
     , _amountofNodes(AmountofNodesInfo, 1, 1, 100)
     , _nodeskipMethod(NodeskipMethodInfo)
     , _defaultNodeSkip(DefaultNodeSkipInfo, 1, 1, 100)
-    , _fluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0, -20, 10)
+    , _fluxNodeskipThreshold(FluxNodeskipThresholdInfo, 0.f, -20.f, 10.f)
     , _earthNodeSkip(EarthNodeSkipInfo, 1, 1, 100)
     , _radiusNodeSkipThreshold(RadiusNodeSkipThresholdInfo, 0.f, 0.f, 5.f)
     , _cameraPerspectiveGroup({ "CameraPerspective" })
@@ -344,27 +348,18 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     _colorTableRange = p.colorTableRange.value_or(_colorTableRange);
 
     _binarySourceFolderPath = p.sourceFolder;
-    if (std::filesystem::is_directory(_binarySourceFolderPath)) {
-        // Extract all file paths from the provided folder
-        namespace fs = std::filesystem;
-        for (const fs::directory_entry& e :
-            fs::directory_iterator(_binarySourceFolderPath))
-        {
-            if (e.is_regular_file()) {
-                _binarySourceFiles.push_back(e.path());
-            }
-        }
-        std::sort(_binarySourceFiles.begin(), _binarySourceFiles.end());
-
-        // Ensure that there are available and valid source files left
-        if (_binarySourceFiles.empty()) {
-            LERROR(std::format("'{}' contains no files", _binarySourceFolderPath));
+    // Extract all file paths from the provided folder
+    namespace fs = std::filesystem;
+    for (const fs::directory_entry& e : fs::directory_iterator(_binarySourceFolderPath)) {
+        if (e.is_regular_file()) {
+            _binarySourceFiles.push_back(e.path());
         }
     }
-    else {
-        LERROR(std::format(
-            "Source folder '{}' is not a valid directory", _binarySourceFolderPath
-        ));
+    std::sort(_binarySourceFiles.begin(), _binarySourceFiles.end());
+
+    // Ensure that there are available and valid source files left
+    if (_binarySourceFiles.empty()) {
+        LERROR(std::format("'{}' contains no files", _binarySourceFolderPath));
     }
 
     _goesEnergyBins.addOption(static_cast<int>(GoesEnergyBins::Emin01), "Emin01");
@@ -387,7 +382,8 @@ RenderableFluxNodes::RenderableFluxNodes(const ghoul::Dictionary& dictionary)
     if (p.energyBin.has_value()) {
         _goesEnergyBins.setValue(p.energyBin.value());
     }
-    else { // default int 1 == Emin03 == MeV>100
+    else {
+        // Default int 1 == Emin03 == MeV>100
         LINFO("Assuming default value 1, meaning Emin03");
         _goesEnergyBins.setValue(1);
     }
@@ -401,7 +397,6 @@ void RenderableFluxNodes::initialize() {
 }
 
 void RenderableFluxNodes::initializeGL() {
-    // Setup shader program
     _shaderProgram = global::renderEngine->buildRenderProgram(
         "Fluxnodes",
         absPath("${MODULE_SPACE}/shaders/fluxnodes_vs.glsl"),
@@ -412,7 +407,7 @@ void RenderableFluxNodes::initializeGL() {
     _uniformCache.nodeSize = _shaderProgram->uniformLocation("nodeSize");
     _uniformCache.thresholdFlux = _shaderProgram->uniformLocation("thresholdFlux");
 
-    ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache, UniformNames);
+    ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
 
     glCreateBuffers(1, &_vboPosition);
     glCreateBuffers(1, &_vboColor);
@@ -489,8 +484,8 @@ void RenderableFluxNodes::loadNodeData(int energybinOption) {
 
     if (_nStates != _startTimes.size()) {
         LERROR(
-            "Number of states, _nStates, and number of start times, _startTimes, "
-            "do not match"
+            "Number of states, _nStates, and number of start times, _startTimes, do not "
+            "match"
         );
         return;
     }
@@ -501,8 +496,9 @@ void RenderableFluxNodes::loadNodeData(int energybinOption) {
 
     for (unsigned int i = 0; i < _nStates; i++) {
         _vertexPositions.resize(nNodesPerTimestep);
-        fileStream.read(reinterpret_cast<char*>(
-            _vertexPositions.data()), nNodesPerTimestep * sizeof(glm::vec3)
+        fileStream.read(
+            reinterpret_cast<char*>(_vertexPositions.data()),
+            nNodesPerTimestep * sizeof(glm::vec3)
         );
 
         _statesPos.push_back(_vertexPositions);
@@ -510,8 +506,9 @@ void RenderableFluxNodes::loadNodeData(int energybinOption) {
     }
     for (unsigned int i = 0; i < _nStates; i++) {
         _vertexColor.resize(nNodesPerTimestep);
-        fileStream2.read(reinterpret_cast<char*>(
-            _vertexColor.data()), nNodesPerTimestep * sizeof(float)
+        fileStream2.read(
+            reinterpret_cast<char*>(_vertexColor.data()),
+            nNodesPerTimestep * sizeof(float)
         );
 
         _statesColor.push_back(_vertexColor);
@@ -519,8 +516,9 @@ void RenderableFluxNodes::loadNodeData(int energybinOption) {
     }
     for (unsigned int i = 0; i < _nStates; i++) {
         _vertexRadius.resize(nNodesPerTimestep);
-        fileStream3.read(reinterpret_cast<char*>(
-            _vertexRadius.data()), nNodesPerTimestep * sizeof(float)
+        fileStream3.read(
+            reinterpret_cast<char*>(_vertexRadius.data()),
+            nNodesPerTimestep * sizeof(float)
         );
 
         _statesRadius.push_back(_vertexRadius);
@@ -602,8 +600,8 @@ void RenderableFluxNodes::populateStartTimes() {
         }
 
         const std::string f = filePath.filename().string();
-        // if no file extention but word "time" in file name
-        if (f.find("time") != std::string::npos && f.find('.') == std::string::npos) {
+        // If no file extention but word "time" in file name
+        if (f.contains("time") && !f.contains('.')) {
             timeFile = filePath;
             break;
         }
@@ -616,30 +614,31 @@ void RenderableFluxNodes::populateStartTimes() {
         );
     }
 
-    // time filestream
+    // Time filestream
     std::ifstream tfs = std::ifstream(timeFile);
     if (!tfs.is_open()) {
         throw ghoul::RuntimeError("Could not open file");
     }
 
     std::string line;
-    // gets only first line to "remove" header
+    // Gets only first line to "remove" header
     ghoul::getline(tfs, line);
     std::stringstream s;
     s << line;
 
     int nColumns = 0;
     std::string columnName;
-    // loops through the names/columns in first line/header
+    // Loops through the names/columns in first line/header
     while (s >> columnName) {
         nColumns++;
     }
-    while (ghoul::getline(tfs, line)) {   // for each line of data
+    while (ghoul::getline(tfs, line)) {
         std::istringstream iss(line);
-        for (int i = 0; i < nColumns; i++) {    // for each column in line
+        for (int i = 0; i < nColumns; i++) {
             std::string columnValue;
             iss >> columnValue;
-            if (i != nColumns - 1) {    // last column
+            if (i != nColumns - 1) {
+                // Last column
                 continue;
             }
             if (columnValue.length() == 23) {
@@ -735,10 +734,7 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
         _uniformCache.time,
         global::windowDelegate->applicationTime()
     );
-    _shaderProgram->setUniform(
-        _uniformCache.maxNodeDistanceSize,
-        _maxNodeDistanceSize
-    );
+    _shaderProgram->setUniform(_uniformCache.maxNodeDistanceSize, _maxNodeDistanceSize);
     _shaderProgram->setUniform(
         _uniformCache.usingCameraPerspective,
         _cameraPerspectiveEnabled
@@ -753,13 +749,9 @@ void RenderableFluxNodes::render(const RenderData& data, RendererTasks&) {
     );
     _shaderProgram->setUniform(_uniformCache.minMaxNodeSize, _minMaxNodeSize);
     _shaderProgram->setUniform(_uniformCache.usingPulse, _pulseEnabled);
-    _shaderProgram->setUniform(
-        _uniformCache.usingGaussianPulse,
-        _gaussianPulseEnabled
-    );
+    _shaderProgram->setUniform(_uniformCache.usingGaussianPulse, _gaussianPulseEnabled);
 
-    const glm::vec3 cameraPos = data.camera.positionVec3() * data.modelTransform.rotation;
-
+    const glm::vec3 cameraPos = data.camera.position() * data.modelTransform.rotation;
     _shaderProgram->setUniform("cameraPos", cameraPos);
 
     if (_colorMode == static_cast<int>(ColorMethod::ByFluxValue)) {
@@ -786,7 +778,7 @@ void RenderableFluxNodes::computeSequenceEndTime() {
         _sequenceEndTime = lastTriggerTime + averageStateDuration;
     }
     else if (_nStates == 1) {
-        // If there's just one state it should never disappear!
+        // If there's just one state it should never disappear
         _sequenceEndTime = std::numeric_limits<double>::max();
     }
     else {
@@ -802,11 +794,10 @@ void RenderableFluxNodes::update(const UpdateData& data) {
         _shaderProgram->rebuildFromFile();
     }
     bool needsUpdate = true;
-    //Everything below is for updating depending on time
+    // Everything below is for updating depending on time
     const double currentTime = data.time.j2000Seconds();
     const bool isInInterval = (currentTime >= _startTimes[0]) &&
             (currentTime < _sequenceEndTime);
-    //const bool isInInterval = true;
     if (isInInterval) {
         const size_t nextIdx = _activeTriggerTimeIndex + 1;
         if (
@@ -818,7 +809,7 @@ void RenderableFluxNodes::update(const UpdateData& data) {
             (nextIdx < _nStates && currentTime >= _startTimes[nextIdx]))
         {
             updateActiveTriggerTimeIndex(currentTime);
-        } // else {we're still in same state as previous frame (no changes needed)}
+        }
     }
     else {
         _activeTriggerTimeIndex = -1;
@@ -836,11 +827,7 @@ void RenderableFluxNodes::update(const UpdateData& data) {
 
     if (_shaderProgram->isDirty()) {
         _shaderProgram->rebuildFromFile();
-        ghoul::opengl::updateUniformLocations(
-            *_shaderProgram,
-            _uniformCache,
-            UniformNames
-        );
+        ghoul::opengl::updateUniformLocations(*_shaderProgram, _uniformCache);
     }
 }
 

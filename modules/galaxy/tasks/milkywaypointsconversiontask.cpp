@@ -31,15 +31,15 @@
 #include <iostream>
 #include <vector>
 
+namespace {
+    struct [[codegen::Dictionary(MilkywayPointsConversionTask)]] Parameters {};
+} // namespace
+#include "milkywaypointsconversiontask_codegen.cpp"
+
 namespace openspace {
 
 Documentation MilkywayPointsConversionTask::Documentation() {
-    return {
-        "MilkywayPointsConversionTask",
-        "galaxy_milkywaypointsconversiontask",
-        "",
-        {}
-    };
+    return codegen::doc<Parameters>("galaxy_milkywaypointsconversiontask");
 }
 
 MilkywayPointsConversionTask::MilkywayPointsConversionTask(const ghoul::Dictionary&) {}
@@ -59,7 +59,7 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
 
     const size_t nFloats = nPoints * 7;
 
-    std::vector<float> pointData(nFloats);
+    std::vector<float> pointData = std::vector<float>(nFloats);
 
     float x = 0.f;
     float y = 0.f;
@@ -71,20 +71,18 @@ void MilkywayPointsConversionTask::perform(const Task::ProgressCallback& progres
 
     for (int64_t i = 0; i < nPoints; i++) {
         in >> x >> y >> z >> r >> g >> b >> a;
-        if (in.good()) {
-            pointData[i * 7 + 0] = x;
-            pointData[i * 7 + 1] = y;
-            pointData[i * 7 + 2] = z;
-            pointData[i * 7 + 3] = r;
-            pointData[i * 7 + 4] = g;
-            pointData[i * 7 + 5] = b;
-            pointData[i * 7 + 6] = a;
-            progressCallback(static_cast<float>(i + 1) / nPoints);
+        if (!in.good()) {
+            throw ghoul::RuntimeError("Failed to convert point data");
         }
-        else {
-            std::cout << "Failed to convert point data";
-            return;
-        }
+
+        pointData[i * 7 + 0] = x;
+        pointData[i * 7 + 1] = y;
+        pointData[i * 7 + 2] = z;
+        pointData[i * 7 + 3] = r;
+        pointData[i * 7 + 4] = g;
+        pointData[i * 7 + 5] = b;
+        pointData[i * 7 + 6] = a;
+        progressCallback(static_cast<float>(i + 1) / nPoints);
     }
 
     out.write(reinterpret_cast<char*>(&nPoints), sizeof(int64_t));

@@ -47,8 +47,8 @@ namespace {
         std::filesystem::path seedpoints [[codegen::directory()]];
 
         // If data sets parameter start_time differ from start of run,
-        // elapsed_time_in_seconds might be in relation to start of run.
-        // ManuelTimeOffset will be added to trigger time.
+        // elapsed_time_in_seconds might be in relation to start of run. ManualTimeOffset
+        // will be added to trigger time.
         std::optional<double> manualTimeOffset;
 
         // The name of the kameleon variable to use for tracing, like b, or u.
@@ -57,18 +57,17 @@ namespace {
         // The folder to write the files to.
         std::filesystem::path outputFolder [[codegen::directory()]];
 
-        enum class
-        [[codegen::map(openspace::KameleonVolumeToFieldlinesTask::OutputType)]]
+        enum class [[codegen::map(openspace::KameleonVolumeToFieldlinesTask::OutputType)]]
         OutputType
         {
             Json,
             Osfls
         };
 
-        // Output type. Either osfls (OpenSpace FieldLineSequence) or json
+        // Output type. Either osfls (OpenSpace FieldLineSequence) or JSON.
         OutputType outputType;
 
-        // A list of vector variables to extract along the fieldlines
+        // A list of vector variables to extract along the fieldlines.
         std::optional<std::vector<std::string>> extraVars;
     };
 } // namespace
@@ -118,8 +117,8 @@ KameleonVolumeToFieldlinesTask::KameleonVolumeToFieldlinesTask(
 
 std::string KameleonVolumeToFieldlinesTask::description() {
     return std::format(
-        "Extract fieldline data from cdf file {} and seedpoint file {}. "
-        "Write either osfls files or json files into the folder {}.",
+        "Extract fieldline data from cdf file {} and seedpoint file {}. Write either "
+        "osfls files or json files into the folder {}.",
         _inputPath, _seedpointsPath, _outputFolder
     );
 }

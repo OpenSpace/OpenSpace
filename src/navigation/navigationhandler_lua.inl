@@ -151,8 +151,8 @@ namespace {
 }
 
 /**
- * Picks the next node from the interesting nodes out of the profile and selects that.
- * If the current anchor is not an interesting node, the first node in the list will be
+ * Picks the next node from the interesting nodes out of the profile and selects that. If
+ * the current anchor is not an interesting node, the first node in the list will be
  * selected.
  */
 [[codegen::luawrap]] void targetNextInterestingAnchor() {
@@ -269,8 +269,7 @@ namespace {
                                            std::string axisType,
                                            bool shouldInvert = false,
                                            std::string joystickType = "JoystickLike",
-                                           bool isSticky = false,
-                                           bool shouldFlip = false,
+                                           bool isSticky = false, bool shouldFlip = false,
                                            double sensitivity = 0.0)
 {
     global::navigationHandler->setJoystickAxisMapping(
@@ -321,45 +320,45 @@ namespace {
 }
 
 struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
-    // The current type of axis binding
+    /// The current type of axis binding.
     std::string type;
 
-    // Whether the values are inverted
+    /// Whether the values are inverted.
     bool invert;
 
-    // The type of joystick that this axis represents on the controller - either
-    // `\"JoystickLike\"` or `\"TriggerLike\"`. A joystick is `\"TriggerLike\"` if it
-    // can only be pressed or pushed in one direction. A `\"JoystickLike\"` axis can
-    // be pushed in two directions; for example, left and right, or up and down.
+    /// The type of joystick that this axis represents on the controller - either
+    /// `\"JoystickLike\"` or `\"TriggerLike\"`. A joystick is `\"TriggerLike\"` if it
+    /// can only be pressed or pushed in one direction. A `\"JoystickLike\"` axis can
+    /// be pushed in two directions; for example, left and right, or up and down.
     std::string joystickType;
 
-    // Whether or not this axis is “sticky”. An axis is “sticky” if, when you let go of
-    // it, the values it represents in the software do not go back to the default.
+    /// Whether or not this axis is “sticky”. An axis is “sticky” if, when you let go of
+    /// it, the values it represents in the software do not go back to the default.
     bool isSticky;
 
-    // Whether the camera movement for the axis is reversed. In the case of a
-    // `\"JoystickLike\"` axis, this is the same as inverting the axis. However, in the
-    // case of a `\"TriggerLike\" axis, this can reverse the camera movement for the
-    // trigger.
+    /// Whether the camera movement for the axis is reversed. In the case of a
+    /// `\"JoystickLike\"` axis, this is the same as inverting the axis. However, in the
+    /// case of a `\"TriggerLike\" axis, this can reverse the camera movement for the
+    /// trigger.
     bool flip;
 
-    // Sensitivity value for this axis
+    /// Sensitivity value for this axis.
     double sensitivity;
 
-    // The identifier (URI) of the property that is bound to this axes, if one is
+    /// The identifier (URI) of the property that is bound to this axes, if one is.
     std::optional<std::string> propertyUri;
 
-    // If a property is bound to this axis, this is the min value that can be set using
-    // the joystick input
+    /// If a property is bound to this axis, this is the min value that can be set using
+    /// the joystick input.
     std::optional<float> minValue;
 
-    // If a property is bound to this axis, this is the max value that can be set using
-    // the joystick input
+    /// If a property is bound to this axis, this is the max value that can be set using
+    /// the joystick input.
     std::optional<float> maxValue;
 
-    // If a property is bound to this axis, this says whether the property changes should
-    // be forwarded to other connected nodes or sessions (similarly to \"isLocal\" for
-    // actions)
+    /// If a property is bound to this axis, this says whether the property changes should
+    /// be forwarded to other connected nodes or sessions (similarly to \"isLocal\" for
+    /// actions).
     std::optional<bool> isRemote;
 };
 
@@ -463,7 +462,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 
 /**
  * Remove all commands that are currently bound to a button of a joystick or game
- * controller
+ * controller.
  *
  * \param joystickName the name for the joystick or game controller
  * \param button the button for which to clear the commands
@@ -597,7 +596,7 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 /**
  * Return the complete list of connected joysticks.
  *
- * \return a list of joystick names
+ * \return A list of joystick names
  */
 [[codegen::luawrap]] std::vector<std::string> listAllJoysticks() {
     return global::navigationHandler->listAllJoysticks();
@@ -606,40 +605,38 @@ struct [[codegen::Dictionary(JoystickAxis)]] JoystickAxis {
 /**
  * Return the distance to the current focus node.
  *
- * \return the distance, in meters
+ * \return The distance, in meters
  */
 [[codegen::luawrap]] double distanceToFocus() {
     const SceneGraphNode* focus = global::navigationHandler->anchorNode();
     Camera* camera = global::navigationHandler->camera();
 
-    return glm::distance(camera->positionVec3(), focus->worldPosition());
+    return glm::distance(camera->position(), focus->worldPosition());
 }
 
 /**
  * Return the distance to the current focus node's bounding sphere.
  *
- * \return the distance, in meters
+ * \return The distance, in meters
  */
 [[codegen::luawrap]] double distanceToFocusBoundingSphere() {
     const SceneGraphNode* focus = global::navigationHandler->anchorNode();
     Camera* camera = global::navigationHandler->camera();
 
-    double distance = glm::distance(camera->positionVec3(), focus->worldPosition());
-
+    double distance = glm::distance(camera->position(), focus->worldPosition());
     return distance - focus->boundingSphere();
 }
 
 /**
  * Return the distance to the current focus node's interaction sphere.
  *
- * \return the distance, in meters
+ * \return The distance, in meters
  */
 [[codegen::luawrap]] double distanceToFocusInteractionSphere() {
     const SceneGraphNode* focus = global::navigationHandler->anchorNode();
     Camera* camera = global::navigationHandler->camera();
 
-    double distance = glm::distance(camera->positionVec3(), focus->worldPosition());
-
+    double distance = glm::distance(camera->position(), focus->worldPosition());
     return distance - focus->interactionSphere();
 }
 
@@ -717,7 +714,7 @@ void flyToGeoInternal(std::string node, double latitude, double longitude,
         altitude
     );
 
-    const glm::dvec3 currentPosW = global::navigationHandler->camera()->positionVec3();
+    const glm::dvec3 currentPosW = global::navigationHandler->camera()->position();
     const glm::dvec3 currentPosModelCoords =
         glm::inverse(n->modelTransform()) * glm::dvec4(currentPosW, 1.0);
 
@@ -946,7 +943,7 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
                                                            std::optional<double> duration)
 {
     if (!sceneGraphNode(nodeIdentifier)) {
-        throw ghoul::lua::LuaError("Unknown node name: " + nodeIdentifier);
+        throw ghoul::lua::LuaError(std::format("Unknown node name: {}", nodeIdentifier));
     }
 
     ghoul::Dictionary insDict;
@@ -1195,12 +1192,12 @@ localPositionFromGeo(std::string nodeIdentifier, double latitude, double longitu
 }
 
 /**
- * Fade rendering to black, jump to the specified navigation state, and then fade in.
- * This is done by triggering another script that handles the logic.
+ * Fade rendering to black, jump to the specified navigation state, and then fade in. This
+ * is done by triggering another script that handles the logic.
  *
  * \param nodeIdentifier The identifier of the scene graph node to jump to
- * \param fadeDuration An optional duration for the fading. If not included, the
- *                     property in Navigation Handler will be used
+ * \param fadeDuration An optional duration for the fading. If not included, the property
+ *                     in Navigation Handler will be used
  */
 [[codegen::luawrap]] void jumpTo(std::string nodeIdentifier,
                                  std::optional<double> fadeDuration)

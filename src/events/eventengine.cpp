@@ -65,12 +65,13 @@ void EventEngine::postFrameCleanup() {
 void EventEngine::registerEventAction(Event::Type type, std::string identifier,
                                       std::optional<ghoul::Dictionary> filter)
 {
-    ActionInfo ai;
-    ai.id = nextRegisteredEventId;
-    ai.isEnabled = true;
-    ai.type = type;
-    ai.action = std::move(identifier);
-    ai.filter = std::move(filter);
+    ActionInfo ai = {
+        .type = type,
+        .id = nextRegisteredEventId,
+        .isEnabled = true,
+        .action = std::move(identifier),
+        .filter = std::move(filter)
+    };
     const auto it = _eventActions.find(type);
     if (it != _eventActions.end()) {
         it->second.push_back(ai);
@@ -137,31 +138,30 @@ void EventEngine::unregisterEventAction(uint32_t identifier) {
 
 void EventEngine::unregisterEventTopic(size_t topicId, Event::Type type) {
     const auto it = _eventTopics.find(type);
-    if (it != _eventTopics.end()) {
-        const auto jt = std::find_if(
-            it->second.begin(), it->second.end(),
-            [topicId](const TopicInfo& ti) {
-                return ti.id == topicId;
-            }
-        );
-        if (jt != it->second.end()) {
-            it->second.erase(jt);
+    if (it == _eventTopics.end()) {
+        LWARNING(std::format("Could not find registered event '{}'", toString(type)));
+        return;
+    }
 
-            // This might have been the last action so we might need to remove the
-            // entry alltogether
-            if (it->second.empty()) {
-                _eventTopics.erase(it);
-            }
-        }
-        else {
-            LWARNING(std::format(
-                "Could not find registered event '{}' with topicId: {}",
-                toString(type), topicId)
-            );
+    const auto jt = std::find_if(
+        it->second.begin(),
+        it->second.end(),
+        [topicId](const TopicInfo& ti) { return ti.id == topicId; }
+    );
+    if (jt != it->second.end()) {
+        it->second.erase(jt);
+
+        // This might have been the last action so we might need to remove the
+        // entry alltogether
+        if (it->second.empty()) {
+            _eventTopics.erase(it);
         }
     }
     else {
-        LWARNING(std::format("Could not find registered event '{}'", toString(type)));
+        LWARNING(std::format(
+            "Could not find registered event '{}' with topicId: {}",
+            toString(type), topicId)
+        );
     }
 }
 

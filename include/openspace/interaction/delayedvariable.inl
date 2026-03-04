@@ -39,14 +39,15 @@ template <typename T, typename ScaleType>
 void DelayedVariable<T, ScaleType>::set(T value, double dt) {
     _targetValue = value;
     _currentValue = _currentValue + (_targetValue - _currentValue) *
-        glm::min(_scaleFactor * dt, 1.0); // less or equal to 1.0 keeps it stable
+        // Less or equal to 1.0 keeps it stable
+        glm::min(_scaleFactor * dt, 1.0);
 }
 
 template <typename T, typename ScaleType>
 void DelayedVariable<T, ScaleType>::decelerate(double dt) {
     _currentValue = _currentValue + (- _currentValue) *
+        // Less or equal to 1.0 keeps it stable
         glm::min(_scaleFactor * _friction * dt, 1.0);
-        // less or equal to 1.0 keeps it stable
 }
 
 template <typename T, typename ScaleType>

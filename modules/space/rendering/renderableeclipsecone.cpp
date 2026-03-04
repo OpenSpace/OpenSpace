@@ -230,10 +230,8 @@ RenderableEclipseCone::RenderableEclipseCone(const ghoul::Dictionary& dictionary
     , _shadower(ShadowerInfo)
     , _shadowerFrame(ShadowerFrameInfo)
     , _shadowee(ShadoweeInfo)
-    //, _test({"ABC", "ABC", ""}, 1, 0, 380)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
-    //addProperty(_test);
     addProperty(Fadeable::_opacity);
 
     _numberOfPoints = p.numberOfPoints.value_or(_numberOfPoints);

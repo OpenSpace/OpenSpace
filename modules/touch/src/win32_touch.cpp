@@ -97,8 +97,8 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
             //Implementation from microsoft STL of high_resolution_clock(steady_clock):
             const long long freq = gFrequency;
             const long long whole = (info.PerformanceCount / freq) * std::micro::den;
-            const long long part  = (info.PerformanceCount % freq) *
-                                    std::micro::den / freq;
+            const long long part = (info.PerformanceCount % freq) *
+                                   std::micro::den / freq;
             const std::chrono::microseconds timestamp =
                 std::chrono::duration<UINT64, std::micro>(whole + part) - gStartTime;
 
@@ -109,16 +109,15 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
             // native touch to screen conversion
             ScreenToClient(pStruct->hwnd, reinterpret_cast<LPPOINT>(&p));
 
-            const float xPos = static_cast<float>(p.x) /
-                               static_cast<float>(rect.right - rect.left);
-            const float yPos = static_cast<float>(p.y) /
-                               static_cast<float>(rect.bottom - rect.top);
+            const float xPos =
+                static_cast<float>(p.x) / static_cast<float>(rect.right - rect.left);
+            const float yPos =
+                static_cast<float>(p.y) / static_cast<float>(rect.bottom - rect.top);
 
-            TouchInput touchInput(
+            TouchInput touchInput = TouchInput(
                 reinterpret_cast<size_t>(info.sourceDevice),
                 static_cast<size_t>(info.pointerId),
-                xPos,
-                yPos,
+                glm::vec2(xPos, yPos),
                 static_cast<double>(timestamp.count()) / 1000000.0
             );
 
@@ -171,13 +170,13 @@ LRESULT CALLBACK HookCallback(int nCode, WPARAM wParam, LPARAM lParam) {
         }
     }
 
-    // Pass the hook along!
+    // Pass the hook along
     return CallNextHookEx(0, nCode, wParam, lParam);
 }
 
 Win32TouchHook::Win32TouchHook(void* nativeWindow) {
     HWND hWnd = reinterpret_cast<HWND>(nativeWindow);
-    if (hWnd == nullptr) {
+    if (!hWnd) {
         LINFO("No windowhandle available for touch input");
         return;
     }
@@ -185,7 +184,7 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow) {
     // Test for touch:
     int value = GetSystemMetrics(SM_DIGITIZER);
     if ((value & NID_READY) == 0) {
-        // Don't bother setting up touch hooks?
+        // Don't bother setting up touch hooks
         return;
     }
     // stack ready, drivers installed and digitizer is ready for input
@@ -197,15 +196,15 @@ Win32TouchHook::Win32TouchHook(void* nativeWindow) {
         // Integrated touch
     }
 
-    // This should be needed, but we seem to receive messages even without it,
-    // this ought to be part to the older (< win8) windows touch-api.
-    // Also - RegisterTouchWindow enables Windows gestures, which we don't want
-    // since they produce visual feedback for "press-and-tap" etc.
+    // This should be needed, but we seem to receive messages even without it, this ought
+    // to be part to the older (< win8) windows touch-api. Also - RegisterTouchWindow
+    // enables Windows gestures, which we don't want since they produce visual feedback
+    // for "press-and-tap" etc.
     // RegisterTouchWindow(hWnd, TWF_FINETOUCH | TWF_WANTPALM);
 
     // TODO: Would be nice to find out if the gesture "press-and-tap" can be disabled
-    // basically we don't really care for windows gestures for now...
-    // this disables press and hold (right-click) gesture
+    // basically we don't really care for windows gestures for now... this disables press
+    // and hold (right-click) gesture
     const UINT_PTR dwHwndTabletProperty = TABLET_DISABLE_PRESSANDHOLD;
 
     ATOM atom = ::GlobalAddAtom(MICROSOFT_TABLETPENSERVICE_PROPERTY);
@@ -280,13 +279,12 @@ Win32TouchHook::~Win32TouchHook() {
 }
 
 // Low-level mouse hook is "needed" if we want to stop mousecursor from moving when we get
-// a touch-input on our window.
-// A negative effect is that this function is for global threads, meaning our application
-// will cause Windows to stall the mouse cursor when this  function can't be scheduled
-// (i.e. when debugger hits a breakpoint). This is not yet fail-proof...might be a
-// race-condition on message pumping?
-// - Seems to move the cursor when we get two fingers as input..
-// - If we ourselves would pump windows for events, we can handle this.
+// a touch-input on our window. A negative effect is that this function is for global
+// threads, meaning our application will cause Windows to stall the mouse cursor when this
+// function can't be scheduled (i.e. when debugger hits a breakpoint). This is not yet
+// fail-proof...might be a race-condition on message pumping?
+//   - Seems to move the cursor when we get two fingers as input..
+//   - If we ourselves would pump windows for events, we can handle this.
 LRESULT CALLBACK LowLevelMouseProc(int nCode, WPARAM wParam, LPARAM lParam) {
     constexpr LONG_PTR SIGNATURE_MASK = 0xFFFFFF00;
     constexpr LONG_PTR MOUSEEVENTF_FROMTOUCH = 0xFF515700;

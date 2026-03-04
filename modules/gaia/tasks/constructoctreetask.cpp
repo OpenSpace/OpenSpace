@@ -324,12 +324,6 @@ void ConstructOctreeTask::perform(const Task::ProgressCallback& onProgress) {
 void ConstructOctreeTask::constructOctreeFromSingleFile(
                                            const Task::ProgressCallback& progressCallback)
 {
-    std::vector<float> fullData;
-    int32_t nValues = 0;
-    int32_t nValuesPerStar = 0;
-    size_t nFilteredStars = 0;
-    int nTotalStars = 0;
-
     _octreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
     LINFO(std::format("Reading data file '{}'", _inFileOrFolderPath));
@@ -339,9 +333,15 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         _octreeManager->maxDist(), _octreeManager->maxStarsPerNode()
     ));
 
+    std::vector<float> fullData;
+    int32_t nValues = 0;
+    size_t nFilteredStars = 0;
+    int nTotalStars = 0;
+
     std::ifstream inFile = std::ifstream(_inFileOrFolderPath, std::ifstream::binary);
     if (inFile.good()) {
         inFile.read(reinterpret_cast<char*>(&nValues), sizeof(int32_t));
+        int32_t nValuesPerStar = 0;
         inFile.read(reinterpret_cast<char*>(&nValuesPerStar), sizeof(int32_t));
 
         fullData.resize(nValues);
@@ -355,10 +355,11 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
         for (size_t i = 0; i < fullData.size(); i += nValuesPerStar) {
             auto first = fullData.begin() + i;
             auto last = fullData.begin() + i + nValuesPerStar;
-            const std::vector<float> filterValues(first, last);
-            const std::vector<float> renderValues(first, first + RENDER_VALUES);
+            const std::vector<float> filterValues = std::vector<float>(first, last);
+            const std::vector<float> renderValues =
+                std::vector<float>(first, first + RENDER_VALUES);
 
-            // Filter data by parameters.
+            // Filter data by parameters
             if (checkAllFilters(filterValues)) {
                 nFilteredStars++;
                 continue;
@@ -386,8 +387,6 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
             LERROR("Error writing file - No values were read from file");
         }
         _octreeManager->writeToFile(outFile, true);
-
-        outFile.close();
     }
     else {
         LERROR(std::format(
@@ -399,9 +398,6 @@ void ConstructOctreeTask::constructOctreeFromSingleFile(
 void ConstructOctreeTask::constructOctreeFromFolder(
                                            const Task::ProgressCallback& progressCallback)
 {
-    int32_t nStars = 0;
-    int32_t nValuesPerStar = 0;
-    size_t nFilteredStars = 0;
 
     std::vector<std::filesystem::path> allInputFiles;
     if (std::filesystem::is_directory(_inFileOrFolderPath)) {
@@ -413,9 +409,6 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         }
     }
 
-    std::vector<float> filterValues;
-    std::vector<std::thread> writeThreads = std::vector<std::thread>(8);
-
     _indexOctreeManager->initOctree(0, _maxDist, _maxStarsPerNode);
 
     const float processOneFile = 1.f / allInputFiles.size();
@@ -425,6 +418,11 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         _indexOctreeManager->maxDist(), _indexOctreeManager->maxStarsPerNode()
     ));
 
+    int32_t nValuesPerStar = 0;
+    int32_t nStars = 0;
+    size_t nFilteredStars = 0;
+    std::vector<float> filterValues;
+    std::vector<std::thread> writeThreads = std::vector<std::thread>(8);
     for (size_t idx = 0; idx < allInputFiles.size(); idx++) {
         std::filesystem::path inFilePath = allInputFiles[idx];
         int nStarsInfile = 0;
@@ -441,14 +439,14 @@ void ConstructOctreeTask::constructOctreeFromFolder(
                 nValuesPerStar * sizeof(filterValues[0])
             ))
             {
-                // Filter data by parameters.
+                // Filter data by parameters
                 if (checkAllFilters(filterValues)) {
                     nFilteredStars++;
                     continue;
                 }
                 // Generate a 50/12,5 dataset (gMag <=13/>13).
 
-                // If all filters passed then insert render values into Octree.
+                // If all filters passed then insert render values into Octree
                 const std::vector<float> renderValues(
                     filterValues.begin(),
                     filterValues.begin() + RENDER_VALUES
@@ -465,7 +463,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
             ));
         }
 
-        // Slice LOD data.
+        // Slice LOD data
         LINFO("Slicing LOD data");
         _indexOctreeManager->sliceLodData(idx);
 
@@ -481,8 +479,8 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         ));
 
         // Write to 8 separate files in a separate thread. Data will be cleared after it
-        // has been written. Store joinable thread for later sync.
-        std::thread t(
+        // has been written. Store joinable thread for later sync
+        std::thread t = std::thread(
             &OctreeManager::writeToMultipleFiles,
             _indexOctreeManager,
             _outFileOrFolderPath,
@@ -497,7 +495,7 @@ void ConstructOctreeTask::constructOctreeFromFolder(
     ));
     LINFO(std::format("{} stars were filtered", nFilteredStars));
 
-    // Write index file of Octree structure.
+    // Write index file of Octree structure
     std::filesystem::path indexFileOutPath = _outFileOrFolderPath / "index.bin";
     std::ofstream outFileStream = std::ofstream(indexFileOutPath, std::ofstream::binary);
     if (outFileStream.good()) {
@@ -512,14 +510,14 @@ void ConstructOctreeTask::constructOctreeFromFolder(
         ));
     }
 
-    // Make sure all threads are done.
+    // Make sure all threads are done
     for (int i = 0; i < 8; i++) {
         writeThreads[i].join();
     }
 }
 
 bool ConstructOctreeTask::checkAllFilters(const std::vector<float>& filterValues) {
-    // Return true if star is caught in any filter.
+    // Return true if star is caught in any filter
     return (_filterPosX && filterStar(_posX, filterValues[0])) ||
         (_filterPosY && filterStar(_posY, filterValues[1])) ||
         (_filterPosZ && filterStar(_posZ, filterValues[2])) ||

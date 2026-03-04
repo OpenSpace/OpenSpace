@@ -23,11 +23,11 @@
  ****************************************************************************************/
 
 #include <openspace/scene/scene.h>
-#include <ghoul/lua/lua_helper.h>
 #include <openspace/engine/globals.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/scripting/scriptengine.h>
 #include <ghoul/logging/logmanager.h>
+#include <ghoul/lua/lua_helper.h>
 
 using namespace openspace;
 

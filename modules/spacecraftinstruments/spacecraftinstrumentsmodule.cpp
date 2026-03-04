@@ -51,7 +51,9 @@ namespace openspace {
 
 ghoul::opengl::ProgramObjectManager SpacecraftInstrumentsModule::ProgramObjectManager;
 
-SpacecraftInstrumentsModule::SpacecraftInstrumentsModule() : OpenSpaceModule(Name) {}
+SpacecraftInstrumentsModule::SpacecraftInstrumentsModule()
+    : OpenSpaceModule(Name)
+{}
 
 void SpacecraftInstrumentsModule::internalInitialize(const ghoul::Dictionary&) {
     ZoneScoped;
@@ -121,7 +123,7 @@ std::string SpacecraftInstrumentsModule::frameFromBody(const std::string& body) 
     }
 
     constexpr std::string_view unionPrefix = "IAU_";
-    if (body.find(unionPrefix) == std::string::npos) {
+    if (!body.contains(unionPrefix)) {
         return std::format("{}{}", unionPrefix, body);
     }
     else {

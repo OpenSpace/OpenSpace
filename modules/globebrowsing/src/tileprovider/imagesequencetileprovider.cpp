@@ -126,7 +126,7 @@ TileDepthTransform ImageSequenceTileProvider::depthTransform() {
         return _currentTileProvider->depthTransform();
     }
     else {
-        return { 1.f, 0.f };
+        return { .scale = 1.f, .offset = 0.f };
     }
 }
 

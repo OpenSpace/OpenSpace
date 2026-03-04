@@ -184,7 +184,7 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
         entry.data.reserve(nDataColumns);
 
         for (size_t i = 0; i < row.size(); i++) {
-            // Check if column should be exluded. Note that list of indices is sorted
+            // Check if column should be excluded. Note that list of indices is sorted
             // so we can do a binary search
             if (hasExcludeColumns &&
                 std::binary_search(skipColumns.begin(), skipColumns.end(), i))
@@ -246,11 +246,11 @@ Dataset loadCsvFile(std::filesystem::path filePath, std::optional<DataMapping> s
 }
 
 std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
-                                          const std::set<int>& texturesInData)
+                                                 const std::set<int>& texturesInData)
 {
     ghoul_assert(std::filesystem::exists(path), "File must exist");
 
-    std::ifstream file(path);
+    std::ifstream file = std::ifstream(path);
     if (!file.good()) {
         throw ghoul::RuntimeError(std::format(
             "Failed to open texture map file {}", path
@@ -285,7 +285,7 @@ std::vector<Dataset::Texture> loadTextureMapFile(std::filesystem::path path,
             ));
         }
 
-        std::stringstream str(line);
+        std::stringstream str = std::stringstream(line);
 
         // Each line is following the template:
         // <idx> <file name>

@@ -46,7 +46,7 @@ namespace {
         // tile provider with the earliest time will be used for all dates prior to that
         // date and the provider with the latest time will be used for all dates
         // afterwards. In between, a provider is used from the specified time until the
-        // time of the next provider
+        // time of the next provider.
         std::map<std::string, ghoul::Dictionary> providers;
     };
 } // namespace

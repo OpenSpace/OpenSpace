@@ -536,12 +536,12 @@ void VideoPlayer::renderMpv() {
 }
 
 void VideoPlayer::renderFrame() {
-    // Save the currently bound fbo
+    // Save the currently bound FBO
     const GLint defaultFBO = ghoul::opengl::FramebufferObject::getActiveObject();
 
-    // See render_gl.h on what OpenGL environment mpv expects, and other API
-    // details. This function fills the fbo and texture with data, after it
-    // we can get the data on the GPU, not the CPU
+    // See render_gl.h on what OpenGL environment mpv expects, and other API details. This
+    // function fills the fbo and texture with data, after it we can get the data on the
+    // GPU, not the CPU
     const int fboInt = static_cast<int>(_fbo);
     mpv_opengl_fbo mpfbo = {
         fboInt,
@@ -556,8 +556,7 @@ void VideoPlayer::renderFrame() {
         { MPV_RENDER_PARAM_FLIP_Y, &flipY },
         { MPV_RENDER_PARAM_INVALID, nullptr }
     };
-    // This "renders" to the video_framebuffer "linked by ID" in the
-    // params_fbo
+    // This "renders" to the video_framebuffer "linked by ID" in the params_fbo
     mpv_render_context_render(_mpvRenderContext, params);
 
     // We have to set the Viewport on every cycle because
@@ -638,9 +637,9 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
     if (formats[key] == MPV_FORMAT_NODE) {
         const int result = mpv_event_to_node(&node, event);
         if (!checkMpvError(result)) {
-            LWARNING(
-                std::format("Error getting data from libmpv property: {}", keys[key])
-            );
+            LWARNING(std::format(
+                "Error getting data from libmpv property: {}", keys[key]
+            ));
         }
     }
     else {
@@ -779,8 +778,8 @@ void VideoPlayer::handleMpvProperties(mpv_event* event) {
 
 void VideoPlayer::destroy() {
     _isDestroying = true;
-    // Destroy the GL renderer and all of the GL objects it allocated. If video
-    // is still running, the video track will be deselected.
+    // Destroy the GL renderer and all of the GL objects it allocated. If video is still
+    // running, the video track will be deselected
     mpv_render_context_free(_mpvRenderContext);
     _mpvRenderContext = nullptr;
     mpv_destroy(_mpvHandle);
@@ -859,7 +858,7 @@ void VideoPlayer::createTexture(glm::ivec2 size) {
     LINFO(std::format("Creating new FBO with width: {} and height: {}", size.x, size.y));
 
     if (size.x <= 0 || size.y <= 0) {
-        LERROR("Cannot create empty fbo");
+        LERROR("Cannot create empty FBO");
         return;
     }
 
@@ -867,13 +866,13 @@ void VideoPlayer::createTexture(glm::ivec2 size) {
     _videoResolution = size;
 
     _frameTexture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(size, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit{}
+        ghoul::opengl::Texture::SamplerInit {}
     );
 
     // Bind texture to framebuffer

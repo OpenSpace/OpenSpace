@@ -24,8 +24,8 @@
 
 #include <modules/galaxy/tasks/milkywayconversiontask.h>
 
-#include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/rawvolumewriter.h>
+#include <modules/volume/textureslicevolumereader.h>
 #include <modules/volume/volumesampler.h>
 #include <openspace/documentation/documentation.h>
 #include <ghoul/misc/dictionary.h>
@@ -71,19 +71,22 @@ void MilkywayConversionTask::perform(const Task::ProgressCallback& onProgress) {
         );
     }
 
-    TextureSliceVolumeReader<glm::tvec4<GLfloat>> sliceReader(filenames, _inNSlices, 10);
+    TextureSliceVolumeReader<glm::tvec4<GLfloat>> sliceReader =
+        TextureSliceVolumeReader<glm::tvec4<GLfloat>>(filenames, _inNSlices, 10);
     sliceReader.initialize();
 
-    RawVolumeWriter<glm::tvec4<GLfloat>> rawWriter(_outFilename);
+    RawVolumeWriter<glm::tvec4<GLfloat>> rawWriter =
+        RawVolumeWriter<glm::tvec4<GLfloat>>(_outFilename);
     rawWriter.setDimensions(_outDimensions);
 
     const glm::vec3 resolutionRatio = static_cast<glm::vec3>(sliceReader.dimensions()) /
                                       static_cast<glm::vec3>(rawWriter.dimensions());
 
-    const VolumeSampler<TextureSliceVolumeReader<glm::tvec4<GLfloat>>> sampler(
-        &sliceReader,
-        resolutionRatio
-    );
+    const VolumeSampler<TextureSliceVolumeReader<glm::tvec4<GLfloat>>> sampler =
+        VolumeSampler<TextureSliceVolumeReader<glm::tvec4<GLfloat>>>(
+            &sliceReader,
+            resolutionRatio
+        );
     auto sampleFunction = [resolutionRatio, sampler](const glm::ivec3& outCoord) {
         const glm::vec3 inCoord =
             ((glm::vec3(outCoord) + glm::vec3(0.5f)) * resolutionRatio) - glm::vec3(0.5f);

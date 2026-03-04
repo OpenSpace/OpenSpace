@@ -564,7 +564,7 @@ void RenderableVectorField::update(const UpdateData&) {
             _colorTexture = ghoul::io::TextureReader::ref().loadTexture(
                 absPath(_colorSettings.colorMap),
                 1,
-                ghoul::opengl::Texture::SamplerInit{
+                ghoul::opengl::Texture::SamplerInit {
                     .filter = ghoul::opengl::Texture::FilterMode::Nearest,
                     .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge
                 }
@@ -581,6 +581,7 @@ void RenderableVectorField::applyLuaFilter() {
     if (!_filterByLua) {
         return;
     }
+
     std::filesystem::path path = _luaScriptFile.value();
     if (path.empty()) {
         LERROR(std::format(
@@ -735,7 +736,7 @@ void RenderableVectorField::computeSparseFieldLines() {
     _instances.clear();
     _instances.resize(totalInstances);
 
-    std::vector<size_t> indices(totalInstances);
+    std::vector<size_t> indices = std::vector<size_t>(totalInstances);
     std::iota(indices.begin(), indices.end(), 0);
 
     auto computeArrowInstance = [this](size_t instanceIdx) {
@@ -743,12 +744,12 @@ void RenderableVectorField::computeSparseFieldLines() {
         const glm::vec3& position = _sparse.data[dataIdx].position;
         const glm::vec3& velocity = _sparse.data[dataIdx].velocity;
 
-        float magnitude = glm::length(velocity);
+        const float magnitude = glm::length(velocity);
         glm::vec3 direction = (magnitude > 0.f) ?
             glm::normalize(velocity) :
             glm::vec3(0.f);
 
-        _instances[instanceIdx] = (ArrowInstance(position, direction, magnitude));
+        _instances[instanceIdx] = ArrowInstance(position, direction, magnitude);
     };
 
     std::for_each(
@@ -895,7 +896,10 @@ void RenderableVectorField::loadCSVData(const std::filesystem::path& path) {
                 velocity.z = value;
             }
         }
-        _sparse.data.push_back({ position, velocity });
+        _sparse.data.push_back({
+            .position = position,
+            .velocity = velocity
+        });
 
         if (_colorSettings.shouldComputeMagnitudeRange) {
             float magnitude = glm::length(velocity);

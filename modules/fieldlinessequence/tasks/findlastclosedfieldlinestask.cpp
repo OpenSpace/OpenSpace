@@ -38,23 +38,22 @@ namespace {
     constexpr std::string_view _loggerCat = "FindLastClosedFieldlinesTask";
 
     struct [[codegen::Dictionary(FindLastClosedFieldlinesTask)]] Parameters {
-        // The folder to the cdf files to extract data from
+        // The folder to the cdf files to extract data from.
         std::filesystem::path input [[codegen::directory()]];
 
-        // The name of the kameleon variable to use for tracing, like b for magnetic
-        // or u for velocity or even electric?
+        // The name of the kameleon variable to use for tracing, like b for magnetic or u
+        // for velocity or even electric?
         std::optional<std::string> tracingVar;
 
-        // number of points to work with
+        // Number of points to work with.
         std::optional<int> numberOfPointsOnBoundary;
 
-        // this will determine how accurate to the boundary it will get
-        // every iteration the seedpoint will move closer to the boundary,
-        // the distance it moves will be halfed each iteration until that
-        // distance is less than this threshold.
+        // This will determine how accurate to the boundary it will get every iteration
+        // the seedpoint will move closer to the boundary, the distance it moves will be
+        // halfed each iteration until that distance is less than this threshold.
         std::optional<float> threshold;
 
-        // The folder to write the files to
+        // The folder to write the files to.
         std::filesystem::path output [[codegen::directory()]];
     };
 } // namespace
@@ -135,8 +134,7 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
                     magVariableNames.push_back(kameleon->getVariableName(i + 2));
                     LINFO(std::format(
                         "Magnitude variable name : {}, {}, {}",
-                        name,
-                        kameleon->getVariableName(i + 1),
+                        name, kameleon->getVariableName(i + 1),
                         kameleon->getVariableName(i + 2)
                     ));
                     i += 2;
@@ -147,10 +145,10 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
                 }
             }
         }
-        // This checks if t or T is already in there, and if not, it makes sure
-        // that p and rho is there before adding the key string "T = p/rho" for
-        // later calculating and adding the temperature parameter in the
-        // kameleon fieldline helper function addExtraQuantities later.
+        // This checks if t or T is already in there, and if not, it makes sure that p and
+        // rho is there before adding the key string "T = p/rho" for later calculating and
+        // adding the temperature parameter in the Kameleon fieldline helper function
+        // addExtraQuantities later
         auto t = std::find(variableNames.begin(), variableNames.end(), "t");
         auto T = std::find(variableNames.begin(), variableNames.end(), "T");
         auto p = std::find(variableNames.begin(), variableNames.end(), "p");
@@ -160,13 +158,15 @@ void FindLastClosedFieldlinesTask::perform(const Task::ProgressCallback& progres
         {
             variableNames.push_back("T = p/rho");
         }
-        // either take input of the names wanting to save:
+        // Either take input of the names wanting to save:
         // con: requires knowing the exact names, more difficult running script
-        // pro: easy way to include P/rho = temperature, smaller data.
+        // pro: easy way to include P/rho = temperature, smaller data
+        //
         // or
-        // save all and check if both P and rho are there:
+        //
+        // Save all and check if both P and rho are there:
         // con: bigger files, longer tracing time(?)
-        // pro: easier to run task, guaranties temp will be there if possible.
+        // pro: easier to run task, guaranties temp will be there if possible
         std::vector<ccmc::Fieldline> fieldlines =
             tracer.getLastClosedFieldlines(_numberOfPointsOnBoundary, 1, 5.1f, 300);
 

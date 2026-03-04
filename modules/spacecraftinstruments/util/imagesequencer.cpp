@@ -137,45 +137,36 @@ const std::vector<double>& ImageSequencer::captureProgression() const {
 }
 
 std::vector<std::pair<std::string, bool>> ImageSequencer::activeInstruments(double time) {
-    // first set all instruments to off
     for (std::pair<std::string, bool>& i : _switchingMap) {
         i.second = false;
     }
 
-    // go over the filetranslaton map
     using K = std::string;
     using V = std::unique_ptr<Decoder>;
     for (const std::pair<const K, V>& key : _fileTranslation) {
-        // for each spice-instrument
         for (const std::string& instrumentID : key.second->translations()) {
-            // check if the spice-instrument is active
-            if (isInstrumentActive(time, instrumentID)) {
-                // go over switching map
-                for (std::pair<std::string, bool>& instrument : _switchingMap) {
-                    // if instrument is present in switching map
-                    if (instrumentID == instrument.first) {
-                        // set as active
-                        instrument.second = true;
-                    }
+            if (!isInstrumentActive(time, instrumentID)) {
+                continue;
+            }
+
+            for (std::pair<std::string, bool>& instrument : _switchingMap) {
+                if (instrumentID == instrument.first) {
+                    instrument.second = true;
                 }
             }
         }
     }
-    // return entire map, seen in GUI
     return _switchingMap;
 }
 
 bool ImageSequencer::isInstrumentActive(double time, const std::string& instrument) const
 {
     for (const std::pair<std::string, TimeRange>& i : _instrumentTimes) {
-        // check if this instrument is in range
         if (!i.second.includes(time)) {
             continue;
         }
 
-        // if so, then get the corresponding spiceID
         const std::vector<std::string>& is = _fileTranslation.at(i.first)->translations();
-        // check which specific subinstrument is firing
         const auto it = std::find(is.begin(), is.end(), instrument);
         if (it != is.end()) {
             return true;
@@ -188,14 +179,10 @@ float ImageSequencer::instrumentActiveTime(double time,
                                            const std::string& instrumentID) const
 {
     for (const std::pair<std::string, TimeRange>& i : _instrumentTimes) {
-        // check if this instrument is in range
         if (!i.second.includes(time)) {
             continue;
         }
-        // if so, then get the corresponding spiceID
         const std::vector<std::string>& is = _fileTranslation.at(i.first)->translations();
-
-        // check which specific subinstrument is firing
         const auto it = std::find(is.begin(), is.end(), instrumentID);
         if (it != is.end()) {
             return static_cast<float>(
@@ -212,8 +199,7 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
 {
     // TODO: Check how this works with time jumps
 
-    // check if this instance is either in range or
-    // a valid candidate to recieve data
+    // Check if this instance is either in range or a valid candidate to recieve data
 
     const bool instrumentActive = isInstrumentActive(time, instrument);
     const bool hasCurrentTime = _subsetMap[projectee]._range.includes(time);
@@ -223,19 +209,19 @@ std::vector<Image> ImageSequencer::imagePaths(const std::string& projectee,
         return std::vector<Image>();
     }
 
-    // for readability we store the iterators
+    // For readability we store the iterators
     auto begin = _subsetMap[projectee]._subset.begin();
     auto end = _subsetMap[projectee]._subset.end();
 
-    // create temporary storage
+    // Create temporary storage
     std::vector<Image> captures;
-    // what to look for
+    // What to look for
     Image findPrevious;
     Image findCurrent;
     findPrevious.timeRange.start = sinceTime;
     findCurrent.timeRange.start = time;
 
-    // find the two iterators that correspond to the latest time jump
+    // Find the two iterators that correspond to the latest time jump
     auto compareTime = [](const Image& a, const Image& b) -> bool {
         return a.timeRange.start < b.timeRange.start;
     };
@@ -331,29 +317,29 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
     const std::vector<std::pair<double, std::string>>& targetTimes = parser.targetTimes();
     const std::vector<double>& captureProgression = parser.captureProgression();
 
-    // check for sanity
+    // Check for sanity
     if (imageData.empty() || instrumentTimes.empty() || captureProgression.empty()) {
         LINFO("Parser did not contain images, instrument times or capture progression");
         return;
     }
 
-    // append data
+    // Append data
     for (std::pair<const std::string, std::unique_ptr<Decoder>>& it : translations) {
         _fileTranslation[it.first] = std::move(it.second);
     }
 
     for (std::pair<const std::string, ImageSubset>& it : imageData) {
         if (_subsetMap.find(it.first) == _subsetMap.end()) {
-            // if key not exist yet - add sequence data for key (target)
+            // If key not exist yet - add sequence data for key (target)
             _subsetMap.insert(it);
             continue;
         }
 
         const std::string& key = it.first;
-        std::vector<Image>& source = it.second._subset; // prediction
-        const std::vector<Image>& destination = _subsetMap[key]._subset; // imagery
+        std::vector<Image>& source = it.second._subset;
+        const std::vector<Image>& destination = _subsetMap[key]._subset;
 
-        // simple search function
+        // Simple search function
         double min = 10;
         auto findMin = [&min](const std::vector<Image>& vec) -> double {
             for (size_t i = 1; i < vec.size(); i++) {
@@ -365,13 +351,13 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
             return min;
         };
 
-        // find the smallest separation of images in time
+        // Find the smallest separation of images in time
         double epsilon = findMin(destination);
-        // set epsilon as 1% smaller than min
+        // Set epsilon as 1% smaller than min
         epsilon -= min * 0.01;
 
-        // IFF images have same time as mission planned capture, erase that event
-        // from 'predicted event file' (mission-playbook)
+        // IFF images have same time as mission planned capture, erase that event from
+        // 'predicted event file' (mission-playbook)
         for (const Image& i : source) {
             for (const Image& j : destination) {
                 if (source.empty()) {
@@ -389,7 +375,7 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
                 }
             }
         }
-        // pad image data with predictions (ie - where no actual images, add placeholder)
+        // Pad image data with predictions (ie - where no actual images, add placeholder)
         _subsetMap[key]._subset.insert(
             _subsetMap[key]._subset.end(),
             source.begin(),
@@ -411,10 +397,10 @@ void ImageSequencer::runSequenceParser(SequenceParser& parser) {
         captureProgression.end()
     );
 
-    // sorting of data _not_ optional
+    // Sorting of data _not_ optional
     sortData();
 
-    // extract payload from _fileTranslation
+    // Extract payload from _fileTranslation
     for (std::pair<const std::string, std::unique_ptr<Decoder>>& t : _fileTranslation) {
         if (t.second->decoderType() == "CAMERA" || t.second->decoderType() == "SCANNER") {
             const std::vector<std::string>& spiceIDs = t.second->translations();

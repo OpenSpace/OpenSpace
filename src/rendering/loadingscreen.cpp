@@ -74,9 +74,9 @@ namespace {
 
     constexpr int MaxNumberLocationSamples = 1000;
 
-    constexpr std::chrono::milliseconds TTL(5000);
+    constexpr std::chrono::milliseconds TTL = std::chrono::milliseconds(5000);
 
-    constexpr std::chrono::milliseconds RefreshRate(16);
+    constexpr std::chrono::milliseconds RefreshRate = std::chrono::milliseconds(16);
 
     bool rectOverlaps(glm::vec2 lhsLl, glm::vec2 lhsUr, glm::vec2 rhsLl, glm::vec2 rhsUr)
     {
@@ -214,20 +214,20 @@ void LoadingScreen::exec(AssetManager& manager, Scene& scene) {
                     return
                         static_cast<float>(sync->nSynchronizedBytes()) /
                         static_cast<float>(sync->nTotalBytes());
-                    }(*it);
+                }(*it);
 
-                    progressInfo.currentSize = (*it)->nSynchronizedBytes();
-                    if ((*it)->nTotalBytesIsKnown()) {
-                        progressInfo.totalSize = (*it)->nTotalBytes();
-                    }
+                progressInfo.currentSize = (*it)->nSynchronizedBytes();
+                if ((*it)->nTotalBytesIsKnown()) {
+                    progressInfo.totalSize = (*it)->nTotalBytes();
+                }
 
-                    updateItem(
-                        (*it)->identifier(),
-                        (*it)->name(),
-                        LoadingScreen::ItemStatus::Started,
-                        progressInfo
-                    );
-                    it++;
+                updateItem(
+                    (*it)->identifier(),
+                    (*it)->name(),
+                    LoadingScreen::ItemStatus::Started,
+                    progressInfo
+                );
+                it++;
             }
             else if ((*it)->isRejected()) {
                 updateItem(
@@ -267,7 +267,7 @@ void LoadingScreen::exec(AssetManager& manager, Scene& scene) {
         if (finishedLoading) {
             break;
         }
-    } // while(true)
+    }
 
     setPhase(LoadingScreen::Phase::Initialization);
 
@@ -328,7 +328,7 @@ void LoadingScreen::render() {
     // Render logo
     //
     rendering::renderBox(
-        glm::vec2(1.f) - ((LogoCenter + glm::vec2(1.f)) / 2.f),
+        glm::vec2(1.f) - (LogoCenter + glm::vec2(1.f)) / 2.f,
         size,
         glm::vec4(1.f),
         *_logoTexture,
@@ -564,8 +564,8 @@ void LoadingScreen::render() {
 
     }
 
-    // Render log messages last to make them slightly more visible if a download item
-    // is slightly overlapping
+    // Render log messages last to make them slightly more visible if a download item is
+    // slightly overlapping
     if (_showLog) {
         renderLogMessages();
     }

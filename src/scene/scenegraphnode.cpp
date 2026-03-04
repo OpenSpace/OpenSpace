@@ -179,7 +179,7 @@ namespace {
     constexpr Property::PropertyInfo GuiDescriptionInfo = {
         "GuiDescription",
         "GUI description",
-        "This is the description for the scene graph node to be shown in the gui. "
+        "This is the description for the scene graph node to be shown in the GUI. "
         "Example: Earth is a special place.",
         Property::Visibility::Hidden
     };
@@ -187,8 +187,8 @@ namespace {
     constexpr Property::PropertyInfo GuiHiddenInfo = {
         "GuiHidden",
         "GUI hidden",
-        "This represents if the scene graph node should be shown in the gui. "
-        "Example: false.",
+        "This represents if the scene graph node should be shown in the GUI. Example: "
+        "false.",
         Property::Visibility::Hidden
     };
 
@@ -204,8 +204,8 @@ namespace {
     constexpr Property::PropertyInfo UseGuiOrderInfo = {
         "UseGuiOrdering",
         "Use GUI ordering",
-        "If true, use the 'GuiOrderingNumber' to place this scene graph node in a "
-        "sorted way in relation to its neighbors in the GUI",
+        "If true, use the 'GuiOrderingNumber' to place this scene graph node in a sorted "
+        "way in relation to its neighbors in the GUI.",
         Property::Visibility::Hidden
     };
 
@@ -223,8 +223,8 @@ namespace {
         "Show debug sphere",
         "If enabled the bounding sphere of this scene graph node is rendered as a debug "
         "method. The interaction sphere is rendered in cyan and the bounding sphere in "
-        "purple. If only one is visible, this may be because the spheres have equal "
-        "size and are overlapping.",
+        "purple. If only one is visible, this may be because the spheres have equal size "
+        "and are overlapping.",
         Property::Visibility::AdvancedUser
     };
 
@@ -232,12 +232,12 @@ namespace {
         "SupportsDirectInteraction",
         "Supports direct interaction",
         "Only relevant when using touch interaction. If true, the \'direct "
-        "manipulation\' scheme will be used when interacting with this scene graph "
-        "node, meaning that the positions on the interaction sphere that intersects "
-        "with the touch points will directly follow the motion of the touch points. "
-        "Works best for objects that have an interaction sphere of about the same size "
-        "as the bounding sphere, and that are somewhat spherical. Note that using this "
-        "feature might significalty reduce the performance.",
+        "manipulation\' scheme will be used when interacting with this scene graph node, "
+        "meaning that the positions on the interaction sphere that intersects with the "
+        "touch points will directly follow the motion of the touch points. Works best "
+        "for objects that have an interaction sphere of about the same size as the "
+        "bounding sphere, and that are somewhat spherical. Note that using this feature "
+        "might significalty reduce the performance.",
         Property::Visibility::AdvancedUser
     };
 
@@ -250,7 +250,7 @@ namespace {
 
         // This names the parent of the currently specified scene graph node. The parent
         // must already exist in the scene graph. If not specified, the node will be
-        // attached to the root of the scene graph
+        // attached to the root of the scene graph.
         std::optional<std::string> parent [[codegen::identifier()]];
 
         // The renderable that is to be created for this scene graph node. A renderable is
@@ -258,7 +258,7 @@ namespace {
         // screen. The specifics heavily depend on the 'Type' of the renderable. If no
         // Renderable is specified, this scene graph node is an internal node and can be
         // used for either group children, or apply common transformations to a group of
-        // children
+        // children.
         std::optional<ghoul::Dictionary> renderable [[codegen::reference("renderable")]];
 
         // [[codegen::verbatim(BoundingSphereInfo.description)]]
@@ -273,19 +273,19 @@ namespace {
         struct Transform {
             // This node describes a translation that is applied to the scene graph node
             // and all its children. Depending on the 'Type' of the translation, this can
-            // either be a static translation or a time-varying one
+            // either be a static translation or a time-varying one.
             std::optional<ghoul::Dictionary> translation
                 [[codegen::reference("core_transform_translation")]];
 
             // This nodes describes a rotation that is applied to the scene graph node and
             // all its children. Depending on the 'Type' of the rotation, this can either
-            // be a static rotation or a time-varying one
+            // be a static rotation or a time-varying one.
             std::optional<ghoul::Dictionary> rotation
                 [[codegen::reference("core_transform_rotation")]];
 
             // This node describes a scaling that is applied to the scene graph node and
             // all its children. Depending on the 'Type' of the scaling, this can either
-            // be a static scaling or a time-varying one
+            // be a static scaling or a time-varying one.
             std::optional<ghoul::Dictionary> scale
                 [[codegen::reference("core_transform_scale")]];
         };
@@ -300,34 +300,34 @@ namespace {
         // This value is a multiplication factor for the interaction sphere that
         // determines when the camera is 'approaching' the scene graph node. If this value
         // is not specified, a default value of 5 is used instead. This value must be
-        // larger than the reachFactor or unexpected things might happen
+        // larger than the reachFactor or unexpected things might happen.
         std::optional<double> approachFactor [[codegen::greaterequal(0.0)]];
 
         // This value is a multiplication factor for the interaction sphere that
         // determines when the camera has 'reached' the scene graph node. If this value is
         // not specified, a default value of 1.25 is used instead. This value must be
-        // smaller than the approachFactor or unexpected things might happen
+        // smaller than the approachFactor or unexpected things might happen.
         std::optional<double> reachFactor [[codegen::greaterequal(0.0)]];
 
         // One or multiple actions that are executed whenever the camera is focused on
-        // this scene graph node and if it enters the interaction sphere of the node
+        // this scene graph node and if it enters the interaction sphere of the node.
         std::optional<std::variant<std::string, std::vector<std::string>>> onApproach;
 
         // One or multiple actions that are executed whenever the camera is focused on
         // this scene graph node and if it transitions from the approach distance to the
-        // reach distance of the node
+        // reach distance of the node.
         std::optional<std::variant<std::string, std::vector<std::string>>> onReach;
 
         // One or multiple actions that are executed whenever the camera is focused on
         // this scene graph node and if it transitions from the reach distance to the
-        // approach distance of the node
+        // approach distance of the node.
         std::optional<std::variant<std::string, std::vector<std::string>>> onRecede;
 
         // One or multiple actions that are executed whenever the camera is focused on
-        // this scene graph node and if it exits the interaction sphere of the node
+        // this scene graph node and if it exits the interaction sphere of the node.
         std::optional<std::variant<std::string, std::vector<std::string>>> onExit;
 
-        // Specifies the time frame for when this node should be active
+        // Specifies the time frame for when this node should be active.
         std::optional<ghoul::Dictionary> timeFrame
             [[codegen::reference("core_time_frame")]];
 
@@ -337,20 +337,20 @@ namespace {
 
         struct Gui {
             // An optional user-facing name for this SceneGraphNode, which does not have
-            // to be unique, though it is recommended, and can contain any characters
+            // to be unique, though it is recommended, and can contain any characters.
             std::optional<std::string> name;
 
             // If this value is specified, this '/' separated URI specifies the location
             // of this scene graph node in a GUI representation, for instance
-            // '/SolarSystem/Earth/Moon'
+            // '/SolarSystem/Earth/Moon'.
             std::optional<std::string> path;
 
-            // A user-facing description about this scene graph node
+            // A user-facing description about this scene graph node.
             std::optional<std::string> description;
 
             // If this value is specified, GUI applications are incouraged to ignore this
             // scene graph node. This is most useful to trim collective lists of nodes and
-            // not display, for example, barycenters
+            // not display, for example, barycenters.
             std::optional<bool> hidden;
 
             // [[codegen::verbatim(GuiFocusableInfo.description)]]
@@ -366,7 +366,7 @@ namespace {
             std::optional<float> orderingNumber;
         };
         // Additional information that is passed to GUI applications. These are all hints
-        // and do not have any impact on the actual function of the scene graph node
+        // and do not have any impact on the actual function of the scene graph node.
         std::optional<Gui> gui [[codegen::key("GUI")]];
     };
 } // namespace
@@ -556,7 +556,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::createFromDictionary(
 }
 
 Documentation SceneGraphNode::Documentation() {
-    return codegen::doc<Parameters>("core_scene_node");
+    return codegen::doc<Parameters>("core_scenegraphnode");
 }
 
 ghoul::opengl::ProgramObject* SceneGraphNode::_debugSphereProgram = nullptr;
@@ -617,15 +617,17 @@ SceneGraphNode::SceneGraphNode()
     addProperty(_screenSizeRadius);
     addProperty(_visibilityDistance);
 
-    _boundingSphere.onChange([this]() {
-        if (_boundingSphere >= 0.0) {
-            _overrideBoundingSphere = _boundingSphere;
+    _boundingSphere.onChange(
+        [this]() {
+            if (_boundingSphere >= 0.0) {
+                _overrideBoundingSphere = _boundingSphere;
+            }
+            else {
+                _overrideBoundingSphere = std::nullopt;
+            }
+            _evaluatedBoundingSphere = boundingSphere();
         }
-        else {
-            _overrideBoundingSphere = std::nullopt;
-        }
-        _evaluatedBoundingSphere = boundingSphere();
-    });
+    );
     // @TODO (2021-06-30, emmbr) Uncomment this when exponential sliders support
     // negative values
     //_boundingSphere.setExponent(10.f);
@@ -633,15 +635,17 @@ SceneGraphNode::SceneGraphNode()
     _evaluatedBoundingSphere.setReadOnly(true);
     addProperty(_evaluatedBoundingSphere);
 
-    _interactionSphere.onChange([this]() {
-        if (_interactionSphere >= 0.0) {
-            _overrideInteractionSphere = _interactionSphere;
+    _interactionSphere.onChange(
+        [this]() {
+            if (_interactionSphere >= 0.0) {
+                _overrideInteractionSphere = _interactionSphere;
+            }
+            else {
+                _overrideInteractionSphere = std::nullopt;
+            }
+            _evaluatedInteractionSphere = interactionSphere();
         }
-        else {
-            _overrideInteractionSphere = std::nullopt;
-        }
-        _evaluatedInteractionSphere = interactionSphere();
-    });
+    );
     // @TODO (2021-06-30, emmbr) Uncomment this when exponential sliders support
     // negative values
     //_interactionSphere.setExponent(10.f);
@@ -677,7 +681,6 @@ void SceneGraphNode::initialize() {
     TracyPlot("RAM", static_cast<int64_t>(global::openSpaceEngine->ramInUse()));
     TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
 #endif // TRACY_ENABLE
-
 
     LDEBUG(std::format("Initializing: {}", identifier()));
 
@@ -859,7 +862,7 @@ void SceneGraphNode::render(const RenderData& data, RendererTasks& tasks) {
     TracyPlot("VRAM", static_cast<int64_t>(global::openSpaceEngine->vramInUse()));
 #endif // TRACY_ENABLE
 
-    RenderData newData = {
+    const RenderData newData = {
         .camera = data.camera,
         .time = data.time,
         .renderBinMask = data.renderBinMask,
@@ -907,7 +910,6 @@ void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
         glm::dmat4(_worldRotationCached) *
         glm::scale(glm::dmat4(1.0), scaleVec);
 
-
     const glm::mat4 modelViewProjection = camera.projectionMatrix() *
         glm::mat4(camera.combinedViewMatrix() * modelTransform);
 
@@ -933,7 +935,6 @@ void SceneGraphNode::renderDebugSphere(const Camera& camera, double size,
     );
 
     glBindVertexArray(0);
-
     _debugSphereProgram->deactivate();
 }
 
@@ -1009,9 +1010,7 @@ ghoul::mm_unique_ptr<SceneGraphNode> SceneGraphNode::detachChild(SceneGraphNode&
 }
 
 void SceneGraphNode::clearChildren() {
-    traversePreOrder([](SceneGraphNode* node) {
-        node->clearDependencies();
-    });
+    traversePreOrder([](SceneGraphNode* node) { node->clearDependencies(); });
     for (const ghoul::mm_unique_ptr<SceneGraphNode>& c : _children) {
         if (_scene) {
             c->setScene(nullptr);
@@ -1079,9 +1078,9 @@ void SceneGraphNode::setDependencies(const std::vector<SceneGraphNode*>& depende
     }
 }
 
-void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
+void SceneGraphNode::computeScreenSpaceData(const RenderData& newData) {
     // Purposely slow the update rate of screen space position in order to reduce the
-    // effects of jittering in the position of information icon markers in web gui.
+    // effects of jittering in the position of information icon markers in web gui
     auto now = std::chrono::high_resolution_clock::now();
     if ((now - _lastScreenSpaceUpdateTime) < std::chrono::milliseconds(100)) {
         return;
@@ -1110,8 +1109,7 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
     const double nodeRadius = boundingSphere();
 
     // Distance from the camera to the node
-    const double distFromCamToNode =
-        glm::distance(cam.positionVec3(), worldPos) - nodeRadius;
+    const double distFromCamToNode = glm::distance(cam.position(), worldPos) - nodeRadius;
 
     // Fix to limit the update of properties
     if (distFromCamToNode >= _visibilityDistance) {
@@ -1122,7 +1120,7 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
     _screenVisibility = true;
 
     // Calculate the node radius to screensize pixels
-    const glm::dvec3 lookUp = normalize(cam.lookUpVectorWorldSpace());
+    const glm::dvec3 lookUp = glm::normalize(cam.lookUpVectorWorldSpace());
     const glm::dvec3 radiusPos = worldPos + (nodeRadius * lookUp);
     const glm::dvec4 clipSpaceRadius = glm::dmat4(cam.projectionMatrix()) *
                                     cam.combinedViewMatrix() * glm::vec4(radiusPos, 1.0);
@@ -1136,18 +1134,18 @@ void SceneGraphNode::computeScreenSpaceData(RenderData& newData) {
         (radiusNDC.x + 1.0) * res.x / 2,
         (radiusNDC.y + 1.0) * res.y / 2
     );
-    const double screenSpaceRadius = length(
+    const double screenSpaceRadius = glm::length(
         glm::vec2(centerScreenSpace) - glm::vec2(radiusScreenSpace)
     );
 
     constexpr double RadiusThreshold = 2.0;
-    const double r = std::fabs(_screenSizeRadius - screenSpaceRadius);
+    const double r = std::abs(_screenSizeRadius - screenSpaceRadius);
     if (r > RadiusThreshold) {
         _screenSizeRadius = screenSpaceRadius;
     }
 
     constexpr double ZoomThreshold = 0.1;
-    const double d = std::fabs(_distFromCamToNode - distFromCamToNode);
+    const double d = std::abs(_distFromCamToNode - distFromCamToNode);
     if (d > (ZoomThreshold * distFromCamToNode)) {
         _distFromCamToNode = distFromCamToNode;
     }
@@ -1171,9 +1169,9 @@ SurfacePositionHandle SceneGraphNode::calculateSurfacePositionHandle(
     else {
         const glm::dvec3 directionFromCenterToTarget = glm::normalize(targetModelSpace);
         return {
-            directionFromCenterToTarget * interactionSphere(),
-            directionFromCenterToTarget,
-            0.0
+            .centerToReferenceSurface = directionFromCenterToTarget * interactionSphere(),
+            .referenceSurfaceOutDirection = directionFromCenterToTarget,
+            .heightToSurface = 0.0
         };
     }
 }
@@ -1233,7 +1231,6 @@ glm::dvec3 SceneGraphNode::calculateWorldPosition() const {
         const glm::dmat3 wrot = _parent->worldRotationMatrix();
         const glm::dvec3 ws = _parent->worldScale();
         const glm::dvec3 p = position();
-
         return wp + wrot * (ws * p);
     }
     else {
@@ -1256,7 +1253,7 @@ bool SceneGraphNode::isTimeFrameActive() const {
 }
 
 glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
-    // recursive up the hierarchy if there are parents available
+    // Recursive up the hierarchy if there are parents available
     if (_parent) {
         return _parent->worldRotationMatrix() * rotationMatrix();
     }
@@ -1266,7 +1263,7 @@ glm::dmat3 SceneGraphNode::calculateWorldRotation() const {
 }
 
 glm::dvec3 SceneGraphNode::calculateWorldScale() const {
-    // recursive up the hierarchy if there are parents available
+    // Recursive up the hierarchy if there are parents available
     if (_parent) {
         return _parent->worldScale() * scale();
     }
@@ -1287,24 +1284,28 @@ void SceneGraphNode::setScene(Scene* scene) {
     ZoneScoped;
 
     // Unregister from previous scene, bottom up
-    traversePostOrder([](SceneGraphNode* node) {
-        if (node->_scene) {
-            node->_scene->unregisterNode(node);
+    traversePostOrder(
+        [](SceneGraphNode* node) {
+            if (node->_scene) {
+                node->_scene->unregisterNode(node);
+            }
+            node->_scene = nullptr;
         }
-        node->_scene = nullptr;
-    });
+    );
 
     if (!scene) {
         return;
     }
 
     // Register on new scene, top down
-    traversePreOrder([scene](SceneGraphNode* node) {
-        node->_scene = scene;
-        if (scene) {
-            scene->registerNode(node);
+    traversePreOrder(
+        [scene](SceneGraphNode* node) {
+            node->_scene = scene;
+            if (scene) {
+                scene->registerNode(node);
+            }
         }
-    });
+    );
 }
 
 std::vector<SceneGraphNode*> SceneGraphNode::children() const {

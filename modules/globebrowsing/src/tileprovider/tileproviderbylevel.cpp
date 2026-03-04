@@ -109,7 +109,7 @@ TileProviderByLevel::TileProviderByLevel(const ghoul::Dictionary& dictionary) {
             _providerIndices.resize(provider.maxLevel + 1, -1);
         }
 
-        // map this level to the tile provider index
+        // Map this level to the tile provider index
         _providerIndices[provider.maxLevel] =
             static_cast<int>(_levelTileProviders.size()) - 1;
     }
@@ -164,7 +164,7 @@ TileProvider* TileProviderByLevel::levelProvider(int level) const {
 }
 
 TileDepthTransform TileProviderByLevel::depthTransform() {
-    return { 0.f, 1.f };
+    return { .scale = 0.f, .offset = 1.f };
 }
 
 void TileProviderByLevel::update() {

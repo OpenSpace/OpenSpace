@@ -34,11 +34,11 @@
 #include <openspace/events/eventengine.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/interactionmonitor.h>
+#include <openspace/interaction/joystickinputstate.h>
 #include <openspace/interaction/keybindingmanager.h>
 #include <openspace/interaction/keyframerecordinghandler.h>
-#include <openspace/interaction/joystickinputstate.h>
-#include <openspace/interaction/websocketinputstate.h>
 #include <openspace/interaction/sessionrecordinghandler.h>
+#include <openspace/interaction/websocketinputstate.h>
 #include <openspace/mission/missionmanager.h>
 #include <openspace/navigation/navigationhandler.h>
 #include <openspace/network/parallelpeer.h>

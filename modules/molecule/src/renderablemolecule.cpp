@@ -55,14 +55,21 @@ namespace {
     {
         if (!filter.empty() && filter != "all") {
             str_t str = { filter.data(), static_cast<int64_t>(filter.length()) };
-            char errBuf[1024];
+            std::array<char, 1024> buf = { '\0' };
 
-            const bool success =
-                md_filter(&mask, str, &mol, nullptr, &isDynamic, errBuf, sizeof(errBuf));
+            const bool success = md_filter(
+                &mask,
+                str,
+                &mol,
+                nullptr,
+                &isDynamic,
+                buf.data(),
+                static_cast<int>(buf.size())
+            );
             if (success) {
                 return;
             }
-            LERROR(std::format("Invalid filter expression '{}': {}", filter, errBuf));
+            LERROR(std::format("Invalid filter expression '{}': {}", filter, buf.data()));
         }
         md_bitfield_clear(&mask);
         md_bitfield_set_range(&mask, 0, mol.atom.count);
@@ -361,7 +368,7 @@ RenderableMolecule::RenderableMolecule(const ghoul::Dictionary& dictionary)
     _animationRepeatMode.addOptions({
         { static_cast<int>(AnimationRepeatMode::PingPong), "PingPong" },
         { static_cast<int>(AnimationRepeatMode::Wrap), "Wrap" },
-        { static_cast<int>(AnimationRepeatMode::Clamp), "Clamp" },
+        { static_cast<int>(AnimationRepeatMode::Clamp), "Clamp" }
     });
     _animationRepeatMode = static_cast<int>(
         codegen::map<AnimationRepeatMode>(
@@ -416,21 +423,21 @@ void RenderableMolecule::render(const RenderData& data, RendererTasks&) {
     ZoneScoped;
 
     // Compute distance from camera to molecule
-    const glm::dvec3 frwd = data.modelTransform.translation - data.camera.positionVec3();
+    const glm::dvec3 frwd = data.modelTransform.translation - data.camera.position();
     const glm::dvec3 dir = data.camera.viewDirectionWorldSpace();
-    // "signed" distance from camera to object
+    // "Signed" distance from camera to object
     const double distance = glm::length(frwd) * sign(glm::dot(dir, frwd));
 
-    // distance < 0 means behind the camera, 10000 is arbitrary
+    // `distance` < 0 means behind the camera, 10000 is arbitrary
     if (distance < 0.0 || distance > 10000.0) {
         return;
     }
 
     _renderableInView = true;
 
-    // Because the molecule is small, a scaling of the view matrix causes the molecule
-    // to be moved out of view in clip space. Resetting the scaling for the molecule
-    // is fine for now. This will have an impact on stereoscopic depth though
+    // Because the molecule is small, a scaling of the view matrix causes the molecule to
+    // be moved out of view in clip space. Resetting the scaling for the molecule is fine
+    // for now. This will have an impact on stereoscopic depth though
     Camera camCopy = data.camera;
     camCopy.setScaling(0.1f);
 
@@ -685,8 +692,7 @@ RenderableMolecule::Representation::Representation(size_t number,
                                                    bool enabled_,
                                                    molecule::rep::Type type_,
                                                    molecule::rep::Color color_,
-                                                   std::string filter_,
-                                                   float scale_,
+                                                   std::string filter_, float scale_,
                                                    glm::vec4 uniformColor_)
     : PropertyOwner({
         .identifier = std::format("rep{}", number),

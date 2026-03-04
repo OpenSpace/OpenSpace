@@ -211,7 +211,6 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
     _gridProgram->setUniform("opacity", opacity());
     _gridProgram->setUniform("gridColor", _color);
 
-    // Change GL state:
     glLineWidth(_lineWidth);
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -226,7 +225,6 @@ void RenderableRadialGrid::render(const RenderData& data, RendererTasks&) {
 
     _gridProgram->deactivate();
 
-    // Restore GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetLineState();
     global::renderEngine->openglStateCache().resetDepthState();
@@ -277,15 +275,14 @@ void RenderableRadialGrid::update(const UpdateData&) {
     _circles.reserve(nCircles);
 
     auto addRing = [this](int nSegments, float radius) {
-        std::vector<rendering::Vertex> vertices =
-            rendering::createRing(nSegments, radius);
+        std::vector<rendering::Vertex> verts = rendering::createRing(nSegments, radius);
 
         _circles.emplace_back(GL_LINE_STRIP);
-        std::vector<rendering::VertexXYZ> data = rendering::convert(std::move(vertices));
+        std::vector<rendering::VertexXYZ> data = rendering::convert(std::move(verts));
         _circles.back().update(data);
     };
 
-    // add an extra inmost circle
+    // Add an extra inmost circle
     if (hasInnerRadius) {
         addRing(_circleSegments, innerRadius);
     }
@@ -308,13 +305,10 @@ void RenderableRadialGrid::update(const UpdateData&) {
             rendering::createRing(nLines, innerRadius);
 
         for (int i = 0; i < nLines; i++) {
-            const rendering::VertexXYZ vOut =
-                rendering::convertToXYZ(outerVertices[i]);
-
-            const rendering::VertexXYZ vIn =
-                rendering::convertToXYZ(innerVertices[i]);
-
+            const rendering::VertexXYZ vOut = rendering::convertToXYZ(outerVertices[i]);
             data.push_back(vOut);
+
+            const rendering::VertexXYZ vIn = rendering::convertToXYZ(innerVertices[i]);
             data.push_back(vIn);
         }
         _lines.update(data);

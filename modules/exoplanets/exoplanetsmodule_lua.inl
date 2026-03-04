@@ -47,7 +47,7 @@ ExoplanetSystem findSystemInData(std::string_view starName) {
     const ExoplanetsModule* module = global::moduleEngine->module<ExoplanetsModule>();
 
     const std::filesystem::path binPath = module->exoplanetsDataPath();
-    std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
+    std::ifstream data = std::ifstream(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
         throw ghoul::lua::LuaError(std::format(
             "Failed to open exoplanets data file '{}'", binPath
@@ -55,7 +55,7 @@ ExoplanetSystem findSystemInData(std::string_view starName) {
     }
 
     const std::filesystem::path lutPath = module->lookUpTablePath();
-    std::ifstream lut(absPath(lutPath));
+    std::ifstream lut = std::ifstream(absPath(lutPath));
     if (!lut.good()) {
         throw ghoul::lua::LuaError(std::format(
             "Failed to open exoplanets look-up table '{}'", lutPath
@@ -64,13 +64,13 @@ ExoplanetSystem findSystemInData(std::string_view starName) {
 
     ExoplanetSystem system;
 
-    // 1. search lut for the starname and return the corresponding location
-    // 2. go to that location in the data file
-    // 3. read sizeof(exoplanet) bytes into an exoplanet object.
+    // 1. Search lut for the starname and return the corresponding location
+    // 2. Go to that location in the data file
+    // 3. Read sizeof(exoplanet) bytes into an exoplanet object
     ExoplanetDataEntry p;
     std::string line;
     while (ghoul::getline(lut, line)) {
-        std::istringstream ss(line);
+        std::istringstream ss = std::istringstream(line);
         std::string name;
         ghoul::getline(ss, name, ',');
 
@@ -119,7 +119,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
     }
 
     const std::filesystem::path binPath = module->exoplanetsDataPath();
-    std::ifstream data(absPath(binPath), std::ios::in | std::ios::binary);
+    std::ifstream data = std::ifstream(absPath(binPath), std::ios::in | std::ios::binary);
     if (!data.good()) {
         throw ghoul::lua::LuaError(std::format("Failed to open data file '{}'", binPath));
     }
@@ -144,8 +144,8 @@ std::vector<std::string> hostStarsWithSufficientData() {
         // Remove the last two characters, that specify the planet
         name = name.substr(0, name.size() - 2);
 
-        // Don't want to list systems where there is not enough data to visualize.
-        // So, test if there is before adding the name to the list.
+        // Don't want to list systems where there is not enough data to visualize. So,
+        // test if there is before adding the name to the list
         std::string location_s;
         ghoul::getline(ss, location_s);
         long location = std::stol(location_s.c_str());
@@ -255,7 +255,7 @@ std::vector<std::string> hostStarsWithSufficientData() {
 {
     using PlanetData = ExoplanetsDataPreparationTask::PlanetData;
 
-    std::ifstream inputDataFile(csvFile);
+    std::ifstream inputDataFile = std::ifstream(csvFile);
     if (!inputDataFile.good()) {
         throw ghoul::lua::LuaError(std::format(
             "Failed to open input file '{}'", csvFile

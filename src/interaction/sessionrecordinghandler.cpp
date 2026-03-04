@@ -68,6 +68,8 @@ namespace {
 
     constexpr std::string_view _loggerCat = "SessionRecording";
 
+    constexpr std::string_view ScriptReturnPrefix = "return ";
+
     template <class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
     template <class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 
@@ -101,8 +103,6 @@ namespace {
         "that converts the position into a J2000+Galactic reference frame.",
         Property::Visibility::Developer
     };
-
-    constexpr std::string_view ScriptReturnPrefix = "return ";
 } // namespace
 
 namespace openspace {
@@ -191,7 +191,7 @@ void SessionRecordingHandler::tickPlayback(double dt) {
         throw SessionRecordingError("No valid camera keyframes found in recording");
     }
 
-    // update camera with or without new keyframes
+    // Update camera with or without new keyframes
     const auto& prevPose =
         hasValidPrevCamera ?
         std::get<SessionRecording::Entry::Camera>(prevCamera->value) :
@@ -210,8 +210,8 @@ void SessionRecordingHandler::tickPlayback(double dt) {
         nextCamera->timestamp :
         _timeline.entries.back().timestamp;
 
-    // Need to actively update the focusNode position of the camera in relation to
-    // the rendered objects will be unstable and actually incorrect
+    // Need to actively update the focusNode position of the camera in relation to the
+    // rendered objects will be unstable and actually incorrect
     const SceneGraphNode* n = sceneGraphNode(prevPose.focusNode);
     if (n) {
         global::navigationHandler->orbitalNavigator().setFocusNode(n->identifier());
@@ -234,8 +234,8 @@ void SessionRecordingHandler::tickPlayback(double dt) {
     if (isSavingFramesDuringPlayback()) {
         ghoul_assert(dt == _playback.saveScreenshots.deltaTime, "Misaligned delta times");
 
-        // Check if renderable in focus is still resolving tile loading
-        // do not adjust time while we are doing this, or take screenshot
+        // Check if renderable in focus is still resolving tile loading do not adjust time
+        // while we are doing this, or take screenshot
         const SceneGraphNode* focusNode =
             global::navigationHandler->orbitalNavigator().anchorNode();
         const Renderable* focusRenderable = focusNode->renderable();
@@ -272,10 +272,17 @@ void SessionRecordingHandler::tickRecording(double dt) {
 
     using namespace datamessagestructures;
     CameraKeyframe kf = generateCameraKeyframe();
+    KeyframeNavigator::CameraPose pose = {
+        .position = kf._position,
+        .rotation = kf._rotation,
+        .focusNode = kf._focusNode,
+        .scale = kf._scale,
+        .followFocusNodeRotation = kf._followNodeRotation
+    };
     _timeline.entries.emplace_back(
         _recording.elapsedTime,
         global::timeManager->time().j2000Seconds(),
-        KeyframeNavigator::CameraPose(std::move(kf))
+        std::move(pose)
     );
 }
 
@@ -332,8 +339,8 @@ void SessionRecordingHandler::startRecording() {
     _savePropertiesBaseline.clear();
     _recording.elapsedTime = 0.0;
 
-    // Record the current delta time as the first property to save in the file.
-    // This needs to be saved as a baseline whether or not it changes during recording
+    // Record the current delta time as the first property to save in the file. This needs
+    // to be saved as a baseline whether or not it changes during recording.
     // Dummy `_time` "property" to store the time setup in the baseline
     _savePropertiesBaseline["_time"] = std::format(
         "openspace.time.setPause({});openspace.time.setDeltaTime({});",
@@ -440,7 +447,6 @@ void SessionRecordingHandler::setupPlayback(double startTime) {
         global::windowDelegate->applicationTime();
     global::navigationHandler->keyframeNavigator().setReferenceTime(startTime);
 
-
     auto firstCamera = _timeline.entries.begin();
     while (firstCamera != _timeline.entries.end() &&
            !std::holds_alternative<SessionRecording::Entry::Camera>(firstCamera->value))
@@ -453,8 +459,8 @@ void SessionRecordingHandler::setupPlayback(double startTime) {
     auto it = std::find(_loadedNodes.begin(), _loadedNodes.end(), startFocusNode);
     if (it == _loadedNodes.end()) {
         throw SessionRecordingError(std::format(
-            "Playback file requires scenegraph node '{}', which is "
-            "not currently loaded", startFocusNode
+            "Playback file requires scenegraph node '{}', which is not currently loaded",
+            startFocusNode
         ));
     }
 
@@ -557,9 +563,9 @@ void SessionRecordingHandler::saveScriptKeyframeToTimeline(std::string script) {
         }
     }
 
-    // Any script snippet included in this vector will be trimmed from any script
-    // from the script manager, before it is recorded in the session recording file.
-    // The remainder of the script will be retained.
+    // Any script snippet included in this vector will be trimmed from any script from the
+    // script manager, before it is recorded in the session recording file. The remainder
+    // of the script will be retained.
     using ScriptSubstringReplace = std::pair<std::string_view, std::string_view>;
     constexpr std::array<ScriptSubstringReplace, 2> ScriptsToBeReplaced = {
         std::pair {
@@ -665,15 +671,14 @@ void SessionRecordingHandler::checkIfScriptUsesScenegraphNode(
         if (end != std::string::npos) {
             return s.substr(0, end);
         }
-        else {
-            // There were no closing quotes so we remove as much as possible
-            constexpr std::string_view UnwantedChars = " );";
-            size_t i = s.find_last_not_of(UnwantedChars);
-            if (i != std::string_view::npos) {
-                s.remove_suffix(i);
-            }
-            return s;
+
+        // There were no closing quotes so we remove as much as possible
+        constexpr std::string_view UnwantedChars = " );";
+        size_t i = s.find_last_not_of(UnwantedChars);
+        if (i != std::string_view::npos) {
+            s.remove_suffix(i);
         }
+        return s;
     };
 
     auto checkForScenegraphNodeAccessNav = [](std::string_view navTerm) -> bool {
@@ -684,7 +689,7 @@ void SessionRecordingHandler::checkIfScriptUsesScenegraphNode(
         };
 
         for (std::string_view s : NavScriptsUsingNodes) {
-            if (navTerm.find(s) != std::string::npos) {
+            if (navTerm.contains(s)) {
                 return true;
             }
         }
@@ -695,9 +700,7 @@ void SessionRecordingHandler::checkIfScriptUsesScenegraphNode(
         script.remove_prefix(ScriptReturnPrefix.length());
     }
     // This works for both setPropertyValue and setPropertyValueSingle
-    if (!script.starts_with("openspace.setPropertyValue") ||
-        script.find('(') == std::string::npos)
-    {
+    if (!script.starts_with("openspace.setPropertyValue") || !script.contains('(')) {
         return;
     }
 
@@ -718,7 +721,7 @@ void SessionRecordingHandler::checkIfScriptUsesScenegraphNode(
             }
         }
     }
-    else if (subjectOfSetProp.find("Scene.") != std::string::npos) {
+    else if (subjectOfSetProp.contains("Scene.")) {
         auto extractScenegraphNodeFromScene = [](std::string_view s) -> std::string_view {
             constexpr std::string_view Scene = "Scene.";
             size_t scene = s.find(Scene);

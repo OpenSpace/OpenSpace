@@ -142,8 +142,11 @@ void ExoplanetsDataPreparationTask::perform(
         return;
     }
 
-    std::ofstream binFile(_outputBinPath, std::ios::out | std::ios::binary);
-    std::ofstream lutFile(_outputLutPath);
+    std::ofstream binFile = std::ofstream(
+        _outputBinPath,
+        std::ios::out | std::ios::binary
+    );
+    std::ofstream lutFile = std::ofstream(_outputLutPath);
 
     if (!binFile.good()) {
         LERROR(std::format("Error when writing to '{}'",_outputBinPath));
@@ -164,8 +167,7 @@ void ExoplanetsDataPreparationTask::perform(
     int version = 1;
     binFile.write(reinterpret_cast<char*>(&version), sizeof(int));
 
-    // Read until the first line contaning the column names, and save them for
-    // later access
+    // Read until the first line containing the column names and save them for later
     const std::vector<std::string> columnNames = readFirstDataRow(inputDataFile);
 
     // Read total number of items
@@ -177,8 +179,8 @@ void ExoplanetsDataPreparationTask::perform(
     inputDataFile.clear();
     inputDataFile.seekg(0);
 
-    // The reading is restarted, so we need to read past the first line,
-    // containing the data names, again
+    // The reading is restarted, so we need to read past the first line containing the
+    // data names, again
     readFirstDataRow(inputDataFile);
 
     LINFO(std::format("Loading {} exoplanets", total));
@@ -222,7 +224,7 @@ ExoplanetsDataPreparationTask::readFirstDataRow(std::ifstream& file)
         }
     }
 
-    // The identified line should contain the column names. Return them!
+    // The identified line should contain the column names
     std::vector<std::string> columnNames;
     std::stringstream sStream(line);
     std::string colName;
@@ -483,10 +485,9 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
 
     std::string line;
     while (ghoul::getline(exoplanetsFile, line)) {
-        const bool shouldSkipLine = (
+        const bool shouldSkipLine =
             line.empty() || line[0] == '#' || line.substr(0, 7) == "datavar" ||
-            line.substr(0, 10) == "texturevar" || line.substr(0, 7) == "texture"
-        );
+            line.substr(0, 10) == "texturevar" || line.substr(0, 7) == "texture";
 
         if (shouldSkipLine) {
             continue;
@@ -494,7 +495,7 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
 
         std::string data;
         std::string name;
-        std::istringstream linestream(line);
+        std::istringstream linestream = std::istringstream(line);
         ghoul::getline(linestream, data, '#');
         ghoul::getline(linestream, name);
         name.erase(0, 1);
@@ -503,11 +504,11 @@ glm::vec3 ExoplanetsDataPreparationTask::starPosition(const std::string& starNam
         if (name == starName) {
             std::stringstream dataStream(data);
             ghoul::getline(dataStream, coord, ' ');
-            position[0] = std::stof(coord, nullptr);
+            position.x = std::stof(coord, nullptr);
             ghoul::getline(dataStream, coord, ' ');
-            position[1] = std::stof(coord, nullptr);
+            position.y = std::stof(coord, nullptr);
             ghoul::getline(dataStream, coord, ' ');
-            position[2] = std::stof(coord, nullptr);
+            position.z = std::stof(coord, nullptr);
             break;
         }
     }
@@ -528,8 +529,8 @@ float ExoplanetsDataPreparationTask::bvFromTeff(float teff,
         return std::numeric_limits<float>::quiet_NaN();
     }
 
-    // Find the line in the file that most closely corresponds to the specified teff,
-    // and finally interpolate the value
+    // Find the line in the file that most closely corresponds to the specified teff, and
+    // finally interpolate the value
     float bv = 0.f;
     float bvUpper = 0.f;
     float bvLower = 0.f;

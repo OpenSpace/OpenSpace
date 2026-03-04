@@ -40,55 +40,57 @@ namespace {
 
     void renderMission(const Mission& mission) {
         // The hashname is necessary since ImGui computes a hash based off the name of the
-        // elements.  This does not play well with using %s as the name
-        const std::string missionHashname = "##" + mission.name();
+        // elements. This does not play well with using %s as the name
+        const std::string missionNameHash = "##" + mission.name();
 
 
         const double currentTime = global::timeManager->time().j2000Seconds();
         const MissionPhase::Trace t = mission.phaseTrace(currentTime, 0);
 
         const int treeOption = t.empty() ? 0 : ImGuiTreeNodeFlags_DefaultOpen;
-        if (ImGui::TreeNodeEx(
-                ("%s" + missionHashname).c_str(),
-                treeOption,
-                "%s",
-                mission.name().c_str())
-            )
-        {
-            if (!mission.description().empty()) {
-                ImGui::Text("%s", mission.description().c_str());
-            }
-
-            const TimeRange range = mission.timeRange();
-            const Time startTime = Time(range.start);
-            const Time endTime = Time(range.end);
-
-            CaptionText("Mission Progress");
-
-            ImGui::Text("%s", std::string(startTime.UTC()).c_str());
-            ImGui::SameLine();
-            float v = static_cast<float>(currentTime);
-            const float s = static_cast<float>(startTime.j2000Seconds());
-            const float e = static_cast<float>(endTime.j2000Seconds());
-
-            ImGui::SliderFloat(
-                missionHashname.c_str(),
-                &v,
-                s,
-                e,
-                std::string(global::timeManager->time().UTC()).c_str()
-            );
-            ImGui::SameLine();
-            ImGui::Text("%s", std::string(endTime.UTC()).c_str());
-
-            CaptionText("Phases");
-
-            for (const Mission& m : mission.phases()) {
-                renderMission(m);
-            }
-
-            ImGui::TreePop();
+        const bool openTree = ImGui::TreeNodeEx(
+            ("%s" + missionNameHash).c_str(),
+            treeOption,
+            "%s",
+            mission.name().c_str()
+        );
+        if (!openTree) {
+            return;
         }
+
+        if (!mission.description().empty()) {
+            ImGui::Text("%s", mission.description().c_str());
+        }
+
+        const TimeRange range = mission.timeRange();
+        const Time startTime = Time(range.start);
+        const Time endTime = Time(range.end);
+
+        CaptionText("Mission Progress");
+
+        ImGui::Text("%s", std::string(startTime.UTC()).c_str());
+        ImGui::SameLine();
+        float v = static_cast<float>(currentTime);
+        const float s = static_cast<float>(startTime.j2000Seconds());
+        const float e = static_cast<float>(endTime.j2000Seconds());
+
+        ImGui::SliderFloat(
+            missionNameHash.c_str(),
+            &v,
+            s,
+            e,
+            std::string(global::timeManager->time().UTC()).c_str()
+        );
+        ImGui::SameLine();
+        ImGui::Text("%s", std::string(endTime.UTC()).c_str());
+
+        CaptionText("Phases");
+
+        for (const Mission& m : mission.phases()) {
+            renderMission(m);
+        }
+
+        ImGui::TreePop();
     }
 } // namespace
 

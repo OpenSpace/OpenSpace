@@ -76,7 +76,7 @@ namespace {
     return hasMission;
 }
 
-// Set the currnet mission.
+// Set the current mission.
 [[codegen::luawrap]] void setCurrentMission(std::string identifier) {
     if (identifier.empty()) {
         throw ghoul::lua::LuaError("Mission identifier is empty");

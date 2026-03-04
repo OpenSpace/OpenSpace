@@ -33,7 +33,9 @@
 
 namespace openspace {
 
-MultiresVolumeModule::MultiresVolumeModule() : OpenSpaceModule(Name) {}
+MultiresVolumeModule::MultiresVolumeModule()
+    : OpenSpaceModule(Name)
+{}
 
 void MultiresVolumeModule::internalInitialize(const ghoul::Dictionary&) {
     ghoul::TemplateFactory<Renderable>* fRenderable =

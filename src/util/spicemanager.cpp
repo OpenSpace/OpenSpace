@@ -63,24 +63,6 @@ namespace {
             default:                                  throw ghoul::MissingCaseException();
         }
     }
-
-
-    void getValueInternal(const std::string& body, const std::string& value, int size,
-                          double* v)
-    {
-        ghoul_assert(!body.empty(), "Empty body");
-        ghoul_assert(!value.empty(), "Empty value");
-        ghoul_assert(v != nullptr, "Empty value pointer");
-
-        SpiceInt n = 0;
-        bodvrd_c(body.c_str(), value.c_str(), size, &n, v);
-
-        if (failed_c()) {
-            throwSpiceError(std::format(
-                "Error getting value '{}' for body '{}'", value, body
-            ));
-        }
-    }
 } // namespace
 
 namespace openspace {
@@ -103,15 +85,15 @@ SpiceManager::AberrationCorrection::AberrationCorrection(Type t, Direction d)
 
 SpiceManager::AberrationCorrection::AberrationCorrection(const std::string& identifier) {
     const static std::map<std::string, std::pair<Type, Direction>> Mapping =  {
-        { "NONE"  , { Type::None, Direction::Reception } },
-        { "LT"    , { Type::LightTime, Direction::Reception } },
-        { "LT+S"  , { Type::LightTimeStellar, Direction::Reception } },
-        { "CN"    , { Type::ConvergedNewtonian, Direction::Reception } },
-        { "CN+S"  , { Type::ConvergedNewtonianStellar, Direction::Reception } },
-        { "XLT"   , { Type::LightTime, Direction::Transmission } },
-        { "XLT+S" , { Type::LightTimeStellar, Direction::Transmission } },
-        { "XCN"   , { Type::ConvergedNewtonian, Direction::Transmission } },
-        { "XCN+S" , { Type::ConvergedNewtonianStellar, Direction::Transmission } }
+        { "NONE",  { Type::None, Direction::Reception } },
+        { "LT",    { Type::LightTime, Direction::Reception } },
+        { "LT+S",  { Type::LightTimeStellar, Direction::Reception } },
+        { "CN",    { Type::ConvergedNewtonian, Direction::Reception } },
+        { "CN+S",  { Type::ConvergedNewtonianStellar, Direction::Reception } },
+        { "XLT",   { Type::LightTime, Direction::Transmission } },
+        { "XLT+S", { Type::LightTimeStellar, Direction::Transmission } },
+        { "XCN",   { Type::ConvergedNewtonian, Direction::Transmission } },
+        { "XCN+S", { Type::ConvergedNewtonianStellar, Direction::Transmission } }
     };
 
     auto it = Mapping.find(identifier);
@@ -141,9 +123,9 @@ SpiceManager::AberrationCorrection::operator const char*() const {
 }
 
 SpiceManager::FieldOfViewMethod SpiceManager::fieldOfViewMethodFromString(
-                                                                const std::string& method)
+                                                                  std::string_view method)
 {
-    const static std::map<std::string, FieldOfViewMethod> Mapping = {
+    const static std::map<std::string_view, FieldOfViewMethod> Mapping = {
         { "ELLIPSOID", FieldOfViewMethod::Ellipsoid },
         { "POINT", FieldOfViewMethod::Point }
     };
@@ -153,10 +135,9 @@ SpiceManager::FieldOfViewMethod SpiceManager::fieldOfViewMethodFromString(
     return Mapping.at(method);
 }
 
-SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString(
-                                                                  const std::string& type)
+SpiceManager::TerminatorType SpiceManager::terminatorTypeFromString(std::string_view type)
 {
-    const static std::map<std::string, TerminatorType> Mapping = {
+    const static std::map<std::string_view, TerminatorType> Mapping = {
         { "UMBRAL", TerminatorType::Umbral },
         { "PENUMBRAL", TerminatorType::Penumbral }
     };
@@ -225,7 +206,7 @@ void throwSpiceError(const std::string& errorMessage) {
         buffer.resize(SpiceErrorBufferSize);
         getmsg_c("LONG", SpiceErrorBufferSize, buffer.data());
         reset_c();
-        throw SpiceManager::SpiceException(errorMessage + ": " + buffer);
+        throw SpiceManager::SpiceException(std::format("{}: {}", errorMessage, buffer));
     }
     else {
         reset_c();
@@ -278,18 +259,14 @@ SpiceManager::KernelHandle SpiceManager::loadKernel(std::filesystem::path filePa
     }
 
     const std::filesystem::path fileExtension = filePath.extension();
-    if (fileExtension == ".bc" ||
-        fileExtension == ".BC" ||
-        fileExtension == ".ck" ||
-        fileExtension == ".CK")
+    if (fileExtension == ".bc" || fileExtension == ".BC" ||
+        fileExtension == ".ck" || fileExtension == ".CK")
     {
         findCkCoverage(filePath); // binary ck kernel
     }
-    else if (fileExtension == ".bsp" ||
-            fileExtension == ".BSP" ||
-            fileExtension == ".spk" ||
-            fileExtension == ".SPK")
-        {
+    else if (fileExtension == ".bsp" || fileExtension == ".BSP" ||
+            fileExtension == ".spk" || fileExtension == ".SPK")
+    {
             findSpkCoverage(filePath); // spk kernel
     }
 
@@ -345,19 +322,18 @@ void SpiceManager::unloadKernel(std::filesystem::path filePath) {
             return;
         }
     }
+
+    // If there was only one part interested in the kernel, we can unload it
+    if (it->refCount == 1) {
+        LINFO(std::format("Unloading SPICE kernel '{}'", filePath));
+        const std::string p = filePath.string();
+        unload_c(p.c_str());
+        _loadedKernels.erase(it);
+    }
     else {
-        // If there was only one part interested in the kernel, we can unload it
-        if (it->refCount == 1) {
-            LINFO(std::format("Unloading SPICE kernel '{}'", filePath));
-            const std::string p = filePath.string();
-            unload_c(p.c_str());
-            _loadedKernels.erase(it);
-        }
-        else {
-            // Otherwise, we hold on to it, but reduce the reference counter by 1
-            it->refCount--;
-            LDEBUG(std::format("Reducing reference counter to: {}", it->refCount));
-        }
+        // Otherwise, we hold on to it, but reduce the reference counter by 1
+        it->refCount--;
+        LDEBUG(std::format("Reducing reference counter to: {}", it->refCount));
     }
 }
 
@@ -406,7 +382,6 @@ std::vector<std::pair<double, double>> SpiceManager::spkCoverage(
         return emptyList;
     }
 }
-
 
 bool SpiceManager::hasCkCoverage(const std::string& frame, double et) const {
     ghoul_assert(!frame.empty(), "Empty target");
@@ -501,17 +476,17 @@ std::vector<std::pair<int, std::string>> SpiceManager::spiceBodies(
     return bodies;
 }
 
-bool SpiceManager::hasValue(int naifId, const std::string& item) const {
-    return bodfnd_c(naifId, item.c_str()) == SPICETRUE;
-}
-
-bool SpiceManager::hasValue(const std::string& body, const std::string& item) const {
-    ghoul_assert(!body.empty(), "Empty body");
-    ghoul_assert(!item.empty(), "Empty item");
-
-    const int id = naifId(body);
-    return hasValue(id, item);
-}
+//bool SpiceManager::hasValue(int naifId, const std::string& item) const {
+//    return bodfnd_c(naifId, item.c_str()) == SPICETRUE;
+//}
+//
+//bool SpiceManager::hasValue(const std::string& body, const std::string& item) const {
+//    ghoul_assert(!body.empty(), "Empty body");
+//    ghoul_assert(!item.empty(), "Empty item");
+//
+//    const int id = naifId(body);
+//    return hasValue(id, item);
+//}
 
 int SpiceManager::naifId(const std::string& body) const {
     ghoul_assert(!body.empty(), "Empty body");
@@ -554,38 +529,6 @@ bool SpiceManager::hasFrameId(const std::string& frame) const {
     return id != 0;
 }
 
-void SpiceManager::getValue(const std::string& body, const std::string& value,
-                            double& v) const
-{
-    getValueInternal(body, value, 1, &v);
-}
-
-void SpiceManager::getValue(const std::string& body, const std::string& value,
-                            glm::dvec2& v) const
-{
-    getValueInternal(body, value, 2, glm::value_ptr(v));
-}
-
-void SpiceManager::getValue(const std::string& body, const std::string& value,
-                            glm::dvec3& v) const
-{
-    getValueInternal(body, value, 3, glm::value_ptr(v));
-}
-
-void SpiceManager::getValue(const std::string& body, const std::string& value,
-                            glm::dvec4& v) const
-{
-    getValueInternal(body, value, 4, glm::value_ptr(v));
-}
-
-void SpiceManager::getValue(const std::string& body, const std::string& value,
-                            std::vector<double>& v) const
-{
-    ghoul_assert(!v.empty(), "Array for values has to be preallocaed");
-
-    getValueInternal(body, value, static_cast<int>(v.size()), v.data());
-}
-
 double SpiceManager::spacecraftClockToET(const std::string& craft,
                                          double craftTicks) const
 {
@@ -604,7 +547,6 @@ double SpiceManager::spacecraftClockToET(const std::string& craft,
 
 double SpiceManager::ephemerisTimeFromDate(const std::string& timeString) const {
     ghoul_assert(!timeString.empty(), "Empty timeString");
-
     return ephemerisTimeFromDate(timeString.c_str());
 }
 
@@ -670,12 +612,10 @@ glm::dvec3 SpiceManager::targetPosition(const std::string& target,
     const bool observerHasCoverage = hasSpkCoverage(observer, ephemerisTime);
     if (!targetHasCoverage && !observerHasCoverage) {
         if (_useExceptions) {
-            throw SpiceException(
-                std::format(
-                    "Neither target '{}' nor observer '{}' has SPK coverage at time '{}'",
-                    target, observer, ephemerisTime
-                )
-            );
+            throw SpiceException(std::format(
+                "Neither target '{}' nor observer '{}' has SPK coverage at time '{}'",
+                target, observer, ephemerisTime
+            ));
         }
         else {
             return glm::dvec3(0.0);
@@ -936,7 +876,7 @@ glm::dmat3 SpiceManager::positionTransformMatrix(const std::string& sourceFrame,
     if (failed_c()) {
         throwSpiceError("");
     }
-    const SpiceBoolean success = !(failed_c());
+    const SpiceBoolean success = (failed_c() != 0);
     reset_c();
     if (!success) {
         result = getEstimatedTransformMatrix(
@@ -993,15 +933,15 @@ SpiceManager::FieldOfViewResult SpiceManager::fieldOfView(int instrument) const 
     double boundsArr[MaxBoundsSize][3];
     char fovShapeBuffer[BufferSize];
     char frameNameBuffer[BufferSize];
-    getfov_c(instrument,                        // instrument id
-        MaxBoundsSize,                          // maximum size for the bounds vector
-        BufferSize,                             // maximum size for the fov shape buffer
-        BufferSize,                             // maximum size for the frame name buffer
-        fovShapeBuffer,                         // the fov shape buffer
-        frameNameBuffer,                        // the frame name buffer
-        glm::value_ptr(res.boresightVector),    // the boresight vector
-        &nrReturned,                            // the number of returned array values
-        boundsArr                               // the bounds
+    getfov_c(instrument,                     // instrument id
+        MaxBoundsSize,                       // maximum size for the bounds vector
+        BufferSize,                          // maximum size for the fov shape buffer
+        BufferSize,                          // maximum size for the frame name buffer
+        fovShapeBuffer,                      // the fov shape buffer
+        frameNameBuffer,                     // the frame name buffer
+        glm::value_ptr(res.boresightVector), // the boresight vector
+        &nrReturned,                         // the number of returned array values
+        boundsArr                            // the bounds
     );
 
     if (failed_c()) {
@@ -1016,8 +956,8 @@ SpiceManager::FieldOfViewResult SpiceManager::fieldOfView(int instrument) const 
         res.bounds.emplace_back(boundsArr[i][0], boundsArr[i][1], boundsArr[i][2]);
     }
 
-    const std::string shape = std::string(fovShapeBuffer);
-    static const std::map<std::string, FieldOfViewResult::Shape> Map = {
+    const std::string_view shape = std::string_view(fovShapeBuffer);
+    static const std::map<std::string_view, FieldOfViewResult::Shape> Map = {
         { "POLYGON", FieldOfViewResult::Shape::Polygon },
         { "RECTANGLE" , FieldOfViewResult::Shape::Rectangle },
         { "CIRCLE", FieldOfViewResult::Shape::Circle },
@@ -1405,8 +1345,6 @@ glm::dmat3 SpiceManager::getEstimatedTransformMatrix(const std::string& fromFram
 
 std::filesystem::path SpiceManager::leapSecondKernel() {
     constexpr std::string_view Naif00012tlsSource = R"(KPL/LSK
-
-
 LEAPSECONDS KERNEL FILE
 ===========================================================================
 
@@ -1554,7 +1492,6 @@ DELTET/DELTA_AT        = ( 10,   @1972-JAN-1
                            37,   @2017-JAN-1 )
 
 \begintext
-
 
 )";
     const std::filesystem::path path = std::filesystem::temp_directory_path();

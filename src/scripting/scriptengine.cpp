@@ -337,7 +337,6 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
         // First we run the script to set its values in the current state
         ghoul::lua::runScriptFile(state, script);
 
-
         // Then, we extract the documentation information from the file
         ghoul::lua::push(state, "documentation");
         lua_gettable(state, -2);
@@ -358,11 +357,11 @@ void ScriptEngine::addLibraryFunctions(lua_State* state, LuaLibrary& library,
 
                 LuaLibrary::Function func;
                 func.name = p.name;
-                for (const std::vector<std::string>& pair : p.arguments)
-                {
-                    LuaLibrary::Function::Argument arg;
-                    arg.name = pair[0];
-                    arg.type = pair[1];
+                for (const std::vector<std::string>& pair : p.arguments) {
+                    LuaLibrary::Function::Argument arg = {
+                        .name = pair[0],
+                        .type = pair[1]
+                    };
                     func.arguments.push_back(arg);
                 }
                 func.returnType = p.returnValue.value_or(func.returnType);

@@ -74,8 +74,6 @@ namespace {
         Property::Visibility::AdvancedUser
     };
 
-    constexpr std::array<GLfloat, 4> ShadowBorder = { 1.f, 1.f, 1.f, 1.f };
-
     struct [[codegen::Dictionary(ShadowComponent)]] Parameters {
         // [[codegen::verbatim(DistanceFractionInfo.description)]]
         std::optional<int> distanceFraction;
@@ -160,44 +158,29 @@ RenderData ShadowComponent::begin(const RenderData& data) {
         updateDepthTexture();
     }
 
-    // ===========================================
-    // Builds light's ModelViewProjectionMatrix:
-    // ===========================================
-
     const glm::dvec3 diffVector =
         glm::dvec3(_sunPosition) - data.modelTransform.translation;
     const double originalLightDistance = glm::length(diffVector);
     const glm::dvec3 lightDirection = glm::normalize(diffVector);
 
-    // Percentage of the original light source distance (to avoid artifacts)
-    //double multiplier = originalLightDistance *
-    //    (static_cast<double>(_distanceFraction)/1.0E5);
-
     const double multiplier = originalLightDistance *
         (static_cast<double>(_distanceFraction) / 1E17);
 
     // New light source position
-    //glm::dvec3 lightPosition = data.modelTransform.translation +
-    //    (lightDirection * multiplier);
     const glm::dvec3 lightPosition = data.modelTransform.translation +
         (diffVector * multiplier);
 
-    //// Light Position
-    //glm::dvec3 lightPosition = glm::dvec3(_sunPosition);
-
-    //=============== Manually Created Camera Matrix ===================
-    //==================================================================
-    // camera Z
+    // Camera Z
     const glm::dvec3 cameraZ = lightDirection;
 
-    // camera X
+    // Camera X
     const glm::dvec3 upVector = glm::dvec3(0.0, 1.0, 0.0);
     const glm::dvec3 cameraX = glm::normalize(glm::cross(upVector, cameraZ));
 
-    // camera Y
+    // Camera Y
     const glm::dvec3 cameraY = glm::cross(cameraZ, cameraX);
 
-    // init 4x4 matrix
+    // Init 4x4 matrix
     glm::dmat4 cameraRotationMatrix(1.0);
 
     double* matrix = glm::value_ptr(cameraRotationMatrix);
@@ -211,19 +194,9 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     matrix[6] = cameraZ.y;
     matrix[10] = cameraZ.z;
 
-    // set translation part
-    // We aren't setting the position here because it is set in
-    // the camera->setPosition()
-    //matrix[12] = -glm::dot(cameraX, lightPosition);
-    //matrix[13] = -glm::dot(cameraY, lightPosition);
-    //matrix[14] = -glm::dot(cameraZ, lightPosition);
-
-
     _lightCamera = std::make_unique<Camera>(data.camera);
-    _lightCamera->setPositionVec3(lightPosition);
+    _lightCamera->setPosition(lightPosition);
     _lightCamera->setRotation(glm::dquat(glm::inverse(cameraRotationMatrix)));
-    //=======================================================================
-    //=======================================================================
 
 
     // Saves current state
@@ -242,12 +215,11 @@ RenderData ShadowComponent::begin(const RenderData& data) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     RenderData lightRenderData {
-        *_lightCamera,
-        data.time,
-        data.renderBinMask,
-        data.modelTransform
+        .camera = *_lightCamera,
+        .time = data.time,
+        .renderBinMask = data.renderBinMask,
+        .modelTransform = data.modelTransform
     };
-
     return lightRenderData;
 }
 
@@ -257,8 +229,7 @@ void ShadowComponent::end() {
         _executeDepthTextureSave = false;
     }
 
-    // Restores system state
-    std::array<GLenum, 3> drawBuffers = {
+    const std::array<GLenum, 3> drawBuffers = {
         GL_COLOR_ATTACHMENT0,
         GL_COLOR_ATTACHMENT1,
         GL_COLOR_ATTACHMENT2
@@ -268,7 +239,6 @@ void ShadowComponent::end() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, _currentFBO);
 
-    // Restores OpenGL Rendering State
     global::renderEngine->openglStateCache().resetColorState();
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
@@ -291,7 +261,6 @@ void ShadowComponent::createDepthTexture() {
     updateDepthTexture();
 
     _shadowData.shadowDepthTexture = _shadowDepthTexture;
-    //_shadowData.positionInLightSpaceTexture = _positionInLightSpaceTexture;
 }
 
 void ShadowComponent::createShadowFBO() {
@@ -304,14 +273,6 @@ void ShadowComponent::createShadowFBO() {
 
 void ShadowComponent::updateDepthTexture() const {
     glBindTexture(GL_TEXTURE_2D, _shadowDepthTexture);
-
-    //glTexStorage2D(
-    //    GL_TEXTURE_2D,
-    //    1,
-    //    GL_DEPTH_COMPONENT32F,
-    //    _shadowDepthTextureWidth,
-    //    _shadowDepthTextureHeight
-    //);
 
     glTexImage2D(
         GL_TEXTURE_2D,
@@ -329,10 +290,11 @@ void ShadowComponent::updateDepthTexture() const {
     glTextureParameteri(_shadowDepthTexture, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTextureParameteri(_shadowDepthTexture, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
     glTextureParameteri(_shadowDepthTexture, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    constexpr glm::vec4 ShadowBorder = glm::vec4(1.f);
     glTextureParameterfv(
         _shadowDepthTexture,
         GL_TEXTURE_BORDER_COLOR,
-        ShadowBorder.data()
+        glm::value_ptr(ShadowBorder)
     );
     glTextureParameteri(
         _shadowDepthTexture,
@@ -371,7 +333,7 @@ void ShadowComponent::buildDDepthTexture() {
 
 void ShadowComponent::saveDepthBuffer() const {
     const int size = _shadowDepthTextureWidth * _shadowDepthTextureHeight;
-    std::vector<GLubyte> buffer(size);
+    std::vector<GLubyte> buffer = std::vector<GLubyte>(size);
 
     glReadPixels(
         0,
@@ -383,31 +345,29 @@ void ShadowComponent::saveDepthBuffer() const {
         buffer.data()
     );
 
-    std::fstream ppmFile;
-
-    ppmFile.open("depthBufferShadowMapping.ppm", std::fstream::out);
-    if (ppmFile.is_open()) {
-        ppmFile << "P3\n";
-        ppmFile << _shadowDepthTextureWidth << " " << _shadowDepthTextureHeight << '\n';
-        ppmFile << "255\n";
+    std::fstream ppm = std::fstream("depthBufferShadowMapping.ppm", std::fstream::out);
+    if (ppm.is_open()) {
+        ppm << "P3\n";
+        ppm << _shadowDepthTextureWidth << " " << _shadowDepthTextureHeight << '\n';
+        ppm << "255\n";
 
         LDEBUG("Saving depth texture to file depthBufferShadowMapping.ppm");
         int k = 0;
         for (int i = 0; i < _shadowDepthTextureWidth; i++) {
             for (int j = 0; j < _shadowDepthTextureHeight; j++, k++) {
                 const unsigned int val = static_cast<unsigned int>(buffer[k]);
-                ppmFile << std::format("{0} {0} {0} ", val);
+                ppm << std::format("{0} {0} {0} ", val);
             }
-            ppmFile << '\n';
+            ppm << '\n';
         }
 
-        ppmFile.close();
+        ppm.close();
         LDEBUG("Texture saved to file depthBufferShadowMapping.ppm");
     }
 
     buffer.clear();
 
-    std::vector<GLfloat> bBuffer(size * 4);
+    std::vector<GLfloat> bBuffer = std::vector<GLfloat>(size * 4);
 
     glReadBuffer(GL_COLOR_ATTACHMENT3);
     glReadPixels(
@@ -420,13 +380,11 @@ void ShadowComponent::saveDepthBuffer() const {
         bBuffer.data()
     );
 
-    ppmFile.clear();
-
-    ppmFile.open("positionBufferShadowMapping.ppm", std::fstream::out);
-    if (ppmFile.is_open()) {
-        ppmFile << "P3\n";
-        ppmFile << _shadowDepthTextureWidth << " " << _shadowDepthTextureHeight << '\n';
-        ppmFile << "255\n";
+    ppm = std::fstream("positionBufferShadowMapping.ppm", std::fstream::out);
+    if (ppm.is_open()) {
+        ppm << "P3\n";
+        ppm << _shadowDepthTextureWidth << " " << _shadowDepthTextureHeight << '\n';
+        ppm << "255\n";
 
         LDEBUG("Saving texture position to positionBufferShadowMapping.ppm");
 
@@ -446,15 +404,13 @@ void ShadowComponent::saveDepthBuffer() const {
         k = 0;
         for (int i = 0; i < _shadowDepthTextureWidth; i++) {
             for (int j = 0; j < _shadowDepthTextureHeight; j++) {
-                ppmFile << static_cast<unsigned int>(bBuffer[k] / biggestValue) << " "
+                ppm << static_cast<unsigned int>(bBuffer[k] / biggestValue) << " "
                     << static_cast<unsigned int>(bBuffer[k + 1] / biggestValue) << " "
                     << static_cast<unsigned int>(bBuffer[k + 2] / biggestValue) << " ";
                 k += 4;
             }
-            ppmFile << '\n';
+            ppm << '\n';
         }
-
-        ppmFile.close();
 
         LDEBUG("Texture saved to file positionBufferShadowMapping.ppm");
     }

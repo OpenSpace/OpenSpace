@@ -83,8 +83,7 @@ void GuiGlobeBrowsingComponent::render() {
             nodes.end(),
             [](SceneGraphNode* n) {
                 const Renderable* r = n->renderable();
-                const RenderableGlobe* rg = dynamic_cast<const RenderableGlobe*>(r);
-                return rg == nullptr;
+                return dynamic_cast<const RenderableGlobe*>(r) == nullptr;
             }
         ),
         nodes.end()
@@ -111,9 +110,7 @@ void GuiGlobeBrowsingComponent::render() {
     auto firstWithoutUrl = std::find_if(
         nodes.begin(),
         nodes.end(),
-        [module](SceneGraphNode* n) {
-            return !module->hasUrlInfo(n->identifier());
-        }
+        [module](SceneGraphNode* n) { return !module->hasUrlInfo(n->identifier()); }
     );
     nodes.insert(firstWithoutUrl, nullptr);
 

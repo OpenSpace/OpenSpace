@@ -36,7 +36,9 @@ namespace {
 
 namespace openspace {
 
-Ellipsoid::Ellipsoid(glm::dvec3 radii) : _radii(std::move(radii)) {
+Ellipsoid::Ellipsoid(glm::dvec3 radii)
+    : _radii(std::move(radii))
+{
     // If the radii is equal to 0, all of the calculations below fail and result in nan's
     // being raised all over the place
     if (glm::length(radii) > 0.0) {
@@ -100,7 +102,6 @@ glm::dvec3 Ellipsoid::geodeticSurfaceNormalForGeocentricallyProjectedPoint(
 
 glm::dvec3 Ellipsoid::geodeticSurfaceNormal(const Geodetic2& geodetic2) const {
     const double cosLat = std::cos(geodetic2.lat);
-    //geodetic2.lon = geodetic2.lon > M_PI ? geodetic2.lon - M_PI * 2 : geodetic2.lon;
     return glm::dvec3(
         cosLat * std::cos(geodetic2.lon),
         cosLat * std::sin(geodetic2.lon),
@@ -158,7 +159,7 @@ Geodetic2 Ellipsoid::cartesianToGeodetic2(const glm::dvec3& p) const {
 
 glm::dvec3 Ellipsoid::cartesianSurfacePosition(const Geodetic2& geodetic2) const {
     // Position on surface : height = 0
-    return cartesianPosition(Geodetic3({ geodetic2, 0 }));
+    return cartesianPosition(Geodetic3({ geodetic2, 0.0 }));
 }
 
 glm::dvec3 Ellipsoid::cartesianPosition(const Geodetic3& geodetic3) const {

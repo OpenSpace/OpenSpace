@@ -40,8 +40,8 @@ namespace {
     constexpr Property::PropertyInfo TextureInfo = {
         "URL",
         "Image URL",
-        "A URL to an image to use as a texture for this sphere. The image is expected "
-        "to be an equirectangular projection.",
+        "A URL to an image to use as a texture for this sphere. The image is expected to "
+        "be an equirectangular projection.",
         Property::Visibility::User
     };
 
@@ -96,9 +96,7 @@ RenderableSphereImageOnline::RenderableSphereImageOnline(
     const Parameters p = codegen::bake<Parameters>(dictionary);
 
     _textureUrl = p.url;
-    _textureUrl.onChange([this]() {
-        _textureIsDirty = true;
-    });
+    _textureUrl.onChange([this]() { _textureIsDirty = true; });
     addProperty(_textureUrl);
 }
 

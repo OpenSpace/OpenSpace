@@ -437,8 +437,8 @@ public:
      *   - Property::ViewOptions::MinMaxRange = `MinMaxRange` (Intended for Vec2)
      */
     struct ViewOptions {
-        static const char* Color;
-        static const char* MinMaxRange;
+        static std::string Color;
+        static std::string MinMaxRange;
     };
 
     /**

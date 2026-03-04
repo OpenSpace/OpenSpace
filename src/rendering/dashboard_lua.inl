@@ -34,7 +34,7 @@ using namespace openspace;
 
 namespace {
 
- // Adds a new dashboard item to the main dashboard.
+// Adds a new dashboard item to the main dashboard.
 [[codegen::luawrap]] void addDashboardItem(ghoul::Dictionary dashboard) {
     try {
         global::dashboard->addDashboardItem(

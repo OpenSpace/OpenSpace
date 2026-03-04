@@ -89,7 +89,6 @@ namespace {
         int index = 0;
         static int nextIndex;
 #endif // Debugging_ImGui_TreeNode_Indices
-
     };
 
 #ifdef Debugging_ImGui_TreeNode_Indices
@@ -154,7 +153,7 @@ namespace {
     }
 
     void renderTree(const TreeNode& node,
-            const std::function<void (PropertyOwner*)>& renderFunc)
+                    const std::function<void (PropertyOwner*)>& renderFunc)
     {
         if (node.path.empty() || ImGui::TreeNode(node.path.c_str())) {
             for (const std::unique_ptr<TreeNode>& c : node.children) {
@@ -281,12 +280,11 @@ void GuiPropertyComponent::render() {
     );
 
     if (_useTreeLayout) {
-        for (PropertyOwner* owner : owners) {
+        for ([[maybe_unused]] PropertyOwner* owner : owners) {
             ghoul_assert(
                 dynamic_cast<SceneGraphNode*>(owner),
                 "When using the tree layout, all owners must be SceneGraphNodes"
             );
-            (void)owner; // using [[maybe_unused]] in the for loop gives an error
         }
 
         // Sort: by name and shortest first
@@ -309,13 +307,13 @@ void GuiPropertyComponent::render() {
         );
     }
 
-    // If the owners list is empty, we wnat to do the normal thing (-> nothing)
-    // Otherwise, check if the first owner has a GUI group
-    // This makes the assumption that the tree layout is only used if the owners are
-    // SceenGraphNodes (checked above)
-    const bool noGuiGroups = owners.empty() ||
-                             (dynamic_cast<SceneGraphNode*>(*owners.begin()) &&
-                       dynamic_cast<SceneGraphNode*>(*owners.begin())->guiPath().empty());
+    // If the owners list is empty, we wnat to do the normal thing (-> nothing).
+    // Otherwise, check if the first owner has a GUI group. This makes the assumption that
+    // the tree layout is only used if the owners are SceenGraphNodes (checked above)
+    const bool noGuiGroups =
+        owners.empty() ||
+        (dynamic_cast<SceneGraphNode*>(*owners.begin()) &&
+         dynamic_cast<SceneGraphNode*>(*owners.begin())->guiPath().empty());
 
     auto renderProp = [this, owners](PropertyOwner* pOwner) {
         const int count = nVisibleProperties(pOwner->propertiesRecursive());
@@ -324,7 +322,7 @@ void GuiPropertyComponent::render() {
             return;
         }
 
-        auto header = [&owners, &pOwner]() -> bool {
+        auto header = [&owners, &pOwner]() {
             if (owners.size() > 1) {
                 // Create a header in case we have multiple owners
                 return ImGui::CollapsingHeader(pOwner->guiName().c_str());
@@ -349,8 +347,9 @@ void GuiPropertyComponent::render() {
     if (!_useTreeLayout || noGuiGroups) {
         std::for_each(owners.begin(), owners.end(), renderProp);
     }
-    else { // _useTreeLayout && gui groups exist
-        TreeNode root("");
+    else {
+        // _useTreeLayout && gui groups exist
+        TreeNode root = TreeNode("");
 
         for (PropertyOwner* pOwner : owners) {
             // We checked above that pOwner is a SceneGraphNode

@@ -89,7 +89,7 @@ void SceneInitializer::initializeNode(SceneGraphNode* node) {
                     progressInfo
                 );
             }
-            };
+        };
 
         LoadingScreen::ProgressInfo progressInfo;
         progressInfo.progress = 0.f;

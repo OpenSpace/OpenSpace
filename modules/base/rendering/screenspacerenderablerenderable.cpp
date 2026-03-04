@@ -259,8 +259,8 @@ void ScreenSpaceRenderableRenderable::initializeGL() {
 
         Camera camera;
         // @TODO (2025-03-24, abock): These two lines can be removed once #3573 is fixed
-        camera.setPositionVec3(glm::dvec3(0.0, 0.0, 0.0));
-        camera.setRotation(glm::dvec3(0.0, 0.0, 0.0));
+        camera.setPosition(glm::dvec3(0.0));
+        camera.setRotation(glm::dvec3(0.0));
 
         glm::mat4 view = glm::lookAt(
             _cameraPosition.value(),
@@ -278,7 +278,7 @@ void ScreenSpaceRenderableRenderable::initializeGL() {
         );
         camera.sgctInternal.setProjectionMatrix(proj);
 
-        openspace::RenderData renderData = {
+        const openspace::RenderData renderData = {
             .camera = camera,
             .time = Time(_time),
             .modelTransform = {

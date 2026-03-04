@@ -96,7 +96,7 @@ bool HttpRequest::perform(std::chrono::milliseconds timeout) {
         curl,
         CURLOPT_XFERINFOFUNCTION,
         +[](void* userData, int64_t nTotalDownloadBytes, int64_t nDownloadedBytes,
-           int64_t, int64_t)
+            int64_t, int64_t)
         {
             HttpRequest* r = reinterpret_cast<HttpRequest*>(userData);
 
@@ -288,7 +288,6 @@ bool HttpFileDownload::setup() {
     if (_file.good()) {
         return true;
     }
-
 
 #ifdef WIN32
     // GetLastError() gives more details than errno.

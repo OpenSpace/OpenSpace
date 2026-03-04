@@ -27,9 +27,9 @@
 #include <modules/server/include/connection.h>
 #include <modules/server/include/jsonconverters.h>
 #include <openspace/engine/globals.h>
+#include <openspace/interaction/action.h>
 #include <openspace/interaction/actionmanager.h>
 #include <openspace/interaction/keybindingmanager.h>
-#include <openspace/interaction/action.h>
 #include <openspace/util/keys.h>
 #include <ghoul/misc/stringconversion.h>
 #include <algorithm>
@@ -98,8 +98,8 @@ nlohmann::json ActionKeybindTopic::allActionsKeybinds() const {
 
     for (const std::pair<const KeyWithModifier, std::string>& keyBinding : keyBindings) {
         if (!global::actionManager->hasAction(keyBinding.second)) {
-            // We don't warn here as we don't know if the user didn't expect the action
-            // to be there or not. They might have defined a keybind to do multiple things
+            // We don't warn here as we don't know if the user didn't expect the action to
+            // be there or not. They might have defined a keybind to do multiple things
             // only one of which is actually defined
             continue;
         }

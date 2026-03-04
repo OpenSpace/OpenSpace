@@ -159,7 +159,6 @@ void RenderableHabitableZone::render(const RenderData& data, RendererTasks&) {
 
     _shader->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetBlendState();
     global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetPolygonAndClippingState();

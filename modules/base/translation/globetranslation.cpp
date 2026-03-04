@@ -25,9 +25,9 @@
 #include <modules/base/translation/globetranslation.h>
 
 #include <openspace/documentation/documentation.h>
+#include <openspace/query/query.h>
 #include <openspace/rendering/renderable.h>
 #include <openspace/scene/scenegraphnode.h>
-#include <openspace/query/query.h>
 #include <openspace/util/geodetic.h>
 #include <openspace/util/updatestructures.h>
 #include <ghoul/format.h>
@@ -240,16 +240,8 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
     }
 
     if (_useHeightmap) {
-        const glm::vec3 groundPos = cartesianCoordinatesFromGeo(
-            *_attachedNode,
-            lat,
-            lon,
-            0.0
-        );
-
-        const SurfacePositionHandle h = _attachedNode->calculateSurfacePositionHandle(
-            groundPos
-        );
+        const glm::vec3 p = cartesianCoordinatesFromGeo(*_attachedNode, lat, lon, 0.0);
+        const SurfacePositionHandle h = _attachedNode->calculateSurfacePositionHandle(p);
 
         _position = cartesianCoordinatesFromGeo(
             *_attachedNode,
@@ -259,12 +251,7 @@ glm::dvec3 GlobeTranslation::position(const UpdateData&) const {
         );
     }
     else {
-        _position = cartesianCoordinatesFromGeo(
-            *_attachedNode,
-            lat,
-            lon,
-            alt
-        );
+        _position = cartesianCoordinatesFromGeo(*_attachedNode, lat, lon, alt);
         _positionIsDirty = false;
     }
     return _position;

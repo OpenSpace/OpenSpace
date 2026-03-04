@@ -24,9 +24,9 @@
 
 #include <openspace/mission/missionmanager.h>
 
+#include <openspace/engine/globals.h>
 #include <openspace/events/event.h>
 #include <openspace/events/eventengine.h>
-#include <openspace/engine/globals.h>
 #include <openspace/scripting/lualibrary.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/exception.h>
@@ -44,7 +44,9 @@ namespace {
 
 namespace openspace {
 
-MissionManager::MissionManager() : _currentMission(_missionMap.end()) {}
+MissionManager::MissionManager()
+    : _currentMission(_missionMap.end())
+{}
 
 void MissionManager::setCurrentMission(const std::string& identifier) {
     ghoul_assert(!identifier.empty(), "missionName must not be empty");
@@ -53,15 +55,13 @@ void MissionManager::setCurrentMission(const std::string& identifier) {
     if (it == _missionMap.end()) {
         throw MissionManagerException("Mission has not been loaded");
     }
-    else {
-        _currentMission = it;
-    }
+
+    _currentMission = it;
 }
 
 bool MissionManager::hasCurrentMission() const {
     return _currentMission != _missionMap.end();
 }
-
 
 std::string MissionManager::loadMission(Mission mission) {
     // Changing the values might invalidate the _currentMission iterator
@@ -101,6 +101,7 @@ const Mission& MissionManager::currentMission() {
     if (_currentMission == _missionMap.end()) {
         throw MissionManagerException("No current mission has been specified");
     }
+
     return _currentMission->second;
 }
 

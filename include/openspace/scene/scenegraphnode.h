@@ -159,7 +159,7 @@ private:
     glm::dvec3 calculateWorldPosition() const;
     glm::dmat3 calculateWorldRotation() const;
     glm::dvec3 calculateWorldScale() const;
-    void computeScreenSpaceData(RenderData& newData);
+    void computeScreenSpaceData(const RenderData& newData);
     void renderDebugSphere(const Camera& camera, double size,
         const glm::vec4& color) const;
 

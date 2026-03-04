@@ -46,7 +46,7 @@
 //       this class needs to exist at all)
 
 namespace {
-    // returns the number of days in a given month and year (takes leap year into account)
+    // Returns the number of days in a given month and year (takes leap year into account)
     constexpr int monthSize(int month_, int year_) {
         using namespace date;
         const year_month_day_last d = year(year_) / month(month_) / last;
@@ -54,12 +54,12 @@ namespace {
     }
 
     /**
-     * singleIncrement is used for any of the date/time types, and handles overflow
-     * values using the min/max parameters
+     * `singleIncrement` is used for any of the date/time types, and handles overflow
+     * values using the min/max parameters.
      *
      * \param oper the date/time variable to operate on (will be changed)
-     * \param val the value of the increment, which may be changed in this function
-     *        if an overflow occurs
+     * \param val the value of the increment, which may be changed in this function if an
+     *        overflow occurs
      * \param min the minimum allowable value
      * \param max the maximum allowable value (determines where overflow occurs)
      */
@@ -75,12 +75,12 @@ namespace {
     }
 
     /**
-     * singleDecrement is used for any of the date/time types, and handles underflow
-     * values using the min/max parameters
+     * `singleDecrement` is used for any of the date/time types, and handles underflow
+     * values using the min/max parameters.
      *
      * \param oper the date/time variable to operate on (will be changed)
-     * \param val the value of the decrement, which may be changed in this function
-     *        if an underflow occurs
+     * \param val the value of the decrement, which may be changed in this function if an
+     *        underflow occurs
      * \param min the minimum allowable value
      * \param max the maximum allowable value (determines where underflow occurs)
      */
@@ -349,7 +349,8 @@ double TimeQuantizer::parseTimeResolutionStr(const std::string& resolutionStr) {
     const double value = strtol(numberString.c_str(), &p, 10);
     _resolutionValue = value;
     _resolutionUnit = unit;
-    if (*p) { // not a number
+    if (*p) {
+        // not a number
         throw ghoul::RuntimeError(std::format(
             "Cannot convert {} to number", numberString
         ));
@@ -382,7 +383,7 @@ void TimeQuantizer::verifyStartTimeRestrictions() {
         helpfulDescription = "monthly increment";
     }
     else if (_resolutionUnit == 'y') {
-        //Get month sizes using a fixed non-leap year
+        // Get month sizes using a fixed non-leap year
         dayUpperLimit = monthSize(_start.month(), 2001);
         helpfulDescription += " on a yearly increment";
     }
@@ -446,10 +447,9 @@ void TimeQuantizer::verifyResolutionRestrictions(const int value, const char uni
     }
 }
 
-double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char unit) {
+double TimeQuantizer::computeSecondsFromResolution(int valueIn, const char unit) {
     double value = static_cast<double>(valueIn);
-    // convert value to seconds, based on unit.
-    // The switch statment has intentional fall throughs
+    // Convert value to seconds, based on unit
     switch (unit) {
         case 'y':
             value *= 365;
@@ -466,11 +466,9 @@ double TimeQuantizer::computeSecondsFromResolution(const int valueIn, const char
         case 's':
             value *= 1.0;
             break;
-
         case 'M':
             value *= (30.4 * 24.0 * 60.0 * 60.0);
             break;
-
         default:
             throw ghoul::RuntimeError(std::format(
                 "Invalid resolution unit format '{}'. Expected 'y', 'M', 'd', 'h', 'm', "
@@ -497,7 +495,7 @@ bool TimeQuantizer::quantize(Time& t, bool clamp) {
     const DateTime unquantized = DateTime(
         std::string_view(unquantizedString, BufferSize)
     );
-    // resolutionFraction helps to improve iteration performance
+    // ResolutionFraction helps to improve iteration performance
     constexpr double ResolutionFraction = 0.7;
     constexpr int IterationLimit = 50;
 

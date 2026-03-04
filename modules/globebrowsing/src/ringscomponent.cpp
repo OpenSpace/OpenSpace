@@ -33,13 +33,13 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
+#include <ghoul/io/texture/texturereader.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/misc/exception.h>
 #include <ghoul/misc/profiling.h>
 #include <ghoul/opengl/openglstatecache.h>
 #include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/io/texture/texturereader.h>
 #include <array>
 #include <cstddef>
 #include <filesystem>
@@ -124,9 +124,9 @@ namespace {
         "Offset",
         "Offset",
         "This value is used to limit the width of the rings. Each of the two values is "
-        "a value between 0 and 1, where 0 is the center of the ring and 1 is the "
-        "maximum extent at the radius. For example, if the value is {0.5, 1.0}, the "
-        "ring is only shown between radius/2 and radius. It defaults to {0.0, 1.0}.",
+        "a value between 0 and 1, where 0 is the center of the ring and 1 is the maximum "
+        "extent at the radius. For example, if the value is {0.5, 1.0}, the ring is only "
+        "shown between radius/2 and radius. It defaults to {0.0, 1.0}.",
         Property::Visibility::AdvancedUser
     };
 
@@ -150,16 +150,16 @@ namespace {
     constexpr Property::PropertyInfo ZFightingPercentageInfo = {
         "ZFightingPercentage",
         "Z-fighting percentage",
-        "The percentage of the correct distance to the surface being shadowed. "
-        "Possible values: [0.0, 1.0].",
+        "The percentage of the correct distance to the surface being shadowed. Possible "
+        "values: [0.0, 1.0].",
         Property::Visibility::Developer
     };
 
     constexpr Property::PropertyInfo NumberShadowSamplesInfo = {
         "NumberShadowSamples",
         "Number of shadow samples",
-        "The number of samples used during shadow mapping calculation "
-        "(Percentage Closer Filtering).",
+        "The number of samples used during shadow mapping calculation (Percentage Closer "
+        "Filtering).",
         Property::Visibility::Developer
     };
 
@@ -167,7 +167,7 @@ namespace {
         // [[codegen::verbatim(EnabledInfo.description)]]
         std::optional<bool> enabled;
 
-        // This value determines the overall opacity of the rings
+        // This value determines the overall opacity of the rings.
         std::optional<float> opacity [[codegen::inrange(0.f, 1.f)]];
 
         // [[codegen::verbatim(TextureInfo.description)]]
@@ -230,14 +230,14 @@ RingsComponent::RingsComponent(const ghoul::Dictionary& dictionary)
     , _enabled(EnabledInfo, true)
     , _zFightingPercentage(ZFightingPercentageInfo, 0.95f, 0.000001f, 1.f)
     , _nShadowSamples(NumberShadowSamplesInfo, 2, 1, 7)
-    // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long
-    // term and rather extract the values directly here.  This would require a bit of
-    // a rewrite in the RenderableGlobe class to not create the RingsComponent in the
+    // @TODO (abock, 2019-12-16) It would be better to not store the dictionary long term
+    // and rather extract the values directly here.  This would require a bit of a rewrite
+    // in the RenderableGlobe class to not create the RingsComponent in the
     // class-initializer list though
-    // @TODO (abock, 2021-03-25) Righto!  The RenderableGlobe passes this dictionary
-    // in as-is so it would be easy to just pass it directly to the initialize method
-    // instead
+    // @TODO (abock, 2021-03-25) Righto!  The RenderableGlobe passes this dictionary in
+    // as-is so it would be easy to just pass it directly to the initialize method instead
     // @TODO (abock, 2025-02-16) Why haven't you done it yet?!
+    // @TODO (abock, 2026-03-03) Cooome oooooooon!
     , _ringsDictionary(dictionary)
 {}
 
@@ -339,7 +339,6 @@ void RingsComponent::initializeGL() {
     compileShadowShader();
 
     try {
-        //global::renderEngine.removeRenderProgram(_geometryOnlyShader.get());
         _geometryOnlyShader = global::renderEngine->buildRenderProgram(
             "RingsGeomOnlyProgram",
             absPath("${MODULE_GLOBEBROWSING}/shaders/rings_geom_vs.glsl"),
@@ -398,8 +397,7 @@ void RingsComponent::deinitializeGL() {
     _geometryOnlyShader = nullptr;
 }
 
-void RingsComponent::draw(const RenderData& data,
-                          const ShadowComponent::ShadowMapData&)
+void RingsComponent::draw(const RenderData& data, const ShadowComponent::ShadowMapData&)
 {
     _shader->activate();
 
@@ -593,9 +591,7 @@ void RingsComponent::loadTexture() {
 
         LDEBUG(std::format("Loaded texture from '{}'", absPath(_texturePath)));
 
-        _textureFile = std::make_unique<ghoul::filesystem::File>(
-            _texturePath.value()
-        );
+        _textureFile = std::make_unique<ghoul::filesystem::File>(_texturePath.value());
         _textureFile->setCallback([this]() { _textureIsDirty = true; });
     }
 
@@ -625,8 +621,7 @@ void RingsComponent::loadTexture() {
         );
 
         LDEBUG(std::format(
-            "Loaded backwards scattering texture from '{}'",
-            absPath(_textureBckwrdPath)
+            "Loaded backwards scattering texture from '{}'", absPath(_textureBckwrdPath)
         ));
 
         _textureFileBackwards = std::make_unique<ghoul::filesystem::File>(
@@ -642,9 +637,7 @@ void RingsComponent::loadTexture() {
             { . filter = Texture::FilterMode::AnisotropicMipMap }
         );
 
-        LDEBUG(std::format(
-            "Loaded unlit texture from '{}'", absPath(_textureUnlitPath)
-        ));
+        LDEBUG(std::format("Loaded unlit texture from '{}'", absPath(_textureUnlitPath)));
 
         _textureFileUnlit = std::make_unique<ghoul::filesystem::File>(
             _textureUnlitPath.value()
@@ -659,9 +652,7 @@ void RingsComponent::loadTexture() {
             { .filter = Texture::FilterMode::AnisotropicMipMap }
         );
 
-        LDEBUG(
-            std::format("Loaded color texture from '{}'", absPath(_textureColorPath))
-        );
+        LDEBUG(std::format("Loaded color texture from '{}'", absPath(_textureColorPath)));
 
         _textureFileColor = std::make_unique<ghoul::filesystem::File>(
             _textureColorPath.value()

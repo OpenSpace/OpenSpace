@@ -91,7 +91,7 @@ private:
     GLuint calculateDeltaE();
     std::pair<GLuint, GLuint> calculateDeltaS();
     void calculateIrradiance();
-    void calculateInscattering(GLuint deltaSRayleigh, GLuint deltaSMie);
+    void calculateInscattering(GLuint deltaSRayleigh, GLuint deltaSMie) const;
     void calculateDeltaJ(int scatteringOrder,
         ghoul::opengl::ProgramObject& program, GLuint deltaJ, GLuint deltaE,
         GLuint deltaSRayleigh, GLuint deltaSMie);
@@ -103,7 +103,7 @@ private:
     void calculateIrradiance(int scatteringOrder,
         ghoul::opengl::ProgramObject& program, GLuint deltaE);
     void calculateInscattering(int scatteringOrder,
-        ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh);
+        ghoul::opengl::ProgramObject& program, GLuint deltaSRayleigh) const;
 
     UniformCache(cullAtmosphere, opacity, rPlanet, rAtmosphere, groundRadianceEmission,
         rayleighHeightScale, betaRayleigh, mieHeightScale, betaMieExtinction, mieG,

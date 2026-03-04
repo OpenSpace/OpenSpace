@@ -60,7 +60,7 @@ private:
     void internalInitialize(const ghoul::Dictionary&) override;
     void preDraw();
     void render(const glm::mat4& sceneMatrix, const glm::mat4& viewMatrix,
-        const glm::mat4& projectionMatrix);
+        const glm::mat4& projectionMatrix) const;
 
     inline static int _initializeCounter = 0;
 

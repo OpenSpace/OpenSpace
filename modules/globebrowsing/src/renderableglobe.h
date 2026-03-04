@@ -58,7 +58,7 @@ class Layer;
 struct BoundingHeights {
     float min;
     float max;
-    bool available;
+    bool isAvailable;
     bool tileOK;
 };
 

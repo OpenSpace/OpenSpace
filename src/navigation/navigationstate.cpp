@@ -58,32 +58,32 @@ namespace {
     // scene may have changed. The get the exact same visuals as when the NavigationState
     // was saved you need to also set the simulation time to correpsond to the timestamp.
     struct [[codegen::Dictionary(NavigationState)]] Parameters {
-        // The identifier of the anchor node
+        // The identifier of the anchor node.
         std::string anchor;
 
-        // The identifier of the aim node, if used
+        // The identifier of the aim node, if used.
         std::optional<std::string> aim;
 
         // The identifier of the scene graph node to use as reference frame. If not
-        // specified, this will be the same as the anchor
+        // specified, this will be the same as the anchor.
         std::optional<std::string> referenceFrame;
 
         // The position of the camera relative to the anchor node, expressed in meters in
-        // the specified reference frame
+        // the specified reference frame.
         glm::dvec3 position;
 
-        // The up vector expressed in the coordinate system of the reference frame
+        // The up vector expressed in the coordinate system of the reference frame.
         std::optional<glm::dvec3> up;
 
-        // The yaw angle in radians. Positive angle means yawing camera to the right
+        // The yaw angle in radians. Positive angle means yawing camera to the right.
         std::optional<double> yaw;
 
-        // The pitch angle in radians. Positive angle means pitching camera upwards
+        // The pitch angle in radians. Positive angle means pitching camera upwards.
         std::optional<double> pitch;
 
         // The timestamp for when the navigation state was captured or is valid. Specified
         // either as seconds past the J2000 epoch, or as a date string in ISO 8601 format:
-        // 'YYYY MM DD HH:mm:ss.xxx'
+        // 'YYYY MM DD HH:mm:ss.xxx'.
         std::optional<std::variant<double, std::string>> timestamp;
     };
 } // namespace
@@ -96,10 +96,8 @@ NavigationState::NavigationState(const ghoul::Dictionary& dictionary) {
 
     anchor = p.anchor;
     position = p.position;
-
     referenceFrame = p.referenceFrame.value_or(anchor);
     aim = p.aim.value_or(aim);
-
     up = p.up;
     yaw = p.yaw.value_or(yaw);
     pitch = p.pitch.value_or(pitch);

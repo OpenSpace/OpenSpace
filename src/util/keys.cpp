@@ -111,7 +111,6 @@ std::string keyToString(KeyWithModifier keyWithModifier) {
     // The modifier has a residual + at the end that we use here
     return modifier + key;
 }
-
 } // namespace openspace
 
 namespace ghoul {

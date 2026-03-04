@@ -115,7 +115,7 @@ DashboardItemVelocity::DashboardItemVelocity(const ghoul::Dictionary& dictionary
 void DashboardItemVelocity::update() {
     ZoneScoped;
 
-    const glm::dvec3 currentPos = global::renderEngine->scene()->camera()->positionVec3();
+    const glm::dvec3 currentPos = global::renderEngine->scene()->camera()->position();
     const glm::dvec3 dt = currentPos - _prevPosition;
     _prevPosition = currentPos;
 

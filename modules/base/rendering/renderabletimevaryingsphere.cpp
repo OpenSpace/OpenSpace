@@ -103,8 +103,8 @@ void RenderableTimeVaryingSphere::deinitializeGL() {
 }
 
 void RenderableTimeVaryingSphere::extractMandatoryInfoFromSourceFolder() {
-    // Ensure that the source folder exists and then extract
-    // the files with the same extension as <inputFileTypeString>
+    // Ensure that the source folder exists and then extract the files with the same
+    // extension as <inputFileTypeString>
     namespace fs = std::filesystem;
     const fs::path sourceFolder = absPath(_textureSourcePath);
     if (!std::filesystem::is_directory(sourceFolder)) {
@@ -162,10 +162,10 @@ void RenderableTimeVaryingSphere::update(const UpdateData& data) {
         {
             updateActiveTriggerTimeIndex(currentTime);
             _textureIsDirty = true;
-        } // else {we're still in same state as previous frame (no changes needed)}
+        } // Else {we're still in same state as previous frame (no changes needed)}
     }
     else {
-        // not in interval => set everything to false
+        // Not in interval => set everything to false
         _activeTriggerTimeIndex = 0;
     }
 

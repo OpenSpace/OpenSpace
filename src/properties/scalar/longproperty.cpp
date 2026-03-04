@@ -28,8 +28,8 @@
 
 namespace openspace {
 
-LongProperty::LongProperty(Property::PropertyInfo info, long value,
-                           long minValue, long maxValue, long stepValue)
+LongProperty::LongProperty(PropertyInfo info, long value, long minValue, long maxValue,
+                           long stepValue)
     : NumericalProperty<long>(std::move(info), value, minValue, maxValue, stepValue)
 {}
 

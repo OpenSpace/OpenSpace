@@ -282,7 +282,7 @@ void AudioModule::setVolume(const std::string& identifier, float volume, float f
     }
 
     // We clamp the volume level between [0, 1] to not accidentally blow any speakers
-    volume = glm::clamp(volume, 0.f, 1.f);
+    volume = std::clamp(volume, 0.f, 1.f);
     if (fade == 0.f) {
         _engine->setVolume(it->second.handle, volume);
     }
@@ -341,7 +341,7 @@ void AudioModule::setGlobalVolume(float volume, float fade) const {
     ghoul_assert(_engine, "No audio engine loaded");
 
     // We clamp the volume level between [0, 1] to not accidentally blow any speakers
-    volume = glm::clamp(volume, 0.f, 1.f);
+    volume = std::clamp(volume, 0.f, 1.f);
     if (fade == 0.f) {
         _engine->setGlobalVolume(volume);
     }

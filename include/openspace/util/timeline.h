@@ -46,10 +46,10 @@ template <typename T>
 struct Keyframe : public KeyframeBase {
     Keyframe(size_t i, double t, T d);
 
-    Keyframe(Keyframe const&) = default;
+    Keyframe(const Keyframe&) = default;
     Keyframe(Keyframe&&) noexcept = default;
     Keyframe& operator=(Keyframe&&) noexcept = default;
-    Keyframe& operator=(Keyframe const&) = default;
+    Keyframe& operator=(const Keyframe&) = default;
     T data;
 };
 

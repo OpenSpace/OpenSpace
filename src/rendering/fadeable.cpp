@@ -30,18 +30,18 @@ namespace {
     constexpr Property::PropertyInfo OpacityInfo = {
         "Opacity",
         "Opacity",
-        "This value determines the opacity of this object. A value of 0 means "
-        "completely transparent.",
+        "This value determines the opacity of this object. A value of 0 means completely "
+        "transparent.",
         Property::Visibility::NoviceUser
     };
 
     constexpr Property::PropertyInfo FadeInfo = {
         "Fade",
         "Fade",
-        "This value is used by the system to be able to fade out objects "
-        "independently from the Opacity value selected by the user. This value should "
-        "not be directly manipulated through a user interface, but instead used by other "
-        "components of the system programmatically.",
+        "This value is used by the system to be able to fade out objects independently "
+        "from the Opacity value selected by the user. This value should not be directly "
+        "manipulated through a user interface, but instead used by other components of "
+        "the system programmatically.",
         Property::Visibility::Developer
     };
 } // namespace
@@ -53,7 +53,7 @@ Fadeable::Fadeable()
     , _fade(FadeInfo, 1.f, 0.f, 1.f)
 {
     // Note that this is not a property owner. It's still up to the subclasses to
-    // add the properties, assign values, etc.
+    // add the properties, assign values, etc
 }
 
 void Fadeable::setFade(float fade) {

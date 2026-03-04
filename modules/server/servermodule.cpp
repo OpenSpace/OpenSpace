@@ -60,11 +60,10 @@ ServerModule::ServerModule()
     addPropertySubOwner(_interfaceOwner);
 
     global::callback::preSync->emplace_back([this]() {
-        // Trigger callbacks
         using K = CallbackHandle;
         using V = CallbackFunction;
         for (const std::pair<K, V>& it : _preSyncCallbacks) {
-            it.second(); // call function
+            it.second();
         }
     });
 }
@@ -125,7 +124,7 @@ void ServerModule::internalInitialize(const ghoul::Dictionary& configuration) {
 }
 
 void ServerModule::preSync() {
-    // Set up new connections.
+    // Set up new connections
     for (std::unique_ptr<ServerInterface>& serverInterface : _interfaces) {
         if (!serverInterface->isEnabled()) {
             continue;
@@ -141,7 +140,7 @@ void ServerModule::preSync() {
         while ((socket = socketServer->nextPendingSocket())) {
             const std::string address = socket->address();
             if (serverInterface->clientIsBlocked(address)) {
-                // Drop connection if the address is blocked.
+                // Drop connection if the address is blocked
                 continue;
             }
             socket->startStreams();
@@ -161,10 +160,10 @@ void ServerModule::preSync() {
         }
     }
 
-    // Consume all messages put into the message queue by the socket threads.
+    // Consume all messages put into the message queue by the socket threads
     consumeMessages();
 
-    // Join threads for sockets that disconnected.
+    // Join threads for sockets that disconnected
     cleanUpFinishedThreads();
 }
 

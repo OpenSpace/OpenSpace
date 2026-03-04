@@ -322,7 +322,6 @@ void RenderablePrism::render(const RenderData& data, RendererTasks&) {
     );
     _shader->setUniform(_uniformCache.color, glm::vec4(_lineColor.value(), opacity()));
 
-    // Render
     glEnable(GL_PRIMITIVE_RESTART);
     glPrimitiveRestartIndex(255);
     glLineWidth(_lineWidth);

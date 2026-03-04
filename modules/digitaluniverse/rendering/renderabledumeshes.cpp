@@ -65,8 +65,8 @@ namespace {
     constexpr Property::PropertyInfo TextOpacityInfo = {
         "TextOpacity",
         "Text opacity",
-        "Determines the transparency of the text label, where 1 is completely opaque "
-        "and 0 fully transparent.",
+        "Determines the transparency of the text label, where 1 is completely opaque and "
+        "0 fully transparent.",
         Property::Visibility::NoviceUser
     };
 
@@ -257,8 +257,7 @@ RenderableDUMeshes::RenderableDUMeshes(const ghoul::Dictionary& dictionary)
 }
 
 bool RenderableDUMeshes::isReady() const {
-    return (_program != nullptr) &&
-        (!_renderingMeshesMap.empty() || (!_labelset.entries.empty()));
+    return _program && (!_renderingMeshesMap.empty() || (!_labelset.entries.empty()));
 }
 
 void RenderableDUMeshes::initialize() {
@@ -317,7 +316,6 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
 {
     glEnablei(GL_BLEND, 0);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     glDepthMask(false);
     glEnable(GL_DEPTH_TEST);
 
@@ -351,7 +349,6 @@ void RenderableDUMeshes::renderMeshes(const RenderData&,
     glBindVertexArray(0);
     _program->deactivate();
 
-    // Restores GL State
     global::renderEngine->openglStateCache().resetDepthState();
     global::renderEngine->openglStateCache().resetBlendState();
 }
@@ -373,7 +370,7 @@ void RenderableDUMeshes::renderLabels(const RenderData& data,
         .mvpMatrix = modelViewProjectionMatrix,
         .orthoRight = orthoRight,
         .orthoUp = orthoUp,
-        .cameraPos = data.camera.positionVec3(),
+        .cameraPos = data.camera.position(),
         .cameraLookUp = data.camera.lookUpVectorWorldSpace()
     };
 
@@ -479,8 +476,8 @@ bool RenderableDUMeshes::readSpeckFile() {
             break;
         }
 
-        // Guard against wrong line endings (copying files from Windows to Mac) causes
-        // lines to have a final \r
+        // Guard against wrong line endings (copying files between operating systems)
+        // causes lines to have a final \r
         if (!line.empty() && line.back() == '\r') {
             line = line.substr(0, line.length() - 1);
         }
@@ -499,7 +496,7 @@ bool RenderableDUMeshes::readSpeckFile() {
             // where textnum is the index of the texture;
             // colorindex is the index of the color for the mesh
             // and style is solid, wire or point (for now we support only wire)
-            std::stringstream str(line);
+            std::stringstream str = std::stringstream(line);
 
             RenderingMesh mesh;
             mesh.meshIndex = meshIndex;
@@ -539,17 +536,17 @@ bool RenderableDUMeshes::readSpeckFile() {
             } while (dummy != "{");
 
             ghoul::getline(file, line);
-            std::stringstream dim(line);
+            std::stringstream dim = std::stringstream(line);
             dim >> mesh.numU >> mesh.numV;
 
-            // We can now read the vertices data:
+            // We can now read the vertices data
             for (int l = 0; l < mesh.numU * mesh.numV; l++) {
                 ghoul::getline(file, line);
                 if (line.substr(0, 1) == "}") {
                     break;
                 }
 
-                std::stringstream lineData(line);
+                std::stringstream lineData = std::stringstream(line);
 
                 // Try to read three values for the position
                 glm::vec3 pos;

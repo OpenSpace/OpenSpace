@@ -52,7 +52,7 @@ void OpenSpaceModule::initialize(const ghoul::Dictionary& configuration) {
 
     const std::string upperIdentifier = ghoul::toUpperCase(identifier());
 
-    std::string moduleToken = "${" + std::string(ModuleBaseToken) + upperIdentifier + "}";
+    std::string moduleToken = std::format("${{{}{}}}", ModuleBaseToken, upperIdentifier);
 
     std::filesystem::path path = modulePath();
     if (!path.empty()) {

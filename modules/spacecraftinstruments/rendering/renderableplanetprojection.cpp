@@ -35,9 +35,9 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/io/texture/texturereader.h>
 #include <ghoul/misc/dictionary.h>
+#include <ghoul/opengl/programobject.h>
 #include <ghoul/opengl/texture.h>
 #include <ghoul/opengl/textureunit.h>
-#include <ghoul/opengl/programobject.h>
 #include <algorithm>
 #include <array>
 #include <cmath>
@@ -225,7 +225,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
             return;
         }
         _colorTexturePaths.addOption(
-            // as we started with 0, this works
+            // As we started with 0, this works
             static_cast<int>(_colorTexturePaths.options().size()),
             _addColorTexturePath.value()
         );
@@ -251,7 +251,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
     _addHeightMapTexturePath.onChange([this]() {
         if (!_addHeightMapTexturePath.value().empty()) {
             _heightMapTexturePaths.addOption(
-                // as we started with 0, this works
+                // As we started with 0, this works
                 static_cast<int>(_heightMapTexturePaths.options().size()),
                 _addHeightMapTexturePath.value()
             );
@@ -288,7 +288,7 @@ RenderablePlanetProjection::RenderablePlanetProjection(const ghoul::Dictionary& 
 
     if (std::holds_alternative<float>(p.radius)) {
         const float r = std::get<float>(p.radius);
-        _radius = glm::dvec3(r, r, r);
+        _radius = glm::dvec3(r);
     }
     else {
         _radius = std::get<glm::vec3>(p.radius);
@@ -346,7 +346,7 @@ void RenderablePlanetProjection::initializeGL() {
     const glm::vec3 radius = _radius;
     setBoundingSphere(std::max(std::max(radius[0], radius[1]), radius[2]));
 
-    // SCREEN-QUAD
+    // Screen Quad
     glCreateBuffers(1, &_vbo);
     struct Vertex {
         float x;
@@ -423,7 +423,6 @@ void RenderablePlanetProjection::imageProjectGPU(
 
 glm::mat4 RenderablePlanetProjection::attitudeParameters(double time, const glm::vec3& up)
 {
-    // precomputations for shader
     const glm::dmat3 instrumentMatrix = SpiceManager::ref().positionTransformMatrix(
         _projectionComponent.instrumentId(),
         "GALACTIC",
@@ -589,7 +588,7 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
     const double time = data.time.j2000Seconds();
     const double integrateFromTime = data.previousFrameTime.j2000Seconds();
 
-    // Only project new images if time changed since last update.
+    // Only project new images if time changed since last update
     if (time > integrateFromTime && ImageSequencer::ref().isReady() &&
         _projectionComponent.doesPerformProjection())
     {
@@ -602,8 +601,8 @@ void RenderablePlanetProjection::update(const UpdateData& data) {
 
         if (!newImageTimes.empty()) {
             const double firstNewImage = newImageTimes[0].timeRange.end;
-            // Make sure images are always projected in the correct order
-            // (Remove buffered images with a later timestamp)
+            // Make sure images are always projected in the correct order (Remove buffered
+            // images with a later timestamp)
             const auto& it = std::find_if(
                 _imageTimes.begin(),
                 _imageTimes.end(),
@@ -644,7 +643,7 @@ void RenderablePlanetProjection::loadColorTexture() {
         _baseTexture = ghoul::io::TextureReader::ref().loadTexture(
             absPath(selectedPath),
             2,
-            ghoul::opengl::Texture::SamplerInit{
+            ghoul::opengl::Texture::SamplerInit {
                 .filter = Texture::FilterMode::LinearMipMap,
                 .wrapping = wrapping,
                 .swizzleMask = std::array<GLenum, 4>{ GL_RED, GL_RED, GL_RED, GL_ONE }

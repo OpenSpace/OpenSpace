@@ -110,7 +110,7 @@ private:
 
     TileProvider* tileProvider(const Time& time);
 
-    Mode _mode;
+    Mode _mode = Mode::Prototype;
 
     struct {
         double startTimeJ2000 = 0.0;

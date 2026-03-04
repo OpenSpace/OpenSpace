@@ -32,8 +32,8 @@
 #include <openspace/documentation/documentation.h>
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/raycastermanager.h>
-#include <openspace/util/histogram.h>
 #include <openspace/rendering/transferfunction.h>
+#include <openspace/util/histogram.h>
 #include <openspace/util/time.h>
 #include <openspace/util/timemanager.h>
 #include <openspace/util/updatestructures.h>
@@ -253,7 +253,7 @@ void RenderableTimeVaryingVolume::initializeGL() {
         const float diff = t.metadata.maxValue - t.metadata.minValue;
         float* data = t.rawVolume->data();
         for (size_t i = 0; i < t.rawVolume->nCells(); i++) {
-            data[i] = glm::clamp((data[i] - min) / diff, 0.f, 1.f);
+            data[i] = std::clamp((data[i] - min) / diff, 0.f, 1.f);
         }
 
         t.histogram = std::make_shared<Histogram>(0.f, 1.f, 100);
@@ -263,13 +263,13 @@ void RenderableTimeVaryingVolume::initializeGL() {
         // TODO: handle normalization properly for different timesteps + transfer function
 
         t.texture = std::make_shared<ghoul::opengl::Texture>(
-            ghoul::opengl::Texture::FormatInit{
+            ghoul::opengl::Texture::FormatInit {
                 .dimensions = t.metadata.dimensions,
                 .type = GL_TEXTURE_3D,
                 .format = ghoul::opengl::Texture::Format::Red,
                 .dataType = GL_FLOAT
             },
-            ghoul::opengl::Texture::SamplerInit{
+            ghoul::opengl::Texture::SamplerInit {
                 .wrapping = ghoul::opengl::Texture::WrappingMode::Clamp
             },
             reinterpret_cast<std::byte*>(data)
@@ -344,12 +344,12 @@ void RenderableTimeVaryingVolume::loadTimestepMetadata(const std::filesystem::pa
         return;
     }
 
-    Timestep t;
-    t.metadata = metadata;
-    t.baseName = path.stem();
-    t.inRam = false;
-    t.onGpu = false;
-
+    Timestep t = {
+        .baseName = path.stem(),
+        .inRam = false,
+        .onGpu = false,
+        .metadata = metadata
+    };
     _volumeTimesteps[t.metadata.time] = std::move(t);
 }
 
@@ -429,8 +429,8 @@ void RenderableTimeVaryingVolume::update(const UpdateData&) {
         Timestep* t = currentTimestep();
 
         // Set scale and translation matrices:
-        // The original data cube is a unit cube centered in 0
-        // ie with lower bound from (-0.5, -0.5, -0.5) and upper bound (0.5, 0.5, 0.5)
+        // The original data cube is a unit cube centered in 0, that is with lower bound
+        // from (-0.5, -0.5, -0.5) and upper bound (0.5, 0.5, 0.5)
         if (t && t->texture) {
             if (_raycaster->gridType() == VolumeGridType::Cartesian) {
                 const glm::dvec3 scale =

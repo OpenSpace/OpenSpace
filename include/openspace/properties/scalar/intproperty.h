@@ -32,12 +32,11 @@
 namespace openspace {
 
 /**
- * This class is a concrete implementation of TemplateProperty with
- * the type `int`.
+ * This class is a concrete implementation of TemplateProperty with the type `int`.
  */
 class IntProperty : public NumericalProperty<int> {
 public:
-    explicit IntProperty(Property::PropertyInfo info, int value = 0,
+    explicit IntProperty(PropertyInfo info, int value = 0,
         int minValue = std::numeric_limits<int>::lowest(),
         int maxValue = std::numeric_limits<int>::max(), int stepValue = 1);
 

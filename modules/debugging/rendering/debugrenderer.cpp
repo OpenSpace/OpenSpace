@@ -54,9 +54,7 @@ DebugRenderer::DebugRenderer()  {
 
 DebugRenderer::DebugRenderer(std::unique_ptr<ghoul::opengl::ProgramObject> programObject)
     : _programObject(std::move(programObject))
-{
-    // nothing to do
-}
+{}
 
 const DebugRenderer& DebugRenderer::ref() {
     if (!_reference) {
@@ -94,7 +92,6 @@ void DebugRenderer::renderVertices(const Vertices& clippingSpacePoints, GLenum m
     glVertexArrayAttribFormat(vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
     glVertexArrayAttribBinding(vao, 0, 0);
 
-    // Activate the shader program and set the uniform color within the shader
     _programObject->activate();
     _programObject->setUniform("color", color);
 
@@ -117,7 +114,7 @@ void DebugRenderer::renderBoxFaces(const Vertices& clippingSpaceBoxCorners,
 
     std::vector<glm::vec4> T;
 
-    // add "sides"
+    // Add "sides"
     T.push_back(V[1]); T.push_back(V[0]); T.push_back(V[4]);
     T.push_back(V[4]); T.push_back(V[5]); T.push_back(V[1]);
 
@@ -131,11 +128,11 @@ void DebugRenderer::renderBoxFaces(const Vertices& clippingSpaceBoxCorners,
     T.push_back(V[4]); T.push_back(V[2]); T.push_back(V[6]);
     T.push_back(V[2]); T.push_back(V[4]); T.push_back(V[0]);
 
-    // add "top"
+    // Add "top"
     T.push_back(V[5]); T.push_back(V[6]); T.push_back(V[7]);
     T.push_back(V[6]); T.push_back(V[5]); T.push_back(V[4]);
 
-    // add bottom
+    // Add bottom
     T.push_back(V[0]); T.push_back(V[1]); T.push_back(V[2]);
     T.push_back(V[3]); T.push_back(V[2]); T.push_back(V[1]);
 
@@ -147,20 +144,24 @@ void DebugRenderer::renderBoxEdges(const Vertices& clippingSpaceBoxCorners,
 {
     ghoul_assert(clippingSpaceBoxCorners.size() == 8, "Box must have 8 vertices");
 
-    const Vertices& V = clippingSpaceBoxCorners;
+    const Vertices& v = clippingSpaceBoxCorners;
 
     std::vector<glm::vec4> lineVertices;
 
     for (size_t i = 0; i < 4; i++) {
-        lineVertices.push_back(V[2 * i]);
-        lineVertices.push_back(V[2 * i + 1]);
-        lineVertices.push_back(V[i]);
-        lineVertices.push_back(V[i + 4]);
+        lineVertices.push_back(v[2 * i]);
+        lineVertices.push_back(v[2 * i + 1]);
+        lineVertices.push_back(v[i]);
+        lineVertices.push_back(v[i + 4]);
     }
-    lineVertices.push_back(V[0]); lineVertices.push_back(V[2]);
-    lineVertices.push_back(V[1]); lineVertices.push_back(V[3]);
-    lineVertices.push_back(V[4]); lineVertices.push_back(V[6]);
-    lineVertices.push_back(V[5]); lineVertices.push_back(V[7]);
+    lineVertices.push_back(v[0]);
+    lineVertices.push_back(v[1]);
+    lineVertices.push_back(v[2]);
+    lineVertices.push_back(v[3]);
+    lineVertices.push_back(v[4]);
+    lineVertices.push_back(v[5]);
+    lineVertices.push_back(v[6]);
+    lineVertices.push_back(v[7]);
 
     DebugRenderer::ref().renderVertices(lineVertices, GL_LINES, rgba);
 }
@@ -181,14 +182,13 @@ void DebugRenderer::renderCameraFrustum(const RenderData& data, const Camera& ot
                                         const glm::vec4& rgba) const
 {
     using namespace glm;
-//    dmat4 modelTransform = translate(dmat4(1), data.position.dvec3());
     const dmat4 viewTransform = dmat4(data.camera.combinedViewMatrix());
     const dmat4 vp = dmat4(data.camera.projectionMatrix()) * viewTransform;
 
     const dmat4 inverseSavedV = glm::inverse(otherCamera.combinedViewMatrix());
     const dmat4 inverseSavedP = glm::inverse(otherCamera.projectionMatrix());
     Vertices clippingSpaceFrustumCorners(8);
-    // loop through the corners of the saved camera frustum
+    // Loop through the corners of the saved camera frustum
     for (size_t i = 0; i < 8; i++) {
         const bool cornerIsRight = i % 2 == 0;
         const bool cornerIsUp = i > 3;

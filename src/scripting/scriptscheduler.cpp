@@ -58,26 +58,25 @@ namespace {
     };
 
     struct [[codegen::Dictionary(ScheduledScript)]] Parameters {
-        // The time at which, when the in game time passes it, the two scripts will
-        // be executed. If the traversal is forwards (towards + infinity), the
-        // ForwardScript will be executed, otherwise the BackwardScript will be
-        // executed instead
+        // The time at which, when the in game time passes it, the two scripts will be
+        // executed. If the traversal is forwards (towards + infinity), the ForwardScript
+        // will be executed, otherwise the BackwardScript will be executed instead.
         std::string time;
 
         // The Lua script that will be executed when the specified time is passed
-        // independent of its direction. This script will be executed before the
-        // specific scripts if both versions are specified
+        // independent of its direction. This script will be executed before the specific
+        // scripts if both versions are specified.
         std::optional<std::string> script;
 
-        // The Lua script that is executed when OpenSpace passes the time in a
-        // forward direction
+        // The Lua script that is executed when OpenSpace passes the time in a forward
+        // direction.
         std::optional<std::string> forwardScript;
 
-        // The Lua script that is executed when OpenSpace passes the time in a
-        // backward direction
+        // The Lua script that is executed when OpenSpace passes the time in a backward
+        // direction.
         std::optional<std::string> backwardScript;
 
-        // The group that this script belongs to, default group is 0
+        // The group that this script belongs to, default group is 0.
         std::optional<int> group;
     };
 } // namespace

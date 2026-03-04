@@ -77,7 +77,7 @@ private:
     Vec3Property _ozoneCoeff;
     FloatProperty _mieHeightScale;
     Vec3Property _mieScatteringCoeff;
-    FloatProperty _mieScatteringExtinctionPropCoeff;
+    FloatProperty _mieScatteringExtinctionCoeff;
     FloatProperty _miePhaseConstant;
     FloatProperty _sunIntensity;
     BoolProperty _sunFollowingCameraEnabled;
@@ -91,7 +91,7 @@ private:
     Vec2Property _atmosphereDimmingSunsetAngle;
 
     float _planetRadius = 0.f;
-    float _mieScattExtPropCoefProp = 1.f;
+    float _mieScattExtCoef = 1.f;
 
     glm::vec3 _mieExtinctionCoeff = glm::vec3(0.f);
 

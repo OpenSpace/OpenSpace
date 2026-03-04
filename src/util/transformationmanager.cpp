@@ -86,7 +86,6 @@ TransformationManager& TransformationManager::ref() {
     return *_instance;
 }
 
-
 glm::dmat3 TransformationManager::kameleonTransformationMatrix(
                                                  [[maybe_unused]] const std::string& from,
                                                    [[maybe_unused]] const std::string& to,

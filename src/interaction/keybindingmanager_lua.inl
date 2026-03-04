@@ -109,7 +109,7 @@ namespace {
 
 /**
  * Returns the keybinds to which the provided action is bound. As actions can be bound to
- * multiple keys, this function returns a list of all keys
+ * multiple keys, this function returns a list of all keys.
  */
 [[codegen::luawrap]] std::vector<std::string> keyBindingsForAction(std::string action) {
     const std::multimap<KeyWithModifier, std::string>& keybinds =
@@ -142,7 +142,7 @@ namespace {
     }
 }
 
-// Clear all key bindings
+// Clear all key bindings.
 [[codegen::luawrap]] void clearKeys() {
     global::keybindingManager->resetKeyBindings();
 }

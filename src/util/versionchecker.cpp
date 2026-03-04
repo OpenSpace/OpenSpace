@@ -117,10 +117,10 @@ void VersionChecker::cancel() {
         _latestVersion = { major, minor, patch };
         _request = nullptr;
 
-        SemanticVersion currentVersion{
-            OPENSPACE_VERSION_MAJOR,
-            OPENSPACE_VERSION_MINOR,
-            OPENSPACE_VERSION_PATCH
+        SemanticVersion currentVersion = {
+            .major = OPENSPACE_VERSION_MAJOR,
+            .minor = OPENSPACE_VERSION_MINOR,
+            .patch = OPENSPACE_VERSION_PATCH
         };
 
         if (currentVersion < _latestVersion) {

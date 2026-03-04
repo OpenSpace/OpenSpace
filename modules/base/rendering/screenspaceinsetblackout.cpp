@@ -31,8 +31,8 @@
 #include <ghoul/filesystem/filesystem.h>
 #include <ghoul/format.h>
 #include <ghoul/io/texture/texturereader.h>
-#include <ghoul/misc/clipboard.h>
 #include <ghoul/misc/assert.h>
+#include <ghoul/misc/clipboard.h>
 #include <ghoul/misc/dictionary.h>
 #include <ghoul/misc/interpolator.h>
 #include <ghoul/opengl/programobject.h>
@@ -51,13 +51,17 @@ namespace {
 
     void checkCornerSpecification(const std::vector<glm::vec2>& corners) {
         if (corners.size() != 4) {
-            TestResult res;
-            res.success = false;
-            res.offenses.push_back(TestResult::Offense());
-            res.offenses[0].offender = "ScreenSpaceInsetBlackout.Blackoutshape.Corners";
-            res.offenses[0].explanation = "Asset must contain exactly 4 corners";
-            res.offenses[0].reason = TestResult::Offense::Reason::Verification;
-            throw SpecificationError(res, "ScreenSpaceInsetBlackout");
+            TestResult res = {
+                .success = false,
+                .offenses = {
+                    {
+                        .offender = "ScreenSpaceInsetBlackout.Blackoutshape.Corners",
+                        .reason = TestResult::Offense::Reason::Verification,
+                        .explanation = "Asset must contain exactly 4 corners"
+                    }
+                }
+            };
+            throw SpecificationError(std::move(res), "ScreenSpaceInsetBlackout");
         }
     }
 
@@ -112,8 +116,8 @@ namespace {
         for (size_t i = 0; i < data.size(); i++) {
             std::string xVal = std::format("{}", data[i].x);
             std::string yVal = std::format("{}", data[i].y);
-            xVal += (xVal.find(".") == std::string::npos) ? ".0" : "";
-            yVal += (yVal.find(".") == std::string::npos) ? ".0" : "";
+            xVal += !xVal.contains(".") ? ".0" : "";
+            yVal += !yVal.contains(".") ? ".0" : "";
             str.append(std::format("{{{}, {}}}", xVal, yVal));
             std::string delimiter = (i < data.size() - 1) ? ", " : " ";
             str.append(delimiter);
@@ -305,10 +309,12 @@ ScreenSpaceInsetBlackout::BlackoutShape::Spline::Spline(std::vector<glm::vec2>& 
             std::format("Point{}Position", i),
             std::format("{} Point #{}", base, i + 1)
         ));
-        points[i]->prop->onChange([this, i]() {
-            points[i]->updateData();
-            dataHasChanged = true;
-        });
+        points[i]->prop->onChange(
+            [this, i]() {
+                points[i]->updateData();
+                dataHasChanged = true;
+            }
+        );
         addProperty(points[i]->prop.get());
     }
 
@@ -386,23 +392,23 @@ ScreenSpaceInsetBlackout::BlackoutShape::BlackoutShape(
     const Parameters params = codegen::bake<Parameters>(dictionary);
 
     cornerData = params.blackoutshape.corners;
-    corners = std::unique_ptr<Corners>(new Corners(cornerData));
+    corners = std::make_unique<Corners>(cornerData);
     addPropertySubOwner(*corners);
 
     topSplineData = params.blackoutshape.top.value_or(std::vector<glm::vec2>());
-    topSpline = std::unique_ptr<Spline>(new Spline(topSplineData, "Top"));
+    topSpline = std::make_unique<Spline>(topSplineData, "Top");
     addPropertySubOwner(*topSpline);
 
     rightSplineData = params.blackoutshape.right.value_or(std::vector<glm::vec2>());
-    rightSpline = std::unique_ptr<Spline>(new Spline(rightSplineData, "Right"));
+    rightSpline = std::make_unique<Spline>(rightSplineData, "Right");
     addPropertySubOwner(*rightSpline);
 
     bottomSplineData = params.blackoutshape.bottom.value_or(std::vector<glm::vec2>());
-    bottomSpline = std::unique_ptr<Spline>(new Spline(bottomSplineData, "Bottom"));
+    bottomSpline = std::make_unique<Spline>(bottomSplineData, "Bottom");
     addPropertySubOwner(*bottomSpline);
 
     leftSplineData = params.blackoutshape.left.value_or(std::vector<glm::vec2>());
-    leftSpline = std::unique_ptr<Spline>(new Spline(leftSplineData, "Left"));
+    leftSpline = std::make_unique<Spline>(leftSplineData, "Left");
     addPropertySubOwner(*leftSpline);
 
     // Add additional controls to GUI
@@ -440,7 +446,7 @@ void ScreenSpaceInsetBlackout::BlackoutShape::resetHasChanged() {
 }
 
 void ScreenSpaceInsetBlackout::BlackoutShape::checkAndUpdateGUI() {
-    std::array<std::reference_wrapper<std::unique_ptr<Spline>>,4> refs = {
+    std::array<std::reference_wrapper<std::unique_ptr<Spline>>, 4> refs = {
         std::ref(topSpline),
         std::ref(rightSpline),
         std::ref(bottomSpline),
@@ -517,8 +523,7 @@ ScreenSpaceInsetBlackout::ScreenSpaceInsetBlackout(const ghoul::Dictionary& dict
             LWARNINGC(
                 "ScreenSpaceInsetBlackout",
                 std::format(
-                    "Could not find calibration texture '{}'.",
-                    *optTexturePath
+                    "Could not find calibration texture '{}'.", *optTexturePath
                 )
             );
         }
@@ -541,13 +546,13 @@ void ScreenSpaceInsetBlackout::initializeGL() {
     );
 
     _blackoutTexture = std::make_unique<ghoul::opengl::Texture>(
-        ghoul::opengl::Texture::FormatInit{
+        ghoul::opengl::Texture::FormatInit {
             .dimensions = glm::uvec3(BlackoutTextureSize, 1),
             .type = GL_TEXTURE_2D,
             .format = ghoul::opengl::Texture::Format::RGBA,
             .dataType = GL_UNSIGNED_BYTE
         },
-        ghoul::opengl::Texture::SamplerInit{}
+        ghoul::opengl::Texture::SamplerInit {}
     );
 
     _uniformCache.color = _fboProgram->uniformLocation("color");
@@ -597,13 +602,11 @@ void ScreenSpaceInsetBlackout::generateTexture() {
     glCreateFramebuffers(1, &fbo);
     glNamedFramebufferTexture(fbo, GL_COLOR_ATTACHMENT0, *_blackoutTexture, 0);
 
-
     defer {
         glDeleteVertexArrays(1, &vao);
         glDeleteBuffers(1, &vbo);
         glDeleteFramebuffers(1, &fbo);
     };
-
 
 
     std::vector<glm::vec2> vboData;

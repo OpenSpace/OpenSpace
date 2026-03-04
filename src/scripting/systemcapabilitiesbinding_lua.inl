@@ -157,9 +157,9 @@ namespace {
 }
 
 /**
- * Returns the value of a call to `glGetString(GL_VENDOR)`. This will give
- * detailed information about the vendor of the main graphics card. This string can be
- * used if the automatic Vendor detection failed.
+ * Returns the value of a call to `glGetString(GL_VENDOR)`. This will give detailed
+ * information about the vendor of the main graphics card. This string can be used if the
+ * automatic Vendor detection failed.
  */
 [[codegen::luawrap]] std::string glslCompiler() {
     std::string compiler = OpenGLCap.glslCompiler();

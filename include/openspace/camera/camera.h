@@ -72,7 +72,7 @@ public:
 
     // Mutators
     void setPose(CameraPose pose);
-    void setPositionVec3(glm::dvec3 pos);
+    void setPosition(glm::dvec3 pos);
     void setRotation(glm::dquat rotation);
     void setScaling(float scaling);
     void setMaxFov(float fov);
@@ -85,8 +85,8 @@ public:
 
     // Accessors
     // Remove Vec3 from the name when psc is gone
-    const glm::dvec3& positionVec3() const;
-    glm::dvec3 eyePositionVec3() const;
+    const glm::dvec3& position() const;
+    glm::dvec3 eyePosition() const;
     const glm::dvec3& unsynchedPositionVec3() const;
     const glm::dvec3& viewDirectionWorldSpace() const;
     const glm::dvec3& lookUpVectorCameraSpace() const;
@@ -108,9 +108,6 @@ public:
     const glm::dmat4& combinedViewMatrix() const;
 
     void invalidateCache();
-
-    void serialize(std::ostream& os) const;
-    void deserialize(std::istream& is);
 
     /**
      * Handles SGCT's internal matrices. Also caches a calculated viewProjection
