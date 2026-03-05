@@ -260,7 +260,7 @@ namespace {
         else if (month == "OCT") { MM = "10"; }
         else if (month == "NOV") { MM = "11"; }
         else if (month == "DEC") { MM = "12"; }
-        else { ghoul_assert(false, "Bad month") };
+        else { ghoul_assert(false, "Bad month"); };
 
         datetime.replace(4, 5, "-" + MM + "-");
         return datetime;

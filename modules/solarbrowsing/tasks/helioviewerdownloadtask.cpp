@@ -69,7 +69,7 @@ namespace {
 
         // The path to the colormap that will be used for this spacecraft and instrument.
         // Note, the colormap is copied into the output folder.
-        std::string colorMap [[codegen::annotation("A valid path")]];
+        std::filesystem::path colorMap;
 
         // The beginning of the time interval to extract data from. Format:
         // YYYY-MM-DDTHH:MM:SS
@@ -103,7 +103,7 @@ HelioviewerDownloadTask::HelioviewerDownloadTask(const ghoul::Dictionary& dictio
     _name = p.name;
     _instrument = p.instrument;
     _outputFolder = absPath(p.outputFolder);
-    _colorMapPath = absPath(p.colorMap);
+    _colorMapPath = p.colorMap;
 }
 
 std::string HelioviewerDownloadTask::description() {
@@ -124,7 +124,10 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
         _timeStep
     );
 
-    LDEBUG("Fetching Helioviewer JPX data");
+    // @TODO (anden88 2026-03-05): Due to how the progress bar uses the '\r' carriage
+    // return, we do a new line before printing to the log so that we get slightly more
+    // readable and nicer output
+    LDEBUG("\nFetching Helioviewer JPX data");
     LINFO(std::format("Requesting {}", jpxRequest));
 
     HttpMemoryDownload fileListing(jpxRequest);
@@ -148,7 +151,7 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
         }
 
         // Display the optional message from HelioViewer which contains important
-        // regarding the settings used for the request.
+        // regarding the settings used for the request
         std::string* message = json["message"].get_ptr<std::string*>();
         if (message && !message->empty()) {
             LWARNING(*message);
@@ -158,7 +161,6 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
         LERROR(std::format("Failed to parse json response: {}", listingString));
         return;
     }
-
 
     LDEBUG("Processing frames");
     std::vector<std::string> epochAsIsoString;
@@ -201,6 +203,9 @@ void HelioviewerDownloadTask::perform(const Task::ProgressCallback& progressCall
         std::filesystem::copy_options::skip_existing
     );
 
+    // @TODO (anden88 2026-03-05): Due to how the progress bar uses the '\r' carriage
+    // return, we do a new line before printing to the log so that we get slightly more
+    // readable and nicer output
     LDEBUG("\nDownloading image data from Helioviewer");
     std::for_each(
         std::execution::par,
