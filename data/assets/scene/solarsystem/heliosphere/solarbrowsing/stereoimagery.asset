@@ -2,7 +2,8 @@ local stereo_a = asset.require('scene/solarsystem/missions/stereo/stereo_a')
 local coreKernels = asset.require("spice/core")
 local kernels = asset.require("scene/solarsystem/missions/stereo/kernels")
 
-print(stereo_a)
+
+
 -- We use the Stereo position with an added rotation to stabilize the image and remove
 -- any wobble effect since we don't have the CK kernels
 local StereoPosition = {

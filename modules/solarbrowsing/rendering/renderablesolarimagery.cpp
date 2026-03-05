@@ -620,10 +620,12 @@ void RenderableSolarImagery::updateImageryTexture() {
         std::pow(2, static_cast<unsigned int>(_downsamplingLevel))
     );
 
-    std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
-        keyframe->data.filePath,
-        std::format("{}x{}", imageSize, imageSize),
-        "solarbrowsing"
+    SolarBrowsingModule* module = global::moduleEngine->module<SolarBrowsingModule>();
+
+    std::filesystem::path path = keyframe->data.filePath;
+    std::filesystem::path cached = module->cacheManager()->cachedFilename(
+        path.replace_extension(".bin"),
+        std::format("{}x{}", imageSize, imageSize)
     );
 
     // If the current keyframe image has not yet been decoded and cached we'll just wait
@@ -709,10 +711,12 @@ void RenderableSolarImagery::requestPredictiveFrames(
             static_cast<int>(std::pow(2, _downsamplingLevel.value())
         );
 
-        std::filesystem::path cacheFile = FileSys.cacheManager()->cachedFilename(
-            kf.data.filePath,
-            std::format("{}x{}", imageSize, imageSize),
-            "solarbrowsing"
+        SolarBrowsingModule* module = global::moduleEngine->module<SolarBrowsingModule>();
+
+        std::filesystem::path path = kf.data.filePath;
+        std::filesystem::path cacheFile = module->cacheManager()->cachedFilename(
+            path.replace_extension(".bin"),
+            std::format("{}x{}", imageSize, imageSize)
         );
 
         // Skip if file is already cached
