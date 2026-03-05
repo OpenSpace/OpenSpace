@@ -136,19 +136,15 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
         _gui.deinitializeGL();
     });
 
-    global::callback::preSync->emplace_back([&]() {
-        // Before updating, reset the dataset updated flag
-        _dataWasUpdated = false;
-    });
-
     global::callback::draw2D->emplace_back([&]() {
-        if (!_enabled) {
+        WindowDelegate& delegate = *global::windowDelegate;
+
+        if (!_enabled || !delegate.isMaster()) {
             return;
         }
 
-        WindowDelegate& delegate = *global::windowDelegate;
         const bool showGui = delegate.hasGuiWindow() ? delegate.isGuiWindow() : true;
-        if (delegate.isMaster() && showGui) {
+        if (showGui) {
             const glm::ivec2 windowSize = delegate.currentSubwindowSize();
             const glm::ivec2 resolution = delegate.currentDrawBufferResolution();
 
@@ -225,8 +221,6 @@ ExoplanetsExpertToolModule::ExoplanetsExpertToolModule()
             return _gui.mouseWheelCallback(posY);
         }
     );
-
-    _dataWasUpdated = false;
 }
 
 bool ExoplanetsExpertToolModule::enabled() const {
@@ -241,23 +235,34 @@ std::filesystem::path ExoplanetsExpertToolModule::dataConfigFile() const {
     return std::filesystem::path(_dataConfigFile.value());
 }
 
-bool ExoplanetsExpertToolModule::dataWasUpdated() const {
-    return _dataWasUpdated;
-}
-
 const ExoplanetsExpertToolModule::GlyphRenderData&
 ExoplanetsExpertToolModule::glyphRenderData() const {
     return _glyphRenderData;
 }
 
-void ExoplanetsExpertToolModule::updateGlyphRenderData(GlyphRenderData data) {
-    _glyphRenderData = std::move(data);
-    _dataWasUpdated = true;
+void ExoplanetsExpertToolModule::updateGlyphRenderData(
+                                                std::vector<GlyphRenderData::Item> data)
+{
+    // OBS! These are set only on master, but should be synced to all the nodes
+    _glyphRenderData.items = std::move(data);
+    _glyphRenderData.timeStamp = global::windowDelegate->applicationTime();
+    _gotNewDataFromGui = true;
 }
 
 void ExoplanetsExpertToolModule::encode(SyncBuffer* syncBuffer) {
     std::lock_guard guard(_syncMutex);
-    size_t nItems = _glyphRenderData.items.size();
+
+    if (!_gotNewDataFromGui) {
+        // Indicate that there is no update (nItems = -1)
+        syncBuffer->encode(-1);
+        return;
+    }
+
+    _gotNewDataFromGui = false;
+
+    LDEBUG("Encode: Encoding glyph render data");
+
+    int nItems = static_cast<int>(_glyphRenderData.items.size());
     syncBuffer->encode(nItems);
 
     for (const GlyphRenderData::Item& item : _glyphRenderData.items) {
@@ -278,13 +283,21 @@ void ExoplanetsExpertToolModule::encode(SyncBuffer* syncBuffer) {
         }
     }
 
-    syncBuffer->encode(_dataWasUpdated);
+    // Sync timestamp
+    syncBuffer->encode(_glyphRenderData.timeStamp);
 }
 
 void ExoplanetsExpertToolModule::decode(SyncBuffer* syncBuffer) {
     std::lock_guard guard(_syncMutex);
-    size_t nItems;
+    int nItems;
     syncBuffer->decode(nItems);
+
+    if (nItems == -1) {
+        // No update => no need to change the data
+        return;
+    }
+
+    LDEBUG("Decode: Decoding glyph data");
 
     _glyphRenderData.items.clear();
     _glyphRenderData.items.reserve(nItems);
@@ -309,7 +322,7 @@ void ExoplanetsExpertToolModule::decode(SyncBuffer* syncBuffer) {
         _glyphRenderData.items.push_back(std::move(item));
     }
 
-    syncBuffer->decode(_dataWasUpdated);
+    syncBuffer->decode(_glyphRenderData.timeStamp);
 }
 
 void ExoplanetsExpertToolModule::internalInitialize(const ghoul::Dictionary& dict) {

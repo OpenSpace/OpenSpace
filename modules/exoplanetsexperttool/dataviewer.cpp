@@ -1329,8 +1329,8 @@ void DataViewer::updateGlyphRenderData() {
 
     using GlyphRenderData = ExoplanetsExpertToolModule::GlyphRenderData;
 
-    GlyphRenderData data;
-    data.items.reserve(_filteredData.size());
+    std::vector<GlyphRenderData::Item> data;
+    data.reserve(_filteredData.size());
 
     for (size_t index : _filteredData) {
         const ExoplanetItem& item = _data[index];
@@ -1360,9 +1360,9 @@ void DataViewer::updateGlyphRenderData() {
                 )
             );
         }
-        data.items.push_back(renderItem);
+        data.push_back(renderItem);
     }
-    data.items.shrink_to_fit();
+    data.shrink_to_fit();
 
     auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
     mod->updateGlyphRenderData(data);

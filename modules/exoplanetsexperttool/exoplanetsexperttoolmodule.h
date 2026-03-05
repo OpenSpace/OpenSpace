@@ -54,6 +54,9 @@ public:
             std::vector<glm::vec4> colors;
         };
         std::vector<Item> items;
+
+        // Timestamp of when the data was last updated
+        double timeStamp = 0.0;
     };
 
     ExoplanetsExpertToolModule();
@@ -63,10 +66,8 @@ public:
     bool showInfoWindowAtStartup() const;
     std::filesystem::path dataConfigFile() const;
 
-    bool dataWasUpdated() const;
-
     const GlyphRenderData& glyphRenderData() const;
-    void updateGlyphRenderData(GlyphRenderData data);
+    void updateGlyphRenderData(std::vector<GlyphRenderData::Item> data);
 
     // Encode the data that should be synced to the other nodes
     void encode(SyncBuffer* syncBuffer) override;
@@ -90,9 +91,11 @@ protected:
 
     bool _cameraWasWithinGalaxy = false;
 
-    // These are set from master only, but should be synced to all the nodes
+    // This data is set from master only, but should be synced to all the nodes
     GlyphRenderData _glyphRenderData;
-    bool _dataWasUpdated;
+
+    // Master-only flag to track if new data needs syncing to nodes
+    bool _gotNewDataFromGui = false;
 
     // Synced data are mutex protected since decode and rendering may happen
     // asynchronously

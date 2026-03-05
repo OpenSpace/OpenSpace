@@ -556,12 +556,17 @@ void RenderableExoplanetGlyphCloud::mapVertexAttributes(GLuint vao) {
 void RenderableExoplanetGlyphCloud::updateDataIfChanged() {
     auto mod = global::moduleEngine->module<ExoplanetsExpertToolModule>();
 
-    if (!mod->dataWasUpdated()) {
-        return;
-    }
-
     using GlyphRenderData = ExoplanetsExpertToolModule::GlyphRenderData;
     GlyphRenderData syncedData = mod->glyphRenderData();
+
+    // Check if timstamp was updated, to avoid unnecessary updates
+    if (syncedData.timeStamp <= _lastDataTimeStamp) {
+        return; // No update
+    }
+
+    LDEBUG("Gor new data. Updating data for rendering");
+
+    _lastDataTimeStamp = syncedData.timeStamp;
 
     _glyphData.clear();
     _glyphIndices.clear();

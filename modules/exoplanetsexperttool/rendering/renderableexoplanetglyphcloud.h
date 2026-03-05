@@ -120,6 +120,7 @@ private:
     GLuint _glyphIdFbo = 0;
 
     glm::ivec2 _lastViewPortSize;
+    double _lastDataTimeStamp = 0.0;
 };
 
 }// namespace openspace::exoplanets
