@@ -987,7 +987,6 @@ void DataViewer::renderColumnValue(const ColumnKey& key, const ExoplanetItem& it
 void DataViewer::renderFilterSettingsWindow(bool* open) {
     // Reset some state changed variables
     _filterChanged = false;
-    _externalSelectionChanged = false;
 
     ImGui::SetNextWindowSize(ImVec2(430, 450), ImGuiCond_FirstUseEver);
     if (!ImGui::Begin("Filters", open)) {
@@ -996,6 +995,7 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
     }
 
     _filterChanged = _filteringView->renderFilterSettings();
+    _filterChanged = _filterChanged || _externalSelectionChanged;
 
     // Update the filtered data
     if (_filterChanged) {
@@ -1021,6 +1021,8 @@ void DataViewer::renderFilterSettingsWindow(bool* open) {
         _selection.clear();
         updateSelectionInRenderable();
     }
+
+    _externalSelectionChanged = false;
 }
 
 int DataViewer::getHoveredPlanetIndex() const {

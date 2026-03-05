@@ -225,7 +225,7 @@ void FilteringView::applyExternalSelection(const std::vector<int>& externalSelec
     }
 
     if (_overrideInternalSelection) {
-        // Just use the external seleciton, out of the box
+        // Just use the external selection, out of the box
         prefilteredData.clear();
         prefilteredData.reserve(externalSelection.size());
         for (int i : externalSelection) {
