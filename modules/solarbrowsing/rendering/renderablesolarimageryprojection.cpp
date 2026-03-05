@@ -44,7 +44,6 @@
 #include <memory>
 
 namespace {
-    constexpr char* _loggerCat = "RendearbleSpacecraftCameraSphere";
     // This number MUST match the constant specified in the shader
     constexpr int MaxSpacecraftObservatories = 7;
     constexpr float SunRadius = 1391600000.0 * 0.5;
@@ -69,6 +68,7 @@ RenderableSolarImageryProjection::RenderableSolarImageryProjection(
     , _sphere(SunRadius * 1.001f, 100)
 {
     const Parameters p = codegen::bake<Parameters>(dictionary);
+    addProperty(Fadeable::_opacity);
 
     for (const std::string& nodeName : p.dependentNodes) {
         SceneGraphNode* dependentNode =
@@ -121,8 +121,8 @@ void RenderableSolarImageryProjection::deinitializeGL() {
     BaseModule::ProgramObjectManager.release(
         "SpacecraftImageSphereProgram",
         [](ghoul::opengl::ProgramObject* p) {
-        global::renderEngine->removeRenderProgram(p);
-    }
+            global::renderEngine->removeRenderProgram(p);
+        }
     );
     _shader = nullptr;
 }
@@ -147,6 +147,7 @@ void RenderableSolarImageryProjection::render(const RenderData& data, RendererTa
         "modelViewProjectionTransform",
         data.camera.projectionMatrix() * glm::mat4(modelViewTransform)
     );
+    _shader->setUniform("opacity", opacity());
 
     const int numPlanes = static_cast<int>(_solarImageryDependencies.size());
     int solarImageryCount = 0;

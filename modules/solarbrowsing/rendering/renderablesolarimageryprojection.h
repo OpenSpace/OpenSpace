@@ -60,7 +60,7 @@ private:
     void loadTexture();
 
     std::vector<SceneGraphNode*> _solarImageryDependencies;
-    ghoul::opengl::ProgramObject* _shader;
+    ghoul::opengl::ProgramObject* _shader  = nullptr;
     Sphere _sphere;
 };
 

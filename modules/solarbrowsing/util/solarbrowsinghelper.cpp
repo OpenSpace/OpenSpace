@@ -329,7 +329,7 @@ std::unordered_map<std::string, std::shared_ptr<TransferFunction>> loadTransferF
     );
 
     using T = Timeline<ImageMetadata>;
-    for (const std::pair<InstrumentName, T>& instrument : imageMetadataMap) {
+    for (const std::pair<const InstrumentName, T>& instrument : imageMetadataMap) {
         // The subdirectories might have a different name than the instrument name so we
         // have to search the directories for the correct texture map
         bool found = false;

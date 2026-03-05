@@ -80,11 +80,6 @@ target_include_directories(
     ${OPENJPEG_ROOT_DIR}/src/lib/openjp2
     ${OPENJPEG_ROOT_DIR}/src/bin/jp2
     ${OPENJPEG_ROOT_DIR}/src/bin/common
-    ${Z_INCLUDE_DIRNAME}
-    ${PNG_INCLUDE_DIRNAME}
-    ${TIFF_INCLUDE_DIRNAME}
-    ${CMAKE_SOURCE_DIR}/include
-    ${TIFF_INCLUDE_DIRNAME}
 )
 
 # Force static linking to prevent __imp* linker errors

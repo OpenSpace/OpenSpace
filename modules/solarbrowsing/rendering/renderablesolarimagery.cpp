@@ -52,7 +52,6 @@
 namespace {
     using namespace openspace;
 
-    constexpr std::string_view _loggerCat = "RenderableSolarImagery";
     constexpr double SunRadius = 1391600000.0 * 0.5;
     constexpr unsigned int DefaultTextureSize = 32;
 
@@ -260,8 +259,44 @@ namespace {
 
 namespace openspace {
 
-    openspace::Documentation RenderableSolarImagery::Documentation() {
-        return codegen::doc<Parameters>("solarbrowsing_renderablesolarimegary");
+openspace::Documentation RenderableSolarImagery::Documentation() {
+    return codegen::doc<Parameters>("solarbrowsing_renderablesolarimegary");
+}
+
+RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
+    : Renderable(dictionary)
+    , _activeInstruments(ActiveInstrumentsInfo)
+    , _contrastValue(ContrastValueInfo, 0.f, -15.f, 15.f)
+    , _enableBorder(EnableBorderInfo, false)
+    , _enableFrustum(EnableFrustumInfo, false)
+    , _gammaValue(GammaValueInfo, 0.9f, 0.1f, 10.f)
+    , _moveFactor(MoveFactorInfo, 1.0, 0.0, 1.0)
+    , _downsamplingLevel(DownsamplingLevelInfo, 2, 0, 5)
+    , _verboseMode(VerboseModeInfo, false)
+    , _predictFramesAfter(PredictFramesAfterInfo, 10, 0, 20)
+    , _predictFramesBefore(PredictFramesBeforeInfo, 2, 0, 20)
+{
+    const Parameters p = codegen::bake<Parameters>(dictionary);
+
+    addProperty(Fadeable::_opacity);
+
+    _imageMetadataMap = loadImageMetadata(p.imageDirectory);
+    _tfMap = loadTransferFunctions(p.imageDirectory, _imageMetadataMap);
+
+    _enableBorder = p.enableBorder.value_or(_enableBorder);
+    addProperty(_enableBorder);
+
+    _enableFrustum = p.enableFrustum.value_or(_enableFrustum);
+    _enableFrustum.onChange([this]() {
+        _enableBorder = _enableFrustum.value();
+    });
+    addProperty(_enableFrustum);
+
+    // Add Instrument GUI names
+    unsigned int guiNameCount = 0;
+    using T = Timeline<ImageMetadata>;
+    for (const std::pair<const InstrumentName, T>& instrument : _imageMetadataMap) {
+        _activeInstruments.addOption(guiNameCount++, instrument.first);
     }
 
     RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictionary)
@@ -465,15 +500,403 @@ namespace openspace {
             }
         );
 
-        _frustumShader = BaseModule::ProgramObjectManager.request(
-            "SpacecraftFrustumProgram",
-            []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
-                return global::renderEngine->buildRenderProgram(
-                    "SpacecraftFrustumProgram",
-                    absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_vs.glsl"),
-                    absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_fs.glsl")
-                );
-            }
+        if (it != options.end()) {
+            _activeInstruments = it->value;
+        }
+    }
+    else {
+        _currentActiveInstrument = _activeInstruments.getDescriptionByValue(
+            _activeInstruments
+        );
+    }
+
+    _activeInstruments.onChange([this]() {
+        _currentActiveInstrument = _activeInstruments.getDescriptionByValue(
+            _activeInstruments
+        );
+        _currentKeyframe = NoActiveKeyframe;
+        _predictionIsDirty = true;
+    });
+    addProperty(_activeInstruments);
+
+    _downsamplingLevel = p.downsamplingLevel.value_or(_downsamplingLevel);
+    _downsamplingLevel.onChange([this]() {
+        _currentKeyframe = NoActiveKeyframe;
+        _predictionIsDirty = true;
+    });
+    addProperty(_downsamplingLevel);
+
+    _moveFactor = p.moveFactor.value_or(_moveFactor);
+    _moveFactor.onChange([this]() { createPlaneAndFrustum(_moveFactor); });
+    addProperty(_moveFactor);
+
+    _gammaValue = p.gamma.value_or(_gammaValue);
+    addProperty(_gammaValue);
+
+    _contrastValue = p.contrast.value_or(_contrastValue);
+    addProperty(_contrastValue);
+
+    _predictFramesAfter = p.predictFramesAfter.value_or(_predictFramesAfter);
+    _predictFramesAfter.onChange([this]() { _predictionIsDirty = true; });
+    addProperty(_predictFramesAfter);
+
+    _predictFramesBefore = p.predictFramesBefore.value_or(_predictFramesBefore);
+    _predictFramesBefore.onChange([this]() { _predictionIsDirty = true; });
+    addProperty(_predictFramesBefore);
+
+    _verboseMode = p.verboseMode.value_or(_verboseMode);
+    _verboseMode.onChange([this]() {
+        if (_asyncDecoder) {
+            _asyncDecoder->setVerboseFlag(_verboseMode);
+        }
+    });
+    addProperty(_verboseMode);
+
+    _asyncDecoder = std::make_unique<AsyncImageDecoder>(
+        std::thread::hardware_concurrency() / 2,
+        _verboseMode
+    );
+}
+
+void RenderableSolarImagery::initializeGL() {
+    _planeShader = BaseModule::ProgramObjectManager.request(
+        "SpacecraftImagePlaneProgram",
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return global::renderEngine->buildRenderProgram(
+                "SpacecraftImagePlaneProgram",
+                absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_vs.glsl"),
+                absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimageplane_fs.glsl")
+            );
+        }
+    );
+
+    _frustumShader = BaseModule::ProgramObjectManager.request(
+        "SpacecraftFrustumProgram",
+        []() -> std::unique_ptr<ghoul::opengl::ProgramObject> {
+            return global::renderEngine->buildRenderProgram(
+                "SpacecraftFrustumProgram",
+                absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_vs.glsl"),
+                absPath("${MODULE_SOLARBROWSING}/shaders/spacecraftimagefrustum_fs.glsl")
+            );
+        }
+    );
+
+    // Initialize plane buffer
+    glCreateVertexArrays(1, &_quadVao);
+    glCreateBuffers(1, &_vertexPositionBuffer);
+    glVertexArrayVertexBuffer(_quadVao, 0, _vertexPositionBuffer, 0, sizeof(PlaneVertex));
+
+    glEnableVertexArrayAttrib(_quadVao, 0);
+    glVertexArrayAttribFormat(_quadVao, 0, 2, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_quadVao, 0, 0);
+    // ST coordinates
+    glEnableVertexArrayAttrib(_quadVao, 1);
+    glVertexArrayAttribFormat(
+        _quadVao,
+        1,
+        2,
+        GL_FLOAT,
+        GL_FALSE,
+        offsetof(PlaneVertex, texCoords)
+    );
+    glVertexArrayAttribBinding(_quadVao, 1, 0);
+
+    // Initialize frustum buffer
+    glCreateVertexArrays(1, &_frustumVao);
+    glCreateBuffers(1, &_frustumPositionBuffer);
+    glVertexArrayVertexBuffer(
+        _frustumVao,
+        0,
+        _frustumPositionBuffer,
+        0,
+        sizeof(FrustumVertex)
+    );
+
+    // Position
+    glEnableVertexArrayAttrib(_frustumVao, 0);
+    glVertexArrayAttribFormat(_frustumVao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(_frustumVao, 0, 0);
+
+    ghoul::opengl::updateUniformLocations(*_planeShader, _uniformCachePlane);
+    ghoul::opengl::updateUniformLocations(*_frustumShader, _uniformCacheFrustum);
+    createPlaneAndFrustum(_moveFactor);
+
+    _imageryTexture = std::make_unique<ghoul::opengl::Texture>(
+        ghoul::opengl::Texture::FormatInit{
+            .dimensions = glm::uvec3(DefaultTextureSize, DefaultTextureSize, 1),
+            .type = GL_TEXTURE_2D,
+            .format = ghoul::opengl::Texture::Format::Red,
+            .dataType = GL_UNSIGNED_BYTE,
+        },
+        ghoul::opengl::Texture::SamplerInit{
+            .wrapping = ghoul::opengl::Texture::WrappingMode::ClampToEdge,
+        }
+    );
+
+    updateImageryTexture();
+}
+
+void RenderableSolarImagery::deinitializeGL() {
+    glDeleteVertexArrays(1, &_quadVao);
+    glDeleteVertexArrays(1, &_frustumVao);
+    _imageryTexture = nullptr;
+
+    BaseModule::ProgramObjectManager.release(
+        "SpacecraftImagePlaneProgram",
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine->removeRenderProgram(p);
+        }
+    );
+    _planeShader = nullptr;
+
+
+    BaseModule::ProgramObjectManager.release(
+        "SpacecraftFrustumProgram",
+        [](ghoul::opengl::ProgramObject* p) {
+            global::renderEngine->removeRenderProgram(p);
+        }
+    );
+    _frustumShader = nullptr;
+
+}
+
+bool RenderableSolarImagery::isReady() const {
+    return _planeShader && _frustumShader;
+}
+
+void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
+    updateImageryTexture();
+    const glm::dvec3& sunPositionWorld = sceneGraphNode("Sun")->worldPosition();
+
+    glEnable(GL_CULL_FACE);
+
+    // Perform necessary transforms
+    const glm::dmat4& viewMatrix = data.camera.combinedViewMatrix();
+    const glm::mat4& projectionMatrix = data.camera.projectionMatrix();
+
+    const glm::dvec3& spacecraftPosWorld = data.modelTransform.translation;
+    const glm::dmat3 spacecraftRotWorld = data.modelTransform.rotation;
+
+    const glm::dvec3 sunDir = sunPositionWorld - spacecraftPosWorld;
+    const glm::dvec3 offset = sunDir * _gaussianMoveFactor;
+
+    _position = spacecraftPosWorld + offset;
+    // Normal should point from plane toward spacecraft (i.e. plane faces spacecraft)
+    _normal = glm::normalize(spacecraftPosWorld - sunPositionWorld);
+
+    // (anden88 2025-12-10): An attempt was made to use the glm::lookAt to "simplify"
+    // the rotation matrix without having to build the basis vectors ourselves. However,
+    // the plane rotation would be rotating in all different kinds of orientations.
+     //_rotation = glm::lookAt(
+     //    spacecraftPosWorld,
+     //    glm::dvec3(sunPositionWorld),
+     //    glm::normalize(up)
+     //);
+    // _rotation[3] = glm::dvec4(0.0, 0.0, 0.0, 1.0);
+
+    // Pick a world up. Prefer the spacecraft local +Z transformed to world, but fall back
+    // to a global up if nearly collinear with the normal
+    glm::vec3 worldUp = spacecraftRotWorld * glm::dvec3(0.0, 0.0, 1.0);
+    if (std::abs(glm::dot(worldUp, _normal)) > 0.9999) {
+        // Nearly parallel: pick another stable up (e.g. world Y)
+        worldUp = glm::dvec3(0.0, 1.0, 0.0);
+    }
+
+    // Build tangent basis for the plane: right, upOnPlane, normal
+    glm::vec3 right = glm::normalize(glm::cross(worldUp, _normal));
+    // Already normalized if right and N are normalized
+    glm::vec3 upOnPlane = glm::cross(_normal, right);
+
+    // Build a rotation matrix that transforms local axes -> world axes.
+    // Local axes: +X = right, +Y = upOnPlane, +Z = _normal
+    glm::dmat4 rot = glm::dmat4(1.0);
+    rot[0] = glm::dvec4(right, 0.0);      // first column = world X for local +X
+    rot[1] = glm::dvec4(upOnPlane, 0.0);  // second column = world Y for local +Y
+    rot[2] = glm::dvec4(_normal, 0.0);    // third column = world Z for local +Z
+
+    _rotation = std::move(rot);
+
+    const glm::dmat4 modelTransform =
+        glm::translate(glm::dmat4(1.0), _position) *
+        _rotation *
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))
+    );
+    const glm::dmat4 modelViewTransform = viewMatrix * modelTransform;
+
+    // For frustum
+    const glm::dmat4 spacecraftModelTransform =
+        glm::translate(glm::dmat4(1.0), spacecraftPosWorld) *
+        _rotation *
+        glm::dmat4(glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale))
+    );
+
+    _planeShader->activate();
+    ghoul::opengl::TextureUnit imageUnit;
+    imageUnit.bind(*_imageryTexture);
+
+    _planeShader->setUniform(_uniformCachePlane.isCoronaGraph, _isCoronaGraph);
+    _planeShader->setUniform(_uniformCachePlane.scale, _currentScale);
+    _planeShader->setUniform(_uniformCachePlane.centerPixel, _currentCenterPixel);
+    _planeShader->setUniform(_uniformCachePlane.imageryTexture, imageUnit);
+    _planeShader->setUniform(_uniformCachePlane.planeOpacity, opacity());
+    _planeShader->setUniform(_uniformCachePlane.gammaValue, _gammaValue);
+    _planeShader->setUniform(_uniformCachePlane.contrastValue, _contrastValue);
+    _planeShader->setUniform(
+        _uniformCachePlane.modelViewProjectionTransform,
+        projectionMatrix * glm::mat4(modelViewTransform)
+    );
+
+    ghoul::opengl::TextureUnit tfUnit;
+    TransferFunction* lut = _tfMap[_currentActiveInstrument].get();
+    if (lut) {
+        tfUnit.bind(lut->texture());
+        _planeShader->setUniform(_uniformCachePlane.hasLut, true);
+    }
+    else {
+        _planeShader->setUniform(_uniformCachePlane.hasLut, false);
+    }
+    // Must bind all sampler2D, otherwise undefined behaviour
+    _planeShader->setUniform(_uniformCachePlane.lut, tfUnit);
+
+    glBindVertexArray(_quadVao);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
+
+    _planeShader->deactivate();
+    _frustumShader->activate();
+
+    _frustumShader->setUniform(_uniformCacheFrustum.scale, _currentScale);
+    _frustumShader->setUniform(_uniformCacheFrustum.centerPixel, _currentCenterPixel);
+    _frustumShader->setUniform(_uniformCacheFrustum.planeOpacity, opacity());
+    _frustumShader->setUniform(
+        _uniformCacheFrustum.modelViewProjectionTransform,
+        projectionMatrix * glm::mat4(viewMatrix * spacecraftModelTransform)
+    );
+    _frustumShader->setUniform(
+        _uniformCacheFrustum.modelViewProjectionTransformPlane,
+        projectionMatrix * glm::mat4(modelViewTransform)
+    );
+
+    glBindVertexArray(_frustumVao);
+
+    if (_enableBorder && _enableFrustum) {
+        glDrawArrays(GL_LINES, 0, 16);
+    }
+    else if (!_enableBorder && _enableFrustum) {
+        glDrawArrays(GL_LINES, 0, 8);
+    }
+    else if (!_enableFrustum && _enableBorder) {
+        glDrawArrays(GL_LINES, 8, 16);
+    }
+    _frustumShader->deactivate();
+
+    glDisable(GL_CULL_FACE);
+}
+
+void RenderableSolarImagery::update(const UpdateData& data) {
+    _tfMap[_currentActiveInstrument]->update();
+
+    const Keyframe<ImageMetadata>* keyframe =
+        _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
+            global::timeManager->time().j2000Seconds(),
+            true
+    );
+
+    requestPredictiveFrames(keyframe, data);
+
+    if (_planeShader->isDirty()) {
+        _planeShader->rebuildFromFile();
+    }
+
+    if (_frustumShader->isDirty()) {
+        _frustumShader->rebuildFromFile();
+    }
+}
+
+TransferFunction* RenderableSolarImagery::transferFunction() {
+    return _tfMap[_currentActiveInstrument].get();
+}
+
+const std::unique_ptr<ghoul::opengl::Texture>&
+RenderableSolarImagery::imageryTexture() const
+{
+    return _imageryTexture;
+}
+
+float RenderableSolarImagery::contrastValue() const {
+    return _contrastValue;
+}
+
+float RenderableSolarImagery::gammaValue() const {
+    return _gammaValue;
+}
+
+float RenderableSolarImagery::scale() const {
+    return _currentScale;
+}
+
+bool RenderableSolarImagery::isCoronaGraph() const {
+    return _isCoronaGraph;
+}
+
+glm::vec2 RenderableSolarImagery::centerPixel() const {
+    return _currentCenterPixel;
+}
+
+void RenderableSolarImagery::updateImageryTexture() {
+    const Keyframe<ImageMetadata>* keyframe =
+        _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
+            global::timeManager->time().j2000Seconds(),
+            true
+    );
+
+    if (!keyframe) {
+        // No keyframe avaialble so we clear the texture
+        if (_currentKeyframe != NoActiveKeyframe) {
+            // No need to re-upload an empty image
+            _isCoronaGraph = false;
+            _currentScale = 0;
+            _currentCenterPixel = glm::vec2(2.f);
+            _currentKeyframe = NoActiveKeyframe;
+
+            // Create some dummy data that will be uploaded to the GPU to avoid UB
+            std::vector<unsigned char> buffer;
+            buffer.resize(static_cast<size_t>(DefaultTextureSize) * DefaultTextureSize *
+                sizeof(ImagePrecision)
+            );
+            _imageryTexture->resize(
+                glm::uvec3(DefaultTextureSize, DefaultTextureSize, 1)
+            );
+            _imageryTexture->setPixelData(
+                reinterpret_cast<std::byte*>(buffer.data())
+            );
+        }
+        return;
+    }
+
+    if (_currentKeyframe == keyframe->id) {
+        // This keyframe is already uploaded to the GPU
+        return;
+    }
+
+    unsigned int imageSize = static_cast<unsigned int>(
+        keyframe->data.fullResolution /
+        std::pow(2, static_cast<unsigned int>(_downsamplingLevel))
+    );
+
+    std::filesystem::path cached = FileSys.cacheManager()->cachedFilename(
+        keyframe->data.filePath,
+        std::format("{}x{}", imageSize, imageSize),
+        "solarbrowsing"
+    );
+
+    // If the current keyframe image has not yet been decoded and cached we'll just wait
+    // until it is available. The previous image will be shown until the new one is ready
+    if (std::filesystem::exists(cached)) {
+        // Load data from cache
+        DecodedImageData data = loadDecodedDataFromCache(
+            cached,
+            keyframe->data,
+            imageSize
         );
 
         glCreateVertexArrays(1, &_quadVao);
