@@ -2,18 +2,50 @@
 -- Valid sourceIds can be found at:
 -- https://api.helioviewer.org/docs/v2/appendix/data_sources.html
 
--- @TODO (anden88 2026-02-19): Manually download the color maps from the OpenSpace data
--- servers since we cannot use asset.resource or similar functions to fetch data.
--- local Url = "http://liu-se.cdn.openspaceproject.com/files/solarsystem/missions/sdo/colortables/v1_v1/AIA-171.txt"
--- local SavePath = openspace.absPath("${CACHE}/solarbrowsing/AIA-171.txt")
--- openspace.downloadFile(Url, SavePath, true)
+-- Manually download the color maps from the OpenSpace data servers since we cannot use
+-- asset.resource or similar functions to fetch data
+local SavePathBase = openspace.absPath("${SYNC}/http/solarbrowsing/")
+openspace.createDirectory(SavePathBase, true);
+
+local Downloads = {
+  SDO = {
+    BaseUrl = "http://liu-se.cdn.openspaceproject.com/files/solarsystem/missions/sdo/colortables/v1_v1/",
+    Files = {
+      "AIA-94.txt",
+      "AIA-131.txt",
+      "AIA-171.txt",
+      "AIA-193.txt",
+      "AIA-211.txt",
+      "AIA-304.txt",
+      "AIA-335.txt",
+      "AIA-1311.txt",
+      "AIA-1600.txt",
+      "AIA-1700.txt",
+      "AIA-4500.txt"
+    }
+  },
+  STEREO_A = {
+    BaseUrl = "http://liu-se.cdn.openspaceproject.com/files/solarsystem/missions/stereo_a/colortables/v1_v1/",
+    Files = {
+      "EUVI-A-171.txt"
+    }
+  }
+}
+
+for _, spacecraft in pairs(Downloads) do
+  for _, file in ipairs(spacecraft.Files) do
+    local url = spacecraft.BaseUrl .. file
+    local savePath = SavePathBase .. file
+    openspace.downloadFile(url, savePath, true, false)
+  end
+end
 
 return {{
 	Type = "HelioviewerDownloadTask",
-	Name = "Solar_Orbiter",
-	SourceId = 84,
-	Instrument = "EUI-174",
-	ColorMap = "${ASSETS}/scene/solarsystem/heliosphere/solarbrowsing/colortables/EUI-174.txt",
+	Name = "SDO",
+	SourceId = 10,
+	Instrument = "AIA-171",
+	ColorMap = SavePathBase.. "AIA-171.txt",
 	-- ColorMap = SavePath,
 	StartTime = "2024-05-06T00:00:00.000Z",
 	EndTime = "2024-05-14T00:00:00.000Z",
@@ -26,7 +58,7 @@ return {{
 	Name = "STEREO",
 	SourceId = 20,
 	Instrument = "EUVI-A 171",
-	ColorMap = "${ASSETS}/scene/solarsystem/heliosphere/solarbrowsing/colortables/EUVI-A-171.txt",
+	ColorMap = SavePathBase .. "EUVI-A-171.txt",
 	StartTime = "2024-05-06T00:00:00.000Z",
 	EndTime = "2024-05-14T00:00:00.000Z",
 	TimeStep = 60*60, -- Download an image every hour
