@@ -91,8 +91,7 @@ private:
 
     void updateImageryTexture();
     void requestPredictiveFrames(const Keyframe<ImageMetadata>* keyframe,
-        const UpdateData& data
-    );
+        const UpdateData& data);
 
     void createPlaneAndFrustum(double moveDistance);
     void createPlane() const;

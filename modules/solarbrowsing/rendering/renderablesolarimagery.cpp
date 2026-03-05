@@ -50,7 +50,6 @@
 namespace {
     using namespace openspace;
 
-    constexpr std::string_view _loggerCat = "RenderableSolarImagery";
     constexpr double SunRadius = 1391600000.0 * 0.5;
     constexpr unsigned int DefaultTextureSize = 32;
 
@@ -220,7 +219,7 @@ RenderableSolarImagery::RenderableSolarImagery(const ghoul::Dictionary& dictiona
     // Add Instrument GUI names
     unsigned int guiNameCount = 0;
     using T = Timeline<ImageMetadata>;
-    for (const std::pair<InstrumentName, T>& instrument : _imageMetadataMap) {
+    for (const std::pair<const InstrumentName, T>& instrument : _imageMetadataMap) {
         _activeInstruments.addOption(guiNameCount++, instrument.first);
     }
 
@@ -531,6 +530,8 @@ void RenderableSolarImagery::render(const RenderData& data, RendererTasks&) {
 }
 
 void RenderableSolarImagery::update(const UpdateData& data) {
+    _tfMap[_currentActiveInstrument]->update();
+
     const Keyframe<ImageMetadata>* keyframe =
         _imageMetadataMap[_currentActiveInstrument].lastKeyframeBefore(
             global::timeManager->time().j2000Seconds(),

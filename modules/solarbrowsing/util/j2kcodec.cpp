@@ -25,10 +25,10 @@
 #include <modules/solarbrowsing/util/j2kcodec.h>
 
 #include <ghoul/logging/logmanager.h>
+#include <format_defs.h>
 #include <chrono>
 #include <cstring>
 #include <format>
-#include <format_defs.h>
 #include <fstream>
 #include <memory>
 #include <vector>
