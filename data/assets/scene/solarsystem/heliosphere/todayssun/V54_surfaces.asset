@@ -29,6 +29,11 @@ local outerBoundaryAdapt = outerBoundary * 1.00002
 local WSA_54_Magnetic_Field_GONGZ_5_Rs = {
   Identifier = "WSA_54_Magnetic_Field_GONGZ_5_Rs",
   Parent = transforms.WSAOffset60.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2022 DEC 14 16:14:00",
+    End = "2025 DEC 16 10:14:00"
+  },
   Renderable = {
     Type = "RenderableTimeVaryingFitsSphere",
     Size = fiveSunRadius,
@@ -51,7 +56,7 @@ local WSA_54_Magnetic_Field_GONGZ_5_Rs = {
   },
   GUI = {
     Name = "Magnetic Field at 5Rs (GONG-Z)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Path = "/Solar System/Heliosphere/WSA 5.4 Coronal Model",
     Description = [[Texture sequence of simulation model WSA 5.4, showing the coronal
       magnetic field on a sphere at 5 solar radii. Output: FITS files using GONG-Z Maps
       (RADOUT = 5.0).]],
@@ -62,6 +67,11 @@ local WSA_54_Magnetic_Field_GONGZ_5_Rs = {
 local WSA_54_Magnetic_Field_ADAPT_5_Rs = {
   Identifier = "WSA_54_Magnetic_Field_ADAPT_5_Rs",
   Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2022 DEC 14 16:14:00",
+    End = "2025 DEC 16 10:14:00"
+  },
   Renderable = {
     Type = "RenderableTimeVaryingFitsSphere",
     Size = fiveSunRadiusAdapt,
@@ -84,7 +94,7 @@ local WSA_54_Magnetic_Field_ADAPT_5_Rs = {
   },
   GUI = {
     Name = "Magnetic Field at 5Rs (GONG ADAPT)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Path = "/Solar System/Heliosphere/WSA 5.4 Coronal Model",
     Description = [[Texture sequence of simulation model WSA 5.4, showing the coronal
       magnetic field on a sphere at 5 solar radii. Output: FITS file using
       ADAPT GONG realization 000 to 011 Maps (RADOUT = 5.0).]],
@@ -95,6 +105,11 @@ local WSA_54_Magnetic_Field_ADAPT_5_Rs = {
 local WSA_54_Magnetograms_GONGZ = {
   Identifier = "WSA_54_Magnetograms_GONGZ",
   Parent = transforms.WSAOffset60.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2022 DEC 14 16:14:00",
+    End = "2025 DEC 16 10:14:00"
+  },
   Renderable = {
     Type = "RenderableTimeVaryingFitsSphere",
     Size = extendedRadius,
@@ -125,7 +140,7 @@ local WSA_54_Magnetograms_GONGZ = {
   },
   GUI = {
     Name = "Solar Surface (GONG-Z)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Path = "/Solar System/Heliosphere/WSA 5.4 Coronal Model",
     Description = [[Texture sequence of simulation model WSA 5.4, showing data on the
       solar surface with multiple options in the list under Texture Layer Options. Output:
       FITS files using GONG-Z Maps (RADOUT = 5.0).]],
@@ -136,6 +151,11 @@ local WSA_54_Magnetograms_GONGZ = {
 local WSA_54_Magnetograms_ADAPT = {
   Identifier = "WSA_54_Magnetograms_ADAPT",
   Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2022 DEC 14 16:14:00",
+    End = "2025 DEC 16 10:14:00"
+  },
   Renderable = {
     Type = "RenderableTimeVaryingFitsSphere",
     Size = extendedRadiusAdapt,
@@ -166,7 +186,7 @@ local WSA_54_Magnetograms_ADAPT = {
   },
   GUI = {
     Name = "Solar Surface (GONG ADAPT)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Path = "/Solar System/Heliosphere/WSA 5.4 Coronal Model",
     Description = [[Texture sequence of simulation model WSA 5.4, showing data on the
       solar surface with multiple options in the list under Texture Layer Options. Output:
       FITS file using ADAPT GONG realization 000 to 011 Maps (RADOUT = 5.0).]],
@@ -177,6 +197,11 @@ local WSA_54_Magnetograms_ADAPT = {
 local WSA_Velocity_Adapt_Outer_Boundary = {
   Identifier = "WSA_54_velocity_ADAPT_Outer_Boundary",
   Parent = transforms.HeliocentricEarthEquatorial180.Identifier,
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2022 DEC 14 16:14:00",
+    End = "2025 DEC 16 10:14:00"
+  },
   Renderable = {
     Type = "RenderableTimeVaryingFitsSphere",
     Size = outerBoundaryAdapt,
@@ -200,7 +225,7 @@ local WSA_Velocity_Adapt_Outer_Boundary = {
   },
   GUI = {
     Name = "Velocity at Outer Boundary (GONG-ADAPT)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Path = "/Solar System/Heliosphere/WSA 5.4 Coronal Model",
     Description = [[Texture sequence of simulation model WSA 5.4, showing data on a sphere
       at the outer boundary of the simulation model, either solar wind speed or coronal
       magnetic field. Output: FITS file using ADAPT GONG realization 000-011 Maps
@@ -211,6 +236,11 @@ local WSA_Velocity_Adapt_Outer_Boundary = {
 
 local WSA_Velocity_Gongz_Outer_Boundary = {
   Identifier = "WSA_54_velocity_GONGZ_Outer_Boundary",
+  TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = "2022 DEC 14 16:14:00",
+    End = "2025 DEC 16 10:14:00"
+  },
   Parent = transforms.WSAOffset60.Identifier,
   Renderable = {
     Type = "RenderableTimeVaryingFitsSphere",
@@ -235,7 +265,7 @@ local WSA_Velocity_Gongz_Outer_Boundary = {
   },
   GUI = {
     Name = "Velocity at Outer Boundary (GONG-Z)",
-    Path = "/Solar System/Heliosphere/WSA Coronal Model",
+    Path = "/Solar System/Heliosphere/WSA 5.4 Coronal Model",
     Description = [[Texture sequence of simulation model WSA 5.4, showing data on a sphere
       at the outer boundary of the simulation model, either solar wind speed or coronal
       magnetic field. Output: FITS file using GONG-Z Maps (RADOUT = 21.5).]],
