@@ -11,12 +11,12 @@
 return {{
 	Type = "HelioviewerDownloadTask",
 	Name = "STEREO_A",
-	SourceId = 20,
-	Instrument = "SECCHI",
-	ColorMap = "${ASSETS}/scene/solarsystem/heliosphere/solarbrowsing/colortables/EUVI-A-171.txt",
+	SourceId = 29,
+	Instrument = "COR2-A",
+	ColorMap = "${USER_ASSETS}/solarbrowsing/colortables/stereoA/COR2-A.txt",
 	-- ColorMap = SavePath,
-	StartTime = "2024-05-06T00:00:00.000Z",
-	EndTime = "2024-05-14T00:00:00.000Z",
+	StartTime = "2025-06-14T00:00:00.000Z",
+	EndTime = "2025-06-24T00:00:00.000Z",
 	TimeStep = 60*60, -- Download an image every hour
-	OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/stereo/EUVI-A-171"
+	OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/stereo-A/COR2-A"
 }}

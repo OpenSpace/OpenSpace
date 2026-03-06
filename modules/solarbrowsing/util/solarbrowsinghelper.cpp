@@ -373,7 +373,7 @@ namespace {
             im.scale = (rSunObsValue / cDelt1Value) / (im.fullResolution / 2.f);
             im.isCoronaGraph = false;
         }
-        else if (istarts_with(*telescop, "GOES")) {
+        else if (istarts_with(*telescop, "GOES") || iequals(*telescop, " CCOR-1")) {
             // GOES-R SUVI uses FITS WCS keywords like CRPIXn/CDELTn/CUNITn and also DSUN_OBS. :contentReference[oaicite:4]{index=4}
 
             const auto rsArcsec = rsunObsArcsec(bufferView, *metaData);

@@ -12,11 +12,11 @@ return {{
 	Type = "HelioviewerDownloadTask",
 	Name = "SOHO",
 	SourceId = 5,
-	Instrument = "LASCO",
+	Instrument = "LASCO-C3",
 	ColorMap = "${ASSETS}/scene/solarsystem/heliosphere/solarbrowsing/colortables/LASCO-C3.txt",
 	-- ColorMap = SavePath,
-	StartTime = "2024-05-06T00:00:00.000Z",
-	EndTime = "2024-05-14T00:00:00.000Z",
+	StartTime = "2025-06-14T00:00:00.000Z",
+	EndTime = "2025-06-24T00:00:00.000Z",
 	TimeStep = 60*60, -- Download an image every hour
 	OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/SOHO/LASCO-C3"
 }}

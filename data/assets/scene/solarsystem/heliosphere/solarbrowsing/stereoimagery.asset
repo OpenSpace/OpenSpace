@@ -34,7 +34,7 @@ local SolarImagery = {
   },
   Renderable = {
     Type = "RenderableSolarImagery",
-    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing/stereo"),
+    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing/stereo-A"),
     TransferfunctionDir = asset.resource("colortables")
   },
   GUI = {
@@ -43,20 +43,42 @@ local SolarImagery = {
   }
 }
 
+local StereoBImagery = {
+  Identifier = "SolarImagery_STEREO_B",
+  Parent = StereoPosition.Identifier,
+    TimeFrame = {
+    Type = "TimeFrameInterval",
+    Start = stereo_a.MissionBegin,
+    End = stereo_a.MissionEnd
+  },
+  Renderable = {
+    Type = "RenderableSolarImagery",
+    ImageDirectory = openspace.absPath("${SYNC_DYNAMIC}/solarbrowsing/stereo-B"),
+    TransferfunctionDir = asset.resource("colortables")
+  },
+  GUI = {
+    Name = "STEREO B Imagery",
+    Path = "/Solar System/Solar Imagery"
+  }
+}
+
 
 asset.onInitialize(function ()
   openspace.addSceneGraphNode(StereoPosition)
   openspace.addSceneGraphNode(SolarImagery)
+  openspace.addSceneGraphNode(StereoBImagery)
 end
 )
 
 asset.onDeinitialize(function ()
+  openspace.removeSceneGraphNode(StereoBImagery)
   openspace.removeSceneGraphNode(SolarImagery)
   openspace.removeSceneGraphNode(StereoPosition)
 end
 )
 
 asset.export("Imagery", SolarImagery)
+asset.export("StereoBImagery", StereoBImagery)
 
 
 

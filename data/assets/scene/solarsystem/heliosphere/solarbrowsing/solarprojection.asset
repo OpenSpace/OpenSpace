@@ -1,11 +1,9 @@
 local sunTransforms = asset.require("scene/solarsystem/sun/transforms")
 local sdoImagery = asset.require("./sdoimagery")
 local stereoImagery = asset.require("./stereoimagery")
-local sohoImagery = asset.require("./goesimagery")
-local goesImagery = asset.require("./sohoimagery")
+local goesImagery = asset.require("./goesimagery")
+local sohoImagery = asset.require("${USER_ASSETS}/soho/sohoimagery")
 local solarOrbiterImagery = asset.require("${USER_ASSETS}/solarorbiter/model.asset")
-
-
 
 local SolarImageryProjection = {
   Identifier = "SunProjection_Stereo_Sdo",
@@ -17,6 +15,7 @@ local SolarImageryProjection = {
       goesImagery.Imagery.Identifier,
       sohoImagery.Imagery.Identifier,
       stereoImagery.Imagery.Identifier,
+      stereoImagery.StereoBImagery.Identifier,
       solarOrbiterImagery.Imagery.Identifier
     }
   },

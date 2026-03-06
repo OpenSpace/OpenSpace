@@ -11,12 +11,12 @@
 return {{
 	Type = "HelioviewerDownloadTask",
 	Name = "SDO",
-	SourceId = 10,
-	Instrument = "AIA-171",
-	ColorMap = "${ASSETS}/scene/solarsystem/heliosphere/solarbrowsing/colortables/AIA-171.txt",
+	SourceId = 19,
+	Instrument = "HMI-magnetogram",
+	ColorMap = "${USER_ASSETS}/solarbrowsing/colortables/HMI-magnetogram.txt",
 	-- ColorMap = SavePath,
-	StartTime = "2024-05-06T00:00:00.000Z",
-	EndTime = "2024-05-14T00:00:00.000Z",
+	StartTime = "2025-06-14T00:00:00.000Z",
+	EndTime = "2025-06-24T00:00:00.000Z",
 	TimeStep = 60*60, -- Download an image every hour
-	OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/sdo/aia-171"
+	OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/sdo/HMI-magnetogram"
 }}

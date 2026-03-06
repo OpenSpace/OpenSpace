@@ -10,13 +10,13 @@
 
 return {{
 	Type = "HelioviewerDownloadTask",
-	Name = "GOES",
-	SourceId = 132,
-	Instrument = "CCOR-1",
-	ColorMap = "${USER_ASSETS}/solarbrowsing/colortables/GOES-CCOR-1.txt",
+	Name = "STEREO_B",
+	SourceId = 31,
+	Instrument = "COR2-B",
+	ColorMap = "${USER_ASSETS}/solarbrowsing/colortables/stereoA/COR2-A.txt",
 	-- ColorMap = SavePath,
-	StartTime = "2025-06-14T00:00:00.000Z",
-	EndTime = "2025-06-24T00:00:00.000Z",
+	StartTime = "2012-07-18T00:00:00.000Z",
+	EndTime = "2012-07-28T00:00:00.000Z",
 	TimeStep = 60*60, -- Download an image every hour
-	OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/GOES/CCOR-1"
+	OutputFolder = "${SYNC_DYNAMIC}/solarbrowsing/stereo-B/COR2-B"
 }}
