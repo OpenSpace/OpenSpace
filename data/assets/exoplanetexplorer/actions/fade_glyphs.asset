@@ -1,39 +1,49 @@
 local identifier = "ExoplanetDataPoints"
 
-local hide_glyphs = {
+local HideGlyphs = {
   Identifier = "os.hide_exo_glyphs",
   Name = "Hide ExoExplorer Renderable",
-  Command = [[
-      local identifier = "]] .. identifier .. [["
-      openspace.setPropertyValueSingle("Scene." .. identifier .. ".Renderable.Fade", 0.0, 1.0)
-  ]],
+  Command = [[openspace.fadeOut("Scene.]] .. identifier .. [[.Renderable")]],
   Documentation = [[]],
   GuiPath = "/ExoplanetExplorer",
   IsLocal = false
 }
-asset.export("hide_glyphs", hide_glyphs.Identifier)
+asset.export("HideGlyphs", HideGlyphs.Identifier)
 
-local show_glyphs = {
+local ShowGlyphs = {
   Identifier = "os.show_exo_glyphs",
   Name = "Show ExoExplorer Renderable",
-  Command = [[
-      local identifier = "]] .. identifier .. [["
-      openspace.setPropertyValueSingle("Scene." .. identifier .. ".Renderable.Fade", 1.0, 1.0)
-  ]],
+  Command = [[openspace.fadeIn("Scene.]] .. identifier .. [[.Renderable")]],
   Documentation = [[]],
   GuiPath = "/ExoplanetExplorer",
   IsLocal = false
 }
-asset.export("show_glyphs", show_glyphs.Identifier)
+asset.export("ShowGlyphs", ShowGlyphs.Identifier)
+
+local ToggleGlyphs = {
+  Identifier = "os.toggle_exo_glyphs",
+  Name = "Toggle ExoExplorer Renderable",
+  Command = [[openspace.toggleFade("Scene.]] .. identifier .. [[.Renderable")]],
+  Documentation = [[]],
+  GuiPath = "/ExoplanetExplorer",
+  IsLocal = false
+}
+asset.export("ToggleGlyphs", ToggleGlyphs.Identifier)
 
 asset.onInitialize(function()
-  openspace.action.registerAction(show_glyphs)
-  openspace.action.registerAction(hide_glyphs)
+  openspace.action.registerAction(ShowGlyphs)
+  openspace.action.registerAction(HideGlyphs)
+  openspace.action.registerAction(ToggleGlyphs)
+
+  openspace.bindKey("G", ToggleGlyphs)
 end)
 
 asset.onDeinitialize(function()
-  openspace.action.removeAction(show_glyphs)
-  openspace.action.removeAction(hide_glyphs)
+  openspace.clearKey("G")
+
+  openspace.action.removeAction(ToggleGlyphs)
+  openspace.action.removeAction(HideGlyphs)
+  openspace.action.removeAction(ShowGlyphs)
 end)
 
 

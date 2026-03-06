@@ -1,17 +1,17 @@
 local action = asset.require("../actions/fade_glyphs")
 
--- Events that handle the "close up" view of exoplanet systems. 
+-- Events that handle the "close up" view of exoplanet systems.
 -- The glyph renderable are faded in and faded out when approaching / leaving
 
 asset.onInitialize(function()
   openspace.event.registerEventAction(
     "CameraFocusTransition",
-    action.show_glyphs,
+    action.ShowGlyphs,
     { Transition = "Exiting" }
   )
   openspace.event.registerEventAction(
     "CameraFocusTransition",
-    action.hide_glyphs,
+    action.HideGlyphs,
     { Transition = "Approaching" }
   )
 end)
@@ -20,12 +20,12 @@ end)
 asset.onDeinitialize(function()
   openspace.event.unregisterEventAction(
     "CameraFocusTransition",
-    action.show_glyphs,
+    action.ShowGlyphs,
     { Transition = "Exiting" }
   )
   openspace.event.unregisterEventAction(
     "CameraFocusTransition",
-    action.hide_glyphs,
+    action.HideGlyphs,
     { Transition = "Approaching" }
   )
 end)
